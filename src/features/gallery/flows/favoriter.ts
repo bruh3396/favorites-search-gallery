@@ -1,27 +1,26 @@
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
-import { Events } from "@/app/channels/events";
-import { ON_MOBILE_DEVICE } from "@/app/context/environment";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { vibrate } from "@/utils/browser/haptics";
 
-export async function addFavoriteInGallery(): Promise<void> {
-  const status = await GalleryModel.addFavorite();
+export class GalleryFavoriterFlow extends GalleryFlow {
+  public async addFavoriteInGallery(): Promise<void> {
+    const status = await this.model.addFavorite();
 
-  if (status === "success") {
-    Events.app.favoriteAdded.emit(GalleryModel.currentThumb().id);
+    if (status === "success") {
+      this.context.events.app.favoriteAdded.emit(this.model.currentThumb().id);
 
-    if (ON_MOBILE_DEVICE) {
-      vibrate(15);
+      if (this.context.environment.onMobileDevice) {
+        vibrate(15);
+      }
     }
+    this.view.showAddedFavoriteStatus(status);
   }
-  GalleryView.showAddedFavoriteStatus(status);
-}
 
-export async function removeFavoriteInGallery(): Promise<void> {
-  const status = await GalleryModel.removeFavorite();
+  public async removeFavoriteInGallery(): Promise<void> {
+    const status = await this.model.removeFavorite();
 
-  if (status === "success") {
-    Events.app.favoriteRemoved.emit(GalleryModel.currentThumb().id);
+    if (status === "success") {
+      this.context.events.app.favoriteRemoved.emit(this.model.currentThumb().id);
+    }
+    this.view.showRemovedFavoriteStatus(status);
   }
-  GalleryView.showRemovedFavoriteStatus(status);
 }

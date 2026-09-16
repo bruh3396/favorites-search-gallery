@@ -1,114 +1,120 @@
-import { FavoritesSettingsCatalog } from "@/features/favorites/control/settings/catalog";
-import { ON_MOBILE_DEVICE } from "@/app/context/environment";
+import { Environment } from "@/app/context/environment";
+import { SettingsCatalog } from "@/features/favorites/control/settings/catalog";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 
-const DesktopSettingsSections: SettingsSection[] = [
-  {
-    title: "General",
-    expanded: true,
-    controls: [
-      FavoritesSettingsCatalog.performanceProfile,
-      FavoritesSettingsCatalog.enhanceSearchPages,
-      FavoritesSettingsCatalog.hints
-    ]
-  },
-  {
-    title: "Thumbnails",
-    controls: [
-      FavoritesSettingsCatalog.postActionBar,
-      FavoritesSettingsCatalog.postActionBarButtons,
-      FavoritesSettingsCatalog.postOverlay,
-      FavoritesSettingsCatalog.tooltip
-    ]
-  },
-  {
-    title: "Appearance",
-    controls: [
-      FavoritesSettingsCatalog.theme,
-      FavoritesSettingsCatalog.darkMode,
-      FavoritesSettingsCatalog.header
-    ]
-  },
-  {
-    title: "Layout",
-    controls: [
-      FavoritesSettingsCatalog.layout,
-      FavoritesSettingsCatalog.columnCount,
-      FavoritesSettingsCatalog.rowHeight
-    ]
-  },
-  {
-    title: "Results",
-    controls: [
-      FavoritesSettingsCatalog.rating,
-      FavoritesSettingsCatalog.sortKey,
-      FavoritesSettingsCatalog.sortAscending,
-      FavoritesSettingsCatalog.excludeBlacklist,
-      FavoritesSettingsCatalog.infiniteScroll,
-      FavoritesSettingsCatalog.resultsPerPage
-    ]
-  },
-  {
-    title: "Gallery",
-    controls: [
-      FavoritesSettingsCatalog.autoplay,
-      FavoritesSettingsCatalog.galleryMenu,
-      FavoritesSettingsCatalog.fullscreenOnHover,
-      FavoritesSettingsCatalog.themedBackground,
-      FavoritesSettingsCatalog.backgroundOpacity
-    ]
-  }
-];
+export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment): SettingsSection[] {
+  return environment.onMobileDevice ? mobileSections(catalog) : desktopSections(catalog);
+}
 
-const MobileSettingsSections: SettingsSection[] = [
-  {
-    title: "General",
-    expanded: true,
-    controls: [
-      FavoritesSettingsCatalog.enhanceSearchPages,
-      FavoritesSettingsCatalog.mobileGallery
-    ]
-  },
-  {
-    title: "Thumbnails",
-    controls: [
-      FavoritesSettingsCatalog.postActionBarToggle,
-      FavoritesSettingsCatalog.postActionBarButtons
-    ]
-  },
-  {
-    title: "Appearance",
-    controls: [
-      FavoritesSettingsCatalog.theme,
-      FavoritesSettingsCatalog.darkMode,
-      FavoritesSettingsCatalog.header
-    ]
-  },
-  {
-    title: "Layout",
-    controls: [
-      FavoritesSettingsCatalog.layout,
-      FavoritesSettingsCatalog.columnCount
-    ]
-  },
-  {
-    title: "Results",
-    controls: [
-      FavoritesSettingsCatalog.rating,
-      FavoritesSettingsCatalog.sortKey,
-      FavoritesSettingsCatalog.sortAscending,
-      FavoritesSettingsCatalog.excludeBlacklist,
-      FavoritesSettingsCatalog.infiniteScroll,
-      FavoritesSettingsCatalog.resultsPerPage
-    ]
-  },
-  {
-    title: "Gallery",
-    controls: [
-      FavoritesSettingsCatalog.autoplay,
-      FavoritesSettingsCatalog.themedBackground
-    ]
-  }
-];
+function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
+  return [
+    {
+      title: "General",
+      expanded: true,
+      controls: [
+        catalog.performanceProfile,
+        catalog.enhanceSearchPages,
+        catalog.hints
+      ]
+    },
+    {
+      title: "Thumbnails",
+      controls: [
+        catalog.postActionBar,
+        catalog.postActionBarButtons,
+        catalog.postOverlay,
+        catalog.tooltip
+      ]
+    },
+    {
+      title: "Appearance",
+      controls: [
+        catalog.theme,
+        catalog.darkMode,
+        catalog.header
+      ]
+    },
+    {
+      title: "Layout",
+      controls: [
+        catalog.layout,
+        catalog.columnCount,
+        catalog.rowHeight
+      ]
+    },
+    {
+      title: "Results",
+      controls: [
+        catalog.rating,
+        catalog.sortKey,
+        catalog.sortAscending,
+        catalog.excludeBlacklist,
+        catalog.infiniteScroll,
+        catalog.resultsPerPage
+      ]
+    },
+    {
+      title: "Gallery",
+      controls: [
+        catalog.autoplay,
+        catalog.galleryMenu,
+        catalog.fullscreenOnHover,
+        catalog.themedBackground,
+        catalog.backgroundOpacity
+      ]
+    }
+  ];
+}
 
-export const SettingsSections: SettingsSection[] = ON_MOBILE_DEVICE ? MobileSettingsSections : DesktopSettingsSections;
+function mobileSections(catalog: SettingsCatalog): SettingsSection[] {
+  return [
+    {
+      title: "General",
+      expanded: true,
+      controls: [
+        catalog.enhanceSearchPages,
+        catalog.mobileGallery
+      ]
+    },
+    {
+      title: "Thumbnails",
+      controls: [
+        catalog.postActionBarToggle,
+        catalog.postActionBarButtons
+      ]
+    },
+    {
+      title: "Appearance",
+      controls: [
+        catalog.theme,
+        catalog.darkMode,
+        catalog.header
+      ]
+    },
+    {
+      title: "Layout",
+      controls: [
+        catalog.layout,
+        catalog.columnCount
+      ]
+    },
+    {
+      title: "Results",
+      controls: [
+        catalog.rating,
+        catalog.sortKey,
+        catalog.sortAscending,
+        catalog.excludeBlacklist,
+        catalog.infiniteScroll,
+        catalog.resultsPerPage
+      ]
+    },
+    {
+      title: "Gallery",
+      controls: [
+        catalog.autoplay,
+        catalog.themedBackground
+      ]
+    }
+  ];
+}

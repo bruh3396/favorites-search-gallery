@@ -4,7 +4,6 @@ import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FavoritesDownloaderDependencies } from "@/features/favorites/features/downloader/dependencies";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
-import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { categoryOptions } from "@/features/favorites/features/downloader/filename_settings";
@@ -76,7 +75,7 @@ function buildDownloadLabel(itemCount: number): string {
   if (itemCount === 0) {
     return "Download Results";
   }
-  const batchCount = countBatches(itemCount, Preferences.favorites.downloadBatchSize.value);
+  const batchCount = countBatches(itemCount, FavoritesDownloaderDependencies.batchSize.value);
 
   if (batchCount <= 1) {
     return `Download ${itemCount} Result${pluralSuffix(itemCount)}`;
@@ -94,7 +93,7 @@ function buildFilenameFormatControl(): HTMLElement {
     label: "Filename",
     tooltip: "Add selected meta tags to each filename",
     tooltipPosition: "below",
-    preference: Preferences.favorites.downloadFilenameFormat,
+    preference: FavoritesDownloaderDependencies.filenameFormat,
     options: categoryOptions()
   })();
 }
@@ -105,7 +104,7 @@ function buildBatchSizeControl(): HTMLElement {
     label: "Batch Size",
     tooltip: "Split download into smaller chunks",
     tooltipPosition: "below",
-    preference: Preferences.favorites.downloadBatchSize,
+    preference: FavoritesDownloaderDependencies.batchSize,
     options: new Map(DownloaderConfig.batchSizeOptions.map(size => [size, size === 0 ? "All" : String(size)]))
   })();
 }
@@ -133,7 +132,7 @@ async function startDownload(): Promise<void> {
   status.textContent = `Downloading ${items.length}...`;
 
   try {
-    const result = await FavoritesDownload.download(items, Preferences.favorites.downloadBatchSize.value, controller.signal, showProgress);
+    const result = await FavoritesDownload.download(items, FavoritesDownloaderDependencies.batchSize.value, controller.signal, showProgress);
 
     status.textContent = summarize(result);
   } finally {

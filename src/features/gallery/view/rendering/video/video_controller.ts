@@ -1,350 +1,360 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { isVideoThumb, toMediaItem } from "@/lib/ui/thumb/media_item";
+import { Environment } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
-import { VideoClip } from "@/features/gallery/types/gallery_types";
+import { VideoClip } from "@/features/gallery/types/types";
 import { doNothing } from "@/utils/pure/function";
 import { videoUrl } from "@/lib/media/url";
 
-const videoPlayers: HTMLVideoElement[] = [];
-const videoClips = new Map();
-const videoContainer: HTMLElement = document.createElement("div");
-let onVideoEnded: () => void = doNothing;
-let onVideoDoubleClicked: (event: MouseEvent) => void = doNothing;
-let onVolumeChanged: (volume: number) => void = doNothing;
+export class GalleryVideoController {
+  private readonly environment: Environment;
+  private readonly preferences: Preferences;
+  private readonly videoPlayers: HTMLVideoElement[] = [];
+  private readonly videoClips = new Map();
+  private readonly videoContainer: HTMLElement = document.createElement("div");
+  private onVideoEnded: () => void = doNothing;
+  private onVideoDoubleClicked: (event: MouseEvent) => void = doNothing;
+  private onVolumeChanged: (volume: number) => void = doNothing;
 
-videoContainer.id = "video-container-inner";
-
-export function setup(container: HTMLElement, videoEnded: () => void, videoDoubleClicked: (event: MouseEvent) => void, volumeChanged: (volume: number) => void): void {
-  onVideoEnded = videoEnded;
-  onVideoDoubleClicked = videoDoubleClicked;
-  onVolumeChanged = volumeChanged;
-  insertVideoContainer(container);
-  createVideoPlayers();
-  preventVideoPlayersFromFlashingWhenLoaded();
-  addEventListenersToVideoContainer();
-  addEventListenersToVideoPlayers();
-  loadVideoClips();
-}
-
-export function clearVideoSources(): void {
-  for (const video of videoPlayers) {
-    video.src = "";
+  constructor(preferences: Preferences, environment: Environment) {
+    this.preferences = preferences;
+    this.environment = environment;
+    this.videoContainer.id = "video-container-inner";
   }
-}
 
-export function preloadVideoPlayers(thumbs: HTMLElement[]): void {
-  if (videoPlayers.length === 1) {
-    return;
+  public setup(container: HTMLElement, videoEnded: () => void, videoDoubleClicked: (event: MouseEvent) => void, volumeChanged: (volume: number) => void): void {
+    this.onVideoEnded = videoEnded;
+    this.onVideoDoubleClicked = videoDoubleClicked;
+    this.onVolumeChanged = volumeChanged;
+    this.insertVideoContainer(container);
+    this.createVideoPlayers();
+    this.preventVideoPlayersFromFlashingWhenLoaded();
+    this.addEventListenersToVideoContainer();
+    this.addEventListenersToVideoPlayers();
+    this.loadVideoClips();
   }
-  const activeVideoPlayer = getActiveVideoPlayer();
-  const inactiveVideoPlayers = getInactiveVideoPlayers();
-  const videoThumbsAroundInitialThumb = thumbs
-    .filter(thumb => isVideoThumb(thumb) && !videoPlayerHasSource(activeVideoPlayer, thumb))
-    .slice(0, inactiveVideoPlayers.length);
-  const loadedVideoSources = new Set(inactiveVideoPlayers
-    .map(video => video.src)
-    .filter(src => src !== ""));
-  const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => videoUrl(toMediaItem(thumb))));
-  const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(videoUrl(toMediaItem(thumb))));
-  const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
 
-  for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-    setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
-    pauseVideo(freeInactiveVideoPlayers[i]);
-  }
-}
-
-export function toggleVideoLooping(value: boolean): void {
-  for (const video of videoPlayers) {
-    video.toggleAttribute("loop", value);
-  }
-}
-
-export function toggleActiveVideoPause(): void {
-  if (document.activeElement !== getActiveVideoPlayer()) {
-    toggleVideoPause(getActiveVideoPlayer());
-  }
-}
-
-export function restartActiveVideo(): void {
-  getActiveVideoPlayer().play().catch();
-}
-
-export function playVideo(thumb: HTMLElement): Promise<void> {
-  setActiveVideoPlayer(thumb);
-  toggleVideoContainer(true);
-  stopAllVideos();
-  const video = getActiveVideoPlayer();
-  return new Promise((resolve, reject) => {
-    video.onloadedmetadata = (): void => resolve();
-    video.onerror = (): void => {
+  public clearVideoSources(): void {
+    for (const video of this.videoPlayers) {
       video.src = "";
-      reject(new Error("Video failed to load"));
-    };
-    setVideoSource(video, thumb);
-    video.style.display = "block";
-    video.play().catch(() => { });
-    toggleVideoControls(true);
-  });
-}
-
-export function stopAllVideos(): void {
-  for (const video of videoPlayers) {
-    stopVideo(video);
+    }
   }
-}
 
-export function setVideoMuted(muted: boolean): void {
-  for (const video of videoPlayers) {
+  public preloadVideoPlayers(thumbs: HTMLElement[]): void {
+    if (this.videoPlayers.length === 1) {
+      return;
+    }
+    const activeVideoPlayer = this.getActiveVideoPlayer();
+    const inactiveVideoPlayers = this.getInactiveVideoPlayers();
+    const videoThumbsAroundInitialThumb = thumbs
+      .filter(thumb => isVideoThumb(thumb) && !this.videoPlayerHasSource(activeVideoPlayer, thumb))
+      .slice(0, inactiveVideoPlayers.length);
+    const loadedVideoSources = new Set(inactiveVideoPlayers
+      .map(video => video.src)
+      .filter(src => src !== ""));
+    const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => videoUrl(toMediaItem(thumb))));
+    const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(videoUrl(toMediaItem(thumb))));
+    const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
+
+    for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
+      this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
+      this.pauseVideo(freeInactiveVideoPlayers[i]);
+    }
+  }
+
+  public toggleVideoLooping(value: boolean): void {
+    for (const video of this.videoPlayers) {
+      video.toggleAttribute("loop", value);
+    }
+  }
+
+  public toggleActiveVideoPause(): void {
+    if (document.activeElement !== this.getActiveVideoPlayer()) {
+      this.toggleVideoPause(this.getActiveVideoPlayer());
+    }
+  }
+
+  public restartActiveVideo(): void {
+    this.getActiveVideoPlayer().play().catch();
+  }
+
+  public playVideo(thumb: HTMLElement): Promise<void> {
+    this.setActiveVideoPlayer(thumb);
+    this.toggleVideoContainer(true);
+    this.stopAllVideos();
+    const video = this.getActiveVideoPlayer();
+    return new Promise((resolve, reject) => {
+      video.onloadedmetadata = (): void => resolve();
+      video.onerror = (): void => {
+        video.src = "";
+        reject(new Error("Video failed to load"));
+      };
+      this.setVideoSource(video, thumb);
+      video.style.display = "block";
+      video.play().catch(() => { });
+      this.toggleVideoControls(true);
+    });
+  }
+
+  public stopAllVideos(): void {
+    for (const video of this.videoPlayers) {
+      this.stopVideo(video);
+    }
+  }
+
+  public setVideoMuted(muted: boolean): void {
+    for (const video of this.videoPlayers) {
+      video.muted = muted;
+    }
+  }
+
+  private createVideoPlayer(volume: number, muted: boolean): void {
+    const video = document.createElement("video");
+
+    video.setAttribute("width", "100%");
+    video.setAttribute("height", "100%");
+    video.autoplay = true;
+    video.volume = volume;
     video.muted = muted;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute("controlsList", "nofullscreen");
+    video.setAttribute("webkit-playsinline", "");
+    this.videoPlayers.push(video);
+    this.videoContainer.appendChild(video);
   }
-}
 
-function createVideoPlayer(volume: number, muted: boolean): void {
-  const video = document.createElement("video");
+  private createVideoPlayers(): void {
+    const volume = this.preferences.gallery.videoVolume.value;
+    const isMuted = this.preferences.gallery.videoMuted.value;
 
-  video.setAttribute("width", "100%");
-  video.setAttribute("height", "100%");
-  video.autoplay = true;
-  video.volume = volume;
-  video.muted = muted;
-  video.loop = true;
-  video.playsInline = true;
-  video.setAttribute("controlsList", "nofullscreen");
-  video.setAttribute("webkit-playsinline", "");
-  videoPlayers.push(video);
-  videoContainer.appendChild(video);
-}
+    this.createVideoPlayer(volume, isMuted);
 
-function createVideoPlayers(): void {
-  const volume = Preferences.gallery.videoVolume.value;
-  const isMuted = Preferences.gallery.videoMuted.value;
+    const preloadedVideoCount = this.environment.onMobileDevice ? GalleryConfig.preloadedVideoCount.mobile : GalleryConfig.preloadedVideoCount.desktop;
 
-  createVideoPlayer(volume, isMuted);
-
-  for (let i = 0; i < GalleryConfig.preloadedVideoCount; i += 1) {
-    createVideoPlayer(volume, isMuted);
+    for (let i = 0; i < preloadedVideoCount; i += 1) {
+      this.createVideoPlayer(volume, isMuted);
+    }
   }
-}
 
-function preventVideoPlayersFromFlashingWhenLoaded(): void {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
+  private preventVideoPlayersFromFlashingWhenLoaded(): void {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
 
-  if (context !== null) {
-    context.clearRect(0, 0, canvas.width, canvas.height);
-  }
-  canvas.toBlob((blob) => {
-    if (blob === null) {
-      return;
+    if (context !== null) {
+      context.clearRect(0, 0, canvas.width, canvas.height);
     }
-    const videoBackgroundUrl = URL.createObjectURL(blob);
-
-    for (const video of videoPlayers) {
-      video.setAttribute("poster", videoBackgroundUrl);
-    }
-  });
-}
-
-function preventDefaultBehaviorWhenControlKeyIsPressed(): void {
-  videoContainer.onclick = (event): void => {
-    if (!event.ctrlKey) {
-      event.preventDefault();
-    }
-  };
-}
-
-function addEventListenersToVideoContainer(): void {
-  preventDefaultBehaviorWhenControlKeyIsPressed();
-}
-
-function insertVideoContainer(container: HTMLElement): void {
-  container.appendChild(videoContainer);
-}
-
-function addEventListenersToVideoPlayers(): void {
-  for (const video of videoPlayers) {
-    addEventListenerToVideoPlayer(video);
-  }
-}
-
-function addEventListenerToVideoPlayer(video: HTMLVideoElement): void {
-  revealControlsWhenMouseMoves(video);
-  pauseWhenClicked(video);
-  updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video);
-  broadcastEnding(video);
-  broadcastDoubleClick(video);
-  revealControlsWhenTouched(video);
-}
-
-function revealControlsWhenMouseMoves(video: HTMLVideoElement): void {
-  if (ON_MOBILE_DEVICE) {
-    return;
-  }
-  video.addEventListener("mousemove", () => {
-    if (!video.hasAttribute("controls")) {
-      video.setAttribute("controls", "");
-    }
-  }, {
-    passive: true
-  });
-}
-
-function pauseWhenClicked(video: HTMLVideoElement): void {
-  video.addEventListener("click", (event) => {
-    if (event.ctrlKey) {
-      return;
-    }
-    toggleVideoPause(video);
-  }, {
-    passive: true
-  });
-}
-
-function toggleVideoPause(video: HTMLVideoElement): void {
-  if (video.paused) {
-    video.play().catch(() => { });
-  } else {
-    video.pause();
-  }
-}
-
-function updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElement): void {
-  video.addEventListener("volumechange", (event) => {
-    if (!(event.target instanceof HTMLVideoElement)) {
-      return;
-    }
-
-    if (event.target === null || !event.target.hasAttribute("active")) {
-      return;
-    }
-    onVolumeChanged(video.volume);
-
-    for (const v of getInactiveVideoPlayers()) {
-      v.volume = video.volume;
-      v.muted = video.muted;
-    }
-  }, {
-    passive: true
-  });
-}
-
-function broadcastEnding(video: HTMLVideoElement): void {
-  video.addEventListener("ended", () => {
-    onVideoEnded();
-  }, {
-    passive: true
-  });
-}
-
-function broadcastDoubleClick(video: HTMLVideoElement): void {
-  video.addEventListener("dblclick", (event) => {
-    onVideoDoubleClicked(event);
-  });
-}
-
-function revealControlsWhenTouched(video: HTMLVideoElement): void {
-  if (ON_DESKTOP_DEVICE) {
-    return;
-  }
-  video.addEventListener("touchend", () => {
-    toggleVideoControls(true);
-  }, {
-    passive: true
-  });
-}
-
-function loadVideoClips(): void {
-  setTimeout(() => {
-    let storedVideoClips;
-
-    try {
-      storedVideoClips = Storage.get<typeof storedVideoClips>("storedVideoClips") ?? {};
-
-      for (const [id, videoClip] of Object.entries(storedVideoClips)) {
-        videoClips.set(id, videoClip as VideoClip);
+    canvas.toBlob((blob) => {
+      if (blob === null) {
+        return;
       }
-    } catch (error) {
-      console.error(error);
+      const videoBackgroundUrl = URL.createObjectURL(blob);
+
+      for (const video of this.videoPlayers) {
+        video.setAttribute("poster", videoBackgroundUrl);
+      }
+    });
+  }
+
+  private preventDefaultBehaviorWhenControlKeyIsPressed(): void {
+    this.videoContainer.onclick = (event): void => {
+      if (!event.ctrlKey) {
+        event.preventDefault();
+      }
+    };
+  }
+
+  private addEventListenersToVideoContainer(): void {
+    this.preventDefaultBehaviorWhenControlKeyIsPressed();
+  }
+
+  private insertVideoContainer(container: HTMLElement): void {
+    container.appendChild(this.videoContainer);
+  }
+
+  private addEventListenersToVideoPlayers(): void {
+    for (const video of this.videoPlayers) {
+      this.addEventListenerToVideoPlayer(video);
     }
-  }, 50);
-}
-
-function getActiveVideoPlayer(): HTMLVideoElement {
-  return videoPlayers.find(video => video.hasAttribute("active")) || videoPlayers[0];
-}
-
-function getInactiveVideoPlayers(): HTMLVideoElement[] {
-  return videoPlayers.filter(video => !video.hasAttribute("active"));
-}
-
-function stopVideo(video: HTMLVideoElement): void {
-  video.style.display = "none";
-  pauseVideo(video);
-}
-
-function pauseVideo(video: HTMLVideoElement): void {
-  video.pause();
-  video.removeAttribute("controls");
-}
-
-function videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): boolean {
-  return video.src === videoUrl(toMediaItem(thumb));
-}
-
-function setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
-  if (videoPlayerHasSource(video, thumb)) {
-    return;
-  }
-  applyVideoClip(video, thumb);
-  video.src = videoUrl(toMediaItem(thumb));
-}
-
-function applyVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
-  const videoClip = videoClips.get(thumb.id);
-
-  if (videoClip === undefined) {
-    video.ontimeupdate = null;
-    return;
-  }
-  video.ontimeupdate = (): void => {
-    if (video.currentTime < videoClip.start || video.currentTime > videoClip.end) {
-      video.removeAttribute("controls");
-      video.currentTime = videoClip.start;
-    }
-  };
-}
-
-function setActiveVideoPlayer(thumb: HTMLElement): void {
-  for (const video of videoPlayers) {
-    video.removeAttribute("active");
   }
 
-  for (const video of videoPlayers) {
-    if (videoPlayerHasSource(video, thumb)) {
-      video.setAttribute("active", "");
+  private addEventListenerToVideoPlayer(video: HTMLVideoElement): void {
+    this.revealControlsWhenMouseMoves(video);
+    this.pauseWhenClicked(video);
+    this.updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video);
+    this.broadcastEnding(video);
+    this.broadcastDoubleClick(video);
+    this.revealControlsWhenTouched(video);
+  }
+
+  private revealControlsWhenMouseMoves(video: HTMLVideoElement): void {
+    if (this.environment.onMobileDevice) {
       return;
     }
+    video.addEventListener("mousemove", () => {
+      if (!video.hasAttribute("controls")) {
+        video.setAttribute("controls", "");
+      }
+    }, {
+      passive: true
+    });
   }
-  videoPlayers[0].setAttribute("active", "");
-}
 
-function toggleVideoControls(value: boolean): void {
-  const video = getActiveVideoPlayer();
+  private pauseWhenClicked(video: HTMLVideoElement): void {
+    video.addEventListener("click", (event) => {
+      if (event.ctrlKey) {
+        return;
+      }
+      this.toggleVideoPause(video);
+    }, {
+      passive: true
+    });
+  }
 
-  if (ON_MOBILE_DEVICE) {
-    if (value) {
-      video.setAttribute("controls", "");
+  private toggleVideoPause(video: HTMLVideoElement): void {
+    if (video.paused) {
+      video.play().catch(() => { });
+    } else {
+      video.pause();
     }
   }
 
-  if (!value) {
+  private updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElement): void {
+    video.addEventListener("volumechange", (event) => {
+      if (!(event.target instanceof HTMLVideoElement)) {
+        return;
+      }
+
+      if (event.target === null || !event.target.hasAttribute("active")) {
+        return;
+      }
+      this.onVolumeChanged(video.volume);
+
+      for (const v of this.getInactiveVideoPlayers()) {
+        v.volume = video.volume;
+        v.muted = video.muted;
+      }
+    }, {
+      passive: true
+    });
+  }
+
+  private broadcastEnding(video: HTMLVideoElement): void {
+    video.addEventListener("ended", () => {
+      this.onVideoEnded();
+    }, {
+      passive: true
+    });
+  }
+
+  private broadcastDoubleClick(video: HTMLVideoElement): void {
+    video.addEventListener("dblclick", (event) => {
+      this.onVideoDoubleClicked(event);
+    });
+  }
+
+  private revealControlsWhenTouched(video: HTMLVideoElement): void {
+    if (this.environment.onDesktopDevice) {
+      return;
+    }
+    video.addEventListener("touchend", () => {
+      this.toggleVideoControls(true);
+    }, {
+      passive: true
+    });
+  }
+
+  private loadVideoClips(): void {
+    setTimeout(() => {
+      let storedVideoClips;
+
+      try {
+        storedVideoClips = Storage.get<typeof storedVideoClips>("storedVideoClips") ?? {};
+
+        for (const [id, videoClip] of Object.entries(storedVideoClips)) {
+          this.videoClips.set(id, videoClip as VideoClip);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }, 50);
+  }
+
+  private getActiveVideoPlayer(): HTMLVideoElement {
+    return this.videoPlayers.find(video => video.hasAttribute("active")) || this.videoPlayers[0];
+  }
+
+  private getInactiveVideoPlayers(): HTMLVideoElement[] {
+    return this.videoPlayers.filter(video => !video.hasAttribute("active"));
+  }
+
+  private stopVideo(video: HTMLVideoElement): void {
+    video.style.display = "none";
+    this.pauseVideo(video);
+  }
+
+  private pauseVideo(video: HTMLVideoElement): void {
+    video.pause();
     video.removeAttribute("controls");
   }
-}
 
-function toggleVideoContainer(value: boolean): void {
-  videoContainer.style.display = value ? "block" : "none";
+  private videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): boolean {
+    return video.src === videoUrl(toMediaItem(thumb));
+  }
+
+  private setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
+    if (this.videoPlayerHasSource(video, thumb)) {
+      return;
+    }
+    this.applyVideoClip(video, thumb);
+    video.src = videoUrl(toMediaItem(thumb));
+  }
+
+  private applyVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
+    const videoClip = this.videoClips.get(thumb.id);
+
+    if (videoClip === undefined) {
+      video.ontimeupdate = null;
+      return;
+    }
+    video.ontimeupdate = (): void => {
+      if (video.currentTime < videoClip.start || video.currentTime > videoClip.end) {
+        video.removeAttribute("controls");
+        video.currentTime = videoClip.start;
+      }
+    };
+  }
+
+  private setActiveVideoPlayer(thumb: HTMLElement): void {
+    for (const video of this.videoPlayers) {
+      video.removeAttribute("active");
+    }
+
+    for (const video of this.videoPlayers) {
+      if (this.videoPlayerHasSource(video, thumb)) {
+        video.setAttribute("active", "");
+        return;
+      }
+    }
+    this.videoPlayers[0].setAttribute("active", "");
+  }
+
+  private toggleVideoControls(value: boolean): void {
+    const video = this.getActiveVideoPlayer();
+
+    if (this.environment.onMobileDevice) {
+      if (value) {
+        video.setAttribute("controls", "");
+      }
+    }
+
+    if (!value) {
+      video.removeAttribute("controls");
+    }
+  }
+
+  private toggleVideoContainer(value: boolean): void {
+    this.videoContainer.style.display = value ? "block" : "none";
+  }
 }

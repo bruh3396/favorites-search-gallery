@@ -1,9 +1,11 @@
-import { Preferences } from "@/app/context/preferences";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 
-export function toggleVideoMute(): void {
-  Preferences.gallery.videoMuted.set(!Preferences.gallery.videoMuted.value);
-}
+export class GalleryVideoFlow extends GalleryFlow {
+  public toggleVideoMute(): void {
+    this.context.preferences.gallery.videoMuted.set(!this.context.preferences.gallery.videoMuted.value);
+  }
 
-export function setVolume(volume: number): void {
-  Preferences.gallery.videoVolume.set(volume);
+  public setVolume(volume: number): void {
+    this.context.preferences.gallery.videoVolume.set(volume);
+  }
 }

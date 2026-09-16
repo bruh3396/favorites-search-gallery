@@ -1,41 +1,44 @@
-import * as TooltipFlows from "@/features/tooltip/flows/flows";
-import * as TooltipModel from "@/features/tooltip/model/model";
-import * as TooltipView from "@/features/tooltip/view/view";
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
-import { ON_FAVORITES_PAGE } from "@/app/context/environment";
-import { Preferences } from "@/app/context/preferences";
-import { TOOLTIP_DISABLED } from "@/app/context/flags";
-import { getCurrentSearchQuery } from "@/app/channels/feature_bridge";
+import { AppContext } from "@/app/context/context";
+import { TooltipComponents } from "@/features/tooltip/types/types";
+import { TooltipFlows } from "@/features/tooltip/flows/flows";
+import { TooltipModel } from "@/features/tooltip/model/model";
+import { TooltipView } from "@/features/tooltip/view/view";
 
-export function startTooltip(): void {
-  if (TOOLTIP_DISABLED) {
+export function startTooltip(context: AppContext): void {
+  if (context.flags.tooltipDisabled) {
     return;
   }
-  setup();
-  start();
+  const model = new TooltipModel(context);
+  const view = new TooltipView(context);
+  const flows = new TooltipFlows(context, model, view);
+  const components: TooltipComponents = { context, model, view, flows };
+
+  setup(components);
+  start(components);
 }
 
-function setup(): void {
-  setupView();
-  subscribeToEvents();
+function setup(components: TooltipComponents): void {
+  setupView(components);
+  subscribeToEvents(components);
 }
 
-function setupView(): void {
-  TooltipView.setup();
+function setupView({ view }: TooltipComponents): void {
+  view.setup();
 }
 
-function subscribeToEvents(): void {
-  DomEvents.document.mouseover.on(TooltipFlows.Hover.handleMouseOver);
-  DomEvents.window.scrollend.on(TooltipFlows.Scroll.reposition);
-  Preferences.favorites.tooltipEnabled.on(TooltipFlows.Toggle.hideIfDisabled);
-  Preferences.postList.tooltipEnabled.on(TooltipFlows.Toggle.hideIfDisabled);
+function subscribeToEvents({ context, model, flows }: TooltipComponents): void {
+  const { domEvents, events, preferences, environment } = context;
 
-  if (ON_FAVORITES_PAGE) {
-    Events.favorites.searchRequested.on(TooltipModel.rebuildHighlights, { async: true });
+  domEvents.document.mouseover.on((event) => flows.hover.handleMouseOver(event));
+  domEvents.window.scrollend.on(() => flows.scroll.reposition());
+  preferences.favorites.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
+  preferences.postList.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
+
+  if (environment.onFavoritesPage) {
+    events.favorites.searchRequested.on((query) => model.rebuildHighlights(query), { async: true });
   }
 }
 
-function start(): void {
-  TooltipModel.rebuildHighlights(getCurrentSearchQuery());
+function start({ context, model }: TooltipComponents): void {
+  model.rebuildHighlights(context.featureBridge.currentSearchQuery());
 }

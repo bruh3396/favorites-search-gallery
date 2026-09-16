@@ -1,17 +1,36 @@
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/app/context/environment";
+import { Environment } from "@/app/context/environment";
+import { PerformanceProfile } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
 
-export const PERFORMANCE_PROFILE = Preferences.app.performanceProfile.value;
-export const IMAGUS_SUPPORT_ENABLED = PERFORMANCE_PROFILE === "low" || PERFORMANCE_PROFILE === "potato";
+export class Flags {
+  public readonly performanceProfile: PerformanceProfile;
+  public readonly imagusSupportEnabled: boolean;
+  public readonly favoritesSearchGalleryEnabled: boolean;
+  public readonly favoritesSearchGalleryDisabled: boolean;
+  public readonly galleryEnabled: boolean;
+  public readonly galleryDisabled: boolean;
+  public readonly tooltipEnabled: boolean;
+  public readonly tooltipDisabled: boolean;
+  public readonly postOverlayEnabled: boolean;
+  public readonly postOverlayDisabled: boolean;
 
-export const FAVORITES_SEARCH_GALLERY_ENABLED = ON_FAVORITES_PAGE || (ON_POST_LIST_PAGE && Preferences.postList.enabled.value);
-export const FAVORITES_SEARCH_GALLERY_DISABLED = !FAVORITES_SEARCH_GALLERY_ENABLED;
+  constructor(environment: Environment, preferences: Preferences) {
+    const { onFavoritesPage, onPostListPage, onDesktopDevice } = environment;
+    const performanceProfile = preferences.app.performanceProfile.value;
 
-export const GALLERY_ENABLED = (ON_FAVORITES_PAGE || ON_POST_LIST_PAGE) && (PERFORMANCE_PROFILE === "normal" || PERFORMANCE_PROFILE === "medium");
-export const GALLERY_DISABLED = !GALLERY_ENABLED;
+    this.performanceProfile = performanceProfile;
+    this.imagusSupportEnabled = performanceProfile === "low" || performanceProfile === "potato";
 
-export const TOOLTIP_ENABLED = (ON_FAVORITES_PAGE || ON_POST_LIST_PAGE) && ON_DESKTOP_DEVICE && PERFORMANCE_PROFILE !== "potato";
-export const TOOLTIP_DISABLED = !TOOLTIP_ENABLED;
+    this.favoritesSearchGalleryEnabled = onFavoritesPage || (onPostListPage && preferences.postList.enabled.value);
+    this.favoritesSearchGalleryDisabled = !this.favoritesSearchGalleryEnabled;
 
-export const POST_OVERLAY_ENABLED = ON_FAVORITES_PAGE && ON_DESKTOP_DEVICE && PERFORMANCE_PROFILE !== "potato";
-export const POST_OVERLAY_DISABLED = !POST_OVERLAY_ENABLED;
+    this.galleryEnabled = (onFavoritesPage || onPostListPage) && (performanceProfile === "normal" || performanceProfile === "medium");
+    this.galleryDisabled = !this.galleryEnabled;
+
+    this.tooltipEnabled = (onFavoritesPage || onPostListPage) && onDesktopDevice && performanceProfile !== "potato";
+    this.tooltipDisabled = !this.tooltipEnabled;
+
+    this.postOverlayEnabled = onFavoritesPage && onDesktopDevice && performanceProfile !== "potato";
+    this.postOverlayDisabled = !this.postOverlayEnabled;
+  }
+}

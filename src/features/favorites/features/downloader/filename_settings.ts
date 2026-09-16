@@ -1,7 +1,6 @@
 import { FavoritesDownloaderDependencies } from "@/features/favorites/features/downloader/dependencies";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types";
 import { MediaItem } from "@/types/media";
-import { Preferences } from "@/app/context/preferences";
 import { buildFilename } from "@/features/favorites/features/downloader/filename_builder";
 import { capitalize } from "@/utils/pure/string";
 
@@ -16,6 +15,6 @@ export function categoryOptions(): Map<number, string> {
 }
 
 function selectedCategories(): FilenameCategory[] {
-  const selected = Preferences.favorites.downloadFilenameFormat.value;
+  const selected = FavoritesDownloaderDependencies.filenameFormat.value;
   return CATEGORIES.filter((category, index) => (selected & (1 << index)) > 0);
 }

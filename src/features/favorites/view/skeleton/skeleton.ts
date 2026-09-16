@@ -1,16 +1,15 @@
-import * as FavoritesAspectRatios from "@/features/favorites/view/skeleton/aspect_ratios";
+import { FavoritesAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/app";
-import { Preferences } from "@/app/context/preferences";
 import { SkeletonConfig } from "@/config/skeleton_config";
-import { getLayout } from "@/app/layout/content_tiler";
-export { collectAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
 
-class FavoritesSkeleton {
+export class FavoritesSkeleton {
+  private readonly aspectRatios: FavoritesAspectRatios;
   private readonly items: FavoritesSkeletonItem[];
   private readonly itemCount;
 
   constructor(layout: Layout, itemCount = SkeletonConfig.defaultItemCount) {
+    this.aspectRatios = new FavoritesAspectRatios();
     this.itemCount = itemCount;
     this.items = this.createItems(layout);
   }
@@ -19,17 +18,17 @@ class FavoritesSkeleton {
     return this.items.map((item) => item.element);
   }
 
+  public collectAspectRatios(thumbs: HTMLElement[]): void {
+    this.aspectRatios.collect(thumbs);
+  }
+
   private createItems(layout: Layout): FavoritesSkeletonItem[] {
     return Array.from(
       { length: this.itemCount },
       () => new FavoritesSkeletonItem(
         layout,
-        FavoritesAspectRatios.getNextAspectRatio()
+        this.aspectRatios.getNext()
       )
     );
   }
-}
-
-export function build(): HTMLElement[] {
-  return new FavoritesSkeleton(getLayout(), Preferences.favorites.resultsPerPage.value).elements;
 }

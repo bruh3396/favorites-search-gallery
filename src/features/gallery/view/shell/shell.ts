@@ -1,8 +1,16 @@
-import { Overlays } from "@/app/layout/shell";
+import { Shell } from "@/app/context/shell";
 
-export const GalleryRoot = document.createElement("div");
-GalleryRoot.id = "gallery-container";
+export class GalleryShell {
+  public readonly root: HTMLElement;
+  private readonly shell: Shell;
 
-export function mountGallery(): void {
-  Overlays.insertAdjacentElement("beforeend", GalleryRoot);
+  constructor(shell: Shell) {
+    this.shell = shell;
+    this.root = document.createElement("div");
+    this.root.id = "gallery-container";
+  }
+
+  public mountGallery(): void {
+    this.shell.overlays.insertAdjacentElement("beforeend", this.root);
+  }
 }

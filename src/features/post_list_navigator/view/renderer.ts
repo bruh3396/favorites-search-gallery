@@ -1,9 +1,9 @@
-import * as ContentTiler from "@/app/layout/content_tiler";
+import { ContentTiler } from "@/app/layout/content_tiler";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
-export function render(postList: PostList): void {
-  ContentTiler.tile(postList.thumbs);
+export function render(contentTiler: ContentTiler, postList: PostList): void {
+  contentTiler.tile(postList.thumbs);
   updatePaginator(postList);
   updateAddressBar(postList);
 }

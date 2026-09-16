@@ -1,3 +1,4 @@
+import { Environment } from "@/app/context/environment";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryImageCanvas } from "@/features/gallery/view/rendering/image/canvas";
@@ -5,21 +6,30 @@ import { GalleryImageLoader } from "@/features/gallery/view/rendering/image/load
 import { GalleryMainThreadUpscaler } from "@/features/gallery/view/rendering/image/upscalers/main_thread_upscaler";
 import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler_wrapper";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { Renderer } from "@/features/gallery/types/gallery_types";
-import { USING_FIREFOX } from "@/app/context/environment";
+import { Preferences } from "@/app/context/preferences";
+import { Renderer } from "@/features/gallery/types/types";
+import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { isImageThumb } from "@/lib/ui/thumb/media_item";
-import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
 import { withTimeout } from "@/lib/async/scheduling";
 
 export class GalleryImageRenderer implements Renderer {
   public readonly root = div();
-  private readonly loader = new GalleryImageLoader((request) => this.onBitmapLoaded(request));
-  private readonly upscaler: GalleryAbstractUpscaler = GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper() : new GalleryMainThreadUpscaler();
-  private readonly canvas = new GalleryImageCanvas();
+  private readonly environment: Environment;
+  private readonly shell: Shell;
+  private readonly loader: GalleryImageLoader;
+  private readonly upscaler: GalleryAbstractUpscaler;
+  private readonly canvas: GalleryImageCanvas;
   private activeId = "";
 
-  constructor() {
+  constructor(environment: Environment, preferences: Preferences, shell: Shell) {
+    this.environment = environment;
+    this.shell = shell;
+    this.loader = new GalleryImageLoader(environment, (request) => this.onBitmapLoaded(request));
+    const getContentThumbs = (): HTMLElement[] => shell.getContentThumbs();
+
+    this.upscaler = environment.usingFirefox ? new GalleryWorkerUpscalerWrapper(environment, preferences, getContentThumbs) : new GalleryMainThreadUpscaler(environment, preferences, getContentThumbs);
+    this.canvas = new GalleryImageCanvas(environment);
     this.canvas.mount(this.root);
   }
 
@@ -33,7 +43,7 @@ export class GalleryImageRenderer implements Renderer {
     this.toggleZoomCursor(false);
     this.toggleZoom(false);
 
-    if (USING_FIREFOX) {
+    if (this.environment.usingFirefox) {
       this.canvas.clear();
     }
   }
@@ -120,6 +130,6 @@ export class GalleryImageRenderer implements Renderer {
   }
 
   private waitForAllThumbsToLoadWithTimeout(): Promise<unknown[]> {
-    return withTimeout(waitForAllThumbsToLoad(), GalleryConfig.preloadWaitingTimeout);
+    return withTimeout(this.shell.waitForContentThumbsToLoad(), GalleryConfig.preloadWaitingTimeout);
   }
 }

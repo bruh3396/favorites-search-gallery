@@ -1,77 +1,74 @@
-import * as FavoritesFlows from "@/features/favorites/flows/flows";
-import * as FavoritesModel from "@/features/favorites/model/model";
-import * as FavoritesView from "@/features/favorites/view/view";
-import { Events } from "@/app/channels/events";
-import { FAVORITES_PAGE_ID } from "@/app/context/environment";
 import { FavoritesConfig } from "@/config/favorites_config";
+import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { fetchFavoritesCount } from "@/lib/remote/fetchers/html";
 import { pluralSuffix } from "@/utils/pure/string";
 import { sleep } from "@/lib/async/scheduling";
 
-export async function loadAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
-  const storedFavoritesCount = await FavoritesModel.countStoredFavorites();
-  const hasStoredFavorites = storedFavoritesCount > 0;
+export class FavoritesLoadFlow extends FavoritesFlow {
 
-  Events.favorites.storedFavoritesFound.emit(hasStoredFavorites);
+  public async loadAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
+    const storedFavoritesCount = await this.model.countStoredFavorites();
+    const hasStoredFavorites = storedFavoritesCount > 0;
 
-  if (hasStoredFavorites) {
-    await loadStoredFavorites(storedFavoritesCount);
-    await fetchNewFavorites(firstPageFavorites);
-    await indexLoadedFavorites();
-    FavoritesFlows.Search.reSearchFavorites();
-  } else {
-    // FavoritesView.toggleSearchInputs(true);
-    await fetchAllFavorites(firstPageFavorites);
+    this.context.events.favorites.storedFavoritesFound.emit(hasStoredFavorites);
+
+    if (hasStoredFavorites) {
+      await this.loadStoredFavorites(storedFavoritesCount);
+      await this.fetchNewFavorites(firstPageFavorites);
+      await this.indexLoadedFavorites();
+      this.flows.search.reSearchFavorites();
+    } else {
+      await this.fetchAllFavorites(firstPageFavorites);
+    }
+    this.context.events.favorites.favoritesLoaded.emit();
   }
-  // FavoritesView.toggleSearchInputs(true);
-  Events.favorites.favoritesLoaded.emit();
-}
 
-async function loadStoredFavorites(storedFavoritesCount: number): Promise<void> {
-  if (storedFavoritesCount > FavoritesConfig.streamStoredFavoritesThreshold) {
-    await streamStoredFavorites();
-  } else {
-    FavoritesView.setStatus("Loading favorites");
-    await FavoritesModel.loadStoredFavorites();
+  private async loadStoredFavorites(storedFavoritesCount: number): Promise<void> {
+    if (storedFavoritesCount > FavoritesConfig.streamStoredFavoritesThreshold) {
+      await this.streamStoredFavorites();
+    } else {
+      this.view.setStatus("Loading favorites");
+      await this.model.loadStoredFavorites();
+    }
+    this.context.events.favorites.storedFavoritesLoaded.emit();
+    this.view.setTemporaryStatus("Favorites loaded");
+    this.view.clearStatus();
   }
-  Events.favorites.storedFavoritesLoaded.emit();
-  FavoritesView.setTemporaryStatus("Favorites loaded");
-  FavoritesView.clearStatus();
-}
 
-async function streamStoredFavorites(): Promise<void> {
-  const totalFavoritesCount = await FavoritesModel.countStoredFavorites();
+  private async streamStoredFavorites(): Promise<void> {
+    const totalFavoritesCount = await this.model.countStoredFavorites();
 
-  FavoritesView.setLoadProgress(0, totalFavoritesCount);
-  await FavoritesModel.streamStoredFavorites(loaded => FavoritesView.setLoadProgress(loaded, totalFavoritesCount));
-}
-
-async function fetchNewFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
-  FavoritesView.setStatus("Fetching new favorites");
-  const newFavorites = await FavoritesModel.fetchNewFavorites(firstPageFavorites);
-
-  if (newFavorites.length === 0) {
-    FavoritesView.clearStatus();
-    return;
+    this.view.setLoadProgress(0, totalFavoritesCount);
+    await this.model.streamStoredFavorites(loaded => this.view.setLoadProgress(loaded, totalFavoritesCount));
   }
-  await FavoritesModel.storeFavorites(newFavorites);
-  FavoritesView.markAsNew(newFavorites);
-  FavoritesView.setTemporaryStatus(`Saved ${newFavorites.length} new favorite${pluralSuffix(newFavorites.length)}`);
-  FavoritesModel.repaginateCurrentResults();
-}
 
-async function indexLoadedFavorites(): Promise<void> {
-  FavoritesView.setStatus("Indexing");
-  await sleep(10);
-  FavoritesModel.indexAllFavorites();
-  FavoritesView.clearStatus();
-}
+  private async fetchNewFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
+    this.view.setStatus("Fetching new favorites");
+    const newFavorites = await this.model.fetchNewFavorites(firstPageFavorites);
 
-async function fetchAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
-  fetchFavoritesCount(FAVORITES_PAGE_ID).then(FavoritesView.setExpectedTotalFavoritesCount);
-  FavoritesFlows.Display.clear();
-  await FavoritesModel.fetchAllFavorites(FavoritesFlows.Display.sync, firstPageFavorites);
-  FavoritesView.setStatus("Saving favorites");
-  await FavoritesModel.storeFavorites(FavoritesModel.getAllFavorites());
-  FavoritesView.setTemporaryStatus("All favorites saved");
+    if (newFavorites.length === 0) {
+      this.view.clearStatus();
+      return;
+    }
+    await this.model.storeFavorites(newFavorites);
+    this.view.markAsNew(newFavorites);
+    this.view.setTemporaryStatus(`Saved ${newFavorites.length} new favorite${pluralSuffix(newFavorites.length)}`);
+    this.model.repaginateCurrentResults();
+  }
+
+  private async indexLoadedFavorites(): Promise<void> {
+    this.view.setStatus("Indexing");
+    await sleep(10);
+    this.model.indexAllFavorites();
+    this.view.clearStatus();
+  }
+
+  private async fetchAllFavorites(firstPageFavorites: HTMLElement[] | undefined): Promise<void> {
+    fetchFavoritesCount(this.context.environment.favoritesPageId).then((count) => this.view.setExpectedTotalFavoritesCount(count));
+    this.flows.display.clear();
+    await this.model.fetchAllFavorites(favorites => this.flows.display.sync(favorites), firstPageFavorites);
+    this.view.setStatus("Saving favorites");
+    await this.model.storeFavorites(this.model.getAllFavorites());
+    this.view.setTemporaryStatus("All favorites saved");
+  }
 }

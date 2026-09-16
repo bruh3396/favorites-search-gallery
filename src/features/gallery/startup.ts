@@ -1,168 +1,195 @@
-import * as GalleryControl from "@/features/gallery/control/control";
-import * as GalleryFeatures from "@/features/gallery/features/features";
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { hideTutorial, showTutorial } from "@/features/gallery/dom_tweaks/tutorial";
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { GALLERY_DISABLED } from "@/app/context/flags";
+import { AppContext } from "@/app/context/context";
+import { GalleryComponents } from "@/features/gallery/types/types";
+import { GalleryControl } from "@/features/gallery/control/control";
+import { GalleryFeatures } from "@/features/gallery/features/features";
+import { GalleryFlows } from "@/features/gallery/flows/flows";
+import { GalleryModel } from "@/features/gallery/model/model";
+import { GalleryView } from "@/features/gallery/view/view";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 
-export async function startGallery(): Promise<void> {
-  if (GALLERY_DISABLED) {
+export async function startGallery(context: AppContext): Promise<void> {
+  if (context.flags.galleryDisabled) {
     return;
   }
-  await waitUntilPageIsReady();
-  setup();
-  start();
+  await waitUntilPageIsReady(context);
+
+  const model = new GalleryModel(context.preferences);
+  const view = new GalleryView(context);
+  const control = new GalleryControl(context, view);
+  const flows = new GalleryFlows(context, model, view, control);
+  const features = new GalleryFeatures(context);
+  const components: GalleryComponents = { context, model, view, control, flows, features };
+
+  setup(components);
+  start(components);
 }
 
-async function waitUntilPageIsReady(): Promise<void> {
-  if (ON_FAVORITES_PAGE) {
-    await Events.favorites.storedFavoritesFound.wait();
+async function waitUntilPageIsReady(context: AppContext): Promise<void> {
+  const { environment, events } = context;
+
+  if (environment.onFavoritesPage) {
+    await events.favorites.storedFavoritesFound.wait();
   }
 
-  if (ON_POST_LIST_PAGE) {
-    await Events.postList.postListInitialized.wait();
+  if (environment.onPostListPage) {
+    await events.postList.postListInitialized.wait();
   }
 }
 
-function setup(): void {
-  setupModel();
-  setupView();
-  setupSubFeatures();
-  setupControl();
-  subscribeToEvents();
-  serveExternalRequests();
+function setup(components: GalleryComponents): void {
+  setupModel(components);
+  setupView(components);
+  setupSubFeatures(components);
+  setupControl(components);
+  subscribeToEvents(components);
+  serveExternalRequests(components);
 }
 
-function setupModel(): void {
-  if (ON_FAVORITES_PAGE) {
-    GalleryModel.setup(id => GalleryModel.wrappingThumbsAroundId(FeatureBridge.favorites.searchResults.call(), id, favorite => favorite.root));
+async function start(components: GalleryComponents): Promise<void> {
+  const { context, flows } = components;
+  const { environment } = context;
+
+  if (environment.onPostListPage) {
+    flows.content.refresh();
+    return;
+  }
+
+  if (environment.onFavoritesPage && !(await hasStoredFavorites(context))) {
+    flows.content.refresh();
+  }
+}
+
+function hasStoredFavorites(context: AppContext): Promise<boolean> {
+  return context.events.favorites.storedFavoritesFound.wait();
+}
+
+function setupModel({ context, model }: GalleryComponents): void {
+  const { environment, featureBridge } = context;
+
+  if (environment.onFavoritesPage) {
+    model.setupWrappingWindow(() => featureBridge.favorites.searchResults.call(), (favorite) => favorite.root);
   } else {
-    GalleryModel.setup(id => GalleryModel.clampedThumbsAroundId(FeatureBridge.postList.thumbs.call(), id, thumb => thumb));
+    model.setupClampedWindow(() => featureBridge.postList.thumbs.call(), (thumb) => thumb);
   }
 }
 
-async function start(): Promise<void> {
-  if (ON_POST_LIST_PAGE) {
-    GalleryFlows.Content.refresh();
-    return;
-  }
-
-  if (ON_FAVORITES_PAGE && !(await hasStoredFavorites())) {
-    GalleryFlows.Content.refresh();
-  }
-}
-
-function hasStoredFavorites(): Promise<boolean> {
-  return Events.favorites.storedFavoritesFound.wait();
-}
-
-function setupView(): void {
-  GalleryView.setup({
-    onMenuAction: Events.gallery.galleryMenuButtonClicked.emit,
-    onVideoEnded: GalleryFeatures.handleVideoEnded,
-    onVideoDoubleClicked: GalleryFlows.OpenClose.close,
-    onVolumeChanged: GalleryFlows.Video.setVolume
+function setupView({ context, view, flows, features }: GalleryComponents): void {
+  view.setup({
+    onMenuAction: context.events.gallery.galleryMenuButtonClicked.emit,
+    onVideoEnded: () => features.handleVideoEnded(),
+    onVideoDoubleClicked: () => flows.openClose.close(),
+    onVolumeChanged: (volume) => flows.video.setVolume(volume)
   });
 }
 
-function setupControl(): void {
-  GalleryControl.setup(GalleryFlows.Visibility.handleVisibleThumbsChanged);
+function setupControl({ control, flows }: GalleryComponents): void {
+  control.setup(() => flows.visibility.handleVisibleThumbsChanged());
 }
 
-function setupSubFeatures(): void {
-  GalleryFeatures.setup({
+function setupSubFeatures({ context, view, flows, features }: GalleryComponents): void {
+  const { domEvents } = context;
+
+  features.setup({
     autoplay: {
-      setVideoLooping: GalleryView.toggleVideoLooping,
-      onComplete: (direction?: NavigationKey) => GalleryFlows.Dispatch.run({
-        open: GalleryFlows.Navigation.navigate
+      setVideoLooping: (value) => view.toggleVideoLooping(value),
+      onComplete: (direction?: NavigationKey) => flows.dispatch.run<NavigationKey>({
+        open: (key) => flows.navigation.navigate(key)
       }, direction),
-      onVideoEndedBeforeMinimumViewTime: () => GalleryView.restartVideo(),
-      subscribeToMouseMove: DomEvents.document.mousemove.on,
-      subscribeToKeyDown: DomEvents.document.keydown.on
+      onVideoEndedBeforeMinimumViewTime: () => view.restartVideo(),
+      subscribeToMouseMove: domEvents.document.mousemove.on,
+      subscribeToKeyDown: domEvents.document.keydown.on
     }
   });
 }
 
-function subscribeToEvents(): void {
-  Events.gallery.galleryMenuButtonClicked.on(GalleryFlows.Menu.handleAction);
-  Preferences.gallery.backgroundOpacity.on(GalleryView.setBackgroundOpacity);
-  Preferences.gallery.menuPinned.on(GalleryView.setMenuPinned);
-  Preferences.gallery.menuDockedLeft.on(GalleryView.setMenuDockedLeft);
-  Preferences.gallery.videoMuted.on(GalleryView.setVideoMuted);
+function subscribeToEvents(components: GalleryComponents): void {
+  const { context, view, flows } = components;
+  const { events, preferences, environment } = context;
 
-  if (ON_FAVORITES_PAGE) {
-    subscribeToFavoritesEvents();
+  events.gallery.galleryMenuButtonClicked.on((action) => flows.menu.handleAction(action));
+  preferences.gallery.backgroundOpacity.on((opacity) => view.setBackgroundOpacity(opacity));
+  preferences.gallery.menuPinned.on((pinned) => view.setMenuPinned(pinned));
+  preferences.gallery.menuDockedLeft.on((dockedLeft) => view.setMenuDockedLeft(dockedLeft));
+  preferences.gallery.videoMuted.on((muted) => view.setVideoMuted(muted));
+
+  if (environment.onFavoritesPage) {
+    subscribeToFavoritesEvents(components);
   }
 
-  if (ON_POST_LIST_PAGE) {
-    subscribeToPostListEvents();
+  if (environment.onPostListPage) {
+    subscribeToPostListEvents(components);
   }
 
-  if (ON_DESKTOP_DEVICE) {
-    subscribeToDesktopInput();
+  if (environment.onDesktopDevice) {
+    subscribeToDesktopInput(components);
   } else {
-    subscribeToMobileInput();
+    subscribeToMobileInput(components);
   }
 }
 
-function subscribeToFavoritesEvents(): void {
-  Events.favorites.contentReplaced.on(GalleryFlows.Content.refresh);
-  Events.favorites.contentAdded.on(GalleryFlows.Content.refresh);
-  Preferences.gallery.previewEnabled.on(GalleryModel.preview);
-  Events.favorites.searchResultsUpdated.on(GalleryFlows.Content.downscaleThumbsOutsideResults, { async: true});
+function subscribeToFavoritesEvents({ context, model, flows }: GalleryComponents): void {
+  const { events, preferences } = context;
+
+  events.favorites.contentReplaced.on(() => flows.content.refresh());
+  events.favorites.contentAdded.on(() => flows.content.refresh());
+  preferences.gallery.previewEnabled.on((enabled) => model.preview(enabled));
+  events.favorites.searchResultsUpdated.on(() => flows.content.downscaleThumbsOutsideResults(), { async: true });
 }
 
-function subscribeToPostListEvents(): void {
-  Preferences.postList.upscaleThumbs.on(GalleryFlows.PostList.toggleUpscaling);
-  Events.postList.initialPostListCreated.on(GalleryFlows.PostList.preloadOnIdle, { once: true });
-  Events.postList.moreResultsAdded.on(GalleryFlows.Content.refresh);
-  Preferences.postList.infiniteScroll.on(GalleryFlows.Content.refresh);
-  Events.postList.pageChanged.on(GalleryFlows.Content.refresh);
+function subscribeToPostListEvents({ context, flows }: GalleryComponents): void {
+  const { events, preferences } = context;
+
+  preferences.postList.upscaleThumbs.on((value) => flows.postList.toggleUpscaling(value));
+  events.postList.initialPostListCreated.on(() => flows.postList.preloadOnIdle(), { once: true });
+  events.postList.moreResultsAdded.on(() => flows.content.refresh());
+  preferences.postList.infiniteScroll.on(() => flows.content.refresh());
+  events.postList.pageChanged.on(() => flows.content.refresh());
 }
 
-function subscribeToDesktopInput(): void {
-  DomEvents.document.mouseover.on(GalleryFlows.MouseOver.handleMouseOver);
-  DomEvents.document.mouseover.on(GalleryView.toggleMenuPersistence);
-  DomEvents.document.click.on(GalleryFlows.Click.handleClick);
-  DomEvents.document.mousedown.on(GalleryFlows.Click.handleMouseDown);
-  DomEvents.document.contextmenu.on(GalleryFlows.Click.handleContextMenu);
-  DomEvents.document.mousemove.on(GalleryFlows.Interaction.showCursorInGallery);
-  DomEvents.document.mousemove.on(GalleryView.revealMenu);
-  DomEvents.document.wheel.on(GalleryFlows.Wheel.handleWheel);
-  DomEvents.document.keydown.on(GalleryFlows.Key.handleKeyDown);
-  DomEvents.document.keyup.on(GalleryFlows.Key.handleKeyUp);
-  Events.gallery.interactionStopped.on(GalleryFlows.Interaction.hideCursorInGallery);
+function subscribeToDesktopInput({ context, view, flows }: GalleryComponents): void {
+  const { domEvents, events } = context;
+
+  domEvents.document.mouseover.on((event) => flows.mouseOver.handleMouseOver(event));
+  domEvents.document.mouseover.on((event) => view.toggleMenuPersistence(event));
+  domEvents.document.click.on((event) => flows.click.handleClick(event));
+  domEvents.document.mousedown.on((event) => flows.click.handleMouseDown(event));
+  domEvents.document.contextmenu.on((event) => flows.click.handleContextMenu(event));
+  domEvents.document.mousemove.on((event) => flows.interaction.showCursorInGallery(event));
+  domEvents.document.mousemove.on(() => view.revealMenu());
+  domEvents.document.wheel.on((event) => flows.wheel.handleWheel(event));
+  domEvents.document.keydown.on((event) => flows.key.handleKeyDown(event));
+  domEvents.document.keyup.on((event) => flows.key.handleKeyUp(event));
+  events.gallery.interactionStopped.on(() => flows.interaction.hideCursorInGallery());
 }
 
-function subscribeToMobileInput(): void {
-  Events.gallery.leftTap.on(GalleryFlows.Touch.navigateBackInGallery);
-  Events.gallery.rightTap.on(GalleryFlows.Touch.navigateForwardInGallery);
-  DomEvents.document.mousedown.on(GalleryFlows.Touch.handleMouseDown);
-  DomEvents.document.touchStart.on(GalleryFlows.Touch.handleTouchStart);
-  DomEvents.mobile.swipedDown.on(GalleryFlows.Touch.closeGallery);
-  DomEvents.mobile.swipedUp.on(GalleryFeatures.showMenu);
-  DomEvents.mobile.touchHold.on(GalleryFlows.Touch.favoriteCurrentPost);
-  DomEvents.window.orientationChange.on(GalleryView.correctOrientation);
-  Events.gallery.openedGallery.on(showTutorialOnFirstOpen, { once: true });
-  Events.gallery.showControlsRequested.on(showTutorial);
-  Events.gallery.closedGallery.on(hideTutorial);
+function subscribeToMobileInput({ context, view, flows, features }: GalleryComponents): void {
+  const { domEvents, events, preferences } = context;
+
+  events.gallery.leftTap.on(() => flows.touch.navigateBackInGallery());
+  events.gallery.rightTap.on(() => flows.touch.navigateForwardInGallery());
+  domEvents.document.mousedown.on((event) => flows.touch.handleMouseDown(event));
+  domEvents.document.touchStart.on((event) => flows.touch.handleTouchStart(event));
+  domEvents.mobile.swipedDown.on(() => flows.touch.closeGallery());
+  domEvents.mobile.swipedUp.on(() => features.showMenu());
+  domEvents.mobile.touchHold.on(() => flows.touch.favoriteCurrentPost());
+  domEvents.window.orientationChange.on(() => view.correctOrientation());
+  events.gallery.openedGallery.on(() => showTutorialOnFirstOpen(preferences), { once: true });
+  events.gallery.showControlsRequested.on(showTutorial);
+  events.gallery.closedGallery.on(hideTutorial);
 }
 
-function showTutorialOnFirstOpen(): void {
-  if (!Preferences.gallery.tutorialSeen.value) {
-    Preferences.gallery.tutorialSeen.set(true);
+function showTutorialOnFirstOpen(preferences: Preferences): void {
+  if (!preferences.gallery.tutorialSeen.value) {
+    preferences.gallery.tutorialSeen.set(true);
     showTutorial();
   }
 }
 
-function serveExternalRequests(): void {
-  FeatureBridge.gallery.state.serve(GalleryModel.getCurrentState);
-  FeatureBridge.gallery.currentThumb.serve(GalleryModel.currentThumbIfOpen);
+function serveExternalRequests({ context, model }: GalleryComponents): void {
+  const { featureBridge } = context;
+
+  featureBridge.gallery.state.serve(() => model.getCurrentState());
+  featureBridge.gallery.currentThumb.serve(() => model.currentThumbIfOpen());
 }

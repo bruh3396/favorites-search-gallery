@@ -1,7 +1,7 @@
 import { Post } from "@/types/api";
 import { daysToMilliseconds } from "@/utils/pure/number";
 
-const timeToLive = daysToMilliseconds(14);
+const timeToLive = daysToMilliseconds(21);
 
 export function postIsComplete(post: Post): boolean {
   return post.width > 0 && post.height > 0;

@@ -1,11 +1,13 @@
-import { FAVORITES_SEARCH_GALLERY_ENABLED } from "@/app/context/flags";
+import { createAppContext } from "@/app/context/context";
 import { launchFeatures } from "@/app/startup/features";
 import { setupRuntime } from "@/app/startup/runtime";
 
 function runFavoritesSearchGallery(): void {
-  if (FAVORITES_SEARCH_GALLERY_ENABLED) {
-    setupRuntime();
-    launchFeatures();
+  const context = createAppContext();
+
+  if (context.flags.favoritesSearchGalleryEnabled) {
+    setupRuntime(context);
+    launchFeatures(context);
   }
 }
 

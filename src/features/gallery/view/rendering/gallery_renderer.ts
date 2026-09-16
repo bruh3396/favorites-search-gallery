@@ -1,32 +1,34 @@
 import { isGif, isVideo } from "@/lib/media/media_type";
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
+import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
-import { Renderer } from "@/features/gallery/types/gallery_types";
+import { Renderer } from "@/features/gallery/types/types";
 import { forceReflow } from "@/utils/browser/element";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryRenderer {
-  private readonly root: HTMLElement;
   private readonly imageRenderer: GalleryImageRenderer;
   private readonly videoRenderer: GalleryVideoRenderer;
   private readonly gifRenderer: GalleryGifRenderer;
   private readonly renderers: Renderer[];
 
-  constructor(
-    root: HTMLElement,
+  constructor(appRoot: HTMLElement, context: AppContext) {
+    this.imageRenderer = new GalleryImageRenderer(context.environment, context.preferences, context.shell);
+    this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment);
+    this.gifRenderer = new GalleryGifRenderer(context.environment);
+    this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
+    this.renderers.forEach((renderer) => appRoot.appendChild(renderer.root));
+  }
+
+  public setup(
     onVideoEnded: () => void,
     onVideoDoubleClicked: (event: MouseEvent) => void,
     onVolumeChanged: (volume: number) => void
-  ) {
-    this.root = root;
-    this.imageRenderer = new GalleryImageRenderer();
-    this.videoRenderer = new GalleryVideoRenderer(onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
-    this.gifRenderer = new GalleryGifRenderer();
-    this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
-    this.renderers.forEach((renderer) => this.root.appendChild(renderer.root));
+  ): void {
+    this.videoRenderer.setup(onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
   }
 
   public render(thumb: HTMLElement): void {

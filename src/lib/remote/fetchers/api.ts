@@ -1,6 +1,7 @@
 import { ParsedPost, PostResponse, Route, TagResponse } from "@/types/api";
 import { ApiConfig } from "@/config/api_config";
 import { CoalescingResolver } from "@/lib/async/coalescing";
+import { Environment } from "@/app/context/environment";
 import { LocalOverrides } from "@/config/local_overrides";
 import { PostFetchError } from "@/types/errors";
 import { RateLimiter } from "@/lib/async/rate_limiting";
@@ -21,8 +22,8 @@ const tagLimiter = new RateLimiter(ApiConfig.tagRateLimit);
 const postResolver = new CoalescingResolver<string, PostResponse>(ApiConfig.coalesceSize, ApiConfig.flushTimeout, fetchPosts);
 const tagResolver = new CoalescingResolver<string, TagResponse>(ApiConfig.coalesceSize, ApiConfig.flushTimeout, fetchTagCategories);
 
-export function ping(identity: { userId: string; version: string; platform: string }): void {
-  REQUEST_INIT.headers = { "X-User-Id": identity.userId, "X-Version": identity.version, "X-Platform": identity.platform };
+export function ping(environment: Environment): void {
+  REQUEST_INIT.headers = { "X-User-Id": environment.userId, "X-Version": environment.version, "X-Platform": environment.platform };
   fetchApi("ping");
 }
 

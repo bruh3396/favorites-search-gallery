@@ -1,48 +1,48 @@
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { SettingsControl, toggle as toggleControl } from "@/lib/ui/settings/controls";
 import { applyTheme, swapNativeStylesheet } from "@/lib/ui/theme/apply";
-import { Events } from "@/app/channels/events";
+import { Environment } from "@/app/context/environment";
+import { Events } from "@/app/context/events";
 import { Layout } from "@/types/app";
-import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
 
-export function toggle(config: Partial<ToggleSetting>): SettingsControl {
-  return toggleControl({ registerHotkey, ...config });
+export function toggle(config: Partial<ToggleSetting>, events: Events): SettingsControl {
+  return toggleControl({ registerHotkey: (key, fire) => registerHotkey(events, key, fire), ...config });
 }
 
-export function whenLayout(predicate: (layout: Layout) => boolean): EnableRule {
-  return enableWhen(Preferences.favorites.layout, predicate);
+export function whenLayout(preferences: Preferences, predicate: (layout: Layout) => boolean): EnableRule {
+  return enableWhen(preferences.favorites.layout, predicate);
 }
 
-export function whenNotInfiniteScroll(): EnableRule {
-  return enableWhen(Preferences.favorites.infiniteScroll, (on) => !on);
+export function whenNotInfiniteScroll(preferences: Preferences): EnableRule {
+  return enableWhen(preferences.favorites.infiniteScroll, (on) => !on);
 }
 
-export function whenNotFullscreenOnHover(): EnableRule {
-  return enableWhen(Preferences.gallery.previewEnabled, (on) => !on);
+export function whenNotFullscreenOnHover(preferences: Preferences): EnableRule {
+  return enableWhen(preferences.gallery.previewEnabled, (on) => !on);
 }
 
-export function applyCurrentTheme(): void {
-  applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
+export function applyCurrentTheme(preferences: Preferences): void {
+  applyTheme(preferences.app.theme.value, preferences.app.darkMode.value);
 }
 
-export function applyDarkMode(dark: boolean): void {
-  applyCurrentTheme();
-  swapNativeStylesheet(dark, ON_DESKTOP_DEVICE);
+export function applyDarkMode(preferences: Preferences, environment: Environment, dark: boolean): void {
+  applyCurrentTheme(preferences);
+  swapNativeStylesheet(dark, environment.onDesktopDevice);
 }
 
-export function isExpanded(section: SettingsSection): boolean {
-  return Preferences.favorites.settingsExpandedSections.value[section.title] ?? section.expanded === true;
+export function isExpanded(preferences: Preferences, section: SettingsSection): boolean {
+  return preferences.favorites.settingsExpandedSections.value[section.title] ?? section.expanded === true;
 }
 
-export function allSectionsCollapsed(sections: SettingsSection[]): boolean {
-  return sections.every((section) => !isExpanded(section));
+export function allSectionsCollapsed(preferences: Preferences, sections: SettingsSection[]): boolean {
+  return sections.every((section) => !isExpanded(preferences, section));
 }
 
-function registerHotkey(key: string, fire: () => void): void {
-  Events.app.hotkeyPressed.on((pressed) => {
+function registerHotkey(events: Events, key: string, fire: () => void): void {
+  events.app.hotkeyPressed.on((pressed) => {
     if (pressed === key.toLowerCase()) {
       fire();
     }

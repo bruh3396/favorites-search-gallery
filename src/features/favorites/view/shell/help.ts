@@ -1,7 +1,7 @@
 import * as DrawerPanel from "@/lib/ui/drawer_panel";
 import { FavoritesClass, FavoritesHelpLinks } from "@/features/favorites/types/scaffold";
+import { Environment } from "@/app/context/environment";
 import { FavoritesDrawerViewContent } from "@/types/favorite";
-import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
@@ -10,14 +10,14 @@ const PANEL_CLASSES = {
   sectionTitle: FavoritesClass.drawerSectionTitle
 };
 
-export function buildDrawerView(onShowControls: () => void): FavoritesDrawerViewContent {
-  return { mount: (panel) => buildHelpPanel(panel, onShowControls) };
+export function buildDrawerView(environment: Environment, onShowControls: () => void): FavoritesDrawerViewContent {
+  return { mount: (panel) => buildHelpPanel(environment, panel, onShowControls) };
 }
 
-function buildHelpPanel(panel: HTMLElement, onShowControls: () => void): void {
+function buildHelpPanel(environment: Environment, panel: HTMLElement, onShowControls: () => void): void {
   const rows: HTMLElement[] = [];
 
-  if (ON_MOBILE_DEVICE) {
+  if (environment.onMobileDevice) {
     rows.push(buildControlsRow(onShowControls));
   }
 

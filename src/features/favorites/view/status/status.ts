@@ -1,70 +1,79 @@
-import * as FavoritesEta from "@/features/favorites/view/status/eta";
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
+import { FavoritesEta } from "@/features/favorites/view/status/eta";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { Root } from "@/app/layout/shell";
+import { Shell } from "@/app/context/shell";
 import { Timeout } from "@/types/async";
 
-let resultsCountIndicator: HTMLElement;
-let statusIndicator: HTMLElement;
-let progressBar: ProgressBar;
-let totalFavoritesCount: number | null = null;
-let statusTimeout: Timeout;
 const TEMPORARY_STATUS_TIMEOUT = 1_000;
 
-export function setStatus(text: string): void {
-  clearTimeout(statusTimeout);
-  statusIndicator.textContent = text;
-}
+export class FavoritesStatus {
+  private readonly eta = new FavoritesEta();
+  private resultsCountIndicator: HTMLElement;
+  private statusIndicator: HTMLElement;
+  private progressBar: ProgressBar;
+  private totalFavoritesCount: number | null = null;
+  private statusTimeout: Timeout | undefined;
 
-export function setTemporaryStatus(text: string): void {
-  setStatus(text);
-  clearTimeout(statusTimeout);
-  statusTimeout = setTimeout(clearStatus, TEMPORARY_STATUS_TIMEOUT);
-}
+  constructor(private readonly shell: Shell) {
+    this.resultsCountIndicator = document.createElement("label");
+    this.statusIndicator = document.createElement("label");
+    this.progressBar = buildProgressBar(FavoritesId.loadProgressBar);
+  }
 
-export function setResultsCount(value: number): void {
-  resultsCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
-}
+  public setup(): void {
+    this.resultsCountIndicator = this.shell.root.querySelector(`#${FavoritesId.resultsCount}`) ?? this.resultsCountIndicator;
+    this.statusIndicator = this.shell.root.querySelector(`#${FavoritesId.loadStatus}`) ?? this.statusIndicator;
+    this.shell.root.querySelector(`#${FavoritesId.toolbar}`)?.append(this.progressBar.element);
+  }
 
-export function updateFetchStatus(completed: number, resultsCount: number): void {
-  let statusText = `Fetching - ${completed}`;
+  public setStatus(text: string): void {
+    clearTimeout(this.statusTimeout);
+    this.statusIndicator.textContent = text;
+  }
 
-  if (totalFavoritesCount !== null) {
-    statusText = `${statusText} / ${totalFavoritesCount}`;
-    const eta = FavoritesEta.getEta(completed, totalFavoritesCount);
+  public setTemporaryStatus(text: string): void {
+    this.setStatus(text);
+    clearTimeout(this.statusTimeout);
+    this.statusTimeout = setTimeout(() => this.clearStatus(), TEMPORARY_STATUS_TIMEOUT);
+  }
 
-    if (eta !== null) {
-      statusText = `${statusText} - ${eta}`;
+  public setResultsCount(value: number): void {
+    this.resultsCountIndicator.textContent = `${value} ${value === 1 ? "Result" : "Results"}`;
+  }
+
+  public updateFetchStatus(completed: number, resultsCount: number): void {
+    let statusText = `Fetching - ${completed}`;
+
+    if (this.totalFavoritesCount !== null) {
+      statusText = `${statusText} / ${this.totalFavoritesCount}`;
+      const eta = this.eta.getEta(completed, this.totalFavoritesCount);
+
+      if (eta !== null) {
+        statusText = `${statusText} - ${eta}`;
+      }
+      this.progressBar.setProgress(completed, this.totalFavoritesCount);
+      this.progressBar.setVisible(true);
     }
-    progressBar.setProgress(completed, totalFavoritesCount);
-    progressBar.setVisible(true);
+    this.setStatus(statusText);
+    this.setResultsCount(resultsCount);
   }
-  setStatus(statusText);
-  setResultsCount(resultsCount);
-}
 
-export function setLoadProgress(loaded: number, total: number): void {
-  if (total > 0) {
-    progressBar.setProgress(loaded, total);
-    progressBar.setVisible(true);
-    setStatus(`Loading favorites - ${loaded} / ${total}`);
-  } else {
-    setStatus("Loading favorites");
+  public setLoadProgress(loaded: number, total: number): void {
+    if (total > 0) {
+      this.progressBar.setProgress(loaded, total);
+      this.progressBar.setVisible(true);
+      this.setStatus(`Loading favorites - ${loaded} / ${total}`);
+    } else {
+      this.setStatus("Loading favorites");
+    }
   }
-}
 
-export function setExpectedTotalFavoritesCount(count: number | null): void {
-  totalFavoritesCount = count;
-}
+  public setExpectedTotalFavoritesCount(count: number | null): void {
+    this.totalFavoritesCount = count;
+  }
 
-export function setup(): void {
-  resultsCountIndicator = Root.querySelector(`#${FavoritesId.resultsCount}`) ?? document.createElement("label");
-  statusIndicator = Root.querySelector(`#${FavoritesId.loadStatus}`) ?? document.createElement("label");
-  progressBar = buildProgressBar(FavoritesId.loadProgressBar);
-  Root.querySelector(`#${FavoritesId.toolbar}`)?.append(progressBar.element);
-}
-
-export function clearStatus(): void {
-  statusIndicator.textContent = "";
-  progressBar.setVisible(false);
+  public clearStatus(): void {
+    this.statusIndicator.textContent = "";
+    this.progressBar.setVisible(false);
+  }
 }

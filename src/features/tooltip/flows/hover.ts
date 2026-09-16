@@ -1,16 +1,17 @@
-import * as TooltipModel from "@/features/tooltip/model/model";
-import * as TooltipView from "@/features/tooltip/view/view";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { galleryIdle } from "@/app/channels/feature_bridge";
+import { TooltipFlow } from "@/features/tooltip/flows/flow";
 
-export function handleMouseOver(event: EnhancedMouseEvent): void {
-  if (!TooltipModel.tooltipEnabled() || !galleryIdle()) {
-    return;
-  }
+export class TooltipHoverFlow extends TooltipFlow {
 
-  if (event.thumb === null) {
-    TooltipView.hide();
-  } else {
-    TooltipView.show(event.thumb, TooltipModel.colorForTag);
+  public handleMouseOver(event: EnhancedMouseEvent): void {
+    if (!this.model.tooltipEnabled() || !this.context.featureBridge.galleryIdle()) {
+      return;
+    }
+
+    if (event.thumb === null) {
+      this.view.hide();
+    } else {
+      this.view.show(event.thumb, (tag) => this.model.colorForTag(tag));
+    }
   }
 }

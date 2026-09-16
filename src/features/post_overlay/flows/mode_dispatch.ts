@@ -1,13 +1,16 @@
-import { Preferences } from "@/app/context/preferences";
+import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
 
 type OverlayModeHandlers<V> = {
   tag?: (arg: V) => void;
 };
 
-export function dispatchByMode<V>(handlers: OverlayModeHandlers<V>, args?: V): void {
-  const handler = {
-    tag: handlers.tag
-  }[Preferences.postOverlay.mode.value];
+export class PostOverlayModeDispatchFlow extends PostOverlayFlow {
 
-  handler?.(args as V);
+  public dispatchByMode<V>(handlers: OverlayModeHandlers<V>, args?: V): void {
+    const handler = {
+      tag: handlers.tag
+    }[this.context.preferences.postOverlay.mode.value];
+
+    handler?.(args as V);
+  }
 }

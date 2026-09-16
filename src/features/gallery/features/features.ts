@@ -1,12 +1,11 @@
-import * as GalleryAutoplay from "@/features/gallery/features/autoplay/autoplay";
+import { AppContext } from "@/app/context/context";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
-import { Events } from "@/app/channels/events";
+import { GalleryAutoplay } from "@/features/gallery/features/autoplay/autoplay";
 import { NavigationKey } from "@/types/input";
-import { Preferences } from "@/app/context/preferences";
 
 type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
 
-export interface GalleryFeaturesDependencies {
+interface GalleryFeaturesDependencies {
   autoplay: {
     setVideoLooping: (value: boolean) => void;
     onComplete: (direction?: NavigationKey) => void;
@@ -16,17 +15,32 @@ export interface GalleryFeaturesDependencies {
   };
 }
 
-export function setup(dependencies: GalleryFeaturesDependencies): void {
-  setupAutoplay(dependencies.autoplay);
-}
+export class GalleryFeatures {
+  private readonly autoplay: GalleryAutoplay;
 
-function setupAutoplay(dependencies: GalleryFeaturesDependencies["autoplay"]): void {
-  GalleryAutoplay.setup(dependencies);
-  Preferences.gallery.autoplayActive.on(GalleryAutoplay.toggle);
-  Events.gallery.openedGallery.on(GalleryAutoplay.startAutoplay);
-  Events.gallery.closedGallery.on(GalleryAutoplay.stopAutoplay);
-  Events.gallery.displayedThumb.on(GalleryAutoplay.startViewTimer);
-}
+  constructor(private readonly context: AppContext) {
+    this.autoplay = new GalleryAutoplay(context);
+  }
 
-export const handleVideoEnded = GalleryAutoplay.handleVideoEnded;
-export const showMenu = GalleryAutoplay.showMenu;
+  public setup(dependencies: GalleryFeaturesDependencies): void {
+    this.setupAutoplay(dependencies.autoplay);
+  }
+
+  public handleVideoEnded(): void {
+    this.autoplay.handleVideoEnded();
+  }
+
+  public showMenu(): void {
+    this.autoplay.showMenu();
+  }
+
+  private setupAutoplay(dependencies: GalleryFeaturesDependencies["autoplay"]): void {
+    const { events, preferences } = this.context;
+
+    this.autoplay.setup(dependencies);
+    preferences.gallery.autoplayActive.on((value) => this.autoplay.toggle(value));
+    events.gallery.openedGallery.on(() => this.autoplay.startAutoplay());
+    events.gallery.closedGallery.on(() => this.autoplay.stopAutoplay());
+    events.gallery.displayedThumb.on((thumb) => this.autoplay.startViewTimer(thumb));
+  }
+}

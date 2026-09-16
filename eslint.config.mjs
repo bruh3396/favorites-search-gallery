@@ -378,7 +378,7 @@ export default defineConfig([
           types: ["boolean"],
           format: ["PascalCase"],
           prefix: [
-            "is", "has", "should", "can", "was", "did", "will", "must",
+            "is", "has", "should", "can", "was", "did", "will", "must", "on",
             "using", "requires", "needs", "allows", "in", "are", "supports",
             "overflows", "includes", "contains", "exceeds", "matches"
           ]
@@ -433,12 +433,37 @@ export default defineConfig([
             "signature",
             "call-signature",
 
-            // Fields
+            // === All static members before all non-static ===
+
+            // Static fields
             "public-static-field",
             "protected-static-field",
             "private-static-field",
             "#private-static-field",
 
+            // Static initialization
+            "static-initialization",
+
+            // Static getters / setters
+            "public-static-get",
+            "protected-static-get",
+            "private-static-get",
+            "#private-static-get",
+
+            "public-static-set",
+            "protected-static-set",
+            "private-static-set",
+            "#private-static-set",
+
+            "static-accessor",
+
+            // Static methods
+            "public-static-method",
+            "protected-static-method",
+            "private-static-method",
+            "#private-static-method",
+
+            // === Instance fields ===
             "public-decorated-field",
             "protected-decorated-field",
             "private-decorated-field",
@@ -456,16 +481,12 @@ export default defineConfig([
             "private-field",
             "#private-field",
 
-            "static-field",
             "instance-field",
             "abstract-field",
 
             "decorated-field",
 
             "field",
-
-            // Static initialization
-            "static-initialization",
 
             // Constructors
             "public-constructor",
@@ -474,12 +495,7 @@ export default defineConfig([
 
             "constructor",
 
-            // Accessors
-            "public-static-accessor",
-            "protected-static-accessor",
-            "private-static-accessor",
-            "#private-static-accessor",
-
+            // Instance accessors
             "public-decorated-accessor",
             "protected-decorated-accessor",
             "private-decorated-accessor",
@@ -497,7 +513,6 @@ export default defineConfig([
             "private-accessor",
             "#private-accessor",
 
-            "static-accessor",
             "instance-accessor",
             "abstract-accessor",
 
@@ -505,12 +520,7 @@ export default defineConfig([
 
             "accessor",
 
-            // Getters
-            "public-static-get",
-            "protected-static-get",
-            "private-static-get",
-            "#private-static-get",
-
+            // Instance getters
             "public-decorated-get",
             "protected-decorated-get",
             "private-decorated-get",
@@ -528,7 +538,6 @@ export default defineConfig([
             "private-get",
             "#private-get",
 
-            "static-get",
             "instance-get",
             "abstract-get",
 
@@ -536,12 +545,7 @@ export default defineConfig([
 
             "get",
 
-            // Setters
-            "public-static-set",
-            "protected-static-set",
-            "private-static-set",
-            "#private-static-set",
-
+            // Instance setters
             "public-decorated-set",
             "protected-decorated-set",
             "private-decorated-set",
@@ -559,7 +563,6 @@ export default defineConfig([
             "private-set",
             "#private-set",
 
-            "static-set",
             "instance-set",
             "abstract-set",
 
@@ -567,12 +570,7 @@ export default defineConfig([
 
             "set",
 
-            // Methods
-            "public-static-method",
-            "protected-static-method",
-            "private-static-method",
-            "#private-static-method",
-
+            // Instance methods
             "public-decorated-method",
             "protected-decorated-method",
             "private-decorated-method",
@@ -590,7 +588,6 @@ export default defineConfig([
             "private-method",
             "#private-method",
 
-            "static-method",
             "instance-method",
             "abstract-method",
 

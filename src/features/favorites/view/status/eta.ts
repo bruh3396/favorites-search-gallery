@@ -1,32 +1,35 @@
 import { FAVORITES_PER_PAGE } from "@/lib/constants";
 import { average } from "@/utils/pure/number";
 
-let last: number | null = null;
-const recentElapsed: number[] = [];
 const ROLLING_WINDOW = 10;
 
-export function getEta(current: number, total: number): string | null {
-  const now = Date.now();
+export class FavoritesEta {
+  private last: number | null = null;
+  private readonly recentElapsed: number[] = [];
 
-  if (last === null) {
-    last = now;
-    return null;
+  public getEta(current: number, total: number): string | null {
+    const now = Date.now();
+
+    if (this.last === null) {
+      this.last = now;
+      return null;
+    }
+    this.recentElapsed.push(now - this.last);
+
+    if (this.recentElapsed.length > ROLLING_WINDOW) {
+      this.recentElapsed.shift();
+    }
+    const remaining = total - current;
+    const seconds = Math.ceil((remaining / FAVORITES_PER_PAGE) * (average(this.recentElapsed) / 1_000));
+
+    this.last = now;
+    return this.format(seconds);
   }
-  recentElapsed.push(now - last);
 
-  if (recentElapsed.length > ROLLING_WINDOW) {
-    recentElapsed.shift();
+  private format(seconds: number): string {
+    if (seconds >= 60) {
+      return `${Math.ceil(seconds / 60)}m`;
+    }
+    return `${String(seconds).padStart(3, " ")}s`;
   }
-  const remaining = total - current;
-  const seconds = Math.ceil((remaining / FAVORITES_PER_PAGE) * (average(recentElapsed) / 1_000));
-
-  last = now;
-  return format(seconds);
-}
-
-function format(seconds: number): string {
-  if (seconds >= 60) {
-    return `${Math.ceil(seconds / 60)}m`;
-  }
-  return `${String(seconds).padStart(3, " ")}s`;
 }

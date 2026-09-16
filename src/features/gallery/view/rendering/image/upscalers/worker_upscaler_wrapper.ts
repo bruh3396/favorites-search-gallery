@@ -1,7 +1,9 @@
+import { Environment } from "@/app/context/environment";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler?raw";
+import { Preferences } from "@/app/context/preferences";
 import { replaceCanvas } from "@/utils/browser/canvas";
 import { resolveImageUrl } from "@/lib/media/resolver";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
@@ -12,8 +14,8 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   private readonly currentlyTransferred: Set<string> = new Set();
   private readonly previouslyTransferred: Set<string> = new Set();
 
-  constructor() {
-    super();
+  constructor(environment: Environment, preferences: Preferences, getContentThumbs: () => HTMLElement[]) {
+    super(environment, preferences, getContentThumbs);
     this.worker = new Worker(URL.createObjectURL(new Blob([OFFSCREEN_UPSCALER_CODE], { type: "application/javascript" })));
     this.worker.postMessage({ action: "init", config: GalleryUpscaleConfig });
   }

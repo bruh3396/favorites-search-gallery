@@ -1,75 +1,168 @@
-import * as GalleryDesktopMenu from "@/features/gallery/view/shell/menu";
-import * as GalleryShell from "@/features/gallery/view/shell/shell";
-import * as GalleryUi from "@/features/gallery/view/shell/ui";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
+import { EnhancedMouseEvent } from "@/lib/event/input";
 import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
+import { GalleryMenu } from "@/features/gallery/view/shell/menu";
 import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_renderer";
-import { GalleryViewDependencies } from "@/features/gallery/types/gallery_types";
+import { GalleryShell } from "@/features/gallery/view/shell/shell";
+import { GalleryUi } from "@/features/gallery/view/shell/ui";
+import { GalleryViewDependencies } from "@/features/gallery/types/types";
 import { insertStyle } from "@/utils/browser/injector";
 
-let renderer: GalleryRenderer;
+export class GalleryView {
+  private readonly context: AppContext;
+  private readonly shell: GalleryShell;
+  private readonly ui: GalleryUi;
+  private readonly menu: GalleryMenu;
+  private readonly renderer: GalleryRenderer;
 
-export function setup(dependencies: GalleryViewDependencies): void {
-  insertStyle(GALLERY_CSS);
-  GalleryShell.mountGallery();
-  GalleryUi.setup(GalleryShell.GalleryRoot);
-  renderer = new GalleryRenderer(GalleryShell.GalleryRoot, dependencies.onVideoEnded, dependencies.onVideoDoubleClicked, dependencies.onVolumeChanged);
-  GalleryDesktopMenu.setup(dependencies.onMenuAction);
+  constructor(context: AppContext) {
+    this.context = context;
+    this.shell = new GalleryShell(context.shell);
+    this.ui = new GalleryUi(context.preferences, context.environment, context.featureBridge, context.shell);
+    this.menu = new GalleryMenu(context.preferences, context.environment);
+    this.renderer = new GalleryRenderer(this.shell.root, context);
+  }
+
+  public setup(dependencies: GalleryViewDependencies): void {
+    insertStyle(GALLERY_CSS);
+    this.shell.mountGallery();
+    this.ui.setup(this.shell.root);
+    this.renderer.setup(dependencies.onVideoEnded, dependencies.onVideoDoubleClicked, dependencies.onVolumeChanged);
+    this.menu.setup(this.shell.root, dependencies.onMenuAction);
+  }
+
+  public open(thumb: HTMLElement): void {
+    this.shell.root.toggleAttribute("data-visible", true);
+    this.renderer.toggleUpscaler(true);
+    this.ui.open(thumb);
+  }
+
+  public close(): void {
+    this.renderer.toggleUpscaler(false);
+    this.shell.root.toggleAttribute("data-visible", false);
+    this.renderer.hide();
+    this.ui.close();
+    this.renderer.upscaleCachedThumbs();
+  }
+
+  public display(thumb: HTMLElement): void {
+    this.renderer.render(thumb);
+    this.ui.update(thumb);
+  }
+
+  public showPreview(thumb: HTMLElement): void {
+    this.shell.root.toggleAttribute("data-visible", true);
+    this.renderer.render(thumb);
+    this.renderer.toggleZoom(false);
+    this.ui.toggleScrollbar(false);
+  }
+
+  public hidePreview(): void {
+    this.shell.root.toggleAttribute("data-visible", false);
+    this.renderer.hide();
+    this.ui.toggleScrollbar(true);
+  }
+
+  public toggleZoomCursor(value: boolean): void {
+    this.ui.toggleZoomCursor(value);
+    this.renderer.toggleZoomCursor(value);
+  }
+
+  public nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
+    this.renderer.nudge(thumb, direction);
+  }
+
+  public cache(thumbs: HTMLElement[]): void {
+    this.renderer.cache(thumbs);
+  }
+
+  public toggleZoom(value: boolean | undefined): boolean {
+    return this.renderer.toggleZoom(value);
+  }
+
+  public zoomToPoint(x: number, y: number): void {
+    this.renderer.zoomToPoint(x, y);
+  }
+
+  public cacheImages(thumbs: HTMLElement[]): Promise<void> {
+    return this.renderer.cacheImages(thumbs);
+  }
+
+  public upscale(thumbs: HTMLElement[]): Promise<void> {
+    return this.renderer.upscale(thumbs);
+  }
+
+  public upscaleCachedThumbs(): void {
+    this.renderer.upscaleCachedThumbs();
+  }
+
+  public downscaleAll(): void {
+    this.renderer.downscaleAll();
+  }
+
+  public reupscaleCachedThumbs(): void {
+    this.renderer.reupscaleCachedThumbs();
+  }
+
+  public correctOrientation(): void {
+    this.renderer.correctOrientation();
+  }
+
+  public toggleVideoLooping(value: boolean): void {
+    this.renderer.toggleVideoLooping(value);
+  }
+
+  public restartVideo(): void {
+    this.renderer.restartVideo();
+  }
+
+  public toggleVideoPause(): void {
+    this.renderer.toggleVideoPause();
+  }
+
+  public setVideoMuted(muted: boolean): void {
+    this.renderer.setVideoMuted(muted);
+  }
+
+  public revealMenu(): void {
+    this.menu.reveal();
+  }
+
+  public toggleMenuPersistence(event: EnhancedMouseEvent): void {
+    this.menu.togglePersistence(event);
+  }
+
+  public setMenuPinned(pinned: boolean): void {
+    this.menu.setPinned(pinned);
+  }
+
+  public setMenuDockedLeft(dockedLeft: boolean): void {
+    this.menu.setDockedLeft(dockedLeft);
+  }
+
+  public toggleCursor(value: boolean): void {
+    this.ui.toggleCursor(value);
+  }
+
+  public setBackgroundOpacity(opacity: number): void {
+    this.ui.setBackgroundOpacity(opacity);
+  }
+
+  public showAddedFavoriteStatus(status: AddFavoriteStatus): void {
+    this.ui.showAddedFavoriteStatus(status);
+  }
+
+  public showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
+    this.ui.showRemovedFavoriteStatus(status);
+  }
+
+  public showCursor(): void {
+    this.ui.toggleCursor(true);
+  }
+
+  public appendToGallery(element: HTMLElement): HTMLElement {
+    return this.shell.root.appendChild(element);
+  }
 }
-
-export function open(thumb: HTMLElement): void {
-  GalleryShell.GalleryRoot.toggleAttribute("data-visible", true);
-  renderer.toggleUpscaler(true);
-  GalleryUi.open(thumb);
-}
-
-export function close(): void {
-  renderer.toggleUpscaler(false);
-  GalleryShell.GalleryRoot.toggleAttribute("data-visible", false);
-  renderer.hide();
-  GalleryUi.close();
-  renderer.upscaleCachedThumbs();
-}
-
-export function display(thumb: HTMLElement): void {
-  renderer.render(thumb);
-  GalleryUi.update(thumb);
-}
-
-export function showPreview(thumb: HTMLElement): void {
-  GalleryShell.GalleryRoot.toggleAttribute("data-visible", true);
-  renderer.render(thumb);
-  renderer.toggleZoom(false);
-  GalleryUi.toggleScrollbar(false);
-}
-
-export function hidePreview(): void {
-  GalleryShell.GalleryRoot.toggleAttribute("data-visible", false);
-  renderer.hide();
-  GalleryUi.toggleScrollbar(true);
-}
-
-export function toggleZoomCursor(value: boolean): void {
-  GalleryUi.toggleZoomCursor(value);
-  renderer.toggleZoomCursor(value);
-}
-
-export const nudge = (thumb: HTMLElement, direction: BoundaryEdge): void => renderer.nudge(thumb, direction);
-export const cache = (thumbs: HTMLElement[]): void => renderer.cache(thumbs);
-export const toggleZoom = (value: boolean | undefined): boolean => renderer.toggleZoom(value);
-export const zoomToPoint = (x: number, y:number): void => renderer.zoomToPoint(x, y);
-export const cacheImages = (thumbs: HTMLElement[]): Promise<void> => renderer.cacheImages(thumbs);
-export const upscale = (thumbs: HTMLElement[]): Promise<void> => renderer.upscale(thumbs);
-export const upscaleCachedThumbs = (): void => renderer.upscaleCachedThumbs();
-export const downscaleAll = (): void => renderer.downscaleAll();
-export const reupscaleCachedThumbs = (): void => renderer.reupscaleCachedThumbs();
-export const correctOrientation = (): void => renderer.correctOrientation();
-export const toggleVideoLooping = (value: boolean): void => renderer.toggleVideoLooping(value);
-export const restartVideo = (): void => renderer.restartVideo();
-export const toggleVideoPause = (): void => renderer.toggleVideoPause();
-export const setVideoMuted = (muted: boolean): void => renderer.setVideoMuted(muted);
-
-export { reveal as revealMenu, togglePersistence as toggleMenuPersistence, setPinned as setMenuPinned, setDockedLeft as setMenuDockedLeft } from "@/features/gallery/view/shell/menu";
-export { toggleCursor, setBackgroundOpacity, showAddedFavoriteStatus, showRemovedFavoriteStatus } from "@/features/gallery/view/shell/ui";
-export const showCursor = (): void => GalleryUi.toggleCursor(true);
-export const appendToGallery = (element: HTMLElement): HTMLElement => GalleryShell.GalleryRoot.appendChild(element);

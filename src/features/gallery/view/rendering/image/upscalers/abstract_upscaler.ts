@@ -1,24 +1,25 @@
 import * as GalleryFetcher from "@/features/gallery/view/rendering/image/fetcher";
+import { Environment } from "@/app/context/environment";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
-import { getAllContentThumbs } from "@/app/layout/content_thumbs";
-import { PERFORMANCE_PROFILE } from "@/app/context/flags";
-
-function upscalingEnabled(): boolean {
-  if (ON_POST_LIST_PAGE && !Preferences.postList.upscaleThumbs.value) {
-    return false;
-  }
-  return PERFORMANCE_PROFILE === "normal";
-}
 
 export abstract class GalleryAbstractUpscaler {
   protected readonly requiresBitmap: boolean = true;
-  private readonly directUpscaleQueue: ThrottleQueue = new ThrottleQueue(GalleryUpscaleConfig.upscaleDelay);
+  protected readonly upscaledCanvasWidth: number;
+  private readonly directUpscaleQueue: ThrottleQueue;
   private readonly upscaledIds: Set<string> = new Set();
   private paused: boolean = false;
+
+  constructor(
+    private readonly environment: Environment,
+    private readonly preferences: Preferences,
+    private readonly getContentThumbs: () => HTMLElement[]
+  ) {
+    this.directUpscaleQueue = new ThrottleQueue(environment.usingFirefox ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other);
+    this.upscaledCanvasWidth = environment.usingFirefox ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
+  }
 
   public toggle(value: boolean): void {
     this.paused = value;
@@ -44,7 +45,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private async directlyUpscale(request: ImageRequest): Promise<void> {
-    if (!upscalingEnabled() || !this.isEligible(request)) {
+    if (!this.upscalingEnabled() || !this.isEligible(request)) {
       return;
     }
     await this.directUpscaleQueue.wait();
@@ -55,8 +56,15 @@ export abstract class GalleryAbstractUpscaler {
     this.draw(request);
   }
 
+  private upscalingEnabled(): boolean {
+    if (this.environment.onPostListPage && !this.preferences.postList.upscaleThumbs.value) {
+      return false;
+    }
+    return this.preferences.app.performanceProfile.value === "normal";
+  }
+
   private draw(request: ImageRequest): void {
-    if (upscalingEnabled() && this.canDraw(request)) {
+    if (this.upscalingEnabled() && this.canDraw(request)) {
       this.upscaledIds.add(request.id);
       this.evictOldestBeyondCap();
       this.finishUpscale(request);
@@ -64,7 +72,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private evictOldestBeyondCap(): void {
-    const idsOnPage = new Set(getAllContentThumbs().map(thumb => thumb.id));
+    const idsOnPage = new Set(this.getContentThumbs().map(thumb => thumb.id));
 
     while (this.upscaledIds.size > GalleryUpscaleConfig.maxUpscaledThumbs) {
       const oldest = [...this.upscaledIds].find(id => !idsOnPage.has(id));

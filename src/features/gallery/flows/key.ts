@@ -1,94 +1,94 @@
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
 import { isExitKey, isNavigationKey } from "@/types/guards";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
 import { GalleryConfig } from "@/config/gallery_config";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { throttle } from "@/lib/async/rate_limiting";
 import { toggleFullscreen } from "@/utils/browser/window";
 
-const insideGalleryHotkeyHandlers: Record<string, () => void> = {
-  b: () => GalleryFlows.Background.toggleBackgroundOpacity(),
-  e: () => GalleryFlows.Favoriter.addFavoriteInGallery(),
-  f: toggleFullscreen,
-  g: () => GalleryFlows.OpenClose.close(),
-  m: () => GalleryFlows.Video.toggleVideoMute(),
-  q: GalleryModel.openMedia,
-  s: GalleryModel.download,
-  w: GalleryModel.openPost,
-  // x: () => GalleryFlows.Favoriter.removeFavoriteInGallery(),
-  " ": pauseVideo
-};
+export class GalleryKeyFlow extends GalleryFlow {
+  private readonly insideGalleryHotkeyHandlers: Record<string, () => void> = {
+    b: () => this.flows.background.toggleBackgroundOpacity(),
+    e: () => this.flows.favoriter.addFavoriteInGallery(),
+    f: toggleFullscreen,
+    g: () => this.flows.openClose.close(),
+    m: () => this.flows.video.toggleVideoMute(),
+    q: () => this.model.openMedia(),
+    s: () => this.model.download(),
+    w: () => this.model.openPost(),
+    // x: () => this.flows.favoriter.removeFavoriteInGallery(),
+    " ": () => this.pauseVideo()
+  };
 
-const outsideGalleryHotkeyHandlers: Record<string, () => void> = {
-  g: () => GalleryFlows.OpenClose.reOpen(),
-  f: toggleFullscreen
-};
+  private readonly outsideGalleryHotkeyHandlers: Record<string, () => void> = {
+    g: () => this.flows.openClose.reOpen(),
+    f: toggleFullscreen
+  };
 
-export function handleKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
-  if (keyboardEvent.originalEvent.repeat) {
-    handleKeyDownThrottled(keyboardEvent.originalEvent);
-  } else {
-    handleKeyDownNoThrottle(keyboardEvent.originalEvent);
-  }
-}
+  private readonly handleKeyDownThrottled = throttle((event: KeyboardEvent) => this.handleKeyDownNoThrottle(event), GalleryConfig.galleryNavigationDelay);
 
-export function handleKeyUp(event: EnhancedKeyboardEvent): void {
-  GalleryFlows.Dispatch.run({ open: handleKeyUpInGallery }, event);
-}
-
-const handleKeyDownNoThrottle = (event: KeyboardEvent): void => {
-  GalleryFlows.Dispatch.run({
-    idle: handleKeyDownOutsideGallery,
-    preview: handleKeyDownOutsideGallery,
-    open: handleKeyDownInGallery
-  }, new EnhancedKeyboardEvent(event));
-};
-
-const handleKeyDownThrottled = throttle(handleKeyDownNoThrottle, GalleryConfig.galleryNavigationDelay);
-
-function handleKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
-  const event = keyboardEvent.originalEvent;
-
-  if (event.ctrlKey) {
-    return;
+  public handleKeyDown(keyboardEvent: EnhancedKeyboardEvent): void {
+    if (keyboardEvent.originalEvent.repeat) {
+      this.handleKeyDownThrottled(keyboardEvent.originalEvent);
+    } else {
+      this.handleKeyDownNoThrottle(keyboardEvent.originalEvent);
+    }
   }
 
-  if (isNavigationKey(event.key)) {
-    event.stopImmediatePropagation();
-    GalleryFlows.Navigation.navigate(event.key);
-    return;
+  public handleKeyUp(event: EnhancedKeyboardEvent): void {
+    this.flows.dispatch.run({ open: (keyboardEvent) => this.handleKeyUpInGallery(keyboardEvent) }, event);
   }
 
-  if (isExitKey(event.key)) {
-    GalleryFlows.OpenClose.close();
-    return;
+  private handleKeyDownNoThrottle(event: KeyboardEvent): void {
+    this.flows.dispatch.run({
+      idle: (keyboardEvent) => this.handleKeyDownOutsideGallery(keyboardEvent),
+      preview: (keyboardEvent) => this.handleKeyDownOutsideGallery(keyboardEvent),
+      open: (keyboardEvent) => this.handleKeyDownInGallery(keyboardEvent)
+    }, new EnhancedKeyboardEvent(event));
   }
 
-  if (event.shiftKey) {
-    GalleryView.toggleZoomCursor(true);
-    return;
+  private handleKeyDownInGallery(keyboardEvent: EnhancedKeyboardEvent): void {
+    const event = keyboardEvent.originalEvent;
+
+    if (event.ctrlKey) {
+      return;
+    }
+
+    if (isNavigationKey(event.key)) {
+      event.stopImmediatePropagation();
+      this.flows.navigation.navigate(event.key);
+      return;
+    }
+
+    if (isExitKey(event.key)) {
+      this.flows.openClose.close();
+      return;
+    }
+
+    if (event.shiftKey) {
+      this.view.toggleZoomCursor(true);
+      return;
+    }
+
+    if (keyboardEvent.isHotkey) {
+      this.insideGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
+    }
   }
 
-  if (keyboardEvent.isHotkey) {
-    insideGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
+  private handleKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
+    if (event.isHotkey) {
+      this.outsideGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
+    }
   }
-}
 
-function handleKeyDownOutsideGallery(event: EnhancedKeyboardEvent): void {
-  if (event.isHotkey) {
-    outsideGalleryHotkeyHandlers[event.key.toLowerCase()]?.();
+  private handleKeyUpInGallery(event: EnhancedKeyboardEvent): void {
+    if (event.key === "shift") {
+      this.view.toggleZoomCursor(false);
+    }
   }
-}
 
-function handleKeyUpInGallery(event: EnhancedKeyboardEvent): void {
-  if (event.key === "shift") {
-    GalleryView.toggleZoomCursor(false);
-  }
-}
-
-function pauseVideo(): void {
-  if (GalleryModel.isViewingVideo()) {
-    GalleryView.toggleVideoPause();
+  private pauseVideo(): void {
+    if (this.model.isViewingVideo()) {
+      this.view.toggleVideoPause();
+    }
   }
 }

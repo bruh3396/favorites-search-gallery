@@ -1,4 +1,4 @@
-import { ON_FAVORITES_PAGE, ON_MOBILE_DEVICE } from "@/app/context/environment";
+import { Environment } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 
@@ -8,7 +8,7 @@ type BudgetedRequests = {
 };
 
 export class GalleryImageBudgeter {
-  constructor(private readonly getPixelCount: (id: string) => number) {}
+  constructor(private readonly environment: Environment, private readonly getPixelCount: (id: string) => number) {}
 
   public partition(thumbs: HTMLElement[]): BudgetedRequests {
     return this.partitionByLimit(thumbs.map(t => new ImageRequest(t)));
@@ -19,7 +19,7 @@ export class GalleryImageBudgeter {
   }
 
   private partitionByLimit(requests: ImageRequest[]): BudgetedRequests {
-    return ON_FAVORITES_PAGE && !ON_MOBILE_DEVICE ? this.partitionByMemory(requests) : this.partitionByCount(requests);
+    return this.environment.onFavoritesPage && !this.environment.onMobileDevice ? this.partitionByMemory(requests) : this.partitionByCount(requests);
   }
 
   private partitionByMemory(requests: ImageRequest[]): BudgetedRequests {
@@ -40,7 +40,7 @@ export class GalleryImageBudgeter {
   }
 
   private partitionByCount(requests: ImageRequest[]): BudgetedRequests {
-    const cutoff = GalleryConfig.cachedImageCount;
+    const cutoff = this.environment.onMobileDevice ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
     return { accepted: requests.slice(0, cutoff), rejected: requests.slice(cutoff) };
   }
 }

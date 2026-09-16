@@ -2,7 +2,6 @@ import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
-import { SettingsSections } from "@/features/favorites/control/settings/menu";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { allSectionsCollapsed } from "@/features/favorites/control/settings/helpers";
 import { createElement } from "@/utils/browser/element";
@@ -24,28 +23,28 @@ export function resetAllButton(): HTMLElement {
   return button;
 }
 
-export function collapseExpandButton(): HTMLElement {
+export function collapseExpandButton(preferences: Preferences, sections: SettingsSection[]): HTMLElement {
   const button = createElement("button", { className: SettingsClass.collapseExpand, children: [icon("collapseAll"), icon("expandAll")] });
 
   button.type = "button";
-  renderCollapseState(button, allSectionsCollapsed(SettingsSections));
-  Preferences.favorites.settingsExpandedSections.on(() => {
-    renderCollapseState(button, allSectionsCollapsed(SettingsSections));
+  renderCollapseState(button, allSectionsCollapsed(preferences, sections));
+  preferences.favorites.settingsExpandedSections.on(() => {
+    renderCollapseState(button, allSectionsCollapsed(preferences, sections));
   });
   button.addEventListener("click", () => {
-    toggleAllSections(SettingsSections);
+    toggleAllSections(preferences, sections);
   });
   return button;
 }
 
-function toggleAllSections(sections: SettingsSection[]): void {
-  const isCollapsed = !allSectionsCollapsed(sections);
+function toggleAllSections(preferences: Preferences, sections: SettingsSection[]): void {
+  const isCollapsed = !allSectionsCollapsed(preferences, sections);
   const state: Record<string, boolean> = {};
 
   for (const { title } of sections) {
     state[title] = !isCollapsed;
   }
-  Preferences.favorites.settingsExpandedSections.set(state);
+  preferences.favorites.settingsExpandedSections.set(state);
 
   for (const element of document.querySelectorAll<HTMLElement>(`.${SettingsClass.view} .${SettingsClass.section}`)) {
     toggleDataset(element, "collapsed", isCollapsed);

@@ -1,29 +1,29 @@
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryView from "@/features/gallery/view/view";
 import { GalleryConfig } from "@/config/gallery_config";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
-import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
-export function toggleUpscaling(value: boolean): void {
-  if (value) {
-    const thumbs = getAllContentThumbs();
-    const isNotUsingInfiniteScroll = thumbs.length <= POSTS_PER_POST_LIST_PAGE;
+export class GalleryPostListFlow extends GalleryFlow {
+  public toggleUpscaling(value: boolean): void {
+    if (value) {
+      const thumbs = this.context.shell.getContentThumbs();
+      const isNotUsingInfiniteScroll = thumbs.length <= POSTS_PER_POST_LIST_PAGE;
 
-    if (isNotUsingInfiniteScroll) {
-      GalleryView.cacheImages(thumbs);
+      if (isNotUsingInfiniteScroll) {
+        this.view.cacheImages(thumbs);
+      }
+      this.view.upscaleCachedThumbs();
+    } else {
+      this.view.downscaleAll();
     }
-    GalleryView.upscaleCachedThumbs();
-  } else {
-    GalleryView.downscaleAll();
   }
-}
 
-export function preloadOnIdle(): void {
-  if (GalleryConfig.preloadOutsideGalleryOnPostList) {
-    GalleryFlows.Dispatch.run({ idle: preload });
+  public preloadOnIdle(): void {
+    if (GalleryConfig.preloadOutsideGalleryOnPostList) {
+      this.flows.dispatch.run({ idle: () => this.preload() });
+    }
   }
-}
 
-function preload(): void {
-  GalleryView.cacheImages(getAllContentThumbs());
+  private preload(): void {
+    this.view.cacheImages(this.context.shell.getContentThumbs());
+  }
 }

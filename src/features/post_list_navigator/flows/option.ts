@@ -1,26 +1,26 @@
-import * as PostListNavigatorFlows from "@/features/post_list_navigator/flows/flows";
-import * as PostListNavigatorModel from "@/features/post_list_navigator/model/model";
-import * as PostListNavigatorView from "@/features/post_list_navigator/view/view";
-import { Preferences } from "@/app/context/preferences";
+import { PostListNavigatorFlow } from "@/features/post_list_navigator/flows/flow";
 
-export function startInfiniteScroll(): void {
-  if (Preferences.postList.infiniteScroll.value) {
-    toggleInfiniteScroll(true);
+export class PostListNavigatorOptionFlow extends PostListNavigatorFlow {
+
+  public startInfiniteScroll(): void {
+    if (this.context.preferences.postList.infiniteScroll.value) {
+      this.toggleInfiniteScroll(true);
+    }
   }
-}
 
-export function toggleInfiniteScroll(value: boolean): void {
-  if (value) {
-    PostListNavigatorFlows.InfiniteScroll.enableInfiniteScroll();
-    PostListNavigatorFlows.InfiniteScroll.showMoreResults();
-  } else {
-    PostListNavigatorFlows.InfiniteScroll.disableInfiniteScroll();
-    PostListNavigatorModel.resetCurrentPageNumber();
-    PostListNavigatorView.renderPostList(PostListNavigatorModel.getInitialPostList());
+  public toggleInfiniteScroll(value: boolean): void {
+    if (value) {
+      this.flows.infiniteScroll.enableInfiniteScroll();
+      this.flows.infiniteScroll.showMoreResults();
+    } else {
+      this.flows.infiniteScroll.disableInfiniteScroll();
+      this.model.resetCurrentPageNumber();
+      this.view.renderPostList(this.model.getInitialPostList());
+    }
+    this.view.setInfiniteScrollStyle(value);
   }
-  PostListNavigatorView.setInfiniteScrollStyle(value);
-}
 
-export function toggleFavoriteIndicator(enabled: boolean): Promise<void> {
-  return PostListNavigatorFlows.FavoritesMarker.toggleIndicator(enabled);
+  public toggleFavoriteIndicator(enabled: boolean): Promise<void> {
+    return this.flows.favoritesMarker.toggleIndicator(enabled);
+  }
 }

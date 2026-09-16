@@ -1,62 +1,61 @@
-import * as GalleryFlows from "@/features/gallery/flows/flows";
 import { EnhancedMouseEvent } from "@/lib/event/input";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { NavigationKey } from "@/types/input";
-import { Preferences } from "@/app/context/preferences";
-import { didHold } from "@/app/dom/touch_hold_events";
-import { didSwipe } from "@/app/dom/swipe_events";
 
-export function handleMouseDown(event: EnhancedMouseEvent): void {
-  GalleryFlows.Dispatch.run({
-    preview: handleMouseDownOutsideGallery,
-    idle: handleMouseDownOutsideGallery
-  }, event);
-}
-
-export function handleTouchStart(event: TouchEvent): void {
-  GalleryFlows.Dispatch.run({
-    open: handleTouchStartInGallery
-  }, event);
-}
-
-export function navigateBackInGallery(): void {
-  navigateInGallery("ArrowLeft");
-}
-
-export function navigateForwardInGallery(): void {
-  navigateInGallery("ArrowRight");
-}
-
-export function closeGallery(): void {
-  GalleryFlows.Dispatch.run({ open: GalleryFlows.OpenClose.close });
-}
-
-export function favoriteCurrentPost(): void {
-  GalleryFlows.Dispatch.run({ open: GalleryFlows.Favoriter.addFavoriteInGallery });
-}
-
-function navigateInGallery(direction: NavigationKey): void {
-  if (didSwipe() || didHold()) {
-    return;
+export class GalleryTouchFlow extends GalleryFlow {
+  public handleMouseDown(event: EnhancedMouseEvent): void {
+    this.flows.dispatch.run({
+      preview: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent),
+      idle: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent)
+    }, event);
   }
-  GalleryFlows.Dispatch.run({
-    open: () => {
-      GalleryFlows.Navigation.navigate(direction);
+
+  public handleTouchStart(event: TouchEvent): void {
+    this.flows.dispatch.run({
+      open: (touchEvent) => this.handleTouchStartInGallery(touchEvent)
+    }, event);
+  }
+
+  public navigateBackInGallery(): void {
+    this.navigateInGallery("ArrowLeft");
+  }
+
+  public navigateForwardInGallery(): void {
+    this.navigateInGallery("ArrowRight");
+  }
+
+  public closeGallery(): void {
+    this.flows.dispatch.run({ open: () => this.flows.openClose.close() });
+  }
+
+  public favoriteCurrentPost(): void {
+    this.flows.dispatch.run({ open: () => this.flows.favoriter.addFavoriteInGallery() });
+  }
+
+  private navigateInGallery(direction: NavigationKey): void {
+    if (this.context.domEvents.didSwipe() || this.context.domEvents.didHold()) {
+      return;
     }
-  });
-}
-
-function handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
-  if (mouseEvent.thumb !== null && Preferences.gallery.mobileEnabled.value) {
-    mouseEvent.originalEvent.preventDefault();
-    mouseEvent.originalEvent.stopPropagation();
-    mouseEvent.originalEvent.stopImmediatePropagation();
-    GalleryFlows.OpenClose.open(mouseEvent.thumb);
+    this.flows.dispatch.run({
+      open: () => {
+        this.flows.navigation.navigate(direction);
+      }
+    });
   }
-}
 
-function handleTouchStartInGallery(event: TouchEvent): void {
-  if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu, #autoplay-menu") !== null) {
-    return;
+  private handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
+    if (mouseEvent.thumb !== null && this.context.preferences.gallery.mobileEnabled.value) {
+      mouseEvent.originalEvent.preventDefault();
+      mouseEvent.originalEvent.stopPropagation();
+      mouseEvent.originalEvent.stopImmediatePropagation();
+      this.flows.openClose.open(mouseEvent.thumb);
+    }
   }
-  event.preventDefault();
+
+  private handleTouchStartInGallery(event: TouchEvent): void {
+    if (event.target instanceof HTMLElement && event.target.closest("#gallery-menu, #autoplay-menu") !== null) {
+      return;
+    }
+    event.preventDefault();
+  }
 }

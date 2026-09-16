@@ -1,9 +1,11 @@
-let isCurrentlyResizing = false;
+export class ResizeState {
+  private isCurrentlyResizing = false;
 
-export function isResizing(): boolean {
-  return isCurrentlyResizing;
-}
+  public isResizing(): boolean {
+    return this.isCurrentlyResizing;
+  }
 
-export function setResizing(active: boolean): void {
-  isCurrentlyResizing = active;
+  public setResizing(active: boolean): void {
+    this.isCurrentlyResizing = active;
+  }
 }

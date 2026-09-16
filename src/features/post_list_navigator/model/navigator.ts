@@ -1,69 +1,75 @@
-import * as PostListNavigatorPageLoader from "@/features/post_list_navigator/model/page_loader";
 import * as PostListNavigatorUrlContext from "@/features/post_list_navigator/model/url_context";
+import { AppContext } from "@/app/context/context";
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
-import { getAllPageThumbs } from "@/app/layout/content_thumbs";
+import { PostListNavigatorPageLoader } from "@/features/post_list_navigator/model/page_loader";
 import { navigationDelta } from "@/utils/pure/number";
 
-let initialPageNumber: number;
-let currentPageNumber: number;
-let baseUrl: string;
-let initialPostList: PostList;
+export class PostListNavigatorNavigator {
+  private readonly pageLoader: PostListNavigatorPageLoader;
+  private readonly initialPageNumber: number;
+  private currentPageNumber: number;
+  private readonly baseUrl: string;
+  private readonly initialPostList: PostList;
 
-export function setup(): void {
-  initialPageNumber = PostListNavigatorUrlContext.initialPageNumber();
-  baseUrl = PostListNavigatorUrlContext.baseUrl();
-  currentPageNumber = initialPageNumber;
-  initialPostList = new PostList(initialPageNumber, Array.from(getAllPageThumbs()), document.getElementById("paginator"));
-  PostListNavigatorPageLoader.markLoaded(initialPageNumber, initialPostList);
-}
-
-export function preloadAroundInitialPage(): void {
-  PostListNavigatorPageLoader.preloadAround(baseUrl, initialPageNumber);
-}
-
-export function navigate(direction: NavigationKey): PostListNavigationResult {
-  const nextPageNumber = currentPageNumber + navigationDelta(direction);
-
-  if (nextPageNumber < 0) {
-    return { postList: null, boundary: "start" };
+  constructor(context: AppContext) {
+    this.pageLoader = new PostListNavigatorPageLoader(context);
+    this.initialPageNumber = PostListNavigatorUrlContext.initialPageNumber();
+    this.baseUrl = PostListNavigatorUrlContext.baseUrl();
+    this.currentPageNumber = this.initialPageNumber;
+    this.initialPostList = new PostList(this.initialPageNumber, Array.from(context.shell.getPageThumbs()), document.getElementById("paginator"));
+    this.pageLoader.markLoaded(this.initialPageNumber, this.initialPostList);
   }
-  const postList = PostListNavigatorPageLoader.get(nextPageNumber);
 
-  if (postList === undefined || postList.isEmpty) {
-    PostListNavigatorPageLoader.reload(baseUrl, nextPageNumber);
-    return { postList: null, boundary: "end" };
+  public preloadAroundInitialPage(): void {
+    this.pageLoader.preloadAround(this.baseUrl, this.initialPageNumber);
   }
-  currentPageNumber = nextPageNumber;
-  PostListNavigatorPageLoader.preloadAround(baseUrl, currentPageNumber);
-  return { postList, boundary: "none" };
-}
 
-export async function getMoreResults(): Promise<HTMLElement[]> {
-  const currentPostList = PostListNavigatorPageLoader.get(currentPageNumber);
+  public navigate(direction: NavigationKey): PostListNavigationResult {
+    const nextPageNumber = this.currentPageNumber + navigationDelta(direction);
 
-  if (currentPostList === undefined || currentPostList.isLast) {
-    return [];
+    if (nextPageNumber < 0) {
+      return { postList: null, boundary: "start" };
+    }
+    const postList = this.pageLoader.get(nextPageNumber);
+
+    if (postList === undefined || postList.isEmpty) {
+      this.pageLoader.reload(this.baseUrl, nextPageNumber);
+      return { postList: null, boundary: "end" };
+    }
+    this.currentPageNumber = nextPageNumber;
+    this.pageLoader.preloadAround(this.baseUrl, this.currentPageNumber);
+    return { postList, boundary: "none" };
   }
-  currentPageNumber += 1;
-  await PostListNavigatorPageLoader.load(baseUrl, currentPageNumber);
-  const nextPostList = PostListNavigatorPageLoader.get(currentPageNumber);
 
-  if (nextPostList === undefined) {
-    console.error(`Could not load next search page ${currentPageNumber}`);
-    return [];
+  public async getMoreResults(): Promise<HTMLElement[]> {
+    const currentPostList = this.pageLoader.get(this.currentPageNumber);
+
+    if (currentPostList === undefined || currentPostList.isLast) {
+      return [];
+    }
+    this.currentPageNumber += 1;
+    await this.pageLoader.load(this.baseUrl, this.currentPageNumber);
+    const nextPostList = this.pageLoader.get(this.currentPageNumber);
+
+    if (nextPostList === undefined) {
+      console.error(`Could not load next search page ${this.currentPageNumber}`);
+      return [];
+    }
+    this.pageLoader.load(this.baseUrl, this.currentPageNumber + 1);
+    return nextPostList.thumbs;
   }
-  PostListNavigatorPageLoader.load(baseUrl, currentPageNumber + 1);
-  return nextPostList.thumbs;
-}
 
-export function getInitialPostList(): PostList {
-  return initialPostList;
-}
+  public getInitialPostList(): PostList {
+    return this.initialPostList;
+  }
 
-export function resetCurrentPageNumber(): void {
-  currentPageNumber = initialPageNumber;
-}
+  public resetCurrentPageNumber(): void {
+    this.currentPageNumber = this.initialPageNumber;
+  }
 
-export { allThumbs } from "@/features/post_list_navigator/model/page_loader";
+  public allThumbs(): HTMLElement[] {
+    return this.pageLoader.allThumbs();
+  }
+}

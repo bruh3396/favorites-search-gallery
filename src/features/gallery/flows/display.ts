@@ -1,23 +1,23 @@
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
-import { Events } from "@/app/channels/events";
 import { GalleryConfig } from "@/config/gallery_config";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { queueMacroTask } from "@/lib/async/scheduling";
 
-export function displaySelected(): void {
-  display(GalleryModel.currentThumb());
-}
+export class GalleryDisplayFlow extends GalleryFlow {
+  public displaySelected(): void {
+    this.display(this.model.currentThumb());
+  }
 
-export function display(thumb: HTMLElement): void {
-  GalleryView.display(thumb);
-  Events.gallery.displayedThumb.emit(thumb);
-  cacheAdjacent(thumb);
-}
+  public display(thumb: HTMLElement): void {
+    this.view.display(thumb);
+    this.context.events.gallery.displayedThumb.emit(thumb);
+    this.cacheAdjacent(thumb);
+  }
 
-function cacheAdjacent(thumb: HTMLElement): void {
-  if (GalleryConfig.preloadingEnabled) {
-    queueMacroTask(() => {
-      GalleryView.cache(GalleryModel.getItemsAround(thumb.id));
-    });
+  private cacheAdjacent(thumb: HTMLElement): void {
+    if (GalleryConfig.preloadingEnabled) {
+      queueMacroTask(() => {
+        this.view.cache(this.model.getItemsAround(thumb.id));
+      });
+    }
   }
 }

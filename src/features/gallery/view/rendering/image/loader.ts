@@ -1,5 +1,6 @@
 import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { CachedRequest, GalleryImageCache } from "@/features/gallery/view/rendering/image/cache";
+import { Environment } from "@/app/context/environment";
 import { GalleryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { LowResolutionImageRequest } from "@/features/gallery/types/low_resolution_image_request";
@@ -7,9 +8,11 @@ import { isImageThumb } from "@/lib/ui/thumb/media_item";
 
 export class GalleryImageLoader {
   private readonly cache = new GalleryImageCache();
-  private readonly budgeter = new GalleryImageBudgeter(() => 0);
+  private readonly budgeter: GalleryImageBudgeter;
 
-  constructor(private readonly onRequestCompleted: (request: ImageRequest) => void) {}
+  constructor(environment: Environment, private readonly onRequestCompleted: (request: ImageRequest) => void) {
+    this.budgeter = new GalleryImageBudgeter(environment, () => 0);
+  }
 
   public load(thumbs: HTMLElement[]): ImageRequest[] {
     const { accepted, rejected } = this.budgeter.partition(thumbs.filter(t => isImageThumb(t)));

@@ -1,65 +1,64 @@
-import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
-import * as PostOverlayModel from "@/features/post_overlay/model/model";
-import * as PostOverlayView from "@/features/post_overlay/view/view";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { Preferences } from "@/app/context/preferences";
-import { galleryIdle } from "@/app/channels/feature_bridge";
+import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
 import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
-export function handleMouseOver(event: EnhancedMouseEvent): void {
-  PostOverlayModel.recordCursorPosition(event);
+export class PostOverlayHoverFlow extends PostOverlayFlow {
 
-  if (!Preferences.postOverlay.enabled.value || !galleryIdle() || PostOverlayModel.isResizing()) {
-    return;
+  public handleMouseOver(event: EnhancedMouseEvent): void {
+    this.model.recordCursorPosition(event);
+
+    if (!this.context.preferences.postOverlay.enabled.value || !this.context.featureBridge.galleryIdle() || this.model.isResizing()) {
+      return;
+    }
+
+    if (this.model.isCoolingDown() || isInsideOverlay(event.originalEvent.target)) {
+      return;
+    }
+
+    if (!event.insideOfThumb || event.thumb === null) {
+      this.hideOverlay();
+      return;
+    }
+    this.showOverlay(event.thumb);
   }
 
-  if (PostOverlayModel.isCoolingDown() || isInsideOverlay(event.originalEvent.target)) {
-    return;
+  public hideOverlay(): void {
+    this.model.clearOverlayTarget();
+    this.view.hide();
   }
 
-  if (!event.insideOfThumb || event.thumb === null) {
-    hideOverlay();
-    return;
+  public hideTemporarily(): void {
+    this.hideOverlay();
+    this.model.startReopenCooldown(() => this.showThumbUnderCursor());
   }
-  showOverlay(event.thumb);
-}
 
-export function hideOverlay(): void {
-  PostOverlayModel.clearOverlayTarget();
-  PostOverlayView.hide();
-}
+  public showThumbUnderCursor(): void {
+    if (!this.context.preferences.postOverlay.enabled.value) {
+      return;
+    }
+    const thumb = this.model.thumbUnderCursor();
 
-export function hideTemporarily(): void {
-  hideOverlay();
-  PostOverlayModel.startReopenCooldown(showThumbUnderCursor);
-}
-
-export function showThumbUnderCursor(): void {
-  if (!Preferences.postOverlay.enabled.value) {
-    return;
+    if (thumb !== null) {
+      this.showOverlay(thumb);
+    }
   }
-  const thumb = PostOverlayModel.thumbUnderCursor();
 
-  if (thumb !== null) {
-    showOverlay(thumb);
+  private showOverlay(thumb: HTMLElement): void {
+    if (this.model.isCurrentTarget(thumb.id)) {
+      return;
+    }
+    this.model.setCurrentTarget(thumb.id);
+    this.flows.modeDispatch.dispatchByMode<HTMLElement>({
+      tag: (t) => this.showTags(t)
+    }, thumb);
   }
-}
 
-function showOverlay(thumb: HTMLElement): void {
-  if (PostOverlayModel.isCurrentTarget(thumb.id)) {
-    return;
-  }
-  PostOverlayModel.setCurrentTarget(thumb.id);
-  PostOverlayFlows.ModeDispatch.dispatchByMode<HTMLElement>({
-    tag: showTags
-  }, thumb);
-}
+  private async showTags(thumb: HTMLElement): Promise<void> {
+    const categories = await this.model.resolveTagCategories(thumb);
 
-async function showTags(thumb: HTMLElement): Promise<void> {
-  const categories = await PostOverlayModel.resolveTagCategories(thumb);
-
-  if (PostOverlayModel.isCurrentTarget(thumb.id)) {
-    PostOverlayView.renderTags(thumb.id, categories);
-    PostOverlayView.reveal(thumb);
+    if (this.model.isCurrentTarget(thumb.id)) {
+      this.view.renderTags(thumb.id, categories);
+      this.view.reveal(thumb);
+    }
   }
 }

@@ -1,34 +1,30 @@
-import * as GalleryControl from "@/features/gallery/control/control";
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
-import { Preferences } from "@/app/context/preferences";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 
-export function open(thumb: HTMLElement): void {
-  disablePreview();
-  GalleryModel.open(thumb);
-  GalleryView.open(thumb);
-  GalleryFlows.Display.display(thumb);
-  GalleryControl.enableInteractionTracking();
-  Events.gallery.openedGallery.emit(thumb);
-}
+export class GalleryOpenCloseFlow extends GalleryFlow {
+  public open(thumb: HTMLElement): void {
+    this.disablePreview();
+    this.model.open(thumb);
+    this.view.open(thumb);
+    this.flows.display.display(thumb);
+    this.control.enableInteractionTracking();
+    this.context.events.gallery.openedGallery.emit(thumb);
+  }
 
-export function close(): void {
-  GalleryModel.close();
-  GalleryView.close();
-  GalleryControl.disableInteractionTracking();
-  DomEvents.document.wheel.toggle(true);
-  Events.gallery.closedGallery.emit();
-}
+  public close(): void {
+    this.model.close();
+    this.view.close();
+    this.control.disableInteractionTracking();
+    this.context.domEvents.document.wheel.toggle(true);
+    this.context.events.gallery.closedGallery.emit();
+  }
 
-export function reOpen(): void {
-  open(GalleryModel.currentThumb());
-}
+  public reOpen(): void {
+    this.open(this.model.currentThumb());
+  }
 
-function disablePreview(): void {
-  if (Preferences.gallery.previewEnabled.value) {
-    Preferences.gallery.previewEnabled.set(false);
+  private disablePreview(): void {
+    if (this.context.preferences.gallery.previewEnabled.value) {
+      this.context.preferences.gallery.previewEnabled.set(false);
+    }
   }
 }

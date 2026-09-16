@@ -1,143 +1,153 @@
-import * as FavoritesControl from "@/features/favorites/control/control";
-import * as FavoritesFeatures from "@/features/favorites/features/features";
-import * as FavoritesFlows from "@/features/favorites/flows/flows";
-import * as FavoritesModel from "@/features/favorites/model/model";
-import * as FavoritesView from "@/features/favorites/view/view";
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
-import { ON_DESKTOP_DEVICE, ON_FAVORITES_PAGE, ON_FIRST_FAVORITES_PAGE, ON_POST_LIST_PAGE } from "@/app/context/environment";
 import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { Preferences } from "@/app/context/preferences";
+import { AppContext } from "@/app/context/context";
+import { FavoritesComponents } from "@/features/favorites/types/types";
+import { FavoritesControl } from "@/features/favorites/control/control";
+import { FavoritesFeatures } from "@/features/favorites/features/features";
+import { FavoritesFlows } from "@/features/favorites/flows/flows";
+import { FavoritesModel } from "@/features/favorites/model/model";
+import { FavoritesView } from "@/features/favorites/view/view";
 import { createElement } from "@/utils/browser/element";
 import { deferPostPageFetchesUntil } from "@/lib/remote/fetchers/html";
-import { IMAGUS_SUPPORT_ENABLED } from "@/app/context/flags";
 import { setFavoriteTagsLookup } from "@/lib/ui/thumb/tag";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 
-export function startFavorites(): void {
-  if (ON_FAVORITES_PAGE) {
-    setup();
-    start();
-  } else if (ON_POST_LIST_PAGE) {
-    servePostListRequests();
+export function startFavorites(context: AppContext): void {
+  if (context.environment.onFavoritesPage) {
+    const model = new FavoritesModel(context);
+    const view = new FavoritesView(context);
+    const flows = new FavoritesFlows(context, model, view);
+    const control = new FavoritesControl(context);
+    const features = new FavoritesFeatures(context);
+    const components: FavoritesComponents = { context, model, view, flows, control, features };
+
+    setup(components);
+    start(components);
+  } else if (context.environment.onPostListPage) {
+    servePostListRequests(context, new FavoritesModel(context));
   }
 }
 
-function setup(): void {
-  setupSubFeatures();
-  setupModel();
-  setupView();
-  setupControl();
-  subscribeToEvents();
-  subscribeToPreferences();
-  subscribeToDomEvents();
-  serveFavoritesPageRequests();
+function setup(components: FavoritesComponents): void {
+  setupSubFeatures(components);
+  setupView(components);
+  setupControl(components);
+  subscribeToEvents(components);
+  subscribeToPreferences(components);
+  subscribeToDomEvents(components);
+  serveFavoritesPageRequests(components);
 }
 
-function start(): void {
-  FavoritesView.removeOriginalUnusedScripts();
-  deferPostPageFetchesUntil(Events.favorites.favoritesLoaded.wait());
-  setFavoriteTagsLookup((id: string) => FavoritesModel.getFavorite(id)?.tags);
-  FavoritesView.showSkeleton();
-  // FavoritesView.toggleSearchInputs(false);
-  const nativeFavorites = FavoritesView.takeNativeFavorites();
+function start(components: FavoritesComponents): void {
+  const { context, model, view, flows } = components;
 
-  FavoritesFlows.Load.loadAllFavorites(ON_FIRST_FAVORITES_PAGE ? nativeFavorites : undefined);
+  view.removeOriginalUnusedScripts();
+  deferPostPageFetchesUntil(context.events.favorites.favoritesLoaded.wait());
+  setFavoriteTagsLookup((id: string) => model.getFavorite(id)?.tags);
+  view.showSkeleton();
+  const nativeFavorites = view.takeNativeFavorites();
+
+  flows.load.loadAllFavorites(context.environment.onFirstFavoritesPage ? nativeFavorites : undefined);
 }
 
-function setupSubFeatures(): void {
-  FavoritesFeatures.setup({
+function setupSubFeatures({ context, model, control, features }: FavoritesComponents): void {
+  features.setup({
     downloader: {
-      getSearchResults: FavoritesModel.getCurrentSearchResults,
+      batchSize: context.preferences.favorites.downloadBatchSize,
+      filenameFormat: context.preferences.favorites.downloadFilenameFormat,
+      getSearchResults: () => model.getCurrentSearchResults(),
       getTagCategory: TagCategoryStore.get,
-      getTagsForIds: FavoritesModel.getTagsForIds
+      getTagsForIds: (ids) => model.getTagsForIds(ids)
     },
     snippets: {
-      appendToSearch: FavoritesControl.appendToSearch,
-      getSearchResults: FavoritesModel.getCurrentSearchResults
+      appendToSearch: (text) => control.appendToSearch(text),
+      getSearchResults: () => model.getCurrentSearchResults()
     }
   });
 }
 
-function setupModel(): void {
-  FavoritesModel.setup({
-    onSearchResultsChanged: Events.favorites.searchResultsUpdated.emit
-  });
-}
+function setupView({ context, view, flows, control, features }: FavoritesComponents): void {
+  const { preferences, events } = context;
 
-function setupView(): void {
-  FavoritesView.setup({
-    onPageSelected: FavoritesFlows.Display.goToPage,
-    onPageStepped: FavoritesFlows.Display.advance,
-    onContentReplaced: Events.favorites.contentReplaced.emit,
-    onContentAdded: Events.favorites.contentAdded.emit,
-    onDrawerOpen: () => Preferences.favorites.drawerOpen.set(true),
-    onDrawerViewSelected: Preferences.favorites.drawerActiveView.set,
-    onShowControls: Events.gallery.showControlsRequested.emit,
+  view.setup({
+    onPageSelected: (pageNumber) => flows.display.goToPage(pageNumber),
+    onPageStepped: (direction) => flows.display.advance(direction),
+    onContentReplaced: events.favorites.contentReplaced.emit,
+    onContentAdded: events.favorites.contentAdded.emit,
+    onDrawerOpen: () => preferences.favorites.drawerOpen.set(true),
+    onDrawerViewSelected: preferences.favorites.drawerActiveView.set,
+    onShowControls: events.gallery.showControlsRequested.emit,
     drawerViews: {
-      settings: FavoritesControl.mountSettings(),
-      download: FavoritesFeatures.mountDownloader(),
-      snippets: FavoritesFeatures.mountSnippets(),
+      settings: control.mountSettings(),
+      download: features.mountDownloader(),
+      snippets: features.mountSnippets(),
       tags: { mount: panel => panel.appendChild(createElement("div", { className: "favorites-drawer-placeholder", textContent: "Work in progress" })) }
     }
   });
 }
 
-function setupControl(): void {
-  FavoritesControl.setup();
+function setupControl({ control }: FavoritesComponents): void {
+  control.setup();
 }
 
-function subscribeToEvents(): void {
-  Events.favorites.searchButtonClicked.on(FavoritesControl.handleSearchButtonClicked);
-  Events.favorites.clearButtonClicked.on(FavoritesControl.clearSearch);
-  Events.favorites.shuffleButtonClicked.on(FavoritesFlows.Search.shuffleSearchResults);
-  Events.favorites.invertButtonClicked.on(FavoritesFlows.Search.invertSearchResults);
-  Events.favorites.resetButtonClicked.on(FavoritesFlows.Reset.reset);
-  Events.favorites.searchRequested.on(FavoritesFlows.Search.searchFavorites);
-  Events.postOverlay.searchForTag.on(FavoritesControl.runSearch);
-  Events.postOverlay.addTagToSearch.on(FavoritesControl.appendToSearch);
-  Events.postOverlay.excludeTagFromSearch.on(FavoritesControl.excludeFromSearch);
-  Events.app.favoriteRemoved.on(FavoritesModel.deleteStoredFavorite);
-  Events.app.favoriteAdded.on(markActionBarFavorited);
-  Events.app.favoriteRemoved.on(markActionBarUnfavorited);
-  Events.favorites.favoritesLoaded.on(FavoritesView.collectAspectRatios, { once: true });
+function subscribeToEvents({ context, model, view, flows, control }: FavoritesComponents): void {
+  const { events } = context;
+
+  events.favorites.searchButtonClicked.on((event) => control.handleSearchButtonClicked(event));
+  events.favorites.clearButtonClicked.on(() => control.clearSearch());
+  events.favorites.shuffleButtonClicked.on(() => flows.search.shuffleSearchResults());
+  events.favorites.invertButtonClicked.on(() => flows.search.invertSearchResults());
+  events.favorites.resetButtonClicked.on(() => flows.reset.reset());
+  events.favorites.searchRequested.on((query) => flows.search.searchFavorites(query));
+  events.postOverlay.searchForTag.on((tag) => control.runSearch(tag));
+  events.postOverlay.addTagToSearch.on((tag) => control.appendToSearch(tag));
+  events.postOverlay.excludeTagFromSearch.on((tag) => control.excludeFromSearch(tag));
+  events.app.favoriteRemoved.on((id) => model.deleteStoredFavorite(id));
+  events.app.favoriteAdded.on(markActionBarFavorited);
+  events.app.favoriteRemoved.on(markActionBarUnfavorited);
+  events.favorites.favoritesLoaded.on(() => view.collectAspectRatios(), { once: true });
 }
 
-function subscribeToPreferences(): void {
-  Preferences.favorites.drawerOpen.on(FavoritesView.toggleDrawer);
-  Preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
-  Preferences.favorites.layout.on(FavoritesView.changeLayout);
-  Preferences.favorites.sortKey.on(FavoritesFlows.Search.reSearchFavorites);
-  Preferences.favorites.sortAscending.on(FavoritesFlows.Search.reSearchFavorites);
-  Preferences.favorites.infiniteScroll.on(FavoritesFlows.Display.toggleInfiniteScroll);
-  Preferences.favorites.resultsPerPage.on(FavoritesFlows.Display.redisplayLatestResults);
-  Preferences.favorites.allowedRatings.on(FavoritesFlows.Search.reSearchFavorites);
-  Preferences.favorites.excludeBlacklist.on(FavoritesFlows.Search.reSearchFavorites);
+function subscribeToPreferences({ context, view, flows }: FavoritesComponents): void {
+  const { preferences } = context;
+
+  preferences.favorites.drawerOpen.on((open) => view.toggleDrawer(open));
+  preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
+  preferences.favorites.layout.on((layout) => view.changeLayout(layout));
+  preferences.favorites.sortKey.on(() => flows.search.reSearchFavorites());
+  preferences.favorites.sortAscending.on(() => flows.search.reSearchFavorites());
+  preferences.favorites.infiniteScroll.on(() => flows.display.toggleInfiniteScroll());
+  preferences.favorites.resultsPerPage.on(() => flows.display.redisplayLatestResults());
+  preferences.favorites.allowedRatings.on(() => flows.search.reSearchFavorites());
+  preferences.favorites.excludeBlacklist.on(() => flows.search.reSearchFavorites());
 }
 
-function subscribeToDomEvents(): void {
-  if (ON_DESKTOP_DEVICE) {
-    if (IMAGUS_SUPPORT_ENABLED) {
-      DomEvents.document.mouseover.on(FavoritesView.suppressLinkOnHoveredThumb);
+function subscribeToDomEvents({ context, view, flows }: FavoritesComponents): void {
+  const { domEvents, environment, flags } = context;
+
+  if (environment.onDesktopDevice) {
+    if (flags.imagusSupportEnabled) {
+      domEvents.document.mouseover.on((event) => view.suppressLinkOnHoveredThumb(event));
     }
-    DomEvents.document.click.on(FavoritesFlows.Input.handleClick);
-    DomEvents.document.mousedown.on(FavoritesFlows.Input.handleMouseDown);
+    domEvents.document.click.on((event) => flows.input.handleClick(event));
+    domEvents.document.mousedown.on((event) => flows.input.handleMouseDown(event));
   } else {
-    DomEvents.document.click.on(FavoritesFlows.Input.triggerPostAction);
+    domEvents.document.click.on((event) => flows.input.triggerPostAction(event));
   }
 }
 
-function serveFavoritesPageRequests(): void {
-  FeatureBridge.favorites.advance.serve(FavoritesFlows.Display.advance);
-  FeatureBridge.favorites.searchResults.serve(FavoritesModel.getCurrentSearchResults);
-  FeatureBridge.favorites.getFavorite.serve(FavoritesModel.getFavorite);
-  FeatureBridge.favorites.allFavorites.serve(FavoritesModel.getAllFavorites);
-  FeatureBridge.favorites.searchQuery.serve(FavoritesModel.getCurrentSearchQuery);
-  FeatureBridge.favorites.usingInfiniteScroll.serve(() => Preferences.favorites.infiniteScroll.value);
+function serveFavoritesPageRequests({ context, model, view, flows }: FavoritesComponents): void {
+  const { featureBridge, preferences } = context;
+
+  featureBridge.favorites.advance.serve((direction) => flows.display.advance(direction));
+  featureBridge.favorites.searchResults.serve(() => model.getCurrentSearchResults());
+  featureBridge.favorites.getFavorite.serve((id) => model.getFavorite(id));
+  featureBridge.favorites.allFavorites.serve(() => model.getAllFavorites());
+  featureBridge.favorites.searchQuery.serve(() => model.getCurrentSearchQuery());
+  featureBridge.favorites.usingInfiniteScroll.serve(() => preferences.favorites.infiniteScroll.value);
+  featureBridge.favorites.layout.serve(() => view.getLayout());
 }
 
-function servePostListRequests(): void {
-  FeatureBridge.favorites.favoriteIds.serve(FavoritesModel.loadFavoriteIds);
+function servePostListRequests(context: AppContext, model: FavoritesModel): void {
+  context.featureBridge.favorites.favoriteIds.serve(() => model.loadFavoriteIds());
 }

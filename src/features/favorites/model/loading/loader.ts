@@ -1,4 +1,4 @@
-import { FAVORITES_PAGE_ID, ON_FAVORITES_PAGE, USER_ID } from "@/app/context/environment";
+import { Environment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConcurrentFetcher } from "@/features/favorites/model/loading/retrieval/concurrent_fetcher";
 import { FavoritesItem } from "@/features/favorites/model/loading/construction/favorites_item";
@@ -7,11 +7,16 @@ import { FavoritesStore } from "@/features/favorites/model/loading/retrieval/sto
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { toTagSet } from "@/utils/pure/tag";
 
-const FAVORITES_PAGE_ID_OR_EMPTY = FAVORITES_PAGE_ID ?? "";
-const DATABASE_KEY = `user${ON_FAVORITES_PAGE ? FAVORITES_PAGE_ID_OR_EMPTY : USER_ID}`;
-
 export class FavoritesLoader {
-  private readonly store = new FavoritesStore(DATABASE_KEY);
+  private readonly favoritesPageId: string;
+  private readonly store: FavoritesStore;
+
+  constructor(environment: Environment) {
+    this.favoritesPageId = environment.favoritesPageId ?? "";
+    const databaseKey = `user${environment.onFavoritesPage ? this.favoritesPageId : environment.userId}`;
+
+    this.store = new FavoritesStore(databaseKey);
+  }
 
   public readStoredFavorites(): Promise<FavoritesItem[]> {
     return this.store.readAll().then(posts => posts.map(post => new FavoritesItem(post)));
@@ -28,11 +33,11 @@ export class FavoritesLoader {
   public fetchAllFavorites(onFavoritesFound: (favorites: FavoritesItem[]) => void, firstPageFavorites?: HTMLElement[]): Promise<void> {
     return new FavoritesConcurrentFetcher((elements: HTMLElement[]): void => {
       onFavoritesFound(elements.map(element => new FavoritesItem(element)));
-    }, FAVORITES_PAGE_ID_OR_EMPTY, firstPageFavorites).fetchAllFavorites();
+    }, this.favoritesPageId, firstPageFavorites).fetchAllFavorites();
   }
 
   public fetchNewFavorites(existingIds: Set<string>, firstPageFavorites?: HTMLElement[]): Promise<FavoritesItem[]> {
-    return new FavoritesSequentialFetcher(Rule34NetworkConfig.favoritesPageFetchDelay, Rule34NetworkConfig.favoritesPageFetchRetries, FAVORITES_PAGE_ID_OR_EMPTY)
+    return new FavoritesSequentialFetcher(Rule34NetworkConfig.favoritesPageFetchDelay, Rule34NetworkConfig.favoritesPageFetchRetries, this.favoritesPageId)
       .fetchNewFavorites(existingIds, firstPageFavorites)
       .then(elements => elements.map(element => new FavoritesItem(element)));
   }

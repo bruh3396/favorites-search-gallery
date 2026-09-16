@@ -1,31 +1,39 @@
 import * as TooltipContent from "@/features/tooltip/view/content";
-import * as TooltipElement from "@/features/tooltip/view/shell/element";
 import * as TooltipPosition from "@/features/tooltip/view/position";
+import { AppContext } from "@/app/context/context";
+import { TooltipElement } from "@/features/tooltip/view/element";
 
-let lastThumb: HTMLElement | null = null;
-let lastTooltip: HTMLElement | null = null;
+export class TooltipView {
+  private readonly element: TooltipElement;
+  private lastThumb: HTMLElement | null = null;
+  private lastTooltip: HTMLElement | null = null;
 
-export function setup(): void {
-  TooltipElement.setup();
-}
+  constructor(context: AppContext) {
+    this.element = new TooltipElement(context.shell);
+  }
 
-export function show(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
-  const tooltip = TooltipElement.reveal();
+  public setup(): void {
+    this.element.setup();
+  }
 
-  lastThumb = thumb;
-  lastTooltip = tooltip;
-  TooltipContent.render(tooltip, thumb, getColor);
-  TooltipPosition.position(tooltip, thumb);
-}
+  public show(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
+    const tooltip = this.element.reveal();
 
-export function hide(): void {
-  lastThumb = null;
-  lastTooltip = null;
-  TooltipElement.hide();
-}
+    this.lastThumb = thumb;
+    this.lastTooltip = tooltip;
+    TooltipContent.render(tooltip, thumb, getColor);
+    TooltipPosition.position(tooltip, thumb);
+  }
 
-export function repositionIfVisible(): void {
-  if (lastThumb !== null && lastTooltip !== null) {
-    TooltipPosition.position(lastTooltip, lastThumb);
+  public hide(): void {
+    this.lastThumb = null;
+    this.lastTooltip = null;
+    this.element.hide();
+  }
+
+  public repositionIfVisible(): void {
+    if (this.lastThumb !== null && this.lastTooltip !== null) {
+      TooltipPosition.position(this.lastTooltip, this.lastThumb);
+    }
   }
 }

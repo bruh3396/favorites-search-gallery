@@ -1,28 +1,26 @@
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
-import { GALLERY_DISABLED } from "@/app/context/flags";
-import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeNonNumericCharacters } from "@/utils/pure/string";
 import { resolveMediaType } from "@/lib/media/media_type";
 import { setDataset } from "@/utils/browser/dataset";
 
-export function preparePostListThumbs(thumbs: HTMLElement[]): HTMLElement[] {
-  thumbs.forEach(thumb => prepareThumb(thumb));
+export function preparePostListThumbs(thumbs: HTMLElement[], onMobileDevice: boolean, galleryDisabled: boolean): HTMLElement[] {
+  thumbs.forEach(thumb => prepareThumb(thumb, onMobileDevice, galleryDisabled));
   return thumbs;
 }
 
-function prepareThumb(thumb: HTMLElement): void {
+function prepareThumb(thumb: HTMLElement, onMobileDevice: boolean, galleryDisabled: boolean): void {
   moveTagsFromTitleToTagsAttribute(thumb);
   assignMediaType(thumb);
-  addCanvas(thumb);
+  addCanvas(thumb, galleryDisabled);
   addActionBar(thumb);
   thumb.id = removeNonNumericCharacters(parseIdFromThumb(thumb));
   stampActionBarId(thumb);
   thumb.classList.remove(RAW_THUMB_CLASS_NAME);
   thumb.classList.add(ITEM_CLASS_NAME, TILE_CLASS_NAME);
-  prepareMobileThumb(thumb);
+  prepareMobileThumb(thumb, onMobileDevice);
 }
 
 function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
@@ -46,8 +44,8 @@ function assignMediaType(thumb: HTMLElement): void {
   setDataset(thumb, "mediaType", resolveMediaType(tags));
 }
 
-function addCanvas(thumb: HTMLElement): void {
-  if (GALLERY_DISABLED || thumb.querySelector("canvas") !== null) {
+function addCanvas(thumb: HTMLElement, galleryDisabled: boolean): void {
+  if (galleryDisabled || thumb.querySelector("canvas") !== null) {
     return;
   }
   const anchor = thumb.querySelector("a");
@@ -65,8 +63,8 @@ function addActionBar(thumb: HTMLElement): void {
   }
 }
 
-function prepareMobileThumb(thumb: HTMLElement): void {
-  if (!ON_MOBILE_DEVICE) {
+function prepareMobileThumb(thumb: HTMLElement, onMobileDevice: boolean): void {
+  if (!onMobileDevice) {
     return;
   }
 

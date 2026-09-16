@@ -1,10 +1,42 @@
-import * as FavoritesSearchBox from "@/features/favorites/control/toolbar/search_box";
 import * as FavoritesToolbar from "@/features/favorites/control/toolbar/toolbar";
+import { AppContext } from "@/app/context/context";
+import { FavoritesDrawerViewContent } from "@/types/favorite";
+import { SearchBox } from "@/features/favorites/control/toolbar/search_box";
+import { mount as mountSettingsView } from "@/features/favorites/control/settings/settings";
 
-export function setup(): void {
-  FavoritesSearchBox.setup();
-  FavoritesToolbar.setup();
+export class FavoritesControl {
+  private searchBox: SearchBox | null = null;
+
+  constructor(private readonly context: AppContext) {}
+
+  public setup(): void {
+    const { events, environment, preferences } = this.context;
+
+    FavoritesToolbar.setup(events, environment, preferences);
+    this.searchBox = new SearchBox(events);
+  }
+
+  public appendToSearch(text: string): void {
+    this.searchBox?.append(text);
+  }
+
+  public excludeFromSearch(tag: string): void {
+    this.searchBox?.append(`-${tag}`);
+  }
+
+  public runSearch(query: string): void {
+    this.searchBox?.search(query);
+  }
+
+  public clearSearch(): void {
+    this.searchBox?.clear();
+  }
+
+  public handleSearchButtonClicked(event: MouseEvent): void {
+    this.searchBox?.handleSearchButtonClicked(event);
+  }
+
+  public mountSettings(): FavoritesDrawerViewContent {
+    return mountSettingsView(this.context);
+  }
 }
-
-export { append as appendToSearch, exclude as excludeFromSearch, search as runSearch, clear as clearSearch, handleSearchButtonClicked } from "@/features/favorites/control/toolbar/search_box";
-export { mount as mountSettings } from "@/features/favorites/control/settings/settings";

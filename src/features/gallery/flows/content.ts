@@ -1,36 +1,33 @@
-import * as GalleryControl from "@/features/gallery/control/control";
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
 import { GalleryConfig } from "@/config/gallery_config";
-import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { debounceLeading } from "@/lib/async/rate_limiting";
-import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 
-export function refresh(): void {
-  reIndex();
-  recache();
-}
+export class GalleryContentFlow extends GalleryFlow {
+  private readonly recache = debounceLeading(() => {
+    this.flows.dispatch.run({
+      idle: () => this.recacheFirstThumbs(),
+      preview: () => this.recacheFirstThumbs(),
+      open: () => this.view.reupscaleCachedThumbs()
+    });
+  }, GalleryConfig.contentRefreshTime);
 
-export function downscaleThumbsOutsideResults(): void {
-  GalleryView.downscaleAll();
-}
+  public refresh(): void {
+    this.reIndex();
+    this.recache();
+  }
 
-function reIndex(): void {
-  GalleryControl.refreshThumbObserver();
-  GalleryModel.indexThumbs(getAllContentThumbs());
-}
+  public downscaleThumbsOutsideResults(): void {
+    this.view.downscaleAll();
+  }
 
-const recache = debounceLeading(() => {
-  GalleryFlows.Dispatch.run({
-    idle: recacheFirstThumbs,
-    preview: recacheFirstThumbs,
-    open: GalleryView.reupscaleCachedThumbs
-  });
-}, GalleryConfig.contentRefreshTime);
+  private reIndex(): void {
+    this.control.refreshThumbObserver();
+    this.model.indexThumbs(this.context.shell.getContentThumbs());
+  }
 
-function recacheFirstThumbs(): void {
-  if (ON_DESKTOP_DEVICE) {
-    GalleryView.cacheImages(getAllContentThumbs().slice(0, 25));
+  private recacheFirstThumbs(): void {
+    if (this.context.environment.onDesktopDevice) {
+      this.view.cacheImages(this.context.shell.getContentThumbs().slice(0, 25));
+    }
   }
 }

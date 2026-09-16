@@ -1,23 +1,77 @@
-import * as ContentTiler from "@/app/layout/content_tiler";
-import * as PostListNavigatorShell from "@/features/post_list_navigator/view/shell/shell";
-import { markAsFavorite, unmarkAsFavorite } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
+import { markAsFavorite, markAsFavoriteById, setFavoriteIndicatorLoading, unmarkAsFavorite } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
+import { AppContext } from "@/app/context/context";
+import { ContentTiler } from "@/app/layout/content_tiler";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
-import { getAllPageThumbs } from "@/app/layout/content_thumbs";
+import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { preparePostListThumbs } from "@/features/post_list_navigator/dom_tweaks/thumb_preparer";
+import { render } from "@/features/post_list_navigator/view/renderer";
+import { setInfiniteScrollStyle } from "@/features/post_list_navigator/dom_tweaks/infinite_scroll_style";
 
-export { render as renderPostList } from "@/features/post_list_navigator/view/renderer";
-export { addToBottom as insertNewSearchResults } from "@/app/layout/content_tiler";
-export { setInfiniteScrollStyle } from "@/features/post_list_navigator/dom_tweaks/infinite_scroll_style";
-export { setFavoriteIndicatorLoading, markAsFavorite, markAsFavoriteById, unmarkAsFavorite } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
+export class PostListNavigatorView {
+  private readonly contentTiler: ContentTiler;
 
-export function setup(): void {
-  ContentTiler.setup();
-  PostListNavigatorShell.build();
+  constructor(private readonly context: AppContext) {
+    this.contentTiler = new ContentTiler(context);
+    this.contentTiler.setup();
+  }
+
+  public renderPostList(postList: PostList): void {
+    render(this.contentTiler, postList);
+  }
+
+  public insertNewSearchResults(items: HTMLElement[]): void {
+    this.contentTiler.addToBottom(items);
+  }
+
+  public tileNativePostListThumbs(): void {
+    this.contentTiler.tile(this.context.shell.getPageThumbs());
+  }
+
+  public removeNativeImageList(): void {
+    document.querySelector(".image-list")?.replaceChildren();
+  }
+
+  public prepareNativePostListThumbs(): HTMLElement[] {
+    return preparePostListThumbs(Array.from(document.querySelectorAll(ITEM_SELECTOR)), this.context.environment.onMobileDevice, this.context.flags.galleryDisabled);
+  }
+
+  public currentSearch(): string {
+    return (document.querySelector("input[name=\"tags\"]") as HTMLInputElement)?.value ?? "";
+  }
+
+  public changeLayout(layout: Parameters<ContentTiler["changeLayout"]>[0]): void {
+    this.contentTiler.changeLayout(layout);
+  }
+
+  public getLayout(): ReturnType<ContentTiler["getLayout"]> {
+    return this.contentTiler.getLayout();
+  }
+
+  public setInfiniteScrollStyle(enabled: boolean): void {
+    setInfiniteScrollStyle(enabled);
+  }
+
+  public setFavoriteIndicatorLoading(loading: boolean): void {
+    setFavoriteIndicatorLoading(loading);
+  }
+
+  public markAsFavorite(thumb: HTMLElement): void {
+    markAsFavorite(thumb);
+  }
+
+  public markAsFavoriteById(id: string): void {
+    markAsFavoriteById(id);
+  }
+
+  public unmarkAsFavorite(thumb: HTMLElement): void {
+    unmarkAsFavorite(thumb);
+  }
+
+  public markAsFavorites(thumbs: HTMLElement[]): void {
+    thumbs.forEach(thumb => markAsFavorite(thumb));
+  }
+
+  public unmarkAsFavorites(thumbs: HTMLElement[]): void {
+    thumbs.forEach(thumb => unmarkAsFavorite(thumb));
+  }
 }
-
-export const tileNativePostListThumbs = (): void => ContentTiler.tile(getAllPageThumbs());
-export const removeNativeImageList = (): void => document.querySelector(".image-list")?.replaceChildren();
-export const prepareNativePostListThumbs = (): HTMLElement[] => preparePostListThumbs(Array.from(document.querySelectorAll(ITEM_SELECTOR)));
-export const currentSearch = (): string => (document.querySelector("input[name=\"tags\"]") as HTMLInputElement)?.value ?? "";
-export const markAsFavorites = (thumbs: HTMLElement[]): void => thumbs.forEach(thumb => markAsFavorite(thumb));
-export const unmarkAsFavorites = (thumbs: HTMLElement[]): void => thumbs.forEach(thumb => unmarkAsFavorite(thumb));

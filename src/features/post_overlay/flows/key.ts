@@ -1,31 +1,31 @@
-import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
-import * as PostOverlayModel from "@/features/post_overlay/model/model";
-import * as PostOverlayView from "@/features/post_overlay/view/view";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
-import { Preferences } from "@/app/context/preferences";
+import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
 
-export function handleKeyDown(event: EnhancedKeyboardEvent): void {
-  if (!Preferences.postOverlay.enabled.value) {
-    return;
-  }
+export class PostOverlayKeyFlow extends PostOverlayFlow {
 
-  if (event.key === "shift") {
-    PostOverlayModel.setResizing(true);
+  public handleKeyDown(event: EnhancedKeyboardEvent): void {
+    if (!this.context.preferences.postOverlay.enabled.value) {
+      return;
+    }
 
-    if (PostOverlayView.isVisible()) {
-      PostOverlayView.hide();
+    if (event.key === "shift") {
+      this.model.setResizing(true);
+
+      if (this.view.isVisible()) {
+        this.view.hide();
+      }
     }
   }
-}
 
-export function handleKeyUp(event: EnhancedKeyboardEvent): void {
-  if (!Preferences.postOverlay.enabled.value) {
-    return;
-  }
+  public handleKeyUp(event: EnhancedKeyboardEvent): void {
+    if (!this.context.preferences.postOverlay.enabled.value) {
+      return;
+    }
 
-  if (event.key === "shift") {
-    PostOverlayModel.setResizing(false);
-    PostOverlayModel.clearOverlayTarget();
-    PostOverlayFlows.Hover.showThumbUnderCursor();
+    if (event.key === "shift") {
+      this.model.setResizing(false);
+      this.model.clearOverlayTarget();
+      this.flows.hover.showThumbUnderCursor();
+    }
   }
 }

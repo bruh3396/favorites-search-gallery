@@ -1,4 +1,5 @@
 import { MediaItem } from "@/types/media";
+import { Preference } from "@/lib/storage/preference";
 import { TagCategory } from "@/types/search";
 
 export type FilenameCategory = Extract<TagCategory, "artist" | "character" | "copyright">;
@@ -19,6 +20,8 @@ export interface DownloadResult {
 }
 
 export interface DownloaderDependencies {
+  batchSize: Preference<number>;
+  filenameFormat: Preference<number>;
   getSearchResults: () => MediaItem[];
   getTagCategory: (tagName: string) => TagCategory | undefined;
   getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;

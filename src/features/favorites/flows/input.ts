@@ -1,53 +1,53 @@
-import * as FavoritesView from "@/features/favorites/view/view";
 import { openMedia, openPost } from "@/lib/remote/fetchers/action";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { Events } from "@/app/channels/events";
-import { GALLERY_DISABLED } from "@/app/context/flags";
-import { didSwipe } from "@/app/dom/swipe_events";
+import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
 
-export function triggerPostAction(event: EnhancedMouseEvent): void {
-  if (didSwipe()) {
-    return;
-  }
-  handleActionBarClick(event.originalEvent, {
-    onFavoriteAdded: Events.app.favoriteAdded.emit,
-    onFavoriteRemoved: Events.app.favoriteRemoved.emit
-  });
-}
+export class FavoritesInputFlow extends FavoritesFlow {
 
-export function handleClick(event: EnhancedMouseEvent): void {
-  triggerPostAction(event);
-
-  if (event.thumb === null) {
-    return;
+  public triggerPostAction(event: EnhancedMouseEvent): void {
+    if (this.context.domEvents.didSwipe()) {
+      return;
+    }
+    handleActionBarClick(event.originalEvent, {
+      onFavoriteAdded: this.context.events.app.favoriteAdded.emit,
+      onFavoriteRemoved: this.context.events.app.favoriteRemoved.emit
+    });
   }
 
-  if (event.ctrlKey) {
-    openMedia(event.thumb);
+  public handleClick(event: EnhancedMouseEvent): void {
+    this.triggerPostAction(event);
+
+    if (event.thumb === null) {
+      return;
+    }
+
+    if (event.ctrlKey) {
+      openMedia(event.thumb);
+    }
+    event.originalEvent.preventDefault();
   }
-  event.originalEvent.preventDefault();
-}
 
-export function handleMouseDown(event: EnhancedMouseEvent): void {
-  closePopoversOutside(event);
+  public handleMouseDown(event: EnhancedMouseEvent): void {
+    this.closePopoversOutside(event);
 
-  if (event.thumb === null || event.ctrlKey) {
-    return;
+    if (event.thumb === null || event.ctrlKey) {
+      return;
+    }
+    const shouldOpen = event.middleClick ||
+      (event.leftClick && (event.shiftKey || this.context.flags.galleryDisabled));
+
+    if (shouldOpen) {
+      openPost(event.thumb.id);
+    }
+    event.originalEvent.preventDefault();
   }
-  const shouldOpen = event.middleClick ||
-    (event.leftClick && (event.shiftKey || GALLERY_DISABLED));
 
-  if (shouldOpen) {
-    openPost(event.thumb.id);
-  }
-  event.originalEvent.preventDefault();
-}
+  private closePopoversOutside(event: EnhancedMouseEvent): void {
+    const target = event.originalEvent.target;
 
-function closePopoversOutside(event: EnhancedMouseEvent): void {
-  const target = event.originalEvent.target;
-
-  if (target instanceof Node && !FavoritesView.isGotoPagePopoverTarget(target)) {
-    FavoritesView.closeGotoPagePopover();
+    if (target instanceof Node && !this.view.isGotoPagePopoverTarget(target)) {
+      this.view.closeGotoPagePopover();
+    }
   }
 }

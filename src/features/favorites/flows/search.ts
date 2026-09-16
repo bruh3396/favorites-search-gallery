@@ -1,7 +1,20 @@
-import * as FavoritesFlows from "@/features/favorites/flows/flows";
-import * as FavoritesModel from "@/features/favorites/model/model";
+import { FavoritesFlow } from "@/features/favorites/flows/flow";
 
-export const searchFavorites = (searchQuery: string): void => FavoritesFlows.Display.display(FavoritesModel.searchFavorites(searchQuery));
-export const reSearchFavorites = (): void => FavoritesFlows.Display.display(FavoritesModel.reSearchFavorites(), { fade: false });
-export const shuffleSearchResults = (): void => FavoritesFlows.Display.display(FavoritesModel.shuffleSearchResults());
-export const invertSearchResults = (): void => FavoritesFlows.Display.display(FavoritesModel.invertSearchResults());
+export class FavoritesSearchFlow extends FavoritesFlow {
+
+  public searchFavorites(searchQuery: string): void {
+    this.flows.display.display(this.model.searchFavorites(searchQuery));
+  }
+
+  public reSearchFavorites(): void {
+    this.flows.display.display(this.model.reSearchFavorites(), { fade: false });
+  }
+
+  public shuffleSearchResults(): void {
+    this.flows.display.display(this.model.shuffleSearchResults());
+  }
+
+  public invertSearchResults(): void {
+    this.flows.display.display(this.model.invertSearchResults());
+  }
+}

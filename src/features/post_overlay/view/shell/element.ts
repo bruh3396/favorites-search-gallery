@@ -1,32 +1,35 @@
 import { ElementPool } from "@/lib/ui/element_pool";
-import { Overlays } from "@/app/layout/shell";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
+import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { insertStyle } from "@/utils/browser/injector";
 
-const pool = new ElementPool(3, createOverlayElement);
+export class PostOverlayElement {
+  private readonly pool;
 
-export function setup(): void {
-  insertStyle(POST_OVERLAY_CSS, PostOverlayClass.overlay);
-  pool.all.forEach(overlay => Overlays.appendChild(overlay));
-}
+  constructor(shell: Shell) {
+    insertStyle(POST_OVERLAY_CSS, PostOverlayClass.overlay);
+    this.pool = new ElementPool(3, createOverlayElement);
+    this.pool.all.forEach(overlay => shell.overlays.appendChild(overlay));
+  }
 
-export function getOverlay(): HTMLElement {
-  return pool.next;
-}
+  public getOverlay(): HTMLElement {
+    return this.pool.next;
+  }
 
-export function reveal(thumb: HTMLElement): void {
-  position(pool.next, thumb);
-  pool.reveal();
-}
+  public reveal(thumb: HTMLElement): void {
+    position(this.pool.next, thumb);
+    this.pool.reveal();
+  }
 
-export function isVisible(): boolean {
-  return pool.isVisible;
-}
+  public isVisible(): boolean {
+    return this.pool.isVisible;
+  }
 
-export function hide(): void {
-  pool.hide();
+  public hide(): void {
+    this.pool.hide();
+  }
 }
 
 function createOverlayElement(): HTMLDivElement {

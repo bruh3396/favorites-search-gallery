@@ -6,12 +6,12 @@ import { icon } from "@/lib/ui/icon";
 import { isExpanded } from "@/features/favorites/control/settings/helpers";
 import { toggleDataset } from "@/utils/browser/dataset";
 
-export function buildSections(sections: SettingsSection[]): HTMLElement[] {
-  return sections.map(buildSection);
+export function buildSections(preferences: Preferences, sections: SettingsSection[]): HTMLElement[] {
+  return sections.map((section) => buildSection(preferences, section));
 }
 
-function buildSection(settingsSection: SettingsSection): HTMLElement {
-  const isCollapsed = !isExpanded(settingsSection);
+function buildSection(preferences: Preferences, settingsSection: SettingsSection): HTMLElement {
+  const isCollapsed = !isExpanded(preferences, settingsSection);
   const section = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
   const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
@@ -20,18 +20,18 @@ function buildSection(settingsSection: SettingsSection): HTMLElement {
 
   header.type = "button";
   header.addEventListener("click", () => {
-    toggleSection(settingsSection.title, section);
+    toggleSection(preferences, settingsSection.title, section);
   });
 
   section.append(header, wrap);
   return section;
 }
 
-function toggleSection(title: string, element: HTMLElement): void {
+function toggleSection(preferences: Preferences, title: string, element: HTMLElement): void {
   const isCollapsed = element.dataset.collapsed === undefined;
 
   toggleDataset(element, "collapsed", isCollapsed);
-  const state = { ...Preferences.favorites.settingsExpandedSections.value, [title]: !isCollapsed };
+  const state = { ...preferences.favorites.settingsExpandedSections.value, [title]: !isCollapsed };
 
-  Preferences.favorites.settingsExpandedSections.set(state);
+  preferences.favorites.settingsExpandedSections.set(state);
 }

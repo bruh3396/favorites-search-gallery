@@ -1,14 +1,16 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { getThumbAtPoint } from "@/lib/ui/thumb/query";
 
-let lastCursorX = 0;
-let lastCursorY = 0;
+export class CursorTracker {
+  private lastCursorX = 0;
+  private lastCursorY = 0;
 
-export function record(event: EnhancedMouseEvent): void {
-  lastCursorX = event.originalEvent.clientX;
-  lastCursorY = event.originalEvent.clientY;
-}
+  public record(event: EnhancedMouseEvent): void {
+    this.lastCursorX = event.originalEvent.clientX;
+    this.lastCursorY = event.originalEvent.clientY;
+  }
 
-export function thumbUnderCursor(): HTMLElement | null {
-  return getThumbAtPoint(lastCursorX, lastCursorY);
+  public thumbUnderCursor(): HTMLElement | null {
+    return getThumbAtPoint(this.lastCursorX, this.lastCursorY);
+  }
 }

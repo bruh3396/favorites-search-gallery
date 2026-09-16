@@ -1,6 +1,6 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete, markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { Events } from "@/app/channels/events";
+import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { debounceLeading } from "@/lib/async/rate_limiting";
@@ -12,12 +12,15 @@ const HISTORY_DEPTH = 30;
 const INPUT_PERSIST_DELAY = 500;
 const COLLAPSED_HEIGHT = 28;
 
-class SearchBox {
+export class SearchBox {
   private readonly id: string = FavoritesId.searchBox;
   private readonly history = new SearchHistory(HISTORY_DEPTH);
   private readonly searchBox: HTMLTextAreaElement;
 
-  constructor(private readonly parentId: string) {
+  constructor(
+    private readonly events: Events,
+    private readonly parentId: string = FavoritesId.searchField
+  ) {
     this.searchBox = this.createSearchBox();
     this.subscribeToEvents();
     queueMicrotask(() => this.refreshClearButton());
@@ -76,7 +79,7 @@ class SearchBox {
   private startSearch(): void {
     this.history.add(this.searchBox.value);
     hideAwesomplete(this.searchBox);
-    Events.favorites.searchRequested.emit(this.searchBox.value);
+    this.events.favorites.searchRequested.emit(this.searchBox.value);
   }
 
   private refreshClearButton(): void {
@@ -88,7 +91,7 @@ class SearchBox {
     this.searchBox.addEventListener("input", debounceLeading<Event>(() => this.history.setLastQuery(this.searchBox.value), INPUT_PERSIST_DELAY));
     this.subscribeToKeyboard();
     this.subscribeToGrowOnFocus();
-    Events.app.hotkeyPressed.on((key) => this.handleHotkey(key));
+    this.events.app.hotkeyPressed.on((key) => this.handleHotkey(key));
   }
 
   private handleHotkey(key: string): void {
@@ -162,16 +165,3 @@ class SearchBox {
     this.growToFit();
   }
 }
-
-let searchBox: SearchBox | null = null;
-
-export function setup(): void {
-  searchBox = new SearchBox(FavoritesId.searchField);
-}
-
-export const append = (text: string): void => searchBox?.append(text);
-export const exclude = (tag: string): void => searchBox?.append(`-${tag}`);
-export const search = (query: string): void => searchBox?.search(query);
-export const clear = (): void => searchBox?.clear();
-export const focus = (): void => searchBox?.focus();
-export const handleSearchButtonClicked = (event: MouseEvent): void => searchBox?.handleSearchButtonClicked(event);

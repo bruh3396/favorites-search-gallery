@@ -1,21 +1,27 @@
 import * as TooltipHighlightBuilder from "@/features/tooltip/model/highlight_builder";
 import * as TooltipTagMatcher from "@/features/tooltip/model/tag_matcher";
-import { ON_FAVORITES_PAGE } from "@/app/context/environment";
-import { Preferences } from "@/app/context/preferences";
+import { AppContext } from "@/app/context/context";
 import { SearchTermHighlight } from "@/features/tooltip/types/highlight";
-let currentHighlights: SearchTermHighlight[] = [];
 
-export function rebuildHighlights(query: string): void {
-  currentHighlights = TooltipHighlightBuilder.buildHighlights(query);
-}
+export class TooltipModel {
+  private currentHighlights: SearchTermHighlight[] = [];
 
-export function colorForTag(tag: string): string | null {
-  if (!Preferences.app.darkMode.value) {
-    return TooltipTagMatcher.findMatchingDarkColor(tag, currentHighlights);
+  constructor(private readonly context: AppContext) { }
+
+  public rebuildHighlights(query: string): void {
+    this.currentHighlights = TooltipHighlightBuilder.buildHighlights(query);
   }
-  return TooltipTagMatcher.findMatchingLightColor(tag, currentHighlights);
-}
 
-export function tooltipEnabled(): boolean {
-  return ON_FAVORITES_PAGE ? Preferences.favorites.tooltipEnabled.value : Preferences.postList.tooltipEnabled.value;
+  public colorForTag(tag: string): string | null {
+    if (!this.context.preferences.app.darkMode.value) {
+      return TooltipTagMatcher.findMatchingDarkColor(tag, this.currentHighlights);
+    }
+    return TooltipTagMatcher.findMatchingLightColor(tag, this.currentHighlights);
+  }
+
+  public tooltipEnabled(): boolean {
+    const { environment, preferences } = this.context;
+
+    return environment.onFavoritesPage ? preferences.favorites.tooltipEnabled.value : preferences.postList.tooltipEnabled.value;
+  }
 }

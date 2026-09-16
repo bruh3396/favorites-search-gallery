@@ -1,14 +1,16 @@
 import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
-import { Preferences } from "@/app/context/preferences";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 
-export function toggleBackgroundOpacity(): void {
-  Preferences.gallery.backgroundOpacity.set(Preferences.gallery.backgroundOpacity.value < 1 ? 1 : 0);
-}
+export class GalleryBackgroundFlow extends GalleryFlow {
+  public toggleBackgroundOpacity(): void {
+    this.context.preferences.gallery.backgroundOpacity.set(this.context.preferences.gallery.backgroundOpacity.value < 1 ? 1 : 0);
+  }
 
-export function updateBackgroundOpacity(event: WheelEvent): void {
-  Preferences.gallery.backgroundOpacity.set(roundToTwoDecimalPlaces(computeOpacity(event)));
-}
+  public updateBackgroundOpacity(event: WheelEvent): void {
+    this.context.preferences.gallery.backgroundOpacity.set(roundToTwoDecimalPlaces(this.computeOpacity(event)));
+  }
 
-function computeOpacity(event: WheelEvent): number {
-  return clamp(Preferences.gallery.backgroundOpacity.value - (event.deltaY * 0.0005), 0, 1);
+  private computeOpacity(event: WheelEvent): number {
+    return clamp(this.context.preferences.gallery.backgroundOpacity.value - (event.deltaY * 0.0005), 0, 1);
+  }
 }

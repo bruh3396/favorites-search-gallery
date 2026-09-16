@@ -1,18 +1,18 @@
 import { createElement, label, span } from "@/utils/browser/element";
+import { Environment } from "@/app/context/environment";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { VERSION } from "@/app/context/environment";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { icon } from "@/lib/ui/icon";
 
-export function build(): HTMLElement {
+export function build(environment: Environment): HTMLElement {
   return createElement("div", {
     id: FavoritesId.toolbar,
     className: "u-no-select",
-    children: [grid()]
+    children: [grid(environment)]
   });
 }
 
-function grid(): HTMLElement {
+function grid(environment: Environment): HTMLElement {
   return createElement("div", {
     id: FavoritesId.toolbarGrid,
     children: [
@@ -21,7 +21,7 @@ function grid(): HTMLElement {
       span(FavoritesId.buttonsSlot),
       span(FavoritesId.paginationSlot),
       status(),
-      about()
+      about(environment)
     ]
   });
 }
@@ -51,12 +51,12 @@ function status(): HTMLElement {
   });
 }
 
-function about(): HTMLElement {
+function about(environment: Environment): HTMLElement {
   return createElement("div", {
     id: FavoritesId.aboutSlot,
     children: [
       help(),
-      version()
+      version(environment)
     ]
   });
 }
@@ -72,9 +72,9 @@ function help(): HTMLElement {
   return button;
 }
 
-function version(): HTMLElement {
+function version(environment: Environment): HTMLElement {
   return createElement("span", {
     id: FavoritesId.aboutVersion,
-    textContent: `v${VERSION}`
+    textContent: `v${environment.version}`
   });
 }

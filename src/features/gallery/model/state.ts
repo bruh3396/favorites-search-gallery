@@ -1,8 +1,11 @@
 import { GalleryState } from "@/types/app";
-import { Preferences } from "@/app/context/preferences";
 
 export class GalleryStateController {
-  private state: GalleryState = Preferences.gallery.previewEnabled.value ? "preview" : "idle";
+  private state: GalleryState;
+
+  constructor(initialState: GalleryState) {
+    this.state = initialState;
+  }
 
   public get currentState(): GalleryState {
     return this.state;

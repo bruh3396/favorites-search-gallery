@@ -1,10 +1,11 @@
 import { Rating, SortKey } from "@/types/search";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { resetEnvironment, setEnvironment } from "@/app/context/environment";
+import { describe, expect, test, vi } from "vitest";
+import { Environment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
+import { Preferences } from "@/app/context/preferences";
 
-interface ConfigOverrides {
+interface ContextOverrides {
   onOwnFavoritesPage?: boolean;
   excludeBlacklist?: boolean;
   allowedRatings?: Rating;
@@ -12,238 +13,216 @@ interface ConfigOverrides {
   sortAscending?: boolean;
 }
 
-const preferences = {
-  excludeBlacklist: false as boolean,
-  allowedRatings: 7 as Rating,
-  sortKey: "default" as SortKey,
-  sortAscending: false as boolean
-};
-
-vi.mock("@/app/context/preferences", () => ({
-  Preferences: {
+function fakePreferences(overrides: ContextOverrides): Preferences {
+  return {
     favorites: {
-      excludeBlacklist: {
-        get value() {
-          return preferences.excludeBlacklist;
-        }
-      },
-      allowedRatings: {
-        get value() {
-          return preferences.allowedRatings;
-        }
-      },
-      sortKey: {
-        get value() {
-          return preferences.sortKey;
-        }
-      },
-      sortAscending: {
-        get value() {
-          return preferences.sortAscending;
-        }
-      }
+      excludeBlacklist: { value: overrides.excludeBlacklist ?? false },
+      allowedRatings: { value: overrides.allowedRatings ?? 7 },
+      sortKey: { value: overrides.sortKey ?? "default" },
+      sortAscending: { value: overrides.sortAscending ?? false }
     }
-  }
-}));
+  } as unknown as Preferences;
+}
 
-vi.mock("@/config/favorites_config", () => ({
-  FavoritesConfig: { useBitSearchEngine: false }
-}));
+function fakeEnvironment(overrides: ContextOverrides): Environment {
+  return {
+    userIsOnTheirOwnFavoritesPage: overrides.onOwnFavoritesPage ?? true,
+    negatedBlacklistedTags: "-blacklisted"
+  } as unknown as Environment;
+}
 
-const favorite = (id: string, rating: string, ...tags: string[]): Favorite => {
+function favorite(id: string, rating: string, ...tags: string[]): Favorite {
   const tagSet = new Set(tags);
-  return { id, tags: tagSet, rating, getMetric: () => Number(id) } as unknown as Favorite;
-};
+  return { id, tags: tagSet, consumeTags: () => tagSet, rating, getMetric: () => Number(id) } as unknown as Favorite;
+}
 
-const ids = (results: Favorite[]): string[] => results.map(r => r.id);
-
-const applyOverrides = (overrides: ConfigOverrides = {}): void => {
-  setEnvironment({
-    USER_IS_ON_THEIR_OWN_FAVORITES_PAGE: overrides.onOwnFavoritesPage ?? true,
-    NEGATED_BLACKLISTED_TAGS: "-blacklisted"
-  });
-  preferences.excludeBlacklist = overrides.excludeBlacklist ?? false;
-  preferences.allowedRatings = overrides.allowedRatings ?? 7;
-  preferences.sortKey = overrides.sortKey ?? "default";
-  preferences.sortAscending = overrides.sortAscending ?? false;
-};
+function idsOf(results: Favorite[]): string[] {
+  return results.map(r => r.id);
+}
 
 describe("FavoritesSearcher", () => {
   let searcher: FavoritesSearcher;
 
-  const withIndexed = (favorites: Favorite[], overrides?: ConfigOverrides): Favorite[] => {
-    applyOverrides(overrides);
-    searcher = new FavoritesSearcher();
+  function configureSearcher(favorites: Favorite[], overrides: ContextOverrides = {}): void {
+    searcher = new FavoritesSearcher(fakePreferences(overrides), fakeEnvironment(overrides));
     searcher.index(favorites);
-    return favorites;
-  };
-
-  beforeEach(() => {
-    applyOverrides();
-    searcher = new FavoritesSearcher();
-  });
-
-  afterEach(() => resetEnvironment());
+  }
 
   describe("search", () => {
     test("returns the favorites matching the query", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog"), favorite("3", "s", "cat")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog"), favorite("3", "s", "cat")];
 
-      expect(ids(searcher.search(favorites, "cat")).sort()).toEqual(["1", "3"]);
+      configureSearcher(favorites);
+      expect(idsOf(searcher.search(favorites, "cat")).sort()).toEqual(["1", "3"]);
     });
 
     test("records the query as the current search query", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat")]);
+      const favorites = [favorite("1", "s", "cat")];
 
+      configureSearcher(favorites);
       searcher.search(favorites, "cat");
       expect(searcher.getCurrentSearchQuery()).toBe("cat");
     });
 
     test("stores the matches as the current search results", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog")];
 
+      configureSearcher(favorites);
       searcher.search(favorites, "cat");
-      expect(ids(searcher.getCurrentSearchResults())).toEqual(["1"]);
+      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["1"]);
     });
 
     test("notifies the onSearchResultsChanged listener", () => {
       const onChanged = vi.fn();
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog")];
 
+      configureSearcher(favorites);
       searcher.setup(onChanged);
       searcher.search(favorites, "cat");
-      expect(ids(onChanged.mock.lastCall?.[0])).toEqual(["1"]);
+      expect(idsOf(onChanged.mock.lastCall?.[0])).toEqual(["1"]);
     });
 
     test("appends the blacklist tags when the blacklist is active", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")], { excludeBlacklist: true });
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")];
 
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
+      configureSearcher(favorites, { excludeBlacklist: true });
+      expect(idsOf(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
 
     test("does not apply the blacklist when it is inactive", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "cat", "blacklisted")];
 
-      expect(ids(searcher.search(favorites, "cat")).sort()).toEqual(["1", "2"]);
+      configureSearcher(favorites);
+      expect(idsOf(searcher.search(favorites, "cat")).sort()).toEqual(["1", "2"]);
     });
   });
 
   describe("filtering by rating", () => {
     test("keeps only favorites whose rating is allowed", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "e", "cat")], { allowedRatings: 1 });
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "e", "cat")];
 
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
+      configureSearcher(favorites, { allowedRatings: 1 });
+      expect(idsOf(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
   });
 
   describe("sorting", () => {
-    test("orders results by the metric, descending by default", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")], { sortKey: "score" });
+    const orderingCases: { sortKey: SortKey; sortAscending: boolean; expected: string[] }[] = [
+      { sortKey: "default", sortAscending: false, expected: ["1", "3", "2"] },
+      { sortKey: "default", sortAscending: true, expected: ["2", "3", "1"] },
+      { sortKey: "score", sortAscending: false, expected: ["3", "2", "1"] },
+      { sortKey: "score", sortAscending: true, expected: ["1", "2", "3"] }
+    ];
 
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["3", "2", "1"]);
+    test.each(orderingCases)("sortKey=$sortKey ascending=$sortAscending orders results as $expected", ({ sortKey, sortAscending, expected }) => {
+      const favorites = [favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")];
+
+      configureSearcher(favorites, { sortKey, sortAscending });
+      expect(idsOf(searcher.search(favorites, "cat"))).toEqual(expected);
     });
 
-    test("orders ascending when configured", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")], { sortKey: "score", sortAscending: true });
+    test("does not mutate the input array when reversing an ascending default sort", () => {
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "cat"), favorite("3", "s", "cat")];
 
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1", "2", "3"]);
-    });
-
-    test("leaves results in match order under the default sort key", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("3", "s", "cat"), favorite("2", "s", "cat")]);
-
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1", "3", "2"]);
+      configureSearcher(favorites, { sortKey: "default", sortAscending: true });
+      searcher.search(favorites, "");
+      expect(idsOf(favorites)).toEqual(["1", "2", "3"]);
     });
   });
 
   describe("reSearch", () => {
     test("re-runs the current query without changing it", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog")];
 
+      configureSearcher(favorites);
       searcher.search(favorites, "cat");
-      expect(ids(searcher.reSearch(favorites))).toEqual(["1"]);
+      expect(idsOf(searcher.reSearch(favorites))).toEqual(["1"]);
       expect(searcher.getCurrentSearchQuery()).toBe("cat");
     });
   });
 
   describe("add", () => {
     test("makes newly indexed favorites matchable", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat")]);
+      const favorites = [favorite("1", "s", "cat")];
       const added = favorite("2", "s", "cat");
 
+      configureSearcher(favorites);
       searcher.add([added]);
-      expect(ids(searcher.search([...favorites, added], "cat")).sort()).toEqual(["1", "2"]);
+      expect(idsOf(searcher.search([...favorites, added], "cat")).sort()).toEqual(["1", "2"]);
     });
   });
 
   describe("update", () => {
     test("reflects corrected tags for a favorite", () => {
       const target = favorite("1", "s", "ct");
-      const favorites = withIndexed([target]);
+      const favorites = [target];
       const oldTerms = new Set(target.tags);
 
+      configureSearcher(favorites);
       target.tags.clear();
       target.tags.add("cat");
       searcher.update([{ doc: target, oldTerms, newTerms: target.tags }]);
-
-      expect(ids(searcher.search(favorites, "ct"))).toEqual([]);
-      expect(ids(searcher.search(favorites, "cat"))).toEqual(["1"]);
+      expect(idsOf(searcher.search(favorites, "ct"))).toEqual([]);
+      expect(idsOf(searcher.search(favorites, "cat"))).toEqual(["1"]);
     });
   });
 
   describe("invertResults", () => {
     test("returns favorites absent from the current results", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog"), favorite("3", "s", "fox")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog"), favorite("3", "s", "fox")];
 
+      configureSearcher(favorites);
       searcher.search(favorites, "cat");
-      expect(ids(searcher.invertResults()).sort()).toEqual(["2", "3"]);
+      expect(idsOf(searcher.invertResults()).sort()).toEqual(["2", "3"]);
     });
 
     test("replaces the current results with the inverted set", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "dog")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog")];
 
+      configureSearcher(favorites);
       searcher.search(favorites, "cat");
       searcher.invertResults();
-      expect(ids(searcher.getCurrentSearchResults())).toEqual(["2"]);
+      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["2"]);
     });
 
     test("enforces the blacklist when off the user's own favorites page", () => {
-      const favorites = withIndexed(
-        [favorite("1", "s", "cat"), favorite("2", "s", "dog", "blacklisted")],
-        { onOwnFavoritesPage: false }
-      );
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "dog", "blacklisted")];
 
+      configureSearcher(favorites, { onOwnFavoritesPage: false });
       searcher.search(favorites, "cat");
-      expect(ids(searcher.invertResults())).toEqual([]);
+      expect(idsOf(searcher.invertResults())).toEqual([]);
     });
   });
 
   describe("appendResults", () => {
     test("appends matched favorites to the current results", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "cat")];
 
+      configureSearcher(favorites);
       searcher.search([favorites[0]], "cat");
       searcher.appendResults([favorites[1]]);
-      expect(ids(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
+      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
     });
   });
 
   describe("prependResults", () => {
     test("prepends matched favorites to the current results", () => {
-      const favorites = withIndexed([favorite("2", "s", "cat"), favorite("1", "s", "cat")]);
+      const favorites = [favorite("2", "s", "cat"), favorite("1", "s", "cat")];
 
+      configureSearcher(favorites);
       searcher.search([favorites[0]], "cat");
       searcher.prependResults([favorites[1]]);
-      expect(ids(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
+      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
     });
   });
 
   describe("shuffleSearchResults", () => {
     test("keeps the same set of results", () => {
-      const favorites = withIndexed([favorite("1", "s", "cat"), favorite("2", "s", "cat"), favorite("3", "s", "cat")]);
+      const favorites = [favorite("1", "s", "cat"), favorite("2", "s", "cat"), favorite("3", "s", "cat")];
 
+      configureSearcher(favorites);
       searcher.search(favorites, "cat");
-      expect(ids(searcher.shuffleSearchResults()).sort()).toEqual(["1", "2", "3"]);
+      expect(idsOf(searcher.shuffleSearchResults()).sort()).toEqual(["1", "2", "3"]);
     });
   });
 });

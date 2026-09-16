@@ -1,48 +1,48 @@
-import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
-import * as PostOverlayView from "@/features/post_overlay/view/view";
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
-import { ON_FAVORITES_PAGE } from "@/app/context/environment";
-import { POST_OVERLAY_DISABLED } from "@/app/context/flags";
-import { Preferences } from "@/app/context/preferences";
+import { AppContext } from "@/app/context/context";
+import { PostOverlayComponents } from "@/features/post_overlay/types/types";
+import { PostOverlayFlows } from "@/features/post_overlay/flows/flows";
+import { PostOverlayModel } from "@/features/post_overlay/model/model";
+import { PostOverlayView } from "@/features/post_overlay/view/view";
 
-export async function startPostOverlay(): Promise<void> {
-  if (POST_OVERLAY_DISABLED) {
+export async function startPostOverlay(context: AppContext): Promise<void> {
+  if (context.flags.postOverlayDisabled) {
     return;
   }
-  setup();
-  await waitUntilFavoritesAreReady();
+  const model = new PostOverlayModel();
+  const view = new PostOverlayView(context.shell);
+  const flows = new PostOverlayFlows(context, model, view);
+  const components: PostOverlayComponents = { context, model, view, flows };
+
+  setup(components);
+  await waitUntilFavoritesAreReady(context);
   start();
 }
 
-function setup(): void {
-  setupView();
-  subscribeToEvents();
+function setup(components: PostOverlayComponents): void {
+  subscribeToEvents(components);
 }
 
 function start(): void {
   TagCategoryStore.preload();
 }
 
-function setupView(): void {
-  PostOverlayView.setup();
+function subscribeToEvents({ context, flows }: PostOverlayComponents): void {
+  const { domEvents, events, preferences } = context;
+
+  domEvents.document.mouseover.on((event) => flows.hover.handleMouseOver(event));
+  domEvents.document.mousedown.on((event) => flows.tagClick.handleMouseDown(event));
+  domEvents.document.contextmenu.on((event) => flows.tagClick.handleContextMenu(event));
+  domEvents.document.keydown.on((event) => flows.key.handleKeyDown(event));
+  domEvents.document.keyup.on((event) => flows.key.handleKeyUp(event));
+  preferences.postOverlay.enabled.on((enabled) => flows.toggle.setVisible(enabled));
+  domEvents.window.scroll.on(() => flows.hover.hideTemporarily());
+  events.favorites.contentReplaced.on(() => flows.hover.hideTemporarily());
+  preferences.favorites.columnCount.on(() => flows.hover.hideTemporarily());
+  preferences.favorites.layout.on(() => flows.hover.hideTemporarily());
+  preferences.favorites.rowHeight.on(() => flows.hover.hideTemporarily());
 }
 
-function subscribeToEvents(): void {
-  DomEvents.document.mouseover.on(PostOverlayFlows.Hover.handleMouseOver);
-  DomEvents.document.mousedown.on(PostOverlayFlows.TagClick.handleMouseDown);
-  DomEvents.document.contextmenu.on(PostOverlayFlows.TagClick.handleContextMenu);
-  DomEvents.document.keydown.on(PostOverlayFlows.Key.handleKeyDown);
-  DomEvents.document.keyup.on(PostOverlayFlows.Key.handleKeyUp);
-  Preferences.postOverlay.enabled.on(PostOverlayFlows.Toggle.setVisible);
-  DomEvents.window.scroll.on(PostOverlayFlows.Hover.hideTemporarily);
-  Events.favorites.contentReplaced.on(PostOverlayFlows.Hover.hideTemporarily);
-  Preferences.favorites.columnCount.on(PostOverlayFlows.Hover.hideTemporarily);
-  Preferences.favorites.layout.on(PostOverlayFlows.Hover.hideTemporarily);
-  Preferences.favorites.rowHeight.on(PostOverlayFlows.Hover.hideTemporarily);
-}
-
-function waitUntilFavoritesAreReady(): Promise<unknown> {
-  return ON_FAVORITES_PAGE ? Events.favorites.storedFavoritesLoaded.timeout(2_000) : Promise.resolve();
+function waitUntilFavoritesAreReady(context: AppContext): Promise<unknown> {
+  return context.environment.onFavoritesPage ? context.events.favorites.storedFavoritesLoaded.timeout(2_000) : Promise.resolve();
 }

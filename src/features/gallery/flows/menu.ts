@@ -1,28 +1,28 @@
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryModel from "@/features/gallery/model/model";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { GalleryMenuAction } from "@/types/app";
-import { Preferences } from "@/app/context/preferences";
 
-const menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
-  exit: () => GalleryFlows.OpenClose.close(),
-  openPost: GalleryModel.openPost,
-  openOriginal: GalleryModel.openMedia,
-  download: GalleryModel.download,
-  addFavorite: () => GalleryFlows.Favoriter.addFavoriteInGallery(),
-  removeFavorite: () => GalleryFlows.Favoriter.removeFavoriteInGallery(),
-  toggleBackground: () => GalleryFlows.Background.toggleBackgroundOpacity(),
-  pin: togglePin,
-  toggleDockPosition
-};
+export class GalleryMenuFlow extends GalleryFlow {
+  private readonly menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
+    exit: () => this.flows.openClose.close(),
+    openPost: () => this.model.openPost(),
+    openOriginal: () => this.model.openMedia(),
+    download: () => this.model.download(),
+    addFavorite: () => this.flows.favoriter.addFavoriteInGallery(),
+    removeFavorite: () => this.flows.favoriter.removeFavoriteInGallery(),
+    toggleBackground: () => this.flows.background.toggleBackgroundOpacity(),
+    pin: () => this.togglePin(),
+    toggleDockPosition: () => this.toggleDockPosition()
+  };
 
-export function handleAction(action: GalleryMenuAction): void {
-  menuHandlers[action]?.();
-}
+  public handleAction(action: GalleryMenuAction): void {
+    this.menuHandlers[action]?.();
+  }
 
-function togglePin(): void {
-  Preferences.gallery.menuPinned.set(!Preferences.gallery.menuPinned.value);
-}
+  private togglePin(): void {
+    this.context.preferences.gallery.menuPinned.set(!this.context.preferences.gallery.menuPinned.value);
+  }
 
-function toggleDockPosition(): void {
-  Preferences.gallery.menuDockedLeft.set(!Preferences.gallery.menuDockedLeft.value);
+  private toggleDockPosition(): void {
+    this.context.preferences.gallery.menuDockedLeft.set(!this.context.preferences.gallery.menuDockedLeft.value);
+  }
 }

@@ -38,7 +38,7 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
       return;
     }
     this.canvases.set(request.id, canvas);
-    setCanvasDimensions(canvas, request.bitmap.width, request.bitmap.height, GalleryUpscaleConfig.upscaledCanvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight);
+    setCanvasDimensions(canvas, request.bitmap.width, request.bitmap.height, this.upscaledCanvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight);
     drawScaledBitmap(canvas.getContext("2d"), request.bitmap);
 
     if (request.disposable) {

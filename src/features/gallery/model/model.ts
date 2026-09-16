@@ -1,47 +1,118 @@
 import * as Actions from "@/lib/remote/fetchers/action";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { GalleryState, Identifiable } from "@/types/app";
 import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/ui/thumb/favorite_actions";
+import { clampedThumbsAroundId, wrappingThumbsAroundId } from "@/features/gallery/model/item_window";
 import { Boundary } from "@/types/boundary";
-import { GalleryState } from "@/types/app";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { ItemCursor } from "@/lib/collection/item_cursor";
 import { NavigationKey } from "@/types/input";
+import { Preferences } from "@/app/context/preferences";
 import { downloadFromThumb } from "@/lib/media/download";
 import { isVideoThumb } from "@/lib/ui/thumb/media_item";
 import { navigationDelta } from "@/utils/pure/number";
 
-const cursor = new ItemCursor<HTMLElement>();
-const stateController = new GalleryStateController();
-let getThumbsAround: (id: string) => HTMLElement[] = () => [];
+export class GalleryModel {
+  private readonly cursor: ItemCursor<HTMLElement>;
+  private readonly state: GalleryStateController;
+  private getThumbsAround: (id: string) => HTMLElement[];
 
-export { wrappingThumbsAroundId, clampedThumbsAroundId } from "@/features/gallery/model/item_window";
+  constructor(preferences: Preferences) {
+    this.cursor = new ItemCursor<HTMLElement>();
+    this.state = new GalleryStateController(preferences.gallery.previewEnabled.value ? "preview" : "idle");
+    this.getThumbsAround = (): HTMLElement[] => [];
+  }
 
-export function setup(thumbsAround: (id: string) => HTMLElement[]): void {
-  getThumbsAround = thumbsAround;
-}
+  public setupWrappingWindow<T extends Identifiable>(getItems: () => T[], toThumb: (item: T) => HTMLElement): void {
+    this.getThumbsAround = (id): HTMLElement[] => wrappingThumbsAroundId(getItems(), id, toThumb);
+  }
 
-export const getItemsAround = (id: string): HTMLElement[] => getThumbsAround(id);
-export const jumpToLast = (): void => cursor.jumpToLast();
-export const jumpToFirst = (): void => cursor.jumpToFirst();
-export const move = (direction: NavigationKey): Boundary => cursor.move(navigationDelta(direction));
-export const currentThumb = (): HTMLElement => cursor.currentItem();
-export const pointTo = (thumb: HTMLElement): void => cursor.pointTo(thumb);
-export const indexThumbs = (source: HTMLElement[]): void => cursor.indexItems(source);
-export const isViewingVideo = (): boolean => stateController.isInGallery && isVideoThumb(cursor.currentItem());
-export const openPost = (): void => Actions.openPost(cursor.currentItem().id);
-export const openMedia = (): Promise<void> => Actions.openMedia(cursor.currentItem());
-export const download = (): Promise<void> => downloadFromThumb(cursor.currentItem());
-export const addFavorite = (): Promise<AddFavoriteStatus> => addFavoriteFromThumb(cursor.currentItem());
-export const removeFavorite = (): Promise<RemoveFavoriteStatus> => removeFavoriteFromThumb(cursor.currentItem());
-export const getCurrentState = (): GalleryState => stateController.currentState;
-export const currentThumbIfOpen = (): HTMLElement | null => (stateController.isInGallery ? cursor.currentItem() : null);
-export const isIdle = (): boolean => stateController.isIdle;
-export const isInGallery = (): boolean => stateController.isInGallery;
-export const isShowingPreviews = (): boolean => stateController.isShowingPreviews;
-export const close = (): void => stateController.close();
-export const preview = (value: boolean): void => stateController.preview(value);
+  public setupClampedWindow<T extends Identifiable>(getItems: () => T[], toThumb: (item: T) => HTMLElement): void {
+    this.getThumbsAround = (id): HTMLElement[] => clampedThumbsAroundId(getItems(), id, toThumb);
+  }
 
-export function open(thumb: HTMLElement): void {
-  cursor.pointTo(thumb);
-  stateController.open();
+  public getItemsAround(id: string): HTMLElement[] {
+    return this.getThumbsAround(id);
+  }
+
+  public jumpToLast(): void {
+    this.cursor.jumpToLast();
+  }
+
+  public jumpToFirst(): void {
+    this.cursor.jumpToFirst();
+  }
+
+  public move(direction: NavigationKey): Boundary {
+    return this.cursor.move(navigationDelta(direction));
+  }
+
+  public currentThumb(): HTMLElement {
+    return this.cursor.currentItem();
+  }
+
+  public pointTo(thumb: HTMLElement): void {
+    this.cursor.pointTo(thumb);
+  }
+
+  public indexThumbs(source: HTMLElement[]): void {
+    this.cursor.indexItems(source);
+  }
+
+  public isViewingVideo(): boolean {
+    return this.state.isInGallery && isVideoThumb(this.cursor.currentItem());
+  }
+
+  public openPost(): void {
+    Actions.openPost(this.cursor.currentItem().id);
+  }
+
+  public openMedia(): Promise<void> {
+    return Actions.openMedia(this.cursor.currentItem());
+  }
+
+  public download(): Promise<void> {
+    return downloadFromThumb(this.cursor.currentItem());
+  }
+
+  public addFavorite(): Promise<AddFavoriteStatus> {
+    return addFavoriteFromThumb(this.cursor.currentItem());
+  }
+
+  public removeFavorite(): Promise<RemoveFavoriteStatus> {
+    return removeFavoriteFromThumb(this.cursor.currentItem());
+  }
+
+  public getCurrentState(): GalleryState {
+    return this.state.currentState;
+  }
+
+  public currentThumbIfOpen(): HTMLElement | null {
+    return this.state.isInGallery ? this.cursor.currentItem() : null;
+  }
+
+  public isIdle(): boolean {
+    return this.state.isIdle;
+  }
+
+  public isInGallery(): boolean {
+    return this.state.isInGallery;
+  }
+
+  public isShowingPreviews(): boolean {
+    return this.state.isShowingPreviews;
+  }
+
+  public close(): void {
+    this.state.close();
+  }
+
+  public preview(value: boolean): void {
+    this.state.preview(value);
+  }
+
+  public open(thumb: HTMLElement): void {
+    this.cursor.pointTo(thumb);
+    this.state.open();
+  }
 }

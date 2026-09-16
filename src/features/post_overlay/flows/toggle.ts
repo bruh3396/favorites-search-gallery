@@ -1,9 +1,12 @@
-import * as PostOverlayFlows from "@/features/post_overlay/flows/flows";
+import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
 
-export function setVisible(enabled: boolean): void {
-  if (enabled) {
-    PostOverlayFlows.Hover.showThumbUnderCursor();
-  } else {
-    PostOverlayFlows.Hover.hideOverlay();
+export class PostOverlayToggleFlow extends PostOverlayFlow {
+
+  public setVisible(enabled: boolean): void {
+    if (enabled) {
+      this.flows.hover.showThumbUnderCursor();
+    } else {
+      this.flows.hover.hideOverlay();
+    }
   }
 }

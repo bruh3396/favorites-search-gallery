@@ -1,7 +1,8 @@
 import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
+import { Environment } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
-import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
+import { Resolution } from "@/types/media";
 import { setDataset } from "@/utils/browser/dataset";
 import { toDimensions2D } from "@/utils/pure/geometry";
 
@@ -10,12 +11,19 @@ export class GalleryImageCanvas {
   private readonly mainContext = this.mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
   private container: HTMLElement | null = null;
 
-  constructor() {
-    const dimensions = toDimensions2D(GalleryConfig.mainCanvasResolution);
+  constructor(private readonly environment: Environment) {
+    const dimensions = toDimensions2D(this.mainCanvasResolution);
 
     this.mainCanvas.className = "gallery-image";
     this.mainCanvas.width = dimensions.x;
     this.mainCanvas.height = dimensions.y;
+  }
+
+  private get mainCanvasResolution(): Resolution {
+    if (this.environment.onMobileDevice || this.environment.usingFirefox) {
+      return GalleryConfig.mainCanvasResolution.lowPower;
+    }
+    return this.environment.onPostListPage ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;
   }
 
   public mount(newContainer: HTMLElement): void {
@@ -46,7 +54,7 @@ export class GalleryImageCanvas {
   }
 
   public correctOrientation(): void {
-    if (ON_DESKTOP_DEVICE) {
+    if (this.environment.onDesktopDevice) {
       return;
     }
     const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;

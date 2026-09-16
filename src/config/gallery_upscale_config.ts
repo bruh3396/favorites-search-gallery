@@ -1,9 +1,7 @@
-import { USING_FIREFOX } from "@/app/context/environment";
-
 export const GalleryUpscaleConfig = {
-  upscaledCanvasWidth: USING_FIREFOX ? 500 : 750,
+  upscaledCanvasWidth: { firefox: 500, other: 750 },
   maxUpscaledCanvasHeight: 16_000,
   maxUpscaledThumbs: 100,
   upscaleUsingSamples: false,
-  upscaleDelay: USING_FIREFOX ? 100 : 25
+  upscaleDelay: { firefox: 100, other: 25 }
 };

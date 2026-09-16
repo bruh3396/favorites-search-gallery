@@ -9,6 +9,7 @@ export interface Favorite extends MediaItem, Searchable {
   tags: Set<string>;
   enrich: (post: Post) => void;
   setDuration: (duration: number) => void;
+  consumeTags: () => Set<string>;
   getMetric: (metric: Metric) => number;
 }
 

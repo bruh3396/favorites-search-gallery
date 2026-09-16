@@ -1,9 +1,8 @@
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
-import { ON_DESKTOP_DEVICE } from "@/app/context/environment";
-import { PostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
-import { Preferences } from "@/app/context/preferences";
+import { AppContext } from "@/app/context/context";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
+import { buildPostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
@@ -12,52 +11,57 @@ interface SettingsSection {
   controls: SettingsControl[];
 }
 
-const DesktopSettingsSections: SettingsSection[] = [
-  {
-    title: "Favorites Search Gallery",
-    controls: [
-      PostListSettingsCatalog.upscale,
-      PostListSettingsCatalog.infiniteScroll,
-      PostListSettingsCatalog.autoplay,
-      PostListSettingsCatalog.tooltip,
-      PostListSettingsCatalog.galleryMenu,
-      PostListSettingsCatalog.favoriteIndicator,
-      PostListSettingsCatalog.postActionBar,
-      PostListSettingsCatalog.postActionBarButtons,
-      PostListSettingsCatalog.layout,
-      PostListSettingsCatalog.columnCount,
-      PostListSettingsCatalog.rowHeight,
-      PostListSettingsCatalog.performanceProfile
-    ]
-  }
-];
-const MobileSettingsSections: SettingsSection[] = [
-  {
-    title: "Favorites Search Gallery",
-    controls: [
-      PostListSettingsCatalog.favoriteIndicator,
-      PostListSettingsCatalog.mobileGallery,
-      PostListSettingsCatalog.infiniteScroll,
-      PostListSettingsCatalog.layout,
-      PostListSettingsCatalog.columnCount,
-      PostListSettingsCatalog.postActionBarToggle,
-      PostListSettingsCatalog.postActionBarButtons,
-      PostListSettingsCatalog.autoplay
-    ]
-  }
-];
-const sections: SettingsSection[] = ON_DESKTOP_DEVICE ? DesktopSettingsSections : MobileSettingsSections;
+function buildSections(context: AppContext): SettingsSection[] {
+  const catalog = buildPostListSettingsCatalog(context);
 
-export function build(panel: HTMLElement): void {
+  if (context.environment.onDesktopDevice) {
+    return [
+      {
+        title: "Favorites Search Gallery",
+        controls: [
+          catalog.upscale,
+          catalog.infiniteScroll,
+          catalog.autoplay,
+          catalog.tooltip,
+          catalog.galleryMenu,
+          catalog.favoriteIndicator,
+          catalog.postActionBar,
+          catalog.postActionBarButtons,
+          catalog.layout,
+          catalog.columnCount,
+          catalog.rowHeight,
+          catalog.performanceProfile
+        ]
+      }
+    ];
+  }
+  return [
+    {
+      title: "Favorites Search Gallery",
+      controls: [
+        catalog.favoriteIndicator,
+        catalog.mobileGallery,
+        catalog.infiniteScroll,
+        catalog.layout,
+        catalog.columnCount,
+        catalog.postActionBarToggle,
+        catalog.postActionBarButtons,
+        catalog.autoplay
+      ]
+    }
+  ];
+}
+
+export function build(context: AppContext, panel: HTMLElement): void {
   panel.classList.add(SettingsClass.view);
 
-  for (const section of sections) {
-    panel.appendChild(buildSection(section));
+  for (const section of buildSections(context)) {
+    panel.appendChild(buildSection(context, section));
   }
 }
 
-function buildSection(settingsSection: SettingsSection): HTMLElement {
-  const isCollapsed = Preferences.postList.settingsCollapsed.value;
+function buildSection(context: AppContext, settingsSection: SettingsSection): HTMLElement {
+  const isCollapsed = context.preferences.postList.settingsCollapsed.value;
   const section = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
   const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
   const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
@@ -67,14 +71,14 @@ function buildSection(settingsSection: SettingsSection): HTMLElement {
   header.type = "button";
 
   header.addEventListener("click", () => {
-    toggleSection(section);
+    toggleSection(context, section);
   });
 
   section.append(header, wrap);
   return section;
 }
 
-function toggleSection(element: HTMLElement): void {
+function toggleSection(context: AppContext, element: HTMLElement): void {
   const isCollapsed = element.dataset.collapsed === undefined;
 
   if (isCollapsed) {
@@ -82,5 +86,5 @@ function toggleSection(element: HTMLElement): void {
   } else {
     removeDataset(element, "collapsed");
   }
-  Preferences.postList.settingsCollapsed.set(isCollapsed);
+  context.preferences.postList.settingsCollapsed.set(isCollapsed);
 }

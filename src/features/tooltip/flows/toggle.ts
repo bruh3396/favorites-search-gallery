@@ -1,7 +1,10 @@
-import * as TooltipView from "@/features/tooltip/view/view";
+import { TooltipFlow } from "@/features/tooltip/flows/flow";
 
-export function hideIfDisabled(value: boolean): void {
-  if (!value) {
-    TooltipView.hide();
+export class TooltipToggleFlow extends TooltipFlow {
+
+  public hideIfDisabled(value: boolean): void {
+    if (!value) {
+      this.view.hide();
+    }
   }
 }

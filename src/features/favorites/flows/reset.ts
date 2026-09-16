@@ -1,14 +1,20 @@
-import * as FavoritesModel from "@/features/favorites/model/model";
-import { ON_MOBILE_DEVICE } from "@/app/context/environment";
+import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { Storage } from "@/lib/storage/local_storage";
 
 const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag edits and search snippets will be preserved.";
-const RESET_PROMPT = `Are you sure you want to reset?\nThis will clear all cached favorites and preferences.${ON_MOBILE_DEVICE ? "" : DESKTOP_RESET_PROMPT_SUFFIX}`;
-const persistentLocalStorageKeys: ReadonlySet<string> = new Set(["customTags", "savedSearches", "searchSnippets"]);
+const PERSISTENT_LOCAL_STORAGE_KEYS: ReadonlySet<string> = new Set(["customTags", "savedSearches", "searchSnippets"]);
 
-export function reset(): void {
-  if (confirm(RESET_PROMPT)) {
-    Storage.clear(persistentLocalStorageKeys);
-    FavoritesModel.destroyStore();
+export class FavoritesResetFlow extends FavoritesFlow {
+
+  public reset(): void {
+    if (confirm(this.resetPrompt())) {
+      Storage.clear(PERSISTENT_LOCAL_STORAGE_KEYS);
+      this.model.destroyStore();
+    }
+  }
+
+  private resetPrompt(): string {
+    const suffix = this.context.environment.onMobileDevice ? "" : DESKTOP_RESET_PROMPT_SUFFIX;
+    return `Are you sure you want to reset?\nThis will clear all cached favorites and preferences.${suffix}`;
   }
 }

@@ -1,13 +1,15 @@
-let currentThumbId: string | null = null;
+export class OverlayTarget {
+  private currentThumbId: string | null = null;
 
-export function isCurrent(thumbId: string): boolean {
-  return thumbId === currentThumbId;
-}
+  public isCurrent(thumbId: string): boolean {
+    return thumbId === this.currentThumbId;
+  }
 
-export function setCurrent(thumbId: string): void {
-  currentThumbId = thumbId;
-}
+  public setCurrent(thumbId: string): void {
+    this.currentThumbId = thumbId;
+  }
 
-export function clear(): void {
-  currentThumbId = null;
+  public clear(): void {
+    this.currentThumbId = null;
+  }
 }

@@ -1,15 +1,25 @@
-const ids: Set<string> = new Set();
-let loadPromise: Promise<void> | null = null;
+export class PostListNavigatorFavoriteIds {
+  private readonly ids: Set<string> = new Set();
+  private loadPromise: Promise<void> | null = null;
 
-export function ensureLoaded(fetchIds: () => Promise<string[]>): Promise<void> {
-  loadPromise ??= fetchIds().then(addAll);
-  return loadPromise;
-}
+  public ensureLoaded(fetchIds: () => Promise<string[]>): Promise<void> {
+    this.loadPromise ??= fetchIds().then(loaded => this.addAll(loaded));
+    return this.loadPromise;
+  }
 
-export const has = (id: string): boolean => ids.has(id);
-export const add = (id: string): Set<string> => ids.add(id);
-export const remove = (id: string): boolean => ids.delete(id);
+  public has(id: string): boolean {
+    return this.ids.has(id);
+  }
 
-function addAll(loaded: string[]): void {
-  loaded.forEach(id => ids.add(String(id)));
+  public add(id: string): void {
+    this.ids.add(id);
+  }
+
+  public remove(id: string): void {
+    this.ids.delete(id);
+  }
+
+  private addAll(loaded: string[]): void {
+    loaded.forEach(id => this.ids.add(String(id)));
+  }
 }

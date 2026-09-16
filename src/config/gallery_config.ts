@@ -1,21 +1,22 @@
-import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE, USING_FIREFOX } from "@/app/context/environment";
 import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
 import { Resolution } from "@/types/media";
 
 export const GalleryConfig = {
-  get mainCanvasResolution(): Resolution {
-    return ON_MOBILE_DEVICE || USING_FIREFOX ? "1920x1080" : ON_POST_LIST_PAGE ? "3840x2160" : "7680x4320";
+  mainCanvasResolution: {
+    lowPower: "1920x1080" as Resolution,
+    postList: "3840x2160" as Resolution,
+    favorites: "7680x4320" as Resolution
   },
 
   imageMegabyteLimit: 700,
-  cachedImageCount: ON_MOBILE_DEVICE ? 4 : POSTS_PER_POST_LIST_PAGE,
+  cachedImageCount: { mobile: 4, desktop: POSTS_PER_POST_LIST_PAGE },
   minimumCachedImageCount: 5,
-  preloadedVideoCount: ON_MOBILE_DEVICE ? 0 : 2,
-  preloadedGifCount: ON_MOBILE_DEVICE ? 0 : 2,
+  preloadedVideoCount: { mobile: 0, desktop: 2 },
+  preloadedGifCount: { mobile: 0, desktop: 2 },
   maxVisibleThumbsBeforeStoppingPreload: 175,
   preloadWaitingTimeout: 1_000,
   preloadingEnabled: true,
-  cacheImagesOnIdle: !USING_FIREFOX,
+  // cacheImagesOnIdle: !firefox
   cacheFirstImages: true,
   gifPreloadingEnabled: false,
   preloadOutsideGalleryOnPostList: true,
@@ -26,12 +27,12 @@ export const GalleryConfig = {
   galleryNavigationDelay: 50,
   idleInteractionDuration: 300,
   recentCloseDuration: 500,
-  menuVisibilityTime: ON_MOBILE_DEVICE ? 2_000 : 1_000,
+  menuVisibilityTime: { mobile: 2_000, desktop: 1_000 },
 
-  maxImagesToPreloadAroundInGallery: ON_MOBILE_DEVICE ? 3 : 50,
+  maxImagesToPreloadAroundInGallery: { mobile: 3, desktop: 50 },
   bottomOverscanPercent: 175,
   bitmapCloseDelay: 50,
 
-  useOffscreenThumbUpscaler: USING_FIREFOX,
+  // useOffscreenThumbUpscaler: firefox
   galleryMenuMonoColor: true
 };

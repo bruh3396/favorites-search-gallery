@@ -1,8 +1,10 @@
-import * as TooltipModel from "@/features/tooltip/model/model";
-import * as TooltipView from "@/features/tooltip/view/view";
+import { TooltipFlow } from "@/features/tooltip/flows/flow";
 
-export function reposition(): void {
-  if (TooltipModel.tooltipEnabled()) {
-    TooltipView.repositionIfVisible();
+export class TooltipScrollFlow extends TooltipFlow {
+
+  public reposition(): void {
+    if (this.model.tooltipEnabled()) {
+      this.view.repositionIfVisible();
+    }
   }
 }

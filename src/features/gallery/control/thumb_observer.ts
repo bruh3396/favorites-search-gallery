@@ -1,7 +1,6 @@
-import { ON_MOBILE_DEVICE, ON_POST_LIST_PAGE } from "@/app/context/environment";
+import { AppContext } from "@/app/context/context";
 import { GalleryConfig } from "@/config/gallery_config";
 import { debounceTrailing } from "@/lib/async/rate_limiting";
-import { getAllContentThumbs } from "@/app/layout/content_thumbs";
 import { rectDistance } from "@/utils/pure/geometry";
 
 class VisibleThumbObserver {
@@ -20,12 +19,12 @@ class VisibleThumbObserver {
     });
   }
 
-  public refresh(): void {
+  public refresh(thumbs: HTMLElement[]): void {
     this.setCenterThumb(null);
     this.observer.disconnect();
     this.visibleThumbs.clear();
     this.suppressNextBroadcast = true;
-    getAllContentThumbs().forEach(thumb => this.observer.observe(thumb));
+    thumbs.forEach(thumb => this.observer.observe(thumb));
   }
 
   public setCenterThumb(thumb: HTMLElement | null): void {
@@ -74,27 +73,29 @@ class VisibleThumbObserver {
   }
 }
 
-let instance: VisibleThumbObserver | null = null;
+export class GalleryThumbObserver {
+  private observer: VisibleThumbObserver | null = null;
 
-export function setup(onVisibleThumbsChanged: () => void): void {
-  if (ON_MOBILE_DEVICE || (ON_POST_LIST_PAGE && !GalleryConfig.upscaleEverythingOnPostList)) {
-    return;
+  constructor(private readonly context: AppContext) {}
+
+  public setup(onVisibleThumbsChanged: () => void): void {
+    const { onMobileDevice, onPostListPage } = this.context.environment;
+
+    if (onMobileDevice || (onPostListPage && !GalleryConfig.upscaleEverythingOnPostList)) {
+      return;
+    }
+    this.observer = new VisibleThumbObserver(onVisibleThumbsChanged);
   }
-  instance = new VisibleThumbObserver(onVisibleThumbsChanged);
-}
 
-export function refresh(): void {
-  instance?.refresh();
-}
+  public refresh(): void {
+    this.observer?.refresh(this.context.shell.getContentThumbs());
+  }
 
-export function setCenterThumb(thumb: HTMLElement | null): void {
-  instance?.setCenterThumb(thumb);
-}
+  public setCenterThumb(thumb: HTMLElement | null): void {
+    this.observer?.setCenterThumb(thumb);
+  }
 
-export function getVisibleThumbs(): HTMLElement[] {
-  return instance?.getVisible() ?? [];
-}
-
-export function getVisibleThumbIds(): Set<string> {
-  return new Set(getVisibleThumbs().map(thumb => thumb.id));
+  public getVisibleThumbs(): HTMLElement[] {
+    return this.observer?.getVisible() ?? [];
+  }
 }

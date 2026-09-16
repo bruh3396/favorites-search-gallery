@@ -1,30 +1,34 @@
-import * as PostListNavigatorModel from "@/features/post_list_navigator/model/model";
-import * as PostListNavigatorView from "@/features/post_list_navigator/view/view";
-import { Events } from "@/app/channels/events";
+import { PostListNavigatorFlow, PostListNavigatorFlowDependencies } from "@/features/post_list_navigator/flows/flow";
 import { PostListNavigatorPageBottomObserver } from "@/features/post_list_navigator/flows/page_bottom_observer";
-import { Preferences } from "@/app/context/preferences";
 
-const pageBottomObserver: PostListNavigatorPageBottomObserver = new PostListNavigatorPageBottomObserver(showMoreResults);
+export class PostListNavigatorInfiniteScrollFlow extends PostListNavigatorFlow {
+  private readonly pageBottomObserver: PostListNavigatorPageBottomObserver;
 
-export function disableInfiniteScroll(): void {
-  pageBottomObserver.disconnect();
-}
+  constructor(dependencies: PostListNavigatorFlowDependencies) {
+    super(dependencies);
+    this.pageBottomObserver = new PostListNavigatorPageBottomObserver(() => this.showMoreResults());
+  }
 
-export function enableInfiniteScroll(): void {
-  pageBottomObserver.refresh();
-}
+  public disableInfiniteScroll(): void {
+    this.pageBottomObserver.disconnect();
+  }
 
-export async function showMoreResults(): Promise<boolean> {
-  if (!Preferences.postList.infiniteScroll.value) {
+  public enableInfiniteScroll(): void {
+    this.pageBottomObserver.refresh();
+  }
+
+  public async showMoreResults(): Promise<boolean> {
+    if (!this.context.preferences.postList.infiniteScroll.value) {
+      return false;
+    }
+    const moreResults = await this.model.getMoreResults();
+
+    if (moreResults.length > 0 && this.context.preferences.postList.infiniteScroll.value) {
+      this.view.insertNewSearchResults(moreResults);
+      this.context.events.postList.moreResultsAdded.emit(moreResults);
+      this.pageBottomObserver.refresh();
+      return true;
+    }
     return false;
   }
-  const moreResults = await PostListNavigatorModel.getMoreResults();
-
-  if (moreResults.length > 0 && Preferences.postList.infiniteScroll.value) {
-    PostListNavigatorView.insertNewSearchResults(moreResults);
-    Events.postList.moreResultsAdded.emit(moreResults);
-    pageBottomObserver.refresh();
-    return true;
-  }
-  return false;
 }

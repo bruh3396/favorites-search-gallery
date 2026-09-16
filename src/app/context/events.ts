@@ -1,15 +1,16 @@
 import { Emitter, StickyEmitter } from "@/lib/event/emitter";
-import { FeatureNamespace, GalleryMenuAction } from "@/types/app";
 import { Favorite } from "@/types/favorite";
+import { GalleryMenuAction } from "@/types/app";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
-export const Events = {
-  app: {
+export class Events {
+  public readonly app = {
     favoriteAdded: new Emitter<string>(),
     favoriteRemoved: new Emitter<string>(),
     hotkeyPressed: new Emitter<string>()
-  },
-  favorites: {
+  };
+
+  public readonly favorites = {
     clearButtonClicked: new Emitter<MouseEvent>(),
     invertButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
@@ -25,8 +26,9 @@ export const Events = {
 
     contentAdded: new Emitter<Favorite[]>(),
     contentReplaced: new Emitter<void>()
-  },
-  gallery: {
+  };
+
+  public readonly gallery = {
     closedGallery: new Emitter<void>(),
     displayedThumb: new Emitter<HTMLElement>(),
     galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
@@ -35,16 +37,18 @@ export const Events = {
     openedGallery: new Emitter<HTMLElement>(),
     rightTap: new Emitter<void>(),
     showControlsRequested: new Emitter<void>()
-  },
-  postOverlay: {
+  };
+
+  public readonly postOverlay = {
     addTagToSearch: new Emitter<string>(),
     excludeTagFromSearch: new Emitter<string>(),
     searchForTag: new Emitter<string>()
-  },
-  postList: {
+  };
+
+  public readonly postList = {
     initialPostListCreated: new StickyEmitter<PostList>(),
     moreResultsAdded: new Emitter<HTMLElement[]>(),
     pageChanged: new Emitter<HTMLElement[]>(),
     postListInitialized: new StickyEmitter<void>()
-  }
-} satisfies FeatureNamespace;
+  };
+}

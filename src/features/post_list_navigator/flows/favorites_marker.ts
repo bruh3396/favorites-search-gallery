@@ -1,29 +1,29 @@
-import * as PostListNavigatorModel from "@/features/post_list_navigator/model/model";
-import * as PostListNavigatorView from "@/features/post_list_navigator/view/view";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { Preferences } from "@/app/context/preferences";
+import { PostListNavigatorFlow } from "@/features/post_list_navigator/flows/flow";
 
-export async function toggleIndicator(enabled: boolean): Promise<void> {
-  if (enabled) {
-    PostListNavigatorView.setFavoriteIndicatorLoading(true);
-    await PostListNavigatorModel.ensureFavoriteIdsLoaded(() => FeatureBridge.favorites.favoriteIds.call());
-    PostListNavigatorView.markAsFavorites(PostListNavigatorModel.filterFavorites(PostListNavigatorModel.allThumbs()));
-    PostListNavigatorView.setFavoriteIndicatorLoading(false);
-  } else {
-    PostListNavigatorView.unmarkAsFavorites(PostListNavigatorModel.allThumbs());
+export class PostListNavigatorFavoritesMarkerFlow extends PostListNavigatorFlow {
+
+  public async toggleIndicator(enabled: boolean): Promise<void> {
+    if (enabled) {
+      this.view.setFavoriteIndicatorLoading(true);
+      await this.model.ensureFavoriteIdsLoaded(() => this.context.featureBridge.favorites.favoriteIds.call());
+      this.view.markAsFavorites(this.model.filterFavorites(this.model.allThumbs()));
+      this.view.setFavoriteIndicatorLoading(false);
+    } else {
+      this.view.unmarkAsFavorites(this.model.allThumbs());
+    }
   }
-}
 
-export function markExistingFavoritesIfEnabled(thumbs: HTMLElement[]): void {
-  if (Preferences.postList.favoriteIndicator.value) {
-    PostListNavigatorView.markAsFavorites(PostListNavigatorModel.filterFavorites(thumbs));
+  public markExistingFavoritesIfEnabled(thumbs: HTMLElement[]): void {
+    if (this.context.preferences.postList.favoriteIndicator.value) {
+      this.view.markAsFavorites(this.model.filterFavorites(thumbs));
+    }
   }
-}
 
-export function registerFavorite(id: string): void {
-  PostListNavigatorModel.addFavoriteId(id);
+  public registerFavorite(id: string): void {
+    this.model.addFavoriteId(id);
 
-  if (Preferences.postList.favoriteIndicator.value) {
-    PostListNavigatorView.markAsFavoriteById(id);
+    if (this.context.preferences.postList.favoriteIndicator.value) {
+      this.view.markAsFavoriteById(id);
+    }
   }
 }

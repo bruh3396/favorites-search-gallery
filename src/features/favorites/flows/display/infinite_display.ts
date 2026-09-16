@@ -1,69 +1,73 @@
-import * as ContentTiler from "@/app/layout/content_tiler";
-import * as FavoritesView from "@/features/favorites/view/view";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { FavoritesBottomEdgeObserver } from "@/features/favorites/flows/display/edge_observer";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDisplay } from "@/features/favorites/types/types";
-import { ScrollSentinelBottom } from "@/app/layout/shell";
-import { doNothing } from "@/utils/pure/function";
-import { waitForAllThumbsToLoad } from "@/app/layout/content_thumbs";
+import { FavoritesView } from "@/features/favorites/view/view";
+import { Shell } from "@/app/context/shell";
 
-const bottomObserver = new FavoritesBottomEdgeObserver(extendBelow, () => [...ContentTiler.bottomEdgeElements(), ScrollSentinelBottom]);
-let favorites: Favorite[] = [];
-let displayedCount = 0;
+export class FavoritesInfiniteDisplay implements FavoritesDisplay {
+  private readonly bottomObserver: FavoritesBottomEdgeObserver;
+  private favorites: Favorite[] = [];
+  private displayedCount = 0;
 
-export const FavoritesInfiniteDisplay = {
-  initialize,
-  sync,
-  advance,
-  goToPage: doNothing,
-  teardown: (): void => bottomObserver.disconnect()
-} satisfies FavoritesDisplay;
-
-async function initialize(newFavorites: Favorite[], options?: ContentDisplayOptions): Promise<void> {
-  favorites = newFavorites;
-  displayedCount = 0;
-  FavoritesView.showSearchResults(takeNextBatch(), options);
-  await waitForAllThumbsToLoad();
-  bottomObserver.refresh();
-}
-
-function sync(newFavorites: Favorite[]): void {
-  const wasExhausted = !hasMore();
-
-  favorites.push(...newFavorites);
-
-  if (wasExhausted && hasMore()) {
-    bottomObserver.refresh();
+  constructor(private readonly view: FavoritesView, private readonly shell: Shell) {
+    this.bottomObserver = new FavoritesBottomEdgeObserver(
+      () => this.extendBelow(),
+      () => [...this.view.bottomEdgeElements(), this.shell.scrollSentinelBottom]
+    );
   }
-}
 
-async function extendBelow(): Promise<boolean> {
-  if (!advance()) {
-    return false;
+  public async initialize(newFavorites: Favorite[], options?: ContentDisplayOptions): Promise<void> {
+    this.favorites = newFavorites;
+    this.displayedCount = 0;
+    this.view.showSearchResults(this.takeNextBatch(), options);
+    await this.shell.waitForContentThumbsToLoad();
+    this.bottomObserver.refresh();
   }
-  await waitForAllThumbsToLoad();
-  return hasMore();
-}
 
-function advance(): boolean {
-  const batch = takeNextBatch();
+  public sync(newFavorites: Favorite[]): void {
+    const wasExhausted = !this.hasMore();
 
-  if (batch.length === 0) {
-    return false;
+    this.favorites.push(...newFavorites);
+
+    if (wasExhausted && this.hasMore()) {
+      this.bottomObserver.refresh();
+    }
   }
-  FavoritesView.addToBottom(batch);
-  return true;
-}
 
-function takeNextBatch(): Favorite[] {
-  const batch = favorites.slice(displayedCount, displayedCount + FavoritesConfig.infiniteScrollSliceSize);
+  public advance(): boolean {
+    const batch = this.takeNextBatch();
 
-  displayedCount += batch.length;
-  return batch;
-}
+    if (batch.length === 0) {
+      return false;
+    }
+    this.view.addToBottom(batch);
+    return true;
+  }
 
-function hasMore(): boolean {
-  return displayedCount < favorites.length;
+  public goToPage(): void { }
+
+  public teardown(): void {
+    this.bottomObserver.disconnect();
+  }
+
+  private async extendBelow(): Promise<boolean> {
+    if (!this.advance()) {
+      return false;
+    }
+    await this.shell.waitForContentThumbsToLoad();
+    return this.hasMore();
+  }
+
+  private takeNextBatch(): Favorite[] {
+    const batch = this.favorites.slice(this.displayedCount, this.displayedCount + FavoritesConfig.infiniteScrollSliceSize);
+
+    this.displayedCount += batch.length;
+    return batch;
+  }
+
+  private hasMore(): boolean {
+    return this.displayedCount < this.favorites.length;
+  }
 }

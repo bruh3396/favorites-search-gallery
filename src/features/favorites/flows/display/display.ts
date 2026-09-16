@@ -1,35 +1,60 @@
-import * as FavoritesModel from "@/features/favorites/model/model";
-import * as FavoritesView from "@/features/favorites/view/view";
+import { FavoritesFlow, FavoritesFlowDependencies } from "@/features/favorites/flows/flow";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { FavoritesInfiniteDisplay } from "@/features/favorites/flows/display/infinite_display";
 import { FavoritesPaginatedDisplay } from "@/features/favorites/flows/display/paginated_display";
 import { NavigationKey } from "@/types/input";
-import { Preferences } from "@/app/context/preferences";
 
-export function display(favorites: Favorite[], options?: ContentDisplayOptions): void {
-  FavoritesView.setMatchCount(favorites.length);
-  activeDisplay().initialize(favorites, options);
+export class FavoritesDisplayFlow extends FavoritesFlow {
+  private readonly paginatedDisplay: FavoritesPaginatedDisplay;
+  private readonly infiniteDisplay: FavoritesInfiniteDisplay;
+
+  constructor(dependencies: FavoritesFlowDependencies) {
+    super(dependencies);
+    this.paginatedDisplay = new FavoritesPaginatedDisplay(this.model, this.view, this.context.events, this.context.shell);
+    this.infiniteDisplay = new FavoritesInfiniteDisplay(this.view, this.context.shell);
+  }
+
+  public display(favorites: Favorite[], options?: ContentDisplayOptions): void {
+    this.view.setMatchCount(favorites.length);
+    this.activeDisplay().initialize(favorites, options);
+  }
+
+  public sync(favorites: Favorite[]): void {
+    this.view.updateFetchStatus(
+      this.model.getAllFavorites().length,
+      this.model.getCurrentSearchResults().length
+    );
+    this.activeDisplay().sync(favorites);
+  }
+
+  public toggleInfiniteScroll(): void {
+    this.inactiveDisplay().teardown();
+    this.redisplayLatestResults();
+  }
+
+  public redisplayLatestResults(): void {
+    this.display(this.model.getCurrentSearchResults(), { fade: false });
+  }
+
+  public clear(): void {
+    this.display([]);
+  }
+
+  public advance(direction: NavigationKey): boolean {
+    return this.activeDisplay().advance(direction);
+  }
+
+  public goToPage(pageNumber: number): void {
+    this.activeDisplay().goToPage(pageNumber);
+  }
+
+  private activeDisplay(): FavoritesDisplay {
+    return this.context.preferences.favorites.infiniteScroll.value ? this.infiniteDisplay : this.paginatedDisplay;
+  }
+
+  private inactiveDisplay(): FavoritesDisplay {
+    return this.activeDisplay() === this.infiniteDisplay ? this.paginatedDisplay : this.infiniteDisplay;
+  }
 }
-
-export function sync(favorites: Favorite[]): void {
-  FavoritesView.updateFetchStatus(
-    FavoritesModel.getAllFavorites().length,
-    FavoritesModel.getCurrentSearchResults().length
-  );
-  activeDisplay().sync(favorites);
-}
-
-export function toggleInfiniteScroll(): void {
-  inactiveDisplay().teardown();
-  redisplayLatestResults();
-}
-
-export const redisplayLatestResults = (): void => display(FavoritesModel.getCurrentSearchResults(), { fade: false });
-export const clear = (): void => display([]);
-export const advance = (direction: NavigationKey): boolean => activeDisplay().advance(direction);
-export const goToPage = (pageNumber: number): void => activeDisplay().goToPage(pageNumber);
-
-const activeDisplay = (): FavoritesDisplay => (Preferences.favorites.infiniteScroll.value ? FavoritesInfiniteDisplay : FavoritesPaginatedDisplay);
-const inactiveDisplay = (): FavoritesDisplay => (activeDisplay() === FavoritesInfiniteDisplay ? FavoritesPaginatedDisplay : FavoritesInfiniteDisplay);

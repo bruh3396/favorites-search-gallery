@@ -1,50 +1,52 @@
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryModel from "@/features/gallery/model/model";
-import * as GalleryView from "@/features/gallery/view/view";
-import { FeatureBridge, usingInfiniteScroll } from "@/app/channels/feature_bridge";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { NavigationKey } from "@/types/input";
-import { ON_POST_LIST_PAGE } from "@/app/context/environment";
 
-export function navigate(direction: NavigationKey): void {
-  switch (GalleryModel.move(direction)) {
-    case "start": handleStartBoundary();
-      break;
-    case "end": handleEndBoundary();
-      break;
-    case "none":
-      GalleryFlows.Display.displaySelected();
-      break;
-    default:
-      break;
-  }
-}
-
-function handleStartBoundary(): void {
-  if (usingInfiniteScroll() || !advanceResults("ArrowLeft")) {
-    GalleryView.nudge(GalleryModel.currentThumb(), "start");
-    return;
-  }
-  GalleryModel.jumpToLast();
-  GalleryFlows.Display.displaySelected();
-}
-
-function handleEndBoundary(): void {
-  if (!advanceResults("ArrowRight")) {
-    GalleryView.nudge(GalleryModel.currentThumb(), "end");
-    return;
+export class GalleryNavigationFlow extends GalleryFlow {
+  public navigate(direction: NavigationKey): void {
+    switch (this.model.move(direction)) {
+      case "start": this.handleStartBoundary();
+        break;
+      case "end": this.handleEndBoundary();
+        break;
+      case "none":
+        this.flows.display.displaySelected();
+        break;
+      default:
+        break;
+    }
   }
 
-  if (usingInfiniteScroll()) {
-    GalleryModel.move("ArrowRight");
-  } else {
-    GalleryModel.jumpToFirst();
+  private handleStartBoundary(): void {
+    if (this.usingInfiniteScroll() || !this.advanceResults("ArrowLeft")) {
+      this.view.nudge(this.model.currentThumb(), "start");
+      return;
+    }
+    this.model.jumpToLast();
+    this.flows.display.displaySelected();
   }
-  GalleryFlows.Display.displaySelected();
-}
 
-function advanceResults(direction: NavigationKey): boolean {
-  if (ON_POST_LIST_PAGE) {
-    return FeatureBridge.postList.navigateToAdjacent.call(direction) !== null;
+  private handleEndBoundary(): void {
+    if (!this.advanceResults("ArrowRight")) {
+      this.view.nudge(this.model.currentThumb(), "end");
+      return;
+    }
+
+    if (this.usingInfiniteScroll()) {
+      this.model.move("ArrowRight");
+    } else {
+      this.model.jumpToFirst();
+    }
+    this.flows.display.displaySelected();
   }
-  return FeatureBridge.favorites.advance.call(direction);
+
+  private advanceResults(direction: NavigationKey): boolean {
+    if (this.context.environment.onPostListPage) {
+      return this.context.featureBridge.postList.navigateToAdjacent.call(direction) !== null;
+    }
+    return this.context.featureBridge.favorites.advance.call(direction);
+  }
+
+  private usingInfiniteScroll(): boolean {
+    return this.context.featureBridge.usingInfiniteScroll();
+  }
 }

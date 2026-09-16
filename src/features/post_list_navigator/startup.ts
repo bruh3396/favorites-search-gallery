@@ -1,69 +1,72 @@
-import * as ContentTiler from "@/app/layout/content_tiler";
-import * as PostListNavigatorFlows from "@/features/post_list_navigator/flows/flows";
-import * as PostListNavigatorModel from "@/features/post_list_navigator/model/model";
-import * as PostListNavigatorView from "@/features/post_list_navigator/view/view";
 import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
-import { FeatureBridge } from "@/app/channels/feature_bridge";
-import { ON_POST_LIST_PAGE } from "@/app/context/environment";
-import { Preferences } from "@/app/context/preferences";
+import { AppContext } from "@/app/context/context";
+import { PostListNavigatorComponents } from "@/features/post_list_navigator/types/types";
+import { PostListNavigatorControl } from "@/features/post_list_navigator/control/control";
+import { PostListNavigatorFlows } from "@/features/post_list_navigator/flows/flows";
+import { PostListNavigatorModel } from "@/features/post_list_navigator/model/model";
+import { PostListNavigatorView } from "@/features/post_list_navigator/view/view";
 
-export function startPostListNavigator(): void {
-  if (ON_POST_LIST_PAGE) {
-    setup();
-    start();
+export function startPostListNavigator(context: AppContext): void {
+  if (context.environment.onPostListPage) {
+    const model = new PostListNavigatorModel(context);
+    const view = new PostListNavigatorView(context);
+    const flows = new PostListNavigatorFlows(context, model, view);
+    const control = new PostListNavigatorControl(context);
+    const components: PostListNavigatorComponents = { context, model, view, flows, control };
+
+    setup(components);
+    start(components);
   }
 }
 
-function setup(): void {
-  setupModel();
-  setupView();
-  setupFavoriteIndicator();
-  subscribeToEvents();
-  serveExternalRequests();
+function setup(components: PostListNavigatorComponents): void {
+  components.control.buildShell();
+  setupFavoriteIndicator(components);
+  subscribeToEvents(components);
+  serveExternalRequests(components);
 }
 
-async function start(): Promise<void> {
-  PostListNavigatorModel.preloadAroundInitialPage();
-  PostListNavigatorView.tileNativePostListThumbs();
-  PostListNavigatorView.removeNativeImageList();
-  PostListNavigatorView.prepareNativePostListThumbs();
-  PostListNavigatorFlows.Option.startInfiniteScroll();
+async function start(components: PostListNavigatorComponents): Promise<void> {
+  const { context, model, view, flows } = components;
 
-  if (Preferences.postList.favoriteIndicator.value) {
-    await PostListNavigatorFlows.FavoritesMarker.toggleIndicator(true);
+  model.preloadAroundInitialPage();
+  view.tileNativePostListThumbs();
+  view.removeNativeImageList();
+  view.prepareNativePostListThumbs();
+  flows.option.startInfiniteScroll();
+
+  if (context.preferences.postList.favoriteIndicator.value) {
+    await flows.favoritesMarker.toggleIndicator(true);
   }
-  Events.postList.initialPostListCreated.emit(PostListNavigatorModel.getInitialPostList());
-  Events.postList.postListInitialized.emit();
+  context.events.postList.initialPostListCreated.emit(model.getInitialPostList());
+  context.events.postList.postListInitialized.emit();
 }
 
-function setupModel(): void {
-  PostListNavigatorModel.setup();
+function setupFavoriteIndicator({ context, flows }: PostListNavigatorComponents): void {
+  const { events, preferences } = context;
+
+  events.postList.pageChanged.on((thumbs) => flows.favoritesMarker.markExistingFavoritesIfEnabled(thumbs));
+  events.postList.moreResultsAdded.on((thumbs) => flows.favoritesMarker.markExistingFavoritesIfEnabled(thumbs));
+  events.app.favoriteAdded.on((id) => flows.favoritesMarker.registerFavorite(id));
+  preferences.postList.favoriteIndicator.on((enabled) => flows.option.toggleFavoriteIndicator(enabled));
 }
 
-function setupView(): void {
-  PostListNavigatorView.setup();
+function subscribeToEvents({ context, view, flows }: PostListNavigatorComponents): void {
+  const { events, preferences, domEvents } = context;
+
+  preferences.postList.layout.on((layout) => view.changeLayout(layout));
+  preferences.postList.infiniteScroll.on((value) => flows.option.toggleInfiniteScroll(value));
+  domEvents.document.click.on((event) => flows.postAction.triggerPostAction(event));
+  events.app.favoriteAdded.on(markActionBarFavorited);
+  events.app.favoriteRemoved.on(markActionBarUnfavorited);
 }
 
-function setupFavoriteIndicator(): void {
-  Events.postList.pageChanged.on(PostListNavigatorFlows.FavoritesMarker.markExistingFavoritesIfEnabled);
-  Events.postList.moreResultsAdded.on(PostListNavigatorFlows.FavoritesMarker.markExistingFavoritesIfEnabled);
-  Events.app.favoriteAdded.on(PostListNavigatorFlows.FavoritesMarker.registerFavorite);
-  Preferences.postList.favoriteIndicator.on(PostListNavigatorFlows.Option.toggleFavoriteIndicator);
-}
+function serveExternalRequests({ context, model, view, flows }: PostListNavigatorComponents): void {
+  const { featureBridge, preferences } = context;
 
-function subscribeToEvents(): void {
-  Preferences.postList.layout.on(ContentTiler.changeLayout);
-  Preferences.postList.infiniteScroll.on(PostListNavigatorFlows.Option.toggleInfiniteScroll);
-  DomEvents.document.click.on(PostListNavigatorFlows.PostAction.triggerPostAction);
-  Events.app.favoriteAdded.on(markActionBarFavorited);
-  Events.app.favoriteRemoved.on(markActionBarUnfavorited);
-}
-
-function serveExternalRequests(): void {
-  FeatureBridge.postList.searchQuery.serve(PostListNavigatorView.currentSearch);
-  FeatureBridge.postList.navigateToAdjacent.serve(PostListNavigatorFlows.Navigation.navigatePostLists);
-  FeatureBridge.postList.thumbs.serve(PostListNavigatorModel.allThumbs);
-  FeatureBridge.postList.usingInfiniteScroll.serve(() => Preferences.postList.infiniteScroll.value);
+  featureBridge.postList.searchQuery.serve(() => view.currentSearch());
+  featureBridge.postList.navigateToAdjacent.serve((direction) => flows.navigation.navigatePostLists(direction));
+  featureBridge.postList.thumbs.serve(() => model.allThumbs());
+  featureBridge.postList.usingInfiniteScroll.serve(() => preferences.postList.infiniteScroll.value);
+  featureBridge.postList.layout.serve(() => view.getLayout());
 }

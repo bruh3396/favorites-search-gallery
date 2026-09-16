@@ -1,7 +1,5 @@
-import { DomEvents } from "@/app/dom/events";
-import { Events } from "@/app/channels/events";
+import { AppContext } from "@/app/context/context";
 import { GalleryConfig } from "@/config/gallery_config";
-import { ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { Timeout } from "@/types/async";
 import { doNothing } from "@/utils/pure/function";
 
@@ -89,31 +87,35 @@ class InteractionTracker {
   }
 }
 
-let galleryInteractionTracker: InteractionTracker | null = null;
+export class GalleryInteractionTracker {
+  private tracker: InteractionTracker | null = null;
 
-export function setup(): void {
-  if (ON_MOBILE_DEVICE) {
-    return;
+  constructor(private readonly context: AppContext) {}
+
+  public setup(): void {
+    if (this.context.environment.onMobileDevice) {
+      return;
+    }
+    const onInteractionStopped = (): void => {
+      this.context.events.gallery.interactionStopped.emit();
+    };
+
+    this.tracker = new InteractionTracker(
+      GalleryConfig.idleInteractionDuration,
+      doNothing,
+      onInteractionStopped,
+      doNothing,
+      onInteractionStopped,
+      this.context.domEvents.document.mousemove.on,
+      this.context.domEvents.window.scroll.on
+    );
   }
-  const onInteractionStopped = (): void => {
-    Events.gallery.interactionStopped.emit();
-  };
 
-  galleryInteractionTracker = new InteractionTracker(
-    GalleryConfig.idleInteractionDuration,
-    doNothing,
-    onInteractionStopped,
-    doNothing,
-    onInteractionStopped,
-    DomEvents.document.mousemove.on,
-    DomEvents.window.scroll.on
-  );
-}
+  public enable(): void {
+    this.tracker?.enable();
+  }
 
-export function enableInteractionTracking(): void {
-  galleryInteractionTracker?.enable();
-}
-
-export function disableInteractionTracking(): void {
-  galleryInteractionTracker?.disable();
+  public disable(): void {
+    this.tracker?.disable();
+  }
 }

@@ -1,16 +1,14 @@
-import { ON_DESKTOP_DEVICE, ON_MOBILE_DEVICE } from "@/app/context/environment";
 import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
+import { AppContext } from "@/app/context/context";
 import BADGE_CSS from "@/assets/css/base/badge.css";
 import CONTROLS_CSS from "@/assets/css/base/controls.css";
-import { Content } from "@/app/layout/shell";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
 import MOBILE_CSS from "@/assets/css/base/mobile.css";
 import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
-import { Preferences } from "@/app/context/preferences";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
 import THUMB_LOADING_CSS from "@/assets/css/base/loading.css";
@@ -24,19 +22,25 @@ import { insertStyle } from "@/utils/browser/injector";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
 
-export function setupStyles(): void {
-  insertBaseStyles();
-  applyTheme(Preferences.app.theme.value, Preferences.app.darkMode.value);
-  toggleGradient(Preferences.app.gradient.value);
-  setTooltipsEnabled(Preferences.favorites.hintsEnabled.value);
-  toggleNativeFont(Preferences.app.nativeFont.value);
-  toggleThemedGalleryBackground(Preferences.gallery.themedBackground.value);
-  applyTileVariables();
+export function setupStyles(context: AppContext): void {
+  insertBaseStyles(context);
+  applyPreferenceStyles(context);
+  applyTileVariables(context);
 }
 
-function insertBaseStyles(): void {
-  const fadeInCss = Preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
-  const mobileCss = ON_MOBILE_DEVICE ? MOBILE_CSS + CONTROLS_CSS : "";
+function applyPreferenceStyles(context: AppContext): void {
+  const { preferences } = context;
+
+  applyTheme(preferences.app.theme.value, preferences.app.darkMode.value);
+  toggleGradient(preferences.app.gradient.value);
+  setTooltipsEnabled(preferences.favorites.hintsEnabled.value);
+  toggleNativeFont(preferences.app.nativeFont.value);
+  toggleThemedGalleryBackground(preferences.gallery.themedBackground.value);
+}
+
+function insertBaseStyles(context: AppContext): void {
+  const fadeInCss = context.preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
+  const mobileCss = context.environment.onMobileDevice ? MOBILE_CSS + CONTROLS_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
@@ -56,11 +60,13 @@ function insertBaseStyles(): void {
     fadeInCss);
 }
 
-function applyTileVariables(): void {
-  const outlineSize = ON_MOBILE_DEVICE ? 1 : 2;
-  const rightMargin = ON_DESKTOP_DEVICE ? ThumbConfig.rightContentMargin : 0;
+function applyTileVariables(context: AppContext): void {
+  const { content } = context.shell;
+  const outlineSize = context.environment.onMobileDevice ? 1 : 2;
+  const rightMargin = context.environment.onDesktopDevice ? ThumbConfig.rightContentMargin : 0;
+  const tileGap = context.environment.onPostListPage ? ThumbConfig.spacing.postList : ThumbConfig.spacing.favorites;
 
-  Content.style.setProperty("--media-outline-size", `${outlineSize}px`);
-  Content.style.setProperty("--tile-gap", `${ThumbConfig.spacing}px`);
-  Content.style.setProperty("--content-right-margin", `${rightMargin}px`);
+  content.style.setProperty("--media-outline-size", `${outlineSize}px`);
+  content.style.setProperty("--tile-gap", `${tileGap}px`);
+  content.style.setProperty("--content-right-margin", `${rightMargin}px`);
 }

@@ -1,16 +1,18 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { postPageUrl } from "@/lib/remote/url";
 
-let previousThumb: HTMLElement | null = null;
+export class FavoritesLinkSuppressor {
+  private previousThumb: HTMLElement | null = null;
 
-export function suppressLinkOnHoveredThumb(event: EnhancedMouseEvent): void {
-  if (event.thumb === previousThumb || event.thumb === null) {
-    return;
-  }
+  public suppressLinkOnHoveredThumb(event: EnhancedMouseEvent): void {
+    if (event.thumb === this.previousThumb || event.thumb === null) {
+      return;
+    }
 
-  if (previousThumb !== null) {
-    previousThumb.querySelector("a")?.setAttribute("href", postPageUrl(previousThumb.id));
+    if (this.previousThumb !== null) {
+      this.previousThumb.querySelector("a")?.setAttribute("href", postPageUrl(this.previousThumb.id));
+    }
+    event.thumb.querySelector("a")?.removeAttribute("href");
+    this.previousThumb = event.thumb;
   }
-  event.thumb.querySelector("a")?.removeAttribute("href");
-  previousThumb = event.thumb;
 }

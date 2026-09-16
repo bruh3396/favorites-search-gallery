@@ -11,11 +11,7 @@ import { resolveMediaType } from "@/lib/media/media_type";
 import { thumbToPost } from "@/features/favorites/model/loading/construction/thumb_to_post";
 import { toTagSet } from "@/utils/pure/tag";
 
-let arena = new FavoritesArena();
-
-export function setArena(next: FavoritesArena): void {
-  arena = next;
-}
+const arena = new FavoritesArena();
 
 export class FavoritesItem implements Favorite {
   private readonly index: number;
@@ -39,13 +35,7 @@ export class FavoritesItem implements Favorite {
   }
 
   public get tags(): Set<string> {
-    const tags = arena.tagSets.get(this);
-
-    if (tags === undefined) {
-      return toTagSet(this.tagsString);
-    }
-    arena.tagSets.delete(this);
-    return tags;
+    return arena.tagSets.get(this) ?? toTagSet(this.tagsString);
   }
 
   public get mediaType(): MediaType {
@@ -93,6 +83,13 @@ export class FavoritesItem implements Favorite {
 
   private get tagsString(): string {
     return arena.loadTags({ offset: arena.tagOffsets[this.index], count: arena.tagCounts[this.index] });
+  }
+
+  public consumeTags(): Set<string> {
+    const tags = this.tags;
+
+    arena.tagSets.delete(this);
+    return tags;
   }
 
   public getMetric(metric: Metric): number {

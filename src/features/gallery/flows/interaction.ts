@@ -1,11 +1,12 @@
-import * as GalleryFlows from "@/features/gallery/flows/flows";
-import * as GalleryView from "@/features/gallery/view/view";
+import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { throttle } from "@/lib/async/rate_limiting";
 
-export const showCursorInGallery = throttle<MouseEvent>(() => {
-  GalleryFlows.Dispatch.run({ open: GalleryView.showCursor });
-}, 250);
+export class GalleryInteractionFlow extends GalleryFlow {
+  public showCursorInGallery = throttle<MouseEvent>(() => {
+    this.flows.dispatch.run({ open: () => this.view.showCursor() });
+  }, 250);
 
-export function hideCursorInGallery(): void {
-  GalleryFlows.Dispatch.run({ open: () => GalleryView.toggleCursor(false) });
+  public hideCursorInGallery(): void {
+    this.flows.dispatch.run({ open: () => this.view.toggleCursor(false) });
+  }
 }
