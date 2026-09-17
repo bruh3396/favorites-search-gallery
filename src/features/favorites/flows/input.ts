@@ -1,4 +1,4 @@
-import { openMedia, openPost } from "@/lib/remote/fetchers/action";
+import { addFavorite, openMedia, openPost, removeFavorite } from "@/lib/remote/fetchers/action";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
@@ -10,8 +10,14 @@ export class FavoritesInputFlow extends FavoritesFlow {
       return;
     }
     handleActionBarClick(event.originalEvent, {
-      onFavoriteAdded: this.context.events.app.favoriteAdded.emit,
-      onFavoriteRemoved: this.context.events.app.favoriteRemoved.emit
+      onFavoriteAdded: (id) => {
+        addFavorite(id);
+        this.context.events.app.favoriteAdded.emit(id);
+      },
+      onFavoriteRemoved: (id) => {
+        removeFavorite(id);
+        this.context.events.app.favoriteRemoved.emit(id);
+      }
     });
   }
 

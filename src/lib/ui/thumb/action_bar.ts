@@ -1,4 +1,3 @@
-import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/ui/thumb/favorite_actions";
 import { camelToKebabCase, capitalize } from "@/utils/pure/string";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
@@ -138,10 +137,8 @@ function toggleFavorite({ bar, thumb, callbacks }: ActionContext): void {
   const wasFavorite = bar.dataset[ActionBarDataset.isFavorite] !== undefined;
 
   if (wasFavorite) {
-    removeFavoriteFromThumb(thumb);
     callbacks.onFavoriteRemoved(thumb.id);
   } else {
-    addFavoriteFromThumb(thumb);
     callbacks.onFavoriteAdded(thumb.id);
   }
 }

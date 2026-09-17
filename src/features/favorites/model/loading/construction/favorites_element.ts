@@ -7,10 +7,10 @@ import { setDataset } from "@/utils/browser/dataset";
 const template: HTMLElement = new DOMParser().parseFromString("", "text/html").createElement("div");
 
 export class FavoritesElement {
-  private static imagusSupportEnabled = false;
+  private static shouldLinkToPostPage = false;
 
-  public static configure(imagusSupportEnabled: boolean, galleryDisabled: boolean, userIsOnTheirOwnFavoritesPage: boolean): void {
-    FavoritesElement.imagusSupportEnabled = imagusSupportEnabled;
+  public static configure(imagusSupportEnabled: boolean, galleryDisabled: boolean, onMobileDevice: boolean, userIsOnTheirOwnFavoritesPage: boolean): void {
+    FavoritesElement.shouldLinkToPostPage = onMobileDevice || imagusSupportEnabled;
     template.className = `${ITEM_CLASS_NAME} ${TILE_CLASS_NAME}`;
     const canvas = galleryDisabled ? "" : "<canvas></canvas>";
 
@@ -33,7 +33,7 @@ export class FavoritesElement {
     this.image = this.container.children[0] as HTMLImageElement;
     this.populateAttributes(id, previewUrl, mediaType);
 
-    if (FavoritesElement.imagusSupportEnabled) {
+    if (FavoritesElement.shouldLinkToPostPage) {
       this.container.href = postPageUrl(this.root.id);
     }
   }

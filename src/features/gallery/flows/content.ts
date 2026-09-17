@@ -17,7 +17,16 @@ export class GalleryContentFlow extends GalleryFlow {
   }
 
   public downscaleThumbsOutsideResults(): void {
-    this.view.downscaleAll();
+    this.view.downscaleDetached();
+  }
+
+  public toggleUpscaling(value: boolean): void {
+    if (value) {
+      this.view.upscaleCached();
+      this.control.refreshThumbObserver();
+    } else {
+      this.view.downscaleAll();
+    }
   }
 
   private reIndex(): void {

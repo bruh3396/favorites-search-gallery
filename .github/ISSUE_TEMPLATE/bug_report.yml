@@ -1,0 +1,76 @@
+name: Bug report
+description: Report a reproducible bug
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: checkboxes
+    id: version
+    attributes:
+      label: Version
+      options:
+        - label: I am using the latest version of the userscript.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: List the exact steps needed to reproduce the issue.
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. Do ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / Error Output
+      description: Paste any relevant console errors or error messages. Remove sensitive information.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Desktop
+        - Mobile
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Firefox
+        - Chrome
+        - Opera
+        - Safari
+        - Edge
+    validations:
+      required: true
+
+  - type: dropdown
+    id: userscript-manager
+    attributes:
+      label: Userscript manager
+      options:
+        - Tampermonkey
+        - Other
+    validations:
+      required: false

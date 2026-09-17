@@ -53,7 +53,7 @@ export class DomEvents {
     this.appendRootOnDomLoad(shell.root);
     this.setupDocumentEvents(environment.onFavoritesPage ? shell.root : document.documentElement);
     this.setupWindowEvents();
-    this.setupMobileGestures(environment.onMobileDevice);
+    this.setupMobileGestures(environment.onDesktopDevice);
     this.setupHotkeys(events, () => featureBridge.galleryOpened());
   }
 
@@ -84,8 +84,8 @@ export class DomEvents {
     });
   }
 
-  private setupMobileGestures(onMobileDevice: boolean): void {
-    if (onMobileDevice) {
+  private setupMobileGestures(onDesktopDevice: boolean): void {
+    if (onDesktopDevice) {
       return;
     }
     this.document.touchStart.on((event) => this.onSwipeTouchStart(event));
@@ -180,6 +180,9 @@ export class DomEvents {
       this.document.touchStart.emit(event);
     }, { passive: false });
     root.addEventListener("touchend", (event) => {
+      this.document.touchEnd.emit(event);
+    });
+    document.documentElement.addEventListener("touchend", (event) => {
       this.document.touchEnd.emit(event);
     });
   }

@@ -24,7 +24,7 @@ export class Flags {
     this.favoritesSearchGalleryEnabled = onFavoritesPage || (onPostListPage && preferences.postList.enabled.value);
     this.favoritesSearchGalleryDisabled = !this.favoritesSearchGalleryEnabled;
 
-    this.galleryEnabled = (onFavoritesPage || onPostListPage) && (performanceProfile === "normal" || performanceProfile === "medium");
+    this.galleryEnabled = (onFavoritesPage || onPostListPage) && performanceProfile === "normal";
     this.galleryDisabled = !this.galleryEnabled;
 
     this.tooltipEnabled = (onFavoritesPage || onPostListPage) && onDesktopDevice && performanceProfile !== "potato";

@@ -37,6 +37,15 @@ export abstract class GalleryAbstractUpscaler {
     this.directUpscaleQueue.reset();
 
     for (const id of [...this.upscaledIds]) {
+      this.upscaledIds.delete(id);
+      this.evict(id);
+    }
+  }
+
+  public downscaleDetached(): void {
+    this.directUpscaleQueue.reset();
+
+    for (const id of [...this.upscaledIds]) {
       if (document.getElementById(id) === null) {
         this.upscaledIds.delete(id);
         this.evict(id);
@@ -57,10 +66,10 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private upscalingEnabled(): boolean {
-    if (this.environment.onPostListPage && !this.preferences.postList.upscaleThumbs.value) {
-      return false;
+    if (this.environment.onPostListPage) {
+      return this.preferences.postList.upscaleThumbs.value;
     }
-    return this.preferences.app.performanceProfile.value === "normal";
+    return this.preferences.favorites.upscaleThumbs.value;
   }
 
   private draw(request: ImageRequest): void {

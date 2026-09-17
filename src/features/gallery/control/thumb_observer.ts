@@ -79,9 +79,9 @@ export class GalleryThumbObserver {
   constructor(private readonly context: AppContext) {}
 
   public setup(onVisibleThumbsChanged: () => void): void {
-    const { onMobileDevice, onPostListPage } = this.context.environment;
+    const { onPostListPage } = this.context.environment;
 
-    if (onMobileDevice || (onPostListPage && !GalleryConfig.upscaleEverythingOnPostList)) {
+    if (onPostListPage && !GalleryConfig.upscaleEverythingOnPostList) {
       return;
     }
     this.observer = new VisibleThumbObserver(onVisibleThumbsChanged);

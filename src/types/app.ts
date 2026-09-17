@@ -1,5 +1,5 @@
 export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip";
-export type PerformanceProfile = "normal" | "medium" | "low" | "potato";
+export type PerformanceProfile = "normal" | "low" | "potato";
 export type Layout = "row" | "square" | "grid" | "column" | "native";
 export type GalleryState = "idle" | "preview" | "open";
 export type PostOverlayMode = "tag";

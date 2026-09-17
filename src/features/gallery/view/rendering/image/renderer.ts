@@ -65,7 +65,7 @@ export class GalleryImageRenderer implements Renderer {
 
   public reupscaleCachedThumbs(): void {
     this.upscaler.downscaleAll();
-    setTimeout(() => this.upscaleCachedThumbs(), 10);
+    setTimeout(() => this.upscaleCached(), 10);
   }
 
   public toggleZoomCursor(value: boolean): boolean {
@@ -80,12 +80,16 @@ export class GalleryImageRenderer implements Renderer {
     return this.canvas.zoomToPoint(x, y);
   }
 
-  public upscaleCachedThumbs(): void {
+  public upscaleCached(): void {
     this.upscaler.upscaleAll(this.loader.completedRequests());
   }
 
   public downscaleAll(): void {
     this.upscaler.downscaleAll();
+  }
+
+  public downscaleDetached(): void {
+    this.upscaler.downscaleDetached();
   }
 
   public toggleUpscaler(value: boolean): void {

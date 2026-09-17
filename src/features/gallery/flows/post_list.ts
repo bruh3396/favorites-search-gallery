@@ -11,7 +11,7 @@ export class GalleryPostListFlow extends GalleryFlow {
       if (isNotUsingInfiniteScroll) {
         this.view.cacheImages(thumbs);
       }
-      this.view.upscaleCachedThumbs();
+      this.view.upscaleCached();
     } else {
       this.view.downscaleAll();
     }

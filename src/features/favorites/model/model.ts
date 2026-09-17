@@ -18,7 +18,7 @@ export class FavoritesModel {
   private readonly paginator: Paginator<Favorite>;
 
   constructor(context: AppContext) {
-    FavoritesElement.configure(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.userIsOnTheirOwnFavoritesPage);
+    FavoritesElement.configure(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.onMobileDevice, context.environment.userIsOnTheirOwnFavoritesPage);
     this.collection = new IdentifiedList<Favorite>();
     this.searcher = new FavoritesSearcher(context.preferences, context.environment);
     this.loader = new FavoritesLoader(context.environment);

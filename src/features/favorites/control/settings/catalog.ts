@@ -49,6 +49,13 @@ export function buildSettingsCatalog(context: AppContext): SettingsCatalog {
       preference: preferences.app.fadeThumbs,
       apply: reloadWindow
     }, events),
+    upscale: toggle({
+      id: "upscale",
+      label: "Upscale",
+      tooltip: "Upscale thumbnails for higher quality",
+      enabled: flags.galleryEnabled,
+      preference: preferences.favorites.upscaleThumbs
+    }, events),
     layout: segmented<Layout>({
       id: "layout-select",
       tooltip: "Choose favorites layout",
@@ -277,8 +284,7 @@ export function buildSettingsCatalog(context: AppContext): SettingsCatalog {
       tooltipPosition: "below",
       options: new Map<PerformanceProfile, string>([
         ["normal", "Normal"],
-        ["medium", "Medium"],
-        ...(environment.onMobileDevice ? [] : [["low", "Low"] as [PerformanceProfile, string]]),
+        ["low", "Low"],
         ["potato", "Potato"]
       ])
     })

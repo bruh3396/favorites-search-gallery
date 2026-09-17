@@ -44,7 +44,7 @@ export class GalleryView {
     this.shell.root.toggleAttribute("data-visible", false);
     this.renderer.hide();
     this.ui.close();
-    this.renderer.upscaleCachedThumbs();
+    this.renderer.upscaleCached();
   }
 
   public display(thumb: HTMLElement): void {
@@ -94,12 +94,16 @@ export class GalleryView {
     return this.renderer.upscale(thumbs);
   }
 
-  public upscaleCachedThumbs(): void {
-    this.renderer.upscaleCachedThumbs();
+  public upscaleCached(): void {
+    this.renderer.upscaleCached();
   }
 
   public downscaleAll(): void {
     this.renderer.downscaleAll();
+  }
+
+  public downscaleDetached(): void {
+    this.renderer.downscaleDetached();
   }
 
   public reupscaleCachedThumbs(): void {

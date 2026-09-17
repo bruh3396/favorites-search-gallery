@@ -135,6 +135,7 @@ function subscribeToFavoritesEvents({ context, model, flows }: GalleryComponents
   events.favorites.contentReplaced.on(() => flows.content.refresh());
   events.favorites.contentAdded.on(() => flows.content.refresh());
   preferences.gallery.previewEnabled.on((enabled) => model.preview(enabled));
+  preferences.favorites.upscaleThumbs.on((value) => flows.content.toggleUpscaling(value));
   events.favorites.searchResultsUpdated.on(() => flows.content.downscaleThumbsOutsideResults(), { async: true });
 }
 

@@ -36,6 +36,7 @@ export class Preferences {
     sortAscending: Preference<boolean>;
     sortKey: Preference<SortKey>;
     tooltipEnabled: Preference<boolean>;
+    upscaleThumbs: Preference<boolean>;
   };
 
   public readonly gallery: {
@@ -83,7 +84,7 @@ export class Preferences {
       fadeThumbs: new Preference<boolean>("appFadeThumbs", true),
       gradient: new Preference("appGradient", false),
       nativeFont: new Preference<boolean>("appNativeFont", true),
-      performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", onDesktopDevice ? "normal" : "medium"),
+      performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
       theme: new Preference<Theme>("appTheme", "native")
     };
 
@@ -106,7 +107,8 @@ export class Preferences {
       settingsExpandedSections: new Preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
       sortAscending: new Preference("favoritesSortAscending", false),
       sortKey: new Preference<SortKey>("favoritesSortKey", "default"),
-      tooltipEnabled: new Preference("favoritesTooltipEnabled", false)
+      tooltipEnabled: new Preference("favoritesTooltipEnabled", false),
+      upscaleThumbs: new Preference("favoritesUpscaleThumbs", true)
     };
 
     this.gallery = {

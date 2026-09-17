@@ -1,10 +1,9 @@
 import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
+import { SettingsControl, dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
 import { AppContext } from "@/app/context/context";
 import { Preferences } from "@/app/context/preferences";
-import { SettingsControl } from "@/lib/ui/settings/controls";
 import { ThumbConfig } from "@/config/thumb_config";
 import { booleanPreference } from "@/lib/storage/preference";
 import { reloadWindow } from "@/utils/browser/window";
@@ -133,7 +132,6 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       enabled: environment.onDesktopDevice,
       options: new Map<PerformanceProfile, string>([
         ["normal", "Normal"],
-        ["medium", "Medium"],
         ["low", "Low"],
         ["potato", "Potato"]
       ])

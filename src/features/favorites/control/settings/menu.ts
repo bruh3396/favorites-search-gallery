@@ -22,6 +22,7 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
       controls: [
         catalog.postActionBar,
         catalog.postActionBarButtons,
+        catalog.upscale,
         catalog.postOverlay,
         catalog.tooltip
       ]
@@ -79,6 +80,7 @@ function mobileSections(catalog: SettingsCatalog): SettingsSection[] {
     {
       title: "Thumbnails",
       controls: [
+        catalog.upscale,
         catalog.postActionBarToggle,
         catalog.postActionBarButtons
       ]

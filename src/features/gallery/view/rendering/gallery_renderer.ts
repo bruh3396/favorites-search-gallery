@@ -81,12 +81,16 @@ export class GalleryRenderer {
     return this.imageRenderer.upscale(thumbs);
   }
 
-  public upscaleCachedThumbs(): void {
-    this.imageRenderer.upscaleCachedThumbs();
+  public upscaleCached(): void {
+    this.imageRenderer.upscaleCached();
   }
 
   public downscaleAll(): void {
     this.imageRenderer.downscaleAll();
+  }
+
+  public downscaleDetached(): void {
+    this.imageRenderer.downscaleDetached();
   }
 
   public reupscaleCachedThumbs(): void {

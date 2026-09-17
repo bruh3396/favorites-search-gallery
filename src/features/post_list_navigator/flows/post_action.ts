@@ -1,5 +1,7 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { PostListNavigatorFlow } from "@/features/post_list_navigator/flows/flow";
+import { addFavorite } from "@/lib/remote/fetchers/action";
+import { doNothing } from "@/utils/pure/function";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
 
 export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
@@ -9,8 +11,11 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
       return;
     }
     handleActionBarClick(event.originalEvent, {
-      onFavoriteAdded: this.context.events.app.favoriteAdded.emit,
-      onFavoriteRemoved: this.context.events.app.favoriteRemoved.emit
+      onFavoriteAdded: (id) => {
+        addFavorite(id);
+        this.context.events.app.favoriteAdded.emit(id);
+      },
+      onFavoriteRemoved: doNothing
     });
   }
 }
