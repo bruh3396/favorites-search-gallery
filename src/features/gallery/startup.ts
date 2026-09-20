@@ -1,6 +1,5 @@
 import { hideTutorial, showTutorial } from "@/features/gallery/dom_tweaks/tutorial";
 import { AppContext } from "@/app/context/context";
-import { GalleryComponents } from "@/features/gallery/types/types";
 import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryFeatures } from "@/features/gallery/features/features";
 import { GalleryFlows } from "@/features/gallery/flows/flows";
@@ -8,6 +7,15 @@ import { GalleryModel } from "@/features/gallery/model/model";
 import { GalleryView } from "@/features/gallery/view/view";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
+
+interface GalleryComponents {
+  context: AppContext;
+  model: GalleryModel;
+  view: GalleryView;
+  control: GalleryControl;
+  flows: GalleryFlows;
+  features: GalleryFeatures;
+}
 
 export async function startGallery(context: AppContext): Promise<void> {
   if (context.flags.galleryDisabled) {

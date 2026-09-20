@@ -1,7 +1,6 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
 import { AppContext } from "@/app/context/context";
-import { FavoritesComponents } from "@/features/favorites/types/types";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesFeatures } from "@/features/favorites/features/features";
 import { FavoritesFlows } from "@/features/favorites/flows/flows";
@@ -11,6 +10,15 @@ import { createElement } from "@/utils/browser/element";
 import { deferPostPageFetchesUntil } from "@/lib/remote/fetchers/html";
 import { setFavoriteTagsLookup } from "@/lib/ui/thumb/tag";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
+
+interface FavoritesComponents {
+  context: AppContext;
+  model: FavoritesModel;
+  view: FavoritesView;
+  flows: FavoritesFlows;
+  control: FavoritesControl;
+  features: FavoritesFeatures;
+}
 
 export function startFavorites(context: AppContext): void {
   if (context.environment.onFavoritesPage) {
@@ -86,8 +94,8 @@ function setupView({ context, view, flows, control, features }: FavoritesCompone
   });
 }
 
-function setupControl({ control }: FavoritesComponents): void {
-  control.setup();
+function setupControl({ view, control }: FavoritesComponents): void {
+  control.setup(view.getToolbarSlots());
 }
 
 function subscribeToEvents({ context, model, view, flows, control }: FavoritesComponents): void {
@@ -144,6 +152,7 @@ function serveFavoritesPageRequests({ context, model, view, flows }: FavoritesCo
   featureBridge.favorites.getFavorite.serve((id) => model.getFavorite(id));
   featureBridge.favorites.allFavorites.serve(() => model.getAllFavorites());
   featureBridge.favorites.searchQuery.serve(() => model.getCurrentSearchQuery());
+  featureBridge.favorites.toolbar.serve(() => view.getToolbar());
   featureBridge.favorites.usingInfiniteScroll.serve(() => preferences.favorites.infiniteScroll.value);
   featureBridge.favorites.layout.serve(() => view.getLayout());
 }

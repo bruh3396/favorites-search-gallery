@@ -23,6 +23,14 @@ export class Shell {
     return this.usingColumnLayout() ? getThumbsInMatrix(this.content) : getItemsInContainer(this.content);
   }
 
+  public findThumb(id: string): HTMLElement | null {
+    return this.content.querySelector<HTMLElement>(`[id="${id}"]`);
+  }
+
+  public hasThumb(id: string): boolean {
+    return this.findThumb(id) !== null;
+  }
+
   public getPageThumbs(): HTMLElement[] {
     return getItemsInContainer(document);
   }

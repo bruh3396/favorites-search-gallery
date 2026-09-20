@@ -3,14 +3,12 @@ import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@
 import { Environment } from "@/app/context/environment";
 import { Events } from "@/app/context/events";
 import { FeatureBridge } from "@/app/context/feature_bridge";
+import { Point } from "@/types/geometry";
 import { Shell } from "@/app/context/shell";
 import { Timeout } from "@/types/async";
 
 const SWIPE_THRESHOLD = 90;
 const TOUCH_HOLD_THRESHOLD = 300;
-
-type Point = { x: number; y: number };
-type SwipeDirection = "up" | "down" | "left" | "right" | null;
 
 export class DomEvents {
   public readonly document = {
@@ -120,7 +118,7 @@ export class DomEvents {
     }
   }
 
-  private getSwipeDirection(): SwipeDirection {
+  private getSwipeDirection(): "up" | "down" | "left" | "right" | null {
     const dx = this.swipeEnd.x - this.swipeStart.x;
     const dy = this.swipeEnd.y - this.swipeStart.y;
 

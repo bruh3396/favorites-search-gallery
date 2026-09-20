@@ -1,7 +1,7 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { getThumbAtPoint } from "@/lib/ui/thumb/query";
 
-export class CursorTracker {
+export class PostOverlayCursorTracker {
   private lastCursorX = 0;
   private lastCursorY = 0;
 

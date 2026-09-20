@@ -1,7 +1,8 @@
 import * as FavoritesChangelog from "@/features/favorites/view/shell/changelog";
 import * as FavoritesHelp from "@/features/favorites/view/shell/help";
-import * as NativePageCleaner from "@/features/favorites/view/native_page_cleaner";
+import * as FavoritesNativePageCleaner from "@/features/favorites/view/native_page_cleaner";
 import { ContentDisplayOptions, PaginationState } from "@/types/ui";
+import { FavoritesToolbarSlots, FavoritesViewDependencies } from "@/features/favorites/types/types";
 import { AppContext } from "@/app/context/context";
 import { ContentTiler } from "@/app/layout/content_tiler";
 import { EnhancedMouseEvent } from "@/lib/event/input";
@@ -12,7 +13,6 @@ import { FavoritesPaginationRenderer } from "@/features/favorites/view/paginatio
 import { FavoritesShell } from "@/features/favorites/view/shell/shell";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
-import { FavoritesViewDependencies } from "@/features/favorites/types/types";
 import { Layout } from "@/types/app";
 import { doNothing } from "@/utils/pure/function";
 import { markAsNew } from "@/features/favorites/view/badge";
@@ -20,8 +20,8 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 export class FavoritesView {
   public readonly markAsNew = markAsNew;
-  public readonly removeOriginalUnusedScripts = NativePageCleaner.removeOriginalUnusedScripts;
-  public readonly takeNativeFavorites = NativePageCleaner.takeNativeFavorites;
+  public readonly removeOriginalUnusedScripts = FavoritesNativePageCleaner.removeOriginalUnusedScripts;
+  public readonly takeNativeFavorites = FavoritesNativePageCleaner.takeNativeFavorites;
   private readonly contentTiler: ContentTiler;
   private readonly shell: FavoritesShell;
   private readonly status: FavoritesStatus;
@@ -37,7 +37,7 @@ export class FavoritesView {
     this.linkSuppressor = new FavoritesLinkSuppressor();
     this.skeleton = new FavoritesSkeleton(this.getLayout());
     this.shell = new FavoritesShell(context.shell, context.environment);
-    this.status = new FavoritesStatus(context.shell);
+    this.status = new FavoritesStatus();
     this.pagination = new FavoritesPaginationRenderer(context.preferences);
     this.drawer = new FavoritesDrawer(context.preferences, this.shell);
   }
@@ -46,9 +46,11 @@ export class FavoritesView {
     this.onContentReplaced = dependencies.onContentReplaced;
     this.onContentAdded = dependencies.onContentAdded;
     this.shell.setup();
-    this.status.setup();
+    const slots = this.shell.getToolbarSlots();
+
+    this.status.setup(slots, this.shell.getToolbar());
     this.contentTiler.setup();
-    this.pagination.setup(dependencies.onPageSelected, dependencies.onPageStepped);
+    this.pagination.setup(dependencies.onPageSelected, dependencies.onPageStepped, slots.paginationSlot, slots.resultsCount);
     this.drawer.setup({
       change: FavoritesChangelog.buildDrawerView(),
       help: FavoritesHelp.buildDrawerView(this.context.environment, dependencies.onShowControls),
@@ -62,6 +64,14 @@ export class FavoritesView {
 
   public getLayout(): Layout {
     return this.contentTiler.getLayout();
+  }
+
+  public getToolbarSlots(): FavoritesToolbarSlots {
+    return this.shell.getToolbarSlots();
+  }
+
+  public getToolbar(): HTMLElement | null {
+    return this.shell.getToolbar();
   }
 
   public bottomEdgeElements(): HTMLElement[] {

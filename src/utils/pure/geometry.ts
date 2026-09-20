@@ -2,7 +2,7 @@ import { Dimensions2D } from "@/types/geometry";
 
 export function toDimensions2D(dimensions: string): Dimensions2D {
   const match = dimensions.match(/^(\d+)(?:x|\/)(\d+)$/);
-  return match ? { x: parseInt(match[1], 10), y: parseInt(match[2], 10)} : { x: 100, y: 100 };
+  return match ? { width: parseInt(match[1], 10), height: parseInt(match[2], 10)} : { width: 100, height: 100 };
 }
 
 export function rectDistance(rect1: DOMRectReadOnly, rect2: DOMRectReadOnly): number {

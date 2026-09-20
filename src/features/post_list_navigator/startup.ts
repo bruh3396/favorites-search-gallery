@@ -1,10 +1,17 @@
 import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
 import { AppContext } from "@/app/context/context";
-import { PostListNavigatorComponents } from "@/features/post_list_navigator/types/types";
 import { PostListNavigatorControl } from "@/features/post_list_navigator/control/control";
 import { PostListNavigatorFlows } from "@/features/post_list_navigator/flows/flows";
 import { PostListNavigatorModel } from "@/features/post_list_navigator/model/model";
 import { PostListNavigatorView } from "@/features/post_list_navigator/view/view";
+
+interface PostListNavigatorComponents {
+  context: AppContext;
+  model: PostListNavigatorModel;
+  view: PostListNavigatorView;
+  flows: PostListNavigatorFlows;
+  control: PostListNavigatorControl;
+}
 
 export function startPostListNavigator(context: AppContext): void {
   if (context.environment.onPostListPage) {

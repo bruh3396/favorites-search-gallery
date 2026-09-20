@@ -5,6 +5,14 @@ const LOCAL_STORAGE_KEY = "preferences";
 const cache: Record<string, unknown> = readStored();
 
 export class Preference<T> {
+  public static resetAll(): void {
+    Storage.remove(LOCAL_STORAGE_KEY);
+
+    for (const key of Object.keys(cache)) {
+      delete cache[key];
+    }
+  }
+
   private readonly key: string;
   private readonly defaultValue: T;
   private readonly emitter: Emitter<T> = new Emitter<T>();
@@ -18,14 +26,6 @@ export class Preference<T> {
 
   public get value(): T {
     return (cache[this.key] as T) ?? this.defaultValue;
-  }
-
-  public static resetAll(): void {
-    Storage.remove(LOCAL_STORAGE_KEY);
-
-    for (const key of Object.keys(cache)) {
-      delete cache[key];
-    }
   }
 
   public set(value: T): void {

@@ -1,7 +1,7 @@
 import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesElement } from "@/features/favorites/model/loading/construction/favorites_element";
+import { FavoritesElement } from "@/features/favorites/types/favorites_element";
 import { FavoritesEnricher } from "@/features/favorites/model/enrichment/enricher";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";

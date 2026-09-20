@@ -23,7 +23,7 @@ export function resetAllButton(): HTMLElement {
   return button;
 }
 
-export function collapseExpandButton(preferences: Preferences, sections: SettingsSection[]): HTMLElement {
+export function collapseExpandButton(preferences: Preferences, sections: SettingsSection[], container: HTMLElement): HTMLElement {
   const button = createElement("button", { className: SettingsClass.collapseExpand, children: [icon("collapseAll"), icon("expandAll")] });
 
   button.type = "button";
@@ -32,12 +32,12 @@ export function collapseExpandButton(preferences: Preferences, sections: Setting
     renderCollapseState(button, allSectionsCollapsed(preferences, sections));
   });
   button.addEventListener("click", () => {
-    toggleAllSections(preferences, sections);
+    toggleAllSections(preferences, sections, container);
   });
   return button;
 }
 
-function toggleAllSections(preferences: Preferences, sections: SettingsSection[]): void {
+function toggleAllSections(preferences: Preferences, sections: SettingsSection[], container: HTMLElement): void {
   const isCollapsed = !allSectionsCollapsed(preferences, sections);
   const state: Record<string, boolean> = {};
 
@@ -46,7 +46,7 @@ function toggleAllSections(preferences: Preferences, sections: SettingsSection[]
   }
   preferences.favorites.settingsExpandedSections.set(state);
 
-  for (const element of document.querySelectorAll<HTMLElement>(`.${SettingsClass.view} .${SettingsClass.section}`)) {
+  for (const element of container.querySelectorAll<HTMLElement>(`.${SettingsClass.view} .${SettingsClass.section}`)) {
     toggleDataset(element, "collapsed", isCollapsed);
   }
 }

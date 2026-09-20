@@ -10,8 +10,8 @@ import { icon } from "@/lib/ui/icon";
 
 export class FavoritesDrawer {
   private activeView: FavoritesDrawerView;
-  private onOpen: () => void = () => { };
-  private onViewSelected: (view: FavoritesDrawerView) => void = () => { };
+  private readonly sidebarIcons = new Map<FavoritesDrawerView, HTMLElement>();
+  private readonly viewElements = new Map<FavoritesDrawerView, HTMLElement>();
 
   constructor(
     private readonly preferences: Preferences,
@@ -30,13 +30,18 @@ export class FavoritesDrawer {
     this.applySidebarLabelVisibility();
     this.insertDrawer(renderers);
     this.renderView(this.activeView);
-    this.setupViewShortcut(FavoritesId.aboutVersion, "change");
-    this.setupViewShortcut(FavoritesId.aboutHelp, "help");
+    const slots = this.shell.getToolbarSlots();
+
+    this.setupViewShortcut(slots.aboutVersion, "change");
+    this.setupViewShortcut(slots.aboutHelp, "help");
   }
 
   public toggle(open: boolean): void {
     toggleDataset(this.shell.root, "drawerOpen", open);
   }
+
+  private onOpen: () => void = () => { };
+  private onViewSelected: (view: FavoritesDrawerView) => void = () => { };
 
   private applySidebarLabelVisibility(): void {
     if (!FavoritesConfig.drawerSidebarLabelsEnabled) {
@@ -76,6 +81,7 @@ export class FavoritesDrawer {
     button.id = favoritesDrawerSidebarIconId(view);
     button.className = FavoritesClass.drawerSidebarIcon;
     button.appendChild(icon(iconName));
+    this.sidebarIcons.set(view, button);
 
     if (FavoritesConfig.drawerSidebarLabelsEnabled) {
       const labelSpan = createElement("span", { className: FavoritesClass.drawerSidebarIconLabel, textContent: label });
@@ -103,6 +109,7 @@ export class FavoritesDrawer {
 
     element.className = FavoritesClass.drawerView;
     element.append(this.buildTitle(title ?? label, content?.actions ?? []), this.buildPanel(content?.mount));
+    this.viewElements.set(view, element);
     return element;
   }
 
@@ -130,8 +137,8 @@ export class FavoritesDrawer {
 
     for (const candidate of FavoritesDrawerViewNames) {
       const isActive = candidate === view;
-      const tabElement = document.getElementById(favoritesDrawerSidebarIconId(candidate));
-      const viewElement = document.getElementById(favoritesDrawerViewId(candidate));
+      const tabElement = this.sidebarIcons.get(candidate) ?? null;
+      const viewElement = this.viewElements.get(candidate) ?? null;
 
       if (isActive) {
         setDataset(tabElement, "selected", "");
@@ -143,12 +150,7 @@ export class FavoritesDrawer {
     }
   }
 
-  private setupViewShortcut(elementId: string, view: FavoritesDrawerView): void {
-    const element = document.getElementById(elementId);
-
-    if (element === null) {
-      return;
-    }
+  private setupViewShortcut(element: HTMLElement, view: FavoritesDrawerView): void {
     element.onclick = (): void => {
       if (!this.isOpen()) {
         this.onOpen();

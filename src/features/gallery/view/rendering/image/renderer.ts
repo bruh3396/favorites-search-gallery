@@ -6,6 +6,7 @@ import { GalleryImageLoader } from "@/features/gallery/view/rendering/image/load
 import { GalleryMainThreadUpscaler } from "@/features/gallery/view/rendering/image/upscalers/main_thread_upscaler";
 import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler_wrapper";
 import { ImageRequest } from "@/features/gallery/types/image_request";
+import { Point } from "@/types/geometry";
 import { Preferences } from "@/app/context/preferences";
 import { Renderer } from "@/features/gallery/types/types";
 import { Shell } from "@/app/context/shell";
@@ -76,8 +77,8 @@ export class GalleryImageRenderer implements Renderer {
     return this.root.classList.toggle("gallery-image-frame--zoomed", value);
   }
 
-  public zoomToPoint(x: number, y: number): void {
-    return this.canvas.zoomToPoint(x, y);
+  public zoomToPoint(point: Point): void {
+    return this.canvas.zoomToPoint(point);
   }
 
   public upscaleCached(): void {

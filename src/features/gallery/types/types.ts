@@ -1,10 +1,4 @@
-import { AppContext } from "@/app/context/context";
-import { GalleryControl } from "@/features/gallery/control/control";
-import { GalleryFeatures } from "@/features/gallery/features/features";
-import { GalleryFlows } from "@/features/gallery/flows/flows";
 import { GalleryMenuAction } from "@/types/app";
-import { GalleryModel } from "@/features/gallery/model/model";
-import { GalleryView } from "@/features/gallery/view/view";
 
 export interface Renderer {
   root: HTMLElement;
@@ -34,12 +28,3 @@ export type GalleryMenuButton = {
   color: string;
   href?: string;
 };
-
-export interface GalleryComponents {
-  context: AppContext;
-  model: GalleryModel;
-  view: GalleryView;
-  control: GalleryControl;
-  flows: GalleryFlows;
-  features: GalleryFeatures;
-}

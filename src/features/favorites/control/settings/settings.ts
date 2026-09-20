@@ -9,10 +9,10 @@ import { buildSettingsSections } from "@/features/favorites/control/settings/men
 import { createElement } from "@/utils/browser/element";
 
 export function mount(context: AppContext): FavoritesDrawerViewContent {
-  const { environment, preferences } = context;
+  const { environment, preferences, shell } = context;
   const catalog = buildSettingsCatalog(context);
   const sections = buildSettingsSections(catalog, environment);
-  const collapseExpand = collapseExpandButton(preferences, sections);
+  const collapseExpand = collapseExpandButton(preferences, sections, shell.root);
   return {
     mount: (panel): void => {
       build(context, panel, sections, [collapseExpand]);

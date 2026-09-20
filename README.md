@@ -298,4 +298,4 @@ Q: Why am I experiencing lag?<br>
 ## Credits
 
 **Awesomplete**: [Website](https://leaverou.github.io/awesomplete/) | [GitHub](https://github.com/LeaVerou/awesomplete)<br>
-Copyright (c) 2013-2025, Lea Verou
+Copyright (c) 2013-2026, Lea Verou

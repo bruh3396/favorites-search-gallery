@@ -11,7 +11,12 @@ const releases = new Map<string, string[]>([
     [
       "Added infinitely nested search support",
       "Added group negation, e.g. -( tag1 ~ tag2 )",
-      "Reduced memory usage"
+      "Added upscale toggle and removed medium performance profile",
+      "Added thumbnail upscaling to mobile",
+      "Reduced memory usage",
+      "Fixed favorites clipping at bottom on mobile",
+      "Fixed default sort by ascending",
+      "Added progress bar to loading cached favorites"
     ]
   ],
   [

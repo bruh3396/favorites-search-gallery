@@ -1,4 +1,4 @@
-import * as FavoritesRating from "@/features/favorites/model/search/rating";
+import * as FavoritesRating from "@/features/favorites/types/rating";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { Environment } from "@/app/context/environment";
@@ -101,7 +101,9 @@ export class FavoritesSearcher {
   }
 
   private findMatches(favorites: Favorite[]): Favorite[] {
-    return this.filterByRating(this.searchOrPassThrough(this.finalSearchQuery(), favorites));
+    const query = this.finalSearchQuery();
+    const result = isEmptyString(query) ? favorites : this.engine.search(query, favorites);
+    return this.filterByRating(result);
   }
 
   private blacklistQuery(): string | undefined {

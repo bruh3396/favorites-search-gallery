@@ -1,7 +1,7 @@
 import { Environment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConcurrentFetcher } from "@/features/favorites/model/loading/retrieval/concurrent_fetcher";
-import { FavoritesItem } from "@/features/favorites/model/loading/construction/favorites_item";
+import { FavoritesItem } from "@/features/favorites/types/favorites_item";
 import { FavoritesSequentialFetcher } from "@/features/favorites/model/loading/retrieval/sequential_fetcher";
 import { FavoritesStore } from "@/features/favorites/model/loading/retrieval/store";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";

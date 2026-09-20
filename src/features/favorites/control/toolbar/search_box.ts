@@ -2,6 +2,7 @@ import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete, markAsN
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { openPostList } from "@/lib/remote/fetchers/action";
@@ -19,7 +20,7 @@ export class SearchBox {
 
   constructor(
     private readonly events: Events,
-    private readonly parentId: string = FavoritesId.searchField
+    private readonly slots: FavoritesToolbarSlots
   ) {
     this.searchBox = this.createSearchBox();
     this.subscribeToEvents();
@@ -66,13 +67,7 @@ export class SearchBox {
     searchBox.spellcheck = false;
     searchBox.value = this.history.lastEditedQuery;
     markAsNeedingAutocomplete(searchBox);
-    const searchButtonSlot = document.getElementById(FavoritesId.searchButton);
-
-    if (searchButtonSlot === null) {
-      document.getElementById(this.parentId)?.insertAdjacentElement("beforeend", searchBox);
-    } else {
-      searchButtonSlot.insertAdjacentElement("afterend", searchBox);
-    }
+    this.slots.searchButton.insertAdjacentElement("afterend", searchBox);
     return searchBox;
   }
 
@@ -83,7 +78,7 @@ export class SearchBox {
   }
 
   private refreshClearButton(): void {
-    toggleDataset(document.getElementById(FavoritesId.clearButton), "hidden", this.searchBox.value === "");
+    toggleDataset(this.slots.searchActions.querySelector<HTMLElement>(`#${FavoritesId.clearButton}`), "hidden", this.searchBox.value === "");
   }
 
   private subscribeToEvents(): void {
@@ -126,11 +121,7 @@ export class SearchBox {
   }
 
   private setExpanded(expanded: boolean): void {
-    const field = this.searchBox.closest(`#${FavoritesId.searchField}`);
-
-    if (field instanceof HTMLElement) {
-      toggleDataset(field, "expanded", expanded);
-    }
+    toggleDataset(this.slots.searchField, "expanded", expanded);
   }
 
   private subscribeToKeyboard(): void {

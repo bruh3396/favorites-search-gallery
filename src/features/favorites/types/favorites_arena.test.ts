@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { FavoritesArena } from "@/features/favorites/model/loading/construction/favorites_arena";
+import { FavoritesArena } from "@/features/favorites/types/favorites_arena";
 
 describe("FavoriteArena", () => {
   let arena: FavoritesArena;

@@ -624,7 +624,7 @@ export default defineConfig([
   {
     files: [
       "src/**/array.ts",
-      "src/features/favorites/model/search/rating.ts",
+      "src/features/favorites/types/rating.ts",
       "src/features/favorites/features/downloader/filename_settings.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",

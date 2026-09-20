@@ -1,14 +1,14 @@
 import { MediaExtension, MediaType, decodeMediaExtension, encodeMediaExtension } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { compressPreviewSource, decompressPreviewSource } from "@/features/favorites/types/preview_source_codec";
-import { toRatingString, toRatingValue } from "@/features/favorites/model/search/rating";
+import { toRatingString, toRatingValue } from "@/features/favorites/types/rating";
 import { Favorite } from "@/types/favorite";
-import { FavoritesArena } from "@/features/favorites/model/loading/construction/favorites_arena";
-import { FavoritesElement } from "@/features/favorites/model/loading/construction/favorites_element";
+import { FavoritesArena } from "@/features/favorites/types/favorites_arena";
+import { FavoritesElement } from "@/features/favorites/types/favorites_element";
 import { Post } from "@/types/api";
 import { internString } from "@/lib/search/interner";
 import { resolveMediaType } from "@/lib/media/media_type";
-import { thumbToPost } from "@/features/favorites/model/loading/construction/thumb_to_post";
+import { thumbToPost } from "@/features/favorites/types/thumb_to_post";
 import { toTagSet } from "@/utils/pure/tag";
 
 const arena = new FavoritesArena();

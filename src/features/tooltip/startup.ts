@@ -1,8 +1,14 @@
 import { AppContext } from "@/app/context/context";
-import { TooltipComponents } from "@/features/tooltip/types/types";
 import { TooltipFlows } from "@/features/tooltip/flows/flows";
 import { TooltipModel } from "@/features/tooltip/model/model";
 import { TooltipView } from "@/features/tooltip/view/view";
+
+interface TooltipComponents {
+  context: AppContext;
+  model: TooltipModel;
+  view: TooltipView;
+  flows: TooltipFlows;
+}
 
 export function startTooltip(context: AppContext): void {
   if (context.flags.tooltipDisabled) {
@@ -22,8 +28,8 @@ function setup(components: TooltipComponents): void {
   subscribeToEvents(components);
 }
 
-function setupView({ view }: TooltipComponents): void {
-  view.setup();
+function setupView({ context, view }: TooltipComponents): void {
+  view.setup(() => context.featureBridge.favorites.toolbar.call());
 }
 
 function subscribeToEvents({ context, model, flows }: TooltipComponents): void {

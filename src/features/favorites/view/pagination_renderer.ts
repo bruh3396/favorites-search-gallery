@@ -3,7 +3,6 @@ import { PaginationSequence, PaginationState } from "@/types/ui";
 import { Stepper, buildStepper } from "@/lib/ui/settings/components/stepper_control";
 import { createElement, label, span } from "@/utils/browser/element";
 import { removeDataset, toggleDataset } from "@/utils/browser/dataset";
-import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
@@ -39,10 +38,10 @@ export class FavoritesPaginationRenderer {
 
   constructor(private readonly preferences: Preferences) { }
 
-  public setup(pageSelected: (pageNumber: number) => void, pageStepped: (direction: NavigationKey) => void): void {
+  public setup(pageSelected: (pageNumber: number) => void, pageStepped: (direction: NavigationKey) => void, paginationSlot: HTMLElement, resultsCount: HTMLElement): void {
     this.onPageSelected = pageSelected;
     this.onPageStepped = pageStepped;
-    this.insert();
+    this.insert(paginationSlot, resultsCount);
     this.buildPaginator({ currentPage: 1, finalPage: 1, totalCount: 0, sliceStart: 0, sliceEnd: 0, sequence: [1] });
     this.togglePaginator(!this.preferences.favorites.infiniteScroll.value);
   }
@@ -74,16 +73,14 @@ export class FavoritesPaginationRenderer {
     this.updateExistingArrowTraversalButtons(context);
   }
 
-  private insertMenu(): void {
-    const placeToInsert = document.getElementById(FavoritesId.paginationSlot);
-
-    placeToInsert?.insertAdjacentElement("afterend", this.container);
-    placeToInsert?.remove();
+  private insertMenu(paginationSlot: HTMLElement): void {
+    paginationSlot.insertAdjacentElement("afterend", this.container);
+    paginationSlot.remove();
   }
 
-  private insert(): void {
-    document.getElementById(FavoritesId.resultsCount)?.insertAdjacentElement("beforebegin", this.rangeIndicator);
-    this.insertMenu();
+  private insert(paginationSlot: HTMLElement, resultsCount: HTMLElement): void {
+    resultsCount.insertAdjacentElement("beforebegin", this.rangeIndicator);
+    this.insertMenu(paginationSlot);
   }
 
   private updateRangeIndicator(start: number, end: number, count: number): void {

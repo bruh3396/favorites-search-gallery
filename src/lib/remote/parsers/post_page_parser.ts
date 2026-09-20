@@ -17,8 +17,8 @@ export function parsePostFromPostPage(html: string): ParsedPost {
   return {
     post: {
       id: statistics.id,
-      width: dimensions.x,
-      height: dimensions.y,
+      width: dimensions.width,
+      height: dimensions.height,
       score: Number(statistics.score),
       rating,
       change: 0,

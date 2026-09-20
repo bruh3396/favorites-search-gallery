@@ -12,8 +12,9 @@ export class TooltipView {
     this.element = new TooltipElement(context.shell);
   }
 
-  public setup(): void {
+  public setup(getTopObstruction: () => HTMLElement | null): void {
     this.element.setup();
+    this.getTopObstruction = getTopObstruction;
   }
 
   public show(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
@@ -22,7 +23,7 @@ export class TooltipView {
     this.lastThumb = thumb;
     this.lastTooltip = tooltip;
     TooltipContent.render(tooltip, thumb, getColor);
-    TooltipPosition.position(tooltip, thumb);
+    TooltipPosition.position(tooltip, thumb, this.getTopObstruction());
   }
 
   public hide(): void {
@@ -33,7 +34,9 @@ export class TooltipView {
 
   public repositionIfVisible(): void {
     if (this.lastThumb !== null && this.lastTooltip !== null) {
-      TooltipPosition.position(this.lastTooltip, this.lastThumb);
+      TooltipPosition.position(this.lastTooltip, this.lastThumb, this.getTopObstruction());
     }
   }
+
+  private getTopObstruction: () => HTMLElement | null = () => null;
 }

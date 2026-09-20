@@ -61,7 +61,7 @@ export class GalleryClickFlow extends GalleryFlow {
 
     if (mouseEvent.shiftKey) {
       if (this.toggleGalleryImageZoom()) {
-        this.view.zoomToPoint(mouseEvent.originalEvent.x, mouseEvent.originalEvent.y);
+        this.view.zoomToPoint({x: mouseEvent.originalEvent.x, y: mouseEvent.originalEvent.y});
       }
       return;
     }

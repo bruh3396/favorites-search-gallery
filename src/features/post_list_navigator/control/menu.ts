@@ -11,6 +11,14 @@ interface SettingsSection {
   controls: SettingsControl[];
 }
 
+export function build(context: AppContext, panel: HTMLElement): void {
+  panel.classList.add(SettingsClass.view);
+
+  for (const section of buildSections(context)) {
+    panel.appendChild(buildSection(context, section));
+  }
+}
+
 function buildSections(context: AppContext): SettingsSection[] {
   const catalog = buildPostListSettingsCatalog(context);
 
@@ -50,14 +58,6 @@ function buildSections(context: AppContext): SettingsSection[] {
       ]
     }
   ];
-}
-
-export function build(context: AppContext, panel: HTMLElement): void {
-  panel.classList.add(SettingsClass.view);
-
-  for (const section of buildSections(context)) {
-    panel.appendChild(buildSection(context, section));
-  }
 }
 
 function buildSection(context: AppContext, settingsSection: SettingsSection): HTMLElement {

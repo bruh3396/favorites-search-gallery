@@ -20,10 +20,10 @@ export class GalleryVisibilityFlow extends GalleryFlow {
   }
 
   private cacheOrUpscale(thumbs: HTMLElement[]): void {
-    if (!this.context.environment.usingFirefox) {
-      this.view.cacheImages(thumbs);
-    } else {
+    if (this.context.environment.usingFirefox) {
       this.view.upscale(thumbs);
+    } else {
+      this.view.cacheImages(thumbs);
     }
   }
 

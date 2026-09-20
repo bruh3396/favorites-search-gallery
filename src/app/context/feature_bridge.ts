@@ -14,6 +14,7 @@ export class FeatureBridge {
     layout: new FeatureChannel<void, Layout>("column"),
     searchQuery: new FeatureChannel<void, string>(""),
     searchResults: new FeatureChannel<void, Favorite[]>([]),
+    toolbar: new FeatureChannel<void, HTMLElement | null>(null),
     usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
   };
 

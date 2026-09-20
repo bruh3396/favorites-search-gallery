@@ -58,7 +58,7 @@ export class ContentTiler {
     this.columnTiler = new ColumnTiler(config.content, config.columnCount.value);
     this.tilers = [this.columnTiler, new GridTiler(config.content), new RowTiler(config.content), new SquareTiler(config.content), new NativeTiler(config.content)];
     this.tilerMap = new Map(this.tilers.map(tiler => [tiler.layout, tiler]));
-    this.fade = new Fader(config.fadeThumbs, () => this.config.columnCount.value);
+    this.fade = new Fader(config.content, config.fadeThumbs, () => this.config.columnCount.value);
     this.currentLayout = config.layout.value;
     this.currentTiler = this.tilerMap.get(this.currentLayout) ?? this.columnTiler;
   }

@@ -16,7 +16,7 @@ export class FavoritesLoadFlow extends FavoritesFlow {
       await this.loadStoredFavorites(storedFavoritesCount);
       await this.fetchNewFavorites(firstPageFavorites);
       await this.indexLoadedFavorites();
-      this.flows.search.reSearchFavorites();
+      this.flows.search.searchFavorites("");
     } else {
       await this.fetchAllFavorites(firstPageFavorites);
     }

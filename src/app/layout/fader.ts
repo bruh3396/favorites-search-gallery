@@ -8,10 +8,10 @@ export class Fader {
   private readonly fadeThumbs: boolean;
   private readonly getColumnCount: () => number;
 
-  constructor(fadeThumbs: boolean, getColumnCount: () => number) {
+  constructor(root: HTMLElement, fadeThumbs: boolean, getColumnCount: () => number) {
     this.fadeThumbs = fadeThumbs;
     this.getColumnCount = getColumnCount;
-    document.documentElement.style.setProperty("--fade-cascade-step", `${ThumbConfig.fadeCascadeStepMs}ms`);
+    root.style.setProperty("--fade-cascade-step", `${ThumbConfig.fadeCascadeStepMs}ms`);
   }
 
   public fadeInReplacement(thumbs: HTMLElement[], insert: () => void): void {

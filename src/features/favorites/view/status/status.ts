@@ -1,7 +1,7 @@
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
-import { Shell } from "@/app/context/shell";
+import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { Timeout } from "@/types/async";
 
 const TEMPORARY_STATUS_TIMEOUT = 1_000;
@@ -14,16 +14,16 @@ export class FavoritesStatus {
   private totalFavoritesCount: number | null = null;
   private statusTimeout: Timeout | undefined;
 
-  constructor(private readonly shell: Shell) {
+  constructor() {
     this.resultsCountIndicator = document.createElement("label");
     this.statusIndicator = document.createElement("label");
     this.progressBar = buildProgressBar(FavoritesId.loadProgressBar);
   }
 
-  public setup(): void {
-    this.resultsCountIndicator = this.shell.root.querySelector(`#${FavoritesId.resultsCount}`) ?? this.resultsCountIndicator;
-    this.statusIndicator = this.shell.root.querySelector(`#${FavoritesId.loadStatus}`) ?? this.statusIndicator;
-    this.shell.root.querySelector(`#${FavoritesId.toolbar}`)?.append(this.progressBar.element);
+  public setup(slots: FavoritesToolbarSlots, toolbar: HTMLElement | null): void {
+    this.resultsCountIndicator = slots.resultsCount;
+    this.statusIndicator = slots.loadStatus;
+    toolbar?.append(this.progressBar.element);
   }
 
   public setStatus(text: string): void {

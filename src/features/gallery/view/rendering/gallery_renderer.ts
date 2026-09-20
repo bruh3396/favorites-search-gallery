@@ -5,6 +5,7 @@ import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
+import { Point } from "@/types/geometry";
 import { Renderer } from "@/features/gallery/types/types";
 import { forceReflow } from "@/utils/browser/element";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
@@ -69,8 +70,8 @@ export class GalleryRenderer {
     this.imageRenderer.toggleUpscaler(value);
   }
 
-  public zoomToPoint(x: number, y: number): void {
-    this.imageRenderer.zoomToPoint(x, y);
+  public zoomToPoint(point: Point): void {
+    this.imageRenderer.zoomToPoint(point);
   }
 
   public cacheImages(thumbs: HTMLElement[]): Promise<void> {

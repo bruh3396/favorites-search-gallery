@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { toRatingString, toRatingValue } from "@/features/favorites/model/search/rating";
+import { toRatingString, toRatingValue } from "@/features/favorites/types/rating";
 import { DiscreteRating } from "@/types/search";
 
 describe("toRatingValue", () => {

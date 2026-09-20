@@ -81,7 +81,7 @@ export class FavoritesPaginatedDisplay implements FavoritesDisplay {
     if (this.hasAppendedFirstResults && !this.model.atFinalPage()) {
       return;
     }
-    const missing = this.model.currentPageFavorites().filter(favorite => document.getElementById(favorite.id) === null);
+    const missing = this.model.currentPageFavorites().filter(favorite => !this.shell.hasThumb(favorite.id));
 
     if (missing.length === 0) {
       return;

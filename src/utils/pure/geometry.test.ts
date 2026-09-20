@@ -1,19 +1,20 @@
 import { describe, expect, test } from "vitest";
 import { rectDistance, toDimensions2D } from "@/utils/pure/geometry";
+import { Dimensions2D } from "@/types/geometry";
 
 describe("parseDimensions2D", () => {
-  const defaultDimensions = { x: 100, y: 100 };
+  const defaultDimensions: Dimensions2D = { width: 100, height: 100 };
 
   test("empty", () => {
     expect(toDimensions2D("")).toStrictEqual(defaultDimensions);
   });
 
   test("square", () => {
-    expect(toDimensions2D("20x20")).toStrictEqual({ x: 20, y: 20 });
+    expect(toDimensions2D("20x20")).toStrictEqual({ width: 20, height: 20 });
   });
 
   test("rectangle", () => {
-    expect(toDimensions2D("1920x1080")).toStrictEqual({ x: 1920, y: 1080 });
+    expect(toDimensions2D("1920x1080")).toStrictEqual({ width: 1920, height: 1080 });
   });
 
   test("invalid format", () => {
@@ -33,7 +34,7 @@ describe("parseDimensions2D", () => {
   });
 
   test("different separator", () => {
-    expect(toDimensions2D("20/20")).toStrictEqual({ x: 20, y: 20 });
+    expect(toDimensions2D("20/20")).toStrictEqual({ width: 20, height: 20 });
   });
 });
 

@@ -1,8 +1,8 @@
 import { AppContext } from "@/app/context/context";
 import { GalleryBackgroundFlow } from "@/features/gallery/flows/background";
-import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryClickFlow } from "@/features/gallery/flows/click";
 import { GalleryContentFlow } from "@/features/gallery/flows/content";
+import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryDispatchFlow } from "@/features/gallery/flows/dispatch";
 import { GalleryDisplayFlow } from "@/features/gallery/flows/display";
 import { GalleryFavoriterFlow } from "@/features/gallery/flows/favoriter";

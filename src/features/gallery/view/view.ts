@@ -8,6 +8,7 @@ import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_rende
 import { GalleryShell } from "@/features/gallery/view/shell/shell";
 import { GalleryUi } from "@/features/gallery/view/shell/ui";
 import { GalleryViewDependencies } from "@/features/gallery/types/types";
+import { Point } from "@/types/geometry";
 import { insertStyle } from "@/utils/browser/injector";
 
 export class GalleryView {
@@ -82,8 +83,8 @@ export class GalleryView {
     return this.renderer.toggleZoom(value);
   }
 
-  public zoomToPoint(x: number, y: number): void {
-    this.renderer.zoomToPoint(x, y);
+  public zoomToPoint(point: Point): void {
+    this.renderer.zoomToPoint(point);
   }
 
   public cacheImages(thumbs: HTMLElement[]): Promise<void> {

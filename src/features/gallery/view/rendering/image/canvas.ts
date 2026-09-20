@@ -2,6 +2,7 @@ import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
 import { Environment } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
+import { Point } from "@/types/geometry";
 import { Resolution } from "@/types/media";
 import { setDataset } from "@/utils/browser/dataset";
 import { toDimensions2D } from "@/utils/pure/geometry";
@@ -15,8 +16,8 @@ export class GalleryImageCanvas {
     const dimensions = toDimensions2D(this.mainCanvasResolution);
 
     this.mainCanvas.className = "gallery-image";
-    this.mainCanvas.width = dimensions.x;
-    this.mainCanvas.height = dimensions.y;
+    this.mainCanvas.width = dimensions.width;
+    this.mainCanvas.height = dimensions.height;
   }
 
   private get mainCanvasResolution(): Resolution {
@@ -42,7 +43,7 @@ export class GalleryImageCanvas {
     this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
   }
 
-  public zoomToPoint(x: number, y: number): void {
+  public zoomToPoint({x, y}: Point): void {
     if (this.container === null) {
       return;
     }

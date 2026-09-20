@@ -1,4 +1,4 @@
-export class OverlayTarget {
+export class PostOverlayTarget {
   private currentThumbId: string | null = null;
 
   public isCurrent(thumbId: string): boolean {

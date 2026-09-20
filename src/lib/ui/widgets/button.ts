@@ -5,7 +5,6 @@ import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/browser/element";
 
 export interface ButtonElement {
-  parentId: string;
   id: string;
   enabled: boolean;
   title: string;
@@ -17,7 +16,6 @@ export interface ButtonElement {
 }
 
 export const defaultButtonElement: ButtonElement = {
-  parentId: "",
   id: "",
   enabled: true,
   title: "",

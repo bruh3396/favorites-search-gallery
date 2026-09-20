@@ -2,44 +2,49 @@ import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
 import { Environment } from "@/app/context/environment";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
 import { buildToggleButton } from "@/lib/ui/settings/components/toggle_button";
 
-export function setup(events: Events, environment: Environment, preferences: Preferences): void {
-  buildButtons(events, environment).forEach(insertButton);
-  insertDrawerToggle(preferences);
+interface ButtonConfig extends Partial<ButtonElement> {
+  parent: HTMLElement;
 }
 
-function insertDrawerToggle(preferences: Preferences): void {
+export function setup(events: Events, environment: Environment, preferences: Preferences, slots: FavoritesToolbarSlots): void {
+  buildButtons(events, environment, slots).forEach(insertButton);
+  insertDrawerToggle(preferences, slots);
+}
+
+function insertDrawerToggle(preferences: Preferences, slots: FavoritesToolbarSlots): void {
   const drawerToggle = buildToggleButton({
     id: FavoritesId.drawerToggleButton,
     tooltip: "Menu",
     preference: preferences.favorites.drawerOpen
   }, "hamburger");
 
-  document.getElementById(FavoritesId.drawerToggleSlot)?.appendChild(drawerToggle);
+  slots.drawerToggle.appendChild(drawerToggle);
 }
 
-function buildButtons(events: Events, environment: Environment): Partial<ButtonElement>[] {
+function buildButtons(events: Events, environment: Environment, slots: FavoritesToolbarSlots): ButtonConfig[] {
   const onDesktop = environment.onDesktopDevice;
   return [
     {
       id: "search-button",
-      parentId: FavoritesId.searchButton,
+      parent: slots.searchButton,
       icon: "search",
       rightClickEnabled: true,
       event: events.favorites.searchButtonClicked
     },
     {
       id: "reset-button",
-      parentId: FavoritesId.buttonsSlot,
+      parent: slots.buttons,
       textContent: "RESET",
       icon: onDesktop ? null : "reset",
       event: events.favorites.resetButtonClicked
     },
     {
       id: "invert-button",
-      parentId: FavoritesId.buttonsSlot,
+      parent: slots.buttons,
       textContent: "INVERT",
       icon: onDesktop ? null : "changeDirection",
       enabled: onDesktop,
@@ -47,25 +52,23 @@ function buildButtons(events: Events, environment: Environment): Partial<ButtonE
     },
     {
       id: "shuffle-button",
-      parentId: FavoritesId.buttonsSlot,
+      parent: slots.buttons,
       textContent: "SHUFFLE",
       icon: onDesktop ? null : "shuffle",
       event: events.favorites.shuffleButtonClicked
     },
     {
       id: FavoritesId.clearButton,
-      parentId: FavoritesId.actions,
+      parent: slots.searchActions,
       icon: "clear",
       event: events.favorites.clearButtonClicked
     }
   ];
 }
 
-function insertButton(config: Partial<ButtonElement>): void {
-  if (config.enabled === false || config.parentId === undefined) {
+function insertButton(config: ButtonConfig): void {
+  if (config.enabled === false) {
     return;
   }
-  const parent = document.getElementById(config.parentId);
-
-  parent?.insertAdjacentElement(config.position ?? "afterbegin", buildButton(config));
+  config.parent.insertAdjacentElement(config.position ?? "afterbegin", buildButton(config));
 }

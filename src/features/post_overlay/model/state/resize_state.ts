@@ -1,4 +1,4 @@
-export class ResizeState {
+export class PostOverlayResizeState {
   private isCurrentlyResizing = false;
 
   public isResizing(): boolean {

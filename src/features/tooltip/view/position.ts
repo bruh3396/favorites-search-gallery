@@ -2,11 +2,11 @@ import { clamp } from "@/utils/pure/number";
 
 const TOP_MARGIN = 100;
 
-export function position(tooltip: HTMLElement, thumb: HTMLElement): void {
+export function position(tooltip: HTMLElement, thumb: HTMLElement, topObstruction: HTMLElement | null): void {
   const rect = thumb.getBoundingClientRect();
   const width = tooltip.offsetWidth;
   const height = tooltip.offsetHeight;
-  const topBoundary = Math.max(TOP_MARGIN, getMenuBottom());
+  const topBoundary = Math.max(TOP_MARGIN, getObstructionBottom(topObstruction));
   const overflowsRight = rect.right + width > window.innerWidth;
   const overflowsTop = rect.top < topBoundary;
   const overflowsBottom = rect.top + height > window.innerHeight;
@@ -20,7 +20,6 @@ export function position(tooltip: HTMLElement, thumb: HTMLElement): void {
   tooltip.style.top = `${clampedTop + window.scrollY}px`;
 }
 
-function getMenuBottom(): number {
-  const menu = document.getElementById("favorites-toolbar");
-  return (menu === null || menu.offsetParent === null) ? 0 : menu.getBoundingClientRect().bottom;
+function getObstructionBottom(obstruction: HTMLElement | null): number {
+  return (obstruction === null || obstruction.offsetParent === null) ? 0 : obstruction.getBoundingClientRect().bottom;
 }

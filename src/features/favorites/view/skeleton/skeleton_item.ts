@@ -22,8 +22,8 @@ export class FavoritesSkeletonItem {
     if (layout === "native") {
       const dimensions: Dimensions2D = aspectRatio ? toDimensions2D(aspectRatio) : randomDimensions();
 
-      this.element.style.setProperty("width", `${dimensions.x}px`);
-      this.element.style.setProperty("height", `${dimensions.y}px`);
+      this.element.style.setProperty("width", `${dimensions.width}px`);
+      this.element.style.setProperty("height", `${dimensions.height}px`);
     } else {
       this.element.style.setProperty("aspect-ratio", aspectRatio ?? randomAspectRatio());
     }
@@ -66,7 +66,7 @@ function randomDimensions(): Dimensions2D {
   const shouldMaximizeWidth = randomBoolean();
   const randomDimension = randomIntInRange(min, max);
   return {
-    x: shouldMaximizeWidth ? max : randomDimension,
-    y: shouldMaximizeWidth ? randomDimension : max
+    width: shouldMaximizeWidth ? max : randomDimension,
+    height: shouldMaximizeWidth ? randomDimension : max
   };
 }

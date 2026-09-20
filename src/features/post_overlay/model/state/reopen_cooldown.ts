@@ -2,7 +2,7 @@ import { Timeout } from "@/types/async";
 
 const REOPEN_COOLDOWN = 300;
 
-export class ReopenCooldown {
+export class PostOverlayReopenCooldown {
   private timeoutId: Timeout | null = null;
 
   public isCoolingDown(): boolean {

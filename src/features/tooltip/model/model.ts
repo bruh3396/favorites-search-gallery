@@ -21,7 +21,6 @@ export class TooltipModel {
 
   public tooltipEnabled(): boolean {
     const { environment, preferences } = this.context;
-
     return environment.onFavoritesPage ? preferences.favorites.tooltipEnabled.value : preferences.postList.tooltipEnabled.value;
   }
 }

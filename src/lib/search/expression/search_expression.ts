@@ -7,8 +7,6 @@ type SearchExpressionNode =
   | { kind: "not"; child: SearchExpression };
 
 export class SearchExpression {
-  constructor(public readonly node: SearchExpressionNode) { }
-
   public static term(term: AbstractSearchTerm): SearchExpression {
     return new SearchExpression({ kind: "term", term });
   }
@@ -24,4 +22,6 @@ export class SearchExpression {
   public static not(child: SearchExpression): SearchExpression {
     return new SearchExpression({ kind: "not", child });
   }
+
+  constructor(public readonly node: SearchExpressionNode) { }
 }
