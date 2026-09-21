@@ -4,8 +4,9 @@ import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_par
 import { fetchFavoritesPage } from "@/lib/remote/fetchers/html";
 import { sleep } from "@/lib/async/scheduling";
 
+const PENDING_POLL_INTERVAL = 200;
+
 export class FavoritesConcurrentFetcher {
-  private static readonly PENDING_POLL_INTERVAL = 200;
   private readonly inFlight = new Set<number>();
   private readonly failed: FavoritesPageRequest[] = [];
   private readonly pendingDelivery = new SortedArray<FavoritesPageRequest>((a, b) => a.pageNumber - b.pageNumber);
@@ -26,7 +27,7 @@ export class FavoritesConcurrentFetcher {
       const request = this.takeNextRequest();
 
       if (request === undefined) {
-        await sleep(FavoritesConcurrentFetcher.PENDING_POLL_INTERVAL);
+        await sleep(PENDING_POLL_INTERVAL);
         continue;
       }
       this.fetchPage(request);

@@ -81,6 +81,10 @@ export class FavoritesModel {
     return this.searcher.search(this.collection.getAll(), query);
   }
 
+  public searchFavoritesPure(favorites: Favorite[], query: string): Favorite[] {
+    return this.searcher.searchPure(favorites, query);
+  }
+
   public reSearchFavorites(): Favorite[] {
     return this.searcher.reSearch(this.collection.getAll());
   }

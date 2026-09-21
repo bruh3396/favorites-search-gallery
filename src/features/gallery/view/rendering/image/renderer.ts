@@ -27,9 +27,7 @@ export class GalleryImageRenderer implements Renderer {
     this.environment = environment;
     this.shell = shell;
     this.loader = new GalleryImageLoader(environment, (request) => this.onBitmapLoaded(request));
-    const getContentThumbs = (): HTMLElement[] => shell.getContentThumbs();
-
-    this.upscaler = environment.usingFirefox ? new GalleryWorkerUpscalerWrapper(environment, preferences, getContentThumbs) : new GalleryMainThreadUpscaler(environment, preferences, getContentThumbs);
+    this.upscaler = GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper(environment, preferences, shell) : new GalleryMainThreadUpscaler(environment, preferences, shell);
     this.canvas = new GalleryImageCanvas(environment);
     this.canvas.mount(this.root);
   }
@@ -56,16 +54,16 @@ export class GalleryImageRenderer implements Renderer {
       .map((request) => request.thumb);
     const animated = thumbs.filter((thumb) => !isImageThumb(thumb));
 
-    this.upscaler.upscaleAll(this.disposableRequests([...animated, ...rejected]));
+    this.upscaler.fetchThenPaintAll(this.disposableRequests([...animated, ...rejected]));
   }
 
   public async upscale(thumbs: HTMLElement[]): Promise<void> {
     await this.waitForAllThumbsToLoadWithTimeout();
-    this.upscaler.upscaleAll(this.disposableRequests(thumbs));
+    this.upscaler.fetchThenPaintAll(this.disposableRequests(thumbs));
   }
 
   public reupscaleCachedThumbs(): void {
-    this.upscaler.downscaleAll();
+    this.upscaler.eraseAll();
     setTimeout(() => this.upscaleCached(), 10);
   }
 
@@ -82,19 +80,23 @@ export class GalleryImageRenderer implements Renderer {
   }
 
   public upscaleCached(): void {
-    this.upscaler.upscaleAll(this.loader.completedRequests());
+    this.upscaler.repaintAll(this.loader.completedRequests());
   }
 
   public downscaleAll(): void {
-    this.upscaler.downscaleAll();
+    this.upscaler.eraseAll();
   }
 
   public downscaleDetached(): void {
-    this.upscaler.downscaleDetached();
+    this.upscaler.eraseDetached();
   }
 
-  public toggleUpscaler(value: boolean): void {
-    this.upscaler.toggle(value);
+  public pauseUpscaler(): void {
+    this.upscaler.pause();
+  }
+
+  public resumeUpscaler(): void {
+    this.upscaler.resume();
   }
 
   public correctOrientation(): void {
@@ -123,7 +125,7 @@ export class GalleryImageRenderer implements Renderer {
   }
 
   private onBitmapLoaded(request: ImageRequest): void {
-    this.upscaler.upscale(request);
+    this.upscaler.tryPainting(request);
 
     if (request.id === this.activeId) {
       this.draw(request.thumb);

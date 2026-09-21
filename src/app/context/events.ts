@@ -13,6 +13,7 @@ export class Events {
   public readonly favorites = {
     clearButtonClicked: new Emitter<MouseEvent>(),
     invertButtonClicked: new Emitter<MouseEvent>(),
+    scratchButtonClicked: new Emitter<MouseEvent>(),
     resetButtonClicked: new Emitter<MouseEvent>(),
     searchButtonClicked: new Emitter<MouseEvent>(),
     shuffleButtonClicked: new Emitter<MouseEvent>(),

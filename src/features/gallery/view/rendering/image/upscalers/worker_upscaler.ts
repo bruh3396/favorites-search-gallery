@@ -5,7 +5,7 @@ type UpscaleConfig = {
 
 type UpscaleCommand =
   | { action: "init"; config: UpscaleConfig }
-  | { action: "upscale"; id: string; url: string; canvas?: OffscreenCanvas }
+  | { action: "paint"; id: string; url: string; canvas?: OffscreenCanvas }
   | { action: "evict"; id: string };
 
 const canvases: Map<string, OffscreenCanvas> = new Map();
@@ -19,8 +19,8 @@ self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
       config = message.config;
       break;
 
-    case "upscale":
-      upscale(message.id, message.url, message.canvas);
+    case "paint":
+      paintFromUrl(message.id, message.url, message.canvas);
       break;
 
     case "evict":
@@ -31,7 +31,7 @@ self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
   }
 };
 
-async function upscale(id: string, url: string, canvas?: OffscreenCanvas): Promise<void> {
+async function paintFromUrl(id: string, url: string, canvas?: OffscreenCanvas): Promise<void> {
   if (canvas !== undefined) {
     canvases.set(id, canvas);
   }

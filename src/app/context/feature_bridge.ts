@@ -52,9 +52,4 @@ export class FeatureBridge {
   public currentLayout(): Layout {
     return this.environment.onPostListPage ? this.postList.layout.call() : this.favorites.layout.call();
   }
-
-  public getCurrentSearchQuery(): string {
-    // return ON_POST_LIST_PAGE ? (): string => FeatureBridge.postList.searchQuery.call() : (): string => FeatureBridge.favorites.searchQuery.call();
-    return "";
-  }
 }

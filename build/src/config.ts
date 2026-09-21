@@ -10,7 +10,7 @@ const SCRIPT_VERSION = resolveScriptVersion();
 export const OUT_FILE = "dist/favorites_search_gallery.js";
 export const META_FILE = "dist/meta.json";
 export const BUILD_OPTIONS: BuildOptions = {
-  entryPoints: ["src/app/favorites_search_gallery.ts"],
+  entryPoints: ["src/favorites_search_gallery.ts"],
   bundle: true,
   metafile: true,
   outfile: OUT_FILE,

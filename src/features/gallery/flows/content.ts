@@ -23,7 +23,10 @@ export class GalleryContentFlow extends GalleryFlow {
   public toggleUpscaling(value: boolean): void {
     if (value) {
       this.view.upscaleCached();
+      const visible = this.control.getVisibleThumbs().slice(0, 25);
+
       this.control.refreshThumbObserver();
+      this.view.upscale(visible);
     } else {
       this.view.downscaleAll();
     }

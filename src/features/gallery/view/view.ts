@@ -36,12 +36,12 @@ export class GalleryView {
 
   public open(thumb: HTMLElement): void {
     this.shell.root.toggleAttribute("data-visible", true);
-    this.renderer.toggleUpscaler(true);
+    this.renderer.pauseUpscaler();
     this.ui.open(thumb);
   }
 
   public close(): void {
-    this.renderer.toggleUpscaler(false);
+    this.renderer.resumeUpscaler();
     this.shell.root.toggleAttribute("data-visible", false);
     this.renderer.hide();
     this.ui.close();

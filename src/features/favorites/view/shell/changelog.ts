@@ -7,6 +7,10 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.23.2",
+    ["Fixed Firefox thumb upscaling"]
+  ],
+  [
     "v1.23.1",
     [
       "Added infinitely nested search support",

@@ -24,8 +24,8 @@ export function startFavorites(context: AppContext): void {
   if (context.environment.onFavoritesPage) {
     const model = new FavoritesModel(context);
     const view = new FavoritesView(context);
-    const flows = new FavoritesFlows(context, model, view);
     const control = new FavoritesControl(context);
+    const flows = new FavoritesFlows(context, model, view, control);
     const features = new FavoritesFeatures(context);
     const components: FavoritesComponents = { context, model, view, flows, control, features };
 
@@ -105,6 +105,7 @@ function subscribeToEvents({ context, model, view, flows, control }: FavoritesCo
   events.favorites.clearButtonClicked.on(() => control.clearSearch());
   events.favorites.shuffleButtonClicked.on(() => flows.search.shuffleSearchResults());
   events.favorites.invertButtonClicked.on(() => flows.search.invertSearchResults());
+  events.favorites.scratchButtonClicked.on(() => flows.scratch.excludeMostFrequentTags());
   events.favorites.resetButtonClicked.on(() => flows.reset.reset());
   events.favorites.searchRequested.on((query) => flows.search.searchFavorites(query));
   events.postOverlay.searchForTag.on((tag) => control.runSearch(tag));

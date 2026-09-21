@@ -37,11 +37,14 @@ function subscribeToEvents({ context, model, flows }: TooltipComponents): void {
 
   domEvents.document.mouseover.on((event) => flows.hover.handleMouseOver(event));
   domEvents.window.scrollend.on(() => flows.scroll.reposition());
-  preferences.favorites.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
-  preferences.postList.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
 
   if (environment.onFavoritesPage) {
     events.favorites.searchRequested.on((query) => model.rebuildHighlights(query), { async: true });
+    preferences.favorites.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
+  }
+
+  if (environment.onPostListPage) {
+    preferences.postList.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
   }
 }
 

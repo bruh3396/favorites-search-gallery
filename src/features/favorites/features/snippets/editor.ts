@@ -4,8 +4,8 @@ import { SnippetSelectors } from "@/features/favorites/features/snippets/selecto
 import { SnippetState } from "@/features/favorites/features/snippets/state";
 import { WidgetSelectors } from "@/lib/ui/widgets/selectors";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
+import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { createElement } from "@/utils/browser/element";
-import { markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { rule } from "@/features/favorites/features/snippets/components";
 import { toggleDataset } from "@/utils/browser/dataset";
 
@@ -30,7 +30,6 @@ export function build(): HTMLElement {
   queryField.placeholder = "query";
   queryField.spellcheck = false;
   queryField.autocomplete = "off";
-  markAsNeedingAutocomplete(queryField);
   saveButton.type = "button";
   cancelButton.type = "button";
   resultsButton.type = "button";
@@ -42,10 +41,13 @@ export function build(): HTMLElement {
   queryField.addEventListener("input", () => handlers.onEditorInput());
   nameField.addEventListener("keydown", onKeyDown);
   queryField.addEventListener("keydown", onKeyDown);
-  return createElement("div", {
+  const footer = createElement("div", {
     className: SnippetSelectors.footer,
     children: [rule(), eyebrow, fields()]
   });
+
+  attachAutocomplete(queryField);
+  return footer;
 }
 
 export function render(): void {

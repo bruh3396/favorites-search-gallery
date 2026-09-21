@@ -39,6 +39,12 @@ export class FavoritesSearcher {
     return this.updateSearchResults(favorites);
   }
 
+  public searchPure(favorites: Favorite[], searchQuery: string): Favorite[] {
+    const query = this.usingBlacklist() ? `${searchQuery} ${this.negatedBlacklistedTags}` : searchQuery;
+    const matches = isEmptyString(query) ? favorites : this.engine.search(query, favorites);
+    return this.filterByRating(matches);
+  }
+
   public reSearch(favorites: Favorite[]): Favorite[] {
     return this.updateSearchResults(favorites);
   }
@@ -108,10 +114,6 @@ export class FavoritesSearcher {
 
   private blacklistQuery(): string | undefined {
     return this.enforcingBlacklist() && !isEmptyString(this.negatedBlacklistedTags) ? this.negatedBlacklistedTags : undefined;
-  }
-
-  private searchOrPassThrough(query: string, candidates: Favorite[]): Favorite[] {
-    return isEmptyString(query) ? candidates : this.engine.search(query, candidates);
   }
 
   private filterByRating(favorites: Favorite[]): Favorite[] {

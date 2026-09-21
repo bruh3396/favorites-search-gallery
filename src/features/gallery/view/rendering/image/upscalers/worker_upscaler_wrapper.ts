@@ -4,51 +4,59 @@ import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler?raw";
 import { Preferences } from "@/app/context/preferences";
+import { Shell } from "@/app/context/shell";
 import { replaceCanvas } from "@/utils/browser/canvas";
 import { resolveImageUrl } from "@/lib/media/resolver";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
-  protected readonly requiresBitmap: boolean = false;
+  protected readonly needsBitmapForPaint: boolean = false;
   private readonly worker: Worker;
-  private readonly currentlyTransferred: Set<string> = new Set();
-  private readonly previouslyTransferred: Set<string> = new Set();
+  private readonly transferredCanvases: Map<string, HTMLCanvasElement> = new Map();
 
-  constructor(environment: Environment, preferences: Preferences, getContentThumbs: () => HTMLElement[]) {
-    super(environment, preferences, getContentThumbs);
+  constructor(environment: Environment, preferences: Preferences, shell: Shell) {
+    super(environment, preferences, shell);
     this.worker = new Worker(URL.createObjectURL(new Blob([OFFSCREEN_UPSCALER_CODE], { type: "application/javascript" })));
-    this.worker.postMessage({ action: "init", config: GalleryUpscaleConfig });
+    this.worker.postMessage({
+      action: "init",
+      config: {
+        upscaledCanvasWidth: this.upscaledCanvasWidth,
+        maxUpscaledCanvasHeight: GalleryUpscaleConfig.maxUpscaledCanvasHeight
+      }
+    });
   }
 
   protected evict(id: string): void {
-    this.currentlyTransferred.delete(id);
+    const transferred = this.transferredCanvases.get(id);
+
+    if (transferred !== undefined) {
+      replaceCanvas(transferred);
+      this.transferredCanvases.delete(id);
+    }
     this.worker.postMessage({ action: "evict", id });
   }
 
-  protected async finishUpscale(request: ImageRequest): Promise<void> {
+  protected async paint(request: ImageRequest): Promise<void> {
     const url = await resolveImageUrl(toMediaItem(request.thumb));
     const canvas = this.transferCanvas(request);
 
     if (canvas === undefined) {
-      this.worker.postMessage({ action: "upscale", id: request.id, url });
+      this.worker.postMessage({ action: "paint", id: request.id, url });
     } else {
-      this.worker.postMessage({ action: "upscale", id: request.id, url, canvas }, [canvas]);
+      this.worker.postMessage({ action: "paint", id: request.id, url, canvas }, [canvas]);
     }
   }
 
   private transferCanvas(request: ImageRequest): OffscreenCanvas | undefined {
-    if (this.currentlyTransferred.has(request.id)) {
+    if (this.transferredCanvases.has(request.id)) {
       return undefined;
     }
-    const existing = request.thumb.querySelector("canvas");
+    const canvas = request.thumb.querySelector("canvas");
 
-    if (!(existing instanceof HTMLCanvasElement)) {
+    if (!(canvas instanceof HTMLCanvasElement)) {
       return undefined;
     }
-    const canvas = this.previouslyTransferred.has(request.id) ? replaceCanvas(existing) : existing;
-
-    this.currentlyTransferred.add(request.id);
-    this.previouslyTransferred.add(request.id);
+    this.transferredCanvases.set(request.id, canvas);
     return canvas.transferControlToOffscreen();
   }
 }

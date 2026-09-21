@@ -2,109 +2,118 @@ import * as GalleryFetcher from "@/features/gallery/view/rendering/image/fetcher
 import { Environment } from "@/app/context/environment";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ImageRequest } from "@/features/gallery/types/image_request";
+import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
+import { Shell } from "@/app/context/shell";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 
 export abstract class GalleryAbstractUpscaler {
-  protected readonly requiresBitmap: boolean = true;
+  protected readonly needsBitmapForPaint: boolean = true;
   protected readonly upscaledCanvasWidth: number;
-  private readonly directUpscaleQueue: ThrottleQueue;
-  private readonly upscaledIds: Set<string> = new Set();
+  private readonly fetchPaintQueue: ThrottleQueue;
+  private readonly paintedIds: Set<string> = new Set();
+  private readonly preference: Preference<boolean>;
+  private readonly shell: Shell;
   private paused: boolean = false;
 
-  constructor(
-    private readonly environment: Environment,
-    private readonly preferences: Preferences,
-    private readonly getContentThumbs: () => HTMLElement[]
-  ) {
-    this.directUpscaleQueue = new ThrottleQueue(environment.usingFirefox ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other);
+  constructor(environment: Environment, preferences: Preferences, shell: Shell) {
+    this.preference = (environment.onPostListPage ? preferences.postList : preferences.favorites).upscaleThumbs;
+    this.shell = shell;
+    this.fetchPaintQueue = new ThrottleQueue(environment.usingFirefox ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other);
     this.upscaledCanvasWidth = environment.usingFirefox ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
   }
 
-  public toggle(value: boolean): void {
-    this.paused = value;
+  public pause(): void {
+    this.paused = true;
   }
 
-  public upscale(request: ImageRequest): void {
-    this.draw(request);
+  public resume(): void {
+    this.paused = false;
   }
 
-  public upscaleAll(requests: ImageRequest[]): void {
-    requests.forEach(request => this.directlyUpscale(request));
+  public tryPainting(request: ImageRequest): void {
+    if (this.isEnabled() && this.isEligible(request) && this.isReadyToPaint(request)) {
+      this.paintedIds.add(request.id);
+      this.eraseOldest();
+      this.paint(request);
+    }
   }
 
-  public downscaleAll(): void {
-    this.directUpscaleQueue.reset();
+  public fetchThenPaintAll(requests: ImageRequest[]): void {
+    if (this.isEnabled()) {
+      this.eligibleRequests(requests).forEach(request => this.fetchThenPaint(request));
+    }
+  }
 
-    for (const id of [...this.upscaledIds]) {
-      this.upscaledIds.delete(id);
+  public repaintAll(completedRequests: ImageRequest[]): void {
+    if (this.isEnabled()) {
+      this.eligibleRequests(completedRequests).forEach(request => this.tryPainting(request));
+    }
+  }
+
+  public eraseAll(): void {
+    this.fetchPaintQueue.reset();
+
+    for (const id of [...this.paintedIds]) {
+      this.paintedIds.delete(id);
       this.evict(id);
     }
   }
 
-  public downscaleDetached(): void {
-    this.directUpscaleQueue.reset();
+  public eraseDetached(): void {
+    this.fetchPaintQueue.reset();
 
-    for (const id of [...this.upscaledIds]) {
-      if (document.getElementById(id) === null) {
-        this.upscaledIds.delete(id);
+    for (const id of [...this.paintedIds]) {
+      if (this.shell.findThumb(id) === null) {
+        this.paintedIds.delete(id);
         this.evict(id);
       }
     }
   }
 
-  private async directlyUpscale(request: ImageRequest): Promise<void> {
-    if (!this.upscalingEnabled() || !this.isEligible(request)) {
+  private async fetchThenPaint(request: ImageRequest): Promise<void> {
+    if (!await this.fetchPaintQueue.wait() || !this.isEligible(request)) {
       return;
     }
-    await this.directUpscaleQueue.wait();
 
-    if (this.requiresBitmap && request.isIncomplete && !await GalleryFetcher.fetchBitmap(request)) {
+    if (this.needsBitmapForPaint && !await GalleryFetcher.fetchBitmap(request)) {
       return;
     }
-    this.draw(request);
+    this.tryPainting(request);
   }
 
-  private upscalingEnabled(): boolean {
-    if (this.environment.onPostListPage) {
-      return this.preferences.postList.upscaleThumbs.value;
-    }
-    return this.preferences.favorites.upscaleThumbs.value;
+  private isEnabled(): boolean {
+    return this.preference.value && !this.paused;
   }
 
-  private draw(request: ImageRequest): void {
-    if (this.upscalingEnabled() && this.canDraw(request)) {
-      this.upscaledIds.add(request.id);
-      this.evictOldestBeyondCap();
-      this.finishUpscale(request);
-    }
+  private isEligible(request: ImageRequest): boolean {
+    return !this.paintedIds.has(request.id) &&
+    this.shell.findThumb(request.id) !== null &&
+    request.isHighRes;
   }
 
-  private evictOldestBeyondCap(): void {
-    const idsOnPage = new Set(this.getContentThumbs().map(thumb => thumb.id));
+  private isReadyToPaint(request: ImageRequest): boolean {
+    return request.hasCompleted || !this.needsBitmapForPaint;
+  }
 
-    while (this.upscaledIds.size > GalleryUpscaleConfig.maxUpscaledThumbs) {
-      const oldest = [...this.upscaledIds].find(id => !idsOnPage.has(id));
+  private eligibleRequests(requests: ImageRequest[]): ImageRequest[] {
+    return requests.filter(request => this.isEligible(request));
+  }
+
+  private eraseOldest(): void {
+    const visibleIds = new Set(this.shell.getContentThumbs().map(thumb => thumb.id));
+
+    while (this.paintedIds.size > GalleryUpscaleConfig.maxUpscaledThumbs) {
+      const oldest = [...this.paintedIds].find(id => !visibleIds.has(id));
 
       if (oldest === undefined) {
         return;
       }
-      this.upscaledIds.delete(oldest);
+      this.paintedIds.delete(oldest);
       this.evict(oldest);
     }
   }
 
-  private isEligible(request: ImageRequest): boolean {
-    if (this.upscaledIds.has(request.id) || this.paused) {
-      return false;
-    }
-    return document.getElementById(request.id) !== null;
-  }
-
-  private canDraw(request: ImageRequest): boolean {
-    return this.isEligible(request) && request.isHighRes && (request.hasCompleted || !this.requiresBitmap);
-  }
-
   protected abstract evict(id: string): void;
-  protected abstract finishUpscale(request: ImageRequest): void;
+  protected abstract paint(request: ImageRequest): void;
 }

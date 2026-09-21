@@ -16,7 +16,6 @@ export const GalleryConfig = {
   maxVisibleThumbsBeforeStoppingPreload: 175,
   preloadWaitingTimeout: 1_000,
   preloadingEnabled: true,
-  // cacheImagesOnIdle: !firefox
   cacheFirstImages: true,
   gifPreloadingEnabled: false,
   preloadOutsideGalleryOnPostList: true,
@@ -33,6 +32,6 @@ export const GalleryConfig = {
   bottomOverscanPercent: 175,
   bitmapCloseDelay: 50,
 
-  // useOffscreenThumbUpscaler: firefox
+  useOffscreenThumbUpscaler: false,
   galleryMenuMonoColor: true
 };

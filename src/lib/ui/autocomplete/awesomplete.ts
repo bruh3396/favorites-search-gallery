@@ -1,13 +1,3 @@
-import { setDataset } from "@/utils/browser/dataset";
-
-const AUTOCOMPLETE_DATASET_KEY = "autocomplete";
-
-export const AUTOCOMPLETE_SELECTOR = `[data-${AUTOCOMPLETE_DATASET_KEY}]`;
-
-export function markAsNeedingAutocomplete(input: HTMLInputElement | HTMLTextAreaElement): void {
-  setDataset(input, AUTOCOMPLETE_DATASET_KEY);
-}
-
 export function hideAwesomplete(input: HTMLInputElement | HTMLTextAreaElement): void {
   const awesomplete = getAwesompleteFromInput(input);
 

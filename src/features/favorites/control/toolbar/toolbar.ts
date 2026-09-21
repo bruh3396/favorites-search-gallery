@@ -51,6 +51,13 @@ function buildButtons(events: Events, environment: Environment, slots: Favorites
       event: events.favorites.invertButtonClicked
     },
     {
+      id: "scratch-button",
+      parent: slots.buttons,
+      textContent: "SCRATCH",
+      enabled: false,
+      event: events.favorites.scratchButtonClicked
+    },
+    {
       id: "shuffle-button",
       parent: slots.buttons,
       textContent: "SHUFFLE",

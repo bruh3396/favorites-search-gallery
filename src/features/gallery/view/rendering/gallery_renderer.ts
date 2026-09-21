@@ -66,8 +66,12 @@ export class GalleryRenderer {
     return this.imageRenderer.toggleZoomCursor(value);
   }
 
-  public toggleUpscaler(value: boolean): void {
-    this.imageRenderer.toggleUpscaler(value);
+  public pauseUpscaler(): void {
+    this.imageRenderer.pauseUpscaler();
+  }
+
+  public resumeUpscaler(): void {
+    this.imageRenderer.resumeUpscaler();
   }
 
   public zoomToPoint(point: Point): void {

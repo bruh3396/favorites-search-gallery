@@ -11,12 +11,15 @@ export class Shell {
   public readonly scrollSentinelTop = div("scroll-sentinel-top");
   public readonly scrollSentinelBottom = div("scroll-sentinel-bottom");
 
-  constructor(environment: Environment) {
-    if (environment.onMobileDevice) {
+  constructor(private readonly environment: Environment) { }
+
+  public mount(): void {
+    if (this.environment.onMobileDevice) {
       this.root.dataset.mobile = "";
       this.lockViewport();
     }
     this.root.append(this.overlays);
+    document.body.appendChild(this.root);
   }
 
   public getContentThumbs(): HTMLElement[] {

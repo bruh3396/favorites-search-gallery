@@ -1,9 +1,10 @@
-import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete, markAsNeedingAutocomplete } from "@/lib/ui/autocomplete/awesomplete";
+import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/scaffold";
 import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
+import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { openPostList } from "@/lib/remote/fetchers/action";
 import { queueMacroTask } from "@/lib/async/scheduling";
@@ -66,8 +67,8 @@ export class SearchBox {
     searchBox.placeholder = "Search Favorites";
     searchBox.spellcheck = false;
     searchBox.value = this.history.lastEditedQuery;
-    markAsNeedingAutocomplete(searchBox);
     this.slots.searchButton.insertAdjacentElement("afterend", searchBox);
+    attachAutocomplete(searchBox);
     return searchBox;
   }
 

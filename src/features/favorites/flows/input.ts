@@ -4,7 +4,6 @@ import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
 
 export class FavoritesInputFlow extends FavoritesFlow {
-
   public triggerPostAction(event: EnhancedMouseEvent): void {
     if (this.context.domEvents.didSwipe()) {
       return;

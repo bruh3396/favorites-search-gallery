@@ -1,30 +1,21 @@
-import { AUTOCOMPLETE_SELECTOR, hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
 import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
 import { HOSTNAME } from "@/lib/constants";
 import { addCustomTagsToAutocomplete } from "@/lib/ui/autocomplete/custom_tags";
 import { fetchHtml } from "@/utils/browser/http";
-import { queueMacroTask } from "@/lib/async/scheduling";
+import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { replaceTagInText } from "@/lib/ui/autocomplete/tag_replacer";
 
 type SnippetSuggestionSource = (prefix: string) => AwesompleteSuggestion[];
 
 let getSnippetSuggestions: SnippetSuggestionSource = () => [];
 
-export function setupAutocomplete(onFavoritesPage: boolean): void {
-  if (onFavoritesPage) {
-    queueMacroTask(addAwesompleteToAllInputs);
-  }
+export function attachAutocomplete(input: HTMLInputElement | HTMLTextAreaElement): void {
+  addEventListenersToInput(input, createAwesompleteInstance(input));
 }
 
 export function setSnippetSuggestionSource(source: SnippetSuggestionSource): void {
   getSnippetSuggestions = source;
-}
-
-function addAwesompleteToAllInputs(): void {
-  for (const input of document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(AUTOCOMPLETE_SELECTOR)) {
-    addEventListenersToInput(input, createAwesompleteInstance(input));
-  }
 }
 
 function createAwesompleteInstance(input: HTMLTextAreaElement | HTMLInputElement): Awesomplete {
@@ -126,7 +117,7 @@ function addEventListenersToInput(input: HTMLTextAreaElement | HTMLInputElement,
   });
 
   input.oninput = (): void => {
-    populateAwesompleteList(input.id, getCurrentTagWithHyphen(input), awesomplete);
+    populateAwesompleteList(getCurrentTagWithHyphen(input), awesomplete);
   };
 }
 
@@ -140,7 +131,7 @@ function getLastTagWithHyphen(searchQuery: string): string {
   return lastTag === null ? "" : lastTag[0];
 }
 
-async function populateAwesompleteList(inputId: string, prefix: string, awesomplete: Awesomplete): Promise<void> {
+async function populateAwesompleteList(prefix: string, awesomplete: Awesomplete): Promise<void> {
   if (isEmptyString(prefix)) {
     return;
   }

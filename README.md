@@ -45,7 +45,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 
 ## Features
 
-* Search favorites with the the same [syntax](#search-syntax) as the normal search pages (including meta tags):
+* Search favorites with the the same [syntax](#search-syntax) as the normal search pages (including meta tags)
 * View full resolution images, or play videos and GIFs in a gallery (also works on search pages)
 * Download all search results at once
   * Optionally include artist, character, and/or copyright tags in each filename
@@ -53,7 +53,7 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 * Remove favorites without reloading page
 * Add favorites from other users' favorites pages
 * Only wait on fetching once
-  * Favorites are stored in a client database after fetching them for the first time
+  * Favorites are cached in a client database after fetching them for the first time
   * Allows for quick loading anytime later
 * Add custom or existing tags to favorites
     * Allows for complex tags and grouping (essentially folders)
@@ -73,15 +73,8 @@ https://sleazyfork.org/en/scripts/504184-rule34-favorites-search-gallery
 * Sort by score, width, height, rating, id, date uploaded, or date changed
 * Filter by rating: safe, questionable, explicit, or any combination of the three
 * Choose between multiple themes
-* Add/Remove favorites while in gallery
+* Add favorites while in gallery
 * Redirect to original images in new tabs
-
-## Recommended Specs:
-| Metric | Recommended |
-| :-------- | :-------- |
-| Memory | 8GB |
-| Video Memory | 4GB |
-| Download Speed | 75Mb/s |
 
 ## Controls
 ### General Controls (Desktop)
@@ -277,7 +270,7 @@ Q: Everything stopped working, why I can't see any favorites?<br>
 
 Q: What browsers are supported?
 <br>
-**A: Chrome, Edge, and Firefox are supported.**
+**A: Chrome, Edge, Safari, Opera and Firefox are supported.**
 
 Q: Does it work on mobile/Android/iOS?<br>
 **A: Yes**<br>

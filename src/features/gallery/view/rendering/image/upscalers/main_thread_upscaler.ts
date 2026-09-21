@@ -16,22 +16,22 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
     this.canvases.delete(id);
   }
 
-  protected finishUpscale(request: ImageRequest): void {
+  protected paint(request: ImageRequest): void {
     if (GalleryUpscaleConfig.upscaleUsingSamples) {
-      this.upscaleSampleImageRequest(request);
+      this.paintFromSample(request);
     } else {
-      this.upscaleFullImageRequest(request);
+      this.paintFromFull(request);
     }
   }
 
-  private async upscaleSampleImageRequest(request: ImageRequest): Promise<void> {
+  private async paintFromSample(request: ImageRequest): Promise<void> {
     const sampleRequest = new ImageRequest(request.thumb, true);
 
     sampleRequest.complete(await fetchSampleImageBitmapFromThumb(sampleRequest.thumb));
-    this.upscaleFullImageRequest(sampleRequest);
+    this.paintFromFull(sampleRequest);
   }
 
-  private upscaleFullImageRequest(request: ImageRequest): void {
+  private paintFromFull(request: ImageRequest): void {
     const canvas = request.thumb.querySelector("canvas");
 
     if (!(canvas instanceof HTMLCanvasElement) || !(request.bitmap instanceof ImageBitmap)) {

@@ -48,7 +48,6 @@ export class DomEvents {
 
   public addEventListeners(shell: Shell, environment: Environment, events: Events, featureBridge: FeatureBridge): void {
     this.broadcastDomLoad();
-    this.appendRootOnDomLoad(shell.root);
     this.setupDocumentEvents(environment.onFavoritesPage ? shell.root : document.documentElement);
     this.setupWindowEvents();
     this.setupMobileGestures(environment.onDesktopDevice);
@@ -65,12 +64,6 @@ export class DomEvents {
 
   public didHold(): boolean {
     return this.wasHeld;
-  }
-
-  private appendRootOnDomLoad(root: HTMLElement): void {
-    this.document.domLoaded.on(() => {
-      document.body.appendChild(root);
-    }, { once: true });
   }
 
   private setupHotkeys(events: Events, galleryOpened: () => boolean): void {
