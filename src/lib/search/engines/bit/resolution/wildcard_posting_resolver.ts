@@ -9,7 +9,7 @@ export class WildcardPostingResolver<Doc> extends WildcardResolver<Posting | und
 
   protected combine(matches: string[]): Posting | undefined {
     const postings = this.postingsForTerms(matches);
-    return postings.length === 0 ? undefined : new DensePosting(this.bitIndex.unionOfPostings(postings));
+    return postings.length === 0 ? undefined : new DensePosting(this.bitIndex.unionOf(postings));
   }
 
   private postingsForTerms(terms: string[]): Posting[] {

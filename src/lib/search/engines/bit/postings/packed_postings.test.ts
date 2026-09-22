@@ -5,13 +5,23 @@ const anySparse = (): boolean => true;
 
 function packed(entries: Record<string, number[]>, isSparse: (length: number) => boolean = anySparse): PackedPostings {
   const p = new PackedPostings();
+  const sparseTerms: [string, number[]][] = [];
+  let total = 0;
+  let max = 0;
 
-  p.build(new Map(Object.entries(entries)), isSparse);
+  for (const [term, positions] of Object.entries(entries)) {
+    if (isSparse(positions.length)) {
+      sparseTerms.push([term, positions]);
+      total += positions.length;
+      max = Math.max(max, ...positions);
+    }
+  }
+  p.pack(sparseTerms, total, max);
   return p;
 }
 
 function sliceArray(p: PackedPostings, term: string): number[] | undefined {
-  const view = p.slice(term);
+  const view = p.positionsFor(term);
   return view === undefined ? undefined : [...view];
 }
 
@@ -28,20 +38,27 @@ describe("PackedPostings", () => {
     const p = packed({ a: [1], b: [2] });
 
     expect(p.has("a")).toBe(true);
-    expect(p.has("missing")).toBe(false);
+    expect(p.has("c")).toBe(false);
   });
 
   test("returns undefined for an unknown term", () => {
-    expect(packed({ a: [1] }).slice("nope")).toBeUndefined();
+    expect(packed({ a: [1] }).positionsFor("nope")).toBeUndefined();
   });
 
   test("packs everything into a single backing buffer", () => {
     const p = packed({ a: [1, 2], b: [3, 4, 5] });
-    const a = p.slice("a") as Int32Array;
-    const b = p.slice("b") as Int32Array;
+    const a = p.positionsFor("a")!;
+    const b = p.positionsFor("b")!;
 
     expect(a.buffer).toBe(b.buffer);
     expect(b.byteOffset).toBe(a.byteOffset + a.byteLength);
+  });
+
+  test("narrows the backing array to the smallest width that fits the max position", () => {
+    expect(packed({ a: [0, 255] }).positionsFor("a")).toBeInstanceOf(Uint8Array);
+    expect(packed({ a: [0, 256] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
+    expect(packed({ a: [0, 65535] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
+    expect(packed({ a: [0, 65536] }).positionsFor("a")).toBeInstanceOf(Uint32Array);
   });
 
   test("only stores terms the predicate calls sparse", () => {
@@ -49,21 +66,21 @@ describe("PackedPostings", () => {
 
     expect(p.has("rare")).toBe(true);
     expect(p.has("common")).toBe(false);
-    expect(p.slice("common")).toBeUndefined();
+    expect(p.positionsFor("common")).toBeUndefined();
   });
 
   test("handles empty input", () => {
     const p = packed({});
 
     expect(p.has("x")).toBe(false);
-    expect(p.slice("x")).toBeUndefined();
+    expect(p.positionsFor("x")).toBeUndefined();
   });
 
   test("rebuild replaces prior contents", () => {
     const p = new PackedPostings();
 
-    p.build(new Map([["a", [1, 2, 3]]]), anySparse);
-    p.build(new Map([["b", [9]]]), anySparse);
+    p.pack([["a", [1, 2, 3]]], 3, 3);
+    p.pack([["b", [9]]], 1, 9);
     expect(p.has("a")).toBe(false);
     expect(sliceArray(p, "b")).toEqual([9]);
   });
@@ -91,7 +108,10 @@ describe("PackedPostings", () => {
         positions.sort((a, b) => a - b);
         oracle.set(`term${t}`, positions);
       }
-      p.build(oracle, anySparse);
+      const sparseTerms = [...oracle];
+      const total = sparseTerms.reduce((sum, [, positions]) => sum + positions.length, 0);
+      const max = Math.max(0, ...sparseTerms.flatMap(([, positions]) => positions));
+      p.pack(sparseTerms, total, max);
 
       for (const [term, expected] of oracle) {
         expect(sliceArray(p, term)).toEqual(expected);

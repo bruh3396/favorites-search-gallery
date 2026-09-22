@@ -185,7 +185,7 @@ describe("BitSet", () => {
 
     test("retainPositions keeps only the intersecting positions in place", () => {
       const set = bitSetFrom(128, [1, 40, 70, 100]);
-      const isEmpty = set.andPositionsInPlace(Int32Array.from([40, 70, 90]));
+      const isEmpty = set.andPositionsInPlace(Uint32Array.from([40, 70, 90]));
 
       expect(isEmpty).toBe(false);
       expect(positionsOf(set)).toEqual([40, 70]);
@@ -194,14 +194,14 @@ describe("BitSet", () => {
     test("retainPositions reports empty when nothing intersects", () => {
       const set = bitSetFrom(128, [1, 2, 3]);
 
-      expect(set.andPositionsInPlace(Int32Array.from([50, 60]))).toBe(true);
+      expect(set.andPositionsInPlace(Uint32Array.from([50, 60]))).toBe(true);
       expect(set.isEmpty()).toBe(true);
     });
 
     test("retainPositions on an empty argument clears the set", () => {
       const set = bitSetFrom(128, [1, 2, 3]);
 
-      expect(set.andPositionsInPlace(Int32Array.from([]))).toBe(true);
+      expect(set.andPositionsInPlace(Uint32Array.from([]))).toBe(true);
       expect(set.isEmpty()).toBe(true);
     });
   });

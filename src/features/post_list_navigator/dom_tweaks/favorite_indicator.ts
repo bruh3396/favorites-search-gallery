@@ -1,3 +1,5 @@
+import { Shell } from "@/app/context/shell";
+
 const FAVORITE_CLASS = "is-favorite";
 const LOADING_CLASS = "is-loading-favorite-indicator";
 
@@ -9,8 +11,8 @@ export function markAsFavorite(thumb: HTMLElement): void {
   thumb.classList.add(FAVORITE_CLASS);
 }
 
-export function markAsFavoriteById(id: string): void {
-  const thumb = document.getElementById(id);
+export function markAsFavoriteById(id: string, shell: Shell): void {
+  const thumb = shell.findThumb(id);
 
   if (thumb !== null) {
     markAsFavorite(thumb);

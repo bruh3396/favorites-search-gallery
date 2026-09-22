@@ -4,7 +4,7 @@ import { FavoritesFlow } from "@/features/favorites/flows/flow";
 export class FavoritesScratchFlow extends FavoritesFlow {
   public excludeMostFrequentTags(): void {
     let query = "-female";
-    let results = this.model.searchFavoritesPure(this.model.getCurrentSearchResults(), query);
+    let results = this.model.searchFavoritesPure(this.model.getAllFavorites(), query);
 
     do {
       const top = mostFrequentTag(results);

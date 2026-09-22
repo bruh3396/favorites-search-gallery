@@ -1,12 +1,11 @@
 import { FruitName, fruitDocs } from "@/lib/search/testing/fruit_corpus";
-import { MetricSearchable, Searchable, SearchableMetric } from "@/types/search";
 import { QueryAssertion, searchCases } from "@/lib/search/testing/search_cases";
+import { Searchable, SearchableMetric } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser";
 
-export type MetricDoc = MetricSearchable & { name: string };
 type Doc = Searchable & { name: string; getMetric?: (metric: SearchableMetric) => number };
 type Searcher = (query: string, docs: Doc[]) => string[];
 

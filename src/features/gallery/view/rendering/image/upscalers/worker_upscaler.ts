@@ -1,15 +1,14 @@
 type UpscaleConfig = {
-  upscaledCanvasWidth: number;
   maxUpscaledCanvasHeight: number;
 };
 
 type UpscaleCommand =
   | { action: "init"; config: UpscaleConfig }
-  | { action: "paint"; id: string; url: string; canvas?: OffscreenCanvas }
+  | { action: "paint"; id: string; url: string; width: number; canvas?: OffscreenCanvas }
   | { action: "evict"; id: string };
 
 const canvases: Map<string, OffscreenCanvas> = new Map();
-let config: UpscaleConfig = { upscaledCanvasWidth: 600, maxUpscaledCanvasHeight: 16_000 };
+let config: UpscaleConfig = { maxUpscaledCanvasHeight: 16_000 };
 
 self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
   const message = event.data;
@@ -20,7 +19,7 @@ self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
       break;
 
     case "paint":
-      paintFromUrl(message.id, message.url, message.canvas);
+      paintFromUrl(message.id, message.url, message.width, message.canvas);
       break;
 
     case "evict":
@@ -31,7 +30,7 @@ self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
   }
 };
 
-async function paintFromUrl(id: string, url: string, canvas?: OffscreenCanvas): Promise<void> {
+async function paintFromUrl(id: string, url: string, width: number, canvas?: OffscreenCanvas): Promise<void> {
   if (canvas !== undefined) {
     canvases.set(id, canvas);
   }
@@ -40,7 +39,7 @@ async function paintFromUrl(id: string, url: string, canvas?: OffscreenCanvas): 
   if (target === undefined) {
     return;
   }
-  const bitmap = await fetchBitmap(url, config.upscaledCanvasWidth);
+  const bitmap = await fetchBitmap(url, width);
 
   if (bitmap === null) {
     return;

@@ -176,3 +176,6 @@
   font-size: 18px;
   width: 6ch;
 }
+[data-mobile] .favorites-pagination-ellipsis  {
+  display: none;
+}

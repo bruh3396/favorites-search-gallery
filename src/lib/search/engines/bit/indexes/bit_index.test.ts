@@ -73,7 +73,7 @@ describe("BitIndex", () => {
   test("emptyBitSet() matches nothing", () => {
     const bitIndex = index(corpus);
 
-    expect(bitIndex.docsFrom(bitIndex.emptyBitSet())).toEqual([]);
+    expect(bitIndex.docsFrom(bitIndex.empty())).toEqual([]);
   });
 
   test("handles a corpus larger than one word (word-boundary positions)", () => {
@@ -127,13 +127,13 @@ describe("BitIndex", () => {
     test("unions the docs of several postings", () => {
       const bitIndex = index(corpus);
 
-      expect(bitIndex.docsFrom(bitIndex.unionOfPostings(postingsFor(bitIndex, "sweet", "sour")))).toEqual([apple, lemon]);
+      expect(bitIndex.docsFrom(bitIndex.unionOf(postingsFor(bitIndex, "sweet", "sour")))).toEqual([apple, lemon]);
     });
 
     test("is empty for no postings", () => {
       const bitIndex = index(corpus);
 
-      expect(bitIndex.docsFrom(bitIndex.unionOfPostings([]))).toEqual([]);
+      expect(bitIndex.docsFrom(bitIndex.unionOf([]))).toEqual([]);
     });
   });
 });

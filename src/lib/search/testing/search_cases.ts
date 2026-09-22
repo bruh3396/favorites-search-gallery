@@ -240,6 +240,26 @@ export const searchCases: SearchCaseGroup[] = [
     cases: [{ query: "score:>15 score:<30", expected: ["banana", "orange"] }]
   },
   {
+    name: "metric duration absolute comparison",
+    cases: [
+      { query: "duration:>100", expected: ["cherry", "kiwi", "mango", "strawberry"] },
+      { query: "duration:<100", expected: ["apple", "banana", "blueberry", "grape", "orange", "pear"] },
+      { query: "duration:200", expected: ["cherry"] },
+      { query: "duration:>1000", expected: [] },
+      { query: "-duration:>100", expected: ["apple", "banana", "blueberry", "grape", "orange", "pear"] },
+      { query: "red duration:>100", expected: ["cherry", "strawberry"] }
+    ]
+  },
+  {
+    name: "metric duration relative comparison",
+    cases: [
+      { query: "duration:>score", expected: ["apple", "cherry", "kiwi", "mango", "orange", "strawberry"] },
+      { query: "duration:score", expected: ["banana", "blueberry", "grape", "pear"] },
+      { query: "duration:duration", expected: allDocNames },
+      { query: "duration:>duration", expected: [] }
+    ]
+  },
+  {
     name: "metric relative comparison",
     cases: [
       { query: "width:>height", expected: ["apple", "grape", "mango", "orange"] },

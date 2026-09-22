@@ -18,11 +18,10 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
       ]
     },
     {
-      title: "Thumbnails",
+      title: "Interaction",
       controls: [
         catalog.postActionBar,
         catalog.postActionBarButtons,
-        catalog.upscale,
         catalog.postOverlay,
         catalog.tooltip
       ]
@@ -32,7 +31,9 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
       controls: [
         catalog.theme,
         catalog.darkMode,
-        catalog.header
+        catalog.header,
+        catalog.upscale,
+        catalog.upscaleQuality
       ]
     },
     {
@@ -41,6 +42,7 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
         catalog.layout,
         catalog.columnCount,
         catalog.rowHeight
+
       ]
     },
     {
@@ -78,9 +80,8 @@ function mobileSections(catalog: SettingsCatalog): SettingsSection[] {
       ]
     },
     {
-      title: "Thumbnails",
+      title: "Interaction",
       controls: [
-        catalog.upscale,
         catalog.postActionBarToggle,
         catalog.postActionBarButtons
       ]
@@ -90,6 +91,8 @@ function mobileSections(catalog: SettingsCatalog): SettingsSection[] {
       controls: [
         catalog.theme,
         catalog.darkMode,
+        catalog.upscale,
+        catalog.upscaleQuality,
         catalog.header
       ]
     },

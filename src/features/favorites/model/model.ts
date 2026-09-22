@@ -70,6 +70,10 @@ export class FavoritesModel {
     this.searcher.index(this.collection.getAll());
   }
 
+  public compressFavorites(): void {
+    this.loader.compressFavorites();
+  }
+
   public getAllFavorites(): Favorite[] {
     return this.collection.getAll();
   }

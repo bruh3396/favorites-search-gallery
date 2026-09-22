@@ -22,7 +22,7 @@ function dense(...positions: number[]): DensePosting {
 }
 
 function sparse(...positions: number[]): SparsePosting {
-  return new SparsePosting(Int32Array.from(positions));
+  return new SparsePosting(Uint32Array.from(positions));
 }
 
 const cases: { name: string; make: (...positions: number[]) => Posting }[] = [

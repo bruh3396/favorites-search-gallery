@@ -19,7 +19,7 @@ function evaluatorFor(items: Item[]): BitEvaluator<Item> {
   bitIndex.build(items);
   const metricIndex = new MetricBitIndex<Item>(doc => doc.id.length);
 
-  metricIndex.build(bitIndex.width, bitIndex.positionalDocs());
+  metricIndex.build(bitIndex.width, bitIndex.allDocs());
   const wildcardResolver = new WildcardPostingResolver(bitIndex);
 
   wildcardResolver.index(bitIndex.indexedTerms());

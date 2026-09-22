@@ -6,89 +6,22 @@ import { FavoritesDrawerView } from "@/types/favorite";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
 
-export class Preferences {
-  public readonly app: {
-    darkMode: Preference<boolean>;
-    fadeThumbs: Preference<boolean>;
-    gradient: Preference<boolean>;
-    nativeFont: Preference<boolean>;
-    performanceProfile: Preference<PerformanceProfile>;
-    theme: Preference<Theme>;
-  };
+export type Preferences = ReturnType<typeof buildPreferences>;
 
-  public readonly favorites: {
-    allowedRatings: Preference<Rating>;
-    columnCount: Preference<number>;
-    downloadBatchSize: Preference<number>;
-    downloadFilenameFormat: Preference<number>;
-    drawerActiveView: Preference<FavoritesDrawerView>;
-    drawerOpen: Preference<boolean>;
-    excludeBlacklist: Preference<boolean>;
-    headerEnabled: Preference<boolean>;
-    hintsEnabled: Preference<boolean>;
-    infiniteScroll: Preference<boolean>;
-    layout: Preference<Layout>;
-    postActionBar: Preference<ActionBarMode>;
-    postActionBarButtons: Preference<number>;
-    resultsPerPage: Preference<number>;
-    rowHeight: Preference<number>;
-    settingsExpandedSections: Preference<Record<string, boolean>>;
-    sortAscending: Preference<boolean>;
-    sortKey: Preference<SortKey>;
-    tooltipEnabled: Preference<boolean>;
-    upscaleThumbs: Preference<boolean>;
-  };
-
-  public readonly gallery: {
-    autoplayActive: Preference<boolean>;
-    autoplayForward: Preference<boolean>;
-    autoplayImageDuration: Preference<number>;
-    autoplayMinimumVideoDuration: Preference<number>;
-    autoplayPaused: Preference<boolean>;
-    backgroundOpacity: Preference<number>;
-    menuDockedLeft: Preference<boolean>;
-    menuEnabled: Preference<boolean>;
-    menuPinned: Preference<boolean>;
-    mobileEnabled: Preference<boolean>;
-    previewEnabled: Preference<boolean>;
-    themedBackground: Preference<boolean>;
-    tutorialSeen: Preference<boolean>;
-    videoMuted: Preference<boolean>;
-    videoVolume: Preference<number>;
-  };
-
-  public readonly postOverlay: {
-    enabled: Preference<boolean>;
-    mode: Preference<PostOverlayMode>;
-  };
-
-  public readonly postList: {
-    columnCount: Preference<number>;
-    enabled: Preference<boolean>;
-    favoriteIndicator: Preference<boolean>;
-    infiniteScroll: Preference<boolean>;
-    layout: Preference<Layout>;
-    postActionBar: Preference<ActionBarMode>;
-    postActionBarButtons: Preference<number>;
-    rowHeight: Preference<number>;
-    settingsCollapsed: Preference<boolean>;
-    tooltipEnabled: Preference<boolean>;
-    upscaleThumbs: Preference<boolean>;
-  };
-
-  constructor(environment: Environment) {
-    const { onDesktopDevice, onMobileDevice, usingDarkMode } = environment;
-
-    this.app = {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
+export function buildPreferences(environment: Environment) {
+  const { onDesktopDevice, onMobileDevice, usingDarkMode } = environment;
+  return {
+    app: {
       darkMode: new Preference<boolean>("appDarkMode", usingDarkMode),
       fadeThumbs: new Preference<boolean>("appFadeThumbs", true),
       gradient: new Preference("appGradient", false),
       nativeFont: new Preference<boolean>("appNativeFont", true),
       performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
       theme: new Preference<Theme>("appTheme", "native")
-    };
+    },
 
-    this.favorites = {
+    favorites: {
       allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
       columnCount: new Preference("favoritesColumnCount", onDesktopDevice ? 5 : 2),
       downloadBatchSize: new Preference("favoritesDownloadBatchSize", 500),
@@ -108,10 +41,11 @@ export class Preferences {
       sortAscending: new Preference("favoritesSortAscending", false),
       sortKey: new Preference<SortKey>("favoritesSortKey", "default"),
       tooltipEnabled: new Preference("favoritesTooltipEnabled", false),
+      upscaleQuality: new Preference("favoritesUpscaleQuality", 1),
       upscaleThumbs: new Preference("favoritesUpscaleThumbs", true)
-    };
+    },
 
-    this.gallery = {
+    gallery: {
       autoplayActive: new Preference("galleryAutoplayActive", false),
       autoplayForward: new Preference("galleryAutoplayForward", true),
       autoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
@@ -127,14 +61,14 @@ export class Preferences {
       tutorialSeen: new Preference("galleryTutorialSeen", false),
       videoMuted: new Preference("galleryVideoMuted", false),
       videoVolume: new Preference("galleryVideoVolume", 1)
-    };
+    },
 
-    this.postOverlay = {
+    postOverlay: {
       enabled: new Preference("postOverlayEnabled", false),
       mode: new Preference<PostOverlayMode>("postOverlayMode", "tag")
-    };
+    },
 
-    this.postList = {
+    postList: {
       columnCount: new Preference("postListColumnCount", onDesktopDevice ? 5 : 2),
       enabled: new Preference("postListEnabled", false),
       favoriteIndicator: new Preference("postListFavoriteIndicator", false),
@@ -145,7 +79,8 @@ export class Preferences {
       rowHeight: new Preference("postListRowHeight", 7),
       settingsCollapsed: new Preference("postListSettingsCollapsed", false),
       tooltipEnabled: new Preference("postListTooltipEnabled", false),
+      upscaleQuality: new Preference("postListUpscaleQuality", 1),
       upscaleThumbs: new Preference("postListUpscaleThumbs", onDesktopDevice)
-    };
-  }
+    }
+  };
 }

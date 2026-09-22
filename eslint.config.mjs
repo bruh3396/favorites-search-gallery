@@ -632,6 +632,8 @@ export default defineConfig([
       "src/lib/ui/thumb/action_bar.ts",
       "src/lib/search/engines/bit/**",
       "src/app/context/preferences.ts",
+      "src/utils/pure/bit.ts",
+      "src/utils/pure/bit.test.ts",
       "src/features/favorites/features/downloader/zip_writer.ts"
     ],
     rules: {

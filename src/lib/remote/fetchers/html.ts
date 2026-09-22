@@ -35,7 +35,7 @@ export function deferPostPageFetchesUntil(gate: Promise<void>): void {
   postPageFetchGate = gate;
 }
 
-async function fetchProfilePage(pageId: string): Promise<string> {
+export async function fetchProfilePage(pageId: string): Promise<string> {
   await macroTask();
   return withExponentialBackoff(
     () => fetchHtml(profilePageUrl(pageId)),

@@ -54,7 +54,7 @@ export class GalleryImageCache {
       return;
     }
     GalleryImageFetcher.cancelFetch(cached.request.id);
-    cached.request.close();
+    cached.request.dispose();
     cached.request.cancel();
   }
 }

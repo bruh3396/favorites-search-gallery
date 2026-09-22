@@ -7,17 +7,17 @@ export class ImageRequest {
   public readonly id: string;
   public readonly thumb: HTMLElement;
   public readonly abortController: AbortController;
-  public readonly disposable: boolean;
+  public readonly isDisposable: boolean;
+  public isCancelled: boolean;
   public bitmap: ImageBitmap | null;
-  public cancelled: boolean;
 
   constructor(thumb: HTMLElement, disposable: boolean = false) {
     this.id = thumb.id;
     this.thumb = thumb;
     this.bitmap = null;
     this.abortController = new AbortController();
-    this.cancelled = false;
-    this.disposable = disposable;
+    this.isCancelled = false;
+    this.isDisposable = disposable;
   }
 
   public get isIncomplete(): boolean {
@@ -37,11 +37,11 @@ export class ImageRequest {
   }
 
   public cancel(): void {
-    this.cancelled = true;
+    this.isCancelled = true;
     this.abortController.abort();
   }
 
-  public async close(): Promise<void> {
+  public async dispose(): Promise<void> {
     await bitmapCloseQueue.wait();
 
     if (this.bitmap instanceof ImageBitmap) {

@@ -38,18 +38,18 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   }
 
   public complementOf(current: Doc[], filter?: string): Doc[] {
-    return this.bitIndex.complementOfDocs(current, this.bitSetFromQuery(filter));
+    return this.bitIndex.docComplementOf(current, this.bitSetFromQuery(filter));
   }
 
   public index(docs: Doc[]): void {
     this.bitIndex.build(docs);
-    this.metricIndex.build(this.bitIndex.width, this.bitIndex.positionalDocs());
+    this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
     this.wildcardResolver.index(this.bitIndex.indexedTerms());
   }
 
   public add(docs: Doc[]): void {
     this.bitIndex.add(docs).forEach(term => this.wildcardResolver.add(term));
-    this.metricIndex.build(this.bitIndex.width, this.bitIndex.positionalDocs());
+    this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
   }
 
   public update(updates: readonly TermUpdate<Doc>[]): void {
@@ -57,7 +57,7 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
 
     added.forEach(term => this.wildcardResolver.add(term));
     removed.forEach(term => this.wildcardResolver.remove(term));
-    this.metricIndex.build(this.bitIndex.width, this.bitIndex.positionalDocs());
+    this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
   }
 
   private bitSetFromQuery(query?: string): BitSet | undefined {

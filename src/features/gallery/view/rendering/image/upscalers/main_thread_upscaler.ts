@@ -41,8 +41,8 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
     setCanvasDimensions(canvas, request.bitmap.width, request.bitmap.height, this.upscaledCanvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight);
     drawScaledBitmap(canvas.getContext("2d"), request.bitmap);
 
-    if (request.disposable) {
-      request.close();
+    if (request.isDisposable) {
+      request.dispose();
     }
   }
 }

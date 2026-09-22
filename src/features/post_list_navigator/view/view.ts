@@ -60,7 +60,7 @@ export class PostListNavigatorView {
   }
 
   public markAsFavoriteById(id: string): void {
-    markAsFavoriteById(id);
+    markAsFavoriteById(id, this.context.shell);
   }
 
   public unmarkAsFavorite(thumb: HTMLElement): void {

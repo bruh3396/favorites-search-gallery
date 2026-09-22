@@ -40,8 +40,8 @@ export class GalleryImageLoader {
   private settleRequest(request: ImageRequest): void {
     const cached = this.cache.get(request.id);
 
-    if (cached === undefined || request.cancelled) {
-      request.close();
+    if (cached === undefined || request.isCancelled) {
+      request.dispose();
       return;
     }
 
@@ -56,7 +56,7 @@ export class GalleryImageLoader {
   }
 
   private async runRequest(request: ImageRequest): Promise<void> {
-    if (!request.cancelled && await GalleryImageFetcher.fetchBitmap(request)) {
+    if (!request.isCancelled && await GalleryImageFetcher.fetchBitmap(request)) {
       this.settleRequest(request);
     }
   }

@@ -1,4 +1,4 @@
-import { BitSet } from "@/lib/search/engines/bit/postings/bitset";
+import { BitSet, PositionArray } from "@/lib/search/engines/bit/postings/bitset";
 
 export interface Posting {
   readonly cardinality: number;
@@ -52,7 +52,7 @@ export class DensePosting implements Posting {
 }
 
 export class SparsePosting implements Posting {
-  constructor(private readonly positions: Int32Array) { }
+  constructor(private readonly positions: PositionArray) { }
 
   public get cardinality(): number {
     return this.positions.length;
@@ -132,6 +132,6 @@ class EmptyPosting implements Posting {
   }
 }
 
-const EMPTY_POSITIONS = new Int32Array(0);
+const EMPTY_POSITIONS = new Uint8Array(0);
 
 export const EMPTY_POSTING: Posting = new EmptyPosting();

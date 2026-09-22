@@ -9,18 +9,26 @@ import { ThrottleQueue } from "@/lib/async/rate_limiting";
 
 export abstract class GalleryAbstractUpscaler {
   protected readonly needsBitmapForPaint: boolean = true;
-  protected readonly upscaledCanvasWidth: number;
-  private readonly fetchPaintQueue: ThrottleQueue;
+  private readonly baseCanvasWidth: number;
+  private readonly paintQueue: ThrottleQueue;
   private readonly paintedIds: Set<string> = new Set();
   private readonly preference: Preference<boolean>;
+  private readonly quality: Preference<number>;
   private readonly shell: Shell;
   private paused: boolean = false;
 
   constructor(environment: Environment, preferences: Preferences, shell: Shell) {
-    this.preference = (environment.onPostListPage ? preferences.postList : preferences.favorites).upscaleThumbs;
+    const preferenceGroup = environment.onPostListPage ? preferences.postList : preferences.favorites;
+
+    this.preference = preferenceGroup.upscaleThumbs;
+    this.quality = preferenceGroup.upscaleQuality;
     this.shell = shell;
-    this.fetchPaintQueue = new ThrottleQueue(environment.usingFirefox ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other);
-    this.upscaledCanvasWidth = environment.usingFirefox ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
+    this.paintQueue = new ThrottleQueue(environment.usingFirefox ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other);
+    this.baseCanvasWidth = environment.usingFirefox ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
+  }
+
+  protected get upscaledCanvasWidth(): number {
+    return Math.round(this.baseCanvasWidth * this.quality.value);
   }
 
   public pause(): void {
@@ -41,18 +49,29 @@ export abstract class GalleryAbstractUpscaler {
 
   public fetchThenPaintAll(requests: ImageRequest[]): void {
     if (this.isEnabled()) {
-      this.eligibleRequests(requests).forEach(request => this.fetchThenPaint(request));
+      requests.forEach(request => this.fetchThenPaint(request));
     }
   }
 
-  public repaintAll(completedRequests: ImageRequest[]): void {
-    if (this.isEnabled()) {
-      this.eligibleRequests(completedRequests).forEach(request => this.tryPainting(request));
+  public async repaint(completedRequests: ImageRequest[]): Promise<void> {
+    if (!this.isEnabled()) {
+      return;
+    }
+
+    for (const request of completedRequests) {
+      if (!(await this.paintQueue.wait())) {
+        return;
+      }
+
+      if (this.shell.findThumb(request.id) !== null) {
+        this.paintedIds.add(request.id);
+        this.paint(request);
+      }
     }
   }
 
   public eraseAll(): void {
-    this.fetchPaintQueue.reset();
+    this.paintQueue.reset();
 
     for (const id of [...this.paintedIds]) {
       this.paintedIds.delete(id);
@@ -61,7 +80,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public eraseDetached(): void {
-    this.fetchPaintQueue.reset();
+    this.paintQueue.reset();
 
     for (const id of [...this.paintedIds]) {
       if (this.shell.findThumb(id) === null) {
@@ -72,7 +91,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   private async fetchThenPaint(request: ImageRequest): Promise<void> {
-    if (!await this.fetchPaintQueue.wait() || !this.isEligible(request)) {
+    if (!this.isEligible(request) || !await this.paintQueue.wait() || !this.isEligible(request)) {
       return;
     }
 
@@ -94,10 +113,6 @@ export abstract class GalleryAbstractUpscaler {
 
   private isReadyToPaint(request: ImageRequest): boolean {
     return request.hasCompleted || !this.needsBitmapForPaint;
-  }
-
-  private eligibleRequests(requests: ImageRequest[]): ImageRequest[] {
-    return requests.filter(request => this.isEligible(request));
   }
 
   private eraseOldest(): void {

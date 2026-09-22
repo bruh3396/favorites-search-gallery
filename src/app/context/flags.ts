@@ -1,36 +1,30 @@
 import { Environment } from "@/app/context/environment";
-import { PerformanceProfile } from "@/types/app";
 import { Preferences } from "@/app/context/preferences";
 
-export class Flags {
-  public readonly performanceProfile: PerformanceProfile;
-  public readonly imagusSupportEnabled: boolean;
-  public readonly favoritesSearchGalleryEnabled: boolean;
-  public readonly favoritesSearchGalleryDisabled: boolean;
-  public readonly galleryEnabled: boolean;
-  public readonly galleryDisabled: boolean;
-  public readonly tooltipEnabled: boolean;
-  public readonly tooltipDisabled: boolean;
-  public readonly postOverlayEnabled: boolean;
-  public readonly postOverlayDisabled: boolean;
+export type Flags = ReturnType<typeof buildFlags>;
 
-  constructor(environment: Environment, preferences: Preferences) {
-    const { onFavoritesPage, onPostListPage, onDesktopDevice } = environment;
-    const performanceProfile = preferences.app.performanceProfile.value;
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
+export function buildFlags(environment: Environment, preferences: Preferences) {
+  const { onFavoritesPage, onPostListPage, onDesktopDevice } = environment;
+  const performanceProfile = preferences.app.performanceProfile.value;
+  const isFavoritesSearchGalleryEnabled = onFavoritesPage || (onPostListPage && preferences.postList.enabled.value);
+  const isGalleryEnabled = (onFavoritesPage || onPostListPage) && performanceProfile === "normal";
+  const isTooltipEnabled = (onFavoritesPage || onPostListPage) && onDesktopDevice && performanceProfile !== "potato";
+  const isPostOverlayEnabled = onFavoritesPage && onDesktopDevice && performanceProfile !== "potato";
+  return {
+    performanceProfile,
+    imagusSupportEnabled: performanceProfile === "low" || performanceProfile === "potato",
 
-    this.performanceProfile = performanceProfile;
-    this.imagusSupportEnabled = performanceProfile === "low" || performanceProfile === "potato";
+    favoritesSearchGalleryEnabled: isFavoritesSearchGalleryEnabled,
+    favoritesSearchGalleryDisabled: !isFavoritesSearchGalleryEnabled,
 
-    this.favoritesSearchGalleryEnabled = onFavoritesPage || (onPostListPage && preferences.postList.enabled.value);
-    this.favoritesSearchGalleryDisabled = !this.favoritesSearchGalleryEnabled;
+    galleryEnabled: isGalleryEnabled,
+    galleryDisabled: !isGalleryEnabled,
 
-    this.galleryEnabled = (onFavoritesPage || onPostListPage) && performanceProfile === "normal";
-    this.galleryDisabled = !this.galleryEnabled;
+    tooltipEnabled: isTooltipEnabled,
+    tooltipDisabled: !isTooltipEnabled,
 
-    this.tooltipEnabled = (onFavoritesPage || onPostListPage) && onDesktopDevice && performanceProfile !== "potato";
-    this.tooltipDisabled = !this.tooltipEnabled;
-
-    this.postOverlayEnabled = onFavoritesPage && onDesktopDevice && performanceProfile !== "potato";
-    this.postOverlayDisabled = !this.postOverlayEnabled;
-  }
+    postOverlayEnabled: isPostOverlayEnabled,
+    postOverlayDisabled: !isPostOverlayEnabled
+  };
 }

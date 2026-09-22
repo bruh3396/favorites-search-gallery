@@ -97,7 +97,7 @@ export class BitEvaluator<Doc> {
   }
 
   private union(children: SearchExpression[]): Value {
-    const result = this.bitIndex.emptyBitSet();
+    const result = this.bitIndex.empty();
     let needsUniverseMask = false;
 
     for (const child of children) {

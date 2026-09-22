@@ -1,8 +1,8 @@
 import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
-import { applyCurrentTheme, applyDarkMode, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll } from "@/features/favorites/control/settings/helpers";
+import { applyCurrentTheme, applyDarkMode, toggle, whenLayout, whenNotFullscreenOnHover, whenNotInfiniteScroll, whenUpscaling } from "@/features/favorites/control/settings/helpers";
+import { dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
 import { toggleGalleryMenuEnabled, toggleHeader, toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import { AppContext } from "@/app/context/context";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -14,9 +14,11 @@ import { reloadWindow } from "@/utils/browser/window";
 import { themeOptions } from "@/lib/ui/theme/builder";
 import { toggleGradient } from "@/lib/ui/theme/apply";
 
-export type SettingsCatalog = Record<string, SettingsControl>;
+export type SettingsCatalog = ReturnType<typeof buildSettingsCatalog>;
+export type SettingKey = keyof SettingsCatalog;
 
-export function buildSettingsCatalog(context: AppContext): SettingsCatalog {
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
+export function buildSettingsCatalog(context: AppContext) {
   const { preferences, environment, events, flags } = context;
   return {
     theme: dropdown<Theme>({
@@ -51,11 +53,25 @@ export function buildSettingsCatalog(context: AppContext): SettingsCatalog {
     }, events),
     upscale: toggle({
       id: "upscale",
-      label: "Upscale",
+      label: "Upscale Thumbnails",
       tooltip: "Upscale thumbnails for higher quality",
       enabled: flags.galleryEnabled,
       preference: preferences.favorites.upscaleThumbs
     }, events),
+    upscaleQuality: segmented<number>({
+      id: "upscale-quality",
+      label: "Upscale Quality",
+      tooltip: "Set upscaled thumbnail resolution. Higher values are sharper but use more graphics memory",
+      enabled: flags.galleryEnabled,
+      preference: preferences.favorites.upscaleQuality,
+      enabledWhen: whenUpscaling(preferences),
+      options: new Map<number, string>([
+        [4, "Ultra"],
+        [2, "High"],
+        [1, "Normal"],
+        [0.5, "Low"]
+      ])
+    }),
     layout: segmented<Layout>({
       id: "layout-select",
       tooltip: "Choose favorites layout",

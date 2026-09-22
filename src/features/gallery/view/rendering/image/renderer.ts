@@ -1,3 +1,4 @@
+import { sleep, withTimeout } from "@/lib/async/scheduling";
 import { Environment } from "@/app/context/environment";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
 import { GalleryConfig } from "@/config/gallery_config";
@@ -12,7 +13,6 @@ import { Renderer } from "@/features/gallery/types/types";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { isImageThumb } from "@/lib/ui/thumb/media_item";
-import { withTimeout } from "@/lib/async/scheduling";
 
 export class GalleryImageRenderer implements Renderer {
   public readonly root = div();
@@ -34,7 +34,7 @@ export class GalleryImageRenderer implements Renderer {
 
   public render(thumb: HTMLElement): void {
     this.root.style.visibility = "visible";
-    this.draw(thumb);
+    this.paint(thumb);
   }
 
   public hide(): void {
@@ -49,9 +49,7 @@ export class GalleryImageRenderer implements Renderer {
 
   public async cache(thumbs: HTMLElement[]): Promise<void> {
     await this.waitForAllThumbsToLoadWithTimeout();
-    const rejected = this.loader
-      .load(thumbs)
-      .map((request) => request.thumb);
+    const rejected = this.loader.load(thumbs).map((request) => request.thumb);
     const animated = thumbs.filter((thumb) => !isImageThumb(thumb));
 
     this.upscaler.fetchThenPaintAll(this.disposableRequests([...animated, ...rejected]));
@@ -60,11 +58,6 @@ export class GalleryImageRenderer implements Renderer {
   public async upscale(thumbs: HTMLElement[]): Promise<void> {
     await this.waitForAllThumbsToLoadWithTimeout();
     this.upscaler.fetchThenPaintAll(this.disposableRequests(thumbs));
-  }
-
-  public reupscaleCachedThumbs(): void {
-    this.upscaler.eraseAll();
-    setTimeout(() => this.upscaleCached(), 10);
   }
 
   public toggleZoomCursor(value: boolean): boolean {
@@ -79,8 +72,9 @@ export class GalleryImageRenderer implements Renderer {
     return this.canvas.zoomToPoint(point);
   }
 
-  public upscaleCached(): void {
-    this.upscaler.repaintAll(this.loader.completedRequests());
+  public async reUpscale(): Promise<void> {
+    await sleep(10);
+    this.upscaler.repaint(this.loader.completedRequests());
   }
 
   public downscaleAll(): void {
@@ -101,7 +95,7 @@ export class GalleryImageRenderer implements Renderer {
 
   public correctOrientation(): void {
     this.canvas.correctOrientation();
-    const thumb = document.getElementById(this.activeId);
+    const thumb = this.shell.findThumb(this.activeId);
 
     if (thumb === null) {
       return;
@@ -109,11 +103,11 @@ export class GalleryImageRenderer implements Renderer {
     const cached = this.loader.get(this.activeId);
 
     if (cached && cached.status === "complete") {
-      this.draw(thumb);
+      this.paint(thumb);
     }
   }
 
-  private draw(thumb: HTMLElement): void {
+  private paint(thumb: HTMLElement): void {
     this.activeId = thumb.id;
     const cached = this.loader.get(thumb.id);
 
@@ -128,7 +122,7 @@ export class GalleryImageRenderer implements Renderer {
     this.upscaler.tryPainting(request);
 
     if (request.id === this.activeId) {
-      this.draw(request.thumb);
+      this.paint(request.thumb);
     }
   }
 

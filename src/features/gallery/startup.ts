@@ -59,12 +59,7 @@ async function start(components: GalleryComponents): Promise<void> {
   const { context, flows } = components;
   const { environment } = context;
 
-  if (environment.onPostListPage) {
-    flows.content.refresh();
-    return;
-  }
-
-  if (environment.onFavoritesPage && !(await hasStoredFavorites(context))) {
+  if (environment.onPostListPage || (environment.onFavoritesPage && !(await hasStoredFavorites(context)))) {
     flows.content.refresh();
   }
 }
@@ -137,14 +132,15 @@ function subscribeToEvents(components: GalleryComponents): void {
   }
 }
 
-function subscribeToFavoritesEvents({ context, model, flows }: GalleryComponents): void {
+function subscribeToFavoritesEvents({ context, model, view, flows }: GalleryComponents): void {
   const { events, preferences } = context;
 
   events.favorites.contentReplaced.on(() => flows.content.refresh());
   events.favorites.contentAdded.on(() => flows.content.refresh());
   preferences.gallery.previewEnabled.on((enabled) => model.preview(enabled));
   preferences.favorites.upscaleThumbs.on((value) => flows.content.toggleUpscaling(value));
-  events.favorites.searchResultsUpdated.on(() => flows.content.downscaleThumbsOutsideResults(), { async: true });
+  events.favorites.searchResultsUpdated.on(() => flows.content.downscaleDetached(), { async: true });
+  preferences.favorites.upscaleQuality.on(() => view.reUpscale());
 }
 
 function subscribeToPostListEvents({ context, flows }: GalleryComponents): void {

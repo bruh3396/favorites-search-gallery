@@ -32,6 +32,6 @@ export class PostingResolver<Doc> {
   private postingForNumeric(term: NumericSearchTerm): Posting {
     const taggedPosting = this.bitIndex.postingFor(term.value) ?? EMPTY_POSTING;
     const idPosting = this.metricIndex.postingFor(term.idComparison);
-    return new DensePosting(this.bitIndex.unionOfPostings([taggedPosting, idPosting]));
+    return new DensePosting(this.bitIndex.unionOf([taggedPosting, idPosting]));
   }
 }

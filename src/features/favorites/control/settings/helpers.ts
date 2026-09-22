@@ -24,6 +24,10 @@ export function whenNotFullscreenOnHover(preferences: Preferences): EnableRule {
   return enableWhen(preferences.gallery.previewEnabled, (on) => !on);
 }
 
+export function whenUpscaling(preferences: Preferences): EnableRule {
+  return enableWhen(preferences.favorites.upscaleThumbs, (on) => on);
+}
+
 export function applyCurrentTheme(preferences: Preferences): void {
   applyTheme(preferences.app.theme.value, preferences.app.darkMode.value);
 }

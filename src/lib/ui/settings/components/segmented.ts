@@ -30,6 +30,8 @@ export function buildSegmentedRow<T extends string | number>(config: Partial<Sel
 
   const row = controlRow(config, group);
 
-  bindEnableRule(row, config.enabledWhen);
+  if (config.enabled !== false) {
+    bindEnableRule(row, config.enabledWhen);
+  }
   return row;
 }

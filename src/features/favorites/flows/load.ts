@@ -20,6 +20,7 @@ export class FavoritesLoadFlow extends FavoritesFlow {
     } else {
       await this.fetchAllFavorites(firstPageFavorites);
     }
+    this.model.compressFavorites();
     this.context.events.favorites.favoritesLoaded.emit();
   }
 

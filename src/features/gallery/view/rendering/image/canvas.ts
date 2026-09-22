@@ -21,7 +21,7 @@ export class GalleryImageCanvas {
   }
 
   private get mainCanvasResolution(): Resolution {
-    if (this.environment.onMobileDevice || this.environment.usingFirefox) {
+    if (this.environment.onMobileDevice) {
       return GalleryConfig.mainCanvasResolution.lowPower;
     }
     return this.environment.onPostListPage ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;

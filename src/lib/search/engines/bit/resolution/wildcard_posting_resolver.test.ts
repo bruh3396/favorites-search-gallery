@@ -32,7 +32,7 @@ function harness(docs: Doc[] = corpus): Harness {
   const bitIndex = new BitIndex<Doc>(d => d.tags);
 
   bitIndex.build(docs);
-  const unionSpy = vi.spyOn(bitIndex, "unionOfPostings");
+  const unionSpy = vi.spyOn(bitIndex, "unionOf");
   const resolver = new WildcardPostingResolver(bitIndex);
 
   resolver.index(bitIndex.indexedTerms());

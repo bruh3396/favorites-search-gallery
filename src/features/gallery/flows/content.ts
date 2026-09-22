@@ -7,7 +7,7 @@ export class GalleryContentFlow extends GalleryFlow {
     this.flows.dispatch.run({
       idle: () => this.recacheFirstThumbs(),
       preview: () => this.recacheFirstThumbs(),
-      open: () => this.view.reupscaleCachedThumbs()
+      open: () => this.view.reUpscale()
     });
   }, GalleryConfig.contentRefreshTime);
 
@@ -16,20 +16,17 @@ export class GalleryContentFlow extends GalleryFlow {
     this.recache();
   }
 
-  public downscaleThumbsOutsideResults(): void {
-    this.view.downscaleDetached();
-  }
-
   public toggleUpscaling(value: boolean): void {
     if (value) {
-      this.view.upscaleCached();
-      const visible = this.control.getVisibleThumbs().slice(0, 25);
-
-      this.control.refreshThumbObserver();
-      this.view.upscale(visible);
+      this.view.reUpscale();
+      this.view.upscale(this.control.getVisibleThumbs().slice(0, 25));
     } else {
       this.view.downscaleAll();
     }
+  }
+
+  public downscaleDetached(): void {
+    this.view.downscaleDetached();
   }
 
   private reIndex(): void {

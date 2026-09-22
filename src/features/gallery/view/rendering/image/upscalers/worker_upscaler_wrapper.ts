@@ -20,7 +20,6 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
     this.worker.postMessage({
       action: "init",
       config: {
-        upscaledCanvasWidth: this.upscaledCanvasWidth,
         maxUpscaledCanvasHeight: GalleryUpscaleConfig.maxUpscaledCanvasHeight
       }
     });
@@ -39,11 +38,12 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   protected async paint(request: ImageRequest): Promise<void> {
     const url = await resolveImageUrl(toMediaItem(request.thumb));
     const canvas = this.transferCanvas(request);
+    const width = this.upscaledCanvasWidth;
 
     if (canvas === undefined) {
-      this.worker.postMessage({ action: "paint", id: request.id, url });
+      this.worker.postMessage({ action: "paint", id: request.id, url, width });
     } else {
-      this.worker.postMessage({ action: "paint", id: request.id, url, canvas }, [canvas]);
+      this.worker.postMessage({ action: "paint", id: request.id, url, width, canvas }, [canvas]);
     }
   }
 

@@ -15,7 +15,7 @@ export function cancelFetch(id: string): void {
 }
 
 async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
-  if (!await fetchQueue.wait(request.id) || request.cancelled) {
+  if (!await fetchQueue.wait(request.id) || request.isCancelled) {
     return false;
   }
 

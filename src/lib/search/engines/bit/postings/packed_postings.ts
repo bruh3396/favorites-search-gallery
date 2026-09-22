@@ -1,47 +1,52 @@
+import { PositionArray } from "@/lib/search/engines/bit/postings/bitset";
+
 export class PackedPostings {
-  private values: Int32Array = new Int32Array(0);
-  private readonly offsets = new Map<string, number>();
-  private readonly lengths = new Map<string, number>();
+  private positions: PositionArray = new Uint8Array(0);
+  private offsets: Uint32Array = new Uint32Array(0);
+  private readonly slotByTerm = new Map<string, number>();
 
-  public build(positionsByTerm: ReadonlyMap<string, number[]>, isSparse: (length: number) => boolean): void {
-    this.offsets.clear();
-    this.lengths.clear();
-    let total = 0;
-
-    for (const positions of positionsByTerm.values()) {
-      if (isSparse(positions.length)) {
-        total += positions.length;
-      }
-    }
-    this.values = new Int32Array(total);
-
+  public pack(sparseTerms: ReadonlyArray<readonly [string, number[]]>, totalPositions: number, maxPosition: number): void {
+    this.slotByTerm.clear();
+    this.positions = newPositionArray(totalPositions, maxPosition);
+    this.offsets = new Uint32Array(sparseTerms.length + 1);
     let cursor = 0;
+    let slot = 0;
 
-    for (const [term, positions] of positionsByTerm) {
-      if (!isSparse(positions.length)) {
-        continue;
-      }
-      this.values.set(positions, cursor);
-      this.offsets.set(term, cursor);
-      this.lengths.set(term, positions.length);
+    for (const [term, positions] of sparseTerms) {
+      this.positions.set(positions, cursor);
+      this.slotByTerm.set(term, slot);
+      this.offsets[slot] = cursor;
       cursor += positions.length;
+      slot += 1;
     }
+    this.offsets[slot] = cursor;
   }
 
   public has(term: string): boolean {
-    return this.offsets.has(term);
+    return this.slotByTerm.has(term);
   }
 
   public terms(): IterableIterator<string> {
-    return this.offsets.keys();
+    return this.slotByTerm.keys();
   }
 
-  public slice(term: string): Int32Array | undefined {
-    const offset = this.offsets.get(term);
+  public positionsFor(term: string): PositionArray | undefined {
+    const slot = this.slotByTerm.get(term);
 
-    if (offset === undefined) {
+    if (slot === undefined) {
       return undefined;
     }
-    return this.values.subarray(offset, offset + (this.lengths.get(term) as number));
+    return this.positions.subarray(this.offsets[slot], this.offsets[slot + 1]);
   }
+}
+
+function newPositionArray(length: number, max: number): PositionArray {
+  if (max <= 0xff) {
+    return new Uint8Array(length);
+  }
+
+  if (max <= 0xffff) {
+    return new Uint16Array(length);
+  }
+  return new Uint32Array(length);
 }
