@@ -1,5 +1,5 @@
 import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
-import { COLUMN_SELECTOR } from "@/lib/ui/thumb/selectors";
+import { COLUMN_SELECTOR, ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { Environment } from "@/app/context/environment";
 import { div } from "@/utils/browser/element";
 import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";
@@ -15,7 +15,6 @@ export class Shell {
 
   public mount(): void {
     if (this.environment.onMobileDevice) {
-      this.root.dataset.mobile = "";
       this.lockViewport();
     }
     this.root.append(this.overlays);
@@ -24,6 +23,10 @@ export class Shell {
 
   public getContentThumbs(): HTMLElement[] {
     return this.usingColumnLayout() ? getThumbsInMatrix(this.content) : getItemsInContainer(this.content);
+  }
+
+  public getFirstContentThumb(): HTMLElement | null {
+    return this.content.querySelector<HTMLElement>(ITEM_SELECTOR);
   }
 
   public findThumb(id: string): HTMLElement | null {

@@ -3,7 +3,7 @@ import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";
 import { getItemsInContainer } from "@/lib/ui/thumb/query";
-import { rescale } from "@/utils/pure/number";
+import { rescaleGeometric } from "@/utils/pure/number";
 import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";
 
 export class RowTiler extends AbstractTiler {
@@ -13,6 +13,14 @@ export class RowTiler extends AbstractTiler {
   public tile(items: HTMLElement[]): void {
     super.tile(items);
     this.markItemsOnLastRow();
+  }
+
+  public reTile(items: HTMLElement[]): boolean {
+    if (!super.reTile(items)) {
+      return false;
+    }
+    this.markItemsOnLastRow();
+    return true;
   }
 
   public addItemsToBottom(items: HTMLElement[]): void {
@@ -51,8 +59,8 @@ export class RowTiler extends AbstractTiler {
 
 function rowHeightToPixels(rowHeight: number): number {
   const minWidth = Math.floor(window.innerWidth / 20);
-  const maxWidth = Math.floor(window.innerWidth / 4);
-  return Math.round(rescale(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth));
+  const maxWidth = Math.floor(window.innerWidth / 2);
+  return rescaleGeometric(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth);
 }
 
 function getItemsOnLastRow(items: HTMLElement[]): HTMLElement[] {

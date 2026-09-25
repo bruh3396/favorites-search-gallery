@@ -11,6 +11,11 @@ export function rescale(value: number, fromMin: number, fromMax: number, toMin: 
   return Math.round(toMin + (((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin)));
 }
 
+export function rescaleGeometric(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
+  const t = (value - fromMin) / (fromMax - fromMin);
+  return Math.round(toMin * ((toMax / toMin) ** t));
+}
+
 export function roundUpToMultiple(value: number, multiple: number): number {
   return multiple <= 0 ? value : (Math.floor(value / multiple) + 1) * multiple;
 }

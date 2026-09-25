@@ -1,10 +1,11 @@
-import { isVideoThumb, toMediaItem } from "@/lib/ui/thumb/media_item";
 import { Environment } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
+import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";
 import { Storage } from "@/lib/storage/local_storage";
 import { VideoClip } from "@/features/gallery/types/types";
 import { doNothing } from "@/utils/pure/function";
+import { isVideo } from "@/lib/media/media_type";
 import { videoUrl } from "@/lib/media/url";
 
 export class GalleryVideoController {
@@ -41,24 +42,24 @@ export class GalleryVideoController {
     }
   }
 
-  public preloadVideoPlayers(thumbs: HTMLElement[]): void {
+  public preloadVideoPlayers(items: MediaItem[]): void {
     if (this.videoPlayers.length === 1) {
       return;
     }
     const activeVideoPlayer = this.getActiveVideoPlayer();
     const inactiveVideoPlayers = this.getInactiveVideoPlayers();
-    const videoThumbsAroundInitialThumb = thumbs
-      .filter(thumb => isVideoThumb(thumb) && !this.videoPlayerHasSource(activeVideoPlayer, thumb))
+    const videoItemsAroundInitialItem = items
+      .filter(item => isVideo(item) && !this.videoPlayerHasSource(activeVideoPlayer, item))
       .slice(0, inactiveVideoPlayers.length);
     const loadedVideoSources = new Set(inactiveVideoPlayers
       .map(video => video.src)
       .filter(src => src !== ""));
-    const videoSourcesAroundInitialThumb = new Set(videoThumbsAroundInitialThumb.map(thumb => videoUrl(toMediaItem(thumb))));
-    const videoThumbsNotLoaded = videoThumbsAroundInitialThumb.filter(thumb => !loadedVideoSources.has(videoUrl(toMediaItem(thumb))));
-    const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialThumb.has(video.src));
+    const videoSourcesAroundInitialItem = new Set(videoItemsAroundInitialItem.map(item => videoUrl(item)));
+    const videoItemsNotLoaded = videoItemsAroundInitialItem.filter(item => !loadedVideoSources.has(videoUrl(item)));
+    const freeInactiveVideoPlayers = inactiveVideoPlayers.filter(video => !videoSourcesAroundInitialItem.has(video.src));
 
-    for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoThumbsNotLoaded.length; i += 1) {
-      this.setVideoSource(freeInactiveVideoPlayers[i], videoThumbsNotLoaded[i]);
+    for (let i = 0; i < freeInactiveVideoPlayers.length && i < videoItemsNotLoaded.length; i += 1) {
+      this.setVideoSource(freeInactiveVideoPlayers[i], videoItemsNotLoaded[i]);
       this.pauseVideo(freeInactiveVideoPlayers[i]);
     }
   }
@@ -79,8 +80,8 @@ export class GalleryVideoController {
     this.getActiveVideoPlayer().play().catch();
   }
 
-  public playVideo(thumb: HTMLElement): Promise<void> {
-    this.setActiveVideoPlayer(thumb);
+  public playVideo(item: MediaItem): Promise<void> {
+    this.setActiveVideoPlayer(item);
     this.toggleVideoContainer(true);
     this.stopAllVideos();
     const video = this.getActiveVideoPlayer();
@@ -90,7 +91,7 @@ export class GalleryVideoController {
         video.src = "";
         reject(new Error("Video failed to load"));
       };
-      this.setVideoSource(video, thumb);
+      this.setVideoSource(video, item);
       video.style.display = "block";
       video.play().catch(() => { });
       this.toggleVideoControls(true);
@@ -299,20 +300,20 @@ export class GalleryVideoController {
     video.removeAttribute("controls");
   }
 
-  private videoPlayerHasSource(video: HTMLVideoElement, thumb: HTMLElement): boolean {
-    return video.src === videoUrl(toMediaItem(thumb));
+  private videoPlayerHasSource(video: HTMLVideoElement, item: MediaItem): boolean {
+    return video.src === videoUrl(item);
   }
 
-  private setVideoSource(video: HTMLVideoElement, thumb: HTMLElement): void {
-    if (this.videoPlayerHasSource(video, thumb)) {
+  private setVideoSource(video: HTMLVideoElement, item: MediaItem): void {
+    if (this.videoPlayerHasSource(video, item)) {
       return;
     }
-    this.applyVideoClip(video, thumb);
-    video.src = videoUrl(toMediaItem(thumb));
+    this.applyVideoClip(video, item);
+    video.src = videoUrl(item);
   }
 
-  private applyVideoClip(video: HTMLVideoElement, thumb: HTMLElement): void {
-    const videoClip = this.videoClips.get(thumb.id);
+  private applyVideoClip(video: HTMLVideoElement, item: MediaItem): void {
+    const videoClip = this.videoClips.get(item.id);
 
     if (videoClip === undefined) {
       video.ontimeupdate = null;
@@ -326,13 +327,13 @@ export class GalleryVideoController {
     };
   }
 
-  private setActiveVideoPlayer(thumb: HTMLElement): void {
+  private setActiveVideoPlayer(item: MediaItem): void {
     for (const video of this.videoPlayers) {
       video.removeAttribute("active");
     }
 
     for (const video of this.videoPlayers) {
-      if (this.videoPlayerHasSource(video, thumb)) {
+      if (this.videoPlayerHasSource(video, item)) {
         video.setAttribute("active", "");
         return;
       }

@@ -2,24 +2,22 @@ import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
 import { GalleryMenu } from "@/features/gallery/view/shell/menu";
 import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_renderer";
 import { GalleryShell } from "@/features/gallery/view/shell/shell";
 import { GalleryUi } from "@/features/gallery/view/shell/ui";
 import { GalleryViewDependencies } from "@/features/gallery/types/types";
+import { MediaItem } from "@/types/media";
 import { Point } from "@/types/geometry";
-import { insertStyle } from "@/utils/browser/injector";
+import { queueMacroTask } from "@/lib/async/scheduling";
 
 export class GalleryView {
-  private readonly context: AppContext;
   private readonly shell: GalleryShell;
   private readonly ui: GalleryUi;
   private readonly menu: GalleryMenu;
   private readonly renderer: GalleryRenderer;
 
   constructor(context: AppContext) {
-    this.context = context;
     this.shell = new GalleryShell(context.shell);
     this.ui = new GalleryUi(context.preferences, context.environment, context.featureBridge, context.shell);
     this.menu = new GalleryMenu(context.preferences, context.environment);
@@ -27,7 +25,6 @@ export class GalleryView {
   }
 
   public setup(dependencies: GalleryViewDependencies): void {
-    insertStyle(GALLERY_CSS);
     this.shell.mountGallery();
     this.ui.setup(this.shell.root);
     this.renderer.setup(dependencies.onVideoEnded, dependencies.onVideoDoubleClicked, dependencies.onVolumeChanged);
@@ -35,13 +32,14 @@ export class GalleryView {
   }
 
   public open(thumb: HTMLElement): void {
-    this.shell.root.toggleAttribute("data-visible", true);
     this.renderer.pauseUpscaler();
+    this.shell.root.toggleAttribute("data-visible", true);
     this.ui.open(thumb);
   }
 
   public close(): void {
     this.renderer.resumeUpscaler();
+    queueMacroTask(() => this.reUpscale());
     this.shell.root.toggleAttribute("data-visible", false);
     this.renderer.hide();
     this.ui.close();
@@ -74,8 +72,8 @@ export class GalleryView {
     this.renderer.nudge(thumb, direction);
   }
 
-  public cache(thumbs: HTMLElement[]): void {
-    this.renderer.cache(thumbs);
+  public cache(items: MediaItem[]): void {
+    this.renderer.cache(items);
   }
 
   public toggleZoom(value: boolean | undefined): boolean {
@@ -100,10 +98,6 @@ export class GalleryView {
 
   public downscaleAll(): void {
     this.renderer.downscaleAll();
-  }
-
-  public downscaleDetached(): void {
-    this.renderer.downscaleDetached();
   }
 
   public correctOrientation(): void {

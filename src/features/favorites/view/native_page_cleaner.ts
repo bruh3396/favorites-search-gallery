@@ -1,3 +1,6 @@
+import { Post } from "@/types/api";
+import { thumbToPost } from "@/features/favorites/types/thumb_to_post";
+
 export function removeOriginalUnusedScripts(): void {
   for (const script of document.querySelectorAll("script")) {
     if ((/(?:fluidplayer|awesomplete)/).test(script.src)) {
@@ -7,16 +10,32 @@ export function removeOriginalUnusedScripts(): void {
   releaseUnusedGlobals();
 }
 
-export function takeNativeFavorites(): HTMLElement[] | undefined {
+export function takeNativeFavorites(): Post[] | undefined {
   const content = document.querySelector<HTMLElement>("#content, div:has(.thumb)");
 
   if (content === null) {
     return undefined;
   }
   const thumbs = Array.from(content.querySelectorAll<HTMLElement>(".thumb"));
+  const posts = thumbs.map(thumbToPost);
 
+  purgeNativeContent(content);
+  return posts.length === 0 ? undefined : posts;
+}
+
+function purgeNativeContent(content: HTMLElement): void {
+  for (const element of content.querySelectorAll("*")) {
+    stripAttributes(element);
+    element.remove();
+  }
+  stripAttributes(content);
   content.remove();
-  return thumbs.length === 0 ? undefined : thumbs;
+}
+
+function stripAttributes(element: Element): void {
+  for (const name of Array.from(element.getAttributeNames())) {
+    element.removeAttribute(name);
+  }
 }
 
 function releaseUnusedGlobals(): void {

@@ -2,9 +2,10 @@ import { camelToKebabCase, capitalize } from "@/utils/pure/string";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
-import { Svg } from "@/assets/svg/svg";
+import { IconName } from "@/lib/ui/icon";
 import { ThumbConfig } from "@/config/thumb_config";
 import { downloadFromThumb } from "@/lib/media/download";
+import { iconMaskStyles } from "@/lib/ui/icon_mask";
 import { openPost } from "@/lib/remote/fetchers/action";
 
 export type ActionBarAction = "favorite" | "download" | "open";
@@ -27,7 +28,7 @@ export interface ActionBarCallbacks {
 interface ActionBarButtonSpec {
   bit: ActionBarButton;
   action: ActionBarAction;
-  icon: string;
+  innerHtml: string;
   run: (context: ActionContext) => void;
 }
 
@@ -41,9 +42,16 @@ export const ActionBarSelectors = {
   bar: "post-action-bar",
   button: "post-action-button",
   id: "post-action-id",
+  icon: "post-action-icon",
   heartEmpty: "post-action-heart-empty",
   heartFilled: "post-action-heart-filled"
 } as const;
+
+const ACTION_BAR_ICONS: readonly IconName[] = ["externalLink", "download", "heart", "heartFilled"];
+
+export function actionBarIconStyles(): string {
+  return iconMaskStyles(`.${ActionBarSelectors.icon}`, ACTION_BAR_ICONS);
+}
 
 export const ActionBarDataset = {
   mode: "postActionBarMode",
@@ -52,14 +60,14 @@ export const ActionBarDataset = {
 } as const;
 
 const ACTION_BAR_BUTTONS: ActionBarButtonSpec[] = [
-  { bit: ActionBarButton.Open, action: "open", icon: Svg.externalLink, run: ({ thumb }) => openPost(thumb.id) },
-  { bit: ActionBarButton.Download, action: "download", icon: Svg.download, run: ({ thumb }) => downloadFromThumb(thumb) },
-  { bit: ActionBarButton.Favorite, action: "favorite", icon: `<span class="${ActionBarSelectors.heartEmpty}">${Svg.heart}</span><span class="${ActionBarSelectors.heartFilled}">${Svg.heartFilled}</span>`, run: toggleFavorite }
+  { bit: ActionBarButton.Open, action: "open", innerHtml: iconSpan("externalLink"), run: ({ thumb }) => openPost(thumb.id) },
+  { bit: ActionBarButton.Download, action: "download", innerHtml: iconSpan("download"), run: ({ thumb }) => downloadFromThumb(thumb) },
+  { bit: ActionBarButton.Favorite, action: "favorite", innerHtml: iconSpan("heart", ActionBarSelectors.heartEmpty) + iconSpan("heartFilled", ActionBarSelectors.heartFilled), run: toggleFavorite }
 ];
 
 export function actionBarHtml(isFavorite: boolean): string {
   const favoriteState = isFavorite ? ` data-${camelToKebabCase(ActionBarDataset.isFavorite)}` : "";
-  const buttons = ACTION_BAR_BUTTONS.map((spec) => actionButton(spec.action, spec.icon)).join("");
+  const buttons = ACTION_BAR_BUTTONS.map((spec) => actionButton(spec.action, spec.innerHtml)).join("");
   return `<div class="${ActionBarSelectors.bar}"${favoriteState}><span class="${ActionBarSelectors.id}"></span>${buttons}</div>`;
 }
 
@@ -112,6 +120,11 @@ export function markActionBarUnfavorited(id: string): void {
 
 function actionButton(action: ActionBarAction, innerHTML: string): string {
   return `<button type="button" class="${ActionBarSelectors.button}" data-action="${action}">${innerHTML}</button>`;
+}
+
+function iconSpan(name: IconName, extraClass?: string): string {
+  const className = extraClass === undefined ? ActionBarSelectors.icon : `${ActionBarSelectors.icon} ${extraClass}`;
+  return `<span class="${className}" data-icon="${name}"></span>`;
 }
 
 function closestActionButton(target: EventTarget | null): HTMLElement | null {

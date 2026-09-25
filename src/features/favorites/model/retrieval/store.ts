@@ -1,6 +1,5 @@
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";
-import { Favorite } from "@/types/favorite";
 import { Post } from "@/types/api";
 
 export class FavoritesStore {
@@ -11,17 +10,6 @@ export class FavoritesStore {
   constructor(databaseKey: string) {
     this.database = new Database<Post>("FavoritesV2", databaseKey);
     this.databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, this.database.update.bind(this.database));
-  }
-
-  public async writeAll(favorites: Favorite[]): Promise<void> {
-    await this.database.write([...favorites].reverse().map(favorite => favorite.post));
-    this.isDatabaseEmpty = false;
-  }
-
-  public update(favorite: Favorite): void {
-    if (!this.isDatabaseEmpty) {
-      this.databaseUpdater.schedule(favorite.post);
-    }
   }
 
   public async readAll(): Promise<Post[]> {
@@ -45,28 +33,39 @@ export class FavoritesStore {
     this.isDatabaseEmpty = !hasStreamedAny;
   }
 
-  public async count(): Promise<number> {
-    return (await this.database.exists()) ? this.database.count() : 0;
-  }
-
-  public exists(): Promise<boolean> {
-    return this.database.exists();
+  public async readMany(ids: string[]): Promise<Post[]> {
+    return (await this.database.exists()) ? this.database.readMany(ids) : [];
   }
 
   public async readIds(): Promise<string[]> {
     return (await this.database.exists()) ? this.database.readAllIds() : [];
   }
 
-  public async readMany(ids: string[]): Promise<Post[]> {
-    return (await this.database.exists()) ? this.database.readMany(ids) : [];
+  public async writeAll(posts: Post[]): Promise<void> {
+    await this.database.write([...posts].reverse());
+    this.isDatabaseEmpty = false;
+  }
+
+  public overwrite(post: Post): void {
+    if (!this.isDatabaseEmpty) {
+      this.databaseUpdater.schedule(post);
+    }
+  }
+
+  public delete(id: string): Promise<void> {
+    return this.database.delete([id]);
+  }
+
+  public exists(): Promise<boolean> {
+    return this.database.exists();
+  }
+
+  public async count(): Promise<number> {
+    return (await this.database.exists()) ? this.database.count() : 0;
   }
 
   public async hasAny(): Promise<boolean> {
     return (await this.database.exists()) && (await this.database.count()) > 0;
-  }
-
-  public deleteId(id: string): Promise<void> {
-    return this.database.delete([id]);
   }
 
   public destroy(): Promise<void> {

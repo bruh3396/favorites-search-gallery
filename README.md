@@ -255,7 +255,7 @@ The whole query is parsed as a full expression tree, so parentheses group exactl
 
 * ( video ~ animated ~ high_res\* ~ absurd_res\* ) -low_res\* ( female\* ~ 1girls ~ 123 ) -ai_generated -red_hair -no_sound looking_at_viewer score:>100
 * ( fortnite\* ~ valorant\* ~ apex\* ~ \*league\* ) -ai_generated \*3d\* -\*2d\* ( gif ~ ( animated -video ) ~ ( video duration:<5 ) )
-
+* ( ( apple\* ~ \*berry ) ( ripe ~ sweet ~ ( green -sour ) ) ~ ( smoothie ( no_ice -crushed_ice ) score:>500 ) ) -ai_generated -( monochrome ~ sketch ) ( video ~ ( \*high_res -absurd_res\* ) ) -( bruised ~ moldy ~ ( overripe -mild\* ) ) fresh
 
 ## FAQ
 

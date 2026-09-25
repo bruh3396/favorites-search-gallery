@@ -4,9 +4,12 @@ import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryFeatures } from "@/features/gallery/features/features";
 import { GalleryFlows } from "@/features/gallery/flows/flows";
 import { GalleryModel } from "@/features/gallery/model/model";
+import { GallerySizeSettings } from "@/features/gallery/types/types";
+import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { GalleryView } from "@/features/gallery/view/view";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 interface GalleryComponents {
   context: AppContext;
@@ -23,7 +26,7 @@ export async function startGallery(context: AppContext): Promise<void> {
   }
   await waitUntilPageIsReady(context);
 
-  const model = new GalleryModel(context.preferences);
+  const model = new GalleryModel(context.preferences, context.shell);
   const view = new GalleryView(context);
   const control = new GalleryControl(context, view);
   const flows = new GalleryFlows(context, model, view, control);
@@ -72,9 +75,9 @@ function setupModel({ context, model }: GalleryComponents): void {
   const { environment, featureBridge } = context;
 
   if (environment.onFavoritesPage) {
-    model.setupWrappingWindow(() => featureBridge.favorites.searchResults.call(), (favorite) => favorite.root);
+    model.setupWrappingWindow(() => featureBridge.favorites.searchResults.call(), (favorite) => favorite);
   } else {
-    model.setupClampedWindow(() => featureBridge.postList.thumbs.call(), (thumb) => thumb);
+    model.setupClampedWindow(() => featureBridge.postList.thumbs.call(), toMediaItem);
   }
 }
 
@@ -139,11 +142,10 @@ function subscribeToFavoritesEvents({ context, model, view, flows }: GalleryComp
   events.favorites.contentAdded.on(() => flows.content.refresh());
   preferences.gallery.previewEnabled.on((enabled) => model.preview(enabled));
   preferences.favorites.upscaleThumbs.on((value) => flows.content.toggleUpscaling(value));
-  events.favorites.searchResultsUpdated.on(() => flows.content.downscaleDetached(), { async: true });
-  preferences.favorites.upscaleQuality.on(() => view.reUpscale());
+  subscribeToQualityChanges(preferences.favorites, view, flows);
 }
 
-function subscribeToPostListEvents({ context, flows }: GalleryComponents): void {
+function subscribeToPostListEvents({ context, view, flows }: GalleryComponents): void {
   const { events, preferences } = context;
 
   preferences.postList.upscaleThumbs.on((value) => flows.postList.toggleUpscaling(value));
@@ -151,6 +153,18 @@ function subscribeToPostListEvents({ context, flows }: GalleryComponents): void 
   events.postList.moreResultsAdded.on(() => flows.content.refresh());
   preferences.postList.infiniteScroll.on(() => flows.content.refresh());
   events.postList.pageChanged.on(() => flows.content.refresh());
+  subscribeToQualityChanges(preferences.postList, view, flows);
+}
+
+function subscribeToQualityChanges(settings: GallerySizeSettings, view: GalleryView, flows: GalleryFlows): void {
+  settings.upscaleQuality.on(() => view.reUpscale());
+
+  if (!GalleryUpscaleConfig.dynamicQuality) {
+    return;
+  }
+  settings.layout.on(() => flows.content.updateUpscaleQuality());
+  settings.columnCount.on(() => flows.content.updateUpscaleQuality());
+  settings.rowHeight.on(() => flows.content.updateUpscaleQuality());
 }
 
 function subscribeToDesktopInput({ context, view, flows }: GalleryComponents): void {

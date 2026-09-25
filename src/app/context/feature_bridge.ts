@@ -8,10 +8,9 @@ import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 export class FeatureBridge {
   public readonly favorites = {
     advance: new FeatureChannel<NavigationKey, boolean>(false),
-    allFavorites: new FeatureChannel<void, Favorite[]>([]),
     favoriteIds: new FeatureChannel<void, Promise<string[]>>(Promise.resolve([])),
-    getFavorite: new FeatureChannel<string, Favorite | undefined>(undefined),
     layout: new FeatureChannel<void, Layout>("column"),
+    pixelCount: new FeatureChannel<string, number>(0),
     searchQuery: new FeatureChannel<void, string>(""),
     searchResults: new FeatureChannel<void, Favorite[]>([]),
     toolbar: new FeatureChannel<void, HTMLElement | null>(null),

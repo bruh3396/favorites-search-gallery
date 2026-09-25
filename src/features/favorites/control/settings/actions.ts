@@ -3,7 +3,6 @@ import { Preferences } from "@/app/context/preferences";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
-import { allSectionsCollapsed } from "@/features/favorites/control/settings/helpers";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 import { reloadWindow } from "@/utils/browser/window";
@@ -27,9 +26,9 @@ export function collapseExpandButton(preferences: Preferences, sections: Setting
   const button = createElement("button", { className: SettingsClass.collapseExpand, children: [icon("collapseAll"), icon("expandAll")] });
 
   button.type = "button";
-  renderCollapseState(button, allSectionsCollapsed(preferences, sections));
+  renderCollapse(button, allSectionsCollapsed(preferences, sections));
   preferences.favorites.settingsExpandedSections.on(() => {
-    renderCollapseState(button, allSectionsCollapsed(preferences, sections));
+    renderCollapse(button, allSectionsCollapsed(preferences, sections));
   });
   button.addEventListener("click", () => {
     toggleAllSections(preferences, sections, container);
@@ -51,7 +50,15 @@ function toggleAllSections(preferences: Preferences, sections: SettingsSection[]
   }
 }
 
-function renderCollapseState(button: HTMLElement, collapsed: boolean): void {
+function renderCollapse(button: HTMLElement, collapsed: boolean): void {
   toggleDataset(button, "collapsed", collapsed);
   addTooltip(button, `${collapsed ? "Expand" : "Collapse"} all`, "below");
+}
+
+function allSectionsCollapsed(preferences: Preferences, sections: SettingsSection[]): boolean {
+  return sections.every((section) => !isExpanded(preferences, section));
+}
+
+function isExpanded(preferences: Preferences, section: SettingsSection): boolean {
+  return preferences.favorites.settingsExpandedSections.value[section.title] ?? section.expanded === true;
 }

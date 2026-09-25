@@ -24,6 +24,8 @@ export enum DiscreteRating {
   Safe = 1
 }
 
+export const ALL_RATINGS = DiscreteRating.Explicit | DiscreteRating.Questionable | DiscreteRating.Safe;
+
 export interface Searchable {
   readonly tags: Set<string>;
 }

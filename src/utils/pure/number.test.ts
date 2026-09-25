@@ -9,6 +9,7 @@ import {
   randomInt,
   randomIntInRange,
   rescale,
+  rescaleGeometric,
   roundDownToMultiple,
   roundToTwoDecimalPlaces,
   roundUpToMultiple,
@@ -54,6 +55,36 @@ describe("rescale", () => {
     expect(rescale(0, 0, 10, 100, 0)).toBe(100);
     expect(rescale(10, 0, 10, 100, 0)).toBe(0);
     expect(rescale(5, 0, 10, 100, 0)).toBe(50);
+  });
+});
+
+describe("rescaleGeometric", () => {
+  test("hits both endpoints exactly", () => {
+    expect(rescaleGeometric(1, 1, 10, 96, 960)).toBe(96);
+    expect(rescaleGeometric(10, 1, 10, 96, 960)).toBe(960);
+  });
+
+  test("each step multiplies by a constant ratio", () => {
+    // 9 steps from 96 to 960: ratio per step is (960/96)^(1/9) ≈ 1.29
+    const values = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(h => rescaleGeometric(h, 1, 10, 96, 960));
+    const ratios = values.slice(1).map((v, i) => v / values[i]);
+
+    for (const ratio of ratios) {
+      expect(ratio).toBeCloseTo(1.291, 1);
+    }
+  });
+
+  test("midpoint is the geometric mean, not the arithmetic mean", () => {
+    // sqrt(96 * 960) ≈ 303.6, versus a linear midpoint of 528
+    expect(rescaleGeometric(5.5, 1, 10, 96, 960)).toBeCloseTo(304, -1);
+  });
+
+  test("simple powers of two", () => {
+    expect(rescaleGeometric(0, 0, 4, 1, 16)).toBe(1);
+    expect(rescaleGeometric(1, 0, 4, 1, 16)).toBe(2);
+    expect(rescaleGeometric(2, 0, 4, 1, 16)).toBe(4);
+    expect(rescaleGeometric(3, 0, 4, 1, 16)).toBe(8);
+    expect(rescaleGeometric(4, 0, 4, 1, 16)).toBe(16);
   });
 });
 

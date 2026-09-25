@@ -1,8 +1,10 @@
 import { FavoritesPageRequest } from "@/features/favorites/types/favorites_page_request";
+import { Post } from "@/types/api";
 import { SortedArray } from "@/lib/collection/sorted_array";
 import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
 import { fetchFavoritesPage } from "@/lib/remote/fetchers/html";
 import { sleep } from "@/lib/async/scheduling";
+import { thumbToPost } from "@/features/favorites/types/thumb_to_post";
 
 const PENDING_POLL_INTERVAL = 200;
 
@@ -15,9 +17,9 @@ export class FavoritesConcurrentFetcher {
   private allPagesFetched = false;
 
   constructor(
-    private readonly onFavoritesFound: (elements: HTMLElement[]) => void,
+    private readonly onFavoritesFound: (posts: Post[]) => void,
     private readonly favoritesPageId: string,
-    private readonly firstPageFavorites?: HTMLElement[]
+    private firstPageFavorites?: Post[]
   ) { }
 
   public async fetchAllFavorites(): Promise<void> {
@@ -42,6 +44,7 @@ export class FavoritesConcurrentFetcher {
     this.nextPage = 1;
     this.lastDeliveredPage = 0;
     this.onFavoritesFound(this.firstPageFavorites);
+    this.firstPageFavorites = undefined;
   }
 
   private takeNextRequest(): FavoritesPageRequest | undefined {
@@ -84,7 +87,7 @@ export class FavoritesConcurrentFetcher {
       const request = this.pendingDelivery.shift()!;
 
       this.lastDeliveredPage = request.pageNumber;
-      this.onFavoritesFound(request.elements);
+      this.onFavoritesFound(request.elements.map(thumbToPost));
     }
   }
 }

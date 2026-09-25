@@ -36,7 +36,7 @@ export class FavoritesShell {
     this.root.append(this.workspace);
     this.workspace.append(this.drawerTrack, this.contentPane);
     this.contentPane.append(this.shell.scrollSentinelTop, this.shell.content, this.shell.scrollSentinelBottom);
-    insertStyle(TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS, "favorites-ui");
+    insertStyle(TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS);
     this.toolbarSlots = toolbar.slots;
     this.toolbarRoot = toolbar.root;
   }

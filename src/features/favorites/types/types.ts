@@ -1,6 +1,27 @@
 import { Favorite, FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
+import { MediaExtension, MediaType } from "@/types/media";
+import { Metric, Rating } from "@/types/search";
 import { ContentDisplayOptions } from "@/types/ui";
 import { NavigationKey } from "@/types/input";
+import { Post } from "@/types/api";
+
+export interface FavoritesArena {
+  allocate: () => number;
+  write: (index: number, post: Post) => void;
+  id: (index: number) => number;
+  rating: (index: number) => Rating;
+  getMetric: (index: number, metric: Metric) => number;
+  extension: (index: number) => MediaExtension | undefined;
+  isNewFavorite: (index: number) => boolean;
+  markNew: (index: number) => void;
+  previewUrl: (index: number) => string;
+  setDuration: (index: number, duration: number) => void;
+  cacheTagSet: (index: number, tags: Set<string>) => void;
+  tagSet: (index: number) => Set<string>;
+  consumeTagSet: (index: number) => Set<string>;
+  mediaType: (index: number) => MediaType;
+  toPost: (index: number) => Post;
+}
 
 export interface FavoritesToolbarSlots {
   drawerToggle: HTMLElement;
@@ -29,6 +50,13 @@ export interface FavoritesViewDependencies {
   onDrawerViewSelected: (view: FavoritesDrawerView) => void;
   onShowControls: () => void;
   drawerViews: FavoritesDrawerViewMap;
+}
+
+export interface ThumbOperations<Node> {
+  create: () => Node;
+  bind: (node: Node, favorite: Favorite, favorited: boolean) => void;
+  setAsFavorited: (node: Node, favorited: boolean) => void;
+  blankImage: (node: Node) => void;
 }
 
 export interface FavoritesDisplay {

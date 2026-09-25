@@ -32,6 +32,7 @@ declare module "awesomplete" {
     public list: AwesompleteSuggestion[];
     public suggestions: AwesompleteSuggestion[];
     public isOpened: boolean;
+    public readonly selected: boolean;
     public next(): void;
     public select(): void;
     public close(options?: { reason: string }): void;

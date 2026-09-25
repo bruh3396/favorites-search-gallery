@@ -2,7 +2,7 @@ import { AppContext } from "@/app/context/context";
 import { GalleryView } from "@/features/gallery/view/view";
 import { macroTask } from "@/lib/async/scheduling";
 
-export class GalleryEdgeTapControls {
+export class GalleryTapControls {
   constructor(private readonly context: AppContext, private readonly view: GalleryView) {}
 
   public setup(): void {

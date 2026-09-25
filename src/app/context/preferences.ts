@@ -14,7 +14,7 @@ export function buildPreferences(environment: Environment) {
   return {
     app: {
       darkMode: new Preference<boolean>("appDarkMode", usingDarkMode),
-      fadeThumbs: new Preference<boolean>("appFadeThumbs", true),
+      fadeThumbs: new Preference<boolean>("appFadeThumbs", false),
       gradient: new Preference("appGradient", false),
       nativeFont: new Preference<boolean>("appNativeFont", true),
       performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),

@@ -12,11 +12,6 @@
   flex: 1;
 }
 
-html:not([data-mobile]) .sidebar {
-  max-width: 220px !important;
-  background-color: transparent;
-}
-
 input:checked + .slider {
     background-color: var(--theme-accent) !important;
 }

@@ -1,49 +1,41 @@
+import { fetchFullImageBitmap, imageUrlToBitmap } from "@/lib/media/bitmap";
+import { ImageFetcher } from "@/features/gallery/types/types";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
-import { fetchFullImageBitmapFromThumb } from "@/lib/media/bitmap";
-import { getImageFromThumb } from "@/lib/ui/thumb/query";
-import { isImageLoaded } from "@/utils/browser/image";
 
-const fetchQueue = new ThrottleQueue(10);
+export class GalleryImageFetcher implements ImageFetcher {
+  private readonly fetchQueue = new ThrottleQueue(10);
 
-export function fetchBitmap(request: ImageRequest): Promise<boolean> {
-  return request.isHighRes ? fetchHighResBitmap(request) : fetchLowResBitmap(request);
-}
-
-export function cancelFetch(id: string): void {
-  fetchQueue.cancel(id);
-}
-
-async function fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
-  if (!await fetchQueue.wait(request.id) || request.isCancelled) {
-    return false;
+  public fetchBitmap(request: ImageRequest): Promise<boolean> {
+    return request.isHighRes ? this.fetchHighResBitmap(request) : this.fetchLowResBitmap(request);
   }
 
-  try {
-    request.complete(await fetchFullImageBitmapFromThumb(request.thumb, request.abortController));
-    return true;
-  } catch (error) {
-    if (isAbortError(error)) {
+  public cancelFetch(id: string): void {
+    this.fetchQueue.cancel(id);
+  }
+
+  private async fetchHighResBitmap(request: ImageRequest): Promise<boolean> {
+    if (!await this.fetchQueue.wait(request.id) || request.isCancelled) {
       return false;
     }
-    throw error;
+
+    try {
+      request.complete(await fetchFullImageBitmap(request.item, request.abortController));
+      return true;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return false;
+      }
+      throw error;
+    }
   }
-}
 
-function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
-}
-
-async function fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
-  const image = getImageFromThumb(request.thumb);
-
-  if (image === null || !isImageLoaded(image)) {
-    return false;
-  }
-  try {
-    request.complete(await createImageBitmap(image));
-    return true;
-  } catch {
-    return false;
+  private async fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
+    try {
+      request.complete(await imageUrlToBitmap(request.item.thumbUrl));
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

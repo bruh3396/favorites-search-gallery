@@ -1,5 +1,5 @@
+import { AbstractTiler, reconcileChildren } from "@/lib/ui/tilers/abstract_tiler";
 import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
-import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 
 export class ColumnTiler extends AbstractTiler {
@@ -19,6 +19,19 @@ export class ColumnTiler extends AbstractTiler {
     this.createColumns();
     this.addItemsToColumns(items);
     this.addColumnsToContainer();
+  }
+
+  public reTile(items: HTMLElement[]): boolean {
+    if (this.columns.length !== this.columnCount || this.columns.length === 0) {
+      return false;
+    }
+
+    for (let c = 0; c < this.columnCount; c += 1) {
+      if (!reconcileChildren(this.columns[c], this.itemsForColumn(items, c))) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public addItemsToTop(items: HTMLElement[]): void {
@@ -98,6 +111,15 @@ export class ColumnTiler extends AbstractTiler {
 
   private addItemToColumn(itemIndex: number, item: HTMLElement): void {
     this.columns[itemIndex % this.columnCount].appendChild(item);
+  }
+
+  private itemsForColumn(items: HTMLElement[], column: number): HTMLElement[] {
+    const columnItems: HTMLElement[] = [];
+
+    for (let i = column; i < items.length; i += this.columnCount) {
+      columnItems.push(items[i]);
+    }
+    return columnItems;
   }
 
   private clearContainer(): void {

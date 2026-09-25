@@ -1,53 +1,53 @@
-[data-mobile] * {
+* {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-[data-mobile] #favorites-toolbar .menu-icon-btn:hover,
-[data-mobile] #favorites-drawer .favorites-drawer-sidebar-icon:hover,
-[data-mobile] #favorites-about-version:hover,
-[data-mobile] #favorites-drawer .favorites-drawer-title-action:hover {
+#favorites-toolbar .menu-icon-btn:hover,
+#favorites-drawer .favorites-drawer-sidebar-icon:hover,
+#favorites-about-version:hover,
+#favorites-drawer .favorites-drawer-title-action:hover {
   background: transparent;
 }
 
-[data-mobile] button:focus,
-[data-mobile] .setting-row:focus {
+button:focus,
+.setting-row:focus {
   outline: none;
 }
 
-[data-mobile] #favorites-search-gallery-content {
+#favorites-search-gallery-content {
   padding: 10px;
   margin-bottom: 80px;
 }
 
-[data-mobile] #favorites-toolbar-grid {
+#favorites-toolbar-grid {
   grid-template-columns: var(--toolbar-drawer-toggle) 1fr max-content max-content;
   grid-template-areas: "drawer search buttons about";
 }
 
-[data-mobile] #favorites-drawer-toggle-slot {
+#favorites-drawer-toggle-slot {
   grid-area: drawer;
 }
 
-[data-mobile] #favorites-search-field {
+#favorites-search-field {
   margin-left: 0px;
   grid-area: search;
 }
 
-[data-mobile] #favorites-button-slot {
+#favorites-button-slot {
   grid-area: buttons;
   margin-left: 0;
 }
 
-[data-mobile] #favorites-about-slot {
+#favorites-about-slot {
   grid-area: about;
   padding-right: 0px;
   margin-left: -8px;
 
 }
 
-[data-mobile] #favorites-pagination,
-[data-mobile] #favorites-search-status {
+#favorites-pagination,
+#favorites-search-status {
   position: fixed;
   left: 0;
   right: 0;
@@ -56,7 +56,7 @@
   background: var(--theme-surface);
 }
 
-[data-mobile] #favorites-pagination {
+#favorites-pagination {
   bottom: 34px;
   height: 40px;
   padding-top: 2px;
@@ -67,7 +67,7 @@
   border-top: 1px solid var(--theme-border);
 }
 
-[data-mobile] #favorites-search-status {
+#favorites-search-status {
   bottom: 0;
   height: 34px;
   padding: 2px 8px;
@@ -78,32 +78,32 @@
   overflow: hidden;
 }
 
-[data-mobile] #favorites-search-status > #favorites-load-status-label {
+#favorites-search-status > #favorites-load-status-label {
   flex: 0 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-[data-mobile] #favorites-about-version {
+#favorites-about-version {
   display: none !important;
 }
 
-[data-mobile] #favorites-toolbar {
+#favorites-toolbar {
   padding: 4px 6px;
 }
 
-[data-mobile] #favorites-drawer-toggle-slot {
+#favorites-drawer-toggle-slot {
     margin-left: 5px !important;
 }
 
-[data-mobile] #favorites-drawer-track,
-[data-mobile] #favorites-root[data-drawer-open] #favorites-drawer-track {
+#favorites-drawer-track,
+#favorites-root[data-drawer-open] #favorites-drawer-track {
   flex: 0 0 0;
   width: 0;
 }
 
-[data-mobile] .gallery-tap-zone {
+.gallery-tap-zone {
   position: fixed;
   top: 50% !important;
   height: 80vh;
@@ -114,47 +114,47 @@
   opacity: 0;
 }
 
-[data-mobile] #left-mobile-tap-control {
+#left-mobile-tap-control {
   left: 0 !important;
   right: unset !important;
 }
 
-[data-mobile] #right-mobile-tap-control {
+#right-mobile-tap-control {
   right: 0 !important;
   left: unset !important;
 }
 
-[data-mobile] .post-action-button {
+.post-action-button {
   width: 3.4rem;
   height: 3.4rem;
 }
 
-[data-mobile] .post-action-button svg {
+.post-action-icon {
   width: 2.3rem;
   height: 2.3rem;
 }
 
-[data-mobile] #displayOptions {
+#displayOptions {
   width: 98vw;
 }
 
-[data-mobile] #thumbnailSize {
+#thumbnailSize {
   display: none;
 }
 
-[data-mobile] .sidebar {
+.sidebar {
   background-color: transparent !important;
 }
 
-[data-mobile] #postListDisplayOptsForm>h3, .postListSidebarRight {
+#postListDisplayOptsForm>h3, .postListSidebarRight {
     display: block !important;
 }
 
-[data-mobile] #postListDisplayOptsForm>*:nth-child(-n+2) {
+#postListDisplayOptsForm>*:nth-child(-n+2) {
     display: none !important;
 }
 
-[data-mobile] #post-list-menu .setting-row-label {
+#post-list-menu .setting-row-label {
     text-align: left;
 }
 
@@ -163,19 +163,19 @@
     outline: .2rem solid var(--theme-link);
 }
 
-[data-mobile] #autoplay-settings-menu>div {
+#autoplay-settings-menu>div {
   font-size: 18px;
   padding: 5px 12px;
 }
 
-[data-mobile] #autoplay-settings-menu>div>label {
+#autoplay-settings-menu>div>label {
   padding-right: 14px;
 }
 
-[data-mobile] #autoplay-settings-menu select {
+#autoplay-settings-menu select {
   font-size: 18px;
   width: 6ch;
 }
-[data-mobile] .favorites-pagination-ellipsis  {
+.favorites-pagination-ellipsis  {
   display: none;
 }

@@ -1,23 +1,30 @@
 import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
+import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AppContext } from "@/app/context/context";
 import BADGE_CSS from "@/assets/css/base/badge.css";
 import CONTROLS_CSS from "@/assets/css/base/controls.css";
+import DESKTOP_CSS from "@/assets/css/base/desktop.css";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
+import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
 import MOBILE_CSS from "@/assets/css/base/mobile.css";
 import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
+import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
+import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
 import THUMB_LOADING_CSS from "@/assets/css/base/loading.css";
 import TILE_CSS from "@/assets/css/base/tile.css";
-import TOOLTIP_CSS from "@/assets/css/base/tooltip.css";
+import TOOLTIP_CSS from "@/assets/css/tooltip.css";
+import TOOLTIP_HINT_CSS from "@/assets/css/base/tooltip_hint.css";
 import { ThumbConfig } from "@/config/thumb_config";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
+import { actionBarIconStyles } from "@/lib/ui/thumb/action_bar";
 import { insertStyle } from "@/utils/browser/injector";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
@@ -40,7 +47,10 @@ function applyPreferenceStyles(context: AppContext): void {
 
 function insertBaseStyles(context: AppContext): void {
   const fadeInCss = context.preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
-  const mobileCss = context.environment.onMobileDevice ? MOBILE_CSS + CONTROLS_CSS : "";
+  const platformCss = context.environment.onMobileDevice ? MOBILE_CSS + CONTROLS_CSS : DESKTOP_CSS;
+  const galleryCss = context.flags.galleryEnabled ? GALLERY_CSS + AUTOPLAY_CSS : "";
+  const tooltipCss = context.flags.tooltipEnabled ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
+  const postListCss = context.environment.onPostListPage ? POST_LIST_CSS + SETTINGS_PANEL_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
@@ -52,11 +62,14 @@ function insertBaseStyles(context: AppContext): void {
     POST_ACTION_BAR_CSS +
     TILE_CSS +
     BADGE_CSS +
-    TOOLTIP_CSS +
+    tooltipCss +
     THEMES_CSS +
     themeStyles() +
+    actionBarIconStyles() +
     THUMB_LOADING_CSS +
-    mobileCss +
+    platformCss +
+    galleryCss +
+    postListCss +
     fadeInCss);
 }
 

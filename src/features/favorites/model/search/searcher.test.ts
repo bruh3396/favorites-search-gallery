@@ -1,9 +1,11 @@
-import { Rating, SortKey } from "@/types/search";
+import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { describe, expect, test, vi } from "vitest";
 import { Environment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
 import { Preferences } from "@/app/context/preferences";
+
+const RATINGS: Record<string, Rating> = { s: DiscreteRating.Safe, q: DiscreteRating.Questionable, e: DiscreteRating.Explicit };
 
 interface ContextOverrides {
   onOwnFavoritesPage?: boolean;
@@ -33,7 +35,7 @@ function fakeEnvironment(overrides: ContextOverrides): Environment {
 
 function favorite(id: string, rating: string, ...tags: string[]): Favorite {
   const tagSet = new Set(tags);
-  return { id, tags: tagSet, consumeTags: () => tagSet, rating, getMetric: () => Number(id) } as unknown as Favorite;
+  return { id, tags: tagSet, consumeTags: () => tagSet, rating: RATINGS[rating], getMetric: () => Number(id) } as unknown as Favorite;
 }
 
 function idsOf(results: Favorite[]): string[] {

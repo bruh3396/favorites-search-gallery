@@ -624,7 +624,7 @@ export default defineConfig([
   {
     files: [
       "src/**/array.ts",
-      "src/features/favorites/types/rating.ts",
+      "src/features/favorites/model/search/searcher.ts",
       "src/features/favorites/features/downloader/filename_settings.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
@@ -632,6 +632,7 @@ export default defineConfig([
       "src/lib/ui/thumb/action_bar.ts",
       "src/lib/search/engines/bit/**",
       "src/app/context/preferences.ts",
+      "src/types/search.ts",
       "src/utils/pure/bit.ts",
       "src/utils/pure/bit.test.ts",
       "src/features/favorites/features/downloader/zip_writer.ts"

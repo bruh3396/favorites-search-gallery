@@ -2,6 +2,18 @@ export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postLis
 export type PerformanceProfile = "normal" | "low" | "potato";
 export type Layout = "row" | "square" | "grid" | "column" | "native";
 export type GalleryState = "idle" | "preview" | "open";
+
+export enum UpscaleQuality {
+  Low = 0.5,
+  Normal = 1,
+  High = 2,
+  Ultra = 4
+}
+
+export type QualityCutoff = {
+  maxRatio: number;
+  quality: UpscaleQuality;
+};
 export type PostOverlayMode = "tag";
 
 export type GalleryMenuAction =

@@ -101,7 +101,9 @@ function addEventListenersToInput(input: HTMLTextAreaElement | HTMLInputElement,
         if (!awesomplete.isOpened || awesomplete.suggestions.length === 0) {
           return;
         }
-        awesomplete.next();
+        if (!awesomplete.selected) {
+          awesomplete.next();
+        }
         awesomplete.select();
 
         keyEvent.preventDefault();

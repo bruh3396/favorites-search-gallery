@@ -1,4 +1,4 @@
-import * as FavoritesRating from "@/features/favorites/types/rating";
+import { ALL_RATINGS, SearchableMetric } from "@/types/search";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { Environment } from "@/app/context/environment";
@@ -6,7 +6,6 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { Preferences } from "@/app/context/preferences";
-import { SearchableMetric } from "@/types/search";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
@@ -14,20 +13,22 @@ import { shuffleInPlace } from "@/utils/pure/array";
 
 export class FavoritesSearcher {
   private readonly engine: SearchEngine<Favorite>;
-  private readonly results = new ObservableList<Favorite>();
+  private readonly results: ObservableList<Favorite>;
   private readonly preferences: Preferences;
   private readonly userIsOnTheirOwnFavoritesPage: boolean;
   private readonly negatedBlacklistedTags: string;
-  private currentSearchQuery = "";
+  private currentSearchQuery: string;
 
   constructor(preferences: Preferences, environment: Environment) {
-    this.preferences = preferences;
-    this.userIsOnTheirOwnFavoritesPage = environment.userIsOnTheirOwnFavoritesPage;
-    this.negatedBlacklistedTags = environment.negatedBlacklistedTags;
     const termsFor = (favorite: Favorite): Set<string> => favorite.consumeTags();
     const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
 
     this.engine = FavoritesConfig.useBitSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
+    this.results = new ObservableList<Favorite>();
+    this.preferences = preferences;
+    this.userIsOnTheirOwnFavoritesPage = environment.userIsOnTheirOwnFavoritesPage;
+    this.negatedBlacklistedTags = environment.negatedBlacklistedTags;
+    this.currentSearchQuery = "";
   }
 
   public setup(onSearchResultsChanged: (results: Favorite[]) => void): void {
@@ -117,7 +118,8 @@ export class FavoritesSearcher {
   }
 
   private filterByRating(favorites: Favorite[]): Favorite[] {
-    return FavoritesRating.filterByRating(favorites, this.preferences.favorites.allowedRatings.value);
+    const allowedRatings = this.preferences.favorites.allowedRatings.value;
+    return allowedRatings === ALL_RATINGS ? favorites : favorites.filter(favorite => (favorite.rating & allowedRatings) > 0);
   }
 
   private sort(favorites: Favorite[]): Favorite[] {

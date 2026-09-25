@@ -2,7 +2,6 @@ import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/svg/icons";
 import { clamp, toSeconds } from "@/utils/pure/number";
 import { isImageThumb, isVideoThumb } from "@/lib/ui/thumb/media_item";
-import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AppContext } from "@/app/context/context";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
@@ -187,13 +186,12 @@ export class GalleryAutoplay {
   }
 
   private insertHtml(): void {
-    this.insertMenuHtml();
+    this.insertMenu();
     this.insertImageProgressHtml();
     this.insertVideoProgressHtml();
   }
 
-  private insertMenuHtml(): void {
-    insertStyle(AUTOPLAY_CSS);
+  private insertMenu(): void {
     this.ui = AutoplayMenu.build();
     this.context.shell.overlays.insertAdjacentElement("afterbegin", this.ui.container);
   }

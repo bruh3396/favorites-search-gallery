@@ -7,6 +7,14 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.23.3",
+    [
+      "Fixed pressing Enter on an autocomplete suggestion also triggering a search",
+      "Fixed pressing Tab selecting the suggestion after the highlighted one",
+      "Improved upscaled thumbnail quality"
+    ]
+  ],
+  [
     "v1.23.2",
     ["Fixed Firefox thumb upscaling"]
   ],

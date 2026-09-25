@@ -10,13 +10,12 @@ import { openPostList } from "@/lib/remote/fetchers/action";
 import { queueMacroTask } from "@/lib/async/scheduling";
 import { toggleDataset } from "@/utils/browser/dataset";
 
-const HISTORY_DEPTH = 30;
 const INPUT_PERSIST_DELAY = 500;
 const COLLAPSED_HEIGHT = 28;
 
 export class SearchBox {
   private readonly id: string = FavoritesId.searchBox;
-  private readonly history = new SearchHistory(HISTORY_DEPTH);
+  private readonly history = new SearchHistory(30);
   private readonly searchBox: HTMLTextAreaElement;
 
   constructor(
@@ -139,7 +138,7 @@ export class SearchBox {
   }
 
   private handleEnter(event: KeyboardEvent): void {
-    if (event.repeat || !awesompleteIsUnselected(this.searchBox)) {
+    if (event.repeat || event.defaultPrevented || !awesompleteIsUnselected(this.searchBox)) {
       return;
     }
     event.preventDefault();

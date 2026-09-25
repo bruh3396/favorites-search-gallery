@@ -4,9 +4,10 @@ import { Post } from "@/types/api";
 
 export interface Favorite extends MediaItem, Searchable {
   rating: Rating;
-  root: HTMLElement;
   post: Post;
   tags: Set<string>;
+  isNew: boolean;
+  markAsNew: () => void;
   enrich: (post: Post) => void;
   setDuration: (duration: number) => void;
   consumeTags: () => Set<string>;

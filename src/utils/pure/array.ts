@@ -110,6 +110,16 @@ export function removeValue(sorted: number[], value: number): void {
   }
 }
 
+export function partition<V>(array: V[], matches: (value: V) => boolean): [V[], V[]] {
+  const matching: V[] = [];
+  const rest: V[] = [];
+
+  for (const value of array) {
+    (matches(value) ? matching : rest).push(value);
+  }
+  return [matching, rest];
+}
+
 export function chunk<V>(array: V[], chunkSize: number): V[][] {
   const result: V[][] = [];
 
@@ -121,4 +131,12 @@ export function chunk<V>(array: V[], chunkSize: number): V[][] {
     result.push(array.slice(i, i + chunkSize));
   }
   return result;
+}
+
+export function grow<T extends Uint8Array | Uint16Array | Uint32Array | Float64Array>(array: T, capacity: number): T {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const next = new (array.constructor as any)(capacity) as T;
+
+  next.set(array);
+  return next;
 }

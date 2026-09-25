@@ -1,42 +1,47 @@
-import { Environment } from "@/app/context/environment";
-import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/upscalers/abstract_upscaler";
-import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
+import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/upscalers/worker_upscaler?raw";
-import { Preferences } from "@/app/context/preferences";
-import { Shell } from "@/app/context/shell";
+import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/worker_upscaler?raw";
+import { Preference } from "@/lib/storage/preference";
 import { replaceCanvas } from "@/utils/browser/canvas";
 import { resolveImageUrl } from "@/lib/media/resolver";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   protected readonly needsBitmapForPaint: boolean = false;
   private readonly worker: Worker;
   private readonly transferredCanvases: Map<string, HTMLCanvasElement> = new Map();
 
-  constructor(environment: Environment, preferences: Preferences, shell: Shell) {
-    super(environment, preferences, shell);
+  constructor(
+    canvasFor: (id: string) => HTMLCanvasElement | null,
+    enabled: Preference<boolean>,
+    quality: Preference<number>,
+    fetchBitmap: (request: ImageRequest) => Promise<boolean>,
+    paintDelay: number,
+    baseCanvasWidth: number,
+    maxUpscaledCanvasHeight: number
+  ) {
+    super(canvasFor, enabled, quality, fetchBitmap, paintDelay, baseCanvasWidth, maxUpscaledCanvasHeight);
     this.worker = new Worker(URL.createObjectURL(new Blob([OFFSCREEN_UPSCALER_CODE], { type: "application/javascript" })));
     this.worker.postMessage({
       action: "init",
       config: {
-        maxUpscaledCanvasHeight: GalleryUpscaleConfig.maxUpscaledCanvasHeight
+        maxUpscaledCanvasHeight: this.maxUpscaledCanvasHeight
       }
     });
   }
 
-  protected evict(id: string): void {
-    const transferred = this.transferredCanvases.get(id);
-
-    if (transferred !== undefined) {
-      replaceCanvas(transferred);
-      this.transferredCanvases.delete(id);
+  protected erase(canvas: HTMLCanvasElement): void {
+    for (const [id, transferred] of this.transferredCanvases) {
+      if (transferred === canvas) {
+        replaceCanvas(transferred);
+        this.transferredCanvases.delete(id);
+        this.worker.postMessage({ action: "evict", id });
+        return;
+      }
     }
-    this.worker.postMessage({ action: "evict", id });
   }
 
   protected async paint(request: ImageRequest): Promise<void> {
-    const url = await resolveImageUrl(toMediaItem(request.thumb));
+    const url = await resolveImageUrl(request.item);
     const canvas = this.transferCanvas(request);
     const width = this.upscaledCanvasWidth;
 
@@ -51,7 +56,7 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
     if (this.transferredCanvases.has(request.id)) {
       return undefined;
     }
-    const canvas = request.thumb.querySelector("canvas");
+    const canvas = this.canvasFor(request.id);
 
     if (!(canvas instanceof HTMLCanvasElement)) {
       return undefined;

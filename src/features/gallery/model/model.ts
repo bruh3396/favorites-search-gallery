@@ -4,10 +4,14 @@ import { GalleryState, Identifiable } from "@/types/app";
 import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/ui/thumb/favorite_actions";
 import { clampedThumbsAroundId, wrappingThumbsAroundId } from "@/features/gallery/model/item_window";
 import { Boundary } from "@/types/boundary";
+import { GalleryDynamicUpscaleQuality } from "@/features/gallery/model/upscale_quality";
 import { GalleryStateController } from "@/features/gallery/model/state";
+import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
+import { MediaItem } from "@/types/media";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
+import { Shell } from "@/app/context/shell";
 import { downloadFromThumb } from "@/lib/media/download";
 import { isVideoThumb } from "@/lib/ui/thumb/media_item";
 import { navigationDelta } from "@/utils/pure/number";
@@ -15,23 +19,29 @@ import { navigationDelta } from "@/utils/pure/number";
 export class GalleryModel {
   private readonly cursor: ItemCursor<HTMLElement>;
   private readonly state: GalleryStateController;
-  private getThumbsAround: (id: string) => HTMLElement[];
+  private readonly quality: GalleryDynamicUpscaleQuality;
+  private getThumbsAround: (id: string) => MediaItem[];
 
-  constructor(preferences: Preferences) {
+  constructor(preferences: Preferences, shell: Shell) {
     this.cursor = new ItemCursor<HTMLElement>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value ? "preview" : "idle");
-    this.getThumbsAround = (): HTMLElement[] => [];
+    this.quality = new GalleryDynamicUpscaleQuality(() => shell.getFirstContentThumb()?.getBoundingClientRect().width ?? null, () => window.innerWidth, GalleryUpscaleConfig.dynamicQualityCutoffs);
+    this.getThumbsAround = (): MediaItem[] => [];
   }
 
-  public setupWrappingWindow<T extends Identifiable>(getItems: () => T[], toThumb: (item: T) => HTMLElement): void {
-    this.getThumbsAround = (id): HTMLElement[] => wrappingThumbsAroundId(getItems(), id, toThumb);
+  public computeUpscaleQuality(): number | null {
+    return this.quality.compute();
   }
 
-  public setupClampedWindow<T extends Identifiable>(getItems: () => T[], toThumb: (item: T) => HTMLElement): void {
-    this.getThumbsAround = (id): HTMLElement[] => clampedThumbsAroundId(getItems(), id, toThumb);
+  public setupWrappingWindow<T extends Identifiable>(getItems: () => T[], toItem: (item: T) => MediaItem): void {
+    this.getThumbsAround = (id): MediaItem[] => wrappingThumbsAroundId(getItems(), id, toItem);
   }
 
-  public getItemsAround(id: string): HTMLElement[] {
+  public setupClampedWindow<T extends Identifiable>(getItems: () => T[], toItem: (item: T) => MediaItem): void {
+    this.getThumbsAround = (id): MediaItem[] => clampedThumbsAroundId(getItems(), id, toItem);
+  }
+
+  public getItemsAround(id: string): MediaItem[] {
     return this.getThumbsAround(id);
   }
 

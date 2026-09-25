@@ -111,6 +111,7 @@ describe("PackedPostings", () => {
       const sparseTerms = [...oracle];
       const total = sparseTerms.reduce((sum, [, positions]) => sum + positions.length, 0);
       const max = Math.max(0, ...sparseTerms.flatMap(([, positions]) => positions));
+
       p.pack(sparseTerms, total, max);
 
       for (const [term, expected] of oracle) {

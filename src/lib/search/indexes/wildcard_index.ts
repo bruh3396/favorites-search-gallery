@@ -10,7 +10,7 @@ export class WildcardIndex {
   private prefixIndex: PrefixIndex;
   private trigrams: TrigramIndex | null = null;
 
-  constructor(terms: string[] = [], eager: boolean = true) {
+  constructor(terms: string[] = [], eager: boolean = false) {
     this.eager = eager;
     this.terms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);
     this.prefixIndex = new PrefixIndex(this.terms);

@@ -1,17 +1,29 @@
 import { imageUrlToSampleUrl, withRule34WimgHostname } from "@/lib/media/url";
-import { isImageThumb, toMediaItem } from "@/lib/ui/thumb/media_item";
+import { MediaItem } from "@/types/media";
+import { isImage } from "@/lib/media/media_type";
 import { resolveImageUrl } from "@/lib/media/resolver";
 
-export async function fetchFullImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
-  return fetchImageBitmap(await resolveImageUrl(toMediaItem(thumb)), abortController);
+export async function fetchFullImageBitmap(item: MediaItem, abortController?: AbortController): Promise<ImageBitmap> {
+  return fetchImageBitmap(await resolveImageUrl(item), abortController);
 }
 
-export async function fetchSampleImageBitmapFromThumb(thumb: HTMLElement, abortController?: AbortController): Promise<ImageBitmap> {
-  if (!isImageThumb(thumb)) {
-    return fetchFullImageBitmapFromThumb(thumb, abortController);
+export async function fetchSampleImageBitmap(item: MediaItem, abortController?: AbortController): Promise<ImageBitmap> {
+  if (!isImage(item)) {
+    return fetchFullImageBitmap(item, abortController);
   }
-  return fetchImageBitmap(imageUrlToSampleUrl(await resolveImageUrl(toMediaItem(thumb))), abortController)
-    .catch(() => fetchFullImageBitmapFromThumb(thumb, abortController));
+  return fetchImageBitmap(imageUrlToSampleUrl(await resolveImageUrl(item)), abortController)
+    .catch(() => fetchFullImageBitmap(item, abortController));
+}
+
+export async function imageUrlToBitmap(url: string): Promise<ImageBitmap> {
+  const image = new Image();
+
+  image.src = url;
+  await new Promise<void>((resolve, reject) => {
+    image.onload = (): void => resolve();
+    image.onerror = (): void => reject(new Error(`Failed to load image: ${url}`));
+  });
+  return createImageBitmap(image);
 }
 
 function fetchImageBitmap(url: string, abortController?: AbortController): Promise<ImageBitmap> {
@@ -26,13 +38,6 @@ function fetchImageBitmap(url: string, abortController?: AbortController): Promi
     });
 }
 
-async function fetchWimgImageBitmap(url: string): Promise<ImageBitmap> {
-  const image = new Image();
-
-  image.src = withRule34WimgHostname(url);
-  await new Promise<void>((resolve, reject) => {
-    image.onload = (): void => resolve();
-    image.onerror = (): void => reject(new Error(`Failed to load image: ${image.src}`));
-  });
-  return createImageBitmap(image);
+function fetchWimgImageBitmap(url: string): Promise<ImageBitmap> {
+  return imageUrlToBitmap(withRule34WimgHostname(url));
 }

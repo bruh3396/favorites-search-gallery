@@ -54,7 +54,7 @@ function buildButtons(events: Events, environment: Environment, slots: Favorites
       id: "scratch-button",
       parent: slots.buttons,
       textContent: "SCRATCH",
-      enabled: true,
+      enabled: false,
       event: events.favorites.scratchButtonClicked
     },
     {

@@ -5,6 +5,7 @@ import { BoundaryEdge } from "@/types/boundary";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
+import { MediaItem } from "@/types/media";
 import { Point } from "@/types/geometry";
 import { Renderer } from "@/features/gallery/types/types";
 import { forceReflow } from "@/utils/browser/element";
@@ -17,7 +18,7 @@ export class GalleryRenderer {
   private readonly renderers: Renderer[];
 
   constructor(appRoot: HTMLElement, context: AppContext) {
-    this.imageRenderer = new GalleryImageRenderer(context.environment, context.preferences, context.shell);
+    this.imageRenderer = new GalleryImageRenderer(context);
     this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment);
     this.gifRenderer = new GalleryGifRenderer(context.environment);
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
@@ -34,11 +35,13 @@ export class GalleryRenderer {
 
   public render(thumb: HTMLElement): void {
     this.hide();
-    this.resolve(thumb).render(thumb);
+    const item = toMediaItem(thumb);
+
+    this.resolve(item).render(item);
   }
 
   public nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
-    const renderer = this.resolve(thumb);
+    const renderer = this.resolve(toMediaItem(thumb));
 
     if (renderer === this.videoRenderer) {
       return;
@@ -54,8 +57,8 @@ export class GalleryRenderer {
     this.renderers.forEach((renderer) => renderer.hide());
   }
 
-  public cache(thumbs: HTMLElement[]): void {
-    this.renderers.forEach((renderer) => renderer.cache(thumbs));
+  public cache(items: MediaItem[]): void {
+    this.renderers.forEach((renderer) => renderer.cache(items));
   }
 
   public toggleZoom(value: boolean | undefined): boolean {
@@ -79,11 +82,11 @@ export class GalleryRenderer {
   }
 
   public cacheImages(thumbs: HTMLElement[]): Promise<void> {
-    return this.imageRenderer.cache(thumbs);
+    return this.imageRenderer.cache(thumbs.map(toMediaItem));
   }
 
   public upscale(thumbs: HTMLElement[]): Promise<void> {
-    return this.imageRenderer.upscale(thumbs);
+    return this.imageRenderer.upscale(thumbs.map(toMediaItem));
   }
 
   public reUpscale(): void {
@@ -92,10 +95,6 @@ export class GalleryRenderer {
 
   public downscaleAll(): void {
     this.imageRenderer.downscaleAll();
-  }
-
-  public downscaleDetached(): void {
-    this.imageRenderer.downscaleDetached();
   }
 
   public correctOrientation(): void {
@@ -118,8 +117,7 @@ export class GalleryRenderer {
     this.videoRenderer.setVideoMuted(muted);
   }
 
-  private resolve(thumb: HTMLElement): Renderer {
-    const item = toMediaItem(thumb);
+  private resolve(item: MediaItem): Renderer {
     return isVideo(item) ? this.videoRenderer : isGif(item) ? this.gifRenderer : this.imageRenderer;
   }
 }

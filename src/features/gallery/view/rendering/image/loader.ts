@@ -1,30 +1,30 @@
-import * as GalleryImageFetcher from "@/features/gallery/view/rendering/image/fetcher";
 import { CachedRequest, GalleryImageCache } from "@/features/gallery/view/rendering/image/cache";
-import { Environment } from "@/app/context/environment";
-import { GalleryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
-import { ImageRequest } from "@/features/gallery/types/image_request";
-import { LowResolutionImageRequest } from "@/features/gallery/types/low_resolution_image_request";
-import { isImageThumb } from "@/lib/ui/thumb/media_item";
+import { ImageBudgeter, ImageFetcher } from "@/features/gallery/types/types";
+import { ImageRequest, LowResolutionImageRequest } from "@/features/gallery/types/image_request";
+import { MediaItem } from "@/types/media";
 
 export class GalleryImageLoader {
-  private readonly cache = new GalleryImageCache();
-  private readonly budgeter: GalleryImageBudgeter;
+  private readonly cache: GalleryImageCache;
 
-  constructor(environment: Environment, private readonly onRequestCompleted: (request: ImageRequest) => void) {
-    this.budgeter = new GalleryImageBudgeter(environment, () => 0);
+  constructor(
+    private readonly fetcher: ImageFetcher,
+    private readonly budgeter: ImageBudgeter,
+    private readonly onRequestCompleted: (request: ImageRequest) => void
+  ) {
+    this.cache = new GalleryImageCache((id) => fetcher.cancelFetch(id));
   }
 
-  public load(thumbs: HTMLElement[]): ImageRequest[] {
-    const { accepted, rejected } = this.budgeter.partition(thumbs.filter(t => isImageThumb(t)));
+  public load(items: MediaItem[]): MediaItem[] {
+    const { accepted, rejected } = this.budgeter.partition(items);
 
     this.cache.sync(accepted).forEach(request => this.runRequest(request));
-    return rejected;
+    return rejected.map(request => request.item);
   }
 
-  public loadImmediate(thumb: HTMLElement): void {
-    const request = new ImageRequest(thumb);
+  public loadImmediate(item: MediaItem): void {
+    const request = new ImageRequest(item);
 
-    this.cache.markLowRes(request);
+    this.cache.storeAsLowResolution(request);
     this.runRequest(new LowResolutionImageRequest(request));
     this.runRequest(request);
   }
@@ -47,16 +47,16 @@ export class GalleryImageLoader {
 
     if (cached.status !== "complete") {
       if (request.isHighRes) {
-        this.cache.markComplete(request);
+        this.cache.storeAsComplete(request);
       } else {
-        this.cache.markLowRes(request);
+        this.cache.storeAsLowResolution(request);
       }
       this.onRequestCompleted(request);
     }
   }
 
   private async runRequest(request: ImageRequest): Promise<void> {
-    if (!request.isCancelled && await GalleryImageFetcher.fetchBitmap(request)) {
+    if (!request.isCancelled && await this.fetcher.fetchBitmap(request)) {
       this.settleRequest(request);
     }
   }

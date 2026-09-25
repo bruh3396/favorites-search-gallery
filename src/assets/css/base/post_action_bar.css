@@ -47,11 +47,8 @@
   color: #fff;
 }
 
-.post-action-heart-empty,
-.post-action-heart-filled {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.post-action-icon {
+  display: block;
 }
 
 .post-action-bar:not([data-is-favorite]) .post-action-button[data-action="favorite"] .post-action-heart-filled,
@@ -84,7 +81,7 @@
   transform: scale(0.88);
 }
 
-[data-post-action-bar-style="corner"] .post-action-button svg {
+[data-post-action-bar-style="corner"] .post-action-icon {
   width: 1.7rem;
   height: 1.7rem;
 }
@@ -138,12 +135,12 @@
   transform: scale(0.88);
 }
 
-[data-post-action-bar-style="inset"] .post-action-button svg {
+[data-post-action-bar-style="inset"] .post-action-icon {
   width: 21px;
   height: 21px;
 }
 
-[data-post-action-bar-style="inset"] .post-action-button[data-action="download"] svg {
+[data-post-action-bar-style="inset"] .post-action-button[data-action="download"] .post-action-icon {
   width: 24px;
   height: 24px;
 }
@@ -195,12 +192,12 @@
   transform: scale(0.88);
 }
 
-[data-post-action-bar-style="opaque"] .post-action-button svg {
+[data-post-action-bar-style="opaque"] .post-action-icon {
   width: 21px;
   height: 21px;
 }
 
-[data-post-action-bar-style="opaque"] .post-action-button[data-action="download"] svg {
+[data-post-action-bar-style="opaque"] .post-action-button[data-action="download"] .post-action-icon {
   width: 24px;
   height: 24px;
 }

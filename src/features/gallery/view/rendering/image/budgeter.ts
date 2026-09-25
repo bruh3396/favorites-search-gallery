@@ -1,35 +1,44 @@
-import { Environment } from "@/app/context/environment";
-import { GalleryConfig } from "@/config/gallery_config";
+import { BudgetedRequests, ImageBudgeter } from "@/features/gallery/types/types";
 import { ImageRequest } from "@/features/gallery/types/image_request";
+import { MediaItem } from "@/types/media";
 
-type BudgetedRequests = {
-  accepted: ImageRequest[];
-  rejected: ImageRequest[];
-};
+const PIXELS_PER_MEGABYTE = 220_000;
 
-export class GalleryImageBudgeter {
-  constructor(private readonly environment: Environment, private readonly getPixelCount: (id: string) => number) {}
-
-  public partition(thumbs: HTMLElement[]): BudgetedRequests {
-    return this.partitionByLimit(thumbs.map(t => new ImageRequest(t)));
+export abstract class GalleryAbstractImageBudgeter implements ImageBudgeter {
+  public partition(items: MediaItem[]): BudgetedRequests {
+    return this.partitionByLimit(items.map(item => new ImageRequest(item)));
   }
 
-  private megabytes(request: ImageRequest): number {
-    return this.getPixelCount(request.id) / 220_000;
+  protected abstract partitionByLimit(requests: ImageRequest[]): BudgetedRequests;
+}
+
+export class GalleryLimitImageBudgeter extends GalleryAbstractImageBudgeter {
+  constructor(private readonly limit: number) {
+    super();
   }
 
-  private partitionByLimit(requests: ImageRequest[]): BudgetedRequests {
-    return this.environment.onFavoritesPage && !this.environment.onMobileDevice ? this.partitionByMemory(requests) : this.partitionByCount(requests);
+  protected partitionByLimit(requests: ImageRequest[]): BudgetedRequests {
+    return { accepted: requests.slice(0, this.limit), rejected: requests.slice(this.limit) };
+  }
+}
+
+export class GalleryMemoryImageBudgeter extends GalleryAbstractImageBudgeter {
+  constructor(
+    private readonly getPixelCount: (id: string) => number,
+    private readonly megabyteLimit: number,
+    private readonly minimumCount: number
+  ) {
+    super();
   }
 
-  private partitionByMemory(requests: ImageRequest[]): BudgetedRequests {
+  protected partitionByLimit(requests: ImageRequest[]): BudgetedRequests {
     const accepted: ImageRequest[] = [];
     let totalMegabytes = 0;
     let cutoff = requests.length;
 
     for (let i = 0; i < requests.length; i += 1) {
-      if (totalMegabytes >= GalleryConfig.imageMegabyteLimit &&
-        accepted.length >= GalleryConfig.minimumCachedImageCount) {
+      if (totalMegabytes >= this.megabyteLimit &&
+        accepted.length >= this.minimumCount) {
         cutoff = i;
         break;
       }
@@ -39,8 +48,7 @@ export class GalleryImageBudgeter {
     return { accepted, rejected: requests.slice(cutoff) };
   }
 
-  private partitionByCount(requests: ImageRequest[]): BudgetedRequests {
-    const cutoff = this.environment.onMobileDevice ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
-    return { accepted: requests.slice(0, cutoff), rejected: requests.slice(cutoff) };
+  private megabytes(request: ImageRequest): number {
+    return this.getPixelCount(request.id) / PIXELS_PER_MEGABYTE;
   }
 }

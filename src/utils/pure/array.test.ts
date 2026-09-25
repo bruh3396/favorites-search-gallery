@@ -1,6 +1,34 @@
-import { chunk, findFirstIndexWhere, insertSorted, intersectSortedNumbers, isIndexInBounds, itemsAround, removeValue, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
+import { chunk, findFirstIndexWhere, insertSorted, intersectSortedNumbers, isIndexInBounds, itemsAround, partition, removeValue, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
 import { describe, expect, test } from "vitest";
 import { randomInt } from "@/utils/pure/number";
+
+describe("partition", () => {
+  test("splits into matching and rest, preserving order", () => {
+    const [even, odd] = partition([1, 2, 3, 4, 5, 6], (n) => n % 2 === 0);
+
+    expect(even).toEqual([2, 4, 6]);
+    expect(odd).toEqual([1, 3, 5]);
+  });
+
+  test("evaluates the predicate once per element", () => {
+    const seen: number[] = [];
+
+    partition([1, 2, 3], (n) => {
+      seen.push(n);
+      return true;
+    });
+    expect(seen).toEqual([1, 2, 3]);
+  });
+
+  test("returns two empty arrays for an empty input", () => {
+    expect(partition([], () => true)).toEqual([[], []]);
+  });
+
+  test("puts everything in one side when the predicate is constant", () => {
+    expect(partition([1, 2, 3], () => true)).toEqual([[1, 2, 3], []]);
+    expect(partition([1, 2, 3], () => false)).toEqual([[], [1, 2, 3]]);
+  });
+});
 
 describe("insertSorted", () => {
   test("inserts into the middle keeping ascending order", () => {

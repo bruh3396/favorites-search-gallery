@@ -7,5 +7,6 @@ export const ThumbConfig = {
   spacing: { postList: 10, favorites: 6 },
   rightContentMargin: 15,
   fadeCascadeStepMs: 40,
-  actionBarStyle: "corner"
+  actionBarStyle: "corner",
+  reTile: true
 };

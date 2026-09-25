@@ -1,5 +1,6 @@
 import { Environment } from "@/app/context/environment";
 import { GalleryVideoController } from "@/features/gallery/view/rendering/video/video_controller";
+import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";
 import { Renderer } from "@/features/gallery/types/types";
 import { div } from "@/utils/browser/element";
@@ -20,9 +21,9 @@ export class GalleryVideoRenderer implements Renderer {
     this.controller.setup(this.root, onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
   }
 
-  public render(thumb: HTMLElement): void {
+  public render(item: MediaItem): void {
     this.root.style.visibility = "visible";
-    this.controller.playVideo(thumb);
+    this.controller.playVideo(item);
   }
 
   public hide(): void {
@@ -30,8 +31,8 @@ export class GalleryVideoRenderer implements Renderer {
     this.controller.stopAllVideos();
   }
 
-  public cache(thumbs: HTMLElement[]): void {
-    this.controller.preloadVideoPlayers(thumbs);
+  public cache(items: MediaItem[]): void {
+    this.controller.preloadVideoPlayers(items);
   }
 
   public toggleVideoLooping(value: boolean): void {

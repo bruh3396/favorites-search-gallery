@@ -3,15 +3,15 @@ import { SettingsCatalog } from "@/features/favorites/control/settings/catalog";
 import { SettingsSection } from "@/features/favorites/control/settings/types";
 
 export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment): SettingsSection[] {
-  return environment.onMobileDevice ? mobileSections(catalog) : desktopSections(catalog);
-}
-
-function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
+  const onMobile = environment.onMobileDevice;
   return [
     {
       title: "General",
       expanded: true,
-      controls: [
+      controls: onMobile ? [
+        catalog.enhanceSearchPages,
+        catalog.mobileGallery
+      ] : [
         catalog.performanceProfile,
         catalog.enhanceSearchPages,
         catalog.hints
@@ -19,7 +19,10 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
     },
     {
       title: "Interaction",
-      controls: [
+      controls: onMobile ? [
+        catalog.postActionBarToggle,
+        catalog.postActionBarButtons
+      ] : [
         catalog.postActionBar,
         catalog.postActionBarButtons,
         catalog.postOverlay,
@@ -28,21 +31,28 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
     },
     {
       title: "Appearance",
-      controls: [
+      controls: onMobile ? [
         catalog.theme,
         catalog.darkMode,
         catalog.header,
-        catalog.upscale,
-        catalog.upscaleQuality
+        catalog.upscale
+      ] : [
+        catalog.theme,
+        catalog.darkMode,
+        catalog.header,
+        catalog.upscale
+        // catalog.upscaleQuality
       ]
     },
     {
       title: "Layout",
-      controls: [
+      controls: onMobile ? [
+        catalog.layout,
+        catalog.columnCount
+      ] : [
         catalog.layout,
         catalog.columnCount,
         catalog.rowHeight
-
       ]
     },
     {
@@ -58,67 +68,15 @@ function desktopSections(catalog: SettingsCatalog): SettingsSection[] {
     },
     {
       title: "Gallery",
-      controls: [
+      controls: onMobile ? [
+        catalog.autoplay,
+        catalog.themedBackground
+      ] : [
         catalog.autoplay,
         catalog.galleryMenu,
         catalog.fullscreenOnHover,
         catalog.themedBackground,
         catalog.backgroundOpacity
-      ]
-    }
-  ];
-}
-
-function mobileSections(catalog: SettingsCatalog): SettingsSection[] {
-  return [
-    {
-      title: "General",
-      expanded: true,
-      controls: [
-        catalog.enhanceSearchPages,
-        catalog.mobileGallery
-      ]
-    },
-    {
-      title: "Interaction",
-      controls: [
-        catalog.postActionBarToggle,
-        catalog.postActionBarButtons
-      ]
-    },
-    {
-      title: "Appearance",
-      controls: [
-        catalog.theme,
-        catalog.darkMode,
-        catalog.upscale,
-        catalog.upscaleQuality,
-        catalog.header
-      ]
-    },
-    {
-      title: "Layout",
-      controls: [
-        catalog.layout,
-        catalog.columnCount
-      ]
-    },
-    {
-      title: "Results",
-      controls: [
-        catalog.rating,
-        catalog.sortKey,
-        catalog.sortAscending,
-        catalog.excludeBlacklist,
-        catalog.infiniteScroll,
-        catalog.resultsPerPage
-      ]
-    },
-    {
-      title: "Gallery",
-      controls: [
-        catalog.autoplay,
-        catalog.themedBackground
       ]
     }
   ];

@@ -13,6 +13,8 @@ export const FavoritesConfig = {
   infiniteScrollPreloadCount: 100,
   infiniteScrollMargin: "150%",
 
+  thumbPoolMaxRetained: 100,
+
   apiCoalesceSize: 50,
   apiCoalesceTimeout: 1500,
 

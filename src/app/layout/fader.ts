@@ -32,7 +32,7 @@ export class Fader {
 
   public clearFade(thumbs: HTMLElement[]): void {
     this.stopFadeIn();
-    thumbs.forEach(thumb => removeDataset(thumb, "fading"));
+    thumbs.forEach(thumb => this.endFade(thumb));
   }
 
   private stopFadeIn(): void {
@@ -40,7 +40,7 @@ export class Fader {
 
     for (const [thumb, cancel] of this.pending) {
       cancel();
-      removeDataset(thumb, "fading");
+      this.endFade(thumb);
     }
     this.pending.clear();
   }
@@ -91,11 +91,16 @@ export class Fader {
   private startFade(thumb: HTMLElement): void {
     const onAnimationEnd = (): void => {
       this.pending.delete(thumb);
-      removeDataset(thumb, "fading");
+      this.endFade(thumb);
     };
 
     this.pending.set(thumb, () => thumb.removeEventListener("animationend", onAnimationEnd));
     setDataset(thumb, "fading", "play");
     thumb.addEventListener("animationend", onAnimationEnd, { once: true });
+  }
+
+  private endFade(thumb: HTMLElement): void {
+    removeDataset(thumb, "fading");
+    thumb.getAnimations().forEach(animation => animation.cancel());
   }
 }

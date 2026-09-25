@@ -47,7 +47,7 @@ export class ContentTiler {
   private readonly columnTiler: ColumnTiler;
   private readonly tilers: AbstractTiler[];
   private readonly tilerMap: Map<Layout, AbstractTiler>;
-  private readonly fade: Fader;
+  private readonly fader: Fader;
   private currentLayout: Layout;
   private currentTiler: AbstractTiler;
 
@@ -58,7 +58,7 @@ export class ContentTiler {
     this.columnTiler = new ColumnTiler(config.content, config.columnCount.value);
     this.tilers = [this.columnTiler, new GridTiler(config.content), new RowTiler(config.content), new SquareTiler(config.content), new NativeTiler(config.content)];
     this.tilerMap = new Map(this.tilers.map(tiler => [tiler.layout, tiler]));
-    this.fade = new Fader(config.content, config.fadeThumbs, () => this.config.columnCount.value);
+    this.fader = new Fader(config.content, config.fadeThumbs, () => this.config.columnCount.value);
     this.currentLayout = config.layout.value;
     this.currentTiler = this.tilerMap.get(this.currentLayout) ?? this.columnTiler;
   }
@@ -95,20 +95,25 @@ export class ContentTiler {
   }
 
   public tile(items: HTMLElement[], options: ContentDisplayOptions = { fade: true }): void {
+    if (ThumbConfig.reTile && this.config.content.childElementCount > 0 && this.currentTiler.reTile(items)) {
+      this.fader.clearFade(items);
+      return;
+    }
+
     if (options.fade) {
-      this.fade.fadeInReplacement(items, () => this.currentTiler.tile(items));
+      this.fader.fadeInReplacement(items, () => this.currentTiler.tile(items));
     } else {
-      this.fade.clearFade(items);
+      this.fader.clearFade(items);
       this.currentTiler.tile(items);
     }
   }
 
   public addToBottom(items: HTMLElement[]): void {
-    this.fade.fadeIn(items, () => this.currentTiler.addItemsToBottom(items));
+    this.fader.fadeIn(items, () => this.currentTiler.addItemsToBottom(items));
   }
 
   public addToTop(items: HTMLElement[]): void {
-    this.fade.fadeIn(items, () => this.currentTiler.addItemsToTop(items));
+    this.fader.fadeIn(items, () => this.currentTiler.addItemsToTop(items));
   }
 
   public bottomEdgeElements(): HTMLElement[] {

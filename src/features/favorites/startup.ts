@@ -1,5 +1,4 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
-import { markActionBarFavorited, markActionBarUnfavorited } from "@/lib/ui/thumb/action_bar";
 import { AppContext } from "@/app/context/context";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesFeatures } from "@/features/favorites/features/features";
@@ -25,8 +24,8 @@ export function startFavorites(context: AppContext): void {
     const model = new FavoritesModel(context);
     const view = new FavoritesView(context);
     const control = new FavoritesControl(context);
-    const flows = new FavoritesFlows(context, model, view, control);
     const features = new FavoritesFeatures(context);
+    const flows = new FavoritesFlows(context, model, view, control);
     const components: FavoritesComponents = { context, model, view, flows, control, features };
 
     setup(components);
@@ -112,8 +111,8 @@ function subscribeToEvents({ context, model, view, flows, control }: FavoritesCo
   events.postOverlay.addTagToSearch.on((tag) => control.appendToSearch(tag));
   events.postOverlay.excludeTagFromSearch.on((tag) => control.excludeFromSearch(tag));
   events.app.favoriteRemoved.on((id) => model.deleteStoredFavorite(id));
-  events.app.favoriteAdded.on(markActionBarFavorited);
-  events.app.favoriteRemoved.on(markActionBarUnfavorited);
+  events.app.favoriteAdded.on((id) => view.setFavorited(id, true));
+  events.app.favoriteRemoved.on((id) => view.setFavorited(id, false));
   events.favorites.favoritesLoaded.on(() => view.collectAspectRatios(), { once: true });
 }
 
@@ -150,12 +149,11 @@ function serveFavoritesPageRequests({ context, model, view, flows }: FavoritesCo
 
   featureBridge.favorites.advance.serve((direction) => flows.display.advance(direction));
   featureBridge.favorites.searchResults.serve(() => model.getCurrentSearchResults());
-  featureBridge.favorites.getFavorite.serve((id) => model.getFavorite(id));
-  featureBridge.favorites.allFavorites.serve(() => model.getAllFavorites());
   featureBridge.favorites.searchQuery.serve(() => model.getCurrentSearchQuery());
   featureBridge.favorites.toolbar.serve(() => view.getToolbar());
   featureBridge.favorites.usingInfiniteScroll.serve(() => preferences.favorites.infiniteScroll.value);
   featureBridge.favorites.layout.serve(() => view.getLayout());
+  featureBridge.favorites.pixelCount.serve((id) => model.getPixelCount(id));
 }
 
 function servePostListRequests(context: AppContext, model: FavoritesModel): void {

@@ -8,6 +8,14 @@ export default defineConfig({
     }
   },
   test: {
-    exclude: [...configDefaults.exclude]
+    exclude: [...configDefaults.exclude],
+    isolate: false,
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        minThreads: 4,
+        maxThreads: 4
+      }
+    }
   }
 });
