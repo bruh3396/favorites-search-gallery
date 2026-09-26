@@ -68,4 +68,40 @@ describe("ZipWriter", () => {
     expect(view.getUint32(0, true)).toBe(0x06054b50);
     expect(view.getUint16(8, true)).toBe(0);
   });
+
+  test("writes zip64 end records when the entry count reaches the 16-bit limit", async() => {
+    const writer = new ZipWriter();
+    const count = 0xffff;
+
+    for (let index = 0; index < count; index += 1) {
+      writer.add("f", new Uint8Array(0));
+    }
+    const bytes = new Uint8Array(await writer.finish().arrayBuffer());
+    const end = new DataView(bytes.buffer, bytes.length - 22);
+    const locator = new DataView(bytes.buffer, bytes.length - 42, 20);
+    const record = new DataView(bytes.buffer, bytes.length - 98, 56);
+
+    expect(end.getUint32(0, true)).toBe(0x06054b50);
+    expect(end.getUint16(8, true)).toBe(0xffff);
+    expect(end.getUint32(16, true)).toBe(0xffffffff);
+    expect(locator.getUint32(0, true)).toBe(0x07064b50);
+    expect(record.getUint32(0, true)).toBe(0x06064b50);
+    expect(record.getBigUint64(24, true)).toBe(BigInt(count));
+  });
+
+  test("writes a zip64 extra field for an entry of at least 4 GiB", async() => {
+    const writer = new ZipWriter();
+    const size = 2 ** 32;
+    const huge = { length: size, *[Symbol.iterator](): Generator<number> {} } as unknown as Uint8Array<ArrayBuffer>;
+
+    writer.add("big.bin", huge);
+    const header = new DataView(await writer.finish().slice(0, 30 + "big.bin".length + 28).arrayBuffer());
+    const extra = 30 + "big.bin".length;
+
+    expect(header.getUint16(4, true)).toBe(45);
+    expect(header.getUint32(18, true)).toBe(0xffffffff);
+    expect(header.getUint16(28, true)).toBe(28);
+    expect(header.getUint16(extra, true)).toBe(0x0001);
+    expect(header.getBigUint64(extra + 4, true)).toBe(BigInt(size));
+  });
 });

@@ -8,6 +8,7 @@ type UpscaleCommand =
   | { action: "evict"; id: string };
 
 const canvases: Map<string, OffscreenCanvas> = new Map();
+const latestRequests: Map<string, object> = new Map();
 let config: UpscaleConfig = { maxUpscaledCanvasHeight: 16_000 };
 
 self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
@@ -39,12 +40,23 @@ async function paintFromUrl(id: string, url: string, width: number, canvas?: Off
   if (target === undefined) {
     return;
   }
+  const request = {};
+
+  latestRequests.set(id, request);
   const bitmap = await fetchBitmap(url, width);
+  const isLatest = canvases.get(id) === target && latestRequests.get(id) === request;
+
+  if (isLatest) {
+    latestRequests.delete(id);
+  }
 
   if (bitmap === null) {
     return;
   }
-  draw(target, bitmap);
+
+  if (isLatest) {
+    draw(target, bitmap);
+  }
   bitmap.close();
 }
 
@@ -58,6 +70,7 @@ function evict(id: string): void {
   canvas.width = 0;
   canvas.height = 0;
   canvases.delete(id);
+  latestRequests.delete(id);
 }
 
 async function fetchBitmap(url: string, resizeWidth: number): Promise<ImageBitmap | null> {

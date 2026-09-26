@@ -1,7 +1,3 @@
-#favorites-pagination-slot {
-  flex: 0 0 auto;
-}
-
 [data-pagination-hidden] #favorites-pagination,
 [data-pagination-hidden] #results-per-page-container,
 [data-pagination-hidden] #pagination-range-label,

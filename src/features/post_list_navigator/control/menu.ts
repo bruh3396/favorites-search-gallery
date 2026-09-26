@@ -1,10 +1,8 @@
-import { removeDataset, setDataset } from "@/utils/browser/dataset";
+import * as PostListNavigatorCatalog from "@/features/post_list_navigator/control/catalog";
 import { AppContext } from "@/app/context/context";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
-import { buildPostListSettingsCatalog } from "@/features/post_list_navigator/control/catalog";
-import { createElement } from "@/utils/browser/element";
-import { icon } from "@/lib/ui/icon";
+import { buildCollapsibleSection } from "@/lib/ui/settings/components/section";
 
 interface SettingsSection {
   title: string;
@@ -20,7 +18,7 @@ export function build(context: AppContext, panel: HTMLElement): void {
 }
 
 function buildSections(context: AppContext): SettingsSection[] {
-  const catalog = buildPostListSettingsCatalog(context);
+  const catalog = PostListNavigatorCatalog.buildPostListSettingsCatalog(context);
 
   if (context.environment.onDesktopDevice) {
     return [
@@ -60,31 +58,12 @@ function buildSections(context: AppContext): SettingsSection[] {
   ];
 }
 
-function buildSection(context: AppContext, settingsSection: SettingsSection): HTMLElement {
-  const isCollapsed = context.preferences.postList.settingsCollapsed.value;
-  const section = createElement("section", { className: SettingsClass.section, dataset: isCollapsed ? { collapsed: "" } : undefined });
-  const title = createElement("span", { className: SettingsClass.sectionTitle, textContent: settingsSection.title });
-  const header = createElement("button", { className: SettingsClass.sectionHeader, children: [title, icon("chevronDown")] });
-  const body = createElement("div", { className: SettingsClass.group, children: settingsSection.controls.map((control) => control()) });
-  const wrap = createElement("div", { className: SettingsClass.groupWrap, children: [body] });
-
-  header.type = "button";
-
-  header.addEventListener("click", () => {
-    toggleSection(context, section);
+function buildSection(context: AppContext, section: SettingsSection): HTMLElement {
+  const { settingsCollapsed } = context.preferences.postList;
+  return buildCollapsibleSection({
+    title: section.title,
+    collapsed: settingsCollapsed.value,
+    children: section.controls.map((control) => control()),
+    onToggle: settingsCollapsed.set
   });
-
-  section.append(header, wrap);
-  return section;
-}
-
-function toggleSection(context: AppContext, element: HTMLElement): void {
-  const isCollapsed = element.dataset.collapsed === undefined;
-
-  if (isCollapsed) {
-    setDataset(element, "collapsed");
-  } else {
-    removeDataset(element, "collapsed");
-  }
-  context.preferences.postList.settingsCollapsed.set(isCollapsed);
 }

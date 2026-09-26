@@ -1,7 +1,7 @@
+import * as FavoritesIdentity from "@/features/favorites/model/retrieval/identity";
 import * as PostResolver from "@/lib/domain/post/resolver";
 import * as PostStore from "@/lib/domain/post/store";
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
-import { favoritesDatabaseKey, favoritesPageId } from "@/features/favorites/model/retrieval/identity";
 import { AppContext } from "@/app/context/context";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
@@ -16,7 +16,6 @@ import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
 import { Post } from "@/types/api";
-import { configureFavoritesElement } from "@/lib/ui/thumb/favorites_element";
 import { fetchFavoritesPagePosts } from "@/lib/remote/fetchers/html";
 import { readVideoDuration } from "@/lib/media/duration";
 
@@ -27,15 +26,14 @@ export class FavoritesModel {
   private readonly loader: FavoritesLoader;
   private readonly paginator: Paginator<Favorite>;
 
-  constructor(context: AppContext) {
-    configureFavoritesElement(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.onMobileDevice, context.environment.userIsOnTheirOwnFavoritesPage);
+  constructor(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void) {
     this.collection = new FavoritesCollection();
-    this.searcher = new FavoritesSearcher(context.preferences, context.environment, context.events.favorites.searchResultsUpdated.emit);
-    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", favoritesDatabaseKey(context.environment)));
+    this.searcher = new FavoritesSearcher(context.preferences, context.environment, onSearchResultsChanged);
+    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", FavoritesIdentity.favoritesDatabaseKey(context.environment)));
     this.loader = new FavoritesLoader({
       store: this.store,
       fetcher: new FavoritesFetcher({
-        pageId: favoritesPageId(context.environment),
+        pageId: FavoritesIdentity.favoritesPageId(context.environment),
         fetch: fetchFavoritesPagePosts
       }),
       collection: this.collection,

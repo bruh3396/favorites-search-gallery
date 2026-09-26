@@ -17,6 +17,10 @@ export const tagCategoryEncodings: Record<string, EncodedTagCategory> = {
   metadata: 5
 };
 
+const tagCategories: ReadonlySet<TagCategory> = new Set(Object.values(tagCategoryDecodings));
+
+export const isTagCategory = (value: unknown): value is TagCategory => tagCategories.has(value as TagCategory);
+
 export function decodeTagCategory(encoded: EncodedTagCategory): TagCategory {
   if (encoded === null) {
     return "general";

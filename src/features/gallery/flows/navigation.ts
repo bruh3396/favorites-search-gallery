@@ -18,7 +18,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
 
   private handleStartBoundary(): void {
     if (this.usingInfiniteScroll() || !this.advanceResults("ArrowLeft")) {
-      this.view.nudge(this.model.currentThumb(), "start");
+      this.view.nudge(this.model.currentItem(), "start");
       return;
     }
     this.model.jumpToLast();
@@ -27,7 +27,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
 
   private handleEndBoundary(): void {
     if (!this.advanceResults("ArrowRight")) {
-      this.view.nudge(this.model.currentThumb(), "end");
+      this.view.nudge(this.model.currentItem(), "end");
       return;
     }
 

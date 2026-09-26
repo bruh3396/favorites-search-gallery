@@ -6,6 +6,12 @@ export class GalleryInteractionFlow extends GalleryFlow {
     this.flows.dispatch.run({ open: () => this.view.showCursor() });
   }, 250);
 
+  public handleMouseMove(event: MouseEvent): void {
+    this.showCursorInGallery(event);
+    this.view.revealMenu();
+    this.flows.video.showControls(event);
+  }
+
   public hideCursorInGallery(): void {
     this.flows.dispatch.run({ open: () => this.view.toggleCursor(false) });
   }

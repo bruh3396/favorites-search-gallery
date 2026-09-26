@@ -62,7 +62,7 @@ export class ItemCursor<T extends Identifiable> {
       this.index.set(item.id, i);
     }
 
-    if (this.items.length === 0 || this.currentIndex >= this.items.length) {
+    if (this.currentIndex >= this.items.length) {
       this.currentIndex = 0;
     }
   }

@@ -18,7 +18,7 @@ export class TagPool {
 
   public write(index: number, tagString: string): void {
     if (this.packedIds !== null) {
-      this.unpackIds();
+      this.unpackIds(this.packedIds);
     }
     const vocabulary = this.vocabulary ?? this.rebuildVocabulary();
     const tagNames = tagString.split(" ");
@@ -97,14 +97,11 @@ export class TagPool {
     this.ids = new Uint16Array(0);
   }
 
-  private unpackIds(): void {
-    if (this.packedIds === null) {
-      return;
-    }
+  private unpackIds(packedIds: Uint8Array): void {
     const restored = this.vocabularyLength >= 65536 ? new Uint32Array(this.tagsLength) : new Uint16Array(this.tagsLength);
 
     for (let i = 0; i < this.tagsLength; i += 1) {
-      restored[i] = readPackedInt(this.packedIds, i, this.bitsPerId);
+      restored[i] = readPackedInt(packedIds, i, this.bitsPerId);
     }
     this.ids = restored;
     this.packedIds = null;

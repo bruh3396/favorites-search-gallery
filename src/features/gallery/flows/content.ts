@@ -2,6 +2,7 @@ import { debounceLeading, debounceTrailing } from "@/lib/async/rate_limiting";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryContentFlow extends GalleryFlow {
   private readonly refreshImagesDebounced = debounceLeading(() => {
@@ -15,7 +16,7 @@ export class GalleryContentFlow extends GalleryFlow {
   private readonly upscaleQuality = this.context.environment.onPostListPage ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
 
   private readonly updateUpscaleQualityDebounced = debounceTrailing(() => {
-    const quality = this.model.computeUpscaleQuality();
+    const quality = this.model.upscaleQualityFor(this.view.contentThumbWidth(), this.view.viewportWidth());
 
     if (quality !== null) {
       this.upscaleQuality.set(quality);
@@ -25,7 +26,7 @@ export class GalleryContentFlow extends GalleryFlow {
   public refresh(): void {
     this.view.downscaleAll();
     this.control.refreshThumbObserver();
-    this.model.indexThumbs(this.context.shell.getContentThumbs());
+    this.model.indexItems(this.context.shell.getContentThumbs().map(toMediaItem));
     this.refreshImagesDebounced();
   }
 

@@ -15,7 +15,6 @@ export class GalleryVideoController {
   private readonly videoClips = new Map();
   private readonly videoContainer: HTMLElement = document.createElement("div");
   private onVideoEnded: () => void = doNothing;
-  private onVideoDoubleClicked: (event: MouseEvent) => void = doNothing;
   private onVolumeChanged: (volume: number) => void = doNothing;
 
   constructor(preferences: Preferences, environment: Environment) {
@@ -24,14 +23,12 @@ export class GalleryVideoController {
     this.videoContainer.id = "video-container-inner";
   }
 
-  public setup(container: HTMLElement, videoEnded: () => void, videoDoubleClicked: (event: MouseEvent) => void, volumeChanged: (volume: number) => void): void {
+  public setup(container: HTMLElement, videoEnded: () => void, volumeChanged: (volume: number) => void): void {
     this.onVideoEnded = videoEnded;
-    this.onVideoDoubleClicked = videoDoubleClicked;
     this.onVolumeChanged = volumeChanged;
     this.insertVideoContainer(container);
     this.createVideoPlayers();
     this.preventVideoPlayersFromFlashingWhenLoaded();
-    this.addEventListenersToVideoContainer();
     this.addEventListenersToVideoPlayers();
     this.loadVideoClips();
   }
@@ -71,9 +68,15 @@ export class GalleryVideoController {
   }
 
   public toggleActiveVideoPause(): void {
-    if (document.activeElement !== this.getActiveVideoPlayer()) {
-      this.toggleVideoPause(this.getActiveVideoPlayer());
-    }
+    this.toggleVideoPause(this.getActiveVideoPlayer());
+  }
+
+  public showActiveVideoControls(): void {
+    this.getActiveVideoPlayer().setAttribute("controls", "");
+  }
+
+  public isActiveVideoFocused(): boolean {
+    return document.activeElement === this.getActiveVideoPlayer();
   }
 
   public restartActiveVideo(): void {
@@ -158,18 +161,6 @@ export class GalleryVideoController {
     });
   }
 
-  private preventDefaultBehaviorWhenControlKeyIsPressed(): void {
-    this.videoContainer.onclick = (event): void => {
-      if (!event.ctrlKey) {
-        event.preventDefault();
-      }
-    };
-  }
-
-  private addEventListenersToVideoContainer(): void {
-    this.preventDefaultBehaviorWhenControlKeyIsPressed();
-  }
-
   private insertVideoContainer(container: HTMLElement): void {
     container.appendChild(this.videoContainer);
   }
@@ -181,36 +172,8 @@ export class GalleryVideoController {
   }
 
   private addEventListenerToVideoPlayer(video: HTMLVideoElement): void {
-    this.revealControlsWhenMouseMoves(video);
-    this.pauseWhenClicked(video);
     this.updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video);
     this.broadcastEnding(video);
-    this.broadcastDoubleClick(video);
-    this.revealControlsWhenTouched(video);
-  }
-
-  private revealControlsWhenMouseMoves(video: HTMLVideoElement): void {
-    if (this.environment.onMobileDevice) {
-      return;
-    }
-    video.addEventListener("mousemove", () => {
-      if (!video.hasAttribute("controls")) {
-        video.setAttribute("controls", "");
-      }
-    }, {
-      passive: true
-    });
-  }
-
-  private pauseWhenClicked(video: HTMLVideoElement): void {
-    video.addEventListener("click", (event) => {
-      if (event.ctrlKey) {
-        return;
-      }
-      this.toggleVideoPause(video);
-    }, {
-      passive: true
-    });
   }
 
   private toggleVideoPause(video: HTMLVideoElement): void {
@@ -244,23 +207,6 @@ export class GalleryVideoController {
   private broadcastEnding(video: HTMLVideoElement): void {
     video.addEventListener("ended", () => {
       this.onVideoEnded();
-    }, {
-      passive: true
-    });
-  }
-
-  private broadcastDoubleClick(video: HTMLVideoElement): void {
-    video.addEventListener("dblclick", (event) => {
-      this.onVideoDoubleClicked(event);
-    });
-  }
-
-  private revealControlsWhenTouched(video: HTMLVideoElement): void {
-    if (this.environment.onDesktopDevice) {
-      return;
-    }
-    video.addEventListener("touchend", () => {
-      this.toggleVideoControls(true);
     }, {
       passive: true
     });

@@ -15,6 +15,7 @@ export class DomEvents {
     domLoaded: new StickyEmitter<void>(),
     mouseover: new Emitter<EnhancedMouseEvent>(),
     click: new Emitter<EnhancedMouseEvent>(),
+    dblclick: new Emitter<MouseEvent>(),
     mousedown: new Emitter<EnhancedMouseEvent>(),
     touchStart: new Emitter<TouchEvent>(),
     touchEnd: new Emitter<TouchEvent>(),
@@ -146,6 +147,9 @@ export class DomEvents {
     root.addEventListener("click", (event) => {
       this.document.click.emit(new EnhancedMouseEvent(event));
     });
+    root.addEventListener("dblclick", (event) => {
+      this.document.dblclick.emit(event);
+    });
     root.addEventListener("mousedown", (event) => {
       this.document.mousedown.emit(new EnhancedMouseEvent(event));
     });
@@ -171,9 +175,6 @@ export class DomEvents {
       this.document.touchStart.emit(event);
     }, { passive: false });
     root.addEventListener("touchend", (event) => {
-      this.document.touchEnd.emit(event);
-    });
-    document.documentElement.addEventListener("touchend", (event) => {
       this.document.touchEnd.emit(event);
     });
   }

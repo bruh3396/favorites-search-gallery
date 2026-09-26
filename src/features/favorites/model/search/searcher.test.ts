@@ -1,10 +1,10 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { Environment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
-import { Preferences } from "@/app/context/preferences";
+import { createEnvironment } from "@/testing/environment";
+import { createPreferences } from "@/testing/preferences";
 
 const RATINGS: Record<string, Rating> = { s: DiscreteRating.Safe, q: DiscreteRating.Questionable, e: DiscreteRating.Explicit };
 
@@ -14,24 +14,6 @@ interface ContextOverrides {
   allowedRatings?: Rating;
   sortKey?: SortKey;
   sortAscending?: boolean;
-}
-
-function createPreferences(overrides: ContextOverrides): Preferences {
-  return {
-    favorites: {
-      excludeBlacklist: { value: overrides.excludeBlacklist ?? false },
-      allowedRatings: { value: overrides.allowedRatings ?? 7 },
-      sortKey: { value: overrides.sortKey ?? "default" },
-      sortAscending: { value: overrides.sortAscending ?? false }
-    }
-  } as unknown as Preferences;
-}
-
-function createEnvironment(overrides: ContextOverrides): Environment {
-  return {
-    userIsOnTheirOwnFavoritesPage: overrides.onOwnFavoritesPage ?? true,
-    negatedBlacklistedTags: "-blacklisted"
-  } as unknown as Environment;
 }
 
 function createFavorite(id: string, rating: string, ...tags: string[]): Favorite {
@@ -57,7 +39,20 @@ describe.each([
 
   function configureSearcher(favorites: Favorite[], overrides: ContextOverrides = {}, onChanged: (results: Favorite[]) => void = vi.fn()): void {
     FavoritesConfig.useBitSearchEngine = useBitSearchEngine;
-    searcher = new FavoritesSearcher(createPreferences(overrides), createEnvironment(overrides), onChanged);
+    const preferences = createPreferences({
+      favorites: {
+        excludeBlacklist: overrides.excludeBlacklist ?? false,
+        allowedRatings: overrides.allowedRatings ?? 7,
+        sortKey: overrides.sortKey ?? "default",
+        sortAscending: overrides.sortAscending ?? false
+      }
+    });
+    const environment = createEnvironment({
+      userIsOnTheirOwnFavoritesPage: overrides.onOwnFavoritesPage ?? true,
+      negatedBlacklistedTags: "-blacklisted"
+    });
+
+    searcher = new FavoritesSearcher(preferences, environment, onChanged);
     searcher.index(favorites);
   }
 

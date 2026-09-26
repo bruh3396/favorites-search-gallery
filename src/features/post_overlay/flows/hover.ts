@@ -1,6 +1,5 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
-import { isInsideOverlay } from "@/features/post_overlay/dom_tweaks/overlay_hit_test";
 
 export class PostOverlayHoverFlow extends PostOverlayFlow {
 
@@ -11,7 +10,7 @@ export class PostOverlayHoverFlow extends PostOverlayFlow {
       return;
     }
 
-    if (this.model.isCoolingDown() || isInsideOverlay(event.originalEvent.target)) {
+    if (this.model.isCoolingDown() || this.view.isInsideOverlay(event.originalEvent.target)) {
       return;
     }
 

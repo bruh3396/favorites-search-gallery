@@ -41,6 +41,6 @@ export class GalleryFeatures {
     preferences.gallery.autoplayActive.on((value) => this.autoplay.toggle(value));
     events.gallery.openedGallery.on(() => this.autoplay.startAutoplay());
     events.gallery.closedGallery.on(() => this.autoplay.stopAutoplay());
-    events.gallery.displayedThumb.on((thumb) => this.autoplay.startViewTimer(thumb));
+    events.gallery.displayedItem.on((item) => this.autoplay.startViewTimer(item));
   }
 }

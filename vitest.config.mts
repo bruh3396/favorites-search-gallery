@@ -1,7 +1,6 @@
 import { configDefaults, defineConfig } from "vitest/config";
 import path from "path";
 import { fileURLToPath } from "url";
-import { UNTESTED_ROOTS } from "./untested_roots.mjs";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -11,8 +10,12 @@ export default defineConfig({
       "@": path.resolve(dirname, "src")
     }
   },
+  define: {
+    USE_LOCAL_SERVER: "false",
+    SCRIPT_VERSION: JSON.stringify("test")
+  },
   test: {
-    exclude: [...configDefaults.exclude],
+    exclude: [...configDefaults.exclude, ".audit/**", "src/playground/**"],
     isolate: false,
     pool: "threads",
     minWorkers: 4,
@@ -29,7 +32,7 @@ export default defineConfig({
       },
       all: true,
       include: ["src/**/*.ts"],
-      exclude: [...(configDefaults.coverage?.exclude ?? []), ...UNTESTED_ROOTS, "src/playground/**", "src/**/testing/**", "build/**", "src/**/*.test.ts", "src/**/*.d.ts"]
+      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/playground/**", "src/**/testing/**", "build/**", "src/**/*.test.ts", "src/**/*.d.ts"]
     }
   }
 });

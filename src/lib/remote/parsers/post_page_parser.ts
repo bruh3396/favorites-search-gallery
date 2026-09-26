@@ -1,6 +1,6 @@
 import { ParsedPost } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
-import { isTagCategory } from "@/types/guards";
+import { isTagCategory } from "@/lib/domain/tag/category_codec";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 import { toDimensions2D } from "@/utils/pure/geometry";
 import { withRule34Hostname } from "@/lib/media/url";

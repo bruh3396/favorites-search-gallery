@@ -1,12 +1,18 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
-import { overGalleryMenu } from "@/features/gallery/dom_tweaks/menu";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryClickFlow extends GalleryFlow {
   public handleClick(mouseEvent: EnhancedMouseEvent): void {
     this.flows.dispatch.run({
-      open: (event) => this.openMediaOnCtrlClick(event)
+      open: (event) => this.handleClickInGallery(event)
     }, mouseEvent.originalEvent);
+  }
+
+  public handleDoubleClick(mouseEvent: MouseEvent): void {
+    this.flows.dispatch.run({
+      open: (event) => this.flows.video.close(event)
+    }, mouseEvent);
   }
 
   public handleMouseDown(event: EnhancedMouseEvent): void {
@@ -30,6 +36,11 @@ export class GalleryClickFlow extends GalleryFlow {
     return isZoomedIn;
   }
 
+  private handleClickInGallery(mouseEvent: MouseEvent): void {
+    this.openMediaOnCtrlClick(mouseEvent);
+    this.flows.video.togglePause(mouseEvent);
+  }
+
   private openMediaOnCtrlClick(mouseEvent: MouseEvent): void {
     if (mouseEvent.ctrlKey) {
       this.model.openMedia();
@@ -39,7 +50,7 @@ export class GalleryClickFlow extends GalleryFlow {
   private handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
     if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey && !mouseEvent.shiftKey) {
       mouseEvent.originalEvent.preventDefault();
-      this.flows.openClose.open(mouseEvent.thumb);
+      this.flows.openClose.open(toMediaItem(mouseEvent.thumb));
       return;
     }
 
@@ -55,7 +66,7 @@ export class GalleryClickFlow extends GalleryFlow {
   }
 
   private handleMouseDownInGallery(mouseEvent: EnhancedMouseEvent): void {
-    if (mouseEvent.ctrlKey || overGalleryMenu(mouseEvent.originalEvent)) {
+    if (mouseEvent.ctrlKey || this.view.isOverMenu(mouseEvent.originalEvent.target)) {
       return;
     }
 

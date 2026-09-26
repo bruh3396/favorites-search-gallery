@@ -2,7 +2,6 @@ import {
   average,
   clamp,
   daysToMilliseconds,
-  navigationDelta,
   numbersAround,
   numbersInRange,
   randomBoolean,
@@ -350,20 +349,6 @@ describe("randomBoolean", () => {
     }
     expect(heads).toBeGreaterThan(100);
     expect(tails).toBeGreaterThan(100);
-  });
-});
-
-describe("navigationDelta", () => {
-  test("forward keys return 1", () => {
-    expect(navigationDelta("d")).toBe(1);
-    expect(navigationDelta("D")).toBe(1);
-    expect(navigationDelta("ArrowRight")).toBe(1);
-  });
-
-  test("backward keys return -1", () => {
-    expect(navigationDelta("a")).toBe(-1);
-    expect(navigationDelta("A")).toBe(-1);
-    expect(navigationDelta("ArrowLeft")).toBe(-1);
   });
 });
 

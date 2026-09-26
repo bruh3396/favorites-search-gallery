@@ -1,14 +1,15 @@
 import * as AutoplayMenu from "@/features/gallery/features/autoplay/menu";
 import * as Icons from "@/assets/svg/icons";
 import { clamp, toSeconds } from "@/utils/pure/number";
-import { isImageThumb, isVideoThumb } from "@/lib/ui/thumb/media_item";
+import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
+import { isImage, isVideo } from "@/lib/media/media_type";
 import { AppContext } from "@/app/context/context";
 import { AutoplayMenuElements } from "@/features/gallery/features/autoplay/menu";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
+import { MediaItem } from "@/types/media";
 import { NavigationKey } from "@/types/input";
 import { Timer } from "@/lib/async/scheduling";
 import { createObjectUrlFromSvg } from "@/utils/browser/image";
-import { insertStyle } from "@/utils/browser/injector";
 import { throttle } from "@/lib/async/rate_limiting";
 
 type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
@@ -39,7 +40,7 @@ export class GalleryAutoplay {
   private ui!: AutoplayMenuElements;
   private events!: GalleryAutoplayEvents;
   private eventListenersAbortController: AbortController;
-  private currentThumb: HTMLElement | null;
+  private currentItem: MediaItem | null;
   private imageViewTimer!: Timer;
   private menuVisibilityTimer!: Timer;
   private videoViewTimer!: Timer;
@@ -65,7 +66,7 @@ export class GalleryAutoplay {
       }
     };
     this.eventListenersAbortController = new AbortController();
-    this.currentThumb = null;
+    this.currentItem = null;
     this.isActive = false;
     this.isPaused = false;
     this.isMenuPersistent = false;
@@ -90,17 +91,17 @@ export class GalleryAutoplay {
     this.events.setVideoLooping(!value);
   }
 
-  public startViewTimer(thumb: HTMLElement | null): void {
-    if (thumb === null) {
+  public startViewTimer(item: MediaItem | null): void {
+    if (item === null) {
       return;
     }
-    this.currentThumb = thumb;
+    this.currentItem = item;
 
     if (!this.isActive || this.isPaused) {
       return;
     }
 
-    if (isVideoThumb(thumb)) {
+    if (isVideo(item)) {
       this.startVideoViewTimer();
     } else {
       this.startImageViewTimer();
@@ -143,7 +144,7 @@ export class GalleryAutoplay {
 
   private initializeFields(): void {
     this.eventListenersAbortController = new AbortController();
-    this.currentThumb = null;
+    this.currentItem = null;
     this.isActive = this.context.preferences.gallery.autoplayActive.value;
     this.isPaused = this.context.preferences.gallery.autoplayPaused.value;
     this.isMenuPersistent = false;
@@ -187,8 +188,8 @@ export class GalleryAutoplay {
 
   private insertHtml(): void {
     this.insertMenu();
-    this.insertImageProgressHtml();
-    this.insertVideoProgressHtml();
+    this.setImageProgressDuration();
+    this.setVideoProgressDuration();
   }
 
   private insertMenu(): void {
@@ -196,26 +197,12 @@ export class GalleryAutoplay {
     this.context.shell.overlays.insertAdjacentElement("afterbegin", this.ui.container);
   }
 
-  private insertImageProgressHtml(): void {
-    insertStyle(`
-      #autoplay-image-progress-bar.animated {
-          transition: width ${this.config.imageViewDurationInSeconds}s linear;
-          width: 100%;
-      }
-
-      body.autoplay::before {
-        animation: progress ${this.config.imageViewDurationInSeconds}s linear forwards
-      }
-      `, "autoplay-image-progress");
+  private setImageProgressDuration(): void {
+    this.ui.imageProgressBar.style.setProperty("--autoplay-progress-duration", `${this.config.imageViewDurationInSeconds}s`);
   }
 
-  private insertVideoProgressHtml(): void {
-    insertStyle(`
-      #autoplay-video-progress-bar.animated {
-          transition: width ${this.config.minimumVideoDurationInSeconds}s linear;
-          width: 100%;
-      }
-      `, "autoplay-video-progress");
+  private setVideoProgressDuration(): void {
+    this.ui.videoProgressBar.style.setProperty("--autoplay-progress-duration", `${this.config.minimumVideoDurationInSeconds}s`);
   }
 
   private configureMobileUi(): void {
@@ -273,7 +260,7 @@ export class GalleryAutoplay {
   private setMenuIconImageSources(): void {
     this.ui.playButton.src = this.isPaused ? menuIcons.play : menuIcons.pause;
     this.ui.settingsButton.src = menuIcons.tune;
-    this.ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", this.context.preferences.gallery.autoplayForward.value);
+    toggleDataset(this.ui.changeDirectionMask.container, "forward", this.context.preferences.gallery.autoplayForward.value);
   }
 
   private loadAutoplaySettingsIntoUi(): void {
@@ -334,46 +321,42 @@ export class GalleryAutoplay {
     this.ui.settingsMenu.imageDurationInput.onchange = (): void => {
       this.setImageViewDuration();
 
-      if (this.currentThumb !== null && isImageThumb(this.currentThumb)) {
-        this.startViewTimer(this.currentThumb);
+      if (this.currentItem !== null && isImage(this.currentItem)) {
+        this.startViewTimer(this.currentItem);
       }
     };
     this.ui.settingsMenu.minimumVideoDurationInput.onchange = (): void => {
       this.setMinimumVideoViewDuration();
 
-      if (this.currentThumb !== null && !isImageThumb(this.currentThumb)) {
-        this.startViewTimer(this.currentThumb);
+      if (this.currentItem !== null && !isImage(this.currentItem)) {
+        this.startViewTimer(this.currentItem);
       }
     };
   }
 
   private toggleDirection(): void {
     this.context.preferences.gallery.autoplayForward.set(!this.context.preferences.gallery.autoplayForward.value);
-    this.ui.changeDirectionMask.container.classList.toggle("autoplay-direction-mask--upper-right", this.context.preferences.gallery.autoplayForward.value);
+    toggleDataset(this.ui.changeDirectionMask.container, "forward", this.context.preferences.gallery.autoplayForward.value);
   }
 
   private toggleMenuPersistence(value: boolean): void {
     this.isMenuPersistent = value;
-    this.ui.menu.classList.toggle("gallery-menu--persistent", value);
+    toggleDataset(this.ui.menu, "persistent", value);
   }
 
   private toggleMenuVisibility(value: boolean): void {
     this.isMenuVisible = value;
-    this.ui.menu.classList.toggle("autoplay-menu--visible", value);
+    toggleDataset(this.ui.menu, "visible", value);
   }
 
   private isSettingsMenuOpen(): boolean {
-    return this.ui.settingsMenu.container.classList.contains("autoplay-settings--visible");
+    return this.ui.settingsMenu.container.dataset.visible !== undefined;
   }
 
-  private toggleSettingMenu(value?: boolean | undefined): void {
-    if (value === undefined) {
-      this.ui.settingsMenu.container.classList.toggle("autoplay-settings--visible");
-      this.ui.settingsButton.classList.toggle("autoplay-settings-btn--open");
-    } else {
-      this.ui.settingsMenu.container.classList.toggle("autoplay-settings--visible", value);
-      this.ui.settingsButton.classList.toggle("autoplay-settings-btn--open", value);
-    }
+  private toggleSettingMenu(value?: boolean): void {
+    const open = toggleDataset(this.ui.settingsMenu.container, "visible", value);
+
+    toggleDataset(this.ui.settingsButton, "open", open);
   }
 
   private setImageViewDuration(): void {
@@ -388,7 +371,7 @@ export class GalleryAutoplay {
     this.config.imageViewDuration = duration;
     this.imageViewTimer.waitTime = duration;
     this.ui.settingsMenu.imageDurationInput.value = String(this.config.imageViewDurationInSeconds);
-    this.insertImageProgressHtml();
+    this.setImageProgressDuration();
   }
 
   private setMinimumVideoViewDuration(): void {
@@ -403,7 +386,7 @@ export class GalleryAutoplay {
     this.config.minimumVideoDuration = duration;
     this.videoViewTimer.waitTime = duration;
     this.ui.settingsMenu.minimumVideoDurationInput.value = String(this.config.minimumVideoDurationInSeconds);
-    this.insertVideoProgressHtml();
+    this.setVideoProgressDuration();
   }
 
   private startImageViewTimer(): void {
@@ -442,7 +425,7 @@ export class GalleryAutoplay {
     } else {
       this.ui.playButton.src = menuIcons.pause;
       this.ui.playButton.title = "Pause Autoplay";
-      this.startViewTimer(this.currentThumb);
+      this.startViewTimer(this.currentItem);
     }
     this.events.setVideoLooping(this.isPaused);
   }
@@ -468,7 +451,7 @@ export class GalleryAutoplay {
           break;
 
         case " ":
-          if (this.currentThumb !== null && !isVideoThumb(this.currentThumb)) {
+          if (this.currentItem !== null && !isVideo(this.currentItem)) {
             this.showMenu();
             this.pause();
           }
@@ -501,23 +484,22 @@ export class GalleryAutoplay {
   private startImageProgressBar(): void {
     this.stopImageProgressBar();
     setTimeout(() => {
-      this.ui.imageProgressBar.classList.add("animated");
+      setDataset(this.ui.imageProgressBar, "animated");
     }, 20);
   }
 
   private stopImageProgressBar(): void {
-    this.ui.imageProgressBar.classList.remove("animated");
-    document.body.classList.remove("autoplay");
+    removeDataset(this.ui.imageProgressBar, "animated");
   }
 
   private startVideoProgressBar(): void {
     this.stopVideoProgressBar();
     setTimeout(() => {
-      this.ui.videoProgressBar.classList.add("animated");
+      setDataset(this.ui.videoProgressBar, "animated");
     }, 20);
   }
 
   private stopVideoProgressBar(): void {
-    this.ui.videoProgressBar.classList.remove("animated");
+    removeDataset(this.ui.videoProgressBar, "animated");
   }
 }

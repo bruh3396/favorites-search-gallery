@@ -2,6 +2,7 @@ import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { AppContext } from "@/app/context/context";
 import { PostOverlayFlows } from "@/features/post_overlay/flows/flows";
 import { PostOverlayModel } from "@/features/post_overlay/model/model";
+import { PostOverlayShell } from "@/features/post_overlay/shell/shell";
 import { PostOverlayView } from "@/features/post_overlay/view/view";
 
 interface PostOverlayComponents {
@@ -15,8 +16,9 @@ export async function startPostOverlay(context: AppContext): Promise<void> {
   if (context.flags.postOverlayDisabled) {
     return;
   }
+  const shell = new PostOverlayShell(context.shell);
   const model = new PostOverlayModel();
-  const view = new PostOverlayView(context.shell);
+  const view = new PostOverlayView(shell);
   const flows = new PostOverlayFlows(context, model, view);
   const components: PostOverlayComponents = { context, model, view, flows };
 

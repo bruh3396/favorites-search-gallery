@@ -75,6 +75,18 @@ describe("TagPool", () => {
     }
   });
 
+  test("unpacks a Uint32-sized vocabulary after compress", () => {
+    for (let i = 0; i < 65536; i += 1) {
+      store(tagPool, `tag-${i}`);
+    }
+    tagPool.compress();
+    const index = store(tagPool, "tag-65536 tag-0");
+
+    expect(tagPool.read(0)).toBe("tag-0");
+    expect(tagPool.read(65535)).toBe("tag-65535");
+    expect(tagPool.read(index)).toBe("tag-65536 tag-0");
+  });
+
   test("loads tags correctly after compress packs the tag ids", () => {
     const first = store(tagPool, "foo bar baz");
     const second = store(tagPool, "baz qux");
@@ -118,6 +130,32 @@ describe("TagPool", () => {
 
     expect(tagPool.read(before)).toBe("foo bar");
     expect(tagPool.read(after)).toBe("foo baz");
+  });
+
+  test("keeps stored tags readable after trimming to the stored count", () => {
+    const first = store(tagPool, "foo bar");
+    const second = store(tagPool, "baz");
+
+    tagPool.trim(2);
+    expect(tagPool.read(first)).toBe("foo bar");
+    expect(tagPool.read(second)).toBe("baz");
+  });
+
+  test("grows again after trimming", () => {
+    const first = store(tagPool, "foo");
+
+    tagPool.trim(1);
+    const second = store(tagPool, "bar");
+
+    expect(tagPool.read(first)).toBe("foo");
+    expect(tagPool.read(second)).toBe("bar");
+  });
+
+  test("keeps stored tags readable when trimming to the current capacity", () => {
+    const first = store(tagPool, "foo");
+
+    tagPool.trim(1024);
+    expect(tagPool.read(first)).toBe("foo");
   });
 
   test("keeps a mix of pre- and post-compress tags loadable after a second compress", () => {

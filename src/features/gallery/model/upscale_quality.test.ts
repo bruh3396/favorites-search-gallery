@@ -1,7 +1,6 @@
 import { QualityCutoff, UpscaleQuality } from "@/types/app";
-import { beforeEach, describe, expect, test } from "vitest";
-import { GalleryDynamicUpscaleQuality } from "@/features/gallery/model/upscale_quality";
-import { MeasurableThumb } from "@/features/gallery/types/types";
+import { describe, expect, test } from "vitest";
+import { qualityFor } from "@/features/gallery/model/upscale_quality";
 
 const cutoffs: QualityCutoff[] = [
   { maxRatio: 0.10, quality: UpscaleQuality.Low },
@@ -10,24 +9,7 @@ const cutoffs: QualityCutoff[] = [
   { maxRatio: Infinity, quality: UpscaleQuality.Ultra }
 ];
 
-describe("GalleryDynamicUpscaleQuality", () => {
-  let thumbWidth: number | null;
-  let viewportWidth: number;
-
-  function firstThumb(): MeasurableThumb | null {
-    const width = thumbWidth;
-    return width === null ? null : { getBoundingClientRect: () => ({ width }) };
-  }
-
-  function createQuality(qualityCutoffs: QualityCutoff[] = cutoffs): GalleryDynamicUpscaleQuality {
-    return new GalleryDynamicUpscaleQuality({ firstThumb, viewportWidth: () => viewportWidth, cutoffs: qualityCutoffs });
-  }
-
-  beforeEach(() => {
-    thumbWidth = null;
-    viewportWidth = 1000;
-  });
-
+describe("qualityFor", () => {
   test.each([
     [50, UpscaleQuality.Low],
     [99, UpscaleQuality.Low],
@@ -38,34 +20,22 @@ describe("GalleryDynamicUpscaleQuality", () => {
     [350, UpscaleQuality.Ultra],
     [900, UpscaleQuality.Ultra]
   ])("maps a %ipx thumb in a 1000px viewport to quality %f", (width, expected) => {
-    thumbWidth = width;
-    expect(createQuality().compute()).toBe(expected);
+    expect(qualityFor(width, 1000, cutoffs)).toBe(expected);
   });
 
   test("uses the ratio, not the absolute width", () => {
-    thumbWidth = 300;
-    viewportWidth = 3000;
-    expect(createQuality().compute()).toBe(UpscaleQuality.Normal);
-  });
-
-  test("returns null when no thumb is present", () => {
-    thumbWidth = null;
-    expect(createQuality().compute()).toBeNull();
+    expect(qualityFor(300, 3000, cutoffs)).toBe(UpscaleQuality.Normal);
   });
 
   test("returns null for a non-positive thumb width", () => {
-    thumbWidth = 0;
-    expect(createQuality().compute()).toBeNull();
+    expect(qualityFor(0, 1000, cutoffs)).toBeNull();
   });
 
   test("returns null when the viewport width is zero", () => {
-    thumbWidth = 100;
-    viewportWidth = 0;
-    expect(createQuality().compute()).toBeNull();
+    expect(qualityFor(100, 0, cutoffs)).toBeNull();
   });
 
   test("falls back to full quality when the ratio exceeds every cutoff", () => {
-    thumbWidth = 500;
-    expect(createQuality([{ maxRatio: 0.10, quality: UpscaleQuality.Low }]).compute()).toBe(1);
+    expect(qualityFor(500, 1000, [{ maxRatio: 0.10, quality: UpscaleQuality.Low }])).toBe(1);
   });
 });

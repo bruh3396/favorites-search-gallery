@@ -1,5 +1,7 @@
+import * as GalleryMenu from "@/features/gallery/control/menu";
 import { AppContext } from "@/app/context/context";
 import { GalleryInteractionTracker } from "@/features/gallery/control/interaction_tracker";
+import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GalleryTapControls } from "@/features/gallery/control/tap_controls";
 import { GalleryThumbObserver } from "@/features/gallery/control/thumb_observer";
 import { GalleryView } from "@/features/gallery/view/view";
@@ -9,10 +11,11 @@ export class GalleryControl {
   private readonly interactionTracker: GalleryInteractionTracker;
   private readonly thumbObserver: GalleryThumbObserver;
 
-  constructor(context: AppContext, view: GalleryView) {
+  constructor(context: AppContext, shell: GalleryShell, view: GalleryView) {
     this.tapControls = new GalleryTapControls(context, view);
     this.interactionTracker = new GalleryInteractionTracker(context);
     this.thumbObserver = new GalleryThumbObserver(context);
+    GalleryMenu.setup(context, shell);
   }
 
   public setup(onVisibleThumbsChanged: () => void): void {

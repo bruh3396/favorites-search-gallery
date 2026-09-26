@@ -1,4 +1,3 @@
-import { clamp, navigationDelta } from "@/utils/pure/number";
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { AppContext } from "@/app/context/context";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
@@ -13,6 +12,8 @@ import { Preference } from "@/lib/storage/preference";
 import { RowTiler } from "@/lib/ui/tilers/row_tiler";
 import { SquareTiler } from "@/lib/ui/tilers/square_tiler";
 import { ThumbConfig } from "@/config/thumb_config";
+import { clamp } from "@/utils/pure/number";
+import { navigationDelta } from "@/lib/event/keys";
 
 interface ContentTilerConfig {
   content: HTMLElement;

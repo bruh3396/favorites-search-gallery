@@ -3,6 +3,7 @@ import { AppContext } from "@/app/context/context";
 import { PostListNavigatorControl } from "@/features/post_list_navigator/control/control";
 import { PostListNavigatorFlows } from "@/features/post_list_navigator/flows/flows";
 import { PostListNavigatorModel } from "@/features/post_list_navigator/model/model";
+import { PostListNavigatorShell } from "@/features/post_list_navigator/shell/shell";
 import { PostListNavigatorView } from "@/features/post_list_navigator/view/view";
 
 interface PostListNavigatorComponents {
@@ -15,10 +16,11 @@ interface PostListNavigatorComponents {
 
 export function startPostListNavigator(context: AppContext): void {
   if (context.environment.onPostListPage) {
+    const shell = new PostListNavigatorShell(context.shell);
     const model = new PostListNavigatorModel(context);
     const view = new PostListNavigatorView(context);
     const flows = new PostListNavigatorFlows(context, model, view);
-    const control = new PostListNavigatorControl(context);
+    const control = new PostListNavigatorControl(context, shell);
     const components: PostListNavigatorComponents = { context, model, view, flows, control };
 
     setup(components);
@@ -27,7 +29,6 @@ export function startPostListNavigator(context: AppContext): void {
 }
 
 function setup(components: PostListNavigatorComponents): void {
-  components.control.buildShell();
   setupFavoriteIndicator(components);
   subscribeToEvents(components);
   serveExternalRequests(components);

@@ -1,13 +1,15 @@
 import * as PostOverlayTagRenderer from "@/features/post_overlay/view/rendering/tag_renderer";
-import { PostOverlayElement } from "@/features/post_overlay/view/shell/element";
-import { Shell } from "@/app/context/shell";
+import { PostOverlayClass } from "@/features/post_overlay/types/selectors";
+import { PostOverlayPool } from "@/features/post_overlay/view/overlay";
+import { PostOverlayShell } from "@/features/post_overlay/shell/shell";
 import { TagCategoryMap } from "@/types/search";
+import { isInside } from "@/utils/browser/guards";
 
 export class PostOverlayView {
-  private readonly element: PostOverlayElement;
+  private readonly element: PostOverlayPool;
 
-  constructor(shell: Shell) {
-    this.element = new PostOverlayElement(shell);
+  constructor(shell: PostOverlayShell) {
+    this.element = new PostOverlayPool(shell.overlays);
   }
 
   public renderTags(postId: string, categoryMap: TagCategoryMap): void {
@@ -20,6 +22,10 @@ export class PostOverlayView {
 
   public hide(): void {
     this.element.hide();
+  }
+
+  public isInsideOverlay(target: EventTarget | null): boolean {
+    return isInside(target, `.${PostOverlayClass.overlay}`);
   }
 
   public isVisible(): boolean {

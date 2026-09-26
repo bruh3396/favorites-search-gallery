@@ -5,7 +5,7 @@ import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { fetchPostList } from "@/lib/remote/fetchers/html";
 import { numbersAround } from "@/utils/pure/number";
-import { preparePostListThumbs } from "@/features/post_list_navigator/dom_tweaks/thumb_preparer";
+import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 export class PostListNavigatorPageLoader {

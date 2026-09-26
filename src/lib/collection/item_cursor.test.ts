@@ -202,6 +202,16 @@ describe("Cursor indexItems", () => {
     expect(() => cursor.pointTo(createItems("a")[0])).toThrow("Could not find item with id: a");
   });
 
+  test("throws when the indexed source shrinks past the current position", () => {
+    const items = createItems("a", "b", "c");
+    const cursor = new ItemCursor<Identifiable>();
+
+    cursor.indexItems(items);
+    cursor.jumpToLast();
+    items.pop();
+    expect(() => cursor.currentItem()).toThrow("Could not get item at index: 2");
+  });
+
   test("recovers after the items are emptied and indexed again", () => {
     const cursor = createCursor("a", "b", "c");
 

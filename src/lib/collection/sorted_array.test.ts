@@ -15,6 +15,13 @@ describe("SortedArray", () => {
   test("type", () => {
     expectTypeOf(new SortedArray().toArray()).toBeArray();
   });
+
+  test("sorts values passed to the constructor", () => {
+    const sortedArray = new SortedArray<number>(undefined, [3, 1, 2]);
+
+    expect(sortedArray.toArray()).toStrictEqual([1, 2, 3]);
+  });
+
   test("insert number", () => {
     const sortedArray = new SortedArray<number>();
     const unsortedArray: number[] = [];

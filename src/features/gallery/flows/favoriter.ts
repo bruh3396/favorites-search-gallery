@@ -6,7 +6,7 @@ export class GalleryFavoriterFlow extends GalleryFlow {
     const status = await this.model.addFavorite();
 
     if (status === "success") {
-      this.context.events.app.favoriteAdded.emit(this.model.currentThumb().id);
+      this.context.events.app.favoriteAdded.emit(this.model.currentItem().id);
 
       if (this.context.environment.onMobileDevice) {
         vibrate(15);
@@ -19,7 +19,7 @@ export class GalleryFavoriterFlow extends GalleryFlow {
     const status = await this.model.removeFavorite();
 
     if (status === "success") {
-      this.context.events.app.favoriteRemoved.emit(this.model.currentThumb().id);
+      this.context.events.app.favoriteRemoved.emit(this.model.currentItem().id);
     }
     this.view.showRemovedFavoriteStatus(status);
   }

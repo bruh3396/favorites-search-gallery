@@ -3,7 +3,7 @@ import { Storage } from "@/lib/storage/local_storage";
 import { clamp } from "@/utils/pure/number";
 import { isIndexInBounds } from "@/utils/pure/array";
 
-export class SearchHistory {
+export class FavoritesSearchHistory {
   private lastQuery: string;
   private history: string[];
   private index: number;

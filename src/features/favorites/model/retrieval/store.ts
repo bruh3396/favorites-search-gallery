@@ -1,5 +1,6 @@
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { DatabaseLike } from "@/lib/storage/database";
+import { FavoritesConfig } from "@/config/favorites_config";
 import { Post } from "@/types/api";
 import { Store } from "@/features/favorites/types/types";
 import { toTagSet } from "@/utils/pure/tag";
@@ -11,7 +12,7 @@ export class FavoritesStore implements Store {
 
   constructor(database: DatabaseLike<Post>) {
     this.database = database;
-    this.databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, this.database.update.bind(this.database));
+    this.databaseUpdater = new CoalescingExecutor<Post>(FavoritesConfig.storeUpdateCoalesceSize, FavoritesConfig.storeUpdateCoalesceTimeout, this.database.update.bind(this.database));
   }
 
   public async readAll(): Promise<Post[]> {

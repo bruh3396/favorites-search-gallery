@@ -103,6 +103,10 @@
   height: var(--favorites-tab-icon-size);
 }
 
+#favorites-root[data-drawer-icon-only] #favorites-drawer .favorites-drawer-sidebar-icon-label {
+  display: none;
+}
+
 #favorites-drawer .favorites-drawer-sidebar-icon-label {
   text-align: center;
   line-height: 1.2;

@@ -7,7 +7,7 @@ import { RelativeMetricIndex } from "@/lib/search/engines/set/indexes/relative_m
 import { SearchableMetric } from "@/types/search";
 import { SetEvaluator } from "@/lib/search/engines/set/logic/set_evaluator";
 import { WildcardDocResolver } from "@/lib/search/engines/set/resolution/wildcard_doc_resolver";
-import { searchableMetrics } from "@/types/guards";
+import { searchableMetrics } from "@/lib/search/vocabulary";
 import { tryParseSearchExpression } from "@/lib/search/parsers/search_expression_parser";
 
 export class SetSearchEngine<Doc> implements SearchEngine<Doc> {

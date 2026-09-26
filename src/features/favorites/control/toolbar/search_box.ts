@@ -1,9 +1,9 @@
 import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/context/events";
-import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
-import { SearchHistory } from "@/features/favorites/control/toolbar/search_history";
+import { FavoritesSearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { openPostList } from "@/lib/remote/fetchers/action";
@@ -13,9 +13,9 @@ import { toggleDataset } from "@/utils/browser/dataset";
 const INPUT_PERSIST_DELAY = 500;
 const COLLAPSED_HEIGHT = 28;
 
-export class SearchBox {
+export class FavoritesSearchBox {
   private readonly id: string = FavoritesId.searchBox;
-  private readonly history = new SearchHistory(30);
+  private readonly history = new FavoritesSearchHistory(30);
   private readonly searchBox: HTMLTextAreaElement;
 
   constructor(

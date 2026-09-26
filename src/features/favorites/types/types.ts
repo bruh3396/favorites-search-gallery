@@ -1,4 +1,4 @@
-import { Favorite, FavoritesDrawerView, FavoritesDrawerViewMap } from "@/types/favorite";
+import { Favorite, FavoritesDrawerView } from "@/types/favorite";
 import { MediaExtension, MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { ContentDisplayOptions } from "@/types/ui";
@@ -51,35 +51,6 @@ export interface Enricher {
   enrich: (favorites: Favorite[]) => Promise<void>;
 }
 
-export interface FavoritesToolbarSlots {
-  drawerToggle: HTMLElement;
-  searchField: HTMLElement;
-  searchButton: HTMLElement;
-  searchActions: HTMLElement;
-  buttons: HTMLElement;
-  aboutHelp: HTMLElement;
-  aboutVersion: HTMLElement;
-  paginationSlot: HTMLElement;
-  resultsCount: HTMLElement;
-  loadStatus: HTMLElement;
-}
-
-export interface FavoritesToolbarBuild {
-  root: HTMLElement;
-  slots: FavoritesToolbarSlots;
-}
-
-export interface FavoritesViewDependencies {
-  onPageSelected: (pageNumber: number) => void;
-  onPageStepped: (direction: NavigationKey) => void;
-  onContentReplaced: () => void;
-  onContentAdded: (favorites: Favorite[]) => void;
-  onDrawerOpen: () => void;
-  onDrawerViewSelected: (view: FavoritesDrawerView) => void;
-  onShowControls: () => void;
-  drawerViews: FavoritesDrawerViewMap;
-}
-
 export interface ThumbOperations<Node> {
   create: () => Node;
   bind: (node: Node, favorite: Favorite, favorited: boolean) => void;
@@ -93,4 +64,44 @@ export interface Display {
   advance: (direction: NavigationKey) => boolean;
   goToPage: (pageNumber: number) => void;
   teardown: () => void;
+}
+
+export type FavoritesPaginationAction = "page" | "step" | "gotoToggle" | "gotoSubmit";
+
+export interface FavoritesToolbarSlots {
+  drawerToggle: HTMLElement;
+  searchField: HTMLElement;
+  searchButton: HTMLElement;
+  searchActions: HTMLElement;
+  buttons: HTMLElement;
+  aboutHelp: HTMLElement;
+  aboutVersion: HTMLElement;
+  pagination: HTMLElement;
+  rangeIndicator: HTMLElement;
+  resultsCount: HTMLElement;
+  loadStatus: HTMLElement;
+}
+
+export interface FavoritesToolbarBuild {
+  root: HTMLElement;
+  slots: FavoritesToolbarSlots;
+}
+
+export interface FavoritesDrawerViewSlots {
+  tab: HTMLElement;
+  view: HTMLElement;
+  title: HTMLElement;
+  panel: HTMLElement;
+}
+
+export type FavoritesDrawerSlots = Record<FavoritesDrawerView, FavoritesDrawerViewSlots>;
+
+export interface FavoritesDrawerBuild {
+  root: HTMLElement;
+  slots: FavoritesDrawerSlots;
+}
+
+export interface FavoritesViewDependencies {
+  onContentReplaced: () => void;
+  onContentAdded: (favorites: Favorite[]) => void;
 }

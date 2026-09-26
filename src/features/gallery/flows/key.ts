@@ -1,4 +1,4 @@
-import { isExitKey, isNavigationKey } from "@/types/guards";
+import { isExitKey, isNavigationKey } from "@/lib/event/keys";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
@@ -87,7 +87,7 @@ export class GalleryKeyFlow extends GalleryFlow {
   }
 
   private pauseVideo(): void {
-    if (this.model.isViewingVideo()) {
+    if (this.model.isViewingVideo() && !this.view.isVideoFocused()) {
       this.view.toggleVideoPause();
     }
   }

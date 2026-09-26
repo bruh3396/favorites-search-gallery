@@ -18,7 +18,6 @@ export class FeatureBridge {
   };
 
   public readonly gallery = {
-    currentThumb: new FeatureChannel<void, HTMLElement | null>(null),
     state: new FeatureChannel<void, GalleryState>("idle")
   };
 

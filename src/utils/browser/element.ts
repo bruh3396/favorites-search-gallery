@@ -53,6 +53,10 @@ export function img(id?: string): HTMLImageElement {
   return elementWithId("img", id);
 }
 
+export function insertInto(selector: string, position: InsertPosition, element: HTMLElement): void {
+  document.querySelector(selector)?.insertAdjacentElement(position, element);
+}
+
 export function forceReflow(element: HTMLElement): void {
   element.getBoundingClientRect();
 }

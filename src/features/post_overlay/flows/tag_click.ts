@@ -1,5 +1,5 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { PostOverlayClass } from "@/features/post_overlay/types/scaffold";
+import { PostOverlayClass } from "@/features/post_overlay/types/selectors";
 import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
 
 export class PostOverlayTagClickFlow extends PostOverlayFlow {

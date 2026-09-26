@@ -1,15 +1,21 @@
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import * as GalleryTutorial from "@/features/gallery/view/tutorial";
+import { AddFavoriteStatus, Favorite, RemoveFavoriteStatus } from "@/types/favorite";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { GalleryMenu } from "@/features/gallery/view/shell/menu";
+import { GalleryId } from "@/features/gallery/types/selectors";
+import { GalleryMenu } from "@/features/gallery/view/menu";
 import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_renderer";
-import { GalleryShell } from "@/features/gallery/view/shell/shell";
-import { GalleryUi } from "@/features/gallery/view/shell/ui";
+import { GalleryShell } from "@/features/gallery/shell/shell";
+import { GalleryUi } from "@/features/gallery/view/ui";
 import { GalleryViewDependencies } from "@/features/gallery/types/types";
 import { MediaItem } from "@/types/media";
 import { Point } from "@/types/geometry";
+import { isInside } from "@/utils/browser/guards";
 import { queueMacroTask } from "@/lib/async/scheduling";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
+import { toggleDisplay } from "@/lib/ui/toggles";
+import { viewportWidth } from "@/utils/browser/window";
 
 export class GalleryView {
   private readonly shell: GalleryShell;
@@ -17,24 +23,22 @@ export class GalleryView {
   private readonly menu: GalleryMenu;
   private readonly renderer: GalleryRenderer;
 
-  constructor(context: AppContext) {
-    this.shell = new GalleryShell(context.shell);
-    this.ui = new GalleryUi(context.preferences, context.environment, context.featureBridge, context.shell);
-    this.menu = new GalleryMenu(context.preferences, context.environment);
-    this.renderer = new GalleryRenderer(this.shell.root, context);
+  constructor(context: AppContext, shell: GalleryShell, favoriteFor: (id: string) => Favorite | undefined) {
+    this.shell = shell;
+    this.ui = new GalleryUi(context.preferences, context.environment, context.shell, shell.background);
+    this.menu = new GalleryMenu(context.preferences, context.environment, shell.menu);
+    this.renderer = new GalleryRenderer(shell.root, context, favoriteFor);
+    GalleryTutorial.build(shell.tutorial);
   }
 
   public setup(dependencies: GalleryViewDependencies): void {
-    this.shell.mountGallery();
-    this.ui.setup(this.shell.root);
-    this.renderer.setup(dependencies.onVideoEnded, dependencies.onVideoDoubleClicked, dependencies.onVolumeChanged);
-    this.menu.setup(this.shell.root, dependencies.onMenuAction);
+    this.renderer.setup(dependencies.onVideoEnded, dependencies.onVolumeChanged);
   }
 
-  public open(thumb: HTMLElement): void {
+  public open(): void {
     this.renderer.pauseUpscaler();
     this.shell.root.toggleAttribute("data-visible", true);
-    this.ui.open(thumb);
+    this.ui.open();
   }
 
   public close(): void {
@@ -45,14 +49,21 @@ export class GalleryView {
     this.ui.close();
   }
 
-  public display(thumb: HTMLElement): void {
-    this.renderer.render(thumb);
-    this.ui.update(thumb);
+  public display(item: MediaItem): void {
+    this.renderer.render(item);
+  }
+
+  public scrollToThumb(id: string): void {
+    this.ui.scrollToThumb(id);
+  }
+
+  public scrollToThumbAfterLoad(id: string): Promise<void> {
+    return this.ui.scrollToThumbAfterLoad(id);
   }
 
   public showPreview(thumb: HTMLElement): void {
     this.shell.root.toggleAttribute("data-visible", true);
-    this.renderer.render(thumb);
+    this.renderer.render(toMediaItem(thumb));
     this.renderer.toggleZoom(false);
     this.ui.toggleScrollbar(false);
   }
@@ -68,8 +79,16 @@ export class GalleryView {
     this.renderer.toggleZoomCursor(value);
   }
 
-  public nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
-    this.renderer.nudge(thumb, direction);
+  public nudge(item: MediaItem, direction: BoundaryEdge): void {
+    this.renderer.nudge(item, direction);
+  }
+
+  public contentThumbWidth(): number {
+    return this.ui.contentThumbWidth();
+  }
+
+  public viewportWidth(): number {
+    return viewportWidth();
   }
 
   public cache(items: MediaItem[]): void {
@@ -116,6 +135,18 @@ export class GalleryView {
     this.renderer.toggleVideoPause();
   }
 
+  public showVideoControls(): void {
+    this.renderer.showVideoControls();
+  }
+
+  public isVideoFocused(): boolean {
+    return this.renderer.isVideoFocused();
+  }
+
+  public isOverVideo(target: EventTarget | null): boolean {
+    return isInside(target, "#video-container-inner video");
+  }
+
   public setVideoMuted(muted: boolean): void {
     this.renderer.setVideoMuted(muted);
   }
@@ -126,6 +157,22 @@ export class GalleryView {
 
   public toggleMenuPersistence(event: EnhancedMouseEvent): void {
     this.menu.togglePersistence(event);
+  }
+
+  public isOverMenu(target: EventTarget | null): boolean {
+    return isInside(target, ".gallery-sub-menu");
+  }
+
+  public showTutorial(): void {
+    toggleDisplay(this.shell.tutorial, true);
+  }
+
+  public hideTutorial(): void {
+    toggleDisplay(this.shell.tutorial, false);
+  }
+
+  public isOverTutorial(target: EventTarget | null): boolean {
+    return isInside(target, `#${GalleryId.tutorial}`);
   }
 
   public setMenuPinned(pinned: boolean): void {

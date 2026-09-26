@@ -1,12 +1,13 @@
 import { FavoritesConfig } from "@/config/favorites_config";
-import { ITEM_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 
 export class PostListNavigatorPageBottomObserver {
   private intersectionObserver: IntersectionObserver;
   private onBottomReached: () => void;
+  private readonly bottomElements: () => HTMLElement[];
 
-  constructor(onBottomReached: () => void) {
+  constructor(onBottomReached: () => void, bottomElements: () => HTMLElement[]) {
     this.onBottomReached = onBottomReached;
+    this.bottomElements = bottomElements;
     this.intersectionObserver = this.createIntersectionObserver();
   }
 
@@ -27,9 +28,7 @@ export class PostListNavigatorPageBottomObserver {
   }
 
   private observeBottomElements(): void {
-    const bottomElements = Array.from(document.querySelectorAll(`.${ITEM_CLASS_NAME}:last-child`));
-
-    for (const element of bottomElements) {
+    for (const element of this.bottomElements()) {
       this.intersectionObserver.observe(element);
     }
   }

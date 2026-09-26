@@ -16,6 +16,7 @@ export class GalleryMouseOverFlow extends GalleryFlow {
   }, 1_000);
 
   public handleMouseOver(mouseEvent: EnhancedMouseEvent): void {
+    this.view.toggleMenuPersistence(mouseEvent);
     this.flows.dispatch.run({
       preview: (thumb: HTMLElement | null) => this.handlePreview(thumb),
       idle: (thumb: HTMLElement | null) => this.upscaleAround(thumb)

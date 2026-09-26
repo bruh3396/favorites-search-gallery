@@ -1,6 +1,7 @@
 import { AppContext } from "@/app/context/context";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesDisplayFlow } from "@/features/favorites/flows/display/display";
+import { FavoritesFavoriterFlow } from "@/features/favorites/flows/favoriter";
 import { FavoritesFlowDependencies } from "@/features/favorites/flows/flow";
 import { FavoritesInputFlow } from "@/features/favorites/flows/input";
 import { FavoritesLoadFlow } from "@/features/favorites/flows/load";
@@ -12,6 +13,7 @@ import { FavoritesView } from "@/features/favorites/view/view";
 
 export class FavoritesFlows {
   public readonly display: FavoritesDisplayFlow;
+  public readonly favoriter: FavoritesFavoriterFlow;
   public readonly input: FavoritesInputFlow;
   public readonly load: FavoritesLoadFlow;
   public readonly reset: FavoritesResetFlow;
@@ -22,6 +24,7 @@ export class FavoritesFlows {
     const dependencies: FavoritesFlowDependencies = { context, model, view, control, flows: this };
 
     this.display = new FavoritesDisplayFlow(dependencies);
+    this.favoriter = new FavoritesFavoriterFlow(dependencies);
     this.input = new FavoritesInputFlow(dependencies);
     this.load = new FavoritesLoadFlow(dependencies);
     this.reset = new FavoritesResetFlow(dependencies);

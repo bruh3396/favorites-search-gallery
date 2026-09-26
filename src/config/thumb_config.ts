@@ -8,5 +8,5 @@ export const ThumbConfig = {
   rightContentMargin: 15,
   fadeCascadeStepMs: 40,
   actionBarStyle: "corner",
-  reTile: true
+  reTile: false
 };

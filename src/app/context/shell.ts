@@ -41,6 +41,10 @@ export class Shell {
     return getItemsInContainer(document);
   }
 
+  public getPaginator(): HTMLElement | null {
+    return document.getElementById("paginator");
+  }
+
   public waitForContentThumbsToLoad(): Promise<unknown[]> {
     return waitForThumbsToLoadInContainer(this.content);
   }

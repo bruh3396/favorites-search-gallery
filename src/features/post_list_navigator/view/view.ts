@@ -1,11 +1,12 @@
-import { markAsFavorite, markAsFavoriteById, setFavoriteIndicatorLoading, unmarkAsFavorite } from "@/features/post_list_navigator/dom_tweaks/favorite_indicator";
+import * as PostListNavigatorFavoriteIndicator from "@/features/post_list_navigator/view/favorite_indicator";
+import * as PostListNavigatorInfiniteScrollStyle from "@/features/post_list_navigator/view/infinite_scroll_style";
+import * as PostListNavigatorPage from "@/features/post_list_navigator/view/page";
+import * as PostListNavigatorRenderer from "@/features/post_list_navigator/view/renderer";
 import { AppContext } from "@/app/context/context";
 import { ContentTiler } from "@/app/layout/content_tiler";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
-import { preparePostListThumbs } from "@/features/post_list_navigator/dom_tweaks/thumb_preparer";
-import { render } from "@/features/post_list_navigator/view/renderer";
-import { setInfiniteScrollStyle } from "@/features/post_list_navigator/dom_tweaks/infinite_scroll_style";
+import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
 
 export class PostListNavigatorView {
   private readonly contentTiler: ContentTiler;
@@ -16,7 +17,7 @@ export class PostListNavigatorView {
   }
 
   public renderPostList(postList: PostList): void {
-    render(this.contentTiler, postList);
+    PostListNavigatorRenderer.render(this.contentTiler, postList);
   }
 
   public insertNewSearchResults(items: HTMLElement[]): void {
@@ -28,7 +29,7 @@ export class PostListNavigatorView {
   }
 
   public removeNativeImageList(): void {
-    document.querySelector(".image-list")?.replaceChildren();
+    PostListNavigatorPage.removeNativeImageList();
   }
 
   public prepareNativePostListThumbs(): HTMLElement[] {
@@ -36,7 +37,11 @@ export class PostListNavigatorView {
   }
 
   public currentSearch(): string {
-    return (document.querySelector("input[name=\"tags\"]") as HTMLInputElement)?.value ?? "";
+    return PostListNavigatorPage.currentSearch();
+  }
+
+  public lastItems(): HTMLElement[] {
+    return PostListNavigatorPage.lastItems();
   }
 
   public changeLayout(layout: Parameters<ContentTiler["changeLayout"]>[0]): void {
@@ -48,30 +53,30 @@ export class PostListNavigatorView {
   }
 
   public setInfiniteScrollStyle(enabled: boolean): void {
-    setInfiniteScrollStyle(enabled);
+    PostListNavigatorInfiniteScrollStyle.setInfiniteScrollStyle(enabled);
   }
 
   public setFavoriteIndicatorLoading(loading: boolean): void {
-    setFavoriteIndicatorLoading(loading);
+    PostListNavigatorFavoriteIndicator.setFavoriteIndicatorLoading(loading);
   }
 
   public markAsFavorite(thumb: HTMLElement): void {
-    markAsFavorite(thumb);
+    PostListNavigatorFavoriteIndicator.markAsFavorite(thumb);
   }
 
   public markAsFavoriteById(id: string): void {
-    markAsFavoriteById(id, this.context.shell);
+    PostListNavigatorFavoriteIndicator.markAsFavoriteById(id, this.context.shell);
   }
 
   public unmarkAsFavorite(thumb: HTMLElement): void {
-    unmarkAsFavorite(thumb);
+    PostListNavigatorFavoriteIndicator.unmarkAsFavorite(thumb);
   }
 
   public markAsFavorites(thumbs: HTMLElement[]): void {
-    thumbs.forEach(thumb => markAsFavorite(thumb));
+    thumbs.forEach(thumb => PostListNavigatorFavoriteIndicator.markAsFavorite(thumb));
   }
 
   public unmarkAsFavorites(thumbs: HTMLElement[]): void {
-    thumbs.forEach(thumb => unmarkAsFavorite(thumb));
+    thumbs.forEach(thumb => PostListNavigatorFavoriteIndicator.unmarkAsFavorite(thumb));
   }
 }

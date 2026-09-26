@@ -1,3 +1,4 @@
+import { describe, expect, test } from "vitest";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 
 describe("nextInRange", () => {

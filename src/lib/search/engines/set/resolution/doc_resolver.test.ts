@@ -7,7 +7,7 @@ import { MetricIndex } from "@/lib/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/lib/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/lib/search/engines/set/indexes/relative_metric_index";
 import { WildcardDocResolver } from "@/lib/search/engines/set/resolution/wildcard_doc_resolver";
-import { searchableMetrics } from "@/types/guards";
+import { searchableMetrics } from "@/lib/search/vocabulary";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<SearchableMetric, number>> };
 

@@ -13,12 +13,8 @@ export class GalleryVideoRenderer implements Renderer {
     this.controller = new GalleryVideoController(preferences, environment);
   }
 
-  public setup(
-    onVideoEnded: () => void,
-    onVideoDoubleClicked: (event: MouseEvent) => void,
-    onVolumeChanged: (volume: number) => void
-  ): void {
-    this.controller.setup(this.root, onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
+  public setup(onVideoEnded: () => void, onVolumeChanged: (volume: number) => void): void {
+    this.controller.setup(this.root, onVideoEnded, onVolumeChanged);
   }
 
   public render(item: MediaItem): void {
@@ -45,6 +41,14 @@ export class GalleryVideoRenderer implements Renderer {
 
   public toggleVideoPause(): void {
     this.controller.toggleActiveVideoPause();
+  }
+
+  public showVideoControls(): void {
+    this.controller.showActiveVideoControls();
+  }
+
+  public isVideoFocused(): boolean {
+    return this.controller.isActiveVideoFocused();
   }
 
   public setVideoMuted(muted: boolean): void {

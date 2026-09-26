@@ -2,6 +2,7 @@ import { isGif, isVideo } from "@/lib/media/media_type";
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
+import { Favorite } from "@/types/favorite";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
@@ -17,31 +18,25 @@ export class GalleryRenderer {
   private readonly gifRenderer: GalleryGifRenderer;
   private readonly renderers: Renderer[];
 
-  constructor(appRoot: HTMLElement, context: AppContext) {
-    this.imageRenderer = new GalleryImageRenderer(context);
+  constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined) {
+    this.imageRenderer = new GalleryImageRenderer(context, favoriteFor);
     this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment);
     this.gifRenderer = new GalleryGifRenderer(context.environment);
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
-    this.renderers.forEach((renderer) => appRoot.appendChild(renderer.root));
+    this.renderers.forEach((renderer) => galleryRoot.appendChild(renderer.root));
   }
 
-  public setup(
-    onVideoEnded: () => void,
-    onVideoDoubleClicked: (event: MouseEvent) => void,
-    onVolumeChanged: (volume: number) => void
-  ): void {
-    this.videoRenderer.setup(onVideoEnded, onVideoDoubleClicked, onVolumeChanged);
+  public setup(onVideoEnded: () => void, onVolumeChanged: (volume: number) => void): void {
+    this.videoRenderer.setup(onVideoEnded, onVolumeChanged);
   }
 
-  public render(thumb: HTMLElement): void {
+  public render(item: MediaItem): void {
     this.hide();
-    const item = toMediaItem(thumb);
-
     this.resolve(item).render(item);
   }
 
-  public nudge(thumb: HTMLElement, direction: BoundaryEdge): void {
-    const renderer = this.resolve(toMediaItem(thumb));
+  public nudge(item: MediaItem, direction: BoundaryEdge): void {
+    const renderer = this.resolve(item);
 
     if (renderer === this.videoRenderer) {
       return;
@@ -111,6 +106,14 @@ export class GalleryRenderer {
 
   public toggleVideoPause(): void {
     this.videoRenderer.toggleVideoPause();
+  }
+
+  public showVideoControls(): void {
+    this.videoRenderer.showVideoControls();
+  }
+
+  public isVideoFocused(): boolean {
+    return this.videoRenderer.isVideoFocused();
   }
 
   public setVideoMuted(muted: boolean): void {

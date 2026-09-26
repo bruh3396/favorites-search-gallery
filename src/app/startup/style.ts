@@ -5,7 +5,6 @@ import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AppContext } from "@/app/context/context";
 import BADGE_CSS from "@/assets/css/base/badge.css";
 import CHANGELOG_CSS from "@/assets/css/favorites/changelog.css";
-import CONTROLS_CSS from "@/assets/css/base/controls.css";
 import DESKTOP_CSS from "@/assets/css/base/desktop.css";
 import DRAWER_CSS from "@/assets/css/favorites/drawer.css";
 import DRAWER_PANELS_CSS from "@/assets/css/favorites/drawer_panels.css";
@@ -18,6 +17,7 @@ import PAGINATION_CSS from "@/assets/css/favorites/pagination.css";
 import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
+import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
 import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
 import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
@@ -28,12 +28,12 @@ import TILE_CSS from "@/assets/css/base/tile.css";
 import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import TOOLTIP_CSS from "@/assets/css/tooltip.css";
 import TOOLTIP_HINT_CSS from "@/assets/css/base/tooltip_hint.css";
+import TUTORIAL_CSS from "@/assets/css/gallery/tutorial.css";
 import { ThumbConfig } from "@/config/thumb_config";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
 import { actionBarIconStyles } from "@/lib/ui/thumb/action_bar";
-import { insertStyle } from "@/utils/browser/injector";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
 
@@ -55,10 +55,11 @@ function applyPreferenceStyles(context: AppContext): void {
 
 function insertBaseStyles(context: AppContext): void {
   const fadeInCss = context.preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
-  const platformCss = context.environment.onMobileDevice ? MOBILE_CSS + CONTROLS_CSS : DESKTOP_CSS;
+  const platformCss = context.environment.onMobileDevice ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
   const galleryCss = context.flags.galleryEnabled ? GALLERY_CSS + AUTOPLAY_CSS : "";
   const tooltipCss = context.flags.tooltipEnabled ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
   const postListCss = context.environment.onPostListPage ? POST_LIST_CSS + SETTINGS_PANEL_CSS : "";
+  const postOverlayCss = context.flags.postOverlayEnabled ? POST_OVERLAY_CSS : "";
   const favoritesCss = context.environment.onFavoritesPage ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
 
   insertStyle(VARIABLES_CSS +
@@ -80,7 +81,15 @@ function insertBaseStyles(context: AppContext): void {
     galleryCss +
     postListCss +
     fadeInCss +
-    favoritesCss);
+    favoritesCss +
+    postOverlayCss);
+}
+
+function insertStyle(css: string): void {
+  const style = document.createElement("style");
+
+  style.textContent = css;
+  document.head.appendChild(style);
 }
 
 function applyTileVariables(context: AppContext): void {

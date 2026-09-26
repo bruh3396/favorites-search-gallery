@@ -1,7 +1,7 @@
 import { GalleryAbstractImageBudgeter, GalleryLimitImageBudgeter, GalleryMemoryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
 import { AppContext } from "@/app/context/context";
 import { Environment } from "@/app/context/environment";
-import { FeatureBridge } from "@/app/context/feature_bridge";
+import { Favorite } from "@/types/favorite";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryImageCanvas } from "@/features/gallery/view/rendering/image/canvas";
@@ -25,20 +25,20 @@ export class GalleryImageRenderer implements Renderer {
   public readonly root: HTMLElement;
   private readonly environment: Environment;
   private readonly shell: Shell;
-  private readonly featureBridge: FeatureBridge;
+  private readonly favoriteFor: (id: string) => Favorite | undefined;
   private readonly fetcher: GalleryImageFetcher;
   private readonly loader: GalleryImageLoader;
   private readonly upscaler: GalleryAbstractUpscaler;
   private readonly canvas: GalleryImageCanvas;
   private activeItem: MediaItem | undefined;
 
-  constructor(context: AppContext) {
-    const { environment, preferences, shell, featureBridge } = context;
+  constructor(context: AppContext, favoriteFor: (id: string) => Favorite | undefined) {
+    const { environment, preferences, shell } = context;
 
     this.root = div();
     this.environment = environment;
     this.shell = shell;
-    this.featureBridge = featureBridge;
+    this.favoriteFor = favoriteFor;
     this.fetcher = new GalleryImageFetcher();
     this.loader = this.createLoader(environment);
     this.upscaler = this.createUpscaler(environment, preferences, shell);
@@ -123,7 +123,7 @@ export class GalleryImageRenderer implements Renderer {
 
   private createBudgeter(environment: Environment): GalleryAbstractImageBudgeter {
     if (environment.onFavoritesPage && !environment.onMobileDevice) {
-      return new GalleryMemoryImageBudgeter((id) => this.featureBridge.favorites.favorite.call(id), GalleryConfig.imageMegabyteLimit, GalleryConfig.minimumCachedImageCount);
+      return new GalleryMemoryImageBudgeter(this.favoriteFor, GalleryConfig.imageMegabyteLimit, GalleryConfig.minimumCachedImageCount);
     }
     const limit = environment.onMobileDevice ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
     return new GalleryLimitImageBudgeter(limit);

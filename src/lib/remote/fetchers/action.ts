@@ -1,10 +1,10 @@
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { addFavoriteUrl, postListUrlFromQuery, postPageUrl, postVoteUrl, removeFavoriteUrl } from "@/lib/remote/url";
+import { MediaItem } from "@/types/media";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { fetchHtml } from "@/utils/browser/http";
 import { resolveMediaUrl } from "@/lib/media/resolver";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
 const favoriteAddThrottle = new ThrottleQueue(Rule34NetworkConfig.favoriteAddThrottle);
@@ -50,6 +50,6 @@ export function openPostList(searchQuery: string): void {
   window.open(postListUrlFromQuery(searchQuery));
 }
 
-export async function openMedia(thumb: HTMLElement): Promise<void> {
-  window.open(await resolveMediaUrl(toMediaItem(thumb)), "_blank");
+export async function openMedia(item: MediaItem): Promise<void> {
+  window.open(await resolveMediaUrl(item), "_blank");
 }

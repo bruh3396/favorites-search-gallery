@@ -14,9 +14,15 @@ export const FavoritesConfig = {
   infiniteScrollMargin: "150%",
 
   thumbPoolMaxRetained: 100,
+  contentTopOffset: {
+    mobile: 10,
+    desktop: 0
+  },
 
   apiCoalesceSize: 50,
   apiCoalesceTimeout: 1500,
+  storeUpdateCoalesceSize: 100,
+  storeUpdateCoalesceTimeout: 1_000,
 
   preloadThumbs: true,
   bottomNavigationButtonsEnabled: true,

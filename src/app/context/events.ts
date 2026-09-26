@@ -1,6 +1,8 @@
 import { Emitter, StickyEmitter } from "@/lib/event/emitter";
 import { Favorite } from "@/types/favorite";
 import { GalleryMenuAction } from "@/types/app";
+import { MediaItem } from "@/types/media";
+import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export type Events = ReturnType<typeof buildEvents>;
@@ -22,6 +24,11 @@ export function buildEvents() {
       searchButtonClicked: new Emitter<MouseEvent>(),
       shuffleButtonClicked: new Emitter<MouseEvent>(),
 
+      pageSelected: new Emitter<number>(),
+      pageStepped: new Emitter<NavigationKey>(),
+      gotoPageToggled: new Emitter<void>(),
+      gotoPageSubmitted: new Emitter<number>(),
+
       searchRequested: new Emitter<string>(),
       searchResultsUpdated: new Emitter<Favorite[]>(),
 
@@ -35,11 +42,11 @@ export function buildEvents() {
 
     gallery: {
       closedGallery: new Emitter<void>(),
-      displayedThumb: new Emitter<HTMLElement>(),
+      displayedItem: new Emitter<MediaItem>(),
       galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
       interactionStopped: new Emitter<void>(),
       leftTap: new Emitter<void>(),
-      openedGallery: new Emitter<HTMLElement>(),
+      openedGallery: new Emitter<void>(),
       rightTap: new Emitter<void>(),
       showControlsRequested: new Emitter<void>()
     },

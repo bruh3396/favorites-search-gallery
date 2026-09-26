@@ -2,6 +2,7 @@ import { addFavorite, openMedia, openPost, removeFavorite } from "@/lib/remote/f
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class FavoritesInputFlow extends FavoritesFlow {
   public triggerPostAction(event: EnhancedMouseEvent): void {
@@ -28,7 +29,7 @@ export class FavoritesInputFlow extends FavoritesFlow {
     }
 
     if (event.ctrlKey) {
-      openMedia(event.thumb);
+      openMedia(toMediaItem(event.thumb));
     }
     event.originalEvent.preventDefault();
   }
@@ -46,6 +47,15 @@ export class FavoritesInputFlow extends FavoritesFlow {
       openPost(event.thumb.id);
     }
     event.originalEvent.preventDefault();
+  }
+
+  public toggleGotoPage(): void {
+    this.view.toggleGotoPagePopover();
+  }
+
+  public submitGotoPage(pageNumber: number): void {
+    this.view.closeGotoPagePopover();
+    this.flows.display.goToPage(pageNumber);
   }
 
   private closePopoversOutside(event: EnhancedMouseEvent): void {

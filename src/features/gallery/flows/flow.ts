@@ -26,4 +26,8 @@ export abstract class GalleryFlow {
     this.control = dependencies.control;
     this.flows = dependencies.flows;
   }
+
+  protected usingColumnLayout(): boolean {
+    return this.context.featureBridge.currentLayout() === "column";
+  }
 }

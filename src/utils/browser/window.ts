@@ -8,6 +8,10 @@ export function toggleFullscreen(): void {
   }
 }
 
+export function viewportWidth(): number {
+  return window.innerWidth;
+}
+
 export function reloadWindow(): void {
   window.location.reload();
 }

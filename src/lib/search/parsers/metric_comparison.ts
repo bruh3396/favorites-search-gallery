@@ -1,5 +1,5 @@
 import { MetricComparator, SearchableMetric } from "@/types/search";
-import { isSearchableMetadataMetric, searchableMetrics } from "@/types/guards";
+import { isSearchableMetadataMetric, searchableMetrics } from "@/lib/search/vocabulary";
 
 export interface MetricComparison {
   readonly metric: SearchableMetric;

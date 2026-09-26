@@ -1,6 +1,3 @@
-import { NavigationKey } from "@/types/input";
-import { isForwardNavigationKey } from "@/types/guards";
-
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -103,8 +100,4 @@ export function randomBoolean(): boolean {
 export function seededFloat(seed: number): number {
   const x = Math.sin(seed) * 4_051.2948;
   return x - Math.floor(x);
-}
-
-export function navigationDelta(direction: NavigationKey): number {
-  return isForwardNavigationKey(direction) ? 1 : -1;
 }

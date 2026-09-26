@@ -1,9 +1,9 @@
-import { hideTutorial, showTutorial } from "@/features/gallery/dom_tweaks/tutorial";
 import { AppContext } from "@/app/context/context";
 import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryFeatures } from "@/features/gallery/features/features";
 import { GalleryFlows } from "@/features/gallery/flows/flows";
 import { GalleryModel } from "@/features/gallery/model/model";
+import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GallerySizeSettings } from "@/features/gallery/types/types";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { GalleryView } from "@/features/gallery/view/view";
@@ -26,9 +26,10 @@ export async function startGallery(context: AppContext): Promise<void> {
   }
   await waitUntilPageIsReady(context);
 
-  const model = new GalleryModel(context.preferences, context.shell);
-  const view = new GalleryView(context);
-  const control = new GalleryControl(context, view);
+  const shell = new GalleryShell(context.shell);
+  const model = new GalleryModel(context.preferences);
+  const view = new GalleryView(context, shell, (id) => context.featureBridge.favorites.favorite.call(id));
+  const control = new GalleryControl(context, shell, view);
   const flows = new GalleryFlows(context, model, view, control);
   const features = new GalleryFeatures(context);
   const components: GalleryComponents = { context, model, view, control, flows, features };
@@ -81,11 +82,9 @@ function setupModel({ context, model }: GalleryComponents): void {
   }
 }
 
-function setupView({ context, view, flows, features }: GalleryComponents): void {
+function setupView({ view, flows, features }: GalleryComponents): void {
   view.setup({
-    onMenuAction: context.events.gallery.galleryMenuButtonClicked.emit,
     onVideoEnded: () => features.handleVideoEnded(),
-    onVideoDoubleClicked: () => flows.openClose.close(),
     onVolumeChanged: (volume) => flows.video.setVolume(volume)
   });
 }
@@ -167,16 +166,15 @@ function subscribeToQualityChanges(settings: GallerySizeSettings, view: GalleryV
   settings.rowHeight.on(() => flows.content.updateUpscaleQuality());
 }
 
-function subscribeToDesktopInput({ context, view, flows }: GalleryComponents): void {
+function subscribeToDesktopInput({ context, flows }: GalleryComponents): void {
   const { domEvents, events } = context;
 
   domEvents.document.mouseover.on((event) => flows.mouseOver.handleMouseOver(event));
-  domEvents.document.mouseover.on((event) => view.toggleMenuPersistence(event));
   domEvents.document.click.on((event) => flows.click.handleClick(event));
+  domEvents.document.dblclick.on((event) => flows.click.handleDoubleClick(event));
   domEvents.document.mousedown.on((event) => flows.click.handleMouseDown(event));
   domEvents.document.contextmenu.on((event) => flows.click.handleContextMenu(event));
-  domEvents.document.mousemove.on((event) => flows.interaction.showCursorInGallery(event));
-  domEvents.document.mousemove.on(() => view.revealMenu());
+  domEvents.document.mousemove.on((event) => flows.interaction.handleMouseMove(event));
   domEvents.document.wheel.on((event) => flows.wheel.handleWheel(event));
   domEvents.document.keydown.on((event) => flows.key.handleKeyDown(event));
   domEvents.document.keyup.on((event) => flows.key.handleKeyUp(event));
@@ -190,19 +188,20 @@ function subscribeToMobileInput({ context, view, flows, features }: GalleryCompo
   events.gallery.rightTap.on(() => flows.touch.navigateForwardInGallery());
   domEvents.document.mousedown.on((event) => flows.touch.handleMouseDown(event));
   domEvents.document.touchStart.on((event) => flows.touch.handleTouchStart(event));
+  domEvents.document.touchEnd.on((event) => flows.touch.handleTouchEnd(event));
   domEvents.mobile.swipedDown.on(() => flows.touch.closeGallery());
   domEvents.mobile.swipedUp.on(() => features.showMenu());
   domEvents.mobile.touchHold.on(() => flows.touch.favoriteCurrentPost());
   domEvents.window.orientationChange.on(() => view.correctOrientation());
-  events.gallery.openedGallery.on(() => showTutorialOnFirstOpen(preferences), { once: true });
-  events.gallery.showControlsRequested.on(showTutorial);
-  events.gallery.closedGallery.on(hideTutorial);
+  events.gallery.openedGallery.on(() => showTutorialOnFirstOpen(preferences, view), { once: true });
+  events.gallery.showControlsRequested.on(() => view.showTutorial());
+  events.gallery.closedGallery.on(() => view.hideTutorial());
 }
 
-function showTutorialOnFirstOpen(preferences: Preferences): void {
+function showTutorialOnFirstOpen(preferences: Preferences, view: GalleryView): void {
   if (!preferences.gallery.tutorialSeen.value) {
     preferences.gallery.tutorialSeen.set(true);
-    showTutorial();
+    view.showTutorial();
   }
 }
 
@@ -210,5 +209,4 @@ function serveExternalRequests({ context, model }: GalleryComponents): void {
   const { featureBridge } = context;
 
   featureBridge.gallery.state.serve(() => model.getCurrentState());
-  featureBridge.gallery.currentThumb.serve(() => model.currentThumbIfOpen());
 }

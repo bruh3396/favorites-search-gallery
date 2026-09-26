@@ -1,29 +1,27 @@
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
-import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { Timeout } from "@/types/async";
 
 const TEMPORARY_STATUS_TIMEOUT = 1_000;
 
 export class FavoritesStatus {
-  private readonly eta = new FavoritesEta();
-  private resultsCountIndicator: HTMLElement;
-  private statusIndicator: HTMLElement;
-  private progressBar: ProgressBar;
-  private totalFavoritesCount: number | null = null;
+  private readonly eta: FavoritesEta;
+  private readonly resultsCountIndicator: HTMLElement;
+  private readonly statusIndicator: HTMLElement;
+  private readonly progressBar: ProgressBar;
+  private totalFavoritesCount: number | null;
   private statusTimeout: Timeout | undefined;
 
-  constructor() {
-    this.resultsCountIndicator = document.createElement("label");
-    this.statusIndicator = document.createElement("label");
-    this.progressBar = buildProgressBar(FavoritesId.loadProgressBar);
-  }
-
-  public setup(slots: FavoritesToolbarSlots, toolbar: HTMLElement | null): void {
+  constructor(slots: FavoritesToolbarSlots, toolbar: HTMLElement) {
+    this.totalFavoritesCount = null;
+    this.statusTimeout = undefined;
+    this.eta = new FavoritesEta();
     this.resultsCountIndicator = slots.resultsCount;
     this.statusIndicator = slots.loadStatus;
-    toolbar?.append(this.progressBar.element);
+    this.progressBar = buildProgressBar(FavoritesId.loadProgressBar);
+    toolbar.append(this.progressBar.element);
   }
 
   public setStatus(text: string): void {

@@ -182,6 +182,7 @@ export class Database<V extends Identifiable> implements DatabaseLike<V> {
     for (const id of ids) {
       await this.deleteRecord(index, id, objectStore);
     }
+    database.close();
   }
 
   public async exists(objectStoreName: string | undefined = undefined): Promise<boolean> {
@@ -366,6 +367,7 @@ export class KeyedDatabase<V extends Identifiable> extends Database<V> {
     const objectStore = transaction.objectStore(store);
 
     ids.forEach(id => objectStore.delete(id));
+    database.close();
   }
 
   protected override keySource(objectStore: IDBObjectStore): IDBObjectStore | IDBIndex {

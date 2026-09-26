@@ -1,7 +1,7 @@
 import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
 import { Environment } from "@/app/context/environment";
 import { Events } from "@/app/context/events";
-import { FavoritesId } from "@/features/favorites/types/scaffold";
+import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { Preferences } from "@/app/context/preferences";
 import { buildToggleButton } from "@/lib/ui/settings/components/toggle_button";

@@ -6,7 +6,7 @@ export class PostListNavigatorInfiniteScrollFlow extends PostListNavigatorFlow {
 
   constructor(dependencies: PostListNavigatorFlowDependencies) {
     super(dependencies);
-    this.pageBottomObserver = new PostListNavigatorPageBottomObserver(() => this.showMoreResults());
+    this.pageBottomObserver = new PostListNavigatorPageBottomObserver(() => this.showMoreResults(), () => this.view.lastItems());
   }
 
   public disableInfiniteScroll(): void {

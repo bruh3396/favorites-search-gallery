@@ -1,9 +1,11 @@
 import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { GalleryMenuAction } from "@/types/app";
+import { toggleFullscreen } from "@/utils/browser/window";
 
 export class GalleryMenuFlow extends GalleryFlow {
   private readonly menuHandlers: Partial<Record<GalleryMenuAction, () => void>> = {
     exit: () => this.flows.openClose.close(),
+    fullscreen: toggleFullscreen,
     openPost: () => this.model.openPost(),
     openOriginal: () => this.model.openMedia(),
     download: () => this.model.download(),

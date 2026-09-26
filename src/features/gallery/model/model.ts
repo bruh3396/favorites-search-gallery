@@ -1,55 +1,40 @@
 import * as Actions from "@/lib/remote/fetchers/action";
+import * as GalleryItemWindow from "@/features/gallery/model/item_window";
+import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
 import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
 import { GalleryState, Identifiable } from "@/types/app";
-import { addFavoriteFromThumb, removeFavoriteFromThumb } from "@/lib/ui/thumb/favorite_actions";
-import { clampedThumbsAroundId, wrappingThumbsAroundId } from "@/features/gallery/model/item_window";
 import { Boundary } from "@/types/boundary";
-import { GalleryDynamicUpscaleQuality } from "@/features/gallery/model/upscale_quality";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
-import { GalleryViewedPost } from "@/features/gallery/model/viewed_post";
 import { ItemCursor } from "@/lib/collection/item_cursor";
 import { MediaItem } from "@/types/media";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
-import { Shell } from "@/app/context/shell";
-import { downloadFromThumb } from "@/lib/media/download";
-import { isVideoThumb } from "@/lib/ui/thumb/media_item";
-import { navigationDelta } from "@/utils/pure/number";
+import { downloadMedia } from "@/lib/media/download";
+import { isVideo } from "@/lib/media/media_type";
+import { navigationDelta } from "@/lib/event/keys";
 
 export class GalleryModel {
-  private readonly cursor: ItemCursor<HTMLElement>;
+  private readonly cursor: ItemCursor<MediaItem>;
   private readonly state: GalleryStateController;
-  private readonly quality: GalleryDynamicUpscaleQuality;
-  private readonly viewedPost: GalleryViewedPost;
   private getThumbsAround: (id: string) => MediaItem[];
 
-  constructor(preferences: Preferences, shell: Shell) {
-    this.cursor = new ItemCursor<HTMLElement>();
+  constructor(preferences: Preferences) {
+    this.cursor = new ItemCursor<MediaItem>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
-    this.quality = new GalleryDynamicUpscaleQuality({
-      firstThumb: (): HTMLElement | null => shell.getFirstContentThumb(),
-      viewportWidth: (): number => window.innerWidth,
-      cutoffs: GalleryUpscaleConfig.dynamicQualityCutoffs
-    });
-    this.viewedPost = new GalleryViewedPost({
-      isInGallery: (): boolean => this.state.isInGallery,
-      currentThumb: (): HTMLElement => this.cursor.currentItem(),
-      isVideoThumb
-    });
     this.getThumbsAround = (): MediaItem[] => [];
   }
 
-  public computeUpscaleQuality(): number | null {
-    return this.quality.compute();
+  public upscaleQualityFor(thumbWidth: number, viewportWidth: number): number | null {
+    return GalleryUpscaleQuality.qualityFor(thumbWidth, viewportWidth, GalleryUpscaleConfig.dynamicQualityCutoffs);
   }
 
   public setupWrappingWindow<T extends Identifiable>(getItems: () => T[], toItem: (item: T) => MediaItem): void {
-    this.getThumbsAround = (id): MediaItem[] => wrappingThumbsAroundId(getItems(), id, toItem);
+    this.getThumbsAround = (id): MediaItem[] => GalleryItemWindow.wrappingThumbsAroundId(getItems(), id, toItem);
   }
 
   public setupClampedWindow<T extends Identifiable>(getItems: () => T[], toItem: (item: T) => MediaItem): void {
-    this.getThumbsAround = (id): MediaItem[] => clampedThumbsAroundId(getItems(), id, toItem);
+    this.getThumbsAround = (id): MediaItem[] => GalleryItemWindow.clampedThumbsAroundId(getItems(), id, toItem);
   }
 
   public getItemsAround(id: string): MediaItem[] {
@@ -68,20 +53,16 @@ export class GalleryModel {
     return this.cursor.move(navigationDelta(direction));
   }
 
-  public currentThumb(): HTMLElement {
+  public currentItem(): MediaItem {
     return this.cursor.currentItem();
   }
 
-  public pointTo(thumb: HTMLElement): void {
-    this.cursor.pointTo(thumb);
-  }
-
-  public indexThumbs(source: HTMLElement[]): void {
-    this.cursor.indexItems(source);
+  public indexItems(items: MediaItem[]): void {
+    this.cursor.indexItems(items);
   }
 
   public isViewingVideo(): boolean {
-    return this.viewedPost.isVideo();
+    return isVideo(this.cursor.currentItem());
   }
 
   public openPost(): void {
@@ -93,23 +74,20 @@ export class GalleryModel {
   }
 
   public download(): Promise<void> {
-    return downloadFromThumb(this.cursor.currentItem());
+    return downloadMedia(this.cursor.currentItem());
   }
 
   public addFavorite(): Promise<AddFavoriteStatus> {
-    return addFavoriteFromThumb(this.cursor.currentItem());
+    return Actions.addFavorite(this.cursor.currentItem().id);
   }
 
   public removeFavorite(): Promise<RemoveFavoriteStatus> {
-    return removeFavoriteFromThumb(this.cursor.currentItem());
+    Actions.removeFavorite(this.cursor.currentItem().id);
+    return Promise.resolve("success");
   }
 
   public getCurrentState(): GalleryState {
     return this.state.currentState;
-  }
-
-  public currentThumbIfOpen(): HTMLElement | null {
-    return this.viewedPost.get();
   }
 
   public isIdle(): boolean {
@@ -132,8 +110,8 @@ export class GalleryModel {
     this.state.preview(value);
   }
 
-  public open(thumb: HTMLElement): void {
-    this.cursor.pointTo(thumb);
+  public open(item: MediaItem): void {
+    this.cursor.pointTo(item);
     this.state.open();
   }
 }
