@@ -29,6 +29,10 @@ export class RelativeMetricIndex<Doc> {
     this.built = true;
   }
 
+  public invalidate(): void {
+    this.built = false;
+  }
+
   public add(doc: Doc): void {
     if (!this.built) {
       return;

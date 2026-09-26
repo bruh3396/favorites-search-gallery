@@ -1,4 +1,5 @@
-import { BASE_INDEX_URL, ORIGIN, POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
+import { BASE_INDEX_URL, ORIGIN } from "@/lib/constants";
+import { postListPageOffset } from "@/lib/remote/pagination";
 
 export function addFavoriteUrl(id: string): string {
   return `${ORIGIN}/public/addfav.php?id=${id}`;
@@ -28,6 +29,6 @@ export function profilePageUrl(id: string): string {
   return `${BASE_INDEX_URL}account&s=profile&id=${id}`;
 }
 
-export function postListUrlFromBase(baseUrl: string, pageNumber: number): string {
-  return `${baseUrl}&pid=${POSTS_PER_POST_LIST_PAGE * pageNumber}`;
+export function postListUrlFromBase(baseUrl: string, pageIndex: number): string {
+  return `${baseUrl}&pid=${postListPageOffset(pageIndex)}`;
 }

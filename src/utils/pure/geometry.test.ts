@@ -40,61 +40,61 @@ describe("parseDimensions2D", () => {
 
 describe("rectDistance", () => {
   test("identical rects have zero distance", () => {
-    const r = rect(0, 0, 10, 10);
+    const r = createRect(0, 0, 10, 10);
 
     expect(rectDistance(r, r)).toBe(0);
   });
 
   test("rects with the same center have zero distance regardless of size", () => {
-    const a = rect(0, 0, 10, 10);
-    const b = rect(2.5, 2.5, 5, 5);
+    const a = createRect(0, 0, 10, 10);
+    const b = createRect(2.5, 2.5, 5, 5);
 
     expect(rectDistance(a, b)).toBe(0);
   });
 
   test("horizontal separation", () => {
-    const a = rect(0, 0, 10, 10);
-    const b = rect(30, 0, 10, 10);
+    const a = createRect(0, 0, 10, 10);
+    const b = createRect(30, 0, 10, 10);
 
     expect(rectDistance(a, b)).toBe(30);
   });
 
   test("vertical separation", () => {
-    const a = rect(0, 0, 10, 10);
-    const b = rect(0, 30, 10, 10);
+    const a = createRect(0, 0, 10, 10);
+    const b = createRect(0, 30, 10, 10);
 
     expect(rectDistance(a, b)).toBe(30);
   });
 
   test("diagonal separation (3-4-5 triangle)", () => {
-    const a = rect(0, 0, 0, 0);
-    const b = rect(3, 4, 0, 0);
+    const a = createRect(0, 0, 0, 0);
+    const b = createRect(3, 4, 0, 0);
 
     expect(rectDistance(a, b)).toBe(5);
   });
 
   test("is symmetric", () => {
-    const a = rect(0, 0, 10, 20);
-    const b = rect(100, 50, 30, 40);
+    const a = createRect(0, 0, 10, 20);
+    const b = createRect(100, 50, 30, 40);
 
     expect(rectDistance(a, b)).toBe(rectDistance(b, a));
   });
 
   test("accounts for rect size when computing centers", () => {
-    const a = rect(0, 0, 20, 0);
-    const b = rect(20, 0, 20, 0);
+    const a = createRect(0, 0, 20, 0);
+    const b = createRect(20, 0, 20, 0);
 
     expect(rectDistance(a, b)).toBe(20);
   });
 
   test("handles negative coordinates", () => {
-    const a = rect(-10, -10, 0, 0);
-    const b = rect(-7, -6, 0, 0);
+    const a = createRect(-10, -10, 0, 0);
+    const b = createRect(-7, -6, 0, 0);
 
     expect(rectDistance(a, b)).toBe(5);
   });
 });
 
-function rect(left: number, top: number, width: number, height: number): DOMRectReadOnly {
+function createRect(left: number, top: number, width: number, height: number): DOMRectReadOnly {
   return { left, top, width, height } as DOMRectReadOnly;
 }

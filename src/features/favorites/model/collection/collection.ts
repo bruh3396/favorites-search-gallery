@@ -1,13 +1,17 @@
+import { Collection } from "@/features/favorites/types/types";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { FavoritesItem } from "@/features/favorites/model/collection/favorites_item";
 import { IdentifiedList } from "@/lib/collection/identified_list";
 import { Post } from "@/types/api";
 
-export class FavoritesCollection {
+export class FavoritesCollection implements Collection {
   private readonly list = new IdentifiedList<FavoritesItem>();
-  private readonly arena = new FavoritesColumnarArena();
+  private arena = new FavoritesColumnarArena();
 
   public setAll(posts: Post[]): FavoritesItem[] {
+    if (!this.arena.isEmpty) {
+      this.arena = new FavoritesColumnarArena();
+    }
     const favorites = this.admit(posts, true);
 
     this.list.setAll(favorites);

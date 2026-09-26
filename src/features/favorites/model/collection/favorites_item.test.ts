@@ -1,10 +1,11 @@
 import { MediaExtension, MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { describe, expect, test } from "vitest";
-import { FavoritesArena } from "@/features/favorites/types/types";
+import { Arena } from "@/features/favorites/types/types";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { FavoritesItem } from "@/features/favorites/model/collection/favorites_item";
 import { Post } from "@/types/api";
+import { createPost } from "@/testing/post";
 import { toTagSet } from "@/utils/pure/tag";
 
 interface Slot {
@@ -14,7 +15,7 @@ interface Slot {
   isNew: boolean;
 }
 
-class TestArena implements FavoritesArena {
+class TestArena implements Arena {
   public nextIndex = 0;
   public lastIndex = -1;
   private readonly slots = new Map<number, Slot>();
@@ -32,7 +33,7 @@ class TestArena implements FavoritesArena {
     const index = this.nextIndex;
 
     this.nextIndex += 1;
-    this.slots.set(index, { post: post({}), written: false, isNew: false });
+    this.slots.set(index, { post: createPost({}), written: false, isNew: false });
     return index;
   }
 
@@ -121,29 +122,14 @@ class TestArena implements FavoritesArena {
   }
 }
 
-function post(overrides: Partial<Post>): Post {
-  return {
-    id: "0",
-    tags: "",
-    width: 0,
-    height: 0,
-    score: 0,
-    rating: "e",
-    change: 0,
-    fileURL: "",
-    previewURL: "",
-    ...overrides
-  };
-}
-
 describe("FavoritesItem", () => {
   test("allocates its own slot and enriches on construction", () => {
     const arena = new TestArena();
-    const item = new FavoritesItem(post({ id: "42", tags: "cat dog" }), arena, false);
+    const item = new FavoritesItem(createPost({ id: "42", tags: "apple banana" }), arena, false);
 
     expect(arena.slot(0).written).toBe(true);
     expect(item.id).toBe("42");
-    expect(item.tags).toEqual(new Set(["cat", "dog"]));
+    expect(item.tags).toEqual(new Set(["apple", "banana"]));
   });
 
   test("reads every field from its own allocated slot", () => {
@@ -151,7 +137,7 @@ describe("FavoritesItem", () => {
 
     arena.nextIndex = 3;
 
-    const item = new FavoritesItem(post({ id: "7", tags: "a", rating: "s", score: 99 }), arena, false);
+    const item = new FavoritesItem(createPost({ id: "7", tags: "a", rating: "s", score: 99 }), arena, false);
 
     expect(item.id).toBe("7");
     expect(item.tags).toEqual(new Set(["a"]));
@@ -165,7 +151,7 @@ describe("FavoritesItem", () => {
   test("caches the tag set when tags are clean", () => {
     const arena = new TestArena();
 
-    new FavoritesItem(post({ id: "1", tags: "clean tags" }), arena, true);
+    new FavoritesItem(createPost({ id: "1", tags: "clean tags" }), arena, true);
 
     expect(arena.slot(0).cachedTags).toEqual(new Set(["clean", "tags"]));
   });
@@ -173,14 +159,14 @@ describe("FavoritesItem", () => {
   test("does not cache the tag set when tags are dirty", () => {
     const arena = new TestArena();
 
-    new FavoritesItem(post({ id: "1", tags: "dirty tags" }), arena, false);
+    new FavoritesItem(createPost({ id: "1", tags: "dirty tags" }), arena, false);
 
     expect(arena.slot(0).cachedTags).toBeUndefined();
   });
 
   test("setDuration and markAsNew write back to the same slot", () => {
     const arena = new TestArena();
-    const item = new FavoritesItem(post({ id: "5" }), arena, false);
+    const item = new FavoritesItem(createPost({ id: "5" }), arena, false);
 
     item.setDuration(123);
     item.markAsNew();
@@ -191,7 +177,7 @@ describe("FavoritesItem", () => {
 
   test("consumeTags returns and clears the cached tags", () => {
     const arena = new TestArena();
-    const item = new FavoritesItem(post({ id: "1", tags: "one two" }), arena, true);
+    const item = new FavoritesItem(createPost({ id: "1", tags: "one two" }), arena, true);
 
     expect(item.consumeTags()).toEqual(new Set(["one", "two"]));
     expect(arena.slot(0).cachedTags).toBeUndefined();
@@ -199,17 +185,17 @@ describe("FavoritesItem", () => {
 
   test("enrich overwrites the backing post", () => {
     const arena = new TestArena();
-    const item = new FavoritesItem(post({ id: "3", score: 1 }), arena, false);
+    const item = new FavoritesItem(createPost({ id: "3", score: 1 }), arena, false);
 
-    item.enrich(post({ id: "3", score: 500 }));
+    item.enrich(createPost({ id: "3", score: 500 }));
     expect(item.getMetric("score")).toBe(500);
   });
 
   test("keeps distinct items on independent slots", () => {
     const arena = new TestArena();
 
-    const first = new FavoritesItem(post({ id: "10", tags: "one" }), arena, false);
-    const second = new FavoritesItem(post({ id: "20", tags: "two" }), arena, false);
+    const first = new FavoritesItem(createPost({ id: "10", tags: "one" }), arena, false);
+    const second = new FavoritesItem(createPost({ id: "20", tags: "two" }), arena, false);
 
     expect(first.id).toBe("10");
     expect(second.id).toBe("20");
@@ -220,19 +206,20 @@ describe("FavoritesItem", () => {
   describe("real arena", () => {
     test("round trips fields, mutations, and tags", () => {
       const arena = new FavoritesColumnarArena();
-      const item0 = new FavoritesItem(post({ id: "42", tags: "cat dog", rating: "s", score: 99 }), arena, true);
-      const item1 = new FavoritesItem(post({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1920, width: 1080 }), arena, true);
+      const item0 = new FavoritesItem(createPost({ id: "42", tags: "apple banana", rating: "s", score: 99 }), arena, true);
+      const item1 = new FavoritesItem(createPost({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1920, width: 1080 }), arena, true);
 
       expect(item0.id).toBe("42");
       expect(item0.rating).toBe(1 satisfies Rating);
       expect(item0.getMetric("score")).toBe(99);
-      expect(item0.tags).toEqual(new Set(["cat", "dog"]));
+      expect(item0.tags).toEqual(new Set(["apple", "banana"]));
 
       expect(item1.id).toBe("103");
       expect(item1.rating).toBe(4 satisfies Rating);
       expect(item1.getMetric("score")).toBe(3);
       expect(item1.getMetric("width")).toBe(1080);
       expect(item1.getMetric("height")).toBe(1920);
+      expect(item1.pixelCount).toBe(1080 * 1920);
       expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
 
       item0.setDuration(123);
@@ -240,11 +227,20 @@ describe("FavoritesItem", () => {
 
       expect(item0.getMetric("duration")).toBe(123);
       expect(item0.isNew).toBe(true);
-      expect(item0.consumeTags()).toEqual(new Set(["cat", "dog"]));
+      expect(item0.consumeTags()).toEqual(new Set(["apple", "banana"]));
 
       expect(item1.getMetric("duration")).toBe(0);
       expect(item1.isNew).toBe(false);
       expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
+    });
+
+    test("exposes every remaining getter through one item", () => {
+      const arena = new FavoritesColumnarArena();
+      const item = new FavoritesItem(createPost({ id: "1", tags: "cat mp4", extension: "mp4", previewURL: "https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg" }), arena, true);
+
+      expect(item.mediaType).toBe("video");
+      expect(item.extension).toBe("mp4");
+      expect(item.thumbUrl).toBe("https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg");
     });
   });
 });

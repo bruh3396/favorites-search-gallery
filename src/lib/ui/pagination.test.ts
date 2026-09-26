@@ -82,7 +82,7 @@ describe("paginationSequence", () => {
     test("page numbers never repeat", () => {
       for (let finalPage = 1; finalPage <= 20; finalPage += 1) {
         for (let currentPage = 1; currentPage <= finalPage; currentPage += 1) {
-          const pages = pageNumbers(currentPage, finalPage, width);
+          const pages = pageNumbersFor(currentPage, finalPage, width);
 
           expect(new Set(pages).size).toBe(pages.length);
         }
@@ -92,7 +92,7 @@ describe("paginationSequence", () => {
     test("page numbers are strictly increasing", () => {
       for (let finalPage = 1; finalPage <= 20; finalPage += 1) {
         for (let currentPage = 1; currentPage <= finalPage; currentPage += 1) {
-          const pages = pageNumbers(currentPage, finalPage, width);
+          const pages = pageNumbersFor(currentPage, finalPage, width);
 
           expect(pages).toEqual([...pages].sort((a, b) => a - b));
         }
@@ -157,6 +157,6 @@ describe("paginationUpdateStrategy", () => {
   });
 });
 
-function pageNumbers(currentPage: number, finalPage: number, width: number): number[] {
+function pageNumbersFor(currentPage: number, finalPage: number, width: number): number[] {
   return paginationSequence(currentPage, finalPage, width).filter((term: PaginationTerm): term is number => term !== "ellipsis");
 }

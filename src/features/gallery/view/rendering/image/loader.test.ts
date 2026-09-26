@@ -1,165 +1,168 @@
-import { ImageBudgeter, ImageFetcher } from "@/features/gallery/types/types";
-import { Mock, beforeEach, describe, expect, test, vi } from "vitest";
+import { BudgetedRequests, ImageBudgeter, ImageFetcher } from "@/features/gallery/types/types";
+import { beforeEach, describe, expect, test } from "vitest";
+import { createDeferred, flushMicrotasks } from "@/testing/async";
 import { GalleryImageLoader } from "@/features/gallery/view/rendering/image/loader";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { MediaItem } from "@/types/media";
 
-function item(id: string): MediaItem {
+function createItem(id: string): MediaItem {
   return { id, thumbUrl: "", mediaType: "image" };
 }
 
-function request(id: string, overrides: Partial<ImageRequest> = {}): ImageRequest {
-  return {
-    id,
-    item: item(id),
-    isCancelled: false,
-    isHighRes: true,
-    dispose: vi.fn(),
-    cancel: vi.fn(),
-    ...overrides
-  } as Partial<ImageRequest> as ImageRequest;
-}
-
-function budgeterReturning(accepted: ImageRequest[], rejected: ImageRequest[]): ImageBudgeter {
-  return { partition: () => ({ accepted, rejected }) };
-}
-
-function flush(): Promise<void> {
-  return Promise.resolve();
+function resolutionOf(request: ImageRequest): string {
+  return request.isHighRes ? "high" : "low";
 }
 
 describe("GalleryImageLoader", () => {
-  let fetchBitmap: Mock<(request: ImageRequest) => Promise<boolean>>;
-  let cancelFetch: Mock<(id: string) => void>;
-  let onRequestCompleted: Mock<(request: ImageRequest) => void>;
+  let log: string[];
+  let fetchOutcome: (request: ImageRequest) => Promise<boolean>;
   let fetcher: ImageFetcher;
 
   beforeEach(() => {
-    fetchBitmap = vi.fn().mockResolvedValue(true);
-    cancelFetch = vi.fn();
-    onRequestCompleted = vi.fn();
-    fetcher = { fetchBitmap, cancelFetch };
+    log = [];
+    fetchOutcome = (): Promise<boolean> => Promise.resolve(true);
+    fetcher = {
+      fetchBitmap: (fetched): Promise<boolean> => {
+        log.push(`fetch:${fetched.id}:${resolutionOf(fetched)}`);
+        return fetchOutcome(fetched);
+      },
+      cancelFetch: (id): void => {
+        log.push(`cancelFetch:${id}`);
+      }
+    };
   });
 
+  function createRequest(id: string): ImageRequest {
+    return {
+      id,
+      item: createItem(id),
+      isCancelled: false,
+      isHighRes: true,
+      dispose: () => {
+        log.push(`dispose:${id}`);
+        return Promise.resolve();
+      },
+      cancel: () => log.push(`cancel:${id}`)
+    } as Partial<ImageRequest> as ImageRequest;
+  }
+
+  function createBudgeter(...partitions: BudgetedRequests[]): ImageBudgeter {
+    let call = 0;
+    return {
+      partition: (): BudgetedRequests => {
+        const partition = partitions[Math.min(call, partitions.length - 1)];
+
+        call += 1;
+        return partition;
+      }
+    };
+  }
+
   function createLoader(budgeter: ImageBudgeter): GalleryImageLoader {
-    return new GalleryImageLoader(fetcher, budgeter, onRequestCompleted);
+    return new GalleryImageLoader(fetcher, budgeter, completed => log.push(`complete:${completed.id}:${resolutionOf(completed)}`));
   }
 
   describe("load", () => {
     test("returns the items of the rejected requests", () => {
-      const loader = createLoader(budgeterReturning([request("0")], [request("1"), request("2")]));
+      const loader = createLoader(createBudgeter({ accepted: [createRequest("0")], rejected: [createRequest("1"), createRequest("2")] }));
 
-      expect(loader.load([])).toEqual([item("1"), item("2")]);
+      expect(loader.load([])).toEqual([createItem("1"), createItem("2")]);
     });
 
     test("fetches each accepted request", async() => {
-      const loader = createLoader(budgeterReturning([request("0"), request("1")], []));
+      const loader = createLoader(createBudgeter({ accepted: [createRequest("0"), createRequest("1")], rejected: [] }));
 
       loader.load([]);
-      await flush();
+      await flushMicrotasks();
 
-      expect(fetchBitmap).toHaveBeenCalledTimes(2);
+      expect(log).toEqual(["fetch:0:high", "fetch:1:high", "complete:0:high", "complete:1:high"]);
     });
 
     test("stores a fetched high-res request as complete and notifies", async() => {
-      const accepted = [request("0")];
-      const loader = createLoader(budgeterReturning(accepted, []));
+      const accepted = [createRequest("0")];
+      const loader = createLoader(createBudgeter({ accepted, rejected: [] }));
 
       loader.load([]);
-      await flush();
+      await flushMicrotasks();
 
+      expect(log).toEqual(["fetch:0:high", "complete:0:high"]);
       expect(loader.get("0")?.status).toBe("complete");
       expect(loader.completedRequests()).toEqual(accepted);
-      expect(onRequestCompleted).toHaveBeenCalledWith(accepted[0]);
     });
 
     test("does not settle a request whose fetch fails", async() => {
-      fetchBitmap.mockResolvedValue(false);
-      const loader = createLoader(budgeterReturning([request("0")], []));
+      fetchOutcome = (): Promise<boolean> => Promise.resolve(false);
+      const loader = createLoader(createBudgeter({ accepted: [createRequest("0")], rejected: [] }));
 
       loader.load([]);
-      await flush();
+      await flushMicrotasks();
 
+      expect(log).toEqual(["fetch:0:high"]);
       expect(loader.get("0")?.status).toBe("low-resolution");
-      expect(onRequestCompleted).not.toHaveBeenCalled();
     });
 
     test("disposes without notifying a request cancelled during its fetch", async() => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let resolveFetch = (_success: boolean): void => { };
+      const fetch = createDeferred<boolean>();
+      const cancelled = createRequest("0");
+      const loader = createLoader(createBudgeter({ accepted: [cancelled], rejected: [] }));
 
-      fetchBitmap.mockReturnValue(new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
-      const cancelled = request("0");
-      const loader = createLoader(budgeterReturning([cancelled], []));
-
+      fetchOutcome = (): Promise<boolean> => fetch.promise;
       loader.load([]);
       cancelled.isCancelled = true;
-      resolveFetch(true);
-      await flush();
+      fetch.resolve(true);
+      await flushMicrotasks();
 
-      expect(cancelled.dispose).toHaveBeenCalledOnce();
+      expect(log).toEqual(["fetch:0:high", "dispose:0"]);
       expect(loader.get("0")?.status).toBe("low-resolution");
-      expect(onRequestCompleted).not.toHaveBeenCalled();
     });
 
-    test("disposes without notifying a request evicted during its fetch", async() => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      let resolveFetch = (_success: boolean): void => { };
+    test("releases an evicted request, then disposes it again when its fetch settles", async() => {
+      const fetch = createDeferred<boolean>();
+      const loader = createLoader(createBudgeter({ accepted: [createRequest("0")], rejected: [] }, { accepted: [], rejected: [] }));
 
-      fetchBitmap.mockReturnValueOnce(new Promise(resolve => {
-        resolveFetch = resolve;
-      }));
-      const evicted = request("0");
-      const budgeter = { partition: vi.fn() };
-
-      budgeter.partition.mockReturnValueOnce({ accepted: [evicted], rejected: [] });
-      budgeter.partition.mockReturnValueOnce({ accepted: [], rejected: [] });
-      const loader = new GalleryImageLoader(fetcher, budgeter, onRequestCompleted);
-
+      fetchOutcome = (): Promise<boolean> => fetch.promise;
       loader.load([]);
       loader.load([]);
-      resolveFetch(true);
-      await flush();
+      log.push("fetch resolves");
+      fetch.resolve(true);
+      await flushMicrotasks();
 
-      // Disposed twice: once by eviction's release, once by settle finding it gone.
-      expect(evicted.dispose).toHaveBeenCalledTimes(2);
+      expect(log).toEqual(["fetch:0:high", "cancelFetch:0", "dispose:0", "cancel:0", "fetch resolves", "dispose:0"]);
       expect(loader.get("0")).toBeUndefined();
-      expect(onRequestCompleted).not.toHaveBeenCalled();
     });
   });
 
   describe("loadImmediate", () => {
     test("stores the item as low-resolution before any fetch resolves", () => {
-      const loader = createLoader(budgeterReturning([], []));
+      const loader = createLoader(createBudgeter({ accepted: [], rejected: [] }));
 
-      loader.loadImmediate(item("0"));
+      loader.loadImmediate(createItem("0"));
 
       expect(loader.get("0")?.status).toBe("low-resolution");
     });
 
-    test("fetches both a low-resolution and a high-resolution request for the item", async() => {
-      const loader = createLoader(budgeterReturning([], []));
+    test("fetches low-resolution first, then high-resolution, notifying for each", async() => {
+      const loader = createLoader(createBudgeter({ accepted: [], rejected: [] }));
 
-      loader.loadImmediate(item("0"));
-      await flush();
+      loader.loadImmediate(createItem("0"));
+      await flushMicrotasks();
 
-      const fetched = fetchBitmap.mock.calls.map(([r]) => r);
-
-      expect(fetched).toHaveLength(2);
-      expect(fetched.map(r => r.id)).toEqual(["0", "0"]);
-      expect(fetched.map(r => r.isHighRes).sort()).toEqual([false, true]);
+      expect(log).toEqual(["fetch:0:low", "fetch:0:high", "complete:0:low", "complete:0:high"]);
+      expect(loader.get("0")?.status).toBe("complete");
     });
 
-    test("ends complete once the high-resolution fetch settles", async() => {
-      const loader = createLoader(budgeterReturning([], []));
+    test("ignores a low-resolution result that arrives after the high-resolution one", async() => {
+      const lowResolutionFetch = createDeferred<boolean>();
+      const loader = createLoader(createBudgeter({ accepted: [], rejected: [] }));
 
-      loader.loadImmediate(item("0"));
-      await flush();
+      fetchOutcome = (fetched): Promise<boolean> => (fetched.isHighRes ? Promise.resolve(true) : lowResolutionFetch.promise);
+      loader.loadImmediate(createItem("0"));
+      await flushMicrotasks();
+      lowResolutionFetch.resolve(true);
+      await flushMicrotasks();
 
+      expect(log).toEqual(["fetch:0:low", "fetch:0:high", "complete:0:high"]);
       expect(loader.get("0")?.status).toBe("complete");
-      expect(onRequestCompleted).toHaveBeenCalled();
     });
   });
 });

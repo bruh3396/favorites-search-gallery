@@ -3,7 +3,7 @@ import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { Preference } from "@/lib/storage/preference";
 
-function preference<T>(initial: T): Preference<T> {
+function createPreference<T>(initial: T): Preference<T> {
   let current = initial;
   return {
     get value(): T {
@@ -15,7 +15,7 @@ function preference<T>(initial: T): Preference<T> {
   } as Preference<T>;
 }
 
-function request(id: string, overrides: Partial<ImageRequest> = {}): ImageRequest {
+function createRequest(id: string, overrides: Partial<ImageRequest> = {}): ImageRequest {
   return {
     id,
     isHighRes: true,
@@ -46,8 +46,8 @@ describe("GalleryAbstractUpscaler", () => {
   let fetchBitmap: Mock<(request: ImageRequest) => Promise<boolean>>;
 
   beforeEach(() => {
-    enabled = preference(true);
-    quality = preference(2);
+    enabled = createPreference(true);
+    quality = createPreference(2);
     canvases = new Map();
     canvasFor = vi.fn((id: string) => canvases.get(id) ?? null);
     fetchBitmap = vi.fn().mockResolvedValue(true);
@@ -68,7 +68,7 @@ describe("GalleryAbstractUpscaler", () => {
     test("paints an eligible request that has a canvas and is complete", () => {
       createCanvas("0");
       const upscaler = createUpscaler();
-      const req = request("0");
+      const req = createRequest("0");
 
       upscaler.tryPainting(req);
       expect(upscaler.painted).toEqual([req]);
@@ -77,7 +77,7 @@ describe("GalleryAbstractUpscaler", () => {
     test("does not paint when there is no canvas for the request", () => {
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
       expect(upscaler.painted).toEqual([]);
     });
 
@@ -85,7 +85,7 @@ describe("GalleryAbstractUpscaler", () => {
       createCanvas("0");
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0", { isHighRes: false }));
+      upscaler.tryPainting(createRequest("0", { isHighRes: false }));
       expect(upscaler.painted).toEqual([]);
     });
 
@@ -93,16 +93,16 @@ describe("GalleryAbstractUpscaler", () => {
       createCanvas("0");
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0", { hasCompleted: false }));
+      upscaler.tryPainting(createRequest("0", { hasCompleted: false }));
       expect(upscaler.painted).toEqual([]);
     });
 
     test("does not paint while disabled", () => {
       createCanvas("0");
-      enabled = preference(false);
+      enabled = createPreference(false);
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
       expect(upscaler.painted).toEqual([]);
     });
 
@@ -111,10 +111,10 @@ describe("GalleryAbstractUpscaler", () => {
       const upscaler = createUpscaler();
 
       upscaler.pause();
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
       expect(upscaler.painted).toEqual([]);
       upscaler.resume();
-      const req = request("0");
+      const req = createRequest("0");
 
       upscaler.tryPainting(req);
       expect(upscaler.painted).toEqual([req]);
@@ -124,8 +124,8 @@ describe("GalleryAbstractUpscaler", () => {
       createCanvas("0");
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0"));
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
+      upscaler.tryPainting(createRequest("0"));
 
       expect(upscaler.painted).toHaveLength(1);
     });
@@ -134,9 +134,9 @@ describe("GalleryAbstractUpscaler", () => {
       createCanvas("0");
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
       quality.set(3);
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
 
       expect(upscaler.painted).toHaveLength(2);
     });
@@ -148,8 +148,8 @@ describe("GalleryAbstractUpscaler", () => {
       const second = createCanvas("1");
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0"));
-      upscaler.tryPainting(request("1"));
+      upscaler.tryPainting(createRequest("0"));
+      upscaler.tryPainting(createRequest("1"));
       upscaler.eraseAll();
 
       expect(upscaler.erased).toEqual([first, second]);
@@ -159,9 +159,9 @@ describe("GalleryAbstractUpscaler", () => {
       createCanvas("0");
       const upscaler = createUpscaler();
 
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
       upscaler.eraseAll();
-      upscaler.tryPainting(request("0"));
+      upscaler.tryPainting(createRequest("0"));
 
       expect(upscaler.painted).toHaveLength(2);
     });

@@ -1,14 +1,16 @@
 import { CoalescingExecutor } from "@/lib/async/coalescing";
-import { Database } from "@/lib/storage/database";
+import { DatabaseLike } from "@/lib/storage/database";
 import { Post } from "@/types/api";
+import { Store } from "@/features/favorites/types/types";
+import { toTagSet } from "@/utils/pure/tag";
 
-export class FavoritesStore {
-  private readonly database: Database<Post>;
+export class FavoritesStore implements Store {
+  private readonly database: DatabaseLike<Post>;
   private readonly databaseUpdater: CoalescingExecutor<Post>;
   private isDatabaseEmpty = true;
 
-  constructor(databaseKey: string) {
-    this.database = new Database<Post>("FavoritesV2", databaseKey);
+  constructor(database: DatabaseLike<Post>) {
+    this.database = database;
     this.databaseUpdater = new CoalescingExecutor<Post>(100, 1_000, this.database.update.bind(this.database));
   }
 
@@ -35,6 +37,11 @@ export class FavoritesStore {
 
   public async readMany(ids: string[]): Promise<Post[]> {
     return (await this.database.exists()) ? this.database.readMany(ids) : [];
+  }
+
+  public async readTags(ids: string[]): Promise<Map<string, Set<string>>> {
+    const posts = await this.readMany(ids);
+    return new Map(posts.map(post => [post.id, toTagSet(post.tags)]));
   }
 
   public async readIds(): Promise<string[]> {

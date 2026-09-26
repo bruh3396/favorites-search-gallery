@@ -2,7 +2,6 @@ import { BitSet, PositionArray } from "@/lib/search/engines/bit/postings/bitset"
 
 export interface Posting {
   readonly cardinality: number;
-  has(position: number): boolean;
   toBitSet(size: number): BitSet;
   andInto(working: BitSet): boolean;
   andNotInto(working: BitSet): boolean;
@@ -20,10 +19,6 @@ export class DensePosting implements Posting {
       this.cachedCount = this.bits.cardinality();
     }
     return this.cachedCount;
-  }
-
-  public has(position: number): boolean {
-    return this.bits.has(position);
   }
 
   public toBitSet(): BitSet {
@@ -56,10 +51,6 @@ export class SparsePosting implements Posting {
 
   public get cardinality(): number {
     return this.positions.length;
-  }
-
-  public has(position: number): boolean {
-    return this.positions.includes(position);
   }
 
   public toBitSet(size: number): BitSet {
@@ -106,10 +97,6 @@ export class SparsePosting implements Posting {
 
 class EmptyPosting implements Posting {
   public readonly cardinality = 0;
-
-  public has(): boolean {
-    return false;
-  }
 
   public toBitSet(size: number): BitSet {
     return new BitSet(size);

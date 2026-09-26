@@ -1,6 +1,8 @@
 import {
   camelToKebabCase,
   capitalize,
+  compareStrings,
+  copyString,
   decodeHtmlEntities,
   escapeParentheses,
   isEmptyString,
@@ -10,6 +12,7 @@ import {
   removeLeadingModifiers,
   removeNonNumericCharacters,
   replaceSpacesWithUnderscores,
+  snakeToCamelCase,
   trigramsOf
 } from "@/utils/pure/string";
 import { describe, expect, test } from "vitest";
@@ -144,6 +147,68 @@ test("spacesToUnderscores", () => {
   expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
 });
 
+describe("compareStrings", () => {
+  test("less than", () => {
+    expect(compareStrings("apple", "banana")).toBe(-1);
+  });
+
+  test("greater than", () => {
+    expect(compareStrings("banana", "apple")).toBe(1);
+  });
+
+  test("equal", () => {
+    expect(compareStrings("apple", "apple")).toBe(0);
+  });
+
+  test("prefix sorts first", () => {
+    expect(compareStrings("app", "apple")).toBe(-1);
+  });
+
+  test("orders by code unit, not locale", () => {
+    expect(compareStrings("Z", "a")).toBe(-1);
+  });
+
+  test("sorts an array", () => {
+    expect(["c", "a", "b", "a"].sort(compareStrings)).toEqual(["a", "a", "b", "c"]);
+  });
+});
+
+describe("snakeToCamelCase", () => {
+  test("empty", () => {
+    expect(snakeToCamelCase("")).toBe("");
+  });
+
+  test("single word", () => {
+    expect(snakeToCamelCase("surface")).toBe("surface");
+  });
+
+  test("multiple words", () => {
+    expect(snakeToCamelCase("theme_surface_raised")).toBe("themeSurfaceRaised");
+  });
+
+  test("underscore before a non-lowercase character is kept", () => {
+    expect(snakeToCamelCase("a_1_B")).toBe("a_1_B");
+  });
+
+  test("trailing underscore is kept", () => {
+    expect(snakeToCamelCase("surface_")).toBe("surface_");
+  });
+});
+
+describe("copyString", () => {
+  test("empty", () => {
+    expect(copyString("")).toBe("");
+  });
+
+  test("equal to the original", () => {
+    expect(copyString("baldurs_gate")).toBe("baldurs_gate");
+  });
+
+  test("preserves surrogate pairs", () => {
+    expect(copyString("a😀b")).toBe("a😀b");
+  });
+});
+
 describe("camelToKebabCase", () => {
   test("empty", () => {
     expect(camelToKebabCase("")).toBe("");
@@ -271,7 +336,7 @@ describe("trigramsOf", () => {
   });
 
   test("exactly three characters", () => {
-    expect(trigramsOf("cat")).toEqual(["cat"]);
+    expect(trigramsOf("fig")).toEqual(["fig"]);
   });
 
   test("sliding window", () => {

@@ -6,6 +6,7 @@ export class IdentifiedList<T extends Identifiable> {
 
   public setAll(items: T[]): void {
     this.items = items;
+    this.itemsById.clear();
     this.index(items);
   }
 

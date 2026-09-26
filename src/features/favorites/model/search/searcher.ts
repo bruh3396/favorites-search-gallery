@@ -6,12 +6,13 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { Preferences } from "@/app/context/preferences";
+import { Searcher } from "@/features/favorites/types/types";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
 import { shuffleInPlace } from "@/utils/pure/array";
 
-export class FavoritesSearcher {
+export class FavoritesSearcher implements Searcher {
   private readonly engine: SearchEngine<Favorite>;
   private readonly results: ObservableList<Favorite>;
   private readonly preferences: Preferences;
@@ -19,20 +20,16 @@ export class FavoritesSearcher {
   private readonly negatedBlacklistedTags: string;
   private currentSearchQuery: string;
 
-  constructor(preferences: Preferences, environment: Environment) {
+  constructor(preferences: Preferences, environment: Environment, onSearchResultsChanged: (results: Favorite[]) => void) {
     const termsFor = (favorite: Favorite): Set<string> => favorite.consumeTags();
     const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
 
     this.engine = FavoritesConfig.useBitSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
-    this.results = new ObservableList<Favorite>();
+    this.results = new ObservableList<Favorite>(onSearchResultsChanged);
     this.preferences = preferences;
     this.userIsOnTheirOwnFavoritesPage = environment.userIsOnTheirOwnFavoritesPage;
     this.negatedBlacklistedTags = environment.negatedBlacklistedTags;
     this.currentSearchQuery = "";
-  }
-
-  public setup(onSearchResultsChanged: (results: Favorite[]) => void): void {
-    this.results.setup(onSearchResultsChanged);
   }
 
   public search(favorites: Favorite[], searchQuery: string): Favorite[] {

@@ -159,7 +159,7 @@ export function compressPreviewSource(source: string): string {
     return source;
   }
   const match = source.match(previewSourceCompressionRegex);
-  return match === null ? "" : match.splice(1).join("_");
+  return match === null ? source : match.splice(1).join("_");
 }
 
 export function toRatingValue(rating: string): Rating {

@@ -123,7 +123,7 @@ export class GalleryImageRenderer implements Renderer {
 
   private createBudgeter(environment: Environment): GalleryAbstractImageBudgeter {
     if (environment.onFavoritesPage && !environment.onMobileDevice) {
-      return new GalleryMemoryImageBudgeter((id) => this.featureBridge.favorites.pixelCount.call(id), GalleryConfig.imageMegabyteLimit, GalleryConfig.minimumCachedImageCount);
+      return new GalleryMemoryImageBudgeter((id) => this.featureBridge.favorites.favorite.call(id), GalleryConfig.imageMegabyteLimit, GalleryConfig.minimumCachedImageCount);
     }
     const limit = environment.onMobileDevice ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
     return new GalleryLimitImageBudgeter(limit);

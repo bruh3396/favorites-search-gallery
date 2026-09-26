@@ -2,7 +2,7 @@ import { describe, expect, expectTypeOf, test } from "vitest";
 import { SortedArray } from "@/lib/collection/sorted_array";
 import { randomInt } from "@/utils/pure/number";
 
-function testSortedArrayOrder<T extends string | number>(sortedArray: SortedArray<T>): void {
+function expectSortedOrder<T extends string | number>(sortedArray: SortedArray<T>): void {
   const array = sortedArray.toArray();
 
   for (let i = 0; i < array.length - 1; i += 1) {
@@ -26,7 +26,7 @@ describe("SortedArray", () => {
       unsortedArray.push(num);
     }
 
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
     expect(sortedArray.length).toBe(500);
     expect(sortedArray.toArray()).not.toStrictEqual(unsortedArray);
     expect(sortedArray.toArray()).toStrictEqual(unsortedArray.sort((a, b) => a - b));
@@ -43,7 +43,7 @@ describe("SortedArray", () => {
       unsortedArray.push(str);
     }
 
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
     expect(sortedArray.length).toBe(100);
     expect(sortedArray.toArray()).not.toStrictEqual(unsortedArray);
     expect(sortedArray.toArray()).toStrictEqual(unsortedArray.sort());
@@ -58,7 +58,7 @@ describe("SortedArray", () => {
       sortedArray.add(str);
       unsortedArray.push(str);
     }
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
     expect(sortedArray.length).toBe(strings.length);
     expect(sortedArray.toArray()).not.toStrictEqual(unsortedArray);
     expect(sortedArray.toArray()).toStrictEqual(unsortedArray.sort());
@@ -74,7 +74,7 @@ describe("SortedArray", () => {
       sortedArray.push(str);
       unsortedArray.push(str);
     }
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
     expect(sortedArray.length).toBe(strings.length);
     expect(sortedArray.toArray()).not.toStrictEqual(unsortedArray);
     expect(sortedArray.toArray()).toStrictEqual(unsortedArray.sort());
@@ -93,14 +93,14 @@ describe("SortedArray", () => {
     sortedArray.push(7);
     sortedArray.push(14);
     sortedArray.toArray();
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
   });
 
 test("addAll", () => {
   const sortedArray = new SortedArray<number>();
 
   sortedArray.addAll([5, 3, 1, 32, 23, 10, 7, 14]);
-  testSortedArrayOrder(sortedArray);
+  expectSortedOrder(sortedArray);
 });
 
   test("first on empty array", () => {
@@ -127,7 +127,7 @@ test("addAll", () => {
     sortedArray.push(8);
     sortedArray.push(1);
     expect(sortedArray.first()).toBe(1);
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
   });
 
   test("first with custom comparator", () => {
@@ -184,7 +184,7 @@ test("addAll", () => {
     sortedArray.push(1);
     expect(sortedArray.shift()).toBe(1);
     expect(sortedArray.toArray()).toStrictEqual([2, 5, 8]);
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
   });
 
   test("shift with custom comparator", () => {
@@ -209,7 +209,7 @@ test("addAll", () => {
     expect(sortedArray.remove(4)).toBe(true);
     expect(sortedArray.toArray()).toStrictEqual([1, 1, 2, 3, 5, 6, 9]);
     expect(sortedArray.length).toBe(7);
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
   });
 
   test("remove returns false when value missing", () => {
@@ -254,7 +254,7 @@ test("addAll", () => {
     expect(sortedArray.remove(99)).toBe(false);
     expect(sortedArray.length).toBe(3);
     sortedArray.toArray();
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
   });
 
   test("remove first and last elements", () => {
@@ -267,7 +267,7 @@ test("addAll", () => {
     expect(sortedArray.toArray()).toStrictEqual([2, 3, 4, 5]);
     expect(sortedArray.remove(5)).toBe(true);
     expect(sortedArray.toArray()).toStrictEqual([2, 3, 4]);
-    testSortedArrayOrder(sortedArray);
+    expectSortedOrder(sortedArray);
   });
 
   test("custom comparator on objects", () => {

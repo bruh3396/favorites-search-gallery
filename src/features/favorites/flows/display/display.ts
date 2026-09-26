@@ -1,7 +1,7 @@
 import { FavoritesFlow, FavoritesFlowDependencies } from "@/features/favorites/flows/flow";
 import { ContentDisplayOptions } from "@/types/ui";
+import { Display } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { FavoritesInfiniteDisplay } from "@/features/favorites/flows/display/infinite_display";
 import { FavoritesPaginatedDisplay } from "@/features/favorites/flows/display/paginated_display";
 import { NavigationKey } from "@/types/input";
@@ -50,11 +50,11 @@ export class FavoritesDisplayFlow extends FavoritesFlow {
     this.activeDisplay().goToPage(pageNumber);
   }
 
-  private activeDisplay(): FavoritesDisplay {
+  private activeDisplay(): Display {
     return this.context.preferences.favorites.infiniteScroll.value ? this.infiniteDisplay : this.paginatedDisplay;
   }
 
-  private inactiveDisplay(): FavoritesDisplay {
+  private inactiveDisplay(): Display {
     return this.activeDisplay() === this.infiniteDisplay ? this.paginatedDisplay : this.infiniteDisplay;
   }
 }

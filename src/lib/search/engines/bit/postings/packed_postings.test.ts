@@ -3,7 +3,7 @@ import { PackedPostings } from "@/lib/search/engines/bit/postings/packed_posting
 
 const anySparse = (): boolean => true;
 
-function packed(entries: Record<string, number[]>, isSparse: (length: number) => boolean = anySparse): PackedPostings {
+function createPackedPostings(entries: Record<string, number[]>, isSparse: (length: number) => boolean = anySparse): PackedPostings {
   const p = new PackedPostings();
   const sparseTerms: [string, number[]][] = [];
   let total = 0;
@@ -27,7 +27,7 @@ function sliceArray(p: PackedPostings, term: string): number[] | undefined {
 
 describe("PackedPostings", () => {
   test("stores and returns each term's positions", () => {
-    const p = packed({ a: [0, 5, 9], b: [2], c: [1, 3, 4, 7] });
+    const p = createPackedPostings({ a: [0, 5, 9], b: [2], c: [1, 3, 4, 7] });
 
     expect(sliceArray(p, "a")).toEqual([0, 5, 9]);
     expect(sliceArray(p, "b")).toEqual([2]);
@@ -35,18 +35,25 @@ describe("PackedPostings", () => {
   });
 
   test("reports membership", () => {
-    const p = packed({ a: [1], b: [2] });
+    const p = createPackedPostings({ a: [1], b: [2] });
 
     expect(p.has("a")).toBe(true);
     expect(p.has("c")).toBe(false);
   });
 
+  test("forEachTerm visits every term with its positions", () => {
+    const visited: [string, number[]][] = [];
+
+    createPackedPostings({ a: [0, 5], b: [2] }).forEachTerm((term, positions) => visited.push([term, [...positions]]));
+    expect(visited).toEqual([["a", [0, 5]], ["b", [2]]]);
+  });
+
   test("returns undefined for an unknown term", () => {
-    expect(packed({ a: [1] }).positionsFor("nope")).toBeUndefined();
+    expect(createPackedPostings({ a: [1] }).positionsFor("nope")).toBeUndefined();
   });
 
   test("packs everything into a single backing buffer", () => {
-    const p = packed({ a: [1, 2], b: [3, 4, 5] });
+    const p = createPackedPostings({ a: [1, 2], b: [3, 4, 5] });
     const a = p.positionsFor("a")!;
     const b = p.positionsFor("b")!;
 
@@ -55,14 +62,14 @@ describe("PackedPostings", () => {
   });
 
   test("narrows the backing array to the smallest width that fits the max position", () => {
-    expect(packed({ a: [0, 255] }).positionsFor("a")).toBeInstanceOf(Uint8Array);
-    expect(packed({ a: [0, 256] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
-    expect(packed({ a: [0, 65535] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
-    expect(packed({ a: [0, 65536] }).positionsFor("a")).toBeInstanceOf(Uint32Array);
+    expect(createPackedPostings({ a: [0, 255] }).positionsFor("a")).toBeInstanceOf(Uint8Array);
+    expect(createPackedPostings({ a: [0, 256] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
+    expect(createPackedPostings({ a: [0, 65535] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
+    expect(createPackedPostings({ a: [0, 65536] }).positionsFor("a")).toBeInstanceOf(Uint32Array);
   });
 
   test("only stores terms the predicate calls sparse", () => {
-    const p = packed({ rare: [1], common: [0, 1, 2, 3, 4, 5] }, length => length < 3);
+    const p = createPackedPostings({ rare: [1], common: [0, 1, 2, 3, 4, 5] }, length => length < 3);
 
     expect(p.has("rare")).toBe(true);
     expect(p.has("common")).toBe(false);
@@ -70,7 +77,7 @@ describe("PackedPostings", () => {
   });
 
   test("handles empty input", () => {
-    const p = packed({});
+    const p = createPackedPostings({});
 
     expect(p.has("x")).toBe(false);
     expect(p.positionsFor("x")).toBeUndefined();
@@ -86,7 +93,7 @@ describe("PackedPostings", () => {
   });
 
   test("preserves position order within a term", () => {
-    expect(sliceArray(packed({ t: [10, 20, 30, 40] }), "t")).toEqual([10, 20, 30, 40]);
+    expect(sliceArray(createPackedPostings({ t: [10, 20, 30, 40] }), "t")).toEqual([10, 20, 30, 40]);
   });
 
   test("stays correct across many rebuilds with churning term sets (oracle)", () => {

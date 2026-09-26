@@ -14,7 +14,7 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardPostingResolver<Doc>;
   private readonly evaluator: BitEvaluator<Doc>;
 
-  constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: SearchableMetric) => number = () => 0, docs: Doc[] = []) {
+  constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: SearchableMetric) => number, docs: Doc[] = []) {
     this.bitIndex = new BitIndex<Doc>(termsFor);
     this.metricIndex = new MetricBitIndex<Doc>(metricFor);
     this.wildcardResolver = new WildcardPostingResolver(this.bitIndex);

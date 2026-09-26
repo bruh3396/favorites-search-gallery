@@ -59,37 +59,20 @@ export class TrigramIndex {
   }
 
   private candidatesOf(fragment: string): string[] {
-    let candidates: string[] | null = null;
-
-    for (const trigram of trigramsOf(fragment)) {
-      const bucket = this.termsByTrigram.get(trigram);
-
-      if (bucket === undefined) {
-        return [];
-      }
-      // candidates = candidates === null ? bucket.slice() : intersectSorted(candidates, bucket, compareStrings);
-      candidates = candidates === null ? bucket : intersectSorted(candidates, bucket, compareStrings);
-
-      if (candidates.length === 0) {
-        return candidates;
-      }
-    }
-    return candidates ?? [];
+    return this.intersectAll(trigramsOf(fragment), trigram => this.termsByTrigram.get(trigram) ?? []);
   }
 
   private candidatesOfAll(fragments: string[]): string[] {
-    let candidates: string[] | null = null;
+    return this.intersectAll(fragments, fragment => this.candidatesOf(fragment));
+  }
 
-    for (const fragment of fragments) {
-      const buckets = this.candidatesOf(fragment);
+  private intersectAll<T>(sources: readonly T[], candidatesFor: (source: T) => string[]): string[] {
+    let candidates = candidatesFor(sources[0]);
 
-      candidates = candidates === null ? buckets : intersectSorted(candidates, buckets, compareStrings);
-
-      if (candidates.length === 0) {
-        return candidates;
-      }
+    for (let i = 1; i < sources.length && candidates.length > 0; i += 1) {
+      candidates = intersectSorted(candidates, candidatesFor(sources[i]), compareStrings);
     }
-    return candidates ?? [];
+    return candidates;
   }
 
   private insertIntoBucket(bucket: string[], term: string): void {

@@ -7,6 +7,7 @@ import { Boundary } from "@/types/boundary";
 import { GalleryDynamicUpscaleQuality } from "@/features/gallery/model/upscale_quality";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
+import { GalleryViewedPost } from "@/features/gallery/model/viewed_post";
 import { ItemCursor } from "@/lib/collection/item_cursor";
 import { MediaItem } from "@/types/media";
 import { NavigationKey } from "@/types/input";
@@ -20,12 +21,22 @@ export class GalleryModel {
   private readonly cursor: ItemCursor<HTMLElement>;
   private readonly state: GalleryStateController;
   private readonly quality: GalleryDynamicUpscaleQuality;
+  private readonly viewedPost: GalleryViewedPost;
   private getThumbsAround: (id: string) => MediaItem[];
 
   constructor(preferences: Preferences, shell: Shell) {
     this.cursor = new ItemCursor<HTMLElement>();
-    this.state = new GalleryStateController(preferences.gallery.previewEnabled.value ? "preview" : "idle");
-    this.quality = new GalleryDynamicUpscaleQuality(() => shell.getFirstContentThumb()?.getBoundingClientRect().width ?? null, () => window.innerWidth, GalleryUpscaleConfig.dynamicQualityCutoffs);
+    this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
+    this.quality = new GalleryDynamicUpscaleQuality({
+      firstThumb: (): HTMLElement | null => shell.getFirstContentThumb(),
+      viewportWidth: (): number => window.innerWidth,
+      cutoffs: GalleryUpscaleConfig.dynamicQualityCutoffs
+    });
+    this.viewedPost = new GalleryViewedPost({
+      isInGallery: (): boolean => this.state.isInGallery,
+      currentThumb: (): HTMLElement => this.cursor.currentItem(),
+      isVideoThumb
+    });
     this.getThumbsAround = (): MediaItem[] => [];
   }
 
@@ -70,7 +81,7 @@ export class GalleryModel {
   }
 
   public isViewingVideo(): boolean {
-    return this.state.isInGallery && isVideoThumb(this.cursor.currentItem());
+    return this.viewedPost.isVideo();
   }
 
   public openPost(): void {
@@ -98,7 +109,7 @@ export class GalleryModel {
   }
 
   public currentThumbIfOpen(): HTMLElement | null {
-    return this.state.isInGallery ? this.cursor.currentItem() : null;
+    return this.viewedPost.get();
   }
 
   public isIdle(): boolean {

@@ -17,11 +17,7 @@ export function tryParseSearchExpression(query: string): SearchExpression | unde
 
 export function parseSearchExpression(query: string): SearchExpression {
   const tokens = tokenize(normalize(query));
-  const parser = new Parser(tokens);
-  const expression = parser.parseTopLevel();
-
-  parser.expectEnd();
-  return expression;
+  return new Parser(tokens).parseTopLevel();
 }
 
 function normalize(query: string): string {
@@ -53,12 +49,6 @@ class Parser {
       members.push(this.parseMember());
     }
     return SearchExpression.and(members);
-  }
-
-  public expectEnd(): void {
-    if (!this.atEnd()) {
-      throw new Error(`unexpected token '${this.peek()}' at token ${this.cursor + 1}`);
-    }
   }
 
   private parseMember(): SearchExpression {

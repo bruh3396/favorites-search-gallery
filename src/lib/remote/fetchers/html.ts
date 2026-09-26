@@ -1,12 +1,19 @@
 import { favoritesPageUrl, postListUrlFromBase, postPageUrl, profilePageUrl } from "@/lib/remote/url";
 import { macroTask, withExponentialBackoff } from "@/lib/async/scheduling";
+import { Post } from "@/types/api";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { extractFavoriteElements } from "@/lib/remote/parsers/favorites_page_parser";
+import { favoritesPageOffset } from "@/lib/remote/pagination";
 import { fetchHtml } from "@/utils/browser/http";
+import { thumbToPost } from "@/lib/remote/parsers/thumb_parser";
 
 const generalPageRequestLimiter = new RateLimiter(Rule34NetworkConfig.generalPageRequestRateLimit);
-
 let postPageFetchGate: Promise<void> = Promise.resolve();
+
+export function fetchFavoritesPagePosts(pageId: string, pageIndex: number): Promise<Post[]> {
+  return fetchFavoritesPage(pageId, favoritesPageOffset(pageIndex)).then(html => extractFavoriteElements(html).map(thumbToPost));
+}
 
 export function fetchFavoritesPage(pageId: string, pageNumber: number): Promise<string> {
   return fetchHtml(favoritesPageUrl(pageId, pageNumber));

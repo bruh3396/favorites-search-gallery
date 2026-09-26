@@ -42,5 +42,7 @@ describe("desugarNestedOrGroups", () => {
     expect(desugarNestedOrGroups("( apple ~ ( ) )")).toBe("( apple ~ ( ) )");
     expect(desugarNestedOrGroups("( ~ ( banana grape ) )")).toBe("( ~ ( banana grape ) )");
     expect(desugarNestedOrGroups("( apple ( banana grape ) )")).toBe("( apple ( banana grape ) )");
+    expect(desugarNestedOrGroups("( apple ~ ( banana ~ grape ) )")).toBe("( apple ~ ( banana ~ grape ) )");
+    expect(desugarNestedOrGroups("( apple ~ ( banana grape")).toBe("( apple ~ ( banana grape");
   });
 });

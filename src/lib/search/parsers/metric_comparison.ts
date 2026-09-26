@@ -1,5 +1,5 @@
 import { MetricComparator, SearchableMetric } from "@/types/search";
-import { isMetadataComparator, isSearchableMetadataMetric, searchableMetrics } from "@/types/guards";
+import { isSearchableMetadataMetric, searchableMetrics } from "@/types/guards";
 
 export interface MetricComparison {
   readonly metric: SearchableMetric;
@@ -47,8 +47,8 @@ function extractExpression(term: string): { metric: SearchableMetric; operator: 
       value: 0
     };
   }
-  const metric = isSearchableMetadataMetric(match[1]) ? match[1] : "id";
-  const operator = isMetadataComparator(match[2]) ? match[2] : ":";
+  const metric = match[1] as SearchableMetric;
+  const operator = match[2] as MetricComparator;
   const value = isSearchableMetadataMetric(match[3]) ? match[3] : Number(match[3]);
   return { metric, operator, value };
 }

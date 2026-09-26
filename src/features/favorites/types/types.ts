@@ -5,7 +5,7 @@ import { ContentDisplayOptions } from "@/types/ui";
 import { NavigationKey } from "@/types/input";
 import { Post } from "@/types/api";
 
-export interface FavoritesArena {
+export interface Arena {
   allocate: () => number;
   write: (index: number, post: Post) => void;
   id: (index: number) => number;
@@ -21,6 +21,34 @@ export interface FavoritesArena {
   consumeTagSet: (index: number) => Set<string>;
   mediaType: (index: number) => MediaType;
   toPost: (index: number) => Post;
+}
+
+export interface Store {
+  readAll: () => Promise<Post[]>;
+  streamAll: (onBatch: (posts: Post[]) => void) => Promise<void>;
+}
+
+export interface Fetcher {
+  fetchAll: (onFavoritesFound: (posts: Post[]) => void, firstPageFavorites?: Post[]) => Promise<void>;
+  fetchNew: (existingIds: Set<string>, firstPageFavorites?: Post[]) => Promise<Post[]>;
+}
+
+export interface Collection {
+  setAll: (posts: Post[]) => Favorite[];
+  append: (posts: Post[]) => Favorite[];
+  appendDirty: (posts: Post[]) => Favorite[];
+  prependDirty: (posts: Post[]) => Favorite[];
+  getAll: () => Favorite[];
+  getAllIds: () => Set<string>;
+}
+
+export interface Searcher {
+  add: (favorites: Favorite[]) => void;
+  appendResults: (favorites: Favorite[]) => Favorite[];
+}
+
+export interface Enricher {
+  enrich: (favorites: Favorite[]) => Promise<void>;
 }
 
 export interface FavoritesToolbarSlots {
@@ -59,7 +87,7 @@ export interface ThumbOperations<Node> {
   blankImage: (node: Node) => void;
 }
 
-export interface FavoritesDisplay {
+export interface Display {
   initialize: (results: Favorite[], options?: ContentDisplayOptions) => void;
   sync: (newFavorites: Favorite[]) => void;
   advance: (direction: NavigationKey) => boolean;

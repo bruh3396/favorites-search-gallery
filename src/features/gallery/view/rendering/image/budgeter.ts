@@ -1,4 +1,5 @@
 import { BudgetedRequests, ImageBudgeter } from "@/features/gallery/types/types";
+import { Favorite } from "@/types/favorite";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { MediaItem } from "@/types/media";
 
@@ -24,7 +25,7 @@ export class GalleryLimitImageBudgeter extends GalleryAbstractImageBudgeter {
 
 export class GalleryMemoryImageBudgeter extends GalleryAbstractImageBudgeter {
   constructor(
-    private readonly getPixelCount: (id: string) => number,
+    private readonly getFavorite: (id: string) => Pick<Favorite, "pixelCount"> | undefined,
     private readonly megabyteLimit: number,
     private readonly minimumCount: number
   ) {
@@ -49,6 +50,6 @@ export class GalleryMemoryImageBudgeter extends GalleryAbstractImageBudgeter {
   }
 
   private megabytes(request: ImageRequest): number {
-    return this.getPixelCount(request.id) / PIXELS_PER_MEGABYTE;
+    return (this.getFavorite(request.id)?.pixelCount ?? 0) / PIXELS_PER_MEGABYTE;
   }
 }

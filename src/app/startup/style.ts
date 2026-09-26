@@ -4,20 +4,28 @@ import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
 import { AppContext } from "@/app/context/context";
 import BADGE_CSS from "@/assets/css/base/badge.css";
+import CHANGELOG_CSS from "@/assets/css/favorites/changelog.css";
 import CONTROLS_CSS from "@/assets/css/base/controls.css";
 import DESKTOP_CSS from "@/assets/css/base/desktop.css";
+import DRAWER_CSS from "@/assets/css/favorites/drawer.css";
+import DRAWER_PANELS_CSS from "@/assets/css/favorites/drawer_panels.css";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
 import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
+import HELP_CSS from "@/assets/css/favorites/help.css";
 import MOBILE_CSS from "@/assets/css/base/mobile.css";
+import PAGINATION_CSS from "@/assets/css/favorites/pagination.css";
 import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
+import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
 import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
+import SNIPPETS_CSS from "@/assets/css/favorites/snippets.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
 import THUMB_LOADING_CSS from "@/assets/css/base/loading.css";
 import TILE_CSS from "@/assets/css/base/tile.css";
+import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import TOOLTIP_CSS from "@/assets/css/tooltip.css";
 import TOOLTIP_HINT_CSS from "@/assets/css/base/tooltip_hint.css";
 import { ThumbConfig } from "@/config/thumb_config";
@@ -51,6 +59,7 @@ function insertBaseStyles(context: AppContext): void {
   const galleryCss = context.flags.galleryEnabled ? GALLERY_CSS + AUTOPLAY_CSS : "";
   const tooltipCss = context.flags.tooltipEnabled ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
   const postListCss = context.environment.onPostListPage ? POST_LIST_CSS + SETTINGS_PANEL_CSS : "";
+  const favoritesCss = context.environment.onFavoritesPage ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
@@ -70,7 +79,8 @@ function insertBaseStyles(context: AppContext): void {
     platformCss +
     galleryCss +
     postListCss +
-    fadeInCss);
+    fadeInCss +
+    favoritesCss);
 }
 
 function applyTileVariables(context: AppContext): void {

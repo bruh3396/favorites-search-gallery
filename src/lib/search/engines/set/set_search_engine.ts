@@ -42,12 +42,16 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     this.termIndex.addDocs(docs);
     this.wildcardResolver.index(this.termIndex.indexedTerms());
     this.positionIndex.build(docs);
+    this.metricIndex.invalidate();
+    this.relativeMetricIndex.invalidate();
   }
 
   public add(docs: Doc[]): void {
     for (const doc of docs) {
       this.termIndex.addDoc(doc).forEach(term => this.wildcardResolver.add(term));
       this.positionIndex.add(doc);
+      this.metricIndex.add(doc);
+      this.relativeMetricIndex.add(doc);
     }
   }
 

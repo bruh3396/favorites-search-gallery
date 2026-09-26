@@ -1,4 +1,4 @@
-import { GalleryMenuAction, Layout } from "@/types/app";
+import { GalleryMenuAction, Layout, QualityCutoff } from "@/types/app";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { MediaItem } from "@/types/media";
 import { Preference } from "@/lib/storage/preference";
@@ -34,6 +34,22 @@ export interface GallerySizeSettings {
   columnCount: Preference<number>;
   rowHeight: Preference<number>;
   upscaleQuality: Preference<number>;
+}
+
+export type MeasurableThumb = {
+  getBoundingClientRect: () => { width: number };
+};
+
+export interface GalleryUpscaleQualityDependencies {
+  firstThumb: () => MeasurableThumb | null;
+  viewportWidth: () => number;
+  cutoffs: QualityCutoff[];
+}
+
+export interface GalleryViewedPostDependencies {
+  isInGallery: () => boolean;
+  currentThumb: () => HTMLElement;
+  isVideoThumb: (thumb: HTMLElement) => boolean;
 }
 
 export interface GalleryViewDependencies {

@@ -12,7 +12,7 @@ const EMPTY_PAGINATION: PaginationState = {
   totalCount: 0, sliceStart: 0, sliceEnd: 0, currentPage: 1, finalPage: 1, sequence: [1]
 };
 
-function makeFavorite(id: string): Favorite {
+function createFavorite(id: string): Favorite {
   return { id, thumbUrl: `https://example/${id}.jpg` } as Partial<Favorite> as Favorite;
 }
 
@@ -23,7 +23,7 @@ interface ModelOverrides {
   selectWrappedAdjacentPage?: (d: NavigationKey) => boolean;
 }
 
-function makeModel(overrides: ModelOverrides = {}): FavoritesModel {
+function createModel(overrides: ModelOverrides = {}): FavoritesModel {
   return {
     currentPageFavorites: () => overrides.currentPage ?? [],
     adjacentPageFavorites: () => [],
@@ -46,7 +46,7 @@ interface ViewSpies {
   addToBottom: ReturnType<typeof vi.fn>;
 }
 
-function makeView(): { view: FavoritesView; spies: ViewSpies } {
+function createView(): { view: FavoritesView; spies: ViewSpies } {
   const spies: ViewSpies = {
     togglePaginator: vi.fn(),
     updatePaginator: vi.fn(),
@@ -57,7 +57,7 @@ function makeView(): { view: FavoritesView; spies: ViewSpies } {
   return { view: { ...spies } as Partial<FavoritesView> as FavoritesView, spies };
 }
 
-function makeShell(renderedIds: string[] = []): Shell {
+function createShell(renderedIds: string[] = []): Shell {
   const rendered = new Set(renderedIds);
   return {
     hasThumb: (id: string) => rendered.has(id),
@@ -65,73 +65,73 @@ function makeShell(renderedIds: string[] = []): Shell {
   } as Partial<Shell> as Shell;
 }
 
-function makeEvents(favoritesLoaded: boolean): Events {
+function createEvents(favoritesLoaded: boolean): Events {
   return { favorites: { favoritesLoaded: { fired: favoritesLoaded } } } as Partial<Events> as Events;
 }
 
-function build(model: FavoritesModel, view: FavoritesView, shell = makeShell(), loaded = false): FavoritesPaginatedDisplay {
-  return new FavoritesPaginatedDisplay(model, view, makeEvents(loaded), shell);
+function createDisplay(model: FavoritesModel, view: FavoritesView, shell = createShell(), loaded = false): FavoritesPaginatedDisplay {
+  return new FavoritesPaginatedDisplay(model, view, createEvents(loaded), shell);
 }
 
 describe("FavoritesPaginatedDisplay.sync", () => {
   test("appends favorites whose thumbs are not rendered", () => {
-    const favorites = [makeFavorite("18751703"), makeFavorite("42"), makeFavorite("999")];
-    const { view, spies } = makeView();
+    const favorites = [createFavorite("18751703"), createFavorite("42"), createFavorite("999")];
+    const { view, spies } = createView();
 
-    build(makeModel({ currentPage: favorites }), view, makeShell(["18751703"])).sync();
+    createDisplay(createModel({ currentPage: favorites }), view, createShell(["18751703"])).sync();
 
     expect(spies.addToBottom).toHaveBeenCalledTimes(1);
     expect(spies.addToBottom.mock.calls[0][0].map((f: Favorite) => f.id)).toEqual(["42", "999"]);
   });
 
   test("does not append when every thumb is already rendered", () => {
-    const favorites = [makeFavorite("42"), makeFavorite("999")];
-    const { view, spies } = makeView();
+    const favorites = [createFavorite("42"), createFavorite("999")];
+    const { view, spies } = createView();
 
-    build(makeModel({ currentPage: favorites }), view, makeShell(["42", "999"])).sync();
+    createDisplay(createModel({ currentPage: favorites }), view, createShell(["42", "999"])).sync();
 
     expect(spies.addToBottom).not.toHaveBeenCalled();
   });
 
   test("numeric ids do not throw", () => {
-    const { view } = makeView();
+    const { view } = createView();
 
-    expect(() => build(makeModel({ currentPage: [makeFavorite("18751703")] }), view).sync()).not.toThrow();
+    expect(() => createDisplay(createModel({ currentPage: [createFavorite("18751703")] }), view).sync()).not.toThrow();
   });
 });
 
 describe("FavoritesPaginatedDisplay.advance", () => {
   test("before load: renders and returns true when an adjacent page exists", () => {
-    const model = makeModel({ selectAdjacentPage: () => true });
-    const { view, spies } = makeView();
-    const wasAdvanced = build(model, view, makeShell(), false).advance("ArrowRight");
+    const model = createModel({ selectAdjacentPage: () => true });
+    const { view, spies } = createView();
+    const wasAdvanced = createDisplay(model, view, createShell(), false).advance("ArrowRight");
 
     expect(wasAdvanced).toBe(true);
     expect(spies.showSearchResults).toHaveBeenCalledTimes(1);
   });
 
   test("before load: returns false and does not render when no adjacent page", () => {
-    const model = makeModel({ selectAdjacentPage: () => false });
-    const { view, spies } = makeView();
-    const wasAdvanced = build(model, view, makeShell(), false).advance("ArrowRight");
+    const model = createModel({ selectAdjacentPage: () => false });
+    const { view, spies } = createView();
+    const wasAdvanced = createDisplay(model, view, createShell(), false).advance("ArrowRight");
 
     expect(wasAdvanced).toBe(false);
     expect(spies.showSearchResults).not.toHaveBeenCalled();
   });
 
   test("after load: renders and returns true when a wrapped adjacent page exists", () => {
-    const model = makeModel({ selectWrappedAdjacentPage: () => true });
-    const { view, spies } = makeView();
-    const wasAdvanced = build(model, view, makeShell(), true).advance("ArrowLeft");
+    const model = createModel({ selectWrappedAdjacentPage: () => true });
+    const { view, spies } = createView();
+    const wasAdvanced = createDisplay(model, view, createShell(), true).advance("ArrowLeft");
 
     expect(wasAdvanced).toBe(true);
     expect(spies.showSearchResults).toHaveBeenCalledTimes(1);
   });
 
   test("after load: when no wrapped page, returns whether there is only one page", () => {
-    const model = makeModel({ selectWrappedAdjacentPage: () => false, hasOnlyOnePage: true });
-    const { view, spies } = makeView();
-    const wasAdvanced = build(model, view, makeShell(), true).advance("ArrowLeft");
+    const model = createModel({ selectWrappedAdjacentPage: () => false, hasOnlyOnePage: true });
+    const { view, spies } = createView();
+    const wasAdvanced = createDisplay(model, view, createShell(), true).advance("ArrowLeft");
 
     expect(wasAdvanced).toBe(true);
     expect(spies.showSearchResults).not.toHaveBeenCalled();

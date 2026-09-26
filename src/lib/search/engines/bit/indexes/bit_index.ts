@@ -70,30 +70,21 @@ export class BitIndex<Doc> {
     if (!this.docs.hasRoomFor(docs.length)) {
       this.build(this.docs.liveDocs(), this.docs.size + docs.length);
     }
-    this.draft.ensureFresh(this.postings);
-    const newTerms = new Set<string>();
+    return this.mutate(() => {
+      const newTerms = new Set<string>();
+      const positions = this.docs.allocate(docs.length);
 
-    for (const doc of docs) {
-      const position = this.docs.allocate();
-
-      if (position === undefined) {
-        continue;
-      }
-
-      for (const term of this.place(doc, position)) {
-        newTerms.add(term);
-      }
-    }
-    this.materialize();
-    return [...newTerms];
+      docs.forEach((doc, i) => {
+        for (const term of this.place(doc, positions[i])) {
+          newTerms.add(term);
+        }
+      });
+      return [...newTerms];
+    });
   }
 
   public update(updates: readonly TermUpdate<Doc>[]): TermDelta {
-    this.draft.ensureFresh(this.postings);
-    const delta = this.draft.applyUpdates(updates, doc => this.docs.positionOf(doc));
-
-    this.materialize();
-    return delta;
+    return this.mutate(() => this.draft.applyUpdates(updates, doc => this.docs.positionOf(doc)));
   }
 
   public indexedTerms(): string[] {
@@ -115,6 +106,14 @@ export class BitIndex<Doc> {
       }
     }
     return newTerms;
+  }
+
+  private mutate<T>(apply: () => T): T {
+    this.draft.hydrateFrom(this.postings);
+    const result = apply();
+
+    this.materialize();
+    return result;
   }
 
   private materialize(): void {

@@ -1,6 +1,75 @@
-import { compressPreviewSource, decompressPreviewSource, toRatingString, toRatingValue } from "@/features/favorites/model/collection/post_table";
-import { describe, expect, test } from "vitest";
+import { FavoritesPostTable, compressPreviewSource, decompressPreviewSource, toRatingString, toRatingValue } from "@/features/favorites/model/collection/post_table";
+import { beforeEach, describe, expect, test } from "vitest";
 import { DiscreteRating } from "@/types/search";
+import { createPost } from "@/testing/post";
+
+describe("FavoritesPostTable", () => {
+  let table: FavoritesPostTable;
+
+  beforeEach(() => {
+    table = new FavoritesPostTable();
+  });
+
+  describe("write + toPost", () => {
+    test("round-trips a deleted post", () => {
+      table.write(0, createPost({ id: "1", deleted: true }));
+
+      expect(table.toPost(0, "").deleted).toBe(true);
+    });
+
+    test("round-trips a non-deleted post", () => {
+      table.write(0, createPost({ id: "1", deleted: false }));
+
+      expect(table.toPost(0, "").deleted).toBe(false);
+    });
+
+    test("falls back to an empty preview url when none was ever written", () => {
+      expect(table.toPost(0, "").previewURL).toBe("");
+    });
+  });
+
+  describe("getMetric", () => {
+    beforeEach(() => {
+      table.write(0, createPost({ id: "7", change: 123 }));
+    });
+
+    test("reads id", () => {
+      expect(table.getMetric(0, "id")).toBe(7);
+    });
+
+    test("reads lastChangedTimestamp", () => {
+      expect(table.getMetric(0, "lastChangedTimestamp")).toBe(123);
+    });
+
+    test.each(["creationTimestamp", "default", "random"] as const)("returns 0 for %s", metric => {
+      expect(table.getMetric(0, metric)).toBe(0);
+    });
+  });
+
+  describe("previewUrl", () => {
+    test("falls back to an empty preview source when none was ever written", () => {
+      expect(table.previewUrl(0)).toBe("https://wimg.rule34.xxx/thumbnails///thumbnail_undefined.jpg");
+    });
+  });
+
+  describe("trim", () => {
+    test("is a no-op when already at the requested capacity", () => {
+      table.write(0, createPost({ id: "1" }));
+
+      table.trim(1024);
+
+      expect(table.id(0)).toBe(1);
+    });
+
+    test("shrinks capacity and keeps remaining data readable", () => {
+      table.write(0, createPost({ id: "1" }));
+
+      table.trim(1);
+
+      expect(table.id(0)).toBe(1);
+    });
+  });
+});
 
 describe("compressPreviewSource", () => {
   test("normal", () => {

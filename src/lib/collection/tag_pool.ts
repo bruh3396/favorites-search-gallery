@@ -16,7 +16,7 @@ export class TagPool {
   private tagsLength = 0;
   private vocabularyLength = 0;
 
-  public store(index: number, tagString: string): void {
+  public write(index: number, tagString: string): void {
     if (this.packedIds !== null) {
       this.unpackIds();
     }
@@ -42,7 +42,7 @@ export class TagPool {
     }
   }
 
-  public load(index: number): string {
+  public read(index: number): string {
     const offset = this.offsets[index];
     const count = this.counts[index];
     const tagNames: string[] = [];

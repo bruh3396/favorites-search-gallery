@@ -3,6 +3,7 @@ import globals from "globals";
 import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
+import functional from "eslint-plugin-functional";
 
 export default defineConfig([
   {
@@ -29,6 +30,14 @@ export default defineConfig([
         project: "./tsconfig.json",
         tsconfigRootDir: import.meta.dirname
       }
+    }
+  },
+  {
+    files: ["src/**/*.ts"],
+    ignores: ["src/**/*.test.ts", "src/**/testing/**"],
+    plugins: { functional },
+    rules: {
+      "functional/no-let": ["error", { allowInFunctions: true }]
     }
   },
   {

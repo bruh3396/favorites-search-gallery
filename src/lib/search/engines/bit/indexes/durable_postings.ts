@@ -20,7 +20,7 @@ export class DurablePostings {
       } else {
         sparse.push([term, positions]);
         sparsePositions += positions.length;
-        maxPosition = Math.max(maxPosition, positions[positions.length - 1] ?? 0);
+        maxPosition = Math.max(maxPosition, positions[positions.length - 1]);
       }
     }
     this.sparsePostings.pack(sparse, sparsePositions, maxPosition);
@@ -44,14 +44,7 @@ export class DurablePostings {
     for (const [term, posting] of this.densePostings) {
       visit(term, posting.positions());
     }
-
-    for (const term of this.sparsePostings.terms()) {
-      const positions = this.sparsePostings.positionsFor(term);
-
-      if (positions !== undefined) {
-        visit(term, Array.from(positions));
-      }
-    }
+    this.sparsePostings.forEachTerm((term, positions) => visit(term, Array.from(positions)));
   }
 }
 

@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { PositionIndex } from "@/lib/search/engines/set/indexes/position_index";
 
-function docs(...names: string[]): { name: string }[] {
+function createDocs(...names: string[]): { name: string }[] {
   return names.map(name => ({ name }));
 }
 
 describe("PositionIndex", () => {
   test("positionOf reflects build order", () => {
-    const [a, b, c] = docs("a", "b", "c");
+    const [a, b, c] = createDocs("a", "b", "c");
     const index = new PositionIndex<{ name: string }>();
 
     index.build([a, b, c]);
@@ -17,7 +17,7 @@ describe("PositionIndex", () => {
   });
 
   test("positionOf returns -1 for an unknown doc", () => {
-    const [a] = docs("a");
+    const [a] = createDocs("a");
     const index = new PositionIndex<{ name: string }>();
 
     index.build([]);
@@ -25,7 +25,7 @@ describe("PositionIndex", () => {
   });
 
   test("add appends at the next position", () => {
-    const [a, b] = docs("a", "b");
+    const [a, b] = createDocs("a", "b");
     const index = new PositionIndex<{ name: string }>();
 
     index.build([a]);
@@ -34,7 +34,7 @@ describe("PositionIndex", () => {
   });
 
   test("add is a no-op for a doc already indexed", () => {
-    const [a, b] = docs("a", "b");
+    const [a, b] = createDocs("a", "b");
     const index = new PositionIndex<{ name: string }>();
 
     index.build([a, b]);
@@ -44,15 +44,23 @@ describe("PositionIndex", () => {
   });
 
   test("sort orders docs by their indexed position", () => {
-    const [a, b, c] = docs("a", "b", "c");
+    const [a, b, c] = createDocs("a", "b", "c");
     const index = new PositionIndex<{ name: string }>();
 
     index.build([a, b, c]);
     expect(index.sort([c, a, b])).toEqual([a, b, c]);
   });
 
+  test("complementOf returns the indexed docs not given, in position order", () => {
+    const [a, b, c, stranger] = createDocs("a", "b", "c", "stranger");
+    const index = new PositionIndex<{ name: string }>();
+
+    index.build([a, b, c]);
+    expect(index.complementOf([b, stranger])).toEqual([a, c]);
+  });
+
   test("build replaces any prior positions", () => {
-    const [a, b] = docs("a", "b");
+    const [a, b] = createDocs("a", "b");
     const index = new PositionIndex<{ name: string }>();
 
     index.build([a, b]);

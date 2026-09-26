@@ -7,6 +7,7 @@ export interface Favorite extends MediaItem, Searchable {
   post: Post;
   tags: Set<string>;
   isNew: boolean;
+  pixelCount: number;
   markAsNew: () => void;
   enrich: (post: Post) => void;
   setDuration: (duration: number) => void;

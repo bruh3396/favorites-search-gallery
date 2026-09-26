@@ -1,5 +1,5 @@
-import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
 import { COLUMN_SELECTOR, ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
+import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
 import { Environment } from "@/app/context/environment";
 import { div } from "@/utils/browser/element";
 import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";

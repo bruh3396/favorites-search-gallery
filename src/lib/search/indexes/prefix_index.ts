@@ -9,14 +9,8 @@ export class PrefixIndex {
     const result: string[] = [];
     const start = findFirstIndexWhere(sorted.length, index => sorted[index] >= prefix);
 
-    for (let i = start; i < sorted.length; i += 1) {
-      const key = sorted[i];
-
-      if (key.startsWith(prefix)) {
-        result.push(sorted[i]);
-      } else if (key > prefix) {
-        break;
-      }
+    for (let i = start; i < sorted.length && sorted[i].startsWith(prefix); i += 1) {
+      result.push(sorted[i]);
     }
     return result;
   }

@@ -37,32 +37,34 @@ export class MetricIndex<Doc> {
     this.built = true;
   }
 
+  public invalidate(): void {
+    this.built = false;
+  }
+
   public add(doc: Doc): void {
     if (!this.built) {
       return;
     }
 
     for (const metric of this.metrics) {
-      const entries = this.entriesByMetric.get(metric);
+      const entries = this.entriesByMetric.get(metric) as Entry<Doc>[];
+      const value = this.metricFor(doc, metric);
 
-      if (entries !== undefined) {
-        const value = this.metricFor(doc, metric);
-
-        entries.splice(this.lowerBound(entries, value), 0, { value, doc });
-      }
+      entries.splice(this.lowerBound(entries, value), 0, { value, doc });
     }
   }
 
   public remove(doc: Doc): void {
+    if (!this.built) {
+      return;
+    }
+
     for (const metric of this.metrics) {
-      const entries = this.entriesByMetric.get(metric);
+      const entries = this.entriesByMetric.get(metric) as Entry<Doc>[];
+      const index = this.indexOfDoc(entries, this.metricFor(doc, metric), doc);
 
-      if (entries !== undefined) {
-        const index = this.indexOfDoc(entries, this.metricFor(doc, metric), doc);
-
-        if (index !== -1) {
-          entries.splice(index, 1);
-        }
+      if (index !== -1) {
+        entries.splice(index, 1);
       }
     }
   }

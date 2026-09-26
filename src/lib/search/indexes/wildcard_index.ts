@@ -5,30 +5,20 @@ import { TrigramIndex } from "@/lib/search/indexes/trigram_index";
 import { compareStrings } from "@/utils/pure/string";
 
 export class WildcardIndex {
-  private readonly eager: boolean;
   private terms: SortedArray<string>;
   private prefixIndex: PrefixIndex;
-  private trigrams: TrigramIndex | null = null;
+  private trigramIndex: TrigramIndex;
 
-  constructor(terms: string[] = [], eager: boolean = false) {
-    this.eager = eager;
+  constructor(terms: string[] = []) {
     this.terms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);
     this.prefixIndex = new PrefixIndex(this.terms);
-
-    if (eager) {
-      this.trigrams = new TrigramIndex(this.terms);
-    }
-  }
-
-  private get trigramIndex(): TrigramIndex {
-    this.trigrams ??= new TrigramIndex(this.terms);
-    return this.trigrams;
+    this.trigramIndex = new TrigramIndex(this.terms);
   }
 
   public index(terms: string[]): void {
     this.terms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);
     this.prefixIndex = new PrefixIndex(this.terms);
-    this.trigrams = this.eager ? new TrigramIndex(this.terms) : null;
+    this.trigramIndex = new TrigramIndex(this.terms);
   }
 
   public matchingTerms(term: WildcardSearchTerm): string[] {
@@ -48,11 +38,11 @@ export class WildcardIndex {
 
   public add(term: string): void {
     this.terms.add(term);
-    this.trigrams?.add(term);
+    this.trigramIndex.add(term);
   }
 
   public remove(term: string): void {
     this.terms.remove(term);
-    this.trigrams?.remove(term);
+    this.trigramIndex.remove(term);
   }
 }

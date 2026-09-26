@@ -31,8 +31,8 @@ export class DocTable<Doc> {
     return this.liveCount + count < this.capacity;
   }
 
-  public allocate(): number | undefined {
-    return this.freeList.pop();
+  public allocate(count: number): number[] {
+    return this.freeList.splice(this.freeList.length - count).reverse();
   }
 
   public place(doc: Doc, position: number): void {

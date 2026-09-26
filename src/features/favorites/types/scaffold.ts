@@ -65,11 +65,3 @@ export const FavoritesHelpLinks: { label: string; href: string }[] = [
   { label: "Search Syntax", href: "https://github.com/bruh3396/favorites-search-gallery/#search-syntax" },
   { label: "Report an Issue", href: "https://github.com/bruh3396/favorites-search-gallery/issues" }
 ];
-
-export function favoritesDrawerSidebarIconId(view: FavoritesDrawerView): string {
-  return `${FavoritesClass.drawerSidebarIcon}-${view}`;
-}
-
-export function favoritesDrawerViewId(view: FavoritesDrawerView): string {
-  return `${FavoritesClass.drawerView}-${view}`;
-}

@@ -4,12 +4,12 @@ export class PostList {
   public thumbs: HTMLElement[];
   public paginator: HTMLElement | null;
   public ids: Set<string>;
-  public pageNumber: number;
+  public pageIndex: number;
 
-  constructor(pageNumber: number, thumbs: HTMLElement[], paginator: HTMLElement | null) {
+  constructor(pageIndex: number, thumbs: HTMLElement[], paginator: HTMLElement | null) {
     this.thumbs = thumbs;
     this.paginator = paginator;
-    this.pageNumber = pageNumber;
+    this.pageIndex = pageIndex;
     this.ids = new Set(this.thumbs.map(thumb => thumb.id));
   }
 
@@ -18,7 +18,7 @@ export class PostList {
   }
 
   public get isFirst(): boolean {
-    return this.pageNumber === 0;
+    return this.pageIndex === 0;
   }
 
   public get isLast(): boolean {

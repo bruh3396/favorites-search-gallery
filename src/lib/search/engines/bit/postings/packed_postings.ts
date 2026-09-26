@@ -32,10 +32,16 @@ export class PackedPostings {
 
   public positionsFor(term: string): PositionArray | undefined {
     const slot = this.slotByTerm.get(term);
+    return slot === undefined ? undefined : this.positionsAt(slot);
+  }
 
-    if (slot === undefined) {
-      return undefined;
+  public forEachTerm(visit: (term: string, positions: PositionArray) => void): void {
+    for (const [term, slot] of this.slotByTerm) {
+      visit(term, this.positionsAt(slot));
     }
+  }
+
+  private positionsAt(slot: number): PositionArray {
     return this.positions.subarray(this.offsets[slot], this.offsets[slot + 1]);
   }
 }

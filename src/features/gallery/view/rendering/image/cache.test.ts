@@ -2,7 +2,7 @@ import { Mock, beforeEach, describe, expect, test, vi } from "vitest";
 import { GalleryImageCache } from "@/features/gallery/view/rendering/image/cache";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 
-function request(id: string): ImageRequest {
+function createRequest(id: string): ImageRequest {
   return { id, dispose: vi.fn(), cancel: vi.fn() } as Partial<ImageRequest> as ImageRequest;
 }
 
@@ -17,14 +17,14 @@ describe("GalleryImageCache", () => {
 
   describe("sync", () => {
     test("returns every request the first time they are seen", () => {
-      const requests = [request("0"), request("1")];
+      const requests = [createRequest("0"), createRequest("1")];
 
       expect(cache.sync(requests)).toEqual(requests);
     });
 
     test("returns only unseen requests on a subsequent sync", () => {
-      const first = request("0");
-      const second = request("1");
+      const first = createRequest("0");
+      const second = createRequest("1");
 
       cache.sync([first]);
 
@@ -32,7 +32,7 @@ describe("GalleryImageCache", () => {
     });
 
     test("evicts and releases a request no longer in the current set", () => {
-      const stale = request("0");
+      const stale = createRequest("0");
 
       cache.sync([stale]);
       cache.sync([]);
@@ -44,8 +44,8 @@ describe("GalleryImageCache", () => {
     });
 
     test("evicts only the stale requests while keeping the ones still present", () => {
-      const kept = [request("0"), request("1")];
-      const stale = [request("2"), request("3")];
+      const kept = [createRequest("0"), createRequest("1")];
+      const stale = [createRequest("2"), createRequest("3")];
 
       cache.sync([...kept, ...stale]);
       cache.sync(kept);
@@ -69,7 +69,7 @@ describe("GalleryImageCache", () => {
 
   describe("storeAsLowResolution", () => {
     test("stores the request retrievable with a low-resolution status", () => {
-      const request0 = request("0");
+      const request0 = createRequest("0");
 
       cache.storeAsLowResolution(request0);
 
@@ -77,8 +77,8 @@ describe("GalleryImageCache", () => {
     });
 
     test("overwrites an existing entry for the same id", () => {
-      const first = request("0");
-      const replacement = request("0");
+      const first = createRequest("0");
+      const replacement = createRequest("0");
 
       cache.storeAsComplete(first);
       cache.storeAsLowResolution(replacement);
@@ -89,7 +89,7 @@ describe("GalleryImageCache", () => {
 
   describe("storeAsComplete", () => {
     test("stores the request retrievable with a complete status", () => {
-      const request0 = request("0");
+      const request0 = createRequest("0");
 
       cache.storeAsComplete(request0);
 
@@ -97,8 +97,8 @@ describe("GalleryImageCache", () => {
     });
 
     test("overwrites an existing entry for the same id", () => {
-      const first = request("0");
-      const replacement = request("0");
+      const first = createRequest("0");
+      const replacement = createRequest("0");
 
       cache.storeAsLowResolution(first);
       cache.storeAsComplete(replacement);
@@ -113,7 +113,7 @@ describe("GalleryImageCache", () => {
     });
 
     test("returns the stored entry while leaving other ids undefined", () => {
-      const request0 = request("0");
+      const request0 = createRequest("0");
 
       cache.storeAsLowResolution(request0);
 
@@ -128,8 +128,8 @@ describe("GalleryImageCache", () => {
     });
 
     test("returns only requests stored as complete", () => {
-      const lowRes = request("0");
-      const complete = request("1");
+      const lowRes = createRequest("0");
+      const complete = createRequest("1");
 
       cache.storeAsLowResolution(lowRes);
       cache.storeAsComplete(complete);
@@ -138,7 +138,7 @@ describe("GalleryImageCache", () => {
     });
 
     test("includes a request once it transitions from low-resolution to complete", () => {
-      const request0 = request("0");
+      const request0 = createRequest("0");
 
       cache.storeAsLowResolution(request0);
       expect(cache.completedRequests()).toEqual([]);

@@ -29,7 +29,6 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
     this.regex = regex;
     this.prefix = value.slice(0, -1);
     this.substring = value.slice(1, -1);
-    this.optimize();
   }
 
   public get resolutionInputs(): WildcardResolutionInputs {
@@ -60,11 +59,6 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
       case WildcardMatchType.Substring: return this.substring;
       default: return "";
     }
-  }
-
-  private optimize(): void {
-    this.matchesPositive = this.matchType === WildcardMatchType.Prefix ? this.matchesPrefix : this.matchType === WildcardMatchType.Substring ? this.matchesSubstring : this.matchesRegex;
-    this.matches = this.isNegated ? this.matchesNegated : this.matchesPositive;
   }
 
   private matchesPrefix(item: Searchable): boolean {

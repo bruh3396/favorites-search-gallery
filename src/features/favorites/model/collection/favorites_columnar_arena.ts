@@ -1,17 +1,21 @@
 import { MediaExtension, MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
-import { FavoritesArena } from "@/features/favorites/types/types";
+import { Arena } from "@/features/favorites/types/types";
 import { FavoritesPostTable } from "@/features/favorites/model/collection/post_table";
 import { Post } from "@/types/api";
 import { TagPool } from "@/lib/collection/tag_pool";
 import { resolveMediaType } from "@/lib/media/media_type";
 import { toTagSet } from "@/utils/pure/tag";
 
-export class FavoritesColumnarArena implements FavoritesArena {
+export class FavoritesColumnarArena implements Arena {
   public favoriteCount = 0;
   private readonly postTable = new FavoritesPostTable();
   private readonly tagPool = new TagPool();
   private readonly tagSets = new Map<number, Set<string>>();
+
+  public get isEmpty(): boolean {
+    return this.favoriteCount === 0;
+  }
 
   public allocate(): number {
     const index = this.favoriteCount;
@@ -24,7 +28,7 @@ export class FavoritesColumnarArena implements FavoritesArena {
 
   public write(index: number, post: Post): void {
     this.postTable.write(index, post);
-    this.tagPool.store(index, post.tags);
+    this.tagPool.write(index, post.tags);
   }
 
   public compress(): void {
@@ -70,7 +74,7 @@ export class FavoritesColumnarArena implements FavoritesArena {
   }
 
   public tagSet(index: number): Set<string> {
-    return this.tagSets.get(index) ?? toTagSet(this.tagPool.load(index));
+    return this.tagSets.get(index) ?? toTagSet(this.tagPool.read(index));
   }
 
   public consumeTagSet(index: number): Set<string> {
@@ -85,6 +89,6 @@ export class FavoritesColumnarArena implements FavoritesArena {
   }
 
   public toPost(index: number): Post {
-    return this.postTable.toPost(index, this.tagPool.load(index));
+    return this.postTable.toPost(index, this.tagPool.read(index));
   }
 }

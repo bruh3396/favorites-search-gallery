@@ -71,4 +71,23 @@ describe("TrigramIndex mutation", () => {
     index.remove("banana");
     expect(index.termsMatching("ana")).not.toContain("banana");
   });
+
+  test("removing a term's last trigram occurrence makes the trigram unmatched", () => {
+    const index = new TrigramIndex(new SortedArray<string>((a, b) => compareStrings(a, b), ["kiwi"]));
+
+    index.remove("kiwi");
+    expectSameTerms(index.termsMatching("kiwi"), []);
+  });
+
+  test("removing an unindexed term changes nothing", () => {
+    const index = new TrigramIndex(sortedTerms);
+
+    index.remove("zzzz");
+    index.remove("bananas");
+    expect(index.termsMatching("ana")).toContain("banana");
+  });
+
+  test("a fragment whose trigrams exist but never co-occur yields nothing", () => {
+    expectSameTerms(new TrigramIndex(sortedTerms).termsMatching("banvas"), []);
+  });
 });

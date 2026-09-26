@@ -1,5 +1,5 @@
 import { Post } from "@/types/api";
-import { thumbToPost } from "@/features/favorites/types/thumb_to_post";
+import { thumbToPost } from "@/lib/remote/parsers/thumb_parser";
 
 export function removeOriginalUnusedScripts(): void {
   for (const script of document.querySelectorAll("script")) {

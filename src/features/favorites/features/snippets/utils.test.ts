@@ -2,7 +2,7 @@ import { buildIdQuery, failureText, filterSnippets, normalizeName, sortByNewest 
 import { describe, expect, test } from "vitest";
 import { Snippet } from "@/features/favorites/features/snippets/types";
 
-const snippet = (name: string, query: string, lastUsedAt: number = 0, createdAt: number = 0): Snippet => ({ name, query, lastUsedAt, createdAt });
+const createSnippet = (name: string, query: string, lastUsedAt: number = 0, createdAt: number = 0): Snippet => ({ name, query, lastUsedAt, createdAt });
 const namesOf = (snippets: Snippet[]): string[] => snippets.map(entry => entry.name);
 
 describe("buildIdQuery", () => {
@@ -39,19 +39,19 @@ describe("normalizeName", () => {
 
 describe("sortByNewest", () => {
   test("puts the most recently created first", () => {
-    const snippets = [snippet("a", "1", 0, 100), snippet("b", "2", 0, 300), snippet("c", "3", 0, 200)];
+    const snippets = [createSnippet("a", "1", 0, 100), createSnippet("b", "2", 0, 300), createSnippet("c", "3", 0, 200)];
 
     expect(namesOf(sortByNewest(snippets))).toEqual(["b", "c", "a"]);
   });
 
   test("ignores when a snippet was last used", () => {
-    const snippets = [snippet("older", "1", 999, 100), snippet("newer", "2", 0, 200)];
+    const snippets = [createSnippet("older", "1", 999, 100), createSnippet("newer", "2", 0, 200)];
 
     expect(namesOf(sortByNewest(snippets))).toEqual(["newer", "older"]);
   });
 
   test("does not modify the given array", () => {
-    const snippets = [snippet("a", "1", 0, 100), snippet("b", "2", 0, 300)];
+    const snippets = [createSnippet("a", "1", 0, 100), createSnippet("b", "2", 0, 300)];
 
     sortByNewest(snippets);
     expect(namesOf(snippets)).toEqual(["a", "b"]);
@@ -63,7 +63,7 @@ describe("sortByNewest", () => {
 });
 
 describe("filterSnippets", () => {
-  const snippets = [snippet("fruits", "( apple ~ banana )"), snippet("veg", "carrot"), snippet("boys", "male* solo")];
+  const snippets = [createSnippet("fruits", "( apple ~ banana )"), createSnippet("veg", "carrot"), createSnippet("boys", "male* solo")];
 
   test("returns everything when the text is empty", () => {
     expect(namesOf(filterSnippets(snippets, ""))).toEqual(["fruits", "veg", "boys"]);
@@ -90,7 +90,7 @@ describe("filterSnippets", () => {
   });
 
   test("returns every match", () => {
-    expect(namesOf(filterSnippets([snippet("a", "apple"), snippet("apple", "b")], "apple"))).toEqual(["a", "apple"]);
+    expect(namesOf(filterSnippets([createSnippet("a", "apple"), createSnippet("apple", "b")], "apple"))).toEqual(["a", "apple"]);
   });
 
   test("ignores a leading slash", () => {

@@ -4,17 +4,14 @@ import { DurablePostings } from "@/lib/search/engines/bit/indexes/durable_postin
 
 export class DraftPostings {
   private positionsByTerm = new Map<string, number[]>();
-  private stale = false;
 
   public reset(): void {
     this.positionsByTerm = new Map<string, number[]>();
-    this.stale = true;
   }
 
-  public ensureFresh(source: DurablePostings): void {
-    if (this.stale) {
-      this.hydrateFrom(source);
-    }
+  public hydrateFrom(source: DurablePostings): void {
+    this.reset();
+    source.forEachPosting((term, positions) => this.positionsByTerm.set(term, positions));
   }
 
   public entries(): IterableIterator<[string, number[]]> {
@@ -22,7 +19,6 @@ export class DraftPostings {
   }
 
   public add(term: string, position: number): boolean {
-    this.stale = false;
     const positions = this.positionsByTerm.get(term);
 
     if (positions === undefined) {
@@ -47,12 +43,6 @@ export class DraftPostings {
     const added = [...touched].filter(term => this.positionsByTerm.has(term) && !preexisting.has(term));
     const removed = [...preexisting].filter(term => !this.positionsByTerm.has(term));
     return { added, removed };
-  }
-
-  private hydrateFrom(source: DurablePostings): void {
-    this.reset();
-    source.forEachPosting((term, positions) => this.positionsByTerm.set(term, positions));
-    this.stale = false;
   }
 
   private rePoint(position: number, removedTerms: ReadonlySet<string>, addedTerms: ReadonlySet<string>): void {

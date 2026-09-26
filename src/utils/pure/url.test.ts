@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { isUrl, readQueryParam, withHostname, withNoQueryParams, withoutQueryParam } from "@/utils/pure/url";
+import { hasQueryParams, isUrl, readQueryParam, withHostname, withNoQueryParams, withoutQueryParam } from "@/utils/pure/url";
 
 describe("isUrl", () => {
   test("https url", () => {
@@ -60,6 +60,30 @@ describe("readQueryParam", () => {
 
   test("decodes percent-encoded value", () => {
     expect(readQueryParam("https://x.com?q=a%20b", "q")).toBe("a b");
+  });
+});
+
+describe("hasQueryParams", () => {
+  const url = "https://rule34.xxx/index.php?page=favorites&s=view&id=12345";
+
+  test("all params match", () => {
+    expect(hasQueryParams(url, { page: "favorites", s: "view" })).toBe(true);
+  });
+
+  test("one param has a different value", () => {
+    expect(hasQueryParams(url, { page: "favorites", s: "list" })).toBe(false);
+  });
+
+  test("one param is missing", () => {
+    expect(hasQueryParams(url, { page: "favorites", tags: "all" })).toBe(false);
+  });
+
+  test("empty params always match", () => {
+    expect(hasQueryParams("https://x.com", {})).toBe(true);
+  });
+
+  test("compares decoded values", () => {
+    expect(hasQueryParams("https://x.com?q=a%20b", { q: "a b" })).toBe(true);
   });
 });
 

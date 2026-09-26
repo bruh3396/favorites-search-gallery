@@ -3,6 +3,7 @@ src/playground/
 build/bin
 node_modules
 dist
+coverage
 .*/
 *.md
 !README.md

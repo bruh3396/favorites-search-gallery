@@ -9,11 +9,11 @@ import { WildcardPostingResolver } from "@/lib/search/engines/bit/resolution/wil
 
 interface Item extends Searchable { id: string }
 
-function item(id: string, ...tags: string[]): Item {
+function createItem(id: string, ...tags: string[]): Item {
   return { id, tags: new Set(tags) };
 }
 
-function evaluatorFor(items: Item[]): BitEvaluator<Item> {
+function createEvaluator(items: Item[]): BitEvaluator<Item> {
   const bitIndex = new BitIndex<Item>(doc => doc.tags);
 
   bitIndex.build(items);
@@ -28,15 +28,15 @@ function evaluatorFor(items: Item[]): BitEvaluator<Item> {
 }
 
 const corpus: Item[] = [
-  item("1", "red", "sweet", "small"),
-  item("2", "red", "sour", "big"),
-  item("3", "green", "sweet", "big"),
-  item("4", "green", "sour", "small"),
-  item("5", "blue", "sweet", "small")
+  createItem("1", "red", "sweet", "small"),
+  createItem("2", "red", "sour", "big"),
+  createItem("3", "green", "sweet", "big"),
+  createItem("4", "green", "sour", "small"),
+  createItem("5", "blue", "sweet", "small")
 ];
 
 function idsFor(query: string): string[] {
-  return evaluatorFor(corpus).evaluate(parseSearchExpression(query)).map(doc => doc.id).sort();
+  return createEvaluator(corpus).evaluate(parseSearchExpression(query)).map(doc => doc.id).sort();
 }
 
 describe("parseSearchExpression top-level AND", () => {
@@ -58,8 +58,8 @@ describe("parseSearchExpression top-level AND", () => {
   });
 
   test("preserves a literal glued-parenthesis term", () => {
-    const items = [item("a", "apple_(red)"), item("b", "banana")];
-    const evaluator = evaluatorFor(items);
+    const items = [createItem("a", "apple_(red)"), createItem("b", "banana")];
+    const evaluator = createEvaluator(items);
 
     expect(evaluator.evaluate(parseSearchExpression("apple_(red)")).map(d => d.id)).toEqual(["a"]);
   });

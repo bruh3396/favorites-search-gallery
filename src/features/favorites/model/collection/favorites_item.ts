@@ -1,14 +1,14 @@
 import { MediaExtension, MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
+import { Arena } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { FavoritesArena } from "@/features/favorites/types/types";
 import { Post } from "@/types/api";
 
 export class FavoritesItem implements Favorite {
-  private readonly arena: FavoritesArena;
+  private readonly arena: Arena;
   private readonly index: number;
 
-  constructor(post: Post, arena: FavoritesArena, tagsAreClean: boolean) {
+  constructor(post: Post, arena: Arena, tagsAreClean: boolean) {
     this.arena = arena;
     this.index = arena.allocate();
     this.enrich(post);
@@ -48,6 +48,10 @@ export class FavoritesItem implements Favorite {
 
   public get thumbUrl(): string {
     return this.arena.previewUrl(this.index);
+  }
+
+  public get pixelCount(): number {
+    return this.getMetric("width") * this.getMetric("height");
   }
 
   public consumeTags(): Set<string> {

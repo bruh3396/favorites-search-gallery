@@ -3,7 +3,20 @@ import { macroTask } from "@/lib/async/scheduling";
 
 class LockedDatabaseError extends Error { }
 
-export class Database<V extends Identifiable> {
+export interface DatabaseLike<V extends Identifiable> {
+  exists: () => Promise<boolean>;
+  readAll: () => Promise<V[]>;
+  readAllStreamed: (onBatch: (records: V[]) => void, batchSize?: number) => Promise<void>;
+  readMany: (ids: string[]) => Promise<V[]>;
+  readAllIds: () => Promise<string[]>;
+  write: (records: V[]) => Promise<void>;
+  update: (records: V[]) => Promise<void>;
+  delete: (ids: string[]) => Promise<void>;
+  count: () => Promise<number>;
+  destroy: () => Promise<void>;
+}
+
+export class Database<V extends Identifiable> implements DatabaseLike<V> {
   protected readonly name: string;
   protected readonly defaultObjectStoreName: string;
   protected version: number;

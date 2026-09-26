@@ -6,11 +6,11 @@ interface Doc {
   tags: string[];
 }
 
-function doc(id: string, ...tags: string[]): Doc {
+function createDoc(id: string, ...tags: string[]): Doc {
   return { id, tags };
 }
 
-function index(docs: Doc[]): BitIndex<Doc> {
+function createIndex(docs: Doc[]): BitIndex<Doc> {
   const bitIndex = new BitIndex<Doc>(d => d.tags);
 
   bitIndex.build(docs);
@@ -26,38 +26,38 @@ function countForTerm(bitIndex: BitIndex<Doc>, term: string): number {
   return bitIndex.postingFor(term)?.cardinality ?? 0;
 }
 
-const apple = doc("apple", "red", "fruit", "sweet");
-const cherry = doc("cherry", "red", "fruit");
-const lemon = doc("lemon", "yellow", "fruit", "sour");
+const apple = createDoc("apple", "red", "fruit", "sweet");
+const cherry = createDoc("cherry", "red", "fruit");
+const lemon = createDoc("lemon", "yellow", "fruit", "sour");
 const corpus = [apple, cherry, lemon];
 
 describe("BitIndex", () => {
   test("reports the corpus size", () => {
-    expect(index(corpus).size).toBe(3);
+    expect(createIndex(corpus).size).toBe(3);
   });
 
   test("lists every indexed term", () => {
-    expect(index(corpus).indexedTerms().sort()).toEqual(["fruit", "red", "sour", "sweet", "yellow"]);
+    expect(createIndex(corpus).indexedTerms().sort()).toEqual(["fruit", "red", "sour", "sweet", "yellow"]);
   });
 
   test("resolves a term to the docs carrying it", () => {
-    expect(docsForTerm(index(corpus), "red")).toEqual([apple, cherry]);
+    expect(docsForTerm(createIndex(corpus), "red")).toEqual([apple, cherry]);
   });
 
   test("resolves a term shared by all docs", () => {
-    expect(docsForTerm(index(corpus), "fruit")).toEqual([apple, cherry, lemon]);
+    expect(docsForTerm(createIndex(corpus), "fruit")).toEqual([apple, cherry, lemon]);
   });
 
   test("returns undefined for an unknown term", () => {
-    expect(index(corpus).postingFor("purple")).toBeUndefined();
+    expect(createIndex(corpus).postingFor("purple")).toBeUndefined();
   });
 
   test("preserves corpus order when materializing", () => {
-    expect(docsForTerm(index(corpus), "fruit").map(d => d.id)).toEqual(["apple", "cherry", "lemon"]);
+    expect(docsForTerm(createIndex(corpus), "fruit").map(d => d.id)).toEqual(["apple", "cherry", "lemon"]);
   });
 
   test("reports each term's doc count", () => {
-    const bitIndex = index(corpus);
+    const bitIndex = createIndex(corpus);
 
     expect(countForTerm(bitIndex, "fruit")).toBe(3);
     expect(countForTerm(bitIndex, "red")).toBe(2);
@@ -65,20 +65,20 @@ describe("BitIndex", () => {
   });
 
   test("everything() matches the whole corpus", () => {
-    const bitIndex = index(corpus);
+    const bitIndex = createIndex(corpus);
 
     expect(bitIndex.docsFrom(bitIndex.universe())).toEqual(corpus);
   });
 
   test("emptyBitSet() matches nothing", () => {
-    const bitIndex = index(corpus);
+    const bitIndex = createIndex(corpus);
 
     expect(bitIndex.docsFrom(bitIndex.empty())).toEqual([]);
   });
 
   test("handles a corpus larger than one word (word-boundary positions)", () => {
-    const many = Array.from({ length: 100 }, (_, i) => doc(`d${i}`, i % 2 === 0 ? "even" : "odd", "all"));
-    const bitIndex = index(many);
+    const many = Array.from({ length: 100 }, (_, i) => createDoc(`d${i}`, i % 2 === 0 ? "even" : "odd", "all"));
+    const bitIndex = createIndex(many);
 
     expect(bitIndex.size).toBe(100);
     expect(docsForTerm(bitIndex, "even").length).toBe(50);
@@ -96,7 +96,7 @@ describe("BitIndex", () => {
   });
 
   test("handles an empty corpus", () => {
-    const bitIndex = index([]);
+    const bitIndex = createIndex([]);
 
     expect(bitIndex.size).toBe(0);
     expect(bitIndex.indexedTerms()).toEqual([]);
@@ -105,8 +105,8 @@ describe("BitIndex", () => {
 
   describe("dense vs sparse postings", () => {
     test("resolves a frequent (dense) term and a rare (sparse) term identically", () => {
-      const wide = Array.from({ length: 1000 }, (_, i) => doc(`d${i}`, "common", i === 500 ? "unique" : "other"));
-      const bitIndex = index(wide);
+      const wide = Array.from({ length: 1000 }, (_, i) => createDoc(`d${i}`, "common", i === 500 ? "unique" : "other"));
+      const bitIndex = createIndex(wide);
 
       expect(countForTerm(bitIndex, "common")).toBe(1000);
       expect(countForTerm(bitIndex, "unique")).toBe(1);
@@ -115,7 +115,7 @@ describe("BitIndex", () => {
     });
 
     test("a singleton term resolves to its single doc", () => {
-      expect(docsForTerm(index(corpus), "sweet")).toEqual([apple]);
+      expect(docsForTerm(createIndex(corpus), "sweet")).toEqual([apple]);
     });
   });
 
@@ -125,13 +125,13 @@ describe("BitIndex", () => {
     }
 
     test("unions the docs of several postings", () => {
-      const bitIndex = index(corpus);
+      const bitIndex = createIndex(corpus);
 
       expect(bitIndex.docsFrom(bitIndex.unionOf(postingsFor(bitIndex, "sweet", "sour")))).toEqual([apple, lemon]);
     });
 
     test("is empty for no postings", () => {
-      const bitIndex = index(corpus);
+      const bitIndex = createIndex(corpus);
 
       expect(bitIndex.docsFrom(bitIndex.unionOf([]))).toEqual([]);
     });

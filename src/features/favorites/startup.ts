@@ -153,7 +153,7 @@ function serveFavoritesPageRequests({ context, model, view, flows }: FavoritesCo
   featureBridge.favorites.toolbar.serve(() => view.getToolbar());
   featureBridge.favorites.usingInfiniteScroll.serve(() => preferences.favorites.infiniteScroll.value);
   featureBridge.favorites.layout.serve(() => view.getLayout());
-  featureBridge.favorites.pixelCount.serve((id) => model.getPixelCount(id));
+  featureBridge.favorites.favorite.serve((id) => model.getFavorite(id));
 }
 
 function servePostListRequests(context: AppContext, model: FavoritesModel): void {

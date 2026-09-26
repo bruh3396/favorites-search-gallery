@@ -1,8 +1,8 @@
 import { ContentDisplayOptions } from "@/types/ui";
+import { Display } from "@/features/favorites/types/types";
 import { Events } from "@/app/context/events";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { NavigationKey } from "@/types/input";
@@ -11,7 +11,7 @@ import { preloadImage } from "@/utils/browser/image";
 import { sleep } from "@/lib/async/scheduling";
 import { throttle } from "@/lib/async/rate_limiting";
 
-export class FavoritesPaginatedDisplay implements FavoritesDisplay {
+export class FavoritesPaginatedDisplay implements Display {
   private hasAppendedFirstResults = false;
 
   private preloadImages = throttle(async(urls: string[]) => {

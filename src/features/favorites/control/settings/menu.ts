@@ -18,18 +18,6 @@ export function buildSettingsSections(catalog: SettingsCatalog, environment: Env
       ]
     },
     {
-      title: "Interaction",
-      controls: onMobile ? [
-        catalog.postActionBarToggle,
-        catalog.postActionBarButtons
-      ] : [
-        catalog.postActionBar,
-        catalog.postActionBarButtons,
-        catalog.postOverlay,
-        catalog.tooltip
-      ]
-    },
-    {
       title: "Appearance",
       controls: onMobile ? [
         catalog.theme,
@@ -40,8 +28,20 @@ export function buildSettingsSections(catalog: SettingsCatalog, environment: Env
         catalog.theme,
         catalog.darkMode,
         catalog.header,
-        catalog.upscale
-        // catalog.upscaleQuality
+        catalog.upscale,
+        catalog.upscaleQuality
+      ]
+    },
+    {
+      title: "Interaction",
+      controls: onMobile ? [
+        catalog.postActionBarToggle,
+        catalog.postActionBarButtons
+      ] : [
+        catalog.postActionBar,
+        catalog.postActionBarButtons,
+        catalog.postOverlay,
+        catalog.tooltip
       ]
     },
     {

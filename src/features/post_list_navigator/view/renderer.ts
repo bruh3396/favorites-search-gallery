@@ -1,6 +1,6 @@
 import { ContentTiler } from "@/app/layout/content_tiler";
-import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
+import { postListPageOffset } from "@/lib/remote/pagination";
 
 export function render(contentTiler: ContentTiler, postList: PostList): void {
   contentTiler.tile(postList.thumbs);
@@ -23,7 +23,7 @@ function updatePaginator(postList: PostList): void {
 
 function updateAddressBar(postList: PostList): void {
   const baseUrl = location.origin + location.pathname;
-  const searchFragment = `${location.search.replace(/&pid=\d+/g, "")}&pid=${postList.pageNumber * POSTS_PER_POST_LIST_PAGE}`;
+  const searchFragment = `${location.search.replace(/&pid=\d+/g, "")}&pid=${postListPageOffset(postList.pageIndex)}`;
 
   window.history.replaceState(null, "", baseUrl + searchFragment);
 }

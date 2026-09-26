@@ -259,7 +259,8 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "sort-ascending",
       label: "Sort Ascending",
       tooltip: "Sort search results in ascending order",
-      preference: preferences.favorites.sortAscending
+      preference: preferences.favorites.sortAscending,
+      enabledWhen: whenNotSortByRandom(preferences)
     }, events),
     resultsPerPage: stepper({
       id: "results-per-page",
@@ -338,6 +339,10 @@ function whenNotFullscreenOnHover(preferences: Preferences): EnableRule {
 
 function whenUpscaling(preferences: Preferences): EnableRule {
   return enableWhen(preferences.favorites.upscaleThumbs, (on) => on);
+}
+
+function whenNotSortByRandom(preferences: Preferences): EnableRule {
+  return enableWhen(preferences.favorites.sortKey, (key) => key !== "random");
 }
 
 function applyCurrentTheme(preferences: Preferences): void {

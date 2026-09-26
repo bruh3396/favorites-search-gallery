@@ -1,12 +1,12 @@
 import { ContentDisplayOptions } from "@/types/ui";
+import { Display } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoritesBottomEdgeObserver } from "@/features/favorites/flows/display/edge_observer";
 import { FavoritesConfig } from "@/config/favorites_config";
-import { FavoritesDisplay } from "@/features/favorites/types/types";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Shell } from "@/app/context/shell";
 
-export class FavoritesInfiniteDisplay implements FavoritesDisplay {
+export class FavoritesInfiniteDisplay implements Display {
   private readonly bottomObserver: FavoritesBottomEdgeObserver;
   private favorites: Favorite[] = [];
   private displayedCount = 0;

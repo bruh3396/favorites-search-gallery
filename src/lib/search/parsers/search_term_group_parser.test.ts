@@ -8,11 +8,11 @@ function serializeQuery(query: string): string {
   return JSON.stringify({ orGroups: searchQuery.orGroups, andTerms: searchQuery.andTerms });
 }
 
-function testEquality(query1: string, query2: string): void {
+function expectEquivalent(query1: string, query2: string): void {
   expect(serializeQuery(query1)).toBe(serializeQuery(query2));
 }
 
-function testInequality(query1: string, query2: string): void {
+function expectNotEquivalent(query1: string, query2: string): void {
   expect(serializeQuery(query1)).not.toBe(serializeQuery(query2));
 }
 
@@ -43,28 +43,28 @@ describe("normalizeSearchQuery", () => {
   }
 
   test("dedupes and terms by literal", () => {
-    expect(normalize(["cat", "cat", "dog"], [])).toEqual({ andTerms: ["cat", "dog"], orGroups: [] });
+    expect(normalize(["apple", "apple", "banana"], [])).toEqual({ andTerms: ["apple", "banana"], orGroups: [] });
   });
 
   test("keeps a term distinct from its negation", () => {
-    expect(normalize(["cat", "-cat"], [])).toEqual({ andTerms: ["cat", "-cat"], orGroups: [] });
+    expect(normalize(["apple", "-apple"], [])).toEqual({ andTerms: ["apple", "-apple"], orGroups: [] });
   });
 
   test("dedupes terms within an or group", () => {
-    expect(normalize([], [["cat", "cat", "dog"]])).toEqual({ andTerms: [], orGroups: [["cat", "dog"]] });
+    expect(normalize([], [["apple", "apple", "banana"]])).toEqual({ andTerms: [], orGroups: [["apple", "banana"]] });
   });
 
   test("an or group that dedupes down to one term flattens to an and term", () => {
-    expect(normalize([], [["cat", "cat"]])).toEqual({ andTerms: ["cat"], orGroups: [] });
+    expect(normalize([], [["apple", "apple"]])).toEqual({ andTerms: ["apple"], orGroups: [] });
   });
 
   test("flattens a singleton or group into and terms", () => {
-    expect(normalize(["dog"], [["cat"]])).toEqual({ andTerms: ["dog", "cat"], orGroups: [] });
+    expect(normalize(["banana"], [["apple"]])).toEqual({ andTerms: ["banana", "apple"], orGroups: [] });
   });
 });
 
 describe("parseTermGroups", () => {
-  function testTermGroups(input: string, expectedOrGroups: string[][], expectedAndTerms: string[]): void {
+  function expectTermGroups(input: string, expectedOrGroups: string[][], expectedAndTerms: string[]): void {
     const result = parseTermGroups(input);
 
     expect(result.orGroups).toStrictEqual(expectedOrGroups);
@@ -72,92 +72,92 @@ describe("parseTermGroups", () => {
   }
 
   test("empty", () => {
-    testTermGroups("", [], []);
-    testTermGroups(" ", [], []);
-    testTermGroups("\n", [], []);
-    testTermGroups("\t", [], []);
+    expectTermGroups("", [], []);
+    expectTermGroups(" ", [], []);
+    expectTermGroups("\n", [], []);
+    expectTermGroups("\t", [], []);
   });
 
   test("only and terms", () => {
-    testTermGroups("grape", [], ["grape"]);
-    testTermGroups("cherry banana", [], ["cherry", "banana"]);
-    testTermGroups("apple orange", [], ["apple", "orange"]);
-    testTermGroups("apple orange grape", [], ["apple", "orange", "grape"]);
+    expectTermGroups("grape", [], ["grape"]);
+    expectTermGroups("cherry banana", [], ["cherry", "banana"]);
+    expectTermGroups("apple orange", [], ["apple", "orange"]);
+    expectTermGroups("apple orange grape", [], ["apple", "orange", "grape"]);
   });
 
   test("parenthesis", () => {
-    testTermGroups("apple_(red)", [], ["apple_(red)"]);
-    testTermGroups("apple_(red) banana", [], ["apple_(red)", "banana"]);
-    testTermGroups("apple_(red) banana_(yellow)", [], ["apple_(red)", "banana_(yellow)"]);
-    testTermGroups("apple_(red) banana_(yellow) grape", [], ["apple_(red)", "banana_(yellow)", "grape"]);
+    expectTermGroups("apple_(red)", [], ["apple_(red)"]);
+    expectTermGroups("apple_(red) banana", [], ["apple_(red)", "banana"]);
+    expectTermGroups("apple_(red) banana_(yellow)", [], ["apple_(red)", "banana_(yellow)"]);
+    expectTermGroups("apple_(red) banana_(yellow) grape", [], ["apple_(red)", "banana_(yellow)", "grape"]);
   });
 
   test("only groups", () => {
-    testTermGroups("( apple )", [["apple"]], []);
-    testTermGroups("( apple ) ( banana )", [["apple"], ["banana"]], []);
-    testTermGroups("( -apple ) ( banana ) ( -grape )", [["-apple"], ["banana"], ["-grape"]], []);
-    testTermGroups("( apple ~ banana )", [["apple", "banana"]], []);
+    expectTermGroups("( apple )", [["apple"]], []);
+    expectTermGroups("( apple ) ( banana )", [["apple"], ["banana"]], []);
+    expectTermGroups("( -apple ) ( banana ) ( -grape )", [["-apple"], ["banana"], ["-grape"]], []);
+    expectTermGroups("( apple ~ banana )", [["apple", "banana"]], []);
   });
 
   test("only invalid groups", () => {
-    testTermGroups("(apple )", [], ["(apple", ")"]);
-    testTermGroups("( apple", [], ["(", "apple"]);
-    testTermGroups("apple )", [], ["apple", ")"]);
-    testTermGroups("apple (", [], ["apple", "("]);
-    testTermGroups("(apple)", [], ["(apple)"]);
+    expectTermGroups("(apple )", [], ["(apple", ")"]);
+    expectTermGroups("( apple", [], ["(", "apple"]);
+    expectTermGroups("apple )", [], ["apple", ")"]);
+    expectTermGroups("apple (", [], ["apple", "("]);
+    expectTermGroups("(apple)", [], ["(apple)"]);
   });
 
   test("both groups", () => {
-    testTermGroups("apple ( banana )", [["banana"]], ["apple"]);
-    testTermGroups("apple ( banana ) grape", [["banana"]], ["apple", "grape"]);
-    testTermGroups("apple ( banana ) grape ( orange )", [["banana"], ["orange"]], ["apple", "grape"]);
-    testTermGroups("apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
+    expectTermGroups("apple ( banana )", [["banana"]], ["apple"]);
+    expectTermGroups("apple ( banana ) grape", [["banana"]], ["apple", "grape"]);
+    expectTermGroups("apple ( banana ) grape ( orange )", [["banana"], ["orange"]], ["apple", "grape"]);
+    expectTermGroups("apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
   });
 
   test("negated group", () => {
-    testTermGroups("-( apple )", [], ["-(", "apple", ")"]);
+    expectTermGroups("-( apple )", [], ["-(", "apple", ")"]);
   });
 
   test("extra spaces", () => {
-    testTermGroups("  apple  ( banana )  grape  ", [["banana"]], ["apple", "grape"]);
-    testTermGroups("  apple ( banana ) grape ( orange )  ", [["banana"], ["orange"]], ["apple", "grape"]);
-    testTermGroups("  apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi  ", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
-    testTermGroups(" apple                  banana    ( cherry )", [["cherry"]], ["apple", "banana"]);
+    expectTermGroups("  apple  ( banana )  grape  ", [["banana"]], ["apple", "grape"]);
+    expectTermGroups("  apple ( banana ) grape ( orange )  ", [["banana"], ["orange"]], ["apple", "grape"]);
+    expectTermGroups("  apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi  ", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
+    expectTermGroups(" apple                  banana    ( cherry )", [["cherry"]], ["apple", "banana"]);
   });
 });
 
 describe("equality", () => {
   test("order", () => {
-    testEquality("apple ( banana ~ cherry )", "( banana ~ cherry ) apple");
+    expectEquivalent("apple ( banana ~ cherry )", "( banana ~ cherry ) apple");
   });
 
   test("duplicates in or groups", () => {
-    testEquality("apple ( banana ~ cherry )", "( banana ~ cherry ~ cherry ) apple");
+    expectEquivalent("apple ( banana ~ cherry )", "( banana ~ cherry ~ cherry ) apple");
   });
 
   test("sort or groups by length", () => {
-    testEquality("apple ( banana ~ cherry ~ pear ) ( grape ~ orange )", "apple ( grape ~ orange ) ( banana ~ cherry ~ pear )");
-    testInequality("apple ( grape ~ orange ) ( banana ~ cherry )", "apple  ( banana ~ cherry ) ( grape ~ orange )");
+    expectEquivalent("apple ( banana ~ cherry ~ pear ) ( grape ~ orange )", "apple ( grape ~ orange ) ( banana ~ cherry ~ pear )");
+    expectNotEquivalent("apple ( grape ~ orange ) ( banana ~ cherry )", "apple  ( banana ~ cherry ) ( grape ~ orange )");
   });
 
   test("simplify or groups of length 1", () => {
-    testEquality("-apple ( banana )", "banana -apple");
-    testEquality("-apple ( banana* ) ( cherry )", "cherry -apple banana*");
+    expectEquivalent("-apple ( banana )", "banana -apple");
+    expectEquivalent("-apple ( banana* ) ( cherry )", "cherry -apple banana*");
   });
 
   test("equal", () => {
-    testEquality("apple", "apple");
-    testEquality("apple", "apple   ");
-    testEquality("  apple", "apple   ");
-    testEquality("", "");
+    expectEquivalent("apple", "apple");
+    expectEquivalent("apple", "apple   ");
+    expectEquivalent("  apple", "apple   ");
+    expectEquivalent("", "");
   });
 
   test("not equal", () => {
-    testInequality("apple", "banana");
-    testInequality("apple sweet", "apple");
-    testInequality("( apple ~ banana )", "( apple ~ cherry )");
-    testInequality("apple -sweet", "apple sweet");
-    testInequality("app*", "apple");
+    expectNotEquivalent("apple", "banana");
+    expectNotEquivalent("apple sweet", "apple");
+    expectNotEquivalent("( apple ~ banana )", "( apple ~ cherry )");
+    expectNotEquivalent("apple -sweet", "apple sweet");
+    expectNotEquivalent("app*", "apple");
   });
 });
 

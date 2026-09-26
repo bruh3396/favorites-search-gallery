@@ -1,31 +1,27 @@
-import * as PostResolver from "@/lib/domain/post/resolver";
-import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { ParsedPost, Post } from "@/types/api";
-import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
+import { TagCategoryMap } from "@/types/search";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoritesMetadataEnricher {
-  private changeUpdater: CoalescingExecutor<TermUpdate<Favorite>>;
   constructor(
     private readonly onFavoriteEnriched: (favorite: Favorite) => void,
-    onTagsChanged: (updates: TermUpdate<Favorite>[]) => void
-  ) {
-    this.changeUpdater = new CoalescingExecutor(FavoritesConfig.apiCoalesceSize, FavoritesConfig.apiCoalesceTimeout, onTagsChanged);
-  }
+    private readonly onTagsChanged: (update: TermUpdate<Favorite>) => void,
+    private readonly resolvePosts: (posts: Post[], onResolved: (resolved: ParsedPost) => void) => Promise<void>,
+    private readonly persistTagCategories: (tagCategories: TagCategoryMap) => void
+  ) { }
 
   public enrich(favorites: Favorite[]): Promise<void> {
     const favoritesById = new Map(favorites.map(favorite => [favorite.id, favorite]));
-    return PostResolver.resolveAll(
+    return this.resolvePosts(
       favorites.map(favorite => favorite.post),
       resolved => this.applyPost(favoritesById.get(resolved.post.id), resolved)
     );
   }
 
   private applyPost(favorite: Favorite | undefined, { post, tagCategories }: ParsedPost): void {
-    TagCategoryStore.persistAll(tagCategories);
+    this.persistTagCategories(tagCategories);
 
     if (favorite === undefined) {
       return;
@@ -35,7 +31,7 @@ export class FavoritesMetadataEnricher {
       const oldTags = new Set(favorite.tags);
 
       favorite.enrich(post);
-      this.changeUpdater.schedule({ doc: favorite, oldTerms: oldTags, newTerms: favorite.tags });
+      this.onTagsChanged({ doc: favorite, oldTerms: oldTags, newTerms: favorite.tags });
     } else {
       favorite.enrich(post);
     }

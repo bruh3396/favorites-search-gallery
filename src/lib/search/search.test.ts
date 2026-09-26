@@ -9,13 +9,13 @@ import { parseSearchQuery } from "@/lib/search/parsers/search_term_group_parser"
 type Doc = Searchable & { name: string; getMetric?: (metric: SearchableMetric) => number };
 type Searcher = (query: string, docs: Doc[]) => string[];
 
-const metricOf = (doc: Doc, metric: SearchableMetric): number => doc.getMetric?.(metric) ?? 0;
-const termsOf = (doc: Doc): Iterable<string> => doc.tags;
+const metricFor = (doc: Doc, metric: SearchableMetric): number => doc.getMetric?.(metric) ?? 0;
+const termsFor = (doc: Doc): Iterable<string> => doc.tags;
 const nameOf = (doc: Doc): string => doc.name;
 
 const implementations: { name: string; implementation: Searcher; supportsAST: boolean }[] = [
-  { name: "SetSearchEngine", implementation: (query, docs) => new SetSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf), supportsAST: true },
-  { name: "BitSearchEngine", implementation: (query, docs) => new BitSearchEngine<Doc>(termsOf, metricOf, docs).search(query, docs).map(nameOf), supportsAST: true },
+  { name: "SetSearchEngine", implementation: (query, docs) => new SetSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(nameOf), supportsAST: true },
+  { name: "BitSearchEngine", implementation: (query, docs) => new BitSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(nameOf), supportsAST: true },
   { name: "SearchQuery", implementation: (query, docs) => parseSearchQuery<Doc>(query).filter(docs).map(nameOf), supportsAST: false }
 ];
 

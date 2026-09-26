@@ -1,6 +1,7 @@
 import {
   average,
   clamp,
+  daysToMilliseconds,
   navigationDelta,
   numbersAround,
   numbersInRange,
@@ -109,6 +110,22 @@ describe("seededRandom", () => {
       expect(seededFloat(i)).toBe(seededFloat(i));
       expect(seededFloat(i)).not.toBe(seededFloat(i + 1));
     }
+  });
+});
+
+
+describe("daysToMilliseconds", () => {
+  test("zero", () => {
+    expect(daysToMilliseconds(0)).toBe(0);
+  });
+
+  test("whole days", () => {
+    expect(daysToMilliseconds(1)).toBe(86_400_000);
+    expect(daysToMilliseconds(7)).toBe(604_800_000);
+  });
+
+  test("fractional days", () => {
+    expect(daysToMilliseconds(0.5)).toBe(43_200_000);
   });
 });
 

@@ -10,7 +10,7 @@ import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDrawer } from "@/features/favorites/view/shell/drawer";
-import { FavoritesLinkSuppressor } from "@/features/favorites/view/link_suppression";
+import { FavoritesLinkSuppressor } from "@/features/favorites/view/link_suppressor";
 import { FavoritesPaginationRenderer } from "@/features/favorites/view/pagination_renderer";
 import { FavoritesShell } from "@/features/favorites/view/shell/shell";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";

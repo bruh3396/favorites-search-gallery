@@ -2,6 +2,7 @@ import { ActionBarDataset, ActionBarSelectors, actionBarHtml, stampActionBarId }
 import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { Favorite } from "@/types/favorite";
+import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { postPageUrl } from "@/lib/remote/url";
 
 let shouldLinkToPostPage = false;
@@ -54,6 +55,10 @@ export function bindThumb(root: HTMLElement, favorite: Favorite, favorited: bool
     container.href = postPageUrl(root.id);
   }
   setThumbFavorited(root, favorited);
+}
+
+export function blankThumbImage(root: HTMLElement): void {
+  getImageFromThumb(root)?.removeAttribute("src");
 }
 
 export function setThumbFavorited(root: HTMLElement, favorited: boolean): void {

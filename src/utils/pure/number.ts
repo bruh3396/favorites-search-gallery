@@ -1,8 +1,6 @@
 import { NavigationKey } from "@/types/input";
 import { isForwardNavigationKey } from "@/types/guards";
 
-let internalSeed = 100;
-
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
@@ -105,15 +103,6 @@ export function randomBoolean(): boolean {
 export function seededFloat(seed: number): number {
   const x = Math.sin(seed) * 4_051.2948;
   return x - Math.floor(x);
-}
-
-export function nextSeededInt(max: number): number {
-  internalSeed += 1;
-  return Math.floor(seededFloat(internalSeed) * max);
-}
-
-export function nextSeededIntInRange(min: number, max: number): number {
-  return nextSeededInt(max - min) + min;
 }
 
 export function navigationDelta(direction: NavigationKey): number {

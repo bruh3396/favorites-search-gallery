@@ -7,10 +7,6 @@ export class SearchQuery<Doc> {
     public readonly orGroups: AbstractSearchTerm[][] = []
   ) { }
 
-  public allTerms(): AbstractSearchTerm[] {
-    return [...this.andTerms, ...this.orGroups.flat()];
-  }
-
   public filter(items: (Doc & Searchable)[]): Doc[] {
     return items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
   }

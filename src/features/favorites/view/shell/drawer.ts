@@ -1,4 +1,4 @@
-import { FavoritesClass, FavoritesDrawerViewDescriptor, FavoritesDrawerViews, FavoritesId, favoritesDrawerSidebarIconId, favoritesDrawerViewId } from "@/features/favorites/types/scaffold";
+import { FavoritesClass, FavoritesDrawerViewDescriptor, FavoritesDrawerViews, FavoritesId } from "@/features/favorites/types/scaffold";
 import { FavoritesDrawerView, FavoritesDrawerViewContent, FavoritesDrawerViewMap, FavoritesDrawerViewNames } from "@/types/favorite";
 import { createElement, div } from "@/utils/browser/element";
 import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
@@ -162,4 +162,12 @@ export class FavoritesDrawer {
   private isOpen(): boolean {
     return this.shell.root.dataset.drawerOpen !== undefined;
   }
+}
+
+function favoritesDrawerSidebarIconId(view: FavoritesDrawerView): string {
+  return `${FavoritesClass.drawerSidebarIcon}-${view}`;
+}
+
+function favoritesDrawerViewId(view: FavoritesDrawerView): string {
+  return `${FavoritesClass.drawerView}-${view}`;
 }

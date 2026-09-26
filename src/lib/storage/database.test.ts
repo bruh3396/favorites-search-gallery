@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 type Record = { id: string; value: number };
 
 let counter = 0;
-const uniqueName = (): string => {
+const createUniqueName = (): string => {
   counter += 1;
   return `TestDb_${Date.now()}_${counter}`;
 };
@@ -14,7 +14,7 @@ describe("Database (autoIncrement + unique id index)", () => {
   let database: Database<Record>;
 
   beforeEach(() => {
-    database = new Database<Record>(uniqueName(), "records");
+    database = new Database<Record>(createUniqueName(), "records");
   });
 
   test("writes and reads records by id", async() => {
@@ -77,7 +77,7 @@ describe("KeyedDatabase (id as keyPath)", () => {
   let database: KeyedDatabase<Record>;
 
   beforeEach(() => {
-    database = new KeyedDatabase<Record>(uniqueName(), "records");
+    database = new KeyedDatabase<Record>(createUniqueName(), "records");
   });
 
   test("write of the same id twice upserts instead of throwing", async() => {

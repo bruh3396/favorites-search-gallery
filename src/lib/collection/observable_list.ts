@@ -3,10 +3,10 @@ import { doNothing } from "@/utils/pure/function";
 import { shuffleInPlace as shuffleArray } from "@/utils/pure/array";
 
 export class ObservableList<T extends Identifiable> {
+  private readonly onChanged: (items: T[]) => void;
   private items: T[] = [];
-  private onChanged: (items: T[]) => void = doNothing;
 
-  public setup(onChanged: (items: T[]) => void): void {
+  constructor(onChanged: (items: T[]) => void = doNothing) {
     this.onChanged = onChanged;
   }
 
