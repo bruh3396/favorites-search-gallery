@@ -118,15 +118,14 @@ describe("FavoritesModel", () => {
       const { model } = await setup(createFavoritePosts("apple", "1", "2"));
 
       await model.deleteStoredFavorite("1");
-
       expect(await model.loadFavoriteIds()).toEqual(["2"]);
     });
 
     test("destroys the store", async() => {
       const { context, model } = await setup(createFavoritePosts("apple", "1"));
 
+      await vi.waitFor(async() => expect(await createModel(context).countStoredFavorites()).toBe(1));
       await model.destroyStore();
-
       await vi.waitFor(async() => expect(await createModel(context).countStoredFavorites()).toBe(0));
     });
 

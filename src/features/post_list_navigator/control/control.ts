@@ -4,6 +4,6 @@ import { PostListNavigatorShell } from "@/features/post_list_navigator/shell/she
 
 export class PostListNavigatorControl {
   constructor(context: AppContext, shell: PostListNavigatorShell) {
-    PostListNavigatorMenu.build(context, shell.menu);
+    PostListNavigatorMenu.mount(context, shell.menu);
   }
 }

@@ -1,30 +1,15 @@
+import { Favorite } from "@/types/favorite";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { toSortedTagSet } from "@/utils/pure/tag";
-
-let getFavoriteTags: (id: string) => Set<string> | undefined = () => undefined;
-let resolveTagSetFromThumb: (thumb: HTMLElement) => Set<string> = getTagSetFromPostListThumb;
-
-export function setFavoriteTagsLookup(lookup: (id: string) => Set<string> | undefined): void {
-  getFavoriteTags = lookup;
-  resolveTagSetFromThumb = getTagSetFromFavoritesPageThumb;
-}
 
 export function getTagsFromThumb(thumb: HTMLElement): string {
     const image = getImageFromThumb(thumb);
     return image?.title ?? image?.getAttribute("tags") ?? "";
 }
 
-export function getTagSetFromThumb(thumb: HTMLElement): Set<string> {
-  return resolveTagSetFromThumb(thumb);
-}
-
-function getTagSetFromFavoritesPageThumb(thumb: HTMLElement): Set<string> {
-  const tags = getFavoriteTags(thumb.id);
-  return tags === undefined ? new Set() : new Set(tags);
-}
-
-function getTagSetFromPostListThumb(thumb: HTMLElement): Set<string> {
-  return toSortedTagSet(getRawTagsFromPostListThumb(thumb));
+export function getTagSetFromThumb(thumb: HTMLElement, favoriteFor: (id: string) => Favorite | undefined): Set<string> {
+  const favorite = favoriteFor(thumb.id);
+  return favorite === undefined ? toSortedTagSet(getRawTagsFromPostListThumb(thumb)) : new Set(favorite.tags);
 }
 
 function getRawTagsFromPostListThumb(thumb: HTMLElement): string {

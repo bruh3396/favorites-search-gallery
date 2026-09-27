@@ -2,29 +2,32 @@ import { awesompleteIsUnselected, awesompleteIsVisible, hideAwesomplete } from "
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/selectors";
-import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { FavoritesSearchHistory } from "@/features/favorites/control/toolbar/search_history";
+import { FavoritesToolbarSlots } from "@/types/favorites_ui";
+import { KeyValueStorage } from "@/features/favorites/types/types";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
-import { debounceLeading } from "@/lib/async/rate_limiting";
-import { openPostList } from "@/lib/remote/fetchers/action";
+import { buildButton } from "@/lib/ui/widgets/button";
 import { queueMacroTask } from "@/lib/async/scheduling";
 import { toggleDataset } from "@/utils/browser/dataset";
 
-const INPUT_PERSIST_DELAY = 500;
+const HISTORY_DEPTH = 30;
 const COLLAPSED_HEIGHT = 28;
 
 export class FavoritesSearchBox {
-  private readonly id: string = FavoritesId.searchBox;
-  private readonly history = new FavoritesSearchHistory(30);
+  private readonly events: Events;
+  private readonly slots: FavoritesToolbarSlots;
+  private readonly history: FavoritesSearchHistory;
+  private readonly clearButton: HTMLButtonElement;
   private readonly searchBox: HTMLTextAreaElement;
 
-  constructor(
-    private readonly events: Events,
-    private readonly slots: FavoritesToolbarSlots
-  ) {
+  constructor(events: Events, slots: FavoritesToolbarSlots, storage: KeyValueStorage) {
+    this.events = events;
+    this.slots = slots;
+    this.history = new FavoritesSearchHistory(HISTORY_DEPTH, storage);
+    this.clearButton = this.createClearButton();
     this.searchBox = this.createSearchBox();
     this.subscribeToEvents();
-    queueMicrotask(() => this.refreshClearButton());
+    this.refreshClearButton();
   }
 
   public append(text: string): void {
@@ -53,16 +56,27 @@ export class FavoritesSearchBox {
     const mouseEvent = new EnhancedMouseEvent(event);
 
     if (mouseEvent.rightClick || mouseEvent.ctrlKey) {
-      openPostList(this.searchBox.value);
+      this.events.favorites.postListRequested.emit(this.searchBox.value);
       return;
     }
     this.startSearch();
   }
 
+  private createClearButton(): HTMLButtonElement {
+    const clearButton = buildButton({
+      id: FavoritesId.clearButton,
+      icon: "clear",
+      event: this.events.favorites.clearButtonClicked
+    });
+
+    this.slots.searchActions.insertAdjacentElement("afterbegin", clearButton);
+    return clearButton;
+  }
+
   private createSearchBox(): HTMLTextAreaElement {
     const searchBox = document.createElement("textarea");
 
-    searchBox.id = this.id;
+    searchBox.id = FavoritesId.searchBox;
     searchBox.placeholder = "Search Favorites";
     searchBox.spellcheck = false;
     searchBox.value = this.history.lastEditedQuery;
@@ -78,12 +92,12 @@ export class FavoritesSearchBox {
   }
 
   private refreshClearButton(): void {
-    toggleDataset(this.slots.searchActions.querySelector<HTMLElement>(`#${FavoritesId.clearButton}`), "hidden", this.searchBox.value === "");
+    toggleDataset(this.clearButton, "hidden", this.searchBox.value === "");
   }
 
   private subscribeToEvents(): void {
     this.searchBox.addEventListener("input", () => this.refreshClearButton());
-    this.searchBox.addEventListener("input", debounceLeading<Event>(() => this.history.setLastQuery(this.searchBox.value), INPUT_PERSIST_DELAY));
+    this.searchBox.addEventListener("input", () => this.history.editLastQuery(this.searchBox.value));
     this.subscribeToKeyboard();
     this.subscribeToGrowOnFocus();
     this.events.app.hotkeyPressed.on((key) => this.handleHotkey(key));

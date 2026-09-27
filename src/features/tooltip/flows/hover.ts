@@ -1,5 +1,6 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { TooltipFlow } from "@/features/tooltip/flows/flow";
+import { getTagSetFromThumb } from "@/lib/ui/thumb/tag";
 
 export class TooltipHoverFlow extends TooltipFlow {
 
@@ -11,7 +12,9 @@ export class TooltipHoverFlow extends TooltipFlow {
     if (event.thumb === null) {
       this.view.hide();
     } else {
-      this.view.show(event.thumb, (tag) => this.model.colorForTag(tag));
+      const tags = getTagSetFromThumb(event.thumb, (id) => this.context.featureBridge.favorites.favorite.request(id));
+
+      this.view.show(event.thumb, tags, (tag) => this.model.colorForTag(tag));
     }
   }
 }

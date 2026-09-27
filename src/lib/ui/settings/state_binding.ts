@@ -1,19 +1,16 @@
 import { Preference } from "@/lib/storage/preference";
 import { Setting } from "@/lib/ui/settings/setting";
-import { doNothing } from "@/utils/pure/function";
 
 export class StateBinding<T> {
   private currentValue: T;
   private readonly preference: Preference<T> | null;
-  private readonly apply: (value: T) => void;
   private readonly render: (value: T) => void;
 
   constructor(setting: Partial<Setting<T>>, defaultValue: T, render: (value: T) => void) {
     this.preference = setting.preference ?? null;
-    this.apply = setting.apply ?? doNothing;
     this.render = render;
     this.currentValue = this.preference === null ? defaultValue : this.preference.value;
-    this.initialize(setting);
+    this.initialize();
   }
 
   public get value(): T {
@@ -31,14 +28,13 @@ export class StateBinding<T> {
 
   protected commit(value: T): void {
     this.preference?.set(value);
-    this.apply(value);
   }
 
   private rerender(): void {
     this.render(this.currentValue);
   }
 
-  private initialize(setting: Partial<Setting<T>>): void {
+  private initialize(): void {
     this.preference?.on((next) => {
       if (next !== this.currentValue) {
         this.currentValue = next;
@@ -46,9 +42,5 @@ export class StateBinding<T> {
       }
     });
     this.rerender();
-
-    if (setting.applyOnBuild === true) {
-      this.apply(this.currentValue);
-    }
   }
 }

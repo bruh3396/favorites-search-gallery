@@ -1,4 +1,5 @@
-import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
+import { actionBarIconStyles, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { applyTheme, swapNativeStylesheet, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
@@ -7,7 +8,7 @@ import BADGE_CSS from "@/assets/css/base/badge.css";
 import CHANGELOG_CSS from "@/assets/css/favorites/changelog.css";
 import DESKTOP_CSS from "@/assets/css/base/desktop.css";
 import DRAWER_CSS from "@/assets/css/favorites/drawer.css";
-import DRAWER_PANELS_CSS from "@/assets/css/favorites/drawer_panels.css";
+import DRAWER_SECTIONS_CSS from "@/assets/css/favorites/drawer_sections.css";
 import ELEMENTS_CSS from "@/assets/css/base/elements.css";
 import FONT_CSS from "@/assets/css/base/font.css";
 import GALLERY_CSS from "@/assets/css/gallery/gallery.css";
@@ -18,8 +19,9 @@ import POST_ACTION_BAR_CSS from "@/assets/css/base/post_action_bar.css";
 import POST_CSS from "@/assets/css/base/post.css";
 import POST_LIST_CSS from "@/assets/css/post_list/post_list.css";
 import POST_OVERLAY_CSS from "@/assets/css/post_overlay.css";
+import { Preferences } from "@/app/context/preferences";
 import SEARCH_FIELD_CSS from "@/assets/css/favorites/search_field.css";
-import SETTINGS_PANEL_CSS from "@/assets/css/favorites/settings_panel.css";
+import SETTINGS_CSS from "@/assets/css/favorites/settings.css";
 import SKELETON_CSS from "@/assets/css/favorites/skeleton.css";
 import SNIPPETS_CSS from "@/assets/css/favorites/snippets.css";
 import THEMES_CSS from "@/assets/css/base/themes.css";
@@ -33,24 +35,51 @@ import { ThumbConfig } from "@/config/thumb_config";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
-import { actionBarIconStyles } from "@/lib/ui/thumb/action_bar";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
 
 export function setupStyles(context: AppContext): void {
   insertBaseStyles(context);
   applyPreferenceStyles(context);
+  subscribeToPreferenceStyles(context);
   applyTileVariables(context);
 }
 
 function applyPreferenceStyles(context: AppContext): void {
   const { preferences } = context;
+  const actionBar = actionBarPreferences(context);
 
-  applyTheme(preferences.app.theme.value, preferences.app.darkMode.value);
+  applyCurrentTheme(context);
   toggleGradient(preferences.app.gradient.value);
   setTooltipsEnabled(preferences.favorites.hintsEnabled.value);
   toggleNativeFont(preferences.app.nativeFont.value);
   toggleThemedGalleryBackground(preferences.gallery.themedBackground.value);
+  setActionBarMode(actionBar.postActionBar.value);
+  setActionBarButtons(actionBar.postActionBarButtons.value);
+}
+
+function subscribeToPreferenceStyles(context: AppContext): void {
+  const { preferences, environment } = context;
+  const actionBar = actionBarPreferences(context);
+
+  preferences.app.theme.on(() => applyCurrentTheme(context));
+  preferences.app.darkMode.on((dark) => {
+    applyCurrentTheme(context);
+    swapNativeStylesheet(dark, environment.onDesktopDevice);
+  });
+  preferences.app.gradient.on(toggleGradient);
+  preferences.app.nativeFont.on(toggleNativeFont);
+  preferences.gallery.themedBackground.on(toggleThemedGalleryBackground);
+  actionBar.postActionBar.on(setActionBarMode);
+  actionBar.postActionBarButtons.on(setActionBarButtons);
+}
+
+function applyCurrentTheme({ preferences }: AppContext): void {
+  applyTheme(preferences.app.theme.value, preferences.app.darkMode.value);
+}
+
+function actionBarPreferences({ preferences, environment }: AppContext): Preferences["favorites"] | Preferences["postList"] {
+  return environment.onPostListPage ? preferences.postList : preferences.favorites;
 }
 
 function insertBaseStyles(context: AppContext): void {
@@ -58,9 +87,9 @@ function insertBaseStyles(context: AppContext): void {
   const platformCss = context.environment.onMobileDevice ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
   const galleryCss = context.flags.galleryEnabled ? GALLERY_CSS + AUTOPLAY_CSS : "";
   const tooltipCss = context.flags.tooltipEnabled ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
-  const postListCss = context.environment.onPostListPage ? POST_LIST_CSS + SETTINGS_PANEL_CSS : "";
+  const postListCss = context.environment.onPostListPage ? POST_LIST_CSS + SETTINGS_CSS : "";
   const postOverlayCss = context.flags.postOverlayEnabled ? POST_OVERLAY_CSS : "";
-  const favoritesCss = context.environment.onFavoritesPage ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_PANELS_CSS + SETTINGS_PANEL_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
+  const favoritesCss = context.environment.onFavoritesPage ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_SECTIONS_CSS + SETTINGS_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +

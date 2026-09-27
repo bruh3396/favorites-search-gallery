@@ -5,7 +5,7 @@ export class PostListNavigatorFavoritesMarkerFlow extends PostListNavigatorFlow 
   public async toggleIndicator(enabled: boolean): Promise<void> {
     if (enabled) {
       this.view.setFavoriteIndicatorLoading(true);
-      await this.model.ensureFavoriteIdsLoaded(() => this.context.featureBridge.favorites.favoriteIds.call());
+      await this.model.ensureFavoriteIdsLoaded(() => this.context.featureBridge.favorites.favoriteIds.request());
       this.view.markAsFavorites(this.model.filterFavorites(this.model.allThumbs()));
       this.view.setFavoriteIndicatorLoading(false);
     } else {

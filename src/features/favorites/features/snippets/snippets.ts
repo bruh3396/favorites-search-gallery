@@ -1,200 +1,40 @@
-import * as SnippetActions from "@/features/favorites/features/snippets/actions";
-import * as SnippetEditor from "@/features/favorites/features/snippets/editor";
-import * as SnippetView from "@/features/favorites/features/snippets/view";
-import { exportSnippets, importSnippets } from "@/features/favorites/features/snippets/transfer";
 import { AwesompleteSuggestion } from "awesomplete";
-import { FavoritesDrawerViewContent } from "@/types/favorite";
-import { SnippetState } from "@/features/favorites/features/snippets/state";
-import { SnippetStore } from "@/features/favorites/features/snippets/store";
-import { SnippetsDependencies } from "@/features/favorites/features/snippets/types";
+import { FavoritesDrawerSectionContent } from "@/types/favorites_ui";
+import { SnippetControl } from "@/features/favorites/features/snippets/control/control";
+import { SnippetFlows } from "@/features/favorites/features/snippets/flows/flows";
+import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
+import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
+import { SnippetView } from "@/features/favorites/features/snippets/view/view";
+import { SnippetsDependencies } from "@/features/favorites/features/snippets/types/types";
 import { Storage } from "@/lib/storage/local_storage";
-import { buildIdQuery } from "@/features/favorites/features/snippets/utils";
-import { copyText } from "@/utils/browser/clipboard";
+import { downloadBlob } from "@/utils/browser/download";
 
-const SNIPPET_TRIGGER = "/";
-const store = new SnippetStore(Storage);
-let dependencies: SnippetsDependencies;
+export class Snippets {
+  private readonly flows: SnippetFlows;
+  private readonly control: SnippetControl;
 
-export function setup(deps: SnippetsDependencies): void {
-  dependencies = deps;
-  SnippetView.setup({
-    onUse: useSnippet,
-    onMoveToTop: moveSnippetToTop,
-    onCopy: copySnippet,
-    onEdit: editSnippet,
-    onDelete: deleteSnippet,
-    onDeleteRequested: requestDelete,
-    onDeleteCancelled: cancelDelete,
-    onSave: saveSnippet,
-    onResultsQueryRequested: fillQueryFromResults,
-    onEditCancelled: cancelEdit,
-    onEditorInput: clearFailure,
-    onFiltered: SnippetView.render
-  });
-  refresh();
-}
+  constructor({ appendToSearch, getSearchResults }: SnippetsDependencies) {
+    const shell = new SnippetShell();
+    const context = {
+      appendToSearch,
+      getSearchResults,
+      alert: (message: string): void => alert(message),
+      confirm: (message: string): boolean => confirm(message),
+      saveBlob: downloadBlob
+    };
 
-export function suggestions(prefix: string): AwesompleteSuggestion[] {
-  if (!prefix.startsWith(SNIPPET_TRIGGER)) {
-    return [];
-  }
-  return store.getAll().map(snippet => ({
-    label: `${SNIPPET_TRIGGER}${snippet.name} (snippet)`,
-    value: `${SNIPPET_TRIGGER}${snippet.name}`,
-    insert: snippet.query,
-    type: "snippet"
-  }));
-}
-
-export function mount(): FavoritesDrawerViewContent {
-  return {
-    mount: SnippetView.mount,
-    actions: [
-      SnippetActions.importButton(importFromFile),
-      SnippetActions.exportButton(exportToFile),
-      SnippetActions.deleteAllButton(deleteAllSnippets)
-    ]
-  };
-}
-
-function useSnippet(name: string): void {
-  const snippet = store.get(name);
-
-  if (snippet === undefined) {
-    return;
-  }
-  dependencies.appendToSearch(snippet.query);
-  store.use(name);
-  refresh();
-}
-
-function moveSnippetToTop(name: string): void {
-  store.moveToTop(name);
-  refresh();
-}
-
-function copySnippet(name: string): void {
-  const snippet = store.get(name);
-
-  if (snippet === undefined) {
-    return;
-  }
-  copyText(snippet.query);
-}
-
-function editSnippet(name: string): void {
-  const snippet = store.get(name);
-
-  if (snippet === undefined) {
-    return;
-  }
-  SnippetState.editTarget = name;
-  SnippetState.deleteTarget = null;
-  SnippetState.saveFailure = null;
-  SnippetEditor.fill(snippet);
-  SnippetView.render();
-}
-
-function saveSnippet(): void {
-  const target = SnippetState.editTarget;
-  const result = target === null ? store.add(SnippetEditor.name(), SnippetEditor.query()) : store.update(target, SnippetEditor.name(), SnippetEditor.query());
-
-  if (!result.ok) {
-    SnippetState.saveFailure = result.reason;
-    SnippetView.render();
-    return;
-  }
-  clearEditor();
-  refresh();
-}
-
-function fillQueryFromResults(): void {
-  const results = dependencies.getSearchResults();
-
-  if (results.length === 0) {
-    alert("No search results to build a query from");
-    return;
-  }
-  SnippetEditor.setQuery(buildIdQuery(results.map(favorite => favorite.id)));
-  clearFailure();
-}
-
-function cancelEdit(): void {
-  clearEditor();
-  SnippetView.render();
-}
-
-function requestDelete(name: string): void {
-  SnippetState.deleteTarget = name;
-  SnippetView.render();
-}
-
-function cancelDelete(): void {
-  SnippetState.deleteTarget = null;
-  SnippetView.render();
-}
-
-function deleteSnippet(name: string): void {
-  store.remove(name);
-  SnippetState.deleteTarget = null;
-
-  if (SnippetState.editTarget === name) {
-    clearEditor();
-  }
-  refresh();
-}
-
-function deleteAllSnippets(): void {
-  const count = store.getAll().length;
-
-  if (count === 0) {
-    alert("No snippets to delete");
-    return;
+    this.flows = new SnippetFlows(context, new SnippetModel(Storage), new SnippetView(shell));
+    this.control = new SnippetControl(shell, this.flows.library);
   }
 
-  if (!confirm(`Delete all ${count} snippets?`)) {
-    return;
-  }
-  store.replaceAll([]);
-  SnippetState.deleteTarget = null;
-  clearEditor();
-  refresh();
-}
-
-function clearFailure(): void {
-  if (SnippetState.saveFailure !== null) {
-    SnippetState.saveFailure = null;
-    SnippetView.render();
-  }
-}
-
-function exportToFile(): void {
-  exportSnippets(store.getAll());
-}
-
-function importFromFile(contents: string): void {
-  const imported = importSnippets(contents);
-
-  if (imported.length === 0) {
-    alert("No snippets found in that file");
-    return;
+  public suggestions(prefix: string): AwesompleteSuggestion[] {
+    return this.flows.library.suggestions(prefix);
   }
 
-  if (store.getAll().length > 0 && !confirm(`Replace all snippets with ${imported.length} from this file?`)) {
-    return;
+  public buildDrawerSection(): FavoritesDrawerSectionContent {
+    return {
+      mount: (container): void => this.flows.library.mount(container),
+      actions: this.control.actions
+    };
   }
-  store.replaceAll(imported);
-  clearEditor();
-  refresh();
-}
-
-function clearEditor(): void {
-  SnippetState.editTarget = null;
-  SnippetState.saveFailure = null;
-  SnippetEditor.clear();
-}
-
-function refresh(): void {
-  SnippetState.snippets = store.getAll();
-  SnippetView.render();
 }

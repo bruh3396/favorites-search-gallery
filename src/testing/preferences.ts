@@ -1,3 +1,5 @@
+import { Emitter } from "@/lib/event/emitter";
+import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 
 export type PreferenceOverrides = {
@@ -6,80 +8,100 @@ export type PreferenceOverrides = {
   };
 };
 
-export function createPreferences(overrides: PreferenceOverrides = {}): Preferences {
-  const preferences = {
-    app: {
-      darkMode: { value: false },
-      fadeThumbs: { value: false },
-      gradient: { value: false },
-      nativeFont: { value: true },
-      performanceProfile: { value: "normal" },
-      theme: { value: "native" }
-    },
-    favorites: {
-      allowedRatings: { value: 7 },
-      columnCount: { value: 5 },
-      downloadBatchSize: { value: 500 },
-      downloadFilenameFormat: { value: 3 },
-      drawerActiveView: { value: "settings" },
-      drawerOpen: { value: false },
-      excludeBlacklist: { value: false },
-      headerEnabled: { value: true },
-      hintsEnabled: { value: true },
-      infiniteScroll: { value: false },
-      layout: { value: "column" },
-      postActionBar: { value: "hover" },
-      postActionBarButtons: { value: 1 },
-      resultsPerPage: { value: 100 },
-      rowHeight: { value: 7 },
-      settingsExpandedSections: { value: {} },
-      sortAscending: { value: false },
-      sortKey: { value: "default" },
-      tooltipEnabled: { value: false },
-      upscaleQuality: { value: 1 },
-      upscaleThumbs: { value: true }
-    },
-    gallery: {
-      autoplayActive: { value: false },
-      autoplayForward: { value: true },
-      autoplayImageDuration: { value: 3_000 },
-      autoplayMinimumVideoDuration: { value: 5_000 },
-      autoplayPaused: { value: false },
-      backgroundOpacity: { value: 1 },
-      menuDockedLeft: { value: true },
-      menuEnabled: { value: false },
-      menuPinned: { value: false },
-      mobileEnabled: { value: true },
-      previewEnabled: { value: false },
-      themedBackground: { value: false },
-      tutorialSeen: { value: false },
-      videoMuted: { value: false },
-      videoVolume: { value: 1 }
-    },
-    postOverlay: {
-      enabled: { value: false },
-      mode: { value: "tag" }
-    },
-    postList: {
-      columnCount: { value: 5 },
-      enabled: { value: false },
-      favoriteIndicator: { value: false },
-      infiniteScroll: { value: false },
-      layout: { value: "column" },
-      postActionBar: { value: "hover" },
-      postActionBarButtons: { value: 1 },
-      rowHeight: { value: 7 },
-      settingsCollapsed: { value: false },
-      tooltipEnabled: { value: false },
-      upscaleQuality: { value: 1 },
-      upscaleThumbs: { value: true }
-    }
-  } as unknown as Preferences;
+type PreferenceValues = Record<string, Record<string, unknown>>;
 
-  for (const [section, keys] of Object.entries(overrides)) {
-    for (const [key, value] of Object.entries(keys as Record<string, unknown>)) {
-      (preferences as unknown as Record<string, Record<string, { value: unknown }>>)[section][key] = { value };
-    }
+const DEFAULT_VALUES: PreferenceValues = {
+  app: {
+    darkMode: false,
+    fadeThumbs: false,
+    gradient: false,
+    nativeFont: true,
+    performanceProfile: "normal",
+    theme: "native"
+  },
+  favorites: {
+    allowedRatings: 7,
+    columnCount: 5,
+    downloadBatchSize: 500,
+    downloadFilenameFormat: 3,
+    drawerActiveSection: "settings",
+    drawerOpen: false,
+    excludeBlacklist: false,
+    headerEnabled: true,
+    hintsEnabled: true,
+    infiniteScroll: false,
+    layout: "column",
+    postActionBar: "hover",
+    postActionBarButtons: 1,
+    resultsPerPage: 100,
+    rowHeight: 7,
+    settingsExpandedSections: {},
+    sortAscending: false,
+    sortKey: "default",
+    tooltipEnabled: false,
+    upscaleQuality: 1,
+    upscaleThumbs: true
+  },
+  gallery: {
+    autoplayActive: false,
+    autoplayForward: true,
+    autoplayImageDuration: 3_000,
+    autoplayMinimumVideoDuration: 5_000,
+    autoplayPaused: false,
+    backgroundOpacity: 1,
+    menuDockedLeft: true,
+    menuEnabled: false,
+    menuPinned: false,
+    mobileEnabled: true,
+    previewEnabled: false,
+    themedBackground: false,
+    tutorialSeen: false,
+    videoMuted: false,
+    videoVolume: 1
+  },
+  postOverlay: {
+    enabled: false,
+    mode: "tag"
+  },
+  postList: {
+    columnCount: 5,
+    enabled: false,
+    favoriteIndicator: false,
+    infiniteScroll: false,
+    layout: "column",
+    postActionBar: "hover",
+    postActionBarButtons: 1,
+    rowHeight: 7,
+    settingsCollapsed: false,
+    tooltipEnabled: false,
+    upscaleQuality: 1,
+    upscaleThumbs: true
   }
-  return preferences;
+};
+
+// An in-memory preference: set() writes and notifies listeners, like the real
+// one, without touching storage.
+export function createPreference<T>(initial: T): Preference<T> {
+  const emitter = new Emitter<T>();
+  let current = initial;
+  return {
+    get value(): T {
+      return current;
+    },
+    set(next: T): void {
+      current = next;
+      emitter.emit(next);
+    },
+    on(listener: (value: T) => void): void {
+      emitter.on(listener);
+    }
+  } as unknown as Preference<T>;
+}
+
+export function createPreferences(overrides: PreferenceOverrides = {}): Preferences {
+  const values = overrides as PreferenceValues;
+  return Object.fromEntries(Object.entries(DEFAULT_VALUES).map(([section, defaults]) => [
+    section,
+    Object.fromEntries(Object.entries({ ...defaults, ...values[section] }).map(([key, value]) => [key, createPreference(value)]))
+  ])) as unknown as Preferences;
 }

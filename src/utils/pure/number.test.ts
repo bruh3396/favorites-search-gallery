@@ -112,7 +112,6 @@ describe("seededRandom", () => {
   });
 });
 
-
 describe("daysToMilliseconds", () => {
   test("zero", () => {
     expect(daysToMilliseconds(0)).toBe(0);

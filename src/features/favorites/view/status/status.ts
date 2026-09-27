@@ -1,7 +1,7 @@
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
 import { FavoritesId } from "@/features/favorites/types/selectors";
-import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
+import { FavoritesToolbarSlots } from "@/types/favorites_ui";
 import { Timeout } from "@/types/async";
 
 const TEMPORARY_STATUS_TIMEOUT = 1_000;

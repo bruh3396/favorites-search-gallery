@@ -2,14 +2,14 @@ import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { Rating, SortKey } from "@/types/search";
 import { Environment } from "@/app/context/environment";
-import { FavoritesDrawerView } from "@/types/favorite";
+import { FavoritesDrawerSectionName } from "@/types/favorites_ui";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
 
-export type Preferences = ReturnType<typeof buildPreferences>;
+export type Preferences = ReturnType<typeof createPreferences>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-export function buildPreferences(environment: Environment) {
+export function createPreferences(environment: Environment) {
   const { onDesktopDevice, onMobileDevice, usingDarkMode } = environment;
   return {
     app: {
@@ -26,7 +26,7 @@ export function buildPreferences(environment: Environment) {
       columnCount: new Preference("favoritesColumnCount", onDesktopDevice ? 5 : 2),
       downloadBatchSize: new Preference("favoritesDownloadBatchSize", 500),
       downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
-      drawerActiveView: new Preference<FavoritesDrawerView>("favoritesDrawerActiveView", "settings"),
+      drawerActiveSection: new Preference<FavoritesDrawerSectionName>("favoritesDrawerActiveView", "settings"),
       drawerOpen: new Preference("favoritesDrawerOpen", false),
       excludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
       headerEnabled: new Preference("favoritesHeaderEnabled", true),
@@ -35,8 +35,8 @@ export function buildPreferences(environment: Environment) {
       layout: new Preference<Layout>("favoritesLayout", "column"),
       postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", onDesktopDevice ? "hover" : "off"),
       postActionBarButtons: new Preference("favoritesPostActionBarButtons", onDesktopDevice ? ActionBarButton.Favorite : ActionBarButton.Favorite | ActionBarButton.Open),
-      resultsPerPage: new Preference("favoritesResultsPerPage", 100),
-      rowHeight: new Preference("favoritesRowHeight", 7),
+      resultsPerPage: new Preference("favoritesResultsPerPage", 50),
+      rowHeight: new Preference("favoritesRowHeight", 10),
       settingsExpandedSections: new Preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
       sortAscending: new Preference("favoritesSortAscending", false),
       sortKey: new Preference<SortKey>("favoritesSortKey", "default"),

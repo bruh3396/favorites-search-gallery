@@ -1,9 +1,14 @@
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
+import { openPostList } from "@/lib/remote/fetchers/action";
 
 export class FavoritesSearchFlow extends FavoritesFlow {
 
   public searchFavorites(searchQuery: string): void {
     this.flows.display.display(this.model.searchFavorites(searchQuery));
+  }
+
+  public openPostList(searchQuery: string): void {
+    openPostList(searchQuery);
   }
 
   public reSearchFavorites(): void {

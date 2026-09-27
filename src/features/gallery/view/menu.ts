@@ -1,9 +1,9 @@
+import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Environment } from "@/app/context/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
-import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 export class GalleryMenu {
@@ -17,7 +17,11 @@ export class GalleryMenu {
     this.menuVisibilityTimeout = undefined;
     this.setDockedLeft(preferences.gallery.menuDockedLeft.value);
     this.setPinned(preferences.gallery.menuPinned.value);
-    toggleGalleryMenuEnabled(preferences.gallery.menuEnabled.value);
+    this.setEnabled(preferences.gallery.menuEnabled.value);
+  }
+
+  public setEnabled(enabled: boolean): void {
+    toggleGalleryMenuEnabled(enabled);
   }
 
   public togglePersistence(event: EnhancedMouseEvent): void {

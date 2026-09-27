@@ -1,14 +1,14 @@
 import { Emitter, StickyEmitter } from "@/lib/event/emitter";
 import { Favorite } from "@/types/favorite";
-import { GalleryMenuAction } from "@/types/app";
+import { GalleryAction } from "@/types/app";
 import { MediaItem } from "@/types/media";
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
-export type Events = ReturnType<typeof buildEvents>;
+export type Events = ReturnType<typeof createEvents>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-export function buildEvents() {
+export function createEvents() {
   return {
     app: {
       favoriteAdded: new Emitter<string>(),
@@ -23,6 +23,7 @@ export function buildEvents() {
       resetButtonClicked: new Emitter<MouseEvent>(),
       searchButtonClicked: new Emitter<MouseEvent>(),
       shuffleButtonClicked: new Emitter<MouseEvent>(),
+      settingsResetRequested: new Emitter<void>(),
 
       pageSelected: new Emitter<number>(),
       pageStepped: new Emitter<NavigationKey>(),
@@ -30,6 +31,7 @@ export function buildEvents() {
       gotoPageSubmitted: new Emitter<number>(),
 
       searchRequested: new Emitter<string>(),
+      postListRequested: new Emitter<string>(),
       searchResultsUpdated: new Emitter<Favorite[]>(),
 
       favoritesLoaded: new StickyEmitter<void>(),
@@ -41,20 +43,20 @@ export function buildEvents() {
     },
 
     gallery: {
-      closedGallery: new Emitter<void>(),
-      displayedItem: new Emitter<MediaItem>(),
-      galleryMenuButtonClicked: new Emitter<GalleryMenuAction>(),
+      galleryClosed: new Emitter<void>(),
+      itemDisplayed: new Emitter<MediaItem>(),
+      galleryMenuButtonClicked: new Emitter<GalleryAction>(),
       interactionStopped: new Emitter<void>(),
-      leftTap: new Emitter<void>(),
-      openedGallery: new Emitter<void>(),
-      rightTap: new Emitter<void>(),
-      showControlsRequested: new Emitter<void>()
+      leftTapped: new Emitter<void>(),
+      rightTapped: new Emitter<void>(),
+      galleryOpened: new Emitter<void>(),
+      tutorialRequested: new Emitter<void>()
     },
 
     postOverlay: {
-      addTagToSearch: new Emitter<string>(),
-      excludeTagFromSearch: new Emitter<string>(),
-      searchForTag: new Emitter<string>()
+      addTagToSearchRequested: new Emitter<string>(),
+      excludeTagFromSearchRequested: new Emitter<string>(),
+      searchForTagRequested: new Emitter<string>()
     },
 
     postList: {

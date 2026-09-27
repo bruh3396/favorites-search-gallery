@@ -27,9 +27,9 @@ export class GalleryImageCanvas {
     return this.environment.onPostListPage ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;
   }
 
-  public mount(newContainer: HTMLElement): void {
+  public mount(container: HTMLElement): void {
     this.correctOrientation();
-    this.insertGalleryCanvas(newContainer);
+    this.insertGalleryCanvas(container);
   }
 
   public draw(bitmap: ImageBitmap | null): void {

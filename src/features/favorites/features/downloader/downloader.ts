@@ -1,47 +1,45 @@
 import * as MediaResolver from "@/lib/media/resolver";
-import { DownloaderDependencies } from "@/features/favorites/features/downloader/types";
-import { FavoritesArchiver } from "@/features/favorites/features/downloader/archiver";
-import { FavoritesBatchDownloader } from "@/features/favorites/features/downloader/download";
-import { FavoritesDownloadPanel } from "@/features/favorites/features/downloader/panel";
-import { FavoritesDownloadSession } from "@/features/favorites/features/downloader/session";
-import { FavoritesDrawerViewContent } from "@/types/favorite";
-import { FavoritesFilenameSettings } from "@/features/favorites/features/downloader/filename_settings";
+import { DownloaderContext, DownloaderDependencies } from "@/features/favorites/features/downloader/types/types";
+import { DownloaderControl } from "@/features/favorites/features/downloader/control/control";
+import { DownloaderFlows } from "@/features/favorites/features/downloader/flows/flows";
+import { DownloaderModel } from "@/features/favorites/features/downloader/model/model";
+import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
+import { DownloaderView } from "@/features/favorites/features/downloader/view/view";
+import { FavoritesDrawerSectionContent } from "@/types/favorites_ui";
 import { downloadBlob } from "@/utils/browser/download";
 
-export class FavoritesDownloader {
-  private readonly panel: FavoritesDownloadPanel;
-  private readonly session: FavoritesDownloadSession;
+export class Downloader {
+  private readonly flows: DownloaderFlows;
+  private readonly control: DownloaderControl;
 
-  constructor({ batchSize, filenameFormat, getSearchResults, getTagCategory, getTagsForIds }: DownloaderDependencies) {
-    const filenamer = new FavoritesFilenameSettings({ filenameFormat, getTagCategory });
-    const archiver = new FavoritesArchiver({
-      filenamer,
-      getTagsForIds,
+  constructor(dependencies: DownloaderDependencies) {
+    const context: DownloaderContext = {
+      ...dependencies,
       resolveExtension: MediaResolver.resolveExtension,
       resolveMediaUrl: MediaResolver.resolveMediaUrl,
-      fetch: (url, init): Promise<Response> => fetch(url, init)
-    });
-    const batchDownloader = new FavoritesBatchDownloader({ archiver, saveBlob: downloadBlob });
+      fetch: (url, init): Promise<Response> => fetch(url, init),
+      saveBlob: downloadBlob
+    };
+    const shell = new DownloaderShell();
+    const model = new DownloaderModel(context);
 
-    this.panel = new FavoritesDownloadPanel({
-      batchSize,
-      filenameFormat,
-      filenameOptions: filenamer.options(),
-      onDownload: (): Promise<void> => this.session.start(),
-      onCancel: (): void => this.session.cancel()
+    this.flows = new DownloaderFlows(context, model, new DownloaderView(shell));
+    this.control = new DownloaderControl(shell, this.flows.session, {
+      batchSize: dependencies.batchSize,
+      filenameFormat: dependencies.filenameFormat,
+      filenameOptions: model.filenameOptions()
     });
-    this.session = new FavoritesDownloadSession({ panel: this.panel, batchDownloader, batchSize, getSearchResults });
   }
 
-  public mount(): FavoritesDrawerViewContent {
-    return { mount: panel => this.panel.mount(panel) };
+  public buildDrawerSection(): FavoritesDrawerSectionContent {
+    return { mount: (container): void => this.flows.session.mount(container) };
   }
 
   public enable(): void {
-    this.session.enable();
+    this.flows.session.enable();
   }
 
   public reRender(): void {
-    this.session.reRender();
+    this.flows.session.reRender();
   }
 }

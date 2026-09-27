@@ -1,5 +1,6 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { PostOverlayFlow } from "@/features/post_overlay/flows/flow";
+import { getTagSetFromThumb } from "@/lib/ui/thumb/tag";
 
 export class PostOverlayHoverFlow extends PostOverlayFlow {
 
@@ -53,7 +54,8 @@ export class PostOverlayHoverFlow extends PostOverlayFlow {
   }
 
   private async showTags(thumb: HTMLElement): Promise<void> {
-    const categories = await this.model.resolveTagCategories(thumb);
+    const tags = getTagSetFromThumb(thumb, (id) => this.context.featureBridge.favorites.favorite.request(id));
+    const categories = await this.model.resolveTagCategories(thumb.id, tags);
 
     if (this.model.isCurrentTarget(thumb.id)) {
       this.view.renderTags(thumb.id, categories);

@@ -1,4 +1,4 @@
-import { ActionBarButton, ActionBarMode, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile } from "@/types/app";
 import { SettingsControl, dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
@@ -6,8 +6,6 @@ import { AppContext } from "@/app/context/context";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
 import { booleanPreference } from "@/lib/storage/preference";
-import { reloadWindow } from "@/utils/browser/window";
-import { toggleGalleryMenuEnabled } from "@/lib/ui/toggles";
 
 export type PostListSettingsCatalog = Record<string, SettingsControl>;
 
@@ -46,7 +44,6 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       label: "Gallery Menu",
       tooltip: "Show menu in gallery",
       enabled: flags.galleryEnabled,
-      apply: toggleGalleryMenuEnabled,
       preference: preferences.gallery.menuEnabled
     }),
     favoriteIndicator: toggle({
@@ -60,8 +57,6 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       label: "Actions",
       tooltip: "Show actions thumbnails",
       preference: preferences.postList.postActionBar,
-      applyOnBuild: true,
-      apply: setActionBarMode,
       options: new Map<ActionBarMode, string>([
         ["always", "Always"],
         ["hover", "Hover"],
@@ -73,8 +68,6 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       label: "Action Buttons",
       tooltip: "Choose which actions appear on thumbnails",
       preference: preferences.postList.postActionBarButtons,
-      applyOnBuild: true,
-      apply: setActionBarButtons,
       requireSelection: true,
       options: new Map<ActionBarButton, string>([
         [ActionBarButton.Favorite, "Favorite"],
@@ -86,9 +79,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       id: "post-action-bar-toggle",
       label: "Show Actions",
       tooltip: "Show actions on thumbnails",
-      preference: booleanPreference<ActionBarMode>(preferences.postList.postActionBar, "always", "off"),
-      applyOnBuild: true,
-      apply: (on) => setActionBarMode(on ? "always" : "off")
+      preference: booleanPreference<ActionBarMode>(preferences.postList.postActionBar, "always", "off")
     }),
     layout: dropdown<Layout>({
       id: "layout-select",
@@ -128,7 +119,6 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       label: "Performance",
       tooltip: "Choose performance profile",
       preference: preferences.app.performanceProfile,
-      apply: reloadWindow,
       enabled: environment.onDesktopDevice,
       options: new Map<PerformanceProfile, string>([
         ["normal", "Normal"],

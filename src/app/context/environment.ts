@@ -1,3 +1,4 @@
+import { Platform } from "@/types/app";
 import { hasQueryParams } from "@/utils/pure/url";
 import { negateTags } from "@/utils/pure/tag";
 import { readCookie } from "@/utils/browser/cookie";
@@ -13,7 +14,7 @@ export interface Environment {
   usingFirefox: boolean;
   onMobileDevice: boolean;
   onDesktopDevice: boolean;
-  platform: "mobile" | "desktop";
+  platform: Platform;
   userId: string;
   favoritesPageId: string | null;
   userIsOnTheirOwnFavoritesPage: boolean;

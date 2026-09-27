@@ -1,10 +1,6 @@
 import * as TagCategoryResolver from "@/lib/domain/tag/category_resolver";
 import { TagCategoryMap } from "@/types/search";
-import { getTagSetFromThumb } from "@/lib/ui/thumb/tag";
 
-export function resolveAll(thumb: HTMLElement): Promise<TagCategoryMap> {
-  const tagSet = getTagSetFromThumb(thumb);
-
-  tagSet.delete(thumb.id);
-  return TagCategoryResolver.resolveCategories(thumb.id, [...tagSet]);
+export function resolveAll(id: string, tags: Set<string>): Promise<TagCategoryMap> {
+  return TagCategoryResolver.resolveCategories(id, [...tags].filter(tag => tag !== id));
 }

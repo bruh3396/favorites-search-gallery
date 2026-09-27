@@ -1,9 +1,9 @@
 import * as Icons from "@/assets/svg/icons";
 import { AppContext } from "@/app/context/context";
 import { Environment } from "@/app/context/environment";
+import { GalleryAction } from "@/types/app";
 import { GalleryClass } from "@/features/gallery/types/selectors";
 import { GalleryConfig } from "@/config/gallery_config";
-import { GalleryMenuAction } from "@/types/app";
 import { GalleryMenuButton } from "@/features/gallery/types/types";
 import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GeneralConfig } from "@/config/general_config";
@@ -55,7 +55,7 @@ function createButton(template: GalleryMenuButton): HTMLElement {
   return button;
 }
 
-function actionOf(target: EventTarget | null): GalleryMenuAction | null {
+function actionOf(target: EventTarget | null): GalleryAction | null {
   const button = target instanceof Element ? target.closest<HTMLElement>("[data-action]") : null;
-  return (button?.dataset.action as GalleryMenuAction | undefined) ?? null;
+  return (button?.dataset.action as GalleryAction | undefined) ?? null;
 }

@@ -1,10 +1,8 @@
-import { getTagSetFromThumb } from "@/lib/ui/thumb/tag";
-
-export function render(tooltip: HTMLElement, thumb: HTMLElement, getColor: (tag: string) => string | null): void {
+export function render(tooltip: HTMLElement, tags: Set<string>, getColor: (tag: string) => string | null): void {
   tooltip.replaceChildren();
   let isFirst = true;
 
-  for (const tag of getTagSetFromThumb(thumb)) {
+  for (const tag of tags) {
     if (!isFirst) {
       tooltip.appendChild(document.createTextNode(" "));
     }

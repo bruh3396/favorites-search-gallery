@@ -9,8 +9,6 @@ export interface Setting<T> {
   tooltipPosition: TooltipPosition;
   enabled: boolean;
   preference: Preference<T> | null;
-  apply: (value: T) => void;
-  applyOnBuild: boolean;
   enabledWhen: EnableRule | null;
 }
 

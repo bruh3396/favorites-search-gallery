@@ -1,9 +1,9 @@
 import { defineConfig } from "eslint/config";
+import functional from "eslint-plugin-functional";
 import globals from "globals";
 import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
-import functional from "eslint-plugin-functional";
 
 export default defineConfig([
   {
@@ -634,7 +634,7 @@ export default defineConfig([
     files: [
       "src/**/array.ts",
       "src/features/favorites/model/search/searcher.ts",
-      "src/features/favorites/features/downloader/filename_settings.ts",
+      "src/features/favorites/features/downloader/model/filenamer.ts",
       "src/**/multi_segmented.ts",
       "src/**/wildcard_search_term.ts",
       "src/playground/search_performance/prefix_index.ts",
@@ -644,7 +644,7 @@ export default defineConfig([
       "src/types/search.ts",
       "src/utils/pure/bit.ts",
       "src/utils/pure/bit.test.ts",
-      "src/features/favorites/features/downloader/zip_writer.ts"
+      "src/features/favorites/features/downloader/model/zip_writer.ts"
     ],
     rules: {
       "no-bitwise": "off"

@@ -36,10 +36,14 @@ export function buildStepper(config: StepperConfig): Stepper {
   display.inputMode = "numeric";
   let current = clamp(config.value, min, max);
 
-  const render = (): void => {
-    display.value = String(current);
+  const renderButtons = (): void => {
     decrement.disabled = current <= min;
     increment.disabled = current >= max;
+  };
+
+  const render = (): void => {
+    display.value = String(current);
+    renderButtons();
   };
 
   const update = (next: number): void => {
@@ -93,8 +97,15 @@ export function buildStepper(config: StepperConfig): Stepper {
       render();
     },
     setMax: (next: number): void => {
+      const clamped = clamp(current, min, next);
+
       max = next;
-      current = clamp(current, min, max);
+
+      if (clamped === current) {
+        renderButtons();
+        return;
+      }
+      current = clamped;
       render();
     }
   };

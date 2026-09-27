@@ -1,0 +1,471 @@
+.favorites-drawer-body.settings-view {
+  display: flex;
+  flex-direction: column;
+  overflow-y: hidden;
+}
+
+.settings-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--theme-border) transparent;
+}
+
+.settings-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.settings-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.settings-body::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+  background-color: var(--theme-border);
+}
+
+.settings-body::-webkit-scrollbar-thumb:hover {
+  background-color: var(--theme-text-muted);
+}
+
+.setting-filter {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  background: var(--theme-surface);
+}
+
+.setting-filter-empty {
+  display: none;
+  padding: 20px 12px;
+  color: var(--theme-text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.settings-view[data-empty] .setting-filter-empty {
+  display: block;
+}
+
+.setting-section[data-filtered],
+.setting-row[data-filtered] {
+  display: none;
+}
+
+.settings-view[data-filtering] .setting-section-header {
+  pointer-events: none;
+  cursor: default;
+}
+
+.settings-view[data-filtering] .setting-section-header .icon {
+  display: none;
+}
+
+.setting-section {
+  margin: 0;
+}
+
+.settings-view button.setting-section-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 8px 10px 12px;
+  border: none;
+  background: none;
+  color: var(--theme-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.setting-section-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 1px;
+  background: var(--theme-border);
+}
+
+.setting-section:first-child .setting-section-header::before {
+  background: none;
+}
+
+.settings-view button.setting-section-header:hover {
+  background: var(--theme-hover);
+}
+
+.settings-view button.setting-section-header:hover .setting-section-title {
+  color: var(--theme-text);
+}
+
+.setting-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--theme-text-muted);
+  transition: color 0.15s ease;
+}
+
+.setting-section:not([data-collapsed]) .setting-section-title,
+.settings-view[data-filtering] .setting-section-title {
+  color: var(--theme-accent);
+}
+
+.setting-section-header .icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  color: var(--theme-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.setting-section[data-collapsed] .setting-section-header .icon {
+  transform: rotate(-90deg);
+}
+
+.setting-group-wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  /* transition: grid-template-rows 0.22s ease; */
+}
+
+.setting-section[data-collapsed] .setting-group-wrap {
+  grid-template-rows: 0fr;
+  overflow: hidden;
+}
+
+.settings-view[data-filtering] .setting-section[data-collapsed] .setting-group-wrap {
+  grid-template-rows: 1fr;
+  overflow: visible;
+}
+
+.settings-view[data-filtering] .setting-section[data-collapsed] .setting-group {
+  padding: 0 0 10px;
+}
+
+.setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-height: 0;
+  padding: 0 0 10px;
+}
+
+.setting-section[data-collapsed] .setting-group {
+  padding: 0;
+}
+
+.setting-collapse-expand[data-collapsed]>.icon:first-child,
+.setting-collapse-expand:not([data-collapsed])>.icon:last-child {
+  display: none;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 30px;
+  padding: 3px 12px;
+  background: transparent;
+  color: var(--theme-text);
+  cursor: pointer;
+}
+
+.settings-view .setting-row:hover {
+  background: var(--theme-hover);
+}
+
+.setting-row[data-disabled] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.setting-row-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--theme-text);
+}
+
+.setting-control {
+  flex: 0 0 auto;
+  min-width: 0;
+  margin-right: 20px;
+}
+
+.setting-toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--theme-sunken);
+  border: 1px solid var(--theme-border);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.setting-toggle-knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--theme-text-muted);
+  transform: translateY(-50%);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.setting-row[data-on] .setting-toggle-track {
+  background: var(--theme-accent);
+  border-color: var(--theme-accent);
+}
+
+.setting-row[data-on] .setting-toggle-knob {
+  transform: translate(18px, -50%);
+  background: var(--theme-accent-text);
+}
+
+.setting-segmented {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--theme-sunken);
+  border: 1px solid var(--theme-border);
+}
+
+.settings-view button.setting-segmented-option {
+  padding: 3px 5px;
+  border: none;
+  border-left: 1px solid var(--theme-border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--theme-text-muted);
+  font: inherit;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.settings-view button.setting-segmented-option:first-child {
+  border-left: none;
+}
+
+.settings-view button.setting-segmented-option:hover {
+  color: var(--theme-text);
+}
+
+.settings-view button.setting-segmented-option[data-selected] {
+  background: var(--theme-accent);
+  color: var(--theme-accent-text);
+}
+
+.settings-view button.setting-segmented-option:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+.setting-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.settings-view button.setting-dropdown-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 130px;
+  padding: 4px 8px;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-sunken);
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.settings-view button.setting-dropdown-button>span {
+  flex: 1 1 auto;
+  text-align: left;
+}
+
+.setting-dropdown-button .icon {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+}
+
+.setting-dropdown-menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  right: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 100%;
+  padding: 4px;
+  border: 1px solid var(--theme-border);
+  border-radius: 8px;
+  background: var(--theme-raised);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}
+
+.setting-dropdown[data-open] .setting-dropdown-menu {
+  display: flex;
+}
+
+.settings-view button.setting-dropdown-option {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--theme-text);
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.settings-view button.setting-dropdown-option:hover {
+  background: var(--theme-hover);
+}
+
+.settings-view button.setting-dropdown-option[data-selected] {
+  color: var(--theme-accent);
+  cursor: default;
+}
+
+.settings-view button.setting-dropdown-option[data-selected]:hover {
+  background: none;
+}
+
+.setting-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--theme-sunken);
+  border: 1px solid var(--theme-border);
+}
+
+button.setting-stepper-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--theme-text);
+  cursor: pointer;
+}
+
+button.setting-stepper-button:hover {
+  background: var(--theme-hover);
+}
+
+button.setting-stepper-button:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.setting-stepper-button .icon {
+  width: 14px;
+  height: 14px;
+}
+
+button.setting-stepper-button[data-step="minus"] .icon {
+  stroke-width: 2.5;
+}
+
+input.setting-stepper-value {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-text);
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input.setting-stepper-value:focus {
+  background-color: transparent !important;
+  outline: none;
+}
+
+input.setting-stepper-value:hover {
+  background-color: transparent !important;
+  outline: none;
+  cursor: text;
+}
+
+.setting-slider {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-view input.setting-slider-input {
+  width: 110px;
+  height: 4px;
+  margin: 0;
+  padding: 0;
+  border-radius: 999px;
+  background: var(--theme-sunken);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.settings-view input.setting-slider-input::-webkit-slider-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--theme-accent);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.settings-view input.setting-slider-input::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: var(--theme-accent);
+  cursor: pointer;
+}
+
+.setting-slider-value {
+  min-width: 30px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--theme-text);
+}

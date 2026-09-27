@@ -56,7 +56,7 @@ export class GalleryRenderer {
     this.renderers.forEach((renderer) => renderer.cache(items));
   }
 
-  public toggleZoom(value: boolean | undefined): boolean {
+  public toggleZoom(value?: boolean): boolean {
     return this.imageRenderer.toggleZoom(value);
   }
 

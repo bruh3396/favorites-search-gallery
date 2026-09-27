@@ -1,52 +1,55 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 import { NavigationKey } from "@/types/input";
+import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryTouchFlow extends GalleryFlow {
   public handleMouseDown(event: EnhancedMouseEvent): void {
-    this.flows.dispatch.run({
+    this.runForState({
       preview: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent),
       idle: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent)
     }, event);
   }
 
   public handleTouchStart(event: TouchEvent): void {
-    this.flows.dispatch.run({
-      open: (touchEvent) => this.handleTouchStartInGallery(touchEvent)
-    }, event);
+    this.runForState({ open: (touchEvent) => this.handleTouchStartInGallery(touchEvent) }, event);
   }
 
   public handleTouchEnd(event: TouchEvent): void {
     this.dismissTutorial(event);
-    this.flows.video.showControls(event);
+
+    if (this.view.isOverVideo(event.target)) {
+      this.view.showVideoControls();
+    }
   }
 
-  public navigateBackInGallery(): void {
-    this.navigateInGallery("ArrowLeft");
+  public navigateBack(): void {
+    this.navigate("ArrowLeft");
   }
 
-  public navigateForwardInGallery(): void {
-    this.navigateInGallery("ArrowRight");
+  public navigateForward(): void {
+    this.navigate("ArrowRight");
   }
 
-  public closeGallery(): void {
-    this.flows.dispatch.run({ open: () => this.flows.openClose.close() });
+  public close(): void {
+    this.runForState({ open: () => this.flows.navigation.close() });
   }
 
   public favoriteCurrentPost(): void {
-    this.flows.dispatch.run({ open: () => this.flows.favoriter.addFavoriteInGallery() });
+    this.runForState({ open: () => this.flows.actions.run("addFavorite") });
   }
 
-  private navigateInGallery(direction: NavigationKey): void {
-    if (this.context.domEvents.didSwipe() || this.context.domEvents.didHold()) {
-      return;
+  public showTutorialOnFirstOpen(): void {
+    if (!this.context.preferences.gallery.tutorialSeen.value) {
+      this.context.preferences.gallery.tutorialSeen.set(true);
+      this.view.showTutorial();
     }
-    this.flows.dispatch.run({
-      open: () => {
-        this.flows.navigation.navigate(direction);
-      }
-    });
+  }
+
+  private navigate(direction: NavigationKey): void {
+    if (!this.context.domEvents.didSwipe() && !this.context.domEvents.didHold()) {
+      this.flows.navigation.navigateIfOpen(direction);
+    }
   }
 
   private dismissTutorial(event: TouchEvent): void {
@@ -60,7 +63,7 @@ export class GalleryTouchFlow extends GalleryFlow {
       mouseEvent.originalEvent.preventDefault();
       mouseEvent.originalEvent.stopPropagation();
       mouseEvent.originalEvent.stopImmediatePropagation();
-      this.flows.openClose.open(toMediaItem(mouseEvent.thumb));
+      this.flows.navigation.open(toMediaItem(mouseEvent.thumb));
     }
   }
 

@@ -13,9 +13,28 @@ import {
   removeNonNumericCharacters,
   replaceSpacesWithUnderscores,
   snakeToCamelCase,
+  toLowerUnderscored,
   trigramsOf
 } from "@/utils/pure/string";
 import { describe, expect, test } from "vitest";
+
+describe("toLowerUnderscored", () => {
+  test("lowercases", () => {
+    expect(toLowerUnderscored("Fruits")).toBe("fruits");
+  });
+
+  test("replaces spaces with underscores", () => {
+    expect(toLowerUnderscored("my fruits")).toBe("my_fruits");
+  });
+
+  test("collapses repeated whitespace before replacing", () => {
+    expect(toLowerUnderscored("  my   fruits  ")).toBe("my_fruits");
+  });
+
+  test("leaves an already underscored name alone", () => {
+    expect(toLowerUnderscored("my_fruits")).toBe("my_fruits");
+  });
+});
 
 describe("removeExtraWhitespace", () => {
   test("empty", () => {

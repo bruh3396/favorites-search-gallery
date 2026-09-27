@@ -3,6 +3,14 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
+const EXCLUDED_TESTS = [...configDefaults.exclude, ".audit/**", "src/playground/**"];
+const DOM_TESTS = [
+  "src/features/*/{control,view,shell,features}/**/*.test.ts",
+  "src/features/*/startup.test.ts",
+  "src/features/*/flows/flows.test.ts",
+  "src/lib/ui/**/*.test.ts",
+  "src/utils/browser/**/*.test.ts"
+];
 
 export default defineConfig({
   resolve: {
@@ -15,7 +23,11 @@ export default defineConfig({
     SCRIPT_VERSION: JSON.stringify("test")
   },
   test: {
-    exclude: [...configDefaults.exclude, ".audit/**", "src/playground/**"],
+    exclude: EXCLUDED_TESTS,
+    projects: [
+      { extends: true, test: { name: "node", exclude: [...EXCLUDED_TESTS, ...DOM_TESTS] } },
+      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom" } }
+    ],
     isolate: false,
     pool: "threads",
     minWorkers: 4,

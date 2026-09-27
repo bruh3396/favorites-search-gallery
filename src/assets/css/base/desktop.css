@@ -2,3 +2,18 @@
   max-width: 220px !important;
   background-color: transparent;
 }
+
+@media (max-width: 1440px) {
+  #favorites-root {
+    --favorites-toolbar-zoom: 0.85;
+  }
+
+  #favorites-toolbar {
+    zoom: var(--favorites-toolbar-zoom);
+  }
+
+  #favorites-root #favorites-drawer {
+    top: calc(var(--favorites-toolbar-height) * var(--favorites-toolbar-zoom));
+    height: calc(100vh - var(--favorites-toolbar-height) * var(--favorites-toolbar-zoom));
+  }
+}

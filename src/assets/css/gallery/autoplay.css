@@ -4,6 +4,10 @@
   visibility: hidden;
 }
 
+#autoplay-container[data-visible] {
+  visibility: visible;
+}
+
 /* Main menu */
 
 #autoplay-menu {

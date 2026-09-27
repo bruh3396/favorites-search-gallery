@@ -1,7 +1,7 @@
 import { IconName, icon } from "@/lib/ui/icon";
 import { createElement } from "@/utils/browser/element";
 
-export function build(container: HTMLElement): void {
+export function mount(container: HTMLElement): void {
   container.append(
     tapButton("gallery-tutorial-tap-left", "chevronLeft", "Tap · previous"),
     tapButton("gallery-tutorial-tap-right", "chevronRight", "Tap · next"),

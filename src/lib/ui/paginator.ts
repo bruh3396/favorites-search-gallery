@@ -1,8 +1,8 @@
-import { clamp } from "@/utils/pure/number";
-import { navigationDelta } from "@/lib/event/keys";
 import { Identifiable } from "@/types/app";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
+import { clamp } from "@/utils/pure/number";
+import { navigationDelta } from "@/lib/event/keys";
 import { paginationSequence } from "@/lib/ui/pagination";
 
 interface PaginatorConfig {

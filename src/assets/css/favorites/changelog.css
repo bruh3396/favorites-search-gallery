@@ -1,8 +1,8 @@
-#favorites-drawer-view-change .favorites-drawer-panel {
+#favorites-drawer-section-change .favorites-drawer-body {
   padding: 6px 6px;
 }
 
-#favorites-drawer-view-change .setting-group ul {
+#favorites-drawer-section-change .setting-group ul {
   margin: 0;
   padding: 0 0 0 24px;
   display: flex;
@@ -10,7 +10,7 @@
   gap: 4px;
 }
 
-#favorites-drawer-view-change .setting-group li {
+#favorites-drawer-section-change .setting-group li {
   font-size: 13px;
   color: var(--theme-text);
 }

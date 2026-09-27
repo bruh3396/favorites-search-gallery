@@ -15,17 +15,17 @@ export class PostOverlayTagClickFlow extends PostOverlayFlow {
     event.stopPropagation();
 
     if (mouseEvent.leftClick) {
-      this.context.events.postOverlay.addTagToSearch.emit(tag);
+      this.context.events.postOverlay.addTagToSearchRequested.emit(tag);
       return;
     }
 
     if (mouseEvent.rightClick) {
-      this.context.events.postOverlay.excludeTagFromSearch.emit(tag);
+      this.context.events.postOverlay.excludeTagFromSearchRequested.emit(tag);
       return;
     }
 
     if (mouseEvent.middleClick) {
-      this.context.events.postOverlay.searchForTag.emit(tag);
+      this.context.events.postOverlay.searchForTagRequested.emit(tag);
     }
   }
 

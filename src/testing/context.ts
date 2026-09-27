@@ -4,9 +4,9 @@ import { DomEvents } from "@/app/context/dom_events";
 import { Environment } from "@/app/context/environment";
 import { FeatureBridge } from "@/app/context/feature_bridge";
 import { Shell } from "@/app/context/shell";
-import { buildEvents } from "@/app/context/events";
-import { buildFlags } from "@/app/context/flags";
 import { createEnvironment } from "@/testing/environment";
+import { createEvents } from "@/app/context/events";
+import { createFlags } from "@/app/context/flags";
 
 interface AppContextOverrides {
   environment?: Partial<Environment>;
@@ -20,8 +20,8 @@ export function createAppContext(overrides: AppContextOverrides = {}): AppContex
   return {
     environment,
     preferences,
-    flags: buildFlags(environment, preferences),
-    events: buildEvents(),
+    flags: createFlags(environment, preferences),
+    events: createEvents(),
     featureBridge: new FeatureBridge(environment),
     domEvents: new DomEvents(),
     shell: overrides.shell ?? createUnavailableShell()

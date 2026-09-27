@@ -2,18 +2,7 @@ import { Mock, beforeEach, describe, expect, test, vi } from "vitest";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { Preference } from "@/lib/storage/preference";
-
-function createPreference<T>(initial: T): Preference<T> {
-  let current = initial;
-  return {
-    get value(): T {
-      return current;
-    },
-    set(next: T): void {
-      current = next;
-    }
-  } as Preference<T>;
-}
+import { createPreference } from "@/testing/preferences";
 
 function createRequest(id: string, overrides: Partial<ImageRequest> = {}): ImageRequest {
   return {

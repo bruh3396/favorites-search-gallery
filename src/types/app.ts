@@ -1,4 +1,5 @@
-export type Feature = "app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip";
+export type Platform = "mobile" | "desktop";
+export type Feature ="app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip";
 export type PerformanceProfile = "normal" | "low" | "potato";
 export type Layout = "row" | "square" | "grid" | "column" | "native";
 export type GalleryState = "idle" | "preview" | "open";
@@ -16,7 +17,7 @@ export type QualityCutoff = {
 };
 export type PostOverlayMode = "tag";
 
-export type GalleryMenuAction =
+export type GalleryAction =
   | "exit"
   | "fullscreen"
   | "openPost"
@@ -26,6 +27,8 @@ export type GalleryMenuAction =
   | "removeFavorite"
   | "toggleDockPosition"
   | "toggleBackground"
+  | "toggleMute"
+  | "togglePause"
   | "search"
   | "pin"
   | "none";

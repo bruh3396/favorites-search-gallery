@@ -23,11 +23,11 @@ export class GalleryTapControls {
     this.view.appendToGallery(tapControlContainer);
     leftTap.ontouchend = async(): Promise<void> => {
       await macroTask();
-      this.context.events.gallery.leftTap.emit();
+      this.context.events.gallery.leftTapped.emit();
     };
     rightTap.ontouchend = async(): Promise<void> => {
       await macroTask();
-      this.context.events.gallery.rightTap.emit();
+      this.context.events.gallery.rightTapped.emit();
     };
   }
 }

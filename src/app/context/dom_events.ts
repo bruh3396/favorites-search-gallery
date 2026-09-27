@@ -35,10 +35,10 @@ export class DomEvents {
   };
 
   public readonly mobile = {
-    swipedUp: new Emitter<void>(),
-    swipedDown: new Emitter<void>(),
-    swipedLeft: new Emitter<void>(),
-    swipedRight: new Emitter<void>(),
+    swipeUp: new Emitter<void>(),
+    swipeDown: new Emitter<void>(),
+    swipeLeft: new Emitter<void>(),
+    swipeRight: new Emitter<void>(),
     touchHold: new Emitter<TouchEvent>()
   };
 
@@ -97,16 +97,16 @@ export class DomEvents {
 
     switch (this.getSwipeDirection()) {
       case "up":
-        this.mobile.swipedUp.emit();
+        this.mobile.swipeUp.emit();
         break;
       case "down":
-        this.mobile.swipedDown.emit();
+        this.mobile.swipeDown.emit();
         break;
       case "left":
-        this.mobile.swipedLeft.emit();
+        this.mobile.swipeLeft.emit();
         break;
       case "right":
-        this.mobile.swipedRight.emit();
+        this.mobile.swipeRight.emit();
         break;
       default: break;
     }

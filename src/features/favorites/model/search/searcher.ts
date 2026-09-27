@@ -1,10 +1,11 @@
-import { ALL_RATINGS, SearchableMetric } from "@/types/search";
+import { ALL_RATINGS, Rating, SearchableMetric, SortKey } from "@/types/search";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { Environment } from "@/app/context/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
+import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { Searcher } from "@/features/favorites/types/types";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
@@ -15,7 +16,10 @@ import { shuffleInPlace } from "@/utils/pure/array";
 export class FavoritesSearcher implements Searcher {
   private readonly engine: SearchEngine<Favorite>;
   private readonly results: ObservableList<Favorite>;
-  private readonly preferences: Preferences;
+  private readonly excludeBlacklist: Preference<boolean>;
+  private readonly allowedRatings: Preference<Rating>;
+  private readonly sortKey: Preference<SortKey>;
+  private readonly sortAscending: Preference<boolean>;
   private readonly userIsOnTheirOwnFavoritesPage: boolean;
   private readonly negatedBlacklistedTags: string;
   private currentSearchQuery: string;
@@ -26,7 +30,10 @@ export class FavoritesSearcher implements Searcher {
 
     this.engine = FavoritesConfig.useBitSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
     this.results = new ObservableList<Favorite>(onSearchResultsChanged);
-    this.preferences = preferences;
+    this.excludeBlacklist = preferences.favorites.excludeBlacklist;
+    this.allowedRatings = preferences.favorites.allowedRatings;
+    this.sortKey = preferences.favorites.sortKey;
+    this.sortAscending = preferences.favorites.sortAscending;
     this.userIsOnTheirOwnFavoritesPage = environment.userIsOnTheirOwnFavoritesPage;
     this.negatedBlacklistedTags = environment.negatedBlacklistedTags;
     this.currentSearchQuery = "";
@@ -93,7 +100,7 @@ export class FavoritesSearcher implements Searcher {
   }
 
   private usingBlacklist(): boolean {
-    return !this.userIsOnTheirOwnFavoritesPage || this.preferences.favorites.excludeBlacklist.value;
+    return !this.userIsOnTheirOwnFavoritesPage || this.excludeBlacklist.value;
   }
 
   private enforcingBlacklist(): boolean {
@@ -115,17 +122,17 @@ export class FavoritesSearcher implements Searcher {
   }
 
   private filterByRating(favorites: Favorite[]): Favorite[] {
-    const allowedRatings = this.preferences.favorites.allowedRatings.value;
+    const allowedRatings = this.allowedRatings.value;
     return allowedRatings === ALL_RATINGS ? favorites : favorites.filter(favorite => (favorite.rating & allowedRatings) > 0);
   }
 
   private sort(favorites: Favorite[]): Favorite[] {
-    const sortKey = this.preferences.favorites.sortKey.value;
+    const sortKey = this.sortKey.value;
 
     if (sortKey === "random") {
       return shuffleInPlace([...favorites]);
     }
-    const isAscending = this.preferences.favorites.sortAscending.value;
+    const isAscending = this.sortAscending.value;
 
     if (sortKey === "default") {
       return isAscending ? [...favorites].reverse() : favorites;

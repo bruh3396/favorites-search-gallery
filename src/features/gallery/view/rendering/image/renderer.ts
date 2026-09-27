@@ -79,7 +79,7 @@ export class GalleryImageRenderer implements Renderer {
     return this.root.classList.toggle("gallery-image-frame--zooming", value);
   }
 
-  public toggleZoom(value: boolean | undefined): boolean {
+  public toggleZoom(value?: boolean): boolean {
     return this.root.classList.toggle("gallery-image-frame--zoomed", value);
   }
 

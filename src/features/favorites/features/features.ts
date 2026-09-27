@@ -1,9 +1,9 @@
-import * as FavoritesSnippets from "@/features/favorites/features/snippets/snippets";
 import { AppContext } from "@/app/context/context";
-import { DownloaderDependencies } from "@/features/favorites/features/downloader/types";
-import { FavoritesDownloader } from "@/features/favorites/features/downloader/downloader";
-import { FavoritesDrawerViewContent } from "@/types/favorite";
-import { SnippetsDependencies } from "@/features/favorites/features/snippets/types";
+import { Downloader } from "@/features/favorites/features/downloader/downloader";
+import { DownloaderDependencies } from "@/features/favorites/features/downloader/types/types";
+import { FavoritesDrawerSectionContent } from "@/types/favorites_ui";
+import { Snippets } from "@/features/favorites/features/snippets/snippets";
+import { SnippetsDependencies } from "@/features/favorites/features/snippets/types/types";
 import { setSnippetSuggestionSource } from "@/lib/ui/autocomplete/autocomplete";
 
 export interface FavoritesFeaturesDependencies {
@@ -13,13 +13,13 @@ export interface FavoritesFeaturesDependencies {
 
 export class FavoritesFeatures {
   private readonly context: AppContext;
-  private readonly downloader: FavoritesDownloader;
-  private readonly snippets: SnippetsDependencies;
+  private readonly downloader: Downloader;
+  private readonly snippets: Snippets;
 
   constructor(context: AppContext, { downloader, snippets }: FavoritesFeaturesDependencies) {
     this.context = context;
-    this.downloader = new FavoritesDownloader(downloader);
-    this.snippets = snippets;
+    this.downloader = new Downloader(downloader);
+    this.snippets = new Snippets(snippets);
   }
 
   public setup(): void {
@@ -27,12 +27,12 @@ export class FavoritesFeatures {
     this.setupSnippets();
   }
 
-  public mountDownloader(): FavoritesDrawerViewContent {
-    return this.downloader.mount();
+  public buildDownloaderSection(): FavoritesDrawerSectionContent {
+    return this.downloader.buildDrawerSection();
   }
 
-  public mountSnippets(): FavoritesDrawerViewContent {
-    return FavoritesSnippets.mount();
+  public buildSnippetsSection(): FavoritesDrawerSectionContent {
+    return this.snippets.buildDrawerSection();
   }
 
   private setupDownloader(): void {
@@ -45,7 +45,6 @@ export class FavoritesFeatures {
   }
 
   private setupSnippets(): void {
-    FavoritesSnippets.setup(this.snippets);
-    setSnippetSuggestionSource(FavoritesSnippets.suggestions);
+    setSnippetSuggestionSource((prefix) => this.snippets.suggestions(prefix));
   }
 }

@@ -1,11 +1,12 @@
-import { FavoritesToolbarBuild, FavoritesToolbarSlots } from "@/features/favorites/types/types";
 import { createElement, label, span } from "@/utils/browser/element";
 import { Environment } from "@/app/context/environment";
 import { FavoritesId } from "@/features/favorites/types/selectors";
+import { FavoritesToolbarSlots } from "@/types/favorites_ui";
+import { ShellPart } from "@/types/ui";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { icon } from "@/lib/ui/icon";
 
-export function build(environment: Environment): FavoritesToolbarBuild {
+export function build(environment: Environment): ShellPart<FavoritesToolbarSlots> {
   const slots: FavoritesToolbarSlots = {
     drawerToggle: span(FavoritesId.drawerToggleSlot),
     searchField: span(),

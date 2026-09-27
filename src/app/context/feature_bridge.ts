@@ -32,22 +32,22 @@ export class FeatureBridge {
   constructor(private readonly environment: Environment) { }
 
   public galleryOpened(): boolean {
-    return this.gallery.state.call() === "open";
+    return this.gallery.state.request() === "open";
   }
 
   public galleryIdle(): boolean {
-    return this.gallery.state.call() === "idle";
+    return this.gallery.state.request() === "idle";
   }
 
   public currentSearchQuery(): string {
-    return this.environment.onPostListPage ? this.postList.searchQuery.call() : this.favorites.searchQuery.call();
+    return this.environment.onPostListPage ? this.postList.searchQuery.request() : this.favorites.searchQuery.request();
   }
 
   public usingInfiniteScroll(): boolean {
-    return this.environment.onPostListPage ? this.postList.usingInfiniteScroll.call() : this.favorites.usingInfiniteScroll.call();
+    return this.environment.onPostListPage ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
   }
 
   public currentLayout(): Layout {
-    return this.environment.onPostListPage ? this.postList.layout.call() : this.favorites.layout.call();
+    return this.environment.onPostListPage ? this.postList.layout.request() : this.favorites.layout.request();
   }
 }

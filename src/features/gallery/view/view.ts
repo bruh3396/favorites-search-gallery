@@ -28,7 +28,7 @@ export class GalleryView {
     this.ui = new GalleryUi(context.preferences, context.environment, context.shell, shell.background);
     this.menu = new GalleryMenu(context.preferences, context.environment, shell.menu);
     this.renderer = new GalleryRenderer(shell.root, context, favoriteFor);
-    GalleryTutorial.build(shell.tutorial);
+    GalleryTutorial.mount(shell.tutorial);
   }
 
   public setup(dependencies: GalleryViewDependencies): void {
@@ -95,7 +95,7 @@ export class GalleryView {
     this.renderer.cache(items);
   }
 
-  public toggleZoom(value: boolean | undefined): boolean {
+  public toggleZoom(value?: boolean): boolean {
     return this.renderer.toggleZoom(value);
   }
 
@@ -173,6 +173,10 @@ export class GalleryView {
 
   public isOverTutorial(target: EventTarget | null): boolean {
     return isInside(target, `#${GalleryId.tutorial}`);
+  }
+
+  public setMenuEnabled(enabled: boolean): void {
+    this.menu.setEnabled(enabled);
   }
 
   public setMenuPinned(pinned: boolean): void {

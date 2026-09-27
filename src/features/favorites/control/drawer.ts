@@ -1,4 +1,4 @@
-import { FavoritesDrawerView, FavoritesDrawerViewMap, FavoritesDrawerViewNames } from "@/types/favorite";
+import { FavoritesDrawerContents, FavoritesDrawerSectionContent, FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
 import { FavoritesClass } from "@/features/favorites/types/selectors";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
@@ -6,32 +6,32 @@ import { Preferences } from "@/app/context/preferences";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 
 export function setup(preferences: Preferences, shell: FavoritesShell): void {
-  const { drawerOpen, drawerActiveView } = preferences.favorites;
-  const open = (view: FavoritesDrawerView): void => {
+  const { drawerOpen, drawerActiveSection } = preferences.favorites;
+  const open = (section: FavoritesDrawerSectionName): void => {
     drawerOpen.set(true);
-    drawerActiveView.set(view);
+    drawerActiveSection.set(section);
   };
 
-  for (const name of FavoritesDrawerViewNames) {
-    const { tab } = shell.drawer[name];
+  for (const name of FavoritesDrawerSectionNames) {
+    const { tab, label } = shell.drawer[name];
 
-    tab.addEventListener("click", () => drawerActiveView.set(name));
+    tab.addEventListener("click", () => drawerActiveSection.set(name));
 
     if (!FavoritesConfig.drawerSidebarLabelsEnabled) {
-      addTooltip(tab, tab.getAttribute("aria-label") ?? name, "right");
+      addTooltip(tab, label, "right");
     }
   }
-  shell.slots.aboutVersion.addEventListener("click", () => open("change"));
-  shell.slots.aboutHelp.addEventListener("click", () => open("help"));
+  shell.toolbar.aboutVersion.addEventListener("click", () => open("change"));
+  shell.toolbar.aboutHelp.addEventListener("click", () => open("help"));
 }
 
-export function mount(shell: FavoritesShell, views: FavoritesDrawerViewMap): void {
-  for (const [name, content] of Object.entries(views) as [FavoritesDrawerView, NonNullable<FavoritesDrawerViewMap[FavoritesDrawerView]>][]) {
-    const { title, panel } = shell.drawer[name];
+export function mount(shell: FavoritesShell, contents: FavoritesDrawerContents): void {
+  for (const [name, content] of Object.entries(contents) as [FavoritesDrawerSectionName, FavoritesDrawerSectionContent][]) {
+    const { title, body } = shell.drawer[name];
     const actions = content.actions ?? [];
 
     actions.forEach(action => action.classList.add(FavoritesClass.drawerTitleAction));
     title.append(...actions);
-    content.mount?.(panel);
+    content.mount?.(body);
   }
 }

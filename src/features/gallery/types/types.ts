@@ -1,4 +1,4 @@
-import { GalleryMenuAction, Layout } from "@/types/app";
+import { GalleryAction, Layout } from "@/types/app";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { MediaItem } from "@/types/media";
 import { Preference } from "@/lib/storage/preference";
@@ -44,7 +44,7 @@ export interface GalleryViewDependencies {
 export type GalleryMenuButton = {
   id: string;
   icon: string;
-  action: GalleryMenuAction;
+  action: GalleryAction;
   enabled: boolean;
   tooltip: string;
   color: string;

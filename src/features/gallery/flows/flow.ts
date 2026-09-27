@@ -12,6 +12,12 @@ export interface GalleryFlowDependencies {
   flows: GalleryFlows;
 }
 
+type GalleryStateHandlers<V> = {
+  idle?: (arg: V) => void;
+  preview?: (arg: V) => void;
+  open?: (arg: V) => void;
+};
+
 export abstract class GalleryFlow {
   protected readonly context: AppContext;
   protected readonly model: GalleryModel;
@@ -25,6 +31,10 @@ export abstract class GalleryFlow {
     this.view = dependencies.view;
     this.control = dependencies.control;
     this.flows = dependencies.flows;
+  }
+
+  protected runForState<V>(handlers: GalleryStateHandlers<V>, arg?: V): void {
+    handlers[this.model.getCurrentState()]?.(arg as V);
   }
 
   protected usingColumnLayout(): boolean {

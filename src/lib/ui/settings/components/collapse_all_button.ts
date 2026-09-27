@@ -14,20 +14,20 @@ export class CollapseAllButton {
     this.element = createElement("button", { className: SettingsClass.collapseExpand, children: [icon("collapseAll"), icon("expandAll")] });
     this.element.type = "button";
     this.element.addEventListener("click", () => {
-      const collapsed = !this.allCollapsed();
+      const wasCollapsed = !this.allCollapsed();
 
-      this.sections.forEach(section => setCollapsed(section, collapsed));
-      onToggleAll(collapsed);
+      this.sections.forEach(section => setCollapsed(section, wasCollapsed));
+      onToggleAll(wasCollapsed);
       this.refresh();
     });
     this.refresh();
   }
 
   public refresh(): void {
-    const collapsed = this.allCollapsed();
+    const wasCollapsed = this.allCollapsed();
 
-    toggleDataset(this.element, "collapsed", collapsed);
-    addTooltip(this.element, `${collapsed ? "Expand" : "Collapse"} all`, "below");
+    toggleDataset(this.element, "collapsed", wasCollapsed);
+    addTooltip(this.element, `${wasCollapsed ? "Expand" : "Collapse"} all`, "below");
   }
 
   private allCollapsed(): boolean {

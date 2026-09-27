@@ -9,11 +9,11 @@ interface SettingsSection {
   controls: SettingsControl[];
 }
 
-export function build(context: AppContext, panel: HTMLElement): void {
-  panel.classList.add(SettingsClass.view);
+export function mount(context: AppContext, container: HTMLElement): void {
+  container.classList.add(SettingsClass.view);
 
   for (const section of buildSections(context)) {
-    panel.appendChild(buildSection(context, section));
+    container.appendChild(buildSection(context, section));
   }
 }
 

@@ -19,10 +19,10 @@ export function buildCollapsibleSection(options: CollapsibleSectionOptions): HTM
 
   header.type = "button";
   header.addEventListener("click", () => {
-    const collapsed = !isCollapsed(section);
+    const wasCollapsed = !isCollapsed(section);
 
-    setCollapsed(section, collapsed);
-    options.onToggle(collapsed);
+    setCollapsed(section, wasCollapsed);
+    options.onToggle(wasCollapsed);
   });
   setCollapsed(section, options.collapsed);
   section.append(header, wrap);

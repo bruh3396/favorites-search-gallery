@@ -12,8 +12,8 @@ export class PostOverlayModel {
   private readonly reopenCooldown = new PostOverlayReopenCooldown();
   private readonly resizeState = new PostOverlayResizeState();
 
-  public resolveTagCategories(thumb: HTMLElement): Promise<TagCategoryMap> {
-    return PostOverlayTagsResolver.resolveAll(thumb);
+  public resolveTagCategories(id: string, tags: Set<string>): Promise<TagCategoryMap> {
+    return PostOverlayTagsResolver.resolveAll(id, tags);
   }
 
   public isCurrentTarget(thumbId: string): boolean {

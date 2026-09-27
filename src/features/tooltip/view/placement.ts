@@ -7,7 +7,6 @@ interface Placed {
 
 export class TooltipPlacement {
   private placed: Placed | null = null;
-  private getTopObstruction: () => HTMLElement | null = () => null;
 
   public setup(getTopObstruction: () => HTMLElement | null): void {
     this.getTopObstruction = getTopObstruction;
@@ -27,4 +26,6 @@ export class TooltipPlacement {
       TooltipPosition.position(this.placed.tooltip, this.placed.thumb, this.getTopObstruction());
     }
   }
+
+  private getTopObstruction: () => HTMLElement | null = () => null;
 }

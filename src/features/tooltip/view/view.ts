@@ -17,10 +17,10 @@ export class TooltipView {
     this.placement.setup(getTopObstruction);
   }
 
-  public show(thumb: HTMLElement, getColor: (tag: string) => string | null): void {
+  public show(thumb: HTMLElement, tags: Set<string>, getColor: (tag: string) => string | null): void {
     const tooltip = this.element.reveal();
 
-    TooltipContent.render(tooltip, thumb, getColor);
+    TooltipContent.render(tooltip, tags, getColor);
     this.placement.place(tooltip, thumb);
   }
 

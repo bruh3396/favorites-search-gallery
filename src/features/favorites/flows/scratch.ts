@@ -12,7 +12,7 @@ export class FavoritesScratchFlow extends FavoritesFlow {
       if (top === undefined || top.count <= 1) {
         break;
       }
-      query += `${query === "" ? "" : " "}-${top.tag}`;
+      query += ` -${top.tag}`;
       results = this.model.searchFavoritesPure(results, `-${top.tag}`);
     } while (results.length > 0);
 
@@ -23,7 +23,7 @@ export class FavoritesScratchFlow extends FavoritesFlow {
 function mostFrequentTag(favorites: Favorite[]): { tag: string; count: number } | undefined {
   const tagCounts = new Map<string, number>();
   let maxCount = 0;
-  let maxTag: string | undefined;
+  let maxTag: string = "not-a-tag";
 
   for (const favorite of favorites) {
     for (const tag of favorite.tags) {
@@ -37,5 +37,5 @@ function mostFrequentTag(favorites: Favorite[]): { tag: string; count: number } 
       }
     }
   }
-  return maxTag === undefined ? undefined : { tag: maxTag, count: maxCount };
+  return { tag: maxTag, count: maxCount };
 }

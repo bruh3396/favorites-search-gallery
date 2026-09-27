@@ -1,6 +1,6 @@
 import * as FavoritesDrawer from "@/features/favorites/shell/drawer";
 import * as FavoritesToolbar from "@/features/favorites/shell/toolbar";
-import { FavoritesDrawerSlots, FavoritesToolbarSlots } from "@/features/favorites/types/types";
+import { FavoritesDrawerSlots, FavoritesToolbarSlots } from "@/types/favorites_ui";
 import { Environment } from "@/app/context/environment";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/selectors";
@@ -13,8 +13,8 @@ export class FavoritesShell {
   public readonly workspace: HTMLElement;
   public readonly drawerTrack: HTMLElement;
   public readonly contentPane: HTMLElement;
-  public readonly toolbar: HTMLElement;
-  public readonly slots: FavoritesToolbarSlots;
+  public readonly toolbarRoot: HTMLElement;
+  public readonly toolbar: FavoritesToolbarSlots;
   public readonly drawer: FavoritesDrawerSlots;
 
   constructor(shell: Shell, environment: Environment) {
@@ -25,12 +25,12 @@ export class FavoritesShell {
     this.workspace = div(FavoritesId.workspace);
     this.drawerTrack = div(FavoritesId.drawerTrack);
     this.contentPane = div(FavoritesId.contentPane);
-    this.toolbar = toolbar.root;
-    this.slots = toolbar.slots;
+    this.toolbarRoot = toolbar.root;
+    this.toolbar = toolbar.slots;
     this.drawer = drawer.slots;
     toggleDataset(this.root, "drawerIconOnly", !FavoritesConfig.drawerSidebarLabelsEnabled);
     shell.root.prepend(this.root);
-    this.root.append(this.toolbar, this.workspace);
+    this.root.append(this.toolbarRoot, this.workspace);
     this.workspace.append(this.drawerTrack, this.contentPane);
     this.drawerTrack.append(drawer.root);
     this.contentPane.append(shell.scrollSentinelTop, shell.content, shell.scrollSentinelBottom);

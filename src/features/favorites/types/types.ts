@@ -1,9 +1,10 @@
-import { Favorite, FavoritesDrawerView } from "@/types/favorite";
 import { MediaExtension, MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { ContentDisplayOptions } from "@/types/ui";
+import { Favorite } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
 import { Post } from "@/types/api";
+import { SettingsControl } from "@/lib/ui/settings/controls";
 
 export interface Arena {
   allocate: () => number;
@@ -26,6 +27,11 @@ export interface Arena {
 export interface Store {
   readAll: () => Promise<Post[]>;
   streamAll: (onBatch: (posts: Post[]) => void) => Promise<void>;
+}
+
+export interface KeyValueStorage {
+  get: <V>(key: string) => V | null;
+  set: <V>(key: string, value: V) => void;
 }
 
 export interface Fetcher {
@@ -68,40 +74,13 @@ export interface Display {
 
 export type FavoritesPaginationAction = "page" | "step" | "gotoToggle" | "gotoSubmit";
 
-export interface FavoritesToolbarSlots {
-  drawerToggle: HTMLElement;
-  searchField: HTMLElement;
-  searchButton: HTMLElement;
-  searchActions: HTMLElement;
-  buttons: HTMLElement;
-  aboutHelp: HTMLElement;
-  aboutVersion: HTMLElement;
-  pagination: HTMLElement;
-  rangeIndicator: HTMLElement;
-  resultsCount: HTMLElement;
-  loadStatus: HTMLElement;
-}
-
-export interface FavoritesToolbarBuild {
-  root: HTMLElement;
-  slots: FavoritesToolbarSlots;
-}
-
-export interface FavoritesDrawerViewSlots {
-  tab: HTMLElement;
-  view: HTMLElement;
-  title: HTMLElement;
-  panel: HTMLElement;
-}
-
-export type FavoritesDrawerSlots = Record<FavoritesDrawerView, FavoritesDrawerViewSlots>;
-
-export interface FavoritesDrawerBuild {
-  root: HTMLElement;
-  slots: FavoritesDrawerSlots;
-}
-
 export interface FavoritesViewDependencies {
   onContentReplaced: () => void;
   onContentAdded: (favorites: Favorite[]) => void;
+}
+
+export interface SettingsSection {
+  title: string;
+  expanded?: boolean;
+  controls: SettingsControl[];
 }

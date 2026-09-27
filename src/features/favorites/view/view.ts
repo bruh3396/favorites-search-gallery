@@ -1,12 +1,13 @@
 import * as FavoritesNativePageCleaner from "@/features/favorites/view/native_page_cleaner";
 import { ContentDisplayOptions, PaginationState } from "@/types/ui";
-import { Favorite, FavoritesDrawerView } from "@/types/favorite";
-import { bindThumb, blankThumbImage, configureFavoritesElement, createBlankThumb, setThumbFavorited } from "@/lib/ui/thumb/favorites_element";
 import { AppContext } from "@/app/context/context";
 import { ContentTiler } from "@/app/layout/content_tiler";
 import { EnhancedMouseEvent } from "@/lib/event/input";
+import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDrawer } from "@/features/favorites/view/drawer";
+import { FavoritesDrawerSectionName } from "@/types/favorites_ui";
+import { FavoritesElementTemplate } from "@/features/favorites/view/element_template";
 import { FavoritesLinkSuppressor } from "@/features/favorites/view/link_suppressor";
 import { FavoritesPaginationRenderer } from "@/features/favorites/view/pagination_renderer";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
@@ -18,6 +19,7 @@ import { Layout } from "@/types/app";
 import { Post } from "@/types/api";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";
+import { toggleHeader } from "@/lib/ui/toggles";
 
 export class FavoritesView {
   public readonly removeOriginalUnusedScripts: () => void;
@@ -28,12 +30,12 @@ export class FavoritesView {
   private readonly drawer: FavoritesDrawer;
   private readonly linkSuppressor: FavoritesLinkSuppressor;
   private readonly skeleton: FavoritesSkeleton;
+  private readonly elementTemplate: FavoritesElementTemplate;
   private readonly thumbPool: FavoritesThumbPool<HTMLElement>;
   private onContentReplaced: () => void;
   private onContentAdded: (favorites: Favorite[]) => void;
 
-  constructor(private readonly context: AppContext, private readonly shell: FavoritesShell) {
-    configureFavoritesElement(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.onMobileDevice, context.environment.userIsOnTheirOwnFavoritesPage);
+  constructor(private readonly context: AppContext, shell: FavoritesShell) {
     this.removeOriginalUnusedScripts = FavoritesNativePageCleaner.removeOriginalUnusedScripts;
     this.takeNativeFavorites = FavoritesNativePageCleaner.takeNativeFavorites;
     this.onContentReplaced = doNothing;
@@ -41,13 +43,19 @@ export class FavoritesView {
     this.contentTiler = new ContentTiler(context);
     this.linkSuppressor = new FavoritesLinkSuppressor();
     this.skeleton = new FavoritesSkeleton(this.getLayout());
-    this.status = new FavoritesStatus(shell.slots, shell.toolbar);
-    this.pagination = new FavoritesPaginationRenderer(shell.slots.pagination, shell.slots.rangeIndicator);
+    this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot);
+    this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
+    this.elementTemplate = new FavoritesElementTemplate(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.onMobileDevice, context.environment.userIsOnTheirOwnFavoritesPage);
     this.thumbPool = this.createThumbPool();
     this.pagination.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
     this.drawer.toggle(context.preferences.favorites.drawerOpen.value);
-    this.drawer.showView(context.preferences.favorites.drawerActiveView.value);
+    this.drawer.showSection(context.preferences.favorites.drawerActiveSection.value);
+    this.toggleHeader(context.preferences.favorites.headerEnabled.value);
+  }
+
+  public toggleHeader(enabled: boolean): void {
+    toggleHeader(enabled);
   }
 
   public setup(dependencies: FavoritesViewDependencies): void {
@@ -111,8 +119,8 @@ export class FavoritesView {
     this.pagination.closeGotoPagePopover();
   }
 
-  public buildPaginator(state: PaginationState): void {
-    this.pagination.buildPaginator(state);
+  public renderPagination(state: PaginationState): void {
+    this.pagination.render(state);
   }
 
   public updatePaginator(state: PaginationState): void {
@@ -123,8 +131,8 @@ export class FavoritesView {
     this.drawer.toggle(open);
   }
 
-  public showDrawerView(view: FavoritesDrawerView): void {
-    this.drawer.showView(view);
+  public showDrawerSection(section: FavoritesDrawerSectionName): void {
+    this.drawer.showSection(section);
   }
 
   public setStatus(text: string): void {
@@ -160,12 +168,12 @@ export class FavoritesView {
     this.skeleton.collectAspectRatios(this.context.shell.getContentThumbs());
   }
 
-  private createThumbPool(): FavoritesThumbPool<HTMLElement> {
-    return new FavoritesThumbPool<HTMLElement>({
-      create: createBlankThumb,
-      bind: bindThumb,
-      setAsFavorited: setThumbFavorited,
-      blankImage: blankThumbImage
-    }, FavoritesConfig.thumbPoolMaxRetained, this.context.environment.userIsOnTheirOwnFavoritesPage);
-  }
+private createThumbPool(): FavoritesThumbPool<HTMLElement> {
+  return new FavoritesThumbPool<HTMLElement>({
+    create: () => this.elementTemplate.createBlankThumb(),
+    bind: (root, favorite, favorited) => this.elementTemplate.bindThumb(root, favorite, favorited),
+    setAsFavorited: (node, favorited) => this.elementTemplate.setThumbFavorited(node, favorited),
+    blankImage: () => this.elementTemplate.blankThumbImage
+  }, FavoritesConfig.thumbPoolMaxRetained, this.context.environment.userIsOnTheirOwnFavoritesPage);
+}
 }

@@ -1,29 +1,34 @@
 import { AppContext } from "@/app/context/context";
-import { EnhancedKeyboardEvent } from "@/lib/event/input";
-import { GalleryAutoplay } from "@/features/gallery/features/autoplay/autoplay";
-import { NavigationKey } from "@/types/input";
+import { Autoplay } from "@/features/gallery/features/autoplay/autoplay";
+import { AutoplayCallbacks } from "@/features/gallery/features/autoplay/types/types";
 
-type Subscribe<E> = (callback: (event: E) => void, options?: AddEventListenerOptions) => void;
-
-interface GalleryFeaturesDependencies {
-  autoplay: {
-    setVideoLooping: (value: boolean) => void;
-    onComplete: (direction?: NavigationKey) => void;
-    onVideoEndedBeforeMinimumViewTime: () => void;
-    subscribeToMouseMove: Subscribe<MouseEvent>;
-    subscribeToKeyDown: Subscribe<EnhancedKeyboardEvent>;
-  };
+export interface GalleryFeaturesDependencies {
+  autoplay: AutoplayCallbacks;
 }
 
 export class GalleryFeatures {
-  private readonly autoplay: GalleryAutoplay;
+  private readonly context: AppContext;
+  private readonly autoplay: Autoplay;
 
-  constructor(private readonly context: AppContext) {
-    this.autoplay = new GalleryAutoplay(context);
+  constructor(context: AppContext, { autoplay }: GalleryFeaturesDependencies) {
+    const { preferences, environment } = context;
+
+    this.context = context;
+    this.autoplay = new Autoplay({
+      ...autoplay,
+      active: preferences.gallery.autoplayActive,
+      paused: preferences.gallery.autoplayPaused,
+      forward: preferences.gallery.autoplayForward,
+      durations: {
+        image: preferences.gallery.autoplayImageDuration,
+        minimumVideo: preferences.gallery.autoplayMinimumVideoDuration
+      },
+      platform: environment.platform
+    });
   }
 
-  public setup(dependencies: GalleryFeaturesDependencies): void {
-    this.setupAutoplay(dependencies.autoplay);
+  public setup(): void {
+    this.setupAutoplay();
   }
 
   public handleVideoEnded(): void {
@@ -34,13 +39,15 @@ export class GalleryFeatures {
     this.autoplay.showMenu();
   }
 
-  private setupAutoplay(dependencies: GalleryFeaturesDependencies["autoplay"]): void {
-    const { events, preferences } = this.context;
+  private setupAutoplay(): void {
+    const { events, preferences, domEvents, shell } = this.context;
 
-    this.autoplay.setup(dependencies);
-    preferences.gallery.autoplayActive.on((value) => this.autoplay.toggle(value));
-    events.gallery.openedGallery.on(() => this.autoplay.startAutoplay());
-    events.gallery.closedGallery.on(() => this.autoplay.stopAutoplay());
-    events.gallery.displayedItem.on((item) => this.autoplay.startViewTimer(item));
+    this.autoplay.mount(shell.overlays);
+    preferences.gallery.autoplayActive.on(() => this.autoplay.refresh());
+    events.gallery.galleryOpened.on(() => this.autoplay.openGallery());
+    events.gallery.galleryClosed.on(() => this.autoplay.closeGallery());
+    events.gallery.itemDisplayed.on((item) => this.autoplay.display(item));
+    domEvents.document.mousemove.on(() => this.autoplay.handleMouseMove());
+    domEvents.document.keydown.on((event) => this.autoplay.handleKeyDown(event));
   }
 }

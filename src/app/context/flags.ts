@@ -1,10 +1,10 @@
 import { Environment } from "@/app/context/environment";
 import { Preferences } from "@/app/context/preferences";
 
-export type Flags = ReturnType<typeof buildFlags>;
+export type Flags = ReturnType<typeof createFlags>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-export function buildFlags(environment: Environment, preferences: Preferences) {
+export function createFlags(environment: Environment, preferences: Preferences) {
   const { onFavoritesPage, onPostListPage, onDesktopDevice } = environment;
   const performanceProfile = preferences.app.performanceProfile.value;
   const isFavoritesSearchGalleryEnabled = onFavoritesPage || (onPostListPage && preferences.postList.enabled.value);

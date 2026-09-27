@@ -1,4 +1,4 @@
-#favorites-drawer-view-snippets .favorites-snippets-panel {
+#favorites-drawer-section-snippets .favorites-snippets-section {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -111,14 +111,14 @@
   height: 16px;
 }
 
-#favorites-drawer-view-snippets .favorites-snippets-name {
+#favorites-drawer-section-snippets .favorites-snippets-name {
   color: var(--theme-text);
   font-family: var(--font-mono) !important;
   font-size: 12.5px;
   font-weight: 600;
 }
 
-#favorites-drawer-view-snippets .favorites-snippets-query {
+#favorites-drawer-section-snippets .favorites-snippets-query {
   overflow: hidden;
   color: var(--theme-text-muted);
   font-family: var(--font-mono) !important;
@@ -134,7 +134,7 @@
   text-align: center;
 }
 
-#favorites-drawer-view-snippets .favorites-snippets-confirm-prompt {
+#favorites-drawer-section-snippets .favorites-snippets-confirm-prompt {
   color: var(--color-danger-text);
 }
 

@@ -6,7 +6,7 @@ export class FeatureChannel<I, O> {
     this.handler = (): O => defaultValue;
   }
 
-  public call(value: I): O {
+  public request(value: I): O {
     return this.handler(value);
   }
 

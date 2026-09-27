@@ -2,7 +2,7 @@ import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
 import { Environment } from "@/app/context/environment";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/selectors";
-import { FavoritesToolbarSlots } from "@/features/favorites/types/types";
+import { FavoritesToolbarSlots } from "@/types/favorites_ui";
 import { Preferences } from "@/app/context/preferences";
 import { buildToggleButton } from "@/lib/ui/settings/components/toggle_button";
 
@@ -63,12 +63,6 @@ function buildButtons(events: Events, environment: Environment, slots: Favorites
       textContent: "SHUFFLE",
       icon: onDesktop ? null : "shuffle",
       event: events.favorites.shuffleButtonClicked
-    },
-    {
-      id: FavoritesId.clearButton,
-      parent: slots.searchActions,
-      icon: "clear",
-      event: events.favorites.clearButtonClicked
     }
   ];
 }

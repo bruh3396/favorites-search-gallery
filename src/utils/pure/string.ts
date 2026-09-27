@@ -26,6 +26,10 @@ export function removeExtraWhitespace(text: string): string {
   return text.trim().replace(/\s\s+/g, " ");
 }
 
+export function toLowerUnderscored(text: string): string {
+  return removeExtraWhitespace(text).toLowerCase().replace(/\s/g, "_");
+}
+
 export function removeLeadingModifiers(text: string): string {
   return text.replace(/^[-*]*/, "");
 }

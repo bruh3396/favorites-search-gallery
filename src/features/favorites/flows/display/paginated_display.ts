@@ -70,7 +70,7 @@ export class FavoritesPaginatedDisplay implements Display {
 
   private renderCurrentPage(options?: ContentDisplayOptions): void {
     this.view.showSearchResults(this.model.currentPageFavorites(), options);
-    this.view.buildPaginator(this.model.paginationContext());
+    this.view.renderPagination(this.model.paginationContext());
 
     if (FavoritesConfig.preloadThumbs) {
       this.preloadImages(this.model.adjacentPageFavorites().map(favorite => favorite.thumbUrl));

@@ -27,19 +27,19 @@ export const FavoritesId = {
   buttonsSlot: "favorites-button-slot",
   drawer: "favorites-drawer",
   drawerSidebar: "favorites-drawer-sidebar",
-  drawerViews: "favorites-drawer-views"
+  drawerSections: "favorites-drawer-sections"
 } as const;
 
 export const FavoritesClass = {
   drawerSidebarIcon: "favorites-drawer-sidebar-icon",
   drawerSidebarIconLabel: "favorites-drawer-sidebar-icon-label",
-  drawerView: "favorites-drawer-view",
+  drawerSection: "favorites-drawer-section",
   drawerTitle: "favorites-drawer-title",
   drawerTitleLabel: "favorites-drawer-title-label",
   drawerTitleAction: "favorites-drawer-title-action",
-  drawerPanel: "favorites-drawer-panel",
-  drawerSection: "favorites-drawer-section",
-  drawerSectionTitle: "favorites-drawer-section-title",
+  drawerBody: "favorites-drawer-body",
+  drawerGroup: "favorites-drawer-group",
+  drawerGroupTitle: "favorites-drawer-group-title",
   drawerHelpLinks: "favorites-drawer-help-links",
   drawerHelpLink: "favorites-drawer-help-link"
 } as const;
