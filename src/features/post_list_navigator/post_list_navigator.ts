@@ -15,17 +15,15 @@ interface PostListNavigatorComponents {
 }
 
 export function startPostListNavigator(context: AppContext): void {
-  if (context.environment.mode === "posts") {
-    const shell = new PostListNavigatorShell(context.shell);
-    const model = new PostListNavigatorModel(context);
-    const view = new PostListNavigatorView(context);
-    const flows = new PostListNavigatorFlows(context, model, view);
-    const control = new PostListNavigatorControl(context, shell);
-    const components: PostListNavigatorComponents = { context, model, view, flows, control };
+  const shell = new PostListNavigatorShell(context.shell);
+  const model = new PostListNavigatorModel(context);
+  const view = new PostListNavigatorView(context);
+  const flows = new PostListNavigatorFlows(context, model, view);
+  const control = new PostListNavigatorControl(context, shell);
+  const components: PostListNavigatorComponents = { context, model, view, flows, control };
 
-    setup(components);
-    start(components);
-  }
+  setup(components);
+  start(components);
 }
 
 function setup(components: PostListNavigatorComponents): void {

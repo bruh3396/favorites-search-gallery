@@ -139,9 +139,9 @@ function subscribeToDomEvents(components: FavoritesComponents): void {
 }
 
 function subscribeToDesktopInput({ context, view, flows }: FavoritesComponents): void {
-  const { domEvents, flags } = context;
+  const { domEvents, features } = context;
 
-  if (flags.imagusSupportEnabled) {
+  if (!features.has("gallery")) {
     domEvents.document.mouseover.on((event) => view.suppressLinkOnHoveredThumb(event));
   }
   domEvents.document.click.on((event) => flows.input.handleClick(event));

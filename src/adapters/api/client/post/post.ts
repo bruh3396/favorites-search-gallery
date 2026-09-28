@@ -1,8 +1,4 @@
-import { BatchedRequests } from "@/adapters/api/client/batch";
 import { EncodedTagCategoryMap } from "@/types/search";
-import { Route } from "@/adapters/api/client/server";
-
-const RATE_LIMIT = { concurrency: 4, ratePerSecond: 2 };
 
 export type ServerPost = {
   id: string;
@@ -22,7 +18,3 @@ export type PostResponse =
   | { status: "error"; id: string }
   | { status: "deleted"; id: string }
   | { status: "deferred"; id: string };
-
-export function createPostRequests(send: (route: Route, body: Record<string, unknown>) => Promise<Record<string, PostResponse>>): BatchedRequests<PostResponse> {
-  return new BatchedRequests(RATE_LIMIT, ids => send("post", { ids }));
-}

@@ -44,17 +44,19 @@ describe("ApiClient", () => {
     expect(requestsOf(fetch)).toEqual([{ url: "https://api.test/tag", body: { tagNames: ["apple", "alice"] } }]);
   });
 
-  test("identifies every request made after identifying", async() => {
+  test("identifies every request by the identity it was built with", async() => {
     const fetch = stubFetch();
-    const client = new ApiClient("https://api.test");
 
-    client.ping();
-    client.identifyAs({ userId: "9", version: "1.0", platform: "mobile" });
-    client.ping();
+    new ApiClient("https://api.test", { userId: "9", version: "1.0", platform: "mobile" }).ping();
     await vi.advanceTimersByTimeAsync(0);
-    expect(fetch.mock.calls.map(([url, init]) => [url, init.headers])).toEqual([
-      ["https://api.test/ping", { "X-User-Id": "", "X-Version": "", "X-Platform": "" }],
-      ["https://api.test/ping", { "X-User-Id": "9", "X-Version": "1.0", "X-Platform": "mobile" }]
-    ]);
+    expect(fetch.mock.calls.map(([url, init]) => [url, init.headers])).toEqual([["https://api.test/ping", { "X-User-Id": "9", "X-Version": "1.0", "X-Platform": "mobile" }]]);
+  });
+
+  test("is anonymous unless given an identity", async() => {
+    const fetch = stubFetch();
+
+    new ApiClient("https://api.test").ping();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetch.mock.calls.map(([, init]) => init.headers)).toEqual([{ "X-User-Id": "", "X-Version": "", "X-Platform": "" }]);
   });
 });

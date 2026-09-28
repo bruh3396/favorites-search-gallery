@@ -2,6 +2,7 @@
 import * as FavoritesSettingsCatalog from "@/features/favorites/control/sections/settings/catalog";
 import { afterEach, describe, expect, test } from "vitest";
 import { AppContext } from "@/app/context/context";
+import { Feature } from "@/core/context/features";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { Preference } from "@/lib/storage/preference";
 import { PreferenceOverrides } from "@/testing/preferences";
@@ -14,8 +15,8 @@ interface Setup {
   build: (key: SettingKey) => HTMLElement;
 }
 
-function setup(preferences: PreferenceOverrides = {}): Setup {
-  const context = createAppContext({ preferences });
+function setup(preferences: PreferenceOverrides = {}, features?: Feature[]): Setup {
+  const context = createAppContext({ preferences, features });
   const catalog = FavoritesSettingsCatalog.buildSettingsCatalog(context);
   return { context, build: (key) => catalog[key]() };
 }
@@ -95,8 +96,8 @@ describe("FavoritesSettingsCatalog", () => {
       expect(isDisabled(build("upscaleQuality"))).toBe(true);
     });
 
-    test("gallery settings are unavailable when the performance profile turns the gallery off", () => {
-      const { context, build } = setup({ app: { performanceProfile: "low" }, gallery: { autoplayActive: false } });
+    test("gallery settings are unavailable when the gallery isn't running", () => {
+      const { context, build } = setup({ gallery: { autoplayActive: false } }, ["favorites"]);
       const row = build("autoplay");
 
       row.click();

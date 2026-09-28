@@ -1,4 +1,4 @@
-﻿import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile, UpscaleQuality } from "@/types/app";
@@ -20,7 +20,7 @@ export type SettingKey = keyof SettingsCatalog;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function buildSettingsCatalog(context: AppContext) {
-  const { preferences, environment, events, flags } = context;
+  const { preferences, environment, events, features } = context;
   return {
     theme: dropdown<Theme>({
       id: "theme",
@@ -52,14 +52,14 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "upscale",
       label: "Upscale Thumbnails",
       tooltip: "Upscale thumbnails for higher quality",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.favorites.upscaleThumbs
     }, events),
     upscaleQuality: segmented<UpscaleQuality>({
       id: "upscale-quality",
       label: "Upscale Quality",
       tooltip: "Set upscaled thumbnail resolution. Higher values are sharper but use more graphics memory",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.favorites.upscaleQuality,
       enabledWhen: whenPickingUpscaleQuality(preferences),
       options: new Map<UpscaleQuality, string>([
@@ -118,34 +118,34 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "enable-autoplay",
       label: "Autoplay",
       tooltip: "Automatically traverse gallery",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.autoplayActive
     }, events),
     mobileGallery: toggleWithHotkey({
       id: "enable-mobile-gallery",
       label: "Gallery",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.mobileEnabled
     }, events),
     fullscreenOnHover: toggleWithHotkey({
       id: "show-on-hover",
       label: "Enlarge on hover",
       tooltip: "Enlarge content on hover",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.previewEnabled
     }, events),
     themedBackground: toggleWithHotkey({
       id: "themed-background",
       label: "Themed Background",
       tooltip: "Use the current theme's background color for the gallery instead of black",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.themedBackground
     }, events),
     backgroundOpacity: slider({
       id: "background-opacity",
       label: "Background Opacity",
       tooltip: "Set gallery background opacity",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.backgroundOpacity,
       min: 0,
       max: 1,
@@ -155,7 +155,7 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "enable-gallery-menu",
       label: "Menu",
       tooltip: "Show gallery sidebar",
-      enabled: flags.galleryEnabled && GeneralConfig.galleryMenuOptionEnabled,
+      enabled: features.has("gallery") && GeneralConfig.galleryMenuOptionEnabled,
       preference: preferences.gallery.menuEnabled
     }, events),
     enhanceSearchPages: toggleWithHotkey({
@@ -255,7 +255,7 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "show-tooltips",
       label: "Tag Tooltip",
       tooltip: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
-      enabled: flags.tooltipEnabled,
+      enabled: features.has("tooltip"),
       preference: preferences.favorites.tooltipEnabled,
       enabledWhen: whenNotFullscreenOnHover(preferences),
       hotkey: "T"
@@ -264,7 +264,7 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "show-post-overlay",
       label: "Tag Overlay",
       tooltip: "Show tag overlay on thumbnails",
-      enabled: flags.postOverlayEnabled,
+      enabled: features.has("postOverlay"),
       preference: preferences.postOverlay.enabled,
       enabledWhen: whenNotFullscreenOnHover(preferences),
       hotkey: "O"

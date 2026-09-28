@@ -85,10 +85,10 @@ function actionBarPreferences({ preferences, environment }: AppContext): Prefere
 function insertBaseStyles(context: AppContext): void {
   const fadeInCss = context.preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
   const platformCss = context.environment.device === "mobile" ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
-  const galleryCss = context.flags.galleryEnabled ? GALLERY_CSS + AUTOPLAY_CSS : "";
-  const tooltipCss = context.flags.tooltipEnabled ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
+  const galleryCss = context.features.has("gallery") ? GALLERY_CSS + AUTOPLAY_CSS : "";
+  const tooltipCss = context.features.has("tooltip") ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
   const postListCss = context.environment.mode === "posts" ? POST_LIST_CSS + SETTINGS_CSS : "";
-  const postOverlayCss = context.flags.postOverlayEnabled ? POST_OVERLAY_CSS : "";
+  const postOverlayCss = context.features.has("postOverlay") ? POST_OVERLAY_CSS : "";
   const favoritesCss = context.environment.mode === "favorites" ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_SECTIONS_CSS + SETTINGS_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
 
   insertStyle(VARIABLES_CSS +

@@ -1,8 +1,8 @@
-import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports";
+import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
 import { MediaItem, MediaType } from "@/types/media";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { GalleryModel } from "@/features/gallery/model/model";
-import { MemoryNavigation } from "@/adapters/memory/navigation/navigation";
+import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
 import { UpscaleQuality } from "@/types/app";
 import { createPreferences } from "@/testing/preferences";
 

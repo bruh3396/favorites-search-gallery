@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page/favorites_page";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
 
 function etaFor(eta: FavoritesEta, elapsedMs: number, current: number, total: number): string | null {

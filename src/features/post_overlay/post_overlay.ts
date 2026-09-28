@@ -13,9 +13,6 @@ interface PostOverlayComponents {
 }
 
 export async function startPostOverlay(context: AppContext): Promise<void> {
-  if (context.flags.postOverlayDisabled) {
-    return;
-  }
   const shell = new PostOverlayShell(context.shell);
   const model = new PostOverlayModel(context.ports.tagSource);
   const view = new PostOverlayView(shell);

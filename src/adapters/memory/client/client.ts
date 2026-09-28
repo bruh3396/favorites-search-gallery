@@ -1,6 +1,5 @@
 import { Post } from "@/core/domain/post/post";
 
-// Posts held in memory, and which of them are favorites, in order.
 export class MemoryClient {
   private readonly postsById: Map<string, Post>;
   private favoriteIds: string[];

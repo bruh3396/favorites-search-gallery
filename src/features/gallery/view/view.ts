@@ -1,5 +1,5 @@
 import * as GalleryTutorial from "@/features/gallery/view/tutorial";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/core/boundary/ports";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
 import { Favorite } from "@/types/favorite";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";

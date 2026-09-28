@@ -1,4 +1,4 @@
-import { ParsedPost } from "@/core/boundary/ports";
+import { ParsedPost } from "@/core/boundary/ports/post_source";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Enricher } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";

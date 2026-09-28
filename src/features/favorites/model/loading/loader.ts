@@ -1,6 +1,6 @@
 import { Collection, Enricher, Searcher, Store } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { FavoritesSource } from "@/core/boundary/ports";
+import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 
 export class FavoritesLoader {
   private readonly store: Store;

@@ -1,5 +1,5 @@
 import { NavigationKey } from "@/types/input";
-import { Platform } from "@/types/app";
+import { Device } from "@/core/boundary/environment";
 import { Preference } from "@/lib/storage/preference";
 
 export type AutoplayDuration = "image" | "minimumVideo";
@@ -20,7 +20,7 @@ export interface AutoplaySettings {
 }
 
 export interface AutoplayDependencies extends AutoplayCallbacks, AutoplaySettings {
-  platform: Platform;
+  platform: Device;
 }
 
 export interface AutoplayIntents {

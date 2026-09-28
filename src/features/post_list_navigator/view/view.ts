@@ -1,4 +1,4 @@
-﻿import * as PostListNavigatorFavoriteIndicator from "@/features/post_list_navigator/view/favorite_indicator";
+import * as PostListNavigatorFavoriteIndicator from "@/features/post_list_navigator/view/favorite_indicator";
 import * as PostListNavigatorInfiniteScrollStyle from "@/features/post_list_navigator/view/infinite_scroll_style";
 import * as PostListNavigatorPage from "@/features/post_list_navigator/view/page";
 import * as PostListNavigatorRenderer from "@/features/post_list_navigator/view/renderer";
@@ -33,7 +33,7 @@ export class PostListNavigatorView {
   }
 
   public prepareNativePostListThumbs(): HTMLElement[] {
-    return preparePostListThumbs(Array.from(document.querySelectorAll(ITEM_SELECTOR)), this.context.environment.device === "mobile", this.context.flags.galleryDisabled);
+    return preparePostListThumbs(Array.from(document.querySelectorAll(ITEM_SELECTOR)), this.context.environment.device === "mobile", !this.context.features.has("gallery"));
   }
 
   public currentSearch(): string {

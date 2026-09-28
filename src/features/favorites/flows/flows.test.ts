@@ -2,7 +2,7 @@ import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
-import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/favorites_page/favorites_page";
+import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesControl } from "@/features/favorites/control/control";

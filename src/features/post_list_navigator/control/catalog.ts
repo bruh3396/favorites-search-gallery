@@ -1,4 +1,4 @@
-﻿import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile } from "@/types/app";
 import { SettingsControl, dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
@@ -10,13 +10,13 @@ import { booleanPreference } from "@/lib/storage/preference";
 export type PostListSettingsCatalog = Record<string, SettingsControl>;
 
 export function buildPostListSettingsCatalog(context: AppContext): PostListSettingsCatalog {
-  const { preferences, environment, flags } = context;
+  const { preferences, environment, features } = context;
   return {
     upscale: toggle({
       id: "post-list-upscale",
       label: "Upscale",
       tooltip: "Upscale thumbnails on search pages",
-      enabled: flags.galleryEnabled && environment.device === "desktop" && preferences.app.performanceProfile.value === "normal",
+      enabled: features.has("gallery") && environment.device === "desktop" && preferences.app.performanceProfile.value === "normal",
       preference: preferences.postList.upscaleThumbs
     }),
     infiniteScroll: toggle({
@@ -29,21 +29,21 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       id: "enable-autoplay",
       label: "Autoplay",
       tooltip: "Autoplay in gallery",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.autoplayActive
     }),
     tooltip: toggle({
       id: "enable-tooltip",
       label: "Tooltip",
       tooltip: "Show tags when hovering over a thumbnail",
-      enabled: flags.tooltipEnabled,
+      enabled: features.has("tooltip"),
       preference: preferences.postList.tooltipEnabled
     }),
     galleryMenu: toggle({
       id: "enable-gallery-menu",
       label: "Gallery Menu",
       tooltip: "Show menu in gallery",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.menuEnabled
     }),
     favoriteIndicator: toggle({
@@ -129,7 +129,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
     mobileGallery: toggle({
       id: "enable-mobile-gallery",
       label: "Gallery",
-      enabled: flags.galleryEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.mobileEnabled
     })
   };

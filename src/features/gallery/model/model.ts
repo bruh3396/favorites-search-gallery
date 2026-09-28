@@ -1,6 +1,7 @@
 import * as GalleryItemWindow from "@/features/gallery/model/item_window";
 import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
-import { AddFavoriteStatus, FavoritesEditor, Navigation, RemoveFavoriteStatus } from "@/core/boundary/ports";
+import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
+import { Navigation } from "@/core/boundary/ports/navigation";
 import { GalleryState, Identifiable } from "@/types/app";
 import { Boundary } from "@/types/boundary";
 import { GalleryStateController } from "@/features/gallery/model/state";

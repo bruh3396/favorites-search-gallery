@@ -41,7 +41,7 @@ export class FavoritesInputFlow extends FavoritesFlow {
       return;
     }
     const shouldOpen = event.middleClick ||
-      (event.leftClick && (event.shiftKey || this.context.flags.galleryDisabled));
+      (event.leftClick && (event.shiftKey || !this.context.features.has("gallery")));
 
     if (shouldOpen) {
       this.context.ports.navigation.openPost(event.thumb.id);

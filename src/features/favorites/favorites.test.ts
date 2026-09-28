@@ -2,9 +2,9 @@ import { Post } from "@/core/domain/post/post";
 /* eslint-disable no-spaced-func, func-call-spacing -- false positive: arrow function types inside test.each's generic confuse these rules */
 import "fake-indexeddb/auto";
 import { DiscreteRating, Rating } from "@/types/search";
-import { addFavoriteUrl, removeFavoriteUrl } from "@/adapters/rule34/client/favorite_actions/favorite_actions";
-import { postListUrlFromQuery } from "@/adapters/rule34/client/post_list_page/post_list_page";
-import { postPageUrl } from "@/adapters/rule34/client/post_page/post_page";
+import { addFavoriteUrl, removeFavoriteUrl } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
+import { postListUrlFromQuery } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/post_page";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { EnhancedMouseEvent } from "@/lib/event/input";
@@ -12,6 +12,7 @@ import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesModel } from "@/features/favorites/model/model";
+import { Feature } from "@/core/context/features";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
@@ -29,11 +30,12 @@ const FRUITS: Partial<Post>[] = [
 interface SetupOptions {
   environment?: Partial<Environment>;
   preferences?: PreferenceOverrides;
+  features?: Feature[];
 }
 
 let pageCounter = 0;
 
-function createContext({ environment: environmentOverrides = {}, preferences = {} }: SetupOptions = {}, withShell = true): AppContext {
+function createContext({ environment: environmentOverrides = {}, preferences = {}, features }: SetupOptions = {}, withShell = true): AppContext {
   pageCounter += 1;
   const id = `startup_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesId: id, ...environmentOverrides });
@@ -42,7 +44,7 @@ function createContext({ environment: environmentOverrides = {}, preferences = {
   if (shell !== undefined) {
     document.body.append(shell.root);
   }
-  return createAppContext({ environment, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell });
+  return createAppContext({ environment, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, features, shell });
 }
 
 function createFruitModel(context: AppContext): FavoritesModel {
@@ -409,13 +411,13 @@ describe("startFavorites", () => {
   });
 
   describe("input", () => {
-    test.each<[string, PreferenceOverrides, MouseEventInit]>([
+    test.each<[string, SetupOptions, MouseEventInit]>([
       ["a middle-click", {}, { button: 1 }],
       ["a shift-click", {}, { button: 0, shiftKey: true }],
-      ["without the gallery, a click", { app: { performanceProfile: "low" } }, { button: 0 }]
-    ])("on desktop, %s on a thumb opens its post", async(_, preferences, init) => {
+      ["without the gallery, a click", { features: ["favorites"] }, { button: 0 }]
+    ])("on desktop, %s on a thumb opens its post", async(_, options, init) => {
       const open = vi.spyOn(window, "open").mockReturnValue(null);
-      const context = await setup({ preferences });
+      const context = await setup(options);
 
       dispatchMouse(context, "mousedown", imageOf(context, "2"), init);
       expect(open).toHaveBeenCalledWith(postPageUrl("2"), "_blank");
@@ -483,8 +485,8 @@ describe("startFavorites", () => {
       expect(isFavoritedOf(context, "2")).toBe(false);
     });
 
-    test("with Imagus support, hovering a thumb takes its link away", async() => {
-      const context = await setup({ preferences: { app: { performanceProfile: "low" } } });
+    test("without the gallery, hovering a thumb takes its link away", async() => {
+      const context = await setup({ features: ["favorites"] });
       const link = imageOf(context, "2").closest("a") as HTMLAnchorElement;
 
       expect(link.getAttribute("href")).toBe(postPageUrl("2"));

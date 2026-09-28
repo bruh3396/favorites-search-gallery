@@ -11,9 +11,6 @@ interface TooltipComponents {
 }
 
 export function startTooltip(context: AppContext): void {
-  if (context.flags.tooltipDisabled) {
-    return;
-  }
   const model = new TooltipModel(context);
   const view = new TooltipView(context);
   const flows = new TooltipFlows(context, model, view);

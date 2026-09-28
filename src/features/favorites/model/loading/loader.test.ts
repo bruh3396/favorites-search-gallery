@@ -1,6 +1,6 @@
 import { Post } from "@/core/domain/post/post";
 import { Collection, Enricher, Searcher, Store } from "@/features/favorites/types/types";
-import { FavoritesSource } from "@/core/boundary/ports";
+import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";

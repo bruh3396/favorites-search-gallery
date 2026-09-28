@@ -1,6 +1,6 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { TagCategoryMap } from "@/types/search";
-import { TagSource } from "@/core/boundary/ports";
+import { TagSource } from "@/core/boundary/ports/tag_source";
 
 export async function resolveCategories(tagSource: TagSource, postId: string, tagNames: string[]): Promise<TagCategoryMap> {
   const categoryMap: TagCategoryMap = new Map();

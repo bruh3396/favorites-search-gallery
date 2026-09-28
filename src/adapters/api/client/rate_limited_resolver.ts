@@ -1,0 +1,23 @@
+import { CoalescingResolver } from "@/lib/async/coalescing";
+import { RateLimiter } from "@/lib/async/rate_limiting";
+import { RateLimiterConfig } from "@/types/async";
+
+const BATCH_SIZE = 50;
+const FLUSH_TIMEOUT = 2000;
+
+export class RateLimitedResolver<V> extends CoalescingResolver<string, V> {
+  constructor(rateLimit: RateLimiterConfig, resolve: (keys: string[]) => Promise<Map<string, V>>) {
+    const limiter = new RateLimiter(rateLimit);
+
+    super(BATCH_SIZE, FLUSH_TIMEOUT, keys => limiter.run(() => resolve(keys)).then(answers => requireEveryKey(keys, answers)));
+  }
+}
+
+function requireEveryKey<V>(keys: string[], answers: Map<string, V>): Map<string, V> {
+  const missing = keys.filter(key => !answers.has(key));
+
+  if (missing.length > 0) {
+    throw new Error(`Unanswered keys: ${missing.join(", ")}`);
+  }
+  return answers;
+}

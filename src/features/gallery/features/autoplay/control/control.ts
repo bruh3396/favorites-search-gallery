@@ -1,13 +1,13 @@
 import { AutoplayAction, AutoplayDuration, AutoplayIntents } from "@/features/gallery/features/autoplay/types/types";
 import { AutoplayConfig } from "@/config/autoplay_config";
 import { AutoplayShell } from "@/features/gallery/features/autoplay/shell/shell";
-import { Platform } from "@/types/app";
+import { Device } from "@/core/boundary/environment";
 
 export class AutoplayControl {
   private readonly intents: AutoplayIntents;
   private readonly dispatch: Record<AutoplayAction, () => void>;
 
-  constructor(shell: AutoplayShell, intents: AutoplayIntents, platform: Platform) {
+  constructor(shell: AutoplayShell, intents: AutoplayIntents, platform: Device) {
     this.intents = intents;
     this.dispatch = {
       toggleSettings: (): void => intents.toggleSettings(),

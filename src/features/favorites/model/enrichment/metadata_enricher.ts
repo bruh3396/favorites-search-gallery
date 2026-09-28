@@ -1,5 +1,5 @@
 import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports";
+import { ParsedPost } from "@/core/boundary/ports/post_source";
 import { Favorite } from "@/types/favorite";
 import { TagCategoryMap } from "@/types/search";
 import { TermUpdate } from "@/lib/search/engines/search_engine";

@@ -10,7 +10,7 @@ import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
-import { postPageUrl } from "@/adapters/rule34/client/post_page/post_page";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/post_page";
 
 interface Setup {
   view: FavoritesView;

@@ -1,5 +1,5 @@
 import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports";
+import { ParsedPost } from "@/core/boundary/ports/post_source";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";

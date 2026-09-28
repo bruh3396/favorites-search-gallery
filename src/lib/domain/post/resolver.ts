@@ -1,6 +1,6 @@
 import { Post } from "@/core/domain/post/post";
 import * as PostStore from "@/lib/domain/post/store";
-import { PostSource, ParsedPost } from "@/core/boundary/ports";
+import { ParsedPost, PostSource } from "@/core/boundary/ports/post_source";
 
 export interface PostResolverDependencies {
   readStored: (ids: string[]) => Promise<Post[]>;

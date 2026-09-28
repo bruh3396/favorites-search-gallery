@@ -7,7 +7,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryFavoritesSource } from "@/adapters/memory/favorites_source/favorites_source";
+import { MemoryFavoritesSource } from "@/adapters/memory/ports/favorites_source/favorites_source";
 import { createAppContext } from "@/testing/context";
 import { createPost } from "@/testing/post";
 

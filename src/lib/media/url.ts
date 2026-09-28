@@ -1,5 +1,5 @@
 import { DEFAULT_EXTENSION, extensionRegex } from "@/lib/media/constants";
-import { HOSTNAME, WIMG_HOSTNAME } from "@/adapters/rule34/client/site";
+import { HOSTNAME, WIMG_HOSTNAME } from "@/adapters/rule34/client/hosts";
 import { MediaExtension } from "@/core/domain/media/extension";
 import { MediaItem } from "@/types/media";
 import { withHostname, withNoQueryParams } from "@/utils/pure/url";

@@ -1,4 +1,4 @@
-import { ImageExtension, MediaExtension } from "@/core/domain/media/extension";
+import { MediaExtension } from "@/core/domain/media/extension";
 
 export type Resolution = "3840x2160" | "7680x4320" | "1920x1080";
 
@@ -22,11 +22,6 @@ export const enum EncodedMediaExtension {
 export type VideoTag = "video" | "mp4";
 export type GifTag = "gif" | "animated" | "animated_gif";
 export type MediaTypeTag = VideoTag | GifTag;
-
-export type MediaExtensionMapping = {
-  id: string;
-  extension: ImageExtension;
-};
 
 export interface MediaItem {
   readonly id: string;
@@ -66,16 +61,5 @@ export function decodeMediaExtension(extension: EncodedMediaExtension): MediaExt
       return "mp4";
     default:
       return undefined;
-  }
-}
-
-export function mediaExtensionToType(extension: MediaExtension | undefined): MediaType {
-    switch (extension) {
-    case "gif":
-      return "gif";
-    case "mp4":
-      return "video";
-    default:
-      return "image";
   }
 }

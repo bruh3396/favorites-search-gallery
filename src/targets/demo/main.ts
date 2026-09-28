@@ -1,12 +1,12 @@
 import { Environment } from "@/core/boundary/environment";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryFavoritesEditor } from "@/adapters/memory/favorites_editor/favorites_editor";
-import { MemoryFavoritesSource } from "@/adapters/memory/favorites_source/favorites_source";
-import { MemoryHost } from "@/adapters/memory/host/host";
-import { MemoryNavigation } from "@/adapters/memory/navigation/navigation";
-import { MemoryPostSource } from "@/adapters/memory/post_source/post_source";
-import { MemoryTagSource } from "@/adapters/memory/tag_source/tag_source";
-import { MemoryTelemetry } from "@/adapters/memory/telemetry/telemetry";
+import { MemoryFavoritesEditor } from "@/adapters/memory/ports/favorites_editor/favorites_editor";
+import { MemoryFavoritesSource } from "@/adapters/memory/ports/favorites_source/favorites_source";
+import { MemoryHost } from "@/adapters/memory/ports/host/host";
+import { MemoryMediaSource } from "@/adapters/memory/ports/media_source/media_source";
+import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryPostSource } from "@/adapters/memory/ports/post_source/post_source";
+import { MemoryTagSource } from "@/adapters/memory/ports/tag_source/tag_source";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { startApp } from "@/app/startup/app";
@@ -24,16 +24,16 @@ function createDemoPlace(): Pick<Environment, "mode" | "favoritesId" | "ownsFavo
 }
 
 function main(): void {
-  const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
+  const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
 
   startApp({ version: "demo", ...readBrowserEnvironment(), ...createDemoPlace() }, {
-    favoritesSource: new MemoryFavoritesSource(memory),
-    favoritesEditor: new MemoryFavoritesEditor(memory),
-    postSource: new MemoryPostSource(memory),
+    favoritesSource: new MemoryFavoritesSource(memoryClient),
+    favoritesEditor: new MemoryFavoritesEditor(memoryClient),
+    postSource: new MemoryPostSource(memoryClient),
     tagSource: new MemoryTagSource(),
+    mediaSource: new MemoryMediaSource(),
     navigation: new MemoryNavigation(),
-    host: new MemoryHost(),
-    telemetry: new MemoryTelemetry()
+    host: new MemoryHost()
   });
 }
 

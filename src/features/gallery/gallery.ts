@@ -19,9 +19,6 @@ interface GalleryComponents {
 }
 
 export async function startGallery(context: AppContext): Promise<void> {
-  if (context.flags.galleryDisabled) {
-    return;
-  }
   await waitUntilPageIsReady(context);
 
   const shell = new GalleryShell(context.shell);

@@ -40,7 +40,7 @@ export class FavoritesView {
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
-    this.elementTemplate = new FavoritesElementTemplate(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id));
+    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id));
     this.thumbPool = this.createThumbPool();
     this.pagination.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
     this.drawer.toggle(context.preferences.favorites.drawerOpen.value);

@@ -2,7 +2,7 @@ import { AutoplayAction, AutoplayDuration } from "@/features/gallery/features/au
 import { IconName, icon } from "@/lib/ui/icon";
 import { createElement, numberInput } from "@/utils/browser/element";
 import { AutoplayConfig } from "@/config/autoplay_config";
-import { Platform } from "@/types/app";
+import { Device } from "@/core/boundary/environment";
 
 type DurationField = HTMLInputElement | HTMLSelectElement;
 
@@ -11,7 +11,7 @@ const DURATION_FIELDS: Record<AutoplayDuration, { id: string; label: string }> =
   minimumVideo: { id: "autoplay-minimum-animated-duration-input", label: "Minimum Video Duration" }
 };
 
-const FIELD_BUILDERS: Record<Platform, (kind: AutoplayDuration) => DurationField> = {
+const FIELD_BUILDERS: Record<Device,(kind: AutoplayDuration) => DurationField> = {
   desktop: numberField,
   mobile: selectField
 };
@@ -28,7 +28,7 @@ export class AutoplayShell {
   public readonly settingsMenu: HTMLElement;
   public readonly durationFields: Record<AutoplayDuration, DurationField>;
 
-  constructor(platform: Platform) {
+  constructor(platform: Device) {
     this.settingsButton = button(createElement("img", { id: "autoplay-settings-button" }), "toggleSettings", "Autoplay settings");
     this.playButton = button(createElement("img", { id: "autoplay-play-button" }), "togglePause", "Pause autoplay");
     this.directionMask = createElement("div", { id: "autoplay-change-direction-mask-container", children: [iconWithId("changeDirectionMask", "autoplay-change-direction-mask")] });

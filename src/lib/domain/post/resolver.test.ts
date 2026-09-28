@@ -1,8 +1,8 @@
 import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports";
+import { ParsedPost } from "@/core/boundary/ports/post_source";
 import { describe, expect, test } from "vitest";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryPostSource } from "@/adapters/memory/post_source/post_source";
+import { MemoryPostSource } from "@/adapters/memory/ports/post_source/post_source";
 import { PostResolver } from "@/lib/domain/post/resolver";
 import { createPost } from "@/testing/post";
 

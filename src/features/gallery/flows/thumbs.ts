@@ -2,7 +2,7 @@ import { GalleryFlow, GalleryFlowDependencies } from "@/features/gallery/flows/f
 import { debounceLeading, debounceTrailing } from "@/lib/async/rate_limiting";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
-import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/post_list_page/post_list_page";
+import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
 import { Preference } from "@/lib/storage/preference";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 

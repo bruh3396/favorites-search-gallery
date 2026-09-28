@@ -2,7 +2,7 @@ import { Post } from "@/core/domain/post/post";
 import { DiscreteRating, Metric, Rating } from "@/types/search";
 import { MediaExtension } from "@/core/domain/media/extension";
 import { decodeMediaExtension, encodeMediaExtension } from "@/types/media";
-import { WIMG_ORIGIN } from "@/adapters/rule34/client/site";
+import { WIMG_ORIGIN } from "@/adapters/rule34/client/hosts";
 import { copyString } from "@/utils/pure/string";
 import { grow } from "@/utils/pure/array";
 import { internString } from "@/lib/search/interner";

@@ -38,7 +38,7 @@ export function createPreferences(environment: Environment) {
       postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", onDesktopDevice ? "hover" : "off"),
       postActionBarButtons: new Preference("favoritesPostActionBarButtons", onDesktopDevice ? ActionBarButton.Favorite : ActionBarButton.Favorite | ActionBarButton.Open),
       resultsPerPage: new Preference("favoritesResultsPerPage", 50),
-      rowHeight: new Preference("favoritesRowHeight", 10),
+      rowHeight: new Preference("favoritesRowHeight", 5),
       settingsExpandedSections: new Preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
       sortAscending: new Preference("favoritesSortAscending", false),
       sortKey: new Preference<SortKey>("favoritesSortKey", "default"),

@@ -1,5 +1,3 @@
-export type Platform = "mobile" | "desktop";
-export type Feature ="app" | "favorites" | "gallery" | "postOverlay" | "postList" | "tooltip";
 export type PerformanceProfile = "normal" | "low" | "potato";
 export type Layout = "row" | "square" | "grid" | "column" | "native";
 export type GalleryState = "idle" | "preview" | "open";
@@ -33,8 +31,5 @@ export type GalleryAction =
   | "pin"
   | "none";
 
-export type FeatureNamespace = Partial<Record<Feature, object>>;
-
 export type MapToString<T extends readonly unknown[]> = { readonly [K in keyof T]: string };
-
 export type Identifiable = { id: string };

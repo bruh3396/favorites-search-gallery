@@ -5,7 +5,7 @@ import { PostOverlayReopenCooldown } from "@/features/post_overlay/model/state/r
 import { PostOverlayResizeState } from "@/features/post_overlay/model/state/resize_state";
 import { PostOverlayTarget } from "@/features/post_overlay/model/state/overlay_target";
 import { TagCategoryMap } from "@/types/search";
-import { TagSource } from "@/core/boundary/ports";
+import { TagSource } from "@/core/boundary/ports/tag_source";
 
 export class PostOverlayModel {
   private readonly overlayTarget = new PostOverlayTarget();
