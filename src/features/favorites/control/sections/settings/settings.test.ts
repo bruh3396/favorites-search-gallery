@@ -1,4 +1,4 @@
-import * as FavoritesSettings from "@/features/favorites/control/sections/settings/settings";
+﻿import * as FavoritesSettings from "@/features/favorites/control/sections/settings/settings";
 import { describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { SettingsClass } from "@/lib/ui/settings/classes";
@@ -14,7 +14,7 @@ interface Setup {
 
 function setup(expanded: Record<string, boolean> = {}, onMobileDevice = false): Setup {
   const context = createAppContext({
-    environment: { onMobileDevice, onDesktopDevice: !onMobileDevice },
+    environment: { device: onMobileDevice ? "mobile" : "desktop" },
     preferences: { favorites: { settingsExpandedSections: expanded } }
   });
   const container = document.createElement("div");

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
@@ -10,7 +10,7 @@ import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
-import { postPageUrl } from "@/lib/remote/url";
+import { postPageUrl } from "@/adapters/rule34/client/post_page/post_page";
 
 interface Setup {
   view: FavoritesView;
@@ -121,7 +121,7 @@ describe("FavoritesView", () => {
     });
 
     test("marks a shown thumb as favorited or not", () => {
-      const { view, content } = setup({ environment: { userIsOnTheirOwnFavoritesPage: false } });
+      const { view, content } = setup({ environment: { ownsFavorites: false } });
 
       view.showSearchResults(createFavorites("1"));
       view.setFavorited("1", true);
@@ -152,7 +152,7 @@ describe("FavoritesView", () => {
     });
 
     test("strips the link from the hovered thumb", () => {
-      const { view, content } = setup({ environment: { onMobileDevice: true } });
+      const { view, content } = setup({ environment: { device: "mobile" } });
 
       view.showSearchResults(createFavorites("1"));
       const link = content.querySelector("a") as HTMLAnchorElement;

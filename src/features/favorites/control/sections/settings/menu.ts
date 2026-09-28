@@ -1,9 +1,9 @@
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { SettingsCatalog } from "@/features/favorites/control/sections/settings/catalog";
 import { SettingsSection } from "@/features/favorites/types/types";
 
 export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment): SettingsSection[] {
-  const onMobile = environment.onMobileDevice;
+  const onMobile = environment.device === "mobile";
   return [
     {
       title: "General",

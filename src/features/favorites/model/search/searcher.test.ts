@@ -48,8 +48,8 @@ describe.each([
       }
     });
     const environment = createEnvironment({
-      userIsOnTheirOwnFavoritesPage: overrides.onOwnFavoritesPage ?? true,
-      negatedBlacklistedTags: "-blacklisted"
+      ownsFavorites: overrides.onOwnFavoritesPage ?? true,
+      blacklistedTags: "blacklisted"
     });
 
     searcher = new FavoritesSearcher(preferences, environment, onChanged);

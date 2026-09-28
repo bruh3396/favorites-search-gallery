@@ -1,4 +1,5 @@
-import { EncodedMediaType, MediaExtension, MediaType } from "@/types/media";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { EncodedMediaType, MediaType } from "@/types/media";
 import { decodeMediaType, encodeMediaType, resolveMediaType } from "@/lib/media/media_type";
 import { describe, expect, test } from "vitest";
 

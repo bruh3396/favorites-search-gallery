@@ -1,4 +1,4 @@
-import { FAVORITES_PER_PAGE } from "@/lib/constants";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page/favorites_page";
 import { average } from "@/utils/pure/number";
 
 const ROLLING_WINDOW = 10;

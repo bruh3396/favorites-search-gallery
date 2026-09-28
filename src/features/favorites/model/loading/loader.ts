@@ -1,17 +1,17 @@
-import { Collection, Enricher, Fetcher, Searcher, Store } from "@/features/favorites/types/types";
+import { Collection, Enricher, Searcher, Store } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { Post } from "@/types/api";
+import { FavoritesSource } from "@/core/boundary/ports";
 
 export class FavoritesLoader {
   private readonly store: Store;
-  private readonly fetcher: Fetcher;
+  private readonly source: FavoritesSource;
   private readonly collection: Collection;
   private readonly searcher: Searcher;
   private readonly enricher: Enricher;
 
-  constructor({ store, fetcher, collection, searcher, enricher }: { store: Store; fetcher: Fetcher; collection: Collection; searcher: Searcher; enricher: Enricher }) {
+  constructor({ store, source, collection, searcher, enricher }: { store: Store; source: FavoritesSource; collection: Collection; searcher: Searcher; enricher: Enricher }) {
     this.store = store;
-    this.fetcher = fetcher;
+    this.source = source;
     this.collection = collection;
     this.searcher = searcher;
     this.enricher = enricher;
@@ -33,18 +33,18 @@ export class FavoritesLoader {
     });
   }
 
-  public fetchAll(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: Post[]): Promise<void> {
-    return this.fetcher.fetchAll((posts) => {
+  public fetchAll(onSearchResultsFound: (newSearchResults: Favorite[]) => void): Promise<void> {
+    return this.source.fetchAll((posts) => {
       const favorites = this.collection.appendDirty(posts);
 
       this.searcher.add(favorites);
       this.enricher.enrich(favorites);
       onSearchResultsFound(this.searcher.appendResults(favorites));
-    }, firstPageFavorites);
+    });
   }
 
-  public fetchNew(firstPageFavorites?: Post[]): Promise<Favorite[]> {
-    return this.fetcher.fetchNew(this.collection.getAllIds(), firstPageFavorites)
+  public fetchNew(): Promise<Favorite[]> {
+    return this.source.fetchNew(this.collection.getAllIds())
       .then((posts) => {
         if (posts.length === 0) {
           return [];

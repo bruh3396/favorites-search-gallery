@@ -57,7 +57,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
   }
 
   private followInContent(item: MediaItem): void {
-    if (!this.usingColumnLayout() && !this.context.environment.usingFirefox) {
+    if (!this.usingColumnLayout() && this.context.environment.canvasBudget !== "reduced") {
       this.view.scrollToThumb(item.id);
     }
   }
@@ -94,7 +94,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
   }
 
   private advanceResults(direction: NavigationKey): boolean {
-    if (this.context.environment.onPostListPage) {
+    if (this.context.environment.mode === "posts") {
       return this.context.featureBridge.postList.navigateToAdjacent.request(direction) !== null;
     }
     return this.context.featureBridge.favorites.advance.request(direction);

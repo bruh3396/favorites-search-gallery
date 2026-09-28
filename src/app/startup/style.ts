@@ -65,7 +65,7 @@ function subscribeToPreferenceStyles(context: AppContext): void {
   preferences.app.theme.on(() => applyCurrentTheme(context));
   preferences.app.darkMode.on((dark) => {
     applyCurrentTheme(context);
-    swapNativeStylesheet(dark, environment.onDesktopDevice);
+    swapNativeStylesheet(dark, environment.device === "desktop");
   });
   preferences.app.gradient.on(toggleGradient);
   preferences.app.nativeFont.on(toggleNativeFont);
@@ -79,17 +79,17 @@ function applyCurrentTheme({ preferences }: AppContext): void {
 }
 
 function actionBarPreferences({ preferences, environment }: AppContext): Preferences["favorites"] | Preferences["postList"] {
-  return environment.onPostListPage ? preferences.postList : preferences.favorites;
+  return environment.mode === "posts" ? preferences.postList : preferences.favorites;
 }
 
 function insertBaseStyles(context: AppContext): void {
   const fadeInCss = context.preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
-  const platformCss = context.environment.onMobileDevice ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
+  const platformCss = context.environment.device === "mobile" ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
   const galleryCss = context.flags.galleryEnabled ? GALLERY_CSS + AUTOPLAY_CSS : "";
   const tooltipCss = context.flags.tooltipEnabled ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
-  const postListCss = context.environment.onPostListPage ? POST_LIST_CSS + SETTINGS_CSS : "";
+  const postListCss = context.environment.mode === "posts" ? POST_LIST_CSS + SETTINGS_CSS : "";
   const postOverlayCss = context.flags.postOverlayEnabled ? POST_OVERLAY_CSS : "";
-  const favoritesCss = context.environment.onFavoritesPage ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_SECTIONS_CSS + SETTINGS_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
+  const favoritesCss = context.environment.mode === "favorites" ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_SECTIONS_CSS + SETTINGS_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +
@@ -123,9 +123,9 @@ function insertStyle(css: string): void {
 
 function applyTileVariables(context: AppContext): void {
   const { content } = context.shell;
-  const outlineSize = context.environment.onMobileDevice ? 1 : 2;
-  const rightMargin = context.environment.onDesktopDevice ? ThumbConfig.rightContentMargin : 0;
-  const tileGap = context.environment.onPostListPage ? ThumbConfig.spacing.postList : ThumbConfig.spacing.favorites;
+  const outlineSize = context.environment.device === "mobile" ? 1 : 2;
+  const rightMargin = context.environment.device === "desktop" ? ThumbConfig.rightContentMargin : 0;
+  const tileGap = context.environment.mode === "posts" ? ThumbConfig.spacing.postList : ThumbConfig.spacing.favorites;
 
   content.style.setProperty("--media-outline-size", `${outlineSize}px`);
   content.style.setProperty("--tile-gap", `${tileGap}px`);

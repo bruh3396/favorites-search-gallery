@@ -1,4 +1,4 @@
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { MediaItem } from "@/types/media";
 import { Renderer } from "@/features/gallery/types/types";
@@ -13,7 +13,7 @@ export class GalleryGifRenderer implements Renderer {
   private readonly preloadedGifCount: number;
 
   constructor(environment: Environment) {
-    this.preloadedGifCount = environment.onMobileDevice ? GalleryConfig.preloadedGifCount.mobile : GalleryConfig.preloadedGifCount.desktop;
+    this.preloadedGifCount = environment.device === "mobile" ? GalleryConfig.preloadedGifCount.mobile : GalleryConfig.preloadedGifCount.desktop;
     this.gif = createElement("img", {className: "gallery-image"});
     this.root = createElement("div", { id: "gif-container", className: "gallery-image-frame", children: [this.gif] });
   }

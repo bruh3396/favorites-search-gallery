@@ -1,3 +1,4 @@
+import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
 import * as PostStore from "@/lib/domain/post/store";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -5,21 +6,21 @@ import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
-import { Post } from "@/types/api";
-import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { MemoryFavorites } from "@/adapters/memory/client/favorites";
+import { MemoryFavoritesSource } from "@/adapters/memory/favorites_source/favorites_source";
 import { createAppContext } from "@/testing/context";
 import { createPost } from "@/testing/post";
 
 const DEFAULT_API_COALESCE_TIMEOUT = FavoritesConfig.apiCoalesceTimeout;
 const DEFAULT_STORE_UPDATE_COALESCE_TIMEOUT = FavoritesConfig.storeUpdateCoalesceTimeout;
-const DEFAULT_FAVORITES_PAGE_FETCH_DELAY = Rule34NetworkConfig.favoritesPageFetchDelay;
 
 let pageCounter = 0;
 
-function createContext(resultsPerPage = 100): AppContext {
+function createContext(resultsPerPage = 100, sourcePosts: Post[] = []): AppContext {
   pageCounter += 1;
   return createAppContext({
-    environment: { favoritesPageId: `model_test_${Date.now()}_${pageCounter}` },
+    environment: { favoritesId: `model_test_${Date.now()}_${pageCounter}` },
+    ports: { favoritesSource: new MemoryFavoritesSource(new MemoryFavorites(sourcePosts)) },
     preferences: { favorites: { resultsPerPage } }
   });
 }
@@ -55,26 +56,15 @@ async function setup(posts: Post[], resultsPerPage?: number, onSearchResultsChan
   return { context, model };
 }
 
-function stubEmptyFavoritesPages(): void {
-  vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(""))));
-  vi.stubGlobal("DOMParser", class {
-    public parseFromString(): Pick<Document, "querySelectorAll"> {
-      return { querySelectorAll: () => [] as unknown as NodeListOf<Element> };
-    }
-  });
-}
-
 describe("FavoritesModel", () => {
   beforeEach(() => {
     FavoritesConfig.apiCoalesceTimeout = 0;
     FavoritesConfig.storeUpdateCoalesceTimeout = 0;
-    Rule34NetworkConfig.favoritesPageFetchDelay = 0;
   });
 
   afterEach(() => {
     FavoritesConfig.apiCoalesceTimeout = DEFAULT_API_COALESCE_TIMEOUT;
     FavoritesConfig.storeUpdateCoalesceTimeout = DEFAULT_STORE_UPDATE_COALESCE_TIMEOUT;
-    Rule34NetworkConfig.favoritesPageFetchDelay = DEFAULT_FAVORITES_PAGE_FETCH_DELAY;
     vi.unstubAllGlobals();
   });
 
@@ -140,18 +130,22 @@ describe("FavoritesModel", () => {
 
   describe("fetching", () => {
     test("fetches all favorites, streaming them into the collection and search results", async() => {
-      stubEmptyFavoritesPages();
-      const model = createModel(createContext());
+      const model = createModel(createContext(100, createFavoritePosts("apple", "1", "2")));
       const onSearchResultsFound = vi.fn();
 
-      await model.fetchAllFavorites(onSearchResultsFound, createFavoritePosts("apple", "1", "2"));
+      await model.fetchAllFavorites(onSearchResultsFound);
       expect(idsOf(onSearchResultsFound.mock.calls.flatMap(([results]) => results))).toEqual(["1", "2"]);
       expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
     });
 
     test("fetches only favorites the collection has not seen", async() => {
-      const { model } = await setup(createFavoritePosts("apple", "1"));
-      const newFavorites = await model.fetchNewFavorites(createFavoritePosts("apple", "1", "2"));
+      const context = createContext(100, createFavoritePosts("apple", "1", "2"));
+
+      await store(context, createFavoritePosts("apple", "1"));
+      const model = createModel(context);
+
+      await model.loadStoredFavorites();
+      const newFavorites = await model.fetchNewFavorites();
 
       expect(idsOf(newFavorites)).toEqual(["2"]);
       expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);

@@ -1,8 +1,18 @@
+import { ApiPostSource } from "@/adapters/api/post_source/post_source";
 import { PreferenceOverrides, createPreferences } from "@/testing/preferences";
+import { fetchFavoritesCount } from "@/adapters/rule34/client/profile_page/profile_page";
+import { fetchFavoritesPagePosts } from "@/adapters/rule34/client/favorites_page/favorites_page";
+import { Rule34PostSource } from "@/adapters/rule34/post_source/post_source";
 import { AppContext } from "@/app/context/context";
 import { DomEvents } from "@/app/context/dom_events";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { FeatureBridge } from "@/app/context/feature_bridge";
+import { MemoryHost } from "@/adapters/memory/host/host";
+import { MemoryTelemetry } from "@/adapters/memory/telemetry/telemetry";
+import { Ports } from "@/core/boundary/ports";
+import { Rule34FavoritesEditor } from "@/adapters/rule34/favorites_editor/favorites_editor";
+import { Rule34FavoritesSource } from "@/adapters/rule34/favorites_source/favorites_source";
+import { Rule34Navigation } from "@/adapters/rule34/navigation/navigation";
 import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 import { createEvents } from "@/app/context/events";
@@ -10,6 +20,7 @@ import { createFlags } from "@/app/context/flags";
 
 interface AppContextOverrides {
   environment?: Partial<Environment>;
+  ports?: Partial<Ports>;
   preferences?: PreferenceOverrides;
   shell?: Shell;
 }
@@ -19,12 +30,25 @@ export function createAppContext(overrides: AppContextOverrides = {}): AppContex
   const preferences = createPreferences(overrides.preferences);
   return {
     environment,
+    ports: createPorts(environment, overrides.ports),
     preferences,
     flags: createFlags(environment, preferences),
     events: createEvents(),
     featureBridge: new FeatureBridge(environment),
     domEvents: new DomEvents(),
     shell: overrides.shell ?? createUnavailableShell()
+  };
+}
+
+function createPorts(environment: Environment, overrides: Partial<Ports> = {}): Ports {
+  return {
+    favoritesSource: new Rule34FavoritesSource(environment.favoritesId, fetchFavoritesPagePosts, fetchFavoritesCount, null),
+    favoritesEditor: new Rule34FavoritesEditor(),
+    postSource: new ApiPostSource(new Rule34PostSource()),
+    navigation: new Rule34Navigation(),
+    host: new MemoryHost(),
+    telemetry: new MemoryTelemetry(),
+    ...overrides
   };
 }
 

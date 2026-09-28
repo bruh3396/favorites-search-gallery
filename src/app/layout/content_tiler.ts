@@ -28,9 +28,9 @@ interface ContentTilerConfig {
 
 function resolveConfig(context: AppContext): ContentTilerConfig {
   const { environment, preferences, domEvents, featureBridge, shell } = context;
-  const onFavoritesPage = environment.onFavoritesPage;
+  const onFavoritesPage = environment.mode === "favorites";
   const settings = onFavoritesPage ? preferences.favorites : preferences.postList;
-  const maxColumnCount = onFavoritesPage ? (environment.onMobileDevice ? ThumbConfig.columnCountBounds.max.mobile : ThumbConfig.columnCountBounds.max.desktop) : (environment.onDesktopDevice ? ThumbConfig.columnCountBounds.max.desktop : 10);
+  const maxColumnCount = onFavoritesPage ? (environment.device === "mobile" ? ThumbConfig.columnCountBounds.max.mobile : ThumbConfig.columnCountBounds.max.desktop) : (environment.device === "desktop" ? ThumbConfig.columnCountBounds.max.desktop : 10);
   return {
     content: shell.content,
     layout: settings.layout,

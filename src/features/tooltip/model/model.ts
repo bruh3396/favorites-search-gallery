@@ -13,7 +13,7 @@ export class TooltipModel {
       usingDarkMode: (): boolean => preferences.app.darkMode.value
     });
     this.visibility = new TooltipVisibility({
-      onFavoritesPage: environment.onFavoritesPage,
+      onFavoritesPage: environment.mode === "favorites",
       favoritesTooltipEnabled: (): boolean => preferences.favorites.tooltipEnabled.value,
       postListTooltipEnabled: (): boolean => preferences.postList.tooltipEnabled.value
     });

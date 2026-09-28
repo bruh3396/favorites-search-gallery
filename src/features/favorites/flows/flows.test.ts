@@ -1,7 +1,8 @@
+import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
-import { FAVORITES_PER_PAGE } from "@/lib/constants";
+import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/favorites_page/favorites_page";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesControl } from "@/features/favorites/control/control";
@@ -9,13 +10,11 @@ import { FavoritesFlows } from "@/features/favorites/flows/flows";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
-import { Post } from "@/types/api";
-import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
 import { createPost } from "@/testing/post";
-import { favoritesPageUrl } from "@/lib/remote/url";
 
 const DEFAULT_FAVORITES_PAGE_FETCH_DELAY = Rule34NetworkConfig.favoritesPageFetchDelay;
 const DEFAULT_STREAM_STORED_FAVORITES_THRESHOLD = FavoritesConfig.streamStoredFavoritesThreshold;
@@ -26,7 +25,7 @@ let pageCounter = 0;
 function createContext(): AppContext {
   pageCounter += 1;
   const id = `flows_test_${Date.now()}_${pageCounter}`;
-  const environment = createEnvironment({ favoritesPageId: id, userId: id });
+  const environment = createEnvironment({ favoritesId: id });
   const shell = new Shell(environment);
 
   document.body.append(shell.root);
@@ -50,7 +49,7 @@ function createFavoritesPage(...ids: string[]): string {
 }
 
 function serveFavoritesPages(context: AppContext, pages: string[][]): void {
-  const htmlByUrl = new Map(pages.map((ids, index) => [favoritesPageUrl(context.environment.favoritesPageId ?? "", index * FAVORITES_PER_PAGE), createFavoritesPage(...ids)]));
+  const htmlByUrl = new Map(pages.map((ids, index) => [favoritesPageUrl(context.environment.favoritesId, index * FAVORITES_PER_PAGE), createFavoritesPage(...ids)]));
 
   vi.stubGlobal("fetch", vi.fn((url: string) => Promise.resolve(new Response(htmlByUrl.get(String(url)) ?? ""))));
 }
@@ -96,20 +95,11 @@ describe("FavoritesFlows", () => {
       const context = createContext();
 
       serveFavoritesPages(context, [["1", "2", "3"]]);
-      await setup(context).load.loadAllFavorites(undefined);
+      await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
     });
 
-    test("starts from the favorites already on the page instead of fetching the first page again", async() => {
-      const context = createContext();
-
-      serveFavoritesPages(context, [[], ["2", "3"]]);
-      await setup(context).load.loadAllFavorites([createFruitPost("1")]);
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
-      expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
-      expect(requestedUrlsOf()).not.toContain(favoritesPageUrl(context.environment.favoritesPageId ?? "", 0));
-    });
   });
 
   describe("loading with favorites stored", () => {
@@ -119,7 +109,7 @@ describe("FavoritesFlows", () => {
 
       await store(context, "1", "2", "3");
       serveFavoritesPages(context, [["1", "2", "3"]]);
-      await setup(context).load.loadAllFavorites(undefined);
+      await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(newIdsOf(context)).toEqual([]);
     });
@@ -129,7 +119,7 @@ describe("FavoritesFlows", () => {
 
       await store(context, "1", "2");
       serveFavoritesPages(context, [["3", "1", "2"]]);
-      await setup(context).load.loadAllFavorites(undefined);
+      await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(newIdsOf(context)).toEqual(["3"]);
       expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);

@@ -1,12 +1,10 @@
-import { FavoritesConfig } from "@/config/favorites_config";
+﻿import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
-import { Post } from "@/types/api";
-import { fetchFavoritesCount } from "@/lib/remote/fetchers/html";
 import { pluralSuffix } from "@/utils/pure/string";
 import { sleep } from "@/lib/async/scheduling";
 
 export class FavoritesLoadFlow extends FavoritesFlow {
-  public async loadAllFavorites(firstPageFavorites: Post[] | undefined): Promise<void> {
+  public async loadAllFavorites(): Promise<void> {
     const storedFavoritesCount = await this.model.countStoredFavorites();
     const hasStoredFavorites = storedFavoritesCount > 0;
 
@@ -14,11 +12,11 @@ export class FavoritesLoadFlow extends FavoritesFlow {
 
     if (hasStoredFavorites) {
       await this.loadStoredFavorites(storedFavoritesCount);
-      await this.fetchNewFavorites(firstPageFavorites);
+      await this.fetchNewFavorites();
       await this.indexAllFavorites();
       this.flows.search.searchFavorites("");
     } else {
-      await this.fetchAllFavorites(firstPageFavorites);
+      await this.fetchAllFavorites();
     }
     this.model.compressFavorites();
     this.context.events.favorites.favoritesLoaded.emit();
@@ -43,9 +41,9 @@ export class FavoritesLoadFlow extends FavoritesFlow {
     await this.model.streamStoredFavorites(loaded => this.view.setLoadProgress(loaded, totalFavoritesCount));
   }
 
-  private async fetchNewFavorites(firstPageFavorites: Post[] | undefined): Promise<void> {
+  private async fetchNewFavorites(): Promise<void> {
     this.view.setStatus("Fetching new favorites");
-    const newFavorites = await this.model.fetchNewFavorites(firstPageFavorites);
+    const newFavorites = await this.model.fetchNewFavorites();
 
     if (newFavorites.length === 0) {
       this.view.clearStatus();
@@ -64,10 +62,10 @@ export class FavoritesLoadFlow extends FavoritesFlow {
     this.view.clearStatus();
   }
 
-  private async fetchAllFavorites(firstPageFavorites: Post[] | undefined): Promise<void> {
-    fetchFavoritesCount(this.context.environment.favoritesPageId).then((count) => this.view.setExpectedTotalFavoritesCount(count));
+  private async fetchAllFavorites(): Promise<void> {
+    this.model.fetchFavoritesCount().then((count) => this.view.setExpectedTotalFavoritesCount(count));
     this.flows.display.clear();
-    await this.model.fetchAllFavorites(favorites => this.flows.display.sync(favorites), firstPageFavorites);
+    await this.model.fetchAllFavorites(favorites => this.flows.display.sync(favorites));
     this.view.setStatus("Saving favorites");
     await this.model.storeFavorites(this.model.getAllFavorites());
     this.view.setTemporaryStatus("All favorites saved");

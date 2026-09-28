@@ -1,31 +1,41 @@
+import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports";
 import { MediaItem, MediaType } from "@/types/media";
-import { addFavoriteUrl, postPageUrl, removeFavoriteUrl } from "@/lib/remote/url";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { GalleryModel } from "@/features/gallery/model/model";
+import { MemoryNavigation } from "@/adapters/memory/navigation/navigation";
 import { UpscaleQuality } from "@/types/app";
 import { createPreferences } from "@/testing/preferences";
+
+interface Setup {
+  model: GalleryModel;
+  items: MediaItem[];
+  navigation: MemoryNavigation;
+  favoritesEditor: { add: ReturnType<typeof vi.fn<FavoritesEditor["add"]>>; remove: ReturnType<typeof vi.fn<FavoritesEditor["remove"]>> };
+}
 
 function createItem(id: string, mediaType: MediaType = "image"): MediaItem {
   return { id, mediaType, extension: "png", thumbUrl: `https://rule34.xxx/thumbnails/1/thumbnail_${id}.jpg` };
 }
 
 function createModel(previewEnabled = false): GalleryModel {
-  return new GalleryModel(createPreferences({ gallery: { previewEnabled } }));
+  return setupWith(previewEnabled).model;
 }
 
-function setup(...ids: string[]): { model: GalleryModel; items: MediaItem[] } {
-  const model = createModel();
+function setupWith(previewEnabled: boolean): Omit<Setup, "items"> {
+  const navigation = new MemoryNavigation();
+  const favoritesEditor = {
+    add: vi.fn<FavoritesEditor["add"]>((): Promise<AddFavoriteStatus> => Promise.resolve("alreadyAdded")),
+    remove: vi.fn<FavoritesEditor["remove"]>((): Promise<RemoveFavoriteStatus> => new Promise(() => { }))
+  };
+  return { model: new GalleryModel(createPreferences({ gallery: { previewEnabled } }), navigation, favoritesEditor), navigation, favoritesEditor };
+}
+
+function setup(...ids: string[]): Setup {
+  const { model, navigation, favoritesEditor } = setupWith(false);
   const items = ids.map(id => createItem(id));
 
   model.indexItems(items);
-  return { model, items };
-}
-
-function stubWindowOpen(): ReturnType<typeof vi.fn> {
-  const open = vi.fn();
-
-  vi.stubGlobal("window", { open });
-  return open;
+  return { model, items, navigation, favoritesEditor };
 }
 
 function stubFetch(response: () => Promise<Response>): ReturnType<typeof vi.fn> {
@@ -146,22 +156,13 @@ describe("GalleryModel", () => {
       expect(model.isViewingVideo()).toBe(false);
     });
 
-    test("opens the post page", () => {
-      const open = stubWindowOpen();
-      const { model, items } = setup("101");
+    test("opens the current item's post and media", () => {
+      const { model, items, navigation } = setup("101");
 
       model.open(items[0]);
       model.openPost();
-      expect(open).toHaveBeenCalledWith(postPageUrl("101"), "_blank");
-    });
-
-    test("opens the original media", async() => {
-      const open = stubWindowOpen();
-      const { model, items } = setup("102");
-
-      model.open(items[0]);
-      await model.openMedia();
-      expect(open).toHaveBeenCalledWith("https://rule34.xxx/images/1/102.png", "_blank");
+      model.openMedia();
+      expect(navigation.opened).toEqual(["#post-101", "#media-101"]);
     });
 
     test("downloads the original media", async() => {
@@ -173,22 +174,20 @@ describe("GalleryModel", () => {
       expect(fetch).toHaveBeenCalledWith("https://rule34.xxx/images/1/103.png");
     });
 
-    test("adds the current item as a favorite", async() => {
-      const fetch = stubFetch(() => Promise.resolve(new Response("3")));
-      const { model, items } = setup("104");
+    test("adds the current item as a favorite and reports the answer", async() => {
+      const { model, items, favoritesEditor } = setup("104");
 
       model.open(items[0]);
-      expect(await model.addFavorite()).toBe("success");
-      expect(fetch).toHaveBeenCalledWith(addFavoriteUrl("104"), undefined);
+      expect(await model.addFavorite()).toBe("alreadyAdded");
+      expect(favoritesEditor.add).toHaveBeenCalledWith("104");
     });
 
-    test("removes the current item from favorites", async() => {
-      const fetch = stubFetch(() => Promise.resolve(new Response("")));
-      const { model, items } = setup("105");
+    test("removes the current item from favorites without waiting for the answer", async() => {
+      const { model, items, favoritesEditor } = setup("105");
 
       model.open(items[0]);
       expect(await model.removeFavorite()).toBe("success");
-      await vi.waitFor(() => expect(fetch).toHaveBeenCalledWith(removeFavoriteUrl("105"), expect.anything()));
+      expect(favoritesEditor.remove).toHaveBeenCalledWith("105");
     });
   });
 });

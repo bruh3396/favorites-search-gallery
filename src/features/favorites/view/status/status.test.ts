@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { FAVORITES_PER_PAGE } from "@/lib/constants";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page/favorites_page";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";

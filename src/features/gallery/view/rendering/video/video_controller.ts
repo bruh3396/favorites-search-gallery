@@ -1,4 +1,4 @@
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";
@@ -135,7 +135,7 @@ export class GalleryVideoController {
 
     this.createVideoPlayer(volume, isMuted);
 
-    const preloadedVideoCount = this.environment.onMobileDevice ? GalleryConfig.preloadedVideoCount.mobile : GalleryConfig.preloadedVideoCount.desktop;
+    const preloadedVideoCount = this.environment.device === "mobile" ? GalleryConfig.preloadedVideoCount.mobile : GalleryConfig.preloadedVideoCount.desktop;
 
     for (let i = 0; i < preloadedVideoCount; i += 1) {
       this.createVideoPlayer(volume, isMuted);
@@ -290,7 +290,7 @@ export class GalleryVideoController {
   private toggleVideoControls(value: boolean): void {
     const video = this.getActiveVideoPlayer();
 
-    if (this.environment.onMobileDevice) {
+    if (this.environment.device === "mobile") {
       if (value) {
         video.setAttribute("controls", "");
       }

@@ -29,6 +29,7 @@
   },
   "scripts": {
     "build": "node build/bin/build || (npm run compile-build && node build/bin/build)",
+    "build:demo": "esbuild src/targets/demo/main.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"demo\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/demo/demo.js && node -e \"require('fs').copyFileSync('src/targets/demo/index.html','dist/demo/index.html')\"",
     "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js",
     "test": "npx vitest --run",
     "test:coverage": "npx vitest --run --coverage",
@@ -36,7 +37,7 @@
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "lint": "npx eslint src/",
     "audit:test": "npx vitest --run --config .audit/vitest.config.mjs",
-    "audit:lint": "npx eslint --no-config-lookup -c .audit/lint/eslint.config.mjs src/",
+    "audit:lint": "npx eslint --no-config-lookup -c .audit/lint/eslint.config.mjs --suppressions-location .audit/lint/suppressions.json src/",
     "audit:structure": "tsx .audit/structure/main.ts",
     "audit": "npm run audit:test && npm run audit:lint && npm run audit:structure",
     "continuous-integration": "npm run build && npm run test:coverage && npm run typecheck",

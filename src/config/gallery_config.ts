@@ -1,4 +1,4 @@
-import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
+import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/post_list_page/post_list_page";
 import { Resolution } from "@/types/media";
 
 export const GalleryConfig = {

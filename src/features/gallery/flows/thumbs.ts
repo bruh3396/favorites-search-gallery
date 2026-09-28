@@ -2,7 +2,7 @@ import { GalleryFlow, GalleryFlowDependencies } from "@/features/gallery/flows/f
 import { debounceLeading, debounceTrailing } from "@/lib/async/rate_limiting";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
-import { POSTS_PER_POST_LIST_PAGE } from "@/lib/constants";
+import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/post_list_page/post_list_page";
 import { Preference } from "@/lib/storage/preference";
 import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
@@ -15,7 +15,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   constructor(dependencies: GalleryFlowDependencies) {
     super(dependencies);
-    this.upscaleQuality = this.context.environment.onPostListPage ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
+    this.upscaleQuality = this.context.environment.mode === "posts" ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
     this.refreshImagesDebounced = debounceLeading(() => this.refreshImages(), GalleryConfig.contentRefreshTime);
     this.updateUpscaleQualityDebounced = debounceTrailing(() => this.updateUpscaleQualityNow(), GalleryUpscaleConfig.dynamicQualitySettleTime);
     this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.cacheOrUpscale(thumbs)), 1_000);
@@ -25,7 +25,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
   public async refreshInitialContent(): Promise<void> {
     const { environment, events } = this.context;
 
-    if (environment.onPostListPage || (environment.onFavoritesPage && !(await events.favorites.storedFavoritesFound.wait()))) {
+    if (environment.mode === "posts" || (environment.mode === "favorites" && !(await events.favorites.storedFavoritesFound.wait()))) {
       this.refresh();
     }
   }
@@ -47,12 +47,12 @@ export class GalleryThumbsFlow extends GalleryFlow {
       return;
     }
 
-    if (this.context.environment.onPostListPage) {
+    if (this.context.environment.mode === "posts") {
       this.cacheUnlessInfiniteScrolling();
     }
     this.view.reUpscale();
 
-    if (this.context.environment.onFavoritesPage) {
+    if (this.context.environment.mode === "favorites") {
       this.view.upscale(this.control.getVisibleThumbs().slice(0, 25));
     }
   }
@@ -87,7 +87,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
   }
 
   private cacheFirstAndReUpscale(): void {
-    if (this.context.environment.onDesktopDevice) {
+    if (this.context.environment.device === "desktop") {
       this.view.cacheImages(this.context.shell.getContentThumbs().slice(0, 25));
     }
     this.view.reUpscale();
@@ -110,14 +110,14 @@ export class GalleryThumbsFlow extends GalleryFlow {
   }
 
   private withVisibleThumbsAround(thumb: HTMLElement | null, use: (thumbs: HTMLElement[]) => void): void {
-    if (thumb !== null && this.context.environment.onFavoritesPage) {
+    if (thumb !== null && this.context.environment.mode === "favorites") {
       this.control.setCenterThumb(thumb);
       this.withVisibleThumbs(use);
     }
   }
 
   private cacheOrUpscale(thumbs: HTMLElement[]): void {
-    if (this.context.environment.usingFirefox) {
+    if (this.context.environment.canvasBudget === "reduced") {
       this.view.upscale(thumbs);
     } else {
       this.view.cacheImages(thumbs);

@@ -15,7 +15,7 @@ interface PostListNavigatorComponents {
 }
 
 export function startPostListNavigator(context: AppContext): void {
-  if (context.environment.onPostListPage) {
+  if (context.environment.mode === "posts") {
     const shell = new PostListNavigatorShell(context.shell);
     const model = new PostListNavigatorModel(context);
     const view = new PostListNavigatorView(context);

@@ -1,4 +1,4 @@
-import { Post } from "@/types/api";
+import { Post } from "@/core/domain/post/post";
 
 export function createPost(overrides: Partial<Post> = {}): Post {
   return {

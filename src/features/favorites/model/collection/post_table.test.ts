@@ -48,7 +48,7 @@ describe("FavoritesPostTable", () => {
 
   describe("previewUrl", () => {
     test("falls back to an empty preview source when none was ever written", () => {
-      expect(table.previewUrl(0)).toBe("https://wimg.rule34.xxx/thumbnails///thumbnail_undefined.jpg");
+      expect(table.previewUrl(0)).toBe("");
     });
   });
 
@@ -108,6 +108,12 @@ describe("decompressPreviewSource", () => {
     const decompressed = "https://api-cdn.rule34.xxx/thumbnails/1227/thumbnail_a34f3df084d16d51bbd0f5c06c68279f.jpg";
 
     expect(decompressPreviewSource(decompressed)).toBe(decompressed);
+  });
+
+  test("a preview that was never compressed, like a data URL, is returned unchanged", () => {
+    const source = "data:image/svg+xml,%3Csvg%3E%3C%2Fsvg%3E";
+
+    expect(decompressPreviewSource(source)).toBe(source);
   });
 });
 

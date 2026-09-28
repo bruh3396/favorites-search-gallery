@@ -1,5 +1,5 @@
 import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
@@ -26,7 +26,7 @@ function insertDrawerToggle(preferences: Preferences, slots: FavoritesToolbarSlo
 }
 
 function buildButtons(events: Events, environment: Environment, slots: FavoritesToolbarSlots): ButtonConfig[] {
-  const onDesktop = environment.onDesktopDevice;
+  const onDesktop = environment.device === "desktop";
   return [
     {
       id: "search-button",

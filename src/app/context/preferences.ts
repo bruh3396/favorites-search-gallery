@@ -1,7 +1,7 @@
 import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { Rating, SortKey } from "@/types/search";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { FavoritesDrawerSectionName } from "@/types/favorites_ui";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
@@ -10,7 +10,9 @@ export type Preferences = ReturnType<typeof createPreferences>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function createPreferences(environment: Environment) {
-  const { onDesktopDevice, onMobileDevice, usingDarkMode } = environment;
+  const { usingDarkMode } = environment;
+  const onDesktopDevice = environment.device === "desktop";
+  const onMobileDevice = environment.device === "mobile";
   return {
     app: {
       darkMode: new Preference<boolean>("appDarkMode", usingDarkMode),

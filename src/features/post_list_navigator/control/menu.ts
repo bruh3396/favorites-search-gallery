@@ -1,4 +1,4 @@
-import * as PostListNavigatorCatalog from "@/features/post_list_navigator/control/catalog";
+﻿import * as PostListNavigatorCatalog from "@/features/post_list_navigator/control/catalog";
 import { AppContext } from "@/app/context/context";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";
@@ -20,7 +20,7 @@ export function mount(context: AppContext, container: HTMLElement): void {
 function buildSections(context: AppContext): SettingsSection[] {
   const catalog = PostListNavigatorCatalog.buildPostListSettingsCatalog(context);
 
-  if (context.environment.onDesktopDevice) {
+  if (context.environment.device === "desktop") {
     return [
       {
         title: "Favorites Search Gallery",

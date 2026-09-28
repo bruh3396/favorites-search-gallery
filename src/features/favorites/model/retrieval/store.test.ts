@@ -1,8 +1,8 @@
+import { Post } from "@/core/domain/post/post";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { createPost, createPosts } from "@/testing/post";
 import { DatabaseLike } from "@/lib/storage/database";
 import { FavoritesStore } from "@/features/favorites/model/retrieval/store";
-import { Post } from "@/types/api";
 
 function createDatabase(overrides: Partial<DatabaseLike<Post>> = {}): DatabaseLike<Post> {
   return {

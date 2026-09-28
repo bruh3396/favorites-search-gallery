@@ -1,8 +1,9 @@
-import { MediaExtension, MediaType } from "@/types/media";
+import { Post } from "@/core/domain/post/post";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { Arena } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { Post } from "@/types/api";
 
 export class FavoritesItem implements Favorite {
   private readonly arena: Arena;

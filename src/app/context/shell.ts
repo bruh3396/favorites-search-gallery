@@ -1,6 +1,6 @@
 import { COLUMN_SELECTOR, ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { div } from "@/utils/browser/element";
 import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";
 
@@ -14,7 +14,7 @@ export class Shell {
   constructor(private readonly environment: Environment) { }
 
   public mount(): void {
-    if (this.environment.onMobileDevice) {
+    if (this.environment.device === "mobile") {
       this.lockViewport();
     }
     this.root.append(this.overlays);

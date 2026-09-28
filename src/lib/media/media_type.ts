@@ -1,4 +1,5 @@
-import { EncodedMediaType, MediaExtension, MediaItem, MediaType } from "@/types/media";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { EncodedMediaType, MediaItem, MediaType } from "@/types/media";
 import { gifTags, videoTags } from "@/lib/media/constants";
 import { hasIntersection } from "@/utils/pure/set";
 import { toSortedTagSet } from "@/utils/pure/tag";

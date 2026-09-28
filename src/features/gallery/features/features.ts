@@ -1,4 +1,4 @@
-import { AppContext } from "@/app/context/context";
+﻿import { AppContext } from "@/app/context/context";
 import { Autoplay } from "@/features/gallery/features/autoplay/autoplay";
 import { AutoplayCallbacks } from "@/features/gallery/features/autoplay/types/types";
 
@@ -23,7 +23,7 @@ export class GalleryFeatures {
         image: preferences.gallery.autoplayImageDuration,
         minimumVideo: preferences.gallery.autoplayMinimumVideoDuration
       },
-      platform: environment.platform
+      platform: environment.device
     });
   }
 

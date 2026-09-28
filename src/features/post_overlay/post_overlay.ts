@@ -52,5 +52,5 @@ function subscribeToEvents({ context, flows }: PostOverlayComponents): void {
 }
 
 function waitUntilFavoritesAreReady(context: AppContext): Promise<unknown> {
-  return context.environment.onFavoritesPage ? context.events.favorites.storedFavoritesLoaded.timeout(2_000) : Promise.resolve();
+  return context.environment.mode === "favorites" ? context.events.favorites.storedFavoritesLoaded.timeout(2_000) : Promise.resolve();
 }

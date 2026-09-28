@@ -1,4 +1,4 @@
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { GalleryVideoController } from "@/features/gallery/view/rendering/video/video_controller";
 import { MediaItem } from "@/types/media";
 import { Preferences } from "@/app/context/preferences";

@@ -1,5 +1,6 @@
+import { Post } from "@/core/domain/post/post";
+import { ParsedPost } from "@/core/boundary/ports";
 import { MediaItem, MediaType } from "@/types/media";
-import { ParsedPost, Post } from "@/types/api";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";

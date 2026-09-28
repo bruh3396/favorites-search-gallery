@@ -1,4 +1,5 @@
-import { GifTag, ImageExtension, MediaExtension, VideoTag } from "@/types/media";
+import { ImageExtension, MediaExtension } from "@/core/domain/media/extension";
+import { GifTag, VideoTag } from "@/types/media";
 
 export const DEFAULT_EXTENSION: MediaExtension = "jpg";
 export const extensionRegex = (/\.(png|jpg|jpeg|gif|mp4)/);

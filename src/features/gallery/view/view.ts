@@ -1,5 +1,6 @@
 import * as GalleryTutorial from "@/features/gallery/view/tutorial";
-import { AddFavoriteStatus, Favorite, RemoveFavoriteStatus } from "@/types/favorite";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/core/boundary/ports";
+import { Favorite } from "@/types/favorite";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { EnhancedMouseEvent } from "@/lib/event/input";

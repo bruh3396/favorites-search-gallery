@@ -1,8 +1,9 @@
-import { MediaExtension, MediaType } from "@/types/media";
+import { Post } from "@/core/domain/post/post";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { Arena } from "@/features/favorites/types/types";
 import { FavoritesPostTable } from "@/features/favorites/model/collection/post_table";
-import { Post } from "@/types/api";
 import { TagPool } from "@/lib/collection/tag_pool";
 import { resolveMediaType } from "@/lib/media/media_type";
 import { toTagSet } from "@/utils/pure/tag";

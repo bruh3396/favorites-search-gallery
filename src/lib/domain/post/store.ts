@@ -1,7 +1,6 @@
-import { postIsComplete, postIsStale } from "@/lib/domain/post/status";
+import { postIsComplete, postIsStale, Post } from "@/core/domain/post/post";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { KeyedDatabase } from "@/lib/storage/database";
-import { Post } from "@/types/api";
 
 const database = new KeyedDatabase<Post>("Posts", "posts");
 const databaseWriter = new CoalescingExecutor<Post>(25, 2_000, database.write.bind(database));

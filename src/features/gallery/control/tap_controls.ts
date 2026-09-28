@@ -1,4 +1,4 @@
-import { AppContext } from "@/app/context/context";
+﻿import { AppContext } from "@/app/context/context";
 import { GalleryView } from "@/features/gallery/view/view";
 import { macroTask } from "@/lib/async/scheduling";
 
@@ -6,7 +6,7 @@ export class GalleryTapControls {
   constructor(private readonly context: AppContext, private readonly view: GalleryView) {}
 
   public setup(): void {
-    if (!this.context.environment.onMobileDevice) {
+    if (this.context.environment.device !== "mobile") {
       return;
     }
     const tapControlContainer = document.createElement("div");

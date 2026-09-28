@@ -1,6 +1,6 @@
 import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Point } from "@/types/geometry";
 import { Resolution } from "@/types/media";
@@ -21,10 +21,10 @@ export class GalleryImageCanvas {
   }
 
   private get mainCanvasResolution(): Resolution {
-    if (this.environment.onMobileDevice) {
+    if (this.environment.device === "mobile") {
       return GalleryConfig.mainCanvasResolution.lowPower;
     }
-    return this.environment.onPostListPage ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;
+    return this.environment.mode === "posts" ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;
   }
 
   public mount(container: HTMLElement): void {
@@ -55,7 +55,7 @@ export class GalleryImageCanvas {
   }
 
   public correctOrientation(): void {
-    if (this.environment.onDesktopDevice) {
+    if (this.environment.device === "desktop") {
       return;
     }
     const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;

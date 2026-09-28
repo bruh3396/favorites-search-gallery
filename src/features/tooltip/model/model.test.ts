@@ -7,7 +7,7 @@ const LIGHT_LIGHTNESS = "70%)";
 const DARK_LIGHTNESS = "45%)";
 
 function createModel(onFavoritesPage: boolean, preferences: PreferenceOverrides = {}): TooltipModel {
-  return new TooltipModel(createAppContext({ environment: { onFavoritesPage, onPostListPage: !onFavoritesPage }, preferences }));
+  return new TooltipModel(createAppContext({ environment: { mode: onFavoritesPage ? "favorites" : "posts" }, preferences }));
 }
 
 describe("TooltipModel", () => {

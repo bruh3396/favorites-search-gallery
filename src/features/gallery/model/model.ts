@@ -1,7 +1,6 @@
-import * as Actions from "@/lib/remote/fetchers/action";
 import * as GalleryItemWindow from "@/features/gallery/model/item_window";
 import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
+import { AddFavoriteStatus, FavoritesEditor, Navigation, RemoveFavoriteStatus } from "@/core/boundary/ports";
 import { GalleryState, Identifiable } from "@/types/app";
 import { Boundary } from "@/types/boundary";
 import { GalleryStateController } from "@/features/gallery/model/state";
@@ -19,7 +18,7 @@ export class GalleryModel {
   private readonly state: GalleryStateController;
   private getThumbsAround: (id: string) => MediaItem[];
 
-  constructor(preferences: Preferences) {
+  constructor(preferences: Preferences, private readonly navigation: Navigation, private readonly favoritesEditor: FavoritesEditor) {
     this.cursor = new ItemCursor<MediaItem>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
     this.getThumbsAround = (): MediaItem[] => [];
@@ -66,11 +65,11 @@ export class GalleryModel {
   }
 
   public openPost(): void {
-    Actions.openPost(this.cursor.currentItem().id);
+    this.navigation.openPost(this.cursor.currentItem().id);
   }
 
-  public openMedia(): Promise<void> {
-    return Actions.openMedia(this.cursor.currentItem());
+  public openMedia(): void {
+    this.navigation.openMedia(this.cursor.currentItem());
   }
 
   public download(): Promise<void> {
@@ -78,11 +77,11 @@ export class GalleryModel {
   }
 
   public addFavorite(): Promise<AddFavoriteStatus> {
-    return Actions.addFavorite(this.cursor.currentItem().id);
+    return this.favoritesEditor.add(this.cursor.currentItem().id);
   }
 
   public removeFavorite(): Promise<RemoveFavoriteStatus> {
-    Actions.removeFavorite(this.cursor.currentItem().id);
+    this.favoritesEditor.remove(this.cursor.currentItem().id);
     return Promise.resolve("success");
   }
 

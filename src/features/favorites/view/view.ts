@@ -1,4 +1,3 @@
-import * as FavoritesNativePageCleaner from "@/features/favorites/view/native_page_cleaner";
 import { ContentDisplayOptions, PaginationState } from "@/types/ui";
 import { AppContext } from "@/app/context/context";
 import { ContentTiler } from "@/app/layout/content_tiler";
@@ -16,14 +15,11 @@ import { FavoritesStatus } from "@/features/favorites/view/status/status";
 import { FavoritesThumbPool } from "@/features/favorites/view/thumb_pool";
 import { FavoritesViewDependencies } from "@/features/favorites/types/types";
 import { Layout } from "@/types/app";
-import { Post } from "@/types/api";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";
 import { toggleHeader } from "@/lib/ui/toggles";
 
 export class FavoritesView {
-  public readonly removeOriginalUnusedScripts: () => void;
-  public readonly takeNativeFavorites: () => Post[] | undefined;
   private readonly contentTiler: ContentTiler;
   private readonly status: FavoritesStatus;
   private readonly pagination: FavoritesPaginationRenderer;
@@ -36,17 +32,15 @@ export class FavoritesView {
   private onContentAdded: (favorites: Favorite[]) => void;
 
   constructor(private readonly context: AppContext, shell: FavoritesShell) {
-    this.removeOriginalUnusedScripts = FavoritesNativePageCleaner.removeOriginalUnusedScripts;
-    this.takeNativeFavorites = FavoritesNativePageCleaner.takeNativeFavorites;
     this.onContentReplaced = doNothing;
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
-    this.linkSuppressor = new FavoritesLinkSuppressor();
+    this.linkSuppressor = new FavoritesLinkSuppressor(context.ports.navigation.postUrl);
     this.skeleton = new FavoritesSkeleton(this.getLayout());
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
-    this.elementTemplate = new FavoritesElementTemplate(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.onMobileDevice, context.environment.userIsOnTheirOwnFavoritesPage);
+    this.elementTemplate = new FavoritesElementTemplate(context.flags.imagusSupportEnabled, context.flags.galleryDisabled, context.environment.device === "mobile", context.environment.ownsFavorites, context.ports.navigation.postUrl);
     this.thumbPool = this.createThumbPool();
     this.pagination.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
     this.drawer.toggle(context.preferences.favorites.drawerOpen.value);
@@ -78,7 +72,7 @@ export class FavoritesView {
 
   public showSearchResults(searchResults: Favorite[], options?: ContentDisplayOptions): void {
     this.contentTiler.tile(this.thumbPool.resolve(searchResults), options);
-    window.scrollTo(0, FavoritesConfig.contentTopOffset[this.context.environment.platform]);
+    window.scrollTo(0, FavoritesConfig.contentTopOffset[this.context.environment.device]);
     this.onContentReplaced();
   }
 
@@ -174,6 +168,6 @@ private createThumbPool(): FavoritesThumbPool<HTMLElement> {
     bind: (root, favorite, favorited) => this.elementTemplate.bindThumb(root, favorite, favorited),
     setAsFavorited: (node, favorited) => this.elementTemplate.setThumbFavorited(node, favorited),
     blankImage: () => this.elementTemplate.blankThumbImage
-  }, FavoritesConfig.thumbPoolMaxRetained, this.context.environment.userIsOnTheirOwnFavoritesPage);
+  }, FavoritesConfig.thumbPoolMaxRetained, this.context.environment.ownsFavorites);
 }
 }

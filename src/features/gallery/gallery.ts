@@ -25,7 +25,7 @@ export async function startGallery(context: AppContext): Promise<void> {
   await waitUntilPageIsReady(context);
 
   const shell = new GalleryShell(context.shell);
-  const model = new GalleryModel(context.preferences);
+  const model = new GalleryModel(context.preferences, context.ports.navigation, context.ports.favoritesEditor);
   const view = new GalleryView(context, shell, (id) => context.featureBridge.favorites.favorite.request(id));
   const control = new GalleryControl(context, shell, view);
   const flows = new GalleryFlows(context, model, view, control);
@@ -45,11 +45,11 @@ export async function startGallery(context: AppContext): Promise<void> {
 async function waitUntilPageIsReady(context: AppContext): Promise<void> {
   const { environment, events } = context;
 
-  if (environment.onFavoritesPage) {
+  if (environment.mode === "favorites") {
     await events.favorites.storedFavoritesFound.wait();
   }
 
-  if (environment.onPostListPage) {
+  if (environment.mode === "posts") {
     await events.postList.postListInitialized.wait();
   }
 }
@@ -70,7 +70,7 @@ function start({ flows }: GalleryComponents): void {
 function setupModel({ context, model }: GalleryComponents): void {
   const { environment, featureBridge } = context;
 
-  if (environment.onFavoritesPage) {
+  if (environment.mode === "favorites") {
     model.setupWrappingWindow(() => featureBridge.favorites.searchResults.request(), (favorite) => favorite);
   } else {
     model.setupClampedWindow(() => featureBridge.postList.thumbs.request(), toMediaItem);
@@ -103,15 +103,15 @@ function subscribeToEvents(components: GalleryComponents): void {
   preferences.gallery.menuDockedLeft.on((dockedLeft) => view.setMenuDockedLeft(dockedLeft));
   preferences.gallery.videoMuted.on((muted) => view.setVideoMuted(muted));
 
-  if (environment.onFavoritesPage) {
+  if (environment.mode === "favorites") {
     subscribeToFavoritesEvents(components);
   }
 
-  if (environment.onPostListPage) {
+  if (environment.mode === "posts") {
     subscribeToPostListEvents(components);
   }
 
-  if (environment.onDesktopDevice) {
+  if (environment.device === "desktop") {
     subscribeToDesktopInput(components);
   } else {
     subscribeToMobileInput(components);

@@ -1,6 +1,6 @@
 import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { EnhancedMouseEvent } from "@/lib/event/input";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Preferences } from "@/app/context/preferences";
 import { Timeout } from "@/types/async";
@@ -13,7 +13,7 @@ export class GalleryMenu {
 
   constructor(preferences: Preferences, environment: Environment, menu: HTMLElement) {
     this.menu = menu;
-    this.menuVisibilityTime = environment.onMobileDevice ? GalleryConfig.menuVisibilityTime.mobile : GalleryConfig.menuVisibilityTime.desktop;
+    this.menuVisibilityTime = environment.device === "mobile" ? GalleryConfig.menuVisibilityTime.mobile : GalleryConfig.menuVisibilityTime.desktop;
     this.menuVisibilityTimeout = undefined;
     this.setDockedLeft(preferences.gallery.menuDockedLeft.value);
     this.setPinned(preferences.gallery.menuPinned.value);

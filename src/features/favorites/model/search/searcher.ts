@@ -1,7 +1,7 @@
 import { ALL_RATINGS, Rating, SearchableMetric, SortKey } from "@/types/search";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
@@ -11,6 +11,7 @@ import { Searcher } from "@/features/favorites/types/types";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
+import { negateTags } from "@/utils/pure/tag";
 import { shuffleInPlace } from "@/utils/pure/array";
 
 export class FavoritesSearcher implements Searcher {
@@ -34,8 +35,8 @@ export class FavoritesSearcher implements Searcher {
     this.allowedRatings = preferences.favorites.allowedRatings;
     this.sortKey = preferences.favorites.sortKey;
     this.sortAscending = preferences.favorites.sortAscending;
-    this.userIsOnTheirOwnFavoritesPage = environment.userIsOnTheirOwnFavoritesPage;
-    this.negatedBlacklistedTags = environment.negatedBlacklistedTags;
+    this.userIsOnTheirOwnFavoritesPage = environment.ownsFavorites;
+    this.negatedBlacklistedTags = negateTags(environment.blacklistedTags);
     this.currentSearchQuery = "";
   }
 

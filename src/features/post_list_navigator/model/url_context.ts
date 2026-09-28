@@ -1,4 +1,4 @@
-import { postListPageIndex } from "@/lib/remote/pagination";
+import { postListPageIndex } from "@/adapters/rule34/client/post_list_page/post_list_page";
 
 export function initialPageNumber(): number {
   const match = (/&pid=(\d+)/).exec(location.href);

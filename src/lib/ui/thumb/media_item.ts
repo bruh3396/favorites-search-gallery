@@ -1,4 +1,5 @@
-import { ImageExtension, MediaItem, MediaType } from "@/types/media";
+import { ImageExtension } from "@/core/domain/media/extension";
+import { MediaItem, MediaType } from "@/types/media";
 import { isGif, isImage, isVideo, resolveMediaType } from "@/lib/media/media_type";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { getTagsFromThumb } from "@/lib/ui/thumb/tag";

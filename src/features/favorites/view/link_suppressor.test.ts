@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { FavoritesLinkSuppressor } from "@/features/favorites/view/link_suppressor";
-import { postPageUrl } from "@/lib/remote/url";
+import { postPageUrl } from "@/adapters/rule34/client/post_page/post_page";
 
 function createThumb(id: string): HTMLElement {
   const thumb = document.createElement("div");
@@ -35,7 +35,7 @@ describe("FavoritesLinkSuppressor", () => {
   });
 
   test("the hovered thumb loses its link", () => {
-    const suppressor = new FavoritesLinkSuppressor();
+    const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
 
     hover(suppressor, imageOf(apple));
@@ -43,7 +43,7 @@ describe("FavoritesLinkSuppressor", () => {
   });
 
   test("moving to another thumb gives the previous one its link back", () => {
-    const suppressor = new FavoritesLinkSuppressor();
+    const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
     const banana = createThumb("2");
 
@@ -54,7 +54,7 @@ describe("FavoritesLinkSuppressor", () => {
   });
 
   test("hovering the same thumb again or leaving the thumbs changes nothing", () => {
-    const suppressor = new FavoritesLinkSuppressor();
+    const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
 
     hover(suppressor, imageOf(apple));

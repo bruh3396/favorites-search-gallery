@@ -1,4 +1,4 @@
-import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+﻿import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile, UpscaleQuality } from "@/types/app";
@@ -76,7 +76,7 @@ export function buildSettingsCatalog(context: AppContext) {
       preference: preferences.favorites.layout,
       options: new Map<Layout, string>([
         ["column", "Waterfall"],
-        ...(environment.onMobileDevice ? [] : [["row", "River"] as [Layout, string]]),
+        ...(environment.device === "mobile" ? [] : [["row", "River"] as [Layout, string]]),
         ["square", "Square"],
         ["grid", "Grid"],
         ["native", "Native"]
@@ -88,7 +88,7 @@ export function buildSettingsCatalog(context: AppContext) {
       tooltip: "Set column count for waterfall, square, and grid layouts",
       preference: preferences.favorites.columnCount,
       min: ThumbConfig.columnCountBounds.min,
-      max: environment.onMobileDevice ? ThumbConfig.columnCountBounds.max.mobile : ThumbConfig.columnCountBounds.max.desktop,
+      max: environment.device === "mobile" ? ThumbConfig.columnCountBounds.max.mobile : ThumbConfig.columnCountBounds.max.desktop,
       step: 1,
       enabledWhen: whenLayout(preferences, (layout) => layout !== "row" && layout !== "native")
     }),
@@ -203,7 +203,7 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "exclude-blacklist",
       label: "Exclude Blacklist",
       tooltip: "Exclude favorites with blacklisted tags from search",
-      enabled: environment.userIsOnTheirOwnFavoritesPage,
+      enabled: environment.ownsFavorites,
       preference: preferences.favorites.excludeBlacklist
     }, events),
     rating: multiSegmented<Rating>({

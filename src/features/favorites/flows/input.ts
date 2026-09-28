@@ -1,4 +1,3 @@
-import { addFavorite, openMedia, openPost, removeFavorite } from "@/lib/remote/fetchers/action";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
@@ -11,13 +10,14 @@ export class FavoritesInputFlow extends FavoritesFlow {
     }
     handleActionBarClick(event.originalEvent, {
       onFavoriteAdded: (id) => {
-        addFavorite(id);
+        this.model.addFavorite(id);
         this.context.events.app.favoriteAdded.emit(id);
       },
       onFavoriteRemoved: (id) => {
-        removeFavorite(id);
+        this.model.removeFavorite(id);
         this.context.events.app.favoriteRemoved.emit(id);
-      }
+      },
+      onPostOpened: (id) => this.context.ports.navigation.openPost(id)
     });
   }
 
@@ -29,7 +29,7 @@ export class FavoritesInputFlow extends FavoritesFlow {
     }
 
     if (event.ctrlKey) {
-      openMedia(toMediaItem(event.thumb));
+      this.context.ports.navigation.openMedia(toMediaItem(event.thumb));
     }
     event.originalEvent.preventDefault();
   }
@@ -44,7 +44,7 @@ export class FavoritesInputFlow extends FavoritesFlow {
       (event.leftClick && (event.shiftKey || this.context.flags.galleryDisabled));
 
     if (shouldOpen) {
-      openPost(event.thumb.id);
+      this.context.ports.navigation.openPost(event.thumb.id);
     }
     event.originalEvent.preventDefault();
   }

@@ -1,8 +1,8 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { TagCategory, TagCategoryMap } from "@/types/search";
-import { fetchPostPageHtml } from "@/lib/remote/fetchers/html";
-import { fetchTagCategory } from "@/lib/remote/fetchers/api";
-import { parseTagCategoriesFromPostPage } from "@/lib/remote/parsers/post_page_parser";
+import { fetchPostPageHtml } from "@/adapters/rule34/client/post_page/post_page";
+import { ApiTags } from "@/adapters/api/tag_source/tag_source";
+import { parseTagCategoriesFromPostPage } from "@/adapters/rule34/client/post_page/parser";
 import { withTimeout } from "@/lib/async/scheduling";
 
 const RESOLVE_TIMEOUT_MS = 10_000;
@@ -26,7 +26,7 @@ async function resolve(tagName: string): Promise<TagCategory> {
   if (cached !== undefined) {
     return cached;
   }
-  const category = await fetchTagCategory(tagName);
+  const category = await ApiTags.fetch(tagName);
 
   TagCategoryStore.persist(tagName, category);
   return category;

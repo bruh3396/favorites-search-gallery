@@ -1,6 +1,6 @@
 import { MediaItem } from "@/types/media";
 import { RateLimiter } from "@/lib/async/rate_limiting";
-import { Rule34NetworkConfig } from "@/config/rule34_network_config";
+import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 import { videoUrl } from "@/lib/media/url";
 
 const videoLimiter = new RateLimiter(Rule34NetworkConfig.videoDurationRateLimit);

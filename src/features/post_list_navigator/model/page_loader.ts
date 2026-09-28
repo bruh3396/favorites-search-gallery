@@ -2,8 +2,8 @@ import { AppContext } from "@/app/context/context";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model/page_cache";
 import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
-import { Rule34NetworkConfig } from "@/config/rule34_network_config";
-import { fetchPostList } from "@/lib/remote/fetchers/html";
+import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
+import { fetchPostList } from "@/adapters/rule34/client/post_list_page/post_list_page";
 import { numbersAround } from "@/utils/pure/number";
 import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
@@ -14,7 +14,7 @@ export class PostListNavigatorPageLoader {
   private readonly galleryDisabled: boolean;
 
   constructor(context: AppContext) {
-    this.onMobileDevice = context.environment.onMobileDevice;
+    this.onMobileDevice = context.environment.device === "mobile";
     this.galleryDisabled = context.flags.galleryDisabled;
   }
 

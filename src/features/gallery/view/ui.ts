@@ -1,7 +1,7 @@
 import * as GalleryFullscreenIcon from "@/features/gallery/view/fullscreen_icon";
 import * as Icons from "@/assets/svg/icons";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/types/favorite";
-import { Environment } from "@/app/context/environment";
+import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/core/boundary/ports";
+import { Environment } from "@/core/boundary/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";
 import { blurActiveElement } from "@/utils/browser/window";
@@ -65,7 +65,7 @@ export class GalleryUi {
   }
 
   public toggleScrollbar(value: boolean): void {
-    const target = this.environment.onMobileDevice ? document.documentElement : document.body;
+    const target = this.environment.device === "mobile" ? document.documentElement : document.body;
 
     target.style.overflowY = value ? "auto" : "hidden";
   }

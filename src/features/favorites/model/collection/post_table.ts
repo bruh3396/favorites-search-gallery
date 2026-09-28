@@ -1,7 +1,8 @@
+import { Post } from "@/core/domain/post/post";
 import { DiscreteRating, Metric, Rating } from "@/types/search";
-import { MediaExtension, decodeMediaExtension, encodeMediaExtension } from "@/types/media";
-import { Post } from "@/types/api";
-import { WIMG_ORIGIN } from "@/lib/constants";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { decodeMediaExtension, encodeMediaExtension } from "@/types/media";
+import { WIMG_ORIGIN } from "@/adapters/rule34/client/site";
 import { copyString } from "@/utils/pure/string";
 import { grow } from "@/utils/pure/array";
 import { internString } from "@/lib/search/interner";
@@ -145,9 +146,10 @@ export class FavoritesPostTable {
 }
 
 const previewSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
+const compressedPreviewSourceRegex = /^[0-9]+_[0-9a-f]+$/;
 
 export function decompressPreviewSource(compressedSource: string): string {
-  if (isUrl(compressedSource)) {
+  if (!compressedPreviewSourceRegex.test(compressedSource)) {
     return compressedSource;
   }
   const splitSource = compressedSource.split("_").map(copyString);

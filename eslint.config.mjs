@@ -621,7 +621,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/types/api.ts"],
+    files: ["src/core/domain/post/post.ts", "src/adapters/api/client/responses.ts"],
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",

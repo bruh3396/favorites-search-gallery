@@ -1,22 +1,20 @@
-import * as FavoritesIdentity from "@/features/favorites/model/retrieval/identity";
-import * as PostResolver from "@/lib/domain/post/resolver";
+import { Post } from "@/core/domain/post/post";
 import * as PostStore from "@/lib/domain/post/store";
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { AppContext } from "@/app/context/context";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
+import { AddFavoriteStatus, FavoritesEditor, FavoritesSource, RemoveFavoriteStatus } from "@/core/boundary/ports";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesEnricher } from "@/features/favorites/model/enrichment/enricher";
-import { FavoritesFetcher } from "@/features/favorites/model/retrieval/fetcher";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
 import { FavoritesStore } from "@/features/favorites/model/retrieval/store";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
-import { Post } from "@/types/api";
-import { fetchFavoritesPagePosts } from "@/lib/remote/fetchers/html";
+import { PostResolver } from "@/lib/domain/post/resolver";
 import { readVideoDuration } from "@/lib/media/duration";
 
 export class FavoritesModel {
@@ -25,23 +23,27 @@ export class FavoritesModel {
   private readonly store: FavoritesStore;
   private readonly loader: FavoritesLoader;
   private readonly paginator: Paginator<Favorite>;
+  private readonly source: FavoritesSource;
+  private readonly editor: FavoritesEditor;
 
   constructor(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void) {
+    const { favoritesSource, favoritesEditor, postSource } = context.ports;
+    const postResolver = new PostResolver(postSource);
+
+    this.source = favoritesSource;
+    this.editor = favoritesEditor;
     this.collection = new FavoritesCollection();
     this.searcher = new FavoritesSearcher(context.preferences, context.environment, onSearchResultsChanged);
-    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", FavoritesIdentity.favoritesDatabaseKey(context.environment)));
+    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", `user${context.environment.favoritesId}`));
     this.loader = new FavoritesLoader({
       store: this.store,
-      fetcher: new FavoritesFetcher({
-        pageId: FavoritesIdentity.favoritesPageId(context.environment),
-        fetch: fetchFavoritesPagePosts
-      }),
+      source: this.source,
       collection: this.collection,
       searcher: this.searcher,
       enricher: new FavoritesEnricher({
         onFavoriteEnriched: (favorite): void => this.store.overwrite(favorite.post),
         onTagsUpdated: (updates): void => this.searcher.update(updates),
-        resolvePosts: PostResolver.resolveAll,
+        resolvePosts: (posts, onResolved): Promise<void> => postResolver.resolveAll(posts, onResolved),
         persistTagCategories: TagCategoryStore.persistAll,
         readDuration: readVideoDuration,
         persistPost: PostStore.write
@@ -61,12 +63,24 @@ export class FavoritesModel {
     return this.loader.streamStored(onBatch);
   }
 
-  public fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void, firstPageFavorites?: Post[]): Promise<void> {
-    return this.loader.fetchAll(onSearchResultsFound, firstPageFavorites);
+  public fetchAllFavorites(onSearchResultsFound: (newSearchResults: Favorite[]) => void): Promise<void> {
+    return this.loader.fetchAll(onSearchResultsFound);
   }
 
-  public fetchNewFavorites(firstPageFavorites?: Post[]): Promise<Favorite[]> {
-    return this.loader.fetchNew(firstPageFavorites);
+  public fetchNewFavorites(): Promise<Favorite[]> {
+    return this.loader.fetchNew();
+  }
+
+  public fetchFavoritesCount(): Promise<number | null> {
+    return this.source.count();
+  }
+
+  public addFavorite(id: string): Promise<AddFavoriteStatus> {
+    return this.editor.add(id);
+  }
+
+  public removeFavorite(id: string): Promise<RemoveFavoriteStatus> {
+    return this.editor.remove(id);
   }
 
   public indexAllFavorites(): void {

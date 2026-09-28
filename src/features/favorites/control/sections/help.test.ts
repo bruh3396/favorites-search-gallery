@@ -1,4 +1,4 @@
-import * as FavoritesHelp from "@/features/favorites/control/sections/help";
+﻿import * as FavoritesHelp from "@/features/favorites/control/sections/help";
 import { describe, expect, test, vi } from "vitest";
 import { createEnvironment } from "@/testing/environment";
 
@@ -10,7 +10,7 @@ interface Setup {
 function setup(onMobileDevice: boolean): Setup {
   const container = document.createElement("div");
   const requestTutorial = vi.fn();
-  const environment = createEnvironment({ onMobileDevice, onDesktopDevice: !onMobileDevice });
+  const environment = createEnvironment({ device: onMobileDevice ? "mobile" : "desktop" });
 
   FavoritesHelp.buildDrawerSection(environment, requestTutorial).mount?.(container);
   return { container, requestTutorial };

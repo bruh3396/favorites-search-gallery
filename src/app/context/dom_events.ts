@@ -1,6 +1,6 @@
 import { Emitter, StickyEmitter } from "@/lib/event/emitter";
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/event/input";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
 import { FeatureBridge } from "@/app/context/feature_bridge";
 import { Point } from "@/types/geometry";
@@ -49,9 +49,9 @@ export class DomEvents {
 
   public addEventListeners(shell: Shell, environment: Environment, events: Events, featureBridge: FeatureBridge): void {
     this.broadcastDomLoad();
-    this.setupDocumentEvents(environment.onFavoritesPage ? shell.root : document.documentElement);
+    this.setupDocumentEvents(environment.mode === "favorites" ? shell.root : document.documentElement);
     this.setupWindowEvents();
-    this.setupMobileGestures(environment.onDesktopDevice);
+    this.setupMobileGestures(environment.device === "desktop");
     this.setupHotkeys(events, () => featureBridge.galleryOpened());
   }
 

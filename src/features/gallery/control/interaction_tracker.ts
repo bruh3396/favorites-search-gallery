@@ -1,4 +1,4 @@
-import { AppContext } from "@/app/context/context";
+﻿import { AppContext } from "@/app/context/context";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Timeout } from "@/types/async";
 import { doNothing } from "@/utils/pure/function";
@@ -93,7 +93,7 @@ export class GalleryInteractionTracker {
   constructor(private readonly context: AppContext) {}
 
   public setup(): void {
-    if (this.context.environment.onMobileDevice) {
+    if (this.context.environment.device === "mobile") {
       return;
     }
     const onInteractionStopped = (): void => {

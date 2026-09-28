@@ -1,6 +1,6 @@
 import { GalleryAbstractImageBudgeter, GalleryLimitImageBudgeter, GalleryMemoryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
 import { AppContext } from "@/app/context/context";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { GalleryConfig } from "@/config/gallery_config";
@@ -57,7 +57,7 @@ export class GalleryImageRenderer implements Renderer {
     this.toggleZoomCursor(false);
     this.toggleZoom(false);
 
-    if (this.environment.usingFirefox) {
+    if (this.environment.canvasBudget === "reduced") {
       this.canvas.clear();
     }
   }
@@ -122,19 +122,19 @@ export class GalleryImageRenderer implements Renderer {
   }
 
   private createBudgeter(environment: Environment): GalleryAbstractImageBudgeter {
-    if (environment.onFavoritesPage && !environment.onMobileDevice) {
+    if (environment.mode === "favorites" && environment.device !== "mobile") {
       return new GalleryMemoryImageBudgeter(this.favoriteFor, GalleryConfig.imageMegabyteLimit, GalleryConfig.minimumCachedImageCount);
     }
-    const limit = environment.onMobileDevice ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
+    const limit = environment.device === "mobile" ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
     return new GalleryLimitImageBudgeter(limit);
   }
 
   private createUpscaler(environment: Environment, preferences: Preferences, shell: Shell): GalleryAbstractUpscaler {
-    const settings = environment.onPostListPage ? preferences.postList : preferences.favorites;
+    const settings = environment.mode === "posts" ? preferences.postList : preferences.favorites;
     const canvasFor = (id: string): HTMLCanvasElement | null => shell.findThumb(id)?.querySelector("canvas") ?? null;
     const fetchBitmap = (request: ImageRequest): Promise<boolean> => this.fetcher.fetchBitmap(request);
-    const paintDelay = environment.usingFirefox ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other;
-    const baseCanvasWidth = environment.usingFirefox ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
+    const paintDelay = environment.canvasBudget === "reduced" ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other;
+    const baseCanvasWidth = environment.canvasBudget === "reduced" ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
     const args = [canvasFor, settings.upscaleThumbs, settings.upscaleQuality, fetchBitmap, paintDelay, baseCanvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight] as const;
     return GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper(...args) : new GalleryMainThreadUpscaler(...args);
   }

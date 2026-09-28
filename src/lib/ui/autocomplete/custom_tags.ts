@@ -1,6 +1,6 @@
 import { AwesompleteSuggestion } from "awesomplete";
 import { Storage } from "@/lib/storage/local_storage";
-import { fetchTagCategory } from "@/lib/remote/fetchers/api";
+import { ApiTags } from "@/adapters/api/tag_source/tag_source";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
 const STORAGE_KEY = "customTags";
@@ -44,7 +44,7 @@ export function addCustomTagsToAutocomplete(officialTags: AwesompleteSuggestion[
 
 export async function isOfficialTag(tagName: string): Promise<boolean> {
   try {
-    const category = await fetchTagCategory(tagName);
+    const category = await ApiTags.fetch(tagName);
     return category !== null;
   } catch (error) {
     console.error(error);

@@ -1,6 +1,6 @@
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
 import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
-import { HOSTNAME } from "@/lib/constants";
+import { HOSTNAME } from "@/adapters/rule34/client/site";
 import { addCustomTagsToAutocomplete } from "@/lib/ui/autocomplete/custom_tags";
 import { fetchHtml } from "@/utils/browser/http";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";

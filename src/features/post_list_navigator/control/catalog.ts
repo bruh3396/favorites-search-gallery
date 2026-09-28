@@ -1,4 +1,4 @@
-import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+﻿import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile } from "@/types/app";
 import { SettingsControl, dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
@@ -16,7 +16,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       id: "post-list-upscale",
       label: "Upscale",
       tooltip: "Upscale thumbnails on search pages",
-      enabled: flags.galleryEnabled && environment.onDesktopDevice && preferences.app.performanceProfile.value === "normal",
+      enabled: flags.galleryEnabled && environment.device === "desktop" && preferences.app.performanceProfile.value === "normal",
       preference: preferences.postList.upscaleThumbs
     }),
     infiniteScroll: toggle({
@@ -89,7 +89,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       options: new Map<Layout, string>([
         ["native", "Native"],
         ["column", "Waterfall"],
-        ...(environment.onMobileDevice ? [] : [["row", "River"] as [Layout, string]]),
+        ...(environment.device === "mobile" ? [] : [["row", "River"] as [Layout, string]]),
         ["square", "Square"],
         ["grid", "Grid"]
       ])
@@ -100,7 +100,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       tooltip: "Number of columns",
       preference: preferences.postList.columnCount,
       min: ThumbConfig.columnCountBounds.min,
-      max: environment.onDesktopDevice ? ThumbConfig.columnCountBounds.max.desktop : 10,
+      max: environment.device === "desktop" ? ThumbConfig.columnCountBounds.max.desktop : 10,
       step: 1,
       enabledWhen: whenLayoutIs(preferences, (layout) => layout !== "row" && layout !== "native")
     }),
@@ -119,7 +119,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       label: "Performance",
       tooltip: "Choose performance profile",
       preference: preferences.app.performanceProfile,
-      enabled: environment.onDesktopDevice,
+      enabled: environment.device === "desktop",
       options: new Map<PerformanceProfile, string>([
         ["normal", "Normal"],
         ["low", "Low"],

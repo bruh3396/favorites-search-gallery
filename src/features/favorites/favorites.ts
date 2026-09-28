@@ -7,7 +7,6 @@ import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { createElement } from "@/utils/browser/element";
-import { deferPostPageFetchesUntil } from "@/lib/remote/fetchers/html";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 
 interface FavoritesComponents {
@@ -21,7 +20,7 @@ interface FavoritesComponents {
 }
 
 export function startFavorites(context: AppContext): void {
-  if (context.environment.onFavoritesPage) {
+  if (context.environment.mode === "favorites") {
     const shell = new FavoritesShell(context.shell, context.environment);
     const model = new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit);
     const view = new FavoritesView(context, shell);
@@ -32,7 +31,7 @@ export function startFavorites(context: AppContext): void {
 
     setup(components);
     start(components);
-  } else if (context.environment.onPostListPage) {
+  } else if (context.environment.mode === "posts") {
     servePostListRequests(context, new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit));
   }
 }
@@ -47,13 +46,9 @@ function setup(components: FavoritesComponents): void {
   serveFavoritesPageRequests(components);
 }
 
-function start({ context, view, flows }: FavoritesComponents): void {
-  const nativeFavorites = view.takeNativeFavorites();
-
-  view.removeOriginalUnusedScripts();
-  deferPostPageFetchesUntil(context.events.favorites.favoritesLoaded.wait());
+function start({ view, flows }: FavoritesComponents): void {
   view.showSkeleton();
-  flows.load.loadAllFavorites(context.environment.onFirstFavoritesPage ? nativeFavorites : undefined);
+  flows.load.loadAllFavorites();
 }
 
 function featureDependencies(context: AppContext, model: FavoritesModel, control: FavoritesControl): FavoritesFeaturesDependencies {
@@ -136,7 +131,7 @@ function subscribeToPreferences({ context, view, flows }: FavoritesComponents): 
 function subscribeToDomEvents(components: FavoritesComponents): void {
   const { environment } = components.context;
 
-  if (environment.onDesktopDevice) {
+  if (environment.device === "desktop") {
     subscribeToDesktopInput(components);
   } else {
     subscribeToMobileInput(components);

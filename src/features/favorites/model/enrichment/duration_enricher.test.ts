@@ -1,8 +1,8 @@
+import { Post } from "@/core/domain/post/post";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment/duration_enricher";
 import { MediaItem } from "@/types/media";
-import { Post } from "@/types/api";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 

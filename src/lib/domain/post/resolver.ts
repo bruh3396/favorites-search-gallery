@@ -1,59 +1,36 @@
+import { Post } from "@/core/domain/post/post";
 import * as PostStore from "@/lib/domain/post/store";
-import { ParsedPost, Post } from "@/types/api";
-import { allMediaExtensions, extensionRegex } from "@/lib/media/constants";
-import { fetchDeletedPost, fetchPost } from "@/lib/remote/fetchers/api";
-import { ApiConfig } from "@/config/api_config";
-import { MediaExtension } from "@/types/media";
-import { postIsComplete } from "@/lib/domain/post/status";
-import { withExponentialBackoff } from "@/lib/async/scheduling";
+import { PostSource, ParsedPost } from "@/core/boundary/ports";
 
-export async function resolveAll(stalePosts: Post[], onResolved: (resolved: ParsedPost) => void): Promise<void> {
-  const cached = await readCached(stalePosts.map(post => post.id));
-
-  await Promise.all(stalePosts.map(async post => {
-    onResolved(await resolve(post, cached.get(post.id)));
-  }));
+export interface PostResolverDependencies {
+  readStored: (ids: string[]) => Promise<Post[]>;
+  store: (post: Post) => void;
 }
 
-async function resolve(stale: Post, cached: Post | undefined): Promise<ParsedPost> {
-  if (cached !== undefined) {
-    return { post: cached, tagCategories: new Map() };
-  }
-  const latest = await fetchLatest(stale);
+export class PostResolver {
+  constructor(
+    private readonly source: PostSource,
+    private readonly dependencies: PostResolverDependencies = { readStored: PostStore.readMany, store: PostStore.write }
+  ) { }
 
-  if (!postIsComplete(latest.post)) {
-    return { post: stale, tagCategories: latest.tagCategories };
-  }
-  const complete = { ...stale, ...withExtension(latest.post), fetchedAt: Date.now() };
+  public async resolveAll(stalePosts: Post[], onResolved: (resolved: ParsedPost) => void): Promise<void> {
+    const staleById = new Map(stalePosts.map(post => [post.id, post]));
+    const stored = await this.dependencies.readStored([...staleById.keys()]);
 
-  PostStore.write(complete);
-  return { post: complete, tagCategories: latest.tagCategories };
-}
-
-async function readCached(postIds: string[]): Promise<Map<string, Post>> {
-  const cached = await PostStore.readMany(postIds);
-  return new Map(cached.map(post => [post.id, post]));
-}
-
-function fetchLatest(post: Post): Promise<ParsedPost> {
-  return withExponentialBackoff(async() => {
-    if (post.deleted) {
-      return fetchDeletedPost(post.id);
+    for (const post of stored) {
+      staleById.delete(post.id);
+      onResolved({ post, tagCategories: new Map() });
     }
-    let isDeleted = false;
-    const latest = await fetchPost(post.id, () => {
-      isDeleted = true;
-    });
-    return isDeleted ? { ...latest, post: { ...latest.post, deleted: true } } : latest;
-  }, ApiConfig.postRetries);
-}
+    await Promise.all([...staleById.values()].map(stale => this.source.fetch(stale.id).then(
+      fetched => onResolved(this.refresh(stale, fetched)),
+      () => { }
+    )));
+  }
 
-function withExtension(post: Post): Post {
-  const extension = extractExtension(post.fileURL);
-  return extension === null ? post : { ...post, extension };
-}
+  private refresh(stale: Post, { post, tagCategories }: ParsedPost): ParsedPost {
+    const fresh = { ...stale, ...post, fetchedAt: Date.now() };
 
-function extractExtension(fileURL: string): MediaExtension | null {
-  const match = extensionRegex.exec(fileURL)?.[1];
-  return match !== undefined && allMediaExtensions.includes(match as MediaExtension) ? match as MediaExtension : null;
+    this.dependencies.store(fresh);
+    return { post: fresh, tagCategories };
+  }
 }

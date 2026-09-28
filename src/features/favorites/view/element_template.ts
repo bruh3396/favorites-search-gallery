@@ -1,19 +1,20 @@
-import { ActionBarDataset, ActionBarSelectors, actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
+﻿import { ActionBarDataset, ActionBarSelectors, actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
 import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { removeDataset, setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { Favorite } from "@/types/favorite";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
-import { postPageUrl } from "@/lib/remote/url";
 
 export class FavoritesElementTemplate {
   private readonly shouldLinkToPostPage;
+  private readonly postUrl: (id: string) => string;
   private readonly template: HTMLElement;
 
-  constructor(imagusSupportEnabled: boolean, galleryDisabled: boolean, onMobileDevice: boolean, userIsOnTheirOwnFavoritesPage: boolean) {
+  constructor(imagusSupportEnabled: boolean, galleryDisabled: boolean, onMobileDevice: boolean, userIsOnTheirOwnFavoritesPage: boolean, postUrl: (id: string) => string) {
     const root = new DOMParser().parseFromString("", "text/html").createElement("div");
     const canvas = galleryDisabled ? "" : "<canvas></canvas>";
 
     this.shouldLinkToPostPage = onMobileDevice || imagusSupportEnabled;
+    this.postUrl = postUrl;
     root.className = `${ITEM_CLASS_NAME} ${TILE_CLASS_NAME}`;
     root.innerHTML = `
   <a>
@@ -49,7 +50,7 @@ export class FavoritesElementTemplate {
     }
 
     if (this.shouldLinkToPostPage) {
-      container.href = postPageUrl(root.id);
+      container.href = this.postUrl(root.id);
     }
     this.setThumbFavorited(root, favorited);
   }

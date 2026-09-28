@@ -1,5 +1,5 @@
 import { createElement, label, span } from "@/utils/browser/element";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
 import { ShellPart } from "@/types/ui";

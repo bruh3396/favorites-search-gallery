@@ -1,5 +1,5 @@
 import * as DrawerGroup from "@/lib/ui/drawer_group";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { FavoritesClass } from "@/features/favorites/types/selectors";
 import { FavoritesDrawerSectionContent } from "@/types/favorites_ui";
 import { createElement } from "@/utils/browser/element";
@@ -23,7 +23,7 @@ export function buildDrawerSection(environment: Environment, requestTutorial: ()
 function mount(environment: Environment, container: HTMLElement, requestTutorial: () => void): void {
   const rows: HTMLElement[] = [];
 
-  if (environment.onMobileDevice) {
+  if (environment.device === "mobile") {
     rows.push(buildControlsRow(requestTutorial));
   }
 

@@ -1,9 +1,10 @@
-import { MediaExtension, MediaType } from "@/types/media";
+import { Post } from "@/core/domain/post/post";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { NavigationKey } from "@/types/input";
-import { Post } from "@/types/api";
 import { SettingsControl } from "@/lib/ui/settings/controls";
 
 export interface Arena {
@@ -32,11 +33,6 @@ export interface Store {
 export interface KeyValueStorage {
   get: <V>(key: string) => V | null;
   set: <V>(key: string, value: V) => void;
-}
-
-export interface Fetcher {
-  fetchAll: (onFavoritesFound: (posts: Post[]) => void, firstPageFavorites?: Post[]) => Promise<void>;
-  fetchNew: (existingIds: Set<string>, firstPageFavorites?: Post[]) => Promise<Post[]>;
 }
 
 export interface Collection {

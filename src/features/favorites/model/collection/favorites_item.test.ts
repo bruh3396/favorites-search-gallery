@@ -1,10 +1,11 @@
-import { MediaExtension, MediaType } from "@/types/media";
+import { Post } from "@/core/domain/post/post";
+import { MediaExtension } from "@/core/domain/media/extension";
+import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { Arena } from "@/features/favorites/types/types";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { FavoritesItem } from "@/features/favorites/model/collection/favorites_item";
-import { Post } from "@/types/api";
 import { createPost } from "@/testing/post";
 import { toTagSet } from "@/utils/pure/tag";
 

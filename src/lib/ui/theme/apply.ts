@@ -1,5 +1,5 @@
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
-import { ORIGIN } from "@/lib/constants";
+import { ORIGIN } from "@/adapters/rule34/client/site";
 import { Theme } from "@/lib/ui/theme/themes";
 import { macroTask } from "@/lib/async/scheduling";
 import { writeCookie } from "@/utils/browser/cookie";

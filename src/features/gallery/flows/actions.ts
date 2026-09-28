@@ -13,7 +13,7 @@ export class GalleryActionsFlow extends GalleryFlow {
       exit: (): void => this.flows.navigation.close(),
       fullscreen: toggleFullscreen,
       openPost: (): void => this.model.openPost(),
-      openOriginal: (): Promise<void> => this.model.openMedia(),
+      openOriginal: (): void => this.model.openMedia(),
       download: (): Promise<void> => this.model.download(),
       addFavorite: (): Promise<void> => this.addFavorite(),
       removeFavorite: (): Promise<void> => this.removeFavorite(),
@@ -45,7 +45,7 @@ export class GalleryActionsFlow extends GalleryFlow {
     if (status === "success") {
       this.context.events.app.favoriteAdded.emit(this.model.currentItem().id);
 
-      if (this.context.environment.onMobileDevice) {
+      if (this.context.environment.device === "mobile") {
         vibrate(15);
       }
     }

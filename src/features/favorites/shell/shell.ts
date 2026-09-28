@@ -1,7 +1,7 @@
 import * as FavoritesDrawer from "@/features/favorites/shell/drawer";
 import * as FavoritesToolbar from "@/features/favorites/shell/toolbar";
 import { FavoritesDrawerSlots, FavoritesToolbarSlots } from "@/types/favorites_ui";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { Shell } from "@/app/context/shell";

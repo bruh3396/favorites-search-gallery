@@ -1,8 +1,9 @@
-import { Collection, Enricher, Fetcher, Searcher, Store } from "@/features/favorites/types/types";
+import { Post } from "@/core/domain/post/post";
+import { Collection, Enricher, Searcher, Store } from "@/features/favorites/types/types";
+import { FavoritesSource } from "@/core/boundary/ports";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
-import { Post } from "@/types/api";
 import { createPosts } from "@/testing/post";
 
 function idsOf(favorites: Favorite[]): string[] {
@@ -50,7 +51,7 @@ function setup(sources: { stored?: Post[][]; fetched?: Post[][]; newPosts?: Post
   log: string[];
   catalog: ReturnType<typeof createCatalog>;
   enrich: ReturnType<typeof vi.fn<Enricher["enrich"]>>;
-  fetchNew: ReturnType<typeof vi.fn<Fetcher["fetchNew"]>>;
+  fetchNew: ReturnType<typeof vi.fn<FavoritesSource["fetchNew"]>>;
 } {
   const log: string[] = [];
   const stored = sources.stored ?? [];
@@ -62,13 +63,14 @@ function setup(sources: { stored?: Post[][]; fetched?: Post[][]; newPosts?: Post
       return Promise.resolve();
     }
   };
-  const fetchNew = vi.fn<Fetcher["fetchNew"]>(() => Promise.resolve(sources.newPosts ?? []));
-  const fetcher: Fetcher = {
+  const fetchNew = vi.fn<FavoritesSource["fetchNew"]>(() => Promise.resolve(sources.newPosts ?? []));
+  const source: FavoritesSource = {
     fetchAll: onFavoritesFound => {
       (sources.fetched ?? []).forEach(onFavoritesFound);
       return Promise.resolve();
     },
-    fetchNew
+    fetchNew,
+    count: () => Promise.resolve(null)
   };
   const searcher: Searcher = {
     add: favorites => log.push(`add:${idsOf(favorites).join(",")}`),
@@ -81,7 +83,7 @@ function setup(sources: { stored?: Post[][]; fetched?: Post[][]; newPosts?: Post
     log.push(`enrich:${idsOf(favorites).join(",")}`);
     return new Promise(() => { });
   });
-  const loader = new FavoritesLoader({ store, fetcher, collection: catalog, searcher, enricher: { enrich } });
+  const loader = new FavoritesLoader({ store, source,collection: catalog, searcher, enricher: { enrich } });
   return { loader, log, catalog, enrich, fetchNew };
 }
 
@@ -146,12 +148,11 @@ describe("FavoritesLoader", () => {
 
   describe("fetchNew", () => {
     test("fetches against the ids already in the collection", async() => {
-      const firstPage = createPosts("9");
       const { loader, fetchNew } = setup({ stored: [createPosts("1", "2")] });
 
       await loader.loadStored();
-      await loader.fetchNew(firstPage);
-      expect(fetchNew).toHaveBeenCalledWith(new Set(["1", "2"]), firstPage);
+      await loader.fetchNew();
+      expect(fetchNew).toHaveBeenCalledWith(new Set(["1", "2"]));
     });
 
     test("prepends new posts as dirty, indexes and enriches them, and returns them", async() => {

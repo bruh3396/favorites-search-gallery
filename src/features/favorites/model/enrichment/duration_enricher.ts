@@ -1,6 +1,6 @@
+import { Post } from "@/core/domain/post/post";
 import { Favorite } from "@/types/favorite";
 import { MediaItem } from "@/types/media";
-import { Post } from "@/types/api";
 
 export class FavoritesDurationEnricher {
   constructor(

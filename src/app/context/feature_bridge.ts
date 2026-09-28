@@ -1,5 +1,5 @@
 import { GalleryState, Layout } from "@/types/app";
-import { Environment } from "@/app/context/environment";
+import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/event/feature_channel";
 import { NavigationKey } from "@/types/input";
@@ -40,14 +40,14 @@ export class FeatureBridge {
   }
 
   public currentSearchQuery(): string {
-    return this.environment.onPostListPage ? this.postList.searchQuery.request() : this.favorites.searchQuery.request();
+    return this.environment.mode === "posts" ? this.postList.searchQuery.request() : this.favorites.searchQuery.request();
   }
 
   public usingInfiniteScroll(): boolean {
-    return this.environment.onPostListPage ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
+    return this.environment.mode === "posts" ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
   }
 
   public currentLayout(): Layout {
-    return this.environment.onPostListPage ? this.postList.layout.request() : this.favorites.layout.request();
+    return this.environment.mode === "posts" ? this.postList.layout.request() : this.favorites.layout.request();
   }
 }

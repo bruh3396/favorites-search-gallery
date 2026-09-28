@@ -1,4 +1,4 @@
-import { FavoritesFlow } from "@/features/favorites/flows/flow";
+﻿import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { Preference } from "@/lib/storage/preference";
 import { Storage } from "@/lib/storage/local_storage";
 import { reloadWindow } from "@/utils/browser/window";
@@ -27,7 +27,7 @@ export class FavoritesActionFlow extends FavoritesFlow {
   }
 
   private resetPrompt(): string {
-    const suffix = this.context.environment.onMobileDevice ? "" : DESKTOP_RESET_PROMPT_SUFFIX;
+    const suffix = this.context.environment.device === "mobile" ? "" : DESKTOP_RESET_PROMPT_SUFFIX;
     return `Are you sure you want to reset?\nThis will clear all cached favorites and preferences.${suffix}`;
   }
 }

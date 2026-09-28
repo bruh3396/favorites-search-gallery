@@ -1,6 +1,6 @@
+import { Post } from "@/core/domain/post/post";
 import { Metric, Rating, Searchable } from "@/types/search";
 import { MediaItem } from "@/types/media";
-import { Post } from "@/types/api";
 
 export interface Favorite extends MediaItem, Searchable {
   rating: Rating;
@@ -14,6 +14,3 @@ export interface Favorite extends MediaItem, Searchable {
   consumeTags: () => Set<string>;
   getMetric: (metric: Metric) => number;
 }
-
-export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success";
-export type RemoveFavoriteStatus = "error" | "forbidden" | "success";
