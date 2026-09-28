@@ -1,17 +1,26 @@
-import { TagResponse } from "@/adapters/api/client/responses";
-import { AbstractApiFetcher } from "@/adapters/api/client/abstract_api_fetcher";
-import { ApiConfig } from "@/adapters/api/client/api_config";
+import { TagCategory, TagCategoryMap } from "@/types/search";
+import { ApiClient } from "@/adapters/api/client/client";
 import { PostFetchError } from "@/types/errors";
-import { TagCategory } from "@/types/search";
+import { TagSource } from "@/core/boundary/ports";
 import { decodeTagCategory } from "@/lib/domain/tag/category_codec";
+import { withTimeout } from "@/lib/async/scheduling";
 
-export class ApiTagSource extends AbstractApiFetcher<TagResponse> {
-  constructor() {
-    super(ApiConfig.tagRateLimit, "tag", "tagNames");
+const CATEGORIZE_TIMEOUT_MS = 10_000;
+
+export class ApiTagSource implements TagSource {
+  constructor(private readonly api: Pick<ApiClient, "fetchTag">, private readonly siteTags: TagSource) { }
+
+  public async categorize(postId: string, tagNames: string[]): Promise<TagCategoryMap> {
+    try {
+      const categories = await withTimeout(Promise.all(tagNames.map(tagName => this.fetch(tagName))), CATEGORIZE_TIMEOUT_MS);
+      return new Map(tagNames.map((tagName, index) => [tagName, categories[index] ?? "general"]));
+    } catch {
+      return this.siteTags.categorize(postId, tagNames);
+    }
   }
 
-  public async fetch(tagName: string): Promise<TagCategory> {
-    const response = await this.schedule(tagName);
+  private async fetch(tagName: string): Promise<TagCategory> {
+    const response = await this.api.fetchTag(tagName);
 
     if (response.status === "rate_limited") {
       throw new PostFetchError();
@@ -19,5 +28,3 @@ export class ApiTagSource extends AbstractApiFetcher<TagResponse> {
     return decodeTagCategory(response.category);
   }
 }
-
-export const ApiTags = new ApiTagSource();

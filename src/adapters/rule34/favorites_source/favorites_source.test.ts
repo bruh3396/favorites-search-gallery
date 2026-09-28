@@ -1,11 +1,12 @@
 import { Post } from "@/core/domain/post/post";
-import { Rule34FavoritesSource, computeRetryDelay, onFirstFavoritesPage } from "@/adapters/rule34/favorites_source/favorites_source";
+import { Rule34FavoritesSite, Rule34FavoritesSource, computeRetryDelay } from "@/adapters/rule34/favorites_source/favorites_source";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page/favorites_page";
-import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 import { createPost } from "@/testing/post";
 
 const PAGE_ID = "123";
+const FETCH_DELAY = 1_000;
+const FETCH_ATTEMPTS = 4;
 
 function createPage(index: number, size = 1): Post[] {
   return Array.from({ length: size }, (_, i) => createPost({ id: `page${index}-${i}` }));
@@ -19,8 +20,23 @@ function createPageFetch(lastIndex: number, size = 1): (pageId: string, pageInde
   return vi.fn((_pageId: string, pageIndex: number) => Promise.resolve(pageIndex > lastIndex ? [] : createPage(pageIndex, size)));
 }
 
+function createSite(fetchPage: (pageId: string, pageIndex: number) => Promise<Post[]>, fetchCount: (pageId: string) => Promise<number | null>): Rule34FavoritesSite & { prioritized: number } {
+  const site = {
+    prioritized: 0,
+    readFavoritesPageId: (): string => PAGE_ID,
+    readFirstFavoritesPage: (): Post[] | null => null,
+    fetchFavoritesPage: fetchPage,
+    fetchFavoritesCount: fetchCount,
+    prioritizeFavorites: <T>(fetchFavorites: () => Promise<T>): Promise<T> => {
+      site.prioritized += 1;
+      return fetchFavorites();
+    }
+  };
+  return site;
+}
+
 function createSource(fetchPage: (pageId: string, pageIndex: number) => Promise<Post[]>, fetchCount: (pageId: string) => Promise<number | null> = () => Promise.resolve(null), firstPageFavorites: Post[] | null = null): Rule34FavoritesSource {
-  return new Rule34FavoritesSource(PAGE_ID, fetchPage, fetchCount, firstPageFavorites, () => { });
+  return new Rule34FavoritesSource(createSite(fetchPage, fetchCount), PAGE_ID, firstPageFavorites, FETCH_DELAY, FETCH_ATTEMPTS);
 }
 
 describe("Rule34FavoritesSource", () => {
@@ -30,6 +46,26 @@ describe("Rule34FavoritesSource", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+  });
+
+  test("gives every favorites fetch priority over the site's other pages", async() => {
+    const site = createSite(createPageFetch(0), () => Promise.resolve(null));
+    const source = new Rule34FavoritesSource(site, PAGE_ID, null, FETCH_DELAY, FETCH_ATTEMPTS);
+    const runs = [source.fetchAll(() => { }), source.fetchNew(new Set())];
+
+    await vi.runAllTimersAsync();
+    await Promise.all(runs);
+    expect(site.prioritized).toBe(2);
+  });
+
+  test("reads its page id and the favorites already on the page from the site", () => {
+    const site = createSite(createPageFetch(0), () => Promise.resolve(null));
+    const readFirstFavoritesPage = vi.spyOn(site, "readFirstFavoritesPage");
+    const fetchCount = vi.spyOn(site, "fetchFavoritesCount");
+
+    new Rule34FavoritesSource(site).count();
+    expect(readFirstFavoritesPage).toHaveBeenCalledOnce();
+    expect(fetchCount).toHaveBeenCalledWith(PAGE_ID);
   });
 
   describe("count", () => {
@@ -71,7 +107,7 @@ describe("Rule34FavoritesSource", () => {
       const fetchPage = createPageFetch(1);
       const run = createSource(fetchPage).fetchAll(() => { });
 
-      await vi.advanceTimersByTimeAsync(computeRetryDelay(0) - 1);
+      await vi.advanceTimersByTimeAsync(computeRetryDelay(0, FETCH_DELAY) - 1);
       expect(fetchPage).toHaveBeenCalledTimes(1);
 
       await vi.advanceTimersByTimeAsync(1);
@@ -124,43 +160,25 @@ describe("Rule34FavoritesSource", () => {
       await vi.runAllTimersAsync();
       await run;
 
-      expect(fetchPage).toHaveBeenCalledTimes(Rule34NetworkConfig.favoritesPageFetchRetries);
+      expect(fetchPage).toHaveBeenCalledTimes(FETCH_ATTEMPTS);
     });
   });
 });
 
 describe("computeRetryDelay", () => {
-  const { favoritesPageRetryBackoffBase: base, favoritesPageFetchDelay: delay } = Rule34NetworkConfig;
-
-  test("adds the flat fetch delay to the base for the first attempt", () => {
-    expect(computeRetryDelay(0)).toBe(delay + 1);
+  test("adds the flat fetch delay to a backoff of one for the first attempt", () => {
+    expect(computeRetryDelay(0, FETCH_DELAY)).toBe(FETCH_DELAY + 1);
   });
 
   test("grows the backoff exponentially with the retry count", () => {
-    expect(computeRetryDelay(1)).toBe((base ** 1) + delay);
-    expect(computeRetryDelay(2)).toBe((base ** 2) + delay);
-    expect(computeRetryDelay(3)).toBe((base ** 3) + delay);
+    const base = computeRetryDelay(1, 0);
+
+    expect(base).toBeGreaterThan(1);
+    expect(computeRetryDelay(2, 0)).toBe(base ** 2);
+    expect(computeRetryDelay(3, 0)).toBe(base ** 3);
   });
 
-  test("is monotonically increasing in the retry count", () => {
-    expect(computeRetryDelay(2)).toBeGreaterThan(computeRetryDelay(1));
-    expect(computeRetryDelay(1)).toBeGreaterThan(computeRetryDelay(0));
-  });
-});
-
-describe("onFirstFavoritesPage", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  test.each([
-    ["page=favorites&id=1", true],
-    ["page=favorites&id=1&pid=0", true],
-    ["page=favorites&id=1&pid=50", false],
-    ["page=post&s=list", false]
-  ])("%s → %s", (query, expected) => {
-    vi.stubGlobal("location", { href: `https://rule34.xxx/index.php?${query}` });
-
-    expect(onFirstFavoritesPage()).toBe(expected);
+  test("adds the flat fetch delay on every retry", () => {
+    expect(computeRetryDelay(2, FETCH_DELAY)).toBe(computeRetryDelay(2, 0) + FETCH_DELAY);
   });
 });

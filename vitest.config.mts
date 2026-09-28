@@ -8,9 +8,9 @@ const DOM_TESTS = [
   "src/features/*/{control,view,shell,features}/**/*.test.ts",
   "src/features/*/*.test.ts",
   "src/features/*/flows/flows.test.ts",
-  "src/adapters/rule34/host/native_page.test.ts",
+  "src/adapters/rule34/client/client.test.ts",
+  "src/adapters/rule34/client/favorites_page/cleanup.test.ts",
   "src/adapters/rule34/client/**/parser.test.ts",
-  "src/adapters/rule34/post_source/post_source.test.ts",
   "src/lib/ui/**/*.test.ts",
   "src/utils/browser/**/*.test.ts"
 ];

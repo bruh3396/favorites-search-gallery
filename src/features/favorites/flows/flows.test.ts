@@ -1,6 +1,6 @@
 import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/favorites_page/favorites_page";
 import { Favorite } from "@/types/favorite";
@@ -10,13 +10,11 @@ import { FavoritesFlows } from "@/features/favorites/flows/flows";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
-import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
 import { createPost } from "@/testing/post";
 
-const DEFAULT_FAVORITES_PAGE_FETCH_DELAY = Rule34NetworkConfig.favoritesPageFetchDelay;
 const DEFAULT_STREAM_STORED_FAVORITES_THRESHOLD = FavoritesConfig.streamStoredFavoritesThreshold;
 const FRUITS: Record<string, string> = { "1": "apple", "2": "banana", "3": "apple cherry" };
 
@@ -79,12 +77,7 @@ function storedIdsFor(context: AppContext): Promise<string[]> {
 }
 
 describe("FavoritesFlows", () => {
-  beforeEach(() => {
-    Rule34NetworkConfig.favoritesPageFetchDelay = 0;
-  });
-
   afterEach(() => {
-    Rule34NetworkConfig.favoritesPageFetchDelay = DEFAULT_FAVORITES_PAGE_FETCH_DELAY;
     FavoritesConfig.streamStoredFavoritesThreshold = DEFAULT_STREAM_STORED_FAVORITES_THRESHOLD;
     document.body.replaceChildren();
     vi.unstubAllGlobals();

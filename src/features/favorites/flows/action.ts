@@ -1,10 +1,10 @@
-﻿import { FavoritesFlow } from "@/features/favorites/flows/flow";
+import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { Preference } from "@/lib/storage/preference";
 import { Storage } from "@/lib/storage/local_storage";
 import { reloadWindow } from "@/utils/browser/window";
 
 const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag edits and search snippets will be preserved.";
-const PERSISTENT_LOCAL_STORAGE_KEYS: ReadonlySet<string> = new Set(["customTags", "savedSearches", "searchSnippets"]);
+const PERSISTENT_LOCAL_STORAGE_KEYS: ReadonlySet<string> = new Set(["savedSearches", "searchSnippets"]);
 
 export class FavoritesActionFlow extends FavoritesFlow {
   public removeFavorite(id: string): void {

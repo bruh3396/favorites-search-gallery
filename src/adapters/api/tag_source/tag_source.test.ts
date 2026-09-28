@@ -1,29 +1,19 @@
-import { TagResponse } from "@/adapters/api/client/responses";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiTagSource } from "@/adapters/api/tag_source/tag_source";
-import { PostFetchError } from "@/types/errors";
-import { TagCategory } from "@/types/search";
+import { TagCategoryMap } from "@/types/search";
+import { TagResponse } from "@/adapters/api/client/tag/tag";
 
-type FetchStub = ReturnType<typeof vi.fn<(url: string, init: RequestInit) => Promise<Response>>>;
-
-function setup(responses: Record<string, TagResponse>): { source: ApiTagSource; fetch: FetchStub } {
-  const fetch: FetchStub = vi.fn((_url: string, init: RequestInit) => {
-    const { tagNames } = JSON.parse(String(init.body)) as { tagNames: string[] };
-    return Promise.resolve(new Response(JSON.stringify(Object.fromEntries(tagNames.map(tagName => [tagName, responses[tagName]])))));
-  });
-
-  vi.stubGlobal("fetch", fetch);
-  return { source: new ApiTagSource(), fetch };
+function setup(responses: Record<string, TagResponse>): { source: ApiTagSource; siteTags: { categorize: ReturnType<typeof vi.fn<(postId: string, tagNames: string[]) => Promise<TagCategoryMap>>> } } {
+  const api = { fetchTag: (tagName: string): Promise<TagResponse> => Promise.resolve(responses[tagName]) };
+  const siteTags = { categorize: vi.fn<(postId: string, tagNames: string[]) => Promise<TagCategoryMap>>((_postId: string, tagNames: string[]): Promise<TagCategoryMap> => Promise.resolve(new Map(tagNames.map(tagName => [tagName, "artist"])))) };
+  return { source: new ApiTagSource(api, siteTags), siteTags };
 }
 
-function requestsOf(fetch: FetchStub): { route: string; body: unknown }[] {
-  return fetch.mock.calls.map(([url, init]) => ({ route: url.split("/").at(-1) ?? "", body: JSON.parse(String(init.body)) as unknown }));
-}
+async function categorizedFor(source: ApiTagSource, postId: string, tagNames: string[]): Promise<TagCategoryMap> {
+  const categorized = source.categorize(postId, tagNames);
 
-async function fetchFlushed(fetched: Promise<TagCategory[]>): Promise<TagCategory[]> {
-  fetched.catch(() => { });
   await vi.advanceTimersByTimeAsync(10_000);
-  return fetched;
+  return categorized;
 }
 
 describe("ApiTagSource", () => {
@@ -33,19 +23,18 @@ describe("ApiTagSource", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    vi.unstubAllGlobals();
   });
 
-  test("batches tags requested together and decodes their categories", async() => {
-    const { source, fetch } = setup({ apple: { status: "ok", category: 0 }, alice: { status: "ok", category: 4 } });
+  test("decodes each tag's category", async() => {
+    const { source } = setup({ apple: { status: "ok", category: 0 }, alice: { status: "ok", category: 4 } });
 
-    expect(await fetchFlushed(Promise.all([source.fetch("apple"), source.fetch("alice")]))).toEqual(["general", "character"]);
-    expect(requestsOf(fetch)).toEqual([{ route: "tag", body: { tagNames: ["apple", "alice"] } }]);
+    expect(await categorizedFor(source, "1", ["apple", "alice"])).toEqual(new Map([["apple", "general"], ["alice", "character"]]));
   });
 
-  test("rejects when rate limited", async() => {
-    const { source } = setup({ apple: { status: "rate_limited" } });
+  test("asks the site when rate limited", async() => {
+    const { source, siteTags } = setup({ apple: { status: "rate_limited" } });
 
-    await expect(fetchFlushed(Promise.all([source.fetch("apple")]))).rejects.toThrow(PostFetchError);
+    expect(await categorizedFor(source, "1", ["apple"])).toEqual(new Map([["apple", "artist"]]));
+    expect(siteTags.categorize).toHaveBeenCalledWith("1", ["apple"]);
   });
 });

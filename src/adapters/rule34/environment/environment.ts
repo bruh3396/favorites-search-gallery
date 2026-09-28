@@ -1,38 +1,29 @@
-import { readFavoritesPageId, readPageMode } from "@/adapters/rule34/client/location";
-import { PlaceEnvironment } from "@/core/boundary/environment";
+import { AppMode, Environment } from "@/core/boundary/environment";
+import { PageName } from "@/adapters/rule34/client/current_page/current_page";
+import { Rule34Client } from "@/adapters/rule34/client/client";
 
-export function readRule34Environment(): PlaceEnvironment | null {
-  const mode = readPageMode();
+const MODES: Record<PageName, AppMode> = {
+  favorites: "favorites",
+  postList: "posts"
+};
 
-  if (mode === null) {
+type Rule34Place = Pick<Environment, "mode" | "favoritesId" | "ownsFavorites" | "blacklistedTags" | "usingDarkMode">;
+type Rule34Page = Pick<Rule34Client, "readPageName" | "readUserId" | "readFavoritesPageId" | "readTagBlacklist" | "readTheme">;
+
+export function readRule34Environment(site: Rule34Page): Rule34Place | null {
+  const pageName = site.readPageName();
+
+  if (pageName === null) {
     return null;
   }
-  const userId = readRule34UserId();
-  const favoritesPageId = readFavoritesPageId();
+  const mode = MODES[pageName];
+  const userId = site.readUserId();
+  const favoritesPageId = site.readFavoritesPageId();
   return {
     mode,
     favoritesId: mode === "favorites" ? favoritesPageId : userId,
     ownsFavorites: mode === "favorites" && userId === favoritesPageId,
-    blacklistedTags: readTagBlacklist(),
-    usingDarkMode: readCookie("theme") === "dark"
+    blacklistedTags: site.readTagBlacklist(),
+    usingDarkMode: site.readTheme() === "dark"
   };
-}
-
-export function readRule34UserId(): string {
-  return readCookie("user_id");
-}
-
-function readCookie(key: string): string {
-  const prefix = `${key}=`;
-  const cookie = document.cookie.split(";").map(entry => entry.trimStart()).find(entry => entry.startsWith(prefix));
-  return cookie === undefined ? "" : cookie.substring(prefix.length);
-}
-
-function readTagBlacklist(): string {
-  let tags = readCookie("tag_blacklist");
-
-  for (let i = 0; i < 3; i += 1) {
-    tags = decodeURIComponent(tags).replace(/(?:^| )-/, "");
-  }
-  return tags;
 }

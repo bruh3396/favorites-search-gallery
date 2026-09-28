@@ -2,11 +2,11 @@ import { AppContext } from "@/app/context/context";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model/page_cache";
 import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
-import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 import { fetchPostList } from "@/adapters/rule34/client/post_list_page/post_list_page";
 import { numbersAround } from "@/utils/pure/number";
 import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
-import { withExponentialBackoff } from "@/lib/async/scheduling";
+
+const PREFETCH_LENGTH = 3;
 
 export class PostListNavigatorPageLoader {
   private readonly cache: PostListNavigatorPageCache = new PostListNavigatorPageCache();
@@ -27,7 +27,7 @@ export class PostListNavigatorPageLoader {
     if (pending !== undefined) {
       return pending;
     }
-    const loaded = withExponentialBackoff(() => fetchPostList(baseUrl, pageNumber), Rule34NetworkConfig.postListFetchRetries, Rule34NetworkConfig.postListFetchRetryDelay)
+    const loaded = fetchPostList(baseUrl, pageNumber)
       .then((html: string) => {
         this.cache.markLoaded(pageNumber, this.createPostListFromHtml(pageNumber, html));
       }).catch(() => {
@@ -39,7 +39,7 @@ export class PostListNavigatorPageLoader {
   }
 
   public preloadAround(baseUrl: string, currentPageNumber: number): void {
-    numbersAround(currentPageNumber, Rule34NetworkConfig.postListPrefetchLength).forEach(n => this.load(baseUrl, n));
+    numbersAround(currentPageNumber, PREFETCH_LENGTH).forEach(n => this.load(baseUrl, n));
   }
 
   public createPostListFromHtml(pageNumber: number, html: string): PostList {

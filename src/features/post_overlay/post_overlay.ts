@@ -17,7 +17,7 @@ export async function startPostOverlay(context: AppContext): Promise<void> {
     return;
   }
   const shell = new PostOverlayShell(context.shell);
-  const model = new PostOverlayModel();
+  const model = new PostOverlayModel(context.ports.tagSource);
   const view = new PostOverlayView(shell);
   const flows = new PostOverlayFlows(context, model, view);
   const components: PostOverlayComponents = { context, model, view, flows };

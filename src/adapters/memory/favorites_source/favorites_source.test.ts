@@ -1,10 +1,10 @@
 import { describe, expect, test, vi } from "vitest";
-import { MemoryFavorites } from "@/adapters/memory/client/favorites";
+import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryFavoritesSource } from "@/adapters/memory/favorites_source/favorites_source";
 import { createPost } from "@/testing/post";
 
 function createSource(...ids: string[]): MemoryFavoritesSource {
-  return new MemoryFavoritesSource(new MemoryFavorites(ids.map(id => createPost({ id }))));
+  return new MemoryFavoritesSource(new MemoryClient(ids.map(id => createPost({ id }))));
 }
 
 describe("MemoryFavoritesSource", () => {

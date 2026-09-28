@@ -1,40 +1,24 @@
-import { Post } from "@/core/domain/post/post";
 import { FavoritesSource } from "@/core/boundary/ports";
-import { readFile, readdir, stat } from "node:fs/promises";
-import { join } from "node:path";
+import { FilesystemClient } from "@/adapters/filesystem/client/client";
+import { Post } from "@/core/domain/post/post";
 
-interface PostFile {
-  readonly post: Post;
-  readonly modifiedAt: number;
-}
-
-export class FileSystemFavoritesSource implements FavoritesSource {
-  constructor(private readonly directory: string) { }
+export class FilesystemFavoritesSource implements FavoritesSource {
+  constructor(private readonly files: Pick<FilesystemClient, "readPostFiles" | "countPostFiles">) { }
 
   public async fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    onFavoritesFound(await this.readAll());
+    onFavoritesFound(await this.readNewestFirst());
   }
 
-  public async count(): Promise<number | null> {
-    return (await this.readPostFileNames()).length;
+  public count(): Promise<number | null> {
+    return this.files.countPostFiles();
   }
 
   public async fetchNew(existingIds: Set<string>): Promise<Post[]> {
-    return (await this.readAll()).filter(post => !existingIds.has(post.id));
+    return (await this.readNewestFirst()).filter(post => !existingIds.has(post.id));
   }
 
-  private async readAll(): Promise<Post[]> {
-    const names = await this.readPostFileNames();
-    const files = await Promise.all(names.map(name => this.readPostFile(join(this.directory, name))));
+  private async readNewestFirst(): Promise<Post[]> {
+    const files = await this.files.readPostFiles();
     return files.sort((a, b) => b.modifiedAt - a.modifiedAt).map(file => file.post);
-  }
-
-  private async readPostFileNames(): Promise<string[]> {
-    return (await readdir(this.directory)).filter(name => name.endsWith(".json"));
-  }
-
-  private async readPostFile(path: string): Promise<PostFile> {
-    const [text, stats] = await Promise.all([readFile(path, "utf8"), stat(path)]);
-    return { post: JSON.parse(text) as Post, modifiedAt: stats.mtimeMs };
   }
 }

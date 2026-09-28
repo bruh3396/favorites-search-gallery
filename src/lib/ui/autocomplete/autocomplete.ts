@@ -1,7 +1,6 @@
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
 import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
 import { HOSTNAME } from "@/adapters/rule34/client/site";
-import { addCustomTagsToAutocomplete } from "@/lib/ui/autocomplete/custom_tags";
 import { fetchHtml } from "@/utils/browser/http";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";
 import { replaceTagInText } from "@/lib/ui/autocomplete/tag_replacer";
@@ -149,5 +148,5 @@ function getAutocompleteSuggestions(prefix: string): Promise<string> {
 }
 
 function getFinalAutocompleteSuggestions(html: string, prefix: string): AwesompleteSuggestion[] {
-  return [...getSnippetSuggestions(prefix), ...addCustomTagsToAutocomplete(JSON.parse(html), prefix)];
+  return [...getSnippetSuggestions(prefix), ...JSON.parse(html) as AwesompleteSuggestion[]];
 }

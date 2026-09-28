@@ -4,9 +4,8 @@ import { MediaItem } from "@/types/media";
 import { imageUrl, imageUrlToSampleUrl, replaceExtension, withExtension } from "@/lib/media/url";
 import { isGif, isVideo } from "@/lib/media/media_type";
 import { RateLimiter } from "@/lib/async/rate_limiting";
-import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 
-const extensionProbeLimiter = new RateLimiter(Rule34NetworkConfig.extensionProbeRateLimit);
+const extensionProbeLimiter = new RateLimiter({ concurrency: 3, ratePerSecond: 50 });
 const cache: Map<string, ImageExtension> = new Map();
 
 export const resolveSampleUrl = async(item: MediaItem): Promise<string> => imageUrlToSampleUrl(await resolveImageUrl(item));

@@ -1,15 +1,11 @@
-import { Post } from "@/core/domain/post/post";
-import { PostSource, ParsedPost } from "@/core/boundary/ports";
+import { ParsedPost, PostSource } from "@/core/boundary/ports";
+import { MemoryClient } from "@/adapters/memory/client/client";
 
 export class MemoryPostSource implements PostSource {
-  private readonly postsById: Map<string, Post>;
-
-  constructor(posts: Post[]) {
-    this.postsById = new Map(posts.map(post => [post.id, post]));
-  }
+  constructor(private readonly memory: Pick<MemoryClient, "readPost">) { }
 
   public fetch(id: string): Promise<ParsedPost> {
-    const post = this.postsById.get(id);
+    const post = this.memory.readPost(id);
     return post === undefined ? Promise.reject(new Error(`MemoryPostSource: no post ${id}`)) : Promise.resolve({ post, tagCategories: new Map() });
   }
 }

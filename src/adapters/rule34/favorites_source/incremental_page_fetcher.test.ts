@@ -1,6 +1,6 @@
-import { Post } from "@/core/domain/post/post";
 import { describe, expect, test, vi } from "vitest";
 import { IncrementalPageFetcher } from "@/adapters/rule34/favorites_source/incremental_page_fetcher";
+import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 
 const PAGE_SIZE = 50;

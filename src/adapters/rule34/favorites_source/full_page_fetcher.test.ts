@@ -1,6 +1,6 @@
-import { Post } from "@/core/domain/post/post";
 import { describe, expect, test, vi } from "vitest";
 import { FullPageFetcher } from "@/adapters/rule34/favorites_source/full_page_fetcher";
+import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 

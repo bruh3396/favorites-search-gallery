@@ -1,13 +1,14 @@
 import { Post } from "@/core/domain/post/post";
 import { ParsedPost } from "@/core/boundary/ports";
 import { describe, expect, test } from "vitest";
+import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryPostSource } from "@/adapters/memory/post_source/post_source";
 import { PostResolver } from "@/lib/domain/post/resolver";
 import { createPost } from "@/testing/post";
 
 function setup(sourcePosts: Post[], storedPosts: Post[] = []): { resolver: PostResolver; stored: Post[] } {
   const stored: Post[] = [];
-  const resolver = new PostResolver(new MemoryPostSource(sourcePosts), {
+  const resolver = new PostResolver(new MemoryPostSource(new MemoryClient(sourcePosts)), {
     readStored: ids => Promise.resolve(storedPosts.filter(post => ids.includes(post.id))),
     store: post => stored.push(post)
   });

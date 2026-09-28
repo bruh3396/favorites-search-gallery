@@ -13,7 +13,6 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { PreferenceOverrides } from "@/testing/preferences";
-import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
@@ -21,7 +20,6 @@ import { createPost } from "@/testing/post";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 import { startFavorites } from "@/features/favorites/favorites";
 
-const DEFAULT_FAVORITES_PAGE_FETCH_DELAY = Rule34NetworkConfig.favoritesPageFetchDelay;
 const FRUITS: Partial<Post>[] = [
   { id: "1", tags: "apple", score: 5, rating: "s" },
   { id: "2", tags: "banana", score: 30, rating: "e" },
@@ -111,12 +109,10 @@ function heartOf(context: AppContext, id: string): HTMLElement {
 
 describe("startFavorites", () => {
   beforeEach(() => {
-    Rule34NetworkConfig.favoritesPageFetchDelay = 0;
     vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(""))));
   });
 
   afterEach(() => {
-    Rule34NetworkConfig.favoritesPageFetchDelay = DEFAULT_FAVORITES_PAGE_FETCH_DELAY;
     document.body.replaceChildren();
     document.documentElement.removeAttribute("data-pagination-hidden");
     document.documentElement.removeAttribute("data-loading");

@@ -1,25 +1,16 @@
 import { AppMode } from "@/core/boundary/environment";
 import { Host } from "@/core/boundary/ports";
-import { clearNativePage } from "@/adapters/rule34/host/native_page";
-import { holdPostPageFetches } from "@/adapters/rule34/client/post_page/post_page";
+import { Rule34Client } from "@/adapters/rule34/client/client";
 
 export class Rule34Host implements Host {
   private readonly takeOvers: Record<AppMode, () => void> = {
-    favorites: () => this.takeOverFavoritesPage(),
+    favorites: () => this.site.clearNativePage(),
     posts: () => { }
   };
 
-  constructor(
-    private readonly clearPage: () => void = clearNativePage,
-    private readonly holdPostPages: () => void = holdPostPageFetches
-  ) { }
+  constructor(private readonly site: Pick<Rule34Client, "clearNativePage">) { }
 
   public takeOver(mode: AppMode): void {
     this.takeOvers[mode]();
-  }
-
-  private takeOverFavoritesPage(): void {
-    this.clearPage();
-    this.holdPostPages();
   }
 }

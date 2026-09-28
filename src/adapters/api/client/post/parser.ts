@@ -1,10 +1,15 @@
-import { ServerPost } from "@/adapters/api/client/responses";
-import { ParsedPost } from "@/core/boundary/ports";
 import { TagCategoryMap } from "@/types/search";
+import { Post } from "@/core/domain/post/post";
+import { ServerPost } from "@/adapters/api/client/post/post";
 import { decodeHtmlEntities } from "@/utils/pure/string";
 import { decodeTagCategory } from "@/lib/domain/tag/category_codec";
 
-export function parsePost(post: ServerPost): ParsedPost {
+export type DecodedPost = {
+  post: Post;
+  tagCategories: TagCategoryMap;
+};
+
+export function parsePost(post: ServerPost): DecodedPost {
   const { tagCategories: encodedTagCategories, ...rest } = post;
   const tagCategories: TagCategoryMap = new Map();
 

@@ -4,7 +4,7 @@ import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
-export function thumbToPost(thumb: HTMLElement): Post {
+export function parseThumb(thumb: HTMLElement): Post {
   const image = getImageFromThumb(thumb);
   return {
     id: parseIdFromThumb(thumb),

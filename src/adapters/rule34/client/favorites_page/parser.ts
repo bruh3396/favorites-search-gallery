@@ -1,8 +1,8 @@
 import { Post } from "@/core/domain/post/post";
-import { thumbToPost } from "@/adapters/rule34/client/thumb/thumb_parser";
+import { parseThumb } from "@/adapters/rule34/client/thumb/parser";
 
 export function parseFavoritesPage(page: ParentNode): Post[] {
-  return extractFavoriteElements(page).map(thumbToPost);
+  return extractFavoriteElements(page).map(parseThumb);
 }
 
 function extractFavoriteElements(page: ParentNode): HTMLElement[] {

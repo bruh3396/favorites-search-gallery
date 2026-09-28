@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { clearNativePage } from "@/adapters/rule34/host/native_page";
+import { clearNativePage } from "@/adapters/rule34/client/favorites_page/cleanup";
 
 const globals = window as unknown as Record<string, unknown>;
 

@@ -1,28 +1,15 @@
-import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import { mkdtemp, readdir, rm, writeFile } from "node:fs/promises";
-import { FileSystemFavoritesEditor } from "@/adapters/filesystem/favorites_editor/favorites_editor";
-import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { describe, expect, test, vi } from "vitest";
+import { FilesystemFavoritesEditor } from "@/adapters/filesystem/favorites_editor/favorites_editor";
 
-let directory: string;
+describe("FilesystemFavoritesEditor", () => {
+  test("removing deletes the post's file", async() => {
+    const files = { deletePostFile: vi.fn(() => Promise.resolve()) };
 
-describe("FileSystemFavoritesEditor", () => {
-  beforeEach(async() => {
-    directory = await mkdtemp(join(tmpdir(), "favorites-"));
+    expect(await new FilesystemFavoritesEditor(files).remove("1")).toBe("success");
+    expect(files.deletePostFile).toHaveBeenCalledWith("1");
   });
 
-  afterEach(async() => {
-    await rm(directory, { recursive: true, force: true });
-  });
-
-  test("removing deletes the post's file, and ignores a post without one", async() => {
-    await writeFile(join(directory, "1.json"), "{}");
-    await writeFile(join(directory, "2.json"), "{}");
-    const editor = new FileSystemFavoritesEditor(directory);
-
-    await editor.remove("1");
-    await editor.remove("9");
-
-    expect(await readdir(directory)).toEqual(["2.json"]);
+  test("adding succeeds", async() => {
+    expect(await new FilesystemFavoritesEditor({ deletePostFile: () => Promise.resolve() }).add()).toBe("success");
   });
 });

@@ -1,26 +1,28 @@
 import { ParsedPost, PostSource } from "@/core/boundary/ports";
 import { allMediaExtensions, extensionRegex } from "@/lib/media/constants";
-import { AbstractApiFetcher } from "@/adapters/api/client/abstract_api_fetcher";
-import { ApiConfig } from "@/adapters/api/client/api_config";
+import { ApiClient } from "@/adapters/api/client/client";
 import { MediaExtension } from "@/core/domain/media/extension";
 import { Post } from "@/core/domain/post/post";
 import { PostFetchError } from "@/types/errors";
-import { PostResponse } from "@/adapters/api/client/responses";
-import { parsePost } from "@/adapters/api/post_source/post_parser";
+import { parsePost } from "@/adapters/api/client/post/parser";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
-export class ApiPostSource extends AbstractApiFetcher<PostResponse> implements PostSource {
-  constructor(private readonly deletedPosts: PostSource) {
-    super(ApiConfig.postRateLimit, "post", "ids");
-  }
+const FETCH_ATTEMPTS = 5;
+
+export class ApiPostSource implements PostSource {
+  constructor(
+    private readonly api: Pick<ApiClient, "fetchPost">,
+    private readonly deletedPosts: PostSource,
+    private readonly fetchAttempts: number = FETCH_ATTEMPTS
+  ) { }
 
   public async fetch(id: string): Promise<ParsedPost> {
-    const fetched = await withExponentialBackoff(() => this.fetchOne(id), ApiConfig.postRetries);
+    const fetched = await withExponentialBackoff(() => this.fetchOne(id), this.fetchAttempts);
     return { post: withExtension(fetched.post), tagCategories: fetched.tagCategories };
   }
 
   private async fetchOne(id: string): Promise<ParsedPost> {
-    const response = await this.schedule(id);
+    const response = await this.api.fetchPost(id);
 
     switch (response.status) {
       case "ok":

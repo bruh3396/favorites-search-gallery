@@ -1,5 +1,5 @@
 import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports";
-import { FavoriteActions } from "@/adapters/rule34/client/favorite_actions/favorite_actions";
+import { Rule34Client } from "@/adapters/rule34/client/client";
 
 const SITE_ADD_STATUS: Record<number, AddFavoriteStatus> = {
   0: "error",
@@ -9,14 +9,14 @@ const SITE_ADD_STATUS: Record<number, AddFavoriteStatus> = {
 };
 
 export class Rule34FavoritesEditor implements FavoritesEditor {
-  private readonly actions = new FavoriteActions();
+  constructor(private readonly site: Pick<Rule34Client, "addFavorite" | "removeFavorite">) { }
 
   public async add(id: string): Promise<AddFavoriteStatus> {
-    const answer = await this.actions.add(id);
+    const answer = await this.site.addFavorite(id);
     return answer === null ? "error" : SITE_ADD_STATUS[parseInt(answer, 10)] ?? "error";
   }
 
   public async remove(id: string): Promise<RemoveFavoriteStatus> {
-    return await this.actions.remove(id) ? "success" : "error";
+    return await this.site.removeFavorite(id) ? "success" : "error";
   }
 }

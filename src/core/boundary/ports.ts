@@ -12,12 +12,21 @@ export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "succes
 export type RemoveFavoriteStatus = "error" | "forbidden" | "success";
 
 export interface Ports {
+  postSource: PostSource;
+  tagSource: TagSource;
   favoritesSource: FavoritesSource;
   favoritesEditor: FavoritesEditor;
-  postSource: PostSource;
   navigation: Navigation;
   host: Host;
   telemetry: Telemetry;
+}
+
+export interface PostSource {
+  fetch: (id: string) => Promise<ParsedPost>;
+}
+
+export interface TagSource {
+  categorize: (postId: string, tagNames: string[]) => Promise<TagCategoryMap>;
 }
 
 export interface FavoritesSource {
@@ -29,10 +38,6 @@ export interface FavoritesSource {
 export interface FavoritesEditor {
   add: (id: string) => Promise<AddFavoriteStatus>;
   remove: (id: string) => Promise<RemoveFavoriteStatus>;
-}
-
-export interface PostSource {
-  fetch: (id: string) => Promise<ParsedPost>;
 }
 
 export interface Navigation {

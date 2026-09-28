@@ -1,16 +1,17 @@
-import { postListUrlFromQuery } from "@/adapters/rule34/client/post_list_page/post_list_page";
-import { postPageUrl } from "@/adapters/rule34/client/post_page/post_page";
 import { MediaItem } from "@/types/media";
 import { Navigation } from "@/core/boundary/ports";
+import { Rule34Client } from "@/adapters/rule34/client/client";
 import { resolveMediaUrl } from "@/lib/media/resolver";
 
 export class Rule34Navigation implements Navigation {
+  constructor(private readonly site: Pick<Rule34Client, "postPageUrl" | "postListUrl">) { }
+
   public postUrl(id: string): string {
-    return postPageUrl(id);
+    return this.site.postPageUrl(id);
   }
 
   public openPost(id: string): void {
-    window.open(postPageUrl(id), "_blank");
+    window.open(this.site.postPageUrl(id), "_blank");
   }
 
   public openMedia(item: MediaItem): void {
@@ -20,6 +21,6 @@ export class Rule34Navigation implements Navigation {
   }
 
   public openSearch(query: string): void {
-    window.open(postListUrlFromQuery(query));
+    window.open(this.site.postListUrl(query));
   }
 }

@@ -1,13 +1,14 @@
-import { ApiPostSource } from "@/adapters/api/post_source/post_source";
 import { PreferenceOverrides, createPreferences } from "@/testing/preferences";
-import { fetchFavoritesCount } from "@/adapters/rule34/client/profile_page/profile_page";
-import { fetchFavoritesPagePosts } from "@/adapters/rule34/client/favorites_page/favorites_page";
+import { ApiClient } from "@/adapters/api/client/client";
+import { ApiPostSource } from "@/adapters/api/post_source/post_source";
+import { Rule34Client } from "@/adapters/rule34/client/client";
 import { Rule34PostSource } from "@/adapters/rule34/post_source/post_source";
 import { AppContext } from "@/app/context/context";
 import { DomEvents } from "@/app/context/dom_events";
 import { Environment } from "@/core/boundary/environment";
 import { FeatureBridge } from "@/app/context/feature_bridge";
 import { MemoryHost } from "@/adapters/memory/host/host";
+import { MemoryTagSource } from "@/adapters/memory/tag_source/tag_source";
 import { MemoryTelemetry } from "@/adapters/memory/telemetry/telemetry";
 import { Ports } from "@/core/boundary/ports";
 import { Rule34FavoritesEditor } from "@/adapters/rule34/favorites_editor/favorites_editor";
@@ -41,11 +42,13 @@ export function createAppContext(overrides: AppContextOverrides = {}): AppContex
 }
 
 function createPorts(environment: Environment, overrides: Partial<Ports> = {}): Ports {
+  const rule34 = new Rule34Client();
   return {
-    favoritesSource: new Rule34FavoritesSource(environment.favoritesId, fetchFavoritesPagePosts, fetchFavoritesCount, null),
-    favoritesEditor: new Rule34FavoritesEditor(),
-    postSource: new ApiPostSource(new Rule34PostSource()),
-    navigation: new Rule34Navigation(),
+    favoritesSource: new Rule34FavoritesSource(rule34, environment.favoritesId, null, 0),
+    favoritesEditor: new Rule34FavoritesEditor(rule34),
+    postSource: new ApiPostSource(new ApiClient(), new Rule34PostSource(rule34)),
+    tagSource: new MemoryTagSource(),
+    navigation: new Rule34Navigation(rule34),
     host: new MemoryHost(),
     telemetry: new MemoryTelemetry(),
     ...overrides

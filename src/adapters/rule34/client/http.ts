@@ -1,8 +1,4 @@
 import { RateLimiter } from "@/lib/async/rate_limiting";
-import { Rule34NetworkConfig } from "@/adapters/rule34/client/network_config";
 
-const pageRequestLimiter = new RateLimiter(Rule34NetworkConfig.generalPageRequestRateLimit);
-
-export function runPageRequest<T>(request: () => Promise<T>): Promise<T> {
-  return pageRequestLimiter.run(request);
-}
+export type PageRequests = Pick<RateLimiter, "run">;
+export const sitePageRequests: PageRequests = new RateLimiter({ concurrency: 1, ratePerSecond: 0.3 });
