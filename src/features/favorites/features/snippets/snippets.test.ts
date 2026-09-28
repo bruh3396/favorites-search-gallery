@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { Snippets } from "@/features/favorites/features/snippets/snippets";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 import { flushMicrotasks } from "@/testing/async";
 
 const STORAGE_KEY = "searchSnippets";
+
+let store: MemoryKeyValueStore;
 
 interface Setup {
   snippets: Snippets;
@@ -22,7 +25,7 @@ function setup(stored: Snippet[] = [], results: string[] = []): Setup {
   const saved: string[] = [];
   const container = document.createElement("div");
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+  store.set(STORAGE_KEY, stored);
   vi.stubGlobal("alert", (message: string): number => alerts.push(message));
   vi.stubGlobal("confirm", (): boolean => true);
   vi.stubGlobal("fetch", (): Promise<Response> => Promise.resolve(new Response("[]")));
@@ -32,7 +35,8 @@ function setup(stored: Snippet[] = [], results: string[] = []): Setup {
 
   const snippets = new Snippets({
     appendToSearch: (text): number => appended.push(text),
-    getSearchResults: (): Favorite[] => results.map(id => ({ id }) as Favorite)
+    getSearchResults: (): Favorite[] => results.map(id => ({ id }) as Favorite),
+    store
   });
   const section = snippets.buildDrawerSection();
 
@@ -46,7 +50,7 @@ function namesOf(container: HTMLElement): string[] {
 }
 
 function storedNames(): string[] {
-  return (JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]") as Snippet[]).map(snippet => snippet.name);
+  return ((store.get(STORAGE_KEY) ?? []) as Snippet[]).map(snippet => snippet.name);
 }
 
 function click(container: HTMLElement, action: string, name?: string): void {
@@ -76,7 +80,7 @@ const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
 const veg = createSnippet("veg", "carrot", 0, 200);
 
 beforeEach(() => {
-  localStorage.clear();
+  store = new MemoryKeyValueStore();
 });
 
 afterEach(() => {

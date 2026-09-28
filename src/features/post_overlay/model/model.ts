@@ -4,7 +4,7 @@ import { PostOverlayCursorTracker } from "@/features/post_overlay/model/state/cu
 import { PostOverlayReopenCooldown } from "@/features/post_overlay/model/state/reopen_cooldown";
 import { PostOverlayResizeState } from "@/features/post_overlay/model/state/resize_state";
 import { PostOverlayTarget } from "@/features/post_overlay/model/state/overlay_target";
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { TagSource } from "@/core/boundary/ports/tag_source";
 
 export class PostOverlayModel {

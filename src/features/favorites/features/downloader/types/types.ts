@@ -1,6 +1,7 @@
-import { MediaItem } from "@/types/media";
+import { Media } from "@/core/domain/media/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
-import { TagCategory } from "@/types/search";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 export type FilenameCategory = Extract<TagCategory, "artist" | "character" | "copyright">;
 
@@ -26,15 +27,13 @@ export interface DownloaderResult {
 export interface DownloaderDependencies {
   batchSize: Preference<number>;
   filenameFormat: Preference<number>;
-  getSearchResults: () => MediaItem[];
+  getSearchResults: () => PostMedia[];
   getTagCategory: (tagName: string) => TagCategory | undefined;
   getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
+  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
 }
 
 export interface DownloaderContext extends DownloaderDependencies {
-  resolveExtension: (item: MediaItem) => Promise<string>;
-  resolveMediaUrl: (item: MediaItem) => Promise<string>;
-  fetch: (url: string, init: RequestInit) => Promise<Response>;
   saveBlob: (blob: Blob, filename: string) => void;
 }
 
@@ -50,11 +49,11 @@ export interface DownloaderIntents {
 }
 
 export interface Filenamer {
-  filenameFor: (item: MediaItem, tags: Set<string>, extension: string) => string;
+  filenameFor: (item: PostMedia, tags: Set<string>, extension: string) => string;
 }
 
 export interface Archiver {
-  archive: (items: MediaItem[], signal: AbortSignal, onItemSettled: (filename: string | null) => void) => Promise<Blob | null>;
+  archive: (items: PostMedia[], signal: AbortSignal, onItemSettled: (filename: string | null) => void) => Promise<Blob | null>;
 }
 
 export interface DownloaderScene {

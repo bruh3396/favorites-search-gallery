@@ -1,3 +1,4 @@
+import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 type PostListEntry =
@@ -6,6 +7,7 @@ type PostListEntry =
 
 export class PostListNavigatorPageCache {
   private readonly pages: Map<number, PostListEntry> = new Map();
+  private readonly postsById: Map<string, Post> = new Map();
 
   public isLoaded(pageNumber: number): boolean {
     return this.pages.get(pageNumber)?.status === "loaded";
@@ -22,12 +24,19 @@ export class PostListNavigatorPageCache {
   }
 
   public allThumbs(): HTMLElement[] {
-    return Array.from(this.pages.keys())
-      .sort((a, b) => a - b)
-      .flatMap(n => this.get(n)?.thumbs ?? []);
+    return this.loadedPages().flatMap(page => page.thumbs);
+  }
+
+  public allPosts(): Post[] {
+    return this.loadedPages().flatMap(page => page.posts);
+  }
+
+  public getPost(id: string): Post | undefined {
+    return this.postsById.get(id);
   }
 
   public remove(pageNumber: number): void {
+    this.get(pageNumber)?.posts.forEach(post => this.postsById.delete(post.id));
     this.pages.delete(pageNumber);
   }
 
@@ -36,6 +45,15 @@ export class PostListNavigatorPageCache {
   }
 
   public markLoaded(pageNumber: number, page: PostList): void {
+    this.remove(pageNumber);
     this.pages.set(pageNumber, { status: "loaded", page });
+    page.posts.forEach(post => this.postsById.set(post.id, post));
+  }
+
+  private loadedPages(): PostList[] {
+    return Array.from(this.pages.keys())
+      .sort((a, b) => a - b)
+      .map(n => this.get(n))
+      .filter(page => page !== undefined);
   }
 }

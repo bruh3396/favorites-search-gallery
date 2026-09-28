@@ -1,16 +1,17 @@
-import { Emitter } from "@/lib/event/emitter";
+import { Preferences, createPreferences as createAppPreferences } from "@/app/context/preferences";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Preference } from "@/lib/storage/preference";
-import { Preferences } from "@/app/context/preferences";
+import { createEnvironment } from "@/testing/environment";
+
+type Section = Exclude<keyof Preferences, "reset">;
 
 export type PreferenceOverrides = {
-  [Section in keyof Preferences]?: {
-    [Key in keyof Preferences[Section]]?: Preferences[Section][Key] extends { value: infer V } ? V : never;
+  [S in Section]?: {
+    [Key in keyof Preferences[S]]?: Preferences[S][Key] extends { value: infer V } ? V : never;
   };
 };
 
-type PreferenceValues = Record<string, Record<string, unknown>>;
-
-const DEFAULT_VALUES: PreferenceValues = {
+const DEFAULT_VALUES: Record<Section, Record<string, unknown>> = {
   app: {
     darkMode: false,
     fadeThumbs: false,
@@ -79,29 +80,23 @@ const DEFAULT_VALUES: PreferenceValues = {
   }
 };
 
-// An in-memory preference: set() writes and notifies listeners, like the real
-// one, without touching storage.
+// A lone preference over its own memory store.
 export function createPreference<T>(initial: T): Preference<T> {
-  const emitter = new Emitter<T>();
-  let current = initial;
-  return {
-    get value(): T {
-      return current;
-    },
-    set(next: T): void {
-      current = next;
-      emitter.emit(next);
-    },
-    on(listener: (value: T) => void): void {
-      emitter.on(listener);
-    }
-  } as unknown as Preference<T>;
+  return new Preference(new MemoryKeyValueStore(), "preference", initial);
 }
 
+// The app's preferences over a memory store, set to fixed test values so tests
+// don't depend on the environment's defaults.
 export function createPreferences(overrides: PreferenceOverrides = {}): Preferences {
-  const values = overrides as PreferenceValues;
-  return Object.fromEntries(Object.entries(DEFAULT_VALUES).map(([section, defaults]) => [
-    section,
-    Object.fromEntries(Object.entries({ ...defaults, ...values[section] }).map(([key, value]) => [key, createPreference(value)]))
-  ])) as unknown as Preferences;
+  const preferences = createAppPreferences(createEnvironment(), new MemoryKeyValueStore());
+
+  for (const [section, defaults] of Object.entries(DEFAULT_VALUES)) {
+    const values = { ...defaults, ...overrides[section as Section] };
+    const sectionPreferences = preferences[section as Section] as Record<string, Preference<unknown>>;
+
+    for (const [name, value] of Object.entries(values)) {
+      sectionPreferences[name].set(value);
+    }
+  }
+  return preferences;
 }

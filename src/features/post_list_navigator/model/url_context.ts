@@ -1,4 +1,4 @@
-import { postListPageIndex } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
+import { postListPageIndex } from "@/adapters/rule34/client/site/post_list_page/fetcher";
 
 export function initialPageNumber(): number {
   const match = (/&pid=(\d+)/).exec(location.href);

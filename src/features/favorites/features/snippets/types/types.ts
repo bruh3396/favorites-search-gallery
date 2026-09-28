@@ -1,11 +1,13 @@
 import { Favorite } from "@/types/favorite";
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 
 export interface SnippetsDependencies {
   appendToSearch: (text: string) => void;
   getSearchResults: () => Favorite[];
+  store: KeyValueStore;
 }
 
-export interface SnippetContext extends SnippetsDependencies {
+export interface SnippetContext extends Omit<SnippetsDependencies, "store"> {
   alert: (message: string) => void;
   confirm: (message: string) => boolean;
   saveBlob: (blob: Blob, filename: string) => void;

@@ -17,7 +17,6 @@ import { FavoritesViewDependencies } from "@/features/favorites/types/types";
 import { Layout } from "@/types/app";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";
-import { toggleHeader } from "@/lib/ui/toggles";
 
 export class FavoritesView {
   private readonly contentTiler: ContentTiler;
@@ -36,20 +35,15 @@ export class FavoritesView {
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
     this.linkSuppressor = new FavoritesLinkSuppressor(id => context.ports.navigation.postUrl(id));
-    this.skeleton = new FavoritesSkeleton(this.getLayout());
+    this.skeleton = new FavoritesSkeleton(context.ports.keyValueStore, this.getLayout());
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
-    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id));
+    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id), media => context.ports.mediaSource.previewUrl(media));
     this.thumbPool = this.createThumbPool();
     this.pagination.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
     this.drawer.toggle(context.preferences.favorites.drawerOpen.value);
     this.drawer.showSection(context.preferences.favorites.drawerActiveSection.value);
-    this.toggleHeader(context.preferences.favorites.headerEnabled.value);
-  }
-
-  public toggleHeader(enabled: boolean): void {
-    toggleHeader(enabled);
   }
 
   public setup(dependencies: FavoritesViewDependencies): void {

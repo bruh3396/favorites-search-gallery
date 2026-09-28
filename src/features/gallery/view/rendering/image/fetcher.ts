@@ -1,10 +1,13 @@
-import { fetchFullImageBitmap, imageUrlToBitmap } from "@/lib/media/bitmap";
 import { ImageFetcher } from "@/features/gallery/types/types";
 import { ImageRequest } from "@/features/gallery/types/image_request";
+import { MediaSource } from "@/core/boundary/ports/media_source";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
+import { loadImageBitmap } from "@/utils/browser/image";
 
 export class GalleryImageFetcher implements ImageFetcher {
   private readonly fetchQueue = new ThrottleQueue(10);
+
+  constructor(private readonly mediaSource: Pick<MediaSource, "previewUrl" | "imageUrl">) { }
 
   public fetchBitmap(request: ImageRequest): Promise<boolean> {
     return request.isHighRes ? this.fetchHighResBitmap(request) : this.fetchLowResBitmap(request);
@@ -20,7 +23,9 @@ export class GalleryImageFetcher implements ImageFetcher {
     }
 
     try {
-      request.complete(await fetchFullImageBitmap(request.item, request.abortController));
+      const url = await this.mediaSource.imageUrl(request.item.media);
+
+      request.complete(await loadImageBitmap(url, request.abortController.signal));
       return true;
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {
@@ -32,7 +37,7 @@ export class GalleryImageFetcher implements ImageFetcher {
 
   private async fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
     try {
-      request.complete(await imageUrlToBitmap(request.item.thumbUrl));
+      request.complete(await loadImageBitmap(await this.mediaSource.previewUrl(request.item.media)));
       return true;
     } catch {
       return false;

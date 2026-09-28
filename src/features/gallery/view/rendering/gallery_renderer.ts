@@ -6,11 +6,10 @@ import { Favorite } from "@/types/favorite";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { Point } from "@/types/geometry";
 import { Renderer } from "@/features/gallery/types/types";
 import { forceReflow } from "@/utils/browser/element";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryRenderer {
   private readonly imageRenderer: GalleryImageRenderer;
@@ -20,8 +19,8 @@ export class GalleryRenderer {
 
   constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined) {
     this.imageRenderer = new GalleryImageRenderer(context, favoriteFor);
-    this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment);
-    this.gifRenderer = new GalleryGifRenderer(context.environment);
+    this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment, context.ports.mediaSource);
+    this.gifRenderer = new GalleryGifRenderer(context.environment, context.ports.mediaSource);
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
     this.renderers.forEach((renderer) => galleryRoot.appendChild(renderer.root));
   }
@@ -30,12 +29,12 @@ export class GalleryRenderer {
     this.videoRenderer.setup(onVideoEnded, onVolumeChanged);
   }
 
-  public render(item: MediaItem): void {
+  public render(item: PostMedia): void {
     this.hide();
     this.resolve(item).render(item);
   }
 
-  public nudge(item: MediaItem, direction: BoundaryEdge): void {
+  public nudge(item: PostMedia, direction: BoundaryEdge): void {
     const renderer = this.resolve(item);
 
     if (renderer === this.videoRenderer) {
@@ -52,7 +51,7 @@ export class GalleryRenderer {
     this.renderers.forEach((renderer) => renderer.hide());
   }
 
-  public cache(items: MediaItem[]): void {
+  public cache(items: PostMedia[]): void {
     this.renderers.forEach((renderer) => renderer.cache(items));
   }
 
@@ -76,12 +75,12 @@ export class GalleryRenderer {
     this.imageRenderer.zoomToPoint(point);
   }
 
-  public cacheImages(thumbs: HTMLElement[]): Promise<void> {
-    return this.imageRenderer.cache(thumbs.map(toMediaItem));
+  public cacheImages(items: PostMedia[]): Promise<void> {
+    return this.imageRenderer.cache(items);
   }
 
-  public upscale(thumbs: HTMLElement[]): Promise<void> {
-    return this.imageRenderer.upscale(thumbs.map(toMediaItem));
+  public upscale(items: PostMedia[]): Promise<void> {
+    return this.imageRenderer.upscale(items);
   }
 
   public reUpscale(): void {
@@ -120,7 +119,7 @@ export class GalleryRenderer {
     this.videoRenderer.setVideoMuted(muted);
   }
 
-  private resolve(item: MediaItem): Renderer {
+  private resolve(item: PostMedia): Renderer {
     return isVideo(item) ? this.videoRenderer : isGif(item) ? this.gifRenderer : this.imageRenderer;
   }
 }

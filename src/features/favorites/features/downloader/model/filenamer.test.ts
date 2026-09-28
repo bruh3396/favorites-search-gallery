@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderFilenamer } from "@/features/favorites/features/downloader/model/filenamer";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
-import { TagCategory } from "@/types/search";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 const SEPARATOR = DownloaderConfig.filename.categorySeparator;
 const CATEGORIES: Record<string, TagCategory> = { "artist_one": "artist", "character_one": "character", "copyright_one": "copyright" };
 const TAGS = new Set(Object.keys(CATEGORIES));
-const item: MediaItem = { id: "7", thumbUrl: "", extension: "jpg", mediaType: "image" };
+const item: PostMedia = { id: "7", media: { kind: "image", locator: "1/7.jpg" } };
 
 function createFilenamer(format: number): { filenamer: DownloaderFilenamer; filenameFormat: { value: number } } {
   const filenameFormat = { value: format };

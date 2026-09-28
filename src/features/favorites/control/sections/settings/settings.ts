@@ -12,8 +12,8 @@ import { buildCollapsibleSection } from "@/lib/ui/settings/components/section";
 import { createElement } from "@/utils/browser/element";
 
 export function buildDrawerSection(context: AppContext): FavoritesDrawerSectionContent {
-  const { environment, events, preferences } = context;
-  const settingsSections = FavoritesSettingsMenu.buildSettingsSections(FavoritesSettingsCatalog.buildSettingsCatalog(context), environment);
+  const { environment, events, ports, preferences } = context;
+  const settingsSections = FavoritesSettingsMenu.buildSettingsSections(FavoritesSettingsCatalog.buildSettingsCatalog(context), environment, ports.host);
   const sections = settingsSections.map(section => buildSection(preferences, section, () => collapseAll.refresh()));
   const collapseAll = new CollapseAllButton(sections, (collapsed) => expandAll(preferences, settingsSections, !collapsed));
   return {

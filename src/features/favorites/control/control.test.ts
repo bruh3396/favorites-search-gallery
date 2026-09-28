@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
@@ -14,9 +15,9 @@ interface Setup {
   searched: string[];
 }
 
-function setup(): Setup {
-  const appShell = new Shell(createEnvironment());
-  const context = createAppContext({ shell: appShell });
+function setup(keyValueStore = new MemoryKeyValueStore()): Setup {
+  const appShell = new Shell();
+  const context = createAppContext({ shell: appShell, ports: { keyValueStore } });
   const shell = new FavoritesShell(appShell, context.environment);
   const control = new FavoritesControl(context, shell);
   const searched: string[] = [];
@@ -33,7 +34,6 @@ describe("FavoritesControl", () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
-    localStorage.clear();
     document.body.replaceChildren();
   });
 
@@ -74,11 +74,11 @@ describe("FavoritesControl", () => {
   });
 
   test("keeps the search being typed across a reload", () => {
-    const first = setup();
+    const keyValueStore = new MemoryKeyValueStore();
 
-    first.control.appendToSearch("cat");
+    setup(keyValueStore).control.appendToSearch("cat");
     document.body.replaceChildren();
-    expect(setup().searchField.value).toBe("cat");
+    expect(setup(keyValueStore).searchField.value).toBe("cat");
   });
 
   test("fills its own drawer sections, and mounts the ones it is given", () => {

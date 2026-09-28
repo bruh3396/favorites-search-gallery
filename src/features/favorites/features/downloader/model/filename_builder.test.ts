@@ -2,8 +2,8 @@ import * as DownloaderFilename from "@/features/favorites/features/downloader/mo
 import { describe, expect, test } from "vitest";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
-import { MediaItem } from "@/types/media";
-import { TagCategory } from "@/types/search";
+import { PostMedia } from "@/core/domain/post/post";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 const CAT = DownloaderConfig.filename.categorySeparator;
 const TAG = DownloaderConfig.filename.tagSeparator;
@@ -25,7 +25,7 @@ const CATEGORIES: Record<string, TagCategory> = {
 
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
 const getTagCategory = (tag: string): TagCategory | undefined => CATEGORIES[tag];
-const item: MediaItem = { id: "10146816", thumbUrl: "", extension: "jpg", mediaType: "image" };
+const item: PostMedia = { id: "10146816", media: { kind: "image", locator: "1/10146816.jpg" } };
 const filenameFor = (tags: string[], categories: FilenameCategory[] = ALL): string => DownloaderFilename.build(item, new Set(tags), "jpeg", categories, getTagCategory);
 
 describe("buildFilename", () => {

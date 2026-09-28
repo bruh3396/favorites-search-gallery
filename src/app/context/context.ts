@@ -22,6 +22,6 @@ export function createAppContext(environment: Environment, ports: Ports, prefere
   const events = createEvents();
   const featureBridge = new FeatureBridge(environment);
   const domEvents = new DomEvents();
-  const shell = new Shell(environment);
+  const shell = new Shell();
   return { environment, ports, preferences, features, events, featureBridge, domEvents, shell };
 }

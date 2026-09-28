@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/post_page";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
 
 const POST_PAGE = `
+  <img id="image" src="https://us.rule34.xxx//images/1234/a1b2c3.png">
   <div id="stats"><ul>
     <li>Id: 42</li>
     <li>Size: 1920x1080</li>
@@ -36,12 +37,6 @@ describe("Rule34SiteClient", () => {
     expect(tagCategories).toEqual(new Map([["alice", "character"], ["bob", "artist"]]));
   });
 
-  test("reads tag categories from the post's page", async() => {
-    const { client } = setup();
-
-    expect(await client.fetchPostPageTagCategories("42")).toEqual(new Map([["alice", "character"], ["bob", "artist"]]));
-  });
-
   test("holds post page fetches while favorites are fetched, whether they succeed or fail", async() => {
     const { client, fetch } = setup();
     let finishFirst = (): void => { };
@@ -52,7 +47,7 @@ describe("Rule34SiteClient", () => {
     const second = client.prioritizeFavorites(() => new Promise<void>((_resolve, reject) => {
       failSecond = reject;
     }));
-    const fetched = client.fetchPostPageTagCategories("42");
+    const fetched = client.fetchPostPage("42");
 
     second.catch(() => { });
     finishFirst();

@@ -1,5 +1,5 @@
 import { isEmptyString, removeExtraWhitespace } from "@/utils/pure/string";
-import { KeyValueStorage } from "@/features/favorites/types/types";
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 import { clamp } from "@/utils/pure/number";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { isIndexInBounds } from "@/utils/pure/array";
@@ -11,10 +11,10 @@ export class FavoritesSearchHistory {
   private history: string[];
   private index: number;
   private readonly depth: number;
-  private readonly storage: KeyValueStorage;
+  private readonly storage: KeyValueStore;
   private readonly persistLastQueryLazily: () => void;
 
-  constructor(depth: number, storage: KeyValueStorage) {
+  constructor(depth: number, storage: KeyValueStore) {
     this.storage = storage;
     this.persistLastQueryLazily = debounceLeading(() => this.persistLastQuery(), PERSIST_DELAY);
     this.index = -1;
@@ -79,11 +79,13 @@ export class FavoritesSearchHistory {
   }
 
   private loadSearchHistory(): string[] {
-    return this.storage.get<string[]>("searchHistory") ?? [];
+    const stored = this.storage.get("searchHistory");
+    return Array.isArray(stored) ? stored.filter(entry => typeof entry === "string") : [];
   }
 
   private loadLastEditedQuery(): string {
-    return this.storage.get<string>("lastEditedSearchQuery") ?? "";
+    const stored = this.storage.get("lastEditedSearchQuery");
+    return typeof stored === "string" ? stored : "";
   }
 
   private resetIndex(): void {

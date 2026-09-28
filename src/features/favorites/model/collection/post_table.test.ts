@@ -1,4 +1,4 @@
-import { FavoritesPostTable, compressPreviewSource, decompressPreviewSource, toRatingString, toRatingValue } from "@/features/favorites/model/collection/post_table";
+import { FavoritesPostTable, toRatingString, toRatingValue } from "@/features/favorites/model/collection/post_table";
 import { beforeEach, describe, expect, test } from "vitest";
 import { DiscreteRating } from "@/types/search";
 import { createPost } from "@/testing/post";
@@ -23,8 +23,14 @@ describe("FavoritesPostTable", () => {
       expect(table.toPost(0, "").deleted).toBe(false);
     });
 
-    test("falls back to an empty preview url when none was ever written", () => {
-      expect(table.toPost(0, "").previewURL).toBe("");
+    test.each(["image", "video", "gif"] as const)("round-trips %s media", kind => {
+      table.write(0, createPost({ id: "1", media: { kind, locator: "1234/a1b2c3" } }));
+
+      expect(table.toPost(0, "").media).toEqual({ kind, locator: "1234/a1b2c3" });
+    });
+
+    test("falls back to empty image media when none was ever written", () => {
+      expect(table.toPost(0, "").media).toEqual({ kind: "image", locator: "" });
     });
   });
 
@@ -46,12 +52,6 @@ describe("FavoritesPostTable", () => {
     });
   });
 
-  describe("previewUrl", () => {
-    test("falls back to an empty preview source when none was ever written", () => {
-      expect(table.previewUrl(0)).toBe("");
-    });
-  });
-
   describe("trim", () => {
     test("is a no-op when already at the requested capacity", () => {
       table.write(0, createPost({ id: "1" }));
@@ -68,68 +68,6 @@ describe("FavoritesPostTable", () => {
 
       expect(table.id(0)).toBe(1);
     });
-  });
-});
-
-describe("compressPreviewSource", () => {
-  test("normal", () => {
-    const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-
-    expect(compressPreviewSource(source)).toBe("0123_123456abcde09");
-  });
-
-  test("no subdomain", () => {
-    const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-
-    expect(compressPreviewSource(source)).toBe("0123_123456abcde09");
-  });
-
-  test("compressing an already compressed source returns it unchanged", () => {
-    const compressed = "0123_123456abcde09";
-
-    expect(compressPreviewSource(compressed)).toBe(compressed);
-  });
-});
-
-describe("decompressPreviewSource", () => {
-  test("normal", () => {
-    const compressed = "0123_123456abcde09";
-
-    expect(decompressPreviewSource(compressed)).toBe("https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg");
-  });
-
-  test("decompressing an already decompressed preview returns it unchanged", () => {
-    const decompressed = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
-
-    expect(decompressPreviewSource(decompressed)).toBe(decompressed);
-  });
-
-  test("decompressing an already decompressed preview on a different host returns it unchanged", () => {
-    const decompressed = "https://api-cdn.rule34.xxx/thumbnails/1227/thumbnail_a34f3df084d16d51bbd0f5c06c68279f.jpg";
-
-    expect(decompressPreviewSource(decompressed)).toBe(decompressed);
-  });
-
-  test("a preview that was never compressed, like a data URL, is returned unchanged", () => {
-    const source = "data:image/svg+xml,%3Csvg%3E%3C%2Fsvg%3E";
-
-    expect(decompressPreviewSource(source)).toBe(source);
-  });
-});
-
-describe("compressPreviewSource + decompressPreviewSource", () => {
-  test("normal", () => {
-    const source = "https://us.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
-
-    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
-  });
-
-  test("no subdomain", () => {
-    const source = "https://rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg?11187914";
-    const expected = "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg";
-
-    expect(decompressPreviewSource(compressPreviewSource(source))).toBe(expected);
   });
 });
 

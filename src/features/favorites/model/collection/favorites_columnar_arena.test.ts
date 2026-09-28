@@ -72,82 +72,21 @@ describe("FavoritesColumnarArena", () => {
     });
   });
 
-  describe("extension", () => {
-    test("round-trips a written extension", () => {
+  describe("media", () => {
+    test("round-trips the written media", () => {
       const index = arena.allocate();
 
-      arena.write(index, createPost({ id: "1", extension: "png" }));
+      arena.write(index, createPost({ id: "1", media: { kind: "video", locator: "12/abc123.mp4" } }));
 
-      expect(arena.extension(index)).toBe("png");
+      expect(arena.media(index)).toEqual({ kind: "video", locator: "12/abc123.mp4" });
     });
 
-    test("is undefined when the post has no extension", () => {
+    test("ignores the tags", () => {
       const index = arena.allocate();
 
-      arena.write(index, createPost({ id: "1" }));
+      arena.write(index, createPost({ id: "1", tags: "apple mp4", media: { kind: "image", locator: "12/abc123.png" } }));
 
-      expect(arena.extension(index)).toBeUndefined();
-    });
-  });
-
-  describe("previewUrl", () => {
-    test("expands a compressed thumbnail source", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", previewURL: "https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg" }));
-
-      expect(arena.previewUrl(index)).toBe("https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg");
-    });
-
-    test("expands an already-compressed source", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", previewURL: "12_abc123" }));
-
-      expect(arena.previewUrl(index)).toBe("https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg");
-    });
-
-    test("round-trips a url that does not match the thumbnail pattern instead of losing it", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", previewURL: "https://example.com/image.jpg" }));
-
-      expect(arena.previewUrl(index)).toBe("https://example.com/image.jpg");
-    });
-  });
-
-  describe("mediaType", () => {
-    test("resolves video from tags", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", tags: "apple mp4" }));
-
-      expect(arena.mediaType(index)).toBe("video");
-    });
-
-    test("resolves gif from tags", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", tags: "animated_gif" }));
-
-      expect(arena.mediaType(index)).toBe("gif");
-    });
-
-    test("defaults to image when no media tags are present", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", tags: "apple banana" }));
-
-      expect(arena.mediaType(index)).toBe("image");
-    });
-
-    test("uses a cached tag set instead of decoding the tag pool", () => {
-      const index = arena.allocate();
-
-      arena.write(index, createPost({ id: "1", tags: "apple banana" }));
-      arena.cacheTagSet(index, new Set(["mp4"]));
-
-      expect(arena.mediaType(index)).toBe("video");
+      expect(arena.media(index).kind).toBe("image");
     });
   });
 

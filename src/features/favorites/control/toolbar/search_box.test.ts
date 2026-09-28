@@ -2,21 +2,9 @@ import { Events, createEvents } from "@/app/context/events";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesSearchBox } from "@/features/favorites/control/toolbar/search_box";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
-import { KeyValueStorage } from "@/features/favorites/types/types";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
-
-class FakeStorage implements KeyValueStorage {
-  public readonly values = new Map<string, unknown>();
-
-  public get<V>(key: string): V | null {
-    return (this.values.get(key) ?? null) as V | null;
-  }
-
-  public set<V>(key: string, value: V): void {
-    this.values.set(key, value);
-  }
-}
 
 interface Setup {
   searchBox: FavoritesSearchBox;
@@ -24,14 +12,14 @@ interface Setup {
   input: HTMLTextAreaElement;
   clearButton: HTMLButtonElement;
   events: Events;
-  storage: FakeStorage;
+  storage: MemoryKeyValueStore;
   searched: string[];
   postLists: string[];
 }
 
-function setup(storage = new FakeStorage()): Setup {
+function setup(storage = new MemoryKeyValueStore()): Setup {
   const environment = createEnvironment();
-  const appShell = new Shell(environment);
+  const appShell = new Shell();
   const shell = new FavoritesShell(appShell, environment);
   const events = createEvents();
   const searched: string[] = [];
@@ -315,7 +303,7 @@ describe("FavoritesSearchBox", () => {
     });
 
     test("the query being edited survives a reload", () => {
-      const storage = new FakeStorage();
+      const storage = new MemoryKeyValueStore();
       const first = setup(storage);
 
       type(first.input, "cat");
@@ -325,7 +313,7 @@ describe("FavoritesSearchBox", () => {
     });
 
     test("searches survive a reload", () => {
-      const storage = new FakeStorage();
+      const storage = new MemoryKeyValueStore();
       const first = setup(storage);
 
       type(first.input, "cat");

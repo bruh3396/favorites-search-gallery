@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { createDeferred, flushMicrotasks } from "@/testing/async";
 import { GalleryImageLoader } from "@/features/gallery/view/rendering/image/loader";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 
-function createItem(id: string): MediaItem {
-  return { id, thumbUrl: "", mediaType: "image" };
+function createItem(id: string): PostMedia {
+  return { id, media: { kind: "image", locator: "" } };
 }
 
 function resolutionOf(request: ImageRequest): string {

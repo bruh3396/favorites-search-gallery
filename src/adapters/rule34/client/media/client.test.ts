@@ -37,6 +37,20 @@ describe("Rule34MediaClient", () => {
     expect(await client.originalUrl("1234/a1b2c3", "gif")).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
   });
 
+  test("addresses a video's image as the jpg beside it", async() => {
+    const { client, fetch } = setup();
+
+    expect(await client.imageUrl("1234/a1b2c3.mp4", "video")).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  test("addresses an image's or gif's image as its original", async() => {
+    const { client } = setup();
+
+    expect(await client.imageUrl("1234/a1b2c3.png", "image")).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
+    expect(await client.imageUrl("1234/a1b2c3", "gif")).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
+  });
+
   test("probes an image's extension once", async() => {
     const { client, fetch } = setup(respondOkFor("https://rule34.xxx/images//1234/a1b2c3.png"));
 

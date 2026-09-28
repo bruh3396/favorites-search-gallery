@@ -1,8 +1,7 @@
-import { Post } from "@/core/domain/post/post";
 import { Metric, Rating, Searchable } from "@/types/search";
-import { MediaItem } from "@/types/media";
+import { Post, PostMedia } from "@/core/domain/post/post";
 
-export interface Favorite extends MediaItem, Searchable {
+export interface Favorite extends PostMedia, Searchable {
   rating: Rating;
   post: Post;
   tags: Set<string>;

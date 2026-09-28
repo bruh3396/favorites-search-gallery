@@ -1,9 +1,11 @@
 import { AppContext } from "@/app/context/context";
+import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model/page_cache";
 import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
-import { fetchPostList } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
+import { fetchPostList } from "@/adapters/rule34/client/site/post_list_page/fetcher";
 import { numbersAround } from "@/utils/pure/number";
+import { parseThumb } from "@/adapters/rule34/client/site/thumb/parser";
 import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
 
 const PREFETCH_LENGTH = 3;
@@ -44,9 +46,11 @@ export class PostListNavigatorPageLoader {
 
   public createPostListFromHtml(pageNumber: number, html: string): PostList {
     const dom = new DOMParser().parseFromString(html, "text/html");
-    const thumbs = preparePostListThumbs(Array.from(dom.querySelectorAll(`.${RAW_THUMB_CLASS_NAME}`)), this.onMobileDevice, this.galleryDisabled);
+    const rawThumbs = Array.from(dom.querySelectorAll<HTMLElement>(`.${RAW_THUMB_CLASS_NAME}`));
+    const posts = rawThumbs.map(parseThumb);
+    const thumbs = preparePostListThumbs(rawThumbs, this.onMobileDevice, this.galleryDisabled);
     const paginator = dom.getElementById("paginator");
-    return new PostList(pageNumber, thumbs, paginator);
+    return new PostList(pageNumber, thumbs, posts, paginator);
   }
 
   public reload(baseUrl: string, pageNumber: number): Promise<void> {
@@ -60,6 +64,14 @@ export class PostListNavigatorPageLoader {
 
   public allThumbs(): HTMLElement[] {
     return this.cache.allThumbs();
+  }
+
+  public allPosts(): Post[] {
+    return this.cache.allPosts();
+  }
+
+  public getPost(id: string): Post | undefined {
+    return this.cache.getPost(id);
   }
 
   public markLoaded(pageNumber: number, page: PostList): void {

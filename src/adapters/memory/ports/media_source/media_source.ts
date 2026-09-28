@@ -10,11 +10,15 @@ export class MemoryMediaSource implements MediaSource {
     return Promise.resolve(media.locator);
   }
 
-  public async originalBlob(media: Media, signal?: AbortSignal): Promise<Blob> {
+  public imageUrl(media: Media): Promise<string> {
+    return Promise.resolve(media.locator);
+  }
+
+  public async fetchOriginal(media: Media, signal?: AbortSignal): Promise<Blob> {
     return (await fetch(media.locator, { signal })).blob();
   }
 
-  public duration(): Promise<number> {
+  public fetchDurationSeconds(): Promise<number> {
     return Promise.resolve(0);
   }
 }

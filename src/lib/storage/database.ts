@@ -44,6 +44,20 @@ export class Database<V extends Identifiable> implements DatabaseLike<V> {
       let batch: V[] = [];
       const request = objectStore.openCursor(null, "prev");
 
+      const fail = (error: unknown): void => {
+        database.close();
+        reject(error);
+      };
+      const deliver = (records: V[]): boolean => {
+        try {
+          onBatch(records);
+          return true;
+        } catch (error) {
+          fail(error);
+          return false;
+        }
+      };
+
       request.onsuccess = (): void => {
         const cursor = request.result;
 
@@ -51,15 +65,17 @@ export class Database<V extends Identifiable> implements DatabaseLike<V> {
           batch.push(cursor.value as V);
 
           if (batch.length >= batchSize) {
-            onBatch(batch);
+            if (!deliver(batch)) {
+              return;
+            }
             batch = [];
           }
           cursor.continue();
           return;
         }
 
-        if (batch.length > 0) {
-          onBatch(batch);
+        if (batch.length > 0 && !deliver(batch)) {
+          return;
         }
         database.close();
         resolve();

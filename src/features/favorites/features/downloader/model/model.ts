@@ -3,16 +3,16 @@ import { DownloaderContext, DownloaderProgress, DownloaderResult } from "@/featu
 import { DownloaderArchiver } from "@/features/favorites/features/downloader/model/archiver";
 import { DownloaderBatcher } from "@/features/favorites/features/downloader/model/batcher";
 import { DownloaderFilenamer } from "@/features/favorites/features/downloader/model/filenamer";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 
 export class DownloaderModel {
   private readonly filenamer: DownloaderFilenamer;
   private readonly batcher: DownloaderBatcher;
 
-  constructor({ filenameFormat, getTagCategory, getTagsForIds, resolveExtension, resolveMediaUrl, fetch, saveBlob }: DownloaderContext) {
+  constructor({ filenameFormat, getTagCategory, getTagsForIds, fetchOriginal, saveBlob }: DownloaderContext) {
     this.filenamer = new DownloaderFilenamer({ filenameFormat, getTagCategory });
     this.batcher = new DownloaderBatcher({
-      archiver: new DownloaderArchiver({ filenamer: this.filenamer, getTagsForIds, resolveExtension, resolveMediaUrl, fetch }),
+      archiver: new DownloaderArchiver({ filenamer: this.filenamer, getTagsForIds, fetchOriginal }),
       saveBlob
     });
   }
@@ -21,7 +21,7 @@ export class DownloaderModel {
     return this.filenamer.options();
   }
 
-  public download(items: MediaItem[], batchSize: number, signal: AbortSignal, onProgress: (progress: DownloaderProgress) => void): Promise<DownloaderResult> {
+  public download(items: PostMedia[], batchSize: number, signal: AbortSignal, onProgress: (progress: DownloaderProgress) => void): Promise<DownloaderResult> {
     return this.batcher.download(items, batchSize, signal, onProgress);
   }
 

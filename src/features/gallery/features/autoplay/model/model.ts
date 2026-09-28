@@ -1,7 +1,7 @@
 import * as AutoplayDurations from "@/features/gallery/features/autoplay/model/durations";
 import * as AutoplayPlayback from "@/features/gallery/features/autoplay/model/playback";
 import { AutoplayDuration } from "@/features/gallery/features/autoplay/types/types";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
 
 export class AutoplayModel {
@@ -9,7 +9,7 @@ export class AutoplayModel {
     return AutoplayDurations.parse(kind, seconds, fallback);
   }
 
-  public timerFor(item: MediaItem): AutoplayDuration {
+  public timerFor(item: PostMedia): AutoplayDuration {
     return AutoplayPlayback.timerFor(item);
   }
 
@@ -17,7 +17,7 @@ export class AutoplayModel {
     return AutoplayPlayback.direction(forward);
   }
 
-  public togglesPause(key: string, item: MediaItem | null): boolean {
+  public togglesPause(key: string, item: PostMedia | null): boolean {
     return AutoplayPlayback.togglesPause(key, item);
   }
 }

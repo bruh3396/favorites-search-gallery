@@ -6,14 +6,13 @@ import { SnippetModel } from "@/features/favorites/features/snippets/model/model
 import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
 import { SnippetView } from "@/features/favorites/features/snippets/view/view";
 import { SnippetsDependencies } from "@/features/favorites/features/snippets/types/types";
-import { Storage } from "@/lib/storage/local_storage";
 import { downloadBlob } from "@/utils/browser/download";
 
 export class Snippets {
   private readonly flows: SnippetFlows;
   private readonly control: SnippetControl;
 
-  constructor({ appendToSearch, getSearchResults }: SnippetsDependencies) {
+  constructor({ appendToSearch, getSearchResults, store }: SnippetsDependencies) {
     const shell = new SnippetShell();
     const context = {
       appendToSearch,
@@ -23,7 +22,7 @@ export class Snippets {
       saveBlob: downloadBlob
     };
 
-    this.flows = new SnippetFlows(context, new SnippetModel(Storage), new SnippetView(shell));
+    this.flows = new SnippetFlows(context, new SnippetModel(store), new SnippetView(shell));
     this.control = new SnippetControl(shell, this.flows.library);
   }
 

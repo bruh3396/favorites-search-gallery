@@ -1,12 +1,12 @@
 import { BudgetedRequests, ImageBudgeter } from "@/features/gallery/types/types";
 import { Favorite } from "@/types/favorite";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 
 const PIXELS_PER_MEGABYTE = 220_000;
 
 export abstract class GalleryAbstractImageBudgeter implements ImageBudgeter {
-  public partition(items: MediaItem[]): BudgetedRequests {
+  public partition(items: PostMedia[]): BudgetedRequests {
     return this.partitionByLimit(items.map(item => new ImageRequest(item)));
   }
 

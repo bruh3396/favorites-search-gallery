@@ -26,7 +26,7 @@ function createContext(resultsPerPage = 100, sourcePosts: Post[] = []): AppConte
 }
 
 function createFavoritePost(id: string, tags: string): Post {
-  return createPost({ id, tags, fetchedAt: Date.now(), fileURL: `https://example.com/${id}.jpg` });
+  return createPost({ id, tags, fetchedAt: Date.now(), media: { kind: "image", locator: `https://example.com/${id}.jpg` } });
 }
 
 function createFavoritePosts(tags: string, ...ids: string[]): Post[] {

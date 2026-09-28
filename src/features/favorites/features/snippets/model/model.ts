@@ -4,12 +4,12 @@ import * as SnippetListing from "@/features/favorites/features/snippets/model/li
 import * as SnippetTransfer from "@/features/favorites/features/snippets/model/transfer";
 import { SerializedSnippet, Snippet, SnippetFailureReason, SnippetResult } from "@/features/favorites/features/snippets/types/types";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
-import { Store } from "@/lib/storage/local_storage";
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 
 export class SnippetModel {
   private readonly store: SnippetStore;
 
-  constructor(storage: Store) {
+  constructor(storage: KeyValueStore) {
     this.store = new SnippetStore(storage);
   }
 

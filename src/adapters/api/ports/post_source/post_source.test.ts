@@ -1,7 +1,8 @@
 import { PostResponse, ServerPost } from "@/adapters/api/client/post/post";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiPostSource } from "@/adapters/api/ports/post_source/post_source";
-import { ParsedPost } from "@/core/boundary/ports/post_source";
+import { Media } from "@/core/domain/media/media";
+import { CategorizedPost } from "@/core/domain/post/post";
 import { PostFetchError } from "@/types/errors";
 import { createPost } from "@/testing/post";
 
@@ -11,14 +12,18 @@ function createServerPost(id: string): ServerPost {
   return { id, width: 10, height: 10, score: 0, rating: "e", change: 0, fileURL: `https://example.com/${id}.png`, previewURL: "", tagCategories: {} };
 }
 
-function setup(...responses: PostResponse[]): { source: ApiPostSource; api: { fetchPost: ReturnType<typeof vi.fn> }; deletedPosts: { fetch: ReturnType<typeof vi.fn> } } {
-  const api = { fetchPost: vi.fn((id: string): Promise<PostResponse> => Promise.resolve(responses.shift() ?? { status: "error", id })) };
-  const deletedPosts = { fetch: vi.fn((id: string): Promise<ParsedPost> => Promise.resolve({ post: createPost({ id, width: 10, height: 10, deleted: true }), tagCategories: new Map() })) };
-  return { source: new ApiPostSource(api, deletedPosts, FETCH_ATTEMPTS), api, deletedPosts };
+function mintMedia(fileUrl: string): Media | null {
+  return fileUrl.endsWith(".png") ? { kind: "image", locator: fileUrl } : null;
 }
 
-async function fetchedFor(source: ApiPostSource, id: string): Promise<ParsedPost> {
-  const fetched = source.fetch(id);
+function setup(...responses: PostResponse[]): { source: ApiPostSource; api: { fetchPost: ReturnType<typeof vi.fn> }; deletedPosts: { fetch: ReturnType<typeof vi.fn> } } {
+  const api = { fetchPost: vi.fn((id: string): Promise<PostResponse> => Promise.resolve(responses.shift() ?? { status: "error", id })) };
+  const deletedPosts = { fetch: vi.fn((id: string): Promise<CategorizedPost> => Promise.resolve({ post: createPost({ id, width: 10, height: 10, deleted: true }), tagCategories: new Map() })) };
+  return { source: new ApiPostSource(api, deletedPosts, mintMedia, FETCH_ATTEMPTS), api, deletedPosts };
+}
+
+async function fetchedFor(source: ApiPostSource, id: string): Promise<CategorizedPost> {
+  const fetched = source.fetchPost(id);
 
   fetched.catch(() => { });
   await vi.runAllTimersAsync();
@@ -34,10 +39,16 @@ describe("ApiPostSource", () => {
     vi.useRealTimers();
   });
 
-  test("delivers a served post with its extension", async() => {
+  test("delivers a served post with the media minted from its file", async() => {
     const { source } = setup({ status: "ok", post: createServerPost("1") });
 
-    expect((await fetchedFor(source, "1")).post).toMatchObject({ id: "1", width: 10, extension: "png" });
+    expect((await fetchedFor(source, "1")).post).toMatchObject({ id: "1", width: 10, media: { kind: "image", locator: "https://example.com/1.png" } });
+  });
+
+  test("rejects a post whose file can't be minted", async() => {
+    const { source } = setup(...Array.from({ length: FETCH_ATTEMPTS }, () => ({ status: "ok" as const, post: { ...createServerPost("1"), fileURL: "https://example.com/1.webm" } })));
+
+    await expect(fetchedFor(source, "1")).rejects.toThrow(PostFetchError);
   });
 
   test("asks again for a deferred post", async() => {

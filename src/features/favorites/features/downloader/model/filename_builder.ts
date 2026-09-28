@@ -1,12 +1,12 @@
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
-import { MediaItem } from "@/types/media";
-import { TagCategory } from "@/types/search";
+import { PostMedia } from "@/core/domain/post/post";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 const STRIPPED_CHARACTERS = /[<>:"/\\|?*' -]/g;
 const TRAILING_QUALIFIER = /_\([^)]*\)$/;
 
-export function build(item: MediaItem, tags: Set<string>, extension: string, categories: FilenameCategory[], getTagCategory: (tagName: string) => TagCategory | undefined): string {
+export function build(item: PostMedia, tags: Set<string>, extension: string, categories: FilenameCategory[], getTagCategory: (tagName: string) => TagCategory | undefined): string {
   const segments: string[] = categories
     .map(category => buildCategorySegment(tags, category, getTagCategory))
     .filter(segment => segment !== "");

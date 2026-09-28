@@ -3,6 +3,7 @@ import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryFlows } from "@/features/gallery/flows/flows";
 import { GalleryModel } from "@/features/gallery/model/model";
 import { GalleryView } from "@/features/gallery/view/view";
+import { PostMedia } from "@/core/domain/post/post";
 
 export interface GalleryFlowDependencies {
   context: AppContext;
@@ -39,5 +40,13 @@ export abstract class GalleryFlow {
 
   protected usingColumnLayout(): boolean {
     return this.context.featureBridge.currentLayout() === "column";
+  }
+
+  protected itemFor(thumb: HTMLElement): PostMedia | undefined {
+    return this.context.featureBridge.postMedia(thumb.id);
+  }
+
+  protected itemsFor(thumbs: HTMLElement[]): PostMedia[] {
+    return thumbs.map(thumb => this.itemFor(thumb)).filter(item => item !== undefined);
   }
 }

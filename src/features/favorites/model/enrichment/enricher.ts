@@ -1,22 +1,21 @@
-import { ParsedPost } from "@/core/boundary/ports/post_source";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Enricher } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDurationEnricher } from "@/features/favorites/model/enrichment/duration_enricher";
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
-import { MediaItem } from "@/types/media";
-import { TagCategoryMap } from "@/types/search";
+import { Media } from "@/core/domain/media/media";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { isVideo } from "@/lib/media/media_type";
-import { postIsStale, Post } from "@/core/domain/post/post";
+import { CategorizedPost, postIsStale, Post } from "@/core/domain/post/post";
 
 interface EnricherDependencies {
   onFavoriteEnriched: (favorite: Favorite) => void;
   onTagsUpdated: (updates: TermUpdate<Favorite>[]) => void;
-  resolvePosts: (posts: Post[], onResolved: (resolved: ParsedPost) => void) => Promise<void>;
+  resolvePosts: (posts: Post[], onResolved: (resolved: CategorizedPost) => void) => Promise<void>;
   persistTagCategories: (tagCategories: TagCategoryMap) => void;
-  readDuration: (item: MediaItem) => Promise<number>;
+  fetchDurationSeconds: (media: Media) => Promise<number>;
   persistPost: (post: Post) => void;
 }
 
@@ -33,7 +32,7 @@ export class FavoritesEnricher implements Enricher {
       dependencies.resolvePosts,
       dependencies.persistTagCategories
     );
-    this.durationEnricher = new FavoritesDurationEnricher(dependencies.onFavoriteEnriched, dependencies.readDuration, dependencies.persistPost);
+    this.durationEnricher = new FavoritesDurationEnricher(dependencies.onFavoriteEnriched, dependencies.fetchDurationSeconds, dependencies.persistPost);
   }
 
   public async enrich(favorites: Favorite[]): Promise<void> {

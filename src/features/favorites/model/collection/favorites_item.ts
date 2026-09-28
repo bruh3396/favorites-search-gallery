@@ -1,9 +1,8 @@
-import { Post } from "@/core/domain/post/post";
-import { MediaExtension } from "@/core/domain/media/extension";
-import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { Arena } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
+import { Media } from "@/core/domain/media/media";
+import { Post } from "@/core/domain/post/post";
 
 export class FavoritesItem implements Favorite {
   private readonly arena: Arena;
@@ -31,24 +30,16 @@ export class FavoritesItem implements Favorite {
     return this.arena.toPost(this.index);
   }
 
-  public get mediaType(): MediaType {
-    return this.arena.mediaType(this.index);
+  public get media(): Media {
+    return this.arena.media(this.index);
   }
 
   public get rating(): Rating {
     return this.arena.rating(this.index);
   }
 
-  public get extension(): MediaExtension | undefined {
-    return this.arena.extension(this.index);
-  }
-
   public get isNew(): boolean {
     return this.arena.isNewFavorite(this.index);
-  }
-
-  public get thumbUrl(): string {
-    return this.arena.previewUrl(this.index);
   }
 
   public get pixelCount(): number {

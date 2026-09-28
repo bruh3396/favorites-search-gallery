@@ -9,8 +9,7 @@ export function createPost(overrides: Partial<Post> = {}): Post {
     score: 0,
     rating: "e",
     change: 0,
-    fileURL: "",
-    previewURL: "",
+    media: { kind: "image", locator: "" },
     ...overrides
   };
 }

@@ -2,7 +2,7 @@ import * as PostOverlayTagRenderer from "@/features/post_overlay/view/rendering/
 import { PostOverlayClass } from "@/features/post_overlay/types/selectors";
 import { PostOverlayPool } from "@/features/post_overlay/view/overlay";
 import { PostOverlayShell } from "@/features/post_overlay/shell/shell";
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { isInside } from "@/utils/browser/guards";
 
 export class PostOverlayView {

@@ -1,9 +1,12 @@
 import { Environment } from "@/core/boundary/environment";
+import { Host } from "@/core/boundary/ports/host";
 import { SettingsCatalog } from "@/features/favorites/control/sections/settings/catalog";
+import { SettingsControl } from "@/lib/ui/settings/controls";
 import { SettingsSection } from "@/features/favorites/types/types";
 
-export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment): SettingsSection[] {
+export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment, host: Host): SettingsSection[] {
   const onMobile = environment.device === "mobile";
+  const header: SettingsControl[] = host.setHeaderVisible === null ? [] : [catalog.header];
   return [
     {
       title: "General",
@@ -22,12 +25,12 @@ export function buildSettingsSections(catalog: SettingsCatalog, environment: Env
       controls: onMobile ? [
         catalog.theme,
         catalog.darkMode,
-        catalog.header,
+        ...header,
         catalog.upscale
       ] : [
         catalog.theme,
         catalog.darkMode,
-        catalog.header,
+        ...header,
         catalog.upscale,
         catalog.upscaleQuality
       ]

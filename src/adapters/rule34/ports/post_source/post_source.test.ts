@@ -7,6 +7,6 @@ describe("Rule34PostSource", () => {
     const page = { post: createPost({ id: "42", deleted: true }), tagCategories: new Map([["alice", "character" as const]]) };
     const source = new Rule34PostSource({ fetchPostPage: id => Promise.resolve(id === "42" ? page : Promise.reject(new Error(id))) });
 
-    expect(await source.fetch("42")).toBe(page);
+    expect(await source.fetchPost("42")).toBe(page);
   });
 });

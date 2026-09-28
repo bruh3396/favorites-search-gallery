@@ -1,11 +1,11 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
 import { queueMacroTask } from "@/lib/async/scheduling";
 
 export class GalleryNavigationFlow extends GalleryFlow {
-  public open(item: MediaItem): void {
+  public open(item: PostMedia): void {
     this.disablePreview();
     this.model.open(item);
     this.view.open();
@@ -45,7 +45,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
     this.runForState<NavigationKey>({ open: (key) => this.navigate(key) }, direction);
   }
 
-  private display(item: MediaItem): void {
+  private display(item: PostMedia): void {
     this.view.display(item);
     this.followInContent(item);
     this.context.events.gallery.itemDisplayed.emit(item);
@@ -56,13 +56,13 @@ export class GalleryNavigationFlow extends GalleryFlow {
     this.display(this.model.currentItem());
   }
 
-  private followInContent(item: MediaItem): void {
+  private followInContent(item: PostMedia): void {
     if (!this.usingColumnLayout() && this.context.environment.canvasBudget !== "reduced") {
       this.view.scrollToThumb(item.id);
     }
   }
 
-  private cacheAdjacent(item: MediaItem): void {
+  private cacheAdjacent(item: PostMedia): void {
     if (GalleryConfig.preloadingEnabled) {
       queueMacroTask(() => {
         this.view.cache(this.model.getItemsAround(item.id));

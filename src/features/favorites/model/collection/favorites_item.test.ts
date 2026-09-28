@@ -1,6 +1,5 @@
+import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { MediaExtension } from "@/core/domain/media/extension";
-import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { Arena } from "@/features/favorites/types/types";
@@ -70,9 +69,9 @@ class TestArena implements Arena {
     }
   }
 
-  public extension(index: number): MediaExtension | undefined {
+  public media(index: number): Media {
     this.lastIndex = index;
-    return this.slot(index).post.extension;
+    return this.slot(index).post.media;
   }
 
   public isNewFavorite(index: number): boolean {
@@ -83,11 +82,6 @@ class TestArena implements Arena {
   public markNew(index: number): void {
     this.lastIndex = index;
     this.slot(index).isNew = true;
-  }
-
-  public previewUrl(index: number): string {
-    this.lastIndex = index;
-    return this.slot(index).post.previewURL;
   }
 
   public setDuration(index: number, duration: number): void {
@@ -110,11 +104,6 @@ class TestArena implements Arena {
 
     this.slot(index).cachedTags = undefined;
     return tags;
-  }
-
-  public mediaType(index: number): MediaType {
-    this.lastIndex = index;
-    return "image";
   }
 
   public toPost(index: number): Post {
@@ -237,11 +226,9 @@ describe("FavoritesItem", () => {
 
     test("exposes every remaining getter through one item", () => {
       const arena = new FavoritesColumnarArena();
-      const item = new FavoritesItem(createPost({ id: "1", tags: "cat mp4", extension: "mp4", previewURL: "https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg" }), arena, true);
+      const item = new FavoritesItem(createPost({ id: "1", tags: "cat", media: { kind: "video", locator: "12/abc123.mp4" } }), arena, true);
 
-      expect(item.mediaType).toBe("video");
-      expect(item.extension).toBe("mp4");
-      expect(item.thumbUrl).toBe("https://wimg.rule34.xxx/thumbnails//12/thumbnail_abc123.jpg");
+      expect(item.media).toEqual({ kind: "video", locator: "12/abc123.mp4" });
     });
   });
 });

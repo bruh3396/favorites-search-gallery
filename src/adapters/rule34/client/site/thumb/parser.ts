@@ -1,22 +1,26 @@
+import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
+import { mintMedia } from "@/adapters/rule34/client/media/locator";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
+const NO_MEDIA: Media = { kind: "image", locator: "" };
+
 export function parseThumb(thumb: HTMLElement): Post {
+  const tags = normalizeTags(thumb);
   return {
     id: parseIdFromThumb(thumb),
-    tags: normalizeTags(thumb),
+    tags,
     width: 0,
     height: 0,
     score: 0,
     rating: "",
     change: 0,
-    fileURL: "",
     duration: 0,
     deleted: false,
-    previewURL: parsePreviewURL(getImageFromThumb(thumb))
+    media: mintMedia(parsePreviewURL(getImageFromThumb(thumb)), tags) ?? NO_MEDIA
   };
 }
 

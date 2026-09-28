@@ -2,6 +2,8 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
 import { FavoritesFeatures } from "@/features/favorites/features/features";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { createAppContext } from "@/testing/context";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
@@ -15,24 +17,29 @@ interface Setup {
 }
 
 function createFavorite(id: string): Favorite {
-  return { id, thumbUrl: `https://rule34.xxx/thumbnails/1/thumbnail_${id}.jpg`, mediaType: "image", extension: "png" } as Partial<Favorite> as Favorite;
+  return { id, media: { kind: "image", locator: `1/${id}.png` } } as Partial<Favorite> as Favorite;
 }
 
-function setup(): Setup {
+function setup(snippets: Snippet[] = []): Setup {
   const context = createAppContext();
   const results = [createFavorite("1"), createFavorite("2")];
   const appended: string[] = [];
+  const store = new MemoryKeyValueStore();
+
+  store.set("searchSnippets", snippets);
   const features = new FavoritesFeatures(context, {
     downloader: {
       batchSize: context.preferences.favorites.downloadBatchSize,
       filenameFormat: context.preferences.favorites.downloadFilenameFormat,
       getSearchResults: (): Favorite[] => results,
       getTagCategory: (): undefined => undefined,
-      getTagsForIds: (): Promise<Map<string, Set<string>>> => Promise.resolve(new Map())
+      getTagsForIds: (): Promise<Map<string, Set<string>>> => Promise.resolve(new Map()),
+      fetchOriginal: (): Promise<Blob> => Promise.resolve(new Blob())
     },
     snippets: {
       appendToSearch: (text): number => appended.push(text),
-      getSearchResults: (): Favorite[] => results
+      getSearchResults: (): Favorite[] => results,
+      store
     }
   });
 
@@ -70,7 +77,6 @@ async function suggestionsFor(text: string): Promise<string[]> {
 describe("FavoritesFeatures", () => {
   afterEach(() => {
     document.body.replaceChildren();
-    localStorage.clear();
     vi.unstubAllGlobals();
   });
 
@@ -111,8 +117,7 @@ describe("FavoritesFeatures", () => {
 
   describe("snippets", () => {
     test("builds a section listing the stored snippets, with its actions", () => {
-      localStorage.setItem("searchSnippets", JSON.stringify([createSnippet("fruits", "apple")]));
-      const { features } = setup();
+      const { features } = setup([createSnippet("fruits", "apple")]);
       const container = mountSnippets(features);
 
       expect(container.querySelector("[data-snippet-name]")?.getAttribute("data-snippet-name")).toBe("fruits");
@@ -120,9 +125,8 @@ describe("FavoritesFeatures", () => {
     });
 
     test("suggests stored snippets in search boxes", async() => {
-      localStorage.setItem("searchSnippets", JSON.stringify([createSnippet("fruits", "apple")]));
       vi.stubGlobal("fetch", (): Promise<Response> => Promise.resolve(new Response("[]")));
-      setup();
+      setup([createSnippet("fruits", "apple")]);
       expect(await suggestionsFor("/f")).toEqual(["/fruits (snippet)"]);
     });
   });

@@ -5,12 +5,13 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { PaginationState } from "@/types/ui";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/post_page";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
 
 interface Setup {
   view: FavoritesView;
@@ -23,13 +24,14 @@ interface Setup {
 interface SetupOptions {
   preferences?: PreferenceOverrides;
   environment?: Partial<Environment>;
+  keyValueStore?: MemoryKeyValueStore;
 }
 
-function setup({ preferences = {}, environment: environmentOverrides = {} }: SetupOptions = {}): Setup {
+function setup({ preferences = {}, environment: environmentOverrides = {}, keyValueStore = new MemoryKeyValueStore() }: SetupOptions = {}): Setup {
   const environment = createEnvironment(environmentOverrides);
-  const appShell = new Shell(environment);
+  const appShell = new Shell();
   const shell = new FavoritesShell(appShell, environment);
-  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell });
+  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { keyValueStore } });
   const view = new FavoritesView(context, shell);
   const replaced = vi.fn<() => void>();
   const added = vi.fn<(favorites: Favorite[]) => void>();
@@ -40,7 +42,7 @@ function setup({ preferences = {}, environment: environmentOverrides = {} }: Set
 }
 
 function createFavorite(id: string, width = 100, height = 200): Favorite {
-  return { id, thumbUrl: "", mediaType: "image", isNew: false, extension: undefined, post: { width, height } } as Partial<Favorite> as Favorite;
+  return { id, media: { kind: "image", locator: "" }, isNew: false, post: { width, height } } as unknown as Favorite;
 }
 
 function createFavorites(...ids: string[]): Favorite[] {
@@ -77,7 +79,6 @@ describe("FavoritesView", () => {
     document.body.replaceChildren();
     document.documentElement.removeAttribute("data-pagination-hidden");
     document.documentElement.removeAttribute("data-loading");
-    localStorage.clear();
   });
 
   describe("initial state", () => {
@@ -88,15 +89,6 @@ describe("FavoritesView", () => {
       expect(shell.root.dataset.drawerOpen).toBeDefined();
       expect(shell.drawer.help.root.dataset.hidden).toBeUndefined();
       expect(shell.drawer.settings.root.dataset.hidden).toBeDefined();
-    });
-
-    test("hides the site header when it's disabled", () => {
-      const header = document.createElement("div");
-
-      header.id = "header";
-      document.body.append(header);
-      setup({ preferences: { favorites: { headerEnabled: false } } });
-      expect(header.dataset.hidden).toBeDefined();
     });
   });
 
@@ -172,14 +164,18 @@ describe("FavoritesView", () => {
     });
 
     test("shapes the next visit's placeholders after the thumbs that loaded", async() => {
-      const { view, content } = setup({ preferences: { favorites: { layout: "native" } } });
+      const keyValueStore = new MemoryKeyValueStore();
+      const { view, content } = setup({ preferences: { favorites: { layout: "native" } }, keyValueStore });
 
       view.showSearchResults([createFavorite("1", 120, 240)]);
       content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalWidth", { value: 120 }));
       content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalHeight", { value: 240 }));
-      await view.collectAspectRatios();
+      const collecting = view.collectAspectRatios();
+
+      content.querySelectorAll("img").forEach(image => image.dispatchEvent(new Event("load")));
+      await collecting;
       document.body.replaceChildren();
-      const next = setup({ preferences: { favorites: { layout: "native" } } });
+      const next = setup({ preferences: { favorites: { layout: "native" } }, keyValueStore });
 
       next.view.showSkeleton();
       const first = next.content.querySelector<HTMLElement>(".skeleton-item");

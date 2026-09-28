@@ -1,5 +1,6 @@
-﻿import * as FavoritesSettings from "@/features/favorites/control/sections/settings/settings";
+import * as FavoritesSettings from "@/features/favorites/control/sections/settings/settings";
 import { describe, expect, test, vi } from "vitest";
+import { MemoryHost } from "@/adapters/memory/ports/host/host";
 import { AppContext } from "@/app/context/context";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { createAppContext } from "@/testing/context";
@@ -12,10 +13,11 @@ interface Setup {
   reset: HTMLElement;
 }
 
-function setup(expanded: Record<string, boolean> = {}, onMobileDevice = false): Setup {
+function setup(expanded: Record<string, boolean> = {}, onMobileDevice = false, host = new MemoryHost(true)): Setup {
   const context = createAppContext({
     environment: { device: onMobileDevice ? "mobile" : "desktop" },
-    preferences: { favorites: { settingsExpandedSections: expanded } }
+    preferences: { favorites: { settingsExpandedSections: expanded } },
+    ports: { host }
   });
   const container = document.createElement("div");
   const { mount, actions = [] } = FavoritesSettings.buildDrawerSection(context);
@@ -91,6 +93,14 @@ describe("FavoritesSettings", () => {
     field.dispatchEvent(new Event("input"));
     expect([...sections].filter(([, section]) => section.dataset.filtered === undefined).map(([title]) => title)).toEqual(["Appearance"]);
     expect(collapseAll.dataset.hidden).toBeDefined();
+  });
+
+  test("offers the site header setting where the host has a header", () => {
+    expect(setup().container.textContent).toContain("Site Header");
+  });
+
+  test("doesn't offer the site header setting where the host has none", () => {
+    expect(setup({}, false, new MemoryHost()).container.textContent).not.toContain("Site Header");
   });
 
   test.each([["desktop", false], ["mobile", true]])("on %s, every section offers at least one setting", (_device, onMobileDevice) => {

@@ -9,12 +9,6 @@ export function downloadBlob(blob: Blob, filename: string): void {
   URL.revokeObjectURL(a.href);
 }
 
-export function downloadFromUrl(url: string, filename: string): void {
-  fetch(url)
-  .then(response => response.blob())
-  .then(blob => downloadBlob(blob, filename));
-}
-
 export function selectFile(accept: string, onSelected: (contents: string) => void): void {
   const input = document.createElement("input");
 

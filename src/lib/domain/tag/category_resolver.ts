@@ -1,8 +1,8 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { TagSource } from "@/core/boundary/ports/tag_source";
 
-export async function resolveCategories(tagSource: TagSource, postId: string, tagNames: string[]): Promise<TagCategoryMap> {
+export async function resolveCategories(tagSource: TagSource, tagNames: string[]): Promise<TagCategoryMap> {
   const categoryMap: TagCategoryMap = new Map();
   const uncached: string[] = [];
 
@@ -21,7 +21,7 @@ export async function resolveCategories(tagSource: TagSource, postId: string, ta
   }
 
   try {
-    const fetched = await tagSource.categorize(postId, uncached);
+    const fetched = await tagSource.fetchCategories(uncached);
 
     TagCategoryStore.persistAll(fetched);
 

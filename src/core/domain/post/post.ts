@@ -1,4 +1,5 @@
-import { MediaExtension } from "@/core/domain/media/extension";
+import { Media } from "@/core/domain/media/media";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 const TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
 
@@ -9,14 +10,19 @@ export type Post = {
   score: number;
   rating: string;
   change: number;
-  fileURL: string;
-  previewURL: string;
+  media: Media;
   tags: string;
   duration?: number;
   deleted?: boolean;
-  extension?: MediaExtension;
   fetchedAt?: number;
 };
+
+export type CategorizedPost = {
+  post: Post;
+  tagCategories: TagCategoryMap;
+};
+
+export type PostMedia =Pick<Post, "id" | "media">;
 
 export function postIsComplete(post: Post): boolean {
   return post.width > 0 && post.height > 0;

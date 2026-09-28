@@ -1,7 +1,6 @@
 import { EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/event/input";
 import { GalleryFlow, GalleryFlowDependencies } from "@/features/gallery/flows/flow";
 import { throttle } from "@/lib/async/rate_limiting";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryMouseFlow extends GalleryFlow {
   private readonly showCursorThrottled: () => void;
@@ -64,7 +63,7 @@ export class GalleryMouseFlow extends GalleryFlow {
 
   private handleClickInGallery(mouseEvent: MouseEvent): void {
     if (mouseEvent.ctrlKey) {
-      this.model.openMedia();
+      void this.model.openOriginal();
     }
     this.togglePauseIfOverVideo(mouseEvent);
   }
@@ -86,7 +85,7 @@ export class GalleryMouseFlow extends GalleryFlow {
   private handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
     if (mouseEvent.leftClick && mouseEvent.thumb !== null && !mouseEvent.ctrlKey && !mouseEvent.shiftKey) {
       mouseEvent.originalEvent.preventDefault();
-      this.flows.navigation.open(toMediaItem(mouseEvent.thumb));
+      this.openThumb(mouseEvent.thumb);
       return;
     }
 
@@ -137,12 +136,22 @@ export class GalleryMouseFlow extends GalleryFlow {
     this.flows.navigation.close();
   }
 
+  private openThumb(thumb: HTMLElement): void {
+    const item = this.itemFor(thumb);
+
+    if (item !== undefined) {
+      this.flows.navigation.open(item);
+    }
+  }
+
   private handlePreview(thumb: HTMLElement | null): void {
-    if (thumb === null) {
+    const item = thumb === null ? undefined : this.itemFor(thumb);
+
+    if (item === undefined) {
       this.view.hidePreview();
       return;
     }
-    this.view.showPreview(thumb);
+    this.view.showPreview(item);
     this.flows.thumbs.cacheAround(thumb);
   }
 

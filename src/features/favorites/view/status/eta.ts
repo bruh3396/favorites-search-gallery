@@ -1,29 +1,33 @@
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
-import { average } from "@/utils/pure/number";
-
 const ROLLING_WINDOW = 10;
 
+interface Sample {
+  time: number;
+  count: number;
+}
+
 export class FavoritesEta {
-  private last: number | null = null;
-  private readonly recentElapsed: number[] = [];
+  private readonly samples: Sample[] = [];
 
   public getEta(current: number, total: number): string | null {
-    const now = Date.now();
+    this.samples.push({ time: Date.now(), count: current });
 
-    if (this.last === null) {
-      this.last = now;
+    if (this.samples.length > ROLLING_WINDOW + 1) {
+      this.samples.shift();
+    }
+    const perMillisecond = this.rate();
+
+    if (perMillisecond === null) {
       return null;
     }
-    this.recentElapsed.push(now - this.last);
+    return this.format(Math.ceil((total - current) / perMillisecond / 1_000));
+  }
 
-    if (this.recentElapsed.length > ROLLING_WINDOW) {
-      this.recentElapsed.shift();
-    }
-    const remaining = total - current;
-    const seconds = Math.ceil((remaining / FAVORITES_PER_PAGE) * (average(this.recentElapsed) / 1_000));
-
-    this.last = now;
-    return this.format(seconds);
+  private rate(): number | null {
+    const first = this.samples[0];
+    const last = this.samples[this.samples.length - 1];
+    const arrived = last.count - first.count;
+    const elapsed = last.time - first.time;
+    return arrived > 0 && elapsed > 0 ? arrived / elapsed : null;
   }
 
   private format(seconds: number): string {

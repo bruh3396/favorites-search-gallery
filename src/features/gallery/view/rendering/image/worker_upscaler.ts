@@ -4,7 +4,7 @@ type UpscaleConfig = {
 
 type UpscaleCommand =
   | { action: "init"; config: UpscaleConfig }
-  | { action: "paint"; id: string; url: string; width: number; canvas?: OffscreenCanvas }
+  | { action: "paint"; id: string; bitmap: ImageBitmap; width: number; canvas?: OffscreenCanvas }
   | { action: "evict"; id: string };
 
 const canvases: Map<string, OffscreenCanvas> = new Map();
@@ -20,7 +20,7 @@ self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
       break;
 
     case "paint":
-      paintFromUrl(message.id, message.url, message.width, message.canvas);
+      paint(message.id, message.bitmap, message.width, message.canvas);
       break;
 
     case "evict":
@@ -31,19 +31,22 @@ self.onmessage = (event: MessageEvent<UpscaleCommand>): void => {
   }
 };
 
-async function paintFromUrl(id: string, url: string, width: number, canvas?: OffscreenCanvas): Promise<void> {
+async function paint(id: string, source: ImageBitmap, width: number, canvas?: OffscreenCanvas): Promise<void> {
   if (canvas !== undefined) {
     canvases.set(id, canvas);
   }
   const target = canvases.get(id);
 
   if (target === undefined) {
+    source.close();
     return;
   }
   const request = {};
 
   latestRequests.set(id, request);
-  const bitmap = await fetchBitmap(url, width);
+  const bitmap = await resize(source, width);
+
+  source.close();
   const isLatest = canvases.get(id) === target && latestRequests.get(id) === request;
 
   if (isLatest) {
@@ -73,11 +76,9 @@ function evict(id: string): void {
   latestRequests.delete(id);
 }
 
-async function fetchBitmap(url: string, resizeWidth: number): Promise<ImageBitmap | null> {
+async function resize(source: ImageBitmap, resizeWidth: number): Promise<ImageBitmap | null> {
   try {
-    const response = await fetch(url);
-    const blob = await response.blob();
-    return await createImageBitmap(blob, { resizeWidth, resizeQuality: "high" });
+    return await createImageBitmap(source, { resizeWidth, resizeQuality: "high" });
   } catch {
     return null;
   }

@@ -13,7 +13,7 @@ export class GalleryActionsFlow extends GalleryFlow {
       exit: (): void => this.flows.navigation.close(),
       fullscreen: toggleFullscreen,
       openPost: (): void => this.model.openPost(),
-      openOriginal: (): void => this.model.openMedia(),
+      openOriginal: (): Promise<void> => this.model.openOriginal(),
       download: (): Promise<void> => this.model.download(),
       addFavorite: (): Promise<void> => this.addFavorite(),
       removeFavorite: (): Promise<void> => this.removeFavorite(),
@@ -40,25 +40,25 @@ export class GalleryActionsFlow extends GalleryFlow {
   }
 
   private async addFavorite(): Promise<void> {
-    const status = await this.model.addFavorite();
+    const result = await this.model.addFavorite();
 
-    if (status === "success") {
+    if (result === "added") {
       this.context.events.app.favoriteAdded.emit(this.model.currentItem().id);
 
       if (this.context.environment.device === "mobile") {
         vibrate(15);
       }
     }
-    this.view.showAddedFavoriteStatus(status);
+    this.view.showAddFavoriteResult(result);
   }
 
   private async removeFavorite(): Promise<void> {
-    const status = await this.model.removeFavorite();
+    const result = await this.model.removeFavorite();
 
-    if (status === "success") {
+    if (result === "removed") {
       this.context.events.app.favoriteRemoved.emit(this.model.currentItem().id);
     }
-    this.view.showRemovedFavoriteStatus(status);
+    this.view.showRemoveFavoriteResult(result);
   }
 
   private toggleBackgroundOpacity(): void {

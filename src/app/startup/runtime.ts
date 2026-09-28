@@ -2,8 +2,8 @@ import { AppContext } from "@/app/context/context";
 import { reloadWindow } from "@/utils/browser/window";
 import { setupStyles } from "@/app/startup/style";
 
-export function setupRuntime(context: AppContext): void {
-  context.shell.mount();
+export function setupRuntime(context: AppContext, root: HTMLElement): void {
+  context.shell.mount(root);
   context.domEvents.addEventListeners(context.shell, context.environment, context.events, context.featureBridge);
   setupStyles(context);
   reloadOnRestartPreferences(context);

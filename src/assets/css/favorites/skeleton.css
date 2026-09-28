@@ -33,6 +33,26 @@
   animation-delay: var(--delay-skeleton);
 }
 
+.post[data-loading]>a {
+  background-color: #636363;
+}
+
+.post[data-loading]>a>img:first-child {
+  opacity: 0;
+}
+
+.post[data-loading]>a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-color: #424242;
+  opacity: 0;
+  will-change: opacity;
+  animation: pulse var(--duration-skeleton) infinite cubic-bezier(0.42, 0, 0.58, 1);
+  pointer-events: none;
+}
+
 .skeleton-item[data-animation="shimmer"] {
   position: relative;
   background-color: #636363;

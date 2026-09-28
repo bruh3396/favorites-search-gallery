@@ -14,7 +14,7 @@ describe("MemoryFavoritesEditor", () => {
   test("adding succeeds and leaves the list as it is", async() => {
     const memory = new MemoryClient([createPost({ id: "1" })]);
 
-    expect(await new MemoryFavoritesEditor(memory).add()).toBe("success");
+    expect(await new MemoryFavoritesEditor(memory).add()).toBe("added");
     expect(memory.readFavorites().map(post => post.id)).toEqual(["1"]);
   });
 });

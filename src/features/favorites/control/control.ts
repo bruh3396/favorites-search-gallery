@@ -8,7 +8,6 @@ import { AppContext } from "@/app/context/context";
 import { FavoritesDrawerContents } from "@/types/favorites_ui";
 import { FavoritesSearchBox } from "@/features/favorites/control/toolbar/search_box";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
-import { Storage } from "@/lib/storage/local_storage";
 
 export class FavoritesControl {
   private readonly searchBox: FavoritesSearchBox;
@@ -19,7 +18,7 @@ export class FavoritesControl {
     FavoritesToolbar.setup(events, environment, preferences, shell.toolbar);
     FavoritesDrawer.setup(preferences, shell);
     FavoritesPagination.setup(events, shell.toolbar.pagination);
-    this.searchBox = new FavoritesSearchBox(events, shell.toolbar, Storage);
+    this.searchBox = new FavoritesSearchBox(events, shell.toolbar, context.ports.keyValueStore);
     this.mountDrawerSections({
       settings: FavoritesSettings.buildDrawerSection(context),
       change: FavoritesChangelog.buildDrawerSection(),

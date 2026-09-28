@@ -1,4 +1,4 @@
-﻿import * as FavoritesToolbar from "@/features/favorites/control/toolbar/toolbar";
+import * as FavoritesToolbar from "@/features/favorites/control/toolbar/toolbar";
 import { Events, createEvents } from "@/app/context/events";
 import { describe, expect, test } from "vitest";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
@@ -18,7 +18,7 @@ interface Setup {
 
 function setup(onDesktopDevice = true): Setup {
   const environment = createEnvironment({ device: onDesktopDevice ? "desktop" : "mobile" });
-  const slots = new FavoritesShell(new Shell(environment), environment).toolbar;
+  const slots = new FavoritesShell(new Shell(), environment).toolbar;
   const preferences = createPreferences({ favorites: { drawerOpen: false } });
   const events = createEvents();
   const clicked = recordButtonEvents(events);

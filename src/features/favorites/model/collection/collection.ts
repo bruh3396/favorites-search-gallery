@@ -1,8 +1,8 @@
-import { Post } from "@/core/domain/post/post";
 import { Collection } from "@/features/favorites/types/types";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { FavoritesItem } from "@/features/favorites/model/collection/favorites_item";
 import { IdentifiedList } from "@/lib/collection/identified_list";
+import { Post } from "@/core/domain/post/post";
 
 export class FavoritesCollection implements Collection {
   private readonly list = new IdentifiedList<FavoritesItem>();

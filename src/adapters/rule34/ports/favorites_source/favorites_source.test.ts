@@ -1,6 +1,6 @@
 import { Rule34FavoritesSource, computeRetryDelay } from "@/adapters/rule34/ports/favorites_source/favorites_source";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 

@@ -20,6 +20,10 @@ export class Rule34MediaClient {
     return Addresses.fileUrl(locator, extension);
   }
 
+  public imageUrl(locator: string, kind: MediaKind): Promise<string> {
+    return kind === "video" ? Promise.resolve(Addresses.fileUrl(locator, "jpg")) : this.originalUrl(locator, kind);
+  }
+
   public async fetchFile(url: string, signal?: AbortSignal): Promise<Blob> {
     const response = await fetch(url, { signal });
 

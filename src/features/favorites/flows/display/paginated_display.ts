@@ -5,6 +5,8 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
+import { Media } from "@/core/domain/media/media";
+import { MediaSource } from "@/core/boundary/ports/media_source";
 import { NavigationKey } from "@/types/input";
 import { Shell } from "@/app/context/shell";
 import { preloadImage } from "@/utils/browser/image";
@@ -14,12 +16,12 @@ import { throttle } from "@/lib/async/rate_limiting";
 export class FavoritesPaginatedDisplay implements Display {
   private hasAppendedFirstResults = false;
 
-  private preloadImages = throttle(async(urls: string[]) => {
+  private preloadImages = throttle(async(media: Media[]) => {
     await this.shell.waitForContentThumbsToLoad();
 
-    for (const url of urls) {
+    for (const item of media) {
       await sleep(3);
-      preloadImage(url);
+      preloadImage(await this.mediaSource.previewUrl(item));
     }
   }, 2_000);
 
@@ -27,7 +29,8 @@ export class FavoritesPaginatedDisplay implements Display {
     private readonly model: FavoritesModel,
     private readonly view: FavoritesView,
     private readonly events: Events,
-    private readonly shell: Shell
+    private readonly shell: Shell,
+    private readonly mediaSource: Pick<MediaSource, "previewUrl">
   ) { }
 
   public initialize(results: Favorite[], options?: ContentDisplayOptions): void {
@@ -73,7 +76,7 @@ export class FavoritesPaginatedDisplay implements Display {
     this.view.renderPagination(this.model.paginationContext());
 
     if (FavoritesConfig.preloadThumbs) {
-      this.preloadImages(this.model.adjacentPageFavorites().map(favorite => favorite.thumbUrl));
+      this.preloadImages(this.model.adjacentPageFavorites().map(favorite => favorite.media));
     }
   }
 

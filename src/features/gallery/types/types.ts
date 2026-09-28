@@ -1,7 +1,9 @@
 import { GalleryAction, Layout } from "@/types/app";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
+
+export type Resolution = "3840x2160" | "7680x4320" | "1920x1080";
 
 export type BudgetedRequests = {
   accepted: ImageRequest[];
@@ -9,7 +11,7 @@ export type BudgetedRequests = {
 };
 
 export interface ImageBudgeter {
-  partition: (items: MediaItem[]) => BudgetedRequests;
+  partition: (items: PostMedia[]) => BudgetedRequests;
 }
 
 export interface ImageFetcher {
@@ -19,9 +21,9 @@ export interface ImageFetcher {
 
 export interface Renderer {
   root: HTMLElement;
-  render: (item: MediaItem) => void;
+  render: (item: PostMedia) => void;
   hide: () => void;
-  cache: (items: MediaItem[]) => Promise<void> | void;
+  cache: (items: PostMedia[]) => Promise<void> | void;
 }
 
 export type VideoClip = {

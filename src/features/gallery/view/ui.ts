@@ -1,6 +1,6 @@
 import * as GalleryFullscreenIcon from "@/features/gallery/view/fullscreen_icon";
 import * as Icons from "@/assets/svg/icons";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
 import { Environment } from "@/core/boundary/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";
@@ -70,20 +70,20 @@ export class GalleryUi {
     target.style.overflowY = value ? "auto" : "hidden";
   }
 
-  public showAddedFavoriteStatus(status: AddFavoriteStatus): void {
+  public showAddFavoriteResult(result: AddFavoriteResult): void {
     const icon = {
       alreadyAdded: Icons.HEART_CHECK,
-      success: Icons.HEART_PLUS,
+      added: Icons.HEART_PLUS,
       error: Icons.ERROR,
       loggedOut: Icons.ERROR
-    }[status] ?? Icons.ERROR;
+    }[result] ?? Icons.ERROR;
 
     GalleryFullscreenIcon.showFullscreenIcon(icon);
   }
 
-  public showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
-    switch (status) {
-      case "success":
+  public showRemoveFavoriteResult(result: RemoveFavoriteResult): void {
+    switch (result) {
+      case "removed":
         GalleryFullscreenIcon.showFullscreenIcon(Icons.HEART_MINUS);
         break;
 

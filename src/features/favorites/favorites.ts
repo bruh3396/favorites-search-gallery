@@ -46,7 +46,8 @@ function setup(components: FavoritesComponents): void {
   serveFavoritesPageRequests(components);
 }
 
-function start({ view, flows }: FavoritesComponents): void {
+function start({ context, view, flows }: FavoritesComponents): void {
+  context.ports.host.setHeaderVisible?.(context.preferences.favorites.headerEnabled.value);
   view.showSkeleton();
   flows.load.loadAllFavorites();
 }
@@ -58,11 +59,13 @@ function featureDependencies(context: AppContext, model: FavoritesModel, control
       filenameFormat: context.preferences.favorites.downloadFilenameFormat,
       getSearchResults: () => model.getCurrentSearchResults(),
       getTagCategory: TagCategoryStore.get,
-      getTagsForIds: (ids) => model.getTagsForIds(ids)
+      getTagsForIds: (ids) => model.getTagsForIds(ids),
+      fetchOriginal: (media, signal) => context.ports.mediaSource.fetchOriginal(media, signal)
     },
     snippets: {
       appendToSearch: (text) => control.appendToSearch(text),
-      getSearchResults: () => model.getCurrentSearchResults()
+      getSearchResults: () => model.getCurrentSearchResults(),
+      store: context.ports.keyValueStore
     }
   };
 }
@@ -117,7 +120,7 @@ function subscribeToPreferences({ context, view, flows }: FavoritesComponents): 
 
   preferences.favorites.drawerOpen.on((open) => view.toggleDrawer(open));
   preferences.favorites.drawerActiveSection.on((section) => view.showDrawerSection(section));
-  preferences.favorites.headerEnabled.on((enabled) => view.toggleHeader(enabled));
+  preferences.favorites.headerEnabled.on((enabled) => context.ports.host.setHeaderVisible?.(enabled));
   preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
   preferences.favorites.layout.on((layout) => view.changeLayout(layout));
   preferences.favorites.sortKey.on(() => flows.search.reSearchFavorites());

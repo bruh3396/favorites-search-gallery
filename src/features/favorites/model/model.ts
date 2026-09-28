@@ -4,7 +4,7 @@ import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { AppContext } from "@/app/context/context";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
-import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
 import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -16,8 +16,6 @@ import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
 import { PostResolver } from "@/lib/domain/post/resolver";
-import { readVideoDuration } from "@/lib/media/duration";
-
 export class FavoritesModel {
   private readonly collection: FavoritesCollection;
   private readonly searcher: FavoritesSearcher;
@@ -28,7 +26,7 @@ export class FavoritesModel {
   private readonly editor: FavoritesEditor;
 
   constructor(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void) {
-    const { favoritesSource, favoritesEditor, postSource } = context.ports;
+    const { favoritesSource, favoritesEditor, postSource, mediaSource } = context.ports;
     const postResolver = new PostResolver(postSource);
 
     this.source = favoritesSource;
@@ -46,7 +44,7 @@ export class FavoritesModel {
         onTagsUpdated: (updates): void => this.searcher.update(updates),
         resolvePosts: (posts, onResolved): Promise<void> => postResolver.resolveAll(posts, onResolved),
         persistTagCategories: TagCategoryStore.persistAll,
-        readDuration: readVideoDuration,
+        fetchDurationSeconds: (media): Promise<number> => mediaSource.fetchDurationSeconds(media),
         persistPost: PostStore.write
       })
     });
@@ -76,11 +74,11 @@ export class FavoritesModel {
     return this.source.count();
   }
 
-  public addFavorite(id: string): Promise<AddFavoriteStatus> {
+  public addFavorite(id: string): Promise<AddFavoriteResult> {
     return this.editor.add(id);
   }
 
-  public removeFavorite(id: string): Promise<RemoveFavoriteStatus> {
+  public removeFavorite(id: string): Promise<RemoveFavoriteResult> {
     return this.editor.remove(id);
   }
 

@@ -5,7 +5,7 @@ import { DownloaderModel } from "@/features/favorites/features/downloader/model/
 import { DownloaderSessionFlow } from "@/features/favorites/features/downloader/flows/session";
 import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
 import { DownloaderView } from "@/features/favorites/features/downloader/view/view";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { createPreference } from "@/testing/preferences";
 
 interface Options {
@@ -18,16 +18,16 @@ interface Options {
 interface Setup {
   session: DownloaderSessionFlow;
   shell: DownloaderShell;
-  results: MediaItem[];
+  results: PostMedia[];
   fetched: string[];
   saved: string[];
 }
 
-function createItems(count: number): MediaItem[] {
-  return Array.from({ length: count }, (_, index) => ({ id: String(index), thumbUrl: "", mediaType: "image" }));
+function createItems(count: number): PostMedia[] {
+  return Array.from({ length: count }, (_, index) => ({ id: String(index), media: { kind: "image", locator: `media/${index}` } }));
 }
 
-function abortable(signal: AbortSignal): Promise<Response> {
+function abortable(signal: AbortSignal): Promise<Blob> {
   return new Promise((_, reject) => {
     signal.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
   });
@@ -41,14 +41,12 @@ function setup({ itemCount = 3, batchSize = 0, hang = false, broken = false }: O
   const context: DownloaderContext = {
     batchSize: createPreference(batchSize),
     filenameFormat: createPreference(0),
-    getSearchResults: (): MediaItem[] => results,
+    getSearchResults: (): PostMedia[] => results,
     getTagCategory: (): undefined => undefined,
     getTagsForIds: (): Promise<Map<string, Set<string>>> => (broken ? Promise.reject(new Error("boom")) : Promise.resolve(new Map())),
-    resolveExtension: (): Promise<string> => Promise.resolve("png"),
-    resolveMediaUrl: (item): Promise<string> => Promise.resolve(`https://media/${item.id}`),
-    fetch: (url, init): Promise<Response> => {
-      fetched.push(url);
-      return hang ? abortable(init.signal as AbortSignal) : Promise.resolve(new Response(new Uint8Array([1])));
+    fetchOriginal: (media, signal): Promise<Blob> => {
+      fetched.push(media.locator);
+      return hang ? abortable(signal) : Promise.resolve(new Blob([new Uint8Array([1])], { type: "image/png" }));
     },
     saveBlob: (_blob, filename): number => saved.push(filename)
   };
@@ -131,7 +129,7 @@ describe("DownloaderSessionFlow", () => {
 
     session.enable();
     await session.start();
-    expect(fetched.sort()).toEqual(["https://media/0", "https://media/1", "https://media/2"]);
+    expect(fetched.sort()).toEqual(["media/0", "media/1", "media/2"]);
     expect(saved).toEqual(["favorites_1of2.zip", "favorites_2of2.zip"]);
     expect(shell.status.textContent).toBe("Done: 3 downloaded");
     expect(shell.progressBar.element.textContent).toBe("2.png");

@@ -1,10 +1,9 @@
-import { Post } from "@/core/domain/post/post";
-import { MediaExtension } from "@/core/domain/media/extension";
-import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
+import { Media } from "@/core/domain/media/media";
 import { NavigationKey } from "@/types/input";
+import { Post } from "@/core/domain/post/post";
 import { SettingsControl } from "@/lib/ui/settings/controls";
 
 export interface Arena {
@@ -13,26 +12,19 @@ export interface Arena {
   id: (index: number) => number;
   rating: (index: number) => Rating;
   getMetric: (index: number, metric: Metric) => number;
-  extension: (index: number) => MediaExtension | undefined;
+  media: (index: number) => Media;
   isNewFavorite: (index: number) => boolean;
   markNew: (index: number) => void;
-  previewUrl: (index: number) => string;
   setDuration: (index: number, duration: number) => void;
   cacheTagSet: (index: number, tags: Set<string>) => void;
   tagSet: (index: number) => Set<string>;
   consumeTagSet: (index: number) => Set<string>;
-  mediaType: (index: number) => MediaType;
   toPost: (index: number) => Post;
 }
 
 export interface Store {
   readAll: () => Promise<Post[]>;
   streamAll: (onBatch: (posts: Post[]) => void) => Promise<void>;
-}
-
-export interface KeyValueStorage {
-  get: <V>(key: string) => V | null;
-  set: <V>(key: string, value: V) => void;
 }
 
 export interface Collection {

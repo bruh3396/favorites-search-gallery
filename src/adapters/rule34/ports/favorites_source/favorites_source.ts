@@ -1,4 +1,4 @@
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 import { FullPageFetcher } from "@/adapters/rule34/ports/favorites_source/full_page_fetcher";
 import { IncrementalPageFetcher } from "@/adapters/rule34/ports/favorites_source/incremental_page_fetcher";

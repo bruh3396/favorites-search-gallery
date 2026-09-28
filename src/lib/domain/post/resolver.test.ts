@@ -1,5 +1,4 @@
-import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports/post_source";
+import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryPostSource } from "@/adapters/memory/ports/post_source/post_source";
@@ -15,8 +14,8 @@ function setup(sourcePosts: Post[], storedPosts: Post[] = []): { resolver: PostR
   return { resolver, stored };
 }
 
-async function resolvedFor(resolver: PostResolver, ...stalePosts: Post[]): Promise<ParsedPost[]> {
-  const resolved: ParsedPost[] = [];
+async function resolvedFor(resolver: PostResolver, ...stalePosts: Post[]): Promise<CategorizedPost[]> {
+  const resolved: CategorizedPost[] = [];
 
   await resolver.resolveAll(stalePosts, result => resolved.push(result));
   return resolved;

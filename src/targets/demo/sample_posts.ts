@@ -20,7 +20,6 @@ export function createSamplePosts(count: number): Post[] {
   return Array.from({ length: count }, (_value, index) => {
     const id = count - index;
     const [width, height] = SIZES[id % SIZES.length];
-    const image = imageFor(id, width, height);
     return {
       id: String(id),
       tags: tagsFor(id),
@@ -29,9 +28,7 @@ export function createSamplePosts(count: number): Post[] {
       score: (id * 7) % 100,
       rating: RATINGS[id % RATINGS.length],
       change: id,
-      fileURL: image,
-      previewURL: image,
-      extension: "png"
+      media: { kind: "image", locator: imageFor(id, width, height) }
     };
   });
 }

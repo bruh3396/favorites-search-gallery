@@ -1,12 +1,12 @@
 import { AutoplayDuration, AutoplayIntents } from "@/features/gallery/features/autoplay/types/types";
 import { AutoplayFlow, AutoplayFlowDependencies } from "@/features/gallery/features/autoplay/flows/flow";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { Timer } from "@/lib/async/scheduling";
 
 export class AutoplayPlayerFlow extends AutoplayFlow implements AutoplayIntents {
   private readonly timers: Record<AutoplayDuration, Timer>;
-  private item: MediaItem | null;
+  private item: PostMedia | null;
   private open: boolean;
 
   constructor(dependencies: AutoplayFlowDependencies) {
@@ -47,7 +47,7 @@ export class AutoplayPlayerFlow extends AutoplayFlow implements AutoplayIntents 
     this.refresh();
   }
 
-  public display(item: MediaItem): void {
+  public display(item: PostMedia): void {
     this.item = item;
     this.restartTimer();
   }

@@ -1,17 +1,17 @@
 import { GalleryConfig } from "@/config/gallery_config";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 
 const bitmapCloseQueue = new ThrottleQueue(GalleryConfig.bitmapCloseDelay);
 
 export class ImageRequest {
-  public readonly item: MediaItem;
+  public readonly item: PostMedia;
   public readonly abortController: AbortController;
   public readonly isDisposable: boolean;
   public isCancelled: boolean;
   public bitmap: ImageBitmap | null;
 
-  constructor(item: MediaItem, disposable: boolean = false) {
+  constructor(item: PostMedia, disposable: boolean = false) {
     this.item = item;
     this.bitmap = null;
     this.abortController = new AbortController();

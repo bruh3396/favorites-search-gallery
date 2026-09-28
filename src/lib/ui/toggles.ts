@@ -4,10 +4,6 @@ export function toggleDisplay(element: HTMLElement | null, visible: boolean): vo
   toggleDataset(element, "hidden", !visible);
 }
 
-export function toggleHeader(value: boolean): void {
-  toggleDisplay(document.getElementById("header"), value);
-}
-
 export function toggleGalleryMenuEnabled(value: boolean): void {
   toggleDataset(document.documentElement, "galleryMenuHidden", !value);
 }

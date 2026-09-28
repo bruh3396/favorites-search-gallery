@@ -3,8 +3,8 @@ import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
 import { DiscreteRating, Rating } from "@/types/search";
 import { addFavoriteUrl, removeFavoriteUrl } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
-import { postListUrlFromQuery } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/post_page";
+import { postListUrlFromQuery } from "@/adapters/rule34/client/site/post_list_page/fetcher";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { EnhancedMouseEvent } from "@/lib/event/input";
@@ -12,6 +12,8 @@ import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesModel } from "@/features/favorites/model/model";
+import { MemoryHost } from "@/adapters/memory/ports/host/host";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Feature } from "@/core/context/features";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
@@ -31,20 +33,22 @@ interface SetupOptions {
   environment?: Partial<Environment>;
   preferences?: PreferenceOverrides;
   features?: Feature[];
+  keyValueStore?: MemoryKeyValueStore;
+  host?: MemoryHost;
 }
 
 let pageCounter = 0;
 
-function createContext({ environment: environmentOverrides = {}, preferences = {}, features }: SetupOptions = {}, withShell = true): AppContext {
+function createContext({ environment: environmentOverrides = {}, preferences = {}, features, keyValueStore = new MemoryKeyValueStore(), host = new MemoryHost() }: SetupOptions = {}, withShell = true): AppContext {
   pageCounter += 1;
   const id = `startup_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesId: id, ...environmentOverrides });
-  const shell = withShell ? new Shell(environment) : undefined;
+  const shell = withShell ? new Shell() : undefined;
 
   if (shell !== undefined) {
     document.body.append(shell.root);
   }
-  return createAppContext({ environment, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, features, shell });
+  return createAppContext({ environment, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, features, shell, ports: { keyValueStore, host } });
 }
 
 function createFruitModel(context: AppContext): FavoritesModel {
@@ -52,7 +56,7 @@ function createFruitModel(context: AppContext): FavoritesModel {
 }
 
 async function store(context: AppContext, posts: Partial<Post>[]): Promise<void> {
-  const favorites = posts.map(post => ({ post: createPost({ ...post, fetchedAt: Date.now(), fileURL: `https://example.com/${post.id}.jpg`, previewURL: `https://example.com/thumbnails/1/thumbnail_${post.id}.jpg` }) }));
+  const favorites = posts.map(post => ({ post: createPost({ ...post, fetchedAt: Date.now(), media: { kind: "image", locator: `1/${post.id}.jpg` } }) }));
 
   await createFruitModel(context).storeFavorites(favorites as unknown as Favorite[]);
 }
@@ -119,7 +123,6 @@ describe("startFavorites", () => {
     document.documentElement.removeAttribute("data-pagination-hidden");
     document.documentElement.removeAttribute("data-loading");
     document.documentElement.removeAttribute("data-tooltips");
-    localStorage.clear();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -161,8 +164,10 @@ describe("startFavorites", () => {
     });
 
     test("using a snippet appends its query to the search", async() => {
-      localStorage.setItem("searchSnippets", JSON.stringify([createSnippet("fruits", "apple")]));
-      await setup();
+      const keyValueStore = new MemoryKeyValueStore();
+
+      keyValueStore.set("searchSnippets", [createSnippet("fruits", "apple")]);
+      await setup({ keyValueStore });
       (document.querySelector("[data-snippet-name=fruits]") as HTMLElement).click();
       expect(searchBoxOf().value).toBe("apple");
     });
@@ -281,11 +286,13 @@ describe("startFavorites", () => {
         vi.stubGlobal("confirm", () => true);
         const context = await setup();
 
-        localStorage.setItem("searchSnippets", "[]");
-        localStorage.setItem("favoritesLayout", "\"row\"");
+        const store = context.ports.keyValueStore;
+
+        store.set("searchSnippets", []);
+        context.preferences.favorites.layout.set("row");
         context.events.favorites.resetButtonClicked.emit(new MouseEvent("click"));
-        expect(localStorage.getItem("searchSnippets")).toBe("[]");
-        expect(localStorage.getItem("favoritesLayout")).toBeNull();
+        expect(store.get("searchSnippets")).toEqual([]);
+        expect(context.preferences.favorites.layout.value).not.toBe("row");
         await vi.waitFor(async() => expect(await createFruitModel(context).countStoredFavorites()).toBe(0));
       });
 
@@ -317,9 +324,9 @@ describe("startFavorites", () => {
         const reload = vi.spyOn(window.location, "reload").mockReturnValue();
         const context = await setup();
 
-        localStorage.setItem("preferences", "{\"resultsPerPage\":1}");
+        context.preferences.favorites.resultsPerPage.set(1);
         context.events.favorites.settingsResetRequested.emit();
-        expect(localStorage.getItem("preferences")).toBeNull();
+        expect(context.preferences.favorites.resultsPerPage.value).not.toBe(1);
         expect(reload).toHaveBeenCalled();
       });
     });
@@ -384,15 +391,21 @@ describe("startFavorites", () => {
       expect(isHiddenOf("favorites-drawer-section-settings")).toBe(true);
     });
 
-    test("the header follows its preference", async() => {
-      const header = document.createElement("div");
+    test("the host's header starts as its preference says", async() => {
+      const host = new MemoryHost(true);
 
-      header.id = "header";
-      document.body.append(header);
-      const context = await setup();
+      await setup({ host, preferences: { favorites: { headerEnabled: false } } });
+      expect(host.headerVisible).toBe(false);
+    });
+
+    test("the host's header follows its preference", async() => {
+      const host = new MemoryHost(true);
+      const context = await setup({ host });
 
       context.preferences.favorites.headerEnabled.set(false);
-      expect(isHiddenOf("header")).toBe(true);
+      expect(host.headerVisible).toBe(false);
+      context.preferences.favorites.headerEnabled.set(true);
+      expect(host.headerVisible).toBe(true);
     });
 
     test("hints follow their preference", async() => {
@@ -446,7 +459,7 @@ describe("startFavorites", () => {
       const context = await setup();
 
       dispatchMouse(context, "click", imageOf(context, "2"), { ctrlKey: true });
-      await vi.waitFor(() => expect(open).toHaveBeenCalledWith(expect.stringMatching(/\/images\/.*\/2\.\w+$/), "_blank"));
+      await vi.waitFor(() => expect(open).toHaveBeenCalledWith("1/2.jpg", "_blank"));
     });
 
     test("on mobile, a middle-click on a thumb does nothing", async() => {

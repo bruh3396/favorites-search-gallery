@@ -22,11 +22,11 @@ describe("Rule34Navigation", () => {
     expect(new Rule34Navigation(rule34).postUrl("7")).toBe("post:7");
   });
 
-  test("opens a post's page in a new tab", () => {
+  test("opens a URL in a new tab", () => {
     const { navigation, open } = setup();
 
-    navigation.openPost("7");
-    expect(open).toHaveBeenCalledWith("post:7", "_blank");
+    navigation.openUrl("https://file");
+    expect(open).toHaveBeenCalledWith("https://file", "_blank");
   });
 
   test("opens a search as a post list", () => {

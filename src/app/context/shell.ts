@@ -1,6 +1,5 @@
 import { COLUMN_SELECTOR, ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { getItemsInContainer, getThumbsInMatrix } from "@/lib/ui/thumb/query";
-import { Environment } from "@/core/boundary/environment";
 import { div } from "@/utils/browser/element";
 import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";
 
@@ -11,14 +10,9 @@ export class Shell {
   public readonly scrollSentinelTop = div("scroll-sentinel-top");
   public readonly scrollSentinelBottom = div("scroll-sentinel-bottom");
 
-  constructor(private readonly environment: Environment) { }
-
-  public mount(): void {
-    if (this.environment.device === "mobile") {
-      this.lockViewport();
-    }
+  public mount(into: HTMLElement): void {
     this.root.append(this.overlays);
-    document.body.appendChild(this.root);
+    into.appendChild(this.root);
   }
 
   public getContentThumbs(): HTMLElement[] {
@@ -55,18 +49,5 @@ export class Shell {
 
   private usingColumnLayout(): boolean {
     return this.content.querySelector(COLUMN_SELECTOR) !== null;
-  }
-
-  private lockViewport(): void {
-    const content = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
-    const existing = document.querySelector<HTMLMetaElement>("meta[name=viewport]");
-    const meta = existing ?? document.createElement("meta");
-
-    meta.name = "viewport";
-    meta.content = content;
-
-    if (existing === null) {
-      document.head.appendChild(meta);
-    }
   }
 }

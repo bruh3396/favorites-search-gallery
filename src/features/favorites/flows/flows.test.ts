@@ -2,7 +2,7 @@ import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
-import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
+import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesControl } from "@/features/favorites/control/control";
@@ -24,7 +24,7 @@ function createContext(): AppContext {
   pageCounter += 1;
   const id = `flows_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesId: id });
-  const shell = new Shell(environment);
+  const shell = new Shell();
 
   document.body.append(shell.root);
   return createAppContext({ environment, preferences: { favorites: { layout: "grid" } }, shell });
@@ -35,7 +35,7 @@ function createModel(context: AppContext): FavoritesModel {
 }
 
 function createFruitPost(id: string): Post {
-  return createPost({ id, tags: FRUITS[id], fetchedAt: Date.now(), fileURL: `https://example.com/${id}.jpg` });
+  return createPost({ id, tags: FRUITS[id], fetchedAt: Date.now(), media: { kind: "image", locator: `https://example.com/${id}.jpg` } });
 }
 
 async function store(context: AppContext, ...ids: string[]): Promise<void> {

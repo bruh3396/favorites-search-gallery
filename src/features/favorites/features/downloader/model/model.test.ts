@@ -2,8 +2,8 @@ import { DownloaderContext, DownloaderProgress } from "@/features/favorites/feat
 import { describe, expect, test } from "vitest";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderModel } from "@/features/favorites/features/downloader/model/model";
-import { MediaItem } from "@/types/media";
-import { TagCategory } from "@/types/search";
+import { PostMedia } from "@/core/domain/post/post";
+import { TagCategory } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
 const SEPARATOR = DownloaderConfig.filename.categorySeparator;
@@ -14,8 +14,8 @@ interface Setup {
   saved: string[];
 }
 
-function createItem(id: string): MediaItem {
-  return { id, thumbUrl: "", mediaType: "image" };
+function createItem(id: string): PostMedia {
+  return { id, media: { kind: "image", locator: `media/${id}` } };
 }
 
 function setup(filenameFormat = 0): Setup {
@@ -24,14 +24,12 @@ function setup(filenameFormat = 0): Setup {
   const context: DownloaderContext = {
     batchSize: createPreference(0),
     filenameFormat: createPreference(filenameFormat),
-    getSearchResults: (): MediaItem[] => [],
+    getSearchResults: (): PostMedia[] => [],
     getTagCategory: (tag): TagCategory | undefined => (tag === "someone" ? "artist" : undefined),
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set(["someone"])]))),
-    resolveExtension: (): Promise<string> => Promise.resolve("png"),
-    resolveMediaUrl: (item): Promise<string> => Promise.resolve(`https://media/${item.id}`),
-    fetch: (url): Promise<Response> => {
-      fetched.push(url);
-      return Promise.resolve(new Response(new Uint8Array([1])));
+    fetchOriginal: (media): Promise<Blob> => {
+      fetched.push(media.locator);
+      return Promise.resolve(new Blob([new Uint8Array([1])], { type: "image/png" }));
     },
     saveBlob: (_blob, filename): number => saved.push(filename)
   };
@@ -49,7 +47,7 @@ describe("DownloaderModel", () => {
     const result = await model.download([createItem("1"), createItem("2")], 0, new AbortController().signal, update => progress.push(update));
 
     expect(result).toEqual({ successCount: 2, failureCount: 0, aborted: false });
-    expect(fetched.sort()).toEqual(["https://media/1", "https://media/2"]);
+    expect(fetched.sort()).toEqual(["media/1", "media/2"]);
     expect(saved).toEqual(["favorites.zip"]);
     expect(progress.map(update => update.filename).sort()).toEqual([`someone${SEPARATOR}1.png`, `someone${SEPARATOR}2.png`]);
   });

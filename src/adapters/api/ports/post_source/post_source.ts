@@ -1,9 +1,9 @@
-import { ParsedPost, PostSource } from "@/core/boundary/ports/post_source";
-import { allMediaExtensions, extensionRegex } from "@/lib/media/constants";
+import { PostSource } from "@/core/boundary/ports/post_source";
+import { CategorizedPost } from "@/core/domain/post/post";
 import { ApiClient } from "@/adapters/api/client/client";
-import { MediaExtension } from "@/core/domain/media/extension";
-import { Post } from "@/core/domain/post/post";
+import { Media } from "@/core/domain/media/media";
 import { PostFetchError } from "@/types/errors";
+import { ServerPost } from "@/adapters/api/client/post/post";
 import { parsePost } from "@/adapters/api/client/post/parser";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
 
@@ -13,36 +13,35 @@ export class ApiPostSource implements PostSource {
   constructor(
     private readonly api: Pick<ApiClient, "fetchPost">,
     private readonly deletedPosts: PostSource,
+    private readonly mintMedia: (fileUrl: string) => Media | null,
     private readonly fetchAttempts: number = FETCH_ATTEMPTS
   ) { }
 
-  public async fetch(id: string): Promise<ParsedPost> {
-    const fetched = await withExponentialBackoff(() => this.fetchOne(id), this.fetchAttempts);
-    return { post: withExtension(fetched.post), tagCategories: fetched.tagCategories };
+  public fetchPost(id: string): Promise<CategorizedPost> {
+    return withExponentialBackoff(() => this.fetchOne(id), this.fetchAttempts);
   }
 
-  private async fetchOne(id: string): Promise<ParsedPost> {
+  private async fetchOne(id: string): Promise<CategorizedPost> {
     const response = await this.api.fetchPost(id);
 
     switch (response.status) {
       case "ok":
-        return parsePost(response.post);
+        return this.parse(response.post);
       case "deferred":
         return this.fetchOne(id);
       case "deleted":
-        return this.deletedPosts.fetch(id);
+        return this.deletedPosts.fetchPost(id);
       default:
         throw new PostFetchError(response.status);
     }
   }
-}
 
-function withExtension(post: Post): Post {
-  const extension = extractExtension(post.fileURL);
-  return extension === null ? post : { ...post, extension };
-}
+  private parse(post: ServerPost): CategorizedPost {
+    const media = this.mintMedia(post.fileURL);
 
-function extractExtension(fileURL: string): MediaExtension | null {
-  const match = extensionRegex.exec(fileURL)?.[1];
-  return match !== undefined && allMediaExtensions.includes(match as MediaExtension) ? match as MediaExtension : null;
+    if (media === null) {
+      throw new PostFetchError(`unknown file: ${post.fileURL}`);
+    }
+    return parsePost(post, media);
+  }
 }

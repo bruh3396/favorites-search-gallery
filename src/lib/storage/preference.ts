@@ -1,23 +1,14 @@
 import { Emitter } from "@/lib/event/emitter";
-import { Storage } from "@/lib/storage/local_storage";
-
-const LOCAL_STORAGE_KEY = "preferences";
-const cache: Record<string, unknown> = readStored();
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 
 export class Preference<T> {
-  public static resetAll(): void {
-    Storage.remove(LOCAL_STORAGE_KEY);
-
-    for (const key of Object.keys(cache)) {
-      delete cache[key];
-    }
-  }
-
+  private readonly store: KeyValueStore;
   private readonly key: string;
   private readonly defaultValue: T;
   private readonly emitter: Emitter<T> = new Emitter<T>();
 
-  constructor(key: string, defaultValue: T) {
+  constructor(store: KeyValueStore, key: string, defaultValue: T) {
+    this.store = store;
     this.key = key;
     this.defaultValue = defaultValue;
     this.set = this.set.bind(this);
@@ -25,13 +16,11 @@ export class Preference<T> {
   }
 
   public get value(): T {
-    return (cache[this.key] as T) ?? this.defaultValue;
+    return (this.store.get(this.key) as T | undefined) ?? this.defaultValue;
   }
 
   public set(value: T): void {
-    Object.assign(cache, readStored());
-    cache[this.key] = value;
-    Storage.set(LOCAL_STORAGE_KEY, cache);
+    this.store.set(this.key, value);
     this.emitter.emit(value);
   }
 
@@ -52,8 +41,4 @@ export function booleanPreference<T>(source: Preference<T>, trueValue: T, falseV
       source.on((next) => listener(next === trueValue));
     }
   } as Preference<boolean>;
-}
-
-function readStored(): Record<string, unknown> {
-  return Storage.get<Record<string, unknown>>(LOCAL_STORAGE_KEY) ?? {};
 }

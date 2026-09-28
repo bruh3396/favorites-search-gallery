@@ -1,6 +1,5 @@
-import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports/post_source";
-import { MediaItem, MediaType } from "@/types/media";
+import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { Media, MediaKind } from "@/core/domain/media/media";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -14,16 +13,16 @@ const EXPIRED = 0;
 
 interface FavoriteOptions {
   fetchedAt?: number;
-  mediaType?: MediaType;
+  kind?: MediaKind;
   duration?: number;
   tags?: string[];
 }
 
-function createFavorite(id: string, { fetchedAt, mediaType = "image", duration = 0, tags = [] }: FavoriteOptions = {}): Favorite {
+function createFavorite(id: string, { fetchedAt, kind = "image", duration = 0, tags = [] }: FavoriteOptions = {}): Favorite {
   const favorite = {
     id,
-    mediaType,
-    post: createPost({ id, fetchedAt, duration, tags: tags.join(" ") }),
+    media: { kind, locator: "" },
+    post: createPost({ id, fetchedAt, duration, tags: tags.join(" "), media: { kind, locator: "" } }),
     tags: new Set(tags),
     enrich: vi.fn((post: Post) => {
       favorite.post = post;
@@ -36,7 +35,7 @@ function createFavorite(id: string, { fetchedAt, mediaType = "image", duration =
   return favorite as unknown as Favorite;
 }
 
-function createResolver(tagsById: Record<string, string>): (posts: Post[], onResolved: (resolved: ParsedPost) => void) => Promise<void> {
+function createResolver(tagsById: Record<string, string>): (posts: Post[], onResolved: (resolved: CategorizedPost) => void) => Promise<void> {
   return (posts, onResolved) => {
     posts.forEach(post => onResolved({ post: { ...post, tags: tagsById[post.id] ?? post.tags }, tagCategories: new Map() }));
     return Promise.resolve();
@@ -44,19 +43,19 @@ function createResolver(tagsById: Record<string, string>): (posts: Post[], onRes
 }
 
 function setup(overrides: {
-  resolvePosts?: (posts: Post[], onResolved: (resolved: ParsedPost) => void) => Promise<void>;
-  readDuration?: (item: MediaItem) => Promise<number>;
+  resolvePosts?: (posts: Post[], onResolved: (resolved: CategorizedPost) => void) => Promise<void>;
+  fetchDurationSeconds?: (media: Media) => Promise<number>;
 } = {}): {
   enricher: FavoritesEnricher;
   resolvePosts: ReturnType<typeof vi.fn>;
-  readDuration: ReturnType<typeof vi.fn>;
+  fetchDurationSeconds: ReturnType<typeof vi.fn>;
   enriched: Favorite[];
   tagUpdateBatches: TermUpdate<Favorite>[][];
 } {
   const enriched: Favorite[] = [];
   const tagUpdateBatches: TermUpdate<Favorite>[][] = [];
   const resolvePosts = vi.fn(overrides.resolvePosts ?? createResolver({}));
-  const readDuration = vi.fn(overrides.readDuration ?? ((): Promise<number> => Promise.resolve(10)));
+  const fetchDurationSeconds = vi.fn(overrides.fetchDurationSeconds ?? ((): Promise<number> => Promise.resolve(10)));
   const enricher = new FavoritesEnricher({
     onFavoriteEnriched: (favorite): void => {
       enriched.push(favorite);
@@ -66,10 +65,10 @@ function setup(overrides: {
     },
     resolvePosts,
     persistTagCategories: (): void => { },
-    readDuration,
+    fetchDurationSeconds,
     persistPost: (): void => { }
   });
-  return { enricher, resolvePosts, readDuration, enriched, tagUpdateBatches };
+  return { enricher, resolvePosts, fetchDurationSeconds, enriched, tagUpdateBatches };
 }
 
 describe("FavoritesEnricher", () => {
@@ -88,20 +87,20 @@ describe("FavoritesEnricher", () => {
   });
 
   test("reads duration only for videos without one", async() => {
-    const videoWithoutDuration = createFavorite("1", { fetchedAt: FRESH, mediaType: "video" });
-    const videoWithDuration = createFavorite("2", { fetchedAt: FRESH, mediaType: "video", duration: 30 });
+    const videoWithoutDuration = createFavorite("1", { fetchedAt: FRESH, kind: "video" });
+    const videoWithDuration = createFavorite("2", { fetchedAt: FRESH, kind: "video", duration: 30 });
     const image = createFavorite("3", { fetchedAt: FRESH });
-    const { enricher, readDuration } = setup();
+    const { enricher, fetchDurationSeconds } = setup();
 
     await enricher.enrich([videoWithoutDuration, videoWithDuration, image]);
-    expect(readDuration).toHaveBeenCalledOnce();
-    expect(readDuration).toHaveBeenCalledWith(videoWithoutDuration);
+    expect(fetchDurationSeconds).toHaveBeenCalledOnce();
+    expect(fetchDurationSeconds).toHaveBeenCalledWith(videoWithoutDuration.media);
   });
 
   test("reads durations only after metadata resolution finishes", async() => {
     let finishResolving = (): void => { };
-    const video = createFavorite("1", { mediaType: "video" });
-    const { enricher, readDuration } = setup({
+    const video = createFavorite("1", { kind: "video" });
+    const { enricher, fetchDurationSeconds } = setup({
       resolvePosts: () => new Promise(resolve => {
         finishResolving = resolve;
       })
@@ -110,15 +109,15 @@ describe("FavoritesEnricher", () => {
     const enrichment = enricher.enrich([video]);
 
     await flushMicrotasks();
-    expect(readDuration).not.toHaveBeenCalled();
+    expect(fetchDurationSeconds).not.toHaveBeenCalled();
     finishResolving();
     await enrichment;
-    expect(readDuration).toHaveBeenCalledWith(video);
+    expect(fetchDurationSeconds).toHaveBeenCalledWith(video.media);
   });
 
   test("reports every favorite enriched by either metadata or duration", async() => {
     const stale = createFavorite("1");
-    const video = createFavorite("2", { fetchedAt: FRESH, mediaType: "video" });
+    const video = createFavorite("2", { fetchedAt: FRESH, kind: "video" });
     const { enricher, enriched } = setup();
 
     await enricher.enrich([stale, video]);
@@ -140,11 +139,11 @@ describe("FavoritesEnricher", () => {
   });
 
   test("does nothing for an empty list", async() => {
-    const { enricher, resolvePosts, readDuration, enriched } = setup();
+    const { enricher, resolvePosts, fetchDurationSeconds, enriched } = setup();
 
     await enricher.enrich([]);
     expect(resolvePosts).toHaveBeenCalledWith([], expect.any(Function));
-    expect(readDuration).not.toHaveBeenCalled();
+    expect(fetchDurationSeconds).not.toHaveBeenCalled();
     expect(enriched).toHaveLength(0);
   });
 });

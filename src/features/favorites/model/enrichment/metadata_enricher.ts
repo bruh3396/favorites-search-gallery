@@ -1,7 +1,6 @@
-import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports/post_source";
+import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { Favorite } from "@/types/favorite";
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { toTagSet } from "@/utils/pure/tag";
 
@@ -9,7 +8,7 @@ export class FavoritesMetadataEnricher {
   constructor(
     private readonly onFavoriteEnriched: (favorite: Favorite) => void,
     private readonly onTagsChanged: (update: TermUpdate<Favorite>) => void,
-    private readonly resolvePosts: (posts: Post[], onResolved: (resolved: ParsedPost) => void) => Promise<void>,
+    private readonly resolvePosts: (posts: Post[], onResolved: (resolved: CategorizedPost) => void) => Promise<void>,
     private readonly persistTagCategories: (tagCategories: TagCategoryMap) => void
   ) { }
 
@@ -21,7 +20,7 @@ export class FavoritesMetadataEnricher {
     );
   }
 
-  private applyPost(favorite: Favorite | undefined, { post, tagCategories }: ParsedPost): void {
+  private applyPost(favorite: Favorite | undefined, { post, tagCategories }: CategorizedPost): void {
     this.persistTagCategories(tagCategories);
 
     if (favorite === undefined) {

@@ -1,9 +1,8 @@
-import { Post } from "@/core/domain/post/post";
-import { ParsedPost } from "@/core/boundary/ports/post_source";
+import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesMetadataEnricher } from "@/features/favorites/model/enrichment/metadata_enricher";
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { createPost } from "@/testing/post";
 
@@ -20,18 +19,18 @@ function createFavorite(id: string, tags: string[]): Favorite {
   return favorite as unknown as Favorite;
 }
 
-function createParsedPost(post: Post, tagCategories: TagCategoryMap = new Map()): ParsedPost {
+function createCategorizedPost(post: Post, tagCategories: TagCategoryMap = new Map()): CategorizedPost {
   return { post, tagCategories };
 }
 
-function createResolver(results: ParsedPost[]): (posts: Post[], onResolved: (resolved: ParsedPost) => void) => Promise<void> {
-  return vi.fn((_posts: Post[], onResolved: (resolved: ParsedPost) => void) => {
+function createResolver(results: CategorizedPost[]): (posts: Post[], onResolved: (resolved: CategorizedPost) => void) => Promise<void> {
+  return vi.fn((_posts: Post[], onResolved: (resolved: CategorizedPost) => void) => {
     results.forEach(onResolved);
     return Promise.resolve();
   });
 }
 
-function setup(results: ParsedPost[]): {
+function setup(results: CategorizedPost[]): {
   enricher: FavoritesMetadataEnricher;
   enriched: Favorite[];
   tagUpdates: TermUpdate<Favorite>[];
@@ -64,7 +63,7 @@ describe("FavoritesMetadataEnricher", () => {
   test("enriches the favorite matching the resolved post and reports it", async() => {
     const favorite = createFavorite("1", ["a", "1"]);
     const latest = createPost({ id: "1", tags: "a" });
-    const { enricher, enriched } = setup([createParsedPost(latest)]);
+    const { enricher, enriched } = setup([createCategorizedPost(latest)]);
 
     await enricher.enrich([favorite]);
     expect(favorite.enrich).toHaveBeenCalledWith(latest);
@@ -73,7 +72,7 @@ describe("FavoritesMetadataEnricher", () => {
 
   test("reports a tag change with the old and new tags when tags differ", async() => {
     const favorite = createFavorite("1", ["a", "1"]);
-    const { enricher, tagUpdates } = setup([createParsedPost(createPost({ id: "1", tags: "a b" }))]);
+    const { enricher, tagUpdates } = setup([createCategorizedPost(createPost({ id: "1", tags: "a b" }))]);
 
     await enricher.enrich([favorite]);
     expect(tagUpdates).toHaveLength(1);
@@ -84,7 +83,7 @@ describe("FavoritesMetadataEnricher", () => {
 
   test("does not report a tag change when tags are identical", async() => {
     const favorite = createFavorite("1", ["a", "b"]);
-    const { enricher, tagUpdates, enriched } = setup([createParsedPost(createPost({ id: "1", tags: "a b" }))]);
+    const { enricher, tagUpdates, enriched } = setup([createCategorizedPost(createPost({ id: "1", tags: "a b" }))]);
 
     await enricher.enrich([favorite]);
     expect(tagUpdates).toHaveLength(0);
@@ -93,7 +92,7 @@ describe("FavoritesMetadataEnricher", () => {
 
   test("ignores the favorite's own id when comparing tags", async() => {
     const favorite = createFavorite("1", ["a", "b", "1"]);
-    const { enricher, tagUpdates } = setup([createParsedPost(createPost({ id: "1", tags: "a b" }))]);
+    const { enricher, tagUpdates } = setup([createCategorizedPost(createPost({ id: "1", tags: "a b" }))]);
 
     await enricher.enrich([favorite]);
     expect(tagUpdates).toHaveLength(0);
@@ -101,7 +100,7 @@ describe("FavoritesMetadataEnricher", () => {
 
   test("reports a single-tag difference that is not the id", async() => {
     const favorite = createFavorite("1", ["a", "b"]);
-    const { enricher, tagUpdates } = setup([createParsedPost(createPost({ id: "1", tags: "a" }))]);
+    const { enricher, tagUpdates } = setup([createCategorizedPost(createPost({ id: "1", tags: "a" }))]);
 
     await enricher.enrich([favorite]);
     expect(tagUpdates).toHaveLength(1);
@@ -110,7 +109,7 @@ describe("FavoritesMetadataEnricher", () => {
   test("snapshots old tags before enriching", async() => {
     const favorite = createFavorite("1", ["a"]);
     const originalTags = favorite.tags;
-    const { enricher, tagUpdates } = setup([createParsedPost(createPost({ id: "1", tags: "b" }))]);
+    const { enricher, tagUpdates } = setup([createCategorizedPost(createPost({ id: "1", tags: "b" }))]);
 
     await enricher.enrich([favorite]);
     expect(tagUpdates[0].oldTerms).not.toBe(originalTags);
@@ -119,7 +118,7 @@ describe("FavoritesMetadataEnricher", () => {
 
   test("persists tag categories for every resolved post", async() => {
     const categories: TagCategoryMap = new Map([["a", "artist"]]) as TagCategoryMap;
-    const { enricher, persisted } = setup([createParsedPost(createPost({ id: "1", tags: "a" }), categories)]);
+    const { enricher, persisted } = setup([createCategorizedPost(createPost({ id: "1", tags: "a" }), categories)]);
 
     await enricher.enrich([createFavorite("1", ["a"])]);
     expect(persisted).toEqual([categories]);
@@ -128,7 +127,7 @@ describe("FavoritesMetadataEnricher", () => {
   test("persists tag categories but skips enrichment for an unmatched post", async() => {
     const favorite = createFavorite("1", ["a"]);
     const categories: TagCategoryMap = new Map([["x", "general"]]) as TagCategoryMap;
-    const { enricher, enriched, tagUpdates, persisted } = setup([createParsedPost(createPost({ id: "999", tags: "x" }), categories)]);
+    const { enricher, enriched, tagUpdates, persisted } = setup([createCategorizedPost(createPost({ id: "999", tags: "x" }), categories)]);
 
     await enricher.enrich([favorite]);
     expect(persisted).toEqual([categories]);
@@ -140,7 +139,7 @@ describe("FavoritesMetadataEnricher", () => {
   test("routes each resolved post to its own favorite", async() => {
     const a = createFavorite("1", ["a"]);
     const b = createFavorite("2", ["b"]);
-    const { enricher, enriched } = setup([createParsedPost(createPost({ id: "2", tags: "b" })), createParsedPost(createPost({ id: "1", tags: "a" }))]);
+    const { enricher, enriched } = setup([createCategorizedPost(createPost({ id: "2", tags: "b" })), createCategorizedPost(createPost({ id: "1", tags: "a" }))]);
 
     await enricher.enrich([a, b]);
     expect(enriched).toEqual([b, a]);

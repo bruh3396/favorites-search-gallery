@@ -1,18 +1,18 @@
 import { GalleryAbstractImageBudgeter, GalleryLimitImageBudgeter, GalleryMemoryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
 import { describe, expect, test } from "vitest";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 
 const PIXELS_PER_MB = 220_000;
 
-function createItems(count: number): MediaItem[] {
-  return Array.from({ length: count }, (_, i) => ({ id: String(i), thumbUrl: "", mediaType: "image" }));
+function createItems(count: number): PostMedia[] {
+  return Array.from({ length: count }, (_, i) => ({ id: String(i), media: { kind: "image", locator: "" } }));
 }
 
-function acceptedIdsFor(budgeter: GalleryAbstractImageBudgeter, candidates: MediaItem[]): string[] {
+function acceptedIdsFor(budgeter: GalleryAbstractImageBudgeter, candidates: PostMedia[]): string[] {
   return budgeter.partition(candidates).accepted.map(r => r.id);
 }
 
-function rejectedIdsFor(budgeter: GalleryAbstractImageBudgeter, candidates: MediaItem[]): string[] {
+function rejectedIdsFor(budgeter: GalleryAbstractImageBudgeter, candidates: PostMedia[]): string[] {
   return budgeter.partition(candidates).rejected.map(r => r.id);
 }
 

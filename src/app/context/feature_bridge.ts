@@ -3,6 +3,7 @@ import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/event/feature_channel";
 import { NavigationKey } from "@/types/input";
+import { Post, PostMedia } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export class FeatureBridge {
@@ -24,8 +25,9 @@ export class FeatureBridge {
   public readonly postList = {
     layout: new FeatureChannel<void, Layout>("column"),
     navigateToAdjacent: new FeatureChannel<NavigationKey, PostList | null>(null),
+    post: new FeatureChannel<string, Post | undefined>(undefined),
+    posts: new FeatureChannel<void, Post[]>([]),
     searchQuery: new FeatureChannel<void, string>(""),
-    thumbs: new FeatureChannel<void, HTMLElement[]>([]),
     usingInfiniteScroll: new FeatureChannel<void, boolean>(false)
   };
 
@@ -45,6 +47,10 @@ export class FeatureBridge {
 
   public usingInfiniteScroll(): boolean {
     return this.environment.mode === "posts" ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
+  }
+
+  public postMedia(id: string): PostMedia | undefined {
+    return this.environment.mode === "posts" ? this.postList.post.request(id) : this.favorites.favorite.request(id);
   }
 
   public currentLayout(): Layout {

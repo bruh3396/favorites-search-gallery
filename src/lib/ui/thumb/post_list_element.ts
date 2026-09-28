@@ -1,9 +1,9 @@
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
+import { mintMedia } from "@/adapters/rule34/client/media/locator";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeNonNumericCharacters } from "@/utils/pure/string";
-import { resolveMediaType } from "@/lib/media/media_type";
 import { setDataset } from "@/utils/browser/dataset";
 
 export function preparePostListThumbs(thumbs: HTMLElement[], onMobileDevice: boolean, galleryDisabled: boolean): HTMLElement[] {
@@ -13,7 +13,7 @@ export function preparePostListThumbs(thumbs: HTMLElement[], onMobileDevice: boo
 
 function prepareThumb(thumb: HTMLElement, onMobileDevice: boolean, galleryDisabled: boolean): void {
   moveTagsFromTitleToTagsAttribute(thumb);
-  assignMediaType(thumb);
+  assignMedia(thumb);
   addCanvas(thumb, galleryDisabled);
   addActionBar(thumb);
   thumb.id = removeNonNumericCharacters(parseIdFromThumb(thumb));
@@ -33,15 +33,13 @@ function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
   image.removeAttribute("title");
 }
 
-function assignMediaType(thumb: HTMLElement): void {
+function assignMedia(thumb: HTMLElement): void {
   const image = getImageFromThumb(thumb);
+  const media = image === null ? null : mintMedia(image.src || (image.getAttribute("data-cfsrc") ?? ""), image.getAttribute("tags") ?? "");
 
-  if (image === null) {
-    return;
+  if (media !== null) {
+    setDataset(thumb, "mediaKind", media.kind);
   }
-  const tags = image.getAttribute("tags") ?? "";
-
-  setDataset(thumb, "mediaType", resolveMediaType(tags));
 }
 
 function addCanvas(thumb: HTMLElement, galleryDisabled: boolean): void {

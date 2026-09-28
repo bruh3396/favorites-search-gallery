@@ -1,11 +1,9 @@
-import { Post } from "@/core/domain/post/post";
-import { MediaExtension } from "@/core/domain/media/extension";
-import { MediaType } from "@/types/media";
 import { Metric, Rating } from "@/types/search";
 import { Arena } from "@/features/favorites/types/types";
 import { FavoritesPostTable } from "@/features/favorites/model/collection/post_table";
+import { Media } from "@/core/domain/media/media";
+import { Post } from "@/core/domain/post/post";
 import { TagPool } from "@/lib/collection/tag_pool";
-import { resolveMediaType } from "@/lib/media/media_type";
 import { toTagSet } from "@/utils/pure/tag";
 
 export class FavoritesColumnarArena implements Arena {
@@ -50,8 +48,8 @@ export class FavoritesColumnarArena implements Arena {
     return this.postTable.getMetric(index, metric);
   }
 
-  public extension(index: number): MediaExtension | undefined {
-    return this.postTable.extension(index);
+  public media(index: number): Media {
+    return this.postTable.media(index);
   }
 
   public isNewFavorite(index: number): boolean {
@@ -60,10 +58,6 @@ export class FavoritesColumnarArena implements Arena {
 
   public markNew(index: number): void {
     this.postTable.markNew(index);
-  }
-
-  public previewUrl(index: number): string {
-    return this.postTable.previewUrl(index);
   }
 
   public setDuration(index: number, duration: number): void {
@@ -83,10 +77,6 @@ export class FavoritesColumnarArena implements Arena {
 
     this.tagSets.delete(index);
     return tags;
-  }
-
-  public mediaType(index: number): MediaType {
-    return resolveMediaType(this.tagSet(index));
   }
 
   public toPost(index: number): Post {

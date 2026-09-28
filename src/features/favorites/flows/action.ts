@@ -1,10 +1,8 @@
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
-import { Preference } from "@/lib/storage/preference";
-import { Storage } from "@/lib/storage/local_storage";
 import { reloadWindow } from "@/utils/browser/window";
 
 const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag edits and search snippets will be preserved.";
-const PERSISTENT_LOCAL_STORAGE_KEYS: ReadonlySet<string> = new Set(["savedSearches", "searchSnippets"]);
+const RESET_STORAGE_KEYS = ["searchHistory", "lastEditedSearchQuery", "aspectRatios"];
 
 export class FavoritesActionFlow extends FavoritesFlow {
   public removeFavorite(id: string): void {
@@ -14,14 +12,15 @@ export class FavoritesActionFlow extends FavoritesFlow {
 
   public reset(): void {
     if (confirm(this.resetPrompt())) {
-      Storage.clear(PERSISTENT_LOCAL_STORAGE_KEYS);
+      this.context.preferences.reset();
+      RESET_STORAGE_KEYS.forEach(key => this.context.ports.keyValueStore.remove(key));
       this.model.destroyStore();
     }
   }
 
   public resetSettings(): void {
     if (confirm("Reset all settings?")) {
-      Preference.resetAll();
+      this.context.preferences.reset();
       reloadWindow();
     }
   }

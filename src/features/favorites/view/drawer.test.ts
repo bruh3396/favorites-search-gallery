@@ -12,7 +12,7 @@ interface Setup {
 
 function setup(): Setup {
   const environment = createEnvironment();
-  const shell = new FavoritesShell(new Shell(environment), environment);
+  const shell = new FavoritesShell(new Shell(), environment);
   return { drawer: new FavoritesDrawer(shell), shell };
 }
 

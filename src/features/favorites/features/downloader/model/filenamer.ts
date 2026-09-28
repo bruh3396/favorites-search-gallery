@@ -1,8 +1,8 @@
 import * as DownloaderFilename from "@/features/favorites/features/downloader/model/filename_builder";
 import { FilenameCategory, Filenamer } from "@/features/favorites/features/downloader/types/types";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
-import { TagCategory } from "@/types/search";
+import { TagCategory } from "@/core/domain/tag/tag";
 import { capitalize } from "@/utils/pure/string";
 
 const CATEGORIES: FilenameCategory[] = ["artist", "character", "copyright"];
@@ -16,7 +16,7 @@ export class DownloaderFilenamer implements Filenamer {
     this.getTagCategory = getTagCategory;
   }
 
-  public filenameFor(item: MediaItem, tags: Set<string>, extension: string): string {
+  public filenameFor(item: PostMedia, tags: Set<string>, extension: string): string {
     return DownloaderFilename.build(item, tags, extension, this.selectedCategories(), this.getTagCategory);
   }
 

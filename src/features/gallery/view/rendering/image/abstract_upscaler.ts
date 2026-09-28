@@ -3,7 +3,6 @@ import { Preference } from "@/lib/storage/preference";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 
 export abstract class GalleryAbstractUpscaler {
-  protected readonly needsBitmapForPaint: boolean = true;
   private readonly paintedWidths: Map<HTMLCanvasElement, number> = new Map();
   private readonly paintQueue: ThrottleQueue;
   private paused: boolean = false;
@@ -33,7 +32,7 @@ export abstract class GalleryAbstractUpscaler {
   }
 
   public tryPainting(request: ImageRequest): void {
-    if (this.isEnabled() && this.isEligible(request) && this.isReadyToPaint(request)) {
+    if (this.isEnabled() && this.isEligible(request) && request.hasCompleted) {
       this.trackCanvas(request.id);
       this.paint(request);
     }
@@ -76,7 +75,7 @@ export abstract class GalleryAbstractUpscaler {
       return;
     }
 
-    if (this.needsBitmapForPaint && !await this.fetchBitmap(request)) {
+    if (!await this.fetchBitmap(request)) {
       return;
     }
     this.tryPainting(request);
@@ -89,10 +88,6 @@ export abstract class GalleryAbstractUpscaler {
   private isEligible(request: ImageRequest): boolean {
     const canvas = this.canvasFor(request.id);
     return canvas !== null && this.paintedWidths.get(canvas) !== this.upscaledCanvasWidth && request.isHighRes;
-  }
-
-  private isReadyToPaint(request: ImageRequest): boolean {
-    return request.hasCompleted || !this.needsBitmapForPaint;
   }
 
   private trackCanvas(id: string): void {

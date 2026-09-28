@@ -1,6 +1,8 @@
-import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
-import { MediaItem, MediaType } from "@/types/media";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
+import { PostMedia } from "@/core/domain/post/post";
+import { Media, MediaKind } from "@/core/domain/media/media";
+import { describe, expect, test, vi } from "vitest";
+import { MediaSource } from "@/core/boundary/ports/media_source";
 import { GalleryModel } from "@/features/gallery/model/model";
 import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
 import { UpscaleQuality } from "@/types/app";
@@ -8,13 +10,24 @@ import { createPreferences } from "@/testing/preferences";
 
 interface Setup {
   model: GalleryModel;
-  items: MediaItem[];
+  items: PostMedia[];
   navigation: MemoryNavigation;
   favoritesEditor: { add: ReturnType<typeof vi.fn<FavoritesEditor["add"]>>; remove: ReturnType<typeof vi.fn<FavoritesEditor["remove"]>> };
+  blobsRequested: Media[];
 }
 
-function createItem(id: string, mediaType: MediaType = "image"): MediaItem {
-  return { id, mediaType, extension: "png", thumbUrl: `https://rule34.xxx/thumbnails/1/thumbnail_${id}.jpg` };
+function createMediaSource(blobsRequested: Media[]): Pick<MediaSource, "originalUrl" | "fetchOriginal"> {
+  return {
+    originalUrl: (media): Promise<string> => Promise.resolve(`original:${media.locator}`),
+    fetchOriginal: (media): Promise<Blob> => {
+      blobsRequested.push(media);
+      return new Promise(() => { });
+    }
+  };
+}
+
+function createItem(id: string, kind: MediaKind = "image"): PostMedia {
+  return { id, media: { kind, locator: `1/${id}.png` } };
 }
 
 function createModel(previewEnabled = false): GalleryModel {
@@ -24,32 +37,23 @@ function createModel(previewEnabled = false): GalleryModel {
 function setupWith(previewEnabled: boolean): Omit<Setup, "items"> {
   const navigation = new MemoryNavigation();
   const favoritesEditor = {
-    add: vi.fn<FavoritesEditor["add"]>((): Promise<AddFavoriteStatus> => Promise.resolve("alreadyAdded")),
-    remove: vi.fn<FavoritesEditor["remove"]>((): Promise<RemoveFavoriteStatus> => new Promise(() => { }))
+    add: vi.fn<FavoritesEditor["add"]>((): Promise<AddFavoriteResult> => Promise.resolve("alreadyAdded")),
+    remove: vi.fn<FavoritesEditor["remove"]>((): Promise<RemoveFavoriteResult> => new Promise(() => { }))
   };
-  return { model: new GalleryModel(createPreferences({ gallery: { previewEnabled } }), navigation, favoritesEditor), navigation, favoritesEditor };
+  const blobsRequested: Media[] = [];
+  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), navigation, favoritesEditor, createMediaSource(blobsRequested));
+  return { model, navigation, favoritesEditor, blobsRequested };
 }
 
 function setup(...ids: string[]): Setup {
-  const { model, navigation, favoritesEditor } = setupWith(false);
+  const { model, navigation, favoritesEditor, blobsRequested } = setupWith(false);
   const items = ids.map(id => createItem(id));
 
   model.indexItems(items);
-  return { model, items, navigation, favoritesEditor };
-}
-
-function stubFetch(response: () => Promise<Response>): ReturnType<typeof vi.fn> {
-  const fetch = vi.fn(response);
-
-  vi.stubGlobal("fetch", fetch);
-  return fetch;
+  return { model, items, navigation, favoritesEditor, blobsRequested };
 }
 
 describe("GalleryModel", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   describe("state", () => {
     test("starts idle, or previewing when previews are enabled", () => {
       expect(createModel().isIdle()).toBe(true);
@@ -121,15 +125,15 @@ describe("GalleryModel", () => {
     test("a wrapping window reaches around the ends", () => {
       const model = createModel();
 
-      model.setupWrappingWindow(() => items, item => item);
-      expect(model.getItemsAround("1").map(item => item.id).sort()).toEqual(["1", "2", "3"]);
+      model.setupWrappingWindow(() => items);
+      expect(model.getItemsAround("1").map(item => item.id)).toEqual(["1", "3", "2"]);
     });
 
-    test("a clamped window maps each item it covers", () => {
+    test("a clamped window stops at the ends", () => {
       const model = createModel();
 
-      model.setupClampedWindow(() => items, item => ({ ...item, id: `mapped_${item.id}` }));
-      expect(model.getItemsAround("2").map(item => item.id).sort()).toEqual(["mapped_1", "mapped_2", "mapped_3"]);
+      model.setupClampedWindow(() => items);
+      expect(model.getItemsAround("1").map(item => item.id)).toEqual(["1", "2", "3"]);
     });
   });
 
@@ -156,22 +160,21 @@ describe("GalleryModel", () => {
       expect(model.isViewingVideo()).toBe(false);
     });
 
-    test("opens the current item's post and media", () => {
+    test("opens the current item's post and original", async() => {
       const { model, items, navigation } = setup("101");
 
       model.open(items[0]);
       model.openPost();
-      model.openMedia();
-      expect(navigation.opened).toEqual(["#post-101", "#media-101"]);
+      await model.openOriginal();
+      expect(navigation.opened).toEqual(["#post-101", "original:1/101.png"]);
     });
 
-    test("downloads the original media", async() => {
-      const fetch = stubFetch(() => new Promise(() => { }));
-      const { model, items } = setup("103");
+    test("downloads the current item's original", () => {
+      const { model, items, blobsRequested } = setup("103");
 
       model.open(items[0]);
-      await model.download();
-      expect(fetch).toHaveBeenCalledWith("https://rule34.xxx/images/1/103.png");
+      void model.download();
+      expect(blobsRequested).toEqual([items[0].media]);
     });
 
     test("adds the current item as a favorite and reports the answer", async() => {
@@ -186,7 +189,7 @@ describe("GalleryModel", () => {
       const { model, items, favoritesEditor } = setup("105");
 
       model.open(items[0]);
-      expect(await model.removeFavorite()).toBe("success");
+      expect(await model.removeFavorite()).toBe("removed");
       expect(favoritesEditor.remove).toHaveBeenCalledWith("105");
     });
   });

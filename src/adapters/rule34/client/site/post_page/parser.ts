@@ -1,22 +1,17 @@
-import { Post } from "@/core/domain/post/post";
+import { Media } from "@/core/domain/media/media";
+import { CategorizedPost } from "@/core/domain/post/post";
 import { PostFetchError } from "@/types/errors";
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { isTagCategory } from "@/lib/domain/tag/category_codec";
+import { mintMedia } from "@/adapters/rule34/client/media/locator";
 import { removeExtraWhitespace } from "@/utils/pure/string";
-import { withRule34Hostname } from "@/lib/media/url";
-
-export type PostPage = {
-  post: Post;
-  tagCategories: TagCategoryMap;
-};
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 const sizeRegex = /^([1-9]\d*)(?:x|\/)([1-9]\d*)$/;
 
-export function parsePostFromPostPage(html: string): PostPage {
+export function parsePostFromPostPage(html: string): CategorizedPost {
   const dom = new DOMParser().parseFromString(html, "text/html");
   const statistics = getStatistics(dom);
-  const fileUrl = getFileUrl(dom);
   const tags = getTags(dom);
   const rating = getRating(statistics);
   const dimensions = parseDimensions(statistics.size);
@@ -31,15 +26,10 @@ export function parsePostFromPostPage(html: string): PostPage {
       deleted: true,
       duration: 0,
       tags,
-      fileURL: fileUrl,
-      previewURL: ""
+      media: parseMedia(dom, tags)
     },
     tagCategories: parseTagCategories(dom)
   };
-}
-
-export function parseTagCategoriesFromPostPage(html: string): TagCategoryMap {
-  return parseTagCategories(new DOMParser().parseFromString(html, "text/html"));
 }
 
 function parseTagCategories(dom: Document): TagCategoryMap {
@@ -78,9 +68,14 @@ function parseDimensions(size: string | undefined): { width: number; height: num
   return { width: Number(match[1]), height: Number(match[2]) };
 }
 
-function getFileUrl(dom: Document): string {
-  const image = dom.querySelector("#image");
-  return image instanceof HTMLImageElement ? withRule34Hostname(image.src) : "";
+function parseMedia(dom: Document, tags: string): Media {
+  const file = dom.querySelector("#image")?.getAttribute("src") ?? dom.querySelector("video source")?.getAttribute("src") ?? "";
+  const media = mintMedia(file, tags);
+
+  if (media === null) {
+    throw new PostFetchError(`post page has no file: ${file}`);
+  }
+  return media;
 }
 
 function getTags(dom: Document): string {

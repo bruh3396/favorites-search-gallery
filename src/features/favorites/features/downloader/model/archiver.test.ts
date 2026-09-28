@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { DownloaderArchiver } from "@/features/favorites/features/downloader/model/archiver";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 
 interface Setup {
   archiver: DownloaderArchiver;
@@ -8,8 +8,8 @@ interface Setup {
   tagsSeen: Map<string, Set<string>>;
 }
 
-function createItem(id: string): MediaItem {
-  return { id, thumbUrl: "", mediaType: "image" };
+function createItem(id: string, type = "image/png"): PostMedia {
+  return { id, media: { kind: "image", locator: `${id}|${type}` } };
 }
 
 function setup({ failing = new Set<string>(), tags = new Map<string, Set<string>>(), onFetch = (): void => undefined } = {}): Setup {
@@ -23,17 +23,16 @@ function setup({ failing = new Set<string>(), tags = new Map<string, Set<string>
       }
     },
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map([...tags].filter(([id]) => ids.includes(id)))),
-    resolveExtension: (): Promise<string> => Promise.resolve("png"),
-    resolveMediaUrl: (item): Promise<string> => Promise.resolve(`https://media/${item.id}`),
-    fetch: (url, init): Promise<Response> => {
-      fetched.push(url);
+    fetchOriginal: (media, signal): Promise<Blob> => {
+      const [id, type] = media.locator.split("|");
+
+      fetched.push(id);
       onFetch();
 
-      if (init.signal?.aborted === true) {
+      if (signal.aborted) {
         return Promise.reject(new DOMException("aborted", "AbortError"));
       }
-      const id = url.split("/").pop() ?? "";
-      return Promise.resolve(failing.has(id) ? new Response(null, { status: 404, statusText: "Not Found" }) : new Response(new Uint8Array([Number(id)])));
+      return failing.has(id) ? Promise.reject(new Error("404 Not Found")) : Promise.resolve(new Blob([new Uint8Array([Number(id)])], { type }));
     }
   });
   return { archiver, fetched, tagsSeen };
@@ -56,7 +55,7 @@ async function entryNamesOf(blob: Blob): Promise<string[]> {
   return names;
 }
 
-async function archive(archiver: DownloaderArchiver, items: MediaItem[], signal = new AbortController().signal): Promise<{ blob: Blob | null; settled: (string | null)[] }> {
+async function archive(archiver: DownloaderArchiver, items: PostMedia[], signal = new AbortController().signal): Promise<{ blob: Blob | null; settled: (string | null)[] }> {
   const settled: (string | null)[] = [];
   const blob = await archiver.archive(items, signal, filename => settled.push(filename));
   return { blob, settled };
@@ -71,9 +70,16 @@ describe("DownloaderArchiver", () => {
     const { archiver, fetched } = setup();
     const { blob, settled } = await archive(archiver, [createItem("1"), createItem("2")]);
 
-    expect(fetched.sort()).toEqual(["https://media/1", "https://media/2"]);
+    expect(fetched.sort()).toEqual(["1", "2"]);
     expect(settled.sort()).toEqual(["1.png", "2.png"]);
     expect((await entryNamesOf(blob as Blob)).sort()).toEqual(["1.png", "2.png"]);
+  });
+
+  test("names each file's extension after its type", async() => {
+    const { archiver } = setup();
+    const { settled } = await archive(archiver, [createItem("1", "video/mp4"), createItem("2", "image/gif")]);
+
+    expect(settled.sort()).toEqual(["1.mp4", "2.gif"]);
   });
 
   test("names each file from its own tags, or none when it has no tags", async() => {

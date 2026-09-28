@@ -1,4 +1,3 @@
-import * as MediaResolver from "@/lib/media/resolver";
 import { DownloaderContext, DownloaderDependencies } from "@/features/favorites/features/downloader/types/types";
 import { DownloaderControl } from "@/features/favorites/features/downloader/control/control";
 import { DownloaderFlows } from "@/features/favorites/features/downloader/flows/flows";
@@ -15,9 +14,6 @@ export class Downloader {
   constructor(dependencies: DownloaderDependencies) {
     const context: DownloaderContext = {
       ...dependencies,
-      resolveExtension: MediaResolver.resolveExtension,
-      resolveMediaUrl: MediaResolver.resolveMediaUrl,
-      fetch: (url, init): Promise<Response> => fetch(url, init),
       saveBlob: downloadBlob
     };
     const shell = new DownloaderShell();

@@ -1,18 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesSearchHistory } from "@/features/favorites/control/toolbar/search_history";
-import { KeyValueStorage } from "@/features/favorites/types/types";
-
-class FakeStorage implements KeyValueStorage {
-  public readonly values = new Map<string, unknown>();
-
-  public get<V>(key: string): V | null {
-    return (this.values.get(key) ?? null) as V | null;
-  }
-
-  public set<V>(key: string, value: V): void {
-    this.values.set(key, value);
-  }
-}
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 
 interface Stored {
   history?: string[];
@@ -21,11 +9,11 @@ interface Stored {
 
 interface Setup {
   history: FavoritesSearchHistory;
-  storage: FakeStorage;
+  storage: MemoryKeyValueStore;
 }
 
 function setup(stored: Stored = {}, depth = 30): Setup {
-  const storage = new FakeStorage();
+  const storage = new MemoryKeyValueStore();
 
   if (stored.history !== undefined) {
     storage.set("searchHistory", stored.history);

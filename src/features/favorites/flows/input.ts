@@ -1,7 +1,7 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
+import { downloadMedia } from "@/lib/media/download";
 
 export class FavoritesInputFlow extends FavoritesFlow {
   public triggerPostAction(event: EnhancedMouseEvent): void {
@@ -17,7 +17,8 @@ export class FavoritesInputFlow extends FavoritesFlow {
         this.model.removeFavorite(id);
         this.context.events.app.favoriteRemoved.emit(id);
       },
-      onPostOpened: (id) => this.context.ports.navigation.openPost(id)
+      onPostOpened: (id) => this.openPost(id),
+      onMediaDownloaded: (id) => this.download(id)
     });
   }
 
@@ -29,7 +30,7 @@ export class FavoritesInputFlow extends FavoritesFlow {
     }
 
     if (event.ctrlKey) {
-      this.context.ports.navigation.openMedia(toMediaItem(event.thumb));
+      this.openOriginal(event.thumb.id);
     }
     event.originalEvent.preventDefault();
   }
@@ -44,7 +45,7 @@ export class FavoritesInputFlow extends FavoritesFlow {
       (event.leftClick && (event.shiftKey || !this.context.features.has("gallery")));
 
     if (shouldOpen) {
-      this.context.ports.navigation.openPost(event.thumb.id);
+      this.openPost(event.thumb.id);
     }
     event.originalEvent.preventDefault();
   }
@@ -56,6 +57,26 @@ export class FavoritesInputFlow extends FavoritesFlow {
   public submitGotoPage(pageNumber: number): void {
     this.view.closeGotoPagePopover();
     this.flows.display.goToPage(pageNumber);
+  }
+
+  private download(id: string): void {
+    const favorite = this.model.getFavorite(id);
+
+    if (favorite !== undefined) {
+      void downloadMedia(this.context.ports.mediaSource, favorite);
+    }
+  }
+
+  private openPost(id: string): void {
+    this.context.ports.navigation.openUrl(this.context.ports.navigation.postUrl(id));
+  }
+
+  private openOriginal(id: string): void {
+    const favorite = this.model.getFavorite(id);
+
+    if (favorite !== undefined) {
+      void this.context.ports.mediaSource.originalUrl(favorite.media).then(url => this.context.ports.navigation.openUrl(url));
+    }
   }
 
   private closePopoversOutside(event: EnhancedMouseEvent): void {

@@ -1,5 +1,5 @@
 import { IconName, icon } from "@/lib/ui/icon";
-import { TagCategory, TagCategoryMap } from "@/types/search";
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { PostOverlayClass } from "@/features/post_overlay/types/selectors";
 import { PostOverlayConfig } from "@/config/post_overlay_config";
 

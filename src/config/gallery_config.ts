@@ -1,5 +1,5 @@
-import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
-import { Resolution } from "@/types/media";
+import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/site/post_list_page/fetcher";
+import { Resolution } from "@/features/gallery/types/types";
 
 export const GalleryConfig = {
   mainCanvasResolution: {

@@ -9,9 +9,13 @@ const DOM_TESTS = [
   "src/features/*/*.test.ts",
   "src/features/*/flows/flows.test.ts",
   "src/app/startup/features.test.ts",
+  "src/adapters/browser/ports/key_value_store/key_value_store.test.ts",
   "src/adapters/rule34/client/site/client.test.ts",
   "src/adapters/rule34/client/site/favorites_page/cleanup.test.ts",
+  "src/adapters/rule34/client/site/header/header.test.ts",
+  "src/adapters/rule34/client/site/viewport/viewport.test.ts",
   "src/adapters/rule34/client/site/**/parser.test.ts",
+  "src/lib/media/download.test.ts",
   "src/lib/ui/**/*.test.ts",
   "src/utils/browser/**/*.test.ts"
 ];

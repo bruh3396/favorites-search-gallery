@@ -3,12 +3,12 @@ import { Identifiable } from "@/types/app";
 
 const PRELOAD_WINDOW_SIZE = 50;
 
-export function wrappingThumbsAroundId<T extends Identifiable, R>(items: T[], id: string, toThumb: (item: T) => R): R[] {
-  return wrappedItemsAround(items, indexOfId(items, id), PRELOAD_WINDOW_SIZE).map(toThumb);
+export function wrappingItemsAroundId<T extends Identifiable>(items: T[], id: string): T[] {
+  return wrappedItemsAround(items, indexOfId(items, id), PRELOAD_WINDOW_SIZE);
 }
 
-export function clampedThumbsAroundId<T extends Identifiable, R>(items: T[], id: string, toThumb: (item: T) => R): R[] {
-  return itemsAround(items, indexOfId(items, id), PRELOAD_WINDOW_SIZE).map(toThumb);
+export function clampedItemsAroundId<T extends Identifiable>(items: T[], id: string): T[] {
+  return itemsAround(items, indexOfId(items, id), PRELOAD_WINDOW_SIZE);
 }
 
 function indexOfId<T extends Identifiable>(items: T[], id: string): number {

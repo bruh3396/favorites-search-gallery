@@ -1,5 +1,5 @@
-import { AppMode } from "@/core/boundary/environment";
-
 export interface Host {
-  takeOver: (mode: AppMode) => void;
+  readonly setHeaderVisible: ((visible: boolean) => void) | null;
+  takeOver: () => void;
+  lockViewport: () => void;
 }

@@ -1,45 +1,21 @@
 import { describe, expect, test } from "vitest";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
-import { Store } from "@/lib/storage/local_storage";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 
 const STORAGE_KEY = "searchSnippets";
 
-class FakeStorage implements Store {
-  private readonly values = new Map<string, unknown>();
-
-  public get<V>(key: string): V | null {
-    return this.values.has(key) ? this.values.get(key) as V : null;
-  }
-
-  public set<V>(key: string, value: V): void {
-    this.values.set(key, JSON.parse(JSON.stringify(value)) as unknown);
-  }
-
-  public remove(key: string): void {
-    this.values.delete(key);
-  }
-
-  public keys(): string[] {
-    return Array.from(this.values.keys());
-  }
-
-  public clear(): void {
-    this.values.clear();
-  }
-}
-
 interface Setup {
   model: SnippetModel;
-  storage: FakeStorage;
+  storage: MemoryKeyValueStore;
 }
 
 const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
 const veg = createSnippet("veg", "carrot", 0, 200);
 
 function setup(snippets: Snippet[] = []): Setup {
-  const storage = new FakeStorage();
+  const storage = new MemoryKeyValueStore();
 
   storage.set(STORAGE_KEY, snippets);
   return { model: new SnippetModel(storage), storage };
@@ -49,8 +25,8 @@ function namesOf(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function storedNamesOf(storage: FakeStorage): string[] {
-  return namesOf(storage.get<Snippet[]>(STORAGE_KEY) ?? []);
+function storedNamesOf(storage: MemoryKeyValueStore): string[] {
+  return namesOf((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
 }
 
 describe("reading", () => {

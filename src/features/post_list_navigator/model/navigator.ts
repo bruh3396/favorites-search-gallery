@@ -4,7 +4,9 @@ import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
 import { PostListNavigatorPageLoader } from "@/features/post_list_navigator/model/page_loader";
+import { Post } from "@/core/domain/post/post";
 import { navigationDelta } from "@/lib/event/keys";
+import { parseThumb } from "@/adapters/rule34/client/site/thumb/parser";
 
 export class PostListNavigatorNavigator {
   private readonly pageLoader: PostListNavigatorPageLoader;
@@ -18,7 +20,9 @@ export class PostListNavigatorNavigator {
     this.initialPageNumber = PostListNavigatorUrlContext.initialPageNumber();
     this.baseUrl = PostListNavigatorUrlContext.baseUrl();
     this.currentPageNumber = this.initialPageNumber;
-    this.initialPostList = new PostList(this.initialPageNumber, Array.from(context.shell.getPageThumbs()), context.shell.getPaginator());
+    const thumbs = Array.from(context.shell.getPageThumbs());
+
+    this.initialPostList = new PostList(this.initialPageNumber, thumbs, thumbs.map(parseThumb), context.shell.getPaginator());
     this.pageLoader.markLoaded(this.initialPageNumber, this.initialPostList);
   }
 
@@ -71,5 +75,13 @@ export class PostListNavigatorNavigator {
 
   public allThumbs(): HTMLElement[] {
     return this.pageLoader.allThumbs();
+  }
+
+  public allPosts(): Post[] {
+    return this.pageLoader.allPosts();
+  }
+
+  public getPost(id: string): Post | undefined {
+    return this.pageLoader.getPost(id);
   }
 }

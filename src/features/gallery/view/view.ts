@@ -1,20 +1,19 @@
 import * as GalleryTutorial from "@/features/gallery/view/tutorial";
-import { AddFavoriteStatus, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
-import { Favorite } from "@/types/favorite";
+import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { EnhancedMouseEvent } from "@/lib/event/input";
+import { Favorite } from "@/types/favorite";
 import { GalleryId } from "@/features/gallery/types/selectors";
 import { GalleryMenu } from "@/features/gallery/view/menu";
 import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_renderer";
 import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GalleryUi } from "@/features/gallery/view/ui";
 import { GalleryViewDependencies } from "@/features/gallery/types/types";
-import { MediaItem } from "@/types/media";
 import { Point } from "@/types/geometry";
+import { PostMedia } from "@/core/domain/post/post";
 import { isInside } from "@/utils/browser/guards";
 import { queueMacroTask } from "@/lib/async/scheduling";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 import { toggleDisplay } from "@/lib/ui/toggles";
 import { viewportWidth } from "@/utils/browser/window";
 
@@ -50,7 +49,7 @@ export class GalleryView {
     this.ui.close();
   }
 
-  public display(item: MediaItem): void {
+  public display(item: PostMedia): void {
     this.renderer.render(item);
   }
 
@@ -62,9 +61,9 @@ export class GalleryView {
     return this.ui.scrollToThumbAfterLoad(id);
   }
 
-  public showPreview(thumb: HTMLElement): void {
+  public showPreview(item: PostMedia): void {
     this.shell.root.toggleAttribute("data-visible", true);
-    this.renderer.render(toMediaItem(thumb));
+    this.renderer.render(item);
     this.renderer.toggleZoom(false);
     this.ui.toggleScrollbar(false);
   }
@@ -80,7 +79,7 @@ export class GalleryView {
     this.renderer.toggleZoomCursor(value);
   }
 
-  public nudge(item: MediaItem, direction: BoundaryEdge): void {
+  public nudge(item: PostMedia, direction: BoundaryEdge): void {
     this.renderer.nudge(item, direction);
   }
 
@@ -92,7 +91,7 @@ export class GalleryView {
     return viewportWidth();
   }
 
-  public cache(items: MediaItem[]): void {
+  public cache(items: PostMedia[]): void {
     this.renderer.cache(items);
   }
 
@@ -104,12 +103,12 @@ export class GalleryView {
     this.renderer.zoomToPoint(point);
   }
 
-  public cacheImages(thumbs: HTMLElement[]): Promise<void> {
-    return this.renderer.cacheImages(thumbs);
+  public cacheImages(items: PostMedia[]): Promise<void> {
+    return this.renderer.cacheImages(items);
   }
 
-  public upscale(thumbs: HTMLElement[]): Promise<void> {
-    return this.renderer.upscale(thumbs);
+  public upscale(items: PostMedia[]): Promise<void> {
+    return this.renderer.upscale(items);
   }
 
   public reUpscale(): void {
@@ -196,12 +195,12 @@ export class GalleryView {
     this.ui.setBackgroundOpacity(opacity);
   }
 
-  public showAddedFavoriteStatus(status: AddFavoriteStatus): void {
-    this.ui.showAddedFavoriteStatus(status);
+  public showAddFavoriteResult(result: AddFavoriteResult): void {
+    this.ui.showAddFavoriteResult(result);
   }
 
-  public showRemovedFavoriteStatus(status: RemoveFavoriteStatus): void {
-    this.ui.showRemovedFavoriteStatus(status);
+  public showRemoveFavoriteResult(result: RemoveFavoriteResult): void {
+    this.ui.showRemoveFavoriteResult(result);
   }
 
   public showCursor(): void {

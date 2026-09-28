@@ -1,7 +1,7 @@
 import { Emitter, StickyEmitter } from "@/lib/event/emitter";
 import { Favorite } from "@/types/favorite";
 import { GalleryAction } from "@/types/app";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
@@ -44,7 +44,7 @@ export function createEvents() {
 
     gallery: {
       galleryClosed: new Emitter<void>(),
-      itemDisplayed: new Emitter<MediaItem>(),
+      itemDisplayed: new Emitter<PostMedia>(),
       galleryMenuButtonClicked: new Emitter<GalleryAction>(),
       interactionStopped: new Emitter<void>(),
       leftTapped: new Emitter<void>(),

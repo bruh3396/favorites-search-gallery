@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Downloader } from "@/features/favorites/features/downloader/downloader";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { createPreference } from "@/testing/preferences";
 
 interface Setup {
   container: HTMLElement;
   downloader: Downloader;
-  results: MediaItem[];
+  results: PostMedia[];
   fetched: string[];
   saved: string[];
 }
 
-function createItem(id: string): MediaItem {
-  return { id, thumbUrl: `https://rule34.xxx/thumbnails/1/thumbnail_${id}.jpg`, mediaType: "image", extension: "png" };
+function createItem(id: string): PostMedia {
+  return { id, media: { kind: "image", locator: `1/${id}.png` } };
 }
 
 function actionButtonsOf(container: HTMLElement): [HTMLButtonElement, HTMLButtonElement] {
@@ -24,7 +24,7 @@ function statusOf(container: HTMLElement): string {
   return container.querySelector("[role=status]")?.textContent ?? "";
 }
 
-function abortable(signal: AbortSignal): Promise<Response> {
+function abortable(signal: AbortSignal): Promise<Blob> {
   return new Promise((_, reject) => {
     signal.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
   });
@@ -36,19 +36,19 @@ function setup({ hang = false } = {}): Setup {
   const fetched: string[] = [];
   const saved: string[] = [];
 
-  vi.stubGlobal("fetch", (url: string, init: RequestInit): Promise<Response> => {
-    fetched.push(url);
-    return hang ? abortable(init.signal as AbortSignal) : Promise.resolve(new Response(new Uint8Array([1])));
-  });
   vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function save(this: HTMLAnchorElement): void {
     saved.push(this.download);
   });
   const downloader = new Downloader({
     batchSize: createPreference(0),
     filenameFormat: createPreference(0),
-    getSearchResults: (): MediaItem[] => results,
+    getSearchResults: (): PostMedia[] => results,
     getTagCategory: (): undefined => undefined,
-    getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set([`tag_${id}`])])))
+    getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set([`tag_${id}`])]))),
+    fetchOriginal: (media, signal): Promise<Blob> => {
+      fetched.push(media.locator);
+      return hang ? abortable(signal) : Promise.resolve(new Blob([new Uint8Array([1])], { type: "image/png" }));
+    }
   });
 
   downloader.buildDrawerSection().mount?.(container);
@@ -57,7 +57,6 @@ function setup({ hang = false } = {}): Setup {
 
 describe("Downloader", () => {
   afterEach(() => {
-    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -98,7 +97,7 @@ describe("Downloader", () => {
     download.click();
     await vi.waitFor(() => expect(statusOf(container)).toBe("Done: 2 downloaded"));
 
-    expect(fetched.sort()).toEqual(["https://rule34.xxx/images/1/a.png", "https://rule34.xxx/images/1/b.png"]);
+    expect(fetched.sort()).toEqual(["1/a.png", "1/b.png"]);
     expect(saved).toEqual(["favorites.zip"]);
   });
 

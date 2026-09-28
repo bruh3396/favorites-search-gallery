@@ -3,7 +3,7 @@ import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
 import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Point } from "@/types/geometry";
-import { Resolution } from "@/types/media";
+import { Resolution } from "@/features/gallery/types/types";
 import { setDataset } from "@/utils/browser/dataset";
 import { toDimensions2D } from "@/utils/pure/geometry";
 

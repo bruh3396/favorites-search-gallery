@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { MediaItem } from "@/types/media";
 import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
 
 describe("MemoryNavigation", () => {
@@ -10,9 +9,8 @@ describe("MemoryNavigation", () => {
   test("records each place it was asked to open, in order", () => {
     const navigation = new MemoryNavigation();
 
-    navigation.openPost("7");
-    navigation.openMedia({ id: "8" } as MediaItem);
+    navigation.openUrl("data:image/png;base64,AA");
     navigation.openSearch("apple banana");
-    expect(navigation.opened).toEqual(["#post-7", "#media-8", "#search-apple%20banana"]);
+    expect(navigation.opened).toEqual(["data:image/png;base64,AA", "#search-apple%20banana"]);
   });
 });

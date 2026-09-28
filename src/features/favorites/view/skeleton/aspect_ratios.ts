@@ -1,10 +1,16 @@
-import { Storage } from "@/lib/storage/local_storage";
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
-const LOCAL_STORAGE_KEY = "aspectRatios";
+const STORAGE_KEY = "aspectRatios";
 
 export class FavoritesAspectRatios {
-  private readonly knownAspectRatios: string[] = Storage.get<string[]>(LOCAL_STORAGE_KEY) ?? [];
+  private readonly store: KeyValueStore;
+  private readonly knownAspectRatios: string[];
+
+  constructor(store: KeyValueStore) {
+    this.store = store;
+    this.knownAspectRatios = this.readStored();
+  }
 
   public collect(thumbs: HTMLElement[]): void {
     const images = thumbs
@@ -13,7 +19,7 @@ export class FavoritesAspectRatios {
       .slice(0, 50);
     const newAspectRatios = images.map(image => this.aspectRatio(image.naturalWidth, image.naturalHeight));
 
-    Storage.set(LOCAL_STORAGE_KEY, newAspectRatios.reverse());
+    this.store.set(STORAGE_KEY, newAspectRatios.reverse());
   }
 
   public getNext(): string | undefined {
@@ -22,5 +28,10 @@ export class FavoritesAspectRatios {
 
   private aspectRatio(width: number, height: number): string {
     return `${width}/${height}`;
+  }
+
+  private readStored(): string[] {
+    const stored = this.store.get(STORAGE_KEY);
+    return Array.isArray(stored) ? stored.filter((entry): entry is string => typeof entry === "string") : [];
   }
 }

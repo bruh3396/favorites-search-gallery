@@ -40,6 +40,17 @@ describe("Database (autoIncrement + unique id index)", () => {
     expect(records[0].value).toBe(99);
   });
 
+  test.each([
+    ["a full", 2],
+    ["the final", 1_000]
+  ])("streaming rejects when %s batch can't be handled", async(_, batchSize) => {
+    await database.write([{ id: "1", value: 1 }, { id: "2", value: 2 }, { id: "3", value: 3 }]);
+
+    await expect(database.readAllStreamed(() => {
+      throw new Error("bad record");
+    }, batchSize)).rejects.toThrow("bad record");
+  });
+
   test("readAllIds returns every id", async() => {
     await database.write([{ id: "a", value: 1 }, { id: "b", value: 2 }]);
 

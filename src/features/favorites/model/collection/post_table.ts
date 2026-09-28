@@ -1,14 +1,10 @@
-import { Post } from "@/core/domain/post/post";
 import { DiscreteRating, Metric, Rating } from "@/types/search";
-import { MediaExtension } from "@/core/domain/media/extension";
-import { decodeMediaExtension, encodeMediaExtension } from "@/types/media";
-import { WIMG_ORIGIN } from "@/adapters/rule34/client/hosts";
-import { copyString } from "@/utils/pure/string";
+import { Media, MediaKind } from "@/core/domain/media/media";
+import { Post } from "@/core/domain/post/post";
 import { grow } from "@/utils/pure/array";
-import { internString } from "@/lib/search/interner";
-import { isUrl } from "@/utils/pure/url";
 
 const DEFAULT_CAPACITY = 1024;
+const MEDIA_KINDS: readonly MediaKind[] = ["image", "video", "gif"];
 
 export class FavoritesPostTable {
   private ids = new Uint32Array(DEFAULT_CAPACITY);
@@ -17,12 +13,12 @@ export class FavoritesPostTable {
   private scores = new Uint32Array(DEFAULT_CAPACITY);
   private deleted = new Uint8Array(DEFAULT_CAPACITY);
   private isNew = new Uint8Array(DEFAULT_CAPACITY);
-  private encodedExtensions = new Uint8Array(DEFAULT_CAPACITY);
+  private mediaKinds = new Uint8Array(DEFAULT_CAPACITY);
   private durations = new Uint16Array(DEFAULT_CAPACITY);
   private changes = new Float64Array(DEFAULT_CAPACITY);
   private fetchedAts = new Float64Array(DEFAULT_CAPACITY);
   private ratings = new Uint8Array(DEFAULT_CAPACITY);
-  private previewSources: string[] = [];
+  private mediaLocators: string[] = [];
 
   public write(index: number, post: Post): void {
     this.ids[index] = parseInt(post.id, 10);
@@ -34,8 +30,8 @@ export class FavoritesPostTable {
     this.fetchedAts[index] = post.fetchedAt ?? 0;
     this.ratings[index] = toRatingValue(post.rating);
     this.deleted[index] = post.deleted ? 1 : 0;
-    this.encodedExtensions[index] = encodeMediaExtension(post.extension ? internString(post.extension) as MediaExtension : post.extension);
-    this.previewSources[index] = compressPreviewSource(post.previewURL);
+    this.mediaKinds[index] = MEDIA_KINDS.indexOf(post.media.kind);
+    this.mediaLocators[index] = post.media.locator;
   }
 
   public toPost(index: number, tags: string): Post {
@@ -47,12 +43,10 @@ export class FavoritesPostTable {
       score: this.scores[index],
       rating: toRatingString(this.ratings[index] as Rating),
       change: this.changes[index],
-      fileURL: "",
       duration: this.durations[index],
       fetchedAt: this.fetchedAts[index],
       deleted: this.deleted[index] === 1,
-      previewURL: this.previewSources[index] ?? "",
-      extension: this.extension(index)
+      media: this.media(index)
     };
   }
 
@@ -86,16 +80,12 @@ export class FavoritesPostTable {
     return this.ratings[index] as Rating;
   }
 
-  public extension(index: number): MediaExtension | undefined {
-    return decodeMediaExtension(this.encodedExtensions[index]);
+  public media(index: number): Media {
+    return { kind: MEDIA_KINDS[this.mediaKinds[index]] ?? "image", locator: this.mediaLocators[index] ?? "" };
   }
 
   public isNewItem(index: number): boolean {
     return this.isNew[index] === 1;
-  }
-
-  public previewUrl(index: number): string {
-    return decompressPreviewSource(this.previewSources[index] ?? "");
   }
 
   public markNew(index: number): void {
@@ -119,7 +109,7 @@ export class FavoritesPostTable {
     this.scores = grow(this.scores, capacity);
     this.deleted = grow(this.deleted, capacity);
     this.isNew = grow(this.isNew, capacity);
-    this.encodedExtensions = grow(this.encodedExtensions, capacity);
+    this.mediaKinds = grow(this.mediaKinds, capacity);
     this.durations = grow(this.durations, capacity);
     this.changes = grow(this.changes, capacity);
     this.fetchedAts = grow(this.fetchedAts, capacity);
@@ -136,32 +126,13 @@ export class FavoritesPostTable {
     this.scores = this.scores.slice(0, count);
     this.deleted = this.deleted.slice(0, count);
     this.isNew = this.isNew.slice(0, count);
-    this.encodedExtensions = this.encodedExtensions.slice(0, count);
+    this.mediaKinds = this.mediaKinds.slice(0, count);
     this.durations = this.durations.slice(0, count);
     this.changes = this.changes.slice(0, count);
     this.fetchedAts = this.fetchedAts.slice(0, count);
     this.ratings = this.ratings.slice(0, count);
-    this.previewSources.length = count;
+    this.mediaLocators.length = count;
   }
-}
-
-const previewSourceCompressionRegex = /thumbnails\/+([0-9]+)\/+thumbnail_([0-9a-f]+)/;
-const compressedPreviewSourceRegex = /^[0-9]+_[0-9a-f]+$/;
-
-export function decompressPreviewSource(compressedSource: string): string {
-  if (!compressedPreviewSourceRegex.test(compressedSource)) {
-    return compressedSource;
-  }
-  const splitSource = compressedSource.split("_").map(copyString);
-  return `${WIMG_ORIGIN}/thumbnails//${splitSource[0]}/thumbnail_${splitSource[1]}.jpg`;
-}
-
-export function compressPreviewSource(source: string): string {
-  if (!isUrl(source)) {
-    return source;
-  }
-  const match = source.match(previewSourceCompressionRegex);
-  return match === null ? source : match.splice(1).join("_");
 }
 
 export function toRatingValue(rating: string): Rating {

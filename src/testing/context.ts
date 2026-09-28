@@ -9,6 +9,7 @@ import { Environment } from "@/core/boundary/environment";
 import { Feature } from "@/core/context/features";
 import { FeatureBridge } from "@/app/context/feature_bridge";
 import { MemoryHost } from "@/adapters/memory/ports/host/host";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { MemoryMediaSource } from "@/adapters/memory/ports/media_source/media_source";
 import { MemoryTagSource } from "@/adapters/memory/ports/tag_source/tag_source";
 import { Ports } from "@/core/boundary/ports/ports";
@@ -18,6 +19,7 @@ import { Rule34Navigation } from "@/adapters/rule34/ports/navigation/navigation"
 import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 import { createEvents } from "@/app/context/events";
+import { mintMedia } from "@/adapters/rule34/client/media/locator";
 
 const ALL_FEATURES: Feature[] = ["favorites", "postListNavigator", "gallery", "tooltip", "postOverlay"];
 
@@ -49,11 +51,12 @@ function createPorts(environment: Environment, overrides: Partial<Ports> = {}): 
   return {
     favoritesSource: new Rule34FavoritesSource(rule34SiteClient, environment.favoritesId, null, 0),
     favoritesEditor: new Rule34FavoritesEditor(rule34SiteClient),
-    postSource: new ApiPostSource(new ApiClient(), new Rule34PostSource(rule34SiteClient)),
+    postSource: new ApiPostSource(new ApiClient(), new Rule34PostSource(rule34SiteClient), url => mintMedia(url, "")),
     tagSource: new MemoryTagSource(),
     mediaSource: new MemoryMediaSource(),
     navigation: new Rule34Navigation(rule34SiteClient),
     host: new MemoryHost(),
+    keyValueStore: new MemoryKeyValueStore(),
     ...overrides
   };
 }

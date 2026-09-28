@@ -72,7 +72,8 @@ function serveExternalRequests({ context, model, view, flows }: PostListNavigato
 
   featureBridge.postList.searchQuery.serve(() => view.currentSearch());
   featureBridge.postList.navigateToAdjacent.serve((direction) => flows.navigation.navigatePostLists(direction));
-  featureBridge.postList.thumbs.serve(() => model.allThumbs());
+  featureBridge.postList.posts.serve(() => model.allPosts());
+  featureBridge.postList.post.serve((id) => model.getPost(id));
   featureBridge.postList.usingInfiniteScroll.serve(() => preferences.postList.infiniteScroll.value);
   featureBridge.postList.layout.serve(() => view.getLayout());
 }

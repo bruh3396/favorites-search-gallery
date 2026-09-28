@@ -2,9 +2,8 @@ import { GalleryFlow, GalleryFlowDependencies } from "@/features/gallery/flows/f
 import { debounceLeading, debounceTrailing } from "@/lib/async/rate_limiting";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
-import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/site/post_list_page/post_list_page";
+import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/site/post_list_page/fetcher";
 import { Preference } from "@/lib/storage/preference";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryThumbsFlow extends GalleryFlow {
   private readonly upscaleQuality: Preference<number>;
@@ -19,7 +18,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
     this.refreshImagesDebounced = debounceLeading(() => this.refreshImages(), GalleryConfig.contentRefreshTime);
     this.updateUpscaleQualityDebounced = debounceTrailing(() => this.updateUpscaleQualityNow(), GalleryUpscaleConfig.dynamicQualitySettleTime);
     this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.cacheOrUpscale(thumbs)), 1_000);
-    this.cacheAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.view.cacheImages(thumbs)), 1_000);
+    this.cacheAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.view.cacheImages(this.itemsFor(thumbs))), 1_000);
   }
 
   public async refreshInitialContent(): Promise<void> {
@@ -33,7 +32,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
   public refresh(): void {
     this.view.downscaleAll();
     this.control.refreshThumbObserver();
-    this.model.indexItems(this.context.shell.getContentThumbs().map(toMediaItem));
+    this.model.indexItems(this.itemsFor(this.context.shell.getContentThumbs()));
     this.refreshImagesDebounced();
   }
 
@@ -53,20 +52,20 @@ export class GalleryThumbsFlow extends GalleryFlow {
     this.view.reUpscale();
 
     if (this.context.environment.mode === "favorites") {
-      this.view.upscale(this.control.getVisibleThumbs().slice(0, 25));
+      this.view.upscale(this.itemsFor(this.control.getVisibleThumbs().slice(0, 25)));
     }
   }
 
   public preloadPostListOnIdle(): void {
     if (GalleryConfig.preloadOutsideGalleryOnPostList) {
-      this.runForState({ idle: () => this.view.cacheImages(this.context.shell.getContentThumbs()) });
+      this.runForState({ idle: () => this.view.cacheImages(this.itemsFor(this.context.shell.getContentThumbs())) });
     }
   }
 
   public handleVisibleThumbsChanged(): void {
     this.runForState({
       idle: () => this.withVisibleThumbs((thumbs) => this.cacheOrUpscale(thumbs)),
-      preview: () => this.withVisibleThumbs((thumbs) => this.view.cacheImages(thumbs))
+      preview: () => this.withVisibleThumbs((thumbs) => this.view.cacheImages(this.itemsFor(thumbs)))
     });
   }
 
@@ -88,7 +87,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   private cacheFirstAndReUpscale(): void {
     if (this.context.environment.device === "desktop") {
-      this.view.cacheImages(this.context.shell.getContentThumbs().slice(0, 25));
+      this.view.cacheImages(this.itemsFor(this.context.shell.getContentThumbs().slice(0, 25)));
     }
     this.view.reUpscale();
   }
@@ -105,7 +104,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
     const thumbs = this.context.shell.getContentThumbs();
 
     if (thumbs.length <= POSTS_PER_POST_LIST_PAGE) {
-      this.view.cacheImages(thumbs);
+      this.view.cacheImages(this.itemsFor(thumbs));
     }
   }
 
@@ -118,9 +117,9 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   private cacheOrUpscale(thumbs: HTMLElement[]): void {
     if (this.context.environment.canvasBudget === "reduced") {
-      this.view.upscale(thumbs);
+      this.view.upscale(this.itemsFor(thumbs));
     } else {
-      this.view.cacheImages(thumbs);
+      this.view.cacheImages(this.itemsFor(thumbs));
     }
   }
 

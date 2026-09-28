@@ -3,9 +3,7 @@ import { isImageLoading } from "@/utils/browser/image";
 
 export function waitForThumbsToLoadInContainer(container: HTMLElement | Document): Promise<unknown[]> {
   const unloadedImages = getItemsInContainer(container)
-    .map(thumb => getImageFromThumb(thumb))
-    .filter(image => image instanceof HTMLImageElement)
-    .filter(image => image.dataset.preload !== "true" && isImageLoading(image) && image.loading !== "lazy");
+    .flatMap(thumb => loadingImageOf(thumb) ?? []);
   return Promise.all(unloadedImages
     .map(image => new Promise(resolve => {
       image.addEventListener("load", resolve, {
@@ -15,4 +13,14 @@ export function waitForThumbsToLoadInContainer(container: HTMLElement | Document
         once: true
       });
     })));
+}
+
+function loadingImageOf(thumb: HTMLElement): HTMLImageElement | null {
+  const image = getImageFromThumb(thumb);
+
+  if (image === null || image.dataset.preload === "true" || image.loading === "lazy") {
+    return null;
+  }
+  const awaitingSource = thumb.dataset.loading !== undefined && !image.hasAttribute("src");
+  return isImageLoading(image) || awaitingSource ? image : null;
 }

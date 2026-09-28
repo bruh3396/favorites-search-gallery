@@ -7,7 +7,6 @@ import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GallerySizeSettings } from "@/features/gallery/types/types";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { GalleryView } from "@/features/gallery/view/view";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 interface GalleryComponents {
   context: AppContext;
@@ -22,7 +21,7 @@ export async function startGallery(context: AppContext): Promise<void> {
   await waitUntilPageIsReady(context);
 
   const shell = new GalleryShell(context.shell);
-  const model = new GalleryModel(context.preferences, context.ports.navigation, context.ports.favoritesEditor);
+  const model = new GalleryModel(context.preferences, context.ports.navigation, context.ports.favoritesEditor, context.ports.mediaSource);
   const view = new GalleryView(context, shell, (id) => context.featureBridge.favorites.favorite.request(id));
   const control = new GalleryControl(context, shell, view);
   const flows = new GalleryFlows(context, model, view, control);
@@ -68,9 +67,9 @@ function setupModel({ context, model }: GalleryComponents): void {
   const { environment, featureBridge } = context;
 
   if (environment.mode === "favorites") {
-    model.setupWrappingWindow(() => featureBridge.favorites.searchResults.request(), (favorite) => favorite);
+    model.setupWrappingWindow(() => featureBridge.favorites.searchResults.request());
   } else {
-    model.setupClampedWindow(() => featureBridge.postList.thumbs.request(), toMediaItem);
+    model.setupClampedWindow(() => featureBridge.postList.posts.request());
   }
 }
 

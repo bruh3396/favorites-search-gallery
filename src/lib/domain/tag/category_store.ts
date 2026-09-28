@@ -1,4 +1,5 @@
-import { EncodedTagCategory, TagCategory, TagCategoryMap, TagCategoryMapping } from "@/types/search";
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
+import { EncodedTagCategory, TagCategoryMapping } from "@/types/search";
 import { decodeTagCategory, encodeTagCategory } from "@/lib/domain/tag/category_codec";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Database } from "@/lib/storage/database";

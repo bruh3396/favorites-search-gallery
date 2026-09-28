@@ -1,16 +1,16 @@
 import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types/types";
 import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/utils/pure/string";
-import { Store } from "@/lib/storage/local_storage";
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";
 const GENERATED_NAME_PREFIX = "snippet_";
 
 export class SnippetStore {
-  private readonly storage: Store;
+  private readonly storage: KeyValueStore;
   private readonly snippets: Map<string, Snippet>;
 
-  constructor(storage: Store) {
+  constructor(storage: KeyValueStore) {
     this.storage = storage;
     this.snippets = this.load();
   }
@@ -107,12 +107,12 @@ export class SnippetStore {
   }
 
   private load(): Map<string, Snippet> {
-    const stored = this.storage.get<unknown>(STORAGE_KEY);
-    return stored === null ? this.migrate() : parseSnippets(stored);
+    const stored = this.storage.get(STORAGE_KEY);
+    return stored === undefined ? this.migrate() : parseSnippets(stored);
   }
 
   private migrate(): Map<string, Snippet> {
-    const legacy = this.storage.get<unknown>(LEGACY_STORAGE_KEY);
+    const legacy = this.storage.get(LEGACY_STORAGE_KEY);
     const migrated = new Map<string, Snippet>();
 
     if (!Array.isArray(legacy)) {

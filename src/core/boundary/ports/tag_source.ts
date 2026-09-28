@@ -1,5 +1,5 @@
-import { TagCategoryMap } from "@/types/search";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 export interface TagSource {
-  categorize: (id: string, tagNames: string[]) => Promise<TagCategoryMap>;
+  fetchCategories: (tagNames: string[]) => Promise<TagCategoryMap>;
 }

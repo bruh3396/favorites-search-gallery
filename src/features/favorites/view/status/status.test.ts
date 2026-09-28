@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/favorites_page";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
@@ -13,7 +12,7 @@ interface Setup {
 
 function setup(): Setup {
   const environment = createEnvironment();
-  const shell = new FavoritesShell(new Shell(environment), environment);
+  const shell = new FavoritesShell(new Shell(), environment);
   return { status: new FavoritesStatus(shell.toolbar, shell.toolbarRoot), shell };
 }
 
@@ -95,14 +94,13 @@ describe("FavoritesStatus", () => {
 
     test("with an expected total, shows progress, then a time estimate", () => {
       const { status, shell } = setup();
-      const total = FAVORITES_PER_PAGE * 10;
 
-      status.setExpectedTotalFavoritesCount(total);
+      status.setExpectedTotalFavoritesCount(600);
       status.updateFetchStatus(0, 0);
-      expect(statusOf(shell)).toBe(`Fetching - 0 / ${total}`);
+      expect(statusOf(shell)).toBe("Fetching - 0 / 600");
       vi.advanceTimersByTime(2_000);
-      status.updateFetchStatus(total / 2, 0);
-      expect(statusOf(shell)).toBe(`Fetching - ${total / 2} / ${total} -  10s`);
+      status.updateFetchStatus(300, 0);
+      expect(statusOf(shell)).toBe("Fetching - 300 / 600 -   2s");
       expect(progressOf(shell)).toBe("50%");
     });
 

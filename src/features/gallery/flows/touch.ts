@@ -1,7 +1,6 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { NavigationKey } from "@/types/input";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export class GalleryTouchFlow extends GalleryFlow {
   public handleMouseDown(event: EnhancedMouseEvent): void {
@@ -59,11 +58,13 @@ export class GalleryTouchFlow extends GalleryFlow {
   }
 
   private handleMouseDownOutsideGallery(mouseEvent: EnhancedMouseEvent): void {
-    if (mouseEvent.thumb !== null && this.context.preferences.gallery.mobileEnabled.value) {
+    const item = mouseEvent.thumb === null ? undefined : this.itemFor(mouseEvent.thumb);
+
+    if (item !== undefined && this.context.preferences.gallery.mobileEnabled.value) {
       mouseEvent.originalEvent.preventDefault();
       mouseEvent.originalEvent.stopPropagation();
       mouseEvent.originalEvent.stopImmediatePropagation();
-      this.flows.navigation.open(toMediaItem(mouseEvent.thumb));
+      this.flows.navigation.open(item);
     }
   }
 

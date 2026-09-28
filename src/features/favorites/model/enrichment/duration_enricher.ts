@@ -1,17 +1,17 @@
-import { Post } from "@/core/domain/post/post";
 import { Favorite } from "@/types/favorite";
-import { MediaItem } from "@/types/media";
+import { Media } from "@/core/domain/media/media";
+import { Post } from "@/core/domain/post/post";
 
 export class FavoritesDurationEnricher {
   constructor(
     private readonly onFavoriteEnriched: (favorite: Favorite) => void,
-    private readonly readDuration: (item: MediaItem) => Promise<number>,
+    private readonly fetchDurationSeconds: (media: Media) => Promise<number>,
     private readonly persistPost: (post: Post) => void
   ) { }
 
   public enrich(favorites: Favorite[]): void {
     favorites.forEach(favorite => {
-      this.readDuration(favorite)
+      this.fetchDurationSeconds(favorite.media)
         .then(duration => {
           favorite.setDuration(duration);
           this.persistPost(favorite.post);

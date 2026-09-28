@@ -1,7 +1,7 @@
-export type AddFavoriteStatus = "error" | "alreadyAdded" | "loggedOut" | "success";
-export type RemoveFavoriteStatus = "error" | "forbidden" | "success";
+export type AddFavoriteResult = "error" | "alreadyAdded" | "loggedOut" | "added";
+export type RemoveFavoriteResult = "error" | "forbidden" | "removed";
 
 export interface FavoritesEditor {
-  add: (id: string) => Promise<AddFavoriteStatus>;
-  remove: (id: string) => Promise<RemoveFavoriteStatus>;
+  add: (id: string) => Promise<AddFavoriteResult>;
+  remove: (id: string) => Promise<RemoveFavoriteResult>;
 }

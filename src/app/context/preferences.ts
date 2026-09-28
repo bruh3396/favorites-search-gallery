@@ -3,86 +3,94 @@ import { Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
 import { Rating, SortKey } from "@/types/search";
 import { Environment } from "@/core/boundary/environment";
 import { FavoritesDrawerSectionName } from "@/types/favorites_ui";
+import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { NamespacedStore } from "@/core/utils/storage/namespaced_store";
 import { Preference } from "@/lib/storage/preference";
 import { Theme } from "@/lib/ui/theme/themes";
+
+const NAMESPACE = "preferences";
 
 export type Preferences = ReturnType<typeof createPreferences>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
-export function createPreferences(environment: Environment) {
+export function createPreferences(environment: Environment, store: KeyValueStore) {
+  const namespacedStore = new NamespacedStore(store, NAMESPACE);
+  const preference = <T>(key: string, defaultValue: T): Preference<T> => new Preference(namespacedStore, key, defaultValue);
   const { usingDarkMode } = environment;
   const onDesktopDevice = environment.device === "desktop";
   const onMobileDevice = environment.device === "mobile";
   return {
+    reset: (): void => namespacedStore.clear(),
+
     app: {
-      darkMode: new Preference<boolean>("appDarkMode", usingDarkMode),
-      fadeThumbs: new Preference<boolean>("appFadeThumbs", false),
-      gradient: new Preference("appGradient", false),
-      nativeFont: new Preference<boolean>("appNativeFont", true),
-      performanceProfile: new Preference<PerformanceProfile>("appPerformanceProfile", "normal"),
-      theme: new Preference<Theme>("appTheme", "native")
+      darkMode: preference<boolean>("appDarkMode", usingDarkMode),
+      fadeThumbs: preference<boolean>("appFadeThumbs", false),
+      gradient: preference("appGradient", false),
+      nativeFont: preference<boolean>("appNativeFont", true),
+      performanceProfile: preference<PerformanceProfile>("appPerformanceProfile", "normal"),
+      theme: preference<Theme>("appTheme", "native")
     },
 
     favorites: {
-      allowedRatings: new Preference<Rating>("favoritesAllowedRatings", 7),
-      columnCount: new Preference("favoritesColumnCount", onDesktopDevice ? 5 : 2),
-      downloadBatchSize: new Preference("favoritesDownloadBatchSize", 500),
-      downloadFilenameFormat: new Preference("favoritesDownloadFilenameFormat", 3),
-      drawerActiveSection: new Preference<FavoritesDrawerSectionName>("favoritesDrawerActiveView", "settings"),
-      drawerOpen: new Preference("favoritesDrawerOpen", false),
-      excludeBlacklist: new Preference("favoritesExcludeBlacklist", false),
-      headerEnabled: new Preference("favoritesHeaderEnabled", true),
-      hintsEnabled: new Preference("favoritesHintsEnabled", onDesktopDevice),
-      infiniteScroll: new Preference("favoritesInfiniteScroll", onMobileDevice),
-      layout: new Preference<Layout>("favoritesLayout", "column"),
-      postActionBar: new Preference<ActionBarMode>("favoritesPostActionBar", onDesktopDevice ? "hover" : "off"),
-      postActionBarButtons: new Preference("favoritesPostActionBarButtons", onDesktopDevice ? ActionBarButton.Favorite : ActionBarButton.Favorite | ActionBarButton.Open),
-      resultsPerPage: new Preference("favoritesResultsPerPage", 50),
-      rowHeight: new Preference("favoritesRowHeight", 5),
-      settingsExpandedSections: new Preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
-      sortAscending: new Preference("favoritesSortAscending", false),
-      sortKey: new Preference<SortKey>("favoritesSortKey", "default"),
-      tooltipEnabled: new Preference("favoritesTooltipEnabled", false),
-      upscaleQuality: new Preference("favoritesUpscaleQuality", 1),
-      upscaleThumbs: new Preference("favoritesUpscaleThumbs", true)
+      allowedRatings: preference<Rating>("favoritesAllowedRatings", 7),
+      columnCount: preference("favoritesColumnCount", onDesktopDevice ? 5 : 2),
+      downloadBatchSize: preference("favoritesDownloadBatchSize", 500),
+      downloadFilenameFormat: preference("favoritesDownloadFilenameFormat", 3),
+      drawerActiveSection: preference<FavoritesDrawerSectionName>("favoritesDrawerActiveView", "settings"),
+      drawerOpen: preference("favoritesDrawerOpen", false),
+      excludeBlacklist: preference("favoritesExcludeBlacklist", false),
+      headerEnabled: preference("favoritesHeaderEnabled", true),
+      hintsEnabled: preference("favoritesHintsEnabled", onDesktopDevice),
+      infiniteScroll: preference("favoritesInfiniteScroll", onMobileDevice),
+      layout: preference<Layout>("favoritesLayout", "column"),
+      postActionBar: preference<ActionBarMode>("favoritesPostActionBar", onDesktopDevice ? "hover" : "off"),
+      postActionBarButtons: preference("favoritesPostActionBarButtons", onDesktopDevice ? ActionBarButton.Favorite : ActionBarButton.Favorite | ActionBarButton.Open),
+      resultsPerPage: preference("favoritesResultsPerPage", 50),
+      rowHeight: preference("favoritesRowHeight", 5),
+      settingsExpandedSections: preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
+      sortAscending: preference("favoritesSortAscending", false),
+      sortKey: preference<SortKey>("favoritesSortKey", "default"),
+      tooltipEnabled: preference("favoritesTooltipEnabled", false),
+      upscaleQuality: preference("favoritesUpscaleQuality", 1),
+      upscaleThumbs: preference("favoritesUpscaleThumbs", true)
     },
 
     gallery: {
-      autoplayActive: new Preference("galleryAutoplayActive", false),
-      autoplayForward: new Preference("galleryAutoplayForward", true),
-      autoplayImageDuration: new Preference("galleryAutoplayImageDuration", 3_000),
-      autoplayMinimumVideoDuration: new Preference("galleryAutoplayMinimumVideoDuration", 5_000),
-      autoplayPaused: new Preference("galleryAutoplayPaused", false),
-      backgroundOpacity: new Preference("galleryBackgroundOpacity", 1),
-      menuDockedLeft: new Preference("galleryMenuDockedLeft", onDesktopDevice),
-      menuEnabled: new Preference("galleryMenuEnabled", onMobileDevice),
-      menuPinned: new Preference("galleryMenuPinned", onMobileDevice),
-      mobileEnabled: new Preference("galleryMobileEnabled", true),
-      previewEnabled: new Preference("galleryPreviewEnabled", false),
-      themedBackground: new Preference("galleryThemedBackground", false),
-      tutorialSeen: new Preference("galleryTutorialSeen", false),
-      videoMuted: new Preference("galleryVideoMuted", false),
-      videoVolume: new Preference("galleryVideoVolume", 1)
+      autoplayActive: preference("galleryAutoplayActive", false),
+      autoplayForward: preference("galleryAutoplayForward", true),
+      autoplayImageDuration: preference("galleryAutoplayImageDuration", 3_000),
+      autoplayMinimumVideoDuration: preference("galleryAutoplayMinimumVideoDuration", 5_000),
+      autoplayPaused: preference("galleryAutoplayPaused", false),
+      backgroundOpacity: preference("galleryBackgroundOpacity", 1),
+      menuDockedLeft: preference("galleryMenuDockedLeft", onDesktopDevice),
+      menuEnabled: preference("galleryMenuEnabled", onMobileDevice),
+      menuPinned: preference("galleryMenuPinned", onMobileDevice),
+      mobileEnabled: preference("galleryMobileEnabled", true),
+      previewEnabled: preference("galleryPreviewEnabled", false),
+      themedBackground: preference("galleryThemedBackground", false),
+      tutorialSeen: preference("galleryTutorialSeen", false),
+      videoMuted: preference("galleryVideoMuted", false),
+      videoVolume: preference("galleryVideoVolume", 1)
     },
 
     postOverlay: {
-      enabled: new Preference("postOverlayEnabled", false),
-      mode: new Preference<PostOverlayMode>("postOverlayMode", "tag")
+      enabled: preference("postOverlayEnabled", false),
+      mode: preference<PostOverlayMode>("postOverlayMode", "tag")
     },
 
     postList: {
-      columnCount: new Preference("postListColumnCount", onDesktopDevice ? 5 : 2),
-      enabled: new Preference("postListEnabled", false),
-      favoriteIndicator: new Preference("postListFavoriteIndicator", false),
-      infiniteScroll: new Preference("postListInfiniteScroll", false),
-      layout: new Preference<Layout>("postListLayout", "column"),
-      postActionBar: new Preference<ActionBarMode>("postListPostActionBar", onDesktopDevice ? "hover" : "always"),
-      postActionBarButtons: new Preference("postListPostActionBarButtons", ActionBarButton.Favorite),
-      rowHeight: new Preference("postListRowHeight", 7),
-      settingsCollapsed: new Preference("postListSettingsCollapsed", false),
-      tooltipEnabled: new Preference("postListTooltipEnabled", false),
-      upscaleQuality: new Preference("postListUpscaleQuality", 1),
-      upscaleThumbs: new Preference("postListUpscaleThumbs", onDesktopDevice)
+      columnCount: preference("postListColumnCount", onDesktopDevice ? 5 : 2),
+      enabled: preference("postListEnabled", false),
+      favoriteIndicator: preference("postListFavoriteIndicator", false),
+      infiniteScroll: preference("postListInfiniteScroll", false),
+      layout: preference<Layout>("postListLayout", "column"),
+      postActionBar: preference<ActionBarMode>("postListPostActionBar", onDesktopDevice ? "hover" : "always"),
+      postActionBarButtons: preference("postListPostActionBarButtons", ActionBarButton.Favorite),
+      rowHeight: preference("postListRowHeight", 7),
+      settingsCollapsed: preference("postListSettingsCollapsed", false),
+      tooltipEnabled: preference("postListTooltipEnabled", false),
+      upscaleQuality: preference("postListUpscaleQuality", 1),
+      upscaleThumbs: preference("postListUpscaleThumbs", onDesktopDevice)
     }
   };
 }

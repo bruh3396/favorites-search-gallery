@@ -6,34 +6,10 @@ import { SnippetLibraryFlow } from "@/features/favorites/features/snippets/flows
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
 import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
 import { SnippetView } from "@/features/favorites/features/snippets/view/view";
-import { Store } from "@/lib/storage/local_storage";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 
 const STORAGE_KEY = "searchSnippets";
-
-class FakeStorage implements Store {
-  private readonly values = new Map<string, unknown>();
-
-  public get<V>(key: string): V | null {
-    return this.values.has(key) ? this.values.get(key) as V : null;
-  }
-
-  public set<V>(key: string, value: V): void {
-    this.values.set(key, JSON.parse(JSON.stringify(value)) as unknown);
-  }
-
-  public remove(key: string): void {
-    this.values.delete(key);
-  }
-
-  public keys(): string[] {
-    return Array.from(this.values.keys());
-  }
-
-  public clear(): void {
-    this.values.clear();
-  }
-}
 
 class FakeView extends SnippetView {
   public readonly mounted: HTMLElement[] = [];
@@ -88,7 +64,7 @@ interface Options {
 
 interface Setup {
   library: SnippetLibraryFlow;
-  storage: FakeStorage;
+  storage: MemoryKeyValueStore;
   view: FakeView;
   appended: string[];
   alerts: string[];
@@ -97,7 +73,7 @@ interface Setup {
 }
 
 function setup({ snippets = [], results = [], confirmed = true }: Options = {}): Setup {
-  const storage = new FakeStorage();
+  const storage = new MemoryKeyValueStore();
   const view = new FakeView();
   const appended: string[] = [];
   const alerts: string[] = [];
@@ -120,8 +96,8 @@ function namesOf(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function storedNamesOf(storage: FakeStorage): string[] {
-  return namesOf(storage.get<Snippet[]>(STORAGE_KEY) ?? []);
+function storedNamesOf(storage: MemoryKeyValueStore): string[] {
+  return namesOf((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
 }
 
 const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
@@ -164,7 +140,7 @@ describe("use", () => {
     library.use("fruits");
     expect(appended).toEqual(["( apple ~ banana )"]);
     expect(view.lastScene().rows[0].lastUsedAt).toBeGreaterThan(0);
-    expect(storage.get<Snippet[]>(STORAGE_KEY)?.[0].lastUsedAt).toBeGreaterThan(0);
+    expect((storage.get(STORAGE_KEY) as Snippet[] | undefined)?.[0].lastUsedAt).toBeGreaterThan(0);
   });
 
   test("ignores an unknown snippet", () => {

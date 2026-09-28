@@ -1,12 +1,10 @@
-﻿import { camelToKebabCase, capitalize } from "@/utils/pure/string";
+import { camelToKebabCase, capitalize } from "@/utils/pure/string";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { IconName } from "@/lib/ui/icon";
 import { ThumbConfig } from "@/config/thumb_config";
-import { downloadMedia } from "@/lib/media/download";
 import { iconMaskStyles } from "@/lib/ui/icon_mask";
-import { toMediaItem } from "@/lib/ui/thumb/media_item";
 
 export type ActionBarAction = "favorite" | "download" | "open";
 
@@ -24,6 +22,7 @@ export interface ActionBarCallbacks {
   onFavoriteAdded: (id: string) => void;
   onFavoriteRemoved: (id: string) => void;
   onPostOpened: (id: string) => void;
+  onMediaDownloaded: (id: string) => void;
 }
 
 interface ActionBarButtonSpec {
@@ -62,7 +61,7 @@ export const ActionBarDataset = {
 
 const ACTION_BAR_BUTTONS: ActionBarButtonSpec[] = [
   { bit: ActionBarButton.Open, action: "open", innerHtml: iconSpan("externalLink"), run: ({ thumb, callbacks }) => callbacks.onPostOpened(thumb.id) },
-  { bit: ActionBarButton.Download, action: "download", innerHtml: iconSpan("download"), run: ({ thumb }) => downloadMedia(toMediaItem(thumb)) },
+  { bit: ActionBarButton.Download, action: "download", innerHtml: iconSpan("download"), run: ({ thumb, callbacks }) => callbacks.onMediaDownloaded(thumb.id) },
   { bit: ActionBarButton.Favorite, action: "favorite", innerHtml: iconSpan("heart", ActionBarSelectors.heartEmpty) + iconSpan("heartFilled", ActionBarSelectors.heartFilled), run: toggleFavorite }
 ];
 

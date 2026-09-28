@@ -1,5 +1,6 @@
 import { AppContext } from "@/app/context/context";
 import { NavigationKey } from "@/types/input";
+import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
 import { PostListNavigatorFavoriteIds } from "@/features/post_list_navigator/model/favorite_ids";
@@ -36,6 +37,14 @@ export class PostListNavigatorModel {
 
   public allThumbs(): HTMLElement[] {
     return this.navigator.allThumbs();
+  }
+
+  public allPosts(): Post[] {
+    return this.navigator.allPosts();
+  }
+
+  public getPost(id: string): Post | undefined {
+    return this.navigator.getPost(id);
   }
 
   public ensureFavoriteIdsLoaded(fetchIds: () => Promise<string[]>): Promise<void> {

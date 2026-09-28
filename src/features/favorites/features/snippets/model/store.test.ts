@@ -1,44 +1,20 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
-import { Store } from "@/lib/storage/local_storage";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";
 
-class FakeStorage implements Store {
-  private readonly values = new Map<string, unknown>();
+let storage: MemoryKeyValueStore;
 
-  public get<V>(key: string): V | null {
-    return this.values.has(key) ? this.values.get(key) as V : null;
-  }
-
-  public set<V>(key: string, value: V): void {
-    this.values.set(key, JSON.parse(JSON.stringify(value)) as unknown);
-  }
-
-  public remove(key: string): void {
-    this.values.delete(key);
-  }
-
-  public keys(): string[] {
-    return Array.from(this.values.keys());
-  }
-
-  public clear(): void {
-    this.values.clear();
-  }
-}
-
-let storage: FakeStorage;
-
-const persisted = (): Snippet[] => storage.get<Snippet[]>(STORAGE_KEY) ?? [];
+const persisted = (): Snippet[] => (storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? [];
 const namesOf = (snippets: Snippet[]): string[] => snippets.map(snippet => snippet.name);
 const queriesOf = (snippets: Snippet[]): string[] => snippets.map(snippet => snippet.query);
 const reasonOf = (result: { ok: boolean; reason?: string }): string | undefined => result.reason;
 
 beforeEach(() => {
-  storage = new FakeStorage();
+  storage = new MemoryKeyValueStore();
 });
 
 describe("add", () => {
@@ -570,7 +546,7 @@ describe("legacy migration", () => {
   test("leaves the legacy data in place", () => {
     storage.set(LEGACY_STORAGE_KEY, ["apple"]);
     new SnippetStore(storage);
-    expect(storage.get<string[]>(LEGACY_STORAGE_KEY)).toEqual(["apple"]);
+    expect((storage.get(LEGACY_STORAGE_KEY) as string[] | undefined)).toEqual(["apple"]);
   });
 
   test("does not migrate once snippets are stored", () => {
@@ -597,7 +573,7 @@ describe("legacy migration", () => {
   test("writes nothing when the legacy data holds no usable entries", () => {
     storage.set(LEGACY_STORAGE_KEY, ["", "  "]);
     new SnippetStore(storage);
-    expect(storage.get(STORAGE_KEY)).toBeNull();
+    expect(storage.get(STORAGE_KEY)).toBeUndefined();
   });
 
   test("ignores legacy data that is not an array", () => {

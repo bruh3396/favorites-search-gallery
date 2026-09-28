@@ -3,15 +3,11 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/worker_upscaler?raw";
 import { Preference } from "@/lib/storage/preference";
 import { replaceCanvas } from "@/utils/browser/canvas";
-import { resolveImageUrl } from "@/lib/media/resolver";
-
-type CanvasClaim = { id: string };
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
-  protected readonly needsBitmapForPaint: boolean = false;
   private readonly worker: Worker;
-  private readonly claims: Map<HTMLCanvasElement, CanvasClaim>;
   private readonly transferredCanvases: WeakSet<HTMLCanvasElement>;
+  private readonly paintedIds: Map<HTMLCanvasElement, string>;
 
   constructor(
     canvasFor: (id: string) => HTMLCanvasElement | null,
@@ -27,8 +23,8 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
 
     this.worker = new Worker(workerUrl);
     URL.revokeObjectURL(workerUrl);
-    this.claims = new Map();
     this.transferredCanvases = new WeakSet();
+    this.paintedIds = new Map();
     this.worker.postMessage({
       action: "init",
       config: {
@@ -38,41 +34,29 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   }
 
   protected erase(canvas: HTMLCanvasElement): void {
-    const claim = this.claims.get(canvas);
+    const id = this.paintedIds.get(canvas);
 
-    if (claim === undefined) {
+    if (id === undefined) {
       return;
     }
-    this.claims.delete(canvas);
-
-    if (this.transferredCanvases.has(canvas)) {
-      replaceCanvas(canvas);
-      this.worker.postMessage({ action: "evict", id: claim.id });
-    }
+    this.paintedIds.delete(canvas);
+    replaceCanvas(canvas);
+    this.worker.postMessage({ action: "evict", id });
   }
 
-  protected async paint(request: ImageRequest): Promise<void> {
+  protected paint(request: ImageRequest): void {
     const canvas = this.canvasFor(request.id);
+    const bitmap = request.bitmap;
 
-    if (canvas === null) {
-      return;
-    }
-    const claim = { id: request.id };
-    const width = this.upscaledCanvasWidth;
-
-    this.claims.set(canvas, claim);
-    const url = await resolveImageUrl(request.item);
-
-    if (this.claims.get(canvas) !== claim) {
+    if (canvas === null || bitmap === null) {
       return;
     }
     const offscreen = this.transfer(canvas);
+    const message = { action: "paint", id: request.id, bitmap, width: this.upscaledCanvasWidth, canvas: offscreen };
+    const transfers: Transferable[] = [...offscreen === undefined ? [] : [offscreen], ...request.isDisposable ? [bitmap] : []];
 
-    if (offscreen === undefined) {
-      this.worker.postMessage({ action: "paint", id: request.id, url, width });
-    } else {
-      this.worker.postMessage({ action: "paint", id: request.id, url, width, canvas: offscreen }, [offscreen]);
-    }
+    this.paintedIds.set(canvas, request.id);
+    this.worker.postMessage(message, transfers);
   }
 
   private transfer(canvas: HTMLCanvasElement): OffscreenCanvas | undefined {

@@ -2,32 +2,28 @@ import { Archiver, Filenamer } from "@/features/favorites/features/downloader/ty
 import { ConcurrencyLimiter } from "@/lib/async/rate_limiting";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderZipWriter } from "@/features/favorites/features/downloader/model/zip_writer";
-import { MediaItem } from "@/types/media";
+import { Media } from "@/core/domain/media/media";
+import { PostMedia } from "@/core/domain/post/post";
+import { extensionOfMimeType } from "@/utils/pure/mime";
 
 interface ArchiverDependencies {
   filenamer: Filenamer;
   getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
-  resolveExtension: (item: MediaItem) => Promise<string>;
-  resolveMediaUrl: (item: MediaItem) => Promise<string>;
-  fetch: (url: string, init: RequestInit) => Promise<Response>;
+  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
 }
 
 export class DownloaderArchiver implements Archiver {
   private readonly filenamer: Filenamer;
   private readonly getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
-  private readonly resolveExtension: (item: MediaItem) => Promise<string>;
-  private readonly resolveMediaUrl: (item: MediaItem) => Promise<string>;
-  private readonly fetch: (url: string, init: RequestInit) => Promise<Response>;
+  private readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
 
-  constructor({ filenamer, getTagsForIds, resolveExtension, resolveMediaUrl, fetch }: ArchiverDependencies) {
+  constructor({ filenamer, getTagsForIds, fetchOriginal }: ArchiverDependencies) {
     this.filenamer = filenamer;
     this.getTagsForIds = getTagsForIds;
-    this.resolveExtension = resolveExtension;
-    this.resolveMediaUrl = resolveMediaUrl;
-    this.fetch = fetch;
+    this.fetchOriginal = fetchOriginal;
   }
 
-  public async archive(items: MediaItem[], signal: AbortSignal, onItemSettled: (filename: string | null) => void): Promise<Blob | null> {
+  public async archive(items: PostMedia[], signal: AbortSignal, onItemSettled: (filename: string | null) => void): Promise<Blob | null> {
     const limiter = new ConcurrencyLimiter(DownloaderConfig.concurrency);
     const zipWriter = new DownloaderZipWriter();
     const tagsById = await this.getTagsForIds(items.map(item => item.id));
@@ -54,16 +50,11 @@ export class DownloaderArchiver implements Archiver {
     return zipWriter.finish();
   }
 
-  private async addToArchive(zipWriter: DownloaderZipWriter, item: MediaItem, tags: Set<string>, signal: AbortSignal): Promise<string> {
-    const extension = await this.resolveExtension(item);
-    const url = await this.resolveMediaUrl(item);
-    const response = await this.fetch(url, { signal });
-    const filename = this.filenamer.filenameFor(item, tags, extension);
+  private async addToArchive(zipWriter: DownloaderZipWriter, item: PostMedia, tags: Set<string>, signal: AbortSignal): Promise<string> {
+    const blob = await this.fetchOriginal(item.media, signal);
+    const filename = this.filenamer.filenameFor(item, tags, extensionOfMimeType(blob.type));
 
-    if (!response.ok) {
-      throw new Error(`${response.status} ${response.statusText}`);
-    }
-    zipWriter.add(filename, new Uint8Array(await response.arrayBuffer()));
+    zipWriter.add(filename, new Uint8Array(await blob.arrayBuffer()));
     return filename;
   }
 }

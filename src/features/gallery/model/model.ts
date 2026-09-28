@@ -1,13 +1,14 @@
 import * as GalleryItemWindow from "@/features/gallery/model/item_window";
 import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
-import { AddFavoriteStatus, FavoritesEditor, RemoveFavoriteStatus } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
+import { MediaSource } from "@/core/boundary/ports/media_source";
 import { Navigation } from "@/core/boundary/ports/navigation";
-import { GalleryState, Identifiable } from "@/types/app";
+import { GalleryState } from "@/types/app";
 import { Boundary } from "@/types/boundary";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
-import { MediaItem } from "@/types/media";
+import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
 import { Preferences } from "@/app/context/preferences";
 import { downloadMedia } from "@/lib/media/download";
@@ -15,30 +16,35 @@ import { isVideo } from "@/lib/media/media_type";
 import { navigationDelta } from "@/lib/event/keys";
 
 export class GalleryModel {
-  private readonly cursor: ItemCursor<MediaItem>;
+  private readonly cursor: ItemCursor<PostMedia>;
   private readonly state: GalleryStateController;
-  private getThumbsAround: (id: string) => MediaItem[];
+  private getItemsAroundId: (id: string) => PostMedia[];
 
-  constructor(preferences: Preferences, private readonly navigation: Navigation, private readonly favoritesEditor: FavoritesEditor) {
-    this.cursor = new ItemCursor<MediaItem>();
+  constructor(
+    preferences: Preferences,
+    private readonly navigation: Navigation,
+    private readonly favoritesEditor: FavoritesEditor,
+    private readonly mediaSource: Pick<MediaSource, "originalUrl" | "fetchOriginal">
+  ) {
+    this.cursor = new ItemCursor<PostMedia>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
-    this.getThumbsAround = (): MediaItem[] => [];
+    this.getItemsAroundId = (): PostMedia[] => [];
   }
 
   public upscaleQualityFor(thumbWidth: number, viewportWidth: number): number | null {
     return GalleryUpscaleQuality.qualityFor(thumbWidth, viewportWidth, GalleryUpscaleConfig.dynamicQualityCutoffs);
   }
 
-  public setupWrappingWindow<T extends Identifiable>(getItems: () => T[], toItem: (item: T) => MediaItem): void {
-    this.getThumbsAround = (id): MediaItem[] => GalleryItemWindow.wrappingThumbsAroundId(getItems(), id, toItem);
+  public setupWrappingWindow(getItems: () => PostMedia[]): void {
+    this.getItemsAroundId = (id): PostMedia[] => GalleryItemWindow.wrappingItemsAroundId(getItems(), id);
   }
 
-  public setupClampedWindow<T extends Identifiable>(getItems: () => T[], toItem: (item: T) => MediaItem): void {
-    this.getThumbsAround = (id): MediaItem[] => GalleryItemWindow.clampedThumbsAroundId(getItems(), id, toItem);
+  public setupClampedWindow(getItems: () => PostMedia[]): void {
+    this.getItemsAroundId = (id): PostMedia[] => GalleryItemWindow.clampedItemsAroundId(getItems(), id);
   }
 
-  public getItemsAround(id: string): MediaItem[] {
-    return this.getThumbsAround(id);
+  public getItemsAround(id: string): PostMedia[] {
+    return this.getItemsAroundId(id);
   }
 
   public jumpToLast(): void {
@@ -53,11 +59,11 @@ export class GalleryModel {
     return this.cursor.move(navigationDelta(direction));
   }
 
-  public currentItem(): MediaItem {
+  public currentItem(): PostMedia {
     return this.cursor.currentItem();
   }
 
-  public indexItems(items: MediaItem[]): void {
+  public indexItems(items: PostMedia[]): void {
     this.cursor.indexItems(items);
   }
 
@@ -66,24 +72,24 @@ export class GalleryModel {
   }
 
   public openPost(): void {
-    this.navigation.openPost(this.cursor.currentItem().id);
+    this.navigation.openUrl(this.navigation.postUrl(this.cursor.currentItem().id));
   }
 
-  public openMedia(): void {
-    this.navigation.openMedia(this.cursor.currentItem());
+  public async openOriginal(): Promise<void> {
+    this.navigation.openUrl(await this.mediaSource.originalUrl(this.cursor.currentItem().media));
   }
 
   public download(): Promise<void> {
-    return downloadMedia(this.cursor.currentItem());
+    return downloadMedia(this.mediaSource, this.cursor.currentItem());
   }
 
-  public addFavorite(): Promise<AddFavoriteStatus> {
+  public addFavorite(): Promise<AddFavoriteResult> {
     return this.favoritesEditor.add(this.cursor.currentItem().id);
   }
 
-  public removeFavorite(): Promise<RemoveFavoriteStatus> {
+  public removeFavorite(): Promise<RemoveFavoriteResult> {
     this.favoritesEditor.remove(this.cursor.currentItem().id);
-    return Promise.resolve("success");
+    return Promise.resolve("removed");
   }
 
   public getCurrentState(): GalleryState {
@@ -110,7 +116,7 @@ export class GalleryModel {
     this.state.preview(value);
   }
 
-  public open(item: MediaItem): void {
+  public open(item: PostMedia): void {
     this.cursor.pointTo(item);
     this.state.open();
   }
