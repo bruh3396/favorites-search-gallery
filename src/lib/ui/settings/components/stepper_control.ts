@@ -3,9 +3,9 @@ import { SettingsClass } from "@/lib/ui/settings/classes";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";
 
-const HOLD_INITIAL_DELAY_MS = 120;
-const HOLD_START_INTERVAL_MS = 140;
-const HOLD_MIN_INTERVAL_MS = 20;
+const HOLD_INITIAL_DELAY = 120;
+const HOLD_START_INTERVAL = 140;
+const HOLD_MIN_INTERVAL = 20;
 const HOLD_DECAY = 0.75;
 
 interface StepperConfig {
@@ -113,11 +113,11 @@ export function buildStepper(config: StepperConfig): Stepper {
 
 function bindHold(button: HTMLButtonElement, step: () => void): void {
   let timer = 0;
-  let interval = HOLD_START_INTERVAL_MS;
+  let interval = HOLD_START_INTERVAL;
 
   const stop = (): void => {
     window.clearTimeout(timer);
-    interval = HOLD_START_INTERVAL_MS;
+    interval = HOLD_START_INTERVAL;
   };
 
   const repeat = (): void => {
@@ -126,7 +126,7 @@ function bindHold(button: HTMLButtonElement, step: () => void): void {
       return;
     }
     step();
-    interval = Math.max(HOLD_MIN_INTERVAL_MS, interval * HOLD_DECAY);
+    interval = Math.max(HOLD_MIN_INTERVAL, interval * HOLD_DECAY);
     timer = window.setTimeout(repeat, interval);
   };
 
@@ -136,7 +136,7 @@ function bindHold(button: HTMLButtonElement, step: () => void): void {
     }
     event.preventDefault();
     step();
-    timer = window.setTimeout(repeat, HOLD_INITIAL_DELAY_MS);
+    timer = window.setTimeout(repeat, HOLD_INITIAL_DELAY);
   });
 
   button.addEventListener("pointerup", stop);

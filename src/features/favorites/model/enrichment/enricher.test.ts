@@ -14,22 +14,22 @@ const EXPIRED = 0;
 interface FavoriteOptions {
   fetchedAt?: number;
   kind?: MediaKind;
-  duration?: number;
+  durationSeconds?: number;
   tags?: string[];
 }
 
-function createFavorite(id: string, { fetchedAt, kind = "image", duration = 0, tags = [] }: FavoriteOptions = {}): Favorite {
+function createFavorite(id: string, { fetchedAt, kind = "image", durationSeconds = 0, tags = [] }: FavoriteOptions = {}): Favorite {
   const favorite = {
     id,
     media: { kind, locator: "" },
-    post: createPost({ id, fetchedAt, duration, tags: tags.join(" "), media: { kind, locator: "" } }),
+    post: createPost({ id, fetchedAt, durationSeconds, tags: tags.join(" "), media: { kind, locator: "" } }),
     tags: new Set(tags),
     enrich: vi.fn((post: Post) => {
       favorite.post = post;
       favorite.tags = new Set(post.tags.split(" "));
     }),
-    setDuration: vi.fn((value: number) => {
-      favorite.post.duration = value;
+    setDurationSeconds: vi.fn((value: number) => {
+      favorite.post.durationSeconds = value;
     })
   };
   return favorite as unknown as Favorite;
@@ -88,7 +88,7 @@ describe("FavoritesEnricher", () => {
 
   test("reads duration only for videos without one", async() => {
     const videoWithoutDuration = createFavorite("1", { fetchedAt: FRESH, kind: "video" });
-    const videoWithDuration = createFavorite("2", { fetchedAt: FRESH, kind: "video", duration: 30 });
+    const videoWithDuration = createFavorite("2", { fetchedAt: FRESH, kind: "video", durationSeconds: 30 });
     const image = createFavorite("3", { fetchedAt: FRESH });
     const { enricher, fetchDurationSeconds } = setup();
 

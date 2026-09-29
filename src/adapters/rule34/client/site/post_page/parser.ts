@@ -22,9 +22,9 @@ export function parsePostFromPostPage(html: string): CategorizedPost {
       height: dimensions.height,
       score: Number(statistics.score),
       rating,
-      change: 0,
+      changedAt: 0,
       deleted: true,
-      duration: 0,
+      durationSeconds: 0,
       tags,
       media: parseMedia(dom, tags)
     },

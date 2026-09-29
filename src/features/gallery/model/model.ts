@@ -1,13 +1,13 @@
 import * as GalleryItemWindow from "@/features/gallery/model/item_window";
 import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
-import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { Boundary } from "@/types/boundary";
 import { GalleryState } from "@/types/app";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
-import { MediaSource } from "@/core/boundary/ports/media_source";
-import { Links } from "@/core/boundary/ports/links";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { Navigation } from "@/core/boundary/ports/navigation";
 import { NavigationKey } from "@/types/input";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
@@ -22,9 +22,9 @@ export class GalleryModel {
 
   constructor(
     preferences: Preferences,
-    private readonly links: Links,
-    private readonly favoritesEditor: FavoritesEditor,
-    private readonly mediaSource: Pick<MediaSource, "resolveOriginalUrl" | "fetchOriginal">
+    private readonly navigation: Navigation,
+    private readonly remoteFavorites: Pick<RemoteFavorites, "add" | "remove">,
+    private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl" | "fetchOriginal">
   ) {
     this.cursor = new ItemCursor<PostMedia>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
@@ -72,23 +72,23 @@ export class GalleryModel {
   }
 
   public openPost(): void {
-    this.links.openInNewTab(this.links.postUrl(this.cursor.currentItem().id));
+    this.navigation.openInNewTab(this.navigation.postUrl(this.cursor.currentItem().id));
   }
 
   public async openOriginal(): Promise<void> {
-    this.links.openInNewTab(await this.mediaSource.resolveOriginalUrl(this.cursor.currentItem().media));
+    this.navigation.openInNewTab(await this.remoteMedia.resolveOriginalUrl(this.cursor.currentItem().media));
   }
 
   public download(): Promise<void> {
-    return downloadMedia(this.mediaSource, this.cursor.currentItem());
+    return downloadMedia(this.remoteMedia, this.cursor.currentItem());
   }
 
   public addFavorite(): Promise<AddFavoriteResult> {
-    return this.favoritesEditor.add(this.cursor.currentItem().id);
+    return this.remoteFavorites.add(this.cursor.currentItem().id);
   }
 
   public removeFavorite(): Promise<RemoveFavoriteResult> {
-    this.favoritesEditor.remove(this.cursor.currentItem().id);
+    this.remoteFavorites.remove(this.cursor.currentItem().id);
     return Promise.resolve("removed");
   }
 

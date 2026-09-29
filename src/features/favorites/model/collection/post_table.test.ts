@@ -36,7 +36,7 @@ describe("FavoritesPostTable", () => {
 
   describe("getMetric", () => {
     beforeEach(() => {
-      table.write(0, createPost({ id: "7", change: 123 }));
+      table.write(0, createPost({ id: "7", changedAt: 123 }));
     });
 
     test("reads id", () => {

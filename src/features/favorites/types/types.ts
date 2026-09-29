@@ -15,7 +15,7 @@ export interface Arena {
   media: (index: number) => Media;
   isNewFavorite: (index: number) => boolean;
   markNew: (index: number) => void;
-  setDuration: (index: number, duration: number) => void;
+  setDurationSeconds: (index: number, durationSeconds: number) => void;
   cacheTagSet: (index: number, tags: Set<string>) => void;
   tagSet: (index: number) => Set<string>;
   consumeTagSet: (index: number) => Set<string>;

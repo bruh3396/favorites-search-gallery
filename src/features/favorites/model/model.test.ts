@@ -6,7 +6,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryFavoritesSource } from "@/adapters/memory/ports/favorites_source/favorites_source";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { Post } from "@/core/domain/post/post";
 import { createAppContext } from "@/testing/context";
 import { createPost } from "@/testing/post";
@@ -20,7 +20,7 @@ function createContext(resultsPerPage = 100, sourcePosts: Post[] = []): AppConte
   pageCounter += 1;
   return createAppContext({
     environment: { favoritesOwnerId: `model_test_${Date.now()}_${pageCounter}` },
-    ports: { favoritesSource: new MemoryFavoritesSource(new MemoryClient(sourcePosts)) },
+    ports: { remoteFavorites: new MemoryRemoteFavorites(new MemoryClient(sourcePosts)) },
     preferences: { favorites: { resultsPerPage } }
   });
 }

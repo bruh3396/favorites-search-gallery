@@ -37,6 +37,6 @@ export class FavoritesEnricher implements Enricher {
 
   public async enrich(favorites: Favorite[]): Promise<void> {
     await this.metadataEnricher.enrich(favorites.filter(favorite => postIsStale(favorite.post)));
-    this.durationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && favorite.post.duration === 0));
+    this.durationEnricher.enrich(favorites.filter(favorite => isVideo(favorite) && favorite.post.durationSeconds === 0));
   }
 }

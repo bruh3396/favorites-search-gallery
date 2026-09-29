@@ -1,6 +1,6 @@
 import { Environment } from "@/core/boundary/environment";
 import { GalleryVideoController } from "@/features/gallery/view/rendering/video/video_controller";
-import { MediaSource } from "@/core/boundary/ports/media_source";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { Renderer } from "@/features/gallery/types/types";
@@ -10,8 +10,8 @@ export class GalleryVideoRenderer implements Renderer {
   public readonly root = div("video-container");
   private readonly controller: GalleryVideoController;
 
-  constructor(preferences: Preferences, environment: Environment, mediaSource: Pick<MediaSource, "resolveOriginalUrl">) {
-    this.controller = new GalleryVideoController(preferences, environment, mediaSource);
+  constructor(preferences: Preferences, environment: Environment, remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">) {
+    this.controller = new GalleryVideoController(preferences, environment, remoteMedia);
   }
 
   public setup(onVideoEnded: () => void, onVolumeChanged: (volume: number) => void): void {

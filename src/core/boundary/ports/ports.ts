@@ -1,19 +1,17 @@
-import { FavoritesEditor } from "@/core/boundary/ports/favorites_editor";
-import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 import { Host } from "@/core/boundary/ports/host";
 import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
-import { Links } from "@/core/boundary/ports/links";
-import { MediaSource } from "@/core/boundary/ports/media_source";
-import { PostSource } from "@/core/boundary/ports/post_source";
-import { TagSource } from "@/core/boundary/ports/tag_source";
+import { Navigation } from "@/core/boundary/ports/navigation";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts";
+import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
 
 export interface Ports {
-  favoritesEditor: FavoritesEditor;
-  favoritesSource: FavoritesSource;
   host: Host;
   keyValueStore: KeyValueStore;
-  mediaSource: MediaSource;
-  links: Links;
-  postSource: PostSource;
-  tagSource: TagSource;
+  navigation: Navigation;
+  remoteFavorites: RemoteFavorites;
+  remoteMedia: RemoteMedia;
+  remotePosts: RemotePosts;
+  remoteTagCategories: RemoteTagCategories;
 }

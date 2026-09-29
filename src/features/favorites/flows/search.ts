@@ -7,7 +7,7 @@ export class FavoritesSearchFlow extends FavoritesFlow {
   }
 
   public openPostList(searchQuery: string): void {
-    this.context.ports.links.openSearchInNewTab(searchQuery);
+    this.context.ports.navigation.openSearchInNewTab(searchQuery);
   }
 
   public reSearchFavorites(): void {

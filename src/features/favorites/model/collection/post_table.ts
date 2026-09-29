@@ -14,8 +14,8 @@ export class FavoritesPostTable {
   private deleted = new Uint8Array(DEFAULT_CAPACITY);
   private isNew = new Uint8Array(DEFAULT_CAPACITY);
   private mediaKinds = new Uint8Array(DEFAULT_CAPACITY);
-  private durations = new Uint16Array(DEFAULT_CAPACITY);
-  private changes = new Float64Array(DEFAULT_CAPACITY);
+  private durationSeconds = new Uint16Array(DEFAULT_CAPACITY);
+  private changedAts = new Float64Array(DEFAULT_CAPACITY);
   private fetchedAts = new Float64Array(DEFAULT_CAPACITY);
   private ratings = new Uint8Array(DEFAULT_CAPACITY);
   private mediaLocators: string[] = [];
@@ -25,8 +25,8 @@ export class FavoritesPostTable {
     this.widths[index] = post.width;
     this.heights[index] = post.height;
     this.scores[index] = post.score;
-    this.changes[index] = post.change;
-    this.durations[index] = post.duration ?? 0;
+    this.changedAts[index] = post.changedAt;
+    this.durationSeconds[index] = post.durationSeconds ?? 0;
     this.fetchedAts[index] = post.fetchedAt ?? 0;
     this.ratings[index] = toRatingValue(post.rating);
     this.deleted[index] = post.deleted ? 1 : 0;
@@ -42,8 +42,8 @@ export class FavoritesPostTable {
       height: this.heights[index],
       score: this.scores[index],
       rating: toRatingString(this.ratings[index] as Rating),
-      change: this.changes[index],
-      duration: this.durations[index],
+      changedAt: this.changedAts[index],
+      durationSeconds: this.durationSeconds[index],
       fetchedAt: this.fetchedAts[index],
       deleted: this.deleted[index] === 1,
       media: this.media(index)
@@ -61,9 +61,9 @@ export class FavoritesPostTable {
       case "score":
         return this.scores[index];
       case "lastChangedTimestamp":
-        return this.changes[index];
+        return this.changedAts[index];
       case "duration":
-        return this.durations[index];
+        return this.durationSeconds[index];
       case "creationTimestamp":
       case "default":
       case "random":
@@ -92,8 +92,8 @@ export class FavoritesPostTable {
     this.isNew[index] = 1;
   }
 
-  public setDuration(index: number, duration: number): void {
-    this.durations[index] = duration;
+  public setDurationSeconds(index: number, durationSeconds: number): void {
+    this.durationSeconds[index] = durationSeconds;
   }
 
   public ensureCapacity(required: number): void {
@@ -110,8 +110,8 @@ export class FavoritesPostTable {
     this.deleted = grow(this.deleted, capacity);
     this.isNew = grow(this.isNew, capacity);
     this.mediaKinds = grow(this.mediaKinds, capacity);
-    this.durations = grow(this.durations, capacity);
-    this.changes = grow(this.changes, capacity);
+    this.durationSeconds = grow(this.durationSeconds, capacity);
+    this.changedAts = grow(this.changedAts, capacity);
     this.fetchedAts = grow(this.fetchedAts, capacity);
     this.ratings = grow(this.ratings, capacity);
   }
@@ -127,8 +127,8 @@ export class FavoritesPostTable {
     this.deleted = this.deleted.slice(0, count);
     this.isNew = this.isNew.slice(0, count);
     this.mediaKinds = this.mediaKinds.slice(0, count);
-    this.durations = this.durations.slice(0, count);
-    this.changes = this.changes.slice(0, count);
+    this.durationSeconds = this.durationSeconds.slice(0, count);
+    this.changedAts = this.changedAts.slice(0, count);
     this.fetchedAts = this.fetchedAts.slice(0, count);
     this.ratings = this.ratings.slice(0, count);
     this.mediaLocators.length = count;

@@ -12,11 +12,11 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
     }
     handleActionBarClick(event.originalEvent, {
       onFavoriteAdded: (id) => {
-        this.context.ports.favoritesEditor.add(id);
+        this.context.ports.remoteFavorites.add(id);
         this.context.events.app.favoriteAdded.emit(id);
       },
       onFavoriteRemoved: doNothing,
-      onPostOpened: (id) => this.context.ports.links.openInNewTab(this.context.ports.links.postUrl(id)),
+      onPostOpened: (id) => this.context.ports.navigation.openInNewTab(this.context.ports.navigation.postUrl(id)),
       onMediaDownloaded: (id) => this.download(id)
     });
   }
@@ -25,7 +25,7 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
     const post = this.model.getPost(id);
 
     if (post !== undefined) {
-      downloadMedia(this.context.ports.mediaSource, post);
+      downloadMedia(this.context.ports.remoteMedia, post);
     }
   }
 }

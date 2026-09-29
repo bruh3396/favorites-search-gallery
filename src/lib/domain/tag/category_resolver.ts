@@ -1,8 +1,8 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
-import { TagSource } from "@/core/boundary/ports/tag_source";
+import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
 
-export async function resolveCategories(tagSource: TagSource, tagNames: string[]): Promise<TagCategoryMap> {
+export async function resolveCategories(remoteTagCategories: RemoteTagCategories, tagNames: string[]): Promise<TagCategoryMap> {
   const categoryMap: TagCategoryMap = new Map();
   const uncached: string[] = [];
 
@@ -21,7 +21,7 @@ export async function resolveCategories(tagSource: TagSource, tagNames: string[]
   }
 
   try {
-    const fetched = await tagSource.fetchCategories(uncached);
+    const fetched = await remoteTagCategories.fetch(uncached);
 
     TagCategoryStore.persistAll(fetched);
 

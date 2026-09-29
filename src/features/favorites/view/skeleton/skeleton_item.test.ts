@@ -70,10 +70,10 @@ describe("FavoritesSkeletonItem", () => {
       const delay = parseFloat(element.style.getPropertyValue("--delay-skeleton"));
       const duration = parseFloat(element.style.getPropertyValue("--duration-skeleton"));
 
-      expect(delay).toBeGreaterThanOrEqual(SkeletonConfig.animationDelayRange.min);
-      expect(delay).toBeLessThanOrEqual(SkeletonConfig.animationDelayRange.max);
-      expect(duration).toBeGreaterThanOrEqual(SkeletonConfig.animationDurationRange.min);
-      expect(duration).toBeLessThanOrEqual(SkeletonConfig.animationDurationRange.max);
+      expect(delay).toBeGreaterThanOrEqual(SkeletonConfig.animationDelayRangeSeconds.min);
+      expect(delay).toBeLessThanOrEqual(SkeletonConfig.animationDelayRangeSeconds.max);
+      expect(duration).toBeGreaterThanOrEqual(SkeletonConfig.animationDurationRangeSeconds.min);
+      expect(duration).toBeLessThanOrEqual(SkeletonConfig.animationDurationRangeSeconds.max);
     });
 
     test("is left to the stylesheet when disabled", () => {

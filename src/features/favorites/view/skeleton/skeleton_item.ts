@@ -40,12 +40,12 @@ export class FavoritesSkeletonItem {
 }
 
 function randomAnimationDelay(): number {
-  const { min, max } = SkeletonConfig.animationDelayRange;
+  const { min, max } = SkeletonConfig.animationDelayRangeSeconds;
   return roundToTwoDecimalPlaces(randomFloatInRange(min, max));
 }
 
 function randomAnimationDuration(): number {
-  const { min, max } = SkeletonConfig.animationDurationRange;
+  const { min, max } = SkeletonConfig.animationDurationRangeSeconds;
   return roundToTwoDecimalPlaces(randomFloatInRange(min, max));
 }
 

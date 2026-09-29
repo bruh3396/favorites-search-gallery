@@ -1,16 +1,15 @@
 import { API_ORIGIN, ApiClient } from "@/adapters/api/client/client";
-import { ApiPostSource } from "@/adapters/api/ports/post_source/post_source";
-import { ApiTagSource } from "@/adapters/api/ports/tag_source/tag_source";
+import { ApiRemotePosts } from "@/adapters/api/ports/remote_posts/remote_posts";
+import { ApiRemoteTagCategories } from "@/adapters/api/ports/remote_tag_categories/remote_tag_categories";
 import { BrowserKeyValueStore } from "@/adapters/browser/ports/key_value_store/key_value_store";
 import { Environment } from "@/core/boundary/environment";
 import { Ports } from "@/core/boundary/ports/ports";
-import { Rule34FavoritesEditor } from "@/adapters/rule34/ports/favorites_editor/favorites_editor";
-import { Rule34FavoritesSource } from "@/adapters/rule34/ports/favorites_source/favorites_source";
+import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { Rule34Host } from "@/adapters/rule34/ports/host/host";
 import { Rule34MediaClient } from "@/adapters/rule34/client/media/client";
-import { Rule34MediaSource } from "@/adapters/rule34/ports/media_source/media_source";
-import { Rule34Links } from "@/adapters/rule34/ports/links/links";
-import { Rule34PostSource } from "@/adapters/rule34/ports/post_source/post_source";
+import { Rule34RemoteMedia } from "@/adapters/rule34/ports/remote_media/remote_media";
+import { Rule34Navigation } from "@/adapters/rule34/ports/navigation/navigation";
+import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
 import { mintMedia } from "@/adapters/rule34/client/media/locator";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
@@ -29,12 +28,11 @@ function createApiClient(rule34SiteClient: Rule34SiteClient, environment: Enviro
 
 function createPorts(rule34SiteClient: Rule34SiteClient, apiClient: ApiClient, environment: Environment): Ports {
   return {
-    favoritesSource: new Rule34FavoritesSource(rule34SiteClient),
-    favoritesEditor: new Rule34FavoritesEditor(rule34SiteClient),
-    postSource: new ApiPostSource(apiClient, new Rule34PostSource(rule34SiteClient), url => mintMedia(url, "")),
-    tagSource: new ApiTagSource(apiClient),
-    mediaSource: new Rule34MediaSource(new Rule34MediaClient()),
-    links: new Rule34Links(rule34SiteClient),
+    remoteFavorites: new Rule34RemoteFavorites(rule34SiteClient),
+    remotePosts: new ApiRemotePosts(apiClient, new Rule34RemotePosts(rule34SiteClient), url => mintMedia(url, "")),
+    remoteTagCategories: new ApiRemoteTagCategories(apiClient),
+    remoteMedia: new Rule34RemoteMedia(new Rule34MediaClient()),
+    navigation: new Rule34Navigation(rule34SiteClient),
     host: new Rule34Host(rule34SiteClient, environment.mode),
     keyValueStore: new BrowserKeyValueStore()
   };

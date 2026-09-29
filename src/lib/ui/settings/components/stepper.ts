@@ -5,7 +5,7 @@ import { buildStepper } from "@/lib/ui/settings/components/stepper_control";
 import { clamp } from "@/utils/pure/number";
 import { controlRow } from "@/lib/ui/settings/components/row";
 
-const COMMIT_DEBOUNCE_MS = 50;
+const COMMIT_DEBOUNCE_DELAY = 50;
 
 export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   const min = config.min ?? 0;
@@ -25,7 +25,7 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
 
   const binding = new DebouncedStateBinding(config, min, (value) => {
     stepper.setValue(value);
-  }, COMMIT_DEBOUNCE_MS);
+  }, COMMIT_DEBOUNCE_DELAY);
 
   const row = controlRow(config, stepper.element);
 

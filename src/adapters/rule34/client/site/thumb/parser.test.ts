@@ -18,8 +18,8 @@ describe("parseThumb", () => {
       height: 0,
       score: 0,
       rating: "",
-      change: 0,
-      duration: 0,
+      changedAt: 0,
+      durationSeconds: 0,
       deleted: false,
       media: { kind: "image", locator: "1234/a1b2c3" }
     });

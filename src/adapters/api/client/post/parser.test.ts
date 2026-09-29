@@ -26,7 +26,7 @@ describe("parsePost", () => {
     expect(post.height).toBe(1080);
     expect(post.score).toBe(100);
     expect(post.rating).toBe("e");
-    expect(post.change).toBe(1234567890);
+    expect(post.changedAt).toBe(1234567890_000);
     expect(post.tags).toBe("tag1 tag2");
     expect(post.media).toBe(MEDIA);
   });

@@ -1,10 +1,9 @@
 import * as PostStore from "@/lib/domain/post/store";
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
-import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { AppContext } from "@/app/context/context";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
-import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesEnricher } from "@/features/favorites/model/enrichment/enricher";
@@ -22,21 +21,19 @@ export class FavoritesModel {
   private readonly store: FavoritesStore;
   private readonly loader: FavoritesLoader;
   private readonly paginator: Paginator<Favorite>;
-  private readonly source: FavoritesSource;
-  private readonly editor: FavoritesEditor;
+  private readonly remoteFavorites: RemoteFavorites;
 
   constructor(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void) {
-    const { favoritesSource, favoritesEditor, postSource, mediaSource } = context.ports;
-    const postResolver = new PostResolver(postSource);
+    const { remoteFavorites, remotePosts, remoteMedia } = context.ports;
+    const postResolver = new PostResolver(remotePosts);
 
-    this.source = favoritesSource;
-    this.editor = favoritesEditor;
+    this.remoteFavorites = remoteFavorites;
     this.collection = new FavoritesCollection();
     this.searcher = new FavoritesSearcher(context.preferences, context.environment, onSearchResultsChanged);
-    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", `user${context.environment.favoritesOwnerId}`));
+    this.store = new FavoritesStore(new Database<Post>("FavoritesV3", `user${context.environment.favoritesOwnerId}`));
     this.loader = new FavoritesLoader({
       store: this.store,
-      source: this.source,
+      source: this.remoteFavorites,
       collection: this.collection,
       searcher: this.searcher,
       enricher: new FavoritesEnricher({
@@ -44,7 +41,7 @@ export class FavoritesModel {
         onTagsUpdated: (updates): void => this.searcher.update(updates),
         resolvePosts: (posts, onResolved): Promise<void> => postResolver.resolveAll(posts, onResolved),
         persistTagCategories: TagCategoryStore.persistAll,
-        fetchDurationSeconds: (media): Promise<number> => mediaSource.fetchDurationSeconds(media),
+        fetchDurationSeconds: (media): Promise<number> => remoteMedia.fetchDurationSeconds(media),
         persistPost: PostStore.write
       })
     });
@@ -71,15 +68,15 @@ export class FavoritesModel {
   }
 
   public fetchFavoritesCount(): Promise<number | null> {
-    return this.source.fetchCount();
+    return this.remoteFavorites.fetchCount();
   }
 
   public addFavorite(id: string): Promise<AddFavoriteResult> {
-    return this.editor.add(id);
+    return this.remoteFavorites.add(id);
   }
 
   public removeFavorite(id: string): Promise<RemoveFavoriteResult> {
-    return this.editor.remove(id);
+    return this.remoteFavorites.remove(id);
   }
 
   public indexAllFavorites(): void {

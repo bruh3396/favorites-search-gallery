@@ -17,8 +17,8 @@ export function parseThumb(thumb: HTMLElement): Post {
     height: 0,
     score: 0,
     rating: "",
-    change: 0,
-    duration: 0,
+    changedAt: 0,
+    durationSeconds: 0,
     deleted: false,
     media: mintMedia(parsePreviewURL(getImageFromThumb(thumb)), tags) ?? NO_MEDIA
   };

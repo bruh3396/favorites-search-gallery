@@ -1,7 +1,11 @@
+import { Device } from "@/core/boundary/environment";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { reloadWindow } from "@/utils/browser/window";
 
-const DESKTOP_RESET_PROMPT_SUFFIX = "\nTag edits and search snippets will be preserved.";
+const RESET_PROMPT_SUFFIX: Record<Device, string> = {
+  desktop: "\nTag edits and search snippets will be preserved.",
+  mobile: ""
+};
 const RESET_STORAGE_KEYS = ["searchHistory", "lastEditedSearchQuery", "aspectRatios"];
 
 export class FavoritesActionFlow extends FavoritesFlow {
@@ -26,7 +30,7 @@ export class FavoritesActionFlow extends FavoritesFlow {
   }
 
   private resetPrompt(): string {
-    const suffix = this.context.environment.device === "mobile" ? "" : DESKTOP_RESET_PROMPT_SUFFIX;
+    const suffix = RESET_PROMPT_SUFFIX[this.context.environment.device];
     return `Are you sure you want to reset?\nThis will clear all cached favorites and preferences.${suffix}`;
   }
 }

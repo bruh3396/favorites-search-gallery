@@ -60,8 +60,8 @@ export class FavoritesColumnarArena implements Arena {
     this.postTable.markNew(index);
   }
 
-  public setDuration(index: number, duration: number): void {
-    this.postTable.setDuration(index, duration);
+  public setDurationSeconds(index: number, durationSeconds: number): void {
+    this.postTable.setDurationSeconds(index, durationSeconds);
   }
 
   public cacheTagSet(index: number, tags: Set<string>): void {

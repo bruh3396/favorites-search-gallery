@@ -1,9 +1,9 @@
-import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { describe, expect, test, vi } from "vitest";
 import { GalleryModel } from "@/features/gallery/model/model";
-import { MediaSource } from "@/core/boundary/ports/media_source";
-import { MemoryLinks } from "@/adapters/memory/ports/links/links";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
 import { PostMedia } from "@/core/domain/post/post";
 import { UpscaleQuality } from "@/types/app";
 import { createPreferences } from "@/testing/preferences";
@@ -11,12 +11,12 @@ import { createPreferences } from "@/testing/preferences";
 interface Setup {
   model: GalleryModel;
   items: PostMedia[];
-  links: MemoryLinks;
-  favoritesEditor: { add: ReturnType<typeof vi.fn<FavoritesEditor["add"]>>; remove: ReturnType<typeof vi.fn<FavoritesEditor["remove"]>> };
+  navigation: MemoryNavigation;
+  remoteFavorites: { add: ReturnType<typeof vi.fn<RemoteFavorites["add"]>>; remove: ReturnType<typeof vi.fn<RemoteFavorites["remove"]>> };
   blobsRequested: Media[];
 }
 
-function createMediaSource(blobsRequested: Media[]): Pick<MediaSource, "resolveOriginalUrl" | "fetchOriginal"> {
+function createRemoteMedia(blobsRequested: Media[]): Pick<RemoteMedia, "resolveOriginalUrl" | "fetchOriginal"> {
   return {
     resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`original:${media.locator}`),
     fetchOriginal: (media): Promise<Blob> => {
@@ -35,22 +35,22 @@ function createModel(previewEnabled = false): GalleryModel {
 }
 
 function setupWith(previewEnabled: boolean): Omit<Setup, "items"> {
-  const links = new MemoryLinks();
-  const favoritesEditor = {
-    add: vi.fn<FavoritesEditor["add"]>((): Promise<AddFavoriteResult> => Promise.resolve("alreadyAdded")),
-    remove: vi.fn<FavoritesEditor["remove"]>((): Promise<RemoveFavoriteResult> => new Promise(() => { }))
+  const navigation = new MemoryNavigation();
+  const remoteFavorites = {
+    add: vi.fn<RemoteFavorites["add"]>((): Promise<AddFavoriteResult> => Promise.resolve("alreadyAdded")),
+    remove: vi.fn<RemoteFavorites["remove"]>((): Promise<RemoveFavoriteResult> => new Promise(() => { }))
   };
   const blobsRequested: Media[] = [];
-  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), links, favoritesEditor, createMediaSource(blobsRequested));
-  return { model, links, favoritesEditor, blobsRequested };
+  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), navigation, remoteFavorites, createRemoteMedia(blobsRequested));
+  return { model, navigation, remoteFavorites, blobsRequested };
 }
 
 function setup(...ids: string[]): Setup {
-  const { model, links, favoritesEditor, blobsRequested } = setupWith(false);
+  const { model, navigation, remoteFavorites, blobsRequested } = setupWith(false);
   const items = ids.map(id => createItem(id));
 
   model.indexItems(items);
-  return { model, items, links, favoritesEditor, blobsRequested };
+  return { model, items, navigation, remoteFavorites, blobsRequested };
 }
 
 describe("GalleryModel", () => {
@@ -161,12 +161,12 @@ describe("GalleryModel", () => {
     });
 
     test("opens the current item's post and original", async() => {
-      const { model, items, links } = setup("101");
+      const { model, items, navigation } = setup("101");
 
       model.open(items[0]);
       model.openPost();
       await model.openOriginal();
-      expect(links.opened).toEqual(["#post-101", "original:1/101.png"]);
+      expect(navigation.opened).toEqual(["#post-101", "original:1/101.png"]);
     });
 
     test("downloads the current item's original", () => {
@@ -178,19 +178,19 @@ describe("GalleryModel", () => {
     });
 
     test("adds the current item as a favorite and reports the answer", async() => {
-      const { model, items, favoritesEditor } = setup("104");
+      const { model, items, remoteFavorites } = setup("104");
 
       model.open(items[0]);
       expect(await model.addFavorite()).toBe("alreadyAdded");
-      expect(favoritesEditor.add).toHaveBeenCalledWith("104");
+      expect(remoteFavorites.add).toHaveBeenCalledWith("104");
     });
 
     test("removes the current item from favorites without waiting for the answer", async() => {
-      const { model, items, favoritesEditor } = setup("105");
+      const { model, items, remoteFavorites } = setup("105");
 
       model.open(items[0]);
       expect(await model.removeFavorite()).toBe("removed");
-      expect(favoritesEditor.remove).toHaveBeenCalledWith("105");
+      expect(remoteFavorites.remove).toHaveBeenCalledWith("105");
     });
   });
 });

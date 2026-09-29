@@ -19,8 +19,8 @@ export class GalleryRenderer {
 
   constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined) {
     this.imageRenderer = new GalleryImageRenderer(context, favoriteFor);
-    this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment, context.ports.mediaSource);
-    this.gifRenderer = new GalleryGifRenderer(context.environment, context.ports.mediaSource);
+    this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment, context.ports.remoteMedia);
+    this.gifRenderer = new GalleryGifRenderer(context.environment, context.ports.remoteMedia);
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
     this.renderers.forEach((renderer) => galleryRoot.appendChild(renderer.root));
   }

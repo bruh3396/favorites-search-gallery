@@ -9,7 +9,7 @@ export interface Favorite extends PostMedia, Searchable {
   pixelCount: number;
   markAsNew: () => void;
   enrich: (post: Post) => void;
-  setDuration: (duration: number) => void;
+  setDurationSeconds: (durationSeconds: number) => void;
   consumeTags: () => Set<string>;
   getMetric: (metric: Metric) => number;
 }

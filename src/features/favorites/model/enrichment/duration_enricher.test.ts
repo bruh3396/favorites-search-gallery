@@ -11,9 +11,9 @@ function createFavorite(id: string): Favorite {
   const favorite = {
     id,
     media,
-    post: createPost({ id, duration: 0, media }),
-    setDuration: vi.fn((duration: number) => {
-      favorite.post.duration = duration;
+    post: createPost({ id, durationSeconds: 0, media }),
+    setDurationSeconds: vi.fn((durationSeconds: number) => {
+      favorite.post.durationSeconds = durationSeconds;
     })
   };
   return favorite as unknown as Favorite;
@@ -52,17 +52,17 @@ describe("FavoritesDurationEnricher", () => {
     const enricher = new FavoritesDurationEnricher(
       () => order.push("enriched"),
       () => Promise.resolve(42),
-      post => order.push(`persisted:${post.duration}`)
+      post => order.push(`persisted:${post.durationSeconds}`)
     );
 
-    vi.mocked(favorite.setDuration).mockImplementation(duration => {
-      favorite.post.duration = duration;
+    vi.mocked(favorite.setDurationSeconds).mockImplementation(durationSeconds => {
+      favorite.post.durationSeconds = durationSeconds;
       order.push("set");
     });
     enricher.enrich([favorite]);
     await flushMicrotasks();
 
-    expect(favorite.setDuration).toHaveBeenCalledWith(42);
+    expect(favorite.setDurationSeconds).toHaveBeenCalledWith(42);
     expect(order).toEqual(["set", "persisted:42", "enriched"]);
   });
 
@@ -74,7 +74,7 @@ describe("FavoritesDurationEnricher", () => {
     enricher.enrich([favorite]);
     await flushMicrotasks();
 
-    expect(favorite.setDuration).not.toHaveBeenCalled();
+    expect(favorite.setDurationSeconds).not.toHaveBeenCalled();
     expect(persisted).toHaveLength(0);
     expect(enriched).toHaveLength(0);
     expect(console.error).toHaveBeenCalledOnce();

@@ -1,5 +1,6 @@
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { FavoritesFeatures, FavoritesFeaturesDependencies } from "@/features/favorites/features/features";
+import { AppMode, Device } from "@/core/boundary/environment";
 import { AppContext } from "@/app/context/context";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesFlows } from "@/features/favorites/flows/flows";
@@ -19,21 +20,35 @@ interface FavoritesComponents {
   features: FavoritesFeatures;
 }
 
-export function startFavorites(context: AppContext): void {
-  if (context.environment.mode === "favorites") {
-    const shell = new FavoritesShell(context.shell, context.environment);
-    const model = new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit);
-    const view = new FavoritesView(context, shell);
-    const control = new FavoritesControl(context, shell);
-    const features = new FavoritesFeatures(context, featureDependencies(context, model, control));
-    const flows = new FavoritesFlows(context, model, view, control);
-    const components: FavoritesComponents = { context, shell, model, view, flows, control, features };
+const START: Record<AppMode, (context: AppContext) => void> = {
+  favorites: startOnFavoritesPage,
+  postList: startOnPostList
+};
 
-    setup(components);
-    start(components);
-  } else if (context.environment.mode === "postList") {
-    servePostListRequests(context, new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit));
-  }
+const SUBSCRIBE_TO_INPUT: Record<Device, (components: FavoritesComponents) => void> = {
+  desktop: subscribeToDesktopInput,
+  mobile: subscribeToMobileInput
+};
+
+export function startFavorites(context: AppContext): void {
+  START[context.environment.mode](context);
+}
+
+function startOnFavoritesPage(context: AppContext): void {
+  const shell = new FavoritesShell(context.shell, context.environment);
+  const model = new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit);
+  const view = new FavoritesView(context, shell);
+  const control = new FavoritesControl(context, shell);
+  const features = new FavoritesFeatures(context, featureDependencies(context, model, control));
+  const flows = new FavoritesFlows(context, model, view, control);
+  const components: FavoritesComponents = { context, shell, model, view, flows, control, features };
+
+  setup(components);
+  start(components);
+}
+
+function startOnPostList(context: AppContext): void {
+  servePostListRequests(context, new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit));
 }
 
 function setup(components: FavoritesComponents): void {
@@ -60,7 +75,7 @@ function featureDependencies(context: AppContext, model: FavoritesModel, control
       getSearchResults: () => model.getCurrentSearchResults(),
       getTagCategory: TagCategoryStore.get,
       getTagsForIds: (ids) => model.getTagsForIds(ids),
-      fetchOriginal: (media, signal) => context.ports.mediaSource.fetchOriginal(media, signal)
+      fetchOriginal: (media, signal) => context.ports.remoteMedia.fetchOriginal(media, signal)
     },
     snippets: {
       appendToSearch: (text) => control.appendToSearch(text),
@@ -132,13 +147,7 @@ function subscribeToPreferences({ context, view, flows }: FavoritesComponents): 
 }
 
 function subscribeToDomEvents(components: FavoritesComponents): void {
-  const { environment } = components.context;
-
-  if (environment.device === "desktop") {
-    subscribeToDesktopInput(components);
-  } else {
-    subscribeToMobileInput(components);
-  }
+  SUBSCRIBE_TO_INPUT[components.context.environment.device](components);
 }
 
 function subscribeToDesktopInput({ context, view, flows }: FavoritesComponents): void {

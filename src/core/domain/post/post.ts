@@ -9,10 +9,10 @@ export type Post = {
   height: number;
   score: number;
   rating: string;
-  change: number;
+  changedAt: number;
   media: Media;
   tags: string;
-  duration?: number;
+  durationSeconds?: number;
   deleted?: boolean;
   fetchedAt?: number;
 };

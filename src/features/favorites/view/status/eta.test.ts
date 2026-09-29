@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
 
-function etaFor(eta: FavoritesEta, elapsedMs: number, current: number, total: number): string | null {
-  vi.advanceTimersByTime(elapsedMs);
+function etaFor(eta: FavoritesEta, elapsed: number, current: number, total: number): string | null {
+  vi.advanceTimersByTime(elapsed);
   return eta.getEta(current, total);
 }
 

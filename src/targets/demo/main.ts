@@ -2,13 +2,12 @@ import { readBrowserEnvironment, readPrefersDarkMode } from "@/adapters/browser/
 import { BrowserKeyValueStore } from "@/adapters/browser/ports/key_value_store/key_value_store";
 import { HostEnvironment } from "@/core/boundary/environment";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryFavoritesEditor } from "@/adapters/memory/ports/favorites_editor/favorites_editor";
-import { MemoryFavoritesSource } from "@/adapters/memory/ports/favorites_source/favorites_source";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryHost } from "@/adapters/memory/ports/host/host";
-import { MemoryLinks } from "@/adapters/memory/ports/links/links";
-import { MemoryMediaSource } from "@/adapters/memory/ports/media_source/media_source";
-import { MemoryPostSource } from "@/adapters/memory/ports/post_source/post_source";
-import { MemoryTagSource } from "@/adapters/memory/ports/tag_source/tag_source";
+import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
+import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { Ports } from "@/core/boundary/ports/ports";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
 import { startApp } from "@/app/startup/app";
@@ -27,12 +26,11 @@ function createDemoHostEnvironment(): HostEnvironment {
 
 function createPorts(memoryClient: MemoryClient): Ports {
   return {
-    favoritesSource: new MemoryFavoritesSource(memoryClient),
-    favoritesEditor: new MemoryFavoritesEditor(memoryClient),
-    postSource: new MemoryPostSource(memoryClient),
-    tagSource: new MemoryTagSource(),
-    mediaSource: new MemoryMediaSource(),
-    links: new MemoryLinks(),
+    remoteFavorites: new MemoryRemoteFavorites(memoryClient),
+    remotePosts: new MemoryRemotePosts(memoryClient),
+    remoteTagCategories: new MemoryRemoteTagCategories(),
+    remoteMedia: new MemoryRemoteMedia(),
+    navigation: new MemoryNavigation(),
     host: new MemoryHost(),
     keyValueStore: new BrowserKeyValueStore()
   };

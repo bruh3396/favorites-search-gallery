@@ -1,16 +1,16 @@
 import { Collection, Enricher, Searcher, Store } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
 import { Post } from "@/core/domain/post/post";
 
 export class FavoritesLoader {
   private readonly store: Store;
-  private readonly source: FavoritesSource;
+  private readonly source: Pick<RemoteFavorites, "fetchAllExcept">;
   private readonly collection: Collection;
   private readonly searcher: Searcher;
   private readonly enricher: Enricher;
 
-  constructor({ store, source, collection, searcher, enricher }: { store: Store; source: FavoritesSource; collection: Collection; searcher: Searcher; enricher: Enricher }) {
+  constructor({ store, source, collection, searcher, enricher }: { store: Store; source: Pick<RemoteFavorites, "fetchAllExcept">; collection: Collection; searcher: Searcher; enricher: Enricher }) {
     this.store = store;
     this.source = source;
     this.collection = collection;
@@ -35,7 +35,7 @@ export class FavoritesLoader {
   }
 
   public fetchAll(onSearchResultsFound: (newSearchResults: Favorite[]) => void): Promise<void> {
-    return this.source.fetchMissing(new Set(), (posts) => {
+    return this.source.fetchAllExcept(new Set(), (posts) => {
       const favorites = this.collection.appendDirty(posts);
 
       this.searcher.add(favorites);
@@ -47,7 +47,7 @@ export class FavoritesLoader {
   public async fetchNew(): Promise<Favorite[]> {
     const posts: Post[] = [];
 
-    await this.source.fetchMissing(this.collection.getAllIds(), found => posts.push(...found));
+    await this.source.fetchAllExcept(this.collection.getAllIds(), found => posts.push(...found));
 
     if (posts.length === 0) {
       return [];

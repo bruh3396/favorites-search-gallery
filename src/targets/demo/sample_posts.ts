@@ -27,7 +27,7 @@ export function createSamplePosts(count: number): Post[] {
       height,
       score: (id * 7) % 100,
       rating: RATINGS[id % RATINGS.length],
-      change: id,
+      changedAt: id,
       media: { kind: "image", locator: imageFor(id, width, height) }
     };
   });

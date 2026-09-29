@@ -1,6 +1,6 @@
 import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
-import { MediaSource } from "@/core/boundary/ports/media_source";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { PostMedia } from "@/core/domain/post/post";
 import { Renderer } from "@/features/gallery/types/types";
 import { createElement } from "@/utils/browser/element";
@@ -13,7 +13,7 @@ export class GalleryGifRenderer implements Renderer {
   private readonly preloadedGifCount: number;
   private shownId: string | undefined;
 
-  constructor(environment: Environment, private readonly mediaSource: Pick<MediaSource, "resolveOriginalUrl">) {
+  constructor(environment: Environment, private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">) {
     this.preloadedGifCount = environment.device === "mobile" ? GalleryConfig.preloadedGifCount.mobile : GalleryConfig.preloadedGifCount.desktop;
     this.gif = createElement("img", {className: "gallery-image"});
     this.root = createElement("div", { id: "gif-container", className: "gallery-image-frame", children: [this.gif] });
@@ -43,13 +43,13 @@ export class GalleryGifRenderer implements Renderer {
     for (const gif of gifs) {
       const preloadedGif = new Image();
 
-      preloadedGif.src = await this.mediaSource.resolveOriginalUrl(gif.media);
+      preloadedGif.src = await this.remoteMedia.resolveOriginalUrl(gif.media);
       this.preloadedGifs.push(preloadedGif);
     }
   }
 
   private async show(item: PostMedia): Promise<void> {
-    const url = await this.mediaSource.resolveOriginalUrl(item.media);
+    const url = await this.remoteMedia.resolveOriginalUrl(item.media);
 
     if (this.shownId === item.id) {
       this.gif.src = url;

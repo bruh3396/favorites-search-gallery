@@ -71,10 +71,10 @@ function row(kind: AutoplayDuration, field: DurationField): HTMLElement {
 }
 
 function numberField(kind: AutoplayDuration): HTMLInputElement {
-  return numberInput(DURATION_FIELDS[kind].id, AutoplayConfig.durations[kind].min, AutoplayConfig.durations[kind].max, 1);
+  return numberInput(DURATION_FIELDS[kind].id, AutoplayConfig.durationSeconds[kind].min, AutoplayConfig.durationSeconds[kind].max, 1);
 }
 
 function selectField(kind: AutoplayDuration): HTMLSelectElement {
-  const options = AutoplayConfig.durations[kind].options.map(seconds => createElement("option", { textContent: String(seconds) }));
+  const options = AutoplayConfig.durationSeconds[kind].options.map(seconds => createElement("option", { textContent: String(seconds) }));
   return createElement("select", { id: DURATION_FIELDS[kind].id, children: options });
 }

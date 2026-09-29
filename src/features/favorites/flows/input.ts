@@ -63,19 +63,19 @@ export class FavoritesInputFlow extends FavoritesFlow {
     const favorite = this.model.getFavorite(id);
 
     if (favorite !== undefined) {
-      downloadMedia(this.context.ports.mediaSource, favorite);
+      downloadMedia(this.context.ports.remoteMedia, favorite);
     }
   }
 
   private openPost(id: string): void {
-    this.context.ports.links.openInNewTab(this.context.ports.links.postUrl(id));
+    this.context.ports.navigation.openInNewTab(this.context.ports.navigation.postUrl(id));
   }
 
   private openOriginal(id: string): void {
     const favorite = this.model.getFavorite(id);
 
     if (favorite !== undefined) {
-      this.context.ports.mediaSource.resolveOriginalUrl(favorite.media).then(url => this.context.ports.links.openInNewTab(url));
+      this.context.ports.remoteMedia.resolveOriginalUrl(favorite.media).then(url => this.context.ports.navigation.openInNewTab(url));
     }
   }
 

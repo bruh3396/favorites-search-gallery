@@ -11,6 +11,6 @@ export const SkeletonConfig = {
 
   animation: "pulse" satisfies SkeletonAnimation,
   randomAnimationTiming: true,
-  animationDelayRange: { min: 0, max: 0.15 },
-  animationDurationRange: { min: 0.55, max: 0.85 }
+  animationDelayRangeSeconds: { min: 0, max: 0.15 },
+  animationDurationRangeSeconds: { min: 0.55, max: 0.85 }
 };

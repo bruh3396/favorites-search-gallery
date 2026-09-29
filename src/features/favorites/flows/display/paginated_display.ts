@@ -6,7 +6,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Media } from "@/core/domain/media/media";
-import { MediaSource } from "@/core/boundary/ports/media_source";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { NavigationKey } from "@/types/input";
 import { Shell } from "@/app/context/shell";
 import { preloadImage } from "@/utils/browser/image";
@@ -21,7 +21,7 @@ export class FavoritesPaginatedDisplay implements Display {
 
     for (const item of media) {
       await sleep(3);
-      preloadImage(await this.mediaSource.resolvePreviewUrl(item));
+      preloadImage(await this.remoteMedia.resolvePreviewUrl(item));
     }
   }, 2_000);
 
@@ -30,7 +30,7 @@ export class FavoritesPaginatedDisplay implements Display {
     private readonly view: FavoritesView,
     private readonly events: Events,
     private readonly shell: Shell,
-    private readonly mediaSource: Pick<MediaSource, "resolvePreviewUrl">
+    private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl">
   ) { }
 
   public initialize(results: Favorite[], options?: ContentDisplayOptions): void {

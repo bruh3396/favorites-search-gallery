@@ -12,8 +12,8 @@ export class FavoritesDurationEnricher {
   public enrich(favorites: Favorite[]): void {
     favorites.forEach(favorite => {
       this.fetchDurationSeconds(favorite.media)
-        .then(duration => {
-          favorite.setDuration(duration);
+        .then(durationSeconds => {
+          favorite.setDurationSeconds(durationSeconds);
           this.persistPost(favorite.post);
           this.onFavoriteEnriched(favorite);
         }).catch(console.error);

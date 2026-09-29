@@ -1,6 +1,6 @@
 import * as GalleryFullscreenIcon from "@/features/gallery/view/fullscreen_icon";
 import * as Icons from "@/assets/svg/icons";
-import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
+import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { Environment } from "@/core/boundary/environment";
 import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";

@@ -39,7 +39,7 @@ export class GalleryImageRenderer implements Renderer {
     this.environment = environment;
     this.shell = shell;
     this.favoriteFor = favoriteFor;
-    this.fetcher = new GalleryImageFetcher(context.ports.mediaSource);
+    this.fetcher = new GalleryImageFetcher(context.ports.remoteMedia);
     this.loader = this.createLoader(environment);
     this.upscaler = this.createUpscaler(environment, preferences, shell);
     this.canvas = new GalleryImageCanvas(environment);

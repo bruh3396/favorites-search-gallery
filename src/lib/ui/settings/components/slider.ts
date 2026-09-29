@@ -6,7 +6,7 @@ import { clamp } from "@/utils/pure/number";
 import { controlRow } from "@/lib/ui/settings/components/row";
 import { createElement } from "@/utils/browser/element";
 
-const COMMIT_DEBOUNCE_MS = 50;
+const COMMIT_DEBOUNCE_DELAY = 50;
 
 export function buildSliderRow(config: Partial<SliderSetting>): HTMLElement {
   const min = config.min ?? 0;
@@ -28,7 +28,7 @@ export function buildSliderRow(config: Partial<SliderSetting>): HTMLElement {
     display.textContent = String(clamped);
   };
 
-  const binding = new DebouncedStateBinding(config, min, render, COMMIT_DEBOUNCE_MS);
+  const binding = new DebouncedStateBinding(config, min, render, COMMIT_DEBOUNCE_DELAY);
 
   input.addEventListener("click", (event) => {
     event.stopPropagation();

@@ -38,6 +38,13 @@ export interface GallerySizeSettings {
   upscaleQuality: Preference<number>;
 }
 
+export interface GalleryBudget {
+  upscale: { paintDelay: number; canvasWidth: number };
+  clearCanvasOnHide: boolean;
+  preloadVisibleThumbs: boolean;
+  followInContent: boolean;
+}
+
 export interface GalleryViewDependencies {
   onVideoEnded: () => void;
   onVolumeChanged: (volume: number) => void;

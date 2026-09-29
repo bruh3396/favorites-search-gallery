@@ -54,8 +54,8 @@ export class FavoritesItem implements Favorite {
     return this.arena.getMetric(this.index, metric);
   }
 
-  public setDuration(duration: number): void {
-    this.arena.setDuration(this.index, duration);
+  public setDurationSeconds(durationSeconds: number): void {
+    this.arena.setDurationSeconds(this.index, durationSeconds);
   }
 
   public markAsNew(): void {

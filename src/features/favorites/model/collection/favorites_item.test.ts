@@ -63,7 +63,7 @@ class TestArena implements Arena {
       case "score":
         return value.score;
       case "duration":
-        return value.duration ?? 0;
+        return value.durationSeconds ?? 0;
       default:
         return 0;
     }
@@ -84,9 +84,9 @@ class TestArena implements Arena {
     this.slot(index).isNew = true;
   }
 
-  public setDuration(index: number, duration: number): void {
+  public setDurationSeconds(index: number, durationSeconds: number): void {
     this.lastIndex = index;
-    this.slot(index).post.duration = duration;
+    this.slot(index).post.durationSeconds = durationSeconds;
   }
 
   public cacheTagSet(index: number, tags: Set<string>): void {
@@ -154,11 +154,11 @@ describe("FavoritesItem", () => {
     expect(arena.slot(0).cachedTags).toBeUndefined();
   });
 
-  test("setDuration and markAsNew write back to the same slot", () => {
+  test("setDurationSeconds and markAsNew write back to the same slot", () => {
     const arena = new TestArena();
     const item = new FavoritesItem(createPost({ id: "5" }), arena, false);
 
-    item.setDuration(123);
+    item.setDurationSeconds(123);
     item.markAsNew();
 
     expect(item.getMetric("duration")).toBe(123);
@@ -212,7 +212,7 @@ describe("FavoritesItem", () => {
       expect(item1.pixelCount).toBe(1080 * 1920);
       expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
 
-      item0.setDuration(123);
+      item0.setDurationSeconds(123);
       item0.markAsNew();
 
       expect(item0.getMetric("duration")).toBe(123);

@@ -14,11 +14,11 @@ function setup(failingUrl = ""): { fetcher: GalleryImageFetcher; loaded: string[
     queueMicrotask(() => this.dispatchEvent(new Event(url === failingUrl ? "error" : "load")));
   });
   vi.stubGlobal("createImageBitmap", (image: HTMLImageElement) => Promise.resolve({ image } as unknown as ImageBitmap));
-  const mediaSource = {
+  const remoteMedia = {
     resolvePreviewUrl: (media: Media): Promise<string> => Promise.resolve(`preview/${media.locator}`),
     resolveImageUrl: (media: Media): Promise<string> => Promise.resolve(`image/${media.locator}`)
   };
-  return { fetcher: new GalleryImageFetcher(mediaSource), loaded };
+  return { fetcher: new GalleryImageFetcher(remoteMedia), loaded };
 }
 
 describe("GalleryImageFetcher", () => {

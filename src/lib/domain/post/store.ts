@@ -2,7 +2,7 @@ import { Post, postHasDimensions, postIsStale } from "@/core/domain/post/post";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { KeyedDatabase } from "@/lib/storage/database";
 
-const database = new KeyedDatabase<Post>("Posts", "posts");
+const database = new KeyedDatabase<Post>("PostsV2", "posts");
 const databaseWriter = new CoalescingExecutor<Post>(25, 2_000, database.write.bind(database));
 
 export function write(post: Post): void {

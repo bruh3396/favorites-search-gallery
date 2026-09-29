@@ -2,7 +2,7 @@ import { Collection, Enricher, Searcher, Store } from "@/features/favorites/type
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
-import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
 import { Post } from "@/core/domain/post/post";
 import { createPosts } from "@/testing/post";
 
@@ -51,7 +51,7 @@ function setup(sources: { stored?: Post[][]; fetched?: Post[][]; newPosts?: Post
   log: string[];
   catalog: ReturnType<typeof createCatalog>;
   enrich: ReturnType<typeof vi.fn<Enricher["enrich"]>>;
-  fetchMissing: ReturnType<typeof vi.fn<FavoritesSource["fetchMissing"]>>;
+  fetchAllExcept: ReturnType<typeof vi.fn<RemoteFavorites["fetchAllExcept"]>>;
 } {
   const log: string[] = [];
   const stored = sources.stored ?? [];
@@ -63,11 +63,11 @@ function setup(sources: { stored?: Post[][]; fetched?: Post[][]; newPosts?: Post
       return Promise.resolve();
     }
   };
-  const fetchMissing = vi.fn<FavoritesSource["fetchMissing"]>((knownIds, onFavoritesFound) => {
+  const fetchAllExcept = vi.fn<RemoteFavorites["fetchAllExcept"]>((knownIds, onFavoritesFound) => {
     ((knownIds.size === 0 ? sources.fetched : sources.newPosts) ?? []).forEach(onFavoritesFound);
     return Promise.resolve();
   });
-  const source: FavoritesSource = { fetchMissing, fetchCount: () => Promise.resolve(null) };
+  const source: Pick<RemoteFavorites, "fetchAllExcept"> = { fetchAllExcept };
   const searcher: Searcher = {
     add: favorites => log.push(`add:${idsOf(favorites).join(",")}`),
     appendResults: favorites => {
@@ -80,7 +80,7 @@ function setup(sources: { stored?: Post[][]; fetched?: Post[][]; newPosts?: Post
     return new Promise(() => { });
   });
   const loader = new FavoritesLoader({ store, source, collection: catalog, searcher, enricher: { enrich } });
-  return { loader, log, catalog, enrich, fetchMissing };
+  return { loader, log, catalog, enrich, fetchAllExcept };
 }
 
 describe("FavoritesLoader", () => {
@@ -144,11 +144,11 @@ describe("FavoritesLoader", () => {
 
   describe("fetchNew", () => {
     test("fetches against the ids already in the collection", async() => {
-      const { loader, fetchMissing } = setup({ stored: [createPosts("1", "2")] });
+      const { loader, fetchAllExcept } = setup({ stored: [createPosts("1", "2")] });
 
       await loader.loadStored();
       await loader.fetchNew();
-      expect(fetchMissing).toHaveBeenCalledWith(new Set(["1", "2"]), expect.any(Function));
+      expect(fetchAllExcept).toHaveBeenCalledWith(new Set(["1", "2"]), expect.any(Function));
     });
 
     test("prepends every delivered batch at once as dirty, indexes and enriches them, and returns them", async() => {

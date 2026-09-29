@@ -34,12 +34,12 @@ export class FavoritesView {
     this.onContentReplaced = doNothing;
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
-    this.linkSuppressor = new FavoritesLinkSuppressor(id => context.ports.links.postUrl(id));
+    this.linkSuppressor = new FavoritesLinkSuppressor(id => context.ports.navigation.postUrl(id));
     this.skeleton = new FavoritesSkeleton(context.ports.keyValueStore, this.getLayout());
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
-    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.links.postUrl(id), media => context.ports.mediaSource.resolvePreviewUrl(media));
+    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id), media => context.ports.remoteMedia.resolvePreviewUrl(media));
     this.thumbPool = this.createThumbPool();
     this.pagination.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
     this.drawer.toggle(context.preferences.favorites.drawerOpen.value);

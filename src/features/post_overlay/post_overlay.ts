@@ -14,7 +14,7 @@ interface PostOverlayComponents {
 
 export async function startPostOverlay(context: AppContext): Promise<void> {
   const shell = new PostOverlayShell(context.shell);
-  const model = new PostOverlayModel(context.ports.tagSource);
+  const model = new PostOverlayModel(context.ports.remoteTagCategories);
   const view = new PostOverlayView(shell);
   const flows = new PostOverlayFlows(context, model, view);
   const components: PostOverlayComponents = { context, model, view, flows };

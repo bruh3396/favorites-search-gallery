@@ -1,6 +1,6 @@
 import * as PostStore from "@/lib/domain/post/store";
 import { CategorizedPost, Post } from "@/core/domain/post/post";
-import { PostSource } from "@/core/boundary/ports/post_source";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts";
 
 export interface PostResolverDependencies {
   readStored: (ids: string[]) => Promise<Post[]>;
@@ -9,7 +9,7 @@ export interface PostResolverDependencies {
 
 export class PostResolver {
   constructor(
-    private readonly source: PostSource,
+    private readonly source: RemotePosts,
     private readonly dependencies: PostResolverDependencies = { readStored: PostStore.readMany, store: PostStore.write }
   ) { }
 
