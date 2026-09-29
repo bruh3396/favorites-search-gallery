@@ -1,9 +1,9 @@
 import { GalleryState, Layout } from "@/types/app";
+import { Post, PostMedia } from "@/core/domain/post/post";
 import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/event/feature_channel";
 import { NavigationKey } from "@/types/input";
-import { Post, PostMedia } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export class FeatureBridge {
@@ -42,18 +42,18 @@ export class FeatureBridge {
   }
 
   public currentSearchQuery(): string {
-    return this.environment.mode === "posts" ? this.postList.searchQuery.request() : this.favorites.searchQuery.request();
+    return this.environment.mode === "postList" ? this.postList.searchQuery.request() : this.favorites.searchQuery.request();
   }
 
   public usingInfiniteScroll(): boolean {
-    return this.environment.mode === "posts" ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
+    return this.environment.mode === "postList" ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
   }
 
   public postMedia(id: string): PostMedia | undefined {
-    return this.environment.mode === "posts" ? this.postList.post.request(id) : this.favorites.favorite.request(id);
+    return this.environment.mode === "postList" ? this.postList.post.request(id) : this.favorites.favorite.request(id);
   }
 
   public currentLayout(): Layout {
-    return this.environment.mode === "posts" ? this.postList.layout.request() : this.favorites.layout.request();
+    return this.environment.mode === "postList" ? this.postList.layout.request() : this.favorites.layout.request();
   }
 }

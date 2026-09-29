@@ -5,7 +5,6 @@ import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
-import { createEnvironment } from "@/testing/environment";
 
 interface Setup {
   context: AppContext;

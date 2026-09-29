@@ -15,7 +15,7 @@ describe("selectFeatures", () => {
   });
 
   test("on desktop post lists, the navigator replaces the post overlay", () => {
-    expect(featuresFor({ mode: "posts", device: "desktop" })).toEqual(["favorites", "postListNavigator", "gallery", "tooltip"]);
+    expect(featuresFor({ mode: "postList", device: "desktop" })).toEqual(["favorites", "postListNavigator", "gallery", "tooltip"]);
   });
 
   test("on mobile, hover features don't run", () => {

@@ -24,7 +24,7 @@ export type CategorizedPost = {
 
 export type PostMedia =Pick<Post, "id" | "media">;
 
-export function postIsComplete(post: Post): boolean {
+export function postHasDimensions(post: Post): boolean {
   return post.width > 0 && post.height > 0;
 }
 

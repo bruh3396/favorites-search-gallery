@@ -16,13 +16,13 @@ function createThumb({ loading = false } = {}): { thumb: HTMLElement; image: HTM
 }
 
 async function isSettled(promise: Promise<unknown>): Promise<boolean> {
-  let settled = false;
+  let wasSettled = false;
 
-  void promise.then(() => {
-    settled = true;
+  promise.then(() => {
+    wasSettled = true;
   });
   await flushMicrotasks();
-  return settled;
+  return wasSettled;
 }
 
 describe("waitForThumbsToLoadInContainer", () => {

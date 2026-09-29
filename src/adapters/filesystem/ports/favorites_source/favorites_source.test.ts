@@ -12,23 +12,23 @@ function createSource(...files: [id: string, modifiedAt: number][]): FilesystemF
   });
 }
 
-function idsOf(posts: Post[]): string[] {
-  return posts.map(post => post.id);
+async function missingIdsFor(source: FilesystemFavoritesSource, knownIds: ReadonlySet<string>): Promise<string[]> {
+  const delivered: Post[] = [];
+
+  await source.fetchMissing(knownIds, posts => delivered.push(...posts));
+  return delivered.map(post => post.id);
 }
 
 describe("FilesystemFavoritesSource", () => {
-  test("delivers every post, newest first", async() => {
-    const delivered: Post[] = [];
-
-    await createSource(["old", 1], ["new", 3], ["middle", 2]).fetchAll(posts => delivered.push(...posts));
-    expect(idsOf(delivered)).toEqual(["new", "middle", "old"]);
+  test("delivers every post, newest first, when nothing is known", async() => {
+    expect(await missingIdsFor(createSource(["old", 1], ["new", 3], ["middle", 2]), new Set())).toEqual(["new", "middle", "old"]);
   });
 
   test("counts the post files", async() => {
-    expect(await createSource(["1", 1], ["2", 2]).count()).toBe(2);
+    expect(await createSource(["1", 1], ["2", 2]).fetchCount()).toBe(2);
   });
 
-  test("returns only posts not already known, newest first", async() => {
-    expect(idsOf(await createSource(["1", 1], ["2", 2], ["3", 3]).fetchNew(new Set(["2"])))).toEqual(["3", "1"]);
+  test("delivers only posts not already known, newest first", async() => {
+    expect(await missingIdsFor(createSource(["1", 1], ["2", 2], ["3", 3]), new Set(["2"]))).toEqual(["3", "1"]);
   });
 });

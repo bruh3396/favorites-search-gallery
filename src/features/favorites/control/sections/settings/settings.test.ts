@@ -1,7 +1,7 @@
 import * as FavoritesSettings from "@/features/favorites/control/sections/settings/settings";
 import { describe, expect, test, vi } from "vitest";
-import { MemoryHost } from "@/adapters/memory/ports/host/host";
 import { AppContext } from "@/app/context/context";
+import { MemoryHost } from "@/adapters/memory/ports/host/host";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { createAppContext } from "@/testing/context";
 

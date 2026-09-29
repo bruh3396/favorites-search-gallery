@@ -1,5 +1,5 @@
-import { PostMedia } from "@/core/domain/post/post";
 import { MediaKind } from "@/core/domain/media/media";
+import { PostMedia } from "@/core/domain/post/post";
 
 export const isVideo = (item: PostMedia): boolean => isKind(item, "video");
 export const isGif = (item: PostMedia): boolean => isKind(item, "gif");

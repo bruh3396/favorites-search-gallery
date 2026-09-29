@@ -1,10 +1,10 @@
 import * as PostListNavigatorUrlContext from "@/features/post_list_navigator/model/url_context";
 import { AppContext } from "@/app/context/context";
 import { NavigationKey } from "@/types/input";
+import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigationResult } from "@/features/post_list_navigator/types/navigation";
 import { PostListNavigatorPageLoader } from "@/features/post_list_navigator/model/page_loader";
-import { Post } from "@/core/domain/post/post";
 import { navigationDelta } from "@/lib/event/keys";
 import { parseThumb } from "@/adapters/rule34/client/site/thumb/parser";
 

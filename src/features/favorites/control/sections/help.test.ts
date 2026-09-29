@@ -1,4 +1,4 @@
-﻿import * as FavoritesHelp from "@/features/favorites/control/sections/help";
+import * as FavoritesHelp from "@/features/favorites/control/sections/help";
 import { describe, expect, test, vi } from "vitest";
 import { createEnvironment } from "@/testing/environment";
 

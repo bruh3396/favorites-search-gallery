@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { postIsComplete, postIsStale } from "@/core/domain/post/post";
+import { postHasDimensions, postIsStale } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 
 const DAY = 24 * 60 * 60 * 1_000;
 const NOW = 100 * DAY;
 
-describe("postIsComplete", () => {
+describe("postHasDimensions", () => {
   test("a post with dimensions is complete", () => {
-    expect(postIsComplete(createPost({ width: 800, height: 600 }))).toBe(true);
+    expect(postHasDimensions(createPost({ width: 800, height: 600 }))).toBe(true);
   });
 
   test("a post without dimensions is incomplete", () => {
-    expect(postIsComplete(createPost({ width: 0, height: 600 }))).toBe(false);
-    expect(postIsComplete(createPost({ width: 800, height: 0 }))).toBe(false);
+    expect(postHasDimensions(createPost({ width: 0, height: 600 }))).toBe(false);
+    expect(postHasDimensions(createPost({ width: 800, height: 0 }))).toBe(false);
   });
 });
 

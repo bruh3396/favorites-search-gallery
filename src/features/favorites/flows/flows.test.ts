@@ -1,8 +1,7 @@
-import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
+import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
-import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesControl } from "@/features/favorites/control/control";
@@ -10,6 +9,7 @@ import { FavoritesFlows } from "@/features/favorites/flows/flows";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
+import { Post } from "@/core/domain/post/post";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
@@ -23,7 +23,7 @@ let pageCounter = 0;
 function createContext(): AppContext {
   pageCounter += 1;
   const id = `flows_test_${Date.now()}_${pageCounter}`;
-  const environment = createEnvironment({ favoritesId: id });
+  const environment = createEnvironment({ favoritesOwnerId: id });
   const shell = new Shell();
 
   document.body.append(shell.root);
@@ -47,7 +47,7 @@ function createFavoritesPage(...ids: string[]): string {
 }
 
 function serveFavoritesPages(context: AppContext, pages: string[][]): void {
-  const htmlByUrl = new Map(pages.map((ids, index) => [favoritesPageUrl(context.environment.favoritesId, index * FAVORITES_PER_PAGE), createFavoritesPage(...ids)]));
+  const htmlByUrl = new Map(pages.map((ids, index) => [favoritesPageUrl(context.environment.favoritesOwnerId, index * FAVORITES_PER_PAGE), createFavoritesPage(...ids)]));
 
   vi.stubGlobal("fetch", vi.fn((url: string) => Promise.resolve(new Response(htmlByUrl.get(String(url)) ?? ""))));
 }
@@ -58,10 +58,6 @@ function setup(context: AppContext): FavoritesFlows {
 
   view.setup({ onContentReplaced: () => { }, onContentAdded: () => { } });
   return new FavoritesFlows(context, createModel(context), view, new FavoritesControl(context, shell));
-}
-
-function requestedUrlsOf(): string[] {
-  return vi.mocked(fetch).mock.calls.map(([url]) => String(url));
 }
 
 function idsOf(context: AppContext): string[] {

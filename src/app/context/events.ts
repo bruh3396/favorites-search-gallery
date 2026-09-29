@@ -1,9 +1,9 @@
 import { Emitter, StickyEmitter } from "@/lib/event/emitter";
 import { Favorite } from "@/types/favorite";
 import { GalleryAction } from "@/types/app";
-import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
+import { PostMedia } from "@/core/domain/post/post";
 
 export type Events = ReturnType<typeof createEvents>;
 

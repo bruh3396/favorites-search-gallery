@@ -19,24 +19,27 @@ export class Rule34FavoritesSource implements FavoritesSource {
     private readonly fetchAttempts: number = FETCH_ATTEMPTS
   ) { }
 
-  public count(): Promise<number | null> {
+  public fetchCount(): Promise<number | null> {
     return this.rule34.fetchFavoritesCount(this.pageId);
   }
 
-  public fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    return this.rule34.prioritizeFavorites(() => this.createFullPageFetcher(onFavoritesFound).fetchAll());
+  public fetchMissing(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {
+    return this.rule34.prioritizeFavorites(() => this.fetchPages(knownIds, onFavoritesFound));
   }
 
-  public fetchNew(seen: Set<string>): Promise<Post[]> {
-    return this.rule34.prioritizeFavorites(() => this.createIncrementalPageFetcher(seen).fetchNew(this.firstPageFavorites ?? undefined));
+  private fetchPages(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {
+    if (knownIds.size === 0) {
+      return this.createFullPageFetcher(onFavoritesFound).fetchAll();
+    }
+    return this.createIncrementalPageFetcher(knownIds, onFavoritesFound).fetchMissing(this.firstPageFavorites ?? undefined);
   }
 
   private createFullPageFetcher(onFavoritesFound: (posts: Post[]) => void): FullPageFetcher {
     return new FullPageFetcher(onFavoritesFound, pageIndex => this.fetch(pageIndex), retryCount => computeRetryDelay(retryCount, this.fetchDelay), this.firstPageFavorites ?? undefined);
   }
 
-  private createIncrementalPageFetcher(seen: Set<string>): IncrementalPageFetcher {
-    return new IncrementalPageFetcher(pageIndex => this.fetchWithRetries(pageIndex), FAVORITES_PER_PAGE, this.fetchDelay, seen);
+  private createIncrementalPageFetcher(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): IncrementalPageFetcher {
+    return new IncrementalPageFetcher(onFavoritesFound, pageIndex => this.fetchWithRetries(pageIndex), FAVORITES_PER_PAGE, this.fetchDelay, knownIds);
   }
 
   private fetch(pageIndex: number): Promise<Post[]> {

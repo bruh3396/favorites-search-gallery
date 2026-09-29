@@ -1,4 +1,4 @@
-﻿import { AppContext } from "@/app/context/context";
+import { AppContext } from "@/app/context/context";
 import { Autoplay } from "@/features/gallery/features/autoplay/autoplay";
 import { AutoplayCallbacks } from "@/features/gallery/features/autoplay/types/types";
 

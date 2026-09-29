@@ -1,4 +1,3 @@
-import { Post } from "@/core/domain/post/post";
 import "fake-indexeddb/auto";
 import * as PostStore from "@/lib/domain/post/store";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
@@ -8,6 +7,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryFavoritesSource } from "@/adapters/memory/ports/favorites_source/favorites_source";
+import { Post } from "@/core/domain/post/post";
 import { createAppContext } from "@/testing/context";
 import { createPost } from "@/testing/post";
 
@@ -19,7 +19,7 @@ let pageCounter = 0;
 function createContext(resultsPerPage = 100, sourcePosts: Post[] = []): AppContext {
   pageCounter += 1;
   return createAppContext({
-    environment: { favoritesId: `model_test_${Date.now()}_${pageCounter}` },
+    environment: { favoritesOwnerId: `model_test_${Date.now()}_${pageCounter}` },
     ports: { favoritesSource: new MemoryFavoritesSource(new MemoryClient(sourcePosts)) },
     preferences: { favorites: { resultsPerPage } }
   });

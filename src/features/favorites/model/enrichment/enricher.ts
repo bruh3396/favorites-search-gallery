@@ -1,3 +1,4 @@
+import { CategorizedPost, Post, postIsStale } from "@/core/domain/post/post";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { Enricher } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
@@ -8,7 +9,6 @@ import { Media } from "@/core/domain/media/media";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 import { isVideo } from "@/lib/media/media_type";
-import { CategorizedPost, postIsStale, Post } from "@/core/domain/post/post";
 
 interface EnricherDependencies {
   onFavoriteEnriched: (favorite: Favorite) => void;

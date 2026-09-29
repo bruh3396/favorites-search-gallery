@@ -7,8 +7,8 @@ import * as PostPage from "@/adapters/rule34/client/site/post_page/fetcher";
 import * as PostPageParser from "@/adapters/rule34/client/site/post_page/parser";
 import * as ProfilePage from "@/adapters/rule34/client/site/profile_page/fetcher";
 import * as Viewport from "@/adapters/rule34/client/site/viewport/viewport";
-import { FavoriteActions } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
 import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { FavoriteActions } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { pageRateLimiter } from "@/adapters/rule34/client/site/page_rate_limiter";
 

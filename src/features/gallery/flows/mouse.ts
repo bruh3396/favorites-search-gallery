@@ -63,7 +63,7 @@ export class GalleryMouseFlow extends GalleryFlow {
 
   private handleClickInGallery(mouseEvent: MouseEvent): void {
     if (mouseEvent.ctrlKey) {
-      void this.model.openOriginal();
+      this.model.openOriginal();
     }
     this.togglePauseIfOverVideo(mouseEvent);
   }

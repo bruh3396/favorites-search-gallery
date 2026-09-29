@@ -17,7 +17,7 @@ const POST_PAGE = `
 `;
 
 function setup(): { client: Rule34SiteClient; fetch: ReturnType<typeof vi.fn<(url: string) => Promise<Response>>> } {
-  const fetch = vi.fn((_url: string) => Promise.resolve(new Response(POST_PAGE)));
+  const fetch = vi.fn<(url: string) => Promise<Response>>(() => Promise.resolve(new Response(POST_PAGE)));
 
   vi.stubGlobal("fetch", fetch);
   return { client: new Rule34SiteClient({ run: request => request() }), fetch };
@@ -40,7 +40,7 @@ describe("Rule34SiteClient", () => {
   test("holds post page fetches while favorites are fetched, whether they succeed or fail", async() => {
     const { client, fetch } = setup();
     let finishFirst = (): void => { };
-    let failSecond = (_error: Error): void => { };
+    let failSecond: (error: Error) => void = () => { };
     const first = client.prioritizeFavorites(() => new Promise<void>(resolve => {
       finishFirst = resolve;
     }));

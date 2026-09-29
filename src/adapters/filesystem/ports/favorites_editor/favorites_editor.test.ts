@@ -10,6 +10,6 @@ describe("FilesystemFavoritesEditor", () => {
   });
 
   test("adding succeeds", async() => {
-    expect(await new FilesystemFavoritesEditor({ deletePostFile: () => Promise.resolve() }).add()).toBe("added");
+    expect(await new FilesystemFavoritesEditor({ deletePostFile: (): Promise<void> => Promise.resolve() }).add()).toBe("added");
   });
 });

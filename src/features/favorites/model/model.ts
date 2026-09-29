@@ -1,10 +1,9 @@
-import { Post } from "@/core/domain/post/post";
 import * as PostStore from "@/lib/domain/post/store";
 import * as TagCategoryStore from "@/lib/domain/tag/category_store";
+import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
 import { AppContext } from "@/app/context/context";
 import { Database } from "@/lib/storage/database";
 import { Favorite } from "@/types/favorite";
-import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
 import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesConfig } from "@/config/favorites_config";
@@ -15,6 +14,7 @@ import { FavoritesStore } from "@/features/favorites/model/retrieval/store";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
+import { Post } from "@/core/domain/post/post";
 import { PostResolver } from "@/lib/domain/post/resolver";
 export class FavoritesModel {
   private readonly collection: FavoritesCollection;
@@ -33,7 +33,7 @@ export class FavoritesModel {
     this.editor = favoritesEditor;
     this.collection = new FavoritesCollection();
     this.searcher = new FavoritesSearcher(context.preferences, context.environment, onSearchResultsChanged);
-    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", `user${context.environment.favoritesId}`));
+    this.store = new FavoritesStore(new Database<Post>("FavoritesV2", `user${context.environment.favoritesOwnerId}`));
     this.loader = new FavoritesLoader({
       store: this.store,
       source: this.source,
@@ -71,7 +71,7 @@ export class FavoritesModel {
   }
 
   public fetchFavoritesCount(): Promise<number | null> {
-    return this.source.count();
+    return this.source.fetchCount();
   }
 
   public addFavorite(id: string): Promise<AddFavoriteResult> {

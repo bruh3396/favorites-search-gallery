@@ -1,5 +1,5 @@
-import { TagCategory } from "@/core/domain/tag/tag";
 import { EncodedTagCategory } from "@/types/search";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 export const tagCategoryDecodings: Record<number, TagCategory> = {
   0: "general",

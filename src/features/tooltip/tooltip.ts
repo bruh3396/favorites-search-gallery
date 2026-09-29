@@ -40,7 +40,7 @@ function subscribeToEvents({ context, model, flows }: TooltipComponents): void {
     preferences.favorites.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
   }
 
-  if (environment.mode === "posts") {
+  if (environment.mode === "postList") {
     preferences.postList.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
   }
 }

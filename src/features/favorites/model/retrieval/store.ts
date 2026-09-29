@@ -1,7 +1,7 @@
-import { Post } from "@/core/domain/post/post";
 import { CoalescingExecutor } from "@/lib/async/coalescing";
 import { DatabaseLike } from "@/lib/storage/database";
 import { FavoritesConfig } from "@/config/favorites_config";
+import { Post } from "@/core/domain/post/post";
 import { Store } from "@/features/favorites/types/types";
 import { toTagSet } from "@/utils/pure/tag";
 

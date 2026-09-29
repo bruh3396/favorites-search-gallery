@@ -9,14 +9,14 @@ const ITEM: PostMedia = { id: "7", media: { kind: "video", locator: "7" } };
 function setup(failingUrl = ""): { fetcher: GalleryImageFetcher; loaded: string[] } {
   const loaded: string[] = [];
 
-  vi.spyOn(HTMLImageElement.prototype, "src", "set").mockImplementation(function(this: HTMLImageElement, url: string) {
+  vi.spyOn(HTMLImageElement.prototype, "src", "set").mockImplementation(function setSource(this: HTMLImageElement, url: string) {
     loaded.push(url);
     queueMicrotask(() => this.dispatchEvent(new Event(url === failingUrl ? "error" : "load")));
   });
   vi.stubGlobal("createImageBitmap", (image: HTMLImageElement) => Promise.resolve({ image } as unknown as ImageBitmap));
   const mediaSource = {
-    previewUrl: (media: Media): Promise<string> => Promise.resolve(`preview/${media.locator}`),
-    imageUrl: (media: Media): Promise<string> => Promise.resolve(`image/${media.locator}`)
+    resolvePreviewUrl: (media: Media): Promise<string> => Promise.resolve(`preview/${media.locator}`),
+    resolveImageUrl: (media: Media): Promise<string> => Promise.resolve(`image/${media.locator}`)
   };
   return { fetcher: new GalleryImageFetcher(mediaSource), loaded };
 }

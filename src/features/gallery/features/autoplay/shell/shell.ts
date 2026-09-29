@@ -11,7 +11,7 @@ const DURATION_FIELDS: Record<AutoplayDuration, { id: string; label: string }> =
   minimumVideo: { id: "autoplay-minimum-animated-duration-input", label: "Minimum Video Duration" }
 };
 
-const FIELD_BUILDERS: Record<Device,(kind: AutoplayDuration) => DurationField> = {
+const FIELD_BUILDERS: Record<Device, (kind: AutoplayDuration) => DurationField> = {
   desktop: numberField,
   mobile: selectField
 };

@@ -8,7 +8,7 @@ import { setupRuntime } from "@/app/startup/runtime";
 
 const RUNS_IN: Record<AppMode, (preferences: Preferences) => boolean> = {
   favorites: () => true,
-  posts: (preferences) => preferences.postList.enabled.value
+  postList: (preferences) => preferences.postList.enabled.value
 };
 
 const CLAIM_VIEWPORT: Record<Device, (host: Host) => void> = {

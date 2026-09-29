@@ -24,7 +24,7 @@ export class GalleryImageCanvas {
     if (this.environment.device === "mobile") {
       return GalleryConfig.mainCanvasResolution.lowPower;
     }
-    return this.environment.mode === "posts" ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;
+    return this.environment.mode === "postList" ? GalleryConfig.mainCanvasResolution.postList : GalleryConfig.mainCanvasResolution.favorites;
   }
 
   public mount(container: HTMLElement): void {

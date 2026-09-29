@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { SkeletonConfig } from "@/config/skeleton_config";
 
 function createThumb(width: number, height: number): HTMLElement {

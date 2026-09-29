@@ -1,4 +1,4 @@
-﻿import * as PostListNavigatorCatalog from "@/features/post_list_navigator/control/catalog";
+import * as PostListNavigatorCatalog from "@/features/post_list_navigator/control/catalog";
 import { AppContext } from "@/app/context/context";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { SettingsControl } from "@/lib/ui/settings/controls";

@@ -1,5 +1,5 @@
-import { Media } from "@/core/domain/media/media";
 import { CategorizedPost } from "@/core/domain/post/post";
+import { Media } from "@/core/domain/media/media";
 import { PostFetchError } from "@/types/errors";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { isTagCategory } from "@/lib/domain/tag/category_codec";

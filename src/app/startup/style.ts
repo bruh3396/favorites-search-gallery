@@ -79,7 +79,7 @@ function applyCurrentTheme({ preferences }: AppContext): void {
 }
 
 function actionBarPreferences({ preferences, environment }: AppContext): Preferences["favorites"] | Preferences["postList"] {
-  return environment.mode === "posts" ? preferences.postList : preferences.favorites;
+  return environment.mode === "postList" ? preferences.postList : preferences.favorites;
 }
 
 function insertBaseStyles(context: AppContext): void {
@@ -87,7 +87,7 @@ function insertBaseStyles(context: AppContext): void {
   const platformCss = context.environment.device === "mobile" ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
   const galleryCss = context.features.has("gallery") ? GALLERY_CSS + AUTOPLAY_CSS : "";
   const tooltipCss = context.features.has("tooltip") ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
-  const postListCss = context.environment.mode === "posts" ? POST_LIST_CSS + SETTINGS_CSS : "";
+  const postListCss = context.environment.mode === "postList" ? POST_LIST_CSS + SETTINGS_CSS : "";
   const postOverlayCss = context.features.has("postOverlay") ? POST_OVERLAY_CSS : "";
   const favoritesCss = context.environment.mode === "favorites" ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_SECTIONS_CSS + SETTINGS_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
 
@@ -125,7 +125,7 @@ function applyTileVariables(context: AppContext): void {
   const { content } = context.shell;
   const outlineSize = context.environment.device === "mobile" ? 1 : 2;
   const rightMargin = context.environment.device === "desktop" ? ThumbConfig.rightContentMargin : 0;
-  const tileGap = context.environment.mode === "posts" ? ThumbConfig.spacing.postList : ThumbConfig.spacing.favorites;
+  const tileGap = context.environment.mode === "postList" ? ThumbConfig.spacing.postList : ThumbConfig.spacing.favorites;
 
   content.style.setProperty("--media-outline-size", `${outlineSize}px`);
   content.style.setProperty("--tile-gap", `${tileGap}px`);

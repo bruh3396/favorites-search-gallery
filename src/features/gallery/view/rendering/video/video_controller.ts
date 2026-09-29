@@ -1,7 +1,7 @@
 import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
-import { PostMedia } from "@/core/domain/post/post";
 import { MediaSource } from "@/core/boundary/ports/media_source";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { VideoClip } from "@/features/gallery/types/types";
 import { doNothing } from "@/utils/pure/function";
@@ -18,7 +18,7 @@ export class GalleryVideoController {
   private onVideoEnded: () => void = doNothing;
   private onVolumeChanged: (volume: number) => void = doNothing;
 
-  constructor(preferences: Preferences, environment: Environment, private readonly mediaSource: Pick<MediaSource, "originalUrl">) {
+  constructor(preferences: Preferences, environment: Environment, private readonly mediaSource: Pick<MediaSource, "resolveOriginalUrl">) {
     this.preferences = preferences;
     this.environment = environment;
     this.videoContainer.id = "video-container-inner";
@@ -93,7 +93,7 @@ export class GalleryVideoController {
       };
       video.style.display = "block";
       this.toggleVideoControls(true);
-      void this.setVideoSource(video, item).then((holdsItem) => {
+      this.setVideoSource(video, item).then((holdsItem) => {
         if (holdsItem) {
           video.play().catch(doNothing);
         }
@@ -246,7 +246,7 @@ export class GalleryVideoController {
     }
     video.dataset.id = item.id;
     this.applyVideoClip(video, item);
-    const url = await this.mediaSource.originalUrl(item.media);
+    const url = await this.mediaSource.resolveOriginalUrl(item.media);
 
     if (!this.videoPlayerHasSource(video, item)) {
       return false;

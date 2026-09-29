@@ -21,7 +21,7 @@ export async function startGallery(context: AppContext): Promise<void> {
   await waitUntilPageIsReady(context);
 
   const shell = new GalleryShell(context.shell);
-  const model = new GalleryModel(context.preferences, context.ports.navigation, context.ports.favoritesEditor, context.ports.mediaSource);
+  const model = new GalleryModel(context.preferences, context.ports.links, context.ports.favoritesEditor, context.ports.mediaSource);
   const view = new GalleryView(context, shell, (id) => context.featureBridge.favorites.favorite.request(id));
   const control = new GalleryControl(context, shell, view);
   const flows = new GalleryFlows(context, model, view, control);
@@ -45,7 +45,7 @@ async function waitUntilPageIsReady(context: AppContext): Promise<void> {
     await events.favorites.storedFavoritesFound.wait();
   }
 
-  if (environment.mode === "posts") {
+  if (environment.mode === "postList") {
     await events.postList.postListInitialized.wait();
   }
 }
@@ -103,7 +103,7 @@ function subscribeToEvents(components: GalleryComponents): void {
     subscribeToFavoritesEvents(components);
   }
 
-  if (environment.mode === "posts") {
+  if (environment.mode === "postList") {
     subscribeToPostListEvents(components);
   }
 

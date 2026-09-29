@@ -1,8 +1,8 @@
 import { PostResponse, ServerPost } from "@/adapters/api/client/post/post";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiPostSource } from "@/adapters/api/ports/post_source/post_source";
-import { Media } from "@/core/domain/media/media";
 import { CategorizedPost } from "@/core/domain/post/post";
+import { Media } from "@/core/domain/media/media";
 import { PostFetchError } from "@/types/errors";
 import { createPost } from "@/testing/post";
 
@@ -23,7 +23,7 @@ function setup(...responses: PostResponse[]): { source: ApiPostSource; api: { fe
 }
 
 async function fetchedFor(source: ApiPostSource, id: string): Promise<CategorizedPost> {
-  const fetched = source.fetchPost(id);
+  const fetched = source.fetch(id);
 
   fetched.catch(() => { });
   await vi.runAllTimersAsync();

@@ -31,7 +31,7 @@ export function startFavorites(context: AppContext): void {
 
     setup(components);
     start(components);
-  } else if (context.environment.mode === "posts") {
+  } else if (context.environment.mode === "postList") {
     servePostListRequests(context, new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit));
   }
 }
@@ -47,7 +47,7 @@ function setup(components: FavoritesComponents): void {
 }
 
 function start({ context, view, flows }: FavoritesComponents): void {
-  context.ports.host.setHeaderVisible?.(context.preferences.favorites.headerEnabled.value);
+  context.ports.host.setHeaderVisible(context.preferences.favorites.headerEnabled.value);
   view.showSkeleton();
   flows.load.loadAllFavorites();
 }
@@ -120,7 +120,7 @@ function subscribeToPreferences({ context, view, flows }: FavoritesComponents): 
 
   preferences.favorites.drawerOpen.on((open) => view.toggleDrawer(open));
   preferences.favorites.drawerActiveSection.on((section) => view.showDrawerSection(section));
-  preferences.favorites.headerEnabled.on((enabled) => context.ports.host.setHeaderVisible?.(enabled));
+  preferences.favorites.headerEnabled.on((enabled) => context.ports.host.setHeaderVisible(enabled));
   preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
   preferences.favorites.layout.on((layout) => view.changeLayout(layout));
   preferences.favorites.sortKey.on(() => flows.search.reSearchFavorites());

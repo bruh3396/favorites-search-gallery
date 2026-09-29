@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { FavoritesAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 
 function createThumb(width: number, height: number): HTMLElement {
   const thumb = document.createElement("div");

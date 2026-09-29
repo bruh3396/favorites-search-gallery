@@ -6,10 +6,10 @@ export function createEnvironment(overrides: Partial<Environment> = {}): Environ
     mode: "favorites",
     device: "desktop",
     canvasBudget: "full",
-    favoritesId: "1",
+    favoritesOwnerId: "1",
     ownsFavorites: true,
     blacklistedTags: "",
-    usingDarkMode: false,
+    darkTheme: false,
     ...overrides
   };
 }

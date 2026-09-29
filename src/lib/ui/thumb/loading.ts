@@ -21,6 +21,6 @@ function loadingImageOf(thumb: HTMLElement): HTMLImageElement | null {
   if (image === null || image.dataset.preload === "true" || image.loading === "lazy") {
     return null;
   }
-  const awaitingSource = thumb.dataset.loading !== undefined && !image.hasAttribute("src");
-  return isImageLoading(image) || awaitingSource ? image : null;
+  const isAwaitingSource = thumb.dataset.loading !== undefined && !image.hasAttribute("src");
+  return isImageLoading(image) || isAwaitingSource ? image : null;
 }

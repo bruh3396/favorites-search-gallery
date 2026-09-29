@@ -7,7 +7,7 @@ function setup(): { images: HTMLImageElement[]; decoded: ReturnType<typeof vi.fn
   const images: HTMLImageElement[] = [];
   const decoded = vi.fn(() => Promise.resolve(BITMAP));
 
-  vi.spyOn(HTMLImageElement.prototype, "src", "set").mockImplementation(function(this: HTMLImageElement, url: string) {
+  vi.spyOn(HTMLImageElement.prototype, "src", "set").mockImplementation(function setSource(this: HTMLImageElement, url: string) {
     this.setAttribute("src", url);
     images.push(this);
   });

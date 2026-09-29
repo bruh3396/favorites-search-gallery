@@ -16,14 +16,14 @@ export type Preferences = ReturnType<typeof createPreferences>;
 export function createPreferences(environment: Environment, store: KeyValueStore) {
   const namespacedStore = new NamespacedStore(store, NAMESPACE);
   const preference = <T>(key: string, defaultValue: T): Preference<T> => new Preference(namespacedStore, key, defaultValue);
-  const { usingDarkMode } = environment;
+  const { darkTheme } = environment;
   const onDesktopDevice = environment.device === "desktop";
   const onMobileDevice = environment.device === "mobile";
   return {
     reset: (): void => namespacedStore.clear(),
 
     app: {
-      darkMode: preference<boolean>("appDarkMode", usingDarkMode),
+      darkMode: preference<boolean>("appDarkMode", darkTheme),
       fadeThumbs: preference<boolean>("appFadeThumbs", false),
       gradient: preference("appGradient", false),
       nativeFont: preference<boolean>("appNativeFont", true),

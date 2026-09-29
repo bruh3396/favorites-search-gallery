@@ -2,9 +2,6 @@ import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
 
 type Entries = Record<string, unknown>;
 
-// Keeps its keys as one object under the namespace key of the wrapped store.
-// Reads come from an in-memory copy loaded once; every write saves the whole
-// object, first merging what other tabs wrote so it never reverts them.
 export class NamespacedStore implements KeyValueStore {
   private readonly store: KeyValueStore;
   private readonly namespace: string;

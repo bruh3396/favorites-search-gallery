@@ -1,7 +1,7 @@
 import { FavoriteActions, addFavoriteUrl, postVoteUrl, removeFavoriteUrl } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-const fetchStub = vi.fn((_url: string, _init?: RequestInit): Promise<Response> => Promise.resolve(new Response("3")));
+const fetchStub = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(() => Promise.resolve(new Response("3")));
 
 function requestedUrlsOf(): string[] {
   return fetchStub.mock.calls.map(([url]) => url);

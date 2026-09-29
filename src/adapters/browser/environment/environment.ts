@@ -1,6 +1,6 @@
-import { Runtime } from "@/core/boundary/environment";
+import { RuntimeEnvironment } from "@/core/boundary/environment";
 
-export function readBrowserEnvironment(): Runtime {
+export function readBrowserEnvironment(): RuntimeEnvironment {
   const agent = navigator.userAgent;
   return {
     device: (/iPhone|iPad|iPod|Android/i).test(agent) ? "mobile" : "desktop",

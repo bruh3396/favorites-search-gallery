@@ -39,6 +39,11 @@ function createSource(fetchPage: (pageId: string, pageIndex: number) => Promise<
   return new Rule34FavoritesSource(createClient(fetchPage, fetchCount), PAGE_ID, firstPageFavorites, FETCH_DELAY, FETCH_ATTEMPTS);
 }
 
+function collectMissing(source: Rule34FavoritesSource, knownIds: ReadonlySet<string>): { run: Promise<void>; delivered: Post[] } {
+  const delivered: Post[] = [];
+  return { run: source.fetchMissing(knownIds, posts => delivered.push(...posts)), delivered };
+}
+
 describe("Rule34FavoritesSource", () => {
   beforeEach(() => {
     vi.useFakeTimers();
@@ -51,7 +56,7 @@ describe("Rule34FavoritesSource", () => {
   test("gives every favorites fetch priority over the site's other pages", async() => {
     const rule34 = createClient(createPageFetch(0), () => Promise.resolve(null));
     const source = new Rule34FavoritesSource(rule34, PAGE_ID, null, FETCH_DELAY, FETCH_ATTEMPTS);
-    const runs = [source.fetchAll(() => { }), source.fetchNew(new Set())];
+    const runs = [source.fetchMissing(new Set(), () => { }), source.fetchMissing(new Set(["known"]), () => { })];
 
     await vi.runAllTimersAsync();
     await Promise.all(runs);
@@ -63,25 +68,24 @@ describe("Rule34FavoritesSource", () => {
     const readFirstFavoritesPage = vi.spyOn(rule34, "readFirstFavoritesPage");
     const fetchCount = vi.spyOn(rule34, "fetchFavoritesCount");
 
-    new Rule34FavoritesSource(rule34).count();
+    new Rule34FavoritesSource(rule34).fetchCount();
     expect(readFirstFavoritesPage).toHaveBeenCalledOnce();
     expect(fetchCount).toHaveBeenCalledWith(PAGE_ID);
   });
 
-  describe("count", () => {
+  describe("fetchCount", () => {
     test("counts the favorites of the configured page id", async() => {
       const fetchCount = vi.fn(() => Promise.resolve(42));
 
-      expect(await createSource(createPageFetch(0), fetchCount).count()).toBe(42);
+      expect(await createSource(createPageFetch(0), fetchCount).fetchCount()).toBe(42);
       expect(fetchCount).toHaveBeenCalledWith(PAGE_ID);
     });
   });
 
-  describe("fetchAll", () => {
+  describe("fetchMissing with no known ids", () => {
     test("delivers every page for the configured page id until an empty page", async() => {
       const fetchPage = createPageFetch(2);
-      const delivered: Post[] = [];
-      const run = createSource(fetchPage).fetchAll(posts => delivered.push(...posts));
+      const { run, delivered } = collectMissing(createSource(fetchPage), new Set());
 
       await vi.runAllTimersAsync();
       await run;
@@ -93,8 +97,7 @@ describe("Rule34FavoritesSource", () => {
 
     test("starts from the favorites already on the page instead of fetching the first page", async() => {
       const fetchPage = createPageFetch(2);
-      const delivered: Post[] = [];
-      const run = createSource(fetchPage, undefined, createPage(9)).fetchAll(posts => delivered.push(...posts));
+      const { run, delivered } = collectMissing(createSource(fetchPage, undefined, createPage(9)), new Set());
 
       await vi.runAllTimersAsync();
       await run;
@@ -105,7 +108,7 @@ describe("Rule34FavoritesSource", () => {
 
     test("spaces requests by the first-attempt retry delay", async() => {
       const fetchPage = createPageFetch(1);
-      const run = createSource(fetchPage).fetchAll(() => { });
+      const { run } = collectMissing(createSource(fetchPage), new Set());
 
       await vi.advanceTimersByTimeAsync(computeRetryDelay(0, FETCH_DELAY) - 1);
       expect(fetchPage).toHaveBeenCalledTimes(1);
@@ -118,24 +121,28 @@ describe("Rule34FavoritesSource", () => {
     });
   });
 
-  describe("fetchNew", () => {
+  describe("fetchMissing with known ids", () => {
+    const KNOWN_IDS = new Set(["known"]);
+
     test("reads the first page from the favorites already on the page", async() => {
       const fetchPage = createPageFetch(1);
-      const run = createSource(fetchPage, undefined, createPage(9)).fetchNew(new Set());
+      const { run, delivered } = collectMissing(createSource(fetchPage, undefined, createPage(9)), KNOWN_IDS);
 
       await vi.runAllTimersAsync();
+      await run;
 
-      expect(idsOf(await run)).toEqual(["page9-0"]);
+      expect(idsOf(delivered)).toEqual(["page9-0"]);
       expect(fetchPage).not.toHaveBeenCalled();
     });
 
-    test("returns unseen posts from pages until a page is not entirely new", async() => {
+    test("delivers unknown posts from pages until a page is not entirely unknown", async() => {
       const fetchPage = createPageFetch(1, FAVORITES_PER_PAGE);
-      const run = createSource(fetchPage).fetchNew(new Set(["page1-0"]));
+      const { run, delivered } = collectMissing(createSource(fetchPage), new Set(["page1-0"]));
 
       await vi.runAllTimersAsync();
+      await run;
 
-      expect(await run).toHaveLength((FAVORITES_PER_PAGE * 2) - 1);
+      expect(delivered).toHaveLength((FAVORITES_PER_PAGE * 2) - 1);
       expect(fetchPage).toHaveBeenCalledTimes(2);
       expect(fetchPage).toHaveBeenLastCalledWith(PAGE_ID, 1);
     });
@@ -145,17 +152,18 @@ describe("Rule34FavoritesSource", () => {
         .mockRejectedValueOnce(new Error("boom"))
         .mockRejectedValueOnce(new Error("boom"))
         .mockResolvedValue(createPage(0));
-      const run = createSource(fetchPage).fetchNew(new Set());
+      const { run, delivered } = collectMissing(createSource(fetchPage), KNOWN_IDS);
 
       await vi.runAllTimersAsync();
+      await run;
 
-      expect(idsOf(await run)).toEqual(["page0-0"]);
+      expect(idsOf(delivered)).toEqual(["page0-0"]);
       expect(fetchPage).toHaveBeenCalledTimes(3);
     });
 
     test("gives up after the configured number of attempts", async() => {
       const fetchPage = vi.fn().mockRejectedValue(new Error("boom"));
-      const run = expect(createSource(fetchPage).fetchNew(new Set())).rejects.toThrow("boom");
+      const run = expect(collectMissing(createSource(fetchPage), KNOWN_IDS).run).rejects.toThrow("boom");
 
       await vi.runAllTimersAsync();
       await run;

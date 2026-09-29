@@ -6,8 +6,8 @@ import { Favorite } from "@/types/favorite";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
-import { PostMedia } from "@/core/domain/post/post";
 import { Point } from "@/types/geometry";
+import { PostMedia } from "@/core/domain/post/post";
 import { Renderer } from "@/features/gallery/types/types";
 import { forceReflow } from "@/utils/browser/element";
 

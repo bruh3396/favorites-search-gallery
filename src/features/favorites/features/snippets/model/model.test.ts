@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 
 const STORAGE_KEY = "searchSnippets";

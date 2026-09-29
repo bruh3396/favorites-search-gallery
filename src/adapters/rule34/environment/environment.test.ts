@@ -23,7 +23,7 @@ function createClient({ pageName, favoritesPageId = "", userId = "", theme = "",
 describe("readRule34Environment", () => {
   test("runs in favorites mode on a favorites page, keyed by the viewed page", () => {
     expect(readRule34Environment(createClient({ pageName: "favorites", favoritesPageId: "123", userId: "9" })))
-      .toMatchObject({ mode: "favorites", favoritesId: "123", ownsFavorites: false });
+      .toMatchObject({ mode: "favorites", favoritesOwnerId: "123", ownsFavorites: false });
   });
 
   test("owns the favorites on the viewer's own favorites page", () => {
@@ -32,7 +32,7 @@ describe("readRule34Environment", () => {
 
   test("runs in posts mode on a post list, keyed by the logged-in user", () => {
     expect(readRule34Environment(createClient({ pageName: "postList", userId: "9" })))
-      .toMatchObject({ mode: "posts", favoritesId: "9", ownsFavorites: false });
+      .toMatchObject({ mode: "postList", favoritesOwnerId: "9", ownsFavorites: false });
   });
 
   test("never owns the favorites on a post list, even logged out", () => {
@@ -45,6 +45,6 @@ describe("readRule34Environment", () => {
 
   test("reads the tag blacklist and dark theme", () => {
     expect(readRule34Environment(createClient({ pageName: "favorites", theme: "dark", tagBlacklist: "apple banana" })))
-      .toMatchObject({ usingDarkMode: true, blacklistedTags: "apple banana" });
+      .toMatchObject({ darkTheme: true, blacklistedTags: "apple banana" });
   });
 });

@@ -1,20 +1,20 @@
-export type AppMode = "favorites" | "posts";
+export type AppMode = "favorites" | "postList";
 export type Device = "desktop" | "mobile";
 export type CanvasBudget = "reduced" | "full";
 
-export interface Place {
+export interface HostEnvironment {
   mode: AppMode;
-  favoritesId: string;
+  favoritesOwnerId: string;
   ownsFavorites: boolean;
   blacklistedTags: string;
-  usingDarkMode: boolean;
+  darkTheme: boolean;
 }
 
-export interface Runtime {
+export interface RuntimeEnvironment {
   device: Device;
   canvasBudget: CanvasBudget;
 }
 
-export interface Environment extends Place, Runtime {
+export interface Environment extends HostEnvironment, RuntimeEnvironment {
   version: string;
 }

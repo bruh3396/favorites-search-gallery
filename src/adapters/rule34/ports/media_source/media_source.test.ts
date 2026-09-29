@@ -27,20 +27,20 @@ function setup(): { source: Rule34MediaSource; rule34: Rule34 } {
 
 describe("Rule34MediaSource", () => {
   test("gives a preview's URL from the locator", async() => {
-    expect(await setup().source.previewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
+    expect(await setup().source.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
   });
 
   test("gives an original's URL from the locator and kind", async() => {
     const { source, rule34 } = setup();
 
-    expect(await source.originalUrl(VIDEO)).toBe(ORIGINAL);
+    expect(await source.resolveOriginalUrl(VIDEO)).toBe(ORIGINAL);
     expect(rule34.originalUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
   });
 
   test("gives an image's URL from the locator and kind", async() => {
     const { source, rule34 } = setup();
 
-    expect(await source.imageUrl(VIDEO)).toBe(IMAGE);
+    expect(await source.resolveImageUrl(VIDEO)).toBe(IMAGE);
     expect(rule34.imageUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
   });
 

@@ -1,6 +1,7 @@
 import { Collection, Enricher, Searcher, Store } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoritesSource } from "@/core/boundary/ports/favorites_source";
+import { Post } from "@/core/domain/post/post";
 
 export class FavoritesLoader {
   private readonly store: Store;
@@ -34,7 +35,7 @@ export class FavoritesLoader {
   }
 
   public fetchAll(onSearchResultsFound: (newSearchResults: Favorite[]) => void): Promise<void> {
-    return this.source.fetchAll((posts) => {
+    return this.source.fetchMissing(new Set(), (posts) => {
       const favorites = this.collection.appendDirty(posts);
 
       this.searcher.add(favorites);
@@ -43,17 +44,18 @@ export class FavoritesLoader {
     });
   }
 
-  public fetchNew(): Promise<Favorite[]> {
-    return this.source.fetchNew(this.collection.getAllIds())
-      .then((posts) => {
-        if (posts.length === 0) {
-          return [];
-        }
-        const newFavorites = this.collection.prependDirty(posts);
+  public async fetchNew(): Promise<Favorite[]> {
+    const posts: Post[] = [];
 
-        this.searcher.add(newFavorites);
-        this.enricher.enrich(newFavorites);
-        return newFavorites;
-      });
+    await this.source.fetchMissing(this.collection.getAllIds(), found => posts.push(...found));
+
+    if (posts.length === 0) {
+      return [];
+    }
+    const newFavorites = this.collection.prependDirty(posts);
+
+    this.searcher.add(newFavorites);
+    this.enricher.enrich(newFavorites);
+    return newFavorites;
   }
 }

@@ -6,7 +6,7 @@ import { SettingsSection } from "@/features/favorites/types/types";
 
 export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment, host: Host): SettingsSection[] {
   const onMobile = environment.device === "mobile";
-  const header: SettingsControl[] = host.setHeaderVisible === null ? [] : [catalog.header];
+  const header: SettingsControl[] = host.hasHeader ? [catalog.header] : [];
   return [
     {
       title: "General",

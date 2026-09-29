@@ -1,15 +1,15 @@
 import * as GalleryItemWindow from "@/features/gallery/model/item_window";
 import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
 import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
-import { MediaSource } from "@/core/boundary/ports/media_source";
-import { Navigation } from "@/core/boundary/ports/navigation";
-import { GalleryState } from "@/types/app";
 import { Boundary } from "@/types/boundary";
+import { GalleryState } from "@/types/app";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaSource } from "@/core/boundary/ports/media_source";
+import { Links } from "@/core/boundary/ports/links";
 import { NavigationKey } from "@/types/input";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { downloadMedia } from "@/lib/media/download";
 import { isVideo } from "@/lib/media/media_type";
@@ -22,9 +22,9 @@ export class GalleryModel {
 
   constructor(
     preferences: Preferences,
-    private readonly navigation: Navigation,
+    private readonly links: Links,
     private readonly favoritesEditor: FavoritesEditor,
-    private readonly mediaSource: Pick<MediaSource, "originalUrl" | "fetchOriginal">
+    private readonly mediaSource: Pick<MediaSource, "resolveOriginalUrl" | "fetchOriginal">
   ) {
     this.cursor = new ItemCursor<PostMedia>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
@@ -72,11 +72,11 @@ export class GalleryModel {
   }
 
   public openPost(): void {
-    this.navigation.openUrl(this.navigation.postUrl(this.cursor.currentItem().id));
+    this.links.openInNewTab(this.links.postUrl(this.cursor.currentItem().id));
   }
 
   public async openOriginal(): Promise<void> {
-    this.navigation.openUrl(await this.mediaSource.originalUrl(this.cursor.currentItem().media));
+    this.links.openInNewTab(await this.mediaSource.resolveOriginalUrl(this.cursor.currentItem().media));
   }
 
   public download(): Promise<void> {

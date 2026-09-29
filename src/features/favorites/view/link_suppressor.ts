@@ -1,4 +1,4 @@
-﻿import { EnhancedMouseEvent } from "@/lib/event/input";
+import { EnhancedMouseEvent } from "@/lib/event/input";
 
 export class FavoritesLinkSuppressor {
   private previousThumb: HTMLElement | null = null;

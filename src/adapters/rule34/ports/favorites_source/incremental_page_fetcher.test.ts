@@ -30,85 +30,76 @@ function idsOf(posts: Post[]): string[] {
 
 const NO_DELAY = 0;
 
-describe("IncrementalPageFetcher", () => {
-  test("returns nothing when the first fetched page is empty", async() => {
-    const { fetch, requested } = createPageFetcher([[]]);
-    const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, new Set());
-    const result = await fetcher.fetchNew();
+async function deliveredFor(fetch: (pageIndex: number) => Promise<Post[]>, seen: ReadonlySet<string>, firstPage?: Post[]): Promise<Post[][]> {
+  const delivered: Post[][] = [];
 
-    expect(result).toEqual([]);
+  await new IncrementalPageFetcher(posts => delivered.push(posts), fetch, PAGE_SIZE, NO_DELAY, seen).fetchMissing(firstPage);
+  return delivered;
+}
+
+describe("IncrementalPageFetcher", () => {
+  test("delivers nothing when the first fetched page is empty", async() => {
+    const { fetch, requested } = createPageFetcher([[]]);
+
+    expect(await deliveredFor(fetch, new Set())).toEqual([]);
     expect(requested).toEqual([0]);
   });
 
   test("starts at page index 0 when no first page is provided", async() => {
     const { fetch, requested } = createPageFetcher([createPartialPage(0, 3)]);
-    const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, new Set());
-    const result = await fetcher.fetchNew();
+    const delivered = await deliveredFor(fetch, new Set());
 
-    expect(idsOf(result)).toEqual(["0", "1", "2"]);
+    expect(idsOf(delivered.flat())).toEqual(["0", "1", "2"]);
     expect(requested).toEqual([0]);
   });
 
-  test("stops after a partial page and advances the page index in order", async() => {
+  test("delivers each page as it is fetched and stops after a partial page", async() => {
     const { fetch, requested } = createPageFetcher([createFullPage(0), createFullPage(100), createPartialPage(200, 10)]);
-    const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, new Set());
-    const result = await fetcher.fetchNew();
+    const delivered = await deliveredFor(fetch, new Set());
 
-    expect(result).toHaveLength((PAGE_SIZE * 2) + 10);
+    expect(delivered.map(page => page.length)).toEqual([PAGE_SIZE, PAGE_SIZE, 10]);
     expect(requested).toEqual([0, 1, 2]);
   });
 
   test("filters out already stored posts", async() => {
-    const stored = new Set(["1", "3"]);
     const { fetch } = createPageFetcher([createPartialPage(0, 5)]);
-    const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, stored);
-    const result = await fetcher.fetchNew();
+    const delivered = await deliveredFor(fetch, new Set(["1", "3"]));
 
-    expect(idsOf(result)).toEqual(["0", "2", "4"]);
+    expect(idsOf(delivered.flat())).toEqual(["0", "2", "4"]);
   });
 
   test("stops when dedupe drops a full page below the page size", async() => {
     const first = createFullPage(0);
-    const stored = new Set([first[0].id]);
     const { fetch, requested } = createPageFetcher([first, createFullPage(100)]);
-    const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, stored);
-    const result = await fetcher.fetchNew();
+    const delivered = await deliveredFor(fetch, new Set([first[0].id]));
 
-    expect(result).toHaveLength(PAGE_SIZE - 1);
+    expect(delivered.flat()).toHaveLength(PAGE_SIZE - 1);
     expect(requested).toEqual([0]);
   });
 
   describe("first page provided", () => {
     test("short-circuits without fetching when the first page's unseen count is below the page size", async() => {
       const { fetch, requested } = createPageFetcher([createFullPage(100)]);
-      const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, new Set());
+      const delivered = await deliveredFor(fetch, new Set(), createPartialPage(0, 10));
 
-      const result = await fetcher.fetchNew(createPartialPage(0, 10));
-
-      expect(idsOf(result)).toEqual(idsOf(createPartialPage(0, 10)));
+      expect(idsOf(delivered.flat())).toEqual(idsOf(createPartialPage(0, 10)));
       expect(fetch).not.toHaveBeenCalled();
       expect(requested).toEqual([]);
     });
 
     test("continues from page index 1 when the first page is full", async() => {
       const { fetch, requested } = createPageFetcher([createFullPage(0), createPartialPage(100, 5)]);
-      const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, new Set());
+      const delivered = await deliveredFor(fetch, new Set(), createFullPage(500));
 
-      const result = await fetcher.fetchNew(createFullPage(500));
-
-      expect(result).toHaveLength(PAGE_SIZE + 5);
+      expect(delivered.flat()).toHaveLength(PAGE_SIZE + 5);
       expect(requested).toEqual([1]);
     });
 
     test("applies dedupe to the provided first page", async() => {
-      const provided = createPartialPage(0, 10);
-      const stored = new Set(["0", "5", "9"]);
       const { fetch } = createPageFetcher([]);
-      const fetcher = new IncrementalPageFetcher(fetch, PAGE_SIZE, NO_DELAY, stored);
+      const delivered = await deliveredFor(fetch, new Set(["0", "5", "9"]), createPartialPage(0, 10));
 
-      const result = await fetcher.fetchNew(provided);
-
-      expect(idsOf(result)).toEqual(["1", "2", "3", "4", "6", "7", "8"]);
+      expect(idsOf(delivered.flat())).toEqual(["1", "2", "3", "4", "6", "7", "8"]);
     });
   });
 });

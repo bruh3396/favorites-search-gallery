@@ -1,7 +1,7 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
-import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
+import { PostMedia } from "@/core/domain/post/post";
 import { queueMacroTask } from "@/lib/async/scheduling";
 
 export class GalleryNavigationFlow extends GalleryFlow {
@@ -94,7 +94,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
   }
 
   private advanceResults(direction: NavigationKey): boolean {
-    if (this.context.environment.mode === "posts") {
+    if (this.context.environment.mode === "postList") {
       return this.context.featureBridge.postList.navigateToAdjacent.request(direction) !== null;
     }
     return this.context.featureBridge.favorites.advance.request(direction);

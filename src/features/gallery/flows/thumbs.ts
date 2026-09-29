@@ -14,7 +14,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   constructor(dependencies: GalleryFlowDependencies) {
     super(dependencies);
-    this.upscaleQuality = this.context.environment.mode === "posts" ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
+    this.upscaleQuality = this.context.environment.mode === "postList" ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
     this.refreshImagesDebounced = debounceLeading(() => this.refreshImages(), GalleryConfig.contentRefreshTime);
     this.updateUpscaleQualityDebounced = debounceTrailing(() => this.updateUpscaleQualityNow(), GalleryUpscaleConfig.dynamicQualitySettleTime);
     this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.cacheOrUpscale(thumbs)), 1_000);
@@ -24,7 +24,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
   public async refreshInitialContent(): Promise<void> {
     const { environment, events } = this.context;
 
-    if (environment.mode === "posts" || (environment.mode === "favorites" && !(await events.favorites.storedFavoritesFound.wait()))) {
+    if (environment.mode === "postList" || (environment.mode === "favorites" && !(await events.favorites.storedFavoritesFound.wait()))) {
       this.refresh();
     }
   }
@@ -46,7 +46,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
       return;
     }
 
-    if (this.context.environment.mode === "posts") {
+    if (this.context.environment.mode === "postList") {
       this.cacheUnlessInfiniteScrolling();
     }
     this.view.reUpscale();

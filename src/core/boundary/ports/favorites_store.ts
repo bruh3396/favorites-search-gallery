@@ -1,6 +1,6 @@
 export interface FavoritesStore {
   getAll: () => Promise<string[]>;
-  prepend: (ids: string[]) => Promise<void>;
-  remove: (id: string) => Promise<void>;
+  prepend: (postIds: string[]) => Promise<void>;
+  remove: (postId: string) => Promise<void>;
   clear: () => Promise<void>;
 }

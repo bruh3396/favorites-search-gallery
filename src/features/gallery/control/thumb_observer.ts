@@ -79,7 +79,7 @@ export class GalleryThumbObserver {
   constructor(private readonly context: AppContext) {}
 
   public setup(onVisibleThumbsChanged: () => void): void {
-    if (this.context.environment.mode === "posts" && !GalleryConfig.upscaleEverythingOnPostList) {
+    if (this.context.environment.mode === "postList" && !GalleryConfig.upscaleEverythingOnPostList) {
       return;
     }
     this.observer = new VisibleThumbObserver(onVisibleThumbsChanged);

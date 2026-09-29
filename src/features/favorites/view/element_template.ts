@@ -2,8 +2,8 @@ import { ActionBarDataset, ActionBarSelectors, actionBarHtml, stampActionBarId }
 import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { Favorite } from "@/types/favorite";
-import { doNothing } from "@/utils/pure/function";
 import { Media } from "@/core/domain/media/media";
+import { doNothing } from "@/utils/pure/function";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
 export class FavoritesElementTemplate {
@@ -16,7 +16,7 @@ export class FavoritesElementTemplate {
     onMobileDevice: boolean,
     userIsOnTheirOwnFavoritesPage: boolean,
     postUrl: (id: string) => string,
-    private readonly previewUrl: (media: Media) => Promise<string>
+    private readonly resolvePreviewUrl: (media: Media) => Promise<string>
   ) {
     const root = new DOMParser().parseFromString("", "text/html").createElement("div");
     const canvas = galleryRunning ? "<canvas></canvas>" : "";
@@ -50,27 +50,12 @@ export class FavoritesElementTemplate {
     root.id = favorite.id;
     stampActionBarId(root);
     toggleDataset(root, "newBadge", favorite.isNew);
-    void this.showPreview(root, image, favorite);
+    this.showPreview(root, image, favorite);
 
     if (this.shouldLinkToPostPage) {
       container.href = this.postUrl(root.id);
     }
     this.setThumbFavorited(root, favorited);
-  }
-
-  private async showPreview(root: HTMLElement, image: HTMLImageElement, favorite: Favorite): Promise<void> {
-    toggleDataset(root, "loading", true);
-    const url = await this.previewUrl(favorite.media);
-
-    if (root.id !== favorite.id) {
-      return;
-    }
-    image.src = url;
-    await image.decode().catch(doNothing);
-
-    if (root.id === favorite.id) {
-      toggleDataset(root, "loading", false);
-    }
   }
 
   public blankThumbImage(root: HTMLElement): void {
@@ -82,6 +67,21 @@ export class FavoritesElementTemplate {
 
     if (bar !== null) {
       toggleDataset(bar, ActionBarDataset.isFavorite, favorited);
+    }
+  }
+
+  private async showPreview(root: HTMLElement, image: HTMLImageElement, favorite: Favorite): Promise<void> {
+    toggleDataset(root, "loading", true);
+    const url = await this.resolvePreviewUrl(favorite.media);
+
+    if (root.id !== favorite.id) {
+      return;
+    }
+    image.src = url;
+    await image.decode().catch(doNothing);
+
+    if (root.id === favorite.id) {
+      toggleDataset(root, "loading", false);
     }
   }
 }

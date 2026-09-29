@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import { PostFetchError } from "@/types/errors";
 import { parsePostFromPostPage } from "@/adapters/rule34/client/site/post_page/parser";
 
-const IMAGE = `<img id="image" src="https://us.rule34.xxx//images/1234/a1b2c3.png?42">`;
-const VIDEO = `<video><source src="https://us.rule34.xxx//images/1234/a1b2c3.mp4?42"></video>`;
+const IMAGE = "<img id=\"image\" src=\"https://us.rule34.xxx//images/1234/a1b2c3.png?42\">";
+const VIDEO = "<video><source src=\"https://us.rule34.xxx//images/1234/a1b2c3.mp4?42\"></video>";
 
 function createPostPage(size: string, file: string = IMAGE): string {
   return `

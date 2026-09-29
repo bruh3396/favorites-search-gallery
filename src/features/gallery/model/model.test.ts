@@ -1,24 +1,24 @@
 import { AddFavoriteResult, FavoritesEditor, RemoveFavoriteResult } from "@/core/boundary/ports/favorites_editor";
-import { PostMedia } from "@/core/domain/post/post";
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { describe, expect, test, vi } from "vitest";
-import { MediaSource } from "@/core/boundary/ports/media_source";
 import { GalleryModel } from "@/features/gallery/model/model";
-import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MediaSource } from "@/core/boundary/ports/media_source";
+import { MemoryLinks } from "@/adapters/memory/ports/links/links";
+import { PostMedia } from "@/core/domain/post/post";
 import { UpscaleQuality } from "@/types/app";
 import { createPreferences } from "@/testing/preferences";
 
 interface Setup {
   model: GalleryModel;
   items: PostMedia[];
-  navigation: MemoryNavigation;
+  links: MemoryLinks;
   favoritesEditor: { add: ReturnType<typeof vi.fn<FavoritesEditor["add"]>>; remove: ReturnType<typeof vi.fn<FavoritesEditor["remove"]>> };
   blobsRequested: Media[];
 }
 
-function createMediaSource(blobsRequested: Media[]): Pick<MediaSource, "originalUrl" | "fetchOriginal"> {
+function createMediaSource(blobsRequested: Media[]): Pick<MediaSource, "resolveOriginalUrl" | "fetchOriginal"> {
   return {
-    originalUrl: (media): Promise<string> => Promise.resolve(`original:${media.locator}`),
+    resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`original:${media.locator}`),
     fetchOriginal: (media): Promise<Blob> => {
       blobsRequested.push(media);
       return new Promise(() => { });
@@ -35,22 +35,22 @@ function createModel(previewEnabled = false): GalleryModel {
 }
 
 function setupWith(previewEnabled: boolean): Omit<Setup, "items"> {
-  const navigation = new MemoryNavigation();
+  const links = new MemoryLinks();
   const favoritesEditor = {
     add: vi.fn<FavoritesEditor["add"]>((): Promise<AddFavoriteResult> => Promise.resolve("alreadyAdded")),
     remove: vi.fn<FavoritesEditor["remove"]>((): Promise<RemoveFavoriteResult> => new Promise(() => { }))
   };
   const blobsRequested: Media[] = [];
-  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), navigation, favoritesEditor, createMediaSource(blobsRequested));
-  return { model, navigation, favoritesEditor, blobsRequested };
+  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), links, favoritesEditor, createMediaSource(blobsRequested));
+  return { model, links, favoritesEditor, blobsRequested };
 }
 
 function setup(...ids: string[]): Setup {
-  const { model, navigation, favoritesEditor, blobsRequested } = setupWith(false);
+  const { model, links, favoritesEditor, blobsRequested } = setupWith(false);
   const items = ids.map(id => createItem(id));
 
   model.indexItems(items);
-  return { model, items, navigation, favoritesEditor, blobsRequested };
+  return { model, items, links, favoritesEditor, blobsRequested };
 }
 
 describe("GalleryModel", () => {
@@ -161,19 +161,19 @@ describe("GalleryModel", () => {
     });
 
     test("opens the current item's post and original", async() => {
-      const { model, items, navigation } = setup("101");
+      const { model, items, links } = setup("101");
 
       model.open(items[0]);
       model.openPost();
       await model.openOriginal();
-      expect(navigation.opened).toEqual(["#post-101", "original:1/101.png"]);
+      expect(links.opened).toEqual(["#post-101", "original:1/101.png"]);
     });
 
     test("downloads the current item's original", () => {
       const { model, items, blobsRequested } = setup("103");
 
       model.open(items[0]);
-      void model.download();
+      model.download();
       expect(blobsRequested).toEqual([items[0].media]);
     });
 

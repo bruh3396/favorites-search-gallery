@@ -1,8 +1,8 @@
+import { Preferences, createPreferences } from "@/app/context/preferences";
 import { describe, expect, test } from "vitest";
 import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { Preference } from "@/lib/storage/preference";
 import { createEnvironment } from "@/testing/environment";
-import { Preferences, createPreferences } from "@/app/context/preferences";
 
 function allPreferencesOf(preferences: Preferences): Preference<unknown>[] {
   const { reset: _reset, ...sections } = preferences;

@@ -21,7 +21,7 @@ export class FavoritesPaginatedDisplay implements Display {
 
     for (const item of media) {
       await sleep(3);
-      preloadImage(await this.mediaSource.previewUrl(item));
+      preloadImage(await this.mediaSource.resolvePreviewUrl(item));
     }
   }, 2_000);
 
@@ -30,7 +30,7 @@ export class FavoritesPaginatedDisplay implements Display {
     private readonly view: FavoritesView,
     private readonly events: Events,
     private readonly shell: Shell,
-    private readonly mediaSource: Pick<MediaSource, "previewUrl">
+    private readonly mediaSource: Pick<MediaSource, "resolvePreviewUrl">
   ) { }
 
   public initialize(results: Favorite[], options?: ContentDisplayOptions): void {

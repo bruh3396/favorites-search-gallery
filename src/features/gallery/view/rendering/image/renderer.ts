@@ -11,8 +11,8 @@ import { GalleryMainThreadUpscaler } from "@/features/gallery/view/rendering/ima
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/image/worker_upscaler_wrapper";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { PostMedia } from "@/core/domain/post/post";
 import { Point } from "@/types/geometry";
+import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { Renderer } from "@/features/gallery/types/types";
 import { Shell } from "@/app/context/shell";
@@ -130,7 +130,7 @@ export class GalleryImageRenderer implements Renderer {
   }
 
   private createUpscaler(environment: Environment, preferences: Preferences, shell: Shell): GalleryAbstractUpscaler {
-    const settings = environment.mode === "posts" ? preferences.postList : preferences.favorites;
+    const settings = environment.mode === "postList" ? preferences.postList : preferences.favorites;
     const canvasFor = (id: string): HTMLCanvasElement | null => shell.findThumb(id)?.querySelector("canvas") ?? null;
     const fetchBitmap = (request: ImageRequest): Promise<boolean> => this.fetcher.fetchBitmap(request);
     const paintDelay = environment.canvasBudget === "reduced" ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other;

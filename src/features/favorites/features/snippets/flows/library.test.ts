@@ -1,12 +1,12 @@
 import { Snippet, SnippetScene } from "@/features/favorites/features/snippets/types/types";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/types/favorite";
+import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { SnippetFlows } from "@/features/favorites/features/snippets/flows/flows";
 import { SnippetLibraryFlow } from "@/features/favorites/features/snippets/flows/library";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
 import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
 import { SnippetView } from "@/features/favorites/features/snippets/view/view";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 
 const STORAGE_KEY = "searchSnippets";

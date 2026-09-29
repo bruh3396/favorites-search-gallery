@@ -3,27 +3,30 @@ import { sleep } from "@/lib/async/scheduling";
 
 export class IncrementalPageFetcher {
   constructor(
+    private readonly onPostsFound: (posts: Post[]) => void,
     private readonly fetch: (pageIndex: number) => Promise<Post[]>,
     private readonly pageSize: number,
     private readonly fetchDelay: number,
-    private readonly seen: Set<string>
+    private readonly seen: ReadonlySet<string>
   ) { }
 
-  public async fetchNew(firstPage?: Post[]): Promise<Post[]> {
+  public async fetchMissing(firstPage?: Post[]): Promise<void> {
     let pageIndex = 0;
-    let unseen = this.unseenOf(firstPage ?? await this.fetch(pageIndex));
-    const result = [...unseen];
+    let unseen = this.deliverUnseen(firstPage ?? await this.fetch(pageIndex));
 
     while (unseen.length >= this.pageSize) {
       pageIndex += 1;
       await sleep(this.fetchDelay);
-      unseen = this.unseenOf(await this.fetch(pageIndex));
-      result.push(...unseen);
+      unseen = this.deliverUnseen(await this.fetch(pageIndex));
     }
-    return result;
   }
 
-  private unseenOf(posts: Post[]): Post[] {
-    return posts.filter(post => !this.seen.has(post.id));
+  private deliverUnseen(posts: Post[]): Post[] {
+    const unseen = posts.filter(post => !this.seen.has(post.id));
+
+    if (unseen.length > 0) {
+      this.onPostsFound(unseen);
+    }
+    return unseen;
   }
 }

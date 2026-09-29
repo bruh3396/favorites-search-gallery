@@ -1,6 +1,6 @@
 import { AutoplayDuration } from "@/features/gallery/features/autoplay/types/types";
-import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
+import { PostMedia } from "@/core/domain/post/post";
 import { isVideo } from "@/lib/media/media_type";
 
 export function timerFor(item: PostMedia): AutoplayDuration {

@@ -7,6 +7,20 @@ import { Shell } from "@/app/context/shell";
 import { blurActiveElement } from "@/utils/browser/window";
 import { toggleDataset } from "@/utils/browser/dataset";
 
+const ADD_FAVORITE_ICONS: Record<AddFavoriteResult, string | null> = {
+  added: Icons.HEART_PLUS,
+  alreadyAdded: Icons.HEART_CHECK,
+  loggedOut: Icons.ERROR,
+  cancelled: null,
+  error: Icons.ERROR
+};
+
+const REMOVE_FAVORITE_ICONS: Record<RemoveFavoriteResult, string | null> = {
+  removed: Icons.HEART_MINUS,
+  cancelled: null,
+  error: null
+};
+
 export class GalleryUi {
   private readonly environment: Environment;
   private readonly shell: Shell;
@@ -71,31 +85,18 @@ export class GalleryUi {
   }
 
   public showAddFavoriteResult(result: AddFavoriteResult): void {
-    const icon = {
-      alreadyAdded: Icons.HEART_CHECK,
-      added: Icons.HEART_PLUS,
-      error: Icons.ERROR,
-      loggedOut: Icons.ERROR
-    }[result] ?? Icons.ERROR;
+    const icon = ADD_FAVORITE_ICONS[result];
 
-    GalleryFullscreenIcon.showFullscreenIcon(icon);
+    if (icon !== null) {
+      GalleryFullscreenIcon.showFullscreenIcon(icon);
+    }
   }
 
   public showRemoveFavoriteResult(result: RemoveFavoriteResult): void {
-    switch (result) {
-      case "removed":
-        GalleryFullscreenIcon.showFullscreenIcon(Icons.HEART_MINUS);
-        break;
+    const icon = REMOVE_FAVORITE_ICONS[result];
 
-      case "forbidden":
-        GalleryFullscreenIcon.showFullscreenIcon(Icons.WARNING, 1_000);
-        setTimeout(() => {
-          alert("Removing favorites from the gallery is currently disabled.");
-        }, 20);
-        break;
-
-      default:
-        break;
+    if (icon !== null) {
+      GalleryFullscreenIcon.showFullscreenIcon(icon);
     }
   }
 

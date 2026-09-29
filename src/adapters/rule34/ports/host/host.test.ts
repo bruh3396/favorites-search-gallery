@@ -29,15 +29,16 @@ describe("Rule34Host", () => {
   });
 
   test("leaves the post list page alone", () => {
-    expect(clearedFor("posts")).toBe(false);
+    expect(clearedFor("postList")).toBe(false);
   });
 
   test("shows and hides the site's header", () => {
     const rule34 = createRule34();
-    const { setHeaderVisible } = new Rule34Host(rule34, "favorites");
+    const host = new Rule34Host(rule34, "favorites");
 
-    setHeaderVisible(false);
-    setHeaderVisible(true);
+    expect(host.hasHeader).toBe(true);
+    host.setHeaderVisible(false);
+    host.setHeaderVisible(true);
     expect(rule34.setHeaderVisible.mock.calls).toEqual([[false], [true]]);
   });
 

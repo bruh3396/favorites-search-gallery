@@ -8,8 +8,10 @@ import { createPost } from "@/testing/post";
 function setup(sourcePosts: Post[], storedPosts: Post[] = []): { resolver: PostResolver; stored: Post[] } {
   const stored: Post[] = [];
   const resolver = new PostResolver(new MemoryPostSource(new MemoryClient(sourcePosts)), {
-    readStored: ids => Promise.resolve(storedPosts.filter(post => ids.includes(post.id))),
-    store: post => stored.push(post)
+    readStored: (ids): Promise<Post[]> => Promise.resolve(storedPosts.filter(post => ids.includes(post.id))),
+    store: (post): void => {
+      stored.push(post);
+    }
   });
   return { resolver, stored };
 }

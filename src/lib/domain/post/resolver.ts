@@ -1,6 +1,6 @@
 import * as PostStore from "@/lib/domain/post/store";
-import { PostSource } from "@/core/boundary/ports/post_source";
 import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { PostSource } from "@/core/boundary/ports/post_source";
 
 export interface PostResolverDependencies {
   readStored: (ids: string[]) => Promise<Post[]>;
@@ -21,7 +21,7 @@ export class PostResolver {
       staleById.delete(post.id);
       onResolved({ post, tagCategories: new Map() });
     }
-    await Promise.all([...staleById.values()].map(stale => this.source.fetchPost(stale.id).then(
+    await Promise.all([...staleById.values()].map(stale => this.source.fetch(stale.id).then(
       fetched => onResolved(this.refresh(stale, fetched)),
       () => { }
     )));

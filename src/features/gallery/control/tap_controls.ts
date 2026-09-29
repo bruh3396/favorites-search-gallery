@@ -1,4 +1,4 @@
-﻿import { AppContext } from "@/app/context/context";
+import { AppContext } from "@/app/context/context";
 import { GalleryView } from "@/features/gallery/view/view";
 import { macroTask } from "@/lib/async/scheduling";
 

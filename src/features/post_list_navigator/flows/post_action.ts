@@ -16,7 +16,7 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
         this.context.events.app.favoriteAdded.emit(id);
       },
       onFavoriteRemoved: doNothing,
-      onPostOpened: (id) => this.context.ports.navigation.openUrl(this.context.ports.navigation.postUrl(id)),
+      onPostOpened: (id) => this.context.ports.links.openInNewTab(this.context.ports.links.postUrl(id)),
       onMediaDownloaded: (id) => this.download(id)
     });
   }
@@ -25,7 +25,7 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
     const post = this.model.getPost(id);
 
     if (post !== undefined) {
-      void downloadMedia(this.context.ports.mediaSource, post);
+      downloadMedia(this.context.ports.mediaSource, post);
     }
   }
 }

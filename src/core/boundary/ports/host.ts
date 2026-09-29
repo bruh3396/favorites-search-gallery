@@ -1,5 +1,6 @@
 export interface Host {
-  readonly setHeaderVisible: ((visible: boolean) => void) | null;
+  readonly hasHeader: boolean;
+  setHeaderVisible: (visible: boolean) => void;
   takeOver: () => void;
   lockViewport: () => void;
 }

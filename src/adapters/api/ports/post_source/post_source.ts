@@ -1,8 +1,8 @@
-import { PostSource } from "@/core/boundary/ports/post_source";
-import { CategorizedPost } from "@/core/domain/post/post";
 import { ApiClient } from "@/adapters/api/client/client";
+import { CategorizedPost } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
 import { PostFetchError } from "@/types/errors";
+import { PostSource } from "@/core/boundary/ports/post_source";
 import { ServerPost } from "@/adapters/api/client/post/post";
 import { parsePost } from "@/adapters/api/client/post/parser";
 import { withExponentialBackoff } from "@/lib/async/scheduling";
@@ -17,7 +17,7 @@ export class ApiPostSource implements PostSource {
     private readonly fetchAttempts: number = FETCH_ATTEMPTS
   ) { }
 
-  public fetchPost(id: string): Promise<CategorizedPost> {
+  public fetch(id: string): Promise<CategorizedPost> {
     return withExponentialBackoff(() => this.fetchOne(id), this.fetchAttempts);
   }
 
@@ -30,7 +30,7 @@ export class ApiPostSource implements PostSource {
       case "deferred":
         return this.fetchOne(id);
       case "deleted":
-        return this.deletedPosts.fetchPost(id);
+        return this.deletedPosts.fetch(id);
       default:
         throw new PostFetchError(response.status);
     }

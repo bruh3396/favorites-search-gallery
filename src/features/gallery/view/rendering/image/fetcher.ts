@@ -7,7 +7,7 @@ import { loadImageBitmap } from "@/utils/browser/image";
 export class GalleryImageFetcher implements ImageFetcher {
   private readonly fetchQueue = new ThrottleQueue(10);
 
-  constructor(private readonly mediaSource: Pick<MediaSource, "previewUrl" | "imageUrl">) { }
+  constructor(private readonly mediaSource: Pick<MediaSource, "resolvePreviewUrl" | "resolveImageUrl">) { }
 
   public fetchBitmap(request: ImageRequest): Promise<boolean> {
     return request.isHighRes ? this.fetchHighResBitmap(request) : this.fetchLowResBitmap(request);
@@ -23,7 +23,7 @@ export class GalleryImageFetcher implements ImageFetcher {
     }
 
     try {
-      const url = await this.mediaSource.imageUrl(request.item.media);
+      const url = await this.mediaSource.resolveImageUrl(request.item.media);
 
       request.complete(await loadImageBitmap(url, request.abortController.signal));
       return true;
@@ -37,7 +37,7 @@ export class GalleryImageFetcher implements ImageFetcher {
 
   private async fetchLowResBitmap(request: ImageRequest): Promise<boolean> {
     try {
-      request.complete(await loadImageBitmap(await this.mediaSource.previewUrl(request.item.media)));
+      request.complete(await loadImageBitmap(await this.mediaSource.resolvePreviewUrl(request.item.media)));
       return true;
     } catch {
       return false;

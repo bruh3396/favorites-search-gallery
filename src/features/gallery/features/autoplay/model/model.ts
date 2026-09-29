@@ -1,8 +1,8 @@
 import * as AutoplayDurations from "@/features/gallery/features/autoplay/model/durations";
 import * as AutoplayPlayback from "@/features/gallery/features/autoplay/model/playback";
 import { AutoplayDuration } from "@/features/gallery/features/autoplay/types/types";
-import { PostMedia } from "@/core/domain/post/post";
 import { NavigationKey } from "@/types/input";
+import { PostMedia } from "@/core/domain/post/post";
 
 export class AutoplayModel {
   public parseDuration(kind: AutoplayDuration, seconds: string, fallback: number): number {

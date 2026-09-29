@@ -9,7 +9,7 @@ import { Rule34FavoritesSource } from "@/adapters/rule34/ports/favorites_source/
 import { Rule34Host } from "@/adapters/rule34/ports/host/host";
 import { Rule34MediaClient } from "@/adapters/rule34/client/media/client";
 import { Rule34MediaSource } from "@/adapters/rule34/ports/media_source/media_source";
-import { Rule34Navigation } from "@/adapters/rule34/ports/navigation/navigation";
+import { Rule34Links } from "@/adapters/rule34/ports/links/links";
 import { Rule34PostSource } from "@/adapters/rule34/ports/post_source/post_source";
 import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
 import { mintMedia } from "@/adapters/rule34/client/media/locator";
@@ -34,7 +34,7 @@ function createPorts(rule34SiteClient: Rule34SiteClient, apiClient: ApiClient, e
     postSource: new ApiPostSource(apiClient, new Rule34PostSource(rule34SiteClient), url => mintMedia(url, "")),
     tagSource: new ApiTagSource(apiClient),
     mediaSource: new Rule34MediaSource(new Rule34MediaClient()),
-    navigation: new Rule34Navigation(rule34SiteClient),
+    links: new Rule34Links(rule34SiteClient),
     host: new Rule34Host(rule34SiteClient, environment.mode),
     keyValueStore: new BrowserKeyValueStore()
   };

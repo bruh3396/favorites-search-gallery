@@ -6,15 +6,17 @@ type Rule34 = Pick<Rule34SiteClient, "clearNativePage" | "setHeaderVisible" | "l
 
 const TAKE_OVERS: Record<AppMode, (rule34: Rule34) => void> = {
   favorites: (rule34) => rule34.clearNativePage(),
-  posts: () => { }
+  postList: () => { }
 };
 
 export class Rule34Host implements Host {
   constructor(private readonly rule34: Rule34, private readonly mode: AppMode) { }
 
-  public setHeaderVisible = (visible: boolean): void => {
+  public readonly hasHeader = true;
+
+  public setHeaderVisible(visible: boolean): void {
     this.rule34.setHeaderVisible(visible);
-  };
+  }
 
   public takeOver(): void {
     TAKE_OVERS[this.mode](this.rule34);

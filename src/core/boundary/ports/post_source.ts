@@ -1,5 +1,5 @@
 import { CategorizedPost } from "@/core/domain/post/post";
 
 export interface PostSource {
-  fetchPost: (id: string) => Promise<CategorizedPost>;
+  fetch: (id: string) => Promise<CategorizedPost>;
 }

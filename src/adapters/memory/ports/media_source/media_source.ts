@@ -2,15 +2,15 @@ import { Media } from "@/core/domain/media/media";
 import { MediaSource } from "@/core/boundary/ports/media_source";
 
 export class MemoryMediaSource implements MediaSource {
-  public previewUrl(media: Media): Promise<string> {
+  public resolvePreviewUrl(media: Media): Promise<string> {
     return Promise.resolve(media.locator);
   }
 
-  public originalUrl(media: Media): Promise<string> {
+  public resolveOriginalUrl(media: Media): Promise<string> {
     return Promise.resolve(media.locator);
   }
 
-  public imageUrl(media: Media): Promise<string> {
+  public resolveImageUrl(media: Media): Promise<string> {
     return Promise.resolve(media.locator);
   }
 

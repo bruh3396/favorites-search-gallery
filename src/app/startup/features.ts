@@ -15,13 +15,13 @@ interface FeatureEntry {
   profiles: readonly PerformanceProfile[];
 }
 
-const ALL_MODES: readonly AppMode[] = ["favorites", "posts"];
+const ALL_MODES: readonly AppMode[] = ["favorites", "postList"];
 const ALL_DEVICES: readonly Device[] = ["desktop", "mobile"];
 const ALL_PROFILES: readonly PerformanceProfile[] = ["normal", "low", "potato"];
 
 const FEATURES: Record<Feature, FeatureEntry> = {
   favorites: { start: startFavorites, modes: ALL_MODES, devices: ALL_DEVICES, profiles: ALL_PROFILES },
-  postListNavigator: { start: startPostListNavigator, modes: ["posts"], devices: ALL_DEVICES, profiles: ALL_PROFILES },
+  postListNavigator: { start: startPostListNavigator, modes: ["postList"], devices: ALL_DEVICES, profiles: ALL_PROFILES },
   gallery: { start: startGallery, modes: ALL_MODES, devices: ALL_DEVICES, profiles: ["normal"] },
   tooltip: { start: startTooltip, modes: ALL_MODES, devices: ["desktop"], profiles: ["normal", "low"] },
   postOverlay: { start: startPostOverlay, modes: ["favorites"], devices: ["desktop"], profiles: ["normal", "low"] }

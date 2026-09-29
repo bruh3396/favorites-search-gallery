@@ -1,4 +1,4 @@
-﻿import { FavoritesFlow } from "@/features/favorites/flows/flow";
+import { FavoritesFlow } from "@/features/favorites/flows/flow";
 
 export class FavoritesSearchFlow extends FavoritesFlow {
 
@@ -7,7 +7,7 @@ export class FavoritesSearchFlow extends FavoritesFlow {
   }
 
   public openPostList(searchQuery: string): void {
-    this.context.ports.navigation.openSearch(searchQuery);
+    this.context.ports.links.openSearchInNewTab(searchQuery);
   }
 
   public reSearchFavorites(): void {

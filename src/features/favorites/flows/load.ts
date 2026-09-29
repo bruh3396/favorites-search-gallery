@@ -1,4 +1,4 @@
-﻿import { FavoritesConfig } from "@/config/favorites_config";
+import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { pluralSuffix } from "@/utils/pure/string";
 import { sleep } from "@/lib/async/scheduling";

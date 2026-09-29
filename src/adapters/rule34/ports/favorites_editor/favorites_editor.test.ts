@@ -15,16 +15,16 @@ describe("Rule34FavoritesEditor", () => {
     ["2", "loggedOut"],
     ["3", "added"],
     ["?", "error"]
-  ])("reads the site's add answer %s as %s", async(siteAnswer, status) => {
-    expect(await createEditor(siteAnswer).add("7")).toBe(status);
+  ])("reads the site's add answer %s as %s", async(siteAnswer, result) => {
+    expect(await createEditor(siteAnswer).add("7")).toBe(result);
   });
 
-  test("reads a cancelled add as an error", async() => {
-    expect(await createEditor(null).add("7")).toBe("error");
+  test("reports an add cancelled by a later remove", async() => {
+    expect(await createEditor(null).add("7")).toBe("cancelled");
   });
 
-  test("reads a sent remove as a success and a cancelled one as an error", async() => {
+  test("reports a sent remove as removed and one cancelled by a later add as cancelled", async() => {
     expect(await createEditor("3", true).remove("8")).toBe("removed");
-    expect(await createEditor("3", false).remove("8")).toBe("error");
+    expect(await createEditor("3", false).remove("8")).toBe("cancelled");
   });
 });

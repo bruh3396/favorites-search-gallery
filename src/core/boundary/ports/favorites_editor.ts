@@ -1,5 +1,5 @@
-export type AddFavoriteResult = "error" | "alreadyAdded" | "loggedOut" | "added";
-export type RemoveFavoriteResult = "error" | "forbidden" | "removed";
+export type AddFavoriteResult = "added" | "alreadyAdded" | "loggedOut" | "cancelled" | "error";
+export type RemoveFavoriteResult = "removed" | "cancelled" | "error";
 
 export interface FavoritesEditor {
   add: (id: string) => Promise<AddFavoriteResult>;

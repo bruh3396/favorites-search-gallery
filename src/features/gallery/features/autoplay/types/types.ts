@@ -1,5 +1,5 @@
-import { NavigationKey } from "@/types/input";
 import { Device } from "@/core/boundary/environment";
+import { NavigationKey } from "@/types/input";
 import { Preference } from "@/lib/storage/preference";
 
 export type AutoplayDuration = "image" | "minimumVideo";

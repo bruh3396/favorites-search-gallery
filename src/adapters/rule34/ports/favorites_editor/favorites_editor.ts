@@ -13,10 +13,10 @@ export class Rule34FavoritesEditor implements FavoritesEditor {
 
   public async add(id: string): Promise<AddFavoriteResult> {
     const answer = await this.rule34.addFavorite(id);
-    return answer === null ? "error" : SITE_ADD_RESULTS[parseInt(answer, 10)] ?? "error";
+    return answer === null ? "cancelled" : SITE_ADD_RESULTS[parseInt(answer, 10)] ?? "error";
   }
 
   public async remove(id: string): Promise<RemoveFavoriteResult> {
-    return await this.rule34.removeFavorite(id) ? "removed" : "error";
+    return await this.rule34.removeFavorite(id) ? "removed" : "cancelled";
   }
 }
