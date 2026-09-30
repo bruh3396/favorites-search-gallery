@@ -4,7 +4,7 @@ import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesSearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { buildButton } from "@/lib/ui/widgets/button";
 import { queueMacroTask } from "@/lib/async/scheduling";
@@ -20,7 +20,7 @@ export class FavoritesSearchBox {
   private readonly clearButton: HTMLButtonElement;
   private readonly searchBox: HTMLTextAreaElement;
 
-  constructor(events: Events, slots: FavoritesToolbarSlots, storage: KeyValueStore) {
+  constructor(events: Events, slots: FavoritesToolbarSlots, storage: LocalKeyedValues) {
     this.events = events;
     this.slots = slots;
     this.history = new FavoritesSearchHistory(HISTORY_DEPTH, storage);

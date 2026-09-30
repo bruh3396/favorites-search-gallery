@@ -1,4 +1,5 @@
 import { GalleryAbstractImageBudgeter, GalleryLimitImageBudgeter, GalleryMemoryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
+import { GalleryBudget, Renderer } from "@/features/gallery/types/types";
 import { AppContext } from "@/app/context/context";
 import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
@@ -14,7 +15,6 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import { Point } from "@/types/geometry";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
-import { Renderer } from "@/features/gallery/types/types";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { isImage } from "@/lib/media/media_type";
@@ -23,7 +23,6 @@ import { withTimeout } from "@/lib/async/scheduling";
 
 export class GalleryImageRenderer implements Renderer {
   public readonly root: HTMLElement;
-  private readonly environment: Environment;
   private readonly shell: Shell;
   private readonly favoriteFor: (id: string) => Favorite | undefined;
   private readonly fetcher: GalleryImageFetcher;
@@ -32,17 +31,16 @@ export class GalleryImageRenderer implements Renderer {
   private readonly canvas: GalleryImageCanvas;
   private activeItem: PostMedia | undefined;
 
-  constructor(context: AppContext, favoriteFor: (id: string) => Favorite | undefined) {
+  constructor(context: AppContext, favoriteFor: (id: string) => Favorite | undefined, budget: GalleryBudget) {
     const { environment, preferences, shell } = context;
 
     this.root = div();
-    this.environment = environment;
     this.shell = shell;
     this.favoriteFor = favoriteFor;
     this.fetcher = new GalleryImageFetcher(context.ports.remoteMedia);
     this.loader = this.createLoader(environment);
-    this.upscaler = this.createUpscaler(environment, preferences, shell);
-    this.canvas = new GalleryImageCanvas(environment);
+    this.upscaler = this.createUpscaler(environment, budget, preferences, shell);
+    this.canvas = new GalleryImageCanvas(environment, budget);
     this.canvas.mount(this.root);
     this.activeItem = undefined;
   }
@@ -56,10 +54,7 @@ export class GalleryImageRenderer implements Renderer {
     this.root.style.visibility = "hidden";
     this.toggleZoomCursor(false);
     this.toggleZoom(false);
-
-    if (this.environment.canvasBudget === "reduced") {
-      this.canvas.clear();
-    }
+    this.canvas.release();
   }
 
   public async cache(items: PostMedia[]): Promise<void> {
@@ -129,13 +124,12 @@ export class GalleryImageRenderer implements Renderer {
     return new GalleryLimitImageBudgeter(limit);
   }
 
-  private createUpscaler(environment: Environment, preferences: Preferences, shell: Shell): GalleryAbstractUpscaler {
+  private createUpscaler(environment: Environment, budget: GalleryBudget, preferences: Preferences, shell: Shell): GalleryAbstractUpscaler {
     const settings = environment.mode === "postList" ? preferences.postList : preferences.favorites;
     const canvasFor = (id: string): HTMLCanvasElement | null => shell.findThumb(id)?.querySelector("canvas") ?? null;
     const fetchBitmap = (request: ImageRequest): Promise<boolean> => this.fetcher.fetchBitmap(request);
-    const paintDelay = environment.canvasBudget === "reduced" ? GalleryUpscaleConfig.upscaleDelay.firefox : GalleryUpscaleConfig.upscaleDelay.other;
-    const baseCanvasWidth = environment.canvasBudget === "reduced" ? GalleryUpscaleConfig.upscaledCanvasWidth.firefox : GalleryUpscaleConfig.upscaledCanvasWidth.other;
-    const args = [canvasFor, settings.upscaleThumbs, settings.upscaleQuality, fetchBitmap, paintDelay, baseCanvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight] as const;
+    const { paintDelay, canvasWidth } = budget.upscale;
+    const args = [canvasFor, settings.upscaleThumbs, settings.upscaleQuality, fetchBitmap, paintDelay, canvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight] as const;
     return GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper(...args) : new GalleryMainThreadUpscaler(...args);
   }
 

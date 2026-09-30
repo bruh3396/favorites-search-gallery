@@ -1,4 +1,3 @@
-import * as TagCategoryStore from "@/lib/domain/tag/category_store";
 import { AppContext } from "@/app/context/context";
 import { PostOverlayFlows } from "@/features/post_overlay/flows/flows";
 import { PostOverlayModel } from "@/features/post_overlay/model/model";
@@ -12,24 +11,18 @@ interface PostOverlayComponents {
   flows: PostOverlayFlows;
 }
 
-export async function startPostOverlay(context: AppContext): Promise<void> {
+export function startPostOverlay(context: AppContext): void {
   const shell = new PostOverlayShell(context.shell);
-  const model = new PostOverlayModel(context.ports.remoteTagCategories);
+  const model = new PostOverlayModel(context.ports);
   const view = new PostOverlayView(shell);
   const flows = new PostOverlayFlows(context, model, view);
   const components: PostOverlayComponents = { context, model, view, flows };
 
   setup(components);
-  await waitUntilFavoritesAreReady(context);
-  start();
 }
 
 function setup(components: PostOverlayComponents): void {
   subscribeToEvents(components);
-}
-
-function start(): void {
-  TagCategoryStore.preload();
 }
 
 function subscribeToEvents({ context, flows }: PostOverlayComponents): void {
@@ -46,8 +39,4 @@ function subscribeToEvents({ context, flows }: PostOverlayComponents): void {
   preferences.favorites.columnCount.on(() => flows.hover.hideTemporarily());
   preferences.favorites.layout.on(() => flows.hover.hideTemporarily());
   preferences.favorites.rowHeight.on(() => flows.hover.hideTemporarily());
-}
-
-function waitUntilFavoritesAreReady(context: AppContext): Promise<unknown> {
-  return context.environment.mode === "favorites" ? context.events.favorites.storedFavoritesLoaded.timeout(2_000) : Promise.resolve();
 }

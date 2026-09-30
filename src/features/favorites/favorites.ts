@@ -1,6 +1,5 @@
-import * as TagCategoryStore from "@/lib/domain/tag/category_store";
+import { AppMode, Pointer } from "@/core/boundary/environment";
 import { FavoritesFeatures, FavoritesFeaturesDependencies } from "@/features/favorites/features/features";
-import { AppMode, Device } from "@/core/boundary/environment";
 import { AppContext } from "@/app/context/context";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesFlows } from "@/features/favorites/flows/flows";
@@ -22,12 +21,12 @@ interface FavoritesComponents {
 
 const START: Record<AppMode, (context: AppContext) => void> = {
   favorites: startOnFavoritesPage,
-  postList: startOnPostList
+  postList: startOnPostListPage
 };
 
-const SUBSCRIBE_TO_INPUT: Record<Device, (components: FavoritesComponents) => void> = {
-  desktop: subscribeToDesktopInput,
-  mobile: subscribeToMobileInput
+const SUBSCRIBE_TO_INPUT: Record<Pointer, (components: FavoritesComponents) => void> = {
+  hover: subscribeToHoverInput,
+  touch: subscribeToTouchInput
 };
 
 export function startFavorites(context: AppContext): void {
@@ -35,10 +34,12 @@ export function startFavorites(context: AppContext): void {
 }
 
 function startOnFavoritesPage(context: AppContext): void {
+  const linksToPostPage = context.environment.pointer === "touch" || !context.features.has("gallery");
   const shell = new FavoritesShell(context.shell, context.environment);
   const model = new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit);
-  const view = new FavoritesView(context, shell);
-  const control = new FavoritesControl(context, shell);
+  const view = new FavoritesView(context, shell, linksToPostPage);
+  const offersTutorial = context.environment.pointer === "touch";
+  const control = new FavoritesControl(context, shell, offersTutorial);
   const features = new FavoritesFeatures(context, featureDependencies(context, model, control));
   const flows = new FavoritesFlows(context, model, view, control);
   const components: FavoritesComponents = { context, shell, model, view, flows, control, features };
@@ -47,7 +48,7 @@ function startOnFavoritesPage(context: AppContext): void {
   start(components);
 }
 
-function startOnPostList(context: AppContext): void {
+function startOnPostListPage(context: AppContext): void {
   servePostListRequests(context, new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit));
 }
 
@@ -62,7 +63,7 @@ function setup(components: FavoritesComponents): void {
 }
 
 function start({ context, view, flows }: FavoritesComponents): void {
-  context.ports.host.setHeaderVisible(context.preferences.favorites.headerEnabled.value);
+  context.ports.hostPage.setHeaderVisible(context.preferences.favorites.headerEnabled.value);
   view.showSkeleton();
   flows.load.loadAllFavorites();
 }
@@ -73,14 +74,14 @@ function featureDependencies(context: AppContext, model: FavoritesModel, control
       batchSize: context.preferences.favorites.downloadBatchSize,
       filenameFormat: context.preferences.favorites.downloadFilenameFormat,
       getSearchResults: () => model.getCurrentSearchResults(),
-      getTagCategory: TagCategoryStore.get,
+      getTagCategories: (tagNames) => context.ports.localTagCategories.getMany(tagNames),
       getTagsForIds: (ids) => model.getTagsForIds(ids),
       fetchOriginal: (media, signal) => context.ports.remoteMedia.fetchOriginal(media, signal)
     },
     snippets: {
       appendToSearch: (text) => control.appendToSearch(text),
       getSearchResults: () => model.getCurrentSearchResults(),
-      store: context.ports.keyValueStore
+      store: context.ports.localKeyedValues
     }
   };
 }
@@ -113,7 +114,6 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.favorites.clearButtonClicked.on(() => control.clearSearch());
   events.favorites.shuffleButtonClicked.on(() => flows.search.shuffleSearchResults());
   events.favorites.invertButtonClicked.on(() => flows.search.invertSearchResults());
-  events.favorites.scratchButtonClicked.on(() => flows.scratch.excludeMostFrequentTags());
   events.favorites.resetButtonClicked.on(() => flows.action.reset());
   events.favorites.settingsResetRequested.on(() => flows.action.resetSettings());
   events.favorites.searchRequested.on((query) => flows.search.searchFavorites(query));
@@ -135,7 +135,7 @@ function subscribeToPreferences({ context, view, flows }: FavoritesComponents): 
 
   preferences.favorites.drawerOpen.on((open) => view.toggleDrawer(open));
   preferences.favorites.drawerActiveSection.on((section) => view.showDrawerSection(section));
-  preferences.favorites.headerEnabled.on((enabled) => context.ports.host.setHeaderVisible(enabled));
+  preferences.favorites.headerEnabled.on((enabled) => context.ports.hostPage.setHeaderVisible(enabled));
   preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
   preferences.favorites.layout.on((layout) => view.changeLayout(layout));
   preferences.favorites.sortKey.on(() => flows.search.reSearchFavorites());
@@ -147,10 +147,10 @@ function subscribeToPreferences({ context, view, flows }: FavoritesComponents): 
 }
 
 function subscribeToDomEvents(components: FavoritesComponents): void {
-  SUBSCRIBE_TO_INPUT[components.context.environment.device](components);
+  SUBSCRIBE_TO_INPUT[components.context.environment.pointer](components);
 }
 
-function subscribeToDesktopInput({ context, view, flows }: FavoritesComponents): void {
+function subscribeToHoverInput({ context, view, flows }: FavoritesComponents): void {
   const { domEvents, features } = context;
 
   if (!features.has("gallery")) {
@@ -160,7 +160,7 @@ function subscribeToDesktopInput({ context, view, flows }: FavoritesComponents):
   domEvents.document.mousedown.on((event) => flows.input.handleMouseDown(event));
 }
 
-function subscribeToMobileInput({ context, flows }: FavoritesComponents): void {
+function subscribeToTouchInput({ context, flows }: FavoritesComponents): void {
   context.domEvents.document.click.on((event) => flows.input.triggerPostAction(event));
 }
 

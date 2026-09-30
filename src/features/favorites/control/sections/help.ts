@@ -1,5 +1,4 @@
 import * as DrawerGroup from "@/lib/ui/drawer_group";
-import { Device, Environment } from "@/core/boundary/environment";
 import { FavoritesClass } from "@/features/favorites/types/selectors";
 import { FavoritesDrawerSectionContent } from "@/types/favorites_ui";
 import { createElement } from "@/utils/browser/element";
@@ -11,24 +10,18 @@ const HELP_LINKS: { label: string; href: string }[] = [
   { label: "Report an Issue", href: "https://github.com/bruh3396/favorites-search-gallery/issues" }
 ];
 
-// The gallery's controls tutorial is touch-only.
-const DEVICE_ROWS: Record<Device, (requestTutorial: () => void) => HTMLElement[]> = {
-  desktop: () => [],
-  mobile: requestTutorial => [buildControlsRow(requestTutorial)]
-};
-
 const GROUP_CLASSES = {
   group: FavoritesClass.drawerGroup,
   groupTitle: FavoritesClass.drawerGroupTitle
 };
 
-export function buildDrawerSection(environment: Environment, requestTutorial: () => void): FavoritesDrawerSectionContent {
-  return { mount: (container) => mount(environment, container, requestTutorial) };
+export function buildDrawerSection(offersTutorial: boolean, requestTutorial: () => void): FavoritesDrawerSectionContent {
+  return { mount: (container) => mount(offersTutorial, container, requestTutorial) };
 }
 
-function mount(environment: Environment, container: HTMLElement, requestTutorial: () => void): void {
+function mount(offersTutorial: boolean, container: HTMLElement, requestTutorial: () => void): void {
   const rows: HTMLElement[] = [
-    ...DEVICE_ROWS[environment.device](requestTutorial),
+    ...(offersTutorial ? [buildControlsRow(requestTutorial)] : []),
     ...HELP_LINKS.map(link => buildLinkRow(link.label, link.href))
   ];
   const list = createElement("div", { className: FavoritesClass.drawerHelpLinks, children: rows });

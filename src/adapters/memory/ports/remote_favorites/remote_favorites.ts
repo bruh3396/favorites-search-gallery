@@ -3,7 +3,7 @@ import { MemoryClient } from "@/adapters/memory/client/client";
 import { Post } from "@/core/domain/post/post";
 
 export class MemoryRemoteFavorites implements RemoteFavorites {
-  constructor(private readonly memory: Pick<MemoryClient, "readFavorites" | "removeFavorite">) { }
+  constructor(private readonly memory: Pick<MemoryClient, "readFavorites" | "addFavorite" | "removeFavorite">) { }
 
   public fetchCount(): Promise<number | null> {
     return Promise.resolve(this.memory.readFavorites().length);
@@ -14,7 +14,8 @@ export class MemoryRemoteFavorites implements RemoteFavorites {
     return Promise.resolve();
   }
 
-  public add(): Promise<AddFavoriteResult> {
+  public add(id: string): Promise<AddFavoriteResult> {
+    this.memory.addFavorite(id);
     return Promise.resolve("added");
   }
 

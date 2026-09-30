@@ -4,22 +4,26 @@ import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderZipWriter } from "@/features/favorites/features/downloader/model/zip_writer";
 import { Media } from "@/core/domain/media/media";
 import { PostMedia } from "@/core/domain/post/post";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { extensionOfMimeType } from "@/utils/pure/mime";
 
 interface ArchiverDependencies {
   filenamer: Filenamer;
   getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
+  getTagCategories: (tagNames: string[]) => Promise<TagCategoryMap>;
   fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
 }
 
 export class DownloaderArchiver implements Archiver {
   private readonly filenamer: Filenamer;
   private readonly getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
+  private readonly getTagCategories: (tagNames: string[]) => Promise<TagCategoryMap>;
   private readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
 
-  constructor({ filenamer, getTagsForIds, fetchOriginal }: ArchiverDependencies) {
+  constructor({ filenamer, getTagsForIds, getTagCategories, fetchOriginal }: ArchiverDependencies) {
     this.filenamer = filenamer;
     this.getTagsForIds = getTagsForIds;
+    this.getTagCategories = getTagCategories;
     this.fetchOriginal = fetchOriginal;
   }
 
@@ -27,6 +31,7 @@ export class DownloaderArchiver implements Archiver {
     const limiter = new ConcurrencyLimiter(DownloaderConfig.concurrency);
     const zipWriter = new DownloaderZipWriter();
     const tagsById = await this.getTagsForIds(items.map(item => item.id));
+    const tagCategories = await this.getTagCategories([...new Set([...tagsById.values()].flatMap(tags => [...tags]))]);
 
     await limiter.runAll(items, async(item) => {
       if (signal.aborted) {
@@ -34,7 +39,7 @@ export class DownloaderArchiver implements Archiver {
       }
 
       try {
-        onItemSettled(await this.addToArchive(zipWriter, item, tagsById.get(item.id) ?? new Set(), signal));
+        onItemSettled(await this.addToArchive(zipWriter, item, tagsById.get(item.id) ?? new Set(), tagCategories, signal));
       } catch (error) {
         if (signal.aborted) {
           return;
@@ -50,9 +55,9 @@ export class DownloaderArchiver implements Archiver {
     return zipWriter.finish();
   }
 
-  private async addToArchive(zipWriter: DownloaderZipWriter, item: PostMedia, tags: Set<string>, signal: AbortSignal): Promise<string> {
+  private async addToArchive(zipWriter: DownloaderZipWriter, item: PostMedia, tags: Set<string>, tagCategories: TagCategoryMap, signal: AbortSignal): Promise<string> {
     const blob = await this.fetchOriginal(item.media, signal);
-    const filename = this.filenamer.filenameFor(item, tags, extensionOfMimeType(blob.type));
+    const filename = this.filenamer.filenameFor(item, tags, extensionOfMimeType(blob.type), tagCategories);
 
     zipWriter.add(filename, new Uint8Array(await blob.arrayBuffer()));
     return filename;

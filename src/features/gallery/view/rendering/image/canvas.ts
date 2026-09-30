@@ -1,9 +1,9 @@
+import { GalleryBudget, Resolution } from "@/features/gallery/types/types";
 import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
 import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Point } from "@/types/geometry";
-import { Resolution } from "@/features/gallery/types/types";
 import { setDataset } from "@/utils/browser/dataset";
 import { toDimensions2D } from "@/utils/pure/geometry";
 
@@ -12,7 +12,7 @@ export class GalleryImageCanvas {
   private readonly mainContext = this.mainCanvas.getContext("2d") ?? new CanvasRenderingContext2D();
   private container: HTMLElement | null = null;
 
-  constructor(private readonly environment: Environment) {
+  constructor(private readonly environment: Environment, private readonly budget: GalleryBudget) {
     const dimensions = toDimensions2D(this.mainCanvasResolution);
 
     this.mainCanvas.className = "gallery-image";
@@ -41,6 +41,10 @@ export class GalleryImageCanvas {
 
   public clear(): void {
     this.mainContext.clearRect(0, 0, this.mainCanvas.width, this.mainCanvas.height);
+  }
+
+  public release(): void {
+    this.budget.releaseCanvas(this);
   }
 
   public zoomToPoint({x, y}: Point): void {

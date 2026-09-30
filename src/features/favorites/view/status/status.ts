@@ -11,11 +11,11 @@ export class FavoritesStatus {
   private readonly resultsCountIndicator: HTMLElement;
   private readonly statusIndicator: HTMLElement;
   private readonly progressBar: ProgressBar;
-  private totalFavoritesCount: number | null;
+  private totalFavoriteCount: number | null;
   private statusTimeout: Timeout | undefined;
 
   constructor(slots: FavoritesToolbarSlots, toolbar: HTMLElement) {
-    this.totalFavoritesCount = null;
+    this.totalFavoriteCount = null;
     this.statusTimeout = undefined;
     this.eta = new FavoritesEta();
     this.resultsCountIndicator = slots.resultsCount;
@@ -42,14 +42,14 @@ export class FavoritesStatus {
   public updateFetchStatus(completed: number, resultsCount: number): void {
     let statusText = `Fetching - ${completed}`;
 
-    if (this.totalFavoritesCount !== null) {
-      statusText = `${statusText} / ${this.totalFavoritesCount}`;
-      const eta = this.eta.getEta(completed, this.totalFavoritesCount);
+    if (this.totalFavoriteCount !== null) {
+      statusText = `${statusText} / ${this.totalFavoriteCount}`;
+      const eta = this.eta.getEta(completed, this.totalFavoriteCount);
 
       if (eta !== null) {
         statusText = `${statusText} - ${eta}`;
       }
-      this.progressBar.setProgress(completed, this.totalFavoritesCount);
+      this.progressBar.setProgress(completed, this.totalFavoriteCount);
       this.progressBar.setVisible(true);
     }
     this.setStatus(statusText);
@@ -66,8 +66,8 @@ export class FavoritesStatus {
     }
   }
 
-  public setExpectedTotalFavoritesCount(count: number | null): void {
-    this.totalFavoritesCount = count;
+  public setExpectedTotalFavoriteCount(count: number | null): void {
+    this.totalFavoriteCount = count;
   }
 
   public clearStatus(): void {

@@ -1,7 +1,8 @@
 import { Preferences, createPreferences as createAppPreferences } from "@/app/context/preferences";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Preference } from "@/lib/storage/preference";
 import { createEnvironment } from "@/testing/environment";
+import { selectPreferenceDefaults } from "@/app/context/preference_defaults";
 
 type Section = Exclude<keyof Preferences, "reset">;
 
@@ -13,7 +14,7 @@ export type PreferenceOverrides = {
 
 const DEFAULT_VALUES: Record<Section, Record<string, unknown>> = {
   app: {
-    darkMode: false,
+    colorScheme: "light",
     fadeThumbs: false,
     gradient: false,
     nativeFont: true,
@@ -82,13 +83,13 @@ const DEFAULT_VALUES: Record<Section, Record<string, unknown>> = {
 
 // A lone preference over its own memory store.
 export function createPreference<T>(initial: T): Preference<T> {
-  return new Preference(new MemoryKeyValueStore(), "preference", initial);
+  return new Preference(new MemoryLocalKeyedValues(), "preference", initial);
 }
 
 // The app's preferences over a memory store, set to fixed test values so tests
 // don't depend on the environment's defaults.
 export function createPreferences(overrides: PreferenceOverrides = {}): Preferences {
-  const preferences = createAppPreferences(createEnvironment(), new MemoryKeyValueStore());
+  const preferences = createAppPreferences(selectPreferenceDefaults(createEnvironment()), new MemoryLocalKeyedValues());
 
   for (const [section, defaults] of Object.entries(DEFAULT_VALUES)) {
     const values = { ...defaults, ...overrides[section as Section] };

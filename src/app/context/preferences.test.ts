@@ -1,8 +1,9 @@
 import { Preferences, createPreferences } from "@/app/context/preferences";
 import { describe, expect, test } from "vitest";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Preference } from "@/lib/storage/preference";
 import { createEnvironment } from "@/testing/environment";
+import { selectPreferenceDefaults } from "@/app/context/preference_defaults";
 
 function allPreferencesOf(preferences: Preferences): Preference<unknown>[] {
   const { reset: _reset, ...sections } = preferences;
@@ -11,8 +12,8 @@ function allPreferencesOf(preferences: Preferences): Preference<unknown>[] {
 
 describe("createPreferences", () => {
   test("stores every preference under its own key", () => {
-    const store = new MemoryKeyValueStore();
-    const all = allPreferencesOf(createPreferences(createEnvironment(), store));
+    const store = new MemoryLocalKeyedValues();
+    const all = allPreferencesOf(createPreferences(selectPreferenceDefaults(createEnvironment()), store));
 
     all.forEach((preference, index) => preference.set(index));
 
@@ -20,16 +21,16 @@ describe("createPreferences", () => {
   });
 
   test("reads what an earlier session stored", () => {
-    const store = new MemoryKeyValueStore();
+    const store = new MemoryLocalKeyedValues();
 
-    createPreferences(createEnvironment(), store).favorites.resultsPerPage.set(1);
+    createPreferences(selectPreferenceDefaults(createEnvironment()), store).favorites.resultsPerPage.set(1);
 
-    expect(createPreferences(createEnvironment(), store).favorites.resultsPerPage.value).toBe(1);
+    expect(createPreferences(selectPreferenceDefaults(createEnvironment()), store).favorites.resultsPerPage.value).toBe(1);
   });
 
   test("reset brings every preference back to its default", () => {
-    const store = new MemoryKeyValueStore();
-    const preferences = createPreferences(createEnvironment(), store);
+    const store = new MemoryLocalKeyedValues();
+    const preferences = createPreferences(selectPreferenceDefaults(createEnvironment()), store);
     const defaultValue = preferences.favorites.resultsPerPage.value;
 
     preferences.favorites.resultsPerPage.set(defaultValue + 1);

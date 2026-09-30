@@ -1,22 +1,8 @@
-import { TagCategory } from "@/core/domain/tag/tag";
-
 export type Rating = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type EncodedTagCategory = number | null;
-export type EncodedTagCategoryMap = Record<string, EncodedTagCategory>;
 export type Metric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random" | "duration";
 export type SortKey = Metric;
 export type SearchableMetric = Exclude<Metric, "default" | "creationTimestamp" | "lastChangedTimestamp" | "random">;
 export type MetricComparator = ":" | ":<" | ":>";
-
-export type TagEditDatabaseRecord = {
-  id: string;
-  tags: string;
-};
-
-export type TagCategoryMapping = {
-  id: string;
-  category: TagCategory;
-};
 
 export enum DiscreteRating {
   Explicit = 4,

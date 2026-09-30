@@ -5,7 +5,7 @@ import { PostOverlayReopenCooldown } from "@/features/post_overlay/model/state/r
 import { PostOverlayResizeState } from "@/features/post_overlay/model/state/resize_state";
 import { PostOverlayTarget } from "@/features/post_overlay/model/state/overlay_target";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
-import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
+import { Ports } from "@/core/boundary/ports/ports";
 
 export class PostOverlayModel {
   private readonly overlayTarget = new PostOverlayTarget();
@@ -13,10 +13,10 @@ export class PostOverlayModel {
   private readonly reopenCooldown = new PostOverlayReopenCooldown();
   private readonly resizeState = new PostOverlayResizeState();
 
-  constructor(private readonly remoteTagCategories: RemoteTagCategories) { }
+  constructor(private readonly ports: Pick<Ports, "localTagCategories" | "remoteTagCategories">) { }
 
   public resolveTagCategories(id: string, tags: Set<string>): Promise<TagCategoryMap> {
-    return PostOverlayTagsResolver.resolveAll(this.remoteTagCategories, id, tags);
+    return PostOverlayTagsResolver.resolveAll(this.ports, id, tags);
   }
 
   public isCurrentTarget(thumbId: string): boolean {

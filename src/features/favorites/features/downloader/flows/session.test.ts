@@ -6,6 +6,7 @@ import { DownloaderSessionFlow } from "@/features/favorites/features/downloader/
 import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
 import { DownloaderView } from "@/features/favorites/features/downloader/view/view";
 import { PostMedia } from "@/core/domain/post/post";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
 interface Options {
@@ -42,7 +43,7 @@ function setup({ itemCount = 3, batchSize = 0, hang = false, broken = false }: O
     batchSize: createPreference(batchSize),
     filenameFormat: createPreference(0),
     getSearchResults: (): PostMedia[] => results,
-    getTagCategory: (): undefined => undefined,
+    getTagCategories: (): Promise<TagCategoryMap> => Promise.resolve(new Map()),
     getTagsForIds: (): Promise<Map<string, Set<string>>> => (broken ? Promise.reject(new Error("boom")) : Promise.resolve(new Map())),
     fetchOriginal: (media, signal): Promise<Blob> => {
       fetched.push(media.locator);

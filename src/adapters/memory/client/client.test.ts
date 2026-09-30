@@ -10,6 +10,16 @@ describe("MemoryClient", () => {
     expect(client.readFavorites().map(post => post.id)).toEqual(["3", "2"]);
   });
 
+  test("adds back a known post only once, and never an unknown one", () => {
+    const client = new MemoryClient(["1", "2"].map(id => createPost({ id })));
+
+    client.removeFavorite("2");
+    client.addFavorite("2");
+    client.addFavorite("2");
+    client.addFavorite("3");
+    expect(client.readFavorites().map(post => post.id)).toEqual(["2", "1"]);
+  });
+
   test("keeps a post that stopped being a favorite", () => {
     const client = new MemoryClient([createPost({ id: "1", tags: "apple" })]);
 

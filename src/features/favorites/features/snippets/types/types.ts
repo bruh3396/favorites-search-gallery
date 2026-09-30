@@ -1,10 +1,10 @@
 import { Favorite } from "@/types/favorite";
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 
 export interface SnippetsDependencies {
   appendToSearch: (text: string) => void;
   getSearchResults: () => Favorite[];
-  store: KeyValueStore;
+  store: LocalKeyedValues;
 }
 
 export interface SnippetContext extends Omit<SnippetsDependencies, "store"> {

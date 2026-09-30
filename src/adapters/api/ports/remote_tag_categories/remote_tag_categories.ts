@@ -2,7 +2,7 @@ import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { ApiClient } from "@/adapters/api/client/client";
 import { PostFetchError } from "@/types/errors";
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
-import { decodeTagCategory } from "@/lib/domain/tag/category_codec";
+import { decodeTagCategory } from "@/adapters/api/client/tag/decoder";
 import { withTimeout } from "@/lib/async/scheduling";
 
 const FETCH_CATEGORIES_TIMEOUT = 10_000;

@@ -38,11 +38,24 @@ export interface GallerySizeSettings {
   upscaleQuality: Preference<number>;
 }
 
+export interface GalleryReleasableCanvas {
+  clear: () => void;
+}
+
+export interface GalleryWarmTarget {
+  cacheImages: (items: PostMedia[]) => Promise<void>;
+  upscale: (items: PostMedia[]) => Promise<void>;
+}
+
+export interface GalleryFollowTarget {
+  scrollToThumb: (id: string) => void;
+}
+
 export interface GalleryBudget {
   upscale: { paintDelay: number; canvasWidth: number };
-  clearCanvasOnHide: boolean;
-  preloadVisibleThumbs: boolean;
-  followInContent: boolean;
+  releaseCanvas: (canvas: GalleryReleasableCanvas) => void;
+  warm: (target: GalleryWarmTarget, items: PostMedia[]) => Promise<void>;
+  follow: (target: GalleryFollowTarget, id: string) => void;
 }
 
 export interface GalleryViewDependencies {

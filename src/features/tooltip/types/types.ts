@@ -1,5 +1,7 @@
+import { ColorScheme } from "@/core/boundary/environment";
+
 export interface TooltipHighlightsDependencies {
-  usingDarkMode: () => boolean;
+  colorScheme: () => ColorScheme;
 }
 
 export interface TooltipVisibilityDependencies {

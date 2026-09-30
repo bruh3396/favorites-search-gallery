@@ -3,13 +3,13 @@ import * as SnippetIdQuery from "@/features/favorites/features/snippets/model/id
 import * as SnippetListing from "@/features/favorites/features/snippets/model/listing";
 import * as SnippetTransfer from "@/features/favorites/features/snippets/model/transfer";
 import { SerializedSnippet, Snippet, SnippetFailureReason, SnippetResult } from "@/features/favorites/features/snippets/types/types";
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
 export class SnippetModel {
   private readonly store: SnippetStore;
 
-  constructor(storage: KeyValueStore) {
+  constructor(storage: LocalKeyedValues) {
     this.store = new SnippetStore(storage);
   }
 

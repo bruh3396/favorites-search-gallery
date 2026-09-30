@@ -7,13 +7,12 @@ import { doNothing } from "@/utils/pure/function";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
 export class FavoritesElementTemplate {
-  private readonly shouldLinkToPostPage;
   private readonly postUrl: (id: string) => string;
   private readonly template: HTMLElement;
 
   constructor(
     galleryRunning: boolean,
-    onMobileDevice: boolean,
+    private readonly linksToPostPage: boolean,
     userIsOnTheirOwnFavoritesPage: boolean,
     postUrl: (id: string) => string,
     private readonly resolvePreviewUrl: (media: Media) => Promise<string>
@@ -21,8 +20,6 @@ export class FavoritesElementTemplate {
     const root = new DOMParser().parseFromString("", "text/html").createElement("div");
     const canvas = galleryRunning ? "<canvas></canvas>" : "";
 
-    // Without the gallery, thumbs link to their post so hover extensions (Imagus) can preview them.
-    this.shouldLinkToPostPage = onMobileDevice || !galleryRunning;
     this.postUrl = postUrl;
     root.className = `${ITEM_CLASS_NAME} ${TILE_CLASS_NAME}`;
     root.innerHTML = `
@@ -52,7 +49,7 @@ export class FavoritesElementTemplate {
     toggleDataset(root, "newBadge", favorite.isNew);
     this.showPreview(root, image, favorite);
 
-    if (this.shouldLinkToPostPage) {
+    if (this.linksToPostPage) {
       container.href = this.postUrl(root.id);
     }
     this.setThumbFavorited(root, favorited);

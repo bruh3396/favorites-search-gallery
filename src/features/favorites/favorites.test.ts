@@ -1,17 +1,18 @@
 /* eslint-disable no-spaced-func, func-call-spacing -- false positive: arrow function types inside test.each's generic confuse these rules */
-import "fake-indexeddb/auto";
 import { DiscreteRating, Rating } from "@/types/search";
-import { addFavoriteUrl, removeFavoriteUrl } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Environment } from "@/core/boundary/environment";
-import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { Feature } from "@/core/context/features";
-import { MemoryHost } from "@/adapters/memory/ports/host/host";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { Post } from "@/core/domain/post/post";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
@@ -19,8 +20,6 @@ import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
 import { createPost } from "@/testing/post";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
-import { postListUrlFromQuery } from "@/adapters/rule34/client/site/post_list_page/fetcher";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
 import { startFavorites } from "@/features/favorites/favorites";
 
 const FRUITS: Partial<Post>[] = [
@@ -33,38 +32,50 @@ interface SetupOptions {
   environment?: Partial<Environment>;
   preferences?: PreferenceOverrides;
   features?: Feature[];
-  keyValueStore?: MemoryKeyValueStore;
-  host?: MemoryHost;
+  localKeyedValues?: MemoryLocalKeyedValues;
+  hostPage?: MemoryHostPage;
+  navigation?: MemoryNavigation;
+  remote?: MemoryClient;
 }
 
 let pageCounter = 0;
 
-function createContext({ environment: environmentOverrides = {}, preferences = {}, features, keyValueStore = new MemoryKeyValueStore(), host = new MemoryHost() }: SetupOptions = {}, withShell = true): AppContext {
+function createFruitPosts(): Post[] {
+  return FRUITS.map(post => createPost({ ...post, fetchedAt: Date.now(), media: { kind: "image", locator: `data:text/plain,${post.id}` } }));
+}
+
+function createRemote(): MemoryClient {
+  return new MemoryClient(createFruitPosts());
+}
+
+function createContext({ environment: environmentOverrides = {}, preferences = {}, features, localKeyedValues = new MemoryLocalKeyedValues(), hostPage = new MemoryHostPage(), navigation = new MemoryNavigation(), remote = createRemote() }: SetupOptions = {}, withShell = true): AppContext {
   pageCounter += 1;
   const id = `startup_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesOwnerId: id, ...environmentOverrides });
   const shell = withShell ? new Shell() : undefined;
+  const ports = { localKeyedValues, hostPage, navigation, remoteFavorites: new MemoryRemoteFavorites(remote), remotePosts: new MemoryRemotePosts(remote) };
 
   if (shell !== undefined) {
     document.body.append(shell.root);
   }
-  return createAppContext({ environment, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, features, shell, ports: { keyValueStore, host } });
+  return createAppContext({ environment, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, features, shell, ports });
 }
 
 function createFruitModel(context: AppContext): FavoritesModel {
   return new FavoritesModel(context, () => { });
 }
 
-async function store(context: AppContext, posts: Partial<Post>[]): Promise<void> {
-  const favorites = posts.map(post => ({ post: createPost({ ...post, fetchedAt: Date.now(), media: { kind: "image", locator: `1/${post.id}.jpg` } }) }));
+async function store(context: AppContext): Promise<void> {
+  const stored = createFruitPosts();
 
-  await createFruitModel(context).storeFavorites(favorites as unknown as Favorite[]);
+  await context.ports.localPosts.setMany(stored);
+  await context.ports.localFavorites.prepend(stored.map(post => post.id));
 }
 
 async function setup(options: SetupOptions = {}): Promise<AppContext> {
   const context = createContext(options);
 
-  await store(context, FRUITS);
+  await store(context);
   const loaded = context.events.favorites.favoritesLoaded.wait();
 
   startFavorites(context);
@@ -72,8 +83,8 @@ async function setup(options: SetupOptions = {}): Promise<AppContext> {
   return context;
 }
 
-function requestedUrlsOf(): string[] {
-  return vi.mocked(fetch).mock.calls.map(([url]) => String(url));
+function favoriteIdsOf(remote: MemoryClient): string[] {
+  return remote.readFavorites().map(post => post.id);
 }
 
 function orderOf(context: AppContext): string[] {
@@ -114,10 +125,6 @@ function heartOf(context: AppContext, id: string): HTMLElement {
 }
 
 describe("startFavorites", () => {
-  beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(""))));
-  });
-
   afterEach(() => {
     document.body.replaceChildren();
     document.documentElement.removeAttribute("data-pagination-hidden");
@@ -163,10 +170,10 @@ describe("startFavorites", () => {
     });
 
     test("using a snippet appends its query to the search", async() => {
-      const keyValueStore = new MemoryKeyValueStore();
+      const localKeyedValues = new MemoryLocalKeyedValues();
 
-      keyValueStore.set("searchSnippets", [createSnippet("fruits", "apple")]);
-      await setup({ keyValueStore });
+      localKeyedValues.set("searchSnippets", [createSnippet("fruits", "apple")]);
+      await setup({ localKeyedValues });
       (document.querySelector("[data-snippet-name=fruits]") as HTMLElement).click();
       expect(searchBoxOf().value).toBe("apple");
     });
@@ -197,7 +204,6 @@ describe("startFavorites", () => {
           context.events.favorites.invertButtonClicked.emit(new MouseEvent("click"));
         }, ["2"]
       ],
-      ["the scratch button excludes the most frequent tags", (context): void => context.events.favorites.scratchButtonClicked.emit(new MouseEvent("click")), ["2"]],
       ["the overlay's tag search searches that tag", (context): void => context.events.postOverlay.searchForTagRequested.emit("banana"), ["2"]]
     ])("%s", async(_, trigger, ids) => {
       const context = await setup();
@@ -233,11 +239,11 @@ describe("startFavorites", () => {
     });
 
     test("a post list request opens the post list", async() => {
-      const open = vi.spyOn(window, "open").mockReturnValue(null);
-      const context = await setup();
+      const navigation = new MemoryNavigation();
+      const context = await setup({ navigation });
 
       context.events.favorites.postListRequested.emit("apple");
-      expect(open).toHaveBeenCalledWith(postListUrlFromQuery("apple"));
+      expect(navigation.opened).toEqual(["#search-apple"]);
     });
 
     describe("pages", () => {
@@ -284,7 +290,7 @@ describe("startFavorites", () => {
       test("reset, once confirmed, clears stored favorites and settings but keeps snippets", async() => {
         vi.stubGlobal("confirm", () => true);
         const context = await setup();
-        const store2 = context.ports.keyValueStore;
+        const store2 = context.ports.localKeyedValues;
 
         store2.set("searchSnippets", []);
         context.preferences.favorites.layout.set("row");
@@ -389,21 +395,21 @@ describe("startFavorites", () => {
       expect(isHiddenOf("favorites-drawer-section-settings")).toBe(true);
     });
 
-    test("the host's header starts as its preference says", async() => {
-      const host = new MemoryHost(true);
+    test("the host page's header starts as its preference says", async() => {
+      const hostPage = new MemoryHostPage(true);
 
-      await setup({ host, preferences: { favorites: { headerEnabled: false } } });
-      expect(host.headerVisible).toBe(false);
+      await setup({ hostPage, preferences: { favorites: { headerEnabled: false } } });
+      expect(hostPage.headerVisible).toBe(false);
     });
 
-    test("the host's header follows its preference", async() => {
-      const host = new MemoryHost(true);
-      const context = await setup({ host });
+    test("the host page's header follows its preference", async() => {
+      const hostPage = new MemoryHostPage(true);
+      const context = await setup({ hostPage });
 
       context.preferences.favorites.headerEnabled.set(false);
-      expect(host.headerVisible).toBe(false);
+      expect(hostPage.headerVisible).toBe(false);
       context.preferences.favorites.headerEnabled.set(true);
-      expect(host.headerVisible).toBe(true);
+      expect(hostPage.headerVisible).toBe(true);
     });
 
     test("hints follow their preference", async() => {
@@ -427,11 +433,11 @@ describe("startFavorites", () => {
       ["a shift-click", {}, { button: 0, shiftKey: true }],
       ["without the gallery, a click", { features: ["favorites"] }, { button: 0 }]
     ])("on desktop, %s on a thumb opens its post", async(_, options, init) => {
-      const open = vi.spyOn(window, "open").mockReturnValue(null);
-      const context = await setup(options);
+      const navigation = new MemoryNavigation();
+      const context = await setup({ ...options, navigation });
 
       dispatchMouse(context, "mousedown", imageOf(context, "2"), init);
-      expect(open).toHaveBeenCalledWith(postPageUrl("2"), "_blank");
+      expect(navigation.opened).toEqual([navigation.postUrl("2")]);
     });
 
     test.each<[string, (context: AppContext) => Element, MouseEventInit]>([
@@ -439,11 +445,11 @@ describe("startFavorites", () => {
       ["a ctrl-middle-click on a thumb", (context): Element => imageOf(context, "2"), { button: 1, ctrlKey: true }],
       ["a middle-click outside any thumb", (context): Element => context.shell.content, { button: 1 }]
     ])("on desktop, %s opens no post", async(_, targetOf, init) => {
-      const open = vi.spyOn(window, "open").mockReturnValue(null);
-      const context = await setup();
+      const navigation = new MemoryNavigation();
+      const context = await setup({ navigation });
 
       dispatchMouse(context, "mousedown", targetOf(context), init);
-      expect(open).not.toHaveBeenCalled();
+      expect(navigation.opened).toEqual([]);
     });
 
     test("on desktop, clicking a thumb keeps the page from following its link", async() => {
@@ -453,43 +459,47 @@ describe("startFavorites", () => {
     });
 
     test("on desktop, a ctrl-click on a thumb opens its media", async() => {
-      const open = vi.spyOn(window, "open").mockReturnValue(null);
-      const context = await setup();
+      const navigation = new MemoryNavigation();
+      const context = await setup({ navigation });
 
       dispatchMouse(context, "click", imageOf(context, "2"), { ctrlKey: true });
-      await vi.waitFor(() => expect(open).toHaveBeenCalledWith("1/2.jpg", "_blank"));
+      await vi.waitFor(() => expect(navigation.opened).toEqual(["data:text/plain,2"]));
     });
 
-    test("on mobile, a middle-click on a thumb does nothing", async() => {
-      const open = vi.spyOn(window, "open").mockReturnValue(null);
-      const context = await setup({ environment: { device: "mobile" } });
+    test("with touch, a middle-click on a thumb does nothing", async() => {
+      const navigation = new MemoryNavigation();
+      const context = await setup({ navigation, environment: { pointer: "touch" } });
 
       dispatchMouse(context, "mousedown", imageOf(context, "2"), { button: 1 });
-      expect(open).not.toHaveBeenCalled();
+      expect(navigation.opened).toEqual([]);
     });
 
     test.each<[string, Partial<Environment>]>([
-      ["desktop", {}],
-      ["mobile", { device: "mobile" }]
-    ])("on %s, clicking a thumb's heart favorites it", async(_, environment) => {
-      const context = await setup({ environment: { ownsFavorites: false, ...environment } });
+      ["hover", {}],
+      ["touch", { pointer: "touch" }]
+    ])("with %s, clicking a thumb's heart favorites it", async(_, environment) => {
+      const remote = createRemote();
+
+      remote.removeFavorite("2");
+      const context = await setup({ remote, environment: { ownsFavorites: false, ...environment } });
 
       dispatchMouse(context, "click", heartOf(context, "2"));
       expect(isFavoritedOf(context, "2")).toBe(true);
-      await vi.waitFor(() => expect(requestedUrlsOf()).toContain(addFavoriteUrl("2")));
+      await vi.waitFor(() => expect(favoriteIdsOf(remote)).toContain("2"));
     });
 
     test("on their own favorites page, clicking a thumb's heart unfavorites and forgets it", async() => {
-      const context = await setup();
+      const remote = createRemote();
+      const context = await setup({ remote });
 
       dispatchMouse(context, "click", heartOf(context, "2"));
       expect(isFavoritedOf(context, "2")).toBe(false);
       await vi.waitFor(async() => expect(await createFruitModel(context).countStoredFavorites()).toBe(2));
-      await vi.waitFor(() => expect(requestedUrlsOf()).toContain(removeFavoriteUrl("2")));
+      await vi.waitFor(() => expect(favoriteIdsOf(remote)).not.toContain("2"));
     });
 
-    test("on mobile, a swipe that ends on a thumb's heart does not favorite it", async() => {
-      const context = await setup({ environment: { ownsFavorites: false, device: "mobile" } });
+    test("with touch, a swipe that ends on a thumb's heart does not favorite it", async() => {
+      const context = await setup({ environment: { ownsFavorites: false, pointer: "touch" } });
 
       vi.spyOn(context.domEvents, "didSwipe").mockReturnValue(true);
       dispatchMouse(context, "click", heartOf(context, "2"));
@@ -500,7 +510,7 @@ describe("startFavorites", () => {
       const context = await setup({ features: ["favorites"] });
       const link = imageOf(context, "2").closest("a") as HTMLAnchorElement;
 
-      expect(link.getAttribute("href")).toBe(postPageUrl("2"));
+      expect(link.getAttribute("href")).toBe(context.ports.navigation.postUrl("2"));
       dispatchMouse(context, "mouseover", imageOf(context, "2"));
       expect(link.getAttribute("href")).toBeNull();
     });
@@ -510,7 +520,7 @@ describe("startFavorites", () => {
     test("only serves the stored favorite ids, without touching the page", async() => {
       const context = createContext({ environment: { mode: "postList" } }, false);
 
-      await store(context, FRUITS);
+      await store(context);
       startFavorites(context);
       expect((await context.featureBridge.favorites.favoriteIds.request()).sort()).toEqual(["1", "2", "3"]);
       expect(context.featureBridge.favorites.searchResults.request()).toEqual([]);

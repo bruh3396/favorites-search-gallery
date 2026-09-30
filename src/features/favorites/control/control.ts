@@ -12,17 +12,17 @@ import { FavoritesShell } from "@/features/favorites/shell/shell";
 export class FavoritesControl {
   private readonly searchBox: FavoritesSearchBox;
 
-  constructor(context: AppContext, private readonly shell: FavoritesShell) {
+  constructor(context: AppContext, private readonly shell: FavoritesShell, offersTutorial: boolean) {
     const { events, environment, preferences } = context;
 
     FavoritesToolbar.setup(events, environment, preferences, shell.toolbar);
     FavoritesDrawer.setup(preferences, shell);
     FavoritesPagination.setup(events, shell.toolbar.pagination);
-    this.searchBox = new FavoritesSearchBox(events, shell.toolbar, context.ports.keyValueStore);
+    this.searchBox = new FavoritesSearchBox(events, shell.toolbar, context.ports.localKeyedValues);
     this.mountDrawerSections({
       settings: FavoritesSettings.buildDrawerSection(context),
       change: FavoritesChangelog.buildDrawerSection(),
-      help: FavoritesHelp.buildDrawerSection(environment, events.gallery.tutorialRequested.emit)
+      help: FavoritesHelp.buildDrawerSection(offersTutorial, events.gallery.tutorialRequested.emit)
     });
   }
 

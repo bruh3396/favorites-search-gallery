@@ -1,16 +1,16 @@
 import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types/types";
 import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/utils/pure/string";
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";
 const GENERATED_NAME_PREFIX = "snippet_";
 
 export class SnippetStore {
-  private readonly storage: KeyValueStore;
+  private readonly storage: LocalKeyedValues;
   private readonly snippets: Map<string, Snippet>;
 
-  constructor(storage: KeyValueStore) {
+  constructor(storage: LocalKeyedValues) {
     this.storage = storage;
     this.snippets = this.load();
   }

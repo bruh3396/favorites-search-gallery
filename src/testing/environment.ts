@@ -5,11 +5,12 @@ export function createEnvironment(overrides: Partial<Environment> = {}): Environ
     version: "0",
     mode: "favorites",
     device: "desktop",
+    pointer: "hover",
     canvasBudget: "full",
     favoritesOwnerId: "1",
     ownsFavorites: true,
     blacklistedTags: "",
-    darkTheme: false,
+    colorScheme: "light",
     ...overrides
   };
 }

@@ -13,7 +13,7 @@ import { createElement } from "@/utils/browser/element";
 
 export function buildDrawerSection(context: AppContext): FavoritesDrawerSectionContent {
   const { environment, events, ports, preferences } = context;
-  const settingsSections = FavoritesSettingsMenu.buildSettingsSections(FavoritesSettingsCatalog.buildSettingsCatalog(context), environment, ports.host);
+  const settingsSections = FavoritesSettingsMenu.buildSettingsSections(FavoritesSettingsCatalog.buildSettingsCatalog(context), environment, ports.hostPage);
   const sections = settingsSections.map(section => buildSection(preferences, section, () => collapseAll.refresh()));
   const collapseAll = new CollapseAllButton(sections, (collapsed) => expandAll(preferences, settingsSections, !collapsed));
   return {

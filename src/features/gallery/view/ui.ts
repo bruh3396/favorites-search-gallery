@@ -1,7 +1,7 @@
 import * as GalleryFullscreenIcon from "@/features/gallery/view/fullscreen_icon";
 import * as Icons from "@/assets/svg/icons";
 import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
-import { Environment } from "@/core/boundary/environment";
+import { HostPage } from "@/core/boundary/ports/host_page";
 import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";
 import { blurActiveElement } from "@/utils/browser/window";
@@ -22,13 +22,13 @@ const REMOVE_FAVORITE_ICONS: Record<RemoveFavoriteResult, string | null> = {
 };
 
 export class GalleryUi {
-  private readonly environment: Environment;
   private readonly shell: Shell;
+  private readonly hostPage: HostPage;
   private readonly background: HTMLElement;
 
-  constructor(preferences: Preferences, environment: Environment, shell: Shell, background: HTMLElement) {
-    this.environment = environment;
+  constructor(preferences: Preferences, shell: Shell, hostPage: HostPage, background: HTMLElement) {
     this.shell = shell;
+    this.hostPage = hostPage;
     this.background = background;
     this.background.style.opacity = String(preferences.gallery.backgroundOpacity.value);
     this.toggleOpenState(false);
@@ -42,13 +42,13 @@ export class GalleryUi {
     blurActiveElement();
     this.toggleCursor(true);
     this.toggleBackgroundInteractability(true);
-    this.toggleScrollbar(false);
+    this.hostPage.lockScroll();
     this.toggleOpenState(true);
   }
 
   public close(): void {
     this.toggleBackgroundInteractability(false);
-    this.toggleScrollbar(true);
+    this.hostPage.unlockScroll();
     this.toggleOpenState(false);
     this.toggleCursor(true);
     this.toggleZoomCursor(false);
@@ -78,10 +78,12 @@ export class GalleryUi {
     this.background.style.opacity = String(opacity);
   }
 
-  public toggleScrollbar(value: boolean): void {
-    const target = this.environment.device === "mobile" ? document.documentElement : document.body;
+  public lockScroll(): void {
+    this.hostPage.lockScroll();
+  }
 
-    target.style.overflowY = value ? "auto" : "hidden";
+  public unlockScroll(): void {
+    this.hostPage.unlockScroll();
   }
 
   public showAddFavoriteResult(result: AddFavoriteResult): void {

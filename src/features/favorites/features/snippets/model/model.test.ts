@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
@@ -8,14 +8,14 @@ const STORAGE_KEY = "searchSnippets";
 
 interface Setup {
   model: SnippetModel;
-  storage: MemoryKeyValueStore;
+  storage: MemoryLocalKeyedValues;
 }
 
 const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
 const veg = createSnippet("veg", "carrot", 0, 200);
 
 function setup(snippets: Snippet[] = []): Setup {
-  const storage = new MemoryKeyValueStore();
+  const storage = new MemoryLocalKeyedValues();
 
   storage.set(STORAGE_KEY, snippets);
   return { model: new SnippetModel(storage), storage };
@@ -25,7 +25,7 @@ function namesOf(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function storedNamesOf(storage: MemoryKeyValueStore): string[] {
+function storedNamesOf(storage: MemoryLocalKeyedValues): string[] {
   return namesOf((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
 }
 

@@ -1,4 +1,4 @@
-import { EncodedTagCategoryMap } from "@/types/search";
+import { EncodedTagCategoryMap } from "@/adapters/api/client/tag/tag";
 
 export type ServerPost = {
   id: string;

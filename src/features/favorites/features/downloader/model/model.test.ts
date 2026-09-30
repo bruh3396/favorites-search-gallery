@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderModel } from "@/features/favorites/features/downloader/model/model";
 import { PostMedia } from "@/core/domain/post/post";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
 const SEPARATOR = DownloaderConfig.filename.categorySeparator;
@@ -25,7 +25,7 @@ function setup(filenameFormat = 0): Setup {
     batchSize: createPreference(0),
     filenameFormat: createPreference(filenameFormat),
     getSearchResults: (): PostMedia[] => [],
-    getTagCategory: (tag): TagCategory | undefined => (tag === "someone" ? "artist" : undefined),
+    getTagCategories: (tagNames): Promise<TagCategoryMap> => Promise.resolve(new Map(tagNames.filter(tagName => tagName === "someone").map(tagName => [tagName, "artist"]))),
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set(["someone"])]))),
     fetchOriginal: (media): Promise<Blob> => {
       fetched.push(media.locator);

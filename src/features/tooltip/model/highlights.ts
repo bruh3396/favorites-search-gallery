@@ -13,7 +13,7 @@ export class TooltipHighlights {
   }
 
   public colorForTag(tag: string): string | null {
-    if (this.dependencies.usingDarkMode()) {
+    if (this.dependencies.colorScheme() === "dark") {
       return TooltipTagMatcher.findMatchingLightColor(tag, this.current);
     }
     return TooltipTagMatcher.findMatchingDarkColor(tag, this.current);

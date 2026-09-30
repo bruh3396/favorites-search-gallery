@@ -1,7 +1,7 @@
+import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { PostResponse, ServerPost } from "@/adapters/api/client/post/post";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiRemotePosts } from "@/adapters/api/ports/remote_posts/remote_posts";
-import { CategorizedPost } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
 import { PostFetchError } from "@/types/errors";
 import { createPost } from "@/testing/post";
@@ -18,12 +18,12 @@ function mintMedia(fileUrl: string): Media | null {
 
 function setup(...responses: PostResponse[]): { source: ApiRemotePosts; api: { fetchPost: ReturnType<typeof vi.fn> }; deletedPosts: { fetch: ReturnType<typeof vi.fn> } } {
   const api = { fetchPost: vi.fn((id: string): Promise<PostResponse> => Promise.resolve(responses.shift() ?? { status: "error", id })) };
-  const deletedPosts = { fetch: vi.fn((id: string): Promise<CategorizedPost> => Promise.resolve({ post: createPost({ id, width: 10, height: 10, deleted: true }), tagCategories: new Map() })) };
+  const deletedPosts = { fetch: vi.fn(({ id }: Pick<Post, "id">): Promise<CategorizedPost> => Promise.resolve({ post: createPost({ id, width: 10, height: 10, deleted: true }), tagCategories: new Map() })) };
   return { source: new ApiRemotePosts(api, deletedPosts, mintMedia, FETCH_ATTEMPTS), api, deletedPosts };
 }
 
-async function fetchedFor(source: ApiRemotePosts, id: string): Promise<CategorizedPost> {
-  const fetched = source.fetch(id);
+async function fetchedFor(source: ApiRemotePosts, id: string, deleted?: boolean): Promise<CategorizedPost> {
+  const fetched = source.fetch({ id, deleted });
 
   fetched.catch(() => { });
   await vi.runAllTimersAsync();
@@ -62,8 +62,27 @@ describe("ApiRemotePosts", () => {
     const { source, deletedPosts } = setup({ status: "deleted", id: "1" });
     const fetched = await fetchedFor(source, "1");
 
-    expect(deletedPosts.fetch).toHaveBeenCalledWith("1");
+    expect(deletedPosts.fetch).toHaveBeenCalledWith({ id: "1" });
     expect(fetched.post.deleted).toBe(true);
+  });
+
+  test("asks only the site for a post already marked deleted", async() => {
+    const { source, api, deletedPosts } = setup({ status: "ok", post: createServerPost("1") });
+    const fetched = await fetchedFor(source, "1", true);
+
+    expect(api.fetchPost).not.toHaveBeenCalled();
+    expect(deletedPosts.fetch).toHaveBeenCalledOnce();
+    expect(fetched.post.deleted).toBe(true);
+  });
+
+  test("asks the site once for a deleted post and passes on its failure", async() => {
+    const { source, api, deletedPosts } = setup({ status: "deleted", id: "1" });
+
+    deletedPosts.fetch.mockRejectedValueOnce(new PostFetchError("post page has no file: "));
+
+    await expect(fetchedFor(source, "1")).rejects.toThrow(PostFetchError);
+    expect(api.fetchPost).toHaveBeenCalledOnce();
+    expect(deletedPosts.fetch).toHaveBeenCalledOnce();
   });
 
   test("retries a failure, then rejects when the server keeps failing", async() => {

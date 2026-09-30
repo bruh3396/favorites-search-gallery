@@ -1,7 +1,7 @@
 import { Snippet, SnippetScene } from "@/features/favorites/features/snippets/types/types";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/types/favorite";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { SnippetFlows } from "@/features/favorites/features/snippets/flows/flows";
 import { SnippetLibraryFlow } from "@/features/favorites/features/snippets/flows/library";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
@@ -64,7 +64,7 @@ interface Options {
 
 interface Setup {
   library: SnippetLibraryFlow;
-  storage: MemoryKeyValueStore;
+  storage: MemoryLocalKeyedValues;
   view: FakeView;
   appended: string[];
   alerts: string[];
@@ -73,7 +73,7 @@ interface Setup {
 }
 
 function setup({ snippets = [], results = [], confirmed = true }: Options = {}): Setup {
-  const storage = new MemoryKeyValueStore();
+  const storage = new MemoryLocalKeyedValues();
   const view = new FakeView();
   const appended: string[] = [];
   const alerts: string[] = [];
@@ -96,7 +96,7 @@ function namesOf(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function storedNamesOf(storage: MemoryKeyValueStore): string[] {
+function storedNamesOf(storage: MemoryLocalKeyedValues): string[] {
   return namesOf((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
 }
 

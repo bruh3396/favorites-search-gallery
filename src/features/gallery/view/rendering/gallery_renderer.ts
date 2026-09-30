@@ -1,3 +1,4 @@
+import { GalleryBudget, Renderer } from "@/features/gallery/types/types";
 import { isGif, isVideo } from "@/lib/media/media_type";
 import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AppContext } from "@/app/context/context";
@@ -8,7 +9,6 @@ import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/re
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
 import { Point } from "@/types/geometry";
 import { PostMedia } from "@/core/domain/post/post";
-import { Renderer } from "@/features/gallery/types/types";
 import { forceReflow } from "@/utils/browser/element";
 
 export class GalleryRenderer {
@@ -17,8 +17,8 @@ export class GalleryRenderer {
   private readonly gifRenderer: GalleryGifRenderer;
   private readonly renderers: Renderer[];
 
-  constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined) {
-    this.imageRenderer = new GalleryImageRenderer(context, favoriteFor);
+  constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined, budget: GalleryBudget) {
+    this.imageRenderer = new GalleryImageRenderer(context, favoriteFor, budget);
     this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment, context.ports.remoteMedia);
     this.gifRenderer = new GalleryGifRenderer(context.environment, context.ports.remoteMedia);
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];

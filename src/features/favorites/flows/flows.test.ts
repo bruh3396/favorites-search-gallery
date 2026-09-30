@@ -1,33 +1,32 @@
-import "fake-indexeddb/auto";
-import { FAVORITES_PER_PAGE, favoritesPageUrl } from "@/adapters/rule34/client/site/favorites_page/fetcher";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { AppContext } from "@/app/context/context";
-import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesFlows } from "@/features/favorites/flows/flows";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
+import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { Post } from "@/core/domain/post/post";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
 import { createPost } from "@/testing/post";
 
-const DEFAULT_STREAM_STORED_FAVORITES_THRESHOLD = FavoritesConfig.streamStoredFavoritesThreshold;
 const FRUITS: Record<string, string> = { "1": "apple", "2": "banana", "3": "apple cherry" };
 
 let pageCounter = 0;
 
-function createContext(): AppContext {
+function createContext(...remoteIds: string[]): AppContext {
   pageCounter += 1;
   const id = `flows_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesOwnerId: id });
   const shell = new Shell();
+  const remote = new MemoryClient(remoteIds.map(createFruitPost));
 
   document.body.append(shell.root);
-  return createAppContext({ environment, preferences: { favorites: { layout: "grid" } }, shell });
+  return createAppContext({ environment, preferences: { favorites: { layout: "grid" } }, shell, ports: { remoteFavorites: new MemoryRemoteFavorites(remote), remotePosts: new MemoryRemotePosts(remote) } });
 }
 
 function createModel(context: AppContext): FavoritesModel {
@@ -39,25 +38,16 @@ function createFruitPost(id: string): Post {
 }
 
 async function store(context: AppContext, ...ids: string[]): Promise<void> {
-  await createModel(context).storeFavorites(ids.map(id => ({ post: createFruitPost(id) }) as unknown as Favorite));
-}
-
-function createFavoritesPage(...ids: string[]): string {
-  return ids.map(id => `<span class="thumb" id="s${id}"><a id="p${id}"><img src="https://example.com/${id}.jpg" title="${FRUITS[id]}"></a></span>`).join("");
-}
-
-function serveFavoritesPages(context: AppContext, pages: string[][]): void {
-  const htmlByUrl = new Map(pages.map((ids, index) => [favoritesPageUrl(context.environment.favoritesOwnerId, index * FAVORITES_PER_PAGE), createFavoritesPage(...ids)]));
-
-  vi.stubGlobal("fetch", vi.fn((url: string) => Promise.resolve(new Response(htmlByUrl.get(String(url)) ?? ""))));
+  await context.ports.localPosts.setMany(ids.map(createFruitPost));
+  await context.ports.localFavorites.prepend(ids);
 }
 
 function setup(context: AppContext): FavoritesFlows {
   const shell = new FavoritesShell(context.shell, context.environment);
-  const view = new FavoritesView(context, shell);
+  const view = new FavoritesView(context, shell, false);
 
   view.setup({ onContentReplaced: () => { }, onContentAdded: () => { } });
-  return new FavoritesFlows(context, createModel(context), view, new FavoritesControl(context, shell));
+  return new FavoritesFlows(context, createModel(context), view, new FavoritesControl(context, shell, false));
 }
 
 function idsOf(context: AppContext): string[] {
@@ -74,16 +64,13 @@ function storedIdsFor(context: AppContext): Promise<string[]> {
 
 describe("FavoritesFlows", () => {
   afterEach(() => {
-    FavoritesConfig.streamStoredFavoritesThreshold = DEFAULT_STREAM_STORED_FAVORITES_THRESHOLD;
     document.body.replaceChildren();
-    vi.unstubAllGlobals();
   });
 
   describe("loading with nothing stored", () => {
-    test("fetches every favorites page, shows the favorites, and stores them", async() => {
-      const context = createContext();
+    test("fetches every remote favorite, shows the favorites, and stores them", async() => {
+      const context = createContext("1", "2", "3");
 
-      serveFavoritesPages(context, [["1", "2", "3"]]);
       await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
@@ -92,22 +79,19 @@ describe("FavoritesFlows", () => {
   });
 
   describe("loading with favorites stored", () => {
-    test.each([0, 10])("shows the stored favorites (streaming above %i)", async(threshold) => {
-      FavoritesConfig.streamStoredFavoritesThreshold = threshold;
-      const context = createContext();
+    test("shows the stored favorites", async() => {
+      const context = createContext("1", "2", "3");
 
       await store(context, "1", "2", "3");
-      serveFavoritesPages(context, [["1", "2", "3"]]);
       await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(newIdsOf(context)).toEqual([]);
     });
 
     test("adds favorites made since the last visit, marked as new, and stores them", async() => {
-      const context = createContext();
+      const context = createContext("3", "1", "2");
 
       await store(context, "1", "2");
-      serveFavoritesPages(context, [["3", "1", "2"]]);
       await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(newIdsOf(context)).toEqual(["3"]);

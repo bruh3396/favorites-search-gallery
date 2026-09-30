@@ -26,7 +26,7 @@ function createClient(fetchPage: (pageId: string, pageIndex: number) => Promise<
     readFavoritesPageId: (): string => PAGE_ID,
     readFirstFavoritesPage: (): Post[] | null => null,
     fetchFavoritesPage: fetchPage,
-    fetchFavoritesCount: fetchCount,
+    fetchFavoriteCount: fetchCount,
     prioritizeFavorites: <T>(fetchFavorites: () => Promise<T>): Promise<T> => {
       rule34.prioritized += 1;
       return fetchFavorites();
@@ -72,7 +72,7 @@ describe("Rule34RemoteFavorites", () => {
   test("reads its page id and the favorites already on the page from the site", () => {
     const rule34 = createClient(createPageFetch(0), () => Promise.resolve(null));
     const readFirstFavoritesPage = vi.spyOn(rule34, "readFirstFavoritesPage");
-    const fetchCount = vi.spyOn(rule34, "fetchFavoritesCount");
+    const fetchCount = vi.spyOn(rule34, "fetchFavoriteCount");
 
     new Rule34RemoteFavorites(rule34).fetchCount();
     expect(readFirstFavoritesPage).toHaveBeenCalledOnce();

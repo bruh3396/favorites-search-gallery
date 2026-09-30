@@ -17,7 +17,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
     this.upscaleQuality = this.context.environment.mode === "postList" ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
     this.refreshImagesDebounced = debounceLeading(() => this.refreshImages(), GalleryConfig.contentRefreshTime);
     this.updateUpscaleQualityDebounced = debounceTrailing(() => this.updateUpscaleQualityNow(), GalleryUpscaleConfig.dynamicQualitySettleTime);
-    this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.cacheOrUpscale(thumbs)), 1_000);
+    this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.view.warm(this.itemsFor(thumbs))), 1_000);
     this.cacheAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.view.cacheImages(this.itemsFor(thumbs))), 1_000);
   }
 
@@ -64,7 +64,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   public handleVisibleThumbsChanged(): void {
     this.runForState({
-      idle: () => this.withVisibleThumbs((thumbs) => this.cacheOrUpscale(thumbs)),
+      idle: () => this.withVisibleThumbs((thumbs) => this.view.warm(this.itemsFor(thumbs))),
       preview: () => this.withVisibleThumbs((thumbs) => this.view.cacheImages(this.itemsFor(thumbs)))
     });
   }
@@ -112,14 +112,6 @@ export class GalleryThumbsFlow extends GalleryFlow {
     if (thumb !== null && this.context.environment.mode === "favorites") {
       this.control.setCenterThumb(thumb);
       this.withVisibleThumbs(use);
-    }
-  }
-
-  private cacheOrUpscale(thumbs: HTMLElement[]): void {
-    if (this.context.environment.canvasBudget === "reduced") {
-      this.view.upscale(this.itemsFor(thumbs));
-    } else {
-      this.view.cacheImages(this.itemsFor(thumbs));
     }
   }
 

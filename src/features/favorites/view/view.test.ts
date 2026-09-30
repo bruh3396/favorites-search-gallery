@@ -5,13 +5,13 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
 import { PaginationState } from "@/types/ui";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
 
 interface Setup {
   view: FavoritesView;
@@ -24,15 +24,16 @@ interface Setup {
 interface SetupOptions {
   preferences?: PreferenceOverrides;
   environment?: Partial<Environment>;
-  keyValueStore?: MemoryKeyValueStore;
+  localKeyedValues?: MemoryLocalKeyedValues;
+  linksToPostPage?: boolean;
 }
 
-function setup({ preferences = {}, environment: environmentOverrides = {}, keyValueStore = new MemoryKeyValueStore() }: SetupOptions = {}): Setup {
+function setup({ preferences = {}, environment: environmentOverrides = {}, localKeyedValues = new MemoryLocalKeyedValues(), linksToPostPage = false }: SetupOptions = {}): Setup {
   const environment = createEnvironment(environmentOverrides);
   const appShell = new Shell();
   const shell = new FavoritesShell(appShell, environment);
-  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { keyValueStore } });
-  const view = new FavoritesView(context, shell);
+  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { localKeyedValues } });
+  const view = new FavoritesView(context, shell, linksToPostPage);
   const replaced = vi.fn<() => void>();
   const added = vi.fn<(favorites: Favorite[]) => void>();
 
@@ -144,12 +145,12 @@ describe("FavoritesView", () => {
     });
 
     test("strips the link from the hovered thumb", () => {
-      const { view, content } = setup({ environment: { device: "mobile" } });
+      const { view, content } = setup({ linksToPostPage: true });
 
       view.showSearchResults(createFavorites("1"));
       const link = content.querySelector("a") as HTMLAnchorElement;
 
-      expect(link.getAttribute("href")).toBe(postPageUrl("1"));
+      expect(link.getAttribute("href")).toBe(new MemoryNavigation().postUrl("1"));
       hover(view, content.querySelector("img") as HTMLElement);
       expect(link.getAttribute("href")).toBeNull();
     });
@@ -164,8 +165,8 @@ describe("FavoritesView", () => {
     });
 
     test("shapes the next visit's placeholders after the thumbs that loaded", async() => {
-      const keyValueStore = new MemoryKeyValueStore();
-      const { view, content } = setup({ preferences: { favorites: { layout: "native" } }, keyValueStore });
+      const localKeyedValues = new MemoryLocalKeyedValues();
+      const { view, content } = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
 
       view.showSearchResults([createFavorite("1", 120, 240)]);
       content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalWidth", { value: 120 }));
@@ -175,7 +176,7 @@ describe("FavoritesView", () => {
       content.querySelectorAll("img").forEach(image => image.dispatchEvent(new Event("load")));
       await collecting;
       document.body.replaceChildren();
-      const next = setup({ preferences: { favorites: { layout: "native" } }, keyValueStore });
+      const next = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
 
       next.view.showSkeleton();
       const first = next.content.querySelector<HTMLElement>(".skeleton-item");
@@ -255,7 +256,7 @@ describe("FavoritesView", () => {
     test("reports fetching against the expected total", () => {
       const { view, shell } = setup();
 
-      view.setExpectedTotalFavoritesCount(500);
+      view.setExpectedTotalFavoriteCount(500);
       view.updateFetchStatus(100, 3);
       expect(shell.toolbar.loadStatus.textContent).toBe("Fetching - 100 / 500");
     });

@@ -1,25 +1,19 @@
-import "fake-indexeddb/auto";
-import * as PostStore from "@/lib/domain/post/store";
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { createAppContext } from "@/testing/context";
 import { createPost } from "@/testing/post";
 
-const DEFAULT_API_COALESCE_TIMEOUT = FavoritesConfig.apiCoalesceTimeout;
-const DEFAULT_STORE_UPDATE_COALESCE_TIMEOUT = FavoritesConfig.storeUpdateCoalesceTimeout;
-
-let pageCounter = 0;
+const POST_WRITE_DELAY = 2_000;
 
 function createContext(resultsPerPage = 100, sourcePosts: Post[] = []): AppContext {
-  pageCounter += 1;
   return createAppContext({
-    environment: { favoritesOwnerId: `model_test_${Date.now()}_${pageCounter}` },
     ports: { remoteFavorites: new MemoryRemoteFavorites(new MemoryClient(sourcePosts)) },
     preferences: { favorites: { resultsPerPage } }
   });
@@ -42,62 +36,55 @@ function createModel(context: AppContext, onSearchResultsChanged: (results: Favo
 }
 
 async function store(context: AppContext, posts: Post[]): Promise<void> {
-  await createModel(context).storeFavorites(posts.map(post => ({ post }) as unknown as Favorite));
+  await context.ports.localPosts.setMany(posts);
+  await context.ports.localFavorites.prepend(posts.map(post => post.id));
 }
 
-async function setup(posts: Post[], resultsPerPage?: number, onSearchResultsChanged?: (results: Favorite[]) => void): Promise<{ context: AppContext; model: FavoritesModel }> {
-  const context = createContext(resultsPerPage);
-
+async function setup(posts: Post[], resultsPerPage?: number, onSearchResultsChanged?: (results: Favorite[]) => void, context = createContext(resultsPerPage)): Promise<{ context: AppContext; model: FavoritesModel }> {
   await store(context, posts);
   const model = createModel(context, onSearchResultsChanged);
 
-  await model.loadStoredFavorites();
+  await model.streamStoredFavorites(() => { });
   model.indexAllFavorites();
   return { context, model };
 }
 
 describe("FavoritesModel", () => {
-  beforeEach(() => {
-    FavoritesConfig.apiCoalesceTimeout = 0;
-    FavoritesConfig.storeUpdateCoalesceTimeout = 0;
-  });
-
   afterEach(() => {
-    FavoritesConfig.apiCoalesceTimeout = DEFAULT_API_COALESCE_TIMEOUT;
-    FavoritesConfig.storeUpdateCoalesceTimeout = DEFAULT_STORE_UPDATE_COALESCE_TIMEOUT;
     vi.unstubAllGlobals();
   });
 
   describe("storage", () => {
-    test("favorites stored by one model load back into another with the same identity", async() => {
+    test("favorites stored by one model load back into another sharing its ports", async() => {
       const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
 
       expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
       expect(model.getFavorite("1")?.id).toBe("1");
       expect(await model.countStoredFavorites()).toBe(2);
-      expect(await model.hasStoredFavorites()).toBe(true);
     });
 
-    test("a model with a different identity does not see those favorites", async() => {
-      await setup([createFavoritePost("1", "apple")]);
-
-      expect(await createModel(createContext()).countStoredFavorites()).toBe(0);
-    });
-
-    test("streams stored favorites in batches, reporting the running count", async() => {
+    test("streams stored favorites, reporting each batch's posts", async() => {
       const context = createContext();
+      const batches: string[][] = [];
 
       await store(context, createFavoritePosts("apple", "1", "2"));
-      const model = createModel(context);
-      const onBatch = vi.fn();
+      await createModel(context).streamStoredFavorites(posts => batches.push(posts.map(post => post.id)));
 
-      await model.streamStoredFavorites(onBatch);
-
-      expect(onBatch).toHaveBeenLastCalledWith(2);
-      expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
+      expect(batches).toEqual([["1", "2"]]);
     });
 
-    test("reads stored ids and tags", async() => {
+    test("stores the ids of fetched favorites", async() => {
+      const context = createContext(100, createFavoritePosts("apple", "1", "2"));
+      const model = createModel(context);
+
+      await model.fetchAllFavorites(() => { });
+      await model.storeFavorites(model.getAllFavorites());
+
+      expect(await createModel(context).loadFavoriteIds()).toEqual(["1", "2"]);
+      expect(await context.ports.localPosts.getMany(["1", "2"])).toHaveLength(2);
+    });
+
+    test("reads stored ids and the loaded favorites' tags", async() => {
       const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
 
       expect((await model.loadFavoriteIds()).sort()).toEqual(["1", "2"]);
@@ -111,12 +98,13 @@ describe("FavoritesModel", () => {
       expect(await model.loadFavoriteIds()).toEqual(["2"]);
     });
 
-    test("destroys the store", async() => {
+    test("destroys the stored favorites but keeps their posts", async() => {
       const { context, model } = await setup(createFavoritePosts("apple", "1"));
 
-      await vi.waitFor(async() => expect(await createModel(context).countStoredFavorites()).toBe(1));
       await model.destroyStore();
-      await vi.waitFor(async() => expect(await createModel(context).countStoredFavorites()).toBe(0));
+
+      expect(await createModel(context).countStoredFavorites()).toBe(0);
+      expect(await context.ports.localPosts.getMany(["1"])).toHaveLength(1);
     });
 
     test("compressing keeps every favorite readable", async() => {
@@ -144,7 +132,7 @@ describe("FavoritesModel", () => {
       await store(context, createFavoritePosts("apple", "1"));
       const model = createModel(context);
 
-      await model.loadStoredFavorites();
+      await model.streamStoredFavorites(() => { });
       const newFavorites = await model.fetchNewFavorites();
 
       expect(idsOf(newFavorites)).toEqual(["2"]);
@@ -152,17 +140,18 @@ describe("FavoritesModel", () => {
     });
   });
 
-  describe("enrichment", () => {
-    test("stale favorites take corrected tags from the post cache, in search and in storage", async() => {
-      await PostStore.writeAll([createPost({ id: "900", tags: "apple cherry", width: 1, height: 1, fetchedAt: Date.now() })]);
-      const { context, model } = await setup([createPost({ id: "900", tags: "apple" })]);
+  describe("refreshing", () => {
+    test("a stale favorite takes its refreshed tags, in search and in storage", async() => {
+      const scheduler = new MemoryScheduler();
+      const refreshed = createPost({ id: "900", tags: "apple cherry", width: 1, height: 1 });
+      const context = createAppContext({ ports: { scheduler, remotePosts: new MemoryRemotePosts(new MemoryClient([refreshed])) } });
+      const { model } = await setup([createPost({ id: "900", tags: "apple" })], undefined, undefined, context);
 
-      await vi.waitFor(() => expect(idsOf(model.searchFavorites("cherry"))).toEqual(["900"]));
-      await vi.waitFor(async() => {
-        const tags = await createModel(context).getTagsForIds(["900"]);
+      await vi.waitFor(() => expect(model.getFavorite("900")?.tags.has("cherry")).toBe(true));
+      scheduler.advance(POST_WRITE_DELAY);
 
-        expect(tags.get("900")?.has("cherry")).toBe(true);
-      });
+      expect(idsOf(model.searchFavorites("cherry"))).toEqual(["900"]);
+      expect((await context.ports.localPosts.getMany(["900"]))[0].tags).toBe("apple cherry");
     });
   });
 

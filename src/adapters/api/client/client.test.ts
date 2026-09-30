@@ -1,5 +1,6 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+﻿import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiClient } from "@/adapters/api/client/client";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 
 type FetchStub = ReturnType<typeof vi.fn<(url: string, init: RequestInit) => Promise<Response>>>;
 
@@ -15,7 +16,10 @@ function requestsOf(fetch: FetchStub): { url: string; body: unknown }[] {
 }
 
 describe("ApiClient", () => {
+  let scheduler: MemoryScheduler;
+
   beforeEach(() => {
+    scheduler = new MemoryScheduler();
     vi.useFakeTimers();
   });
 
@@ -26,9 +30,10 @@ describe("ApiClient", () => {
 
   test("batches posts asked for together into one request to its origin", async() => {
     const fetch = stubFetch(({ ids }) => Object.fromEntries(ids.map(id => [id, { status: "deleted", id }])));
-    const client = new ApiClient("https://api.test");
+    const client = new ApiClient(scheduler, "https://api.test");
     const fetched = Promise.all([client.fetchPost("1"), client.fetchPost("2")]);
 
+    scheduler.advance(10_000);
     await vi.advanceTimersByTimeAsync(10_000);
     expect(await fetched).toEqual([{ status: "deleted", id: "1" }, { status: "deleted", id: "2" }]);
     expect(requestsOf(fetch)).toEqual([{ url: "https://api.test/post", body: { ids: ["1", "2"] } }]);
@@ -36,9 +41,10 @@ describe("ApiClient", () => {
 
   test("batches tags asked for together into one request", async() => {
     const fetch = stubFetch(({ tagNames }) => Object.fromEntries(tagNames.map(tagName => [tagName, { status: "ok", category: 0 }])));
-    const client = new ApiClient("https://api.test");
+    const client = new ApiClient(scheduler, "https://api.test");
     const fetched = Promise.all([client.fetchTag("apple"), client.fetchTag("alice")]);
 
+    scheduler.advance(10_000);
     await vi.advanceTimersByTimeAsync(10_000);
     expect(await fetched).toHaveLength(2);
     expect(requestsOf(fetch)).toEqual([{ url: "https://api.test/tag", body: { tagNames: ["apple", "alice"] } }]);
@@ -47,7 +53,7 @@ describe("ApiClient", () => {
   test("identifies every request by the identity it was built with", async() => {
     const fetch = stubFetch();
 
-    new ApiClient("https://api.test", { userId: "9", version: "1.0", platform: "mobile" }).ping();
+    new ApiClient(scheduler, "https://api.test", { userId: "9", version: "1.0", platform: "mobile" }).ping();
     await vi.advanceTimersByTimeAsync(0);
     expect(fetch.mock.calls.map(([url, init]) => [url, init.headers])).toEqual([["https://api.test/ping", { "X-User-Id": "9", "X-Version": "1.0", "X-Platform": "mobile" }]]);
   });
@@ -55,7 +61,7 @@ describe("ApiClient", () => {
   test("is anonymous unless given an identity", async() => {
     const fetch = stubFetch();
 
-    new ApiClient("https://api.test").ping();
+    new ApiClient(scheduler, "https://api.test").ping();
     await vi.advanceTimersByTimeAsync(0);
     expect(fetch.mock.calls.map(([, init]) => init.headers)).toEqual([{ "X-User-Id": "", "X-Version": "", "X-Platform": "" }]);
   });

@@ -1,13 +1,13 @@
 import { Emitter } from "@/lib/event/emitter";
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 
 export class Preference<T> {
-  private readonly store: KeyValueStore;
+  private readonly store: LocalKeyedValues;
   private readonly key: string;
   private readonly defaultValue: T;
   private readonly emitter: Emitter<T> = new Emitter<T>();
 
-  constructor(store: KeyValueStore, key: string, defaultValue: T) {
+  constructor(store: LocalKeyedValues, key: string, defaultValue: T) {
     this.store = store;
     this.key = key;
     this.defaultValue = defaultValue;

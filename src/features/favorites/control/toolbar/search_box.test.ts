@@ -2,7 +2,7 @@ import { Events, createEvents } from "@/app/context/events";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesSearchBox } from "@/features/favorites/control/toolbar/search_box";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 
@@ -12,12 +12,12 @@ interface Setup {
   input: HTMLTextAreaElement;
   clearButton: HTMLButtonElement;
   events: Events;
-  storage: MemoryKeyValueStore;
+  storage: MemoryLocalKeyedValues;
   searched: string[];
   postLists: string[];
 }
 
-function setup(storage = new MemoryKeyValueStore()): Setup {
+function setup(storage = new MemoryLocalKeyedValues()): Setup {
   const environment = createEnvironment();
   const appShell = new Shell();
   const shell = new FavoritesShell(appShell, environment);
@@ -303,7 +303,7 @@ describe("FavoritesSearchBox", () => {
     });
 
     test("the query being edited survives a reload", () => {
-      const storage = new MemoryKeyValueStore();
+      const storage = new MemoryLocalKeyedValues();
       const first = setup(storage);
 
       type(first.input, "cat");
@@ -313,7 +313,7 @@ describe("FavoritesSearchBox", () => {
     });
 
     test("searches survive a reload", () => {
-      const storage = new MemoryKeyValueStore();
+      const storage = new MemoryLocalKeyedValues();
       const first = setup(storage);
 
       type(first.input, "cat");

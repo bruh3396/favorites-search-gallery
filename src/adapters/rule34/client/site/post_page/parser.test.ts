@@ -4,6 +4,7 @@ import { parsePostFromPostPage } from "@/adapters/rule34/client/site/post_page/p
 
 const IMAGE = "<img id=\"image\" src=\"https://us.rule34.xxx//images/1234/a1b2c3.png?42\">";
 const VIDEO = "<video><source src=\"https://us.rule34.xxx//images/1234/a1b2c3.mp4?42\"></video>";
+const ORIGINAL_LINK = "<div class=\"link-list\"><ul><li><a href=\"#\">Edit</a></li><li><a href=\"https://wimg.rule34.xxx//images/1234/a1b2c3.jpeg?42\">Original image</a></li></ul></div>";
 
 function createPostPage(size: string, file: string = IMAGE): string {
   return `
@@ -32,6 +33,10 @@ describe("parsePostFromPostPage", () => {
 
   test("mints a video's media from its source", () => {
     expect(parsePostFromPostPage(createPostPage("1920x1080", VIDEO)).post.media).toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
+  });
+
+  test("mints the media from the original image link when the page shows no file", () => {
+    expect(parsePostFromPostPage(createPostPage("1920x1080", ORIGINAL_LINK)).post.media).toEqual({ kind: "image", locator: "1234/a1b2c3.jpeg" });
   });
 
   test("throws for a page without a file", () => {

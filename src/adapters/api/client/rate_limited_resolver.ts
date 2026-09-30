@@ -1,15 +1,16 @@
-import { CoalescingResolver } from "@/lib/async/coalescing";
+import { CoalescingResolver } from "@/core/utils/async/coalescing";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { RateLimiterConfig } from "@/types/async";
+import { Scheduler } from "@/core/boundary/ports/scheduler";
 
 const BATCH_SIZE = 50;
 const FLUSH_TIMEOUT = 2000;
 
 export class RateLimitedResolver<V> extends CoalescingResolver<string, V> {
-  constructor(rateLimit: RateLimiterConfig, resolve: (keys: string[]) => Promise<Map<string, V>>) {
+  constructor(rateLimit: RateLimiterConfig, resolve: (keys: string[]) => Promise<Map<string, V>>, scheduler: Scheduler) {
     const limiter = new RateLimiter(rateLimit);
 
-    super(BATCH_SIZE, FLUSH_TIMEOUT, keys => limiter.run(() => resolve(keys)).then(answers => requireEveryKey(keys, answers)));
+    super(BATCH_SIZE, FLUSH_TIMEOUT, keys => limiter.run(() => resolve(keys)).then(answers => requireEveryKey(keys, answers)), scheduler);
   }
 }
 

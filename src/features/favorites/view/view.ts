@@ -30,16 +30,16 @@ export class FavoritesView {
   private onContentReplaced: () => void;
   private onContentAdded: (favorites: Favorite[]) => void;
 
-  constructor(private readonly context: AppContext, shell: FavoritesShell) {
+  constructor(private readonly context: AppContext, shell: FavoritesShell, linksToPostPage: boolean) {
     this.onContentReplaced = doNothing;
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
     this.linkSuppressor = new FavoritesLinkSuppressor(id => context.ports.navigation.postUrl(id));
-    this.skeleton = new FavoritesSkeleton(context.ports.keyValueStore, this.getLayout());
+    this.skeleton = new FavoritesSkeleton(context.ports.localKeyedValues, this.getLayout());
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
-    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), context.environment.device === "mobile", context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id), media => context.ports.remoteMedia.resolvePreviewUrl(media));
+    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), linksToPostPage, context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id), media => context.ports.remoteMedia.resolvePreviewUrl(media));
     this.thumbPool = this.createThumbPool();
     this.pagination.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
     this.drawer.toggle(context.preferences.favorites.drawerOpen.value);
@@ -143,8 +143,8 @@ export class FavoritesView {
     this.status.setLoadProgress(loaded, total);
   }
 
-  public setExpectedTotalFavoritesCount(count: number | null): void {
-    this.status.setExpectedTotalFavoritesCount(count);
+  public setExpectedTotalFavoriteCount(count: number | null): void {
+    this.status.setExpectedTotalFavoriteCount(count);
   }
 
   public clearStatus(): void {

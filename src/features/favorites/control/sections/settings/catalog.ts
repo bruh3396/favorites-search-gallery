@@ -4,6 +4,7 @@ import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile, UpscaleQuality } from "@/types/app";
 import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper, toggle } from "@/lib/ui/settings/controls";
 import { AppContext } from "@/app/context/context";
+import { ColorScheme } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
@@ -33,7 +34,7 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "dark-mode",
       label: "Dark Mode",
       tooltip: "Use dark variant of selected color theme",
-      preference: preferences.app.darkMode,
+      preference: booleanPreference<ColorScheme>(preferences.app.colorScheme, "dark", "light"),
       hotkey: "D"
     }, events),
     nativeFont: toggleWithHotkey({

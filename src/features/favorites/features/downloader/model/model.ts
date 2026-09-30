@@ -9,10 +9,10 @@ export class DownloaderModel {
   private readonly filenamer: DownloaderFilenamer;
   private readonly batcher: DownloaderBatcher;
 
-  constructor({ filenameFormat, getTagCategory, getTagsForIds, fetchOriginal, saveBlob }: DownloaderContext) {
-    this.filenamer = new DownloaderFilenamer({ filenameFormat, getTagCategory });
+  constructor({ filenameFormat, getTagCategories, getTagsForIds, fetchOriginal, saveBlob }: DownloaderContext) {
+    this.filenamer = new DownloaderFilenamer({ filenameFormat });
     this.batcher = new DownloaderBatcher({
-      archiver: new DownloaderArchiver({ filenamer: this.filenamer, getTagsForIds, fetchOriginal }),
+      archiver: new DownloaderArchiver({ filenamer: this.filenamer, getTagsForIds, getTagCategories, fetchOriginal }),
       saveBlob
     });
   }

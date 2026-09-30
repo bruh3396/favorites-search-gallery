@@ -8,6 +8,6 @@ describe("Rule34RemotePosts", () => {
     const page = { post: createPost({ id: "42", deleted: true }), tagCategories: new Map([["alice", "character" as const]]) };
     const source = new Rule34RemotePosts({ fetchPostPage: (id: string): Promise<CategorizedPost> => Promise.resolve(id === "42" ? page : Promise.reject(new Error(id))) });
 
-    expect(await source.fetch("42")).toBe(page);
+    expect(await source.fetch({ id: "42" })).toBe(page);
   });
 });

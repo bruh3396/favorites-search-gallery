@@ -1,5 +1,6 @@
 import { PostResponse } from "@/adapters/api/client/post/post";
 import { RateLimitedResolver } from "@/adapters/api/client/rate_limited_resolver";
+import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { TagResponse } from "@/adapters/api/client/tag/tag";
 
 export interface ApiIdentity {
@@ -19,10 +20,10 @@ export class ApiClient {
   private readonly tags: RateLimitedResolver<TagResponse>;
   private readonly headers: Record<string, string>;
 
-  constructor(private readonly origin: string = API_ORIGIN, identity?: ApiIdentity) {
+  constructor(scheduler: Scheduler, private readonly origin: string = API_ORIGIN, identity?: ApiIdentity) {
     this.headers = { "X-User-Id": identity?.userId ?? "", "X-Version": identity?.version ?? "", "X-Platform": identity?.platform ?? "" };
-    this.posts = new RateLimitedResolver(POST_RATE_LIMIT, ids => this.fetchBatch("post", { ids }));
-    this.tags = new RateLimitedResolver(TAG_RATE_LIMIT, tagNames => this.fetchBatch("tag", { tagNames }));
+    this.posts = new RateLimitedResolver(POST_RATE_LIMIT, ids => this.fetchBatch("post", { ids }), scheduler);
+    this.tags = new RateLimitedResolver(TAG_RATE_LIMIT, tagNames => this.fetchBatch("tag", { tagNames }), scheduler);
   }
 
   public ping(): void {

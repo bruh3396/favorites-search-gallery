@@ -1,0 +1,84 @@
+import "fake-indexeddb/auto";
+import { describe, expect, test } from "vitest";
+import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
+import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
+
+let counter = 0;
+
+function createIndexedDb(): IndexedDbClient {
+  counter += 1;
+  return new IndexedDbClient(`local_favorites_test_${counter}`);
+}
+
+function createLocalFavorites(ownerId = "1"): IndexedDbLocalFavorites {
+  return new IndexedDbLocalFavorites(createIndexedDb(), ownerId);
+}
+
+describe("IndexedDbLocalFavorites", () => {
+  test("starts empty", async() => {
+    expect(await createLocalFavorites().getAll()).toEqual([]);
+  });
+
+  test("keeps the newest ids first", async() => {
+    const favorites = createLocalFavorites();
+
+    await favorites.prepend(["2", "1"]);
+    await favorites.prepend(["4", "3"]);
+
+    expect(await favorites.getAll()).toEqual(["4", "3", "2", "1"]);
+  });
+
+  test("moves an id it already holds to the front", async() => {
+    const favorites = createLocalFavorites();
+
+    await favorites.prepend(["3", "2", "1"]);
+    await favorites.prepend(["1"]);
+
+    expect(await favorites.getAll()).toEqual(["1", "3", "2"]);
+  });
+
+  test("keeps one copy of an id given twice in one call", async() => {
+    const favorites = createLocalFavorites();
+
+    await favorites.prepend(["2", "1", "2"]);
+
+    expect(await favorites.getAll()).toEqual(["2", "1"]);
+  });
+
+  test("removes one id", async() => {
+    const favorites = createLocalFavorites();
+
+    await favorites.prepend(["3", "2", "1"]);
+    await favorites.remove("2");
+
+    expect(await favorites.getAll()).toEqual(["3", "1"]);
+  });
+
+  test("clears every id", async() => {
+    const favorites = createLocalFavorites();
+
+    await favorites.prepend(["2", "1"]);
+    await favorites.clear();
+
+    expect(await favorites.getAll()).toEqual([]);
+  });
+
+  test("keeps owners in one namespace apart", async() => {
+    const indexedDb = createIndexedDb();
+    const first = new IndexedDbLocalFavorites(indexedDb, "1");
+    const second = new IndexedDbLocalFavorites(indexedDb, "2");
+
+    await first.prepend(["1"]);
+
+    expect(await second.getAll()).toEqual([]);
+  });
+
+  test("keeps namespaces apart", async() => {
+    const first = createLocalFavorites();
+    const second = createLocalFavorites();
+
+    await first.prepend(["1"]);
+
+    expect(await second.getAll()).toEqual([]);
+  });
+});

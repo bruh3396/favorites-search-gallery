@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { Snippets } from "@/features/favorites/features/snippets/snippets";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
@@ -8,7 +8,7 @@ import { flushMicrotasks } from "@/testing/async";
 
 const STORAGE_KEY = "searchSnippets";
 
-let store: MemoryKeyValueStore;
+let store: MemoryLocalKeyedValues;
 
 interface Setup {
   snippets: Snippets;
@@ -80,7 +80,7 @@ const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
 const veg = createSnippet("veg", "carrot", 0, 200);
 
 beforeEach(() => {
-  store = new MemoryKeyValueStore();
+  store = new MemoryLocalKeyedValues();
 });
 
 afterEach(() => {

@@ -2,8 +2,9 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
 import { FavoritesFeatures } from "@/features/favorites/features/features";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { createAppContext } from "@/testing/context";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
@@ -24,7 +25,7 @@ function setup(snippets: Snippet[] = []): Setup {
   const context = createAppContext();
   const results = [createFavorite("1"), createFavorite("2")];
   const appended: string[] = [];
-  const store = new MemoryKeyValueStore();
+  const store = new MemoryLocalKeyedValues();
 
   store.set("searchSnippets", snippets);
   const features = new FavoritesFeatures(context, {
@@ -32,7 +33,7 @@ function setup(snippets: Snippet[] = []): Setup {
       batchSize: context.preferences.favorites.downloadBatchSize,
       filenameFormat: context.preferences.favorites.downloadFilenameFormat,
       getSearchResults: (): Favorite[] => results,
-      getTagCategory: (): undefined => undefined,
+      getTagCategories: (): Promise<TagCategoryMap> => Promise.resolve(new Map()),
       getTagsForIds: (): Promise<Map<string, Set<string>>> => Promise.resolve(new Map()),
       fetchOriginal: (): Promise<Blob> => Promise.resolve(new Blob())
     },

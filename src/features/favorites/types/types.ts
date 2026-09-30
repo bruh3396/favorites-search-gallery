@@ -5,6 +5,7 @@ import { Media } from "@/core/domain/media/media";
 import { NavigationKey } from "@/types/input";
 import { Post } from "@/core/domain/post/post";
 import { SettingsControl } from "@/lib/ui/settings/controls";
+import { TermUpdate } from "@/lib/search/engines/search_engine";
 
 export interface Arena {
   allocate: () => number;
@@ -22,27 +23,24 @@ export interface Arena {
   toPost: (index: number) => Post;
 }
 
-export interface Store {
-  readAll: () => Promise<Post[]>;
-  streamAll: (onBatch: (posts: Post[]) => void) => Promise<void>;
+export interface PostLibrary {
+  streamAll: (ids: string[], batchSize: number, onProgress: (posts: Post[]) => void) => Promise<void>;
+  storeMissing: (posts: Post[]) => Promise<void>;
+  refreshAll: (posts: Post[]) => Promise<void>;
 }
 
 export interface Collection {
-  setAll: (posts: Post[]) => Favorite[];
   append: (posts: Post[]) => Favorite[];
   appendDirty: (posts: Post[]) => Favorite[];
   prependDirty: (posts: Post[]) => Favorite[];
-  getAll: () => Favorite[];
+  get: (id: string) => Favorite | undefined;
   getAllIds: () => Set<string>;
 }
 
 export interface Searcher {
   add: (favorites: Favorite[]) => void;
+  update: (updates: readonly TermUpdate<Favorite>[]) => void;
   appendResults: (favorites: Favorite[]) => Favorite[];
-}
-
-export interface Enricher {
-  enrich: (favorites: Favorite[]) => Promise<void>;
 }
 
 export interface ThumbOperations<Node> {

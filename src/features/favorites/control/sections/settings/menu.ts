@@ -1,12 +1,12 @@
 import { Environment } from "@/core/boundary/environment";
-import { Host } from "@/core/boundary/ports/host";
+import { HostPage } from "@/core/boundary/ports/host_page";
 import { SettingsCatalog } from "@/features/favorites/control/sections/settings/catalog";
 import { SettingsControl } from "@/lib/ui/settings/controls";
 import { SettingsSection } from "@/features/favorites/types/types";
 
-export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment, host: Host): SettingsSection[] {
+export function buildSettingsSections(catalog: SettingsCatalog, environment: Environment, hostPage: HostPage): SettingsSection[] {
   const onMobile = environment.device === "mobile";
-  const header: SettingsControl[] = host.hasHeader ? [catalog.header] : [];
+  const header: SettingsControl[] = hostPage.hasHeader ? [catalog.header] : [];
   return [
     {
       title: "General",

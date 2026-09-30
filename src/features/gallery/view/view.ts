@@ -1,15 +1,16 @@
 import * as GalleryTutorial from "@/features/gallery/view/tutorial";
 import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
+import { GalleryBudget, GalleryViewDependencies } from "@/features/gallery/types/types";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Favorite } from "@/types/favorite";
+import { GALLERY_BUDGETS } from "@/features/gallery/view/budget";
 import { GalleryId } from "@/features/gallery/types/selectors";
 import { GalleryMenu } from "@/features/gallery/view/menu";
 import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_renderer";
 import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GalleryUi } from "@/features/gallery/view/ui";
-import { GalleryViewDependencies } from "@/features/gallery/types/types";
 import { Point } from "@/types/geometry";
 import { PostMedia } from "@/core/domain/post/post";
 import { isInside } from "@/utils/browser/guards";
@@ -22,12 +23,14 @@ export class GalleryView {
   private readonly ui: GalleryUi;
   private readonly menu: GalleryMenu;
   private readonly renderer: GalleryRenderer;
+  private readonly budget: GalleryBudget;
 
   constructor(context: AppContext, shell: GalleryShell, favoriteFor: (id: string) => Favorite | undefined) {
     this.shell = shell;
-    this.ui = new GalleryUi(context.preferences, context.environment, context.shell, shell.background);
+    this.budget = GALLERY_BUDGETS[context.environment.canvasBudget];
+    this.ui = new GalleryUi(context.preferences, context.shell, context.ports.hostPage, shell.background);
     this.menu = new GalleryMenu(context.preferences, context.environment, shell.menu);
-    this.renderer = new GalleryRenderer(shell.root, context, favoriteFor);
+    this.renderer = new GalleryRenderer(shell.root, context, favoriteFor, this.budget);
     GalleryTutorial.mount(shell.tutorial);
   }
 
@@ -53,8 +56,8 @@ export class GalleryView {
     this.renderer.render(item);
   }
 
-  public scrollToThumb(id: string): void {
-    this.ui.scrollToThumb(id);
+  public follow(id: string): void {
+    this.budget.follow(this.ui, id);
   }
 
   public scrollToThumbAfterLoad(id: string): Promise<void> {
@@ -65,13 +68,13 @@ export class GalleryView {
     this.shell.root.toggleAttribute("data-visible", true);
     this.renderer.render(item);
     this.renderer.toggleZoom(false);
-    this.ui.toggleScrollbar(false);
+    this.ui.lockScroll();
   }
 
   public hidePreview(): void {
     this.shell.root.toggleAttribute("data-visible", false);
     this.renderer.hide();
-    this.ui.toggleScrollbar(true);
+    this.ui.unlockScroll();
   }
 
   public toggleZoomCursor(value: boolean): void {
@@ -109,6 +112,10 @@ export class GalleryView {
 
   public upscale(items: PostMedia[]): Promise<void> {
     return this.renderer.upscale(items);
+  }
+
+  public warm(items: PostMedia[]): Promise<void> {
+    return this.budget.warm(this.renderer, items);
   }
 
   public reUpscale(): void {

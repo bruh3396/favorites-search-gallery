@@ -1,10 +1,10 @@
 /* eslint-disable no-spaced-func, func-call-spacing -- false positive: arrow function types inside test.each's generic confuse these rules */
 import * as FavoritesSettingsCatalog from "@/features/favorites/control/sections/settings/catalog";
+import { Preference, booleanPreference } from "@/lib/storage/preference";
 import { afterEach, describe, expect, test } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { Feature } from "@/core/context/features";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
-import { Preference } from "@/lib/storage/preference";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { createAppContext } from "@/testing/context";
 
@@ -34,7 +34,7 @@ describe("FavoritesSettingsCatalog", () => {
 
   describe("hotkeys", () => {
     test.each<[string, SettingKey, (context: AppContext) => Preference<boolean>]>([
-      ["d", "darkMode", ({ preferences }): Preference<boolean> => preferences.app.darkMode],
+      ["d", "darkMode", ({ preferences }): Preference<boolean> => booleanPreference(preferences.app.colorScheme, "dark", "light")],
       ["h", "hints", ({ preferences }): Preference<boolean> => preferences.favorites.hintsEnabled],
       ["o", "postOverlay", ({ preferences }): Preference<boolean> => preferences.postOverlay.enabled],
       ["t", "tooltip", ({ preferences }): Preference<boolean> => preferences.favorites.tooltipEnabled]

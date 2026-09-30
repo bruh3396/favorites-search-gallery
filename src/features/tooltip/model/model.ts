@@ -1,4 +1,5 @@
 import { AppContext } from "@/app/context/context";
+import { ColorScheme } from "@/core/boundary/environment";
 import { TooltipHighlights } from "@/features/tooltip/model/highlights";
 import { TooltipVisibility } from "@/features/tooltip/model/visibility";
 
@@ -10,7 +11,7 @@ export class TooltipModel {
     const { environment, preferences } = context;
 
     this.highlights = new TooltipHighlights({
-      usingDarkMode: (): boolean => preferences.app.darkMode.value
+      colorScheme: (): ColorScheme => preferences.app.colorScheme.value
     });
     this.visibility = new TooltipVisibility({
       onFavoritesPage: environment.mode === "favorites",

@@ -1,5 +1,5 @@
-import { CategorizedPost } from "@/core/domain/post/post";
+import { CategorizedPost, Post } from "@/core/domain/post/post";
 
 export interface RemotePosts {
-  fetch: (id: string) => Promise<CategorizedPost>;
+  fetch: (post: Pick<Post, "id" | "deleted">) => Promise<CategorizedPost>;
 }

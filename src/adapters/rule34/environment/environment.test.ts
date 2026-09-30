@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { ColorScheme } from "@/core/boundary/environment";
 import { PageName } from "@/adapters/rule34/client/site/current_page/current_page";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 
@@ -6,11 +7,11 @@ interface Visit {
   pageName: PageName | null;
   favoritesPageId?: string;
   userId?: string;
-  theme?: string;
+  theme?: ColorScheme;
   tagBlacklist?: string;
 }
 
-function createClient({ pageName, favoritesPageId = "", userId = "", theme = "", tagBlacklist = "" }: Visit): Parameters<typeof readRule34Environment>[0] {
+function createClient({ pageName, favoritesPageId = "", userId = "", theme = "light", tagBlacklist = "" }: Visit): Parameters<typeof readRule34Environment>[0] {
   return {
     readPageName: () => pageName,
     readFavoritesPageId: () => favoritesPageId,
@@ -43,8 +44,8 @@ describe("readRule34Environment", () => {
     expect(readRule34Environment(createClient({ pageName: null }))).toBeNull();
   });
 
-  test("reads the tag blacklist and dark theme", () => {
+  test("reads the tag blacklist and the site's theme", () => {
     expect(readRule34Environment(createClient({ pageName: "favorites", theme: "dark", tagBlacklist: "apple banana" })))
-      .toMatchObject({ darkTheme: true, blacklistedTags: "apple banana" });
+      .toMatchObject({ colorScheme: "dark", blacklistedTags: "apple banana" });
   });
 });

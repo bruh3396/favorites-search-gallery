@@ -1,14 +1,14 @@
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 const STRIPPED_CHARACTERS = /[<>:"/\\|?*' -]/g;
 const TRAILING_QUALIFIER = /_\([^)]*\)$/;
 
-export function build(item: PostMedia, tags: Set<string>, extension: string, categories: FilenameCategory[], getTagCategory: (tagName: string) => TagCategory | undefined): string {
+export function build(item: PostMedia, tags: Set<string>, extension: string, categories: FilenameCategory[], tagCategories: TagCategoryMap): string {
   const segments: string[] = categories
-    .map(category => buildCategorySegment(tags, category, getTagCategory))
+    .map(category => buildCategorySegment(tags, category, tagCategories))
     .filter(segment => segment !== "");
 
   const suffix = segments.length === 0 ? item.id : `${DownloaderConfig.filename.categorySeparator}${item.id}`;
@@ -16,9 +16,9 @@ export function build(item: PostMedia, tags: Set<string>, extension: string, cat
   return `${name}${suffix}.${extension}`;
 }
 
-function buildCategorySegment(tags: Set<string>, category: FilenameCategory, getTagCategory: (tagName: string) => TagCategory | undefined): string {
+function buildCategorySegment(tags: Set<string>, category: FilenameCategory, tagCategories: TagCategoryMap): string {
   const tagsInCategory = Array.from(tags)
-    .filter(tag => getTagCategory(tag) === category)
+    .filter(tag => tagCategories.get(tag) === category)
     .sort();
   return dropQualifiedDuplicates(tagsInCategory)
     .map(sanitizeForFilename)

@@ -1,9 +1,9 @@
 import { ButtonElement, buildButton } from "@/lib/ui/widgets/button";
 import { Device, Environment } from "@/core/boundary/environment";
-import { IconName } from "@/lib/ui/icon";
 import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
+import { IconName } from "@/lib/ui/icon";
 import { Preferences } from "@/app/context/preferences";
 import { buildToggleButton } from "@/lib/ui/settings/components/toggle_button";
 
@@ -62,13 +62,6 @@ function buildButtons(events: Events, environment: Environment, slots: Favorites
       icon: icons.invert,
       enabled: INVERT_ENABLED[environment.device],
       event: events.favorites.invertButtonClicked
-    },
-    {
-      id: "scratch-button",
-      parent: slots.buttons,
-      textContent: "SCRATCH",
-      enabled: false,
-      event: events.favorites.scratchButtonClicked
     },
     {
       id: "shuffle-button",

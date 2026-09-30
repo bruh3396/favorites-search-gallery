@@ -1,17 +1,16 @@
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { pluralSuffix } from "@/utils/pure/string";
 import { sleep } from "@/lib/async/scheduling";
 
 export class FavoritesLoadFlow extends FavoritesFlow {
   public async loadAllFavorites(): Promise<void> {
-    const storedFavoritesCount = await this.model.countStoredFavorites();
-    const hasStoredFavorites = storedFavoritesCount > 0;
+    const storedFavoriteCount = await this.model.countStoredFavorites();
+    const hasStoredFavorites = storedFavoriteCount > 0;
 
     this.context.events.favorites.storedFavoritesFound.emit(hasStoredFavorites);
 
     if (hasStoredFavorites) {
-      await this.loadStoredFavorites(storedFavoritesCount);
+      await this.loadStoredFavorites(storedFavoriteCount);
       await this.fetchNewFavorites();
       await this.indexAllFavorites();
       this.flows.search.searchFavorites("");
@@ -22,23 +21,17 @@ export class FavoritesLoadFlow extends FavoritesFlow {
     this.context.events.favorites.favoritesLoaded.emit();
   }
 
-  private async loadStoredFavorites(storedFavoritesCount: number): Promise<void> {
-    if (storedFavoritesCount > FavoritesConfig.streamStoredFavoritesThreshold) {
-      await this.streamStoredFavorites();
-    } else {
-      this.view.setStatus("Loading favorites");
-      await this.model.loadStoredFavorites();
-    }
+  private async loadStoredFavorites(storedFavoriteCount: number): Promise<void> {
+    let loadedCount = 0;
+
+    this.view.setLoadProgress(0, storedFavoriteCount);
+    await this.model.streamStoredFavorites(posts => {
+      loadedCount += posts.length;
+      this.view.setLoadProgress(loadedCount, storedFavoriteCount);
+    });
     this.context.events.favorites.storedFavoritesLoaded.emit();
     this.view.setTemporaryStatus("Favorites loaded");
     this.view.clearStatus();
-  }
-
-  private async streamStoredFavorites(): Promise<void> {
-    const totalFavoritesCount = await this.model.countStoredFavorites();
-
-    this.view.setLoadProgress(0, totalFavoritesCount);
-    await this.model.streamStoredFavorites(loaded => this.view.setLoadProgress(loaded, totalFavoritesCount));
   }
 
   private async fetchNewFavorites(): Promise<void> {
@@ -63,7 +56,7 @@ export class FavoritesLoadFlow extends FavoritesFlow {
   }
 
   private async fetchAllFavorites(): Promise<void> {
-    this.model.fetchFavoritesCount().then((count) => this.view.setExpectedTotalFavoritesCount(count));
+    this.model.fetchFavoriteCount().then((count) => this.view.setExpectedTotalFavoriteCount(count));
     this.flows.display.clear();
     await this.model.fetchAllFavorites(favorites => this.flows.display.sync(favorites));
     this.view.setStatus("Saving favorites");

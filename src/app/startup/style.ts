@@ -1,5 +1,5 @@
 import { actionBarIconStyles, setActionBarButtons, setActionBarMode } from "@/lib/ui/thumb/action_bar";
-import { applyTheme, swapNativeStylesheet, toggleGradient } from "@/lib/ui/theme/apply";
+import { applyTheme, toggleGradient } from "@/lib/ui/theme/apply";
 import { toggleNativeFont, toggleThemedGalleryBackground } from "@/lib/ui/toggles";
 import ANIMATIONS_CSS from "@/assets/css/base/animations.css";
 import AUTOPLAY_CSS from "@/assets/css/gallery/autoplay.css";
@@ -59,13 +59,13 @@ function applyPreferenceStyles(context: AppContext): void {
 }
 
 function subscribeToPreferenceStyles(context: AppContext): void {
-  const { preferences, environment } = context;
+  const { preferences, ports } = context;
   const actionBar = actionBarPreferences(context);
 
   preferences.app.theme.on(() => applyCurrentTheme(context));
-  preferences.app.darkMode.on((dark) => {
+  preferences.app.colorScheme.on((colorScheme) => {
     applyCurrentTheme(context);
-    swapNativeStylesheet(dark, environment.device === "desktop");
+    ports.hostPage.setColorScheme(colorScheme);
   });
   preferences.app.gradient.on(toggleGradient);
   preferences.app.nativeFont.on(toggleNativeFont);
@@ -75,7 +75,7 @@ function subscribeToPreferenceStyles(context: AppContext): void {
 }
 
 function applyCurrentTheme({ preferences }: AppContext): void {
-  applyTheme(preferences.app.theme.value, preferences.app.darkMode.value);
+  applyTheme(preferences.app.theme.value, preferences.app.colorScheme.value);
 }
 
 function actionBarPreferences({ preferences, environment }: AppContext): Preferences["favorites"] | Preferences["postList"] {

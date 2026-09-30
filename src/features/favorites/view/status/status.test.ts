@@ -95,7 +95,7 @@ describe("FavoritesStatus", () => {
     test("with an expected total, shows progress, then a time estimate", () => {
       const { status, shell } = setup();
 
-      status.setExpectedTotalFavoritesCount(600);
+      status.setExpectedTotalFavoriteCount(600);
       status.updateFetchStatus(0, 0);
       expect(statusOf(shell)).toBe("Fetching - 0 / 600");
       vi.advanceTimersByTime(2_000);
@@ -107,8 +107,8 @@ describe("FavoritesStatus", () => {
     test("forgetting the expected total goes back to counting", () => {
       const { status, shell } = setup();
 
-      status.setExpectedTotalFavoritesCount(500);
-      status.setExpectedTotalFavoritesCount(null);
+      status.setExpectedTotalFavoriteCount(500);
+      status.setExpectedTotalFavoriteCount(null);
       status.updateFetchStatus(100, 0);
       expect(statusOf(shell)).toBe("Fetching - 100");
     });

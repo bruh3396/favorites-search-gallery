@@ -389,7 +389,7 @@ export default defineConfig([
           prefix: [
             "is", "has", "should", "can", "was", "did", "will", "must", "on",
             "using", "requires", "needs", "allows", "in", "are", "supports",
-            "overflows", "includes", "contains", "exceeds", "matches"
+            "overflows", "includes", "contains", "exceeds", "matches", "offers", "links"
           ]
         },
         { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },

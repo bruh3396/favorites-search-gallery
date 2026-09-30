@@ -1,13 +1,13 @@
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
 const STORAGE_KEY = "aspectRatios";
 
 export class FavoritesAspectRatios {
-  private readonly store: KeyValueStore;
+  private readonly store: LocalKeyedValues;
   private readonly knownAspectRatios: string[];
 
-  constructor(store: KeyValueStore) {
+  constructor(store: LocalKeyedValues) {
     this.store = store;
     this.knownAspectRatios = this.readStored();
   }

@@ -1,11 +1,14 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { DownloaderArchiver } from "@/features/favorites/features/downloader/model/archiver";
 import { PostMedia } from "@/core/domain/post/post";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 interface Setup {
   archiver: DownloaderArchiver;
   fetched: string[];
   tagsSeen: Map<string, Set<string>>;
+  categoriesSeen: TagCategoryMap[];
+  categoryRequests: string[][];
 }
 
 function createItem(id: string, type = "image/png"): PostMedia {
@@ -15,14 +18,21 @@ function createItem(id: string, type = "image/png"): PostMedia {
 function setup({ failing = new Set<string>(), tags = new Map<string, Set<string>>(), onFetch = (): void => undefined } = {}): Setup {
   const fetched: string[] = [];
   const tagsSeen = new Map<string, Set<string>>();
+  const categoriesSeen: TagCategoryMap[] = [];
+  const categoryRequests: string[][] = [];
   const archiver = new DownloaderArchiver({
     filenamer: {
-      filenameFor: (item, itemTags, extension): string => {
+      filenameFor: (item, itemTags, extension, tagCategories): string => {
         tagsSeen.set(item.id, itemTags);
+        categoriesSeen.push(tagCategories);
         return `${item.id}.${extension}`;
       }
     },
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map([...tags].filter(([id]) => ids.includes(id)))),
+    getTagCategories: (tagNames): Promise<TagCategoryMap> => {
+      categoryRequests.push(tagNames);
+      return Promise.resolve(new Map(tagNames.map(tagName => [tagName, "artist"])));
+    },
     fetchOriginal: (media, signal): Promise<Blob> => {
       const [id, type] = media.locator.split("|");
 
@@ -35,7 +45,7 @@ function setup({ failing = new Set<string>(), tags = new Map<string, Set<string>
       return failing.has(id) ? Promise.reject(new Error("404 Not Found")) : Promise.resolve(new Blob([new Uint8Array([Number(id)])], { type }));
     }
   });
-  return { archiver, fetched, tagsSeen };
+  return { archiver, fetched, tagsSeen, categoriesSeen, categoryRequests };
 }
 
 async function entryNamesOf(blob: Blob): Promise<string[]> {
@@ -88,6 +98,15 @@ describe("DownloaderArchiver", () => {
     await archive(archiver, [createItem("1"), createItem("2")]);
 
     expect(tagsSeen).toEqual(new Map([["1", new Set(["a"])], ["2", new Set()]]));
+  });
+
+  test("reads the categories of every tag in the batch once, and names each file with them", async() => {
+    const { archiver, categoriesSeen, categoryRequests } = setup({ tags: new Map([["1", new Set(["a", "b"])], ["2", new Set(["b", "c"])]]) });
+
+    await archive(archiver, [createItem("1"), createItem("2")]);
+
+    expect(categoryRequests).toEqual([["a", "b", "c"]]);
+    expect(categoriesSeen).toEqual([new Map([["a", "artist"], ["b", "artist"], ["c", "artist"]]), new Map([["a", "artist"], ["b", "artist"], ["c", "artist"]])]);
   });
 
   test("reports a failed fetch as null and leaves it out of the zip", async() => {

@@ -13,6 +13,12 @@ export class MemoryClient {
     return this.favoriteIds.map(id => this.postsById.get(id)).filter(post => post !== undefined);
   }
 
+  public addFavorite(id: string): void {
+    if (this.postsById.has(id) && !this.favoriteIds.includes(id)) {
+      this.favoriteIds = [id, ...this.favoriteIds];
+    }
+  }
+
   public removeFavorite(id: string): void {
     this.favoriteIds = this.favoriteIds.filter(favoriteId => favoriteId !== id);
   }

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from "vitest";
 import { FavoritesAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 
 function createThumb(width: number, height: number): HTMLElement {
   const thumb = document.createElement("div");
@@ -21,11 +21,11 @@ function remainingOf(aspectRatios: FavoritesAspectRatios): string[] {
   return remaining;
 }
 
-let store: MemoryKeyValueStore;
+let store: MemoryLocalKeyedValues;
 
 describe("FavoritesAspectRatios", () => {
   beforeEach(() => {
-    store = new MemoryKeyValueStore();
+    store = new MemoryLocalKeyedValues();
   });
 
   test("knows nothing on a first visit", () => {

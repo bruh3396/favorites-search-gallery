@@ -5,12 +5,12 @@ import { createPost } from "@/testing/post";
 
 describe("MemoryRemotePosts", () => {
   test("delivers a post it holds", async() => {
-    const fetched = await new MemoryRemotePosts(new MemoryClient([createPost({ id: "1", tags: "apple" })])).fetch("1");
+    const fetched = await new MemoryRemotePosts(new MemoryClient([createPost({ id: "1", tags: "apple" })])).fetch({ id: "1" });
 
     expect(fetched.post.tags).toBe("apple");
   });
 
   test("rejects for a post it doesn't hold", async() => {
-    await expect(new MemoryRemotePosts(new MemoryClient([])).fetch("2")).rejects.toThrow();
+    await expect(new MemoryRemotePosts(new MemoryClient([])).fetch({ id: "2" })).rejects.toThrow();
   });
 });

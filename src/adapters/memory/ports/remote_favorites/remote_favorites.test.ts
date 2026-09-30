@@ -35,10 +35,11 @@ describe("MemoryRemoteFavorites", () => {
     expect(memory.readFavorites().map(post => post.id)).toEqual(["3", "2"]);
   });
 
-  test("adding succeeds and leaves the list as it is", async() => {
-    const memory = new MemoryClient([createPost({ id: "1" })]);
+  test("adds a favorite to the front of the list", async() => {
+    const memory = new MemoryClient(["3", "1", "2"].map(id => createPost({ id })));
 
-    expect(await new MemoryRemoteFavorites(memory).add()).toBe("added");
-    expect(memory.readFavorites().map(post => post.id)).toEqual(["1"]);
+    memory.removeFavorite("1");
+    expect(await new MemoryRemoteFavorites(memory).add("1")).toBe("added");
+    expect(memory.readFavorites().map(post => post.id)).toEqual(["1", "3", "2"]);
   });
 });

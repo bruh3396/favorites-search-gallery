@@ -17,7 +17,7 @@ export class FavoritesActionFlow extends FavoritesFlow {
   public reset(): void {
     if (confirm(this.resetPrompt())) {
       this.context.preferences.reset();
-      RESET_STORAGE_KEYS.forEach(key => this.context.ports.keyValueStore.remove(key));
+      RESET_STORAGE_KEYS.forEach(key => this.context.ports.localKeyedValues.remove(key));
       this.model.destroyStore();
     }
   }

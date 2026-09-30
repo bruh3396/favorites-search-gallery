@@ -1,8 +1,7 @@
+import { TagCategoryMap, isTagCategory } from "@/core/domain/tag/tag";
 import { CategorizedPost } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
 import { PostFetchError } from "@/types/errors";
-import { TagCategoryMap } from "@/core/domain/tag/tag";
-import { isTagCategory } from "@/lib/domain/tag/category_codec";
 import { mintMedia } from "@/adapters/rule34/client/media/locator";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
@@ -69,7 +68,10 @@ function parseDimensions(size: string | undefined): { width: number; height: num
 }
 
 function parseMedia(dom: Document, tags: string): Media {
-  const file = dom.querySelector("#image")?.getAttribute("src") ?? dom.querySelector("video source")?.getAttribute("src") ?? "";
+  const file = dom.querySelector("#image")?.getAttribute("src")
+    ?? dom.querySelector("video source")?.getAttribute("src")
+    ?? dom.querySelector(".link-list a[href*='/images/']")?.getAttribute("href")
+    ?? "";
   const media = mintMedia(file, tags);
 
   if (media === null) {

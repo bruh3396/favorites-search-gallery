@@ -21,6 +21,6 @@ export function readRule34Environment(rule34: Pick<Rule34SiteClient, "readPageNa
     favoritesOwnerId: mode === "favorites" ? favoritesPageId : userId,
     ownsFavorites: mode === "favorites" && userId === favoritesPageId,
     blacklistedTags: rule34.readTagBlacklist(),
-    darkTheme: rule34.readTheme() === "dark"
+    colorScheme: rule34.readTheme()
   };
 }

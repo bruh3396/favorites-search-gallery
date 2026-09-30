@@ -3,12 +3,12 @@ import { describe, expect, test } from "vitest";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 
 const CAT = DownloaderConfig.filename.categorySeparator;
 const TAG = DownloaderConfig.filename.tagSeparator;
 
-const CATEGORIES: Record<string, TagCategory> = {
+const CATEGORIES: TagCategoryMap = new Map(Object.entries({
   "artist_one": "artist",
   "artist_two": "artist",
   "artist_two_(qualified)": "artist",
@@ -21,12 +21,11 @@ const CATEGORIES: Record<string, TagCategory> = {
   "copyright_two:_subtitle": "copyright",
   "general_one": "general",
   "metadata_one": "metadata"
-};
+} satisfies Record<string, TagCategory>));
 
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
-const getTagCategory = (tag: string): TagCategory | undefined => CATEGORIES[tag];
 const item: PostMedia = { id: "10146816", media: { kind: "image", locator: "1/10146816.jpg" } };
-const filenameFor = (tags: string[], categories: FilenameCategory[] = ALL): string => DownloaderFilename.build(item, new Set(tags), "jpeg", categories, getTagCategory);
+const filenameFor = (tags: string[], categories: FilenameCategory[] = ALL): string => DownloaderFilename.build(item, new Set(tags), "jpeg", categories, CATEGORIES);
 
 describe("buildFilename", () => {
   test("returns just the id when no categories are selected", () => {
@@ -75,8 +74,8 @@ describe("buildFilename", () => {
 
   test("caps length while preserving the id", () => {
     const longTags = Array.from({ length: 40 }, (_, index) => `character_number_${String(index).padStart(3, "0")}`);
-    const categories: Record<string, TagCategory> = Object.fromEntries(longTags.map(tag => [tag, "character"]));
-    const name = DownloaderFilename.build(item, new Set(longTags), "jpeg", ["character"], tag => categories[tag]);
+    const categories: TagCategoryMap = new Map(longTags.map(tag => [tag, "character"]));
+    const name = DownloaderFilename.build(item, new Set(longTags), "jpeg", ["character"], categories);
     const suffix = `${CAT}10146816.jpeg`;
 
     expect(name.length).toBeLessThanOrEqual(DownloaderConfig.filename.maxLength + ".jpeg".length);

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 
@@ -14,11 +14,11 @@ interface Setup {
   searched: string[];
 }
 
-function setup(keyValueStore = new MemoryKeyValueStore()): Setup {
+function setup(localKeyedValues = new MemoryLocalKeyedValues()): Setup {
   const appShell = new Shell();
-  const context = createAppContext({ shell: appShell, ports: { keyValueStore } });
+  const context = createAppContext({ shell: appShell, ports: { localKeyedValues } });
   const shell = new FavoritesShell(appShell, context.environment);
-  const control = new FavoritesControl(context, shell);
+  const control = new FavoritesControl(context, shell, false);
   const searched: string[] = [];
 
   document.body.append(appShell.root);
@@ -73,11 +73,11 @@ describe("FavoritesControl", () => {
   });
 
   test("keeps the search being typed across a reload", () => {
-    const keyValueStore = new MemoryKeyValueStore();
+    const localKeyedValues = new MemoryLocalKeyedValues();
 
-    setup(keyValueStore).control.appendToSearch("cat");
+    setup(localKeyedValues).control.appendToSearch("cat");
     document.body.replaceChildren();
-    expect(setup(keyValueStore).searchField.value).toBe("cat");
+    expect(setup(localKeyedValues).searchField.value).toBe("cat");
   });
 
   test("fills its own drawer sections, and mounts the ones it is given", () => {

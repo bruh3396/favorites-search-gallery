@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesSearchHistory } from "@/features/favorites/control/toolbar/search_history";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 
 interface Stored {
   history?: string[];
@@ -9,11 +9,11 @@ interface Stored {
 
 interface Setup {
   history: FavoritesSearchHistory;
-  storage: MemoryKeyValueStore;
+  storage: MemoryLocalKeyedValues;
 }
 
 function setup(stored: Stored = {}, depth = 30): Setup {
-  const storage = new MemoryKeyValueStore();
+  const storage = new MemoryLocalKeyedValues();
 
   if (stored.history !== undefined) {
     storage.set("searchHistory", stored.history);

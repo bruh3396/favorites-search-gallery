@@ -1,4 +1,4 @@
-import * as Addresses from "@/adapters/rule34/client/media/addresses";
+import { fileUrl, previewUrl } from "@/adapters/rule34/client/media/addresses";
 import { ExtensionProber } from "@/adapters/rule34/client/media/extension_prober";
 import { FileExtension } from "@/adapters/rule34/client/media/extension";
 import { MediaKind } from "@/core/domain/media/media";
@@ -12,16 +12,15 @@ export class Rule34MediaClient {
   private readonly videoDurationReader = new VideoDurationReader();
 
   public previewUrl(locator: string): string {
-    return Addresses.previewUrl(locator);
+    return previewUrl(locator);
   }
 
   public async originalUrl(locator: string, kind: MediaKind): Promise<string> {
-    const extension = readLocator(locator).extension ?? KIND_EXTENSIONS[kind] ?? await this.extensionProber.probe(locator);
-    return Addresses.fileUrl(locator, extension);
+    return fileUrl(locator, await this.extension(locator, kind));
   }
 
   public imageUrl(locator: string, kind: MediaKind): Promise<string> {
-    return kind === "video" ? Promise.resolve(Addresses.fileUrl(locator, "jpg")) : this.originalUrl(locator, kind);
+    return kind === "video" ? Promise.resolve(fileUrl(locator, "jpg")) : this.originalUrl(locator, kind);
   }
 
   public async fetchFile(url: string, signal?: AbortSignal): Promise<Blob> {
@@ -35,5 +34,9 @@ export class Rule34MediaClient {
 
   public readVideoDuration(url: string): Promise<number> {
     return this.videoDurationReader.read(url);
+  }
+
+  private extension(locator: string, kind: MediaKind): Promise<FileExtension> {
+    return Promise.resolve(readLocator(locator).extension ?? KIND_EXTENSIONS[kind] ?? this.extensionProber.probe(locator));
   }
 }

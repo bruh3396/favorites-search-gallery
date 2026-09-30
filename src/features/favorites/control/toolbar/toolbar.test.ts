@@ -29,12 +29,11 @@ function setup(onDesktopDevice = true): Setup {
 
 function recordButtonEvents(events: Events): ButtonEvent[] {
   const clicked: ButtonEvent[] = [];
-  const { searchButtonClicked, resetButtonClicked, invertButtonClicked, scratchButtonClicked, shuffleButtonClicked } = events.favorites;
+  const { searchButtonClicked, resetButtonClicked, invertButtonClicked, shuffleButtonClicked } = events.favorites;
 
   searchButtonClicked.on(() => clicked.push("search"));
   resetButtonClicked.on(() => clicked.push("reset"));
   invertButtonClicked.on(() => clicked.push("invert"));
-  scratchButtonClicked.on(() => clicked.push("scratch"));
   shuffleButtonClicked.on(() => clicked.push("shuffle"));
   return clicked;
 }

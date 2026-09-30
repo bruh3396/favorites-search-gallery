@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import { ColorScheme } from "@/core/boundary/environment";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { TooltipModel } from "@/features/tooltip/model/model";
 import { createAppContext } from "@/testing/context";
@@ -36,11 +37,11 @@ describe("TooltipModel", () => {
       expect(model.colorForTag("blue")).not.toBeNull();
     });
 
-    test.each([
-      [false, DARK_LIGHTNESS],
-      [true, LIGHT_LIGHTNESS]
-    ])("uses the color for the dark mode preference (dark mode %s)", (darkMode, lightness) => {
-      const model = createModel(true, { app: { darkMode } });
+    test.each<[ColorScheme, string]>([
+      ["light", DARK_LIGHTNESS],
+      ["dark", LIGHT_LIGHTNESS]
+    ])("uses the color for the color scheme preference (%s)", (colorScheme, lightness) => {
+      const model = createModel(true, { app: { colorScheme } });
 
       model.rebuildHighlights("red");
       expect(model.colorForTag("red")).toMatch(lightness);

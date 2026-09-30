@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { MemoryKeyValueStore } from "@/adapters/memory/ports/key_value_store/key_value_store";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Snippet } from "@/features/favorites/features/snippets/types/types";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";
 
-let storage: MemoryKeyValueStore;
+let storage: MemoryLocalKeyedValues;
 
 const persisted = (): Snippet[] => (storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? [];
 const namesOf = (snippets: Snippet[]): string[] => snippets.map(snippet => snippet.name);
@@ -14,7 +14,7 @@ const queriesOf = (snippets: Snippet[]): string[] => snippets.map(snippet => sni
 const reasonOf = (result: { ok: boolean; reason?: string }): string | undefined => result.reason;
 
 beforeEach(() => {
-  storage = new MemoryKeyValueStore();
+  storage = new MemoryLocalKeyedValues();
 });
 
 describe("add", () => {

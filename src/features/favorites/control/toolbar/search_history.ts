@@ -1,5 +1,5 @@
 import { isEmptyString, removeExtraWhitespace } from "@/utils/pure/string";
-import { KeyValueStore } from "@/core/boundary/ports/key_value_store";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { clamp } from "@/utils/pure/number";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { isIndexInBounds } from "@/utils/pure/array";
@@ -11,10 +11,10 @@ export class FavoritesSearchHistory {
   private history: string[];
   private index: number;
   private readonly depth: number;
-  private readonly storage: KeyValueStore;
+  private readonly storage: LocalKeyedValues;
   private readonly persistLastQueryLazily: () => void;
 
-  constructor(depth: number, storage: KeyValueStore) {
+  constructor(depth: number, storage: LocalKeyedValues) {
     this.storage = storage;
     this.persistLastQueryLazily = debounceLeading(() => this.persistLastQuery(), PERSIST_DELAY);
     this.index = -1;

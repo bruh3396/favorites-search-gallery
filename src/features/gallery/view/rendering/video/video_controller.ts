@@ -12,7 +12,7 @@ export class GalleryVideoController {
   private readonly preferences: Preferences;
   private readonly videoPlayers: HTMLVideoElement[] = [];
   // Empty until the clip feature lands; it will load clips (stored under
-  // "storedVideoClips") through the KeyValueStore port.
+  // "storedVideoClips") through the LocalKeyedValues port.
   private readonly videoClips = new Map<string, VideoClip>();
   private readonly videoContainer: HTMLElement = document.createElement("div");
   private onVideoEnded: () => void = doNothing;

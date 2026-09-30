@@ -1,3 +1,4 @@
+import { ColorScheme } from "@/core/boundary/environment";
 import { Post } from "@/core/domain/post/post";
 import { parseFavoritesPage } from "@/adapters/rule34/client/site/favorites_page/parser";
 
@@ -30,8 +31,8 @@ export function readUserId(): string {
   return readCookie("user_id");
 }
 
-export function readTheme(): string {
-  return readCookie("theme");
+export function readTheme(): ColorScheme {
+  return readCookie("theme") === "dark" ? "dark" : "light";
 }
 
 export function readTagBlacklist(): string {

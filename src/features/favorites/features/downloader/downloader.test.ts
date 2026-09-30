@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Downloader } from "@/features/favorites/features/downloader/downloader";
 import { PostMedia } from "@/core/domain/post/post";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
 interface Setup {
@@ -43,7 +44,7 @@ function setup({ hang = false } = {}): Setup {
     batchSize: createPreference(0),
     filenameFormat: createPreference(0),
     getSearchResults: (): PostMedia[] => results,
-    getTagCategory: (): undefined => undefined,
+    getTagCategories: (): Promise<TagCategoryMap> => Promise.resolve(new Map()),
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set([`tag_${id}`])]))),
     fetchOriginal: (media, signal): Promise<Blob> => {
       fetched.push(media.locator);

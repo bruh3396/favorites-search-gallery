@@ -2,9 +2,9 @@ import { MockInstance, afterEach, beforeEach, describe, expect, test, vi } from 
 import { createPost, createPosts } from "@/testing/post";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
-import { FavoritesItem } from "@/features/favorites/model/collection/favorites_item";
+import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
 
-function idsOf(items: FavoritesItem[]): string[] {
+function idsOf(items: ArenaFavorite[]): string[] {
   return items.map(item => item.id);
 }
 
@@ -92,6 +92,12 @@ describe("FavoritesCollection", () => {
     expect(collection.get("10")?.tags).toEqual(new Set(["apple"]));
     expect(collection.get("20")?.tags).toEqual(new Set(["banana"]));
     expect(collection.getAllIds()).toEqual(new Set(["10", "20"]));
+  });
+
+  test("reads the tags of the given favorites, skipping missing ones", () => {
+    collection.append([createPost({ id: "10", tags: "apple" }), createPost({ id: "20", tags: "banana" })]);
+
+    expect(collection.getTags(["20", "30"])).toEqual(new Map([["20", new Set(["banana"])]]));
   });
 
   describe("compress", () => {

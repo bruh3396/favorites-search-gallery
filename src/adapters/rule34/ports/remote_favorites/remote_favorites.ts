@@ -1,5 +1,5 @@
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/fetcher";
 import { FullPageFetcher } from "@/adapters/rule34/ports/remote_favorites/full_page_fetcher";
 import { IncrementalPageFetcher } from "@/adapters/rule34/ports/remote_favorites/incremental_page_fetcher";
 import { Post } from "@/core/domain/post/post";
@@ -18,7 +18,7 @@ const SITE_ADD_RESULTS: Record<number, AddFavoriteResult> = {
 
 export class Rule34RemoteFavorites implements RemoteFavorites {
   constructor(
-    private readonly rule34: Pick<Rule34SiteClient, "readFavoritesPageId" | "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoritesCount" | "prioritizeFavorites" | "addFavorite" | "removeFavorite">,
+    private readonly rule34: Pick<Rule34SiteClient, "readFavoritesPageId" | "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites" | "addFavorite" | "removeFavorite">,
     private readonly pageId: string = rule34.readFavoritesPageId(),
     private readonly firstPageFavorites: Post[] | null = rule34.readFirstFavoritesPage(),
     private readonly fetchDelay: number = FETCH_DELAY,
@@ -26,7 +26,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   ) { }
 
   public fetchCount(): Promise<number | null> {
-    return this.rule34.fetchFavoritesCount(this.pageId);
+    return this.rule34.fetchFavoriteCount(this.pageId);
   }
 
   public fetchAllExcept(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {

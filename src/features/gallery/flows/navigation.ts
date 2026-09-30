@@ -57,8 +57,8 @@ export class GalleryNavigationFlow extends GalleryFlow {
   }
 
   private followInContent(item: PostMedia): void {
-    if (!this.usingColumnLayout() && this.context.environment.canvasBudget !== "reduced") {
-      this.view.scrollToThumb(item.id);
+    if (!this.usingColumnLayout()) {
+      this.view.follow(item.id);
     }
   }
 

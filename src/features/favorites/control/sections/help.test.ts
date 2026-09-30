@@ -1,30 +1,28 @@
 import * as FavoritesHelp from "@/features/favorites/control/sections/help";
 import { describe, expect, test, vi } from "vitest";
-import { createEnvironment } from "@/testing/environment";
 
 interface Setup {
   container: HTMLElement;
   requestTutorial: () => void;
 }
 
-function setup(onMobileDevice: boolean): Setup {
+function setup(offersTutorial: boolean): Setup {
   const container = document.createElement("div");
   const requestTutorial = vi.fn();
-  const environment = createEnvironment({ device: onMobileDevice ? "mobile" : "desktop" });
 
-  FavoritesHelp.buildDrawerSection(environment, requestTutorial).mount?.(container);
+  FavoritesHelp.buildDrawerSection(offersTutorial, requestTutorial).mount?.(container);
   return { container, requestTutorial };
 }
 
 describe("FavoritesHelp", () => {
-  test("on mobile, a button shows the gallery controls", () => {
+  test("offers the gallery controls tutorial", () => {
     const { container, requestTutorial } = setup(true);
 
     (container.querySelector("button") as HTMLButtonElement).click();
     expect(requestTutorial).toHaveBeenCalledOnce();
   });
 
-  test("on desktop, there is no gallery controls button", () => {
+  test("doesn't offer the gallery controls tutorial", () => {
     const { container } = setup(false);
 
     expect(container.querySelector("button")).toBeNull();
