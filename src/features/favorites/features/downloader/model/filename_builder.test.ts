@@ -1,9 +1,9 @@
 import * as DownloaderFilename from "@/features/favorites/features/downloader/model/filename_builder";
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { describe, expect, test } from "vitest";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
-import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 
 const CAT = DownloaderConfig.filename.categorySeparator;
 const TAG = DownloaderConfig.filename.tagSeparator;

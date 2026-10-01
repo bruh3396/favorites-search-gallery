@@ -7,7 +7,7 @@ import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { createElement } from "@/utils/browser/element";
-import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
+import { effect } from "@/core/utils/reactive/signal";
 
 interface FavoritesComponents {
   context: AppContext;
@@ -57,13 +57,14 @@ function setup(components: FavoritesComponents): void {
   setupView(components);
   mountDrawerSections(components);
   subscribeToEvents(components);
+  bindPreferences(components);
   subscribeToPreferences(components);
   subscribeToDomEvents(components);
   serveFavoritesPageRequests(components);
 }
 
 function start({ context, view, flows }: FavoritesComponents): void {
-  context.ports.hostPage.setHeaderVisible(context.preferences.favorites.headerEnabled.value);
+  view.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
   view.showSkeleton();
   flows.load.loadAllFavorites();
 }
@@ -130,13 +131,17 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.favorites.favoritesLoaded.on(() => view.collectAspectRatios(), { once: true });
 }
 
+function bindPreferences({ context, view }: FavoritesComponents): void {
+  const { preferences, ports } = context;
+
+  effect(() => view.toggleDrawer(preferences.favorites.drawerOpen.value));
+  effect(() => view.showDrawerSection(preferences.favorites.drawerActiveSection.value));
+  effect(() => ports.hostPage.setHeaderVisible(preferences.favorites.headerEnabled.value));
+}
+
 function subscribeToPreferences({ context, view, flows }: FavoritesComponents): void {
   const { preferences } = context;
 
-  preferences.favorites.drawerOpen.on((open) => view.toggleDrawer(open));
-  preferences.favorites.drawerActiveSection.on((section) => view.showDrawerSection(section));
-  preferences.favorites.headerEnabled.on((enabled) => context.ports.hostPage.setHeaderVisible(enabled));
-  preferences.favorites.hintsEnabled.on(setTooltipsEnabled);
   preferences.favorites.layout.on((layout) => view.changeLayout(layout));
   preferences.favorites.sortKey.on(() => flows.search.reSearchFavorites());
   preferences.favorites.sortAscending.on(() => flows.search.reSearchFavorites());

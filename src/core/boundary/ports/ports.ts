@@ -4,6 +4,7 @@ import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { LocalPosts } from "@/core/boundary/ports/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories";
 import { Navigation } from "@/core/boundary/ports/navigation";
+import { Random } from "@/core/boundary/ports/random";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts";
@@ -17,6 +18,7 @@ export interface Ports {
   localPosts: LocalPosts;
   localTagCategories: LocalTagCategories;
   navigation: Navigation;
+  random: Random;
   remoteFavorites: RemoteFavorites;
   remoteMedia: RemoteMedia;
   remotePosts: RemotePosts;

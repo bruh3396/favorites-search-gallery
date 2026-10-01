@@ -2,7 +2,6 @@ import * as GalleryFullscreenIcon from "@/features/gallery/view/fullscreen_icon"
 import * as Icons from "@/assets/svg/icons";
 import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { HostPage } from "@/core/boundary/ports/host_page";
-import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";
 import { blurActiveElement } from "@/utils/browser/window";
 import { toggleDataset } from "@/utils/browser/dataset";
@@ -26,11 +25,10 @@ export class GalleryUi {
   private readonly hostPage: HostPage;
   private readonly background: HTMLElement;
 
-  constructor(preferences: Preferences, shell: Shell, hostPage: HostPage, background: HTMLElement) {
+  constructor(shell: Shell, hostPage: HostPage, background: HTMLElement) {
     this.shell = shell;
     this.hostPage = hostPage;
     this.background = background;
-    this.background.style.opacity = String(preferences.gallery.backgroundOpacity.value);
     this.toggleOpenState(false);
   }
 

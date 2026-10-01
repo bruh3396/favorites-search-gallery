@@ -1,26 +1,28 @@
 import { Emitter } from "@/lib/event/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { Signal } from "@/core/utils/reactive/signal";
 
 export class Preference<T> {
   private readonly store: LocalKeyedValues;
   private readonly key: string;
-  private readonly defaultValue: T;
+  private readonly current: Signal<T>;
   private readonly emitter: Emitter<T> = new Emitter<T>();
 
   constructor(store: LocalKeyedValues, key: string, defaultValue: T) {
     this.store = store;
     this.key = key;
-    this.defaultValue = defaultValue;
+    this.current = new Signal((store.get(key) as T | undefined) ?? defaultValue);
     this.set = this.set.bind(this);
     this.on = this.on.bind(this);
   }
 
   public get value(): T {
-    return (this.store.get(this.key) as T | undefined) ?? this.defaultValue;
+    return this.current.value;
   }
 
   public set(value: T): void {
     this.store.set(this.key, value);
+    this.current.value = value;
     this.emitter.emit(value);
   }
 

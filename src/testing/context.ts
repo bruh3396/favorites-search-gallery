@@ -11,6 +11,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
 import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
@@ -60,6 +61,7 @@ function createPorts(overrides: Partial<Ports> = {}): Ports {
     localKeyedValues: new MemoryLocalKeyedValues(),
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
+    random: new MemoryRandom(),
     scheduler,
     ...overrides
   };

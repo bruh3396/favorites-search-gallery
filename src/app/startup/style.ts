@@ -32,6 +32,7 @@ import TOOLTIP_CSS from "@/assets/css/tooltip.css";
 import TOOLTIP_HINT_CSS from "@/assets/css/base/tooltip_hint.css";
 import TUTORIAL_CSS from "@/assets/css/gallery/tutorial.css";
 import { ThumbConfig } from "@/config/thumb_config";
+import { effect } from "@/core/utils/reactive/signal";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
@@ -40,42 +41,26 @@ import { themeStyles } from "@/lib/ui/theme/builder";
 
 export function setupStyles(context: AppContext): void {
   insertBaseStyles(context);
-  applyPreferenceStyles(context);
-  subscribeToPreferenceStyles(context);
+  bindPreferenceStyles(context);
+  subscribeToColorSchemeChanges(context);
   applyTileVariables(context);
 }
 
-function applyPreferenceStyles(context: AppContext): void {
+function bindPreferenceStyles(context: AppContext): void {
   const { preferences } = context;
   const actionBar = actionBarPreferences(context);
 
-  applyCurrentTheme(context);
-  toggleGradient(preferences.app.gradient.value);
-  setTooltipsEnabled(preferences.favorites.hintsEnabled.value);
-  toggleNativeFont(preferences.app.nativeFont.value);
-  toggleThemedGalleryBackground(preferences.gallery.themedBackground.value);
-  setActionBarMode(actionBar.postActionBar.value);
-  setActionBarButtons(actionBar.postActionBarButtons.value);
+  effect(() => toggleGradient(preferences.app.gradient.value));
+  effect(() => applyTheme(preferences.app.theme.value, preferences.app.colorScheme.value));
+  effect(() => setTooltipsEnabled(preferences.favorites.hintsEnabled.value));
+  effect(() => toggleNativeFont(preferences.app.nativeFont.value));
+  effect(() => toggleThemedGalleryBackground(preferences.gallery.themedBackground.value));
+  effect(() => setActionBarMode(actionBar.postActionBar.value));
+  effect(() => setActionBarButtons(actionBar.postActionBarButtons.value));
 }
 
-function subscribeToPreferenceStyles(context: AppContext): void {
-  const { preferences, ports } = context;
-  const actionBar = actionBarPreferences(context);
-
-  preferences.app.theme.on(() => applyCurrentTheme(context));
-  preferences.app.colorScheme.on((colorScheme) => {
-    applyCurrentTheme(context);
-    ports.hostPage.setColorScheme(colorScheme);
-  });
-  preferences.app.gradient.on(toggleGradient);
-  preferences.app.nativeFont.on(toggleNativeFont);
-  preferences.gallery.themedBackground.on(toggleThemedGalleryBackground);
-  actionBar.postActionBar.on(setActionBarMode);
-  actionBar.postActionBarButtons.on(setActionBarButtons);
-}
-
-function applyCurrentTheme({ preferences }: AppContext): void {
-  applyTheme(preferences.app.theme.value, preferences.app.colorScheme.value);
+function subscribeToColorSchemeChanges({ preferences, ports }: AppContext): void {
+  preferences.app.colorScheme.on((colorScheme) => ports.hostPage.setColorScheme(colorScheme));
 }
 
 function actionBarPreferences({ preferences, environment }: AppContext): Preferences["favorites"] | Preferences["postList"] {

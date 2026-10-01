@@ -1,4 +1,7 @@
 {
+  "imports": {
+    "#architecture/*": "./architecture/*"
+  },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@stylistic/eslint-plugin": "^5.10.0",
@@ -35,8 +38,12 @@
     "test:coverage": "npx vitest --run --coverage",
     "test:api": "npx vitest --run --config src/playground/vitest.config.mts src/playground/junk/api.test.ts",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "lint": "npx eslint src/",
-    "audit:test": "npx vitest --run --config .audit/vitest.config.mjs",
+    "lint": "npx eslint --suppressions-location architecture/eslint/suppressions.json src/",
+    "architecture:test": "npx vitest --run --project node architecture/",
+    "architecture:lint": "npx eslint --no-config-lookup --no-inline-config -c architecture/eslint/eslint.config.mjs --suppressions-location architecture/eslint/suppressions.json src/",
+    "architecture:typecheck": "tsc --project architecture/tsconfig/core.json",
+    "architecture": "npm run architecture:test && npm run architecture:typecheck && npm run architecture:lint",
+    "audit:test":"npx vitest --run --config .audit/vitest.config.mjs",
     "audit:lint": "npx eslint --no-config-lookup -c .audit/lint/eslint.config.mjs --suppressions-location .audit/lint/suppressions.json src/",
     "audit:structure": "tsx .audit/structure/main.ts",
     "audit": "npm run audit:test && npm run audit:lint && npm run audit:structure",

@@ -1,6 +1,9 @@
 import { chunk, findFirstIndexWhere, grow, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, itemsAround, partition, removeValue, shuffleInPlace, wrappedItemsAround } from "@/utils/pure/array";
 import { describe, expect, test } from "vitest";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 import { randomInt } from "@/utils/pure/number";
+
+const random = new MemoryRandom([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 0.8, 0.5]);
 
 describe("partition", () => {
   test("splits into matching and rest, preserving order", () => {
@@ -230,15 +233,15 @@ describe("shuffleArray", () => {
   const numberSet = new Set(numbers);
 
   test("empty", () => {
-    expect(shuffleInPlace([])).toStrictEqual([]);
+    expect(shuffleInPlace(random, [])).toStrictEqual([]);
   });
 
   test("one", () => {
-    expect(shuffleInPlace([1])).toStrictEqual([1]);
+    expect(shuffleInPlace(random, [1])).toStrictEqual([1]);
   });
 
   test("many", () => {
-    const shuffled = shuffleInPlace(numbers.slice());
+    const shuffled = shuffleInPlace(random, numbers.slice());
 
     expect(shuffled).toHaveLength(numbers.length);
     expect(shuffled).not.toStrictEqual(numbers);
@@ -258,8 +261,8 @@ describe("itemsAround", () => {
 
   test("empty", () => {
     for (let i = 0; i < 10; i += 1) {
-      const startIndex = randomInt(100);
-      const limit = randomInt(100);
+      const startIndex = randomInt(random, 100);
+      const limit = randomInt(random, 100);
 
       expectItemsAroundIndex([], startIndex, limit, []);
     }
@@ -296,8 +299,8 @@ describe("wrappedItemsAround", () => {
 
   test("empty", () => {
     for (let i = 0; i < 10; i += 1) {
-      const startIndex = randomInt(100);
-      const limit = randomInt(100);
+      const startIndex = randomInt(random, 100);
+      const limit = randomInt(random, 100);
 
       expectWrappedItemsAroundIndex([], startIndex, limit, []);
     }

@@ -1,11 +1,11 @@
 import * as PostOverlayTagsResolver from "@/features/post_overlay/model/tags/resolver";
 import { EnhancedMouseEvent } from "@/lib/event/input";
+import { Ports } from "@/core/boundary/ports/ports";
 import { PostOverlayCursorTracker } from "@/features/post_overlay/model/state/cursor_tracker";
 import { PostOverlayReopenCooldown } from "@/features/post_overlay/model/state/reopen_cooldown";
 import { PostOverlayResizeState } from "@/features/post_overlay/model/state/resize_state";
 import { PostOverlayTarget } from "@/features/post_overlay/model/state/overlay_target";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
-import { Ports } from "@/core/boundary/ports/ports";
 
 export class PostOverlayModel {
   private readonly overlayTarget = new PostOverlayTarget();

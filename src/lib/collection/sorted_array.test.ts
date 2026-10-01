@@ -1,6 +1,9 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 import { SortedArray } from "@/lib/collection/sorted_array";
 import { randomInt } from "@/utils/pure/number";
+
+const random = new MemoryRandom([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 0.8, 0.5]);
 
 function expectSortedOrder<T extends string | number>(sortedArray: SortedArray<T>): void {
   const array = sortedArray.toArray();
@@ -27,7 +30,7 @@ describe("SortedArray", () => {
     const unsortedArray: number[] = [];
 
     for (let i = 0; i < 500; i += 1) {
-      const num = randomInt(1000);
+      const num = randomInt(random, 1000);
 
       sortedArray.add(num);
       unsortedArray.push(num);
@@ -298,7 +301,7 @@ test("addAll", () => {
     expect(sortedArray.toArray().map(i => i.id)).toStrictEqual([1, 2, 3]);
   });
 
-  test("custom comparator — remove uses equality, not identity", () => {
+  test("custom comparator â€” remove uses equality, not identity", () => {
     interface Item { id: number }
     const sortedArray = new SortedArray<Item>((a, b) => a.id - b.id);
 

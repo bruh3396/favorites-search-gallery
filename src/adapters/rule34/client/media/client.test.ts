@@ -19,6 +19,10 @@ describe("Rule34MediaClient", () => {
     vi.unstubAllGlobals();
   });
 
+  test("mints media from a file url", () => {
+    expect(setup().client.mintMedia("https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", "")).toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
+  });
+
   test("addresses a preview on the thumbnail host", () => {
     expect(setup().client.previewUrl("1234/a1b2c3")).toBe("https://wimg.rule34.xxx/thumbnails//1234/thumbnail_a1b2c3.jpg");
   });

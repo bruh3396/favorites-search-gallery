@@ -82,17 +82,6 @@ describe("FavoritesView", () => {
     document.documentElement.removeAttribute("data-loading");
   });
 
-  describe("initial state", () => {
-    test("draws the drawer and paginator from preferences", () => {
-      const { shell } = setup({ preferences: { favorites: { infiniteScroll: true, drawerOpen: true, drawerActiveSection: "help" } } });
-
-      expect(document.documentElement.dataset.paginationHidden).toBeDefined();
-      expect(shell.root.dataset.drawerOpen).toBeDefined();
-      expect(shell.drawer.help.root.dataset.hidden).toBeUndefined();
-      expect(shell.drawer.settings.root.dataset.hidden).toBeDefined();
-    });
-  });
-
   describe("content", () => {
     test("shows search results in place of what was there", () => {
       const { view, content, replaced } = setup();

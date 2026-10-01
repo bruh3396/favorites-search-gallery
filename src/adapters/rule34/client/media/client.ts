@@ -1,15 +1,19 @@
 import { fileUrl, previewUrl } from "@/adapters/rule34/client/media/addresses";
 import { ExtensionProber } from "@/adapters/rule34/client/media/extension_prober";
 import { FileExtension } from "@/adapters/rule34/client/media/extension";
-import { MediaKind } from "@/core/domain/media/media";
+import { Media, MediaKind } from "@/core/domain/media/media";
+import { mintMedia, readLocator } from "@/adapters/rule34/client/media/locator";
 import { VideoDurationReader } from "@/adapters/rule34/client/media/video_duration";
-import { readLocator } from "@/adapters/rule34/client/media/locator";
 
 const KIND_EXTENSIONS: Record<MediaKind, FileExtension | null> = { image: null, video: "mp4", gif: "gif" };
 
 export class Rule34MediaClient {
   private readonly extensionProber = new ExtensionProber();
   private readonly videoDurationReader = new VideoDurationReader();
+
+  public mintMedia(url: string, tags: string): Media | null {
+    return mintMedia(url, tags);
+  }
 
   public previewUrl(locator: string): string {
     return previewUrl(locator);

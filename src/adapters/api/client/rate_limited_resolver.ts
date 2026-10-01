@@ -1,7 +1,10 @@
 import { CoalescingResolver } from "@/core/utils/async/coalescing";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { RateLimiterConfig } from "@/types/async";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+
+export interface Scheduler {
+  schedule: (task: () => void, delay: number) => () => void;
+}
 
 const BATCH_SIZE = 50;
 const FLUSH_TIMEOUT = 2000;

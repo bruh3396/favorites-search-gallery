@@ -216,7 +216,6 @@ describe("startFavorites", () => {
       const context = await setup();
       const before = orderOf(context);
 
-      vi.spyOn(Math, "random").mockReturnValue(0);
       context.events.favorites.shuffleButtonClicked.emit(new MouseEvent("click"));
       expect(orderOf(context)).not.toEqual(before);
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
@@ -287,17 +286,19 @@ describe("startFavorites", () => {
     });
 
     describe("resetting", () => {
-      test("reset, once confirmed, clears stored favorites and settings but keeps snippets", async() => {
+      test("reset, once confirmed, clears stored favorites and settings but keeps snippets, then reloads", async() => {
         vi.stubGlobal("confirm", () => true);
+        const reload = vi.spyOn(window.location, "reload").mockReturnValue();
         const context = await setup();
         const store2 = context.ports.localKeyedValues;
+        const resetPreferences = vi.spyOn(context.preferences, "reset");
 
         store2.set("searchSnippets", []);
-        context.preferences.favorites.layout.set("row");
         context.events.favorites.resetButtonClicked.emit(new MouseEvent("click"));
         expect(store2.get("searchSnippets")).toEqual([]);
-        expect(context.preferences.favorites.layout.value).not.toBe("row");
+        expect(resetPreferences).toHaveBeenCalled();
         await vi.waitFor(async() => expect(await createFruitModel(context).countStoredFavorites()).toBe(0));
+        await vi.waitFor(() => expect(reload).toHaveBeenCalled());
       });
 
       test.each<[string, Partial<Environment>, boolean]>([
@@ -327,10 +328,10 @@ describe("startFavorites", () => {
         vi.stubGlobal("confirm", () => true);
         const reload = vi.spyOn(window.location, "reload").mockReturnValue();
         const context = await setup();
+        const resetPreferences = vi.spyOn(context.preferences, "reset");
 
-        context.preferences.favorites.resultsPerPage.set(1);
         context.events.favorites.settingsResetRequested.emit();
-        expect(context.preferences.favorites.resultsPerPage.value).not.toBe(1);
+        expect(resetPreferences).toHaveBeenCalled();
         expect(reload).toHaveBeenCalled();
       });
     });
@@ -385,6 +386,20 @@ describe("startFavorites", () => {
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
     });
 
+    test("the drawer starts as its preferences say", async() => {
+      await setup({ preferences: { favorites: { drawerOpen: true, drawerActiveSection: "help" } } });
+
+      expect(document.getElementById(FavoritesId.root)?.dataset.drawerOpen).toBeDefined();
+      expect(isHiddenOf("favorites-drawer-section-help")).toBe(false);
+      expect(isHiddenOf("favorites-drawer-section-settings")).toBe(true);
+    });
+
+    test("the paginator starts hidden under infinite scroll", async() => {
+      await setup({ preferences: { favorites: { infiniteScroll: true } } });
+
+      expect(document.documentElement.dataset.paginationHidden).toBeDefined();
+    });
+
     test("the drawer opens to the chosen section", async() => {
       const context = await setup();
 
@@ -410,13 +425,6 @@ describe("startFavorites", () => {
       expect(hostPage.headerVisible).toBe(false);
       context.preferences.favorites.headerEnabled.set(true);
       expect(hostPage.headerVisible).toBe(true);
-    });
-
-    test("hints follow their preference", async() => {
-      const context = await setup();
-
-      context.preferences.favorites.hintsEnabled.set(true);
-      expect(document.documentElement.dataset.tooltips).toBeDefined();
     });
 
     test("follows the layout preference", async() => {

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 import { createEnvironment } from "@/testing/environment";
 import { createPreferences } from "@/testing/preferences";
 
@@ -52,7 +53,7 @@ describe.each([
       blacklistedTags: "blacklisted"
     });
 
-    searcher = new FavoritesSearcher(preferences, environment, onChanged);
+    searcher = new FavoritesSearcher(preferences, environment, new MemoryRandom(), onChanged);
     searcher.index(favorites);
   }
 

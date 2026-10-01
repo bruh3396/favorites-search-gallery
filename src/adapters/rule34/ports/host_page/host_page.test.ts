@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from "vitest";
 import { AppMode, ColorScheme } from "@/core/boundary/environment";
+import { describe, expect, test, vi } from "vitest";
 import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/host_page";
 
 interface Rule34 {

@@ -1,3 +1,4 @@
+import architecture from "./architecture/eslint/eslint.config.mjs";
 import { defineConfig } from "eslint/config";
 import functional from "eslint-plugin-functional";
 import globals from "globals";
@@ -649,5 +650,6 @@ export default defineConfig([
     rules: {
       "no-bitwise": "off"
     }
-  }
+  },
+  architecture
 ]);

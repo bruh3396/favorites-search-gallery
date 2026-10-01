@@ -1,0 +1,190 @@
+{
+  "src/adapters/api/client/post/parser.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/api/client/rate_limited_resolver.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/api/ports/remote_posts/remote_posts.test.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/api/ports/remote_posts/remote_posts.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/api/ports/remote_tag_categories/remote_tag_categories.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/rule34/client/media/extension_prober.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/client/media/video_duration.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/client/site/client.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/client/site/favorite_actions/favorite_actions.ts": {
+    "boundaries/dependencies": {
+      "count": 3
+    }
+  },
+  "src/adapters/rule34/client/site/favorites_page/fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/client/site/page_rate_limiter.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/client/site/post_list_page/fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/rule34/client/site/post_page/fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/rule34/client/site/post_page/parser.test.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/client/site/post_page/parser.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/rule34/client/site/profile_page/fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/rule34/client/site/thumb/parser.ts": {
+    "boundaries/dependencies": {
+      "count": 4
+    }
+  },
+  "src/adapters/rule34/ports/remote_favorites/full_page_fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/adapters/rule34/ports/remote_favorites/incremental_page_fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/ports/remote_favorites/remote_favorites.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/config/gallery_config.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/favorites/control/pagination.test.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/favorites/features/snippets/model/store.ts": {
+    "outside/no-restricted-properties": {
+      "count": 5
+    }
+  },
+  "src/features/favorites/flows/flows.test.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/favorites/model/posts/library.ts": {
+    "outside/no-restricted-properties": {
+      "count": 2
+    }
+  },
+  "src/features/favorites/view/link_suppressor.test.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/gallery/flows/thumbs.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/post_list_navigator/model/navigator.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/post_list_navigator/model/page_loader.ts": {
+    "boundaries/dependencies": {
+      "count": 2
+    }
+  },
+  "src/features/post_list_navigator/model/url_context.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    },
+    "outside/no-restricted-globals": {
+      "count": 2
+    }
+  },
+  "src/features/post_list_navigator/types/post_list_page.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/post_list_navigator/view/renderer.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/features/post_overlay/model/state/reopen_cooldown.ts": {
+    "outside/no-restricted-globals": {
+      "count": 2
+    }
+  },
+  "src/lib/ui/autocomplete/autocomplete.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/lib/ui/thumb/post_list_element.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/targets/demo/main.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/targets/userscript/main.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  }
+}

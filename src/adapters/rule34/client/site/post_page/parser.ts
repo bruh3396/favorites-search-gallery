@@ -68,10 +68,10 @@ function parseDimensions(size: string | undefined): { width: number; height: num
 }
 
 function parseMedia(dom: Document, tags: string): Media {
-  const file = dom.querySelector("#image")?.getAttribute("src")
-    ?? dom.querySelector("video source")?.getAttribute("src")
-    ?? dom.querySelector(".link-list a[href*='/images/']")?.getAttribute("href")
-    ?? "";
+  const file = dom.querySelector("#image")?.getAttribute("src") ??
+    dom.querySelector("video source")?.getAttribute("src") ??
+    dom.querySelector(".link-list a[href*='/images/']")?.getAttribute("href") ??
+    "";
   const media = mintMedia(file, tags);
 
   if (media === null) {

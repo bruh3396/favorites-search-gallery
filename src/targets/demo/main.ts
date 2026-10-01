@@ -1,12 +1,13 @@
 import { readBrowserEnvironment, readPreferredColorScheme } from "@/adapters/browser/environment/environment";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
+import { BrowserRandom } from "@/adapters/browser/ports/random/random";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { HostEnvironment } from "@/core/boundary/environment";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
-import { HostEnvironment } from "@/core/boundary/environment";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
@@ -44,6 +45,7 @@ function createPorts(
     localKeyedValues: new BrowserLocalKeyedValues(),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
+    random: new BrowserRandom(),
     scheduler: new BrowserScheduler()
   };
 }

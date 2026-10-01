@@ -26,7 +26,7 @@ export class FavoritesModel {
     this.remoteFavorites = remoteFavorites;
     this.localFavorites = localFavorites;
     this.collection = new FavoritesCollection();
-    this.searcher = new FavoritesSearcher(context.preferences, context.environment, onSearchResultsChanged);
+    this.searcher = new FavoritesSearcher(context.preferences, context.environment, context.ports.random, onSearchResultsChanged);
     this.loader = new FavoritesLoader({
       remoteFavorites,
       localFavorites,

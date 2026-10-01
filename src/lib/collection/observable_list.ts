@@ -1,4 +1,5 @@
 import { Identifiable } from "@/types/app";
+import { Random } from "@/core/boundary/ports/random";
 import { doNothing } from "@/utils/pure/function";
 import { shuffleInPlace as shuffleArray } from "@/utils/pure/array";
 
@@ -20,8 +21,8 @@ export class ObservableList<T extends Identifiable> {
     return this.items;
   }
 
-  public shuffle(): T[] {
-    return this.set(shuffleArray(this.items));
+  public shuffle(random: Random): T[] {
+    return this.set(shuffleArray(random, this.items));
   }
 
   public append(items: T[]): T[] {

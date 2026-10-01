@@ -28,7 +28,7 @@ describe("createPreferences", () => {
     expect(createPreferences(selectPreferenceDefaults(createEnvironment()), store).favorites.resultsPerPage.value).toBe(1);
   });
 
-  test("reset brings every preference back to its default", () => {
+  test("after a reset, the next session reads every default", () => {
     const store = new MemoryLocalKeyedValues();
     const preferences = createPreferences(selectPreferenceDefaults(createEnvironment()), store);
     const defaultValue = preferences.favorites.resultsPerPage.value;
@@ -36,7 +36,7 @@ describe("createPreferences", () => {
     preferences.favorites.resultsPerPage.set(defaultValue + 1);
     preferences.reset();
 
-    expect(preferences.favorites.resultsPerPage.value).toBe(defaultValue);
+    expect(createPreferences(selectPreferenceDefaults(createEnvironment()), store).favorites.resultsPerPage.value).toBe(defaultValue);
     expect(store.get("preferences")).toBeUndefined();
   });
 });

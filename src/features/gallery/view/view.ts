@@ -28,8 +28,8 @@ export class GalleryView {
   constructor(context: AppContext, shell: GalleryShell, favoriteFor: (id: string) => Favorite | undefined) {
     this.shell = shell;
     this.budget = GALLERY_BUDGETS[context.environment.canvasBudget];
-    this.ui = new GalleryUi(context.preferences, context.shell, context.ports.hostPage, shell.background);
-    this.menu = new GalleryMenu(context.preferences, context.environment, shell.menu);
+    this.ui = new GalleryUi(context.shell, context.ports.hostPage, shell.background);
+    this.menu = new GalleryMenu(context.environment, shell.menu);
     this.renderer = new GalleryRenderer(shell.root, context, favoriteFor, this.budget);
     GalleryTutorial.mount(shell.tutorial);
   }

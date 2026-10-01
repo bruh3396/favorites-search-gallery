@@ -1,4 +1,5 @@
 import { randomInt, valuesAround } from "@/utils/pure/number";
+import { Random } from "@/core/boundary/ports/random";
 
 export function isIndexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;
@@ -46,12 +47,12 @@ export function wrappedItemsAround<V>(array: V[], startIndex: number, limit: num
   return result;
 }
 
-export function shuffleInPlace<V>(array: V[]): V[] {
+export function shuffleInPlace<V>(random: Random, array: V[]): V[] {
   let maxIndex = array.length;
   let randomIndex;
 
   while (maxIndex > 0) {
-    randomIndex = randomInt(maxIndex);
+    randomIndex = randomInt(random, maxIndex);
     maxIndex -= 1;
     [array[maxIndex], array[randomIndex]] = [array[randomIndex], array[maxIndex]];
   }

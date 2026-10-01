@@ -14,11 +14,12 @@ export class FavoritesActionFlow extends FavoritesFlow {
     this.view.setFavorited(id, false);
   }
 
-  public reset(): void {
+  public async reset(): Promise<void> {
     if (confirm(this.resetPrompt())) {
       this.context.preferences.reset();
       RESET_STORAGE_KEYS.forEach(key => this.context.ports.localKeyedValues.remove(key));
-      this.model.destroyStore();
+      await this.model.destroyStore();
+      reloadWindow();
     }
   }
 

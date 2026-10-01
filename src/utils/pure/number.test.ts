@@ -18,22 +18,17 @@ import {
   toSeconds
 } from "@/utils/pure/number";
 import { describe, expect, test } from "vitest";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 
-describe("getRandomPositiveInteger", () => {
+describe("randomInt", () => {
   test("zero", () => {
-    expect(randomInt(0)).toBe(0);
+    expect(randomInt(new MemoryRandom([0.5]), 0)).toBe(0);
   });
 
-  test("one", () => {
-    expect(randomInt(1)).toBeLessThanOrEqual(1);
-    expect(randomInt(1)).toBeGreaterThanOrEqual(0);
-  });
-
-  test("many", () => {
-    for (let i = 0; i < 100; i += 1) {
-      expect(randomInt(2000)).toBeLessThanOrEqual(2000);
-      expect(randomInt(2000)).toBeGreaterThanOrEqual(0);
-    }
+  test("spans [0, max)", () => {
+    expect(randomInt(new MemoryRandom([0]), 2000)).toBe(0);
+    expect(randomInt(new MemoryRandom([0.5]), 2000)).toBe(1000);
+    expect(randomInt(new MemoryRandom([0.9999]), 2000)).toBe(1999);
   });
 });
 
@@ -88,18 +83,15 @@ describe("rescaleGeometric", () => {
   });
 });
 
-describe("getRandomPositiveIntegerInRange", () => {
+describe("randomIntInRange", () => {
   test("0 min max", () => {
-    expect(randomIntInRange(0, 0)).toBe(0);
+    expect(randomIntInRange(new MemoryRandom([0.5]), 0, 0)).toBe(0);
   });
 
-  test("range", () => {
-    for (let i = 0; i < 100; i += 1) {
-      const value = randomIntInRange(0, 20);
-
-      expect(value).toBeLessThanOrEqual(20);
-      expect(value).toBeGreaterThanOrEqual(0);
-    }
+  test("spans [min, max)", () => {
+    expect(randomIntInRange(new MemoryRandom([0]), 10, 20)).toBe(10);
+    expect(randomIntInRange(new MemoryRandom([0.5]), 10, 20)).toBe(15);
+    expect(randomIntInRange(new MemoryRandom([0.9999]), 10, 20)).toBe(19);
   });
 });
 
@@ -187,16 +179,12 @@ describe("toSeconds", () => {
 
 describe("randomFloatInRange", () => {
   test("zero", () => {
-    expect(randomFloatInRange(0, 0)).toBe(0);
+    expect(randomFloatInRange(new MemoryRandom([0.5]), 0, 0)).toBe(0);
   });
 
-  test("normal", () => {
-    for (let i = 0; i < 100; i += 1) {
-      const value = randomFloatInRange(0, 20);
-
-      expect(value).toBeLessThanOrEqual(20);
-      expect(value).toBeGreaterThanOrEqual(0);
-    }
+  test("scales into [min, max)", () => {
+    expect(randomFloatInRange(new MemoryRandom([0]), 10, 20)).toBe(10);
+    expect(randomFloatInRange(new MemoryRandom([0.25]), 10, 20)).toBe(12.5);
   });
 });
 
@@ -335,19 +323,9 @@ describe("roundDownToMultiple", () => {
 });
 
 describe("randomBoolean", () => {
-  test("produces both outcomes frequently", () => {
-    let heads = 0;
-    let tails = 0;
-
-    for (let i = 0; i < 1000; i += 1) {
-      if (randomBoolean()) {
-        heads += 1;
-      } else {
-        tails += 1;
-      }
-    }
-    expect(heads).toBeGreaterThan(100);
-    expect(tails).toBeGreaterThan(100);
+  test("splits at one half", () => {
+    expect(randomBoolean(new MemoryRandom([0.49]))).toBe(true);
+    expect(randomBoolean(new MemoryRandom([0.5]))).toBe(false);
   });
 });
 

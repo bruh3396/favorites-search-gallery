@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 import { SkeletonConfig } from "@/config/skeleton_config";
 
 function createThumb(width: number, height: number): HTMLElement {
@@ -28,30 +29,30 @@ describe("FavoritesSkeleton", () => {
   });
 
   test("tiles the default number of placeholders", () => {
-    expect(tiledFor(new FavoritesSkeleton(store, "grid"))).toHaveLength(SkeletonConfig.defaultItemCount);
+    expect(tiledFor(new FavoritesSkeleton(store, new MemoryRandom(), "grid"))).toHaveLength(SkeletonConfig.defaultItemCount);
   });
 
   test("tiles the requested number of placeholders in the layout", () => {
-    const tiled = tiledFor(new FavoritesSkeleton(store, "row", 3));
+    const tiled = tiledFor(new FavoritesSkeleton(store, new MemoryRandom(), "row", 3));
 
     expect(tiled?.map(element => element.dataset.layout)).toEqual(["row", "row", "row"]);
   });
 
   test("once real thumbs load, stops showing and shapes the next visit's placeholders after them", () => {
-    const skeleton = new FavoritesSkeleton(store, "native", 2);
+    const skeleton = new FavoritesSkeleton(store, new MemoryRandom(), "native", 2);
 
     skeleton.collectAspectRatios([createThumb(120, 240), createThumb(200, 150)]);
-    const next = tiledFor(new FavoritesSkeleton(store, "native", 2));
+    const next = tiledFor(new FavoritesSkeleton(store, new MemoryRandom(), "native", 2));
 
     expect(tiledFor(skeleton)).toBeUndefined();
     expect(next?.map(element => [element.style.width, element.style.height])).toEqual([["120px", "240px"], ["200px", "150px"]]);
   });
 
   test("collects aspect ratios only once", () => {
-    const skeleton = new FavoritesSkeleton(store, "native", 1);
+    const skeleton = new FavoritesSkeleton(store, new MemoryRandom(), "native", 1);
 
     skeleton.collectAspectRatios([createThumb(120, 240)]);
     skeleton.collectAspectRatios([createThumb(200, 150)]);
-    expect(tiledFor(new FavoritesSkeleton(store, "native", 1))?.[0].style.width).toBe("120px");
+    expect(tiledFor(new FavoritesSkeleton(store, new MemoryRandom(), "native", 1))?.[0].style.width).toBe("120px");
   });
 });

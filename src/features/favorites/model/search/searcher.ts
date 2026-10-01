@@ -7,6 +7,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
+import { Random } from "@/core/boundary/ports/random";
 import { Searcher } from "@/features/favorites/types/types";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
@@ -23,9 +24,10 @@ export class FavoritesSearcher implements Searcher {
   private readonly sortAscending: Preference<boolean>;
   private readonly userIsOnTheirOwnFavoritesPage: boolean;
   private readonly negatedBlacklistedTags: string;
+  private readonly random: Random;
   private currentSearchQuery: string;
 
-  constructor(preferences: Preferences, environment: Environment, onSearchResultsChanged: (results: Favorite[]) => void) {
+  constructor(preferences: Preferences, environment: Environment, random: Random, onSearchResultsChanged: (results: Favorite[]) => void) {
     const termsFor = (favorite: Favorite): Set<string> => favorite.consumeTags();
     const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
 
@@ -37,6 +39,7 @@ export class FavoritesSearcher implements Searcher {
     this.sortAscending = preferences.favorites.sortAscending;
     this.userIsOnTheirOwnFavoritesPage = environment.ownsFavorites;
     this.negatedBlacklistedTags = negateTags(environment.blacklistedTags);
+    this.random = random;
     this.currentSearchQuery = "";
   }
 
@@ -93,7 +96,7 @@ export class FavoritesSearcher implements Searcher {
   }
 
   public shuffleSearchResults(): Favorite[] {
-    return this.results.shuffle();
+    return this.results.shuffle(this.random);
   }
 
   private updateSearchResults(favorites: Favorite[]): Favorite[] {
@@ -131,7 +134,7 @@ export class FavoritesSearcher implements Searcher {
     const sortKey = this.sortKey.value;
 
     if (sortKey === "random") {
-      return shuffleInPlace([...favorites]);
+      return shuffleInPlace(this.random, [...favorites]);
     }
     const isAscending = this.sortAscending.value;
 

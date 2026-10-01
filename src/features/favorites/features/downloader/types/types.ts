@@ -1,7 +1,7 @@
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { Media } from "@/core/domain/media/media";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
-import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 
 export type FilenameCategory = Extract<TagCategory, "artist" | "character" | "copyright">;
 

@@ -41,13 +41,13 @@ describe("FavoritesSettingsCatalog", () => {
     ])("'%s' toggles %s", (key, setting, preferenceOf) => {
       const { context, build } = setup();
       const preference = preferenceOf(context);
-      const before = preference.value;
+      const wasTrueBefore = preference.value;
 
       build(setting);
       context.events.app.hotkeyPressed.emit(key);
-      expect(preference.value).toBe(!before);
+      expect(preference.value).toBe(!wasTrueBefore);
       context.events.app.hotkeyPressed.emit(key);
-      expect(preference.value).toBe(before);
+      expect(preference.value).toBe(wasTrueBefore);
     });
 
     test("other keys leave the setting alone", () => {

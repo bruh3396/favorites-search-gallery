@@ -7,6 +7,7 @@ import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GallerySizeSettings } from "@/features/gallery/types/types";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { GalleryView } from "@/features/gallery/view/view";
+import { effect } from "@/core/utils/reactive/signal";
 
 interface GalleryComponents {
   context: AppContext;
@@ -55,6 +56,7 @@ function setup(components: GalleryComponents): void {
   setupView(components);
   setupSubFeatures(components);
   setupControl(components);
+  bindPreferences(components);
   subscribeToEvents(components);
   serveExternalRequests(components);
 }
@@ -88,15 +90,20 @@ function setupSubFeatures({ features }: GalleryComponents): void {
   features.setup();
 }
 
+function bindPreferences({ context, view }: GalleryComponents): void {
+  const { preferences } = context;
+
+  effect(() => view.setBackgroundOpacity(preferences.gallery.backgroundOpacity.value));
+  effect(() => view.setMenuDockedLeft(preferences.gallery.menuDockedLeft.value));
+  effect(() => view.setMenuPinned(preferences.gallery.menuPinned.value));
+  effect(() => view.setMenuEnabled(preferences.gallery.menuEnabled.value));
+}
+
 function subscribeToEvents(components: GalleryComponents): void {
   const { context, view, flows } = components;
   const { events, preferences, environment } = context;
 
   events.gallery.galleryMenuButtonClicked.on((action) => flows.actions.run(action));
-  preferences.gallery.backgroundOpacity.on((opacity) => view.setBackgroundOpacity(opacity));
-  preferences.gallery.menuEnabled.on((enabled) => view.setMenuEnabled(enabled));
-  preferences.gallery.menuPinned.on((pinned) => view.setMenuPinned(pinned));
-  preferences.gallery.menuDockedLeft.on((dockedLeft) => view.setMenuDockedLeft(dockedLeft));
   preferences.gallery.videoMuted.on((muted) => view.setVideoMuted(muted));
 
   if (environment.mode === "favorites") {

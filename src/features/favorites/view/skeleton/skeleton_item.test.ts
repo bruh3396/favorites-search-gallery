@@ -1,13 +1,14 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test } from "vitest";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/app";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 import { SkeletonConfig } from "@/config/skeleton_config";
 
 const DEFAULT_RANDOM_ANIMATION_TIMING = SkeletonConfig.randomAnimationTiming;
 
-function createItem(layout: Layout, aspectRatio?: string): HTMLElement {
-  return new FavoritesSkeletonItem(layout, aspectRatio, new SeededSequence()).element;
+function createItem(layout: Layout, aspectRatio?: string, random = new MemoryRandom()): HTMLElement {
+  return new FavoritesSkeletonItem(random, layout, aspectRatio, new SeededSequence()).element;
 }
 
 function sizeOf(element: HTMLElement): { width: number; height: number } {
@@ -21,7 +22,6 @@ function aspectRatioOf(element: HTMLElement): number[] {
 describe("FavoritesSkeletonItem", () => {
   afterEach(() => {
     SkeletonConfig.randomAnimationTiming = DEFAULT_RANDOM_ANIMATION_TIMING;
-    vi.restoreAllMocks();
   });
 
   test("is a pulsing tile for its layout", () => {
@@ -40,8 +40,7 @@ describe("FavoritesSkeletonItem", () => {
       [0.2, "width", "height"],
       [0.8, "height", "width"]
     ])("without one, maxes out one side and picks the other (random %f)", (random, maxed, picked) => {
-      vi.spyOn(Math, "random").mockReturnValue(random);
-      const size = sizeOf(createItem("native"));
+      const size = sizeOf(createItem("native", undefined, new MemoryRandom([random])));
 
       expect(size[maxed]).toBe(SkeletonConfig.discreteDimensionMax);
       expect(size[picked]).toBeGreaterThanOrEqual(SkeletonConfig.discreteDimensionMin);

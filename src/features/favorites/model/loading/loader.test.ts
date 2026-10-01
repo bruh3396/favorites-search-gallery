@@ -1,6 +1,6 @@
 import { Collection, PostLibrary, Searcher } from "@/features/favorites/types/types";
-import { describe, expect, test } from "vitest";
 import { createPost, createPosts } from "@/testing/post";
+import { describe, expect, test } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
