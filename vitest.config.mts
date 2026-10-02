@@ -1,15 +1,16 @@
-import { configDefaults, defineConfig } from "vitest/config";
+﻿import { configDefaults, defineConfig } from "vitest/config";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const EXCLUDED_TESTS = [...configDefaults.exclude, ".audit/**", "src/playground/**"];
+const EXCLUDED_TESTS = [...configDefaults.exclude, ".audit/**", "architecture/**", "src/playground/**"];
 const DOM_TESTS = [
   "src/features/*/{control,view,shell,features}/**/*.test.ts",
   "src/features/*/*.test.ts",
   "src/features/*/flows/flows.test.ts",
   "src/app/startup/features.test.ts",
   "src/app/startup/style.test.ts",
+  "src/core/ui/**/*.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/rule34/client/site/client.test.ts",
@@ -36,7 +37,7 @@ export default defineConfig({
     exclude: EXCLUDED_TESTS,
     projects: [
       { extends: true, test: { name: "node", exclude: [...EXCLUDED_TESTS, ...DOM_TESTS] } },
-      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom" } }
+      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", css: { include: [/src\/core\/ui\/.+\.css/] } } }
     ],
     isolate: false,
     pool: "threads",
@@ -58,3 +59,4 @@ export default defineConfig({
     }
   }
 });
+

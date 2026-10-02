@@ -2,6 +2,7 @@ import { AppContext } from "@/app/context/context";
 import { TooltipFlows } from "@/features/tooltip/flows/flows";
 import { TooltipModel } from "@/features/tooltip/model/model";
 import { TooltipView } from "@/features/tooltip/view/view";
+import { queueMacroTask } from "@/lib/async/scheduling";
 
 interface TooltipComponents {
   context: AppContext;
@@ -36,7 +37,7 @@ function subscribeToEvents({ context, model, flows }: TooltipComponents): void {
   domEvents.window.scrollend.on(() => flows.scroll.reposition());
 
   if (environment.mode === "favorites") {
-    events.favorites.searchRequested.on((query) => model.rebuildHighlights(query), { async: true });
+    events.favorites.searchRequested.on((query) => queueMacroTask(() => model.rebuildHighlights(query)));
     preferences.favorites.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
   }
 

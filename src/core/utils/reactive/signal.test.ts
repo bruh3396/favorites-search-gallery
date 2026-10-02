@@ -16,6 +16,15 @@ describe("Signal", () => {
     signal.value = 2;
     expect(signal.value).toBe(2);
   });
+
+  test("peeks without making an effect depend on it", () => {
+    const signal = new Signal(1);
+    const seen: number[] = [];
+
+    effect(() => seen.push(signal.peek()));
+    signal.value = 2;
+    expect(seen).toEqual([1]);
+  });
 });
 
 describe("effect", () => {

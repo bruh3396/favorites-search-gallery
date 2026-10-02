@@ -3,7 +3,7 @@ import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 
 const LOCKED = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
 
-function viewportsOf(): HTMLMetaElement[] {
+function getDocumentViewports(): HTMLMetaElement[] {
   return [...document.head.querySelectorAll<HTMLMetaElement>("meta[name=viewport]")];
 }
 
@@ -21,7 +21,7 @@ describe("BrowserHostPage", () => {
 
   test("adds a locked viewport when the page has none", () => {
     new BrowserHostPage().lockViewport();
-    expect(viewportsOf().map(meta => meta.content)).toEqual([LOCKED]);
+    expect(getDocumentViewports().map(meta => meta.content)).toEqual([LOCKED]);
   });
 
   test("locks the page's own viewport instead of adding another", () => {
@@ -31,7 +31,7 @@ describe("BrowserHostPage", () => {
     meta.content = "width=device-width";
     document.head.append(meta);
     new BrowserHostPage().lockViewport();
-    expect(viewportsOf()).toEqual([meta]);
+    expect(getDocumentViewports()).toEqual([meta]);
     expect(meta.content).toBe(LOCKED);
   });
 

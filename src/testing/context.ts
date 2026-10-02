@@ -21,6 +21,7 @@ import { Ports } from "@/core/boundary/ports/ports";
 import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 import { createEvents } from "@/app/context/events";
+import { createMilestones } from "@/app/context/milestones";
 
 const ALL_FEATURES: Feature[] = ["favorites", "postListNavigator", "gallery", "tooltip", "postOverlay"];
 
@@ -41,6 +42,7 @@ export function createAppContext(overrides: AppContextOverrides = {}): AppContex
     preferences,
     features: new Set(overrides.features ?? ALL_FEATURES),
     events: createEvents(),
+    milestones: createMilestones(),
     featureBridge: new FeatureBridge(environment),
     domEvents: new DomEvents(),
     shell: overrides.shell ?? createUnavailableShell()

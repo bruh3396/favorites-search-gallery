@@ -76,7 +76,7 @@ async function setup(options: SetupOptions = {}): Promise<AppContext> {
   const context = createContext(options);
 
   await store(context);
-  const loaded = context.events.favorites.favoritesLoaded.wait();
+  const loaded = context.milestones.favorites.favoritesLoaded.wait();
 
   startFavorites(context);
   await loaded;

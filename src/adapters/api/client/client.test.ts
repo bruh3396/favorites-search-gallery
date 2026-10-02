@@ -1,4 +1,4 @@
-﻿import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { ApiClient } from "@/adapters/api/client/client";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 

@@ -7,7 +7,7 @@ export class FavoritesLoadFlow extends FavoritesFlow {
     const storedFavoriteCount = await this.model.countStoredFavorites();
     const hasStoredFavorites = storedFavoriteCount > 0;
 
-    this.context.events.favorites.storedFavoritesFound.emit(hasStoredFavorites);
+    this.context.milestones.favorites.storedFavoritesFound.reach(hasStoredFavorites);
 
     if (hasStoredFavorites) {
       await this.loadStoredFavorites(storedFavoriteCount);
@@ -18,7 +18,7 @@ export class FavoritesLoadFlow extends FavoritesFlow {
       await this.fetchAllFavorites();
     }
     this.model.compressFavorites();
-    this.context.events.favorites.favoritesLoaded.emit();
+    this.context.milestones.favorites.favoritesLoaded.reach();
   }
 
   private async loadStoredFavorites(storedFavoriteCount: number): Promise<void> {
@@ -29,7 +29,6 @@ export class FavoritesLoadFlow extends FavoritesFlow {
       loadedCount += posts.length;
       this.view.setLoadProgress(loadedCount, storedFavoriteCount);
     });
-    this.context.events.favorites.storedFavoritesLoaded.emit();
     this.view.setTemporaryStatus("Favorites loaded");
     this.view.clearStatus();
   }

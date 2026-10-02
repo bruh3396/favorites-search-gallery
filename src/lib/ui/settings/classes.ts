@@ -12,8 +12,6 @@ export const SettingsClass = {
   row: "setting-row",
   rowLabel: "setting-row-label",
   control: "setting-control",
-  toggleTrack: "setting-toggle-track",
-  toggleKnob: "setting-toggle-knob",
   segmented: "setting-segmented",
   segmentedOption: "setting-segmented-option",
   dropdown: "setting-dropdown",

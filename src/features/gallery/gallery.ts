@@ -40,14 +40,14 @@ export async function startGallery(context: AppContext): Promise<void> {
 }
 
 async function waitUntilPageIsReady(context: AppContext): Promise<void> {
-  const { environment, events } = context;
+  const { environment, milestones } = context;
 
   if (environment.mode === "favorites") {
-    await events.favorites.storedFavoritesFound.wait();
+    await milestones.favorites.storedFavoritesFound.wait();
   }
 
   if (environment.mode === "postList") {
-    await events.postList.postListInitialized.wait();
+    await milestones.postList.postListInitialized.wait();
   }
 }
 
@@ -132,10 +132,10 @@ function subscribeToFavoritesEvents({ context, model, view, flows }: GalleryComp
 }
 
 function subscribeToPostListEvents({ context, view, flows }: GalleryComponents): void {
-  const { events, preferences } = context;
+  const { events, milestones, preferences } = context;
 
   preferences.postList.upscaleThumbs.on((value) => flows.thumbs.toggleUpscaling(value));
-  events.postList.initialPostListCreated.on(() => flows.thumbs.preloadPostListOnIdle(), { once: true });
+  milestones.postList.initialPostListCreated.wait().then(() => flows.thumbs.preloadPostListOnIdle());
   events.postList.moreResultsAdded.on(() => flows.thumbs.refresh());
   preferences.postList.infiniteScroll.on(() => flows.thumbs.refresh());
   events.postList.pageChanged.on(() => flows.thumbs.refresh());
@@ -180,7 +180,7 @@ function subscribeToMobileInput({ context, view, flows, features }: GalleryCompo
   domEvents.mobile.swipeUp.on(() => features.showMenu());
   domEvents.mobile.touchHold.on(() => flows.touch.favoriteCurrentPost());
   domEvents.window.orientationChange.on(() => view.correctOrientation());
-  events.gallery.galleryOpened.on(() => flows.touch.showTutorialOnFirstOpen(), { once: true });
+  events.gallery.galleryOpened.once(() => flows.touch.showTutorialOnFirstOpen());
   events.gallery.tutorialRequested.on(() => view.showTutorial());
   events.gallery.galleryClosed.on(() => view.hideTutorial());
 }

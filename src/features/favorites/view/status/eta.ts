@@ -1,3 +1,5 @@
+import { Scheduler } from "@/core/boundary/ports/scheduler";
+
 const ROLLING_WINDOW = 10;
 
 interface Sample {
@@ -8,8 +10,10 @@ interface Sample {
 export class FavoritesEta {
   private readonly samples: Sample[] = [];
 
+  constructor(private readonly scheduler: Scheduler) {}
+
   public getEta(current: number, total: number): string | null {
-    this.samples.push({ time: Date.now(), count: current });
+    this.samples.push({ time: this.scheduler.now(), count: current });
 
     if (this.samples.length > ROLLING_WINDOW + 1) {
       this.samples.shift();

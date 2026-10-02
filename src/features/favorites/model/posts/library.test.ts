@@ -23,7 +23,7 @@ function setup(remotePosts: Post[] = [], fetchDurationSeconds: RemoteMedia["fetc
   onRefreshed: ReturnType<typeof vi.fn>;
 } {
   const localPosts = new MemoryLocalPosts();
-  const scheduler = new MemoryScheduler();
+  const scheduler = new MemoryScheduler(NOW);
   const fetchDuration = vi.fn(fetchDurationSeconds);
   const onRefreshed = vi.fn();
   const library = new FavoritesPostLibrary({
@@ -42,7 +42,6 @@ async function storedIdsOf(localPosts: MemoryLocalPosts, ids: string[]): Promise
 
 describe("FavoritesPostLibrary", () => {
   afterEach(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -68,13 +67,12 @@ describe("FavoritesPostLibrary", () => {
   test("leaves a fresh post alone", async() => {
     const { library, onRefreshed } = setup([createPost({ ...DIMENSIONS, score: 9 })]);
 
-    await library.refreshAll([createPost({ fetchedAt: Date.now() })]);
+    await library.refreshAll([createPost({ fetchedAt: NOW })]);
 
     expect(onRefreshed).not.toHaveBeenCalled();
   });
 
   test("leaves a post fetched within 28 days alone", async() => {
-    vi.useFakeTimers({ now: NOW, toFake: ["Date"] });
     const { library, onRefreshed } = setup([createPost(DIMENSIONS)]);
 
     await library.refreshAll([createPost({ fetchedAt: NOW - (28 * DAY) })]);
@@ -83,7 +81,6 @@ describe("FavoritesPostLibrary", () => {
   });
 
   test("refreshes a post fetched over 28 days ago", async() => {
-    vi.useFakeTimers({ now: NOW, toFake: ["Date"] });
     const { library, onRefreshed } = setup([createPost(DIMENSIONS)]);
 
     await library.refreshAll([createPost({ fetchedAt: NOW - (28 * DAY) - 1 })]);
@@ -97,7 +94,7 @@ describe("FavoritesPostLibrary", () => {
     await library.refreshAll([createPost()]);
 
     expect(onRefreshed).toHaveBeenCalledOnce();
-    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ post: { score: 9, width: 100, fetchedAt: expect.any(Number) as number } });
+    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ post: { score: 9, width: 100, fetchedAt: NOW } });
   });
 
   test("writes a refreshed post once the write delay passes", async() => {
@@ -150,7 +147,7 @@ describe("FavoritesPostLibrary", () => {
   test("does not fetch the duration of a video that has one", async() => {
     const { library, fetchDurationSeconds } = setup();
 
-    await library.refreshAll([createPost({ ...UNTIMED_VIDEO, durationSeconds: 5, fetchedAt: Date.now() })]);
+    await library.refreshAll([createPost({ ...UNTIMED_VIDEO, durationSeconds: 5, fetchedAt: NOW })]);
 
     expect(fetchDurationSeconds).not.toHaveBeenCalled();
   });
@@ -159,7 +156,7 @@ describe("FavoritesPostLibrary", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { library, onRefreshed } = setup([], () => Promise.reject(new Error("offline")));
 
-    await library.refreshAll([createPost({ ...UNTIMED_VIDEO, fetchedAt: Date.now() })]);
+    await library.refreshAll([createPost({ ...UNTIMED_VIDEO, fetchedAt: NOW })]);
 
     expect(onRefreshed).not.toHaveBeenCalled();
   });

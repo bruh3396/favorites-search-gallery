@@ -1,8 +1,8 @@
+import { Media, MediaKind } from "@/core/domain/media/media";
 import { fileUrl, previewUrl } from "@/adapters/rule34/client/media/addresses";
+import { mintMedia, readLocator } from "@/adapters/rule34/client/media/locator";
 import { ExtensionProber } from "@/adapters/rule34/client/media/extension_prober";
 import { FileExtension } from "@/adapters/rule34/client/media/extension";
-import { Media, MediaKind } from "@/core/domain/media/media";
-import { mintMedia, readLocator } from "@/adapters/rule34/client/media/locator";
 import { VideoDurationReader } from "@/adapters/rule34/client/media/video_duration";
 
 const KIND_EXTENSIONS: Record<MediaKind, FileExtension | null> = { image: null, video: "mp4", gif: "gif" };

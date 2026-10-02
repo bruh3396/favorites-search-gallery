@@ -44,8 +44,8 @@ async function start(components: PostListNavigatorComponents): Promise<void> {
   if (context.preferences.postList.favoriteIndicator.value) {
     await flows.favoritesMarker.toggleIndicator(true);
   }
-  context.events.postList.initialPostListCreated.emit(model.getInitialPostList());
-  context.events.postList.postListInitialized.emit();
+  context.milestones.postList.initialPostListCreated.reach(model.getInitialPostList());
+  context.milestones.postList.postListInitialized.reach();
 }
 
 function setupFavoriteIndicator({ context, flows }: PostListNavigatorComponents): void {

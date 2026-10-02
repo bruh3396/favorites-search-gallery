@@ -1,5 +1,5 @@
-import { PostResponse } from "@/adapters/api/client/post/post";
 import { RateLimitedResolver, Scheduler } from "@/adapters/api/client/rate_limited_resolver";
+import { PostResponse } from "@/adapters/api/client/post/post";
 import { TagResponse } from "@/adapters/api/client/tag/tag";
 
 export interface ApiIdentity {

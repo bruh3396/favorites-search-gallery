@@ -1,4 +1,4 @@
-import { CORE, LEGACY_NO_DOM, TESTS } from "#architecture/eslint/syntax/scopes.mjs";
+import { CORE, CORE_RENDERING, LEGACY_CONTROL, LEGACY_NO_DOM, TESTS } from "#architecture/eslint/syntax/scopes.mjs";
 import { createPlugin } from "#architecture/eslint/syntax/plugin.mjs";
 
 export const MESSAGES = {
@@ -9,6 +9,7 @@ export const MESSAGES = {
   rule27: "rule 27: core draws randomness only through the Random port",
   rule28: "rule 28: core opens dialogs only through a port",
   rule29: "rule 29: core reaches files only through a port",
+  rule29b: "rule 29: only view/ and core/ui create object URLs, to render a Blob they hold",
   rule30: "rule 30: only targets and adapter clients use the userscript manager's APIs",
   rule31: "rule 31: core opens windows only through Navigation or HostPage",
   rule33: "rule 33: flows/, types/, and the feature entry never touch document or window; go through the view facade",
@@ -28,9 +29,9 @@ const RESTRICTIONS = {
   rule28: { globals: ["alert", "confirm", "prompt"] },
   rule29: {
     globals: ["FileReader", "showSaveFilePicker", "showOpenFilePicker"],
-    properties: [["URL", "createObjectURL"]],
     syntax: ["AssignmentExpression[left.property.name='download']"]
   },
+  rule29b: { properties: [["URL", "createObjectURL"], ["URL", "revokeObjectURL"]] },
   rule30: {
     globals: ["GM", "unsafeWindow"],
     syntax: ["Identifier[name=/^GM_/]:not(:matches(TSDeclareFunction, VariableDeclarator, TSPropertySignature) > Identifier)"]
@@ -41,6 +42,7 @@ const RESTRICTIONS = {
 };
 
 const CORE_RULES = Object.keys(RESTRICTIONS).filter(rule => rule !== "rule33");
+const RENDERING_RULES = CORE_RULES.filter(rule => rule !== "rule29b");
 
 const GLOBAL_OBJECTS = ["window", "globalThis"];
 const PLUGIN = createPlugin(["no-restricted-globals", "no-restricted-properties", "no-restricted-syntax"]);
@@ -74,7 +76,9 @@ function createBlock(files, ignores, rules) {
 }
 
 export const CONFIGS = [
-  createBlock(CORE, TESTS, CORE_RULES),
+  createBlock(CORE, [...TESTS, ...CORE_RENDERING], CORE_RULES),
+  createBlock(CORE_RENDERING, TESTS, RENDERING_RULES),
   createBlock(LEGACY_NO_DOM, TESTS, ["rule30", "rule33"]),
-  createBlock(["src/**/*.ts"], [...CORE, ...LEGACY_NO_DOM, ...TESTS, "src/targets/**", "src/adapters/*/client/**"], ["rule30"])
+  createBlock(LEGACY_CONTROL, TESTS, ["rule28", "rule30", "rule31"]),
+  createBlock(["src/**/*.ts"], [...CORE, ...LEGACY_NO_DOM, ...LEGACY_CONTROL, ...TESTS, "src/targets/**", "src/adapters/*/client/**"], ["rule30"])
 ];

@@ -20,6 +20,12 @@ describe("BrowserScheduler", () => {
     expect(task).toHaveBeenCalledOnce();
   });
 
+  test("reads the wall clock in epoch milliseconds", () => {
+    vi.setSystemTime(1_700_000_000_000);
+
+    expect(new BrowserScheduler().now()).toBe(1_700_000_000_000);
+  });
+
   test("never runs a cancelled task", () => {
     const task = vi.fn();
 

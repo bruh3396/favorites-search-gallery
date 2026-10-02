@@ -1,0 +1,19 @@
+/* System tokens. Colors alias the legacy theme properties until themes move here. */
+.fsg-App {
+  --fsg-color-accent: var(--theme-accent);
+  --fsg-color-on-accent: var(--theme-accent-text);
+  --fsg-color-outline: var(--theme-border);
+  --fsg-color-surface-sunken: var(--theme-sunken);
+  --fsg-color-on-surface-muted: var(--theme-text-muted);
+
+  --fsg-radius-full: 999px;
+
+  --fsg-motion-duration-short: 150ms;
+  --fsg-motion-easing-standard: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fsg-App {
+    --fsg-motion-duration-short: 0ms;
+  }
+}

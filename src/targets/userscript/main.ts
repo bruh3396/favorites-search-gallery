@@ -45,7 +45,6 @@ function createPorts(
   scheduler: Scheduler
 ): Ports {
   const rule34MediaClient = new Rule34MediaClient();
-
   return {
     remoteFavorites: new Rule34RemoteFavorites(rule34SiteClient),
     remotePosts: new ApiRemotePosts(apiClient, new Rule34RemotePosts(rule34SiteClient), url => rule34MediaClient.mintMedia(url, "")),

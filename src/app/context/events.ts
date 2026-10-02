@@ -1,8 +1,7 @@
-import { Emitter, StickyEmitter } from "@/lib/event/emitter";
+import { Emitter } from "@/lib/event/emitter";
 import { Favorite } from "@/types/favorite";
 import { GalleryAction } from "@/types/app";
 import { NavigationKey } from "@/types/input";
-import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostMedia } from "@/core/domain/post/post";
 
 export type Events = ReturnType<typeof createEvents>;
@@ -33,10 +32,6 @@ export function createEvents() {
       postListRequested: new Emitter<string>(),
       searchResultsUpdated: new Emitter<Favorite[]>(),
 
-      favoritesLoaded: new StickyEmitter<void>(),
-      storedFavoritesFound: new StickyEmitter<boolean>(),
-      storedFavoritesLoaded: new StickyEmitter<void>(),
-
       contentAdded: new Emitter<Favorite[]>(),
       contentReplaced: new Emitter<void>()
     },
@@ -59,10 +54,8 @@ export function createEvents() {
     },
 
     postList: {
-      initialPostListCreated: new StickyEmitter<PostList>(),
       moreResultsAdded: new Emitter<HTMLElement[]>(),
-      pageChanged: new Emitter<HTMLElement[]>(),
-      postListInitialized: new StickyEmitter<void>()
+      pageChanged: new Emitter<HTMLElement[]>()
     }
   };
 }

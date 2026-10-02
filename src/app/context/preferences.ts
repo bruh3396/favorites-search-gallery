@@ -1,13 +1,13 @@
-import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
-import { Layout, PerformanceProfile, PostOverlayMode } from "@/types/app";
-import { Rating, SortKey } from "@/types/search";
-import { ColorScheme } from "@/core/boundary/environment";
-import { FavoritesDrawerSectionName } from "@/types/favorites_ui";
+import { ACTION_BAR_MODES, ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { LAYOUTS, Layout, PERFORMANCE_PROFILES, POST_OVERLAY_MODES, PerformanceProfile, PostOverlayMode } from "@/types/app";
+import { METRICS, RATINGS, Rating, SortKey } from "@/types/search";
+import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
+import { FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/utils/storage/namespaced_local_keyed_values";
-import { Preference } from "@/lib/storage/preference";
+import { Guard, Preference, StoredPreference, oneOf } from "@/lib/storage/preference";
 import { PreferenceDefaults } from "@/app/context/preference_defaults";
-import { Theme } from "@/lib/ui/theme/themes";
+import { THEMES, Theme } from "@/lib/ui/theme/themes";
 
 const NAMESPACE = "preferences";
 
@@ -16,38 +16,38 @@ export type Preferences = ReturnType<typeof createPreferences>;
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function createPreferences(defaults: PreferenceDefaults, store: LocalKeyedValues) {
   const namespacedLocalKeyedValues = new NamespacedLocalKeyedValues(store, NAMESPACE);
-  const preference = <T>(key: string, defaultValue: T): Preference<T> => new Preference(namespacedLocalKeyedValues, key, defaultValue);
+  const preference = <T>(key: string, defaultValue: T, accepts?: Guard<T>): Preference<T> => new StoredPreference(namespacedLocalKeyedValues, key, defaultValue, accepts);
   return {
     reset: (): void => namespacedLocalKeyedValues.clear(),
 
     app: {
-      colorScheme: preference<ColorScheme>("appColorScheme", defaults.colorScheme),
+      colorScheme: preference<ColorScheme>("appColorScheme", defaults.colorScheme, oneOf(COLOR_SCHEMES)),
       fadeThumbs: preference<boolean>("appFadeThumbs", false),
       gradient: preference("appGradient", false),
       nativeFont: preference<boolean>("appNativeFont", true),
-      performanceProfile: preference<PerformanceProfile>("appPerformanceProfile", "normal"),
-      theme: preference<Theme>("appTheme", "native")
+      performanceProfile: preference<PerformanceProfile>("appPerformanceProfile", "normal", oneOf(PERFORMANCE_PROFILES)),
+      theme: preference<Theme>("appTheme", "native", oneOf(Object.keys(THEMES) as Theme[]))
     },
 
     favorites: {
-      allowedRatings: preference<Rating>("favoritesAllowedRatings", 7),
+      allowedRatings: preference<Rating>("favoritesAllowedRatings", 7, oneOf(RATINGS)),
       columnCount: preference("favoritesColumnCount", defaults.favoritesColumnCount),
       downloadBatchSize: preference("favoritesDownloadBatchSize", 500),
       downloadFilenameFormat: preference("favoritesDownloadFilenameFormat", 3),
-      drawerActiveSection: preference<FavoritesDrawerSectionName>("favoritesDrawerActiveView", "settings"),
+      drawerActiveSection: preference<FavoritesDrawerSectionName>("favoritesDrawerActiveView", "settings", oneOf(FavoritesDrawerSectionNames)),
       drawerOpen: preference("favoritesDrawerOpen", false),
       excludeBlacklist: preference("favoritesExcludeBlacklist", false),
       headerEnabled: preference("favoritesHeaderEnabled", true),
       hintsEnabled: preference("favoritesHintsEnabled", defaults.favoritesHintsEnabled),
       infiniteScroll: preference("favoritesInfiniteScroll", defaults.favoritesInfiniteScroll),
-      layout: preference<Layout>("favoritesLayout", "column"),
-      postActionBar: preference<ActionBarMode>("favoritesPostActionBar", defaults.favoritesPostActionBar),
+      layout: preference<Layout>("favoritesLayout", "column", oneOf(LAYOUTS)),
+      postActionBar: preference<ActionBarMode>("favoritesPostActionBar", defaults.favoritesPostActionBar, oneOf(ACTION_BAR_MODES)),
       postActionBarButtons: preference("favoritesPostActionBarButtons", defaults.favoritesPostActionBarButtons),
       resultsPerPage: preference("favoritesResultsPerPage", 50),
       rowHeight: preference("favoritesRowHeight", 5),
       settingsExpandedSections: preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
       sortAscending: preference("favoritesSortAscending", false),
-      sortKey: preference<SortKey>("favoritesSortKey", "default"),
+      sortKey: preference<SortKey>("favoritesSortKey", "default", oneOf(METRICS)),
       tooltipEnabled: preference("favoritesTooltipEnabled", false),
       upscaleQuality: preference("favoritesUpscaleQuality", 1),
       upscaleThumbs: preference("favoritesUpscaleThumbs", true)
@@ -73,7 +73,7 @@ export function createPreferences(defaults: PreferenceDefaults, store: LocalKeye
 
     postOverlay: {
       enabled: preference("postOverlayEnabled", false),
-      mode: preference<PostOverlayMode>("postOverlayMode", "tag")
+      mode: preference<PostOverlayMode>("postOverlayMode", "tag", oneOf(POST_OVERLAY_MODES))
     },
 
     postList: {
@@ -81,8 +81,8 @@ export function createPreferences(defaults: PreferenceDefaults, store: LocalKeye
       enabled: preference("postListEnabled", false),
       favoriteIndicator: preference("postListFavoriteIndicator", false),
       infiniteScroll: preference("postListInfiniteScroll", false),
-      layout: preference<Layout>("postListLayout", "column"),
-      postActionBar: preference<ActionBarMode>("postListPostActionBar", defaults.postListPostActionBar),
+      layout: preference<Layout>("postListLayout", "column", oneOf(LAYOUTS)),
+      postActionBar: preference<ActionBarMode>("postListPostActionBar", defaults.postListPostActionBar, oneOf(ACTION_BAR_MODES)),
       postActionBarButtons: preference("postListPostActionBarButtons", ActionBarButton.Favorite),
       rowHeight: preference("postListRowHeight", 7),
       settingsCollapsed: preference("postListSettingsCollapsed", false),

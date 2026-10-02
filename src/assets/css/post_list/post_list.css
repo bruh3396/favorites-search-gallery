@@ -54,20 +54,6 @@ input:checked + .slider {
   margin-right: 0;
 }
 
-#post-list-menu .setting-toggle-track {
-  width: 32px;
-  height: 18px;
-}
-
-#post-list-menu .setting-toggle-knob {
-  width: 13px;
-  height: 13px;
-}
-
-#post-list-menu .setting-row[data-on] .setting-toggle-knob {
-  transform: translate(15px, -50%);
-}
-
 #post-list-menu .setting-dropdown-button {
   min-width: 84px;
   font-size: 11px;

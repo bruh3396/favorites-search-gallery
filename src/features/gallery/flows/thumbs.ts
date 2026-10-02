@@ -22,9 +22,9 @@ export class GalleryThumbsFlow extends GalleryFlow {
   }
 
   public async refreshInitialContent(): Promise<void> {
-    const { environment, events } = this.context;
+    const { environment, milestones } = this.context;
 
-    if (environment.mode === "postList" || (environment.mode === "favorites" && !(await events.favorites.storedFavoritesFound.wait()))) {
+    if (environment.mode === "postList" || (environment.mode === "favorites" && !(await milestones.favorites.storedFavoritesFound.wait()))) {
       this.refresh();
     }
   }

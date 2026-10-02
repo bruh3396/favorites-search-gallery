@@ -1,4 +1,4 @@
-import { Emitter, StickyEmitter } from "@/lib/event/emitter";
+import { Emitter } from "@/lib/event/emitter";
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/event/input";
 import { Environment } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
@@ -12,7 +12,6 @@ const TOUCH_HOLD_THRESHOLD = 300;
 
 export class DomEvents {
   public readonly document = {
-    domLoaded: new StickyEmitter<void>(),
     mouseover: new Emitter<EnhancedMouseEvent>(),
     click: new Emitter<EnhancedMouseEvent>(),
     dblclick: new Emitter<MouseEvent>(),
@@ -48,7 +47,6 @@ export class DomEvents {
   private wasHeld = false;
 
   public addEventListeners(shell: Shell, environment: Environment, events: Events, featureBridge: FeatureBridge): void {
-    this.broadcastDomLoad();
     this.setupDocumentEvents(environment.mode === "favorites" ? shell.root : document.documentElement);
     this.setupWindowEvents();
     this.setupMobileGestures(environment.device === "desktop");
@@ -195,15 +193,5 @@ export class DomEvents {
     window.addEventListener("scroll", (event) => {
       this.window.scroll.emit(event);
     }, { passive: true });
-  }
-
-  private broadcastDomLoad(): void {
-    if (document.readyState !== "loading") {
-      this.document.domLoaded.emit();
-      return;
-    }
-    document.addEventListener("DOMContentLoaded", () => {
-      this.document.domLoaded.emit();
-    }, { once: true });
   }
 }

@@ -109,7 +109,7 @@ function mountDrawerSections({ control, features }: FavoritesComponents): void {
 }
 
 function subscribeToEvents({ context, view, flows, control }: FavoritesComponents): void {
-  const { events } = context;
+  const { events, milestones } = context;
 
   events.favorites.searchButtonClicked.on((event) => control.handleSearchButtonClicked(event));
   events.favorites.clearButtonClicked.on(() => control.clearSearch());
@@ -128,7 +128,7 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.postOverlay.excludeTagFromSearchRequested.on((tag) => control.excludeFromSearch(tag));
   events.app.favoriteAdded.on((id) => view.setFavorited(id, true));
   events.app.favoriteRemoved.on((id) => flows.action.removeFavorite(id));
-  events.favorites.favoritesLoaded.on(() => view.collectAspectRatios(), { once: true });
+  milestones.favorites.favoritesLoaded.wait().then(() => view.collectAspectRatios());
 }
 
 function bindPreferences({ context, view }: FavoritesComponents): void {

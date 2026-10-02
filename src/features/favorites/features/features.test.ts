@@ -48,6 +48,11 @@ function setup(snippets: Snippet[] = []): Setup {
   return { context, features, results, appended };
 }
 
+async function reachFavoritesLoaded(context: AppContext): Promise<void> {
+  context.milestones.favorites.favoritesLoaded.reach();
+  await flushMicrotasks();
+}
+
 function mountDownloader(features: FavoritesFeatures): HTMLButtonElement {
   const container = document.createElement("div");
 
@@ -82,21 +87,21 @@ describe("FavoritesFeatures", () => {
   });
 
   describe("downloader", () => {
-    test("waits for favorites to load before offering a download", () => {
+    test("waits for favorites to load before offering a download", async () => {
       const { context, features } = setup();
       const download = mountDownloader(features);
 
       expect(download.disabled).toBe(true);
-      context.events.favorites.favoritesLoaded.emit();
+      await reachFavoritesLoaded(context);
       expect(download.disabled).toBe(false);
       expect(download.textContent).toBe("Download 2 Results");
     });
 
-    test("follows the search results", () => {
+    test("follows the search results", async () => {
       const { context, features, results } = setup();
       const download = mountDownloader(features);
 
-      context.events.favorites.favoritesLoaded.emit();
+      await reachFavoritesLoaded(context);
       results.pop();
       context.events.favorites.searchResultsUpdated.emit(results);
       expect(download.textContent).toBe("Download 1 Result");
@@ -105,11 +110,11 @@ describe("FavoritesFeatures", () => {
     test.each([
       ["batch size", (context: AppContext): void => context.preferences.favorites.downloadBatchSize.set(1)],
       ["filename format", (context: AppContext): void => context.preferences.favorites.downloadFilenameFormat.set(1)]
-    ])("redraws when the %s changes", (_, change) => {
+    ])("redraws when the %s changes", async (_, change) => {
       const { context, features, results } = setup();
       const download = mountDownloader(features);
 
-      context.events.favorites.favoritesLoaded.emit();
+      await reachFavoritesLoaded(context);
       results.pop();
       change(context);
       expect(download.textContent).toBe("Download 1 Result");

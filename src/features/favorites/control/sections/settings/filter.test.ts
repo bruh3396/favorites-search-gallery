@@ -1,9 +1,11 @@
 import * as FavoritesSettingsFilter from "@/features/favorites/control/sections/settings/filter";
 import { describe, expect, test } from "vitest";
-import { segmented, toggle } from "@/lib/ui/settings/controls";
 import { SettingsClass } from "@/lib/ui/settings/classes";
+import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { buildCollapsibleSection } from "@/lib/ui/settings/components/section";
+import { buildToggleRow } from "@/lib/ui/settings/components/toggle";
 import { createElement } from "@/utils/browser/element";
+import { segmented } from "@/lib/ui/settings/controls";
 
 interface Setup {
   panel: HTMLElement;
@@ -15,10 +17,10 @@ interface Setup {
 
 function setup(): Setup {
   const rows = {
-    darkMode: toggle({ label: "Dark Mode", tooltip: "Use dark variant of selected color theme" })(),
-    header: toggle({ label: "Site Header", tooltip: "Show site header" })(),
+    darkMode: toggleRow({ label: "Dark Mode", tooltip: "Use dark variant of selected color theme" }),
+    header: toggleRow({ label: "Site Header", tooltip: "Show site header" }),
     layout: segmented({ label: "Layout", tooltip: "Choose favorites layout", options: new Map([["column", "Waterfall"], ["grid", "Grid"]]) })(),
-    autoplay: toggle({ label: "Autoplay", tooltip: "Automatically traverse gallery" })()
+    autoplay: toggleRow({ label: "Autoplay", tooltip: "Automatically traverse gallery" })
   };
   const sections = {
     appearance: section("Appearance", [rows.darkMode, rows.header, rows.layout]),
@@ -30,6 +32,10 @@ function setup(): Setup {
 
   panel.append(filter, sections.appearance, sections.gallery);
   return { panel, field: filter.querySelector("input") as HTMLInputElement, hidden, rows, sections };
+}
+
+function toggleRow(config: Partial<ToggleSetting>): HTMLElement {
+  return buildToggleRow(config, { onToggle: () => { } }).element;
 }
 
 function section(title: string, rows: HTMLElement[]): HTMLElement {
@@ -108,7 +114,7 @@ describe("FavoritesSettingsFilter", () => {
 
   test("matches untitled sections and unlabeled rows only by what they do have", () => {
     const { panel, field } = setup();
-    const extra = { cherry: toggle({ label: "Cherry" })(), unlabeled: createElement("div", { className: SettingsClass.row }) };
+    const extra = { cherry: toggleRow({ label: "Cherry" }), unlabeled: createElement("div", { className: SettingsClass.row }) };
 
     panel.append(
       createElement("section", { className: SettingsClass.section, children: [extra.cherry] }),

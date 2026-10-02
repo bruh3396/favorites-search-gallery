@@ -4,6 +4,7 @@ import { FILES } from "#architecture/eslint/files.mjs";
 import { IMPORTS } from "#architecture/eslint/imports/imports.mjs";
 import { LAYERS } from "#architecture/eslint/layers.mjs";
 import { SYNTAX } from "#architecture/eslint/syntax/syntax.mjs";
+import { TYPED } from "#architecture/eslint/typed/typed.mjs";
 
 export default [
   { ignores: ["src/playground/**"] },
@@ -25,5 +26,6 @@ export default [
       "boundaries/no-unknown-files": "error"
     }
   },
-  ...SYNTAX
+  ...SYNTAX,
+  ...TYPED
 ];

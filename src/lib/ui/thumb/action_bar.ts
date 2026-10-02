@@ -14,7 +14,8 @@ export enum ActionBarButton {
   Open = 4
 }
 
-export type ActionBarMode = "off" | "hover" | "always";
+export const ACTION_BAR_MODES = ["off", "hover", "always"] as const;
+export type ActionBarMode = (typeof ACTION_BAR_MODES)[number];
 
 export type ActionBarStyle = "corner" | "opaque" | "inset";
 

@@ -1,11 +1,16 @@
 import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile } from "@/types/app";
-import { SettingsControl, dropdown, multiSegmented, segmented, stepper, toggle } from "@/lib/ui/settings/controls";
+import { SettingsControl, dropdown, multiSegmented, segmented, stepper } from "@/lib/ui/settings/controls";
 import { AppContext } from "@/app/context/context";
 import { Preferences } from "@/app/context/preferences";
 import { ThumbConfig } from "@/config/thumb_config";
+import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { booleanPreference } from "@/lib/storage/preference";
+import { buildToggleRow } from "@/lib/ui/settings/components/toggle";
+import { effect } from "@/core/utils/reactive/signal";
+
+type ToggleConfig = Partial<ToggleSetting> & Pick<ToggleSetting, "preference">;
 
 export type PostListSettingsCatalog = Record<string, SettingsControl>;
 
@@ -132,6 +137,17 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       enabled: features.has("gallery"),
       preference: preferences.gallery.mobileEnabled
     })
+  };
+}
+
+function toggle(config: ToggleConfig): SettingsControl {
+  return (): HTMLElement => {
+    const { preference } = config;
+    const row = buildToggleRow(config, { onToggle: () => preference.set(!preference.value), size: "small" });
+
+    effect(() => row.setChecked(preference.value));
+    row.setDisabled(config.enabled === false);
+    return row.element;
   };
 }
 

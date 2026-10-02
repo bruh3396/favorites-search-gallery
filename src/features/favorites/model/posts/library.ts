@@ -14,8 +14,8 @@ function postIsComplete(post: Post): boolean {
   return post.width > 0 && post.height > 0;
 }
 
-function postIsStale(post: Post): boolean {
-  return post.fetchedAt === undefined || Date.now() - post.fetchedAt > TIME_TO_LIVE;
+function postIsStale(post: Post, now: number): boolean {
+  return post.fetchedAt === undefined || now - post.fetchedAt > TIME_TO_LIVE;
 }
 
 interface FavoritesPostLibraryDependencies {
@@ -30,6 +30,7 @@ export class FavoritesPostLibrary implements PostLibrary {
   private readonly localPosts: LocalPosts;
   private readonly remotePosts: RemotePosts;
   private readonly remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
+  private readonly scheduler: Scheduler;
   private readonly localPostsWriter: CoalescingExecutor<Post>;
   private readonly onRefreshed: (updated: CategorizedPost) => void;
 
@@ -37,6 +38,7 @@ export class FavoritesPostLibrary implements PostLibrary {
     this.localPosts = dependencies.localPosts;
     this.remotePosts = dependencies.remotePosts;
     this.remoteMedia = dependencies.remoteMedia;
+    this.scheduler = dependencies.scheduler;
     this.localPostsWriter = new CoalescingExecutor(WRITE_BATCH_SIZE, WRITE_DELAY, posts => this.localPosts.setMany(posts), dependencies.scheduler);
     this.onRefreshed = dependencies.onRefreshed;
   }
@@ -72,7 +74,7 @@ export class FavoritesPostLibrary implements PostLibrary {
   private refreshStale(post: Post): Promise<CategorizedPost> {
     const unchanged = { post, tagCategories: new Map() };
 
-    if (!postIsStale(post)) {
+    if (!postIsStale(post, this.scheduler.now())) {
       return Promise.resolve(unchanged);
     }
     return this.fetchFresh(post).catch(() => unchanged);
@@ -88,6 +90,6 @@ export class FavoritesPostLibrary implements PostLibrary {
 
   private async fetchFresh(stale: Post): Promise<CategorizedPost> {
     const { post, tagCategories } = await this.remotePosts.fetch(stale);
-    return { post: { ...stale, ...post, fetchedAt: Date.now() }, tagCategories };
+    return { post: { ...stale, ...post, fetchedAt: this.scheduler.now() }, tagCategories };
   }
 }

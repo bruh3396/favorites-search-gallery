@@ -1,10 +1,5 @@
 import { Scheduler } from "@/core/boundary/ports/scheduler";
 
-interface Deferred<V> {
-  resolve: (value: V) => void;
-  reject: (reason: unknown) => void;
-}
-
 export class CoalescingExecutor<T> {
   private pending: T[] = [];
   private cancelFlush: (() => void) | undefined;
@@ -37,7 +32,7 @@ export class CoalescingExecutor<T> {
 }
 
 export class CoalescingResolver<K, V> {
-  private readonly deferred = new Map<K, Deferred<V>[]>();
+  private readonly deferred = new Map<K, PromiseWithResolvers<V>[]>();
   private readonly executor: CoalescingExecutor<K>;
 
   constructor(
@@ -50,17 +45,16 @@ export class CoalescingResolver<K, V> {
   }
 
   public schedule(key: K): Promise<V> {
-    return new Promise<V>((resolve, reject) => {
-      const deferred = { resolve, reject };
-      const existing = this.deferred.get(key);
+    const deferred = Promise.withResolvers<V>();
+    const existing = this.deferred.get(key);
 
-      if (existing === undefined) {
-        this.deferred.set(key, [deferred]);
-        this.executor.schedule(key);
-      } else {
-        existing.push(deferred);
-      }
-    });
+    if (existing === undefined) {
+      this.deferred.set(key, [deferred]);
+      this.executor.schedule(key);
+    } else {
+      existing.push(deferred);
+    }
+    return deferred.promise;
   }
 
   private resolveCoalesced(coalesced: K[]): void {

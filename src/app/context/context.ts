@@ -1,4 +1,5 @@
 import { Events, createEvents } from "@/app/context/events";
+import { Milestones, createMilestones } from "@/app/context/milestones";
 import { DomEvents } from "@/app/context/dom_events";
 import { Environment } from "@/core/boundary/environment";
 import { FeatureBridge } from "@/app/context/feature_bridge";
@@ -13,6 +14,7 @@ export interface AppContext {
   preferences: Preferences;
   features: Features;
   events: Events;
+  milestones: Milestones;
   featureBridge: FeatureBridge;
   domEvents: DomEvents;
   shell: Shell;
@@ -20,8 +22,9 @@ export interface AppContext {
 
 export function createAppContext(environment: Environment, ports: Ports, preferences: Preferences, features: Features): AppContext {
   const events = createEvents();
+  const milestones = createMilestones();
   const featureBridge = new FeatureBridge(environment);
   const domEvents = new DomEvents();
   const shell = new Shell();
-  return { environment, ports, preferences, features, events, featureBridge, domEvents, shell };
+  return { environment, ports, preferences, features, events, milestones, featureBridge, domEvents, shell };
 }

@@ -1,5 +1,7 @@
-export type PerformanceProfile = "normal" | "low" | "potato";
-export type Layout = "row" | "square" | "grid" | "column" | "native";
+export const PERFORMANCE_PROFILES = ["normal", "low", "potato"] as const;
+export type PerformanceProfile = (typeof PERFORMANCE_PROFILES)[number];
+export const LAYOUTS = ["row", "square", "grid", "column", "native"] as const;
+export type Layout = (typeof LAYOUTS)[number];
 export type GalleryState = "idle" | "preview" | "open";
 
 export enum UpscaleQuality {
@@ -13,7 +15,8 @@ export type QualityCutoff = {
   maxRatio: number;
   quality: UpscaleQuality;
 };
-export type PostOverlayMode = "tag";
+export const POST_OVERLAY_MODES = ["tag"] as const;
+export type PostOverlayMode = (typeof POST_OVERLAY_MODES)[number];
 
 export type GalleryAction =
   | "exit"

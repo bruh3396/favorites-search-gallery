@@ -1,0 +1,15 @@
+:where([class^="fsg-"], [class*=" fsg-"]),
+:where([class^="fsg-"], [class*=" fsg-"])::before,
+:where([class^="fsg-"], [class*=" fsg-"])::after {
+  box-sizing: border-box;
+}
+
+:where(button[class^="fsg-"], button[class*=" fsg-"]) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  appearance: none;
+}

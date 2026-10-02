@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
@@ -8,12 +9,14 @@ import { createEnvironment } from "@/testing/environment";
 interface Setup {
   status: FavoritesStatus;
   shell: FavoritesShell;
+  scheduler: MemoryScheduler;
 }
 
 function setup(): Setup {
   const environment = createEnvironment();
   const shell = new FavoritesShell(new Shell(), environment);
-  return { status: new FavoritesStatus(shell.toolbar, shell.toolbarRoot), shell };
+  const scheduler = new MemoryScheduler();
+  return { status: new FavoritesStatus(shell.toolbar, shell.toolbarRoot, scheduler), shell, scheduler };
 }
 
 function statusOf(shell: FavoritesShell): string | null {
@@ -30,14 +33,6 @@ function progressOf(shell: FavoritesShell): string | null {
 }
 
 describe("FavoritesStatus", () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
   test("starts with a hidden progress bar", () => {
     const { shell } = setup();
 
@@ -45,31 +40,31 @@ describe("FavoritesStatus", () => {
   });
 
   test("shows a status until it's cleared", () => {
-    const { status, shell } = setup();
+    const { status, shell, scheduler } = setup();
 
     status.setStatus("Peeling apples");
-    vi.advanceTimersByTime(60_000);
+    scheduler.advance(60_000);
     expect(statusOf(shell)).toBe("Peeling apples");
     status.clearStatus();
     expect(statusOf(shell)).toBe("");
   });
 
   test("a temporary status clears itself after a second", () => {
-    const { status, shell } = setup();
+    const { status, shell, scheduler } = setup();
 
     status.setTemporaryStatus("Apple added");
-    vi.advanceTimersByTime(999);
+    scheduler.advance(999);
     expect(statusOf(shell)).toBe("Apple added");
-    vi.advanceTimersByTime(1);
+    scheduler.advance(1);
     expect(statusOf(shell)).toBe("");
   });
 
   test("a new status outlasts an earlier temporary one", () => {
-    const { status, shell } = setup();
+    const { status, shell, scheduler } = setup();
 
     status.setTemporaryStatus("Apple added");
     status.setStatus("Peeling apples");
-    vi.advanceTimersByTime(1_000);
+    scheduler.advance(1_000);
     expect(statusOf(shell)).toBe("Peeling apples");
   });
 
@@ -93,12 +88,12 @@ describe("FavoritesStatus", () => {
     });
 
     test("with an expected total, shows progress, then a time estimate", () => {
-      const { status, shell } = setup();
+      const { status, shell, scheduler } = setup();
 
       status.setExpectedTotalFavoriteCount(600);
       status.updateFetchStatus(0, 0);
       expect(statusOf(shell)).toBe("Fetching - 0 / 600");
-      vi.advanceTimersByTime(2_000);
+      scheduler.advance(2_000);
       status.updateFetchStatus(300, 0);
       expect(statusOf(shell)).toBe("Fetching - 300 / 600 -   2s");
       expect(progressOf(shell)).toBe("50%");

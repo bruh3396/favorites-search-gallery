@@ -70,9 +70,16 @@ runSyntax("rule27", {
 });
 
 runSyntax("rule28", {
-  valid: [["features/favorites/control/control.ts", "confirm(text);"]],
+  valid: [
+    ["features/favorites/view/renderer.ts", "confirm(text);"],
+    ["features/favorites/control/control.test.ts", "confirm(text);"],
+    ["features/favorites/control/control.ts", "dialogs.confirm(text);"]
+  ],
   invalid: [
     ...casesFor(CORE_FILES, "confirm(text);"),
+    ["features/favorites/control/control.ts", "confirm(text);"],
+    ["features/favorites/control/sections/menu.ts", "window.alert(text);"],
+    ["features/favorites/features/snippets/control/control.ts", "prompt(text);"],
     ["core/utils/utils.ts", "alert(text);"],
     ["core/utils/utils.ts", "window.prompt(text);"]
   ]
@@ -80,14 +87,30 @@ runSyntax("rule28", {
 
 runSyntax("rule29", {
   valid: [
-    ["adapters/browser/client/client.ts", "URL.createObjectURL(blob);"],
     ["core/utils/utils.ts", "new URL(href);"]
   ],
   invalid: [
-    ...casesFor(CORE_FILES, "URL.createObjectURL(blob);"),
     ["core/utils/utils.ts", "new FileReader();"],
     ["core/utils/utils.ts", "showSaveFilePicker();"],
-    ["core/utils/utils.ts", "anchor.download = name;"]
+    ["core/utils/utils.ts", "anchor.download = name;"],
+    ["core/features/tooltip/view/view.ts", "new FileReader();"],
+    ["core/ui/switch/switch.ts", "anchor.download = name;"]
+  ]
+});
+
+runSyntax("rule29b", {
+  valid: [
+    ["adapters/browser/client/client.ts", "URL.createObjectURL(blob);"],
+    ["core/features/tooltip/view/view.ts", "URL.createObjectURL(blob);"],
+    ["core/features/tooltip/features/preview/view/renderer.ts", "URL.revokeObjectURL(url);"],
+    ["core/ui/switch/switch.ts", "URL.createObjectURL(blob);"],
+    ["features/favorites/view/renderer.ts", "URL.createObjectURL(blob);"]
+  ],
+  invalid: [
+    ...casesFor(CORE_FILES, "URL.createObjectURL(blob);"),
+    ["core/utils/utils.ts", "URL.revokeObjectURL(url);"],
+    ["core/features/tooltip/flows/flows.ts", "URL.createObjectURL(blob);"],
+    ["core/features/tooltip/control/control.ts", "URL.createObjectURL(blob);"]
   ]
 });
 
@@ -102,14 +125,21 @@ runSyntax("rule30", {
     ...casesFor(CORE_FILES, "GM_xmlhttpRequest(request);"),
     ["lib/lib.ts", "GM_setValue(key, value);"],
     ["features/favorites/view/renderer.ts", "GM.getValue(key);"],
+    ["features/favorites/control/control.ts", "GM_setValue(key, value);"],
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "unsafeWindow.document;"]
   ]
 });
 
 runSyntax("rule31", {
-  valid: [["adapters/rule34/client/client.ts", "window.open(url);"]],
+  valid: [
+    ["adapters/rule34/client/client.ts", "window.open(url);"],
+    ["features/favorites/view/renderer.ts", "window.open(url);"],
+    ["features/favorites/control/control.ts", "const open = (name: string): void => show(name); open(section);"]
+  ],
   invalid: [
     ...casesFor(CORE_FILES, "window.open(url);"),
+    ["features/favorites/control/control.ts", "window.open(url);"],
+    ["features/favorites/features/snippets/control/control.ts", "open(url);"],
     ["core/utils/utils.ts", "open(url);"]
   ]
 });

@@ -1,10 +1,23 @@
-import architecture from "./architecture/eslint/eslint.config.mjs";
 import { defineConfig } from "eslint/config";
 import functional from "eslint-plugin-functional";
 import globals from "globals";
 import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
+
+// A boolean among several parameters is a flag argument; a lone boolean is the value being set.
+const SIGNATURE_WITH_SEVERAL_PARAMETERS = ":matches(:function, TSDeclareFunction, TSEmptyBodyFunctionExpression, TSMethodSignature, TSFunctionType, TSCallSignatureDeclaration, TSConstructSignatureDeclaration)[params.length>1]";
+const BOOLEAN_TYPED = "[typeAnnotation.typeAnnotation.type='TSBooleanKeyword']";
+const BOOLEAN_DEFAULT = "[right.type='Literal'][right.raw=/^(true|false)$/]";
+const BOOLEAN_FLAG_MESSAGE = "Boolean flag parameter: pass an options object ({ eager: true }) or split the function. A lone boolean that is the value being set (toggleDrawer(open)) is fine.";
+const BOOLEAN_FLAG_PARAMETERS = [
+  `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > Identifier${BOOLEAN_TYPED}`,
+  `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > AssignmentPattern > Identifier.left${BOOLEAN_TYPED}`,
+  `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > TSParameterProperty > Identifier.parameter${BOOLEAN_TYPED}`,
+  `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > TSParameterProperty > AssignmentPattern > Identifier.left${BOOLEAN_TYPED}`,
+  `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`,
+  `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > TSParameterProperty > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`
+].map(selector => ({ selector, message: BOOLEAN_FLAG_MESSAGE }));
 
 export default defineConfig([
   {
@@ -222,7 +235,8 @@ export default defineConfig([
       "no-restricted-imports": "error",
       "no-restricted-modules": "error",
       "no-restricted-properties": "error",
-      "no-restricted-syntax": "error",
+      "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS],
+      "@typescript-eslint/max-params": ["error", { max: 3 }],
       "no-return-assign": "error",
       "no-return-await": "error",
       "no-script-url": "error",
@@ -650,6 +664,5 @@ export default defineConfig([
     rules: {
       "no-bitwise": "off"
     }
-  },
-  architecture
+  }
 ]);

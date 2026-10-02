@@ -1,23 +1,25 @@
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
 import { FavoritesId } from "@/features/favorites/types/selectors";
+import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
-import { Timeout } from "@/types/async";
 
 const TEMPORARY_STATUS_TIMEOUT = 1_000;
 
 export class FavoritesStatus {
+  private readonly scheduler: Scheduler;
   private readonly eta: FavoritesEta;
   private readonly resultsCountIndicator: HTMLElement;
   private readonly statusIndicator: HTMLElement;
   private readonly progressBar: ProgressBar;
   private totalFavoriteCount: number | null;
-  private statusTimeout: Timeout | undefined;
+  private cancelStatusTimeout: () => void;
 
-  constructor(slots: FavoritesToolbarSlots, toolbar: HTMLElement) {
+  constructor(slots: FavoritesToolbarSlots, toolbar: HTMLElement, scheduler: Scheduler) {
+    this.scheduler = scheduler;
     this.totalFavoriteCount = null;
-    this.statusTimeout = undefined;
-    this.eta = new FavoritesEta();
+    this.cancelStatusTimeout = (): void => undefined;
+    this.eta = new FavoritesEta(scheduler);
     this.resultsCountIndicator = slots.resultsCount;
     this.statusIndicator = slots.loadStatus;
     this.progressBar = buildProgressBar(FavoritesId.loadProgressBar);
@@ -25,14 +27,13 @@ export class FavoritesStatus {
   }
 
   public setStatus(text: string): void {
-    clearTimeout(this.statusTimeout);
+    this.cancelStatusTimeout();
     this.statusIndicator.textContent = text;
   }
 
   public setTemporaryStatus(text: string): void {
     this.setStatus(text);
-    clearTimeout(this.statusTimeout);
-    this.statusTimeout = setTimeout(() => this.clearStatus(), TEMPORARY_STATUS_TIMEOUT);
+    this.cancelStatusTimeout = this.scheduler.schedule(() => this.clearStatus(), TEMPORARY_STATUS_TIMEOUT);
   }
 
   public setResultsCount(value: number): void {

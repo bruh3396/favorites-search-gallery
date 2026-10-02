@@ -4,6 +4,7 @@ import { throttle } from "@/lib/async/rate_limiting";
 
 export class GalleryMouseFlow extends GalleryFlow {
   private readonly showCursorThrottled: () => void;
+  private zoomedIn = false;
 
   constructor(dependencies: GalleryFlowDependencies) {
     super(dependencies);
@@ -49,6 +50,10 @@ export class GalleryMouseFlow extends GalleryFlow {
       preview: (event) => this.flows.actions.adjustBackgroundOpacity(event.originalEvent),
       open: (event) => this.navigateOnWheel(event)
     }, wheelEvent);
+  }
+
+  public clearZoom(): void {
+    this.zoomedIn = false;
   }
 
   public hideCursor(): void {
@@ -122,11 +127,9 @@ export class GalleryMouseFlow extends GalleryFlow {
   }
 
   private zoomToPoint(event: MouseEvent): void {
-    const isZoomedIn = this.view.toggleZoom();
+    this.zoomedIn = this.view.toggleZoom();
 
-    this.context.domEvents.document.wheel.toggle(!isZoomedIn);
-
-    if (isZoomedIn) {
+    if (this.zoomedIn) {
       this.view.zoomToPoint({ x: event.x, y: event.y });
     }
   }
@@ -156,7 +159,7 @@ export class GalleryMouseFlow extends GalleryFlow {
   }
 
   private navigateOnWheel(event: EnhancedWheelEvent): void {
-    if (!event.originalEvent.shiftKey && !event.originalEvent.ctrlKey) {
+    if (!this.zoomedIn && !event.originalEvent.shiftKey && !event.originalEvent.ctrlKey) {
       this.flows.navigation.navigate(event.direction);
     }
   }

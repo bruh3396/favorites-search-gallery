@@ -1,13 +1,15 @@
-import { SelectSetting, Setting } from "@/lib/ui/settings/setting";
+import { Setting } from "@/lib/ui/settings/setting";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/browser/element";
 import { setDataset } from "@/utils/browser/dataset";
 
-export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement): HTMLElement {
+type RowConfig = Partial<Pick<Setting<unknown>, "label" | "tooltip" | "tooltipPosition" | "enabled">> & { options?: Map<unknown, string> };
+
+export function controlRow(config: RowConfig, control: HTMLElement, tag: "div" | "label" = "div"): HTMLElement {
   control.classList.add(SettingsClass.control);
   const text = createElement("span", { className: SettingsClass.rowLabel, textContent: config.label ?? "" });
-  const row = createElement("div", { className: SettingsClass.row, children: [text, control] });
+  const row = createElement(tag, { className: SettingsClass.row, children: [text, control] });
 
   if (config.enabled === false) {
     setDataset(row, "disabled");
@@ -17,7 +19,6 @@ export function controlRow<T>(config: Partial<Setting<T>>, control: HTMLElement)
   return row;
 }
 
-function keywordsOf<T>(config: Partial<Setting<T>>): string {
-  const { options } = config as Partial<SelectSetting<string>>;
-  return [config.label ?? "", config.tooltip ?? "", ...(options?.values() ?? [])].join(" ").toLowerCase();
+function keywordsOf(config: RowConfig): string {
+  return [config.label ?? "", config.tooltip ?? "", ...(config.options?.values() ?? [])].join(" ").toLowerCase();
 }

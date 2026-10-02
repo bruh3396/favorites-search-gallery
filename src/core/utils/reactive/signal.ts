@@ -1,3 +1,4 @@
+// eslint-disable-next-line functional/no-let
 let running: Effect | null = null;
 
 export class Signal<T> {
@@ -19,6 +20,10 @@ export class Signal<T> {
     for (const reader of [...this.readers]) {
       reader.run();
     }
+  }
+
+  public peek(): T {
+    return this.current;
   }
 
   public subscribe(reader: Effect): void {
@@ -53,6 +58,7 @@ class Effect {
     this.untrack();
     const previous = running;
 
+    // eslint-disable-next-line consistent-this, @typescript-eslint/no-this-alias
     running = this;
     this.executing = true;
 

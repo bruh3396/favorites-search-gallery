@@ -36,9 +36,9 @@ export class FavoritesFeatures {
   }
 
   private setupDownloader(): void {
-    const { events, preferences } = this.context;
+    const { events, milestones, preferences } = this.context;
 
-    events.favorites.favoritesLoaded.on(() => this.downloader.enable(), { once: true });
+    milestones.favorites.favoritesLoaded.wait().then(() => this.downloader.enable());
     events.favorites.searchResultsUpdated.on(() => this.downloader.reRender());
     preferences.favorites.downloadBatchSize.on(() => this.downloader.reRender());
     preferences.favorites.downloadFilenameFormat.on(() => this.downloader.reRender());

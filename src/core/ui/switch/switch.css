@@ -1,0 +1,57 @@
+.fsg-Switch {
+  --fsg-switch-thumb-size: 16px;
+  --fsg-switch-travel: 16px;
+
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  inline-size: 38px;
+  block-size: 22px;
+  padding: 2px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-full);
+  background: var(--fsg-color-surface-sunken);
+  cursor: pointer;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Switch[data-size="small"] {
+  --fsg-switch-thumb-size: 12px;
+  --fsg-switch-travel: 14px;
+
+  inline-size: 32px;
+  block-size: 18px;
+}
+
+.fsg-Switch[aria-checked="true"] {
+  border-color: var(--fsg-color-accent);
+  background: var(--fsg-color-accent);
+}
+
+.fsg-Switch:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 2px;
+}
+
+.fsg-Switch:disabled {
+  cursor: not-allowed;
+}
+
+.fsg-Switch-thumb {
+  inline-size: var(--fsg-switch-thumb-size);
+  block-size: var(--fsg-switch-thumb-size);
+  border-radius: var(--fsg-radius-full);
+  background: var(--fsg-color-on-surface-muted);
+  pointer-events: none;
+  transition:
+    transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Switch[aria-checked="true"] .fsg-Switch-thumb {
+  background: var(--fsg-color-on-accent);
+  transform: translateX(var(--fsg-switch-travel));
+}

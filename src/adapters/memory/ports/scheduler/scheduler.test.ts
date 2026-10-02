@@ -34,6 +34,30 @@ describe("MemoryScheduler", () => {
     expect(task).toHaveBeenCalledOnce();
   });
 
+  test("reads the time it was started at", () => {
+    expect(new MemoryScheduler(1000).now()).toBe(1000);
+  });
+
+  test("moves now forward with each advance", () => {
+    const scheduler = new MemoryScheduler(1000);
+
+    scheduler.advance(250);
+
+    expect(scheduler.now()).toBe(1250);
+  });
+
+  test("reads the due time inside a task it runs", () => {
+    const scheduler = new MemoryScheduler();
+    let seen: number | undefined;
+
+    scheduler.schedule(() => {
+      seen = scheduler.now();
+    }, 100);
+    scheduler.advance(300);
+
+    expect(seen).toBe(100);
+  });
+
   test("never runs a cancelled task", () => {
     const scheduler = new MemoryScheduler();
     const task = vi.fn();

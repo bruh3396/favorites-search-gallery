@@ -1,5 +1,7 @@
-export type Rating = 1 | 2 | 3 | 4 | 5 | 6 | 7;
-export type Metric = "default" | "id" | "score" | "width" | "height" | "creationTimestamp" | "lastChangedTimestamp" | "random" | "duration";
+export const RATINGS = [1, 2, 3, 4, 5, 6, 7] as const;
+export type Rating = (typeof RATINGS)[number];
+export const METRICS = ["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random", "duration"] as const;
+export type Metric = (typeof METRICS)[number];
 export type SortKey = Metric;
 export type SearchableMetric = Exclude<Metric, "default" | "creationTimestamp" | "lastChangedTimestamp" | "random">;
 export type MetricComparator = ":" | ":<" | ":>";

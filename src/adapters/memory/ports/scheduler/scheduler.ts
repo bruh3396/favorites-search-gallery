@@ -5,13 +5,20 @@ interface ScheduledTask {
   dueAt: number;
 }
 
-// Time moves only when a test calls advance.
 export class MemoryScheduler implements Scheduler {
-  private now = 0;
+  private time: number;
   private scheduled: ScheduledTask[] = [];
 
+  constructor(startAt = 0) {
+    this.time = startAt;
+  }
+
+  public now(): number {
+    return this.time;
+  }
+
   public schedule(task: () => void, delay: number): () => void {
-    const entry = { task, dueAt: this.now + delay };
+    const entry = { task, dueAt: this.time + delay };
 
     this.scheduled.push(entry);
     return (): void => {
@@ -20,14 +27,14 @@ export class MemoryScheduler implements Scheduler {
   }
 
   public advance(duration: number): void {
-    const end = this.now + duration;
+    const end = this.time + duration;
 
     for (let next = this.nextDue(end); next !== undefined; next = this.nextDue(end)) {
       this.scheduled = this.scheduled.filter(scheduled => scheduled !== next);
-      this.now = next.dueAt;
+      this.time = next.dueAt;
       next.task();
     }
-    this.now = end;
+    this.time = end;
   }
 
   private nextDue(end: number): ScheduledTask | undefined {

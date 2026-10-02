@@ -19,7 +19,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
     this.view.close();
     this.returnToLastViewed();
     this.control.disableInteractionTracking();
-    this.context.domEvents.document.wheel.toggle(true);
+    this.flows.mouse.clearZoom();
     this.context.events.gallery.galleryClosed.emit();
   }
 

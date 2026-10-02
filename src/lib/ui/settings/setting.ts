@@ -12,9 +12,10 @@ export interface Setting<T> {
   enabledWhen: EnableRule | null;
 }
 
-export interface ToggleSetting extends Setting<boolean> {
+export interface ToggleSetting extends Omit<Setting<boolean>, "preference" | "enabledWhen"> {
+  preference: Preference<boolean>;
+  enabledWhen: () => boolean;
   hotkey: string;
-  registerHotkey: (key: string, fire: () => void) => void;
 }
 
 export interface SelectSetting<T extends string | number> extends Setting<T> {

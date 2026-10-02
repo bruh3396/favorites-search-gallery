@@ -2,7 +2,7 @@ import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile, UpscaleQuality } from "@/types/app";
-import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper, toggle } from "@/lib/ui/settings/controls";
+import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
 import { AppContext } from "@/app/context/context";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
@@ -14,7 +14,11 @@ import { Theme } from "@/lib/ui/theme/themes";
 import { ThumbConfig } from "@/config/thumb_config";
 import { ToggleSetting } from "@/lib/ui/settings/setting";
 import { booleanPreference } from "@/lib/storage/preference";
+import { buildToggleRow } from "@/lib/ui/settings/components/toggle";
+import { effect } from "@/core/utils/reactive/signal";
 import { themeOptions } from "@/lib/ui/theme/builder";
+
+type ToggleConfig = Partial<ToggleSetting> & Pick<ToggleSetting, "preference">;
 
 export type SettingsCatalog = ReturnType<typeof buildSettingsCatalog>;
 export type SettingKey = keyof SettingsCatalog;
@@ -30,26 +34,26 @@ export function buildSettingsCatalog(context: AppContext) {
       preference: preferences.app.theme,
       options: themeOptions()
     }),
-    darkMode: toggleWithHotkey({
+    darkMode: toggle({
       id: "dark-mode",
       label: "Dark Mode",
       tooltip: "Use dark variant of selected color theme",
       preference: booleanPreference<ColorScheme>(preferences.app.colorScheme, "dark", "light"),
       hotkey: "D"
     }, events),
-    nativeFont: toggleWithHotkey({
+    nativeFont: toggle({
       id: "native-font",
       label: "Native Font",
       tooltip: "Use native site font",
       preference: preferences.app.nativeFont
     }, events),
-    fadeThumbs: toggleWithHotkey({
+    fadeThumbs: toggle({
       id: "fade-thumbs",
       label: "Fade In Thumbnails",
       tooltip: "Fade thumbnails in as they load (applies on reload)",
       preference: preferences.app.fadeThumbs
     }, events),
-    upscale: toggleWithHotkey({
+    upscale: toggle({
       id: "upscale",
       label: "Upscale Thumbnails",
       tooltip: "Upscale thumbnails for higher quality",
@@ -103,39 +107,39 @@ export function buildSettingsCatalog(context: AppContext) {
       step: 1,
       enabledWhen: whenLayout(preferences, (layout) => layout === "row")
     }),
-    header: toggleWithHotkey({
+    header: toggle({
       id: "toggle-header",
       label: "Site Header",
       tooltip: "Show site header",
       preference: preferences.favorites.headerEnabled
     }, events),
-    gradient: toggleWithHotkey({
+    gradient: toggle({
       id: "toggle-gradient",
       label: "Gradient",
       tooltip: "Use gradient menu background",
       preference: preferences.app.gradient
     }, events),
-    autoplay: toggleWithHotkey({
+    autoplay: toggle({
       id: "enable-autoplay",
       label: "Autoplay",
       tooltip: "Automatically traverse gallery",
       enabled: features.has("gallery"),
       preference: preferences.gallery.autoplayActive
     }, events),
-    mobileGallery: toggleWithHotkey({
+    mobileGallery: toggle({
       id: "enable-mobile-gallery",
       label: "Gallery",
       enabled: features.has("gallery"),
       preference: preferences.gallery.mobileEnabled
     }, events),
-    fullscreenOnHover: toggleWithHotkey({
+    fullscreenOnHover: toggle({
       id: "show-on-hover",
       label: "Enlarge on hover",
       tooltip: "Enlarge content on hover",
       enabled: features.has("gallery"),
       preference: preferences.gallery.previewEnabled
     }, events),
-    themedBackground: toggleWithHotkey({
+    themedBackground: toggle({
       id: "themed-background",
       label: "Themed Background",
       tooltip: "Use the current theme's background color for the gallery instead of black",
@@ -152,20 +156,20 @@ export function buildSettingsCatalog(context: AppContext) {
       max: 1,
       step: 0.05
     }),
-    galleryMenu: toggleWithHotkey({
+    galleryMenu: toggle({
       id: "enable-gallery-menu",
       label: "Menu",
       tooltip: "Show gallery sidebar",
       enabled: features.has("gallery") && GeneralConfig.galleryMenuOptionEnabled,
       preference: preferences.gallery.menuEnabled
     }, events),
-    enhanceSearchPages: toggleWithHotkey({
+    enhanceSearchPages: toggle({
       id: "enhance-post-lists",
       label: "Enhance Search Pages",
       tooltip: "Enable gallery and browser on search pages",
       preference: preferences.postList.enabled
     }, events),
-    infiniteScroll: toggleWithHotkey({
+    infiniteScroll: toggle({
       id: "infinite-scroll",
       label: "Infinite Scroll",
       tooltip: "Use infinite scroll (waterfall) instead of paging",
@@ -182,7 +186,7 @@ export function buildSettingsCatalog(context: AppContext) {
         ["off", "Off"]
       ])
     }),
-    postActionBarToggle: toggleWithHotkey({
+    postActionBarToggle: toggle({
       id: "post-action-bar-toggle",
       label: "Show Actions",
       tooltip: "Show actions on thumbnails",
@@ -200,7 +204,7 @@ export function buildSettingsCatalog(context: AppContext) {
         [ActionBarButton.Open, "Open"]
       ])
     }),
-    excludeBlacklist: toggleWithHotkey({
+    excludeBlacklist: toggle({
       id: "exclude-blacklist",
       label: "Exclude Blacklist",
       tooltip: "Exclude favorites with blacklisted tags from search",
@@ -235,7 +239,7 @@ export function buildSettingsCatalog(context: AppContext) {
         ["random", "Random"]
       ])
     }),
-    sortAscending: toggleWithHotkey({
+    sortAscending: toggle({
       id: "sort-ascending",
       label: "Sort Ascending",
       tooltip: "Sort search results in ascending order",
@@ -252,7 +256,7 @@ export function buildSettingsCatalog(context: AppContext) {
       step: FavoritesConfig.resultsPerPageStep,
       enabledWhen: whenNotInfiniteScroll(preferences)
     }),
-    tooltip: toggleWithHotkey({
+    tooltip: toggle({
       id: "show-tooltips",
       label: "Tag Tooltip",
       tooltip: "Show all tags when hovering over a thumbnail and see which ones were matched by the latest search",
@@ -261,7 +265,7 @@ export function buildSettingsCatalog(context: AppContext) {
       enabledWhen: whenNotFullscreenOnHover(preferences),
       hotkey: "T"
     }, events),
-    postOverlay: toggleWithHotkey({
+    postOverlay: toggle({
       id: "show-post-overlay",
       label: "Tag Overlay",
       tooltip: "Show tag overlay on thumbnails",
@@ -270,7 +274,7 @@ export function buildSettingsCatalog(context: AppContext) {
       enabledWhen: whenNotFullscreenOnHover(preferences),
       hotkey: "O"
     }, events),
-    hints: toggleWithHotkey({
+    hints: toggle({
       id: "show-hints",
       label: "Hints",
       tooltip: "Show hints",
@@ -292,11 +296,27 @@ export function buildSettingsCatalog(context: AppContext) {
   };
 }
 
-function toggleWithHotkey(config: Partial<ToggleSetting>, events: Events): SettingsControl {
-  return toggle({ registerHotkey: (key, fire) => registerHotkey(events, key, fire), ...config });
+function toggle(config: ToggleConfig, events: Events): SettingsControl {
+  return (): HTMLElement => {
+    const { preference } = config;
+    const flip = (): void => preference.set(!preference.value);
+    const row = buildToggleRow(config, { onToggle: flip });
+
+    effect(() => row.setChecked(preference.value));
+    effect(() => row.setDisabled(!isEnabled(config)));
+    registerHotkey(events, config.hotkey, flip);
+    return row.element;
+  };
 }
 
-function registerHotkey(events: Events, key: string, fire: () => void): void {
+function isEnabled(config: ToggleConfig): boolean {
+  return config.enabled !== false && (config.enabledWhen?.() ?? true);
+}
+
+function registerHotkey(events: Events, key: string | undefined, fire: () => void): void {
+  if (key === undefined) {
+    return;
+  }
   events.app.hotkeyPressed.on((pressed) => {
     if (pressed === key.toLowerCase()) {
       fire();
@@ -312,14 +332,14 @@ function whenNotInfiniteScroll(preferences: Preferences): EnableRule {
   return enableWhen(preferences.favorites.infiniteScroll, (on) => !on);
 }
 
-function whenNotFullscreenOnHover(preferences: Preferences): EnableRule {
-  return enableWhen(preferences.gallery.previewEnabled, (on) => !on);
+function whenNotFullscreenOnHover(preferences: Preferences): () => boolean {
+  return () => !preferences.gallery.previewEnabled.value;
 }
 
 function whenPickingUpscaleQuality(preferences: Preferences): EnableRule {
   return enableWhen(preferences.favorites.upscaleThumbs, (on) => on && !GalleryUpscaleConfig.dynamicQuality);
 }
 
-function whenNotSortByRandom(preferences: Preferences): EnableRule {
-  return enableWhen(preferences.favorites.sortKey, (key) => key !== "random");
+function whenNotSortByRandom(preferences: Preferences): () => boolean {
+  return () => preferences.favorites.sortKey.value !== "random";
 }

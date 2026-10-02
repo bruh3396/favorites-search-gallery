@@ -1,6 +1,6 @@
 import { ContentDisplayOptions } from "@/types/ui";
 import { Display } from "@/features/favorites/types/types";
-import { Events } from "@/app/context/events";
+import { Milestone } from "@/core/utils/async/milestone";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
@@ -28,7 +28,7 @@ export class FavoritesPaginatedDisplay implements Display {
   constructor(
     private readonly model: FavoritesModel,
     private readonly view: FavoritesView,
-    private readonly events: Events,
+    private readonly favoritesLoaded: Milestone,
     private readonly shell: Shell,
     private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl">
   ) { }
@@ -47,7 +47,7 @@ export class FavoritesPaginatedDisplay implements Display {
   }
 
   public advance(direction: NavigationKey): boolean {
-    if (this.events.favorites.favoritesLoaded.fired) {
+    if (this.favoritesLoaded.reached) {
       if (this.model.selectWrappedAdjacentPage(direction)) {
         this.renderCurrentPage();
         return true;
