@@ -33,7 +33,7 @@ describe("FavoritesColumnarArena", () => {
     });
 
     test("grows arrays past the initial capacity while preserving data", () => {
-      const beyondInitialCapacity = 1025;
+      const beyondInitialCapacity = 1_025;
 
       for (let i = 0; i < beyondInitialCapacity; i += 1) {
         writeId(arena, i);
@@ -92,7 +92,7 @@ describe("FavoritesColumnarArena", () => {
 
   describe("compress", () => {
     test("preserves item data through a compress that spans a capacity growth", () => {
-      const allocatedCount = 1029;
+      const allocatedCount = 1_029;
 
       for (let i = 0; i < allocatedCount; i += 1) {
         writeId(arena, i * 3);

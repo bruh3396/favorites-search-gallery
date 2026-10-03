@@ -1,12 +1,22 @@
-/* System tokens. Colors alias the legacy theme properties until themes move here. */
+/* System tokens, named for their role (Material 3). Each color resolves per color-scheme through light-dark(),
+   so choosing a scheme is setting color-scheme on the root, never swapping classes.
+   The root sets the font family too: inheritance crosses the shadow boundary, so otherwise the host page's font leaks in. */
 .fsg-App {
-  --fsg-color-accent: var(--theme-accent);
-  --fsg-color-on-accent: var(--theme-accent-text);
-  --fsg-color-outline: var(--theme-border);
-  --fsg-color-surface-sunken: var(--theme-sunken);
-  --fsg-color-on-surface-muted: var(--theme-text-muted);
+  color-scheme: light dark;
+  font-family: var(--fsg-font-family);
 
+  --fsg-color-accent: light-dark(#3b6fd8, #7aa2f7);
+  --fsg-color-on-accent: light-dark(#ffffff, #10131a);
+  --fsg-color-outline: light-dark(#c4c8d0, #3a3f4b);
+  --fsg-color-surface-sunken: light-dark(#eceef2, #1b1e25);
+  --fsg-color-on-surface-muted: light-dark(#6b7280, #9aa3b2);
+
+  --fsg-radius-medium: 8px;
   --fsg-radius-full: 999px;
+
+  --fsg-font-family: system-ui, sans-serif;
+  --fsg-font-size-label: 13px;
+  --fsg-font-size-label-small: 11px;
 
   --fsg-motion-duration-short: 150ms;
   --fsg-motion-easing-standard: ease;

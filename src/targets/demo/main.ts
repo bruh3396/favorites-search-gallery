@@ -41,7 +41,7 @@ function createPorts(
     remoteMedia: new MemoryRemoteMedia(),
     navigation: new MemoryNavigation(),
     hostPage: new BrowserHostPage(),
-    localFavorites: new IndexedDbLocalFavorites(indexedDbClient, "demo"),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: "demo" }, indexedDbClient),
     localKeyedValues: new BrowserLocalKeyedValues(),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
@@ -54,7 +54,10 @@ function main(): void {
   const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
   const indexedDbClient = new IndexedDbClient("demo");
 
-  startApp({ version: "demo", ...readBrowserEnvironment(), ...createDemoHostEnvironment() }, createPorts(memoryClient, indexedDbClient), document.body);
+  startApp({
+      version: "demo",
+      ...readBrowserEnvironment(), ...createDemoHostEnvironment()
+    }, createPorts(memoryClient, indexedDbClient), document.body);
 }
 
 main();

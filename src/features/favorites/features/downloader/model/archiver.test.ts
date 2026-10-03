@@ -54,7 +54,7 @@ async function entryNamesOf(blob: Blob): Promise<string[]> {
   const names: string[] = [];
   let offset = 0;
 
-  while (view.getUint32(offset, true) === 0x04034b50) {
+  while (view.getUint32(offset, true) === 0x04_03_4b_50) {
     const size = view.getUint32(offset + 18, true);
     const nameLength = view.getUint16(offset + 26, true);
     const extraLength = view.getUint16(offset + 28, true);

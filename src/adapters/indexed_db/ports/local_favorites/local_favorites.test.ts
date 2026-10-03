@@ -11,7 +11,7 @@ function createIndexedDb(): IndexedDbClient {
 }
 
 function createLocalFavorites(ownerId = "1"): IndexedDbLocalFavorites {
-  return new IndexedDbLocalFavorites(createIndexedDb(), ownerId);
+  return new IndexedDbLocalFavorites({ ownerId }, createIndexedDb());
 }
 
 describe("IndexedDbLocalFavorites", () => {
@@ -65,8 +65,8 @@ describe("IndexedDbLocalFavorites", () => {
 
   test("keeps owners in one namespace apart", async() => {
     const indexedDb = createIndexedDb();
-    const first = new IndexedDbLocalFavorites(indexedDb, "1");
-    const second = new IndexedDbLocalFavorites(indexedDb, "2");
+    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDb);
+    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDb);
 
     await first.prepend(["1"]);
 

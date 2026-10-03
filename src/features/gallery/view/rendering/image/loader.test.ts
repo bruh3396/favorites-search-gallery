@@ -1,6 +1,6 @@
 import { BudgetedRequests, ImageBudgeter, ImageFetcher } from "@/features/gallery/types/types";
 import { beforeEach, describe, expect, test } from "vitest";
-import { createDeferred, flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/async";
 import { GalleryImageLoader } from "@/features/gallery/view/rendering/image/loader";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { PostMedia } from "@/core/domain/post/post";
@@ -102,7 +102,7 @@ describe("GalleryImageLoader", () => {
     });
 
     test("disposes without notifying a request cancelled during its fetch", async() => {
-      const fetch = createDeferred<boolean>();
+      const fetch = Promise.withResolvers<boolean>();
       const cancelled = createRequest("0");
       const loader = createLoader(createBudgeter({ accepted: [cancelled], rejected: [] }));
 
@@ -117,7 +117,7 @@ describe("GalleryImageLoader", () => {
     });
 
     test("releases an evicted request, then disposes it again when its fetch settles", async() => {
-      const fetch = createDeferred<boolean>();
+      const fetch = Promise.withResolvers<boolean>();
       const loader = createLoader(createBudgeter({ accepted: [createRequest("0")], rejected: [] }, { accepted: [], rejected: [] }));
 
       fetchOutcome = (): Promise<boolean> => fetch.promise;
@@ -152,7 +152,7 @@ describe("GalleryImageLoader", () => {
     });
 
     test("ignores a low-resolution result that arrives after the high-resolution one", async() => {
-      const lowResolutionFetch = createDeferred<boolean>();
+      const lowResolutionFetch = Promise.withResolvers<boolean>();
       const loader = createLoader(createBudgeter({ accepted: [], rejected: [] }));
 
       fetchOutcome = (fetched): Promise<boolean> => (fetched.isHighRes ? Promise.resolve(true) : lowResolutionFetch.promise);

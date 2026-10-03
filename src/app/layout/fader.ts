@@ -2,13 +2,22 @@ import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { ThumbConfig } from "@/config/thumb_config";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
+export interface FaderConfiguration {
+  fadeThumbs: boolean;
+}
+
+export interface FaderDependencies {
+  root: HTMLElement;
+  getColumnCount: () => number;
+}
+
 export class Fader {
   private readonly observer = new IntersectionObserver(entries => this.fadeInOnScreen(entries), { root: null, threshold: 0 });
   private readonly pending: Map<HTMLElement, () => void> = new Map();
   private readonly fadeThumbs: boolean;
   private readonly getColumnCount: () => number;
 
-  constructor(root: HTMLElement, fadeThumbs: boolean, getColumnCount: () => number) {
+  constructor({ fadeThumbs }: FaderConfiguration, { root, getColumnCount }: FaderDependencies) {
     this.fadeThumbs = fadeThumbs;
     this.getColumnCount = getColumnCount;
     root.style.setProperty("--fade-cascade-step", `${ThumbConfig.fadeCascadeStepDelay}ms`);

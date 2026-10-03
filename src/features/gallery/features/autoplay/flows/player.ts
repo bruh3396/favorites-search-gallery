@@ -1,4 +1,4 @@
-import { AutoplayDuration, AutoplayIntents } from "@/features/gallery/features/autoplay/types/types";
+import { AutoplayConfiguration, AutoplayDuration, AutoplayIntents } from "@/features/gallery/features/autoplay/types/types";
 import { AutoplayFlow, AutoplayFlowDependencies } from "@/features/gallery/features/autoplay/flows/flow";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
 import { PostMedia } from "@/core/domain/post/post";
@@ -9,8 +9,8 @@ export class AutoplayPlayerFlow extends AutoplayFlow implements AutoplayIntents 
   private item: PostMedia | null;
   private open: boolean;
 
-  constructor(dependencies: AutoplayFlowDependencies) {
-    super(dependencies);
+  constructor(configuration: AutoplayConfiguration, dependencies: AutoplayFlowDependencies) {
+    super(configuration, dependencies);
     this.timers = {
       image: new Timer(this.context.durations.image.value),
       minimumVideo: new Timer(this.context.durations.minimumVideo.value)

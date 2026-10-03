@@ -1,7 +1,6 @@
-import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/abstract_upscaler";
+import { GalleryAbstractUpscaler, GalleryUpscalerConfiguration, GalleryUpscalerDependencies } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import OFFSCREEN_UPSCALER_CODE from "@/features/gallery/view/rendering/image/worker_upscaler?raw";
-import { Preference } from "@/lib/storage/preference";
 import { replaceCanvas } from "@/utils/browser/canvas";
 
 export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
@@ -9,16 +8,8 @@ export class GalleryWorkerUpscalerWrapper extends GalleryAbstractUpscaler {
   private readonly transferredCanvases: WeakSet<HTMLCanvasElement>;
   private readonly paintedIds: Map<HTMLCanvasElement, string>;
 
-  constructor(
-    canvasFor: (id: string) => HTMLCanvasElement | null,
-    enabled: Preference<boolean>,
-    quality: Preference<number>,
-    fetchBitmap: (request: ImageRequest) => Promise<boolean>,
-    paintDelay: number,
-    baseCanvasWidth: number,
-    maxUpscaledCanvasHeight: number
-  ) {
-    super(canvasFor, enabled, quality, fetchBitmap, paintDelay, baseCanvasWidth, maxUpscaledCanvasHeight);
+  constructor(configuration: GalleryUpscalerConfiguration, dependencies: GalleryUpscalerDependencies) {
+    super(configuration, dependencies);
     const workerUrl = URL.createObjectURL(new Blob([OFFSCREEN_UPSCALER_CODE], { type: "application/javascript" }));
 
     this.worker = new Worker(workerUrl);

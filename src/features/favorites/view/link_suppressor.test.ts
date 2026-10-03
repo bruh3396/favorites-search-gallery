@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { FavoritesLinkSuppressor } from "@/features/favorites/view/link_suppressor";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/url";
 
 function createThumb(id: string): HTMLElement {
   const thumb = document.createElement("div");

@@ -3,7 +3,7 @@ import { Media, MediaKind } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { grow } from "@/utils/pure/array";
 
-const DEFAULT_CAPACITY = 1024;
+const DEFAULT_CAPACITY = 1_024;
 const MEDIA_KINDS: readonly MediaKind[] = ["image", "video", "gif"];
 
 export class FavoritesPostTable {

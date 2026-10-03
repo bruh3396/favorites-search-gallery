@@ -26,6 +26,10 @@ export class MemoryScheduler implements Scheduler {
     };
   }
 
+  public sleep(duration: number): Promise<void> {
+    return new Promise(resolve => this.schedule(resolve, duration));
+  }
+
   public advance(duration: number): void {
     const end = this.time + duration;
 

@@ -9,9 +9,9 @@ function createDoc(name: string, metrics: Partial<Record<SearchableMetric, numbe
   return { name, metrics };
 }
 
-const wide = createDoc("wide", { width: 1920, height: 1080 });
-const tall = createDoc("tall", { width: 720, height: 1280 });
-const square = createDoc("square", { width: 1080, height: 1080 });
+const wide = createDoc("wide", { width: 1_920, height: 1_080 });
+const tall = createDoc("tall", { width: 720, height: 1_280 });
+const square = createDoc("square", { width: 1_080, height: 1_080 });
 const docs = [wide, tall, square];
 
 const metrics: SearchableMetric[] = ["width", "height"];
@@ -89,7 +89,7 @@ describe("RelativeMetricIndex", () => {
 
   test("add before build is a no-op that later build absorbs", () => {
     const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
-    const extra = createDoc("extra", { width: 4000, height: 100 });
+    const extra = createDoc("extra", { width: 4_000, height: 100 });
 
     index.add(extra);
     index.build(new Set([...docs, extra]));
@@ -98,7 +98,7 @@ describe("RelativeMetricIndex", () => {
 
   test("add after build places the doc into the right partition", () => {
     const index = createIndex();
-    const extra = createDoc("extra", { width: 100, height: 4000 });
+    const extra = createDoc("extra", { width: 100, height: 4_000 });
 
     index.add(extra);
     expect(namesOf(index.docsFor(createComparison("width", ":<", "height")))).toEqual(["extra", "tall"]);
@@ -106,7 +106,7 @@ describe("RelativeMetricIndex", () => {
 
   test("invalidate makes ensureBuilt rebuild from the given docs", () => {
     const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
-    const extra = createDoc("extra", { width: 4000, height: 100 });
+    const extra = createDoc("extra", { width: 4_000, height: 100 });
 
     index.ensureBuilt(new Set(docs));
     index.invalidate();

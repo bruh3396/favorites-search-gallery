@@ -30,7 +30,7 @@ describe("SortedArray", () => {
     const unsortedArray: number[] = [];
 
     for (let i = 0; i < 500; i += 1) {
-      const num = randomInt(random, 1000);
+      const num = randomInt(random, 1_000);
 
       sortedArray.add(num);
       unsortedArray.push(num);

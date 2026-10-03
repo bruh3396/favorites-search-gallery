@@ -19,9 +19,11 @@ export interface AutoplaySettings {
   durations: Record<AutoplayDuration, Preference<number>>;
 }
 
-export interface AutoplayDependencies extends AutoplayCallbacks, AutoplaySettings {
+export interface AutoplayConfiguration {
   platform: Device;
 }
+
+export type AutoplayDependencies = AutoplayCallbacks & AutoplaySettings;
 
 export interface AutoplayIntents {
   toggleSettings: () => void;

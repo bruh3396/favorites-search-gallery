@@ -1,8 +1,4 @@
-export interface Deferred<T> {
-  promise: Promise<T>;
-  resolve: (value: T) => void;
-  reject: (reason: unknown) => void;
-}
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 
 export async function flushMicrotasks(): Promise<void> {
   for (let i = 0; i < 20; i += 1) {
@@ -10,12 +6,17 @@ export async function flushMicrotasks(): Promise<void> {
   }
 }
 
-export function createDeferred<T>(): Deferred<T> {
-  const deferred = {} as Deferred<T>;
+export async function advanceAndSettle(scheduler: MemoryScheduler, duration: number): Promise<void> {
+  const step = 10;
 
-  deferred.promise = new Promise<T>((resolve, reject) => {
-    deferred.resolve = resolve;
-    deferred.reject = reject;
-  });
-  return deferred;
+  let elapsed = 0;
+
+  await flushMicrotasks();
+  do {
+    const advance = Math.min(step, duration - elapsed);
+
+    scheduler.advance(advance);
+    elapsed += advance;
+    await flushMicrotasks();
+  } while (elapsed < duration);
 }

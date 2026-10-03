@@ -58,17 +58,17 @@ describe("TagPool", () => {
   });
 
   test("grows tag capacity past a single doubling in one store", () => {
-    const tagString = Array.from({ length: 5000 }, (_, i) => `tag-${i}`).join(" ");
+    const tagString = Array.from({ length: 5_000 }, (_, i) => `tag-${i}`).join(" ");
 
     expect(tagPool.read(store(tagPool, tagString))).toBe(tagString);
   });
 
   test("promotes tag ids from Uint16 to Uint32", () => {
-    for (let i = 0; i < 65536; i += 1) {
+    for (let i = 0; i < 65_536; i += 1) {
       store(tagPool, `tag-${i}`);
     }
 
-    for (let i = 65536; i < 65536 + 25; i += 1) {
+    for (let i = 65_536; i < 65_536 + 25; i += 1) {
       const index = store(tagPool, `tag-${i}`);
 
       expect(tagPool.read(index)).toBe(`tag-${i}`);
@@ -76,14 +76,14 @@ describe("TagPool", () => {
   });
 
   test("unpacks a Uint32-sized vocabulary after compress", () => {
-    for (let i = 0; i < 65536; i += 1) {
+    for (let i = 0; i < 65_536; i += 1) {
       store(tagPool, `tag-${i}`);
     }
     tagPool.compress();
     const index = store(tagPool, "tag-65536 tag-0");
 
     expect(tagPool.read(0)).toBe("tag-0");
-    expect(tagPool.read(65535)).toBe("tag-65535");
+    expect(tagPool.read(65_535)).toBe("tag-65535");
     expect(tagPool.read(index)).toBe("tag-65536 tag-0");
   });
 
@@ -102,7 +102,7 @@ describe("TagPool", () => {
   test("round-trips a large vocabulary through compress", () => {
     const indices = [];
 
-    for (let i = 0; i < 5000; i += 1) {
+    for (let i = 0; i < 5_000; i += 1) {
       indices.push(store(tagPool, `tag-${i} shared-${i % 7}`));
     }
     tagPool.compress();
@@ -154,7 +154,7 @@ describe("TagPool", () => {
   test("keeps stored tags readable when trimming to the current capacity", () => {
     const first = store(tagPool, "foo");
 
-    tagPool.trim(1024);
+    tagPool.trim(1_024);
     expect(tagPool.read(first)).toBe("foo");
   });
 

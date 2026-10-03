@@ -14,6 +14,7 @@
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-boundaries": "^7.2.0",
     "eslint-plugin-functional": "^10.0.1",
+    "eslint-plugin-unicorn": "^65.0.1",
     "fake-indexeddb": "^6.2.5",
     "globals": "^15.15.0",
     "happy-dom": "^20.14.5",
@@ -21,6 +22,7 @@
     "tsx": "^4.23.12",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.30.1",
+    "vite": "^8.3.1",
     "vitest": "^5.0.2"
   },
   "eslintIgnore": [
@@ -33,6 +35,8 @@
   "scripts": {
     "build": "node build/bin/build || (npm run compile-build && node build/bin/build)",
     "build:demo": "esbuild src/targets/demo/main.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"demo\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/demo/demo.js && node -e \"require('fs').copyFileSync('src/targets/demo/index.html','dist/demo/index.html')\"",
+    "kit": "vite --config src/targets/kit/vite.config.mts",
+    "build:kit": "vite build --config src/targets/kit/vite.config.mts",
     "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground.js",
     "test": "npx vitest --run",
     "test:coverage": "npx vitest --run --coverage",
@@ -43,7 +47,7 @@
     "architecture:lint": "npx eslint --no-config-lookup --no-inline-config -c architecture/eslint/eslint.config.mjs --suppressions-location architecture/eslint/suppressions.json src/",
     "architecture:typecheck": "tsc --project architecture/tsconfig/core.json",
     "architecture": "npm run architecture:test && npm run architecture:typecheck && npm run architecture:lint",
-    "audit:test":"npx vitest --run --config .audit/vitest.config.mjs",
+    "audit:test": "npx vitest --run --config .audit/vitest.config.mjs",
     "audit:lint": "npx eslint --no-config-lookup -c .audit/lint/eslint.config.mjs --suppressions-location .audit/lint/suppressions.json src/",
     "audit:structure": "tsx .audit/structure/main.ts",
     "audit": "npm run audit:test && npm run audit:lint && npm run audit:structure",

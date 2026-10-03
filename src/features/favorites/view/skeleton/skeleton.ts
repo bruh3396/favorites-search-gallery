@@ -6,18 +6,25 @@ import { Random } from "@/core/boundary/ports/random";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 import { SkeletonConfig } from "@/config/skeleton_config";
 
+export interface FavoritesSkeletonConfiguration {
+  layout: Layout;
+}
+
+export interface FavoritesSkeletonDependencies {
+  store: LocalKeyedValues;
+  random: Random;
+}
+
 export class FavoritesSkeleton {
   private readonly aspectRatios: FavoritesAspectRatios;
   private readonly fallbackAspectRatioHeights: SeededSequence;
   private readonly random: Random;
   private items: FavoritesSkeletonItem[];
-  private readonly itemCount;
 
-  constructor(store: LocalKeyedValues, random: Random, layout: Layout, itemCount = SkeletonConfig.defaultItemCount) {
+  constructor({ layout }: FavoritesSkeletonConfiguration, { store, random }: FavoritesSkeletonDependencies) {
     this.aspectRatios = new FavoritesAspectRatios(store);
     this.random = random;
     this.fallbackAspectRatioHeights = new SeededSequence();
-    this.itemCount = itemCount;
     this.items = this.createItems(layout);
   }
 
@@ -36,7 +43,7 @@ export class FavoritesSkeleton {
 
   private createItems(layout: Layout): FavoritesSkeletonItem[] {
     return Array.from(
-      { length: this.itemCount },
+      { length: SkeletonConfig.defaultItemCount },
       () => new FavoritesSkeletonItem(
         this.random,
         layout,

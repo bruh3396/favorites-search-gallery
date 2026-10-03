@@ -5,7 +5,7 @@ describe("BrowserRandom", () => {
   test("returns floats in [0, 1)", () => {
     const random = new BrowserRandom();
 
-    for (let i = 0; i < 1000; i += 1) {
+    for (let i = 0; i < 1_000; i += 1) {
       const value = random.next();
 
       expect(value).toBeGreaterThanOrEqual(0);

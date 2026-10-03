@@ -15,14 +15,14 @@ describe("bits", () => {
       expect(bitWidth(5)).toBe(3);
       expect(bitWidth(256)).toBe(8);
       expect(bitWidth(257)).toBe(9);
-      expect(bitWidth(65536)).toBe(16);
-      expect(bitWidth(65537)).toBe(17);
+      expect(bitWidth(65_536)).toBe(16);
+      expect(bitWidth(65_537)).toBe(17);
     });
   });
 
   describe("packIntArray / readPackedInt", () => {
     test("round-trips values at a non-byte-aligned width", () => {
-      const values = Uint16Array.from([0, 1, 5, 130000 & 0x1ffff, 42]);
+      const values = Uint16Array.from([0, 1, 5, 130_000 & 0x1_ff_ff, 42]);
       const bits = 18;
       const packed = packIntArray(values, values.length, bits);
 
@@ -68,7 +68,7 @@ describe("bits", () => {
     test("round-trips a large random sequence across byte boundaries", () => {
       const bits = 20;
       const max = (1 << bits) - 1;
-      const values = new Uint32Array(1000);
+      const values = new Uint32Array(1_000);
 
       for (let i = 0; i < values.length; i += 1) {
         values[i] = Math.floor(Math.random() * (max + 1));

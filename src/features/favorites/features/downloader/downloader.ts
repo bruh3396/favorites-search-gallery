@@ -20,10 +20,11 @@ export class Downloader {
     const model = new DownloaderModel(context);
 
     this.flows = new DownloaderFlows(context, model, new DownloaderView(shell));
-    this.control = new DownloaderControl(shell, this.flows.session, {
+    this.control = new DownloaderControl({ filenameOptions: model.filenameOptions() }, {
+      shell,
+      intents: this.flows.session,
       batchSize: dependencies.batchSize,
-      filenameFormat: dependencies.filenameFormat,
-      filenameOptions: model.filenameOptions()
+      filenameFormat: dependencies.filenameFormat
     });
   }
 

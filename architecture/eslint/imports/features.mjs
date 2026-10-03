@@ -47,7 +47,7 @@ export const POLICIES = [
   {
     from: { element: { type: "features/shell" } },
     disallow: [
-      { to: { element: { type: "!{features/types,core/domain,core/boundary,core/ui,core/utils,legacy}" } } },
+      { to: { element: { type: "!{features/types,core/domain,core/boundary,core/ui,core/ui/components,core/utils,legacy}" } } },
       { to: { file: { path: "**/app/context/!(environment|flags|shell).ts" } } }
     ],
     message: MESSAGES.rule18b

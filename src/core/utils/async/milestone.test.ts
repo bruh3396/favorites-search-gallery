@@ -6,7 +6,7 @@ describe("Milestone", () => {
     expect(new Milestone().reached).toBe(false);
   });
 
-  test("resolves a wait that started before it was reached", async () => {
+  test("resolves a wait that started before it was reached", async() => {
     const milestone = new Milestone<number>();
     const waited = milestone.wait();
 
@@ -15,7 +15,7 @@ describe("Milestone", () => {
     await expect(waited).resolves.toBe(1);
   });
 
-  test("resolves a wait that started after it was reached", async () => {
+  test("resolves a wait that started after it was reached", async() => {
     const milestone = new Milestone<number>();
 
     milestone.reach(1);

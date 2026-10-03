@@ -19,9 +19,9 @@ function createMetricSearchable(metrics: Partial<Record<SearchableMetric, number
   };
 }
 
-const hd = createMetricSearchable({ width: 1920, height: 1080, score: 50, id: 1000, duration: 120 });
-const sd = createMetricSearchable({ width: 1280, height: 720, score: 25, id: 500, duration: 60 });
-const square = createMetricSearchable({ width: 1080, height: 1080, score: 100, id: 9999999, duration: 0 });
+const hd = createMetricSearchable({ width: 1_920, height: 1_080, score: 50, id: 1_000, duration: 120 });
+const sd = createMetricSearchable({ width: 1_280, height: 720, score: 25, id: 500, duration: 60 });
+const square = createMetricSearchable({ width: 1_080, height: 1_080, score: 100, id: 9_999_999, duration: 0 });
 
 describe("MetricSearchTerm", () => {
   describe("equals operator (:)", () => {

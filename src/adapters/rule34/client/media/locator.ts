@@ -1,10 +1,10 @@
-import { FileExtension, isFileExtension, kindOf } from "@/adapters/rule34/client/media/extension";
 import { Media, MediaKind } from "@/core/domain/media/media";
+import { Rule34FileExtension, isFileExtension, kindOf } from "@/adapters/rule34/client/media/extension";
 
 export interface Rule34Locator {
   readonly directory: string;
   readonly name: string;
-  readonly extension: FileExtension | null;
+  readonly extension: Rule34FileExtension | null;
 }
 
 const FILE_URL = /\/(thumbnails|samples|images)\/+([^/]+)\/+(?:thumbnail_|sample_)?([^/.?]+)(?:\.([a-z0-9]+))?/i;

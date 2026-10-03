@@ -6,7 +6,7 @@ describe("parseFavoriteCount", () => {
     expect(parseFavoriteCount(`
       <a href="https://rule34.xxx/index.php?page=account&s=profile&id=7">Profile</a>
       <a href="https://rule34.xxx/index.php?page=favorites&s=view&id=7">1234</a>
-    `)).toBe(1234);
+    `)).toBe(1_234);
   });
 
   test("reads zero from a profile without a favorites link", () => {

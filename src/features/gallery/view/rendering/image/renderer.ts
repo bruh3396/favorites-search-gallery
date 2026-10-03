@@ -1,9 +1,9 @@
 import { GalleryAbstractImageBudgeter, GalleryLimitImageBudgeter, GalleryMemoryImageBudgeter } from "@/features/gallery/view/rendering/image/budgeter";
+import { GalleryAbstractUpscaler, GalleryUpscalerConfiguration, GalleryUpscalerDependencies } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { GalleryBudget, Renderer } from "@/features/gallery/types/types";
 import { AppContext } from "@/app/context/context";
 import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
-import { GalleryAbstractUpscaler } from "@/features/gallery/view/rendering/image/abstract_upscaler";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryImageCanvas } from "@/features/gallery/view/rendering/image/canvas";
 import { GalleryImageFetcher } from "@/features/gallery/view/rendering/image/fetcher";
@@ -118,7 +118,9 @@ export class GalleryImageRenderer implements Renderer {
 
   private createBudgeter(environment: Environment): GalleryAbstractImageBudgeter {
     if (environment.mode === "favorites" && environment.device !== "mobile") {
-      return new GalleryMemoryImageBudgeter(this.favoriteFor, GalleryConfig.imageMegabyteLimit, GalleryConfig.minimumCachedImageCount);
+      const megabyteLimit = GalleryConfig.imageMegabyteLimit;
+      const minimumCount = GalleryConfig.minimumCachedImageCount;
+      return new GalleryMemoryImageBudgeter({ megabyteLimit, minimumCount }, this.favoriteFor);
     }
     const limit = environment.device === "mobile" ? GalleryConfig.cachedImageCount.mobile : GalleryConfig.cachedImageCount.desktop;
     return new GalleryLimitImageBudgeter(limit);
@@ -126,11 +128,20 @@ export class GalleryImageRenderer implements Renderer {
 
   private createUpscaler(environment: Environment, budget: GalleryBudget, preferences: Preferences, shell: Shell): GalleryAbstractUpscaler {
     const settings = environment.mode === "postList" ? preferences.postList : preferences.favorites;
-    const canvasFor = (id: string): HTMLCanvasElement | null => shell.findThumb(id)?.querySelector("canvas") ?? null;
-    const fetchBitmap = (request: ImageRequest): Promise<boolean> => this.fetcher.fetchBitmap(request);
     const { paintDelay, canvasWidth } = budget.upscale;
-    const args = [canvasFor, settings.upscaleThumbs, settings.upscaleQuality, fetchBitmap, paintDelay, canvasWidth, GalleryUpscaleConfig.maxUpscaledCanvasHeight] as const;
-    return GalleryConfig.useOffscreenThumbUpscaler ? new GalleryWorkerUpscalerWrapper(...args) : new GalleryMainThreadUpscaler(...args);
+    const configuration: GalleryUpscalerConfiguration = {
+      paintDelay,
+      baseCanvasWidth: canvasWidth,
+      maxUpscaledCanvasHeight: GalleryUpscaleConfig.maxUpscaledCanvasHeight
+    };
+    const dependencies: GalleryUpscalerDependencies = {
+      canvasFor: (id): HTMLCanvasElement | null => shell.findThumb(id)?.querySelector("canvas") ?? null,
+      enabled: settings.upscaleThumbs,
+      quality: settings.upscaleQuality,
+      fetchBitmap: (request): Promise<boolean> => this.fetcher.fetchBitmap(request)
+    };
+    const Upscaler = GalleryConfig.useOffscreenThumbUpscaler ? GalleryWorkerUpscalerWrapper : GalleryMainThreadUpscaler;
+    return new Upscaler(configuration, dependencies);
   }
 
   private paint(item: PostMedia): void {

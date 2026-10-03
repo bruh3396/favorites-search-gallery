@@ -50,7 +50,10 @@ describe("GalleryAbstractUpscaler", () => {
   }
 
   function createUpscaler(baseCanvasWidth = 100): TestUpscaler {
-    return new TestUpscaler(canvasFor, enabled, quality, fetchBitmap, 0, baseCanvasWidth, 5000);
+    return new TestUpscaler(
+      { paintDelay: 0, baseCanvasWidth, maxUpscaledCanvasHeight: 5_000 },
+      { canvasFor, enabled, quality, fetchBitmap }
+    );
   }
 
   describe("tryPainting", () => {

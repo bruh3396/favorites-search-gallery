@@ -1,29 +1,4 @@
 {
-  "src/adapters/api/client/post/parser.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
-  "src/adapters/api/client/rate_limited_resolver.ts": {
-    "boundaries/dependencies": {
-      "count": 2
-    }
-  },
-  "src/adapters/api/ports/remote_posts/remote_posts.test.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
-  "src/adapters/api/ports/remote_posts/remote_posts.ts": {
-    "boundaries/dependencies": {
-      "count": 2
-    }
-  },
-  "src/adapters/api/ports/remote_tag_categories/remote_tag_categories.ts": {
-    "boundaries/dependencies": {
-      "count": 2
-    }
-  },
   "src/adapters/browser/environment/environment.test.ts": {
     "variation/no-restricted-syntax": {
       "count": 3
@@ -54,11 +29,6 @@
       "count": 3
     }
   },
-  "src/adapters/rule34/client/site/favorites_page/fetcher.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
   "src/adapters/rule34/client/site/page_rate_limiter.ts": {
     "boundaries/dependencies": {
       "count": 1
@@ -69,22 +39,7 @@
       "count": 2
     }
   },
-  "src/adapters/rule34/client/site/post_page/fetcher.ts": {
-    "boundaries/dependencies": {
-      "count": 2
-    }
-  },
-  "src/adapters/rule34/client/site/post_page/parser.test.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
   "src/adapters/rule34/client/site/post_page/parser.ts": {
-    "boundaries/dependencies": {
-      "count": 2
-    }
-  },
-  "src/adapters/rule34/client/site/profile_page/fetcher.ts": {
     "boundaries/dependencies": {
       "count": 2
     }
@@ -156,7 +111,7 @@
   },
   "src/features/favorites/control/drawer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/favorites/control/pagination.test.ts": {
@@ -166,7 +121,7 @@
   },
   "src/features/favorites/control/sections/settings/catalog.ts": {
     "environment/no-restricted-syntax": {
-      "count": 28
+      "count": 11
     },
     "variation/no-restricted-syntax": {
       "count": 2
@@ -197,7 +152,7 @@
   },
   "src/features/favorites/control/toolbar/toolbar.ts": {
     "environment/no-restricted-syntax": {
-      "count": 8
+      "count": 5
     },
     "variation/no-restricted-syntax": {
       "count": 6
@@ -210,22 +165,22 @@
   },
   "src/features/favorites/features/downloader/control/control.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/favorites/features/downloader/model/archiver.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/favorites/features/downloader/model/batcher.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
+      "count": 1
     }
   },
   "src/features/favorites/features/downloader/model/filename_builder.ts": {
     "environment/no-restricted-syntax": {
-      "count": 7
+      "count": 1
     }
   },
   "src/features/favorites/features/snippets/model/store.ts": {
@@ -243,17 +198,17 @@
   },
   "src/features/favorites/flows/display/edge_observer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
+      "count": 1
     }
   },
   "src/features/favorites/flows/display/infinite_display.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/favorites/flows/display/paginated_display.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/favorites/flows/flows.test.ts": {
@@ -263,22 +218,17 @@
   },
   "src/features/favorites/model/model.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
-    }
-  },
-  "src/features/favorites/model/posts/library.ts": {
-    "outside/no-restricted-properties": {
       "count": 2
     }
   },
   "src/features/favorites/model/search/searcher.ts": {
     "environment/no-restricted-syntax": {
-      "count": 6
+      "count": 4
     }
   },
   "src/features/favorites/shell/shell.ts": {
     "environment/no-restricted-syntax": {
-      "count": 5
+      "count": 3
     }
   },
   "src/features/favorites/shell/toolbar.ts": {
@@ -286,24 +236,19 @@
       "count": 4
     }
   },
-  "src/features/favorites/view/link_suppressor.test.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
   "src/features/favorites/view/skeleton/skeleton.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/favorites/view/skeleton/skeleton_item.ts": {
     "environment/no-restricted-syntax": {
-      "count": 8
+      "count": 1
     }
   },
   "src/features/favorites/view/view.ts": {
     "environment/no-restricted-syntax": {
-      "count": 7
+      "count": 4
     },
     "variation/no-restricted-syntax": {
       "count": 1
@@ -311,7 +256,7 @@
   },
   "src/features/gallery/control/interaction_tracker.ts": {
     "environment/no-restricted-syntax": {
-      "count": 5
+      "count": 3
     },
     "variation/no-restricted-syntax": {
       "count": 1
@@ -319,7 +264,7 @@
   },
   "src/features/gallery/control/menu.ts": {
     "environment/no-restricted-syntax": {
-      "count": 18
+      "count": 14
     },
     "variation/no-restricted-syntax": {
       "count": 4
@@ -335,30 +280,27 @@
   },
   "src/features/gallery/control/thumb_observer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 7
+      "count": 3
     }
   },
   "src/features/gallery/features/autoplay/control/control.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
-    },
-    "variation/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/gallery/features/autoplay/flows/menu.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
+      "count": 1
     }
   },
   "src/features/gallery/features/autoplay/model/durations.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/gallery/features/autoplay/shell/shell.ts": {
     "environment/no-restricted-syntax": {
-      "count": 5
+      "count": 1
     },
     "variation/no-restricted-syntax": {
       "count": 4
@@ -387,12 +329,12 @@
   },
   "src/features/gallery/flows/keyboard.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/gallery/flows/navigation.ts": {
     "environment/no-restricted-syntax": {
-      "count": 5
+      "count": 3
     }
   },
   "src/features/gallery/flows/thumbs.ts": {
@@ -400,7 +342,7 @@
       "count": 1
     },
     "environment/no-restricted-syntax": {
-      "count": 25
+      "count": 18
     },
     "variation/no-restricted-syntax": {
       "count": 1
@@ -413,17 +355,17 @@
   },
   "src/features/gallery/model/model.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/gallery/types/image_request.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/gallery/view/menu.ts": {
     "environment/no-restricted-syntax": {
-      "count": 7
+      "count": 4
     },
     "variation/no-restricted-syntax": {
       "count": 1
@@ -436,7 +378,7 @@
   },
   "src/features/gallery/view/rendering/gif/renderer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 8
+      "count": 4
     },
     "variation/no-restricted-syntax": {
       "count": 1
@@ -444,7 +386,7 @@
   },
   "src/features/gallery/view/rendering/image/canvas.ts": {
     "environment/no-restricted-syntax": {
-      "count": 12
+      "count": 8
     },
     "variation/no-restricted-syntax": {
       "count": 2
@@ -452,15 +394,10 @@
   },
   "src/features/gallery/view/rendering/image/renderer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 28
+      "count": 19
     },
     "variation/no-restricted-syntax": {
       "count": 2
-    }
-  },
-  "src/features/gallery/view/rendering/image/worker_upscaler.ts": {
-    "environment/no-restricted-syntax": {
-      "count": 3
     }
   },
   "src/features/gallery/view/rendering/video/renderer.ts": {
@@ -470,7 +407,7 @@
   },
   "src/features/gallery/view/rendering/video/video_controller.ts": {
     "environment/no-restricted-syntax": {
-      "count": 12
+      "count": 9
     },
     "variation/no-restricted-syntax": {
       "count": 2
@@ -483,7 +420,7 @@
   },
   "src/features/post_list_navigator/control/catalog.ts": {
     "environment/no-restricted-syntax": {
-      "count": 18
+      "count": 11
     },
     "variation/no-restricted-syntax": {
       "count": 4
@@ -499,7 +436,7 @@
   },
   "src/features/post_list_navigator/flows/page_bottom_observer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/post_list_navigator/model/model.ts": {
@@ -577,7 +514,7 @@
   },
   "src/features/post_overlay/view/rendering/tag_renderer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
   "src/features/tooltip/model/model.ts": {

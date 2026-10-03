@@ -1,0 +1,45 @@
+.fsg-Segmented {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-medium);
+  background: var(--fsg-color-surface-sunken);
+}
+
+.fsg-Segmented-option {
+  padding: 4px 12px;
+  border-radius: calc(var(--fsg-radius-medium) - 2px);
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Segmented[data-size="small"] .fsg-Segmented-option {
+  padding: 2px 8px;
+  font-size: var(--fsg-font-size-label-small);
+}
+
+.fsg-Segmented-option:hover:not(:disabled, [aria-checked="true"]) {
+  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+}
+
+.fsg-Segmented-option[aria-checked="true"] {
+  background: var(--fsg-color-accent);
+  color: var(--fsg-color-on-accent);
+}
+
+.fsg-Segmented-option:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
+}
+
+.fsg-Segmented-option:disabled {
+  cursor: not-allowed;
+}

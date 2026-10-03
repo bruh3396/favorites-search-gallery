@@ -3,7 +3,8 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { Rule34MediaClient } from "@/adapters/rule34/client/media/client";
 
 export class Rule34RemoteMedia implements RemoteMedia {
-  constructor(private readonly rule34: Pick<Rule34MediaClient, "previewUrl" | "originalUrl" | "imageUrl" | "fetchFile" | "readVideoDuration">) { }
+  constructor(private readonly rule34: Pick<Rule34MediaClient,
+    "previewUrl" | "originalUrl" | "imageUrl" | "fetchFile" | "readVideoDurationSeconds">) { }
 
   public resolvePreviewUrl(media: Media): Promise<string> {
     return Promise.resolve(this.rule34.previewUrl(media.locator));
@@ -22,6 +23,6 @@ export class Rule34RemoteMedia implements RemoteMedia {
   }
 
   public async fetchDurationSeconds(media: Media): Promise<number> {
-    return this.rule34.readVideoDuration(await this.resolveOriginalUrl(media));
+    return this.rule34.readVideoDurationSeconds(await this.resolveOriginalUrl(media));
   }
 }

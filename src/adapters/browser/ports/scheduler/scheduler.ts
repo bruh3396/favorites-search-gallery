@@ -9,4 +9,8 @@ export class BrowserScheduler implements Scheduler {
     const handle = setTimeout(task, delay);
     return (): void => clearTimeout(handle);
   }
+
+  public sleep(duration: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, duration));
+  }
 }

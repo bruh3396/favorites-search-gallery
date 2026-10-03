@@ -18,7 +18,7 @@ function setup(localKeyedValues = new MemoryLocalKeyedValues()): Setup {
   const appShell = new Shell();
   const context = createAppContext({ shell: appShell, ports: { localKeyedValues } });
   const shell = new FavoritesShell(appShell, context.environment);
-  const control = new FavoritesControl(context, shell, false);
+  const control = new FavoritesControl({ offersTutorial: false }, { context, shell });
   const searched: string[] = [];
 
   document.body.append(appShell.root);

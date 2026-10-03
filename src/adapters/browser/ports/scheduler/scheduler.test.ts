@@ -34,4 +34,14 @@ describe("BrowserScheduler", () => {
 
     expect(task).not.toHaveBeenCalled();
   });
+
+  test("wakes a sleep after the duration", async() => {
+    const wake = vi.fn();
+
+    new BrowserScheduler().sleep(100).then(wake);
+    await vi.advanceTimersByTimeAsync(99);
+    expect(wake).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(wake).toHaveBeenCalledOnce();
+  });
 });

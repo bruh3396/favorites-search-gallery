@@ -1,14 +1,4 @@
 {
-  "src/adapters/api/ports/remote_posts/remote_posts.test.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/adapters/api/ports/remote_posts/remote_posts.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/adapters/rule34/ports/remote_favorites/full_page_fetcher.ts": {
     "@typescript-eslint/max-params": {
       "count": 1
@@ -50,11 +40,6 @@
   "src/app/startup/features.ts": {
     "@typescript-eslint/max-params": {
       "count": 1
-    }
-  },
-  "src/core/utils/async/coalescing.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 2
     }
   },
   "src/features/favorites/control/control.ts": {
@@ -406,11 +391,6 @@
     },
     "no-restricted-syntax": {
       "count": 2
-    }
-  },
-  "src/targets/userscript/main.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
     }
   },
   "src/utils/browser/canvas.ts": {

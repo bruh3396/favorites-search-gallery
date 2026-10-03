@@ -9,8 +9,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 
 const STREAM_BATCH_SIZE = 1_000;
-const SEARCHER_UPDATE_BATCH_SIZE = 50;
-const SEARCHER_UPDATE_DELAY = 1_500;
+const SEARCHER_UPDATE_COALESCING = { flushSize: 50, flushTimeout: 1_500 };
 
 interface LoaderDependencies {
   remoteFavorites: Pick<RemoteFavorites, "fetchAllExcept">;
@@ -38,7 +37,10 @@ export class FavoritesLoader {
     this.postLibrary = dependencies.postLibrary;
     this.collection = dependencies.collection;
     this.searcher = dependencies.searcher;
-    this.searcherUpdater = new CoalescingExecutor(SEARCHER_UPDATE_BATCH_SIZE, SEARCHER_UPDATE_DELAY, updates => this.searcher.update(updates), dependencies.scheduler);
+    this.searcherUpdater = new CoalescingExecutor(SEARCHER_UPDATE_COALESCING, {
+      execute: (updates): void => this.searcher.update(updates),
+      scheduler: dependencies.scheduler
+    });
   }
 
   public async streamStored(onProgress: (posts: Post[]) => void): Promise<void> {

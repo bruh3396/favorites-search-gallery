@@ -1,0 +1,51 @@
+.fsg-MultiSelect {
+  display: inline-flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-medium);
+  background: var(--fsg-color-surface-sunken);
+}
+
+.fsg-MultiSelect-option {
+  padding: 4px 12px;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-MultiSelect-option + .fsg-MultiSelect-option {
+  border-inline-start: 1px solid var(--fsg-color-outline);
+}
+
+.fsg-MultiSelect[data-size="small"] .fsg-MultiSelect-option {
+  padding: 2px 8px;
+  font-size: var(--fsg-font-size-label-small);
+}
+
+.fsg-MultiSelect-option:hover:not(:disabled, [aria-pressed="true"]) {
+  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+}
+
+.fsg-MultiSelect-option[aria-pressed="true"] {
+  background: var(--fsg-color-accent);
+  color: var(--fsg-color-on-accent);
+}
+
+.fsg-MultiSelect-option:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: -2px;
+}
+
+.fsg-MultiSelect-option[aria-disabled="true"] {
+  cursor: default;
+}
+
+.fsg-MultiSelect-option:disabled {
+  cursor: not-allowed;
+}

@@ -24,9 +24,9 @@ export function postListPageIndex(offset: number): number {
   return Math.round(offset / POSTS_PER_POST_LIST_PAGE);
 }
 
-export function fetchPostList(baseUrl: string, pageNumber: number): Promise<string> {
+export function fetchPostList(baseUrl: string, pageIndex: number): Promise<string> {
   return withExponentialBackoff(
-    () => pageRateLimiter.run(() => fetchHtml(postListUrlFromBase(baseUrl, pageNumber))),
+    () => pageRateLimiter.run(() => fetchHtml(postListUrlFromBase(baseUrl, pageIndex))),
     FETCH_ATTEMPTS,
     FETCH_RETRY_DELAY
   );

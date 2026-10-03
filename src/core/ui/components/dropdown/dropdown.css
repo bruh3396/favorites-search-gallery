@@ -1,0 +1,31 @@
+.fsg-Dropdown {
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-medium);
+  background-color: var(--fsg-color-surface-sunken);
+  color: inherit;
+  font: inherit;
+  font-size: var(--fsg-font-size-label);
+  line-height: 1.4;
+  cursor: pointer;
+  transition: border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Dropdown[data-size="small"] {
+  padding: 2px 6px;
+  font-size: var(--fsg-font-size-label-small);
+}
+
+.fsg-Dropdown:hover:not(:disabled) {
+  border-color: var(--fsg-color-on-surface-muted);
+}
+
+.fsg-Dropdown:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
+}
+
+.fsg-Dropdown:disabled {
+  cursor: not-allowed;
+}

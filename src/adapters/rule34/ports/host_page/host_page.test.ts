@@ -33,7 +33,7 @@ function createPage(): Page {
 function clearedFor(mode: AppMode): boolean {
   const rule34 = createRule34();
 
-  new Rule34HostPage(rule34, createPage(), mode).clearContent();
+  new Rule34HostPage({ mode }, { rule34, page: createPage() }).clearContent();
   return rule34.clearNativePage.mock.calls.length > 0;
 }
 
@@ -48,7 +48,7 @@ describe("Rule34HostPage", () => {
 
   test("shows and hides the site's header", () => {
     const rule34 = createRule34();
-    const hostPage = new Rule34HostPage(rule34, createPage(), "favorites");
+    const hostPage = new Rule34HostPage({ mode: "favorites" }, { rule34, page: createPage() });
 
     expect(hostPage.hasHeader).toBe(true);
     hostPage.setHeaderVisible(false);
@@ -59,13 +59,13 @@ describe("Rule34HostPage", () => {
   test("remembers the theme on the site", () => {
     const rule34 = createRule34();
 
-    new Rule34HostPage(rule34, createPage(), "favorites").setColorScheme("dark");
+    new Rule34HostPage({ mode: "favorites" }, { rule34, page: createPage() }).setColorScheme("dark");
     expect(rule34.setTheme.mock.calls).toEqual([["dark"]]);
   });
 
   test("leaves the viewport and scrolling to the browser page", () => {
     const page = createPage();
-    const hostPage = new Rule34HostPage(createRule34(), page, "favorites");
+    const hostPage = new Rule34HostPage({ mode: "favorites" }, { rule34: createRule34(), page });
 
     hostPage.lockViewport();
     hostPage.lockScroll();

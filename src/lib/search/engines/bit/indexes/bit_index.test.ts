@@ -105,13 +105,13 @@ describe("BitIndex", () => {
 
   describe("dense vs sparse postings", () => {
     test("resolves a frequent (dense) term and a rare (sparse) term identically", () => {
-      const wide = Array.from({ length: 1000 }, (_, i) => createDoc(`d${i}`, "common", i === 500 ? "unique" : "other"));
+      const wide = Array.from({ length: 1_000 }, (_, i) => createDoc(`d${i}`, "common", i === 500 ? "unique" : "other"));
       const bitIndex = createIndex(wide);
 
-      expect(countForTerm(bitIndex, "common")).toBe(1000);
+      expect(countForTerm(bitIndex, "common")).toBe(1_000);
       expect(countForTerm(bitIndex, "unique")).toBe(1);
       expect(docsForTerm(bitIndex, "unique").map(d => d.id)).toEqual(["d500"]);
-      expect(docsForTerm(bitIndex, "common").length).toBe(1000);
+      expect(docsForTerm(bitIndex, "common").length).toBe(1_000);
     });
 
     test("a singleton term resolves to its single doc", () => {

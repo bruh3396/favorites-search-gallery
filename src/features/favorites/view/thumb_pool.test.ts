@@ -38,7 +38,7 @@ describe("FavoritesThumbPool", () => {
         node.blanked = true;
       }
     };
-    pool = new FavoritesThumbPool(ops, LARGE_RETAINED, false);
+    pool = new FavoritesThumbPool({ maxRetained: LARGE_RETAINED, defaultFavorited: false }, ops);
   });
 
   describe("resolve", () => {
@@ -164,7 +164,7 @@ describe("FavoritesThumbPool", () => {
 
   describe("reclaim", () => {
     test("drops retained nodes beyond the cap, forcing re-creation on grow-back", () => {
-      const capped = new FavoritesThumbPool(ops, 3, false);
+      const capped = new FavoritesThumbPool({ maxRetained: 3, defaultFavorited: false }, ops);
 
       capped.resolve(createFavorites("1", "2", "3", "4", "5", "6"));
       expect(created).toHaveLength(6);
@@ -176,7 +176,7 @@ describe("FavoritesThumbPool", () => {
     });
 
     test("retains at least the cap so a grow-back within it reuses nodes", () => {
-      const capped = new FavoritesThumbPool(ops, 4, false);
+      const capped = new FavoritesThumbPool({ maxRetained: 4, defaultFavorited: false }, ops);
       const first = capped.resolve(createFavorites("1", "2", "3", "4"));
 
       capped.resolve(createFavorites("5"));
@@ -187,7 +187,7 @@ describe("FavoritesThumbPool", () => {
     });
 
     test("never drops nodes that are still active even when active exceeds the cap", () => {
-      const capped = new FavoritesThumbPool(ops, 2, false);
+      const capped = new FavoritesThumbPool({ maxRetained: 2, defaultFavorited: false }, ops);
       const active = capped.resolve(createFavorites("1", "2", "3", "4", "5"));
 
       expect(active.map(n => n.id)).toEqual(["1", "2", "3", "4", "5"]);
@@ -195,7 +195,7 @@ describe("FavoritesThumbPool", () => {
     });
 
     test("blanks the surviving reserve while dropping the rest", () => {
-      const capped = new FavoritesThumbPool(ops, 3, false);
+      const capped = new FavoritesThumbPool({ maxRetained: 3, defaultFavorited: false }, ops);
 
       capped.resolve(createFavorites("1", "2", "3", "4", "5"));
       capped.resolve(createFavorites("6"));
@@ -208,14 +208,14 @@ describe("FavoritesThumbPool", () => {
 
   describe("defaultFavorited", () => {
     test("binds every node as favorited when the default is on", () => {
-      const owned = new FavoritesThumbPool(ops, LARGE_RETAINED, true);
+      const owned = new FavoritesThumbPool({ maxRetained: LARGE_RETAINED, defaultFavorited: true }, ops);
       const nodes = owned.resolve(createFavorites("1", "2", "3"));
 
       expect(nodes.every(n => n.favorited)).toBe(true);
     });
 
     test("an override switches a single node off against an on default", () => {
-      const owned = new FavoritesThumbPool(ops, LARGE_RETAINED, true);
+      const owned = new FavoritesThumbPool({ maxRetained: LARGE_RETAINED, defaultFavorited: true }, ops);
       const [first, second] = owned.resolve(createFavorites("1", "2"));
 
       owned.setFavorited("1", false);
@@ -225,7 +225,7 @@ describe("FavoritesThumbPool", () => {
     });
 
     test("an off override persists when the id is rebound", () => {
-      const owned = new FavoritesThumbPool(ops, LARGE_RETAINED, true);
+      const owned = new FavoritesThumbPool({ maxRetained: LARGE_RETAINED, defaultFavorited: true }, ops);
 
       owned.resolve(createFavorites("1", "2"));
       owned.setFavorited("1", false);

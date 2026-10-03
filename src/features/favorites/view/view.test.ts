@@ -7,6 +7,7 @@ import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { PaginationState } from "@/types/ui";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { Shell } from "@/app/context/shell";
@@ -17,6 +18,7 @@ interface Setup {
   view: FavoritesView;
   shell: FavoritesShell;
   content: HTMLElement;
+  scheduler: MemoryScheduler;
   replaced: ReturnType<typeof vi.fn<() => void>>;
   added: ReturnType<typeof vi.fn<(favorites: Favorite[]) => void>>;
 }
@@ -32,14 +34,15 @@ function setup({ preferences = {}, environment: environmentOverrides = {}, local
   const environment = createEnvironment(environmentOverrides);
   const appShell = new Shell();
   const shell = new FavoritesShell(appShell, environment);
-  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { localKeyedValues } });
-  const view = new FavoritesView(context, shell, linksToPostPage);
+  const scheduler = new MemoryScheduler();
+  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { localKeyedValues, scheduler } });
+  const view = new FavoritesView({ linksToPostPage }, { context, shell });
   const replaced = vi.fn<() => void>();
   const added = vi.fn<(favorites: Favorite[]) => void>();
 
   view.setup({ onContentReplaced: replaced, onContentAdded: added });
   document.body.append(appShell.root);
-  return { view, shell, content: appShell.content, replaced, added };
+  return { view, shell, content: appShell.content, scheduler, replaced, added };
 }
 
 function createFavorite(id: string, width = 100, height = 200): Favorite {
@@ -226,12 +229,11 @@ describe("FavoritesView", () => {
     });
 
     test("a temporary status clears itself", () => {
-      vi.useFakeTimers();
-      const { view, shell } = setup();
+      const { view, shell, scheduler } = setup();
 
       view.setTemporaryStatus("Apple added");
-      vi.runAllTimers();
-      vi.useRealTimers();
+      expect(shell.toolbar.loadStatus.textContent).toBe("Apple added");
+      scheduler.advance(1_000);
       expect(shell.toolbar.loadStatus.textContent).toBe("");
     });
 

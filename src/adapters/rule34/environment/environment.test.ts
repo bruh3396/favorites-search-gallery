@@ -1,17 +1,18 @@
 import { describe, expect, test } from "vitest";
 import { ColorScheme } from "@/core/boundary/environment";
-import { PageName } from "@/adapters/rule34/client/site/current_page/current_page";
+import { Rule34PageName } from "@/adapters/rule34/client/site/current_page/current_page";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 
 interface Visit {
-  pageName: PageName | null;
+  pageName: Rule34PageName | null;
   favoritesPageId?: string;
   userId?: string;
   theme?: ColorScheme;
   tagBlacklist?: string;
 }
 
-function createClient({ pageName, favoritesPageId = "", userId = "", theme = "light", tagBlacklist = "" }: Visit): Parameters<typeof readRule34Environment>[0] {
+function createClient(visit: Visit): Parameters<typeof readRule34Environment>[0] {
+  const { pageName, favoritesPageId = "", userId = "", theme = "light", tagBlacklist = "" } = visit;
   return {
     readPageName: () => pageName,
     readFavoritesPageId: () => favoritesPageId,
@@ -28,7 +29,9 @@ describe("readRule34Environment", () => {
   });
 
   test("owns the favorites on the viewer's own favorites page", () => {
-    expect(readRule34Environment(createClient({ pageName: "favorites", favoritesPageId: "9", userId: "9" }))?.ownsFavorites).toBe(true);
+    const client = createClient({ pageName: "favorites", favoritesPageId: "9", userId: "9" });
+
+    expect(readRule34Environment(client)?.ownsFavorites).toBe(true);
   });
 
   test("runs in posts mode on a post list, keyed by the logged-in user", () => {

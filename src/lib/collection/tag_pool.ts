@@ -2,8 +2,8 @@ import { bitWidth, packIntArray, readPackedInt } from "@/utils/pure/bit";
 import { grow } from "@/utils/pure/array";
 import { internString } from "@/lib/search/interner";
 
-const DEFAULT_ITEM_COUNT = 1024;
-const DEFAULT_TAG_COUNT = 1024;
+const DEFAULT_ITEM_COUNT = 1_024;
+const DEFAULT_TAG_COUNT = 1_024;
 
 export class TagPool {
   private packedIds: Uint8Array | null = null;
@@ -98,7 +98,7 @@ export class TagPool {
   }
 
   private unpackIds(packedIds: Uint8Array): void {
-    const restored = this.vocabularyLength >= 65536 ? new Uint32Array(this.tagsLength) : new Uint16Array(this.tagsLength);
+    const restored = this.vocabularyLength >= 65_536 ? new Uint32Array(this.tagsLength) : new Uint16Array(this.tagsLength);
 
     for (let i = 0; i < this.tagsLength; i += 1) {
       restored[i] = readPackedInt(packedIds, i, this.bitsPerId);
@@ -122,7 +122,7 @@ export class TagPool {
   }
 
   private promoteIds(): void {
-    if (this.ids instanceof Uint16Array && this.vocabularyLength >= 65536) {
+    if (this.ids instanceof Uint16Array && this.vocabularyLength >= 65_536) {
       const next = new Uint32Array(this.ids.length);
 
       next.set(this.ids);

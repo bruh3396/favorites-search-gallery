@@ -87,7 +87,7 @@ describe("FavoritesFeatures", () => {
   });
 
   describe("downloader", () => {
-    test("waits for favorites to load before offering a download", async () => {
+    test("waits for favorites to load before offering a download", async() => {
       const { context, features } = setup();
       const download = mountDownloader(features);
 
@@ -97,7 +97,7 @@ describe("FavoritesFeatures", () => {
       expect(download.textContent).toBe("Download 2 Results");
     });
 
-    test("follows the search results", async () => {
+    test("follows the search results", async() => {
       const { context, features, results } = setup();
       const download = mountDownloader(features);
 
@@ -110,7 +110,7 @@ describe("FavoritesFeatures", () => {
     test.each([
       ["batch size", (context: AppContext): void => context.preferences.favorites.downloadBatchSize.set(1)],
       ["filename format", (context: AppContext): void => context.preferences.favorites.downloadFilenameFormat.set(1)]
-    ])("redraws when the %s changes", async (_, change) => {
+    ])("redraws when the %s changes", async(_, change) => {
       const { context, features, results } = setup();
       const download = mountDownloader(features);
 

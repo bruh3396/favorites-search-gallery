@@ -3,4 +3,9 @@
 @import "./reset.css" layer(reset);
 @import "./tokens.css" layer(tokens);
 
-@import "./switch/switch.css" layer(components);
+@import "./components/switch/switch.css" layer(components);
+@import "./components/segmented/segmented.css" layer(components);
+@import "./components/multi_select/multi_select.css" layer(components);
+@import "./components/stepper/stepper.css" layer(components);
+@import "./components/dropdown/dropdown.css" layer(components);
+@import "./components/setting_row/setting_row.css" layer(components);

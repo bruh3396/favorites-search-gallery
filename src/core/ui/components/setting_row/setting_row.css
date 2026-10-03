@@ -1,0 +1,34 @@
+.fsg-SettingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-SettingRow[hidden] {
+  display: none;
+}
+
+/* Disabled means nothing in the control can be used. :has(:disabled) alone would also
+   match a stepper whose + is disabled at its max. */
+.fsg-SettingRow:not(:has(:enabled)) {
+  opacity: 0.5;
+}
+
+.fsg-SettingRow-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.fsg-SettingRow-label {
+  font-size: var(--fsg-font-size-label);
+}
+
+.fsg-SettingRow-description {
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label-small);
+}

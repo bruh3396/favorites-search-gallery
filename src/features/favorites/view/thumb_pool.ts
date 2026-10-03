@@ -1,13 +1,26 @@
 import { Favorite } from "@/types/favorite";
 import { ThumbOperations } from "@/features/favorites/types/types";
 
+export interface FavoritesThumbPoolConfiguration {
+  maxRetained: number;
+  defaultFavorited: boolean;
+}
+
 export class FavoritesThumbPool<Node> {
   private readonly nodes: Node[] = [];
   private readonly activeById = new Map<string, Node>();
   private readonly favoritedOverrides = new Map<string, boolean>();
+  private readonly maxRetained: number;
+  private readonly defaultFavorited: boolean;
   private activeCount = 0;
 
-  constructor(private readonly operations: ThumbOperations<Node>, private readonly maxRetained: number, private readonly defaultFavorited: boolean) {}
+  constructor(
+    { maxRetained, defaultFavorited }: FavoritesThumbPoolConfiguration,
+    private readonly operations: ThumbOperations<Node>
+  ) {
+    this.maxRetained = maxRetained;
+    this.defaultFavorited = defaultFavorited;
+  }
 
   public resolve(favorites: Favorite[]): Node[] {
     this.activeById.clear();

@@ -4,6 +4,7 @@ import globals from "globals";
 import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
+import unicorn from "eslint-plugin-unicorn";
 
 // A boolean among several parameters is a flag argument; a lone boolean is the value being set.
 const SIGNATURE_WITH_SEVERAL_PARAMETERS = ":matches(:function, TSDeclareFunction, TSEmptyBodyFunctionExpression, TSMethodSignature, TSFunctionType, TSCallSignatureDeclaration, TSConstructSignatureDeclaration)[params.length>1]";
@@ -52,6 +53,12 @@ export default defineConfig([
     plugins: { functional },
     rules: {
       "functional/no-let": ["error", { allowInFunctions: true }]
+    }
+  },
+  {
+    plugins: { unicorn },
+    rules: {
+      "unicorn/numeric-separators-style": ["error", { onlyIfContainsSeparator: false, number: { minimumDigits: 4, groupLength: 3 } }]
     }
   },
   {
@@ -116,6 +123,7 @@ export default defineConfig([
       "lines-around-directive": "error",
       // "max-classes-per-file": ["error"],
       "max-depth": "error",
+      "@stylistic/max-len": ["error", { code: 120, ignorePattern: "^import\\s.+\\sfrom\\s.+;$" }],
       "max-nested-callbacks": "error",
       "max-statements-per-line": "error",
       "multiline-ternary": [
@@ -636,7 +644,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/core/domain/post/post.ts", "src/adapters/api/client/responses.ts"],
+    files: ["src/core/domain/post/post.ts", "src/adapters/frozen_cobalt/client/schema.ts"],
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",

@@ -1,0 +1,75 @@
+/* The kit's own chrome. It uses system colors so it never depends on the tokens it is there to show;
+   they follow the same color-scheme as the components. */
+.kit-Page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+  min-block-size: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+  background: Canvas;
+  color: CanvasText;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.kit-Toolbar {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: 24px;
+}
+
+.kit-Toolbar-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kit-Story {
+  margin: 0 0 32px;
+}
+
+.kit-Story-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.kit-Story-variants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kit-Variant {
+  display: grid;
+  justify-items: start;
+  gap: 8px;
+  min-inline-size: 120px;
+  padding: 12px;
+  border: 1px solid GrayText;
+  border-radius: 8px;
+}
+
+.kit-Variant-label {
+  color: GrayText;
+  font-size: 12px;
+}
+
+.kit-Log {
+  position: sticky;
+  inset-block-start: 24px;
+  align-self: start;
+  max-block-size: calc(100vh - 48px);
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid GrayText;
+  border-radius: 8px;
+  font: 12px/1.5 ui-monospace, monospace;
+  white-space: pre-wrap;
+}

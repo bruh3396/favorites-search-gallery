@@ -152,6 +152,15 @@ describe("FavoritesPostLibrary", () => {
     expect(fetchDurationSeconds).not.toHaveBeenCalled();
   });
 
+  test("keeps a stale video's known duration when its fetched copy has none", async() => {
+    const { library, fetchDurationSeconds, onRefreshed } = setup([createPost({ ...DIMENSIONS, media: UNTIMED_VIDEO.media, score: 9 })]);
+
+    await library.refreshAll([createPost({ ...UNTIMED_VIDEO, durationSeconds: 5 })]);
+
+    expect(fetchDurationSeconds).not.toHaveBeenCalled();
+    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ post: { score: 9, durationSeconds: 5 } });
+  });
+
   test("leaves a video alone when its duration fetch fails", async() => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
     const { library, onRefreshed } = setup([], () => Promise.reject(new Error("offline")));

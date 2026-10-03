@@ -26,9 +26,9 @@ describe("randomInt", () => {
   });
 
   test("spans [0, max)", () => {
-    expect(randomInt(new MemoryRandom([0]), 2000)).toBe(0);
-    expect(randomInt(new MemoryRandom([0.5]), 2000)).toBe(1000);
-    expect(randomInt(new MemoryRandom([0.9999]), 2000)).toBe(1999);
+    expect(randomInt(new MemoryRandom([0]), 2_000)).toBe(0);
+    expect(randomInt(new MemoryRandom([0.5]), 2_000)).toBe(1_000);
+    expect(randomInt(new MemoryRandom([0.9999]), 2_000)).toBe(1_999);
   });
 });
 
@@ -144,17 +144,17 @@ describe("roundToTwoDecimalPlaces", () => {
   });
 
   test("positive large", () => {
-    expect(roundToTwoDecimalPlaces(123456789)).toBe(123456789);
-    expect(roundToTwoDecimalPlaces(123456789.123456)).toBe(123456789.12);
-    expect(roundToTwoDecimalPlaces(123456789.1234)).toBe(123456789.12);
-    expect(roundToTwoDecimalPlaces(123456789.123)).toBe(123456789.12);
+    expect(roundToTwoDecimalPlaces(123_456_789)).toBe(123_456_789);
+    expect(roundToTwoDecimalPlaces(123_456_789.123456)).toBe(123_456_789.12);
+    expect(roundToTwoDecimalPlaces(123_456_789.1234)).toBe(123_456_789.12);
+    expect(roundToTwoDecimalPlaces(123_456_789.123)).toBe(123_456_789.12);
   });
 
   test("negative large", () => {
-    expect(roundToTwoDecimalPlaces(-123456789)).toBe(-123456789);
-    expect(roundToTwoDecimalPlaces(-123456789.123456)).toBe(-123456789.12);
-    expect(roundToTwoDecimalPlaces(-123456789.1234)).toBe(-123456789.12);
-    expect(roundToTwoDecimalPlaces(-123456789.123)).toBe(-123456789.12);
+    expect(roundToTwoDecimalPlaces(-123_456_789)).toBe(-123_456_789);
+    expect(roundToTwoDecimalPlaces(-123_456_789.123456)).toBe(-123_456_789.12);
+    expect(roundToTwoDecimalPlaces(-123_456_789.1234)).toBe(-123_456_789.12);
+    expect(roundToTwoDecimalPlaces(-123_456_789.123)).toBe(-123_456_789.12);
   });
 });
 
@@ -164,16 +164,16 @@ describe("toSeconds", () => {
   });
 
   test("normal cases", () => {
-    expect(toSeconds(1000)).toBe(1);
-    expect(toSeconds(2000)).toBe(2);
-    expect(toSeconds(5000)).toBe(5);
+    expect(toSeconds(1_000)).toBe(1);
+    expect(toSeconds(2_000)).toBe(2);
+    expect(toSeconds(5_000)).toBe(5);
     expect(toSeconds(500)).toBe(0.5);
-    expect(toSeconds(123456)).toBe(123.46);
+    expect(toSeconds(123_456)).toBe(123.46);
   });
 
   test("rounding", () => {
     expect(toSeconds(123.456)).toBe(0.12);
-    expect(toSeconds(1234.567)).toBe(1.23);
+    expect(toSeconds(1_234.567)).toBe(1.23);
   });
 });
 
@@ -252,12 +252,12 @@ describe("clamp", () => {
 
   test("clamp min", () => {
     expect(clamp(10, 16, 20)).toBe(16);
-    expect(clamp(-1000, 16, 20)).toBe(16);
+    expect(clamp(-1_000, 16, 20)).toBe(16);
   });
 
   test("clamp max", () => {
     expect(clamp(100, 16, 20)).toBe(20);
-    expect(clamp(1000, 16, 20)).toBe(20);
+    expect(clamp(1_000, 16, 20)).toBe(20);
   });
 });
 

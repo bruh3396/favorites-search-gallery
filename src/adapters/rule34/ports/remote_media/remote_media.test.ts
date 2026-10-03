@@ -11,7 +11,7 @@ interface Rule34 {
   originalUrl: ReturnType<typeof vi.fn<(locator: string, kind: string) => Promise<string>>>;
   imageUrl: ReturnType<typeof vi.fn<(locator: string, kind: string) => Promise<string>>>;
   fetchFile: ReturnType<typeof vi.fn<(url: string, signal?: AbortSignal) => Promise<Blob>>>;
-  readVideoDuration: ReturnType<typeof vi.fn<(url: string) => Promise<number>>>;
+  readVideoDurationSeconds: ReturnType<typeof vi.fn<(url: string) => Promise<number>>>;
 }
 
 function setup(): { source: Rule34RemoteMedia; rule34: Rule34 } {
@@ -20,7 +20,7 @@ function setup(): { source: Rule34RemoteMedia; rule34: Rule34 } {
     originalUrl: vi.fn(() => Promise.resolve(ORIGINAL)),
     imageUrl: vi.fn(() => Promise.resolve(IMAGE)),
     fetchFile: vi.fn(() => Promise.resolve(new Blob(["bytes"]))),
-    readVideoDuration: vi.fn(() => Promise.resolve(12))
+    readVideoDurationSeconds: vi.fn(() => Promise.resolve(12))
   };
   return { source: new Rule34RemoteMedia(rule34), rule34 };
 }
@@ -56,6 +56,6 @@ describe("Rule34RemoteMedia", () => {
     const { source, rule34 } = setup();
 
     expect(await source.fetchDurationSeconds(VIDEO)).toBe(12);
-    expect(rule34.readVideoDuration).toHaveBeenCalledWith(ORIGINAL);
+    expect(rule34.readVideoDurationSeconds).toHaveBeenCalledWith(ORIGINAL);
   });
 });

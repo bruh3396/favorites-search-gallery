@@ -1,13 +1,27 @@
-import { DownloaderAction, DownloaderIntents, DownloaderSettings } from "@/features/favorites/features/downloader/types/types";
+import { DownloaderAction, DownloaderIntents } from "@/features/favorites/features/downloader/types/types";
 import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
 import { Preference } from "@/lib/storage/preference";
 
+export interface DownloaderControlConfiguration {
+  filenameOptions: Map<number, string>;
+}
+
+export interface DownloaderControlDependencies {
+  shell: DownloaderShell;
+  intents: DownloaderIntents;
+  batchSize: Preference<number>;
+  filenameFormat: Preference<number>;
+}
+
 export class DownloaderControl {
   private readonly dispatch: Record<DownloaderAction, () => void>;
 
-  constructor(shell: DownloaderShell, intents: DownloaderIntents, { batchSize, filenameFormat, filenameOptions }: DownloaderSettings) {
+  constructor(
+    { filenameOptions }: DownloaderControlConfiguration,
+    { shell, intents, batchSize, filenameFormat }: DownloaderControlDependencies
+  ) {
     this.dispatch = {
       start: (): void => intents.start(),
       cancel: (): void => intents.cancel()

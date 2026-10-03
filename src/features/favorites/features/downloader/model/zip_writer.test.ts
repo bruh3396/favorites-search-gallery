@@ -8,7 +8,7 @@ async function entriesOf(blob: Blob): Promise<Map<string, Uint8Array>> {
   const result = new Map<string, Uint8Array>();
   let offset = 0;
 
-  while (view.getUint32(offset, true) === 0x04034b50) {
+  while (view.getUint32(offset, true) === 0x04_03_4b_50) {
     const crc = view.getUint32(offset + 14, true);
     const size = view.getUint32(offset + 18, true);
     const nameLength = view.getUint16(offset + 26, true);
@@ -22,7 +22,7 @@ async function entriesOf(blob: Blob): Promise<Map<string, Uint8Array>> {
     result.set(name, data);
     offset = dataStart + size;
   }
-  expect(view.getUint32(offset, true)).toBe(0x02014b50);
+  expect(view.getUint32(offset, true)).toBe(0x02_01_4b_50);
   return result;
 }
 
@@ -41,7 +41,7 @@ describe("DownloaderZipWriter", () => {
   test("stores multiple files with binary content", async() => {
     const writer = new DownloaderZipWriter();
     const a = new Uint8Array([0, 1, 2, 255, 128]) as Uint8Array<ArrayBuffer>;
-    const b = new Uint8Array(1000).map((_, i) => i % 256) as Uint8Array<ArrayBuffer>;
+    const b = new Uint8Array(1_000).map((_, i) => i % 256) as Uint8Array<ArrayBuffer>;
 
     writer.add("a.bin", a);
     writer.add("b.bin", b);
@@ -65,13 +65,13 @@ describe("DownloaderZipWriter", () => {
     const bytes = new Uint8Array(await new DownloaderZipWriter().finish().arrayBuffer());
     const view = new DataView(bytes.buffer);
 
-    expect(view.getUint32(0, true)).toBe(0x06054b50);
+    expect(view.getUint32(0, true)).toBe(0x06_05_4b_50);
     expect(view.getUint16(8, true)).toBe(0);
   });
 
   test("writes zip64 end records when the entry count reaches the 16-bit limit", async() => {
     const writer = new DownloaderZipWriter();
-    const count = 0xffff;
+    const count = 0xff_ff;
 
     for (let index = 0; index < count; index += 1) {
       writer.add("f", new Uint8Array(0));
@@ -81,11 +81,11 @@ describe("DownloaderZipWriter", () => {
     const locator = new DataView(bytes.buffer, bytes.length - 42, 20);
     const record = new DataView(bytes.buffer, bytes.length - 98, 56);
 
-    expect(end.getUint32(0, true)).toBe(0x06054b50);
-    expect(end.getUint16(8, true)).toBe(0xffff);
-    expect(end.getUint32(16, true)).toBe(0xffffffff);
-    expect(locator.getUint32(0, true)).toBe(0x07064b50);
-    expect(record.getUint32(0, true)).toBe(0x06064b50);
+    expect(end.getUint32(0, true)).toBe(0x06_05_4b_50);
+    expect(end.getUint16(8, true)).toBe(0xff_ff);
+    expect(end.getUint32(16, true)).toBe(0xff_ff_ff_ff);
+    expect(locator.getUint32(0, true)).toBe(0x07_06_4b_50);
+    expect(record.getUint32(0, true)).toBe(0x06_06_4b_50);
     expect(record.getBigUint64(24, true)).toBe(BigInt(count));
   });
 
@@ -99,9 +99,9 @@ describe("DownloaderZipWriter", () => {
     const extra = 30 + "big.bin".length;
 
     expect(header.getUint16(4, true)).toBe(45);
-    expect(header.getUint32(18, true)).toBe(0xffffffff);
+    expect(header.getUint32(18, true)).toBe(0xff_ff_ff_ff);
     expect(header.getUint16(28, true)).toBe(28);
-    expect(header.getUint16(extra, true)).toBe(0x0001);
+    expect(header.getUint16(extra, true)).toBe(0x00_01);
     expect(header.getBigUint64(extra + 4, true)).toBe(BigInt(size));
   });
 });

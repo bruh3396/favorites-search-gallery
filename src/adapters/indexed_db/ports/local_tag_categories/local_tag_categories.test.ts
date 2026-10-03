@@ -16,7 +16,9 @@ describe("IndexedDbLocalTagCategories", () => {
 
     await tagCategories.setMany(new Map([["alice", "character"], ["bob", "artist"]]));
 
-    expect(await tagCategories.getMany(["bob", "missing", "alice"])).toEqual(new Map([["bob", "artist"], ["alice", "character"]]));
+    const found = await tagCategories.getMany(["bob", "missing", "alice"]);
+
+    expect(found).toEqual(new Map([["bob", "artist"], ["alice", "character"]]));
   });
 
   test("overwrites a tag's category", async() => {

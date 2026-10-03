@@ -6,8 +6,7 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler";
 
-const WRITE_BATCH_SIZE = 25;
-const WRITE_DELAY = 2_000;
+const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
 
 function postIsComplete(post: Post): boolean {
@@ -39,7 +38,10 @@ export class FavoritesPostLibrary implements PostLibrary {
     this.remotePosts = dependencies.remotePosts;
     this.remoteMedia = dependencies.remoteMedia;
     this.scheduler = dependencies.scheduler;
-    this.localPostsWriter = new CoalescingExecutor(WRITE_BATCH_SIZE, WRITE_DELAY, posts => this.localPosts.setMany(posts), dependencies.scheduler);
+    this.localPostsWriter = new CoalescingExecutor(WRITE_COALESCING, {
+      execute: (posts): Promise<void> => this.localPosts.setMany(posts),
+      scheduler: dependencies.scheduler
+    });
     this.onRefreshed = dependencies.onRefreshed;
   }
 

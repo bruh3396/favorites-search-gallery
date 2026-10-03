@@ -10,8 +10,8 @@ describe("label", () => {
   test.each([
     [0, 0, "Download Results"],
     [1, 0, "Download 1 Result"],
-    [1200, 0, "Download 1200 Results"],
-    [1200, 500, "Download 1200 Results · 3 zips"],
+    [1_200, 0, "Download 1200 Results"],
+    [1_200, 500, "Download 1200 Results · 3 zips"],
     [400, 500, "Download 400 Results"]
   ])("labels %i results with batch size %i", (itemCount, batchSize, expected) => {
     expect(DownloaderStatus.label(itemCount, batchSize)).toBe(expected);

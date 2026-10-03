@@ -2,10 +2,17 @@ import { CoalescingExecutor, CoalescingResolver } from "@/core/utils/async/coale
 import { describe, expect, test, vi } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 
-function setup(maxSize = 3, flushTimeout = 100): { executor: CoalescingExecutor<number>; execute: ReturnType<typeof vi.fn>; scheduler: MemoryScheduler } {
+const EXECUTOR_COALESCING = { flushSize: 3, flushTimeout: 100 };
+const RESOLVER_COALESCING = { flushSize: 10, flushTimeout: 100 };
+
+function setup(): {
+  executor: CoalescingExecutor<number>;
+  execute: ReturnType<typeof vi.fn>;
+  scheduler: MemoryScheduler;
+} {
   const scheduler = new MemoryScheduler();
   const execute = vi.fn();
-  return { executor: new CoalescingExecutor<number>(maxSize, flushTimeout, execute, scheduler), execute, scheduler };
+  return { executor: new CoalescingExecutor<number>(EXECUTOR_COALESCING, { execute, scheduler }), execute, scheduler };
 }
 
 describe("CoalescingExecutor", () => {
@@ -48,7 +55,7 @@ describe("CoalescingResolver", () => {
   test("resolves every caller of a key from one coalesced call", async() => {
     const scheduler = new MemoryScheduler();
     const resolve = vi.fn((keys: string[]) => Promise.resolve(new Map(keys.map(key => [key, key.toUpperCase()]))));
-    const resolver = new CoalescingResolver<string, string>(10, 100, resolve, scheduler);
+    const resolver = new CoalescingResolver<string, string>(RESOLVER_COALESCING, { resolve, scheduler });
 
     const results = Promise.all([resolver.schedule("a"), resolver.schedule("a"), resolver.schedule("b")]);
 
@@ -60,12 +67,31 @@ describe("CoalescingResolver", () => {
 
   test("rejects every caller in the batch when resolving fails", async() => {
     const scheduler = new MemoryScheduler();
-    const resolver = new CoalescingResolver<string, string>(10, 100, () => Promise.reject(new Error("down")), scheduler);
+    const resolver = new CoalescingResolver<string, string>(RESOLVER_COALESCING, {
+      resolve: (): Promise<Map<string, string>> => Promise.reject(new Error("down")),
+      scheduler
+    });
 
     const result = resolver.schedule("a");
 
     scheduler.advance(100);
 
     await expect(result).rejects.toThrow("down");
+  });
+
+  test("rejects only the callers of keys the coalesced call left unresolved", async() => {
+    const scheduler = new MemoryScheduler();
+    const resolver = new CoalescingResolver<string, string>(RESOLVER_COALESCING, {
+      resolve: (): Promise<Map<string, string>> => Promise.resolve(new Map([["a", "A"]])),
+      scheduler
+    });
+
+    const resolved = resolver.schedule("a");
+    const unresolved = resolver.schedule("b");
+
+    scheduler.advance(100);
+
+    expect(await resolved).toBe("A");
+    await expect(unresolved).rejects.toThrow();
   });
 });

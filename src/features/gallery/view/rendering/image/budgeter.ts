@@ -23,13 +23,22 @@ export class GalleryLimitImageBudgeter extends GalleryAbstractImageBudgeter {
   }
 }
 
+export interface GalleryMemoryImageBudgeterConfiguration {
+  megabyteLimit: number;
+  minimumCount: number;
+}
+
 export class GalleryMemoryImageBudgeter extends GalleryAbstractImageBudgeter {
+  private readonly megabyteLimit: number;
+  private readonly minimumCount: number;
+
   constructor(
-    private readonly getFavorite: (id: string) => Pick<Favorite, "pixelCount"> | undefined,
-    private readonly megabyteLimit: number,
-    private readonly minimumCount: number
+    { megabyteLimit, minimumCount }: GalleryMemoryImageBudgeterConfiguration,
+    private readonly getFavorite: (id: string) => Pick<Favorite, "pixelCount"> | undefined
   ) {
     super();
+    this.megabyteLimit = megabyteLimit;
+    this.minimumCount = minimumCount;
   }
 
   protected partitionByLimit(requests: ImageRequest[]): BudgetedRequests {

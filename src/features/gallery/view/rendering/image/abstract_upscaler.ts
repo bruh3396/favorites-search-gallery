@@ -2,21 +2,38 @@ import { ImageRequest } from "@/features/gallery/types/image_request";
 import { Preference } from "@/lib/storage/preference";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 
+export interface GalleryUpscalerConfiguration {
+  paintDelay: number;
+  baseCanvasWidth: number;
+  maxUpscaledCanvasHeight: number;
+}
+
+export interface GalleryUpscalerDependencies {
+  canvasFor: (id: string) => HTMLCanvasElement | null;
+  enabled: Preference<boolean>;
+  quality: Preference<number>;
+  fetchBitmap: (request: ImageRequest) => Promise<boolean>;
+}
+
 export abstract class GalleryAbstractUpscaler {
+  protected readonly canvasFor: (id: string) => HTMLCanvasElement | null;
+  protected readonly maxUpscaledCanvasHeight: number;
+  private readonly enabled: Preference<boolean>;
+  private readonly quality: Preference<number>;
+  private readonly fetchBitmap: (request: ImageRequest) => Promise<boolean>;
+  private readonly baseCanvasWidth: number;
   private readonly paintedWidths: Map<HTMLCanvasElement, number> = new Map();
   private readonly paintQueue: ThrottleQueue;
   private paused: boolean = false;
 
-  constructor(
-    protected readonly canvasFor: (id: string) => HTMLCanvasElement | null,
-    private readonly enabled: Preference<boolean>,
-    private readonly quality: Preference<number>,
-    private readonly fetchBitmap: (request: ImageRequest) => Promise<boolean>,
-    paintDelay: number,
-    private readonly baseCanvasWidth: number,
-    protected readonly maxUpscaledCanvasHeight: number
-  ) {
-    this.paintQueue = new ThrottleQueue(paintDelay);
+  constructor(configuration: GalleryUpscalerConfiguration, dependencies: GalleryUpscalerDependencies) {
+    this.canvasFor = dependencies.canvasFor;
+    this.enabled = dependencies.enabled;
+    this.quality = dependencies.quality;
+    this.fetchBitmap = dependencies.fetchBitmap;
+    this.baseCanvasWidth = configuration.baseCanvasWidth;
+    this.maxUpscaledCanvasHeight = configuration.maxUpscaledCanvasHeight;
+    this.paintQueue = new ThrottleQueue(configuration.paintDelay);
   }
 
   protected get upscaledCanvasWidth(): number {

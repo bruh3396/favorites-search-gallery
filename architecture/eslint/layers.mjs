@@ -17,6 +17,7 @@ export const LAYERS = [
   { type: "core/boundary/ports", pattern: ["src/core/boundary/ports"] },
   { type: "core/boundary", pattern: ["src/core/boundary"] },
   { type: "core/context", pattern: ["src/core/context"] },
+  { type: "core/ui/components", pattern: ["src/core/ui/components/*"], capture: ["component"] },
   { type: "core/ui", pattern: ["src/core/ui"] },
   { type: "core/utils", pattern: ["src/core/utils"] },
   { type: "adapters/client", pattern: ["src/adapters/*/client"], capture: ["name"] },

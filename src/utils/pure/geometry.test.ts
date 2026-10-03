@@ -14,7 +14,7 @@ describe("parseDimensions2D", () => {
   });
 
   test("rectangle", () => {
-    expect(toDimensions2D("1920x1080")).toStrictEqual({ width: 1920, height: 1080 });
+    expect(toDimensions2D("1920x1080")).toStrictEqual({ width: 1_920, height: 1_080 });
   });
 
   test("invalid format", () => {

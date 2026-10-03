@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
-import { IncrementalPageFetcher } from "@/adapters/rule34/ports/remote_favorites/incremental_page_fetcher";
 import { Post } from "@/core/domain/post/post";
+import { Rule34IncrementalPageFetcher } from "@/adapters/rule34/ports/remote_favorites/incremental_page_fetcher";
 import { createPost } from "@/testing/post";
 
 const PAGE_SIZE = 50;
@@ -30,14 +30,26 @@ function idsOf(posts: Post[]): string[] {
 
 const NO_DELAY = 0;
 
-async function deliveredFor(fetch: (pageIndex: number) => Promise<Post[]>, seen: ReadonlySet<string>, firstPage?: Post[]): Promise<Post[][]> {
+async function deliveredFor(
+  fetch: (pageIndex: number) => Promise<Post[]>,
+  seen: ReadonlySet<string>,
+  firstPage?: Post[]
+): Promise<Post[][]> {
   const delivered: Post[][] = [];
+  const fetcher = new Rule34IncrementalPageFetcher(
+    { pageSize: PAGE_SIZE, fetchDelay: NO_DELAY },
+    {
+      onPostsFound: (posts): number => delivered.push(posts),
+      fetch,
+      scheduler: { sleep: (): Promise<void> => Promise.resolve() }
+    }
+  );
 
-  await new IncrementalPageFetcher(posts => delivered.push(posts), fetch, PAGE_SIZE, NO_DELAY, seen).fetchMissing(firstPage);
+  await fetcher.fetchMissing(seen, firstPage);
   return delivered;
 }
 
-describe("IncrementalPageFetcher", () => {
+describe("Rule34IncrementalPageFetcher", () => {
   test("delivers nothing when the first fetched page is empty", async() => {
     const { fetch, requested } = createPageFetcher([[]]);
 
@@ -54,7 +66,8 @@ describe("IncrementalPageFetcher", () => {
   });
 
   test("delivers each page as it is fetched and stops after a partial page", async() => {
-    const { fetch, requested } = createPageFetcher([createFullPage(0), createFullPage(100), createPartialPage(200, 10)]);
+    const pages = [createFullPage(0), createFullPage(100), createPartialPage(200, 10)];
+    const { fetch, requested } = createPageFetcher(pages);
     const delivered = await deliveredFor(fetch, new Set());
 
     expect(delivered.map(page => page.length)).toEqual([PAGE_SIZE, PAGE_SIZE, 10]);

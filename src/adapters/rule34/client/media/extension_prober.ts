@@ -1,16 +1,27 @@
-import { ImageExtension } from "@/adapters/rule34/client/media/extension";
-import { RateLimiter } from "@/lib/async/rate_limiting";
+import { Rule34Fetch, send } from "@/adapters/rule34/client/request";
+import { RateLimiter } from "@/core/utils/async/rate_limiter";
+import { Rule34ImageExtension } from "@/adapters/rule34/client/media/extension";
+import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { fileUrl } from "@/adapters/rule34/client/media/addresses";
 
+export interface Rule34ExtensionProberDependencies {
+  fetch: Rule34Fetch;
+  scheduler: Scheduler;
+}
+
 const PROBE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 50 };
-const PROBED_EXTENSIONS: readonly ImageExtension[] = ["jpeg", "png", "jpg"];
-const FALLBACK_EXTENSION: ImageExtension = "jpg";
+const PROBED_EXTENSIONS: readonly Rule34ImageExtension[] = ["jpeg", "png", "jpg"];
+const FALLBACK_EXTENSION: Rule34ImageExtension = "jpg";
 
-export class ExtensionProber {
-  private readonly limiter = new RateLimiter(PROBE_RATE_LIMIT);
-  private readonly found = new Map<string, ImageExtension>();
+export class Rule34ExtensionProber {
+  private readonly limiter: RateLimiter;
+  private readonly found = new Map<string, Rule34ImageExtension>();
 
-  public async probe(locator: string): Promise<ImageExtension> {
+  constructor(private readonly dependencies: Rule34ExtensionProberDependencies) {
+    this.limiter = new RateLimiter(PROBE_RATE_LIMIT, dependencies.scheduler);
+  }
+
+  public async probe(locator: string): Promise<Rule34ImageExtension> {
     const cached = this.found.get(locator);
 
     if (cached !== undefined) {
@@ -27,6 +38,7 @@ export class ExtensionProber {
   }
 
   private exists(url: string): Promise<boolean> {
-    return this.limiter.run(() => fetch(url, { method: "HEAD" }).then(response => response.ok, () => false));
+    return this.limiter.run(() => send(this.dependencies.fetch, url, { method: "HEAD" }))
+      .then(response => response.ok, () => false);
   }
 }

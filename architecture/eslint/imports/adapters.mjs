@@ -4,9 +4,9 @@ export const MESSAGES = {
   rule8: "rule 8: an adapter may import only core/boundary, core/domain, core/utils, and its own folder",
   rule9: "rule 9: an adapter's client/ may not import its ports/ or environment/",
   rule10: "rule 10: an adapter's port folder may not import another port folder or environment/, and environment/ may not import ports/",
-  rule11: "rule 11: an adapter's client/ may not import core/boundary/ports/",
+  rule11: "rule 11: an adapter's client/ may import no core port but the Scheduler and Random capabilities",
   rule12: "rule 12: only targets may import adapters, and only an adapter's entries (client/client.ts, client/<server>/client.ts, ports/<port>/<port>.ts, environment/environment.ts)",
-  rule63: "rule 63: a port adapter may import only its own core port"
+  rule63: "rule 63: a port adapter may import only its own core port and the Scheduler and Random capabilities"
 };
 
 export const POLICIES = [
@@ -50,6 +50,10 @@ export const POLICIES = [
     from: { element: { type: "adapters/ports" } },
     disallow: [{ to: { element: { type: "core/boundary/ports", fileInternalPath: "!{{ from.element.captured.port }}.ts" } } }],
     message: MESSAGES.rule63
+  },
+  {
+    from: { element: { type: ["adapters/client", "adapters/ports"] } },
+    allow: [{ to: { element: { type: "core/boundary/ports", fileInternalPath: "{scheduler,random}.ts" } } }]
   },
   {
     from: { element: { type: "targets" } },

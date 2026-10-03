@@ -51,7 +51,7 @@ function newPositionArray(length: number, max: number): PositionArray {
     return new Uint8Array(length);
   }
 
-  if (max <= 0xffff) {
+  if (max <= 0xff_ff) {
     return new Uint16Array(length);
   }
   return new Uint32Array(length);

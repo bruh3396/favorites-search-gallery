@@ -1,13 +1,30 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Rule34MediaClient } from "@/adapters/rule34/client/media/client";
+import { advanceAndSettle } from "@/testing/async";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
+type FetchMock = ReturnType<typeof vi.fn<Fetch>>;
 
-function setup(respond: Fetch = (): Promise<Response> => Promise.resolve(new Response("bytes"))): { client: Rule34MediaClient; fetch: ReturnType<typeof vi.fn<Fetch>> } {
+function respondWithBytes(): Promise<Response> {
+  return Promise.resolve(new Response("bytes"));
+}
+
+interface Setup {
+  client: Rule34MediaClient;
+  fetch: FetchMock;
+  scheduler: MemoryScheduler;
+}
+
+function setup(respond: Fetch = respondWithBytes): Setup {
   const fetch = vi.fn<Fetch>(respond);
+  const scheduler = new MemoryScheduler();
+  return { client: new Rule34MediaClient({ fetch, scheduler }), fetch, scheduler };
+}
 
-  vi.stubGlobal("fetch", fetch);
-  return { client: new Rule34MediaClient(), fetch };
+async function settled<T>(scheduler: MemoryScheduler, pending: Promise<T>): Promise<T> {
+  await advanceAndSettle(scheduler, 1_000);
+  return pending;
 }
 
 function respondOkFor(okUrl: string): Fetch {
@@ -15,16 +32,14 @@ function respondOkFor(okUrl: string): Fetch {
 }
 
 describe("Rule34MediaClient", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   test("mints media from a file url", () => {
-    expect(setup().client.mintMedia("https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", "")).toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
+    expect(setup().client.mintMedia("https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", ""))
+      .toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
   });
 
   test("addresses a preview on the thumbnail host", () => {
-    expect(setup().client.previewUrl("1234/a1b2c3")).toBe("https://wimg.rule34.xxx/thumbnails//1234/thumbnail_a1b2c3.jpg");
+    expect(setup().client.previewUrl("1234/a1b2c3"))
+      .toBe("https://wimg.rule34.xxx/thumbnails//1234/thumbnail_a1b2c3.jpg");
   });
 
   test("addresses an original by the extension its locator carries", async() => {
@@ -56,10 +71,11 @@ describe("Rule34MediaClient", () => {
   });
 
   test("probes an image's extension once", async() => {
-    const { client, fetch } = setup(respondOkFor("https://rule34.xxx/images//1234/a1b2c3.png"));
+    const { client, fetch, scheduler } = setup(respondOkFor("https://rule34.xxx/images//1234/a1b2c3.png"));
+    const original = "https://rule34.xxx/images//1234/a1b2c3.png";
 
-    expect(await client.originalUrl("1234/a1b2c3", "image")).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
-    expect(await client.originalUrl("1234/a1b2c3", "image")).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
+    expect(await settled(scheduler, client.originalUrl("1234/a1b2c3", "image"))).toBe(original);
+    expect(await settled(scheduler, client.originalUrl("1234/a1b2c3", "image"))).toBe(original);
     expect(fetch.mock.calls.map(([url]) => url)).toEqual([
       "https://rule34.xxx/images//1234/a1b2c3.jpeg",
       "https://rule34.xxx/images//1234/a1b2c3.png"
@@ -67,9 +83,10 @@ describe("Rule34MediaClient", () => {
   });
 
   test("falls back to jpg when no probe finds the image", async() => {
-    const { client } = setup(respondOkFor(""));
+    const { client, scheduler } = setup(respondOkFor(""));
 
-    expect(await client.originalUrl("1234/a1b2c3", "image")).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
+    expect(await settled(scheduler, client.originalUrl("1234/a1b2c3", "image")))
+      .toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
   });
 
   test("fetches a file's bytes", async() => {

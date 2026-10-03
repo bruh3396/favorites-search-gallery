@@ -1,0 +1,79 @@
+.fsg-Stepper {
+  display: inline-flex;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-medium);
+  background: var(--fsg-color-surface-sunken);
+}
+
+.fsg-Stepper:focus-within {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
+}
+
+.fsg-Stepper-input {
+  inline-size: 6ch;
+  margin: 0;
+  padding: 4px 8px;
+  border: 0;
+  border-inline: 1px solid var(--fsg-color-outline);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fsg-font-size-label);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  text-align: center;
+  appearance: textfield;
+}
+
+.fsg-Stepper-input::-webkit-inner-spin-button,
+.fsg-Stepper-input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+.fsg-Stepper-input:focus {
+  outline: none;
+}
+
+.fsg-Stepper-button {
+  inline-size: 28px;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Stepper-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+}
+
+.fsg-Stepper-button:active:not(:disabled) {
+  background: var(--fsg-color-accent);
+  color: var(--fsg-color-on-accent);
+}
+
+.fsg-Stepper-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-Stepper-input:disabled {
+  cursor: not-allowed;
+}
+
+.fsg-Stepper[data-size="small"] .fsg-Stepper-input {
+  padding: 2px 6px;
+  font-size: var(--fsg-font-size-label-small);
+}
+
+.fsg-Stepper[data-size="small"] .fsg-Stepper-button {
+  inline-size: 22px;
+  font-size: var(--fsg-font-size-label-small);
+}

@@ -56,7 +56,7 @@ describe("FavoritesPostTable", () => {
     test("is a no-op when already at the requested capacity", () => {
       table.write(0, createPost({ id: "1" }));
 
-      table.trim(1024);
+      table.trim(1_024);
 
       expect(table.id(0)).toBe(1);
     });

@@ -46,9 +46,10 @@ describe("GalleryLimitImageBudgeter", () => {
 describe("GalleryMemoryImageBudgeter", () => {
   const MEGABYTE_LIMIT = 700;
   const MINIMUM_COUNT = 5;
+  const BUDGET = { megabyteLimit: MEGABYTE_LIMIT, minimumCount: MINIMUM_COUNT };
 
   function createMemoryBudgeter(megabytesPerRequest: number): GalleryMemoryImageBudgeter {
-    return new GalleryMemoryImageBudgeter(() => ({ pixelCount: megabytesPerRequest * PIXELS_PER_MB }), MEGABYTE_LIMIT, MINIMUM_COUNT);
+    return new GalleryMemoryImageBudgeter(BUDGET, () => ({ pixelCount: megabytesPerRequest * PIXELS_PER_MB }));
   }
 
   test("accepts every request when the total never reaches the limit", () => {
@@ -76,7 +77,7 @@ describe("GalleryMemoryImageBudgeter", () => {
   });
 
   test("treats images with no known favorite as free", () => {
-    const budgeter = new GalleryMemoryImageBudgeter(() => undefined, MEGABYTE_LIMIT, MINIMUM_COUNT);
+    const budgeter = new GalleryMemoryImageBudgeter(BUDGET, () => undefined);
     const elements = createItems(10);
 
     expect(acceptedIdsFor(budgeter, elements)).toHaveLength(10);

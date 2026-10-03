@@ -197,7 +197,7 @@ describe("ArenaFavorite", () => {
     test("round trips fields, mutations, and tags", () => {
       const arena = new FavoritesColumnarArena();
       const item0 = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", rating: "s", score: 99 }), arena, true);
-      const item1 = new ArenaFavorite(createPost({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1920, width: 1080 }), arena, true);
+      const item1 = new ArenaFavorite(createPost({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1_920, width: 1_080 }), arena, true);
 
       expect(item0.id).toBe("42");
       expect(item0.rating).toBe(1 satisfies Rating);
@@ -207,9 +207,9 @@ describe("ArenaFavorite", () => {
       expect(item1.id).toBe("103");
       expect(item1.rating).toBe(4 satisfies Rating);
       expect(item1.getMetric("score")).toBe(3);
-      expect(item1.getMetric("width")).toBe(1080);
-      expect(item1.getMetric("height")).toBe(1920);
-      expect(item1.pixelCount).toBe(1080 * 1920);
+      expect(item1.getMetric("width")).toBe(1_080);
+      expect(item1.getMetric("height")).toBe(1_920);
+      expect(item1.pixelCount).toBe(1_080 * 1_920);
       expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
 
       item0.setDurationSeconds(123);

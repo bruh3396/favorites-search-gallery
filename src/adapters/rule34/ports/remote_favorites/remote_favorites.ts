@@ -1,68 +1,89 @@
 import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/fetcher";
-import { FullPageFetcher } from "@/adapters/rule34/ports/remote_favorites/full_page_fetcher";
-import { IncrementalPageFetcher } from "@/adapters/rule34/ports/remote_favorites/incremental_page_fetcher";
+import { RetryPolicy, retry } from "@/core/utils/async/retry";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/url";
 import { Post } from "@/core/domain/post/post";
+import { Random } from "@/core/boundary/ports/random";
+import { Rule34FullPageFetcher } from "@/adapters/rule34/ports/remote_favorites/full_page_fetcher";
+import { Rule34IncrementalPageFetcher } from "@/adapters/rule34/ports/remote_favorites/incremental_page_fetcher";
 import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
-import { withExponentialBackoff } from "@/lib/async/scheduling";
+import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { isTransient } from "@/adapters/rule34/client/error";
+
+export interface Rule34RemoteFavoritesDependencies {
+  rule34: Pick<Rule34SiteClient,
+    "readFavoritesPageId" | "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" |
+    "prioritizeFavorites" | "addFavorite" | "removeFavorite">;
+  scheduler: Scheduler;
+  random: Random;
+}
 
 const FETCH_DELAY = 1_000;
-const FETCH_ATTEMPTS = 5;
+const MAX_FETCH_ATTEMPTS = 5;
+const RETRY_BASE_DELAY = 1_000;
 const RETRY_BACKOFF_BASE = 7;
-const SITE_ADD_RESULTS: Record<number, AddFavoriteResult> = {
-  0: "error",
-  1: "alreadyAdded",
-  2: "loggedOut",
-  3: "added"
-};
 
 export class Rule34RemoteFavorites implements RemoteFavorites {
-  constructor(
-    private readonly rule34: Pick<Rule34SiteClient, "readFavoritesPageId" | "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites" | "addFavorite" | "removeFavorite">,
-    private readonly pageId: string = rule34.readFavoritesPageId(),
-    private readonly firstPageFavorites: Post[] | null = rule34.readFirstFavoritesPage(),
-    private readonly fetchDelay: number = FETCH_DELAY,
-    private readonly fetchAttempts: number = FETCH_ATTEMPTS
-  ) { }
+  private readonly pageId: string;
+  private readonly firstPageFavorites: Post[] | null;
+  private readonly retryPolicy: RetryPolicy;
+
+  constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
+    this.pageId = dependencies.rule34.readFavoritesPageId();
+    this.firstPageFavorites = dependencies.rule34.readFirstFavoritesPage();
+    this.retryPolicy = {
+      attempts: MAX_FETCH_ATTEMPTS,
+      baseDelay: RETRY_BASE_DELAY,
+      scheduler: dependencies.scheduler,
+      random: dependencies.random,
+      isRetryable: isTransient
+    };
+  }
 
   public fetchCount(): Promise<number | null> {
-    return this.rule34.fetchFavoriteCount(this.pageId);
+    return retry(() => this.dependencies.rule34.fetchFavoriteCount(this.pageId), this.retryPolicy)
+      .catch(() => null);
   }
 
   public fetchAllExcept(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    return this.rule34.prioritizeFavorites(() => this.fetchPages(knownIds, onFavoritesFound));
+    return this.dependencies.rule34.prioritizeFavorites(() => this.fetchPages(knownIds, onFavoritesFound));
   }
 
   public async add(id: string): Promise<AddFavoriteResult> {
-    const answer = await this.rule34.addFavorite(id);
-    return answer === null ? "cancelled" : SITE_ADD_RESULTS[parseInt(answer, 10)] ?? "error";
+    return await this.dependencies.rule34.addFavorite(id) ?? "cancelled";
   }
 
   public async remove(id: string): Promise<RemoveFavoriteResult> {
-    return await this.rule34.removeFavorite(id) ? "removed" : "cancelled";
+    return await this.dependencies.rule34.removeFavorite(id) ? "removed" : "cancelled";
   }
 
   private fetchPages(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {
+    const firstPage = this.firstPageFavorites ?? undefined;
+
     if (knownIds.size === 0) {
-      return this.createFullPageFetcher(onFavoritesFound).fetchAll();
+      return this.createFullPageFetcher(onFavoritesFound).fetchAll(firstPage);
     }
-    return this.createIncrementalPageFetcher(knownIds, onFavoritesFound).fetchMissing(this.firstPageFavorites ?? undefined);
+    return this.createIncrementalPageFetcher(onFavoritesFound).fetchMissing(knownIds, firstPage);
   }
 
-  private createFullPageFetcher(onFavoritesFound: (posts: Post[]) => void): FullPageFetcher {
-    return new FullPageFetcher(onFavoritesFound, pageIndex => this.fetch(pageIndex), retryCount => computeRetryDelay(retryCount, this.fetchDelay), this.firstPageFavorites ?? undefined);
+  private createFullPageFetcher(onFavoritesFound: (posts: Post[]) => void): Rule34FullPageFetcher {
+    return new Rule34FullPageFetcher({
+      onPostsFound: onFavoritesFound,
+      fetch: (pageIndex): Promise<Post[]> => this.fetch(pageIndex),
+      delayForRetry: (retryCount): number => computeRetryDelay(retryCount, FETCH_DELAY),
+      scheduler: this.dependencies.scheduler
+    });
   }
 
-  private createIncrementalPageFetcher(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): IncrementalPageFetcher {
-    return new IncrementalPageFetcher(onFavoritesFound, pageIndex => this.fetchWithRetries(pageIndex), FAVORITES_PER_PAGE, this.fetchDelay, knownIds);
+  private createIncrementalPageFetcher(onFavoritesFound: (posts: Post[]) => void): Rule34IncrementalPageFetcher {
+    return new Rule34IncrementalPageFetcher({ pageSize: FAVORITES_PER_PAGE, fetchDelay: FETCH_DELAY }, {
+      onPostsFound: onFavoritesFound,
+      fetch: (pageIndex): Promise<Post[]> => retry(() => this.fetch(pageIndex), this.retryPolicy),
+      scheduler: this.dependencies.scheduler
+    });
   }
 
   private fetch(pageIndex: number): Promise<Post[]> {
-    return this.rule34.fetchFavoritesPage(this.pageId, pageIndex);
-  }
-
-  private fetchWithRetries(pageIndex: number): Promise<Post[]> {
-    return withExponentialBackoff(() => this.fetch(pageIndex), this.fetchAttempts);
+    return this.dependencies.rule34.fetchFavoritesPage(this.pageId, pageIndex);
   }
 }
 

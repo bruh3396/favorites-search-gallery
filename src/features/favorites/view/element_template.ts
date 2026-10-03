@@ -6,27 +6,39 @@ import { Media } from "@/core/domain/media/media";
 import { doNothing } from "@/utils/pure/function";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
+export interface FavoritesElementTemplateConfiguration {
+  galleryRunning: boolean;
+  linksToPostPage: boolean;
+  userIsOnTheirOwnFavoritesPage: boolean;
+}
+
+export interface FavoritesElementTemplateDependencies {
+  postUrl: (id: string) => string;
+  resolvePreviewUrl: (media: Media) => Promise<string>;
+}
+
 export class FavoritesElementTemplate {
+  private readonly linksToPostPage: boolean;
   private readonly postUrl: (id: string) => string;
+  private readonly resolvePreviewUrl: (media: Media) => Promise<string>;
   private readonly template: HTMLElement;
 
   constructor(
-    galleryRunning: boolean,
-    private readonly linksToPostPage: boolean,
-    userIsOnTheirOwnFavoritesPage: boolean,
-    postUrl: (id: string) => string,
-    private readonly resolvePreviewUrl: (media: Media) => Promise<string>
+    configuration: FavoritesElementTemplateConfiguration,
+    dependencies: FavoritesElementTemplateDependencies
   ) {
     const root = new DOMParser().parseFromString("", "text/html").createElement("div");
-    const canvas = galleryRunning ? "<canvas></canvas>" : "";
+    const canvas = configuration.galleryRunning ? "<canvas></canvas>" : "";
 
-    this.postUrl = postUrl;
+    this.linksToPostPage = configuration.linksToPostPage;
+    this.postUrl = dependencies.postUrl;
+    this.resolvePreviewUrl = dependencies.resolvePreviewUrl;
     root.className = `${ITEM_CLASS_NAME} ${TILE_CLASS_NAME}`;
     root.innerHTML = `
   <a>
     <img decoding="async" alt="">
     ${canvas}
-    ${actionBarHtml(userIsOnTheirOwnFavoritesPage)}
+    ${actionBarHtml(configuration.userIsOnTheirOwnFavoritesPage)}
   </a>
 `;
     this.template = root;

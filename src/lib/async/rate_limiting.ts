@@ -95,7 +95,7 @@ export class RateLimiter {
 
   constructor({ concurrency, ratePerSecond }: RateLimiterConfig) {
     this.limiter = new ConcurrencyLimiter(concurrency);
-    this.throttle = new ThrottleQueue(Math.round(1000 / ratePerSecond));
+    this.throttle = new ThrottleQueue(Math.round(1_000 / ratePerSecond));
   }
 
   public run<T>(fn: () => Promise<T>): Promise<T> {

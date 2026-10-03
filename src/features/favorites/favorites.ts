@@ -37,9 +37,9 @@ function startOnFavoritesPage(context: AppContext): void {
   const linksToPostPage = context.environment.pointer === "touch" || !context.features.has("gallery");
   const shell = new FavoritesShell(context.shell, context.environment);
   const model = new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit);
-  const view = new FavoritesView(context, shell, linksToPostPage);
+  const view = new FavoritesView({ linksToPostPage }, { context, shell });
   const offersTutorial = context.environment.pointer === "touch";
-  const control = new FavoritesControl(context, shell, offersTutorial);
+  const control = new FavoritesControl({ offersTutorial }, { context, shell });
   const features = new FavoritesFeatures(context, featureDependencies(context, model, control));
   const flows = new FavoritesFlows(context, model, view, control);
   const components: FavoritesComponents = { context, shell, model, view, flows, control, features };

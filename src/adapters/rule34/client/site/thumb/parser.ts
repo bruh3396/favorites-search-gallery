@@ -20,7 +20,7 @@ export function parseThumb(thumb: HTMLElement): Post {
     changedAt: 0,
     durationSeconds: 0,
     deleted: false,
-    media: mintMedia(parsePreviewURL(getImageFromThumb(thumb)), tags) ?? NO_MEDIA
+    media: mintMedia(parsePreviewUrl(getImageFromThumb(thumb)), tags) ?? NO_MEDIA
   };
 }
 
@@ -28,7 +28,7 @@ function normalizeTags(thumb: HTMLElement): string {
   return removeExtraWhitespace(getTagsFromThumb(thumb).replace(/\bvide\b/g, "video"));
 }
 
-function parsePreviewURL(image: HTMLImageElement | null): string {
+function parsePreviewUrl(image: HTMLImageElement | null): string {
   if (image === null) {
     return "";
   }

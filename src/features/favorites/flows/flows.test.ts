@@ -44,10 +44,10 @@ async function store(context: AppContext, ...ids: string[]): Promise<void> {
 
 function setup(context: AppContext): FavoritesFlows {
   const shell = new FavoritesShell(context.shell, context.environment);
-  const view = new FavoritesView(context, shell, false);
+  const view = new FavoritesView({ linksToPostPage: false }, { context, shell });
 
   view.setup({ onContentReplaced: () => { }, onContentAdded: () => { } });
-  return new FavoritesFlows(context, createModel(context), view, new FavoritesControl(context, shell, false));
+  return new FavoritesFlows(context, createModel(context), view, new FavoritesControl({ offersTutorial: false }, { context, shell }));
 }
 
 function idsOf(context: AppContext): string[] {

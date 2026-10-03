@@ -9,11 +9,23 @@ import { FavoritesDrawerContents } from "@/types/favorites_ui";
 import { FavoritesSearchBox } from "@/features/favorites/control/toolbar/search_box";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 
+export interface FavoritesControlConfiguration {
+  offersTutorial: boolean;
+}
+
+export interface FavoritesControlDependencies {
+  context: AppContext;
+  shell: FavoritesShell;
+}
+
 export class FavoritesControl {
+  private readonly shell: FavoritesShell;
   private readonly searchBox: FavoritesSearchBox;
 
-  constructor(context: AppContext, private readonly shell: FavoritesShell, offersTutorial: boolean) {
+  constructor({ offersTutorial }: FavoritesControlConfiguration, { context, shell }: FavoritesControlDependencies) {
     const { events, environment, preferences } = context;
+
+    this.shell = shell;
 
     FavoritesToolbar.setup(events, environment, preferences, shell.toolbar);
     FavoritesDrawer.setup(preferences, shell);

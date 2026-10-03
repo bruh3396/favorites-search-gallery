@@ -12,11 +12,16 @@ function addScript(src: string): HTMLScriptElement {
   return script;
 }
 
+function createThumb(id: string): string {
+  const image = `<img src="https://example.com/${id}.jpg" title="apple banana">`;
+  return `<span class="thumb" id="s${id}"><a id="p${id}">${image}</a></span>`;
+}
+
 function addContent(...ids: string[]): HTMLElement {
   const content = document.createElement("div");
 
   content.id = "content";
-  content.innerHTML = ids.map(id => `<span class="thumb" id="s${id}"><a id="p${id}"><img src="https://example.com/${id}.jpg" title="apple banana"></a></span>`).join("");
+  content.innerHTML = ids.map(createThumb).join("");
   document.body.append(content);
   return content;
 }

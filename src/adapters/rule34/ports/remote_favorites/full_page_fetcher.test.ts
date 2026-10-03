@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
-import { FullPageFetcher } from "@/adapters/rule34/ports/remote_favorites/full_page_fetcher";
 import { Post } from "@/core/domain/post/post";
+import { Rule34FullPageFetcher } from "@/adapters/rule34/ports/remote_favorites/full_page_fetcher";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 
@@ -43,11 +43,24 @@ function createDeferredFetcher(lastIndex: number): {
   return { fetch, requested, settle };
 }
 
-describe("FullPageFetcher", () => {
+function createFetcher(
+  delivered: Post[][],
+  fetch: (index: number) => Promise<Post[]>,
+  delayForRetry: (retryCount: number) => number
+): Rule34FullPageFetcher {
+  return new Rule34FullPageFetcher({
+    onPostsFound: (posts): number => delivered.push(posts),
+    fetch,
+    delayForRetry,
+    scheduler: { sleep: tick }
+  });
+}
+
+describe("Rule34FullPageFetcher", () => {
   test("delivers pages in index order when they complete in order", async() => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
-    const run = new FullPageFetcher(posts => delivered.push(posts), pages.fetch, NO_DELAY).fetchAll();
+    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll();
 
     await flushMicrotasks();
     await pages.settle(0);
@@ -62,7 +75,7 @@ describe("FullPageFetcher", () => {
   test("delivers in index order even when a later page completes first", async() => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
-    const run = new FullPageFetcher(posts => delivered.push(posts), pages.fetch, NO_DELAY).fetchAll();
+    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll();
 
     await flushMicrotasks();
     await pages.settle(2);
@@ -82,7 +95,7 @@ describe("FullPageFetcher", () => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
     const first = [createPost({ id: "first" })];
-    const run = new FullPageFetcher(posts => delivered.push(posts), pages.fetch, NO_DELAY, first).fetchAll();
+    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll(first);
 
     await flushMicrotasks();
     expect(delivered).toEqual([first]);
@@ -102,7 +115,7 @@ describe("FullPageFetcher", () => {
       .mockImplementationOnce(() => Promise.reject(new Error("boom")))
       .mockImplementation((index: number) => Promise.resolve(index > 1 ? [] : createPage(index)));
 
-    await new FullPageFetcher(posts => delivered.push(posts), fetch, NO_DELAY).fetchAll();
+    await createFetcher(delivered, fetch, NO_DELAY).fetchAll();
 
     expect(idsOf(delivered)).toEqual(["page0", "page1"]);
     const page0Attempts = fetch.mock.calls.filter(([index]) => index === 0).length;
@@ -114,7 +127,7 @@ describe("FullPageFetcher", () => {
     const delivered: Post[][] = [];
     const fetch = vi.fn((index: number) => Promise.resolve(index >= 2 ? [] : createPage(index)));
 
-    await new FullPageFetcher(posts => delivered.push(posts), fetch, NO_DELAY).fetchAll();
+    await createFetcher(delivered, fetch, NO_DELAY).fetchAll();
     expect(idsOf(delivered)).toEqual(["page0", "page1"]);
   });
 
@@ -122,7 +135,7 @@ describe("FullPageFetcher", () => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(0);
     let hasFinished = false;
-    const run = new FullPageFetcher(posts => delivered.push(posts), pages.fetch, NO_DELAY).fetchAll()
+    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll()
       .then(() => {
         hasFinished = true;
       });
@@ -153,7 +166,7 @@ describe("FullPageFetcher", () => {
       .mockImplementationOnce(() => Promise.reject(new Error("boom")))
       .mockImplementation((index: number) => Promise.resolve(index > 0 ? [] : createPage(index)));
 
-    await new FullPageFetcher(posts => delivered.push(posts), fetch, delayForRetry).fetchAll();
+    await createFetcher(delivered, fetch, delayForRetry).fetchAll();
     expect(seenRetryCounts).toContain(1);
   });
 });

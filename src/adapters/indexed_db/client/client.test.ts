@@ -14,7 +14,11 @@ describe("IndexedDbClient", () => {
     const indexedDb = createIndexedDb();
 
     await indexedDb.runTransaction("favorites", "readwrite", store => store.put(["1"], "owner"));
-    const request = await indexedDb.runTransaction("favorites", "readonly", store => store.get("owner") as IDBRequest<string[]>);
+    const request = await indexedDb.runTransaction(
+      "favorites",
+      "readonly",
+      store => store.get("owner") as IDBRequest<string[]>
+    );
 
     expect(request.result).toEqual(["1"]);
   });

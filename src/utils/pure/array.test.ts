@@ -229,7 +229,7 @@ describe("isIndexInBounds", () => {
 });
 
 describe("shuffleArray", () => {
-  const numbers = Array.from({ length: 1000 }, (_, i) => i + 1);
+  const numbers = Array.from({ length: 1_000 }, (_, i) => i + 1);
   const numberSet = new Set(numbers);
 
   test("empty", () => {

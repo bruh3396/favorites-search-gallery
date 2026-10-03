@@ -23,7 +23,9 @@ function setup(): Setup {
     cancel: (): number => calls.push("cancel")
   };
 
-  new DownloaderControl(shell, intents, { batchSize, filenameFormat, filenameOptions: new Map([[1, "Artist"], [2, "Character"]]) });
+  const filenameOptions = new Map([[1, "Artist"], [2, "Character"]]);
+
+  new DownloaderControl({ filenameOptions }, { shell, intents, batchSize, filenameFormat });
   return { shell, calls, batchSize, filenameFormat };
 }
 

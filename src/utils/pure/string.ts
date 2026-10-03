@@ -46,10 +46,6 @@ export function escapeParentheses(text: string): string {
   return text.replace(/([()])/g, "\\$&");
 }
 
-export function decodeHtmlEntities(text: string): string {
-  return text.replace(/&amp;/g, "&").replace(/&(?:apos|#0?39);/g, "'");
-}
-
 export function pluralSuffix(count: number): string {
   return count === 1 ? "" : "s";
 }

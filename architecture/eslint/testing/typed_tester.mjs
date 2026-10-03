@@ -3,6 +3,7 @@ import { RuleTester } from "eslint";
 import tsparser from "@typescript-eslint/parser";
 import { resolve } from "node:path";
 import { PLUGIN } from "#architecture/eslint/typed/typed.mjs";
+import { expectInvalid } from "#architecture/eslint/testing/invalid.mjs";
 
 RuleTester.afterAll = afterAll;
 RuleTester.describe = describe;
@@ -19,7 +20,8 @@ const tester = new RuleTester({
   }
 });
 
-export function runTyped(name, { valid, invalid = [] }) {
+export function runTyped(name, { valid, invalid }) {
+  expectInvalid(name, invalid);
   const rule = PLUGIN.rules[name];
   const [messageId] = Object.keys(rule.meta.messages);
 

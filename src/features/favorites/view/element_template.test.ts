@@ -18,7 +18,13 @@ function setup(): Setup {
   const decodes: { resolve: () => void; reject: (error: Error) => void }[] = [];
 
   vi.spyOn(HTMLImageElement.prototype, "decode").mockImplementation(() => new Promise((resolve, reject) => decodes.push({ resolve, reject })));
-  const template = new FavoritesElementTemplate(true, false, true, id => `#post-${id}`, media => Promise.resolve(`preview:${media.locator}`));
+  const template = new FavoritesElementTemplate(
+    { galleryRunning: true, linksToPostPage: false, userIsOnTheirOwnFavoritesPage: true },
+    {
+      postUrl: (id): string => `#post-${id}`,
+      resolvePreviewUrl: (media): Promise<string> => Promise.resolve(`preview:${media.locator}`)
+    }
+  );
   const thumb = template.createBlankThumb();
   const image = thumb.querySelector("img") as HTMLImageElement;
   const decode = (outcome: "loaded" | "failed"): void => {

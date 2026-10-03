@@ -14,7 +14,7 @@ export class GalleryFeatures {
     const { preferences, environment } = context;
 
     this.context = context;
-    this.autoplay = new Autoplay({
+    this.autoplay = new Autoplay({ platform: environment.device }, {
       ...autoplay,
       active: preferences.gallery.autoplayActive,
       paused: preferences.gallery.autoplayPaused,
@@ -22,8 +22,7 @@ export class GalleryFeatures {
       durations: {
         image: preferences.gallery.autoplayImageDuration,
         minimumVideo: preferences.gallery.autoplayMinimumVideoDuration
-      },
-      platform: environment.device
+      }
     });
   }
 

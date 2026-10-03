@@ -1,6 +1,16 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
+import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { Rule34Error } from "@/adapters/rule34/client/error";
 import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
-import { postPageUrl } from "@/adapters/rule34/client/site/post_page/fetcher";
+import { postPageUrl } from "@/adapters/rule34/client/site/post_page/url";
+
+type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
+
+interface Setup {
+  client: Rule34SiteClient;
+  fetch: ReturnType<typeof vi.fn<Fetch>>;
+}
 
 const POST_PAGE = `
   <img id="image" src="https://us.rule34.xxx//images/1234/a1b2c3.png">
@@ -16,24 +26,19 @@ const POST_PAGE = `
   </ul>
 `;
 
-function setup(): { client: Rule34SiteClient; fetch: ReturnType<typeof vi.fn<(url: string) => Promise<Response>>> } {
-  const fetch = vi.fn<(url: string) => Promise<Response>>(() => Promise.resolve(new Response(POST_PAGE)));
-
-  vi.stubGlobal("fetch", fetch);
-  return { client: new Rule34SiteClient({ run: request => request() }), fetch };
+function setup(respond: Fetch = (): Promise<Response> => Promise.resolve(new Response(POST_PAGE))): Setup {
+  const fetch = vi.fn<Fetch>(respond);
+  const dependencies = { fetch, scheduler: new MemoryScheduler(), random: new MemoryRandom() };
+  return { client: new Rule34SiteClient(dependencies, { run: request => request() }), fetch };
 }
 
 describe("Rule34SiteClient", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   test("reads a post and its tag categories from the post's page", async() => {
     const { client, fetch } = setup();
     const { post, tagCategories } = await client.fetchPostPage("42");
 
     expect(fetch).toHaveBeenCalledWith(postPageUrl("42"), undefined);
-    expect(post).toMatchObject({ id: "42", width: 1920, height: 1080, deleted: true });
+    expect(post).toMatchObject({ id: "42", width: 1_920, height: 1_080, deleted: true });
     expect(tagCategories).toEqual(new Map([["alice", "character"], ["bob", "artist"]]));
   });
 
@@ -57,6 +62,18 @@ describe("Rule34SiteClient", () => {
     failSecond(new Error("boom"));
     await fetched;
     expect(fetch).toHaveBeenCalledOnce();
+  });
+
+  test("names a page the host refuses", async() => {
+    const { client } = setup(() => Promise.resolve(new Response(null, { status: 503 })));
+
+    await expect(client.fetchPostPage("42")).rejects.toMatchObject({ reason: "http", status: 503 });
+  });
+
+  test("names a page it can't read", async() => {
+    const { client } = setup(() => Promise.resolve(new Response("<html></html>")));
+
+    await expect(client.fetchPostPage("42")).rejects.toThrow(Rule34Error);
   });
 
   test("hands back what the favorites fetch returns", async() => {

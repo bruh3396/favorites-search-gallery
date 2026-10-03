@@ -1,5 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { flushMicrotasks } from "@/testing/async";
 
 describe("MemoryScheduler", () => {
   test("runs a task only once time reaches its delay", () => {
@@ -35,15 +36,15 @@ describe("MemoryScheduler", () => {
   });
 
   test("reads the time it was started at", () => {
-    expect(new MemoryScheduler(1000).now()).toBe(1000);
+    expect(new MemoryScheduler(1_000).now()).toBe(1_000);
   });
 
   test("moves now forward with each advance", () => {
-    const scheduler = new MemoryScheduler(1000);
+    const scheduler = new MemoryScheduler(1_000);
 
     scheduler.advance(250);
 
-    expect(scheduler.now()).toBe(1250);
+    expect(scheduler.now()).toBe(1_250);
   });
 
   test("reads the due time inside a task it runs", () => {
@@ -66,5 +67,18 @@ describe("MemoryScheduler", () => {
     scheduler.advance(100);
 
     expect(task).not.toHaveBeenCalled();
+  });
+
+  test("wakes a sleep only once time reaches its duration", async() => {
+    const scheduler = new MemoryScheduler();
+    const wake = vi.fn();
+
+    scheduler.sleep(100).then(wake);
+    scheduler.advance(99);
+    await flushMicrotasks();
+    expect(wake).not.toHaveBeenCalled();
+    scheduler.advance(1);
+    await flushMicrotasks();
+    expect(wake).toHaveBeenCalledOnce();
   });
 });

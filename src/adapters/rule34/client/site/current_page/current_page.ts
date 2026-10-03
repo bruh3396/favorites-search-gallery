@@ -2,11 +2,11 @@ import { ColorScheme } from "@/core/boundary/environment";
 import { Post } from "@/core/domain/post/post";
 import { parseFavoritesPage } from "@/adapters/rule34/client/site/favorites_page/parser";
 
-export type PageName = "favorites" | "postList";
+export type Rule34PageName = "favorites" | "postList";
 
 const TAG_BLACKLIST_ENCODINGS = 3;
 
-export function readPageName(): PageName | null {
+export function readPageName(): Rule34PageName | null {
   const page = readQueryParam("page");
 
   if (page === "favorites") {

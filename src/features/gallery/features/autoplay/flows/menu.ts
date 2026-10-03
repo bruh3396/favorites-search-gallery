@@ -1,5 +1,6 @@
 import { AutoplayFlow, AutoplayFlowDependencies } from "@/features/gallery/features/autoplay/flows/flow";
 import { AutoplayConfig } from "@/config/autoplay_config";
+import { AutoplayConfiguration } from "@/features/gallery/features/autoplay/types/types";
 import { Timer } from "@/lib/async/scheduling";
 import { throttle } from "@/lib/async/rate_limiting";
 
@@ -8,9 +9,9 @@ export class AutoplayMenuFlow extends AutoplayFlow {
   private readonly showThrottled: () => void;
   private settingsOpen: boolean;
 
-  constructor(dependencies: AutoplayFlowDependencies) {
-    super(dependencies);
-    this.timer = new Timer(AutoplayConfig.menuVisibilityTime[this.context.platform]);
+  constructor(configuration: AutoplayConfiguration, dependencies: AutoplayFlowDependencies) {
+    super(configuration, dependencies);
+    this.timer = new Timer(AutoplayConfig.menuVisibilityTime[configuration.platform]);
     this.showThrottled = throttle(() => this.show(), AutoplayConfig.menuShowThrottleTime);
     this.settingsOpen = false;
     this.timer.onTimerEnd = (): void => this.expire();

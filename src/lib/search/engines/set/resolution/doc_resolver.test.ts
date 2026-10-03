@@ -15,9 +15,9 @@ function createDoc(name: string, tags: string[], metrics: Partial<Record<Searcha
   return { name, tags: new Set(tags), metrics };
 }
 
-const hd = createDoc("hd", ["video", "red"], { width: 1920, height: 1080, score: 50, id: 1000, duration: 120 });
-const sd = createDoc("sd", ["video", "blue"], { width: 1280, height: 720, score: 25, id: 500, duration: 60 });
-const square = createDoc("square", ["image", "red"], { width: 1080, height: 1080, score: 100, id: 2000, duration: 0 });
+const hd = createDoc("hd", ["video", "red"], { width: 1_920, height: 1_080, score: 50, id: 1_000, duration: 120 });
+const sd = createDoc("sd", ["video", "blue"], { width: 1_280, height: 720, score: 25, id: 500, duration: 60 });
+const square = createDoc("square", ["image", "red"], { width: 1_080, height: 1_080, score: 100, id: 2_000, duration: 0 });
 const docs = [hd, sd, square];
 
 const metricFor = (item: Doc, metric: SearchableMetric): number => item.metrics[metric] ?? 0;

@@ -28,11 +28,11 @@ export class BitSet {
     let cardinality = 0;
 
     for (const word of this.words) {
-      let value = word - ((word >>> 1) & 0x55555555);
+      let value = word - ((word >>> 1) & 0x55_55_55_55);
 
-      value = (value & 0x33333333) + ((value >>> 2) & 0x33333333);
-      value = (value + (value >>> 4)) & 0x0F0F0F0F;
-      cardinality += (value * 0x01010101) >>> 24;
+      value = (value & 0x33_33_33_33) + ((value >>> 2) & 0x33_33_33_33);
+      value = (value + (value >>> 4)) & 0x0F_0F_0F_0F;
+      cardinality += (value * 0x01_01_01_01) >>> 24;
     }
     return cardinality;
   }
@@ -103,7 +103,7 @@ export class BitSet {
   }
 
   public fill(): void {
-    this.words.fill(0xFFFFFFFF);
+    this.words.fill(0xFF_FF_FF_FF);
     this.clearHighBits();
   }
 
@@ -125,7 +125,7 @@ export class BitSet {
       let word = words[wordIndex];
       const base = wordIndex << 5;
 
-      if (word === 0xFFFFFFFF) {
+      if (word === 0xFF_FF_FF_FF) {
         for (let i = 0; i < 32; i += 1) {
           result[next] = source[base + i];
           next += 1;
@@ -135,7 +135,7 @@ export class BitSet {
 
       while (word !== 0) {
         const lowestSetBit = (word & -word) >>> 0;
-        const bit = DE_BRUIJN_BIT_POSITION[(lowestSetBit * 0x077CB531) >>> 27];
+        const bit = DE_BRUIJN_BIT_POSITION[(lowestSetBit * 0x07_7C_B5_31) >>> 27];
 
         result[next] = source[base + bit];
         next += 1;
@@ -155,7 +155,7 @@ export class BitSet {
 
       while (word !== 0) {
         const lowestSetBit = (word & -word) >>> 0;
-        const bit = DE_BRUIJN_BIT_POSITION[(lowestSetBit * 0x077CB531) >>> 27];
+        const bit = DE_BRUIJN_BIT_POSITION[(lowestSetBit * 0x07_7C_B5_31) >>> 27];
 
         result[next] = base + bit;
         next += 1;

@@ -1,11 +1,12 @@
-import { API_ORIGIN, ApiClient } from "@/adapters/api/client/client";
-import { ApiRemotePosts } from "@/adapters/api/ports/remote_posts/remote_posts";
-import { ApiRemoteTagCategories } from "@/adapters/api/ports/remote_tag_categories/remote_tag_categories";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandom } from "@/adapters/browser/ports/random/random";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { Environment } from "@/core/boundary/environment";
+import { FallbackRemotePosts } from "@/core/boundary/composites/fallback_remote_posts";
+import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
+import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
+import { FrozenCobaltRemoteTagCategories } from "@/adapters/frozen_cobalt/ports/remote_tag_categories/remote_tag_categories";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
@@ -18,7 +19,6 @@ import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/
 import { Rule34RemoteMedia } from "@/adapters/rule34/ports/remote_media/remote_media";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 import { startApp } from "@/app/startup/app";
@@ -26,60 +26,57 @@ import { startApp } from "@/app/startup/app";
 declare const SCRIPT_VERSION: string;
 declare const USE_LOCAL_SERVER: boolean;
 
-const LOCAL_API_ORIGIN = "http://localhost:8787";
-
-function createApiClient(
-  rule34SiteClient: Rule34SiteClient,
-  environment: Environment,
-  scheduler: Scheduler
-): ApiClient {
-  const identity = { userId: rule34SiteClient.readUserId(), version: environment.version, platform: environment.device };
-  return new ApiClient(scheduler, USE_LOCAL_SERVER ? LOCAL_API_ORIGIN : API_ORIGIN, identity);
-}
-
-function createPorts(
-  rule34SiteClient: Rule34SiteClient,
-  apiClient: ApiClient,
-  indexedDbClient: IndexedDbClient,
-  environment: Environment,
-  scheduler: Scheduler
-): Ports {
-  const rule34MediaClient = new Rule34MediaClient();
-  return {
-    remoteFavorites: new Rule34RemoteFavorites(rule34SiteClient),
-    remotePosts: new ApiRemotePosts(apiClient, new Rule34RemotePosts(rule34SiteClient), url => rule34MediaClient.mintMedia(url, "")),
-    remoteTagCategories: new ApiRemoteTagCategories(apiClient),
-    remoteMedia: new Rule34RemoteMedia(rule34MediaClient),
-    navigation: new Rule34Navigation(rule34SiteClient),
-    hostPage: new Rule34HostPage(rule34SiteClient, new BrowserHostPage(), environment.mode),
-    localFavorites: new IndexedDbLocalFavorites(indexedDbClient, environment.favoritesOwnerId),
-    localKeyedValues: new BrowserLocalKeyedValues(),
-    localPosts: new IndexedDbLocalPosts(indexedDbClient),
-    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
-    random: new BrowserRandom(),
-    scheduler
-  };
-}
-
-function createRoot(): HTMLElement {
-  return document.body.appendChild(document.createElement("div"));
-}
-
 function main(): void {
-  const rule34SiteClient = new Rule34SiteClient();
+  const scheduler = new BrowserScheduler();
+  const random = new BrowserRandom();
+  const boundFetch = fetch.bind(globalThis);
+  const rule34SiteClient = new Rule34SiteClient({ fetch: boundFetch, scheduler, random });
   const rule34Place = readRule34Environment(rule34SiteClient);
 
   if (rule34Place === null) {
     return;
   }
   const environment: Environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...rule34Place };
-  const scheduler = new BrowserScheduler();
-  const apiClient = createApiClient(rule34SiteClient, environment, scheduler);
+  const frozenCobaltClient = new FrozenCobaltClient(
+    {
+      origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
+      identity: {
+        userId: rule34SiteClient.readUserId(),
+        version: environment.version,
+        platform: environment.device
+      }
+    },
+    { scheduler, fetch: boundFetch }
+  );
+  const rule34MediaClient = new Rule34MediaClient({ fetch: boundFetch, scheduler });
   const indexedDbClient = new IndexedDbClient("rule34");
-  const didStart = startApp(environment, createPorts(rule34SiteClient, apiClient, indexedDbClient, environment, scheduler), createRoot());
 
-  if (didStart) {
-    apiClient.ping();
+  const ports: Ports = {
+    remoteFavorites: new Rule34RemoteFavorites({ rule34: rule34SiteClient, scheduler, random }),
+    remotePosts: new FallbackRemotePosts({
+      primary: new FrozenCobaltRemotePosts({
+        frozenCobalt: frozenCobaltClient,
+        mintMedia: ({ url, tags }) => rule34MediaClient.mintMedia(url, tags),
+        scheduler,
+        random
+      }),
+      fallback: new Rule34RemotePosts({ rule34: rule34SiteClient, scheduler, random })
+    }),
+    remoteTagCategories: new FrozenCobaltRemoteTagCategories(frozenCobaltClient),
+    remoteMedia: new Rule34RemoteMedia(rule34MediaClient),
+    navigation: new Rule34Navigation(rule34SiteClient),
+    hostPage: new Rule34HostPage({ mode: environment.mode }, { rule34: rule34SiteClient, page: new BrowserHostPage() }),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDbClient),
+    localKeyedValues: new BrowserLocalKeyedValues(),
+    localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
+    random,
+    scheduler
+  };
+  const root = document.body.appendChild(document.createElement("div"));
+
+  if (startApp(environment, ports, root)) {
+    frozenCobaltClient.ping();
   }
 }
 

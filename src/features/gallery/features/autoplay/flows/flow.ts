@@ -1,4 +1,4 @@
-import { AutoplayDependencies } from "@/features/gallery/features/autoplay/types/types";
+import { AutoplayConfiguration, AutoplayDependencies } from "@/features/gallery/features/autoplay/types/types";
 import { AutoplayFlows } from "@/features/gallery/features/autoplay/flows/flows";
 import { AutoplayModel } from "@/features/gallery/features/autoplay/model/model";
 import { AutoplayView } from "@/features/gallery/features/autoplay/view/view";
@@ -11,12 +11,14 @@ export interface AutoplayFlowDependencies {
 }
 
 export abstract class AutoplayFlow {
+  protected readonly configuration: AutoplayConfiguration;
   protected readonly context: AutoplayDependencies;
   protected readonly model: AutoplayModel;
   protected readonly view: AutoplayView;
   protected readonly flows: AutoplayFlows;
 
-  constructor(dependencies: AutoplayFlowDependencies) {
+  constructor(configuration: AutoplayConfiguration, dependencies: AutoplayFlowDependencies) {
+    this.configuration = configuration;
     this.context = dependencies.context;
     this.model = dependencies.model;
     this.view = dependencies.view;

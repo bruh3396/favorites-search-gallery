@@ -37,12 +37,6 @@ export interface DownloaderContext extends DownloaderDependencies {
   saveBlob: (blob: Blob, filename: string) => void;
 }
 
-export interface DownloaderSettings {
-  batchSize: Preference<number>;
-  filenameFormat: Preference<number>;
-  filenameOptions: Map<number, string>;
-}
-
 export interface DownloaderIntents {
   start: () => void;
   cancel: () => void;

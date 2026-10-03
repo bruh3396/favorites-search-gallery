@@ -1,14 +1,24 @@
-import { IndexedDbClient, StoreName } from "@/adapters/indexed_db/client/client";
+import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/indexed_db/client/client";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites";
 
-const STORE_NAME: StoreName = "favorites";
+const STORE_NAME: IndexedDbStoreName = "favorites";
+
+export interface IndexedDbLocalFavoritesConfiguration {
+  ownerId: string;
+}
 
 export class IndexedDbLocalFavorites implements LocalFavorites {
-  constructor(private readonly indexedDb: IndexedDbClient, private readonly ownerId: string) { }
+  constructor(
+    private readonly configuration: IndexedDbLocalFavoritesConfiguration,
+    private readonly indexedDb: IndexedDbClient
+  ) { }
 
   public async getAll(): Promise<string[]> {
-    const request = await this.indexedDb.runTransaction(STORE_NAME, "readonly", store => store.get(this.ownerId) as IDBRequest<string[] | undefined>);
-    return request.result ?? [];
+    return (await this.indexedDb.runTransaction(
+      STORE_NAME,
+      "readonly",
+      store => store.get(this.configuration.ownerId) as IDBRequest<string[] | undefined>
+    )).result ?? [];
   }
 
   public prepend(postIds: string[]): Promise<void> {
@@ -23,15 +33,15 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
   }
 
   public async clear(): Promise<void> {
-    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => store.delete(this.ownerId));
+    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => store.delete(this.configuration.ownerId));
   }
 
   private async update(change: (ids: string[]) => string[]): Promise<void> {
     await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => {
-      const request = store.get(this.ownerId) as IDBRequest<string[] | undefined>;
+      const request = store.get(this.configuration.ownerId) as IDBRequest<string[] | undefined>;
 
       request.onsuccess = (): void => {
-        store.put(change(request.result ?? []), this.ownerId);
+        store.put(change(request.result ?? []), this.configuration.ownerId);
       };
     });
   }

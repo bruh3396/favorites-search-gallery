@@ -1,18 +1,18 @@
 import { TagCategoryMap, isTagCategory } from "@/core/domain/tag/tag";
 import { CategorizedPost } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
-import { PostFetchError } from "@/types/errors";
+import { Rule34Error } from "@/adapters/rule34/client/error";
 import { mintMedia } from "@/adapters/rule34/client/media/locator";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 
-const statisticRegex = /(\S+):\s+(\S+)/g;
-const sizeRegex = /^([1-9]\d*)(?:x|\/)([1-9]\d*)$/;
+const STATISTIC_ENTRY = /(\S+):\s+(\S+)/g;
+const DIMENSIONS = /^([1-9]\d*)(?:x|\/)([1-9]\d*)$/;
 
-export function parsePostFromPostPage(html: string): CategorizedPost {
+export function parsePostPage(html: string): CategorizedPost {
   const dom = new DOMParser().parseFromString(html, "text/html");
-  const statistics = getStatistics(dom);
-  const tags = getTags(dom);
-  const rating = getRating(statistics);
+  const statistics = parseStatistics(dom);
+  const tags = parseTags(dom);
+  const rating = parseRating(statistics);
   const dimensions = parseDimensions(statistics.size);
   return {
     post: {
@@ -23,7 +23,6 @@ export function parsePostFromPostPage(html: string): CategorizedPost {
       rating,
       changedAt: 0,
       deleted: true,
-      durationSeconds: 0,
       tags,
       media: parseMedia(dom, tags)
     },
@@ -46,23 +45,23 @@ function parseTagCategories(dom: Document): TagCategoryMap {
   return categoryMap;
 }
 
-function getStatistics(dom: Document): Record<string, string> {
+function parseStatistics(dom: Document): Record<string, string> {
   const stats = dom.querySelector("#stats");
 
   if (stats === null) {
     return {};
   }
   const textContent = removeExtraWhitespace(stats.textContent || "");
-  const matches = Array.from(textContent.matchAll(statisticRegex));
+  const matches = Array.from(textContent.matchAll(STATISTIC_ENTRY));
   const entries = matches.map(match => [match[1].toLowerCase(), match[2]]);
   return Object.fromEntries(entries);
 }
 
 function parseDimensions(size: string | undefined): { width: number; height: number } {
-  const match = sizeRegex.exec(size ?? "");
+  const match = DIMENSIONS.exec(size ?? "");
 
   if (match === null) {
-    throw new PostFetchError(`post page has no size: ${String(size)}`);
+    throw new Rule34Error("malformed", { subject: `post page size ${String(size)}` });
   }
   return { width: Number(match[1]), height: Number(match[2]) };
 }
@@ -75,19 +74,19 @@ function parseMedia(dom: Document, tags: string): Media {
   const media = mintMedia(file, tags);
 
   if (media === null) {
-    throw new PostFetchError(`post page has no file: ${file}`);
+    throw new Rule34Error("malformed", { subject: `post page file ${file}` });
   }
   return media;
 }
 
-function getTags(dom: Document): string {
+function parseTags(dom: Document): string {
   return removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
     .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
     .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
     .join(" ") || "");
 }
 
-function getRating(statistics: Record<string, string>): string {
+function parseRating(statistics: Record<string, string>): string {
   if (statistics.rating === undefined || statistics.rating === "") {
     return "e";
   }

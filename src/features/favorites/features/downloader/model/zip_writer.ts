@@ -1,13 +1,13 @@
-const LOCAL_FILE_HEADER_SIGNATURE = 0x04034b50;
-const CENTRAL_DIRECTORY_SIGNATURE = 0x02014b50;
-const END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06054b50;
-const ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06064b50;
-const ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE = 0x07064b50;
-const ZIP64_EXTRA_FIELD_TAG = 0x0001;
+const LOCAL_FILE_HEADER_SIGNATURE = 0x04_03_4b_50;
+const CENTRAL_DIRECTORY_SIGNATURE = 0x02_01_4b_50;
+const END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06_05_4b_50;
+const ZIP64_END_OF_CENTRAL_DIRECTORY_SIGNATURE = 0x06_06_4b_50;
+const ZIP64_END_OF_CENTRAL_DIRECTORY_LOCATOR_SIGNATURE = 0x07_06_4b_50;
+const ZIP64_EXTRA_FIELD_TAG = 0x00_01;
 const VERSION_ZIP64 = 45;
-const UTF8_FLAG = 0x0800;
-const ZIP64_THRESHOLD = 0xffffffff;
-const ZIP64_COUNT_THRESHOLD = 0xffff;
+const UTF8_FLAG = 0x08_00;
+const ZIP64_THRESHOLD = 0xff_ff_ff_ff;
+const ZIP64_COUNT_THRESHOLD = 0xff_ff;
 
 const crcTable = buildCrcTable();
 
@@ -164,16 +164,16 @@ function buildZip64EndRecords(count: number, size: number, offset: number): Uint
 
 function setUint64(view: DataView, position: number, value: number): void {
   view.setUint32(position, value >>> 0, true);
-  view.setUint32(position + 4, Math.floor(value / 0x100000000), true);
+  view.setUint32(position + 4, Math.floor(value / 0x1_00_00_00_00), true);
 }
 
 function crc32(data: Uint8Array): number {
-  let crc = 0xffffffff;
+  let crc = 0xff_ff_ff_ff;
 
   for (const byte of data) {
     crc = (crc >>> 8) ^ crcTable[(crc ^ byte) & 0xff];
   }
-  return (crc ^ 0xffffffff) >>> 0;
+  return (crc ^ 0xff_ff_ff_ff) >>> 0;
 }
 
 function buildCrcTable(): Uint32Array {
@@ -183,7 +183,7 @@ function buildCrcTable(): Uint32Array {
     let c = n;
 
     for (let k = 0; k < 8; k += 1) {
-      c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+      c = (c & 1) ? 0xed_b8_83_20 ^ (c >>> 1) : c >>> 1;
     }
     table[n] = c >>> 0;
   }

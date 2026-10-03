@@ -5,7 +5,7 @@ export const MESSAGES = {
   rule41: "rule 41: only composition roots compare or switch on mode, device, pointer, or canvasBudget; inject a strategy chosen there",
   rule42: "rule 42: there is no device; key variation on a capability such as pointer or canvasBudget",
   rule43: "rule 43: only composition roots read the environment; take the strategy or value they derive from it",
-  rule44: "rule 44: no config objects; a tuning value is an unexported UPPER_SNAKE const in the file that owns the mechanism",
+  rule44: "rule 44: no config objects or config modules; a tuning value is an unexported UPPER_SNAKE const in the file that owns the mechanism",
   rule45: "rule 45: there are no flags; gate features through the mode-keyed feature table"
 };
 
@@ -18,7 +18,10 @@ const SELECTORS = {
   ],
   rule42: ["Identifier[name=/^[dD]evice$/]", "Literal[value='device']"],
   rule43: ["Identifier[name='environment']"],
-  rule44: ["Identifier[name=/Config$/]"],
+  rule44: [
+    "ExportNamedDeclaration > VariableDeclaration > VariableDeclarator > Identifier.id[name=/(Config|CONFIG|Configuration|CONFIGURATION)$/]",
+    "ImportDeclaration[source.value=/(^|\\/)config\\/|_config(uration)?(\\.ts)?$/]"
+  ],
   rule45: ["Identifier[name=/^[fF]lags$/]", "ImportDeclaration[source.value=/(^|\\/)flags(\\.ts)?$/]"]
 };
 

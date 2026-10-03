@@ -53,15 +53,25 @@ runSyntax("rule43", {
 
 runSyntax("rule44", {
   valid: [
-    ["features/favorites/favorites.ts", "const columns = GalleryConfig.columns;"],
+    ["features/favorites/favorites.ts", "import { GalleryConfig } from \"@/config/gallery_config\";"],
     ["features/favorites/view/renderer.ts", "const PRELOADED_VIDEO_COUNT = 4;"],
+    ["features/favorites/model/library.ts", "const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2000 };"],
+    ["core/utils/coalescing.ts", "export interface CoalescingConfiguration { flushSize: number; }"],
+    ["core/utils/coalescing.ts", "export type RetryConfig = { attempts: number };"],
+    ["core/utils/coalescing.ts", "export class Executor { constructor(private readonly configuration: CoalescingConfiguration) {} }"],
+    ["core/utils/coalescing.ts", "function create(config: RetryConfig): void {}"],
     ["features/favorites/view/renderer.ts", "const config = read();"],
+    ["features/favorites/view/renderer.ts", "import { configure } from \"@/core/utils/configure\";"],
     ["lib/lib.ts", "export const ThumbConfig = { spacing: 4 };"]
   ],
   invalid: [
-    ...casesFor(FEATURE_FILES, "const columns = GalleryConfig.columns;"),
-    ["features/favorites/types/types.ts", "export interface SearchConfig { limit: number; }"],
-    ["core/utils/utils.ts", "export const RetryConfig = { attempts: 3 };"]
+    ...casesFor(FEATURE_FILES, "import { GalleryConfig } from \"@/config/gallery_config\";"),
+    ["features/favorites/view/renderer.ts", "import * as Thumbs from \"@/features/favorites/thumb_config\";"],
+    ["features/favorites/view/renderer.ts", "import { RETRY } from \"./retry_configuration\";"],
+    ["core/utils/utils.ts", "export const RetryConfig = { attempts: 3 };"],
+    ["core/utils/utils.ts", "export const RETRY_CONFIG = { attempts: 3 };"],
+    ["core/utils/utils.ts", "export const retryConfiguration = { attempts: 3 };"],
+    ["features/favorites/types/types.ts", "export const SEARCH_CONFIGURATION = { limit: 10 };"]
   ]
 });
 

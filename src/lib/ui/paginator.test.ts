@@ -6,7 +6,7 @@ const createItems = (count: number): Identifiable[] => Array.from({ length: coun
 const idsOf = (results: Identifiable[]): string[] => results.map(r => r.id);
 
 const createPaginator = (count: number, perPage = 10, nearby = 2): Paginator<Identifiable> => {
-  const paginator = new Paginator<Identifiable>({ resultsPerPage: (): number => perPage, nearbyPageCount: nearby });
+  const paginator = new Paginator<Identifiable>({ nearbyPageCount: nearby }, (): number => perPage);
 
   paginator.paginate(createItems(count));
   return paginator;
@@ -15,7 +15,7 @@ const createPaginator = (count: number, perPage = 10, nearby = 2): Paginator<Ide
 describe("Paginator", () => {
   describe("paginate", () => {
     test("returns the items it was given", () => {
-      const paginator = new Paginator<Identifiable>({ resultsPerPage: (): number => 10, nearbyPageCount: 2 });
+      const paginator = new Paginator<Identifiable>({ nearbyPageCount: 2 }, (): number => 10);
       const next = createItems(3);
 
       expect(paginator.paginate(next)).toBe(next);

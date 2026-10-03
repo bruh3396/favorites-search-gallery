@@ -64,8 +64,8 @@ describe("PackedPostings", () => {
   test("narrows the backing array to the smallest width that fits the max position", () => {
     expect(createPackedPostings({ a: [0, 255] }).positionsFor("a")).toBeInstanceOf(Uint8Array);
     expect(createPackedPostings({ a: [0, 256] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
-    expect(createPackedPostings({ a: [0, 65535] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
-    expect(createPackedPostings({ a: [0, 65536] }).positionsFor("a")).toBeInstanceOf(Uint32Array);
+    expect(createPackedPostings({ a: [0, 65_535] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
+    expect(createPackedPostings({ a: [0, 65_536] }).positionsFor("a")).toBeInstanceOf(Uint32Array);
   });
 
   test("only stores terms the predicate calls sparse", () => {
@@ -98,8 +98,8 @@ describe("PackedPostings", () => {
 
   test("stays correct across many rebuilds with churning term sets (oracle)", () => {
     const p = new PackedPostings();
-    let rng = 987654321 >>> 0;
-    const next = (): number => (rng = ((rng * 1664525) + 1013904223) >>> 0) / 0x100000000;
+    let rng = 987_654_321 >>> 0;
+    const next = (): number => (rng = ((rng * 1_664_525) + 1_013_904_223) >>> 0) / 0x1_00_00_00_00;
 
     for (let round = 0; round < 200; round += 1) {
       const oracle = new Map<string, number[]>();
@@ -110,7 +110,7 @@ describe("PackedPostings", () => {
         const len = 1 + Math.floor(next() * 8);
 
         for (let i = 0; i < len; i += 1) {
-          positions.push(Math.floor(next() * 1000));
+          positions.push(Math.floor(next() * 1_000));
         }
         positions.sort((a, b) => a - b);
         oracle.set(`term${t}`, positions);

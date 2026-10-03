@@ -139,12 +139,12 @@ describe("GalleryModel", () => {
 
   describe("upscale quality", () => {
     test("maps the thumb-to-viewport ratio through the configured cutoffs", () => {
-      expect(createModel().upscaleQualityFor(50, 1000)).toBe(UpscaleQuality.Low);
-      expect(createModel().upscaleQualityFor(500, 1000)).toBe(UpscaleQuality.Ultra);
+      expect(createModel().upscaleQualityFor(50, 1_000)).toBe(UpscaleQuality.Low);
+      expect(createModel().upscaleQualityFor(500, 1_000)).toBe(UpscaleQuality.Ultra);
     });
 
     test("is null when nothing can be measured", () => {
-      expect(createModel().upscaleQualityFor(0, 1000)).toBeNull();
+      expect(createModel().upscaleQualityFor(0, 1_000)).toBeNull();
     });
   });
 

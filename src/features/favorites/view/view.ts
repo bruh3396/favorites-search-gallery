@@ -13,12 +13,22 @@ import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
 import { FavoritesThumbPool } from "@/features/favorites/view/thumb_pool";
-import { FavoritesViewDependencies } from "@/features/favorites/types/types";
+import { FavoritesViewCallbacks } from "@/features/favorites/types/types";
 import { Layout } from "@/types/app";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";
 
+export interface FavoritesViewConfiguration {
+  linksToPostPage: boolean;
+}
+
+export interface FavoritesViewDependencies {
+  context: AppContext;
+  shell: FavoritesShell;
+}
+
 export class FavoritesView {
+  private readonly context: AppContext;
   private readonly contentTiler: ContentTiler;
   private readonly status: FavoritesStatus;
   private readonly pagination: FavoritesPaginationRenderer;
@@ -30,22 +40,35 @@ export class FavoritesView {
   private onContentReplaced: () => void;
   private onContentAdded: (favorites: Favorite[]) => void;
 
-  constructor(private readonly context: AppContext, shell: FavoritesShell, linksToPostPage: boolean) {
+  constructor({ linksToPostPage }: FavoritesViewConfiguration, { context, shell }: FavoritesViewDependencies) {
+    const { ports } = context;
+
+    this.context = context;
     this.onContentReplaced = doNothing;
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
-    this.linkSuppressor = new FavoritesLinkSuppressor(id => context.ports.navigation.postUrl(id));
-    this.skeleton = new FavoritesSkeleton(context.ports.localKeyedValues, context.ports.random, this.getLayout());
-    this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot, context.ports.scheduler);
+    this.linkSuppressor = new FavoritesLinkSuppressor(id => ports.navigation.postUrl(id));
+    this.skeleton = new FavoritesSkeleton(
+      { layout: this.getLayout() },
+      { store: ports.localKeyedValues, random: ports.random }
+    );
+    this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot, ports.scheduler);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
-    this.elementTemplate = new FavoritesElementTemplate(context.features.has("gallery"), linksToPostPage, context.environment.ownsFavorites, id => context.ports.navigation.postUrl(id), media => context.ports.remoteMedia.resolvePreviewUrl(media));
+    this.elementTemplate = new FavoritesElementTemplate({
+      galleryRunning: context.features.has("gallery"),
+      linksToPostPage,
+      userIsOnTheirOwnFavoritesPage: context.environment.ownsFavorites
+    }, {
+      postUrl: (id): string => ports.navigation.postUrl(id),
+      resolvePreviewUrl: (media): Promise<string> => ports.remoteMedia.resolvePreviewUrl(media)
+    });
     this.thumbPool = this.createThumbPool();
   }
 
-  public setup(dependencies: FavoritesViewDependencies): void {
-    this.onContentReplaced = dependencies.onContentReplaced;
-    this.onContentAdded = dependencies.onContentAdded;
+  public setup(callbacks: FavoritesViewCallbacks): void {
+    this.onContentReplaced = callbacks.onContentReplaced;
+    this.onContentAdded = callbacks.onContentAdded;
     this.contentTiler.setup();
   }
 
@@ -153,12 +176,16 @@ export class FavoritesView {
     this.skeleton.collectAspectRatios(this.context.shell.getContentThumbs());
   }
 
-private createThumbPool(): FavoritesThumbPool<HTMLElement> {
-  return new FavoritesThumbPool<HTMLElement>({
-    create: () => this.elementTemplate.createBlankThumb(),
-    bind: (root, favorite, favorited) => this.elementTemplate.bindThumb(root, favorite, favorited),
-    setAsFavorited: (node, favorited) => this.elementTemplate.setThumbFavorited(node, favorited),
-    blankImage: () => this.elementTemplate.blankThumbImage
-  }, FavoritesConfig.thumbPoolMaxRetained, this.context.environment.ownsFavorites);
-}
+  private createThumbPool(): FavoritesThumbPool<HTMLElement> {
+    const configuration = {
+      maxRetained: FavoritesConfig.thumbPoolMaxRetained,
+      defaultFavorited: this.context.environment.ownsFavorites
+    };
+    return new FavoritesThumbPool<HTMLElement>(configuration, {
+      create: () => this.elementTemplate.createBlankThumb(),
+      bind: (root, favorite, favorited) => this.elementTemplate.bindThumb(root, favorite, favorited),
+      setAsFavorited: (node, favorited) => this.elementTemplate.setThumbFavorited(node, favorited),
+      blankImage: (node) => this.elementTemplate.blankThumbImage(node)
+    });
+  }
 }

@@ -42,10 +42,10 @@ export class FavoritesModel {
       searcher: this.searcher,
       scheduler
     });
-    this.paginator = new Paginator<Favorite>({
-      resultsPerPage: (): number => context.preferences.favorites.resultsPerPage.value,
-      nearbyPageCount: FavoritesConfig.nearbyPageCount
-    });
+    this.paginator = new Paginator<Favorite>(
+      { nearbyPageCount: FavoritesConfig.nearbyPageCount },
+      (): number => context.preferences.favorites.resultsPerPage.value
+    );
   }
 
   public streamStoredFavorites(onBatch: (posts: Post[]) => void): Promise<void> {

@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import { FILES } from "#architecture/eslint/files.mjs";
 import { IMPORTS, MESSAGES } from "#architecture/eslint/imports/imports.mjs";
 import { LAYERS } from "#architecture/eslint/layers.mjs";
+import { expectInvalid } from "#architecture/eslint/testing/invalid.mjs";
 
 RuleTester.afterAll = afterAll;
 RuleTester.describe = describe;
@@ -28,7 +29,8 @@ function createCase([file, specifier]) {
   return { filename: resolve(FIXTURES, "src", file), code: `import * as Module from "@/${specifier}";`, options: OPTIONS };
 }
 
-export function runRule(rule, { valid, invalid = [] }) {
+export function runRule(rule, { valid, invalid }) {
+  expectInvalid(rule, invalid);
   tester.run(rule, boundaries.rules.dependencies, {
     valid: valid.map(createCase),
     invalid: invalid.map((pair) => ({ ...createCase(pair), errors: [{ message: MESSAGES[rule] }] }))

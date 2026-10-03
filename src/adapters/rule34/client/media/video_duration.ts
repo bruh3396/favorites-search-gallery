@@ -1,13 +1,24 @@
-import { RateLimiter } from "@/lib/async/rate_limiting";
+import { Rule34Fetch, send } from "@/adapters/rule34/client/request";
+import { RateLimiter } from "@/core/utils/async/rate_limiter";
+import { Scheduler } from "@/core/boundary/ports/scheduler";
+
+export interface Rule34VideoDurationReaderDependencies {
+  fetch: Rule34Fetch;
+  scheduler: Scheduler;
+}
 
 const RATE_LIMIT = { concurrency: 3, ratePerSecond: 5 };
 const METADATA_BYTE_RANGES = [500_000, 1_000_000, 2_000_000, 4_000_000];
 
-export class VideoDurationReader {
-  private readonly limiter = new RateLimiter(RATE_LIMIT);
+export class Rule34VideoDurationReader {
+  private readonly limiter: RateLimiter;
   private pool: HTMLVideoElement[] | undefined;
 
-  public read(url: string): Promise<number> {
+  constructor(private readonly dependencies: Rule34VideoDurationReaderDependencies) {
+    this.limiter = new RateLimiter(RATE_LIMIT, dependencies.scheduler);
+  }
+
+  public readSeconds(url: string): Promise<number> {
     return this.limiter.run(() => this.readWithIncreasingByteRanges(url));
   }
 
@@ -21,7 +32,7 @@ export class VideoDurationReader {
   }
 
   private async readRange(url: string, range: number): Promise<number> {
-    const response = await fetch(url, { headers: { Range: `bytes=0-${range}` } });
+    const response = await send(this.dependencies.fetch, url, { headers: { Range: `bytes=0-${range}` } });
 
     if (!response.ok && response.status !== 206) {
       throw new Error("Range request failed");

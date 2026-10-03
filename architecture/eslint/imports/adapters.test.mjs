@@ -45,10 +45,13 @@ runRule("rule11", {
   valid: [
     ["adapters/rule34/client/client.ts", "core/boundary/environment"],
     ["adapters/rule34/client/client.ts", "core/domain/post"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts"]
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts"],
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/scheduler"],
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/random"]
   ],
   invalid: [
-    ["adapters/rule34/client/client.ts", "core/boundary/ports/scheduler"]
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/remote_posts"],
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/navigation"]
   ]
 });
 
@@ -73,10 +76,12 @@ runRule("rule12", {
 runRule("rule63", {
   valid: [
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts"],
-    ["adapters/memory/ports/local_posts/local_posts.ts", "core/boundary/ports/local_posts"]
+    ["adapters/memory/ports/local_posts/local_posts.ts", "core/boundary/ports/local_posts"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/scheduler"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/random"]
   ],
   invalid: [
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/scheduler"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/local_posts"]
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/local_posts"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/navigation"]
   ]
 });
