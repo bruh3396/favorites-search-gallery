@@ -8,7 +8,7 @@ import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 import { createPreferences } from "@/testing/preferences";
 
-type ButtonEvent = "search" | "reset" | "invert" | "scratch" | "shuffle";
+type ButtonEvent = "search" | "reconcile" | "invert" | "scratch" | "shuffle";
 
 interface Setup {
   slots: FavoritesToolbarSlots;
@@ -18,7 +18,7 @@ interface Setup {
 
 function setup(onDesktopDevice = true): Setup {
   const environment = createEnvironment({ device: onDesktopDevice ? "desktop" : "mobile" });
-  const slots = new FavoritesShell(new Shell(), environment).toolbar;
+  const slots = new FavoritesShell(environment, new Shell()).toolbar;
   const preferences = createPreferences({ favorites: { drawerOpen: false } });
   const events = createEvents();
   const clicked = recordButtonEvents(events);
@@ -29,10 +29,10 @@ function setup(onDesktopDevice = true): Setup {
 
 function recordButtonEvents(events: Events): ButtonEvent[] {
   const clicked: ButtonEvent[] = [];
-  const { searchButtonClicked, resetButtonClicked, invertButtonClicked, shuffleButtonClicked } = events.favorites;
+  const { searchButtonClicked, reconcileButtonClicked, invertButtonClicked, shuffleButtonClicked } = events.favorites;
 
   searchButtonClicked.on(() => clicked.push("search"));
-  resetButtonClicked.on(() => clicked.push("reset"));
+  reconcileButtonClicked.on(() => clicked.push("reconcile"));
   invertButtonClicked.on(() => clicked.push("invert"));
   shuffleButtonClicked.on(() => clicked.push("shuffle"));
   return clicked;
@@ -47,18 +47,18 @@ function isActive(element: Element): boolean {
 }
 
 describe("FavoritesToolbar", () => {
-  test("on desktop, offers reset, invert, and shuffle, each with its own event", () => {
+  test("on desktop, offers reconcile, invert, and shuffle, each with its own event", () => {
     const { slots, clicked } = setup(true);
 
     clickEach(slots.buttons);
-    expect(clicked.sort()).toEqual(["invert", "reset", "shuffle"]);
+    expect(clicked.sort()).toEqual(["invert", "reconcile", "shuffle"]);
   });
 
-  test("on mobile, offers reset and shuffle, but not invert", () => {
+  test("on mobile, offers reconcile and shuffle, but not invert", () => {
     const { slots, clicked } = setup(false);
 
     clickEach(slots.buttons);
-    expect(clicked.sort()).toEqual(["reset", "shuffle"]);
+    expect(clicked.sort()).toEqual(["reconcile", "shuffle"]);
   });
 
   test("the search button reports both left and right clicks", () => {

@@ -9,6 +9,10 @@ export class MemoryClient {
     this.favoriteIds = posts.map(post => post.id);
   }
 
+  public readPosts(): Post[] {
+    return Array.from(this.postsById.values());
+  }
+
   public readFavorites(): Post[] {
     return this.favoriteIds.map(id => this.postsById.get(id)).filter(post => post !== undefined);
   }

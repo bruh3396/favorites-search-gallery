@@ -13,6 +13,11 @@ export class FilesystemRemoteFavorites implements RemoteFavorites {
     onFavoritesFound((await this.readNewestFirst()).filter(post => !knownIds.has(post.id)));
   }
 
+  public async findRemoved(storedIds: readonly string[]): Promise<string[] | null> {
+    const listedIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
+    return storedIds.filter(id => !listedIds.has(id));
+  }
+
   // A file holds a whole post and adding only knows the id, so adding only succeeds.
   public add(): Promise<AddFavoriteResult> {
     return Promise.resolve("added");

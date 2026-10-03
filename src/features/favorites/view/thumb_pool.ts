@@ -47,14 +47,26 @@ export class FavoritesThumbPool<Node> {
     }
   }
 
+  public rebind(favorite: Favorite): void {
+    const node = this.activeById.get(favorite.id);
+
+    if (node !== undefined) {
+      this.bind(node, favorite);
+    }
+  }
+
   private bindRange(start: number, favorites: Favorite[]): void {
     for (let i = 0; i < favorites.length; i += 1) {
       const node = this.nodeAt(start + i);
       const favorite = favorites[i];
 
-      this.operations.bind(node, favorite, this.favoritedOverrides.get(favorite.id) ?? this.defaultFavorited);
+      this.bind(node, favorite);
       this.activeById.set(favorite.id, node);
     }
+  }
+
+  private bind(node: Node, favorite: Favorite): void {
+    this.operations.bind(node, favorite, this.favoritedOverrides.get(favorite.id) ?? this.defaultFavorited);
   }
 
   private nodeAt(index: number): Node {

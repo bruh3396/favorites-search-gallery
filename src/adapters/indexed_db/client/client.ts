@@ -1,3 +1,5 @@
+import { LegacyMigration, prepareLegacyMigration } from "@/adapters/indexed_db/client/legacy_migration";
+
 const VERSION = 1;
 
 const SCHEMA = {
@@ -9,9 +11,12 @@ const SCHEMA = {
 export type IndexedDbStoreName = keyof typeof SCHEMA;
 
 export class IndexedDbClient {
+  private readonly qualifiedName: string;
   private connection: Promise<IDBDatabase> | undefined;
 
-  constructor(private readonly databaseName: string) { }
+  constructor(databaseName: string) {
+    this.qualifiedName = `fsg:${databaseName}`;
+  }
 
   public async runTransaction<T>(
     storeName: IndexedDbStoreName,
@@ -29,10 +34,32 @@ export class IndexedDbClient {
   }
 
   private open(): Promise<IDBDatabase> {
-    this.connection ??= new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.databaseName, VERSION);
+    this.connection ??= this.migrateAndOpen().catch((error: unknown) => {
+      this.connection = undefined;
+      throw error;
+    });
+    return this.connection;
+  }
 
-      request.onupgradeneeded = (): void => createMissingStores(request.result);
+  private async migrateAndOpen(): Promise<IDBDatabase> {
+    const migration = await prepareLegacyMigration(this.qualifiedName);
+    const database = await this.openWithMigration(migration);
+
+    migration.deleteLegacyDatabases();
+    return database;
+  }
+
+  private openWithMigration(migration: LegacyMigration): Promise<IDBDatabase> {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.qualifiedName, VERSION);
+
+      request.onupgradeneeded = (event): void => {
+        createMissingStores(request.result);
+
+        if (event.oldVersion === 0 && request.transaction !== null) {
+          migration.writeToNewDatabase(request.transaction);
+        }
+      };
       request.onsuccess = (): void => {
         request.result.onversionchange = (): void => {
           request.result.close();
@@ -40,12 +67,8 @@ export class IndexedDbClient {
         };
         resolve(request.result);
       };
-      request.onerror = (): void => {
-        this.connection = undefined;
-        reject(request.error);
-      };
+      request.onerror = (): void => reject(request.error);
     });
-    return this.connection;
   }
 }
 

@@ -1,13 +1,12 @@
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 
 export class FavoritesSearchFlow extends FavoritesFlow {
-
   public searchFavorites(searchQuery: string): void {
     this.flows.display.display(this.model.searchFavorites(searchQuery));
   }
 
   public openPostList(searchQuery: string): void {
-    this.context.ports.navigation.openSearchInNewTab(searchQuery);
+    this.context.ports.navigator.open(this.context.ports.remotePages.searchUrl(searchQuery));
   }
 
   public reSearchFavorites(): void {

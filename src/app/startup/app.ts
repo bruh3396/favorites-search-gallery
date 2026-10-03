@@ -17,18 +17,22 @@ const CLAIM_VIEWPORT: Record<Device, (hostPage: HostPage) => void> = {
   mobile: (hostPage) => hostPage.lockViewport()
 };
 
-export function startApp(environment: Environment, ports: Ports, root: HTMLElement): boolean {
+interface ContentHost {
+  claimContent: () => HTMLElement;
+}
+
+export function startApp(environment: Environment, ports: Ports, contentHost: ContentHost): boolean {
   const preferences = createPreferences(selectPreferenceDefaults(environment), ports.localKeyedValues);
 
   if (!RUNS_IN[environment.mode](preferences)) {
     return false;
   }
   const features = selectFeatures(environment, preferences.app.performanceProfile.value);
-  const context = createAppContext(environment, ports, preferences, features);
+  const context = createAppContext({ environment, features }, { ports, preferences });
+  const content = contentHost.claimContent();
 
-  ports.hostPage.clearContent();
   CLAIM_VIEWPORT[environment.device](ports.hostPage);
-  setupRuntime(context, root);
+  setupRuntime(context, content);
   launchFeatures(context);
   return true;
 }

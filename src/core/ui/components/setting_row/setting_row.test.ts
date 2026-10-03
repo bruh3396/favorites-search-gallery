@@ -5,7 +5,6 @@ import { expectClassesStyled } from "@/testing/css";
 
 function setup(options: Partial<SettingRowOptions> = {}): { element: HTMLDivElement; control: HTMLElement } {
   const control = options.control ?? document.createElement("button");
-
   return { ...createSettingRow(document, { label: "Columns", ...options, control }), control };
 }
 

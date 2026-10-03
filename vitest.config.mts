@@ -1,4 +1,4 @@
-﻿import { configDefaults, defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -13,11 +13,8 @@ const DOM_TESTS = [
   "src/core/ui/**/*.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
-  "src/adapters/rule34/client/site/client.test.ts",
-  "src/adapters/rule34/client/site/favorites_page/cleanup.test.ts",
-  "src/adapters/rule34/client/site/header/header.test.ts",
-  "src/adapters/rule34/client/site/theme/theme.test.ts",
-  "src/adapters/rule34/client/site/**/parser.test.ts",
+  "src/adapters/memory/ports/host_page/host_page.test.ts",
+  "src/adapters/rule34/client/{client,current_page,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
   "src/lib/media/download.test.ts",
   "src/lib/ui/**/*.test.ts",
   "src/utils/browser/**/*.test.ts"

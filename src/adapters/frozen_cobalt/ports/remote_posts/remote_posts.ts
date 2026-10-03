@@ -4,7 +4,7 @@ import { FrozenCobaltMintMedia, decodePost } from "@/adapters/frozen_cobalt/clie
 import { PostUnavailableError, RemotePosts } from "@/core/boundary/ports/remote_posts";
 import { RetryPolicy, retry } from "@/core/utils/async/retry";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
-import { Random } from "@/core/boundary/ports/random";
+import { RandomSource } from "@/core/boundary/ports/random_source";
 import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { assertNever } from "@/core/utils/guards/guards";
 
@@ -12,7 +12,7 @@ export interface FrozenCobaltRemotePostsDependencies {
   frozenCobalt: Pick<FrozenCobaltClient, "fetchPost">;
   mintMedia: FrozenCobaltMintMedia;
   scheduler: Scheduler;
-  random: Random;
+  randomSource: RandomSource;
 }
 
 const MAX_FETCH_ATTEMPTS = 5;
@@ -26,7 +26,7 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
       attempts: MAX_FETCH_ATTEMPTS,
       baseDelay: RETRY_BASE_DELAY,
       scheduler: dependencies.scheduler,
-      random: dependencies.random,
+      randomSource: dependencies.randomSource,
       isRetryable: isTransient
     };
   }

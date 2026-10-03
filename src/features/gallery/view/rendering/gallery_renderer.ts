@@ -4,6 +4,7 @@ import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";
 import { Favorite } from "@/types/favorite";
+import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/renderer";
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
@@ -19,8 +20,19 @@ export class GalleryRenderer {
 
   constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined, budget: GalleryBudget) {
     this.imageRenderer = new GalleryImageRenderer(context, favoriteFor, budget);
-    this.videoRenderer = new GalleryVideoRenderer(context.preferences, context.environment, context.ports.remoteMedia);
-    this.gifRenderer = new GalleryGifRenderer(context.environment, context.ports.remoteMedia);
+    const { device } = context.environment;
+
+    this.videoRenderer = new GalleryVideoRenderer({
+      preloadedVideoCount: GalleryConfig.preloadedVideoCount[device],
+      allowsNativeControls: device === "mobile"
+    }, {
+      preferences: context.preferences,
+      remoteMedia: context.ports.remoteMedia
+    });
+    this.gifRenderer = new GalleryGifRenderer(
+      { preloadedGifCount: GalleryConfig.preloadedGifCount[device] },
+      context.ports.remoteMedia
+    );
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
     this.renderers.forEach((renderer) => galleryRoot.appendChild(renderer.root));
   }

@@ -60,6 +60,11 @@ export interface Display {
 
 export type FavoritesPaginationAction = "page" | "step" | "gotoToggle" | "gotoSubmit";
 
+export interface FavoritesModelCallbacks {
+  onSearchResultsChanged: (results: Favorite[]) => void;
+  onPlaceholderFilled: (favorite: Favorite) => void;
+}
+
 export interface FavoritesViewCallbacks {
   onContentReplaced: () => void;
   onContentAdded: (favorites: Favorite[]) => void;

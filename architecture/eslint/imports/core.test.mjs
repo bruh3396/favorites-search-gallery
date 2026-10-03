@@ -30,14 +30,14 @@ runRule("rule2", {
 
 runRule("rule3", {
   valid: [
-    ["core/boundary/ports/navigation.ts", "core/domain/post"],
-    ["core/boundary/ports/navigation.ts", "core/boundary/environment"],
-    ["core/boundary/ports/navigation.ts", "core/boundary/ports/scheduler"]
+    ["core/boundary/ports/navigator.ts", "core/domain/post"],
+    ["core/boundary/ports/navigator.ts", "core/boundary/environment"],
+    ["core/boundary/ports/navigator.ts", "core/boundary/ports/scheduler"]
   ],
   invalid: [
-    ["core/boundary/ports/navigation.ts", "core/utils/utils"],
-    ["core/boundary/ports/navigation.ts", "core/context/context"],
-    ["core/boundary/ports/navigation.ts", "adapters/rule34/client/client"]
+    ["core/boundary/ports/navigator.ts", "core/utils/utils"],
+    ["core/boundary/ports/navigator.ts", "core/context/context"],
+    ["core/boundary/ports/navigator.ts", "adapters/rule34/client/client"]
   ]
 });
 

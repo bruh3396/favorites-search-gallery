@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { Layout } from "@/types/app";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { SkeletonConfig } from "@/config/skeleton_config";
 
 function createThumb(width: number, height: number): HTMLElement {
@@ -16,7 +16,7 @@ function createThumb(width: number, height: number): HTMLElement {
 }
 
 function createSkeleton(layout: Layout): FavoritesSkeleton {
-  return new FavoritesSkeleton({ layout }, { store, random: new MemoryRandom() });
+  return new FavoritesSkeleton({ layout }, { store, randomSource: new MemoryRandomSource() });
 }
 
 function tiledFor(skeleton: FavoritesSkeleton): HTMLElement[] | undefined {

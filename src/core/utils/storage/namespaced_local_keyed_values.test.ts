@@ -4,7 +4,7 @@ import { NamespacedLocalKeyedValues } from "@/core/utils/storage/namespaced_loca
 
 function setup(): { store: MemoryLocalKeyedValues; namespaced: NamespacedLocalKeyedValues } {
   const store = new MemoryLocalKeyedValues();
-  return { store, namespaced: new NamespacedLocalKeyedValues(store, "preferences") };
+  return { store, namespaced: new NamespacedLocalKeyedValues("preferences", store) };
 }
 
 describe("NamespacedLocalKeyedValues", () => {
@@ -23,7 +23,7 @@ describe("NamespacedLocalKeyedValues", () => {
 
     store.set("preferences", { theme: "dark" });
 
-    expect(new NamespacedLocalKeyedValues(store, "preferences").get("theme")).toBe("dark");
+    expect(new NamespacedLocalKeyedValues("preferences", store).get("theme")).toBe("dark");
   });
 
   test.each([null, 3, "text", [1, 2]])("treats a stored value that isn't an object as empty (%s)", (stored) => {
@@ -31,7 +31,7 @@ describe("NamespacedLocalKeyedValues", () => {
 
     store.set("preferences", stored);
 
-    expect(new NamespacedLocalKeyedValues(store, "preferences").get("0")).toBeUndefined();
+    expect(new NamespacedLocalKeyedValues("preferences", store).get("0")).toBeUndefined();
   });
 
   test("returns undefined for a missing key", () => {
@@ -71,8 +71,8 @@ describe("NamespacedLocalKeyedValues", () => {
 
   test("never reverts what another tab wrote since it loaded", () => {
     const store = new MemoryLocalKeyedValues();
-    const tab = new NamespacedLocalKeyedValues(store, "preferences");
-    const otherTab = new NamespacedLocalKeyedValues(store, "preferences");
+    const tab = new NamespacedLocalKeyedValues("preferences", store);
+    const otherTab = new NamespacedLocalKeyedValues("preferences", store);
 
     otherTab.set("columns", 5);
     tab.set("theme", "dark");

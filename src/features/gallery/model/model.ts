@@ -6,26 +6,29 @@ import { GalleryState } from "@/types/app";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
-import { Navigation } from "@/core/boundary/ports/navigation";
 import { NavigationKey } from "@/types/input";
+import { Navigator } from "@/core/boundary/ports/navigator";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemotePages } from "@/core/boundary/ports/remote_pages";
 import { downloadMedia } from "@/lib/media/download";
 import { isVideo } from "@/lib/media/media_type";
 import { navigationDelta } from "@/lib/event/keys";
+
+interface GalleryModelPorts {
+  navigator: Navigator;
+  remotePages: Pick<RemotePages, "postUrl">;
+  remoteFavorites: Pick<RemoteFavorites, "add" | "remove">;
+  remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl" | "fetchOriginal">;
+}
 
 export class GalleryModel {
   private readonly cursor: ItemCursor<PostMedia>;
   private readonly state: GalleryStateController;
   private getItemsAroundId: (id: string) => PostMedia[];
 
-  constructor(
-    preferences: Preferences,
-    private readonly navigation: Navigation,
-    private readonly remoteFavorites: Pick<RemoteFavorites, "add" | "remove">,
-    private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl" | "fetchOriginal">
-  ) {
+  constructor(preferences: Preferences, private readonly ports: GalleryModelPorts) {
     this.cursor = new ItemCursor<PostMedia>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
     this.getItemsAroundId = (): PostMedia[] => [];
@@ -72,23 +75,23 @@ export class GalleryModel {
   }
 
   public openPost(): void {
-    this.navigation.openInNewTab(this.navigation.postUrl(this.cursor.currentItem().id));
+    this.ports.navigator.open(this.ports.remotePages.postUrl(this.cursor.currentItem().id));
   }
 
   public async openOriginal(): Promise<void> {
-    this.navigation.openInNewTab(await this.remoteMedia.resolveOriginalUrl(this.cursor.currentItem().media));
+    this.ports.navigator.open(await this.ports.remoteMedia.resolveOriginalUrl(this.cursor.currentItem().media));
   }
 
   public download(): Promise<void> {
-    return downloadMedia(this.remoteMedia, this.cursor.currentItem());
+    return downloadMedia(this.ports.remoteMedia, this.cursor.currentItem());
   }
 
   public addFavorite(): Promise<AddFavoriteResult> {
-    return this.remoteFavorites.add(this.cursor.currentItem().id);
+    return this.ports.remoteFavorites.add(this.cursor.currentItem().id);
   }
 
   public removeFavorite(): Promise<RemoveFavoriteResult> {
-    this.remoteFavorites.remove(this.cursor.currentItem().id);
+    this.ports.remoteFavorites.remove(this.cursor.currentItem().id);
     return Promise.resolve("removed");
   }
 

@@ -1,16 +1,18 @@
 import { Story, StoryVariant } from "@/targets/kit/story";
-import KIT_CSS from "@/targets/kit/kit.css?inline";
+import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { DROPDOWN_STORY } from "@/targets/kit/stories/dropdown";
+import KIT_CSS from "@/targets/kit/kit.css?inline";
 import { MULTI_SELECT_STORY } from "@/targets/kit/stories/multi_select";
 import { SEGMENTED_STORY } from "@/targets/kit/stories/segmented";
 import { SETTING_ROW_STORY } from "@/targets/kit/stories/setting_row";
+import { SETTING_STORY } from "@/targets/kit/stories/setting";
 import { STEPPER_STORY } from "@/targets/kit/stories/stepper";
 import { SWITCH_STORY } from "@/targets/kit/stories/switch";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { createSegmented } from "@/core/ui/components/segmented/segmented";
 import { createSwitch } from "@/core/ui/components/switch/switch";
 
-const STORIES: Story[] = [SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, SETTING_ROW_STORY];
+const STORIES: Story[] = [SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, SETTING_ROW_STORY, SETTING_STORY];
 
 function createStyleSheet(css: string): CSSStyleSheet {
   const sheet = new CSSStyleSheet();
@@ -91,9 +93,9 @@ function renderToolbar(app: HTMLElement): HTMLElement {
   return toolbar;
 }
 
-// The kit mounts like the app will: one shadow root, the core stylesheet, an fsg-App root.
+// The kit mounts like the app will: a shadow root on the claimed content, the core stylesheet, an fsg-App root.
 function main(): void {
-  const shadowRoot = document.body.appendChild(document.createElement("div")).attachShadow({ mode: "open" });
+  const shadowRoot = new BrowserHostPage().claimContent().attachShadow({ mode: "open" });
   const app = createElement("div", "fsg-App kit-Page");
   const stories = createElement("main", "");
   const logOutput = createElement("output", "kit-Log", "Events appear here.\n");

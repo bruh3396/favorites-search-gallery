@@ -7,6 +7,7 @@ import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { createElement } from "@/utils/browser/element";
+import { doNothing } from "@/utils/pure/function";
 import { effect } from "@/core/utils/reactive/signal";
 
 interface FavoritesComponents {
@@ -35,9 +36,12 @@ export function startFavorites(context: AppContext): void {
 
 function startOnFavoritesPage(context: AppContext): void {
   const linksToPostPage = context.environment.pointer === "touch" || !context.features.has("gallery");
-  const shell = new FavoritesShell(context.shell, context.environment);
-  const model = new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit);
+  const shell = new FavoritesShell({ version: context.environment.version }, context.shell);
   const view = new FavoritesView({ linksToPostPage }, { context, shell });
+  const model = new FavoritesModel(context, {
+    onSearchResultsChanged: context.events.favorites.searchResultsUpdated.emit,
+    onPlaceholderFilled: favorite => view.redrawThumb(favorite)
+  });
   const offersTutorial = context.environment.pointer === "touch";
   const control = new FavoritesControl({ offersTutorial }, { context, shell });
   const features = new FavoritesFeatures(context, featureDependencies(context, model, control));
@@ -49,7 +53,10 @@ function startOnFavoritesPage(context: AppContext): void {
 }
 
 function startOnPostListPage(context: AppContext): void {
-  servePostListRequests(context, new FavoritesModel(context, context.events.favorites.searchResultsUpdated.emit));
+  servePostListRequests(context, new FavoritesModel(context, {
+    onSearchResultsChanged: context.events.favorites.searchResultsUpdated.emit,
+    onPlaceholderFilled: doNothing
+  }));
 }
 
 function setup(components: FavoritesComponents): void {
@@ -115,7 +122,7 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.favorites.clearButtonClicked.on(() => control.clearSearch());
   events.favorites.shuffleButtonClicked.on(() => flows.search.shuffleSearchResults());
   events.favorites.invertButtonClicked.on(() => flows.search.invertSearchResults());
-  events.favorites.resetButtonClicked.on(() => flows.action.reset());
+  events.favorites.reconcileButtonClicked.on(() => flows.action.reconcile());
   events.favorites.settingsResetRequested.on(() => flows.action.resetSettings());
   events.favorites.searchRequested.on((query) => flows.search.searchFavorites(query));
   events.favorites.postListRequested.on((query) => flows.search.openPostList(query));

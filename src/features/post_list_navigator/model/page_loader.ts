@@ -3,9 +3,10 @@ import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model/page_cache";
 import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
-import { fetchPostList } from "@/adapters/rule34/client/site/post_list_page/fetcher";
+import { fetchPostList } from "@/adapters/rule34/client/post_list_page";
+import { mintMedia } from "@/adapters/rule34_cdn/client/locator";
 import { numbersAround } from "@/utils/pure/number";
-import { parseThumb } from "@/adapters/rule34/client/site/thumb/parser";
+import { parseThumb } from "@/adapters/rule34/client/thumb";
 import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
 
 const PREFETCH_LENGTH = 3;
@@ -47,7 +48,7 @@ export class PostListNavigatorPageLoader {
   public createPostListFromHtml(pageNumber: number, html: string): PostList {
     const dom = new DOMParser().parseFromString(html, "text/html");
     const rawThumbs = Array.from(dom.querySelectorAll<HTMLElement>(`.${RAW_THUMB_CLASS_NAME}`));
-    const posts = rawThumbs.map(parseThumb);
+    const posts = rawThumbs.map(thumb => parseThumb(thumb, mintMedia));
     const thumbs = preparePostListThumbs(rawThumbs, this.onMobileDevice, this.galleryDisabled);
     const paginator = dom.getElementById("paginator");
     return new PostList(pageNumber, thumbs, posts, paginator);

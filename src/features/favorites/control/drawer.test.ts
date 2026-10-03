@@ -15,7 +15,7 @@ interface Setup {
 
 function setup(): Setup {
   const environment = createEnvironment();
-  const shell = new FavoritesShell(new Shell(), environment);
+  const shell = new FavoritesShell(environment, new Shell());
   const preferences = createPreferences({ favorites: { drawerOpen: false, drawerActiveSection: "settings" } });
 
   FavoritesDrawer.setup(preferences, shell);

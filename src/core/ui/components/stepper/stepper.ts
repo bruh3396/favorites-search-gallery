@@ -19,6 +19,7 @@ export interface StepperOptions extends ControlOptions<number> {
   step?: number;
   size?: StepperSize;
   scheduler: StepperScheduler;
+  onValueCommit?: (value: number) => void;
 }
 
 export interface Stepper extends Control<number> {
@@ -36,7 +37,7 @@ const KEY_DIRECTIONS: Readonly<Record<string, 1 | -1>> = {
 
 export function createStepper(
   ownerDocument: Document,
-  { label, min, max, step = 1, size = "medium", scheduler, onValueChange }: StepperOptions
+  { label, min, max, step = 1, size = "medium", scheduler, onValueChange, onValueCommit = (): void => undefined }: StepperOptions
 ): Stepper {
   const element = ownerDocument.createElement("div");
   const input = createInput(ownerDocument, { label, min, max, step });
@@ -45,6 +46,7 @@ export function createStepper(
   let current = min;
   let isDisabled = false;
   let cancelHold = (): void => undefined;
+  let gestureStart: number | null = null;
 
   const report = (next: number): void => {
     if (next !== current) {
@@ -58,9 +60,17 @@ export function createStepper(
     decrement.disabled = isDisabled || current <= min;
     increment.disabled = isDisabled || current >= max;
   };
-  const stopHold = (): void => {
+  const begin = (): void => {
+    gestureStart ??= current;
+  };
+  const finish = (): void => {
     cancelHold();
     cancelHold = (): void => undefined;
+
+    if (gestureStart !== null && current !== gestureStart) {
+      onValueCommit(current);
+    }
+    gestureStart = null;
   };
   const hold = (button: HTMLButtonElement, direction: 1 | -1, delay: number): void => {
     cancelHold = scheduler.schedule(() => {
@@ -72,24 +82,26 @@ export function createStepper(
     }, delay);
   };
   const bindButton = (button: HTMLButtonElement, direction: 1 | -1): void => {
-    // Pointer events still reach a disabled button, unlike click.
     button.addEventListener("pointerdown", (event) => {
       if (event.button !== 0 || button.disabled) {
         return;
       }
       event.preventDefault();
-      stopHold();
+      finish();
+      begin();
       stepBy(direction);
       hold(button, direction, HOLD_DELAY);
     });
     button.addEventListener("click", (event) => {
       if (event.detail === 0) {
+        begin();
         stepBy(direction);
+        finish();
       }
     });
 
     for (const type of ["pointerup", "pointerleave", "pointercancel"]) {
-      button.addEventListener(type, stopHold);
+      button.addEventListener(type, finish);
     }
   };
 
@@ -103,16 +115,25 @@ export function createStepper(
 
     if (direction !== undefined) {
       event.preventDefault();
+      begin();
       stepBy(direction);
     }
   });
+  input.addEventListener("keyup", (event) => {
+    if (KEY_DIRECTIONS[event.key] !== undefined) {
+      finish();
+    }
+  });
+  input.addEventListener("blur", finish);
   input.addEventListener("change", () => {
     const typed = input.valueAsNumber;
 
     show();
 
     if (!Number.isNaN(typed)) {
+      begin();
       report(Math.min(max, Math.max(min, typed)));
+      finish();
     }
   });
 
@@ -125,7 +146,7 @@ export function createStepper(
     },
     setDisabled: (disabled): void => {
       isDisabled = disabled;
-      stopHold();
+      finish();
       show();
     }
   };
@@ -137,11 +158,10 @@ function stepFrom(
 ): number {
   const offset = roundToPrecision((value - min) / step, OFFSET_PRECISION);
   const index = direction === 1 ? Math.floor(offset) + 1 : Math.ceil(offset) - 1;
-  const next = roundToPrecision(min + index * step, decimalsOf(step));
+  const next = roundToPrecision(min + (index * step), decimalsOf(step));
   return Math.min(max, Math.max(min, next));
 }
 
-// Division by a decimal step leaves noise (0.6 / 0.1 is 5.999…), which would floor to the step already on.
 function roundToPrecision(value: number, decimals: number): number {
   return Number(value.toFixed(decimals));
 }

@@ -6,7 +6,7 @@ import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { PaginationState } from "@/types/ui";
 import { PreferenceOverrides } from "@/testing/preferences";
@@ -33,7 +33,7 @@ interface SetupOptions {
 function setup({ preferences = {}, environment: environmentOverrides = {}, localKeyedValues = new MemoryLocalKeyedValues(), linksToPostPage = false }: SetupOptions = {}): Setup {
   const environment = createEnvironment(environmentOverrides);
   const appShell = new Shell();
-  const shell = new FavoritesShell(appShell, environment);
+  const shell = new FavoritesShell(environment, appShell);
   const scheduler = new MemoryScheduler();
   const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { localKeyedValues, scheduler } });
   const view = new FavoritesView({ linksToPostPage }, { context, shell });
@@ -142,7 +142,7 @@ describe("FavoritesView", () => {
       view.showSearchResults(createFavorites("1"));
       const link = content.querySelector("a") as HTMLAnchorElement;
 
-      expect(link.getAttribute("href")).toBe(new MemoryNavigation().postUrl("1"));
+      expect(link.getAttribute("href")).toBe(new MemoryRemotePages().postUrl("1"));
       hover(view, content.querySelector("img") as HTMLElement);
       expect(link.getAttribute("href")).toBeNull();
     });

@@ -1,5 +1,5 @@
-import { Stepper, StepperClass, StepperOptions, StepperScheduler, createStepper } from "@/core/ui/components/stepper/stepper";
 import { Mock, describe, expect, test, vi } from "vitest";
+import { Stepper, StepperClass, StepperOptions, StepperScheduler, createStepper } from "@/core/ui/components/stepper/stepper";
 import STEPPER_CSS from "@/core/ui/components/stepper/stepper.css?inline";
 import { expectClassesStyled } from "@/testing/css";
 
@@ -11,7 +11,6 @@ interface PendingTask {
 // Runs scheduled tasks only when the test says so.
 function createScheduler(): StepperScheduler & { runNext: () => number } {
   let pending: PendingTask | undefined;
-
   return {
     schedule: (task, delay): (() => void) => {
       const entry = { task, delay };
@@ -49,7 +48,6 @@ function setup(options: Partial<Omit<StepperOptions, "onValueChange">> & { onVal
   const scheduler = createScheduler();
   const stepper = createStepper(document, { label: "Count", min: 0, max: 10, ...rest, onValueChange, scheduler });
   const [decrement, increment] = stepper.element.querySelectorAll("button");
-
   return { ...stepper, onValueChange, scheduler, input: stepper.element.querySelector("input")!, decrement, increment };
 }
 
@@ -182,6 +180,51 @@ describe("createStepper", () => {
     type(input, "3");
     expect(onValueChange).not.toHaveBeenCalled();
     expect(input.value).toBe("3");
+  });
+
+  test("commits once, on release, the value a held press ends on", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { increment, scheduler, setValue } = setup({ onValueCommit, onValueChange: vi.fn((next: number) => setValue(next)) });
+
+    setValue(0);
+    press(increment);
+    scheduler.runNext();
+    scheduler.runNext();
+    expect(onValueCommit).not.toHaveBeenCalled();
+    release(increment);
+    expect(onValueCommit.mock.calls).toEqual([[3]]);
+  });
+
+  test("commits a held arrow key when it is released", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { input, setValue } = setup({ onValueCommit, onValueChange: vi.fn((next: number) => setValue(next)) });
+
+    setValue(5);
+    keyDown(input, "ArrowUp");
+    keyDown(input, "ArrowUp");
+    expect(onValueCommit).not.toHaveBeenCalled();
+    input.dispatchEvent(new KeyboardEvent("keyup", { key: "ArrowUp" }));
+    expect(onValueCommit.mock.calls).toEqual([[7]]);
+  });
+
+  test("commits a typed value and an assistive-technology click at once", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { input, increment, setValue } = setup({ onValueCommit, onValueChange: vi.fn((next: number) => setValue(next)) });
+
+    setValue(3);
+    type(input, "8");
+    increment.dispatchEvent(new MouseEvent("click", { detail: 0 }));
+    expect(onValueCommit.mock.calls).toEqual([[8], [9]]);
+  });
+
+  test("commits nothing when a gesture ends where it started", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { increment, setValue } = setup({ onValueCommit });
+
+    setValue(4);
+    press(increment);
+    release(increment);
+    expect(onValueCommit).not.toHaveBeenCalled();
   });
 
   test("disables everything and ignores presses while disabled", () => {

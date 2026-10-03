@@ -9,7 +9,13 @@ export class BrowserHostPage implements HostPage {
 
   public setColorScheme(): void { }
 
-  public clearContent(): void { }
+  public reflectSearchPage(): void { }
+
+  public setPaginatorVisible(): void { }
+
+  public claimContent(): HTMLElement {
+    return document.body.appendChild(document.createElement("div"));
+  }
 
   public lockViewport(): void {
     const existing = document.querySelector<HTMLMetaElement>("meta[name=viewport]");

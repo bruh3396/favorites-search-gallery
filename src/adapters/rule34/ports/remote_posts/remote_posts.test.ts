@@ -1,6 +1,6 @@
 import { Mock, describe, expect, test, vi } from "vitest";
 import { CategorizedPost } from "@/core/domain/post/post";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Rule34Error } from "@/adapters/rule34/client/error";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
@@ -17,7 +17,7 @@ const PAGE = {
 function setup(fetchPostPage: FetchPostPage): { remotePosts: Rule34RemotePosts; scheduler: MemoryScheduler } {
   const scheduler = new MemoryScheduler();
   const rule34 = { fetchPostPage };
-  return { remotePosts: new Rule34RemotePosts({ rule34, scheduler, random: new MemoryRandom([1]) }), scheduler };
+  return { remotePosts: new Rule34RemotePosts({ rule34, scheduler, randomSource: new MemoryRandomSource([1]) }), scheduler };
 }
 
 async function fetchedFor(fetchPostPage: FetchPostPage): Promise<CategorizedPost> {

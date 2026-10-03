@@ -20,7 +20,20 @@ export interface AppContext {
   shell: Shell;
 }
 
-export function createAppContext(environment: Environment, ports: Ports, preferences: Preferences, features: Features): AppContext {
+export interface AppContextConfiguration {
+  environment: Environment;
+  features: Features;
+}
+
+export interface AppContextDependencies {
+  ports: Ports;
+  preferences: Preferences;
+}
+
+export function createAppContext(
+  { environment, features }: AppContextConfiguration,
+  { ports, preferences }: AppContextDependencies
+): AppContext {
   const events = createEvents();
   const milestones = createMilestones();
   const featureBridge = new FeatureBridge(environment);

@@ -28,15 +28,13 @@ describe("MemoryLocalFavorites", () => {
     expect(await favorites.getAll()).toEqual(["2", "1"]);
   });
 
-  test("removes one id and clears them all", async() => {
+  test("removes the given ids and keeps the rest in order", async() => {
     const favorites = new MemoryLocalFavorites();
 
-    await favorites.prepend(["3", "2", "1"]);
-    await favorites.remove("2");
+    await favorites.prepend(["4", "3", "2", "1"]);
+    await favorites.remove(["3", "1"]);
 
-    expect(await favorites.getAll()).toEqual(["3", "1"]);
-    await favorites.clear();
-    expect(await favorites.getAll()).toEqual([]);
+    expect(await favorites.getAll()).toEqual(["4", "2"]);
   });
 
   test("a caller mutating what it read never changes what is stored", async() => {

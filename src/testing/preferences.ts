@@ -1,6 +1,6 @@
+import { Preference, StoredPreference } from "@/lib/storage/preference";
 import { Preferences, createPreferences as createAppPreferences } from "@/app/context/preferences";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Preference, StoredPreference } from "@/lib/storage/preference";
 import { createEnvironment } from "@/testing/environment";
 import { selectPreferenceDefaults } from "@/app/context/preference_defaults";
 
@@ -83,7 +83,7 @@ const DEFAULT_VALUES: Record<Section, Record<string, unknown>> = {
 
 // A lone preference over its own memory store.
 export function createPreference<T>(initial: T): Preference<T> {
-  return new StoredPreference(new MemoryLocalKeyedValues(), "preference", initial);
+  return new StoredPreference({ key: "preference", defaultValue: initial }, { store: new MemoryLocalKeyedValues() });
 }
 
 // The app's preferences over a memory store, set to fixed test values so tests

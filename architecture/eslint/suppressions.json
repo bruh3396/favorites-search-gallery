@@ -9,57 +9,37 @@
       "count": 1
     }
   },
-  "src/adapters/rule34/client/media/extension_prober.ts": {
+  "src/adapters/rule34/client/client.ts": {
     "boundaries/dependencies": {
       "count": 1
     }
   },
-  "src/adapters/rule34/client/media/video_duration.ts": {
+  "src/adapters/rule34/client/favorite_actions.ts": {
     "boundaries/dependencies": {
       "count": 1
     }
   },
-  "src/adapters/rule34/client/site/client.ts": {
+  "src/adapters/rule34/client/page_rate_limiter.ts": {
     "boundaries/dependencies": {
       "count": 1
     }
   },
-  "src/adapters/rule34/client/site/favorite_actions/favorite_actions.ts": {
-    "boundaries/dependencies": {
-      "count": 3
-    }
-  },
-  "src/adapters/rule34/client/site/page_rate_limiter.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
-  "src/adapters/rule34/client/site/post_list_page/fetcher.ts": {
+  "src/adapters/rule34/client/post_list_page.ts": {
     "boundaries/dependencies": {
       "count": 2
     }
   },
-  "src/adapters/rule34/client/site/post_page/parser.ts": {
+  "src/adapters/rule34/client/post_page.ts": {
     "boundaries/dependencies": {
-      "count": 2
+      "count": 1
     }
   },
-  "src/adapters/rule34/client/site/thumb/parser.ts": {
+  "src/adapters/rule34/client/thumb.ts": {
     "boundaries/dependencies": {
       "count": 4
     }
   },
-  "src/adapters/rule34/ports/remote_favorites/full_page_fetcher.ts": {
-    "boundaries/dependencies": {
-      "count": 2
-    }
-  },
-  "src/adapters/rule34/ports/remote_favorites/incremental_page_fetcher.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
-  "src/adapters/rule34/ports/remote_favorites/remote_favorites.ts": {
+  "src/adapters/rule34/ports/remote_favorites/all_favorites_fetcher.ts": {
     "boundaries/dependencies": {
       "count": 1
     }

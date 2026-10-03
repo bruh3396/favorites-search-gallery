@@ -4,7 +4,7 @@ import { Mock, describe, expect, test, vi } from "vitest";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { Media } from "@/core/domain/media/media";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts";
 import { advanceAndSettle } from "@/testing/async";
@@ -26,10 +26,10 @@ function mintMedia({ url }: { url: string; tags: string }): Media | null {
 
 function setup(...results: FrozenCobaltPostResult[]): Setup {
   const scheduler = new MemoryScheduler();
-  const random = new MemoryRandom([0.5]);
+  const randomSource = new MemoryRandomSource([0.5]);
   const nextResult = (id: string): FrozenCobaltPostResult => results.shift() ?? { status: "error", id };
   const frozenCobalt = { fetchPost: vi.fn((id: string) => Promise.resolve(nextResult(id))) };
-  const remotePosts = new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, random });
+  const remotePosts = new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource });
   return { remotePosts, frozenCobalt, scheduler };
 }
 

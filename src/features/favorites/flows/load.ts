@@ -2,6 +2,8 @@ import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { pluralSuffix } from "@/utils/pure/string";
 import { sleep } from "@/lib/async/scheduling";
 
+const FETCH_FAILED_STATUS = "Rule34 stopped sending favorites, try again later";
+
 export class FavoritesLoadFlow extends FavoritesFlow {
   public async loadAllFavorites(): Promise<void> {
     const storedFavoriteCount = await this.model.countStoredFavorites();
@@ -35,7 +37,12 @@ export class FavoritesLoadFlow extends FavoritesFlow {
 
   private async fetchNewFavorites(): Promise<void> {
     this.view.setStatus("Fetching new favorites");
-    const newFavorites = await this.model.fetchNewFavorites();
+    const newFavorites = await this.model.fetchNewFavorites().catch(() => null);
+
+    if (newFavorites === null) {
+      this.view.setStatus(FETCH_FAILED_STATUS);
+      return;
+    }
 
     if (newFavorites.length === 0) {
       this.view.clearStatus();
@@ -57,7 +64,13 @@ export class FavoritesLoadFlow extends FavoritesFlow {
   private async fetchAllFavorites(): Promise<void> {
     this.model.fetchFavoriteCount().then((count) => this.view.setExpectedTotalFavoriteCount(count));
     this.flows.display.clear();
-    await this.model.fetchAllFavorites(favorites => this.flows.display.sync(favorites));
+    const wasFetched = await this.model.fetchAllFavorites(favorites => this.flows.display.sync(favorites))
+      .then(() => true, () => false);
+
+    if (!wasFetched) {
+      this.view.setStatus(FETCH_FAILED_STATUS);
+      return;
+    }
     this.view.setStatus("Saving favorites");
     await this.model.storeFavorites(this.model.getAllFavorites());
     this.view.setTemporaryStatus("All favorites saved");

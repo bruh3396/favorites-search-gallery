@@ -1,16 +1,16 @@
 import { Rule34RemoteFavorites, Rule34RemoteFavoritesDependencies, computeRetryDelay } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { describe, expect, test, vi } from "vitest";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/site/favorites_page/url";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { Rule34AddFavoriteAnswer } from "@/adapters/rule34/client/site/favorite_actions/favorite_actions";
+import { Rule34AddFavoriteAnswer } from "@/adapters/rule34/client/favorite_actions";
 import { Rule34Error } from "@/adapters/rule34/client/error";
 import { advanceAndSettle } from "@/testing/async";
 import { createPost } from "@/testing/post";
 
 const PAGE_ID = "123";
-const FETCH_DELAY = 1_000;
+const FETCH_DELAY = 3_000;
 const MAX_FETCH_ATTEMPTS = 5;
 const SETTLE_TIME = 60_000;
 
@@ -72,7 +72,7 @@ function createClient({
 function setup(options: ClientOptions = {}): Setup {
   const rule34 = createClient(options);
   const scheduler = new MemoryScheduler();
-  const remoteFavorites = new Rule34RemoteFavorites({ rule34, scheduler, random: new MemoryRandom([1]) });
+  const remoteFavorites = new Rule34RemoteFavorites({ rule34, scheduler, randomSource: new MemoryRandomSource([1]) });
   return { remoteFavorites, rule34, scheduler };
 }
 
@@ -163,6 +163,36 @@ describe("Rule34RemoteFavorites", () => {
       await advanceAndSettle(scheduler, SETTLE_TIME);
       await run;
     });
+
+    test("stops at the first refused page instead of retrying it", async() => {
+      const fetchPage = vi.fn<FetchPage>((_pageId, pageIndex) => (
+        pageIndex === 0 ? Promise.reject(new Rule34Error("http", { status: 403 })) : Promise.resolve(createPage(pageIndex))
+      ));
+
+      await expect(deliveredFor({ fetchPage }, new Set())).rejects.toThrow(Rule34Error);
+      expect(fetchPage).toHaveBeenCalledOnce();
+    });
+
+    test("gives up on a page after five transient failures", async() => {
+      const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 429 })));
+
+      await expect(deliveredFor({ fetchPage }, new Set())).rejects.toThrow(Rule34Error);
+      expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
+    });
+  });
+
+  test("uses the favorites on screen only for the first fetch after the page loads", async() => {
+    const fetchPage = createPageFetch(0);
+    const { remoteFavorites, scheduler } = setup({ fetchPage, firstPage: createPage(9) });
+    const runs = [
+      remoteFavorites.fetchAllExcept(new Set(["known"]), () => { }),
+      remoteFavorites.fetchAllExcept(new Set(["known"]), () => { })
+    ];
+
+    await advanceAndSettle(scheduler, SETTLE_TIME);
+    await Promise.all(runs);
+    expect(fetchPage).toHaveBeenCalledOnce();
+    expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 0);
   });
 
   describe("fetchAllExcept with known ids", () => {
@@ -204,6 +234,47 @@ describe("Rule34RemoteFavorites", () => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("malformed")));
 
       await expect(deliveredFor({ fetchPage }, KNOWN_IDS)).rejects.toThrow(Rule34Error);
+      expect(fetchPage).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("findRemoved", () => {
+    async function runFindRemoved(options: ClientOptions, storedIds: string[]): Promise<string[] | null> {
+      const { remoteFavorites, scheduler } = setup(options);
+      const found = remoteFavorites.findRemoved(storedIds);
+
+      await advanceAndSettle(scheduler, SETTLE_TIME);
+      return found;
+    }
+
+    test("finds the stored favorites the site no longer lists", async() => {
+      const site = createPage(0, FAVORITES_PER_PAGE);
+      const storedIds = idsOf(site);
+      const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(site.filter(post => post.id !== storedIds[3])));
+
+      expect(await runFindRemoved({ fetchPage }, storedIds)).toEqual([storedIds[3]]);
+    });
+
+    test("fetches the first page fresh instead of trusting the one on screen", async() => {
+      const fetchPage = createPageFetch(0);
+
+      expect(await runFindRemoved({ fetchPage, firstPage: createPage(9) }, ["page0-0"])).toEqual([]);
+      expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 0);
+    });
+
+    test("gives favorites fetches priority", async() => {
+      const { remoteFavorites, rule34, scheduler } = setup({ fetchPage: createPageFetch(0) });
+      const found = remoteFavorites.findRemoved(["page0-0"]);
+
+      await advanceAndSettle(scheduler, SETTLE_TIME);
+      expect(await found).toEqual([]);
+      expect(rule34.prioritized).toBe(1);
+    });
+
+    test("never retries a refused page", async() => {
+      const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
+
+      await expect(runFindRemoved({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledOnce();
     });
   });

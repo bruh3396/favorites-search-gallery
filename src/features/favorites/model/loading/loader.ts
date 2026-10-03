@@ -19,6 +19,7 @@ interface LoaderDependencies {
   collection: Collection;
   searcher: Searcher;
   scheduler: Scheduler;
+  onPlaceholderFilled: (favorite: Favorite) => void;
 }
 
 export class FavoritesLoader {
@@ -29,8 +30,10 @@ export class FavoritesLoader {
   private readonly collection: Collection;
   private readonly searcher: Searcher;
   private readonly searcherUpdater: CoalescingExecutor<TermUpdate<Favorite>>;
+  private readonly onPlaceholderFilled: (favorite: Favorite) => void;
 
   constructor(dependencies: LoaderDependencies) {
+    this.onPlaceholderFilled = dependencies.onPlaceholderFilled;
     this.remoteFavorites = dependencies.remoteFavorites;
     this.localFavorites = dependencies.localFavorites;
     this.localTagCategories = dependencies.localTagCategories;
@@ -100,11 +103,16 @@ export class FavoritesLoader {
       return;
     }
     const oldTags = new Set(favorite.tags);
+    const wasPlaceholder = favorite.media.locator === "";
 
     favorite.enrich(post);
 
     if (oldTags.symmetricDifference(favorite.tags).size > 0) {
       this.searcherUpdater.schedule({ doc: favorite, oldTerms: oldTags, newTerms: favorite.tags });
+    }
+
+    if (wasPlaceholder && favorite.media.locator !== "") {
+      this.onPlaceholderFilled(favorite);
     }
   }
 }

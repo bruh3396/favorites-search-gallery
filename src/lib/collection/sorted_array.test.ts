@@ -1,9 +1,9 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { SortedArray } from "@/lib/collection/sorted_array";
 import { randomInt } from "@/utils/pure/number";
 
-const random = new MemoryRandom([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 0.8, 0.5]);
+const randomSource = new MemoryRandomSource([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 0.8, 0.5]);
 
 function expectSortedOrder<T extends string | number>(sortedArray: SortedArray<T>): void {
   const array = sortedArray.toArray();
@@ -30,7 +30,7 @@ describe("SortedArray", () => {
     const unsortedArray: number[] = [];
 
     for (let i = 0; i < 500; i += 1) {
-      const num = randomInt(random, 1_000);
+      const num = randomInt(randomSource, 1_000);
 
       sortedArray.add(num);
       unsortedArray.push(num);

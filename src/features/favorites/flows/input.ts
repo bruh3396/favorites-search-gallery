@@ -68,14 +68,14 @@ export class FavoritesInputFlow extends FavoritesFlow {
   }
 
   private openPost(id: string): void {
-    this.context.ports.navigation.openInNewTab(this.context.ports.navigation.postUrl(id));
+    this.context.ports.navigator.open(this.context.ports.remotePages.postUrl(id));
   }
 
   private openOriginal(id: string): void {
     const favorite = this.model.getFavorite(id);
 
     if (favorite !== undefined) {
-      this.context.ports.remoteMedia.resolveOriginalUrl(favorite.media).then(url => this.context.ports.navigation.openInNewTab(url));
+      this.context.ports.remoteMedia.resolveOriginalUrl(favorite.media).then(url => this.context.ports.navigator.open(url));
     }
   }
 

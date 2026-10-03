@@ -4,6 +4,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
+import { FavoritesModelCallbacks } from "@/features/favorites/types/types";
 import { FavoritesPostLibrary } from "@/features/favorites/model/posts/library";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites";
@@ -20,13 +21,20 @@ export class FavoritesModel {
   private readonly remoteFavorites: RemoteFavorites;
   private readonly localFavorites: LocalFavorites;
 
-  constructor(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void) {
+  constructor(context: AppContext, { onSearchResultsChanged, onPlaceholderFilled }: FavoritesModelCallbacks) {
     const { remoteFavorites, remotePosts, remoteMedia, localFavorites, localPosts, localTagCategories, scheduler } = context.ports;
 
     this.remoteFavorites = remoteFavorites;
     this.localFavorites = localFavorites;
     this.collection = new FavoritesCollection();
-    this.searcher = new FavoritesSearcher(context.preferences, context.environment, context.ports.random, onSearchResultsChanged);
+    this.searcher = new FavoritesSearcher({
+      userIsOnTheirOwnFavoritesPage: context.environment.ownsFavorites,
+      blacklistedTags: context.environment.blacklistedTags
+    }, {
+      preferences: context.preferences,
+      randomSource: context.ports.randomSource,
+      onSearchResultsChanged
+    });
     this.loader = new FavoritesLoader({
       remoteFavorites,
       localFavorites,
@@ -40,7 +48,8 @@ export class FavoritesModel {
       }),
       collection: this.collection,
       searcher: this.searcher,
-      scheduler
+      scheduler,
+      onPlaceholderFilled
     });
     this.paginator = new Paginator<Favorite>(
       { nearbyPageCount: FavoritesConfig.nearbyPageCount },
@@ -120,12 +129,12 @@ export class FavoritesModel {
     return this.searcher.shuffleSearchResults();
   }
 
-  public destroyStore(): Promise<void> {
-    return this.localFavorites.clear();
+  public async findUnfavoritedIds(): Promise<string[] | null> {
+    return this.remoteFavorites.findRemoved(await this.localFavorites.getAll());
   }
 
-  public deleteStoredFavorite(id: string): Promise<void> {
-    return this.localFavorites.remove(id);
+  public deleteStoredFavorites(ids: string[]): Promise<void> {
+    return this.localFavorites.remove(ids);
   }
 
   public storeFavorites(favorites: Favorite[]): Promise<void> {

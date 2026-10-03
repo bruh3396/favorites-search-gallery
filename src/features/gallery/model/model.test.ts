@@ -2,16 +2,17 @@ import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { describe, expect, test, vi } from "vitest";
 import { GalleryModel } from "@/features/gallery/model/model";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
-import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { PostMedia } from "@/core/domain/post/post";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { UpscaleQuality } from "@/types/app";
 import { createPreferences } from "@/testing/preferences";
 
 interface Setup {
   model: GalleryModel;
   items: PostMedia[];
-  navigation: MemoryNavigation;
+  navigator: MemoryNavigator;
   remoteFavorites: { add: ReturnType<typeof vi.fn<RemoteFavorites["add"]>>; remove: ReturnType<typeof vi.fn<RemoteFavorites["remove"]>> };
   blobsRequested: Media[];
 }
@@ -35,22 +36,27 @@ function createModel(previewEnabled = false): GalleryModel {
 }
 
 function setupWith(previewEnabled: boolean): Omit<Setup, "items"> {
-  const navigation = new MemoryNavigation();
+  const navigator = new MemoryNavigator();
   const remoteFavorites = {
     add: vi.fn<RemoteFavorites["add"]>((): Promise<AddFavoriteResult> => Promise.resolve("alreadyAdded")),
     remove: vi.fn<RemoteFavorites["remove"]>((): Promise<RemoveFavoriteResult> => new Promise(() => { }))
   };
   const blobsRequested: Media[] = [];
-  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), navigation, remoteFavorites, createRemoteMedia(blobsRequested));
-  return { model, navigation, remoteFavorites, blobsRequested };
+  const model = new GalleryModel(createPreferences({ gallery: { previewEnabled } }), {
+    navigator,
+    remotePages: new MemoryRemotePages(),
+    remoteFavorites,
+    remoteMedia: createRemoteMedia(blobsRequested)
+  });
+  return { model, navigator, remoteFavorites, blobsRequested };
 }
 
 function setup(...ids: string[]): Setup {
-  const { model, navigation, remoteFavorites, blobsRequested } = setupWith(false);
+  const { model, navigator, remoteFavorites, blobsRequested } = setupWith(false);
   const items = ids.map(id => createItem(id));
 
   model.indexItems(items);
-  return { model, items, navigation, remoteFavorites, blobsRequested };
+  return { model, items, navigator, remoteFavorites, blobsRequested };
 }
 
 describe("GalleryModel", () => {
@@ -161,12 +167,12 @@ describe("GalleryModel", () => {
     });
 
     test("opens the current item's post and original", async() => {
-      const { model, items, navigation } = setup("101");
+      const { model, items, navigator } = setup("101");
 
       model.open(items[0]);
       model.openPost();
       await model.openOriginal();
-      expect(navigation.opened).toEqual(["#post-101", "original:1/101.png"]);
+      expect(navigator.opened).toEqual(["#post-101", "original:1/101.png"]);
     });
 
     test("downloads the current item's original", () => {

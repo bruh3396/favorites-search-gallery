@@ -33,6 +33,10 @@ describe("FilesystemRemoteFavorites", () => {
     expect(await missingIdsFor(createRemoteFavorites(["1", 1], ["2", 2], ["3", 3]), new Set(["2"]))).toEqual(["3", "1"]);
   });
 
+  test("finds the stored ids that have no post file, in stored order", async() => {
+    expect(await createRemoteFavorites(["3", 3], ["1", 1]).findRemoved(["4", "3", "2", "1"])).toEqual(["4", "2"]);
+  });
+
   test("removing deletes the post's file", async() => {
     const filesystem = { readPostFiles: vi.fn(), countPostFiles: vi.fn(), deletePostFile: vi.fn(() => Promise.resolve()) };
 

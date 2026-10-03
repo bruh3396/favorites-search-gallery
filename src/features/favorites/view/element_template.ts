@@ -3,8 +3,15 @@ import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { Favorite } from "@/types/favorite";
 import { Media } from "@/core/domain/media/media";
+import { Post } from "@/core/domain/post/post";
 import { doNothing } from "@/utils/pure/function";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
+
+const PLACEHOLDER_ASPECT_RATIO = "1 / 1";
+
+function calculateAspectRatio({ width, height }: Pick<Post, "width" | "height">): string {
+  return width > 0 && height > 0 ? `${width} / ${height}` : "";
+}
 
 export interface FavoritesElementTemplateConfiguration {
   galleryRunning: boolean;
@@ -53,13 +60,19 @@ export class FavoritesElementTemplate {
     const container = root.children[0] as HTMLAnchorElement;
     const image = container.children[0] as HTMLImageElement;
 
+    const isPlaceholder = favorite.media.locator === "";
+
     image.removeAttribute("src");
-    image.style.aspectRatio = post.width > 0 && post.height > 0 ? `${post.width} / ${post.height}` : "";
+    image.style.aspectRatio = isPlaceholder ? PLACEHOLDER_ASPECT_RATIO : calculateAspectRatio(post);
     setDataset(root, "mediaKind", favorite.media.kind);
     root.id = favorite.id;
     stampActionBarId(root);
     toggleDataset(root, "newBadge", favorite.isNew);
-    this.showPreview(root, image, favorite);
+    toggleDataset(root, "loading", true);
+
+    if (!isPlaceholder) {
+      this.showPreview(root, image, favorite);
+    }
 
     if (this.linksToPostPage) {
       container.href = this.postUrl(root.id);
@@ -80,7 +93,6 @@ export class FavoritesElementTemplate {
   }
 
   private async showPreview(root: HTMLElement, image: HTMLImageElement, favorite: Favorite): Promise<void> {
-    toggleDataset(root, "loading", true);
     const url = await this.resolvePreviewUrl(favorite.media);
 
     if (root.id !== favorite.id) {

@@ -32,7 +32,7 @@ function idsOf(favorites: Favorite[]): string[] {
 }
 
 function createModel(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void = (): void => { }): FavoritesModel {
-  return new FavoritesModel(context, onSearchResultsChanged);
+  return new FavoritesModel(context, { onSearchResultsChanged, onPlaceholderFilled: () => { } });
 }
 
 async function store(context: AppContext, posts: Post[]): Promise<void> {
@@ -91,20 +91,19 @@ describe("FavoritesModel", () => {
       expect((await model.getTagsForIds(["2"])).get("2")).toEqual(new Set(["banana"]));
     });
 
-    test("deletes one stored favorite", async() => {
-      const { model } = await setup(createFavoritePosts("apple", "1", "2"));
+    test("deletes stored favorites but keeps their posts", async() => {
+      const { context, model } = await setup(createFavoritePosts("apple", "1", "2", "3"));
 
-      await model.deleteStoredFavorite("1");
+      await model.deleteStoredFavorites(["1", "3"]);
       expect(await model.loadFavoriteIds()).toEqual(["2"]);
+      expect(await context.ports.localPosts.getMany(["1", "3"])).toHaveLength(2);
     });
 
-    test("destroys the stored favorites but keeps their posts", async() => {
-      const { context, model } = await setup(createFavoritePosts("apple", "1"));
+    test("finds the stored favorites the site no longer lists", async() => {
+      const context = createContext(100, createFavoritePosts("apple", "2"));
+      const { model } = await setup(createFavoritePosts("apple", "1", "2", "3"), undefined, undefined, context);
 
-      await model.destroyStore();
-
-      expect(await createModel(context).countStoredFavorites()).toBe(0);
-      expect(await context.ports.localPosts.getMany(["1"])).toHaveLength(1);
+      expect((await model.findUnfavoritedIds())?.sort()).toEqual(["1", "3"]);
     });
 
     test("compressing keeps every favorite readable", async() => {

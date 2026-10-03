@@ -14,6 +14,10 @@ function createFavorite(id: string): Favorite {
   return { id, media: { kind: "image", locator: `1/${id}.png` }, isNew: false, post: { width: 100, height: 200 } } as unknown as Favorite;
 }
 
+function createPlaceholderFavorite(id: string): Favorite {
+  return { id, media: { kind: "image", locator: "" }, isNew: false, post: { width: 0, height: 0 } } as unknown as Favorite;
+}
+
 function setup(): Setup {
   const decodes: { resolve: () => void; reject: (error: Error) => void }[] = [];
 
@@ -76,6 +80,28 @@ describe("FavoritesElementTemplate", () => {
     await flushMicrotasks();
     expect(thumb.dataset.loading).toBeDefined();
     expect(image.getAttribute("src")).toBe("preview:1/2.png");
+  });
+
+  test("shows a square skeleton without a preview for a post that hasn't arrived", async() => {
+    const { template, thumb, image } = setup();
+
+    template.bindThumb(thumb, createPlaceholderFavorite("1"), false);
+    await flushMicrotasks();
+
+    expect(thumb.dataset.loading).toBeDefined();
+    expect(image.style.aspectRatio).toBe("1 / 1");
+    expect(image.hasAttribute("src")).toBe(false);
+  });
+
+  test("shows the preview once a placeholder's post has arrived", async() => {
+    const { template, thumb, image } = setup();
+
+    template.bindThumb(thumb, createPlaceholderFavorite("1"), false);
+    template.bindThumb(thumb, createFavorite("1"), false);
+    await flushMicrotasks();
+
+    expect(image.style.aspectRatio).toBe("100 / 200");
+    expect(image.getAttribute("src")).toBe("preview:1/1.png");
   });
 
   test("never gives a preview an empty source or a broken-image icon", () => {

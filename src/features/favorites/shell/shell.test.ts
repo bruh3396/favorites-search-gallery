@@ -11,7 +11,7 @@ interface Setup {
 function setup(): Setup {
   const environment = createEnvironment({ version: "9.9.9" });
   const appShell = new Shell();
-  return { appShell, shell: new FavoritesShell(appShell, environment) };
+  return { appShell, shell: new FavoritesShell(environment, appShell) };
 }
 
 function slotsOf(shell: FavoritesShell): HTMLElement[] {

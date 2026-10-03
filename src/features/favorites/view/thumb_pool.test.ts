@@ -162,6 +162,37 @@ describe("FavoritesThumbPool", () => {
     });
   });
 
+  describe("rebind", () => {
+    test("redraws the visible node of a favorite, keeping its favorited state", () => {
+      const [node] = pool.resolve(createFavorites("1"));
+      const redrawn = { id: "1" } as Favorite;
+      const bound: Favorite[] = [];
+
+      pool.setFavorited("1", true);
+      ops.bind = (_node, favorite, favorited): void => {
+        bound.push(favorite);
+        node.favorited = favorited;
+      };
+      pool.rebind(redrawn);
+
+      expect(bound).toEqual([redrawn]);
+      expect(node.favorited).toBe(true);
+    });
+
+    test("does nothing for a favorite not on the current page", () => {
+      pool.resolve(createFavorites("1"));
+      pool.resolve(createFavorites("2"));
+      const bound: string[] = [];
+
+      ops.bind = (_node, favorite): void => {
+        bound.push(favorite.id);
+      };
+      pool.rebind({ id: "1" } as Favorite);
+
+      expect(bound).toEqual([]);
+    });
+  });
+
   describe("reclaim", () => {
     test("drops retained nodes beyond the cap, forcing re-creation on grow-back", () => {
       const capped = new FavoritesThumbPool({ maxRetained: 3, defaultFavorited: false }, ops);

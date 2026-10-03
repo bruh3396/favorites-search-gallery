@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Identifiable } from "@/types/app";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { ObservableList } from "@/lib/collection/observable_list";
 
 const createItem = (id: string): Identifiable => ({ id });
@@ -44,7 +44,7 @@ describe("ObservableList", () => {
   describe("shuffle", () => {
     test("keeps the same set of results", () => {
       results.set(createItems("1", "2", "3"));
-      expect(idsOf(results.shuffle(new MemoryRandom())).sort()).toEqual(["1", "2", "3"]);
+      expect(idsOf(results.shuffle(new MemoryRandomSource())).sort()).toEqual(["1", "2", "3"]);
     });
 
     test("notifies the onChanged listener", () => {
@@ -53,7 +53,7 @@ describe("ObservableList", () => {
       results = new ObservableList<Identifiable>(onChanged);
       results.set(createItems("1"));
       onChanged.mockClear();
-      results.shuffle(new MemoryRandom());
+      results.shuffle(new MemoryRandomSource());
       expect(onChanged).toHaveBeenCalledTimes(1);
     });
   });

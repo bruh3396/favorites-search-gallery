@@ -47,10 +47,10 @@ export class FavoritesView {
     this.onContentReplaced = doNothing;
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
-    this.linkSuppressor = new FavoritesLinkSuppressor(id => ports.navigation.postUrl(id));
+    this.linkSuppressor = new FavoritesLinkSuppressor(id => ports.remotePages.postUrl(id));
     this.skeleton = new FavoritesSkeleton(
       { layout: this.getLayout() },
-      { store: ports.localKeyedValues, random: ports.random }
+      { store: ports.localKeyedValues, randomSource: ports.randomSource }
     );
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot, ports.scheduler);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
@@ -60,7 +60,7 @@ export class FavoritesView {
       linksToPostPage,
       userIsOnTheirOwnFavoritesPage: context.environment.ownsFavorites
     }, {
-      postUrl: (id): string => ports.navigation.postUrl(id),
+      postUrl: (id): string => ports.remotePages.postUrl(id),
       resolvePreviewUrl: (media): Promise<string> => ports.remoteMedia.resolvePreviewUrl(media)
     });
     this.thumbPool = this.createThumbPool();
@@ -93,6 +93,10 @@ export class FavoritesView {
   public addToBottom(favorites: Favorite[]): void {
     this.contentTiler.addToBottom(this.thumbPool.resolveAppended(favorites));
     this.onContentAdded(favorites);
+  }
+
+  public redrawThumb(favorite: Favorite): void {
+    this.thumbPool.rebind(favorite);
   }
 
   public setFavorited(id: string, favorited: boolean): void {

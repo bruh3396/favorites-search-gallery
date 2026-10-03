@@ -20,7 +20,7 @@ interface Setup {
 function setup(storage = new MemoryLocalKeyedValues()): Setup {
   const environment = createEnvironment();
   const appShell = new Shell();
-  const shell = new FavoritesShell(appShell, environment);
+  const shell = new FavoritesShell(environment, appShell);
   const events = createEvents();
   const searched: string[] = [];
   const postLists: string[] = [];

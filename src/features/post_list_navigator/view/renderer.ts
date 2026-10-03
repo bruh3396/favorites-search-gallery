@@ -1,6 +1,6 @@
 import { ContentTiler } from "@/app/layout/content_tiler";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
-import { postListPageOffset } from "@/adapters/rule34/client/site/post_list_page/fetcher";
+import { postListPageOffset } from "@/adapters/rule34/client/post_list_page";
 
 export function render(contentTiler: ContentTiler, postList: PostList): void {
   contentTiler.tile(postList.thumbs);

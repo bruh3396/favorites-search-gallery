@@ -27,4 +27,11 @@ describe("MemoryClient", () => {
     expect(client.readPost("1")?.tags).toBe("apple");
     expect(client.readPost("2")).toBeUndefined();
   });
+
+  test("reads every post it holds, favorite or not, in order", () => {
+    const client = new MemoryClient(["2", "1"].map(id => createPost({ id })));
+
+    client.removeFavorite("2");
+    expect(client.readPosts().map(post => post.id)).toEqual(["2", "1"]);
+  });
 });

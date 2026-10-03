@@ -1,7 +1,7 @@
 import { ITEM_CLASS_NAME, RAW_THUMB_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
-import { mintMedia } from "@/adapters/rule34/client/media/locator";
+import { mintMedia } from "@/adapters/rule34_cdn/client/locator";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
 import { removeNonNumericCharacters } from "@/utils/pure/string";
 import { setDataset } from "@/utils/browser/dataset";
@@ -35,7 +35,8 @@ function moveTagsFromTitleToTagsAttribute(thumb: HTMLElement): void {
 
 function assignMedia(thumb: HTMLElement): void {
   const image = getImageFromThumb(thumb);
-  const media = image === null ? null : mintMedia(image.src || (image.getAttribute("data-cfsrc") ?? ""), image.getAttribute("tags") ?? "");
+  const url = image?.src || (image?.getAttribute("data-cfsrc") ?? "");
+  const media = image === null ? null : mintMedia({ url, tags: image.getAttribute("tags") ?? "" });
 
   if (media !== null) {
     setDataset(thumb, "mediaKind", media.kind);

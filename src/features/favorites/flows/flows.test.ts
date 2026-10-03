@@ -9,6 +9,8 @@ import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
@@ -19,18 +21,34 @@ const FRUITS: Record<string, string> = { "1": "apple", "2": "banana", "3": "appl
 let pageCounter = 0;
 
 function createContext(...remoteIds: string[]): AppContext {
+  const remote = new MemoryClient(remoteIds.map(createFruitPost));
+  return createContextFor(new MemoryRemoteFavorites(remote), new MemoryRemotePosts(remote));
+}
+
+function createRefusingContext(): AppContext {
+  const remote = new MemoryClient([]);
+  const remoteFavorites = new MemoryRemoteFavorites(remote);
+
+  remoteFavorites.fetchAllExcept = (): Promise<void> => Promise.reject(new Error("refused"));
+  return createContextFor(remoteFavorites, new MemoryRemotePosts(remote));
+}
+
+function createContextFor(remoteFavorites: RemoteFavorites, remotePosts: RemotePosts): AppContext {
   pageCounter += 1;
   const id = `flows_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesOwnerId: id });
   const shell = new Shell();
-  const remote = new MemoryClient(remoteIds.map(createFruitPost));
 
   document.body.append(shell.root);
-  return createAppContext({ environment, preferences: { favorites: { layout: "grid" } }, shell, ports: { remoteFavorites: new MemoryRemoteFavorites(remote), remotePosts: new MemoryRemotePosts(remote) } });
+  return createAppContext({ environment, preferences: { favorites: { layout: "grid" } }, shell, ports: { remoteFavorites, remotePosts } });
+}
+
+function loadedFor(context: AppContext): boolean {
+  return context.milestones.favorites.favoritesLoaded.reached;
 }
 
 function createModel(context: AppContext): FavoritesModel {
-  return new FavoritesModel(context, () => { });
+  return new FavoritesModel(context, { onSearchResultsChanged: () => { }, onPlaceholderFilled: () => { } });
 }
 
 function createFruitPost(id: string): Post {
@@ -43,7 +61,7 @@ async function store(context: AppContext, ...ids: string[]): Promise<void> {
 }
 
 function setup(context: AppContext): FavoritesFlows {
-  const shell = new FavoritesShell(context.shell, context.environment);
+  const shell = new FavoritesShell(context.environment, context.shell);
   const view = new FavoritesView({ linksToPostPage: false }, { context, shell });
 
   view.setup({ onContentReplaced: () => { }, onContentAdded: () => { } });
@@ -76,6 +94,13 @@ describe("FavoritesFlows", () => {
       expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
     });
 
+    test("finishes loading without storing membership when the site refuses favorites", async() => {
+      const context = createRefusingContext();
+
+      await setup(context).load.loadAllFavorites();
+      expect(loadedFor(context)).toBe(true);
+      expect(await storedIdsFor(context)).toEqual([]);
+    });
   });
 
   describe("loading with favorites stored", () => {
@@ -96,6 +121,15 @@ describe("FavoritesFlows", () => {
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(newIdsOf(context)).toEqual(["3"]);
       expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
+    });
+
+    test("still shows and finishes loading the stored favorites when the site refuses new ones", async() => {
+      const context = createRefusingContext();
+
+      await store(context, "1", "2");
+      await setup(context).load.loadAllFavorites();
+      expect(idsOf(context)).toEqual(["1", "2"]);
+      expect(loadedFor(context)).toBe(true);
     });
   });
 });

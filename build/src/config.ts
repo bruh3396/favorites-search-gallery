@@ -8,8 +8,8 @@ import { resolveScriptVersion } from "./version";
 
 const SCRIPT_VERSION = resolveScriptVersion();
 
-export const OUT_FILE = "dist/favorites_search_gallery.js";
-export const META_FILE = "dist/meta.json";
+export const OUT_FILE = "dist/userscript/favorites_search_gallery.js";
+export const META_FILE = "dist/userscript/meta.json";
 export const BUILD_OPTIONS: BuildOptions = {
   entryPoints: ["src/targets/userscript/main.ts"],
   bundle: true,

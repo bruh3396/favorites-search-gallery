@@ -1,11 +1,11 @@
 import { RetryPolicy, retry } from "@/core/utils/async/retry";
 import { describe, expect, test, vi } from "vitest";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { advanceAndSettle } from "@/testing/async";
 
 function createPolicy(scheduler: MemoryScheduler, isRetryable: (error: unknown) => boolean = () => true): RetryPolicy {
-  return { attempts: 3, baseDelay: 100, scheduler, random: new MemoryRandom([1]), isRetryable };
+  return { attempts: 3, baseDelay: 100, scheduler, randomSource: new MemoryRandomSource([1]), isRetryable };
 }
 
 describe("retry", () => {

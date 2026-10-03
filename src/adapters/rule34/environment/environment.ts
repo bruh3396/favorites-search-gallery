@@ -1,13 +1,13 @@
 import { AppMode, HostEnvironment } from "@/core/boundary/environment";
-import { Rule34PageName } from "@/adapters/rule34/client/site/current_page/current_page";
-import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
+import { Rule34Client } from "@/adapters/rule34/client/client";
+import { Rule34PageName } from "@/adapters/rule34/client/current_page";
 
 const MODES: Record<Rule34PageName, AppMode> = {
   favorites: "favorites",
   postList: "postList"
 };
 
-export function readRule34Environment(rule34: Pick<Rule34SiteClient,
+export function readRule34Environment(rule34: Pick<Rule34Client,
   "readPageName" | "readUserId" | "readFavoritesPageId" | "readTagBlacklist" | "readTheme">): HostEnvironment | null {
   const pageName = rule34.readPageName();
 

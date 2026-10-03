@@ -1,3 +1,4 @@
+import { Guard, sameKindAs } from "@/core/utils/guards/guards";
 import { Emitter } from "@/lib/event/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
 import { Signal } from "@/core/utils/reactive/signal";
@@ -8,20 +9,28 @@ export interface Preference<T> {
   on: (listener: (value: T) => void) => () => void;
 }
 
-export type Guard<T> = (raw: unknown) => raw is T;
+export interface StoredPreferenceConfiguration<T> {
+  key: string;
+  defaultValue: T;
+}
+
+export interface StoredPreferenceDependencies<T> {
+  store: LocalKeyedValues;
+  accepts?: Guard<T>;
+}
 
 export class StoredPreference<T> implements Preference<T> {
+  private readonly store: LocalKeyedValues;
+  private readonly key: string;
   private readonly current: Signal<T>;
   private readonly changed = new Emitter<T>();
 
-  constructor(
-    private readonly store: LocalKeyedValues,
-    private readonly key: string,
-    defaultValue: T,
-    accepts: Guard<T> = sameKindAs(defaultValue)
-  ) {
+  constructor({ key, defaultValue }: StoredPreferenceConfiguration<T>, dependencies: StoredPreferenceDependencies<T>) {
+    const { store, accepts = sameKindAs(defaultValue) } = dependencies;
     const stored = store.get(key);
 
+    this.store = store;
+    this.key = key;
     this.current = new Signal(accepts(stored) ? stored : defaultValue);
     this.set = this.set.bind(this);
     this.on = this.on.bind(this);
@@ -45,10 +54,6 @@ export class StoredPreference<T> implements Preference<T> {
   }
 }
 
-export function oneOf<T>(values: readonly T[]): Guard<T> {
-  return (raw): raw is T => values.includes(raw as T);
-}
-
 export function booleanPreference<T>(source: Preference<T>, trueValue: T, falseValue: T): Preference<boolean> {
   const read = (): boolean => source.value === trueValue;
   return {
@@ -57,26 +62,15 @@ export function booleanPreference<T>(source: Preference<T>, trueValue: T, falseV
     },
     set: (value: boolean): void => source.set(value ? trueValue : falseValue),
     on: (listener: (value: boolean) => void): (() => void) => {
-      let last = read();
+      let wasTrue = read();
       return source.on(() => {
-        const next = read();
+        const isTrue = read();
 
-        if (next !== last) {
-          last = next;
-          listener(next);
+        if (isTrue !== wasTrue) {
+          wasTrue = isTrue;
+          listener(isTrue);
         }
       });
     }
   };
-}
-
-function sameKindAs<T>(defaultValue: T): Guard<T> {
-  return (raw): raw is T => kindOf(raw) === kindOf(defaultValue);
-}
-
-function kindOf(value: unknown): string {
-  if (value === null) {
-    return "null";
-  }
-  return Array.isArray(value) ? "array" : typeof value;
 }

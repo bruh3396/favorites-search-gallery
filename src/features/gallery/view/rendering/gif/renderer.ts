@@ -1,10 +1,13 @@
-import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { PostMedia } from "@/core/domain/post/post";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { Renderer } from "@/features/gallery/types/types";
 import { createElement } from "@/utils/browser/element";
 import { isGif } from "@/lib/media/media_type";
+
+export interface GalleryGifRendererConfiguration {
+  preloadedGifCount: number;
+}
 
 export class GalleryGifRenderer implements Renderer {
   public readonly root: HTMLDivElement;
@@ -13,8 +16,11 @@ export class GalleryGifRenderer implements Renderer {
   private readonly preloadedGifCount: number;
   private shownId: string | undefined;
 
-  constructor(environment: Environment, private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">) {
-    this.preloadedGifCount = environment.device === "mobile" ? GalleryConfig.preloadedGifCount.mobile : GalleryConfig.preloadedGifCount.desktop;
+  constructor(
+    configuration: GalleryGifRendererConfiguration,
+    private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">
+  ) {
+    this.preloadedGifCount = configuration.preloadedGifCount;
     this.gif = createElement("img", {className: "gallery-image"});
     this.root = createElement("div", { id: "gif-container", className: "gallery-image-frame", children: [this.gif] });
   }

@@ -6,12 +6,12 @@ export const MESSAGES = {
   rule24: "rule 24: core reaches storage only through a port",
   rule25: "rule 25: core reads and waits on time only through the Scheduler port",
   rule26: "rule 26: core reads the host page and browser only through a port",
-  rule27: "rule 27: core draws randomness only through the Random port",
+  rule27: "rule 27: core draws randomness only through the RandomSource port",
   rule28: "rule 28: core opens dialogs only through a port",
   rule29: "rule 29: core reaches files only through a port",
   rule29b: "rule 29: only view/ and core/ui create object URLs, to render a Blob they hold",
   rule30: "rule 30: only targets and adapter clients use the userscript manager's APIs",
-  rule31: "rule 31: core opens windows only through Navigation or HostPage",
+  rule31: "rule 31: core opens windows only through the Navigator or HostPage port",
   rule33: "rule 33: flows/, types/, and the feature entry never touch document or window; go through the view facade",
   rule35: "rule 35: core reaches the page only through the root it is handed; create elements with root.ownerDocument, take window input from a port"
 };

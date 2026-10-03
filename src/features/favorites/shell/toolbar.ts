@@ -1,12 +1,11 @@
 import { createElement, label, span } from "@/utils/browser/element";
-import { Environment } from "@/core/boundary/environment";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
 import { ShellPart } from "@/types/ui";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { icon } from "@/lib/ui/icon";
 
-export function build(environment: Environment): ShellPart<FavoritesToolbarSlots> {
+export function build(version: string): ShellPart<FavoritesToolbarSlots> {
   const slots: FavoritesToolbarSlots = {
     drawerToggle: span(FavoritesId.drawerToggleSlot),
     searchField: span(),
@@ -18,7 +17,7 @@ export function build(environment: Environment): ShellPart<FavoritesToolbarSlots
     loadStatus: label(FavoritesId.loadStatus),
     resultsCount: label(FavoritesId.resultsCount),
     aboutHelp: help(),
-    aboutVersion: version(environment)
+    aboutVersion: versionLabel(version)
   };
   const root = createElement("div", {
     id: FavoritesId.toolbar,
@@ -86,9 +85,9 @@ function help(): HTMLElement {
   return button;
 }
 
-function version(environment: Environment): HTMLElement {
+function versionLabel(version: string): HTMLElement {
   return createElement("span", {
     id: FavoritesId.aboutVersion,
-    textContent: `v${environment.version}`
+    textContent: `v${version}`
   });
 }

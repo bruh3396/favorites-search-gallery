@@ -18,7 +18,7 @@ export function createEvents() {
     favorites: {
       clearButtonClicked: new Emitter<MouseEvent>(),
       invertButtonClicked: new Emitter<MouseEvent>(),
-      resetButtonClicked: new Emitter<MouseEvent>(),
+      reconcileButtonClicked: new Emitter<MouseEvent>(),
       searchButtonClicked: new Emitter<MouseEvent>(),
       shuffleButtonClicked: new Emitter<MouseEvent>(),
       settingsResetRequested: new Emitter<void>(),

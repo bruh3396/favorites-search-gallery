@@ -1,19 +1,29 @@
 import { ALL_RATINGS, Rating, SearchableMetric, SortKey } from "@/types/search";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
-import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
-import { Random } from "@/core/boundary/ports/random";
+import { RandomSource } from "@/core/boundary/ports/random_source";
 import { Searcher } from "@/features/favorites/types/types";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
 import { negateTags } from "@/utils/pure/tag";
 import { shuffleInPlace } from "@/utils/pure/array";
+
+export interface FavoritesSearcherConfiguration {
+  userIsOnTheirOwnFavoritesPage: boolean;
+  blacklistedTags: string;
+}
+
+export interface FavoritesSearcherDependencies {
+  preferences: Preferences;
+  randomSource: RandomSource;
+  onSearchResultsChanged: (results: Favorite[]) => void;
+}
 
 export class FavoritesSearcher implements Searcher {
   private readonly engine: SearchEngine<Favorite>;
@@ -24,10 +34,10 @@ export class FavoritesSearcher implements Searcher {
   private readonly sortAscending: Preference<boolean>;
   private readonly userIsOnTheirOwnFavoritesPage: boolean;
   private readonly negatedBlacklistedTags: string;
-  private readonly random: Random;
+  private readonly randomSource: RandomSource;
   private currentSearchQuery: string;
 
-  constructor(preferences: Preferences, environment: Environment, random: Random, onSearchResultsChanged: (results: Favorite[]) => void) {
+  constructor(configuration: FavoritesSearcherConfiguration, { preferences, randomSource, onSearchResultsChanged }: FavoritesSearcherDependencies) {
     const termsFor = (favorite: Favorite): Set<string> => favorite.consumeTags();
     const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
 
@@ -37,9 +47,9 @@ export class FavoritesSearcher implements Searcher {
     this.allowedRatings = preferences.favorites.allowedRatings;
     this.sortKey = preferences.favorites.sortKey;
     this.sortAscending = preferences.favorites.sortAscending;
-    this.userIsOnTheirOwnFavoritesPage = environment.ownsFavorites;
-    this.negatedBlacklistedTags = negateTags(environment.blacklistedTags);
-    this.random = random;
+    this.userIsOnTheirOwnFavoritesPage = configuration.userIsOnTheirOwnFavoritesPage;
+    this.negatedBlacklistedTags = negateTags(configuration.blacklistedTags);
+    this.randomSource = randomSource;
     this.currentSearchQuery = "";
   }
 
@@ -96,7 +106,7 @@ export class FavoritesSearcher implements Searcher {
   }
 
   public shuffleSearchResults(): Favorite[] {
-    return this.results.shuffle(this.random);
+    return this.results.shuffle(this.randomSource);
   }
 
   private updateSearchResults(favorites: Favorite[]): Favorite[] {
@@ -134,7 +144,7 @@ export class FavoritesSearcher implements Searcher {
     const sortKey = this.sortKey.value;
 
     if (sortKey === "random") {
-      return shuffleInPlace(this.random, [...favorites]);
+      return shuffleInPlace(this.randomSource, [...favorites]);
     }
     const isAscending = this.sortAscending.value;
 

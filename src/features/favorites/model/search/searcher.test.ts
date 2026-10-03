@@ -3,8 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
-import { createEnvironment } from "@/testing/environment";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { createPreferences } from "@/testing/preferences";
 
 const RATINGS: Record<string, Rating> = { s: DiscreteRating.Safe, q: DiscreteRating.Questionable, e: DiscreteRating.Explicit };
@@ -48,12 +47,12 @@ describe.each([
         sortAscending: overrides.sortAscending ?? false
       }
     });
-    const environment = createEnvironment({
-      ownsFavorites: overrides.onOwnFavoritesPage ?? true,
+    const configuration = {
+      userIsOnTheirOwnFavoritesPage: overrides.onOwnFavoritesPage ?? true,
       blacklistedTags: "blacklisted"
-    });
+    };
 
-    searcher = new FavoritesSearcher(preferences, environment, new MemoryRandom(), onChanged);
+    searcher = new FavoritesSearcher(configuration, { preferences, randomSource: new MemoryRandomSource(), onSearchResultsChanged: onChanged });
     searcher.index(favorites);
   }
 

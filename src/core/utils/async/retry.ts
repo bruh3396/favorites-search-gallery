@@ -1,11 +1,11 @@
-import { Random } from "@/core/boundary/ports/random";
+import { RandomSource } from "@/core/boundary/ports/random_source";
 import { Scheduler } from "@/core/boundary/ports/scheduler";
 
 export interface RetryPolicy {
   attempts: number;
   baseDelay: number;
   scheduler: Scheduler;
-  random: Random;
+  randomSource: RandomSource;
   isRetryable: (error: unknown) => boolean;
 }
 
@@ -20,7 +20,7 @@ async function attempt<T>(task: () => Promise<T>, policy: RetryPolicy, count: nu
     if (count >= policy.attempts || !policy.isRetryable(error)) {
       throw error;
     }
-    await policy.scheduler.sleep(policy.random.next() * policy.baseDelay * (2 ** (count - 1)));
+    await policy.scheduler.sleep(policy.randomSource.next() * policy.baseDelay * (2 ** (count - 1)));
     return attempt(task, policy, count + 1);
   }
 }

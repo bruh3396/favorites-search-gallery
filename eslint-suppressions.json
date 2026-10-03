@@ -1,49 +1,11 @@
 {
-  "src/adapters/rule34/ports/remote_favorites/full_page_fetcher.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/adapters/rule34/ports/remote_favorites/incremental_page_fetcher.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/adapters/rule34/ports/remote_favorites/remote_favorites.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 2
-    }
-  },
-  "src/adapters/rule34/ports/remote_favorites/remote_favorites.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/app/context/context.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/app/context/dom_events.ts": {
     "@typescript-eslint/max-params": {
       "count": 1
     }
   },
-  "src/app/layout/fader.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/app/startup/features.ts": {
     "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/control/control.ts": {
-    "no-restricted-syntax": {
       "count": 1
     }
   },
@@ -173,27 +135,14 @@
       "count": 1
     }
   },
-  "src/features/favorites/model/search/searcher.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/favorites/types/types.ts": {
     "no-restricted-syntax": {
       "count": 2
     }
   },
   "src/features/favorites/view/element_template.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    },
     "no-restricted-syntax": {
-      "count": 5
-    }
-  },
-  "src/features/favorites/view/skeleton/skeleton.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
+      "count": 2
     }
   },
   "src/features/favorites/view/skeleton/skeleton_item.ts": {
@@ -208,16 +157,11 @@
   },
   "src/features/favorites/view/thumb_pool.ts": {
     "no-restricted-syntax": {
-      "count": 2
+      "count": 1
     }
   },
   "src/features/favorites/view/view.ts": {
     "no-restricted-syntax": {
-      "count": 2
-    }
-  },
-  "src/features/gallery/control/interaction_tracker.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
@@ -241,22 +185,12 @@
       "count": 1
     }
   },
-  "src/features/gallery/view/rendering/image/abstract_upscaler.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/gallery/view/rendering/image/renderer.ts": {
     "@typescript-eslint/max-params": {
       "count": 1
     }
   },
   "src/features/gallery/view/rendering/image/worker_upscaler.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/gallery/view/rendering/image/worker_upscaler_wrapper.ts": {
     "@typescript-eslint/max-params": {
       "count": 1
     }
@@ -291,11 +225,6 @@
       "count": 1
     }
   },
-  "src/lib/search/engines/set/indexes/inverted_index.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/lib/search/engines/set/indexes/relative_metric_index.ts": {
     "@typescript-eslint/max-params": {
       "count": 2
@@ -326,11 +255,6 @@
       "count": 1
     },
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/storage/preference.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },

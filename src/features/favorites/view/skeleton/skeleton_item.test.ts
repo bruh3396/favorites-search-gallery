@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, test } from "vitest";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/app";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 import { SkeletonConfig } from "@/config/skeleton_config";
 
 const DEFAULT_RANDOM_ANIMATION_TIMING = SkeletonConfig.randomAnimationTiming;
 
-function createItem(layout: Layout, aspectRatio?: string, random = new MemoryRandom()): HTMLElement {
-  return new FavoritesSkeletonItem(random, layout, aspectRatio, new SeededSequence()).element;
+function createItem(layout: Layout, aspectRatio?: string, randomSource = new MemoryRandomSource()): HTMLElement {
+  return new FavoritesSkeletonItem(randomSource, layout, aspectRatio, new SeededSequence()).element;
 }
 
 function sizeOf(element: HTMLElement): { width: number; height: number } {
@@ -39,8 +39,8 @@ describe("FavoritesSkeletonItem", () => {
     test.each<[number, "width" | "height", "width" | "height"]>([
       [0.2, "width", "height"],
       [0.8, "height", "width"]
-    ])("without one, maxes out one side and picks the other (random %f)", (random, maxed, picked) => {
-      const size = sizeOf(createItem("native", undefined, new MemoryRandom([random])));
+    ])("without one, maxes out one side and picks the other (random %f)", (randomSource, maxed, picked) => {
+      const size = sizeOf(createItem("native", undefined, new MemoryRandomSource([randomSource])));
 
       expect(size[maxed]).toBe(SkeletonConfig.discreteDimensionMax);
       expect(size[picked]).toBeGreaterThanOrEqual(SkeletonConfig.discreteDimensionMin);

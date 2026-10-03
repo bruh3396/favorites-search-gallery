@@ -31,7 +31,7 @@ export function createMultiSelect<T>(ownerDocument: Document, { options, onValue
     if (isLastPressed(pressed, index)) {
       return;
     }
-    onValueChange(options.filter((_, other) => other === index ? !pressed[other] : pressed[other]).map((option) => option.value));
+    onValueChange(options.filter((_, other) => (other === index ? !pressed[other] : pressed[other])).map((option) => option.value));
   };
 
   element.className = MultiSelectClass.root;

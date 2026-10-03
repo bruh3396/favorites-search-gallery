@@ -24,8 +24,10 @@ function createFavorite(post: Post): Favorite {
   const favorite = {
     id: post.id,
     tags: tagsOf(post),
+    media: post.media,
     enrich: (enriched: Post): void => {
       favorite.tags = tagsOf(enriched);
+      favorite.media = enriched.media;
     }
   };
   return favorite as unknown as Favorite;
@@ -63,6 +65,7 @@ async function setup(sources: { stored?: Post[]; remotePages?: Post[][]; stores?
   localTagCategories: MemoryLocalTagCategories;
   scheduler: MemoryScheduler;
   searcherUpdates: TermUpdate<Favorite>[][];
+  filledPlaceholders: string[];
 }> {
   const log: string[] = [];
   const stored = sources.stored ?? [];
@@ -102,10 +105,20 @@ async function setup(sources: { stored?: Post[]; remotePages?: Post[][]; stores?
       return favorites.slice(0, 1);
     }
   };
-  const loader = new FavoritesLoader({ remoteFavorites, localFavorites, localTagCategories, postLibrary, collection, searcher, scheduler });
+  const filledPlaceholders: string[] = [];
+  const loader = new FavoritesLoader({
+    remoteFavorites,
+    localFavorites,
+    localTagCategories,
+    postLibrary,
+    collection,
+    searcher,
+    scheduler,
+    onPlaceholderFilled: favorite => filledPlaceholders.push(favorite.id)
+  });
 
   await localFavorites.prepend(stored.map(post => post.id));
-  return { loader, log, collection, localFavorites, localTagCategories, scheduler, searcherUpdates };
+  return { loader, log, collection, localFavorites, localTagCategories, scheduler, searcherUpdates, filledPlaceholders };
 }
 
 function flushPromises(): Promise<void> {
@@ -246,6 +259,25 @@ describe("FavoritesLoader", () => {
       scheduler.advance(SEARCHER_UPDATE_DELAY);
 
       expect(searcherUpdates).toEqual([]);
+    });
+
+    test("reports a placeholder once its post arrives", async() => {
+      const { loader, filledPlaceholders } = await setup({ stored: [createPost({ id: "1", media: { kind: "image", locator: "" } })] });
+
+      await loader.streamStored(() => { });
+      loader.applyRefreshed({ post: createPost({ id: "1", media: { kind: "image", locator: "1/a.jpg" } }), tagCategories: new Map() });
+
+      expect(filledPlaceholders).toEqual(["1"]);
+    });
+
+    test("does not report a refreshed favorite that was never a placeholder", async() => {
+      const media = { kind: "image", locator: "1/a.jpg" } as const;
+      const { loader, filledPlaceholders } = await setup({ stored: [createPost({ id: "1", media })] });
+
+      await loader.streamStored(() => { });
+      loader.applyRefreshed({ post: createPost({ id: "1", media, score: 9 }), tagCategories: new Map() });
+
+      expect(filledPlaceholders).toEqual([]);
     });
 
     test("still stores the tag categories of a post no longer in the collection", async() => {

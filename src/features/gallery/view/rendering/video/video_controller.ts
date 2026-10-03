@@ -1,5 +1,3 @@
-import { Environment } from "@/core/boundary/environment";
-import { GalleryConfig } from "@/config/gallery_config";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media";
@@ -7,9 +5,20 @@ import { VideoClip } from "@/features/gallery/types/types";
 import { doNothing } from "@/utils/pure/function";
 import { isVideo } from "@/lib/media/media_type";
 
+export interface GalleryVideoControllerConfiguration {
+  preloadedVideoCount: number;
+  allowsNativeControls: boolean;
+}
+
+export interface GalleryVideoControllerDependencies {
+  preferences: Preferences;
+  remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">;
+}
+
 export class GalleryVideoController {
-  private readonly environment: Environment;
+  private readonly configuration: GalleryVideoControllerConfiguration;
   private readonly preferences: Preferences;
+  private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">;
   private readonly videoPlayers: HTMLVideoElement[] = [];
   // Empty until the clip feature lands; it will load clips (stored under
   // "storedVideoClips") through the LocalKeyedValues port.
@@ -18,9 +27,10 @@ export class GalleryVideoController {
   private onVideoEnded: () => void = doNothing;
   private onVolumeChanged: (volume: number) => void = doNothing;
 
-  constructor(preferences: Preferences, environment: Environment, private readonly remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">) {
-    this.preferences = preferences;
-    this.environment = environment;
+  constructor(configuration: GalleryVideoControllerConfiguration, dependencies: GalleryVideoControllerDependencies) {
+    this.configuration = configuration;
+    this.preferences = dependencies.preferences;
+    this.remoteMedia = dependencies.remoteMedia;
     this.videoContainer.id = "video-container-inner";
   }
 
@@ -135,9 +145,7 @@ export class GalleryVideoController {
 
     this.createVideoPlayer(volume, isMuted);
 
-    const preloadedVideoCount = this.environment.device === "mobile" ? GalleryConfig.preloadedVideoCount.mobile : GalleryConfig.preloadedVideoCount.desktop;
-
-    for (let i = 0; i < preloadedVideoCount; i += 1) {
+    for (let i = 0; i < this.configuration.preloadedVideoCount; i += 1) {
       this.createVideoPlayer(volume, isMuted);
     }
   }
@@ -292,7 +300,7 @@ export class GalleryVideoController {
   private toggleVideoControls(value: boolean): void {
     const video = this.getActiveVideoPlayer();
 
-    if (this.environment.device === "mobile") {
+    if (this.configuration.allowsNativeControls) {
       if (value) {
         video.setAttribute("controls", "");
       }

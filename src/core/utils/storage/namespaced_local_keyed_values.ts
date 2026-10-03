@@ -7,7 +7,7 @@ export class NamespacedLocalKeyedValues implements LocalKeyedValues {
   private readonly namespace: string;
   private entries: Entries;
 
-  constructor(inner: LocalKeyedValues, namespace: string) {
+  constructor(namespace: string, inner: LocalKeyedValues) {
     this.inner = inner;
     this.namespace = namespace;
     this.entries = this.readStored();

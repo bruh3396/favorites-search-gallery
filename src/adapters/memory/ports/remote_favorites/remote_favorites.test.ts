@@ -28,6 +28,10 @@ describe("MemoryRemoteFavorites", () => {
     expect(await missingIdsFor(createRemoteFavorites("3", "1", "2"), new Set(["1"]))).toEqual(["3", "2"]);
   });
 
+  test("finds the stored ids it no longer lists, in stored order", async() => {
+    expect(await createRemoteFavorites("3", "1").findRemoved(["4", "3", "2", "1"])).toEqual(["4", "2"]);
+  });
+
   test("removes a favorite from the list", async() => {
     const memory = new MemoryClient(["3", "1", "2"].map(id => createPost({ id })));
 

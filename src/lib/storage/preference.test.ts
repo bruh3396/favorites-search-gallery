@@ -1,10 +1,11 @@
-import { Guard, Preference, StoredPreference, booleanPreference, oneOf } from "@/lib/storage/preference";
+import { Guard, oneOf } from "@/core/utils/guards/guards";
+import { Preference, StoredPreference, booleanPreference } from "@/lib/storage/preference";
 import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { effect } from "@/core/utils/reactive/signal";
 
 function createPreference<T>(defaultValue: T, store = new MemoryLocalKeyedValues(), accepts?: Guard<T>): Preference<T> {
-  return new StoredPreference(store, "key", defaultValue, accepts);
+  return new StoredPreference({ key: "key", defaultValue }, { store, accepts });
 }
 
 function createStore(stored: unknown): MemoryLocalKeyedValues {

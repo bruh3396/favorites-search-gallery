@@ -1,4 +1,4 @@
-import { Random } from "@/core/boundary/ports/random";
+import { RandomSource } from "@/core/boundary/ports/random_source";
 
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
@@ -83,20 +83,20 @@ export function average(numbers: number[]): number {
   return numbers.length === 0 ? 0 : sum(numbers) / numbers.length;
 }
 
-export function randomInt(random: Random, max: number): number {
-  return Math.floor(random.next() * max);
+export function randomInt(randomSource: RandomSource, max: number): number {
+  return Math.floor(randomSource.next() * max);
 }
 
-export function randomIntInRange(random: Random, min: number, max: number): number {
-  return randomInt(random, max - min) + min;
+export function randomIntInRange(randomSource: RandomSource, min: number, max: number): number {
+  return randomInt(randomSource, max - min) + min;
 }
 
-export function randomFloatInRange(random: Random, min: number, max: number): number {
-  return min + (random.next() * (max - min));
+export function randomFloatInRange(randomSource: RandomSource, min: number, max: number): number {
+  return min + (randomSource.next() * (max - min));
 }
 
-export function randomBoolean(random: Random): boolean {
-  return random.next() < 0.5;
+export function randomBoolean(randomSource: RandomSource): boolean {
+  return randomSource.next() < 0.5;
 }
 
 export function seededFloat(seed: number): number {

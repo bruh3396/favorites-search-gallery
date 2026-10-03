@@ -18,17 +18,17 @@ import {
   toSeconds
 } from "@/utils/pure/number";
 import { describe, expect, test } from "vitest";
-import { MemoryRandom } from "@/adapters/memory/ports/random/random";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 
 describe("randomInt", () => {
   test("zero", () => {
-    expect(randomInt(new MemoryRandom([0.5]), 0)).toBe(0);
+    expect(randomInt(new MemoryRandomSource([0.5]), 0)).toBe(0);
   });
 
   test("spans [0, max)", () => {
-    expect(randomInt(new MemoryRandom([0]), 2_000)).toBe(0);
-    expect(randomInt(new MemoryRandom([0.5]), 2_000)).toBe(1_000);
-    expect(randomInt(new MemoryRandom([0.9999]), 2_000)).toBe(1_999);
+    expect(randomInt(new MemoryRandomSource([0]), 2_000)).toBe(0);
+    expect(randomInt(new MemoryRandomSource([0.5]), 2_000)).toBe(1_000);
+    expect(randomInt(new MemoryRandomSource([0.9999]), 2_000)).toBe(1_999);
   });
 });
 
@@ -85,13 +85,13 @@ describe("rescaleGeometric", () => {
 
 describe("randomIntInRange", () => {
   test("0 min max", () => {
-    expect(randomIntInRange(new MemoryRandom([0.5]), 0, 0)).toBe(0);
+    expect(randomIntInRange(new MemoryRandomSource([0.5]), 0, 0)).toBe(0);
   });
 
   test("spans [min, max)", () => {
-    expect(randomIntInRange(new MemoryRandom([0]), 10, 20)).toBe(10);
-    expect(randomIntInRange(new MemoryRandom([0.5]), 10, 20)).toBe(15);
-    expect(randomIntInRange(new MemoryRandom([0.9999]), 10, 20)).toBe(19);
+    expect(randomIntInRange(new MemoryRandomSource([0]), 10, 20)).toBe(10);
+    expect(randomIntInRange(new MemoryRandomSource([0.5]), 10, 20)).toBe(15);
+    expect(randomIntInRange(new MemoryRandomSource([0.9999]), 10, 20)).toBe(19);
   });
 });
 
@@ -179,12 +179,12 @@ describe("toSeconds", () => {
 
 describe("randomFloatInRange", () => {
   test("zero", () => {
-    expect(randomFloatInRange(new MemoryRandom([0.5]), 0, 0)).toBe(0);
+    expect(randomFloatInRange(new MemoryRandomSource([0.5]), 0, 0)).toBe(0);
   });
 
   test("scales into [min, max)", () => {
-    expect(randomFloatInRange(new MemoryRandom([0]), 10, 20)).toBe(10);
-    expect(randomFloatInRange(new MemoryRandom([0.25]), 10, 20)).toBe(12.5);
+    expect(randomFloatInRange(new MemoryRandomSource([0]), 10, 20)).toBe(10);
+    expect(randomFloatInRange(new MemoryRandomSource([0.25]), 10, 20)).toBe(12.5);
   });
 });
 
@@ -324,8 +324,8 @@ describe("roundDownToMultiple", () => {
 
 describe("randomBoolean", () => {
   test("splits at one half", () => {
-    expect(randomBoolean(new MemoryRandom([0.49]))).toBe(true);
-    expect(randomBoolean(new MemoryRandom([0.5]))).toBe(false);
+    expect(randomBoolean(new MemoryRandomSource([0.49]))).toBe(true);
+    expect(randomBoolean(new MemoryRandomSource([0.5]))).toBe(false);
   });
 });
 

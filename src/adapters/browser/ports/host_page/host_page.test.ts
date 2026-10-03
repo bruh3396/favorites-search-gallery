@@ -19,6 +19,22 @@ describe("BrowserHostPage", () => {
     expect(new BrowserHostPage().hasHeader).toBe(false);
   });
 
+  test("has no paginator or search page to reflect", () => {
+    const hostPage = new BrowserHostPage();
+
+    expect(() => {
+      hostPage.reflectSearchPage();
+      hostPage.setPaginatorVisible();
+    }).not.toThrow();
+  });
+
+  test("gives the app an element of its own at the end of the body", () => {
+    const content = new BrowserHostPage().claimContent();
+
+    expect(document.body.lastElementChild).toBe(content);
+    content.remove();
+  });
+
   test("adds a locked viewport when the page has none", () => {
     new BrowserHostPage().lockViewport();
     expect(getDocumentViewports().map(meta => meta.content)).toEqual([LOCKED]);

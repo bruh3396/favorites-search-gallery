@@ -14,13 +14,10 @@ export class MemoryLocalFavorites implements LocalFavorites {
     return Promise.resolve();
   }
 
-  public remove(postId: string): Promise<void> {
-    this.ids = this.ids.filter(id => id !== postId);
-    return Promise.resolve();
-  }
+  public remove(postIds: string[]): Promise<void> {
+    const removed = new Set(postIds);
 
-  public clear(): Promise<void> {
-    this.ids = [];
+    this.ids = this.ids.filter(id => !removed.has(id));
     return Promise.resolve();
   }
 }

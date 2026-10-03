@@ -16,7 +16,7 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
         this.context.events.app.favoriteAdded.emit(id);
       },
       onFavoriteRemoved: doNothing,
-      onPostOpened: (id) => this.context.ports.navigation.openInNewTab(this.context.ports.navigation.postUrl(id)),
+      onPostOpened: (id) => this.context.ports.navigator.open(this.context.ports.remotePages.postUrl(id)),
       onMediaDownloaded: (id) => this.download(id)
     });
   }

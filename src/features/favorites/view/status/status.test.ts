@@ -14,7 +14,7 @@ interface Setup {
 
 function setup(): Setup {
   const environment = createEnvironment();
-  const shell = new FavoritesShell(new Shell(), environment);
+  const shell = new FavoritesShell(environment, new Shell());
   const scheduler = new MemoryScheduler();
   return { status: new FavoritesStatus(shell.toolbar, shell.toolbarRoot, scheduler), shell, scheduler };
 }

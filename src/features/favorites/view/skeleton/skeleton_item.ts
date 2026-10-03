@@ -1,7 +1,7 @@
 import { randomBoolean, randomFloatInRange, randomIntInRange, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { Dimensions2D } from "@/types/geometry";
 import { Layout } from "@/types/app";
-import { Random } from "@/core/boundary/ports/random";
+import { RandomSource } from "@/core/boundary/ports/random_source";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 import { SkeletonConfig } from "@/config/skeleton_config";
 import { TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
@@ -10,19 +10,19 @@ import { toDimensions2D } from "@/utils/pure/geometry";
 export class FavoritesSkeletonItem {
   public readonly element: HTMLElement;
 
-  constructor(random: Random, layout: Layout, aspectRatio: string | undefined, fallbackAspectRatioHeights: SeededSequence) {
+  constructor(randomSource: RandomSource, layout: Layout, aspectRatio: string | undefined, fallbackAspectRatioHeights: SeededSequence) {
     this.element = document.createElement("div");
     this.element.className = `skeleton-item ${TILE_CLASS_NAME}`;
-    this.setSize(random, layout, aspectRatio, fallbackAspectRatioHeights);
-    this.configureAnimation(random);
+    this.setSize(randomSource, layout, aspectRatio, fallbackAspectRatioHeights);
+    this.configureAnimation(randomSource);
 
   }
 
-  private setSize(random: Random, layout: Layout, aspectRatio: string | undefined, fallbackAspectRatioHeights: SeededSequence): void {
+  private setSize(randomSource: RandomSource, layout: Layout, aspectRatio: string | undefined, fallbackAspectRatioHeights: SeededSequence): void {
     this.element.dataset.layout = layout;
 
     if (layout === "native") {
-      const dimensions: Dimensions2D = aspectRatio ? toDimensions2D(aspectRatio) : randomDimensions(random);
+      const dimensions: Dimensions2D = aspectRatio ? toDimensions2D(aspectRatio) : randomDimensions(randomSource);
 
       this.element.style.setProperty("width", `${dimensions.width}px`);
       this.element.style.setProperty("height", `${dimensions.height}px`);
@@ -31,23 +31,23 @@ export class FavoritesSkeletonItem {
     }
   }
 
-  private configureAnimation(random: Random): void {
+  private configureAnimation(randomSource: RandomSource): void {
     if (SkeletonConfig.randomAnimationTiming) {
-      this.element.style.setProperty("--delay-skeleton", `${randomAnimationDelay(random)}s`);
-      this.element.style.setProperty("--duration-skeleton", `${randomAnimationDuration(random)}s`);
+      this.element.style.setProperty("--delay-skeleton", `${randomAnimationDelay(randomSource)}s`);
+      this.element.style.setProperty("--duration-skeleton", `${randomAnimationDuration(randomSource)}s`);
     }
     this.element.dataset.animation = SkeletonConfig.animation;
   }
 }
 
-function randomAnimationDelay(random: Random): number {
+function randomAnimationDelay(randomSource: RandomSource): number {
   const { min, max } = SkeletonConfig.animationDelayRangeSeconds;
-  return roundToTwoDecimalPlaces(randomFloatInRange(random, min, max));
+  return roundToTwoDecimalPlaces(randomFloatInRange(randomSource, min, max));
 }
 
-function randomAnimationDuration(random: Random): number {
+function randomAnimationDuration(randomSource: RandomSource): number {
   const { min, max } = SkeletonConfig.animationDurationRangeSeconds;
-  return roundToTwoDecimalPlaces(randomFloatInRange(random, min, max));
+  return roundToTwoDecimalPlaces(randomFloatInRange(randomSource, min, max));
 }
 
 function randomAspectRatio(fallbackAspectRatioHeights: SeededSequence): string {
@@ -59,14 +59,14 @@ function randomAspectRatio(fallbackAspectRatioHeights: SeededSequence): string {
   return `${w}/${fallbackAspectRatioHeights.nextInRange(hMin, hMax)}`;
 }
 
-function randomDimensions(random: Random): Dimensions2D {
+function randomDimensions(randomSource: RandomSource): Dimensions2D {
   const {
     discreteDimensionMin: min,
     discreteDimensionMax: max
   } = SkeletonConfig;
 
-  const shouldMaximizeWidth = randomBoolean(random);
-  const randomDimension = randomIntInRange(random, min, max);
+  const shouldMaximizeWidth = randomBoolean(randomSource);
+  const randomDimension = randomIntInRange(randomSource, min, max);
   return {
     width: shouldMaximizeWidth ? max : randomDimension,
     height: shouldMaximizeWidth ? randomDimension : max

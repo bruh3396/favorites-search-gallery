@@ -29,6 +29,10 @@ function createCase([file, specifier]) {
   return { filename: resolve(FIXTURES, "src", file), code: `import * as Module from "@/${specifier}";`, options: OPTIONS };
 }
 
+export function runAllowed(exception, valid) {
+  tester.run(exception, boundaries.rules.dependencies, { valid: valid.map(createCase), invalid: [] });
+}
+
 export function runRule(rule, { valid, invalid }) {
   expectInvalid(rule, invalid);
   tester.run(rule, boundaries.rules.dependencies, {

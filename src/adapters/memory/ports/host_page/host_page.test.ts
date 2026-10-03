@@ -30,6 +30,31 @@ describe("MemoryHostPage", () => {
     expect(hostPage.colorScheme).toBe("dark");
   });
 
+  test("remembers the search page it last reflected", () => {
+    const hostPage = new MemoryHostPage();
+
+    expect(hostPage.searchPageIndex).toBeNull();
+    hostPage.reflectSearchPage(2);
+    expect(hostPage.searchPageIndex).toBe(2);
+  });
+
+  test("remembers whether its paginator is visible", () => {
+    const hostPage = new MemoryHostPage();
+
+    expect(hostPage.paginatorVisible).toBe(true);
+    hostPage.setPaginatorVisible(false);
+    expect(hostPage.paginatorVisible).toBe(false);
+  });
+
+  test("hands out one detached content element, however often it is claimed", () => {
+    const hostPage = new MemoryHostPage();
+    const content = hostPage.claimContent();
+
+    expect(content.isConnected).toBe(false);
+    expect(hostPage.claimContent()).toBe(content);
+    expect(hostPage.content).toBe(content);
+  });
+
   test("remembers its viewport being locked", () => {
     const hostPage = new MemoryHostPage();
 

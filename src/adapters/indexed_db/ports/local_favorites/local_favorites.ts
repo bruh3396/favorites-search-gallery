@@ -28,12 +28,9 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
     });
   }
 
-  public remove(postId: string): Promise<void> {
-    return this.update(ids => ids.filter(id => id !== postId));
-  }
-
-  public async clear(): Promise<void> {
-    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => store.delete(this.configuration.ownerId));
+  public remove(postIds: string[]): Promise<void> {
+    const removed = new Set(postIds);
+    return this.update(ids => ids.filter(id => !removed.has(id)));
   }
 
   private async update(change: (ids: string[]) => string[]): Promise<void> {

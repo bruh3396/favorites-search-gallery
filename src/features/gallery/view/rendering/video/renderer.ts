@@ -1,17 +1,17 @@
-import { Environment } from "@/core/boundary/environment";
-import { GalleryVideoController } from "@/features/gallery/view/rendering/video/video_controller";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { GalleryVideoController, GalleryVideoControllerConfiguration, GalleryVideoControllerDependencies } from "@/features/gallery/view/rendering/video/video_controller";
 import { PostMedia } from "@/core/domain/post/post";
-import { Preferences } from "@/app/context/preferences";
 import { Renderer } from "@/features/gallery/types/types";
 import { div } from "@/utils/browser/element";
+
+export type GalleryVideoRendererConfiguration = GalleryVideoControllerConfiguration;
+export type GalleryVideoRendererDependencies = GalleryVideoControllerDependencies;
 
 export class GalleryVideoRenderer implements Renderer {
   public readonly root = div("video-container");
   private readonly controller: GalleryVideoController;
 
-  constructor(preferences: Preferences, environment: Environment, remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl">) {
-    this.controller = new GalleryVideoController(preferences, environment, remoteMedia);
+  constructor(configuration: GalleryVideoRendererConfiguration, dependencies: GalleryVideoRendererDependencies) {
+    this.controller = new GalleryVideoController(configuration, dependencies);
   }
 
   public setup(onVideoEnded: () => void, onVolumeChanged: (volume: number) => void): void {

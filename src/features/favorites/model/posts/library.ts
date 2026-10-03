@@ -5,9 +5,18 @@ import { PostLibrary } from "@/features/favorites/types/types";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { partition } from "@/utils/pure/array";
 
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
+
+function createPlaceholder(id: string): Post {
+  return { id, width: 0, height: 0, score: 0, rating: "", changedAt: 0, tags: "", media: { kind: "image", locator: "" } };
+}
+
+function postIsPlaceholder(post: Post): boolean {
+  return post.media.locator === "";
+}
 
 function postIsComplete(post: Post): boolean {
   return post.width > 0 && post.height > 0;
@@ -47,7 +56,7 @@ export class FavoritesPostLibrary implements PostLibrary {
 
   public async streamAll(ids: string[], batchSize: number, onBatch: (posts: Post[]) => void): Promise<void> {
     for (let i = 0; i < ids.length; i += batchSize) {
-      onBatch(await this.localPosts.getMany(ids.slice(i, i + batchSize)));
+      onBatch(await this.getManyOrPlaceholders(ids.slice(i, i + batchSize)));
     }
   }
 
@@ -56,7 +65,14 @@ export class FavoritesPostLibrary implements PostLibrary {
   }
 
   public async refreshAll(posts: Post[]): Promise<void> {
-    await Promise.all(posts.map(post => this.refresh(post)));
+    const [placeholders, others] = partition(posts, postIsPlaceholder);
+
+    await Promise.all([...placeholders, ...others].map(post => this.refresh(post)));
+  }
+
+  private async getManyOrPlaceholders(ids: string[]): Promise<Post[]> {
+    const stored = new Map((await this.localPosts.getMany(ids)).map(post => [post.id, post]));
+    return ids.map(id => stored.get(id) ?? createPlaceholder(id));
   }
 
   private async refresh(post: Post): Promise<void> {

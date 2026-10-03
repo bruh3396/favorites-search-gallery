@@ -5,11 +5,9 @@ export class InvertedIndex<Doc> {
   private readonly terms: SortedArray<string> = new SortedArray<string>();
   private readonly docs: Set<Doc> = new Set<Doc>();
   private readonly docsByTerm: Map<string, Set<Doc>> = new Map<string, Set<Doc>>();
+  private maintainingSortOrder = true;
 
-  constructor(
-    private readonly extractTerms: (doc: Doc) => Iterable<string>,
-    private maintainingSortOrder: boolean = true
-  ) { }
+  constructor(private readonly extractTerms: (doc: Doc) => Iterable<string>) { }
 
   public indexedTerms(): string[] {
     return this.terms.toArray();

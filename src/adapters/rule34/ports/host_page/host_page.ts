@@ -1,8 +1,8 @@
 import { AppMode, ColorScheme } from "@/core/boundary/environment";
 import { HostPage } from "@/core/boundary/ports/host_page";
-import { Rule34SiteClient } from "@/adapters/rule34/client/site/client";
+import { Rule34Client } from "@/adapters/rule34/client/client";
 
-const TAKE_OVERS: Record<AppMode, (rule34: Pick<Rule34SiteClient, "clearNativePage">) => void> = {
+const TAKE_OVERS: Record<AppMode, (rule34: Pick<Rule34Client, "clearNativePage">) => void> = {
   favorites: (rule34) => rule34.clearNativePage(),
   postList: () => { }
 };
@@ -12,8 +12,8 @@ export interface Rule34HostPageConfiguration {
 }
 
 export interface Rule34HostPageDependencies {
-  rule34: Pick<Rule34SiteClient, "clearNativePage" | "setHeaderVisible" | "setTheme">;
-  page: Pick<HostPage, "lockViewport" | "lockScroll" | "unlockScroll">;
+  rule34: Pick<Rule34Client, "clearNativePage" | "setHeaderVisible" | "setTheme" | "reflectPostListPage" | "setPaginatorVisible">;
+  page: Pick<HostPage, "lockViewport" | "lockScroll" | "unlockScroll"> & { claimContent: () => HTMLElement };
 }
 
 export class Rule34HostPage implements HostPage {
@@ -32,8 +32,17 @@ export class Rule34HostPage implements HostPage {
     this.dependencies.rule34.setTheme(colorScheme);
   }
 
-  public clearContent(): void {
+  public reflectSearchPage(pageIndex: number): void {
+    this.dependencies.rule34.reflectPostListPage(pageIndex);
+  }
+
+  public setPaginatorVisible(visible: boolean): void {
+    this.dependencies.rule34.setPaginatorVisible(visible);
+  }
+
+  public claimContent(): HTMLElement {
     TAKE_OVERS[this.configuration.mode](this.dependencies.rule34);
+    return this.dependencies.page.claimContent();
   }
 
   public lockViewport(): void {

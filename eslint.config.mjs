@@ -26,7 +26,8 @@ export default defineConfig([
       "dist/**",
       "node_modules/**",
       "**/*.min.js",
-      "**/*.js"
+      "**/*.js",
+      "src/**/vite.config.mts"
     ]
   },
   {
@@ -123,7 +124,7 @@ export default defineConfig([
       "lines-around-directive": "error",
       // "max-classes-per-file": ["error"],
       "max-depth": "error",
-      "@stylistic/max-len": ["error", { code: 120, ignorePattern: "^import\\s.+\\sfrom\\s.+;$" }],
+      "@stylistic/max-len": ["error", { code: 160, ignoreUrls: true, ignorePattern: "^import\\s.+\\sfrom\\s.+;$" }],
       "max-nested-callbacks": "error",
       "max-statements-per-line": "error",
       "multiline-ternary": [
@@ -412,7 +413,8 @@ export default defineConfig([
           prefix: [
             "is", "has", "should", "can", "was", "did", "will", "must", "on",
             "using", "requires", "needs", "allows", "in", "are", "supports",
-            "overflows", "includes", "contains", "exceeds", "matches", "offers", "links"
+            "overflows", "includes", "contains", "exceeds", "matches", "offers", "links",
+            "breaks"
           ]
         },
         { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
@@ -667,7 +669,8 @@ export default defineConfig([
       "src/types/search.ts",
       "src/utils/pure/bit.ts",
       "src/utils/pure/bit.test.ts",
-      "src/features/favorites/features/downloader/model/zip_writer.ts"
+      "src/features/favorites/features/downloader/model/zip_writer.ts",
+      "src/adapters/rule34/ports/remote_favorites/removed_favorites_finder.test.ts"
     ],
     rules: {
       "no-bitwise": "off"

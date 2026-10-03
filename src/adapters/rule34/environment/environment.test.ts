@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { ColorScheme } from "@/core/boundary/environment";
-import { Rule34PageName } from "@/adapters/rule34/client/site/current_page/current_page";
+import { Rule34PageName } from "@/adapters/rule34/client/current_page";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 
 interface Visit {

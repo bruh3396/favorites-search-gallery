@@ -14,6 +14,11 @@ export class MemoryRemoteFavorites implements RemoteFavorites {
     return Promise.resolve();
   }
 
+  public findRemoved(storedIds: readonly string[]): Promise<string[] | null> {
+    const listedIds = new Set(this.memory.readFavorites().map(post => post.id));
+    return Promise.resolve(storedIds.filter(id => !listedIds.has(id)));
+  }
+
   public add(id: string): Promise<AddFavoriteResult> {
     this.memory.addFavorite(id);
     return Promise.resolve("added");

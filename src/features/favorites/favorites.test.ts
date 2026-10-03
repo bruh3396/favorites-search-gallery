@@ -10,7 +10,7 @@ import { Feature } from "@/core/context/features";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryNavigation } from "@/adapters/memory/ports/navigation/navigation";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { Post } from "@/core/domain/post/post";
@@ -34,7 +34,7 @@ interface SetupOptions {
   features?: Feature[];
   localKeyedValues?: MemoryLocalKeyedValues;
   hostPage?: MemoryHostPage;
-  navigation?: MemoryNavigation;
+  navigator?: MemoryNavigator;
   remote?: MemoryClient;
 }
 
@@ -48,12 +48,12 @@ function createRemote(): MemoryClient {
   return new MemoryClient(createFruitPosts());
 }
 
-function createContext({ environment: environmentOverrides = {}, preferences = {}, features, localKeyedValues = new MemoryLocalKeyedValues(), hostPage = new MemoryHostPage(), navigation = new MemoryNavigation(), remote = createRemote() }: SetupOptions = {}, withShell = true): AppContext {
+function createContext({ environment: environmentOverrides = {}, preferences = {}, features, localKeyedValues = new MemoryLocalKeyedValues(), hostPage = new MemoryHostPage(), navigator = new MemoryNavigator(), remote = createRemote() }: SetupOptions = {}, withShell = true): AppContext {
   pageCounter += 1;
   const id = `startup_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesOwnerId: id, ...environmentOverrides });
   const shell = withShell ? new Shell() : undefined;
-  const ports = { localKeyedValues, hostPage, navigation, remoteFavorites: new MemoryRemoteFavorites(remote), remotePosts: new MemoryRemotePosts(remote) };
+  const ports = { localKeyedValues, hostPage, navigator, remoteFavorites: new MemoryRemoteFavorites(remote), remotePosts: new MemoryRemotePosts(remote) };
 
   if (shell !== undefined) {
     document.body.append(shell.root);
@@ -62,7 +62,7 @@ function createContext({ environment: environmentOverrides = {}, preferences = {
 }
 
 function createFruitModel(context: AppContext): FavoritesModel {
-  return new FavoritesModel(context, () => { });
+  return new FavoritesModel(context, { onSearchResultsChanged: () => { }, onPlaceholderFilled: () => { } });
 }
 
 async function store(context: AppContext): Promise<void> {
@@ -238,11 +238,11 @@ describe("startFavorites", () => {
     });
 
     test("a post list request opens the post list", async() => {
-      const navigation = new MemoryNavigation();
-      const context = await setup({ navigation });
+      const navigator = new MemoryNavigator();
+      const context = await setup({ navigator });
 
       context.events.favorites.postListRequested.emit("apple");
-      expect(navigation.opened).toEqual(["#search-apple"]);
+      expect(navigator.opened).toEqual(["#search-apple"]);
     });
 
     describe("pages", () => {
@@ -285,33 +285,58 @@ describe("startFavorites", () => {
       });
     });
 
-    describe("resetting", () => {
-      test("reset, once confirmed, clears stored favorites and settings but keeps snippets, then reloads", async() => {
-        vi.stubGlobal("confirm", () => true);
+    describe("reconciling", () => {
+      test("forgets favorites unfavorited on the site but keeps their posts and the settings, without reloading", async() => {
         const reload = vi.spyOn(window.location, "reload").mockReturnValue();
-        const context = await setup();
-        const store2 = context.ports.localKeyedValues;
+        const remote = createRemote();
+        const context = await setup({ remote });
         const resetPreferences = vi.spyOn(context.preferences, "reset");
 
-        store2.set("searchSnippets", []);
-        context.events.favorites.resetButtonClicked.emit(new MouseEvent("click"));
-        expect(store2.get("searchSnippets")).toEqual([]);
-        expect(resetPreferences).toHaveBeenCalled();
-        await vi.waitFor(async() => expect(await createFruitModel(context).countStoredFavorites()).toBe(0));
-        await vi.waitFor(() => expect(reload).toHaveBeenCalled());
+        remote.removeFavorite("2");
+        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
+        await vi.waitFor(async() => expect((await createFruitModel(context).loadFavoriteIds()).sort()).toEqual(["1", "3"]));
+
+        expect(await context.ports.localPosts.getMany(["2"])).toHaveLength(1);
+        expect(resetPreferences).not.toHaveBeenCalled();
+        expect(reload).not.toHaveBeenCalled();
       });
 
-      test.each<[string, Partial<Environment>, boolean]>([
-        ["desktop", {}, true],
-        ["mobile", { device: "mobile" }, false]
-      ])("on %s, the reset prompt says whether snippets are kept", async(_, environment, mentionsSnippets) => {
-        const confirm = vi.fn(() => false);
+      test("keeps every favorite and stays on the page when nothing was unfavorited", async() => {
+        const reload = vi.spyOn(window.location, "reload").mockReturnValue();
+        const context = await setup();
+        const findRemoved = vi.spyOn(context.ports.remoteFavorites, "findRemoved");
 
-        vi.stubGlobal("confirm", confirm);
-        const context = await setup({ environment });
+        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
+        await vi.waitFor(() => expect(findRemoved).toHaveBeenCalled());
 
-        context.events.favorites.resetButtonClicked.emit(new MouseEvent("click"));
-        expect(String(confirm.mock.calls[0]).includes("snippets")).toBe(mentionsSnippets);
+        expect(await createFruitModel(context).countStoredFavorites()).toBe(3);
+        expect(reload).not.toHaveBeenCalled();
+      });
+
+      test("keeps every favorite when the site refuses", async() => {
+        const reload = vi.spyOn(window.location, "reload").mockReturnValue();
+        const context = await setup();
+        const findRemoved = vi.spyOn(context.ports.remoteFavorites, "findRemoved").mockRejectedValue(new Error("refused"));
+
+        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
+        await vi.waitFor(() => expect(findRemoved).toHaveBeenCalled());
+
+        expect(await createFruitModel(context).countStoredFavorites()).toBe(3);
+        expect(reload).not.toHaveBeenCalled();
+      });
+
+      test("waits for favorites to finish loading before checking the site", async() => {
+        const context = createContext();
+
+        await store(context);
+        const findRemoved = vi.spyOn(context.ports.remoteFavorites, "findRemoved");
+        const loaded = context.milestones.favorites.favoritesLoaded.wait();
+
+        startFavorites(context);
+        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
+        await loaded;
+
+        expect(findRemoved).not.toHaveBeenCalled();
       });
 
       test("a settings reset asks first", async() => {
@@ -441,11 +466,11 @@ describe("startFavorites", () => {
       ["a shift-click", {}, { button: 0, shiftKey: true }],
       ["without the gallery, a click", { features: ["favorites"] }, { button: 0 }]
     ])("on desktop, %s on a thumb opens its post", async(_, options, init) => {
-      const navigation = new MemoryNavigation();
-      const context = await setup({ ...options, navigation });
+      const navigator = new MemoryNavigator();
+      const context = await setup({ ...options, navigator });
 
       dispatchMouse(context, "mousedown", imageOf(context, "2"), init);
-      expect(navigation.opened).toEqual([navigation.postUrl("2")]);
+      expect(navigator.opened).toEqual([context.ports.remotePages.postUrl("2")]);
     });
 
     test.each<[string, (context: AppContext) => Element, MouseEventInit]>([
@@ -453,11 +478,11 @@ describe("startFavorites", () => {
       ["a ctrl-middle-click on a thumb", (context): Element => imageOf(context, "2"), { button: 1, ctrlKey: true }],
       ["a middle-click outside any thumb", (context): Element => context.shell.content, { button: 1 }]
     ])("on desktop, %s opens no post", async(_, targetOf, init) => {
-      const navigation = new MemoryNavigation();
-      const context = await setup({ navigation });
+      const navigator = new MemoryNavigator();
+      const context = await setup({ navigator });
 
       dispatchMouse(context, "mousedown", targetOf(context), init);
-      expect(navigation.opened).toEqual([]);
+      expect(navigator.opened).toEqual([]);
     });
 
     test("on desktop, clicking a thumb keeps the page from following its link", async() => {
@@ -467,19 +492,19 @@ describe("startFavorites", () => {
     });
 
     test("on desktop, a ctrl-click on a thumb opens its media", async() => {
-      const navigation = new MemoryNavigation();
-      const context = await setup({ navigation });
+      const navigator = new MemoryNavigator();
+      const context = await setup({ navigator });
 
       dispatchMouse(context, "click", imageOf(context, "2"), { ctrlKey: true });
-      await vi.waitFor(() => expect(navigation.opened).toEqual(["data:text/plain,2"]));
+      await vi.waitFor(() => expect(navigator.opened).toEqual(["data:text/plain,2"]));
     });
 
     test("with touch, a middle-click on a thumb does nothing", async() => {
-      const navigation = new MemoryNavigation();
-      const context = await setup({ navigation, environment: { pointer: "touch" } });
+      const navigator = new MemoryNavigator();
+      const context = await setup({ navigator, environment: { pointer: "touch" } });
 
       dispatchMouse(context, "mousedown", imageOf(context, "2"), { button: 1 });
-      expect(navigation.opened).toEqual([]);
+      expect(navigator.opened).toEqual([]);
     });
 
     test.each<[string, Partial<Environment>]>([
@@ -518,7 +543,7 @@ describe("startFavorites", () => {
       const context = await setup({ features: ["favorites"] });
       const link = imageOf(context, "2").closest("a") as HTMLAnchorElement;
 
-      expect(link.getAttribute("href")).toBe(context.ports.navigation.postUrl("2"));
+      expect(link.getAttribute("href")).toBe(context.ports.remotePages.postUrl("2"));
       dispatchMouse(context, "mouseover", imageOf(context, "2"));
       expect(link.getAttribute("href")).toBeNull();
     });

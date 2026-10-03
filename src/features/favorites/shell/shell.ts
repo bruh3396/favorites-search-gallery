@@ -1,12 +1,15 @@
 import * as FavoritesDrawer from "@/features/favorites/shell/drawer";
 import * as FavoritesToolbar from "@/features/favorites/shell/toolbar";
 import { FavoritesDrawerSlots, FavoritesToolbarSlots } from "@/types/favorites_ui";
-import { Environment } from "@/core/boundary/environment";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { toggleDataset } from "@/utils/browser/dataset";
+
+export interface FavoritesShellConfiguration {
+  version: string;
+}
 
 export class FavoritesShell {
   public readonly root: HTMLElement;
@@ -17,8 +20,8 @@ export class FavoritesShell {
   public readonly toolbar: FavoritesToolbarSlots;
   public readonly drawer: FavoritesDrawerSlots;
 
-  constructor(shell: Shell, environment: Environment) {
-    const toolbar = FavoritesToolbar.build(environment);
+  constructor({ version }: FavoritesShellConfiguration, shell: Shell) {
+    const toolbar = FavoritesToolbar.build(version);
     const drawer = FavoritesDrawer.build();
 
     this.root = div(FavoritesId.root);

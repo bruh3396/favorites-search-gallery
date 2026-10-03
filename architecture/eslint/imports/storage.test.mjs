@@ -3,7 +3,7 @@ import { runRule } from "#architecture/eslint/testing/rule_tester.mjs";
 runRule("rule88", {
   valid: [
     ["features/favorites/model/posts/library.ts", "core/boundary/ports/local_posts"],
-    ["core/boundary/ports/navigation.ts", "core/boundary/ports/local_posts"],
+    ["core/boundary/ports/navigator.ts", "core/boundary/ports/local_posts"],
     ["lib/lib.ts", "core/boundary/ports/remote_posts"]
   ],
   invalid: [

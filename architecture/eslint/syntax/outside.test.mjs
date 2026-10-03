@@ -61,7 +61,7 @@ runSyntax("rule26", {
 runSyntax("rule27", {
   valid: [
     ["adapters/browser/client/client.ts", "Math.random();"],
-    ["core/utils/utils.ts", "random.next();"]
+    ["core/utils/utils.ts", "randomSource.next();"]
   ],
   invalid: [
     ...casesFor(CORE_FILES, "Math.random();"),
