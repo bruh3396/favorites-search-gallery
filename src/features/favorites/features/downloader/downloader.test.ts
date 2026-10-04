@@ -69,7 +69,7 @@ describe("Downloader", () => {
     expect(download.disabled).toBe(true);
   });
 
-  test("enabling offers the current search results", () => {
+  test("offers the current search results once enabled", () => {
     const { container, downloader } = setup();
     const [download] = queryActionButtons(container);
 
@@ -79,7 +79,7 @@ describe("Downloader", () => {
     expect(download.textContent).toBe("Download 2 Results");
   });
 
-  test("re-rendering picks up changed search results", () => {
+  test("picks up changed search results on a re-render", () => {
     const { container, downloader, results } = setup();
     const [download] = queryActionButtons(container);
 
@@ -90,7 +90,7 @@ describe("Downloader", () => {
     expect(download.textContent).toBe("Download 1 Result");
   });
 
-  test("clicking download fetches every result's media and saves one zip", async() => {
+  test("fetches every result's media and saves one zip when download is clicked", async() => {
     const { container, downloader, fetched, saved } = setup();
     const [download] = queryActionButtons(container);
 
@@ -102,7 +102,7 @@ describe("Downloader", () => {
     expect(saved).toEqual(["favorites.zip"]);
   });
 
-  test("clicking cancel aborts the download without saving", async() => {
+  test("aborts the download without saving when cancel is clicked", async() => {
     const { container, downloader, fetched, saved } = setup({ hang: true });
     const [download, cancel] = queryActionButtons(container);
 

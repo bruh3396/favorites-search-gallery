@@ -17,6 +17,15 @@ function addHeader(): HTMLElement {
   return header;
 }
 
+function addPaginator(text: string): HTMLElement {
+  const paginator = document.createElement("div");
+
+  paginator.id = "paginator";
+  paginator.textContent = text;
+  document.body.append(paginator);
+  return paginator;
+}
+
 function addScript(src: string): HTMLScriptElement {
   const script = document.createElement("script");
 
@@ -40,11 +49,14 @@ function addContent(...ids: string[]): HTMLElement {
   return content;
 }
 
-describe("reading the current page", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+  document.head.replaceChildren();
+  document.body.replaceChildren();
+});
 
+describe("readPageName", () => {
   test.each([
     ["page=favorites&s=view&id=1", "favorites"],
     ["page=post&s=list&tags=apple", "postList"],
@@ -54,7 +66,9 @@ describe("reading the current page", () => {
 
     expect(CurrentPage.readPageName()).toBe(name);
   });
+});
 
+describe("readFavoritesPageId", () => {
   test("reads the viewed favorites page id, empty when absent", () => {
     visit("page=favorites&id=123");
     expect(CurrentPage.readFavoritesPageId()).toBe("123");
@@ -62,7 +76,9 @@ describe("reading the current page", () => {
     visit("page=favorites");
     expect(CurrentPage.readFavoritesPageId()).toBe("");
   });
+});
 
+describe("readFirstFavoritesPage", () => {
   test.each([
     ["page=favorites&id=1", true],
     ["page=favorites&id=1&pid=0", true],
@@ -73,7 +89,9 @@ describe("reading the current page", () => {
 
     expect(CurrentPage.readFirstFavoritesPage(() => null) !== null).toBe(read);
   });
+});
 
+describe("readSearchQuery", () => {
   test("reads the decoded search query, empty when absent", () => {
     visit("page=post&s=list&tags=apple+banana%3A");
     expect(CurrentPage.readSearchQuery()).toBe("apple banana:");
@@ -81,7 +99,9 @@ describe("reading the current page", () => {
     visit("page=post&s=list");
     expect(CurrentPage.readSearchQuery()).toBe("");
   });
+});
 
+describe("readPageOffset", () => {
   test.each([
     ["page=post&s=list&pid=84", 84],
     ["page=post&s=list", 0],
@@ -92,7 +112,9 @@ describe("reading the current page", () => {
 
     expect(CurrentPage.readPageOffset()).toBe(offset);
   });
+});
 
+describe("readUserId", () => {
   test("reads the logged-in user, or nothing when logged out", () => {
     visit("page=post&s=list", "theme=dark; user_id=9");
     expect(CurrentPage.readUserId()).toBe("9");
@@ -100,11 +122,20 @@ describe("reading the current page", () => {
     visit("page=post&s=list");
     expect(CurrentPage.readUserId()).toBe("");
   });
+});
 
-  test("reads the theme and the decoded tag blacklist", () => {
-    visit("page=favorites&id=1", "theme=dark; tag_blacklist=apple%2520banana");
+describe("readTheme", () => {
+  test("reads the theme from the site's cookie", () => {
+    visit("page=favorites&id=1", "theme=dark");
 
     expect(CurrentPage.readTheme()).toBe("dark");
+  });
+});
+
+describe("readTagBlacklist", () => {
+  test("reads the decoded tag blacklist from the site's cookie", () => {
+    visit("page=favorites&id=1", "tag_blacklist=apple%2520banana");
+
     expect(CurrentPage.readTagBlacklist()).toBe("apple banana");
   });
 });
@@ -124,10 +155,6 @@ describe("setTheme", () => {
 });
 
 describe("setHeaderVisible", () => {
-  afterEach(() => {
-    document.body.replaceChildren();
-  });
-
   test("hides the site's header, then shows it again", () => {
     const header = addHeader();
 
@@ -143,10 +170,6 @@ describe("setHeaderVisible", () => {
 });
 
 describe("setPageOffset", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
   test("rewrites the address's post offset without loading a page", () => {
     const replaceState = vi.fn<History["replaceState"]>();
 
@@ -157,21 +180,8 @@ describe("setPageOffset", () => {
   });
 });
 
-describe("the paginator", () => {
-  afterEach(() => {
-    document.body.replaceChildren();
-  });
-
-  function addPaginator(text: string): HTMLElement {
-    const paginator = document.createElement("div");
-
-    paginator.id = "paginator";
-    paginator.textContent = text;
-    document.body.append(paginator);
-    return paginator;
-  }
-
-  test("is replaced by another page's paginator, which keeps it hidden", () => {
+describe("replacePaginator", () => {
+  test("puts another page's paginator in place of the current one, keeping it hidden", () => {
     const current = addPaginator("1");
     const next = document.createElement("div");
 
@@ -183,16 +193,7 @@ describe("the paginator", () => {
     expect(next.style.display).toBe("none");
   });
 
-  test("hides, then shows again", () => {
-    const paginator = addPaginator("1");
-
-    CurrentPage.setPaginatorVisible(false);
-    expect(paginator.style.display).toBe("none");
-    CurrentPage.setPaginatorVisible(true);
-    expect(paginator.style.display).toBe("");
-  });
-
-  test("is left alone when the page has none or it is already shown", () => {
+  test("leaves the page alone when it has no paginator or the paginator is already shown", () => {
     const paginator = addPaginator("1");
 
     CurrentPage.replacePaginator(paginator);
@@ -205,13 +206,18 @@ describe("the paginator", () => {
   });
 });
 
-describe("clearNativePage", () => {
-  afterEach(() => {
-    document.head.replaceChildren();
-    document.body.replaceChildren();
-    vi.restoreAllMocks();
-  });
+describe("setPaginatorVisible", () => {
+  test("hides the paginator, then shows it again", () => {
+    const paginator = addPaginator("1");
 
+    CurrentPage.setPaginatorVisible(false);
+    expect(paginator.style.display).toBe("none");
+    CurrentPage.setPaginatorVisible(true);
+    expect(paginator.style.display).toBe("");
+  });
+});
+
+describe("clearNativePage", () => {
   test("removes the page's favorites and strips their attributes", () => {
     const content = addContent("1", "2");
 

@@ -103,7 +103,7 @@ export class GalleryVideoController {
       };
       video.style.display = "block";
       this.toggleVideoControls(true);
-      this.setVideoSource(video, item).then((holdsItem) => {
+      this.setVideoSource(video, item).then(holdsItem => {
         if (holdsItem) {
           video.play().catch(doNothing);
         }
@@ -157,7 +157,7 @@ export class GalleryVideoController {
     if (context !== null) {
       context.clearRect(0, 0, canvas.width, canvas.height);
     }
-    canvas.toBlob((blob) => {
+    canvas.toBlob(blob => {
       if (blob === null) {
         return;
       }
@@ -193,7 +193,7 @@ export class GalleryVideoController {
   }
 
   private updateVolumeOfOtherVideoPlayersWhenVolumeChanges(video: HTMLVideoElement): void {
-    video.addEventListener("volumechange", (event) => {
+    video.addEventListener("volumechange", event => {
       if (!(event.target instanceof HTMLVideoElement)) {
         return;
       }

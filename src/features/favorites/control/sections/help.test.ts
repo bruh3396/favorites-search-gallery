@@ -28,7 +28,7 @@ describe("FavoritesHelp", () => {
     expect(container.querySelector("button")).toBeNull();
   });
 
-  test("every link opens in a new tab without giving it access to this page", () => {
+  test("opens every link in a new tab without giving it access to this page", () => {
     const { container } = setup(false);
     const links = [...container.querySelectorAll("a")];
 

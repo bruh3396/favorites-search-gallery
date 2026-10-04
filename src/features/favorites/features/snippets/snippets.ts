@@ -12,7 +12,7 @@ export class Snippets {
   private readonly flows: SnippetFlows;
   private readonly control: SnippetControl;
 
-  constructor({ appendToSearch, getSearchResults, store }: SnippetsDependencies) {
+  constructor({ appendToSearch, getSearchResults, localSnippets, localKeyedValues }: SnippetsDependencies) {
     const shell = new SnippetShell();
     const context = {
       appendToSearch,
@@ -22,8 +22,12 @@ export class Snippets {
       saveBlob: downloadBlob
     };
 
-    this.flows = new SnippetFlows(context, new SnippetModel(store), new SnippetView(shell));
+    this.flows = new SnippetFlows(context, new SnippetModel({ localSnippets, localKeyedValues }), new SnippetView(shell));
     this.control = new SnippetControl(shell, this.flows.library);
+  }
+
+  public load(): Promise<void> {
+    return this.flows.library.load();
   }
 
   public suggestions(prefix: string): AwesompleteSuggestion[] {

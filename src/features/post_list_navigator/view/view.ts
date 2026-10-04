@@ -33,7 +33,8 @@ export class PostListNavigatorView {
   }
 
   public prepareNativePostListThumbs(): HTMLElement[] {
-    return preparePostListThumbs(Array.from(document.querySelectorAll(ITEM_SELECTOR)), this.context.environment.device === "mobile", !this.context.features.has("gallery"));
+    const thumbs = [...document.querySelectorAll<HTMLElement>(ITEM_SELECTOR)];
+    return preparePostListThumbs(thumbs, this.context.environment.device === "mobile", !this.context.features.has("gallery"));
   }
 
   public currentSearch(): string {

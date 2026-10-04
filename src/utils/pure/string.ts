@@ -60,5 +60,5 @@ export function trigramsOf(value: string): string[] {
 }
 
 export function copyString(value: string): string {
-  return Array.from(value).join("");
+  return [...value].join("");
 }

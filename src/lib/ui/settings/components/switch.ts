@@ -30,7 +30,7 @@ export function createSwitch(ownerDocument: Document, { onToggle, size = "medium
   element.addEventListener("click", () => onToggle());
   return {
     element,
-    setChecked: (checked) => element.setAttribute("aria-checked", String(checked)),
+    setChecked: checked => element.setAttribute("aria-checked", String(checked)),
     setDisabled: (disabled): void => {
       element.disabled = disabled;
     }

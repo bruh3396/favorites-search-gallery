@@ -49,12 +49,12 @@ export class PostOverlayHoverFlow extends PostOverlayFlow {
     }
     this.model.setCurrentTarget(thumb.id);
     this.flows.modeDispatch.dispatchByMode<HTMLElement>({
-      tag: (t) => this.showTags(t)
+      tag: t => this.showTags(t)
     }, thumb);
   }
 
   private async showTags(thumb: HTMLElement): Promise<void> {
-    const tags = getTagSetFromThumb(thumb, (id) => this.context.featureBridge.favorites.favorite.request(id));
+    const tags = getTagSetFromThumb(thumb, id => this.context.featureBridge.favorites.favorite.request(id));
     const categories = await this.model.resolveTagCategories(thumb.id, tags);
 
     if (this.model.isCurrentTarget(thumb.id)) {

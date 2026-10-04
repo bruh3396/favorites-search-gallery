@@ -3,6 +3,14 @@ import { SearchableMetric } from "@/types/search";
 
 const EMPTY: ReadonlySet<never> = new Set<never>();
 
+interface MetricPair<Doc> {
+  left: SearchableMetric;
+  right: SearchableMetric;
+  greater: Set<Doc>;
+  less: Set<Doc>;
+  equal: Set<Doc>;
+}
+
 export class RelativeMetricIndex<Doc> {
   private readonly sets: Map<string, Set<Doc>> = new Map<string, Set<Doc>>();
   private built = false;
@@ -60,28 +68,25 @@ export class RelativeMetricIndex<Doc> {
   }
 
   private buildPair(left: SearchableMetric, right: SearchableMetric, docs: ReadonlySet<Doc>): void {
-    const greater = new Set<Doc>();
-    const less = new Set<Doc>();
-    const equal = new Set<Doc>();
+    const pair: MetricPair<Doc> = { left, right, greater: new Set<Doc>(), less: new Set<Doc>(), equal: new Set<Doc>() };
 
     for (const doc of docs) {
-      this.partition(doc, left, right, greater, less, equal);
+      this.partition(doc, pair);
     }
-    this.aliasPair(left, right, greater, less, equal);
+    this.aliasPair(pair);
   }
 
   private placeInPair(doc: Doc, left: SearchableMetric, right: SearchableMetric): void {
-    this.partition(
-      doc,
+    this.partition(doc, {
       left,
       right,
-      this.sets.get(this.key(left, ":>", right)) as Set<Doc>,
-      this.sets.get(this.key(left, ":<", right)) as Set<Doc>,
-      this.sets.get(this.key(left, ":", right)) as Set<Doc>
-    );
+      greater: this.sets.get(this.key(left, ":>", right)) as Set<Doc>,
+      less: this.sets.get(this.key(left, ":<", right)) as Set<Doc>,
+      equal: this.sets.get(this.key(left, ":", right)) as Set<Doc>
+    });
   }
 
-  private partition(doc: Doc, left: SearchableMetric, right: SearchableMetric, greater: Set<Doc>, less: Set<Doc>, equal: Set<Doc>): void {
+  private partition(doc: Doc, { left, right, greater, less, equal }: MetricPair<Doc>): void {
     const leftValue = this.metricFor(doc, left);
     const rightValue = this.metricFor(doc, right);
 
@@ -94,7 +99,7 @@ export class RelativeMetricIndex<Doc> {
     }
   }
 
-  private aliasPair(left: SearchableMetric, right: SearchableMetric, greater: Set<Doc>, less: Set<Doc>, equal: Set<Doc>): void {
+  private aliasPair({ left, right, greater, less, equal }: MetricPair<Doc>): void {
     this.sets.set(this.key(left, ":>", right), greater);
     this.sets.set(this.key(right, ":<", left), greater);
     this.sets.set(this.key(left, ":<", right), less);

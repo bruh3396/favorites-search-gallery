@@ -23,9 +23,9 @@ export async function startGallery(context: AppContext): Promise<void> {
 
   const shell = new GalleryShell(context.shell);
   const model = new GalleryModel(context.preferences, context.ports);
-  const view = new GalleryView(context, shell, (id) => context.featureBridge.favorites.favorite.request(id));
+  const view = new GalleryView(context, shell, id => context.featureBridge.favorites.favorite.request(id));
   const control = new GalleryControl(context, shell, view);
-  const flows = new GalleryFlows(context, model, view, control);
+  const flows = new GalleryFlows({ context, model, view, control });
   const features = new GalleryFeatures(context, {
     autoplay: {
       navigate: (direction): void => flows.navigation.navigateIfOpen(direction),
@@ -78,7 +78,7 @@ function setupModel({ context, model }: GalleryComponents): void {
 function setupView({ view, flows, features }: GalleryComponents): void {
   view.setup({
     onVideoEnded: () => features.handleVideoEnded(),
-    onVolumeChanged: (volume) => flows.actions.setVolume(volume)
+    onVolumeChanged: volume => flows.actions.setVolume(volume)
   });
 }
 
@@ -103,8 +103,8 @@ function subscribeToEvents(components: GalleryComponents): void {
   const { context, view, flows } = components;
   const { events, preferences, environment } = context;
 
-  events.gallery.galleryMenuButtonClicked.on((action) => flows.actions.run(action));
-  preferences.gallery.videoMuted.on((muted) => view.setVideoMuted(muted));
+  events.gallery.galleryMenuButtonClicked.on(action => flows.actions.run(action));
+  preferences.gallery.videoMuted.on(muted => view.setVideoMuted(muted));
 
   if (environment.mode === "favorites") {
     subscribeToFavoritesEvents(components);
@@ -126,15 +126,15 @@ function subscribeToFavoritesEvents({ context, model, view, flows }: GalleryComp
 
   events.favorites.contentReplaced.on(() => flows.thumbs.refresh());
   events.favorites.contentAdded.on(() => flows.thumbs.refresh());
-  preferences.gallery.previewEnabled.on((enabled) => model.preview(enabled));
-  preferences.favorites.upscaleThumbs.on((value) => flows.thumbs.toggleUpscaling(value));
+  preferences.gallery.previewEnabled.on(enabled => model.preview(enabled));
+  preferences.favorites.upscaleThumbs.on(value => flows.thumbs.toggleUpscaling(value));
   subscribeToQualityChanges(preferences.favorites, view, flows);
 }
 
 function subscribeToPostListEvents({ context, view, flows }: GalleryComponents): void {
   const { events, milestones, preferences } = context;
 
-  preferences.postList.upscaleThumbs.on((value) => flows.thumbs.toggleUpscaling(value));
+  preferences.postList.upscaleThumbs.on(value => flows.thumbs.toggleUpscaling(value));
   milestones.postList.initialPostListCreated.wait().then(() => flows.thumbs.preloadPostListOnIdle());
   events.postList.moreResultsAdded.on(() => flows.thumbs.refresh());
   preferences.postList.infiniteScroll.on(() => flows.thumbs.refresh());
@@ -156,15 +156,15 @@ function subscribeToQualityChanges(settings: GallerySizeSettings, view: GalleryV
 function subscribeToDesktopInput({ context, flows }: GalleryComponents): void {
   const { domEvents, events } = context;
 
-  domEvents.document.mouseover.on((event) => flows.mouse.handleMouseOver(event));
-  domEvents.document.click.on((event) => flows.mouse.handleClick(event));
-  domEvents.document.dblclick.on((event) => flows.mouse.handleDoubleClick(event));
-  domEvents.document.mousedown.on((event) => flows.mouse.handleMouseDown(event));
-  domEvents.document.contextmenu.on((event) => flows.mouse.handleContextMenu(event));
-  domEvents.document.mousemove.on((event) => flows.mouse.handleMouseMove(event));
-  domEvents.document.wheel.on((event) => flows.mouse.handleWheel(event));
-  domEvents.document.keydown.on((event) => flows.keyboard.handleKeyDown(event));
-  domEvents.document.keyup.on((event) => flows.keyboard.handleKeyUp(event));
+  domEvents.document.mouseover.on(event => flows.mouse.handleMouseOver(event));
+  domEvents.document.click.on(event => flows.mouse.handleClick(event));
+  domEvents.document.dblclick.on(event => flows.mouse.handleDoubleClick(event));
+  domEvents.document.mousedown.on(event => flows.mouse.handleMouseDown(event));
+  domEvents.document.contextmenu.on(event => flows.mouse.handleContextMenu(event));
+  domEvents.document.mousemove.on(event => flows.mouse.handleMouseMove(event));
+  domEvents.document.wheel.on(event => flows.mouse.handleWheel(event));
+  domEvents.document.keydown.on(event => flows.keyboard.handleKeyDown(event));
+  domEvents.document.keyup.on(event => flows.keyboard.handleKeyUp(event));
   events.gallery.interactionStopped.on(() => flows.mouse.hideCursor());
 }
 
@@ -173,9 +173,9 @@ function subscribeToMobileInput({ context, view, flows, features }: GalleryCompo
 
   events.gallery.leftTapped.on(() => flows.touch.navigateBack());
   events.gallery.rightTapped.on(() => flows.touch.navigateForward());
-  domEvents.document.mousedown.on((event) => flows.touch.handleMouseDown(event));
-  domEvents.document.touchStart.on((event) => flows.touch.handleTouchStart(event));
-  domEvents.document.touchEnd.on((event) => flows.touch.handleTouchEnd(event));
+  domEvents.document.mousedown.on(event => flows.touch.handleMouseDown(event));
+  domEvents.document.touchStart.on(event => flows.touch.handleTouchStart(event));
+  domEvents.document.touchEnd.on(event => flows.touch.handleTouchEnd(event));
   domEvents.mobile.swipeDown.on(() => flows.touch.close());
   domEvents.mobile.swipeUp.on(() => features.showMenu());
   domEvents.mobile.touchHold.on(() => flows.touch.favoriteCurrentPost());

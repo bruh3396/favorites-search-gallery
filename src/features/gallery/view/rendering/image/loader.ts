@@ -11,7 +11,7 @@ export class GalleryImageLoader {
     private readonly budgeter: ImageBudgeter,
     private readonly onRequestCompleted: (request: ImageRequest) => void
   ) {
-    this.cache = new GalleryImageCache((id) => fetcher.cancelFetch(id));
+    this.cache = new GalleryImageCache(id => fetcher.cancelFetch(id));
   }
 
   public load(items: PostMedia[]): PostMedia[] {

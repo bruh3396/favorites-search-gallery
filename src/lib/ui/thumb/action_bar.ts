@@ -63,12 +63,17 @@ export const ActionBarDataset = {
 const ACTION_BAR_BUTTONS: ActionBarButtonSpec[] = [
   { bit: ActionBarButton.Open, action: "open", innerHtml: iconSpan("externalLink"), run: ({ thumb, callbacks }) => callbacks.onPostOpened(thumb.id) },
   { bit: ActionBarButton.Download, action: "download", innerHtml: iconSpan("download"), run: ({ thumb, callbacks }) => callbacks.onMediaDownloaded(thumb.id) },
-  { bit: ActionBarButton.Favorite, action: "favorite", innerHtml: iconSpan("heart", ActionBarSelectors.heartEmpty) + iconSpan("heartFilled", ActionBarSelectors.heartFilled), run: toggleFavorite }
+  {
+    bit: ActionBarButton.Favorite,
+    action: "favorite",
+    innerHtml: iconSpan("heart", ActionBarSelectors.heartEmpty) + iconSpan("heartFilled", ActionBarSelectors.heartFilled),
+    run: toggleFavorite
+  }
 ];
 
 export function actionBarHtml(isFavorite: boolean): string {
   const favoriteState = isFavorite ? ` data-${camelToKebabCase(ActionBarDataset.isFavorite)}` : "";
-  const buttons = ACTION_BAR_BUTTONS.map((spec) => actionButton(spec.action, spec.innerHtml)).join("");
+  const buttons = ACTION_BAR_BUTTONS.map(spec => actionButton(spec.action, spec.innerHtml)).join("");
   return `<div class="${ActionBarSelectors.bar}"${favoriteState}><span class="${ActionBarSelectors.id}"></span>${buttons}</div>`;
 }
 
@@ -139,7 +144,7 @@ function closestActionButton(target: EventTarget | null): HTMLElement | null {
 function dispatch(button: HTMLElement, callbacks: ActionBarCallbacks): void {
   const bar = button.closest(`.${ActionBarSelectors.bar}`);
   const thumb = button.closest(ITEM_SELECTOR);
-  const spec = ACTION_BAR_BUTTONS.find((candidate) => candidate.action === button.dataset.action);
+  const spec = ACTION_BAR_BUTTONS.find(candidate => candidate.action === button.dataset.action);
 
   if (spec === undefined || !(bar instanceof HTMLElement) || !(thumb instanceof HTMLElement)) {
     return;

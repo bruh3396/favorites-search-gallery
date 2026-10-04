@@ -29,11 +29,11 @@ class FavoritesEdgeObserver {
   }
 
   private onIntersection(entries: IntersectionObserverEntry[]): void {
-    if (this.loading || !entries.some((entry) => entry.isIntersecting)) {
+    if (this.loading || !entries.some(entry => entry.isIntersecting)) {
       return;
     }
     this.loading = true;
-    this.onEdgeReached().then((hasMore) => (hasMore ? this.refresh() : this.disconnect()));
+    this.onEdgeReached().then(hasMore => (hasMore ? this.refresh() : this.disconnect()));
   }
 }
 

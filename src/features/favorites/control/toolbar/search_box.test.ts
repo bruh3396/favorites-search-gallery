@@ -90,241 +90,231 @@ describe("FavoritesSearchBox", () => {
     document.body.replaceChildren();
   });
 
-  describe("searching", () => {
-    test("Enter searches for the typed query", () => {
-      const { input, searched } = setup();
+  test("searches for the typed query on Enter", () => {
+    const { input, searched } = setup();
 
-      type(input, "cat dog");
-      const event = press(input, "Enter");
+    type(input, "cat dog");
+    const event = press(input, "Enter");
 
-      expect(searched).toEqual(["cat dog"]);
-      expect(event.defaultPrevented).toBe(true);
-    });
-
-    test("Enter picks a highlighted suggestion instead of searching", () => {
-      const { input, searched } = setup();
-
-      type(input, "ca");
-      showSuggestion(input, true);
-      press(input, "Enter");
-
-      expect(searched).toEqual([]);
-    });
-
-    test("Enter searches when suggestions are showing but none is highlighted", () => {
-      const { input, searched } = setup();
-
-      type(input, "ca");
-      showSuggestion(input, false);
-      press(input, "Enter");
-
-      expect(searched).toEqual(["ca"]);
-    });
-
-    test("holding Enter searches only once", () => {
-      const { input, searched } = setup();
-
-      type(input, "cat");
-      press(input, "Enter");
-      press(input, "Enter", { repeat: true });
-
-      expect(searched).toEqual(["cat"]);
-    });
-
-    test("the search button searches for the typed query", () => {
-      const { searchBox, input, searched, postLists } = setup();
-
-      type(input, "cat");
-      searchBox.handleSearchButtonClicked(click());
-
-      expect(searched).toEqual(["cat"]);
-      expect(postLists).toEqual([]);
-    });
-
-    test.each([
-      ["ctrl-click", { ctrlKey: true }],
-      ["right-click", { button: 2 }]
-    ])("%s on the search button asks for the post list instead of searching", (_name, init) => {
-      const { searchBox, input, searched, postLists } = setup();
-
-      type(input, "cat");
-      searchBox.handleSearchButtonClicked(click(init));
-
-      expect(postLists).toEqual(["cat"]);
-      expect(searched).toEqual([]);
-    });
-
-    test("search() shows the query and searches for it", () => {
-      const { searchBox, input, searched } = setup();
-
-      searchBox.search("cat");
-
-      expect(input.value).toBe("cat");
-      expect(searched).toEqual(["cat"]);
-    });
+    expect(searched).toEqual(["cat dog"]);
+    expect(event.defaultPrevented).toBe(true);
   });
 
-  describe("editing", () => {
-    test("append() adds to the query, separated by a space", () => {
-      const { searchBox, input } = setup();
+  test("picks a highlighted suggestion on Enter instead of searching", () => {
+    const { input, searched } = setup();
 
-      searchBox.append("cat");
-      searchBox.append("-dog");
+    type(input, "ca");
+    showSuggestion(input, true);
+    press(input, "Enter");
 
-      expect(input.value).toBe("cat -dog");
-    });
-
-    test("clear() empties the query", () => {
-      const { searchBox, input } = setup();
-
-      type(input, "cat");
-      searchBox.clear();
-
-      expect(input.value).toBe("");
-    });
-
-    test("the clear button is hidden exactly while the query is empty", () => {
-      const { searchBox, input, clearButton } = setup();
-
-      expect(isHidden(clearButton)).toBe(true);
-      type(input, "cat");
-      expect(isHidden(clearButton)).toBe(false);
-      searchBox.clear();
-      expect(isHidden(clearButton)).toBe(true);
-      searchBox.append("dog");
-      expect(isHidden(clearButton)).toBe(false);
-    });
-
-    test("clicking the clear button asks for the search to be cleared", () => {
-      const { clearButton, events } = setup();
-      const cleared = vi.fn();
-
-      events.favorites.clearButtonClicked.on(cleared);
-      clearButton.click();
-
-      expect(cleared).toHaveBeenCalledOnce();
-    });
-
-    test("the '/' hotkey focuses the search box", async() => {
-      const { input, events } = setup();
-
-      events.app.hotkeyPressed.emit("/");
-
-      await vi.waitFor(() => expect(document.activeElement).toBe(input));
-    });
-
-    test("other hotkeys leave focus alone", async() => {
-      const { input, events } = setup();
-
-      events.app.hotkeyPressed.emit("d");
-      await new Promise(resolve => setTimeout(resolve));
-      expect(document.activeElement).not.toBe(input);
-    });
+    expect(searched).toEqual([]);
   });
 
-  describe("other keys", () => {
-    test("neither search nor recall history", () => {
-      const { input, searched } = setup();
+  test("searches on Enter when suggestions are showing but none is highlighted", () => {
+    const { input, searched } = setup();
 
-      type(input, "apple");
+    type(input, "ca");
+    showSuggestion(input, false);
+    press(input, "Enter");
+
+    expect(searched).toEqual(["ca"]);
+  });
+
+  test("searches only once while Enter is held", () => {
+    const { input, searched } = setup();
+
+    type(input, "cat");
+    press(input, "Enter");
+    press(input, "Enter", { repeat: true });
+
+    expect(searched).toEqual(["cat"]);
+  });
+
+  test("searches for the typed query when the search button is clicked", () => {
+    const { searchBox, input, searched, postLists } = setup();
+
+    type(input, "cat");
+    searchBox.handleSearchButtonClicked(click());
+
+    expect(searched).toEqual(["cat"]);
+    expect(postLists).toEqual([]);
+  });
+
+  test.each([
+    ["ctrl-click", { ctrlKey: true }],
+    ["right-click", { button: 2 }]
+  ])("asks for the post list instead of searching on a %s of the search button", (_name, init) => {
+    const { searchBox, input, searched, postLists } = setup();
+
+    type(input, "cat");
+    searchBox.handleSearchButtonClicked(click(init));
+
+    expect(postLists).toEqual(["cat"]);
+    expect(searched).toEqual([]);
+  });
+
+  test("shows the query and searches for it when told to search", () => {
+    const { searchBox, input, searched } = setup();
+
+    searchBox.search("cat");
+
+    expect(input.value).toBe("cat");
+    expect(searched).toEqual(["cat"]);
+  });
+
+  test("appends to the query, separated by a space", () => {
+    const { searchBox, input } = setup();
+
+    searchBox.append("cat");
+    searchBox.append("-dog");
+
+    expect(input.value).toBe("cat -dog");
+  });
+
+  test("empties the query when cleared", () => {
+    const { searchBox, input } = setup();
+
+    type(input, "cat");
+    searchBox.clear();
+
+    expect(input.value).toBe("");
+  });
+
+  test("hides the clear button exactly while the query is empty", () => {
+    const { searchBox, input, clearButton } = setup();
+
+    expect(isHidden(clearButton)).toBe(true);
+    type(input, "cat");
+    expect(isHidden(clearButton)).toBe(false);
+    searchBox.clear();
+    expect(isHidden(clearButton)).toBe(true);
+    searchBox.append("dog");
+    expect(isHidden(clearButton)).toBe(false);
+  });
+
+  test("asks for the search to be cleared when the clear button is clicked", () => {
+    const { clearButton, events } = setup();
+    const cleared = vi.fn();
+
+    events.favorites.clearButtonClicked.on(cleared);
+    clearButton.click();
+
+    expect(cleared).toHaveBeenCalledOnce();
+  });
+
+  test("takes focus on the '/' hotkey", async() => {
+    const { input, events } = setup();
+
+    events.app.hotkeyPressed.emit("/");
+
+    await vi.waitFor(() => expect(document.activeElement).toBe(input));
+  });
+
+  test("leaves focus alone on other hotkeys", async() => {
+    const { input, events } = setup();
+
+    events.app.hotkeyPressed.emit("d");
+    await new Promise(resolve => setTimeout(resolve));
+    expect(document.activeElement).not.toBe(input);
+  });
+
+  test("neither searches nor recalls history on other keys", () => {
+    const { input, searched } = setup();
+
+    type(input, "apple");
+    press(input, "Enter");
+    type(input, "banana");
+    const event = press(input, "Tab");
+
+    expect(input.value).toBe("banana");
+    expect(searched).toEqual(["apple"]);
+    expect(event.defaultPrevented).toBe(false);
+  });
+
+  test("grows to fit a long query while focused", () => {
+    const { field, input } = setup();
+
+    wrapLongQueries(input);
+    input.focus();
+    type(input, "apple banana cherry grape mango");
+    expect(isExpanded(field)).toBe(true);
+    expect(input.style.height).toBe("120px");
+    type(input, "apple");
+    expect(isExpanded(field)).toBe(false);
+  });
+
+  test("stays collapsed while not focused", () => {
+    const { field, input } = setup();
+
+    wrapLongQueries(input);
+    type(input, "apple banana cherry grape mango");
+    expect(isExpanded(field)).toBe(false);
+  });
+
+  test("collapses when focus leaves", () => {
+    const { field, input } = setup();
+
+    wrapLongQueries(input);
+    input.focus();
+    type(input, "apple banana cherry grape mango");
+    input.blur();
+    expect(isExpanded(field)).toBe(false);
+    expect(input.style.height).not.toBe("120px");
+  });
+
+  test("recalls earlier searches on ArrowUp and returns to the draft on ArrowDown", () => {
+    const { input } = setup();
+
+    for (const query of ["cat", "dog"]) {
+      type(input, query);
       press(input, "Enter");
-      type(input, "banana");
-      const event = press(input, "Tab");
+    }
+    type(input, "draft");
 
-      expect(input.value).toBe("banana");
-      expect(searched).toEqual(["apple"]);
-      expect(event.defaultPrevented).toBe(false);
-    });
+    press(input, "ArrowUp");
+    expect(input.value).toBe("dog");
+    press(input, "ArrowUp");
+    expect(input.value).toBe("cat");
+    press(input, "ArrowDown");
+    press(input, "ArrowDown");
+    expect(input.value).toBe("draft");
   });
 
-  describe("growing", () => {
-    test("grows to fit a long query while focused", () => {
-      const { field, input } = setup();
+  test("moves through suggestions, not history, on arrow keys while suggestions show", () => {
+    const { input } = setup();
 
-      wrapLongQueries(input);
-      input.focus();
-      type(input, "apple banana cherry grape mango");
-      expect(isExpanded(field)).toBe(true);
-      expect(input.style.height).toBe("120px");
-      type(input, "apple");
-      expect(isExpanded(field)).toBe(false);
-    });
+    type(input, "cat");
+    press(input, "Enter");
+    type(input, "do");
+    showSuggestion(input, false);
+    const event = press(input, "ArrowUp");
 
-    test("stays collapsed while not focused", () => {
-      const { field, input } = setup();
-
-      wrapLongQueries(input);
-      type(input, "apple banana cherry grape mango");
-      expect(isExpanded(field)).toBe(false);
-    });
-
-    test("collapses when focus leaves", () => {
-      const { field, input } = setup();
-
-      wrapLongQueries(input);
-      input.focus();
-      type(input, "apple banana cherry grape mango");
-      input.blur();
-      expect(isExpanded(field)).toBe(false);
-      expect(input.style.height).not.toBe("120px");
-    });
+    expect(input.value).toBe("do");
+    expect(event.defaultPrevented).toBe(false);
   });
 
-  describe("history", () => {
-    test("ArrowUp recalls earlier searches, and ArrowDown returns to the draft", () => {
-      const { input } = setup();
+  test("keeps the query being edited across a reload", () => {
+    const storage = new MemoryLocalKeyedValues();
+    const first = setup(storage);
 
-      for (const query of ["cat", "dog"]) {
-        type(input, query);
-        press(input, "Enter");
-      }
-      type(input, "draft");
+    type(first.input, "cat");
+    document.body.replaceChildren();
 
-      press(input, "ArrowUp");
-      expect(input.value).toBe("dog");
-      press(input, "ArrowUp");
-      expect(input.value).toBe("cat");
-      press(input, "ArrowDown");
-      press(input, "ArrowDown");
-      expect(input.value).toBe("draft");
-    });
+    expect(setup(storage).input.value).toBe("cat");
+  });
 
-    test("arrow keys move through suggestions, not history, while suggestions show", () => {
-      const { input } = setup();
+  test("keeps past searches across a reload", () => {
+    const storage = new MemoryLocalKeyedValues();
+    const first = setup(storage);
 
-      type(input, "cat");
-      press(input, "Enter");
-      type(input, "do");
-      showSuggestion(input, false);
-      const event = press(input, "ArrowUp");
+    type(first.input, "cat");
+    press(first.input, "Enter");
+    document.body.replaceChildren();
+    const { searchBox, input } = setup(storage);
 
-      expect(input.value).toBe("do");
-      expect(event.defaultPrevented).toBe(false);
-    });
+    searchBox.clear();
+    press(input, "ArrowUp");
 
-    test("the query being edited survives a reload", () => {
-      const storage = new MemoryLocalKeyedValues();
-      const first = setup(storage);
-
-      type(first.input, "cat");
-      document.body.replaceChildren();
-
-      expect(setup(storage).input.value).toBe("cat");
-    });
-
-    test("searches survive a reload", () => {
-      const storage = new MemoryLocalKeyedValues();
-      const first = setup(storage);
-
-      type(first.input, "cat");
-      press(first.input, "Enter");
-      document.body.replaceChildren();
-      const { searchBox, input } = setup(storage);
-
-      searchBox.clear();
-      press(input, "ArrowUp");
-
-      expect(input.value).toBe("cat");
-    });
+    expect(input.value).toBe("cat");
   });
 });

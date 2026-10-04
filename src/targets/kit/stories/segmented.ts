@@ -27,7 +27,7 @@ function variant(label: string, { options, value, disabled = false, size }: Segm
       const control = createSegmented(ownerDocument, {
         options,
         size,
-        onValueChange: (next) => {
+        onValueChange: next => {
           log(`Segmented "${label}" → ${next}`);
           control.setValue(next);
         }

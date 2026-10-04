@@ -5,8 +5,6 @@ import { buildStepper } from "@/lib/ui/settings/components/stepper_control";
 import { clamp } from "@/utils/pure/number";
 import { controlRow } from "@/lib/ui/settings/components/row";
 
-const COMMIT_DEBOUNCE_DELAY = 50;
-
 export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
   const min = config.min ?? 0;
   const max = config.max ?? 100;
@@ -18,14 +16,14 @@ export function buildStepperRow(config: Partial<StepperSetting>): HTMLElement {
     max,
     step,
     value: clamp(config.preference?.value ?? min, min, max),
-    onChange: (value) => {
+    onChange: value => {
       binding.set(value);
     }
   });
 
-  const binding = new DebouncedStateBinding(config, min, (value) => {
+  const binding = new DebouncedStateBinding(config, min, value => {
     stepper.setValue(value);
-  }, COMMIT_DEBOUNCE_DELAY);
+  });
 
   const row = controlRow(config, stepper.element);
 

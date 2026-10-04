@@ -22,7 +22,7 @@ function setup({ failing = new Set<string>(), tags = new Map<string, Set<string>
   const categoryRequests: string[][] = [];
   const archiver = new DownloaderArchiver({
     filenamer: {
-      filenameFor: (item, itemTags, extension, tagCategories): string => {
+      filenameFor: (item, { tags: itemTags, extension, tagCategories }): string => {
         tagsSeen.set(item.id, itemTags);
         categoriesSeen.push(tagCategories);
         return `${item.id}.${extension}`;
@@ -65,7 +65,11 @@ async function readEntryNames(blob: Blob): Promise<string[]> {
   return names;
 }
 
-async function archive(archiver: DownloaderArchiver, items: PostMedia[], signal = new AbortController().signal): Promise<{ blob: Blob | null; settled: (string | null)[] }> {
+async function archive(
+  archiver: DownloaderArchiver,
+  items: PostMedia[],
+  signal = new AbortController().signal
+): Promise<{ blob: Blob | null; settled: (string | null)[] }> {
   const settled: (string | null)[] = [];
   const blob = await archiver.archive(items, signal, filename => settled.push(filename));
   return { blob, settled };
@@ -106,7 +110,9 @@ describe("DownloaderArchiver", () => {
     await archive(archiver, [createItem("1"), createItem("2")]);
 
     expect(categoryRequests).toEqual([["a", "b", "c"]]);
-    expect(categoriesSeen).toEqual([new Map([["a", "artist"], ["b", "artist"], ["c", "artist"]]), new Map([["a", "artist"], ["b", "artist"], ["c", "artist"]])]);
+    const categories = new Map([["a", "artist"], ["b", "artist"], ["c", "artist"]]);
+
+    expect(categoriesSeen).toEqual([categories, categories]);
   });
 
   test("reports a failed fetch as null and leaves it out of the zip", async() => {

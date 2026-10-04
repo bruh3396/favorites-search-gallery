@@ -14,7 +14,6 @@ import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { Point } from "@/types/geometry";
 import { PostMedia } from "@/core/domain/post/post";
-import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { isImage } from "@/lib/media/media_type";
@@ -32,14 +31,14 @@ export class GalleryImageRenderer implements Renderer {
   private activeItem: PostMedia | undefined;
 
   constructor(context: AppContext, favoriteFor: (id: string) => Favorite | undefined, budget: GalleryBudget) {
-    const { environment, preferences, shell } = context;
+    const { environment, shell } = context;
 
     this.root = div();
     this.shell = shell;
     this.favoriteFor = favoriteFor;
     this.fetcher = new GalleryImageFetcher(context.ports.remoteMedia);
     this.loader = this.createLoader(environment);
-    this.upscaler = this.createUpscaler(environment, budget, preferences, shell);
+    this.upscaler = this.createUpscaler(context, budget);
     this.canvas = new GalleryImageCanvas(environment, budget);
     this.canvas.mount(this.root);
     this.activeItem = undefined;
@@ -59,7 +58,7 @@ export class GalleryImageRenderer implements Renderer {
 
   public async cache(items: PostMedia[]): Promise<void> {
     await this.waitForAllThumbsToLoadWithTimeout();
-    const [images, animated] = partition(items, (item) => isImage(item));
+    const [images, animated] = partition(items, item => isImage(item));
     const rejected = this.loader.load(images);
 
     this.upscaler.fetchThenPaintAll(this.disposableRequests([...animated, ...rejected]));
@@ -113,7 +112,7 @@ export class GalleryImageRenderer implements Renderer {
 
   private createLoader(environment: Environment): GalleryImageLoader {
     const budgeter = this.createBudgeter(environment);
-    return new GalleryImageLoader(this.fetcher, budgeter, (request) => this.onBitmapLoaded(request));
+    return new GalleryImageLoader(this.fetcher, budgeter, request => this.onBitmapLoaded(request));
   }
 
   private createBudgeter(environment: Environment): GalleryAbstractImageBudgeter {
@@ -126,7 +125,7 @@ export class GalleryImageRenderer implements Renderer {
     return new GalleryLimitImageBudgeter(limit);
   }
 
-  private createUpscaler(environment: Environment, budget: GalleryBudget, preferences: Preferences, shell: Shell): GalleryAbstractUpscaler {
+  private createUpscaler({ environment, preferences, shell }: AppContext, budget: GalleryBudget): GalleryAbstractUpscaler {
     const settings = environment.mode === "postList" ? preferences.postList : preferences.favorites;
     const { paintDelay, canvasWidth } = budget.upscale;
     const configuration: GalleryUpscalerConfiguration = {

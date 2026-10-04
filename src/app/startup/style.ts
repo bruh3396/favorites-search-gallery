@@ -32,12 +32,22 @@ import TOOLTIP_CSS from "@/assets/css/tooltip.css";
 import TOOLTIP_HINT_CSS from "@/assets/css/base/tooltip_hint.css";
 import TUTORIAL_CSS from "@/assets/css/gallery/tutorial.css";
 import { ThumbConfig } from "@/config/thumb_config";
-import { effect } from "@/core/utils/reactive/signal";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
+import { effect } from "@/core/utils/reactive/signal";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
+
+const FAVORITES_CSS = TOOLBAR_CSS +
+  SEARCH_FIELD_CSS +
+  PAGINATION_CSS +
+  DRAWER_CSS +
+  DRAWER_SECTIONS_CSS +
+  SETTINGS_CSS +
+  SNIPPETS_CSS +
+  HELP_CSS +
+  CHANGELOG_CSS;
 
 export function setupStyles(context: AppContext): void {
   insertBaseStyles(context);
@@ -60,7 +70,7 @@ function bindPreferenceStyles(context: AppContext): void {
 }
 
 function subscribeToColorSchemeChanges({ preferences, ports }: AppContext): void {
-  preferences.app.colorScheme.on((colorScheme) => ports.hostPage.setColorScheme(colorScheme));
+  preferences.app.colorScheme.on(colorScheme => ports.hostPage.setColorScheme(colorScheme));
 }
 
 function actionBarPreferences({ preferences, environment }: AppContext): Preferences["favorites"] | Preferences["postList"] {
@@ -74,7 +84,7 @@ function insertBaseStyles(context: AppContext): void {
   const tooltipCss = context.features.has("tooltip") ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
   const postListCss = context.environment.mode === "postList" ? POST_LIST_CSS + SETTINGS_CSS : "";
   const postOverlayCss = context.features.has("postOverlay") ? POST_OVERLAY_CSS : "";
-  const favoritesCss = context.environment.mode === "favorites" ? TOOLBAR_CSS + SEARCH_FIELD_CSS + PAGINATION_CSS + DRAWER_CSS + DRAWER_SECTIONS_CSS + SETTINGS_CSS + SNIPPETS_CSS + HELP_CSS + CHANGELOG_CSS : "";
+  const favoritesCss = context.environment.mode === "favorites" ? FAVORITES_CSS : "";
 
   insertStyle(VARIABLES_CSS +
     ELEMENTS_CSS +

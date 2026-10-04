@@ -31,7 +31,16 @@ export function resetCanvas(canvas: HTMLCanvasElement): void {
   canvas.height = 0;
 }
 
-export function setCanvasDimensions(canvas: HTMLCanvasElement, width: number, height: number, targetWidth: number, maxHeight: number): void {
+export interface CanvasLimits {
+  targetWidth: number;
+  maxHeight: number;
+}
+
+export function setCanvasDimensions(
+  canvas: HTMLCanvasElement,
+  { width, height }: { width: number; height: number },
+  { targetWidth, maxHeight }: CanvasLimits
+): void {
   let targetHeight = (targetWidth / width) * height;
 
   if (targetWidth > width) {

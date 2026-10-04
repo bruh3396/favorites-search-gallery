@@ -18,11 +18,11 @@ function setup(): MultiSelect<Action> & { onValueChange: (next: readonly Action[
 }
 
 function readPressedStates(toggles: HTMLButtonElement[]): boolean[] {
-  return toggles.map((toggle) => toggle.getAttribute("aria-pressed") === "true");
+  return toggles.map(toggle => toggle.getAttribute("aria-pressed") === "true");
 }
 
 function readLockedStates(toggles: HTMLButtonElement[]): boolean[] {
-  return toggles.map((toggle) => toggle.getAttribute("aria-disabled") === "true");
+  return toggles.map(toggle => toggle.getAttribute("aria-disabled") === "true");
 }
 
 describe("createMultiSelect", () => {
@@ -30,8 +30,8 @@ describe("createMultiSelect", () => {
     const { element, toggles } = setup();
 
     expect(element.getAttribute("role")).toBe("group");
-    expect(toggles.map((toggle) => toggle.textContent)).toEqual(["Favorite", "Download", "Open"]);
-    expect(toggles.every((toggle) => toggle.type === "button" && toggle.tabIndex === 0)).toBe(true);
+    expect(toggles.map(toggle => toggle.textContent)).toEqual(["Favorite", "Download", "Open"]);
+    expect(toggles.every(toggle => toggle.type === "button" && toggle.tabIndex === 0)).toBe(true);
     expect(readPressedStates(toggles)).toEqual([false, false, false]);
   });
 
@@ -87,7 +87,7 @@ describe("createMultiSelect", () => {
 
     setDisabled(true);
     toggles[0].click();
-    expect(toggles.every((toggle) => toggle.disabled)).toBe(true);
+    expect(toggles.every(toggle => toggle.disabled)).toBe(true);
     expect(onValueChange).not.toHaveBeenCalled();
   });
 

@@ -36,7 +36,7 @@ describe("DownloaderView", () => {
     const container = document.createElement("div");
 
     view.mount(container);
-    expect(Array.from(container.children)).toEqual([shell.batchSizeRow, shell.filenameFormatRow, shell.progressBar.element, shell.status, shell.actions]);
+    expect([...container.children]).toEqual([shell.batchSizeRow, shell.filenameFormatRow, shell.progressBar.element, shell.status, shell.actions]);
   });
 
   test("starts waiting for favorites with everything hidden and download disabled", () => {

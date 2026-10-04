@@ -53,5 +53,5 @@ function parseAndTerms(query: string): string[] {
 }
 
 function parseOrGroups(query: string): string[][] {
-  return Array.from(query.matchAll(orGroupRegex)).map(orGroup => orGroup[1].split(" ~ "));
+  return [...query.matchAll(orGroupRegex)].map(orGroup => orGroup[1].split(" ~ "));
 }

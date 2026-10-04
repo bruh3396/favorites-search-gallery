@@ -45,6 +45,7 @@ export class FavoritesFeatures {
   }
 
   private setupSnippets(): void {
-    setSnippetSuggestionSource((prefix) => this.snippets.suggestions(prefix));
+    this.snippets.load();
+    setSnippetSuggestionSource(prefix => this.snippets.suggestions(prefix));
   }
 }

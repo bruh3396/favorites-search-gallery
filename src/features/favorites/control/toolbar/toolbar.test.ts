@@ -23,7 +23,7 @@ function setup(onDesktopDevice = true): Setup {
   const events = createEvents();
   const clicked = recordButtonEvents(events);
 
-  FavoritesToolbar.setup(events, environment, preferences, slots);
+  FavoritesToolbar.setup({ events, environment, preferences }, slots);
   return { slots, preferences, clicked };
 }
 
@@ -46,21 +46,21 @@ function isActive(element: Element): boolean {
 }
 
 describe("FavoritesToolbar", () => {
-  test("on desktop, offers invert and shuffle, each with its own event", () => {
+  test("offers invert and shuffle on desktop, each with its own event", () => {
     const { slots, clicked } = setup(true);
 
     clickEach(slots.buttons);
     expect(clicked.sort()).toEqual(["invert", "shuffle"]);
   });
 
-  test("on mobile, offers shuffle, but not invert", () => {
+  test("offers shuffle but not invert on mobile", () => {
     const { slots, clicked } = setup(false);
 
     clickEach(slots.buttons);
     expect(clicked).toEqual(["shuffle"]);
   });
 
-  test("the search button reports both left and right clicks", () => {
+  test("reports both left and right clicks on the search button", () => {
     const { slots, clicked } = setup();
     const button = slots.searchButton.querySelector("button") as HTMLButtonElement;
 
@@ -69,7 +69,7 @@ describe("FavoritesToolbar", () => {
     expect(clicked).toEqual(["search", "search"]);
   });
 
-  test("the drawer toggle opens and closes the drawer, and shows whether it is open", () => {
+  test("opens and closes the drawer from its toggle, and shows on the toggle whether it is open", () => {
     const { slots, preferences } = setup();
     const toggle = slots.drawerToggle.querySelector("button") as HTMLButtonElement;
 
@@ -81,7 +81,7 @@ describe("FavoritesToolbar", () => {
     expect(preferences.favorites.drawerOpen.value).toBe(false);
   });
 
-  test("the drawer toggle follows the drawer when something else opens it", () => {
+  test("keeps the drawer toggle in step when something else opens the drawer", () => {
     const { slots, preferences } = setup();
 
     preferences.favorites.drawerOpen.set(true);

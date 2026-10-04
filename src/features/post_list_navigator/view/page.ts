@@ -9,5 +9,5 @@ export function currentSearch(): string {
 }
 
 export function lastItems(): HTMLElement[] {
-  return Array.from(document.querySelectorAll<HTMLElement>(`.${ITEM_CLASS_NAME}:last-child`));
+  return [...document.querySelectorAll<HTMLElement>(`.${ITEM_CLASS_NAME}:last-child`)];
 }

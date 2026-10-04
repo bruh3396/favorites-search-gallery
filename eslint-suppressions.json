@@ -1,14 +1,4 @@
 {
-  "src/app/context/dom_events.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/app/startup/features.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/favorites/control/sections/help.ts": {
     "no-restricted-syntax": {
       "count": 2
@@ -34,85 +24,14 @@
       "count": 1
     }
   },
-  "src/features/favorites/control/toolbar/toolbar.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/favorites/favorites.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    },
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/archiver.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/archiver.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/batcher.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/batcher.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/filename_builder.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/filenamer.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/model.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/model/zip_writer.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/downloader/types/types.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/snippets/model/store.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/features/snippets/testing/snippets.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
   "src/features/favorites/features/snippets/view/components.ts": {
     "no-restricted-syntax": {
       "count": 3
-    }
-  },
-  "src/features/favorites/flows/flows.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
     }
   },
   "src/features/favorites/model/collection/arena_favorite.ts": {
@@ -122,11 +41,6 @@
   },
   "src/features/favorites/model/collection/collection.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/features/favorites/model/model.test.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
@@ -140,16 +54,6 @@
       "count": 2
     }
   },
-  "src/features/favorites/view/skeleton/skeleton_item.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 2
-    }
-  },
-  "src/features/favorites/view/status/eta.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/favorites/view/thumb_pool.ts": {
     "no-restricted-syntax": {
       "count": 1
@@ -160,48 +64,13 @@
       "count": 1
     }
   },
-  "src/features/gallery/flows/flows.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/gallery/model/model.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/gallery/types/image_request.ts": {
     "no-restricted-syntax": {
       "count": 1
     }
   },
-  "src/features/gallery/view/rendering/gallery_renderer.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/gallery/view/rendering/image/renderer.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/gallery/view/rendering/image/worker_upscaler.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/gallery/view/rendering/video/video_controller.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/features/post_list_navigator/types/post_list_page.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/features/tooltip/model/highlight_builder.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
@@ -217,16 +86,6 @@
   },
   "src/lib/search/engines/set/indexes/inverted_index.test.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/search/engines/set/indexes/relative_metric_index.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 2
-    }
-  },
-  "src/lib/search/engines/set/resolution/doc_resolver.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
@@ -246,25 +105,12 @@
     }
   },
   "src/lib/search/terms/wildcard_search_term.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    },
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/ui/autocomplete/tag_replacer.test.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
   "src/lib/ui/settings/components/section.ts": {
     "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/ui/settings/debounced_state_binding.ts": {
-    "@typescript-eslint/max-params": {
       "count": 1
     }
   },
@@ -283,68 +129,19 @@
       "count": 1
     }
   },
-  "src/lib/ui/tooltip/tooltip.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/playground/junk/database_transfer.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 2
-    }
-  },
   "src/playground/search_performance/legacy_search_engine.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 4
-    },
     "no-restricted-syntax": {
-      "count": 7
+      "count": 5
     }
   },
   "src/playground/search_performance/panel.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 2
-    },
     "no-restricted-syntax": {
       "count": 2
-    }
-  },
-  "src/utils/browser/canvas.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
     }
   },
   "src/utils/browser/dataset.ts": {
     "no-restricted-syntax": {
       "count": 1
-    }
-  },
-  "src/utils/browser/element.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/utils/pure/array.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 2
-    }
-  },
-  "src/utils/pure/bit.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/utils/pure/geometry.test.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
-  "src/utils/pure/number.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 4
     }
   }
 }

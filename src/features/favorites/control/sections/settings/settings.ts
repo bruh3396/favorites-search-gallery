@@ -15,7 +15,7 @@ export function buildDrawerSection(context: AppContext): FavoritesDrawerSectionC
   const { environment, events, ports, preferences } = context;
   const settingsSections = FavoritesSettingsMenu.buildSettingsSections(FavoritesSettingsCatalog.buildSettingsCatalog(context), environment, ports.hostPage);
   const sections = settingsSections.map(section => buildSection(preferences, section, () => collapseAll.refresh()));
-  const collapseAll = new CollapseAllButton(sections, (collapsed) => expandAll(preferences, settingsSections, !collapsed));
+  const collapseAll = new CollapseAllButton(sections, collapsed => expandAll(preferences, settingsSections, !collapsed));
   return {
     mount: (container): void => {
       container.classList.add(SettingsClass.view);
@@ -37,8 +37,8 @@ function buildSection(preferences: Preferences, section: SettingsSection, onTogg
   return buildCollapsibleSection({
     title: section.title,
     collapsed: !isExpanded(preferences, section),
-    children: section.controls.map((control) => control()),
-    onToggle: (collapsed) => {
+    children: section.controls.map(control => control()),
+    onToggle: collapsed => {
       expand(preferences, section.title, !collapsed);
       onToggle();
     }

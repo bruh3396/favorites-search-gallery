@@ -16,7 +16,8 @@ function flattenPostIds(batches: Post[][]): string[] {
   return batches.flat().map(post => post.id);
 }
 
-function tick(): Promise<void> {
+// The fetcher requests its next page only after a macrotask, so waiting on microtasks alone would never see it.
+function yieldToEventLoop(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 0));
 }
 
@@ -35,7 +36,7 @@ function createDeferredFetcher(lastIndex: number): {
 
   async function settle(index: number): Promise<void> {
     while (!resolvers.has(index)) {
-      await tick();
+      await yieldToEventLoop();
     }
     resolvers.get(index)!(index > lastIndex ? [] : createPage(index));
     await flushMicrotasks();
@@ -53,7 +54,7 @@ function createFetcher(
     fetch,
     shouldRetry: () => true,
     delayForRetry,
-    scheduler: { sleep: tick }
+    scheduler: { sleep: yieldToEventLoop }
   });
 }
 
@@ -67,7 +68,7 @@ function createCappedFetcher(
     fetch,
     shouldRetry,
     delayForRetry: NO_DELAY,
-    scheduler: { sleep: tick }
+    scheduler: { sleep: yieldToEventLoop }
   });
 }
 
@@ -157,7 +158,7 @@ describe("Rule34AllFavoritesFetcher", () => {
 
     await flushMicrotasks();
     await pages.settle(1);
-    await tick();
+    await yieldToEventLoop();
     expect(hasFinished).toBe(false);
 
     await pages.settle(0);

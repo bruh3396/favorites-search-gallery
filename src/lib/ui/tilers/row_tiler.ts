@@ -58,13 +58,12 @@ export class RowTiler extends AbstractTiler {
 }
 
 function rowHeightToPixels(rowHeight: number): number {
-  const minWidth = Math.floor(window.innerWidth / 20);
-  const maxWidth = Math.floor(window.innerWidth / 2);
-  return rescaleGeometric(rowHeight, ThumbConfig.rowHeightBounds.min, ThumbConfig.rowHeightBounds.max, minWidth, maxWidth);
+  const widths = { min: Math.floor(window.innerWidth / 20), max: Math.floor(window.innerWidth / 2) };
+  return rescaleGeometric(rowHeight, ThumbConfig.rowHeightBounds, widths);
 }
 
 function getItemsOnLastRow(items: HTMLElement[]): HTMLElement[] {
-  items = items.slice().reverse();
+  items = [...items].reverse();
   const itemsOnLastRow = [];
   const lastRowY = items[0].offsetTop;
 

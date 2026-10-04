@@ -26,7 +26,7 @@ export function awesompleteIsUnselected(input: HTMLInputElement | HTMLTextAreaEl
   if (!awesompleteIsVisible(input)) {
     return true;
   }
-  const searchSuggestions = Array.from(awesomplete.querySelectorAll("li"));
+  const searchSuggestions = [...awesomplete.querySelectorAll("li")];
 
   if (searchSuggestions.length === 0) {
     return true;

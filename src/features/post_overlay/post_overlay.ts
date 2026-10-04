@@ -28,12 +28,12 @@ function setup(components: PostOverlayComponents): void {
 function subscribeToEvents({ context, flows }: PostOverlayComponents): void {
   const { domEvents, events, preferences } = context;
 
-  domEvents.document.mouseover.on((event) => flows.hover.handleMouseOver(event));
-  domEvents.document.mousedown.on((event) => flows.tagClick.handleMouseDown(event));
-  domEvents.document.contextmenu.on((event) => flows.tagClick.handleContextMenu(event));
-  domEvents.document.keydown.on((event) => flows.key.handleKeyDown(event));
-  domEvents.document.keyup.on((event) => flows.key.handleKeyUp(event));
-  preferences.postOverlay.enabled.on((enabled) => flows.toggle.setVisible(enabled));
+  domEvents.document.mouseover.on(event => flows.hover.handleMouseOver(event));
+  domEvents.document.mousedown.on(event => flows.tagClick.handleMouseDown(event));
+  domEvents.document.contextmenu.on(event => flows.tagClick.handleContextMenu(event));
+  domEvents.document.keydown.on(event => flows.key.handleKeyDown(event));
+  domEvents.document.keyup.on(event => flows.key.handleKeyUp(event));
+  preferences.postOverlay.enabled.on(enabled => flows.toggle.setVisible(enabled));
   domEvents.window.scroll.on(() => flows.hover.hideTemporarily());
   events.favorites.contentReplaced.on(() => flows.hover.hideTemporarily());
   preferences.favorites.columnCount.on(() => flows.hover.hideTemporarily());

@@ -1,8 +1,8 @@
 import { Metric, Rating } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { Arena } from "@/features/favorites/types/types";
-import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
+import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
@@ -154,7 +154,7 @@ describe("ArenaFavorite", () => {
     expect(arena.slot(0).cachedTags).toBeUndefined();
   });
 
-  test("setDurationSeconds and markAsNew write back to the same slot", () => {
+  test("writes setDurationSeconds and markAsNew back to the same slot", () => {
     const arena = new TestArena();
     const item = new ArenaFavorite(createPost({ id: "5" }), arena, false);
 
@@ -165,7 +165,7 @@ describe("ArenaFavorite", () => {
     expect(item.isNew).toBe(true);
   });
 
-  test("consumeTags returns and clears the cached tags", () => {
+  test("returns and clears the cached tags on consumeTags", () => {
     const arena = new TestArena();
     const item = new ArenaFavorite(createPost({ id: "1", tags: "one two" }), arena, true);
 
@@ -173,7 +173,7 @@ describe("ArenaFavorite", () => {
     expect(arena.slot(0).cachedTags).toBeUndefined();
   });
 
-  test("enrich overwrites the backing post", () => {
+  test("overwrites the backing post on enrich", () => {
     const arena = new TestArena();
     const item = new ArenaFavorite(createPost({ id: "3", score: 1 }), arena, false);
 
@@ -193,42 +193,40 @@ describe("ArenaFavorite", () => {
     expect(second.tags).toEqual(new Set(["two"]));
   });
 
-  describe("real arena", () => {
-    test("round trips fields, mutations, and tags", () => {
-      const arena = new FavoritesColumnarArena();
-      const item0 = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", rating: "s", score: 99 }), arena, true);
-      const item1 = new ArenaFavorite(createPost({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1_920, width: 1_080 }), arena, true);
+  test("round-trips fields, mutations, and tags through a real arena", () => {
+    const arena = new FavoritesColumnarArena();
+    const item0 = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", rating: "s", score: 99 }), arena, true);
+    const item1 = new ArenaFavorite(createPost({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1_920, width: 1_080 }), arena, true);
 
-      expect(item0.id).toBe("42");
-      expect(item0.rating).toBe(1 satisfies Rating);
-      expect(item0.getMetric("score")).toBe(99);
-      expect(item0.tags).toEqual(new Set(["apple", "banana"]));
+    expect(item0.id).toBe("42");
+    expect(item0.rating).toBe(1 satisfies Rating);
+    expect(item0.getMetric("score")).toBe(99);
+    expect(item0.tags).toEqual(new Set(["apple", "banana"]));
 
-      expect(item1.id).toBe("103");
-      expect(item1.rating).toBe(4 satisfies Rating);
-      expect(item1.getMetric("score")).toBe(3);
-      expect(item1.getMetric("width")).toBe(1_080);
-      expect(item1.getMetric("height")).toBe(1_920);
-      expect(item1.pixelCount).toBe(1_080 * 1_920);
-      expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
+    expect(item1.id).toBe("103");
+    expect(item1.rating).toBe(4 satisfies Rating);
+    expect(item1.getMetric("score")).toBe(3);
+    expect(item1.getMetric("width")).toBe(1_080);
+    expect(item1.getMetric("height")).toBe(1_920);
+    expect(item1.pixelCount).toBe(1_080 * 1_920);
+    expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
 
-      item0.setDurationSeconds(123);
-      item0.markAsNew();
+    item0.setDurationSeconds(123);
+    item0.markAsNew();
 
-      expect(item0.getMetric("duration")).toBe(123);
-      expect(item0.isNew).toBe(true);
-      expect(item0.consumeTags()).toEqual(new Set(["apple", "banana"]));
+    expect(item0.getMetric("duration")).toBe(123);
+    expect(item0.isNew).toBe(true);
+    expect(item0.consumeTags()).toEqual(new Set(["apple", "banana"]));
 
-      expect(item1.getMetric("duration")).toBe(0);
-      expect(item1.isNew).toBe(false);
-      expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
-    });
+    expect(item1.getMetric("duration")).toBe(0);
+    expect(item1.isNew).toBe(false);
+    expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
+  });
 
-    test("exposes every remaining getter through one item", () => {
-      const arena = new FavoritesColumnarArena();
-      const item = new ArenaFavorite(createPost({ id: "1", tags: "cat", media: { kind: "video", locator: "12/abc123.mp4" } }), arena, true);
+  test("exposes every remaining getter through one item on a real arena", () => {
+    const arena = new FavoritesColumnarArena();
+    const item = new ArenaFavorite(createPost({ id: "1", tags: "cat", media: { kind: "video", locator: "12/abc123.mp4" } }), arena, true);
 
-      expect(item.media).toEqual({ kind: "video", locator: "12/abc123.mp4" });
-    });
+    expect(item.media).toEqual({ kind: "video", locator: "12/abc123.mp4" });
   });
 });

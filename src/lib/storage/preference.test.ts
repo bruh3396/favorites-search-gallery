@@ -58,7 +58,7 @@ describe("StoredPreference", () => {
     const preference = createPreference(1);
     const heard: number[] = [];
 
-    preference.on((value) => heard.push(value));
+    preference.on(value => heard.push(value));
     preference.set(2);
     preference.set(2);
     preference.set(1);
@@ -68,7 +68,7 @@ describe("StoredPreference", () => {
   test("stops a listener when its unsubscribe is called", () => {
     const preference = createPreference(1);
     const heard: number[] = [];
-    const off = preference.on((value) => heard.push(value));
+    const off = preference.on(value => heard.push(value));
 
     off();
     preference.set(2);
@@ -125,7 +125,7 @@ describe("booleanPreference", () => {
     const always = booleanPreference(source, "always", "off");
     const heard: boolean[] = [];
 
-    always.on((value) => heard.push(value));
+    always.on(value => heard.push(value));
     source.set("hover");
     source.set("always");
     source.set("off");

@@ -61,7 +61,13 @@ export function forceReflow(element: HTMLElement): void {
   element.getBoundingClientRect();
 }
 
-export function numberInput(id: string, min: number, max: number, step: number): HTMLInputElement {
+export interface NumberInputOptions {
+  min: number;
+  max: number;
+  step: number;
+}
+
+export function numberInput(id: string, { min, max, step }: NumberInputOptions): HTMLInputElement {
   const input = elementWithId("input", id);
 
   input.type = "number";

@@ -20,7 +20,7 @@ describe("MemoryLocalPosts", () => {
     expect((await posts.getMany(["1"])).map(post => post.tags)).toEqual(["new"]);
   });
 
-  test("setManyIfAbsent writes only posts it does not hold yet", async() => {
+  test("writes only posts it does not hold yet through setManyIfAbsent", async() => {
     const posts = new MemoryLocalPosts();
 
     await posts.setMany([createPost({ id: "1", tags: "complete" })]);

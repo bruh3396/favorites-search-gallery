@@ -48,7 +48,7 @@ export function createSetting(ownerDocument: Document, { descriptor, size = "med
   return {
     element,
     setDescriptionVisible,
-    dispose: (): void => disposers.forEach((dispose) => dispose())
+    dispose: (): void => disposers.forEach(dispose => dispose())
   };
 }
 
@@ -68,7 +68,7 @@ function createControl(ownerDocument: Document, descriptor: SettingDescriptor, a
 }
 
 function createSwitchControl(ownerDocument: Document, { preference }: SwitchSetting, { size }: Appearance): BoundControl {
-  return bind(createSwitch(ownerDocument, { size, onValueChange: (next) => preference.set(next) }), preference);
+  return bind(createSwitch(ownerDocument, { size, onValueChange: next => preference.set(next) }), preference);
 }
 
 function createChoiceControl(ownerDocument: Document, descriptor: ChoiceSetting, { size }: Appearance): BoundControl {
@@ -80,7 +80,7 @@ function createChoiceControl(ownerDocument: Document, descriptor: ChoiceSetting,
 
 function createChoicesControl(ownerDocument: Document, descriptor: ChoicesSetting, { size }: Appearance): BoundControl {
   const { preference } = descriptor;
-  return bind(createMultiSelect(ownerDocument, { options: optionsOf(descriptor), size, onValueChange: (next) => preference.set(next) }), preference);
+  return bind(createMultiSelect(ownerDocument, { options: optionsOf(descriptor), size, onValueChange: next => preference.set(next) }), preference);
 }
 
 function createNumberControl(
@@ -107,5 +107,5 @@ function bind<T>(control: Control<T>, preference: SettingPreference<T>): BoundCo
 }
 
 function optionsOf({ members, labels }: ChoiceSetting | ChoicesSetting): { value: string; label: string }[] {
-  return members.map((member) => ({ value: member, label: labels[member] }));
+  return members.map(member => ({ value: member, label: labels[member] }));
 }

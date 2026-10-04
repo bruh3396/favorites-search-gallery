@@ -1,6 +1,7 @@
 import { Preference, StoredPreference } from "@/lib/storage/preference";
 import { Preferences, createPreferences as createAppPreferences } from "@/app/context/preferences";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { createEnvironment } from "@/testing/environment";
 import { selectPreferenceDefaults } from "@/app/context/preference_defaults";
 
@@ -89,7 +90,8 @@ export function createPreference<T>(initial: T): Preference<T> {
 // The app's preferences over a memory store, set to fixed test values so tests
 // don't depend on the environment's defaults.
 export function createPreferences(overrides: PreferenceOverrides = {}): Preferences {
-  const preferences = createAppPreferences(selectPreferenceDefaults(createEnvironment()), new MemoryLocalKeyedValues());
+  const store = new NamespacedLocalKeyedValues("favorites-search-gallery", new MemoryLocalKeyedValues());
+  const preferences = createAppPreferences(selectPreferenceDefaults(createEnvironment()), store);
 
   for (const [section, defaults] of Object.entries(DEFAULT_VALUES)) {
     const values = { ...defaults, ...overrides[section as Section] };

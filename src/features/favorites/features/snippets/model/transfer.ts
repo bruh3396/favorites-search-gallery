@@ -1,4 +1,5 @@
-import { SerializedSnippet, Snippet } from "@/features/favorites/features/snippets/types/types";
+import { SerializedSnippet } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { isEmptyString } from "@/utils/pure/string";
 
 export function serialize(snippets: Snippet[]): Blob {

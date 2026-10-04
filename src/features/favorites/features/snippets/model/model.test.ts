@@ -1,69 +1,68 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 
-const STORAGE_KEY = "searchSnippets";
-
 interface Setup {
   model: SnippetModel;
-  storage: MemoryLocalKeyedValues;
+  localSnippets: MemoryLocalSnippets;
 }
 
-const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
-const veg = createSnippet("veg", "carrot", 0, 200);
+const fruits = createSnippet("fruits", "( apple ~ banana )", { createdAt: 100 });
+const veg = createSnippet("veg", "carrot", { createdAt: 200 });
 
-function setup(snippets: Snippet[] = []): Setup {
-  const storage = new MemoryLocalKeyedValues();
+async function setup(snippets: Snippet[] = []): Promise<Setup> {
+  const localSnippets = new MemoryLocalSnippets();
+  const model = new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues() });
 
-  storage.set(STORAGE_KEY, snippets);
-  return { model: new SnippetModel(storage), storage };
+  await localSnippets.setMany(snippets);
+  await model.loadSnippets();
+  return { model, localSnippets };
 }
 
 function getNames(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function readStoredNames(storage: MemoryLocalKeyedValues): string[] {
-  return getNames((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
+async function readStoredNames(localSnippets: MemoryLocalSnippets): Promise<string[]> {
+  return getNames(await localSnippets.getAll());
 }
 
-describe("reading", () => {
-  test("gets, lists, and counts the stored snippets", () => {
-    const { model } = setup([fruits, veg]);
+describe("SnippetModel", () => {
+  test("gets, lists, and counts the stored snippets", async() => {
+    const { model } = await setup([fruits, veg]);
 
     expect(model.getSnippet("fruits")).toEqual(fruits);
     expect(getNames(model.getAllSnippets())).toEqual(["fruits", "veg"]);
     expect(model.countSnippets()).toBe(2);
   });
 
-  test("lists the matching snippets newest first", () => {
-    const { model } = setup([fruits, veg]);
+  test("lists the matching snippets newest first", async() => {
+    const { model } = await setup([fruits, veg]);
 
     expect(getNames(model.listSnippets(""))).toEqual(["veg", "fruits"]);
     expect(getNames(model.listSnippets("carrot"))).toEqual(["veg"]);
   });
 
-  test("describes an empty list", () => {
-    expect(setup().model.emptyText()).toBe("No snippets yet");
-    expect(setup([fruits]).model.emptyText()).toBe("No matching snippets");
+  test("describes an empty list", async() => {
+    expect((await setup()).model.emptyText()).toBe("No snippets yet");
+    expect((await setup([fruits])).model.emptyText()).toBe("No matching snippets");
   });
-});
 
-describe("writing", () => {
-  test("adds, updates, and removes snippets in storage", () => {
-    const { model, storage } = setup();
+  test("adds, updates, and removes snippets in storage", async() => {
+    const { model, localSnippets } = await setup();
 
     expect(model.addSnippet("fruits", "apple").ok).toBe(true);
     expect(model.updateSnippet("fruits", "berries", "apple").ok).toBe(true);
-    expect(readStoredNames(storage)).toEqual(["berries"]);
+    expect(await readStoredNames(localSnippets)).toEqual(["berries"]);
     model.removeSnippet("berries");
-    expect(readStoredNames(storage)).toEqual([]);
+    expect(await readStoredNames(localSnippets)).toEqual([]);
   });
 
-  test("marks a snippet used and moves one to the top", () => {
-    const { model } = setup([fruits, veg]);
+  test("marks a snippet used and moves one to the top", async() => {
+    const { model } = await setup([fruits, veg]);
 
     model.useSnippet("fruits");
     model.moveSnippetToTop("fruits");
@@ -71,25 +70,23 @@ describe("writing", () => {
     expect(getNames(model.listSnippets(""))).toEqual(["fruits", "veg"]);
   });
 
-  test("replaces every snippet", () => {
-    const { model, storage } = setup([fruits]);
+  test("replaces every snippet", async() => {
+    const { model, localSnippets } = await setup([fruits]);
 
     expect(model.replaceAllSnippets([{ name: "veg", query: "carrot" }])).toBe(1);
-    expect(readStoredNames(storage)).toEqual(["veg"]);
-  });
-});
-
-describe("text", () => {
-  test("describes a failure", () => {
-    expect(setup().model.describeFailure("duplicate-name", "fruits")).toBe("A snippet named /fruits already exists");
+    expect(await readStoredNames(localSnippets)).toEqual(["veg"]);
   });
 
-  test("builds an id query", () => {
-    expect(setup().model.buildIdQuery(["1", "2"])).toBe("( 1 ~ 2 )");
+  test("describes a failure", async() => {
+    expect((await setup()).model.describeFailure("duplicate-name", "fruits")).toBe("A snippet named /fruits already exists");
+  });
+
+  test("builds an id query", async() => {
+    expect((await setup()).model.buildIdQuery(["1", "2"])).toBe("( 1 ~ 2 )");
   });
 
   test("round-trips the snippets through a file", async() => {
-    const { model } = setup([fruits]);
+    const { model } = await setup([fruits]);
     const contents = await model.serializeSnippets().text();
 
     expect(model.parseSnippets(contents)).toEqual([{ name: "fruits", query: "( apple ~ banana )" }]);

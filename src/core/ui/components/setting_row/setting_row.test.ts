@@ -9,7 +9,7 @@ function setup(options: Partial<SettingRowOptions> = {}): SettingRow & { control
 }
 
 function readTexts(elements: readonly Element[] | null): string[] {
-  return (elements ?? []).map((element) => element.textContent ?? "");
+  return (elements ?? []).map(element => element.textContent ?? "");
 }
 
 describe("createSettingRow", () => {

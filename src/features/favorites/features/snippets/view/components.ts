@@ -1,5 +1,6 @@
 import { IconName, icon } from "@/lib/ui/icon";
-import { Snippet, SnippetAction, SnippetScene } from "@/features/favorites/features/snippets/types/types";
+import { SnippetAction, SnippetScene } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/browser/element";
 import { toggleDataset } from "@/utils/browser/dataset";
@@ -17,7 +18,10 @@ const SELECTORS = {
 } as const;
 
 export function list(scene: SnippetScene): HTMLElement[] {
-  return scene.rows.length === 0 ? [placeholder(scene.placeholder)] : scene.rows.map(snippet => (scene.deleteTarget === snippet.name ? confirmRow(snippet) : row(snippet)));
+  if (scene.rows.length === 0) {
+    return [placeholder(scene.placeholder)];
+  }
+  return scene.rows.map(snippet => (scene.deleteTarget === snippet.name ? confirmRow(snippet) : row(snippet)));
 }
 
 export function row(snippet: Snippet): HTMLElement {

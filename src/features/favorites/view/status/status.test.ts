@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 
@@ -49,7 +49,7 @@ describe("FavoritesStatus", () => {
     expect(readStatus(shell)).toBe("");
   });
 
-  test("a temporary status clears itself after a second", () => {
+  test("clears a temporary status after a second", () => {
     const { status, shell, scheduler } = setup();
 
     status.setTemporaryStatus("Apple added");
@@ -59,7 +59,7 @@ describe("FavoritesStatus", () => {
     expect(readStatus(shell)).toBe("");
   });
 
-  test("a new status outlasts an earlier temporary one", () => {
+  test("keeps a new status past an earlier temporary one's timeout", () => {
     const { status, shell, scheduler } = setup();
 
     status.setTemporaryStatus("Apple added");
@@ -78,7 +78,7 @@ describe("FavoritesStatus", () => {
   });
 
   describe("updateFetchStatus", () => {
-    test("without an expected total, shows only what's been fetched", () => {
+    test("shows only what's been fetched without an expected total", () => {
       const { status, shell } = setup();
 
       status.updateFetchStatus(100, 7);
@@ -87,7 +87,7 @@ describe("FavoritesStatus", () => {
       expect(readProgress(shell)).toBeNull();
     });
 
-    test("with an expected total, shows progress, then a time estimate", () => {
+    test("shows progress, then a time estimate, with an expected total", () => {
       const { status, shell, scheduler } = setup();
 
       status.setExpectedTotalFavoriteCount(600);
@@ -99,7 +99,7 @@ describe("FavoritesStatus", () => {
       expect(readProgress(shell)).toBe("50%");
     });
 
-    test("forgetting the expected total goes back to counting", () => {
+    test("goes back to counting once the expected total is forgotten", () => {
       const { status, shell } = setup();
 
       status.setExpectedTotalFavoriteCount(500);
@@ -118,7 +118,7 @@ describe("FavoritesStatus", () => {
       expect(readProgress(shell)).toBe("25%");
     });
 
-    test("without a total, just says it's loading", () => {
+    test("just says it's loading without a total", () => {
       const { status, shell } = setup();
 
       status.setLoadProgress({ loaded: 0, total: 0 });
@@ -127,7 +127,7 @@ describe("FavoritesStatus", () => {
     });
   });
 
-  test("clearing hides the progress bar", () => {
+  test("hides the progress bar when cleared", () => {
     const { status, shell } = setup();
 
     status.setLoadProgress({ loaded: 25, total: 100 });

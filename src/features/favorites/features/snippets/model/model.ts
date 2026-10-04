@@ -2,15 +2,19 @@ import * as SnippetFailure from "@/features/favorites/features/snippets/model/fa
 import * as SnippetIdQuery from "@/features/favorites/features/snippets/model/id_query";
 import * as SnippetListing from "@/features/favorites/features/snippets/model/listing";
 import * as SnippetTransfer from "@/features/favorites/features/snippets/model/transfer";
-import { SerializedSnippet, Snippet, SnippetFailureReason, SnippetResult } from "@/features/favorites/features/snippets/types/types";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { SerializedSnippet, SnippetFailureReason, SnippetResult, SnippetStorage } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
 export class SnippetModel {
   private readonly store: SnippetStore;
 
-  constructor(storage: LocalKeyedValues) {
+  constructor(storage: SnippetStorage) {
     this.store = new SnippetStore(storage);
+  }
+
+  public loadSnippets(): Promise<void> {
+    return this.store.load();
   }
 
   public getSnippet(name: string): Snippet | undefined {

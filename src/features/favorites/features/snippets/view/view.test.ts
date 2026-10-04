@@ -17,51 +17,53 @@ function setup(): Setup {
 }
 
 function readNames(shell: SnippetShell): string[] {
-  return Array.from(shell.list.querySelectorAll<HTMLElement>("[data-snippet-name]")).map(row => row.dataset.snippetName ?? "");
+  return [...shell.list.querySelectorAll<HTMLElement>("[data-snippet-name]")].map(row => row.dataset.snippetName ?? "");
 }
 
-describe("mount", () => {
-  test("appends the filter, the list, and the editor", () => {
-    const { view, shell } = setup();
-    const container = document.createElement("div");
+describe("SnippetView", () => {
+  describe("mount", () => {
+    test("appends the filter, the list, and the editor", () => {
+      const { view, shell } = setup();
+      const container = document.createElement("div");
 
-    view.mount(container);
-    expect(Array.from(container.children)).toEqual([shell.filter, shell.list, shell.footer]);
-  });
-});
-
-describe("render", () => {
-  test("lists the rows in the given order", () => {
-    const { view, shell } = setup();
-
-    view.render(createScene({ rows: [veg, fruits] }));
-    expect(readNames(shell)).toEqual(["veg", "fruits"]);
+      view.mount(container);
+      expect([...container.children]).toEqual([shell.filter, shell.list, shell.footer]);
+    });
   });
 
-  test("asks to confirm only the snippet pending deletion", () => {
-    const { view, shell } = setup();
+  describe("render", () => {
+    test("lists the rows in the given order", () => {
+      const { view, shell } = setup();
 
-    view.render(createScene({ rows: [fruits, veg], deleteTarget: "veg" }));
-    expect(Array.from(shell.list.querySelectorAll<HTMLElement>("[data-snippet-name]")).map(row => row.textContent?.includes("Delete this snippet?"))).toEqual([false, true]);
+      view.render(createScene({ rows: [veg, fruits] }));
+      expect(readNames(shell)).toEqual(["veg", "fruits"]);
+    });
+
+    test("asks to confirm only the snippet pending deletion", () => {
+      const { view, shell } = setup();
+
+      view.render(createScene({ rows: [fruits, veg], deleteTarget: "veg" }));
+      const rows = [...shell.list.querySelectorAll<HTMLElement>("[data-snippet-name]")];
+
+      expect(rows.map(row => row.textContent?.includes("Delete this snippet?"))).toEqual([false, true]);
+    });
+
+    test("shows the placeholder when there are no rows", () => {
+      const { view, shell } = setup();
+
+      view.render(createScene({ placeholder: "No matching snippets" }));
+      expect(shell.list.textContent).toBe("No matching snippets");
+    });
+
+    test("renders the editor too", () => {
+      const { view, shell } = setup();
+
+      view.render(createScene({ editTarget: "veg" }));
+      expect(shell.eyebrow.textContent).toBe("Editing /veg");
+    });
   });
 
-  test("shows the placeholder when there are no rows", () => {
-    const { view, shell } = setup();
-
-    view.render(createScene({ placeholder: "No matching snippets" }));
-    expect(shell.list.textContent).toBe("No matching snippets");
-  });
-
-  test("renders the editor too", () => {
-    const { view, shell } = setup();
-
-    view.render(createScene({ editTarget: "veg" }));
-    expect(shell.eyebrow.textContent).toBe("Editing /veg");
-  });
-});
-
-describe("editor fields", () => {
-  test("fill, setQuery, and clear reach the fields", () => {
+  test("reaches the editor's fields through fill, setQuery, and clear", () => {
     const { view, shell } = setup();
 
     view.fill(fruits);

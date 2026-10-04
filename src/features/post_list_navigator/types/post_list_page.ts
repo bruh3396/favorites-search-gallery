@@ -1,6 +1,13 @@
 import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/post_list_page";
 import { Post } from "@/core/domain/post/post";
 
+export interface PostListContents {
+  pageIndex: number;
+  thumbs: HTMLElement[];
+  posts: Post[];
+  paginator: HTMLElement | null;
+}
+
 export class PostList {
   public thumbs: HTMLElement[];
   public posts: Post[];
@@ -8,7 +15,7 @@ export class PostList {
   public ids: Set<string>;
   public pageIndex: number;
 
-  constructor(pageIndex: number, thumbs: HTMLElement[], posts: Post[], paginator: HTMLElement | null) {
+  constructor({ pageIndex, thumbs, posts, paginator }: PostListContents) {
     this.thumbs = thumbs;
     this.posts = posts;
     this.paginator = paginator;

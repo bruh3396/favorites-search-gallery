@@ -82,7 +82,7 @@ export function createStepper(
     }, delay);
   };
   const bindButton = (button: HTMLButtonElement, direction: 1 | -1): void => {
-    button.addEventListener("pointerdown", (event) => {
+    button.addEventListener("pointerdown", event => {
       if (event.button !== 0 || button.disabled) {
         return;
       }
@@ -92,7 +92,7 @@ export function createStepper(
       stepBy(direction);
       hold(button, direction, HOLD_DELAY);
     });
-    button.addEventListener("click", (event) => {
+    button.addEventListener("click", event => {
       if (event.detail === 0) {
         begin();
         stepBy(direction);
@@ -110,7 +110,7 @@ export function createStepper(
   element.append(decrement, input, increment);
   bindButton(decrement, -1);
   bindButton(increment, 1);
-  input.addEventListener("keydown", (event) => {
+  input.addEventListener("keydown", event => {
     const direction = KEY_DIRECTIONS[event.key];
 
     if (direction !== undefined) {
@@ -119,7 +119,7 @@ export function createStepper(
       stepBy(direction);
     }
   });
-  input.addEventListener("keyup", (event) => {
+  input.addEventListener("keyup", event => {
     if (KEY_DIRECTIONS[event.key] !== undefined) {
       finish();
     }

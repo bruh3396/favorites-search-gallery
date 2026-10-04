@@ -17,7 +17,7 @@ function createThumb(id: string): HTMLElement {
 }
 
 function hover(suppressor: FavoritesLinkSuppressor, target: Element): void {
-  target.addEventListener("mouseover", (event) => suppressor.suppressLinkOnHoveredThumb(new EnhancedMouseEvent(event as MouseEvent)), { once: true });
+  target.addEventListener("mouseover", event => suppressor.suppressLinkOnHoveredThumb(new EnhancedMouseEvent(event as MouseEvent)), { once: true });
   target.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
 }
 
@@ -34,7 +34,7 @@ describe("FavoritesLinkSuppressor", () => {
     document.body.replaceChildren();
   });
 
-  test("the hovered thumb loses its link", () => {
+  test("takes the link from the hovered thumb", () => {
     const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
 
@@ -42,7 +42,7 @@ describe("FavoritesLinkSuppressor", () => {
     expect(readHref(apple)).toBeNull();
   });
 
-  test("moving to another thumb gives the previous one its link back", () => {
+  test("gives the previous thumb its link back when the pointer moves to another", () => {
     const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
     const banana = createThumb("2");
@@ -53,7 +53,7 @@ describe("FavoritesLinkSuppressor", () => {
     expect(readHref(banana)).toBeNull();
   });
 
-  test("hovering the same thumb again or leaving the thumbs changes nothing", () => {
+  test("changes nothing when the same thumb is hovered again or the pointer leaves the thumbs", () => {
     const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
 

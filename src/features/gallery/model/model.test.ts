@@ -59,144 +59,134 @@ function setup(...ids: string[]): Setup {
   return { model, items, navigator, remoteFavoriteActions, blobsRequested };
 }
 
+const PRELOAD_ITEMS = ["1", "2", "3"].map(id => createItem(id));
+
 describe("GalleryModel", () => {
-  describe("state", () => {
-    test("starts idle, or previewing when previews are enabled", () => {
-      expect(createModel().isIdle()).toBe(true);
-      expect(createModel(true).isShowingPreviews()).toBe(true);
-    });
-
-    test("opening points at the item and enters the gallery; closing leaves it", () => {
-      const { model, items } = setup("1", "2", "3");
-
-      model.open(items[1]);
-      expect(model.isInGallery()).toBe(true);
-      expect(model.getCurrentState()).toBe("open");
-      expect(model.currentItem()).toBe(items[1]);
-
-      model.close();
-      expect(model.isIdle()).toBe(true);
-    });
-
-    test("toggling previews does not leave an open gallery", () => {
-      const { model, items } = setup("1");
-
-      model.preview(true);
-      expect(model.isShowingPreviews()).toBe(true);
-      model.open(items[0]);
-      model.preview(false);
-      expect(model.isInGallery()).toBe(true);
-    });
+  test("starts idle, or previewing when previews are enabled", () => {
+    expect(createModel().isIdle()).toBe(true);
+    expect(createModel(true).isShowingPreviews()).toBe(true);
   });
 
-  describe("navigation", () => {
-    test("moves between items and reports the boundary it hits", () => {
-      const { model, items } = setup("1", "2", "3");
+  test("enters the gallery at the opened item and leaves it on close", () => {
+    const { model, items } = setup("1", "2", "3");
 
-      model.open(items[0]);
-      expect(model.move("ArrowRight")).toBe("none");
-      expect(model.currentItem()).toBe(items[1]);
-      expect(model.move("ArrowLeft")).toBe("none");
-      expect(model.move("ArrowLeft")).toBe("start");
-      expect(model.currentItem()).toBe(items[0]);
-    });
+    model.open(items[1]);
+    expect(model.isInGallery()).toBe(true);
+    expect(model.getCurrentState()).toBe("open");
+    expect(model.currentItem()).toBe(items[1]);
 
-    test("jumps to either end", () => {
-      const { model, items } = setup("1", "2", "3");
-
-      model.jumpToLast();
-      expect(model.currentItem()).toBe(items[2]);
-      expect(model.move("ArrowRight")).toBe("end");
-      model.jumpToFirst();
-      expect(model.currentItem()).toBe(items[0]);
-    });
-
-    test("re-indexing replaces the navigable items", () => {
-      const { model } = setup("1", "2");
-      const replacement = createItem("9");
-
-      model.indexItems([replacement]);
-      model.open(replacement);
-      expect(model.currentItem()).toBe(replacement);
-    });
+    model.close();
+    expect(model.isIdle()).toBe(true);
   });
 
-  describe("preload window", () => {
-    const items = ["1", "2", "3"].map(id => createItem(id));
+  test("stays in an open gallery when previews are toggled", () => {
+    const { model, items } = setup("1");
 
-    test("is empty until a window is set up", () => {
-      expect(createModel().getItemsAround("1")).toEqual([]);
-    });
-
-    test("a wrapping window reaches around the ends", () => {
-      const model = createModel();
-
-      model.setupWrappingWindow(() => items);
-      expect(model.getItemsAround("1").map(item => item.id)).toEqual(["1", "3", "2"]);
-    });
-
-    test("a clamped window stops at the ends", () => {
-      const model = createModel();
-
-      model.setupClampedWindow(() => items);
-      expect(model.getItemsAround("1").map(item => item.id)).toEqual(["1", "2", "3"]);
-    });
+    model.preview(true);
+    expect(model.isShowingPreviews()).toBe(true);
+    model.open(items[0]);
+    model.preview(false);
+    expect(model.isInGallery()).toBe(true);
   });
 
-  describe("upscale quality", () => {
-    test("maps the thumb-to-viewport ratio through the configured cutoffs", () => {
-      expect(createModel().upscaleQualityFor(50, 1_000)).toBe(UpscaleQuality.Low);
-      expect(createModel().upscaleQualityFor(500, 1_000)).toBe(UpscaleQuality.Ultra);
-    });
+  test("moves between items and reports the boundary it hits", () => {
+    const { model, items } = setup("1", "2", "3");
 
-    test("is null when nothing can be measured", () => {
-      expect(createModel().upscaleQualityFor(0, 1_000)).toBeNull();
-    });
+    model.open(items[0]);
+    expect(model.move("ArrowRight")).toBe("none");
+    expect(model.currentItem()).toBe(items[1]);
+    expect(model.move("ArrowLeft")).toBe("none");
+    expect(model.move("ArrowLeft")).toBe("start");
+    expect(model.currentItem()).toBe(items[0]);
   });
 
-  describe("actions on the current item", () => {
-    test("knows whether the current item is a video", () => {
-      const model = createModel();
-      const video = createItem("1", "video");
+  test("jumps to either end", () => {
+    const { model, items } = setup("1", "2", "3");
 
-      model.indexItems([video, createItem("2")]);
-      model.open(video);
-      expect(model.isViewingVideo()).toBe(true);
-      model.move("ArrowRight");
-      expect(model.isViewingVideo()).toBe(false);
-    });
+    model.jumpToLast();
+    expect(model.currentItem()).toBe(items[2]);
+    expect(model.move("ArrowRight")).toBe("end");
+    model.jumpToFirst();
+    expect(model.currentItem()).toBe(items[0]);
+  });
 
-    test("opens the current item's post and original", async() => {
-      const { model, items, navigator } = setup("101");
+  test("replaces the navigable items on re-indexing", () => {
+    const { model } = setup("1", "2");
+    const replacement = createItem("9");
 
-      model.open(items[0]);
-      model.openPost();
-      await model.openOriginal();
-      expect(navigator.opened).toEqual(["#post-101", "original:1/101.png"]);
-    });
+    model.indexItems([replacement]);
+    model.open(replacement);
+    expect(model.currentItem()).toBe(replacement);
+  });
 
-    test("downloads the current item's original", () => {
-      const { model, items, blobsRequested } = setup("103");
+  test("finds no items around an id until a preload window is set up", () => {
+    expect(createModel().getItemsAround("1")).toEqual([]);
+  });
 
-      model.open(items[0]);
-      model.download();
-      expect(blobsRequested).toEqual([items[0].media]);
-    });
+  test("reaches around the ends with a wrapping preload window", () => {
+    const model = createModel();
 
-    test("adds the current item as a favorite and reports the answer", async() => {
-      const { model, items, remoteFavoriteActions } = setup("104");
+    model.setupWrappingWindow(() => PRELOAD_ITEMS);
+    expect(model.getItemsAround("1").map(item => item.id)).toEqual(["1", "3", "2"]);
+  });
 
-      model.open(items[0]);
-      expect(await model.addFavorite()).toBe("alreadyAdded");
-      expect(remoteFavoriteActions.add).toHaveBeenCalledWith("104");
-    });
+  test("stops at the ends with a clamped preload window", () => {
+    const model = createModel();
 
-    test("removes the current item from favorites without waiting for the answer", async() => {
-      const { model, items, remoteFavoriteActions } = setup("105");
+    model.setupClampedWindow(() => PRELOAD_ITEMS);
+    expect(model.getItemsAround("1").map(item => item.id)).toEqual(["1", "2", "3"]);
+  });
 
-      model.open(items[0]);
-      expect(await model.removeFavorite()).toBe("removed");
-      expect(remoteFavoriteActions.remove).toHaveBeenCalledWith("105");
-    });
+  test("maps the thumb-to-viewport ratio through the configured upscale cutoffs", () => {
+    expect(createModel().upscaleQualityFor(50, 1_000)).toBe(UpscaleQuality.Low);
+    expect(createModel().upscaleQualityFor(500, 1_000)).toBe(UpscaleQuality.Ultra);
+  });
+
+  test("gives no upscale quality when nothing can be measured", () => {
+    expect(createModel().upscaleQualityFor(0, 1_000)).toBeNull();
+  });
+
+  test("knows whether the current item is a video", () => {
+    const model = createModel();
+    const video = createItem("1", "video");
+
+    model.indexItems([video, createItem("2")]);
+    model.open(video);
+    expect(model.isViewingVideo()).toBe(true);
+    model.move("ArrowRight");
+    expect(model.isViewingVideo()).toBe(false);
+  });
+
+  test("opens the current item's post and original", async() => {
+    const { model, items, navigator } = setup("101");
+
+    model.open(items[0]);
+    model.openPost();
+    await model.openOriginal();
+    expect(navigator.opened).toEqual(["#post-101", "original:1/101.png"]);
+  });
+
+  test("downloads the current item's original", () => {
+    const { model, items, blobsRequested } = setup("103");
+
+    model.open(items[0]);
+    model.download();
+    expect(blobsRequested).toEqual([items[0].media]);
+  });
+
+  test("adds the current item as a favorite and reports the answer", async() => {
+    const { model, items, remoteFavoriteActions } = setup("104");
+
+    model.open(items[0]);
+    expect(await model.addFavorite()).toBe("alreadyAdded");
+    expect(remoteFavoriteActions.add).toHaveBeenCalledWith("104");
+  });
+
+  test("removes the current item from favorites without waiting for the answer", async() => {
+    const { model, items, remoteFavoriteActions } = setup("105");
+
+    model.open(items[0]);
+    expect(await model.removeFavorite()).toBe("removed");
+    expect(remoteFavoriteActions.remove).toHaveBeenCalledWith("105");
   });
 });

@@ -7,7 +7,7 @@ const randomSource = new MemoryRandomSource([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 
 
 describe("partition", () => {
   test("splits into matching and rest, preserving order", () => {
-    const [even, odd] = partition([1, 2, 3, 4, 5, 6], (n) => n % 2 === 0);
+    const [even, odd] = partition([1, 2, 3, 4, 5, 6], n => n % 2 === 0);
 
     expect(even).toEqual([2, 4, 6]);
     expect(odd).toEqual([1, 3, 5]);
@@ -16,7 +16,7 @@ describe("partition", () => {
   test("evaluates the predicate once per element", () => {
     const seen: number[] = [];
 
-    partition([1, 2, 3], (n) => {
+    partition([1, 2, 3], n => {
       seen.push(n);
       return true;
     });
@@ -149,7 +149,7 @@ describe("grow", () => {
   test("copies existing values into a larger array", () => {
     const grown = grow(new Uint16Array([1, 2, 3]), 6);
 
-    expect(Array.from(grown)).toEqual([1, 2, 3, 0, 0, 0]);
+    expect([...grown]).toEqual([1, 2, 3, 0, 0, 0]);
   });
 
   test("preserves the typed array kind", () => {
@@ -165,11 +165,11 @@ describe("grow", () => {
 
     grown[0] = 99;
     expect(grown).not.toBe(original);
-    expect(Array.from(original)).toEqual([7, 8]);
+    expect([...original]).toEqual([7, 8]);
   });
 
-  test("equal capacity makes an identical copy", () => {
-    expect(Array.from(grow(new Float64Array([0.5, 1.5]), 2))).toEqual([0.5, 1.5]);
+  test("makes an identical copy at equal capacity", () => {
+    expect([...grow(new Float64Array([0.5, 1.5]), 2)]).toEqual([0.5, 1.5]);
   });
 });
 
@@ -203,11 +203,11 @@ describe("findFirstIndexWhere", () => {
 });
 
 describe("isIndexInBounds", () => {
-  test("empty", () => {
+  test("returns false for an empty array", () => {
     expect(isIndexInBounds([], 0)).toBe(false);
   });
 
-  test("in bounds", () => {
+  test("returns true for an index in bounds", () => {
     const array = [1, 2, 3];
 
     expect(isIndexInBounds(array, 0)).toBe(true);
@@ -215,7 +215,7 @@ describe("isIndexInBounds", () => {
     expect(isIndexInBounds(array, 2)).toBe(true);
   });
 
-  test("out of bounds", () => {
+  test("returns false for an index out of bounds", () => {
     const array = [1, 2, 3];
 
     expect(isIndexInBounds(array, -2)).toBe(false);
@@ -228,20 +228,20 @@ describe("isIndexInBounds", () => {
   });
 });
 
-describe("shuffleArray", () => {
+describe("shuffleInPlace", () => {
   const numbers = Array.from({ length: 1_000 }, (_, i) => i + 1);
   const numberSet = new Set(numbers);
 
-  test("empty", () => {
+  test("leaves an empty array empty", () => {
     expect(shuffleInPlace(randomSource, [])).toStrictEqual([]);
   });
 
-  test("one", () => {
+  test("leaves a single element in place", () => {
     expect(shuffleInPlace(randomSource, [1])).toStrictEqual([1]);
   });
 
-  test("many", () => {
-    const shuffled = shuffleInPlace(randomSource, numbers.slice());
+  test("reorders many elements without losing any", () => {
+    const shuffled = shuffleInPlace(randomSource, [...numbers]);
 
     expect(shuffled).toHaveLength(numbers.length);
     expect(shuffled).not.toStrictEqual(numbers);
@@ -253,98 +253,86 @@ describe("shuffleArray", () => {
 });
 
 describe("itemsAround", () => {
-  function expectItemsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
-    const result = itemsAround(array, startIndex, limit);
-
-    expect(result).toStrictEqual(expected);
-  }
-
-  test("empty", () => {
+  test("returns nothing for an empty array", () => {
     for (let i = 0; i < 10; i += 1) {
       const startIndex = randomInt(randomSource, 100);
       const limit = randomInt(randomSource, 100);
 
-      expectItemsAroundIndex([], startIndex, limit, []);
+      expect(itemsAround([], startIndex, limit)).toStrictEqual([]);
     }
   });
 
-  test("index out of bounds", () => {
-    expectItemsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+  test("returns nothing for an index out of bounds", () => {
+    expect(itemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
   });
 
-  test("limit greater than length", () => {
-    expectItemsAroundIndex([1, 2], 0, 3, [1, 2]);
+  test("returns every item when the limit exceeds the length", () => {
+    expect(itemsAround([1, 2], 0, 3)).toStrictEqual([1, 2]);
   });
 
-  test("zero limit", () => {
-    expectItemsAroundIndex([1, 2], 0, 0, []);
+  test("returns nothing for a zero limit", () => {
+    expect(itemsAround([1, 2], 0, 0)).toStrictEqual([]);
   });
 
-  test("normal cases", () => {
-    expectItemsAroundIndex([1, 2, 3, 4, 5], 2, 1, [3]);
-    expectItemsAroundIndex([1, 2, 3, 4, 5], 2, 3, [3, 2, 4]);
-    expectItemsAroundIndex([1, 2, 3, 4, 5], 0, 3, [1, 2, 3]);
-    expectItemsAroundIndex([1, 2, 3, 4, 5], 4, 3, [5, 4, 3]);
-    expectItemsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
-    expectItemsAroundIndex([1, 2, 3, 4, 5], 2, 4, [3, 2, 4, 1]);
+  test("alternates outward from the start index", () => {
+    expect(itemsAround([1, 2, 3, 4, 5], 2, 1)).toStrictEqual([3]);
+    expect(itemsAround([1, 2, 3, 4, 5], 2, 3)).toStrictEqual([3, 2, 4]);
+    expect(itemsAround([1, 2, 3, 4, 5], 0, 3)).toStrictEqual([1, 2, 3]);
+    expect(itemsAround([1, 2, 3, 4, 5], 4, 3)).toStrictEqual([5, 4, 3]);
+    expect(itemsAround([1, 2, 3, 4, 5], 2, 5)).toStrictEqual([3, 2, 4, 1, 5]);
+    expect(itemsAround([1, 2, 3, 4, 5], 2, 4)).toStrictEqual([3, 2, 4, 1]);
   });
 });
 
 describe("wrappedItemsAround", () => {
-  function expectWrappedItemsAroundIndex(array: number[], startIndex: number, limit: number, expected: number[]): void {
-    const result = wrappedItemsAround(array, startIndex, limit);
-
-    expect(result).toStrictEqual(expected);
-  }
-
-  test("empty", () => {
+  test("returns nothing for an empty array", () => {
     for (let i = 0; i < 10; i += 1) {
       const startIndex = randomInt(randomSource, 100);
       const limit = randomInt(randomSource, 100);
 
-      expectWrappedItemsAroundIndex([], startIndex, limit, []);
+      expect(wrappedItemsAround([], startIndex, limit)).toStrictEqual([]);
     }
   });
 
-  test("index out of bounds", () => {
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
+  test("returns nothing for an index out of bounds", () => {
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
   });
 
-  test("limit greater than length", () => {
-    expectWrappedItemsAroundIndex([1, 2], 0, 3, [1, 2]);
+  test("returns every item when the limit exceeds the length", () => {
+    expect(wrappedItemsAround([1, 2], 0, 3)).toStrictEqual([1, 2]);
   });
 
-  test("zero limit", () => {
-    expectWrappedItemsAroundIndex([1, 2], 0, 0, []);
+  test("returns nothing for a zero limit", () => {
+    expect(wrappedItemsAround([1, 2], 0, 0)).toStrictEqual([]);
   });
 
-  test("normal cases", () => {
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], 0, 5, [1, 5, 2, 4, 3]);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], 2, 5, [3, 2, 4, 1, 5]);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], 4, 5, [5, 4, 1, 3, 2]);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], 0, 1, [1]);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10, [10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
-    expectWrappedItemsAroundIndex([42], 0, 3, [42]);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], -1, 3, []);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5], 2, 10, [3, 2, 4, 1, 5]);
-    expectWrappedItemsAroundIndex([], 2, 10, []);
-    expectWrappedItemsAroundIndex([], 0, 0, []);
-    expectWrappedItemsAroundIndex([1], 0, 0, []);
-    expectWrappedItemsAroundIndex([1], 0, 1, [1]);
-    expectWrappedItemsAroundIndex([50], 0, 2, [50]);
-    expectWrappedItemsAroundIndex([1, 2, 4, 5], 1, 3, [2, 1, 4]);
-    expectWrappedItemsAroundIndex([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2, [5, 4]);
+  test("alternates outward from the start index, wrapping at the ends", () => {
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], 0, 5)).toStrictEqual([1, 5, 2, 4, 3]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], 2, 5)).toStrictEqual([3, 2, 4, 1, 5]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], 4, 5)).toStrictEqual([5, 4, 1, 3, 2]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], 0, 1)).toStrictEqual([1]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10)).toStrictEqual([10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
+    expect(wrappedItemsAround([42], 0, 3)).toStrictEqual([42]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5], 2, 10)).toStrictEqual([3, 2, 4, 1, 5]);
+    expect(wrappedItemsAround([], 2, 10)).toStrictEqual([]);
+    expect(wrappedItemsAround([], 0, 0)).toStrictEqual([]);
+    expect(wrappedItemsAround([1], 0, 0)).toStrictEqual([]);
+    expect(wrappedItemsAround([1], 0, 1)).toStrictEqual([1]);
+    expect(wrappedItemsAround([50], 0, 2)).toStrictEqual([50]);
+    expect(wrappedItemsAround([1, 2, 4, 5], 1, 3)).toStrictEqual([2, 1, 4]);
+    expect(wrappedItemsAround([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2)).toStrictEqual([5, 4]);
   });
 });
 
 describe("chunk", () => {
-  test("empty", () => {
+  test("returns no chunks for an empty array", () => {
     for (let i = 0; i < 10; i += 1) {
       expect(chunk([], 3)).toStrictEqual([]);
     }
   });
 
-  test("invalid chunk size", () => {
+  test("returns one chunk for a non-positive chunk size", () => {
     const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     expect(chunk(digits, 0)).toStrictEqual([digits]);
@@ -353,7 +341,7 @@ describe("chunk", () => {
     expect(chunk(digits, -2)).toStrictEqual([digits]);
   });
 
-  test("normal cases", () => {
+  test("splits into chunks of the given size", () => {
     const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     expect(chunk(digits, 1)).toStrictEqual([[1], [2], [3], [4], [5], [6], [7], [8], [9]]);
@@ -366,7 +354,7 @@ describe("chunk", () => {
     expect(chunk(digits, 8)).toStrictEqual([[1, 2, 3, 4, 5, 6, 7, 8], [9]]);
   });
 
-  test("chunk size greater or equal to array size", () => {
+  test("returns one chunk when the chunk size covers the array", () => {
     const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     expect(chunk(digits, 9)).toStrictEqual([digits]);

@@ -96,7 +96,7 @@ describe("FavoritesPostLibrary", () => {
     expect(fetched).toEqual(["2", "1", "3"]);
   });
 
-  test("adopting stores only posts that are not already stored", async() => {
+  test("stores only posts not already stored when adopting", async() => {
     const { library, localPosts } = setup();
 
     await localPosts.setMany([createPost({ id: "1", score: 5 })]);
@@ -105,7 +105,7 @@ describe("FavoritesPostLibrary", () => {
     expect((await localPosts.getMany(["1", "2"])).map(post => post.score)).toEqual([5, 0]);
   });
 
-  test("adopting returns the stored copy of a post in place of the one given", async() => {
+  test("returns the stored copy of a post in place of the one given when adopting", async() => {
     const { library, localPosts } = setup();
 
     await localPosts.setMany([createPost({ id: "1", score: 5, fetchedAt: NOW })]);

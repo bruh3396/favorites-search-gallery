@@ -1,5 +1,5 @@
-import { Emitter } from "@/lib/event/emitter";
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/event/input";
+import { Emitter } from "@/lib/event/emitter";
 import { Environment } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
 import { FeatureBridge } from "@/app/context/feature_bridge";
@@ -9,6 +9,13 @@ import { Timeout } from "@/types/async";
 
 const SWIPE_THRESHOLD = 90;
 const TOUCH_HOLD_THRESHOLD = 300;
+
+export interface DomEventsDependencies {
+  shell: Shell;
+  environment: Environment;
+  events: Events;
+  featureBridge: FeatureBridge;
+}
 
 export class DomEvents {
   public readonly document = {
@@ -46,7 +53,7 @@ export class DomEvents {
   private holdTimer: Timeout;
   private wasHeld = false;
 
-  public addEventListeners(shell: Shell, environment: Environment, events: Events, featureBridge: FeatureBridge): void {
+  public addEventListeners({ shell, environment, events, featureBridge }: DomEventsDependencies): void {
     this.setupDocumentEvents(environment.mode === "favorites" ? shell.root : document.documentElement);
     this.setupWindowEvents();
     this.setupMobileGestures(environment.device === "desktop");
@@ -66,7 +73,7 @@ export class DomEvents {
   }
 
   private setupHotkeys(events: Events, galleryOpened: () => boolean): void {
-    this.document.keydown.on((event) => {
+    this.document.keydown.on(event => {
       if (!event.isHotkey || galleryOpened()) {
         return;
       }
@@ -78,9 +85,9 @@ export class DomEvents {
     if (onDesktopDevice) {
       return;
     }
-    this.document.touchStart.on((event) => this.onSwipeTouchStart(event));
-    this.document.touchEnd.on((event) => this.onSwipeTouchEnd(event));
-    this.document.touchStart.on((event) => this.startHoldTimer(event));
+    this.document.touchStart.on(event => this.onSwipeTouchStart(event));
+    this.document.touchEnd.on(event => this.onSwipeTouchEnd(event));
+    this.document.touchStart.on(event => this.startHoldTimer(event));
     this.document.touchEnd.on(() => this.stopHoldTimer());
   }
 
@@ -142,55 +149,55 @@ export class DomEvents {
   }
 
   private setupDocumentEvents(root: HTMLElement): void {
-    root.addEventListener("click", (event) => {
+    root.addEventListener("click", event => {
       this.document.click.emit(new EnhancedMouseEvent(event));
     });
-    root.addEventListener("dblclick", (event) => {
+    root.addEventListener("dblclick", event => {
       this.document.dblclick.emit(event);
     });
-    root.addEventListener("mousedown", (event) => {
+    root.addEventListener("mousedown", event => {
       this.document.mousedown.emit(new EnhancedMouseEvent(event));
     });
-    document.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", event => {
       this.document.keydown.emit(new EnhancedKeyboardEvent(event));
     });
-    document.addEventListener("keyup", (event) => {
+    document.addEventListener("keyup", event => {
       this.document.keyup.emit(new EnhancedKeyboardEvent(event));
     });
-    root.addEventListener("mouseover", (event) => {
+    root.addEventListener("mouseover", event => {
       this.document.mouseover.emit(new EnhancedMouseEvent(event));
     }, { passive: true });
-    root.addEventListener("mousemove", (event) => {
+    root.addEventListener("mousemove", event => {
       this.document.mousemove.emit(event);
     }, { passive: true });
-    document.addEventListener("wheel", (event) => {
+    document.addEventListener("wheel", event => {
       this.document.wheel.emit(new EnhancedWheelEvent(event));
     }, { passive: true });
-    root.addEventListener("contextmenu", (event) => {
+    root.addEventListener("contextmenu", event => {
       this.document.contextmenu.emit(event);
     });
-    root.addEventListener("touchstart", (event) => {
+    root.addEventListener("touchstart", event => {
       this.document.touchStart.emit(event);
     }, { passive: false });
-    root.addEventListener("touchend", (event) => {
+    root.addEventListener("touchend", event => {
       this.document.touchEnd.emit(event);
     });
   }
 
   private setupWindowEvents(): void {
-    window.addEventListener("focus", (event) => {
+    window.addEventListener("focus", event => {
       this.window.focus.emit(event);
     });
-    window.addEventListener("blur", (event) => {
+    window.addEventListener("blur", event => {
       this.window.blur.emit(event);
     });
-    window.addEventListener("orientationchange", (event) => {
+    window.addEventListener("orientationchange", event => {
       this.window.orientationChange.emit(event);
     });
-    window.addEventListener("scrollend", (event) => {
+    window.addEventListener("scrollend", event => {
       this.window.scrollend.emit(event);
     }, { passive: true });
-    window.addEventListener("scroll", (event) => {
+    window.addEventListener("scroll", event => {
       this.window.scroll.emit(event);
     }, { passive: true });
   }

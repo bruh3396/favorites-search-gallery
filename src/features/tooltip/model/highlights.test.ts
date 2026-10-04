@@ -21,7 +21,7 @@ describe("TooltipHighlights", () => {
     expect(buildHighlights("red", "dark").colorForTag("red")).toMatch(LIGHT_LIGHTNESS);
   });
 
-  test.each<ColorScheme>(["light", "dark"])("returns null for a tag no search term matches (%s)", (colorScheme) => {
+  test.each<ColorScheme>(["light", "dark"])("returns null for a tag no search term matches (%s)", colorScheme => {
     expect(buildHighlights("red", colorScheme).colorForTag("blue")).toBeNull();
   });
 
@@ -46,7 +46,7 @@ describe("TooltipHighlights", () => {
     expect(highlights.colorForTag("red")).toMatch(LIGHT_LIGHTNESS);
   });
 
-  test("rebuild replaces the previous highlights", () => {
+  test("replaces the previous highlights on rebuild", () => {
     const highlights = buildHighlights("red", "light");
 
     highlights.rebuild("blue");

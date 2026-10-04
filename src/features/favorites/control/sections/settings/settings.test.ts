@@ -64,7 +64,7 @@ describe("FavoritesSettings", () => {
     expect(readExpandedSections(context)).toEqual({ Layout: true, General: false });
   });
 
-  test("collapse all closes every section and remembers it, then opens them all", () => {
+  test("closes and remembers every section on collapse all, then opens them all", () => {
     const { context, sections, collapseAll } = setup();
     const titles = [...sections.keys()];
 
@@ -76,7 +76,7 @@ describe("FavoritesSettings", () => {
     expect(readExpandedSections(context)).toEqual(Object.fromEntries(titles.map(title => [title, true])));
   });
 
-  test("the reset button asks for every setting to be reset", () => {
+  test("asks for every setting to be reset when the reset button is clicked", () => {
     const { context, reset } = setup();
     const requested = vi.fn();
 
@@ -85,7 +85,7 @@ describe("FavoritesSettings", () => {
     expect(requested).toHaveBeenCalledOnce();
   });
 
-  test("searching narrows the sections and hides collapse all", () => {
+  test("narrows the sections and hides collapse all while searching", () => {
     const { container, sections, collapseAll } = setup();
     const field = container.querySelector(`.${SettingsClass.filter} input`) as HTMLInputElement;
 
@@ -103,7 +103,7 @@ describe("FavoritesSettings", () => {
     expect(setup({}, false, new MemoryHostPage()).container.textContent).not.toContain("Site Header");
   });
 
-  test.each([["desktop", false], ["mobile", true]])("on %s, every section offers at least one setting", (_device, onMobileDevice) => {
+  test.each([["desktop", false], ["mobile", true]])("offers at least one setting in every section on %s", (_device, onMobileDevice) => {
     const { sections } = setup({}, onMobileDevice);
 
     expect(sections.size).toBeGreaterThan(0);

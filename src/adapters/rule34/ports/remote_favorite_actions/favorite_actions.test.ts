@@ -25,7 +25,7 @@ function readRequestedUrls(fetch: FetchMock): string[] {
 }
 
 describe("Rule34FavoriteActions", () => {
-  test("adding upvotes the post, favorites it, and reads the site's answer", async() => {
+  test("upvotes the post, favorites it, and reads the site's answer when adding", async() => {
     const { actions, fetch } = setup();
 
     expect(await actions.add("7")).toBe("added");
@@ -44,7 +44,7 @@ describe("Rule34FavoriteActions", () => {
     expect(await actions.add("7")).toBe(answer);
   });
 
-  test("adding ignores a failed upvote", async() => {
+  test("ignores a failed upvote when adding", async() => {
     const { actions } = setup(url => (
       url === postVoteUrl("7") ? Promise.reject(new TypeError("offline")) : Promise.resolve(new Response("3"))
     ));
@@ -52,14 +52,14 @@ describe("Rule34FavoriteActions", () => {
     expect(await actions.add("7")).toBe("added");
   });
 
-  test("removing unfavorites the post", async() => {
+  test("unfavorites the post when removing", async() => {
     const { actions, fetch } = setup();
 
     expect(await actions.remove("8")).toBe(true);
     expect(readRequestedUrls(fetch)).toEqual([removeFavoriteUrl("8")]);
   });
 
-  test("removing retries a network failure", async() => {
+  test("retries a remove that hits a network failure", async() => {
     const { actions, fetch, scheduler } = setup();
 
     fetch.mockRejectedValueOnce(new TypeError("offline"));
@@ -70,7 +70,7 @@ describe("Rule34FavoriteActions", () => {
     expect(readRequestedUrls(fetch)).toEqual([removeFavoriteUrl("8"), removeFavoriteUrl("8")]);
   });
 
-  test("removing a post cancels its add while the add waits its turn", async() => {
+  test("cancels a post's waiting add when the post is removed", async() => {
     const { actions, fetch } = setup();
     const first = actions.add("1");
     const second = actions.add("2");
@@ -81,7 +81,7 @@ describe("Rule34FavoriteActions", () => {
     expect(readRequestedUrls(fetch)).not.toContain(addFavoriteUrl("2"));
   });
 
-  test("adding a post cancels its remove while the remove waits its turn", async() => {
+  test("cancels a post's waiting remove when the post is added", async() => {
     const { actions, fetch } = setup();
     const first = actions.remove("1");
     const second = actions.remove("2");

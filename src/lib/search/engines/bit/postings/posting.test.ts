@@ -39,42 +39,42 @@ describe.each(cases)("$name", ({ make }) => {
     expect(gatherPositions(make(3, 40, 70).toBitSet(SIZE))).toEqual([3, 40, 70]);
   });
 
-  test("andInto intersects the working set and reports emptiness", () => {
+  test("intersects the working set through andInto and reports emptiness", () => {
     const working = createBitSet(3, 40, 70, 90);
 
     expect(make(40, 70).andInto(working)).toBe(false);
     expect(gatherPositions(working)).toEqual([40, 70]);
   });
 
-  test("andInto reports empty when the intersection is empty", () => {
+  test("reports empty through andInto when the intersection is empty", () => {
     const working = createBitSet(1, 2, 3);
 
     expect(make(50, 60).andInto(working)).toBe(true);
     expect(working.isEmpty()).toBe(true);
   });
 
-  test("andNotInto subtracts its positions and reports emptiness", () => {
+  test("subtracts its positions through andNotInto and reports emptiness", () => {
     const working = createBitSet(3, 40, 70);
 
     expect(make(40).andNotInto(working)).toBe(false);
     expect(gatherPositions(working)).toEqual([3, 70]);
   });
 
-  test("andNotInto reports empty when it removes everything", () => {
+  test("reports empty through andNotInto when it removes everything", () => {
     const working = createBitSet(40, 70);
 
     expect(make(40, 70).andNotInto(working)).toBe(true);
     expect(working.isEmpty()).toBe(true);
   });
 
-  test("orInto unions its positions into the accumulator", () => {
+  test("unions its positions into the accumulator through orInto", () => {
     const accumulator = createBitSet(1);
 
     make(40, 70).orInto(accumulator);
     expect(gatherPositions(accumulator)).toEqual([1, 40, 70]);
   });
 
-  test("orComplementInto sets every bit except where the accumulator was 0 and it carries the position", () => {
+  test("sets every bit through orComplementInto except where the accumulator was 0 and it carries the position", () => {
     const accumulator = createBitSet(5);
 
     make(5, 40).orComplementInto(accumulator);
@@ -96,32 +96,32 @@ describe("EmptyPosting", () => {
     expect(empty.toBitSet(SIZE).isEmpty()).toBe(true);
   });
 
-  test("andInto empties the working set and reports empty", () => {
+  test("empties the working set through andInto and reports empty", () => {
     const working = createBitSet(3, 40, 70);
 
     expect(empty.andInto(working)).toBe(true);
     expect(working.isEmpty()).toBe(true);
   });
 
-  test("andNotInto leaves the working set untouched and reports its emptiness", () => {
+  test("leaves the working set untouched through andNotInto and reports its emptiness", () => {
     const working = createBitSet(3, 40);
 
     expect(empty.andNotInto(working)).toBe(false);
     expect(gatherPositions(working)).toEqual([3, 40]);
   });
 
-  test("andNotInto reports empty when the working set was already empty", () => {
+  test("reports empty through andNotInto when the working set was already empty", () => {
     expect(empty.andNotInto(new BitSet(SIZE))).toBe(true);
   });
 
-  test("orInto leaves the accumulator untouched", () => {
+  test("leaves the accumulator untouched through orInto", () => {
     const accumulator = createBitSet(1, 2);
 
     empty.orInto(accumulator);
     expect(gatherPositions(accumulator)).toEqual([1, 2]);
   });
 
-  test("orComplementInto fills the accumulator, since the complement of nothing is everything", () => {
+  test("fills the accumulator through orComplementInto, since the complement of nothing is everything", () => {
     const accumulator = createBitSet(5);
 
     empty.orComplementInto(accumulator);
@@ -129,8 +129,8 @@ describe("EmptyPosting", () => {
   });
 });
 
-describe("dense and sparse agree", () => {
-  test("produce the same andInto result", () => {
+describe("SparsePosting", () => {
+  test("matches a dense posting's andInto result", () => {
     const denseWorking = createBitSet(3, 40, 70, 90);
     const sparseWorking = createBitSet(3, 40, 70, 90);
 
@@ -139,7 +139,7 @@ describe("dense and sparse agree", () => {
     expect(gatherPositions(denseWorking)).toEqual(gatherPositions(sparseWorking));
   });
 
-  test("produce the same orComplementInto result", () => {
+  test("matches a dense posting's orComplementInto result", () => {
     const denseAcc = createBitSet(5, 12);
     const sparseAcc = createBitSet(5, 12);
 

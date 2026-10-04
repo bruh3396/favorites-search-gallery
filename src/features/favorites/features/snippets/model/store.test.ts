@@ -1,513 +1,617 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
-const STORAGE_KEY = "searchSnippets";
+const UNMOVED_STORAGE_KEY = "searchSnippets";
 
-let storage: MemoryLocalKeyedValues;
+interface Setup {
+  store: SnippetStore;
+  localKeyedValues: MemoryLocalKeyedValues;
+  createStore: () => SnippetStore;
+  loadStore: () => Promise<SnippetStore>;
+  readPersisted: () => Promise<Snippet[]>;
+}
 
-const persisted = (): Snippet[] => (storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? [];
 const getNames = (snippets: Snippet[]): string[] => snippets.map(snippet => snippet.name);
 const getQueries = (snippets: Snippet[]): string[] => snippets.map(snippet => snippet.query);
 const getReason = (result: { ok: boolean; reason?: string }): string | undefined => result.reason;
 
-beforeEach(() => {
-  storage = new MemoryLocalKeyedValues();
-});
-
-describe("add", () => {
-  test("stores a snippet", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "( apple ~ banana )");
-    expect(getNames(store.getAll())).toEqual(["fruits"]);
-  });
+// A store over fresh storage. createStore and loadStore open more stores over the same storage, as a later session would.
+function setup(): Setup {
+  const localSnippets = new MemoryLocalSnippets();
+  const localKeyedValues = new MemoryLocalKeyedValues();
+  const createStore = (): SnippetStore => new SnippetStore({ localSnippets, localKeyedValues });
+  return {
+    store: createStore(),
+    localKeyedValues,
+    createStore,
+    loadStore: async(): Promise<SnippetStore> => {
+      const store = createStore();
+
+      await store.load();
+      return store;
+    },
+    readPersisted: (): Promise<Snippet[]> => localSnippets.getAll()
+  };
+}
+
+function runAtTime(now: number, run: () => void): void {
+  vi.useFakeTimers({ now });
+  run();
+  vi.useRealTimers();
+}
 
-  test("persists the snippet", () => {
-    const store = new SnippetStore(storage);
+describe("SnippetStore", () => {
+  describe("add", () => {
+    test("stores a snippet", () => {
+      const { store } = setup();
+
+      store.add("fruits", "( apple ~ banana )");
+      expect(getNames(store.getAll())).toEqual(["fruits"]);
+    });
+
+    test("persists the snippet", async() => {
+      const { store, readPersisted } = setup();
+
+      store.add("fruits", "( apple ~ banana )");
+      expect(getQueries(await readPersisted())).toEqual(["( apple ~ banana )"]);
+    });
 
-    store.add("fruits", "( apple ~ banana )");
-    expect(getQueries(persisted())).toEqual(["( apple ~ banana )"]);
-  });
+    test("returns the created snippet", () => {
+      const { store } = setup();
+      const result = store.add("fruits", "( apple ~ banana )");
+
+      expect(result.ok).toBe(true);
+      expect(result.ok && result.snippet.query).toBe("( apple ~ banana )");
+    });
+
+    test("normalizes the name", () => {
+      const { store } = setup();
+
+      store.add("My Fruits", "apple");
+      expect(getNames(store.getAll())).toEqual(["my_fruits"]);
+    });
+
+    test("collapses extra whitespace in the query", () => {
+      const { store } = setup();
+
+      store.add("fruits", "(  apple   ~   banana  )");
+      expect(getQueries(store.getAll())).toEqual(["( apple ~ banana )"]);
+    });
+
+    test("starts a snippet unused", () => {
+      const { store } = setup();
+      const result = store.add("fruits", "apple");
+
+      expect(result.ok && result.snippet.lastUsedAt).toBe(0);
+    });
+
+    test("rejects an empty name", () => {
+      const { store } = setup();
+
+      expect(getReason(store.add("", "apple"))).toBe("empty-name");
+      expect(store.getAll()).toEqual([]);
+    });
 
-  test("returns the created snippet", () => {
-    const store = new SnippetStore(storage);
-    const result = store.add("fruits", "( apple ~ banana )");
+    test("rejects a name of only whitespace", () => {
+      const { store } = setup();
+
+      expect(getReason(store.add("   ", "apple"))).toBe("empty-name");
+    });
+
+    test("rejects an empty query", () => {
+      const { store } = setup();
+
+      expect(getReason(store.add("fruits", ""))).toBe("empty-query");
+      expect(store.getAll()).toEqual([]);
+    });
+
+    test("rejects a query of only whitespace", () => {
+      const { store } = setup();
 
-    expect(result.ok).toBe(true);
-    expect(result.ok && result.snippet.query).toBe("( apple ~ banana )");
-  });
+      expect(getReason(store.add("fruits", "   "))).toBe("empty-query");
+    });
 
-  test("normalizes the name", () => {
-    const store = new SnippetStore(storage);
+    test("rejects a duplicate name", () => {
+      const { store } = setup();
 
-    store.add("My Fruits", "apple");
-    expect(getNames(store.getAll())).toEqual(["my_fruits"]);
-  });
+      store.add("fruits", "apple");
+      expect(getReason(store.add("fruits", "banana"))).toBe("duplicate-name");
+    });
 
-  test("collapses extra whitespace in the query", () => {
-    const store = new SnippetStore(storage);
+    test("leaves the original untouched when the name is a duplicate", async() => {
+      const { store, readPersisted } = setup();
 
-    store.add("fruits", "(  apple   ~   banana  )");
-    expect(getQueries(store.getAll())).toEqual(["( apple ~ banana )"]);
-  });
+      store.add("fruits", "apple");
+      store.add("fruits", "banana");
+      expect(getQueries(store.getAll())).toEqual(["apple"]);
+      expect(getQueries(await readPersisted())).toEqual(["apple"]);
+    });
 
-  test("starts a snippet unused", () => {
-    const store = new SnippetStore(storage);
-    const result = store.add("fruits", "apple");
+    test("treats names as duplicates after normalizing", () => {
+      const { store } = setup();
 
-    expect(result.ok && result.snippet.lastUsedAt).toBe(0);
+      store.add("my_fruits", "apple");
+      expect(getReason(store.add("My Fruits", "banana"))).toBe("duplicate-name");
+    });
   });
 
-  test("rejects an empty name", () => {
-    const store = new SnippetStore(storage);
+  describe("update", () => {
+    test("changes the query", () => {
+      const { store } = setup();
 
-    expect(getReason(store.add("", "apple"))).toBe("empty-name");
-    expect(store.getAll()).toEqual([]);
-  });
+      store.add("fruits", "apple");
+      store.update("fruits", "fruits", "banana");
+      expect(getQueries(store.getAll())).toEqual(["banana"]);
+    });
 
-  test("rejects a name of only whitespace", () => {
-    const store = new SnippetStore(storage);
+    test("changes the name", () => {
+      const { store } = setup();
 
-    expect(getReason(store.add("   ", "apple"))).toBe("empty-name");
-  });
+      store.add("fruits", "apple");
+      store.update("fruits", "fruit", "apple");
+      expect(getNames(store.getAll())).toEqual(["fruit"]);
+    });
 
-  test("rejects an empty query", () => {
-    const store = new SnippetStore(storage);
+    test("drops the old name when renaming", () => {
+      const { store } = setup();
 
-    expect(getReason(store.add("fruits", ""))).toBe("empty-query");
-    expect(store.getAll()).toEqual([]);
-  });
+      store.add("fruits", "apple");
+      store.update("fruits", "fruit", "apple");
+      expect(store.getAll()).toHaveLength(1);
+    });
 
-  test("rejects a query of only whitespace", () => {
-    const store = new SnippetStore(storage);
+    test("keeps the creation time", () => {
+      const { store } = setup();
+      const created = store.add("fruits", "apple");
+      const createdAt = created.ok ? created.snippet.createdAt : 0;
 
-    expect(getReason(store.add("fruits", "   "))).toBe("empty-query");
-  });
+      store.update("fruits", "fruit", "banana");
+      expect(store.getAll()[0].createdAt).toBe(createdAt);
+    });
 
-  test("rejects a duplicate name", () => {
-    const store = new SnippetStore(storage);
+    test("keeps the time of last use", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    expect(getReason(store.add("fruits", "banana"))).toBe("duplicate-name");
-  });
+      store.add("fruits", "apple");
+      store.use("fruits");
+      const lastUsedAt = store.getAll()[0].lastUsedAt;
 
-  test("leaves the original untouched when the name is a duplicate", () => {
-    const store = new SnippetStore(storage);
+      store.update("fruits", "fruit", "banana");
+      expect(store.getAll()[0].lastUsedAt).toBe(lastUsedAt);
+    });
 
-    store.add("fruits", "apple");
-    store.add("fruits", "banana");
-    expect(getQueries(store.getAll())).toEqual(["apple"]);
-  });
+    test("persists a rename", async() => {
+      const { store, readPersisted } = setup();
 
-  test("treats names as duplicates after normalizing", () => {
-    const store = new SnippetStore(storage);
+      store.add("fruits", "apple");
+      store.update("fruits", "fruit", "banana");
+      expect(await readPersisted()).toEqual(store.getAll());
+    });
 
-    store.add("my_fruits", "apple");
-    expect(getReason(store.add("My Fruits", "banana"))).toBe("duplicate-name");
-  });
-});
-
-describe("update", () => {
-  test("changes the query", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "apple");
-    store.update("fruits", "fruits", "banana");
-    expect(getQueries(store.getAll())).toEqual(["banana"]);
-  });
+    test("persists a new query under the same name", async() => {
+      const { store, readPersisted } = setup();
 
-  test("changes the name", () => {
-    const store = new SnippetStore(storage);
+      store.add("fruits", "apple");
+      store.update("fruits", "fruits", "banana");
+      expect(getQueries(await readPersisted())).toEqual(["banana"]);
+    });
 
-    store.add("fruits", "apple");
-    store.update("fruits", "fruit", "apple");
-    expect(getNames(store.getAll())).toEqual(["fruit"]);
-  });
+    test("normalizes the new name", () => {
+      const { store } = setup();
 
-  test("drops the old name when renaming", () => {
-    const store = new SnippetStore(storage);
+      store.add("fruits", "apple");
+      store.update("fruits", "My Fruits", "apple");
+      expect(getNames(store.getAll())).toEqual(["my_fruits"]);
+    });
 
-    store.add("fruits", "apple");
-    store.update("fruits", "fruit", "apple");
-    expect(store.getAll()).toHaveLength(1);
-  });
+    test("rejects an unknown snippet", () => {
+      const { store } = setup();
 
-  test("keeps the creation time", () => {
-    const store = new SnippetStore(storage);
-    const created = store.add("fruits", "apple");
-    const createdAt = created.ok ? created.snippet.createdAt : 0;
+      expect(getReason(store.update("missing", "fruits", "apple"))).toBe("not-found");
+    });
 
-    store.update("fruits", "fruit", "banana");
-    expect(store.getAll()[0].createdAt).toBe(createdAt);
-  });
+    test("does not create a snippet when the old name is unknown", async() => {
+      const { store, readPersisted } = setup();
 
-  test("keeps the time of last use", () => {
-    const store = new SnippetStore(storage);
+      store.update("missing", "fruits", "apple");
+      expect(store.getAll()).toEqual([]);
+      expect(await readPersisted()).toEqual([]);
+    });
 
-    store.add("fruits", "apple");
-    store.use("fruits");
-    const lastUsedAt = store.getAll()[0].lastUsedAt;
+    test("rejects renaming onto another snippet", () => {
+      const { store } = setup();
 
-    store.update("fruits", "fruit", "banana");
-    expect(store.getAll()[0].lastUsedAt).toBe(lastUsedAt);
-  });
+      store.add("fruits", "apple");
+      store.add("veg", "carrot");
+      expect(getReason(store.update("fruits", "veg", "apple"))).toBe("duplicate-name");
+    });
 
-  test("persists the change", () => {
-    const store = new SnippetStore(storage);
+    test("leaves both snippets intact when the new name is taken", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.update("fruits", "fruit", "banana");
-    expect(getNames(persisted())).toEqual(["fruit"]);
-  });
+      store.add("fruits", "apple");
+      store.add("veg", "carrot");
+      store.update("fruits", "veg", "apple");
+      expect(getQueries(store.getAll())).toEqual(["apple", "carrot"]);
+    });
 
-  test("normalizes the new name", () => {
-    const store = new SnippetStore(storage);
+    test("allows keeping the same name", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.update("fruits", "My Fruits", "apple");
-    expect(getNames(store.getAll())).toEqual(["my_fruits"]);
-  });
+      store.add("fruits", "apple");
+      expect(store.update("fruits", "fruits", "banana").ok).toBe(true);
+    });
 
-  test("rejects an unknown snippet", () => {
-    const store = new SnippetStore(storage);
+    test("rejects an empty new name", () => {
+      const { store } = setup();
 
-    expect(getReason(store.update("missing", "fruits", "apple"))).toBe("not-found");
-  });
+      store.add("fruits", "apple");
+      expect(getReason(store.update("fruits", "", "apple"))).toBe("empty-name");
+    });
 
-  test("does not create a snippet when the old name is unknown", () => {
-    const store = new SnippetStore(storage);
+    test("restores the snippet when the new name is empty", async() => {
+      const { store, readPersisted } = setup();
 
-    store.update("missing", "fruits", "apple");
-    expect(store.getAll()).toEqual([]);
-  });
+      store.add("fruits", "apple");
+      store.update("fruits", "", "apple");
+      expect(getQueries(store.getAll())).toEqual(["apple"]);
+      expect(getQueries(await readPersisted())).toEqual(["apple"]);
+    });
 
-  test("rejects renaming onto another snippet", () => {
-    const store = new SnippetStore(storage);
+    test("rejects an empty query", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.add("veg", "carrot");
-    expect(getReason(store.update("fruits", "veg", "apple"))).toBe("duplicate-name");
-  });
+      store.add("fruits", "apple");
+      expect(getReason(store.update("fruits", "fruits", ""))).toBe("empty-query");
+    });
 
-  test("leaves both snippets intact when the new name is taken", () => {
-    const store = new SnippetStore(storage);
+    test("restores the snippet when the query is empty", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.add("veg", "carrot");
-    store.update("fruits", "veg", "apple");
-    expect(getQueries(store.getAll())).toEqual(["apple", "carrot"]);
+      store.add("fruits", "apple");
+      store.update("fruits", "fruits", "");
+      expect(getNames(store.getAll())).toEqual(["fruits"]);
+    });
   });
 
-  test("allows keeping the same name", () => {
-    const store = new SnippetStore(storage);
+  describe("remove", () => {
+    test("deletes the snippet", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    expect(store.update("fruits", "fruits", "banana").ok).toBe(true);
-  });
+      store.add("fruits", "apple");
+      store.add("veg", "carrot");
+      store.remove("fruits");
+      expect(getNames(store.getAll())).toEqual(["veg"]);
+    });
 
-  test("rejects an empty new name", () => {
-    const store = new SnippetStore(storage);
+    test("persists the deletion", async() => {
+      const { store, readPersisted } = setup();
 
-    store.add("fruits", "apple");
-    expect(getReason(store.update("fruits", "", "apple"))).toBe("empty-name");
-  });
+      store.add("fruits", "apple");
+      store.remove("fruits");
+      expect(await readPersisted()).toEqual([]);
+    });
 
-  test("restores the snippet when the new name is empty", () => {
-    const store = new SnippetStore(storage);
+    test("ignores an unknown name", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.update("fruits", "", "apple");
-    expect(getQueries(store.getAll())).toEqual(["apple"]);
+      store.add("fruits", "apple");
+      store.remove("missing");
+      expect(store.getAll()).toHaveLength(1);
+    });
   });
 
-  test("rejects an empty query", () => {
-    const store = new SnippetStore(storage);
+  describe("replaceAll", () => {
+    test("discards the existing snippets", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    expect(getReason(store.update("fruits", "fruits", ""))).toBe("empty-query");
-  });
+      store.add("fruits", "apple");
+      store.replaceAll([{ name: "veg", query: "carrot" }]);
+      expect(getNames(store.getAll())).toEqual(["veg"]);
+    });
 
-  test("restores the snippet when the query is empty", () => {
-    const store = new SnippetStore(storage);
+    test("stores every entry", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.update("fruits", "fruits", "");
-    expect(getNames(store.getAll())).toEqual(["fruits"]);
-  });
-});
-
-describe("remove", () => {
-  test("deletes the snippet", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "apple");
-    store.add("veg", "carrot");
-    store.remove("fruits");
-    expect(getNames(store.getAll())).toEqual(["veg"]);
-  });
+      store.replaceAll([{ name: "a", query: "1" }, { name: "b", query: "2" }]);
+      expect(getNames(store.getAll())).toEqual(["a", "b"]);
+    });
 
-  test("persists the deletion", () => {
-    const store = new SnippetStore(storage);
+    test("keeps the order of the imported entries", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.remove("fruits");
-    expect(persisted()).toEqual([]);
-  });
+      store.replaceAll([{ name: "c", query: "3" }, { name: "a", query: "1" }, { name: "b", query: "2" }]);
+      expect(getNames(store.getAll())).toEqual(["c", "a", "b"]);
+    });
 
-  test("ignores an unknown name", () => {
-    const store = new SnippetStore(storage);
+    test("orders imported entries by creation time", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.remove("missing");
-    expect(store.getAll()).toHaveLength(1);
-  });
-});
-
-describe("replaceAll", () => {
-  test("discards the existing snippets", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "apple");
-    store.replaceAll([{ name: "veg", query: "carrot" }]);
-    expect(getNames(store.getAll())).toEqual(["veg"]);
-  });
+      store.replaceAll([{ name: "first", query: "1" }, { name: "second", query: "2" }]);
+      expect(store.getAll()[0].createdAt).toBeGreaterThan(store.getAll()[1].createdAt);
+    });
 
-  test("stores every entry", () => {
-    const store = new SnippetStore(storage);
+    test("returns the number of entries stored", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "a", query: "1" }, { name: "b", query: "2" }]);
-    expect(getNames(store.getAll())).toEqual(["a", "b"]);
-  });
+      expect(store.replaceAll([{ name: "a", query: "1" }, { name: "b", query: "2" }])).toBe(2);
+    });
 
-  test("keeps the order of the imported entries", () => {
-    const store = new SnippetStore(storage);
+    test("normalizes imported names", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "c", query: "3" }, { name: "a", query: "1" }, { name: "b", query: "2" }]);
-    expect(getNames(store.getAll())).toEqual(["c", "a", "b"]);
-  });
+      store.replaceAll([{ name: "My Fruits", query: "apple" }]);
+      expect(getNames(store.getAll())).toEqual(["my_fruits"]);
+    });
 
-  test("orders imported entries by creation time", () => {
-    const store = new SnippetStore(storage);
+    test("skips an entry with an empty name", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "first", query: "1" }, { name: "second", query: "2" }]);
-    expect(store.getAll()[0].createdAt).toBeGreaterThan(store.getAll()[1].createdAt);
-  });
+      store.replaceAll([{ name: "", query: "apple" }, { name: "veg", query: "carrot" }]);
+      expect(getNames(store.getAll())).toEqual(["veg"]);
+    });
 
-  test("returns the number of entries stored", () => {
-    const store = new SnippetStore(storage);
+    test("skips an entry with an empty query", () => {
+      const { store } = setup();
 
-    expect(store.replaceAll([{ name: "a", query: "1" }, { name: "b", query: "2" }])).toBe(2);
-  });
+      store.replaceAll([{ name: "fruits", query: "" }, { name: "veg", query: "carrot" }]);
+      expect(getNames(store.getAll())).toEqual(["veg"]);
+    });
 
-  test("normalizes imported names", () => {
-    const store = new SnippetStore(storage);
+    test("keeps only the first of two entries sharing a name", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "My Fruits", query: "apple" }]);
-    expect(getNames(store.getAll())).toEqual(["my_fruits"]);
-  });
+      store.replaceAll([{ name: "fruits", query: "apple" }, { name: "fruits", query: "banana" }]);
+      expect(getQueries(store.getAll())).toEqual(["apple"]);
+    });
 
-  test("skips an entry with an empty name", () => {
-    const store = new SnippetStore(storage);
+    test("excludes skipped entries from the count", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "", query: "apple" }, { name: "veg", query: "carrot" }]);
-    expect(getNames(store.getAll())).toEqual(["veg"]);
-  });
+      expect(store.replaceAll([{ name: "", query: "apple" }, { name: "veg", query: "carrot" }])).toBe(1);
+    });
 
-  test("skips an entry with an empty query", () => {
-    const store = new SnippetStore(storage);
+    test("clears the snippets when given nothing", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "fruits", query: "" }, { name: "veg", query: "carrot" }]);
-    expect(getNames(store.getAll())).toEqual(["veg"]);
-  });
+      store.add("fruits", "apple");
+      store.replaceAll([]);
+      expect(store.getAll()).toEqual([]);
+    });
 
-  test("keeps only the first of two entries sharing a name", () => {
-    const store = new SnippetStore(storage);
+    test("persists the replacement", async() => {
+      const { store, readPersisted } = setup();
 
-    store.replaceAll([{ name: "fruits", query: "apple" }, { name: "fruits", query: "banana" }]);
-    expect(getQueries(store.getAll())).toEqual(["apple"]);
-  });
+      store.add("fruits", "apple");
+      store.replaceAll([{ name: "veg", query: "carrot" }]);
+      expect(getNames(await readPersisted())).toEqual(["veg"]);
+    });
 
-  test("excludes skipped entries from the count", () => {
-    const store = new SnippetStore(storage);
+    test("persists an empty replacement", async() => {
+      const { store, readPersisted } = setup();
 
-    expect(store.replaceAll([{ name: "", query: "apple" }, { name: "veg", query: "carrot" }])).toBe(1);
-  });
+      store.add("fruits", "apple");
+      store.replaceAll([]);
+      expect(await readPersisted()).toEqual([]);
+    });
 
-  test("clears the snippets when given nothing", () => {
-    const store = new SnippetStore(storage);
+    test("resets the time of last use", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.replaceAll([]);
-    expect(store.getAll()).toEqual([]);
-  });
+      store.add("fruits", "apple");
+      store.use("fruits");
+      store.replaceAll([{ name: "fruits", query: "apple" }]);
+      expect(store.getAll()[0].lastUsedAt).toBe(0);
+    });
 
-  test("persists the replacement", () => {
-    const store = new SnippetStore(storage);
+    test("collapses whitespace in imported queries", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.replaceAll([{ name: "veg", query: "carrot" }]);
-    expect(getNames(persisted())).toEqual(["veg"]);
-  });
+      store.replaceAll([{ name: "fruits", query: "  apple   banana  " }]);
+      expect(getQueries(store.getAll())).toEqual(["apple banana"]);
+    });
 
-  test("persists an empty replacement", () => {
-    const store = new SnippetStore(storage);
+    test("reloads the replacement from storage", async() => {
+      const { store, loadStore } = setup();
 
-    store.add("fruits", "apple");
-    store.replaceAll([]);
-    expect(persisted()).toEqual([]);
+      store.replaceAll([{ name: "veg", query: "carrot" }]);
+      expect(getNames((await loadStore()).getAll())).toEqual(["veg"]);
+    });
   });
 
-  test("resets the time of last use", () => {
-    const store = new SnippetStore(storage);
+  describe("use", () => {
+    test("records the time of use", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.use("fruits");
-    store.replaceAll([{ name: "fruits", query: "apple" }]);
-    expect(store.getAll()[0].lastUsedAt).toBe(0);
-  });
+      store.add("fruits", "apple");
+      store.use("fruits");
+      expect(store.getAll()[0].lastUsedAt).toBeGreaterThan(0);
+    });
 
-  test("collapses whitespace in imported queries", () => {
-    const store = new SnippetStore(storage);
+    test("persists the time of use", async() => {
+      const { store, readPersisted } = setup();
 
-    store.replaceAll([{ name: "fruits", query: "  apple   banana  " }]);
-    expect(getQueries(store.getAll())).toEqual(["apple banana"]);
-  });
+      store.add("fruits", "apple");
+      store.use("fruits");
+      expect((await readPersisted())[0].lastUsedAt).toBeGreaterThan(0);
+    });
 
-  test("reloads the replacement from storage", () => {
-    const store = new SnippetStore(storage);
+    test("leaves the query alone", () => {
+      const { store } = setup();
 
-    store.replaceAll([{ name: "veg", query: "carrot" }]);
-    expect(getNames(new SnippetStore(storage).getAll())).toEqual(["veg"]);
-  });
-});
-
-describe("use", () => {
-  test("records the time of use", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "apple");
-    store.use("fruits");
-    expect(store.getAll()[0].lastUsedAt).toBeGreaterThan(0);
-  });
+      store.add("fruits", "apple");
+      store.use("fruits");
+      expect(getQueries(store.getAll())).toEqual(["apple"]);
+    });
 
-  test("persists the time of use", () => {
-    const store = new SnippetStore(storage);
+    test("ignores an unknown name", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.use("fruits");
-    expect(persisted()[0].lastUsedAt).toBeGreaterThan(0);
+      store.add("fruits", "apple");
+      store.use("missing");
+      expect(store.getAll()[0].lastUsedAt).toBe(0);
+    });
   });
 
-  test("leaves the query alone", () => {
-    const store = new SnippetStore(storage);
+  describe("moveToTop", () => {
+    test("makes the snippet the newest", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.use("fruits");
-    expect(getQueries(store.getAll())).toEqual(["apple"]);
-  });
+      runAtTime(100, () => store.add("fruits", "apple"));
+      runAtTime(200, () => store.add("veg", "carrot"));
+      store.moveToTop("fruits");
+      expect(store.get("fruits")?.createdAt).toBeGreaterThan(200);
+    });
 
-  test("ignores an unknown name", () => {
-    const store = new SnippetStore(storage);
+    test("persists the new creation time", async() => {
+      const { store, readPersisted } = setup();
 
-    store.add("fruits", "apple");
-    store.use("missing");
-    expect(store.getAll()[0].lastUsedAt).toBe(0);
-  });
-});
-
-describe("moveToTop", () => {
-  test("makes the snippet the newest", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "apple", 0, 100);
-    store.add("veg", "carrot", 0, 200);
-    store.moveToTop("fruits");
-    expect(store.get("fruits")?.createdAt).toBeGreaterThan(200);
-  });
+      runAtTime(100, () => store.add("fruits", "apple"));
+      store.moveToTop("fruits");
+      expect((await readPersisted())[0].createdAt).toBeGreaterThan(100);
+    });
 
-  test("persists the new creation time", () => {
-    const store = new SnippetStore(storage);
+    test("leaves the query alone", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple", 0, 100);
-    store.moveToTop("fruits");
-    expect(persisted()[0].createdAt).toBeGreaterThan(100);
-  });
+      store.add("fruits", "apple");
+      store.moveToTop("fruits");
+      expect(getQueries(store.getAll())).toEqual(["apple"]);
+    });
 
-  test("leaves the query alone", () => {
-    const store = new SnippetStore(storage);
+    test("ignores an unknown name", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple");
-    store.moveToTop("fruits");
-    expect(getQueries(store.getAll())).toEqual(["apple"]);
+      runAtTime(100, () => store.add("fruits", "apple"));
+      store.moveToTop("missing");
+      expect(store.get("fruits")?.createdAt).toBe(100);
+    });
   });
 
-  test("ignores an unknown name", () => {
-    const store = new SnippetStore(storage);
+  describe("getAll", () => {
+    test("does not expose the internal collection", () => {
+      const { store } = setup();
 
-    store.add("fruits", "apple", 0, 100);
-    store.moveToTop("missing");
-    expect(store.get("fruits")?.createdAt).toBe(100);
-  });
-});
-
-describe("getAll", () => {
-  test("does not expose the internal collection", () => {
-    const store = new SnippetStore(storage);
-
-    store.add("fruits", "apple");
-    store.getAll().pop();
-    expect(store.getAll()).toHaveLength(1);
-  });
+      store.add("fruits", "apple");
+      store.getAll().pop();
+      expect(store.getAll()).toHaveLength(1);
+    });
 
-  test("keeps insertion order", () => {
-    const store = new SnippetStore(storage);
+    test("keeps insertion order", () => {
+      const { store } = setup();
 
-    store.add("a", "1");
-    store.add("b", "2");
-    store.add("c", "3");
-    expect(getNames(store.getAll())).toEqual(["a", "b", "c"]);
+      store.add("a", "1");
+      store.add("b", "2");
+      store.add("c", "3");
+      expect(getNames(store.getAll())).toEqual(["a", "b", "c"]);
+    });
   });
-});
 
-describe("loading", () => {
-  test("reads snippets persisted by an earlier session", () => {
-    const first = new SnippetStore(storage);
+  describe("load", () => {
+    test("reads snippets persisted by an earlier session", async() => {
+      const { createStore, loadStore } = setup();
 
-    first.add("fruits", "apple");
-    expect(getNames(new SnippetStore(storage).getAll())).toEqual(["fruits"]);
-  });
+      createStore().add("fruits", "apple");
 
-  test("starts empty when nothing is stored", () => {
-    expect(new SnippetStore(storage).getAll()).toEqual([]);
-  });
+      expect(getNames((await loadStore()).getAll())).toEqual(["fruits"]);
+    });
 
-  test("drops entries that are not snippets", () => {
-    storage.set(STORAGE_KEY, [{ name: "fruits", query: "apple", lastUsedAt: 0, createdAt: 0 }, { name: "x" }, "junk", null]);
-    expect(getNames(new SnippetStore(storage).getAll())).toEqual(["fruits"]);
-  });
+    test("starts empty when nothing is stored", async() => {
+      const { loadStore } = setup();
 
-  test("drops entries with an empty name", () => {
-    storage.set(STORAGE_KEY, [{ name: "", query: "apple", lastUsedAt: 0, createdAt: 0 }]);
-    expect(new SnippetStore(storage).getAll()).toEqual([]);
-  });
+      expect((await loadStore()).getAll()).toEqual([]);
+    });
 
-  test("drops entries with an empty query", () => {
-    storage.set(STORAGE_KEY, [{ name: "fruits", query: "   ", lastUsedAt: 0, createdAt: 0 }]);
-    expect(new SnippetStore(storage).getAll()).toEqual([]);
-  });
+    test("keeps a snippet added before loading finished", async() => {
+      const { createStore } = setup();
 
-  test("keeps the first of two entries sharing a name", () => {
-    storage.set(STORAGE_KEY, [
-      { name: "fruits", query: "apple", lastUsedAt: 0, createdAt: 0 },
-      { name: "fruits", query: "banana", lastUsedAt: 0, createdAt: 0 }
-    ]);
-    expect(getQueries(new SnippetStore(storage).getAll())).toEqual(["apple"]);
-  });
+      createStore().add("fruits", "apple");
+      const store = createStore();
+      const loading = store.load();
+
+      store.add("veg", "carrot");
+      await loading;
+
+      expect(getNames(store.getAll()).sort()).toEqual(["fruits", "veg"]);
+    });
+
+    test("keeps the newer copy of a snippet changed before loading finished", async() => {
+      const { createStore } = setup();
+
+      createStore().add("fruits", "apple");
+      const store = createStore();
+      const loading = store.load();
+
+      store.replaceAll([{ name: "fruits", query: "banana" }]);
+      await loading;
+
+      expect(getQueries(store.getAll())).toEqual(["banana"]);
+    });
+
+    test("moves snippets out of local storage into local snippets", async() => {
+      const { localKeyedValues, loadStore, readPersisted } = setup();
+
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, [{ name: "fruits", query: "apple", lastUsedAt: 5, createdAt: 9 }]);
+
+      expect((await loadStore()).getAll()).toEqual([{ name: "fruits", query: "apple", lastUsedAt: 5, createdAt: 9 }]);
+      expect(getNames(await readPersisted())).toEqual(["fruits"]);
+      expect(localKeyedValues.get(UNMOVED_STORAGE_KEY)).toBeUndefined();
+    });
+
+    test("leaves snippets in local storage once local snippets has some", async() => {
+      const { localKeyedValues, createStore, loadStore } = setup();
+
+      createStore().add("veg", "carrot");
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, [{ name: "fruits", query: "apple", lastUsedAt: 0, createdAt: 0 }]);
+
+      expect(getNames((await loadStore()).getAll())).toEqual(["veg"]);
+      expect(localKeyedValues.get(UNMOVED_STORAGE_KEY)).toBeDefined();
+    });
+
+    test("drops local storage entries that are not snippets", async() => {
+      const { localKeyedValues, loadStore } = setup();
+
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, [{ name: "fruits", query: "apple", lastUsedAt: 0, createdAt: 0 }, { name: "x" }, "junk", null]);
+
+      expect(getNames((await loadStore()).getAll())).toEqual(["fruits"]);
+    });
+
+    test("drops local storage entries with an empty name", async() => {
+      const { localKeyedValues, loadStore } = setup();
+
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, [{ name: "", query: "apple", lastUsedAt: 0, createdAt: 0 }]);
+
+      expect((await loadStore()).getAll()).toEqual([]);
+    });
+
+    test("drops local storage entries with an empty query", async() => {
+      const { localKeyedValues, loadStore } = setup();
+
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, [{ name: "fruits", query: "   ", lastUsedAt: 0, createdAt: 0 }]);
+
+      expect((await loadStore()).getAll()).toEqual([]);
+    });
+
+    test("keeps the first of two local storage entries sharing a name", async() => {
+      const { localKeyedValues, loadStore } = setup();
+
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, [
+        { name: "fruits", query: "apple", lastUsedAt: 0, createdAt: 0 },
+        { name: "fruits", query: "banana", lastUsedAt: 0, createdAt: 0 }
+      ]);
+
+      expect(getQueries((await loadStore()).getAll())).toEqual(["apple"]);
+    });
+
+    test("ignores local storage data that is not an array", async() => {
+      const { localKeyedValues, loadStore } = setup();
+
+      localKeyedValues.set(UNMOVED_STORAGE_KEY, { snippets: [] });
 
-  test("ignores stored data that is not an array", () => {
-    storage.set(STORAGE_KEY, { snippets: [] });
-    expect(new SnippetStore(storage).getAll()).toEqual([]);
+      expect((await loadStore()).getAll()).toEqual([]);
+    });
   });
 });

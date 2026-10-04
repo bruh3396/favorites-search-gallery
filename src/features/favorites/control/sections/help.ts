@@ -16,7 +16,7 @@ const GROUP_CLASSES = {
 };
 
 export function buildDrawerSection(offersTutorial: boolean, requestTutorial: () => void): FavoritesDrawerSectionContent {
-  return { mount: (container) => mount(offersTutorial, container, requestTutorial) };
+  return { mount: container => mount(offersTutorial, container, requestTutorial) };
 }
 
 function mount(offersTutorial: boolean, container: HTMLElement, requestTutorial: () => void): void {

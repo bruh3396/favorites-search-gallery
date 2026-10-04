@@ -24,7 +24,7 @@ function variant(label: string, { options, value, disabled = false, size }: Drop
       const control = createDropdown(ownerDocument, {
         options,
         size,
-        onValueChange: (next) => {
+        onValueChange: next => {
           log(`Dropdown "${label}" → ${next}`);
           control.setValue(next);
         }

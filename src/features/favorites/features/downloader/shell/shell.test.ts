@@ -12,7 +12,7 @@ describe("DownloaderShell", () => {
   test("puts both buttons inside the actions slot", () => {
     const { downloadButton, cancelButton, actions } = new DownloaderShell();
 
-    expect(Array.from(actions.children)).toEqual([downloadButton, cancelButton]);
+    expect([...actions.children]).toEqual([downloadButton, cancelButton]);
   });
 
   test("tags the buttons with their actions", () => {

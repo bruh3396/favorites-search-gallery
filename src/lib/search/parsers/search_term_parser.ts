@@ -30,7 +30,7 @@ export function parseNumericSearchTerm(term: string): NumericSearchTerm {
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
   const { isNegated, value } = parseNegation(removeDuplicateAsterisks(term));
-  return new WildcardSearchTerm(value, isNegated, chooseWildcardMatchType(value), buildWildcardRegex(value));
+  return new WildcardSearchTerm(value, isNegated, { matchType: chooseWildcardMatchType(value), regex: buildWildcardRegex(value) });
 }
 
 export function parseMetricSearchTerm(term: string): MetricSearchTerm {

@@ -45,8 +45,8 @@ export class GalleryFeatures {
     preferences.gallery.autoplayActive.on(() => this.autoplay.refresh());
     events.gallery.galleryOpened.on(() => this.autoplay.openGallery());
     events.gallery.galleryClosed.on(() => this.autoplay.closeGallery());
-    events.gallery.itemDisplayed.on((item) => this.autoplay.display(item));
+    events.gallery.itemDisplayed.on(item => this.autoplay.display(item));
     domEvents.document.mousemove.on(() => this.autoplay.handleMouseMove());
-    domEvents.document.keydown.on((event) => this.autoplay.handleKeyDown(event));
+    domEvents.document.keydown.on(event => this.autoplay.handleKeyDown(event));
   }
 }

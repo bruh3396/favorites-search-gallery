@@ -42,7 +42,7 @@ export class FavoritesSearchHistory {
     }
     const cleaned = removeExtraWhitespace(searchQuery);
     const deduped = this.history.filter(entry => entry !== cleaned);
-    const updated = [cleaned].concat(deduped).slice(0, this.depth);
+    const updated = [cleaned, ...deduped].slice(0, this.depth);
 
     this.history = updated;
     this.storage.set("searchHistory", this.history);

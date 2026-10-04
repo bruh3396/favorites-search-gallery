@@ -38,7 +38,7 @@ export function parsePostPage(html: string, mintMedia: Rule34MintMedia): Categor
 function parseTagCategories(dom: Document): TagCategoryMap {
   const categoryMap: TagCategoryMap = new Map();
 
-  for (const tag of Array.from(dom.querySelectorAll(".tag"))) {
+  for (const tag of [...dom.querySelectorAll(".tag")]) {
     const category = tag.classList[0]?.replace("tag-type-", "") ?? "";
     const name = (tag.children[1]?.textContent ?? "").replaceAll(" ", "_");
 
@@ -57,7 +57,7 @@ function parseStatistics(dom: Document): Record<string, string> {
     return {};
   }
   const textContent = removeExtraWhitespace(stats.textContent || "");
-  const matches = Array.from(textContent.matchAll(STATISTIC_ENTRY));
+  const matches = [...textContent.matchAll(STATISTIC_ENTRY)];
   const entries = matches.map(match => [match[1].toLowerCase(), match[2]]);
   return Object.fromEntries(entries);
 }
@@ -85,7 +85,7 @@ function parseMedia(dom: Document, { tags, mintMedia }: { tags: string; mintMedi
 }
 
 function parseTags(dom: Document): string {
-  return removeExtraWhitespace(Array.from(dom.querySelectorAll(".tag>a"))
+  return removeExtraWhitespace([...dom.querySelectorAll(".tag>a")]
     .filter(anchor => anchor instanceof HTMLAnchorElement && anchor.textContent !== "?")
     .map(anchor => (anchor.textContent || "").replaceAll(" ", "_"))
     .join(" ") || "");

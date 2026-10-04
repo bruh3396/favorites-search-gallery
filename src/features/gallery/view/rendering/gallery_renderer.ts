@@ -12,13 +12,20 @@ import { Point } from "@/types/geometry";
 import { PostMedia } from "@/core/domain/post/post";
 import { forceReflow } from "@/utils/browser/element";
 
+export interface GalleryRendererDependencies {
+  galleryRoot: HTMLElement;
+  context: AppContext;
+  favoriteFor: (id: string) => Favorite | undefined;
+  budget: GalleryBudget;
+}
+
 export class GalleryRenderer {
   private readonly imageRenderer: GalleryImageRenderer;
   private readonly videoRenderer: GalleryVideoRenderer;
   private readonly gifRenderer: GalleryGifRenderer;
   private readonly renderers: Renderer[];
 
-  constructor(galleryRoot: HTMLElement, context: AppContext, favoriteFor: (id: string) => Favorite | undefined, budget: GalleryBudget) {
+  constructor({ galleryRoot, context, favoriteFor, budget }: GalleryRendererDependencies) {
     this.imageRenderer = new GalleryImageRenderer(context, favoriteFor, budget);
     const { device } = context.environment;
 
@@ -34,7 +41,7 @@ export class GalleryRenderer {
       context.ports.remoteMedia
     );
     this.renderers = [this.imageRenderer, this.videoRenderer, this.gifRenderer];
-    this.renderers.forEach((renderer) => galleryRoot.appendChild(renderer.root));
+    this.renderers.forEach(renderer => galleryRoot.appendChild(renderer.root));
   }
 
   public setup(onVideoEnded: () => void, onVolumeChanged: (volume: number) => void): void {
@@ -60,11 +67,11 @@ export class GalleryRenderer {
   }
 
   public hide(): void {
-    this.renderers.forEach((renderer) => renderer.hide());
+    this.renderers.forEach(renderer => renderer.hide());
   }
 
   public cache(items: PostMedia[]): void {
-    this.renderers.forEach((renderer) => renderer.cache(items));
+    this.renderers.forEach(renderer => renderer.cache(items));
   }
 
   public toggleZoom(value?: boolean): boolean {

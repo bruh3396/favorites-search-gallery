@@ -42,8 +42,20 @@ export interface DownloaderIntents {
   cancel: () => void;
 }
 
+export interface FilenameParts {
+  tags: Set<string>;
+  extension: string;
+  tagCategories: TagCategoryMap;
+}
+
+export interface DownloadOptions {
+  batchSize: number;
+  signal: AbortSignal;
+  onProgress: (progress: DownloaderProgress) => void;
+}
+
 export interface Filenamer {
-  filenameFor: (item: PostMedia, tags: Set<string>, extension: string, tagCategories: TagCategoryMap) => string;
+  filenameFor: (item: PostMedia, parts: FilenameParts) => string;
 }
 
 export interface Archiver {

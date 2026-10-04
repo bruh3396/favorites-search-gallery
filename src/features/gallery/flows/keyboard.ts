@@ -40,14 +40,14 @@ export class GalleryKeyboardFlow extends GalleryFlow {
   }
 
   public handleKeyUp(event: EnhancedKeyboardEvent): void {
-    this.runForState({ open: (keyboardEvent) => this.handleKeyUpInGallery(keyboardEvent) }, event);
+    this.runForState({ open: keyboardEvent => this.handleKeyUpInGallery(keyboardEvent) }, event);
   }
 
   private handleKeyDownNow(event: KeyboardEvent): void {
     this.runForState({
-      idle: (keyboardEvent) => this.handleKeyDownOutsideGallery(keyboardEvent),
-      preview: (keyboardEvent) => this.handleKeyDownOutsideGallery(keyboardEvent),
-      open: (keyboardEvent) => this.handleKeyDownInGallery(keyboardEvent)
+      idle: keyboardEvent => this.handleKeyDownOutsideGallery(keyboardEvent),
+      preview: keyboardEvent => this.handleKeyDownOutsideGallery(keyboardEvent),
+      open: keyboardEvent => this.handleKeyDownInGallery(keyboardEvent)
     }, new EnhancedKeyboardEvent(event));
   }
 

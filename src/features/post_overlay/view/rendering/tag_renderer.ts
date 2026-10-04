@@ -23,7 +23,7 @@ export function renderTags(target: HTMLElement, postId: string, categoryMap: Tag
 }
 
 function tagNamesInCategory(categoryMap: TagCategoryMap, category: TagCategory): string[] {
-  return Array.from(categoryMap.keys()).filter(tagName => categoryMap.get(tagName) === category);
+  return [...categoryMap.keys()].filter(tagName => categoryMap.get(tagName) === category);
 }
 
 function buildGroup(category: string, label: string, items: string[]): HTMLElement {

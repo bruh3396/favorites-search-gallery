@@ -51,10 +51,10 @@ export class ThrottleQueue {
   }
 
   public wait(id: string | null = null): Promise<boolean> {
-    if (id !== null && this.queue.some((w) => w.id === id)) {
+    if (id !== null && this.queue.some(w => w.id === id)) {
       throw new Error(`ThrottledQueue: duplicate id "${id}"`);
     }
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       this.queue.push({ id, resolve });
 
       if (this.drainPromise === null) {
@@ -66,7 +66,7 @@ export class ThrottleQueue {
   }
 
   public cancel(id: string): void {
-    const index = this.queue.findIndex((w) => w.id === id);
+    const index = this.queue.findIndex(w => w.id === id);
 
     if (index === -1) {
       return;
@@ -77,7 +77,7 @@ export class ThrottleQueue {
   }
 
   public reset(): void {
-    this.queue.forEach((w) => w.resolve(false));
+    this.queue.forEach(w => w.resolve(false));
     this.queue = [];
   }
 

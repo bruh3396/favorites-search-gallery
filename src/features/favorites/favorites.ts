@@ -46,7 +46,7 @@ function startOnFavoritesPage(context: AppContext): void {
   const offersTutorial = context.environment.pointer === "touch";
   const control = new FavoritesControl({ offersTutorial }, { context, shell });
   const features = new FavoritesFeatures(context, featureDependencies(context, model, control));
-  const flows = new FavoritesFlows(context, model, view, control);
+  const flows = new FavoritesFlows({ context, model, view, control });
   const components: FavoritesComponents = { context, shell, model, view, flows, control, features };
 
   setup(components);
@@ -83,14 +83,15 @@ function featureDependencies(context: AppContext, model: FavoritesModel, control
       batchSize: context.preferences.favorites.downloadBatchSize,
       filenameFormat: context.preferences.favorites.downloadFilenameFormat,
       getSearchResults: () => model.getCurrentSearchResults(),
-      getTagCategories: (tagNames) => context.ports.localTagCategories.getMany(tagNames),
-      getTagsForIds: (ids) => model.getTagsForIds(ids),
+      getTagCategories: tagNames => context.ports.localTagCategories.getMany(tagNames),
+      getTagsForIds: ids => model.getTagsForIds(ids),
       fetchOriginal: (media, signal) => context.ports.remoteMedia.fetchOriginal(media, signal)
     },
     snippets: {
-      appendToSearch: (text) => control.appendToSearch(text),
+      appendToSearch: text => control.appendToSearch(text),
       getSearchResults: () => model.getCurrentSearchResults(),
-      store: context.ports.localKeyedValues
+      localSnippets: context.ports.localSnippets,
+      localKeyedValues: context.ports.localKeyedValues
     }
   };
 }
@@ -119,22 +120,22 @@ function mountDrawerSections({ control, features }: FavoritesComponents): void {
 function subscribeToEvents({ context, view, flows, control }: FavoritesComponents): void {
   const { events, milestones } = context;
 
-  events.favorites.searchButtonClicked.on((event) => control.handleSearchButtonClicked(event));
+  events.favorites.searchButtonClicked.on(event => control.handleSearchButtonClicked(event));
   events.favorites.clearButtonClicked.on(() => control.clearSearch());
   events.favorites.shuffleButtonClicked.on(() => flows.search.shuffleSearchResults());
   events.favorites.invertButtonClicked.on(() => flows.search.invertSearchResults());
   events.favorites.settingsResetRequested.on(() => flows.action.resetSettings());
-  events.favorites.searchRequested.on((query) => flows.search.searchFavorites(query));
-  events.favorites.postListRequested.on((query) => flows.search.openPostList(query));
-  events.favorites.pageSelected.on((pageNumber) => flows.display.goToPage(pageNumber));
-  events.favorites.pageStepped.on((direction) => flows.display.advance(direction));
+  events.favorites.searchRequested.on(query => flows.search.searchFavorites(query));
+  events.favorites.postListRequested.on(query => flows.search.openPostList(query));
+  events.favorites.pageSelected.on(pageNumber => flows.display.goToPage(pageNumber));
+  events.favorites.pageStepped.on(direction => flows.display.advance(direction));
   events.favorites.gotoPageToggled.on(() => flows.input.toggleGotoPage());
-  events.favorites.gotoPageSubmitted.on((pageNumber) => flows.input.submitGotoPage(pageNumber));
-  events.postOverlay.searchForTagRequested.on((tag) => control.runSearch(tag));
-  events.postOverlay.addTagToSearchRequested.on((tag) => control.appendToSearch(tag));
-  events.postOverlay.excludeTagFromSearchRequested.on((tag) => control.excludeFromSearch(tag));
-  events.app.favoriteAdded.on((id) => view.setFavorited(id, true));
-  events.app.favoriteRemoved.on((id) => flows.action.removeFavorite(id));
+  events.favorites.gotoPageSubmitted.on(pageNumber => flows.input.submitGotoPage(pageNumber));
+  events.postOverlay.searchForTagRequested.on(tag => control.runSearch(tag));
+  events.postOverlay.addTagToSearchRequested.on(tag => control.appendToSearch(tag));
+  events.postOverlay.excludeTagFromSearchRequested.on(tag => control.excludeFromSearch(tag));
+  events.app.favoriteAdded.on(id => view.setFavorited(id, true));
+  events.app.favoriteRemoved.on(id => flows.action.removeFavorite(id));
   milestones.favorites.favoritesLoaded.wait().then(() => view.collectAspectRatios());
 }
 
@@ -149,7 +150,7 @@ function bindPreferences({ context, view }: FavoritesComponents): void {
 function subscribeToPreferences({ context, view, flows }: FavoritesComponents): void {
   const { preferences } = context;
 
-  preferences.favorites.layout.on((layout) => view.changeLayout(layout));
+  preferences.favorites.layout.on(layout => view.changeLayout(layout));
   preferences.favorites.sortKey.on(() => flows.search.reSearchFavorites());
   preferences.favorites.sortAscending.on(() => flows.search.reSearchFavorites());
   preferences.favorites.infiniteScroll.on(() => flows.display.toggleInfiniteScroll());
@@ -166,26 +167,26 @@ function subscribeToHoverInput({ context, view, flows }: FavoritesComponents): v
   const { domEvents, features } = context;
 
   if (!features.has("gallery")) {
-    domEvents.document.mouseover.on((event) => view.suppressLinkOnHoveredThumb(event));
+    domEvents.document.mouseover.on(event => view.suppressLinkOnHoveredThumb(event));
   }
-  domEvents.document.click.on((event) => flows.input.handleClick(event));
-  domEvents.document.mousedown.on((event) => flows.input.handleMouseDown(event));
+  domEvents.document.click.on(event => flows.input.handleClick(event));
+  domEvents.document.mousedown.on(event => flows.input.handleMouseDown(event));
 }
 
 function subscribeToTouchInput({ context, flows }: FavoritesComponents): void {
-  context.domEvents.document.click.on((event) => flows.input.triggerPostAction(event));
+  context.domEvents.document.click.on(event => flows.input.triggerPostAction(event));
 }
 
 function serveFavoritesPageRequests({ context, shell, model, view, flows }: FavoritesComponents): void {
   const { featureBridge, preferences } = context;
 
-  featureBridge.favorites.advance.serve((direction) => flows.display.advance(direction));
+  featureBridge.favorites.advance.serve(direction => flows.display.advance(direction));
   featureBridge.favorites.searchResults.serve(() => model.getCurrentSearchResults());
   featureBridge.favorites.searchQuery.serve(() => model.getCurrentSearchQuery());
   featureBridge.favorites.toolbar.serve(() => shell.toolbarRoot);
   featureBridge.favorites.usingInfiniteScroll.serve(() => preferences.favorites.infiniteScroll.value);
   featureBridge.favorites.layout.serve(() => view.getLayout());
-  featureBridge.favorites.favorite.serve((id) => model.getFavorite(id));
+  featureBridge.favorites.favorite.serve(id => model.getFavorite(id));
 }
 
 function servePostListRequests(context: AppContext, model: FavoritesModel): void {

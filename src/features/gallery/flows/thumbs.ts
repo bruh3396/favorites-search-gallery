@@ -14,11 +14,17 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   constructor(dependencies: GalleryFlowDependencies) {
     super(dependencies);
-    this.upscaleQuality = this.context.environment.mode === "postList" ? this.context.preferences.postList.upscaleQuality : this.context.preferences.favorites.upscaleQuality;
+    const { environment, preferences } = this.context;
+
+    this.upscaleQuality = environment.mode === "postList" ? preferences.postList.upscaleQuality : preferences.favorites.upscaleQuality;
     this.refreshImagesDebounced = debounceLeading(() => this.refreshImages(), GalleryConfig.contentRefreshTime);
     this.updateUpscaleQualityDebounced = debounceTrailing(() => this.updateUpscaleQualityNow(), GalleryUpscaleConfig.dynamicQualitySettleTime);
-    this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.view.warm(this.itemsFor(thumbs))), 1_000);
-    this.cacheAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => this.withVisibleThumbsAround(thumb, (thumbs) => this.view.cacheImages(this.itemsFor(thumbs))), 1_000);
+    this.upscaleAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => {
+      this.withVisibleThumbsAround(thumb, thumbs => this.view.warm(this.itemsFor(thumbs)));
+    }, 1_000);
+    this.cacheAroundDebounced = debounceTrailing((thumb: HTMLElement | null) => {
+      this.withVisibleThumbsAround(thumb, thumbs => this.view.cacheImages(this.itemsFor(thumbs)));
+    }, 1_000);
   }
 
   public async refreshInitialContent(): Promise<void> {
@@ -64,8 +70,8 @@ export class GalleryThumbsFlow extends GalleryFlow {
 
   public handleVisibleThumbsChanged(): void {
     this.runForState({
-      idle: () => this.withVisibleThumbs((thumbs) => this.view.warm(this.itemsFor(thumbs))),
-      preview: () => this.withVisibleThumbs((thumbs) => this.view.cacheImages(this.itemsFor(thumbs)))
+      idle: () => this.withVisibleThumbs(thumbs => this.view.warm(this.itemsFor(thumbs))),
+      preview: () => this.withVisibleThumbs(thumbs => this.view.cacheImages(this.itemsFor(thumbs)))
     });
   }
 

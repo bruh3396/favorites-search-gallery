@@ -25,7 +25,7 @@ describe("BoundedCache", () => {
     expect(cache.get("a")).toBeUndefined();
   });
 
-  test("re-setting a key updates its value without growing", () => {
+  test("updates a re-set key's value without growing", () => {
     const cache = new BoundedCache<string, number>(3);
 
     cache.set("a", 1);
@@ -46,7 +46,7 @@ describe("BoundedCache", () => {
     expect(cache.size).toBe(2);
   });
 
-  test("reading a key promotes it, sparing it from eviction", () => {
+  test("spares a read key from eviction", () => {
     const cache = new BoundedCache<string, number>(2);
 
     cache.set("a", 1);
@@ -57,7 +57,7 @@ describe("BoundedCache", () => {
     expect(cache.has("b")).toBe(false);
   });
 
-  test("re-setting a key promotes it, sparing it from eviction", () => {
+  test("spares a re-set key from eviction", () => {
     const cache = new BoundedCache<string, number>(2);
 
     cache.set("a", 1);
@@ -68,7 +68,7 @@ describe("BoundedCache", () => {
     expect(cache.has("b")).toBe(false);
   });
 
-  test("clear empties the cache", () => {
+  test("empties the cache on clear", () => {
     const cache = new BoundedCache<string, number>(3);
 
     cache.set("a", 1);

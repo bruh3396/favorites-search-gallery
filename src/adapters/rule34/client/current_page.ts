@@ -143,7 +143,7 @@ function purgeNativeContent(content: HTMLElement): void {
 }
 
 function stripAttributes(element: Element): void {
-  for (const name of Array.from(element.getAttributeNames())) {
+  for (const name of [...element.getAttributeNames()]) {
     element.removeAttribute(name);
   }
 }

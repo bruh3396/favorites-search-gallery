@@ -96,7 +96,7 @@ describe("FavoritesSearchHistory", () => {
     expect(history.lastEditedQuery).toBe("");
   });
 
-  test("editing the draft persists it and restarts navigation from the draft", () => {
+  test("persists an edited draft and restarts navigation from it", () => {
     const { history, storage } = setup({ history: ["b", "a"] });
 
     navigate(history, "ArrowUp", "ArrowUp");
@@ -107,7 +107,7 @@ describe("FavoritesSearchHistory", () => {
     expect(navigate(history, "ArrowUp")).toEqual(["b"]);
   });
 
-  describe("while typing", () => {
+  describe("editLastQuery", () => {
     beforeEach(() => {
       vi.useFakeTimers();
     });
@@ -116,7 +116,7 @@ describe("FavoritesSearchHistory", () => {
       vi.useRealTimers();
     });
 
-    test("the draft is current immediately, even before it is persisted", () => {
+    test("makes the draft current immediately, even before it is persisted", () => {
       const { history } = setup({ history: ["b", "a"] });
 
       history.editLastQuery("d");
@@ -140,7 +140,7 @@ describe("FavoritesSearchHistory", () => {
       expect(storage.get("lastEditedSearchQuery")).toBe("dra");
     });
 
-    test("a late persist does not overwrite navigation with a stale draft", () => {
+    test("keeps a late persist from overwriting navigation with a stale draft", () => {
       const { history, storage } = setup({ history: ["b", "a"] });
 
       history.editLastQuery("d");

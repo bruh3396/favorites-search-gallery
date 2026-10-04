@@ -1,16 +1,31 @@
-import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types/types";
+import { SerializedSnippet, SnippetResult, SnippetStorage } from "@/features/favorites/features/snippets/types/types";
 import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/utils/pure/string";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
+import { Snippet } from "@/core/domain/snippet/snippet";
 
-const STORAGE_KEY = "searchSnippets";
+const UNMOVED_STORAGE_KEY = "searchSnippets";
 
 export class SnippetStore {
-  private readonly storage: LocalKeyedValues;
+  private readonly localSnippets: LocalSnippets;
+  private readonly localKeyedValues: LocalKeyedValues;
   private readonly snippets: Map<string, Snippet>;
 
-  constructor(storage: LocalKeyedValues) {
-    this.storage = storage;
-    this.snippets = this.load();
+  constructor({ localSnippets, localKeyedValues }: SnippetStorage) {
+    this.localSnippets = localSnippets;
+    this.localKeyedValues = localKeyedValues;
+    this.snippets = new Map();
+  }
+
+  public async load(): Promise<void> {
+    const stored = await this.localSnippets.getAll();
+    const loaded = stored.length > 0 ? stored : await this.moveOutOfLocalKeyedValues();
+
+    for (const snippet of loaded) {
+      if (!this.snippets.has(snippet.name)) {
+        this.snippets.set(snippet.name, snippet);
+      }
+    }
   }
 
   public get(name: string): Snippet | undefined {
@@ -18,29 +33,16 @@ export class SnippetStore {
   }
 
   public getAll(): Snippet[] {
-    return Array.from(this.snippets.values());
+    return [...this.snippets.values()];
   }
 
-  public add(name: string, query: string, lastUsedAt: number = 0, createdAt: number = Date.now()): SnippetResult {
-    name = toLowerUnderscored(name);
-    query = removeExtraWhitespace(query);
+  public add(name: string, query: string): SnippetResult {
+    const result = this.insert({ name, query, lastUsedAt: 0, createdAt: Date.now() });
 
-    if (isEmptyString(name)) {
-      return { ok: false, reason: "empty-name" };
+    if (result.ok) {
+      this.localSnippets.setMany([result.snippet]);
     }
-
-    if (isEmptyString(query)) {
-      return { ok: false, reason: "empty-query" };
-    }
-
-    if (this.snippets.has(name)) {
-      return { ok: false, reason: "duplicate-name" };
-    }
-    const snippet: Snippet = { name, query, lastUsedAt, createdAt };
-
-    this.snippets.set(name, snippet);
-    this.save();
-    return { ok: true, snippet };
+    return result;
   }
 
   public update(oldName: string, name: string, query: string): SnippetResult {
@@ -56,37 +58,39 @@ export class SnippetStore {
     }
     this.snippets.delete(oldName);
 
-    const result = this.add(name, query, existing.lastUsedAt, existing.createdAt);
+    const result = this.insert({ ...existing, name, query });
 
     if (!result.ok) {
       this.snippets.set(oldName, existing);
+      return result;
+    }
+    this.localSnippets.setMany([result.snippet]);
+
+    if (result.snippet.name !== oldName) {
+      this.localSnippets.deleteMany([oldName]);
     }
     return result;
   }
 
   public remove(name: string): void {
     this.snippets.delete(name);
-    this.save();
+    this.localSnippets.deleteMany([name]);
   }
 
   public use(name: string): void {
     const snippet = this.snippets.get(name);
 
-    if (snippet === undefined) {
-      return;
+    if (snippet !== undefined) {
+      this.replace({ ...snippet, lastUsedAt: Date.now() });
     }
-    this.snippets.set(name, { ...snippet, lastUsedAt: Date.now() });
-    this.save();
   }
 
   public moveToTop(name: string): void {
     const snippet = this.snippets.get(name);
 
-    if (snippet === undefined) {
-      return;
+    if (snippet !== undefined) {
+      this.replace({ ...snippet, createdAt: Date.now() });
     }
-    this.snippets.set(name, { ...snippet, createdAt: Date.now() });
-    this.save();
   }
 
   public replaceAll(entries: SerializedSnippet[]): number {
@@ -94,18 +98,49 @@ export class SnippetStore {
 
     this.snippets.clear();
 
-    const stored = entries.filter((entry, index) => this.add(entry.name, entry.query, 0, now - index).ok).length;
+    const stored = entries.filter((entry, index) => this.insert({ name: entry.name, query: entry.query, lastUsedAt: 0, createdAt: now - index }).ok).length;
 
-    this.save();
+    this.localSnippets.replaceAll(this.getAll());
     return stored;
   }
 
-  private save(): void {
-    this.storage.set(STORAGE_KEY, this.getAll());
+  private insert(candidate: Snippet): SnippetResult {
+    const name = toLowerUnderscored(candidate.name);
+    const query = removeExtraWhitespace(candidate.query);
+
+    if (isEmptyString(name)) {
+      return { ok: false, reason: "empty-name" };
+    }
+
+    if (isEmptyString(query)) {
+      return { ok: false, reason: "empty-query" };
+    }
+
+    if (this.snippets.has(name)) {
+      return { ok: false, reason: "duplicate-name" };
+    }
+    const snippet: Snippet = { ...candidate, name, query };
+
+    this.snippets.set(name, snippet);
+    return { ok: true, snippet };
   }
 
-  private load(): Map<string, Snippet> {
-    return parseSnippets(this.storage.get(STORAGE_KEY));
+  private replace(snippet: Snippet): void {
+    this.snippets.set(snippet.name, snippet);
+    this.localSnippets.setMany([snippet]);
+  }
+
+  private async moveOutOfLocalKeyedValues(): Promise<Snippet[]> {
+    const unmoved = this.localKeyedValues.get(UNMOVED_STORAGE_KEY);
+
+    if (unmoved === undefined) {
+      return [];
+    }
+    const snippets = [...parseSnippets(unmoved).values()];
+
+    await this.localSnippets.setMany(snippets);
+    this.localKeyedValues.remove(UNMOVED_STORAGE_KEY);
+    return snippets;
   }
 }
 

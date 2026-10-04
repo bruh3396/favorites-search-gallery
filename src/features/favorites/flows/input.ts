@@ -9,10 +9,10 @@ export class FavoritesInputFlow extends FavoritesFlow {
       return;
     }
     handleActionBarClick(event.originalEvent, {
-      onFavoriteAdded: (id) => this.addFavorite(id),
-      onFavoriteRemoved: (id) => this.removeFavorite(id),
-      onPostOpened: (id) => this.openPost(id),
-      onMediaDownloaded: (id) => this.download(id)
+      onFavoriteAdded: id => this.addFavorite(id),
+      onFavoriteRemoved: id => this.removeFavorite(id),
+      onPostOpened: id => this.openPost(id),
+      onMediaDownloaded: id => this.download(id)
     });
   }
 

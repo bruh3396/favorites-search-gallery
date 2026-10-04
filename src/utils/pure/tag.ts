@@ -28,11 +28,11 @@ export function toSortedTagArray(tagString: string): string[] {
 }
 
 export function toTagString(tagSet: Set<string>): string {
-  return tagSet.size === 0 ? "" : Array.from(tagSet).join(" ");
+  return tagSet.size === 0 ? "" : [...tagSet].join(" ");
 }
 
 export function toSortedTagString(tagSet: Set<string>): string {
-  return tagSet.size === 0 ? "" : Array.from(tagSet).sort().join(" ");
+  return tagSet.size === 0 ? "" : [...tagSet].sort().join(" ");
 }
 
 export function negateTags(tags: string): string {

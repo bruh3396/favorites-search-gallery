@@ -35,7 +35,7 @@ export class ColumnTiler extends AbstractTiler {
   }
 
   public addItemsToTop(items: HTMLElement[]): void {
-    this.tile(items.concat(getThumbsInMatrix(this.container)));
+    this.tile([...items, ...getThumbsInMatrix(this.container)]);
   }
 
   public addItemsToBottom(items: HTMLElement[]): void {

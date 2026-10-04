@@ -1,12 +1,12 @@
+import { FilenameCategory, FilenameParts } from "@/features/favorites/features/downloader/types/types";
 import { DownloaderConfig } from "@/config/downloader_config";
-import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 const STRIPPED_CHARACTERS = /[<>:"/\\|?*' -]/g;
 const TRAILING_QUALIFIER = /_\([^)]*\)$/;
 
-export function build(item: PostMedia, tags: Set<string>, extension: string, categories: FilenameCategory[], tagCategories: TagCategoryMap): string {
+export function build(item: PostMedia, { tags, extension, tagCategories }: FilenameParts, categories: FilenameCategory[]): string {
   const segments: string[] = categories
     .map(category => buildCategorySegment(tags, category, tagCategories))
     .filter(segment => segment !== "");
@@ -17,7 +17,7 @@ export function build(item: PostMedia, tags: Set<string>, extension: string, cat
 }
 
 function buildCategorySegment(tags: Set<string>, category: FilenameCategory, tagCategories: TagCategoryMap): string {
-  const tagsInCategory = Array.from(tags)
+  const tagsInCategory = [...tags]
     .filter(tag => tagCategories.get(tag) === category)
     .sort();
   return dropQualifiedDuplicates(tagsInCategory)

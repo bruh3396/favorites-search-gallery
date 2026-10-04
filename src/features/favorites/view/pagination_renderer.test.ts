@@ -27,15 +27,16 @@ function createState(overrides: Partial<PaginationState> = {}): PaginationState 
 }
 
 function readPageLabels(container: HTMLElement): string[] {
-  return Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-action=page]")).map(button => button.textContent ?? "");
+  return [...container.querySelectorAll<HTMLButtonElement>("button[data-action=page]")].map(button => button.textContent ?? "");
 }
 
 function readSelectedPage(container: HTMLElement): string | undefined {
-  return Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-action=page]")).find(button => button.classList.contains("selected"))?.textContent ?? undefined;
+  const pages = [...container.querySelectorAll<HTMLButtonElement>("button[data-action=page]")];
+  return pages.find(button => button.classList.contains("selected"))?.textContent ?? undefined;
 }
 
 function readArrowStates(container: HTMLElement): { previous: boolean; next: boolean } {
-  const [previous, next] = Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-action=step]"));
+  const [previous, next] = [...container.querySelectorAll<HTMLButtonElement>("button[data-action=step]")];
   return { previous: !previous.disabled, next: !next.disabled };
 }
 
@@ -104,14 +105,14 @@ describe("FavoritesPaginationRenderer", () => {
       expect(readArrowStates(container)).toEqual(arrows);
     });
 
-    test("the go-to field starts at the current page and stops at the last page", () => {
+    test("starts the go-to field at the current page and stops it at the last page", () => {
       const { container } = setup({ currentPage: 3 });
 
       expect(queryGotoInput(container).value).toBe("3");
       expect(typeGotoPage(container, "50")).toBe("9");
     });
 
-    test("moving to another page closes the go-to prompt", () => {
+    test("closes the go-to prompt when moving to another page", () => {
       const { renderer, container } = setup(createState());
 
       renderer.toggleGotoPagePopover();
@@ -132,8 +133,8 @@ describe("FavoritesPaginationRenderer", () => {
     });
   });
 
-  describe("go-to-page popover", () => {
-    test("toggling opens it with the field selected, then closes it", () => {
+  describe("toggleGotoPagePopover", () => {
+    test("opens the go-to-page prompt with the field selected, then closes it", () => {
       const { renderer, container } = setup(createState());
       const field = queryGotoInput(container);
 
@@ -143,16 +144,20 @@ describe("FavoritesPaginationRenderer", () => {
       renderer.toggleGotoPagePopover();
       expect(isPopoverOpen(container)).toBe(false);
     });
+  });
 
-    test("closing closes it", () => {
+  describe("closeGotoPagePopover", () => {
+    test("closes the go-to-page prompt", () => {
       const { renderer, container } = setup(createState());
 
       renderer.toggleGotoPagePopover();
       renderer.closeGotoPagePopover();
       expect(isPopoverOpen(container)).toBe(false);
     });
+  });
 
-    test("the popover and the ellipsis count as its targets, pages don't", () => {
+  describe("isGotoPagePopoverTarget", () => {
+    test("counts the prompt and the ellipsis as targets, but not pages", () => {
       const { renderer, container } = setup(createState());
 
       expect(renderer.isGotoPagePopoverTarget(queryGotoInput(container))).toBe(true);
@@ -160,7 +165,7 @@ describe("FavoritesPaginationRenderer", () => {
       expect(renderer.isGotoPagePopoverTarget(container.querySelector("button[data-action=page]") as Node)).toBe(false);
     });
 
-    test("without an ellipsis, only the popover counts", () => {
+    test("counts only the prompt without an ellipsis", () => {
       const { renderer, container } = setup(createState({ sequence: [1, 2] }));
 
       expect(renderer.isGotoPagePopoverTarget(queryPopover(container))).toBe(true);
@@ -194,14 +199,14 @@ describe("FavoritesPaginationRenderer", () => {
       expect(container.lastElementChild?.id).toBe("next-page");
     });
 
-    test("the go-to field stops at the new last page", () => {
+    test("stops the go-to field at the new last page", () => {
       const { renderer, container } = setup(createState());
 
       renderer.updatePaginator(createState({ finalPage: 4, sequence: [1, 2, 3, 4] }));
       expect(typeGotoPage(container, "50")).toBe("4");
     });
 
-    test("the go-to field drops to the new last page when it was past it", () => {
+    test("drops the go-to field to the new last page when it was past it", () => {
       const { renderer, container } = setup(createState({ currentPage: 9 }));
 
       renderer.updatePaginator(createState({ currentPage: 9, finalPage: 4, sequence: [1, 2, 3, 4] }));

@@ -37,7 +37,7 @@ describe("MemoryLocalFavorites", () => {
     expect(await favorites.getAll()).toEqual(["4", "2"]);
   });
 
-  test("a caller mutating what it read never changes what is stored", async() => {
+  test("keeps what is stored when a caller mutates what it read", async() => {
     const favorites = new MemoryLocalFavorites();
 
     await favorites.prepend(["1"]);

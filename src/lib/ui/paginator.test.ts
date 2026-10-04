@@ -91,7 +91,7 @@ describe("Paginator", () => {
   });
 
   describe("selectAdjacentPage", () => {
-    test("moves forward", () => {
+    test("moves to the next page", () => {
       const paginator = createPaginator(30, 10);
 
       paginator.selectAdjacentPage("ArrowRight");
@@ -144,29 +144,31 @@ describe("Paginator", () => {
     });
   });
 
-  describe("atFinalPage / hasOnlyOnePage", () => {
-    test("atFinalPage is true on the last page", () => {
+  describe("atFinalPage", () => {
+    test("returns true on the last page", () => {
       const paginator = createPaginator(25, 10);
 
       paginator.selectPage(3);
       expect(paginator.atFinalPage()).toBe(true);
     });
 
-    test("atFinalPage is false before the last page", () => {
+    test("returns false before the last page", () => {
       const paginator = createPaginator(25, 10);
 
       expect(paginator.atFinalPage()).toBe(false);
     });
+  });
 
-    test("hasOnlyOnePage is true when all items fit on one page", () => {
+  describe("hasOnlyOnePage", () => {
+    test("returns true when all items fit on one page", () => {
       expect(createPaginator(5, 10).hasOnlyOnePage()).toBe(true);
     });
 
-    test("hasOnlyOnePage is true for an empty set", () => {
+    test("returns true for an empty set", () => {
       expect(createPaginator(0, 10).hasOnlyOnePage()).toBe(true);
     });
 
-    test("hasOnlyOnePage is false across multiple pages", () => {
+    test("returns false across multiple pages", () => {
       expect(createPaginator(25, 10).hasOnlyOnePage()).toBe(false);
     });
   });

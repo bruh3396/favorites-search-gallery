@@ -1,5 +1,5 @@
 import * as DownloaderStatus from "@/features/favorites/features/downloader/model/status";
-import { DownloaderContext, DownloaderProgress, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
+import { DownloadOptions, DownloaderContext, DownloaderProgress, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
 import { DownloaderArchiver } from "@/features/favorites/features/downloader/model/archiver";
 import { DownloaderBatcher } from "@/features/favorites/features/downloader/model/batcher";
 import { DownloaderFilenamer } from "@/features/favorites/features/downloader/model/filenamer";
@@ -21,8 +21,8 @@ export class DownloaderModel {
     return this.filenamer.options();
   }
 
-  public download(items: PostMedia[], batchSize: number, signal: AbortSignal, onProgress: (progress: DownloaderProgress) => void): Promise<DownloaderResult> {
-    return this.batcher.download(items, batchSize, signal, onProgress);
+  public download(items: PostMedia[], options: DownloadOptions): Promise<DownloaderResult> {
+    return this.batcher.download(items, options);
   }
 
   public downloadLabel(itemCount: number, batchSize: number): string {

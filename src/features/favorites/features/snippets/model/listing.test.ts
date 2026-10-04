@@ -1,25 +1,25 @@
 import * as SnippetListing from "@/features/favorites/features/snippets/model/listing";
 import { describe, expect, test } from "vitest";
-import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 
 const getNames = (snippets: Snippet[]): string[] => snippets.map(entry => entry.name);
 
 describe("sortByNewest", () => {
   test("puts the most recently created first", () => {
-    const snippets = [createSnippet("a", "1", 0, 100), createSnippet("b", "2", 0, 300), createSnippet("c", "3", 0, 200)];
+    const snippets = [createSnippet("a", "1", { createdAt: 100 }), createSnippet("b", "2", { createdAt: 300 }), createSnippet("c", "3", { createdAt: 200 })];
 
     expect(getNames(SnippetListing.sortByNewest(snippets))).toEqual(["b", "c", "a"]);
   });
 
   test("ignores when a snippet was last used", () => {
-    const snippets = [createSnippet("older", "1", 999, 100), createSnippet("newer", "2", 0, 200)];
+    const snippets = [createSnippet("older", "1", { lastUsedAt: 999, createdAt: 100 }), createSnippet("newer", "2", { createdAt: 200 })];
 
     expect(getNames(SnippetListing.sortByNewest(snippets))).toEqual(["newer", "older"]);
   });
 
   test("does not modify the given array", () => {
-    const snippets = [createSnippet("a", "1", 0, 100), createSnippet("b", "2", 0, 300)];
+    const snippets = [createSnippet("a", "1", { createdAt: 100 }), createSnippet("b", "2", { createdAt: 300 })];
 
     SnippetListing.sortByNewest(snippets);
     expect(getNames(snippets)).toEqual(["a", "b"]);

@@ -10,7 +10,7 @@ export interface MetricComparison {
   readonly isTautological: boolean;
 }
 
-const metricPattern = Array.from(searchableMetrics).join("|");
+const metricPattern = [...searchableMetrics].join("|");
 
 export const metricComparisonRegex: RegExp = new RegExp(`^-?(${metricPattern})(:[<>]?)(\\d+|${metricPattern})$`);
 

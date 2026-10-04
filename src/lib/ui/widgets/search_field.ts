@@ -26,7 +26,7 @@ export function searchField(placeholder: string, onChange: (value: string) => vo
 
   apply();
   input.addEventListener("input", apply);
-  input.addEventListener("keydown", (event) => {
+  input.addEventListener("keydown", event => {
     if (event.key === "Escape" && input.value !== "") {
       event.stopPropagation();
       clear();

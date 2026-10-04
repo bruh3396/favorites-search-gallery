@@ -1,5 +1,5 @@
 import { Searchable, SearchableMetric } from "@/types/search";
-import { beforeEach, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { parseMetricSearchTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 import { DocResolver } from "@/lib/search/engines/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/lib/search/engines/set/indexes/inverted_index";
@@ -26,62 +26,77 @@ function getSortedNames(set: ReadonlySet<Doc>): string[] {
   return [...set].map(item => item.name).sort();
 }
 
+function createResolver(): DocResolver<Doc> {
+  const termIndex = new InvertedIndex<Doc>(item => item.tags);
+  const metricIndex = new MetricIndex<Doc>([...searchableMetrics], metricFor);
+  const relativeMetricIndex = new RelativeMetricIndex<Doc>([...searchableMetrics], metricFor);
+  const positionIndex = new PositionIndex<Doc>();
+
+  docs.forEach(item => termIndex.addDoc(item));
+  positionIndex.build(docs);
+  const wildcardResolver = new WildcardDocResolver<Doc>(termIndex);
+
+  wildcardResolver.index(termIndex.indexedTerms());
+  return new DocResolver<Doc>({ termIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver });
+}
+
 describe("DocResolver", () => {
-  let termIndex: InvertedIndex<Doc>;
-  let resolver: DocResolver<Doc>;
-
-  beforeEach(() => {
-    termIndex = new InvertedIndex<Doc>(item => item.tags);
-    docs.forEach(item => termIndex.addDoc(item));
-    const metricIndex = new MetricIndex<Doc>([...searchableMetrics], metricFor);
-    const relativeMetricIndex = new RelativeMetricIndex<Doc>([...searchableMetrics], metricFor);
-    const positionIndex = new PositionIndex<Doc>();
-
-    positionIndex.build(docs);
-    const wildcardResolver = new WildcardDocResolver<Doc>(termIndex);
-
-    wildcardResolver.index(termIndex.indexedTerms());
-    resolver = new DocResolver<Doc>(termIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver);
-  });
-
-  describe("docsFor", () => {
+  describe("resolve", () => {
     test("routes a wildcard term to the union of matching terms' docs", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseWildcardSearchTerm("re*")))).toEqual(["hd", "square"]);
     });
 
     test("routes a non-metric term to the term index", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseSearchTerm("video")))).toEqual(["hd", "sd"]);
       expect(getSortedNames(resolver.resolve(parseSearchTerm("red")))).toEqual(["hd", "square"]);
     });
 
-    test("an unknown term resolves to nothing", () => {
+    test("resolves an unknown term to nothing", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseSearchTerm("missing")))).toEqual([]);
     });
 
     test("routes a constant metric term to the metric index", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("score:>40")))).toEqual(["hd", "square"]);
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:1080")))).toEqual(["square"]);
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("duration:<100")))).toEqual(["sd", "square"]);
     });
 
     test("resolves a relative metric term against the corpus", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
     });
 
     test("resolves an equal relative metric term", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:height")))).toEqual(["square"]);
     });
 
     test("resolves each relative term consistently", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("height:<width")))).toEqual(["hd", "sd"]);
     });
 
-    test("a tautological equality relative term matches every doc", () => {
+    test("matches every doc for a tautological equality relative term", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:width")))).toEqual(["hd", "sd", "square"]);
     });
 
-    test("a tautological inequality relative term matches nothing", () => {
+    test("matches nothing for a tautological inequality relative term", () => {
+      const resolver = createResolver();
+
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:>width")))).toEqual([]);
       expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:<width")))).toEqual([]);
     });

@@ -1,13 +1,19 @@
 import { Favorite } from "@/types/favorite";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
+import { Snippet } from "@/core/domain/snippet/snippet";
 
-export interface SnippetsDependencies {
-  appendToSearch: (text: string) => void;
-  getSearchResults: () => Favorite[];
-  store: LocalKeyedValues;
+export interface SnippetStorage {
+  localSnippets: LocalSnippets;
+  localKeyedValues: LocalKeyedValues;
 }
 
-export interface SnippetContext extends Omit<SnippetsDependencies, "store"> {
+export interface SnippetsDependencies extends SnippetStorage {
+  appendToSearch: (text: string) => void;
+  getSearchResults: () => Favorite[];
+}
+
+export interface SnippetContext extends Omit<SnippetsDependencies, keyof SnippetStorage> {
   alert: (message: string) => void;
   confirm: (message: string) => boolean;
   saveBlob: (blob: Blob, filename: string) => void;
@@ -30,13 +36,6 @@ export interface SnippetIntents {
   importFromFile: (contents: string) => void;
   exportToFile: () => void;
   deleteAll: () => void;
-}
-
-export interface Snippet {
-  name: string;
-  query: string;
-  lastUsedAt: number;
-  createdAt: number;
 }
 
 export type SerializedSnippet = Omit<Snippet, "lastUsedAt" | "createdAt">;

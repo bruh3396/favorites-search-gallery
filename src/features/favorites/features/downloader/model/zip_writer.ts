@@ -27,12 +27,10 @@ export class DownloaderZipWriter {
 
   public add(filename: string, data: Bytes): void {
     const nameBytes = new TextEncoder().encode(filename) as Bytes;
-    const crc = crc32(data);
-    const requiresZip64 = data.length >= ZIP64_THRESHOLD;
-    const header = buildLocalFileHeader(nameBytes, crc, data.length, requiresZip64);
+    const entry: Entry = { nameBytes, crc: crc32(data), size: data.length, offset: this.offset };
 
-    this.entries.push({ nameBytes, crc, size: data.length, offset: this.offset });
-    this.push(header);
+    this.entries.push(entry);
+    this.push(buildLocalFileHeader(entry));
     this.push(data);
   }
 
@@ -57,7 +55,8 @@ export class DownloaderZipWriter {
   }
 }
 
-function buildLocalFileHeader(nameBytes: Bytes, crc: number, size: number, requiresZip64: boolean): Bytes {
+function buildLocalFileHeader({ nameBytes, crc, size }: Entry): Bytes {
+  const requiresZip64 = size >= ZIP64_THRESHOLD;
   const extra = requiresZip64 ? buildZip64ExtraField(size, size) : new Uint8Array(0);
   const header = new Uint8Array(30 + nameBytes.length + extra.length);
   const view = new DataView(header.buffer);

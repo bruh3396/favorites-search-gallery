@@ -63,7 +63,8 @@ export class GalleryImageCanvas {
       return;
     }
     const usingLandscape = window.screen.orientation.angle === 90 || window.screen.orientation.angle === 270;
-    const usingCorrectOrientation = (usingLandscape && this.mainCanvas.width > this.mainCanvas.height) || (!usingLandscape && this.mainCanvas.width < this.mainCanvas.height);
+    const { width, height } = this.mainCanvas;
+    const usingCorrectOrientation = usingLandscape ? width > height : width < height;
 
     if (usingCorrectOrientation) {
       return;

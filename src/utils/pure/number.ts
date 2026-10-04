@@ -1,16 +1,28 @@
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
+export interface NumberRange {
+  min: number;
+  max: number;
+}
+
+export interface Neighborhood<V> {
+  isInBounds: (position: number) => boolean;
+  at: (position: number) => V;
+}
+
+const ALL_NON_NEGATIVE: NumberRange = { min: 0, max: Number.MAX_SAFE_INTEGER };
+
 export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function rescale(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
-  return Math.round(toMin + (((value - fromMin) / (fromMax - fromMin)) * (toMax - toMin)));
+export function rescale(value: number, from: NumberRange, to: NumberRange): number {
+  return Math.round(to.min + (((value - from.min) / (from.max - from.min)) * (to.max - to.min)));
 }
 
-export function rescaleGeometric(value: number, fromMin: number, fromMax: number, toMin: number, toMax: number): number {
-  const t = (value - fromMin) / (fromMax - fromMin);
-  return Math.round(toMin * ((toMax / toMin) ** t));
+export function rescaleGeometric(value: number, from: NumberRange, to: NumberRange): number {
+  const t = (value - from.min) / (from.max - from.min);
+  return Math.round(to.min * ((to.max / to.min) ** t));
 }
 
 export function roundUpToMultiple(value: number, multiple: number): number {
@@ -33,7 +45,7 @@ export function daysToMilliseconds(days: number): number {
   return days * 24 * 60 * 60 * 1_000;
 }
 
-export function valuesAround<V>(center: number, count: number, isInBounds: (position: number) => boolean, at: (position: number) => V): V[] {
+export function valuesAround<V>(center: number, count: number, { isInBounds, at }: Neighborhood<V>): V[] {
   if (count <= 0 || !isInBounds(center)) {
     return [];
   }
@@ -62,8 +74,11 @@ export function valuesAround<V>(center: number, count: number, isInBounds: (posi
   return result;
 }
 
-export function numbersAround(initial: number, count: number, min: number = 0, max: number = Number.MAX_SAFE_INTEGER): number[] {
-  return valuesAround(initial, count, value => value >= min && value <= max, value => value).sort((a, b) => a - b);
+export function numbersAround(initial: number, count: number, { min, max }: NumberRange = ALL_NON_NEGATIVE): number[] {
+  return valuesAround(initial, count, {
+    isInBounds: value => value >= min && value <= max,
+    at: value => value
+  }).sort((a, b) => a - b);
 }
 
 export function numbersInRange(start: number, end: number): number[] {

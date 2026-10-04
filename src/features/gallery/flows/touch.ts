@@ -5,13 +5,13 @@ import { NavigationKey } from "@/types/input";
 export class GalleryTouchFlow extends GalleryFlow {
   public handleMouseDown(event: EnhancedMouseEvent): void {
     this.runForState({
-      preview: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent),
-      idle: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent)
+      preview: mouseEvent => this.handleMouseDownOutsideGallery(mouseEvent),
+      idle: mouseEvent => this.handleMouseDownOutsideGallery(mouseEvent)
     }, event);
   }
 
   public handleTouchStart(event: TouchEvent): void {
-    this.runForState({ open: (touchEvent) => this.handleTouchStartInGallery(touchEvent) }, event);
+    this.runForState({ open: touchEvent => this.handleTouchStartInGallery(touchEvent) }, event);
   }
 
   public handleTouchEnd(event: TouchEvent): void {

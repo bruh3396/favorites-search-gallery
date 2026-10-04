@@ -43,7 +43,7 @@ export class GalleryGifRenderer implements Renderer {
       return;
     }
     const gifs = items
-      .filter((item) => isGif(item))
+      .filter(item => isGif(item))
       .slice(0, this.preloadedGifCount);
 
     for (const gif of gifs) {

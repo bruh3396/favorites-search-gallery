@@ -16,7 +16,7 @@ function variant(label: string, { open, disabled = false, size }: DisclosureStat
         title: "Appearance",
         content,
         size,
-        onValueChange: (next) => {
+        onValueChange: next => {
           log(`Disclosure "${label}" → ${next}`);
           control.setValue(next);
         }

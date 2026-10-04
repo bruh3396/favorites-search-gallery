@@ -20,7 +20,7 @@ export function buildToggleButton(config: Partial<ToggleButtonSetting>, iconName
   button.type = "button";
   addTooltip(button, config.tooltip ?? "", "below");
 
-  const binding = new StateBinding(config, false, (value) => {
+  const binding = new StateBinding(config, false, value => {
     toggleDataset(button, "active", value);
   });
 

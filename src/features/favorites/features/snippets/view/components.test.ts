@@ -6,7 +6,7 @@ const fruits = createSnippet("fruits", "( apple ~ banana )");
 const colors = createSnippet("colors", "( red ~ blue )");
 
 function queryButtons(element: HTMLElement): HTMLButtonElement[] {
-  return Array.from(element.querySelectorAll("button"));
+  return [...element.querySelectorAll("button")];
 }
 
 describe("list", () => {

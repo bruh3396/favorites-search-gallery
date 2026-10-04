@@ -44,7 +44,7 @@ export class DurablePostings {
     for (const [term, posting] of this.densePostings) {
       visit(term, posting.positions());
     }
-    this.sparsePostings.forEachTerm((term, positions) => visit(term, Array.from(positions)));
+    this.sparsePostings.forEachTerm((term, positions) => visit(term, [...positions]));
   }
 }
 

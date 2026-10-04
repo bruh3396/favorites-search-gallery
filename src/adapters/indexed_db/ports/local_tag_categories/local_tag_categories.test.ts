@@ -1,13 +1,15 @@
 import "fake-indexeddb/auto";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
+import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
 
-let counter = 0;
+beforeEach(() => {
+  globalThis.indexedDB = new IDBFactory();
+});
 
 function createLocalTagCategories(): IndexedDbLocalTagCategories {
-  counter += 1;
-  return new IndexedDbLocalTagCategories(new IndexedDbClient(`local_tag_categories_test_${counter}`));
+  return new IndexedDbLocalTagCategories(new IndexedDbClient());
 }
 
 describe("IndexedDbLocalTagCategories", () => {
@@ -28,14 +30,5 @@ describe("IndexedDbLocalTagCategories", () => {
     await tagCategories.setMany(new Map([["alice", "character"]]));
 
     expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
-  });
-
-  test("keeps namespaces apart", async() => {
-    const first = createLocalTagCategories();
-    const second = createLocalTagCategories();
-
-    await first.setMany(new Map([["alice", "character"]]));
-
-    expect(await second.getMany(["alice"])).toEqual(new Map());
   });
 });

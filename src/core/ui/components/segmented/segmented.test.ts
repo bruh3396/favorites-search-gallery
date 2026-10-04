@@ -27,11 +27,11 @@ function press(target: HTMLElement, key: string): KeyboardEvent {
 }
 
 function readCheckedStates(radios: HTMLButtonElement[]): boolean[] {
-  return radios.map((radio) => radio.getAttribute("aria-checked") === "true");
+  return radios.map(radio => radio.getAttribute("aria-checked") === "true");
 }
 
 function readTabIndexes(radios: HTMLButtonElement[]): number[] {
-  return radios.map((radio) => radio.tabIndex);
+  return radios.map(radio => radio.tabIndex);
 }
 
 afterEach(() => {
@@ -43,8 +43,8 @@ describe("createSegmented", () => {
     const { element, radios } = setup();
 
     expect(element.getAttribute("role")).toBe("radiogroup");
-    expect(radios.map((radio) => radio.textContent)).toEqual(["Column", "Row", "Square"]);
-    expect(radios.every((radio) => radio.type === "button")).toBe(true);
+    expect(radios.map(radio => radio.textContent)).toEqual(["Column", "Row", "Square"]);
+    expect(radios.every(radio => radio.type === "button")).toBe(true);
   });
 
   test("starts with nothing checked and the first option as the tab stop", () => {
@@ -95,7 +95,7 @@ describe("createSegmented", () => {
     ["End", "column", 2]
   ] as const)("%s from %s focuses and reports option %i", (key, from, to) => {
     const { radios, onValueChange, setValue } = setup();
-    const index = OPTIONS.findIndex((option) => option.value === from);
+    const index = OPTIONS.findIndex(option => option.value === from);
 
     setValue(from);
     radios[index].focus();
@@ -116,7 +116,7 @@ describe("createSegmented", () => {
 
     setDisabled(true);
     radios[1].click();
-    expect(radios.every((radio) => radio.disabled)).toBe(true);
+    expect(radios.every(radio => radio.disabled)).toBe(true);
     expect(onValueChange).not.toHaveBeenCalled();
   });
 

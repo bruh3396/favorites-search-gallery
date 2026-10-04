@@ -50,69 +50,71 @@ function setup(docs: Doc[] = corpus): Harness {
 }
 
 describe("WildcardPostingResolver", () => {
-  test("resolves a prefix wildcard to the union of its terms' docs", () => {
-    expect(setup().resolveIds("ban*")).toEqual(["banana", "bandana"]);
+  describe("resolve", () => {
+    test("resolves a prefix wildcard to the union of its terms' docs", () => {
+      expect(setup().resolveIds("ban*")).toEqual(["banana", "bandana"]);
+    });
+
+    test("resolves a suffix wildcard", () => {
+      expect(setup().resolveIds("*ana")).toEqual(["banana", "bandana", "cabana"]);
+    });
+
+    test("resolves a substring wildcard", () => {
+      expect(setup().resolveIds("*and*")).toEqual(["bandana", "brand"]);
+    });
+
+    test("resolves a multi-star wildcard through the regex path", () => {
+      expect(setup().resolveIds("b*na")).toEqual(["banana", "bandana"]);
+    });
+
+    test("resolves nothing when nothing matches", () => {
+      expect(setup().resolveIds("zzz*")).toEqual([]);
+    });
+
+    test("skips resolver terms that have no posting in the index", () => {
+      const h = setup();
+
+      h.resolver.add("bang");
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+    });
+
+    test("unions a pattern once and serves the same posting on repeat", () => {
+      const h = setup();
+      const term = parseWildcardSearchTerm("ban*");
+      const first = h.resolver.resolve(term);
+      const second = h.resolver.resolve(term);
+
+      expect(h.unions).toBe(1);
+      expect(second).toBe(first);
+    });
+
+    test("keys the cache per wildcard shape", () => {
+      const h = setup();
+
+      h.resolver.resolve(parseWildcardSearchTerm("ban*"));
+      h.resolver.resolve(parseWildcardSearchTerm("*ana"));
+      h.resolver.resolve(parseWildcardSearchTerm("*and*"));
+      expect(h.unions).toBe(3);
+    });
+
+    test("caches the empty result without re-resolving", () => {
+      const h = setup();
+      const term = parseWildcardSearchTerm("zzz*");
+
+      expect(h.resolver.resolve(term)).toBeUndefined();
+      expect(h.resolver.resolve(term)).toBeUndefined();
+      expect(h.unions).toBe(0);
+    });
   });
 
-  test("resolves a suffix wildcard", () => {
-    expect(setup().resolveIds("*ana")).toEqual(["banana", "bandana", "cabana"]);
-  });
+  describe("index", () => {
+    test("invalidates the cached union", () => {
+      const h = setup();
 
-  test("resolves a substring wildcard", () => {
-    expect(setup().resolveIds("*and*")).toEqual(["bandana", "brand"]);
-  });
-
-  test("resolves a multi-star wildcard through the regex path", () => {
-    expect(setup().resolveIds("b*na")).toEqual(["banana", "bandana"]);
-  });
-
-  test("returns undefined when nothing matches", () => {
-    expect(setup().resolveIds("zzz*")).toEqual([]);
-  });
-
-  test("skips resolver terms that have no posting in the index", () => {
-    const h = setup();
-
-    h.resolver.add("bang");
-    expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
-  });
-});
-
-describe("WildcardPostingResolver caching", () => {
-  test("unions a pattern once and serves the same posting on repeat", () => {
-    const h = setup();
-    const term = parseWildcardSearchTerm("ban*");
-    const first = h.resolver.resolve(term);
-    const second = h.resolver.resolve(term);
-
-    expect(h.unions).toBe(1);
-    expect(second).toBe(first);
-  });
-
-  test("keys the cache per wildcard shape", () => {
-    const h = setup();
-
-    h.resolver.resolve(parseWildcardSearchTerm("ban*"));
-    h.resolver.resolve(parseWildcardSearchTerm("*ana"));
-    h.resolver.resolve(parseWildcardSearchTerm("*and*"));
-    expect(h.unions).toBe(3);
-  });
-
-  test("caches the empty result without re-resolving", () => {
-    const h = setup();
-    const term = parseWildcardSearchTerm("zzz*");
-
-    expect(h.resolver.resolve(term)).toBeUndefined();
-    expect(h.resolver.resolve(term)).toBeUndefined();
-    expect(h.unions).toBe(0);
-  });
-
-  test("index() invalidates the cached union", () => {
-    const h = setup();
-
-    expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
-    h.resolver.index(h.bitIndex.indexedTerms());
-    expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
-    expect(h.unions).toBe(2);
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      h.resolver.index(h.bitIndex.indexedTerms());
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      expect(h.unions).toBe(2);
+    });
   });
 });

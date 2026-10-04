@@ -14,7 +14,7 @@ function variant(label: string, { checked, disabled = false, size }: SwitchState
     render: (ownerDocument, log): HTMLElement => {
       const control = createSwitch(ownerDocument, {
         size,
-        onValueChange: (next) => {
+        onValueChange: next => {
           log(`Switch "${label}" → ${next}`);
           control.setValue(next);
         }

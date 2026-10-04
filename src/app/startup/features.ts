@@ -1,7 +1,7 @@
 import { AppMode, Device, Environment } from "@/core/boundary/environment";
 import { Feature, Features } from "@/core/context/features";
-import { AppContext } from "@/app/context/context";
 import { PERFORMANCE_PROFILES, PerformanceProfile } from "@/types/app";
+import { AppContext } from "@/app/context/context";
 import { startFavorites } from "@/features/favorites/favorites";
 import { startGallery } from "@/features/gallery/gallery";
 import { startPostListNavigator } from "@/features/post_list_navigator/post_list_navigator";
@@ -13,6 +13,12 @@ interface FeatureEntry {
   modes: readonly AppMode[];
   devices: readonly Device[];
   profiles: readonly PerformanceProfile[];
+}
+
+interface Runtime {
+  mode: AppMode;
+  device: Device;
+  profile: PerformanceProfile;
 }
 
 const ALL_MODES: readonly AppMode[] = ["favorites", "postList"];
@@ -28,7 +34,7 @@ const FEATURES: Record<Feature, FeatureEntry> = {
 
 export function selectFeatures({ mode, device }: Environment, profile: PerformanceProfile): Features {
   const features = Object.keys(FEATURES) as Feature[];
-  return new Set(features.filter(feature => runsIn(FEATURES[feature], mode, device, profile)));
+  return new Set(features.filter(feature => runsIn(FEATURES[feature], { mode, device, profile })));
 }
 
 export function launchFeatures(context: AppContext): void {
@@ -37,6 +43,6 @@ export function launchFeatures(context: AppContext): void {
   }
 }
 
-function runsIn(entry: FeatureEntry, mode: AppMode, device: Device, profile: PerformanceProfile): boolean {
+function runsIn(entry: FeatureEntry, { mode, device, profile }: Runtime): boolean {
   return entry.modes.includes(mode) && entry.devices.includes(device) && entry.profiles.includes(profile);
 }

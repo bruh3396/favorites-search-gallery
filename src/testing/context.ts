@@ -10,6 +10,7 @@ import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
+import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
@@ -75,6 +76,7 @@ function createPorts(overrides: Partial<Ports> = {}): Ports {
     localFavorites: new MemoryLocalFavorites(),
     localKeyedValues: new MemoryLocalKeyedValues(),
     localPosts: new MemoryLocalPosts(),
+    localSnippets: new MemoryLocalSnippets(),
     localTagCategories: new MemoryLocalTagCategories(),
     randomSource: new MemoryRandomSource(),
     scheduler,

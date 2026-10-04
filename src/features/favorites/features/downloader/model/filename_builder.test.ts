@@ -26,10 +26,10 @@ const CATEGORIES: TagCategoryMap = new Map(Object.entries({
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
 const item: PostMedia = { id: "10146816", media: { kind: "image", locator: "1/10146816.jpg" } };
 const buildFilename = (tags: string[], categories: FilenameCategory[] = ALL): string => (
-  DownloaderFilename.build(item, new Set(tags), "jpeg", categories, CATEGORIES)
+  DownloaderFilename.build(item, { tags: new Set(tags), extension: "jpeg", tagCategories: CATEGORIES }, categories)
 );
 
-describe("buildFilename", () => {
+describe("build", () => {
   test("returns just the id when no categories are selected", () => {
     expect(buildFilename(["artist_one", "character_one"], [])).toBe("10146816.jpeg");
   });
@@ -80,7 +80,7 @@ describe("buildFilename", () => {
   test("caps length while preserving the id", () => {
     const longTags = Array.from({ length: 40 }, (_, index) => `character_number_${String(index).padStart(3, "0")}`);
     const categories: TagCategoryMap = new Map(longTags.map(tag => [tag, "character"]));
-    const name = DownloaderFilename.build(item, new Set(longTags), "jpeg", ["character"], categories);
+    const name = DownloaderFilename.build(item, { tags: new Set(longTags), extension: "jpeg", tagCategories: categories }, ["character"]);
     const suffix = `${CAT}10146816.jpeg`;
 
     expect(name.length).toBeLessThanOrEqual(DownloaderConfig.filename.maxLength + ".jpeg".length);

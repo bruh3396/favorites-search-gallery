@@ -163,8 +163,8 @@ export const searchCases: SearchCaseGroup[] = [
   {
     name: "all tags",
     run: (assert: QueryAssertion): void => {
-      const orAllQuery = `( ${Array.from(allTerms).join(" ~ ")} )`;
-      const andAllQuery = `${Array.from(allTerms).join(" ")}`;
+      const orAllQuery = `( ${[...allTerms].join(" ~ ")} )`;
+      const andAllQuery = `${[...allTerms].join(" ")}`;
 
       assert(orAllQuery, allDocNames);
       assert(andAllQuery, []);

@@ -46,13 +46,13 @@ describe("isForwardNavigationKey", () => {
 });
 
 describe("navigationDelta", () => {
-  test("forward keys return 1", () => {
+  test("returns 1 for forward keys", () => {
     expect(navigationDelta("d")).toBe(1);
     expect(navigationDelta("D")).toBe(1);
     expect(navigationDelta("ArrowRight")).toBe(1);
   });
 
-  test("backward keys return -1", () => {
+  test("returns -1 for backward keys", () => {
     expect(navigationDelta("a")).toBe(-1);
     expect(navigationDelta("A")).toBe(-1);
     expect(navigationDelta("ArrowLeft")).toBe(-1);

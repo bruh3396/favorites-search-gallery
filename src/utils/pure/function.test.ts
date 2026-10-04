@@ -12,11 +12,11 @@ describe("doNothing", () => {
 });
 
 describe("chain", () => {
-  test("no functions returns initial", () => {
+  test("returns the initial value with no functions", () => {
     expect(chain(5)).toBe(5);
   });
 
-  test("single function", () => {
+  test("applies a single function", () => {
     expect(chain(5, x => x + 1)).toBe(6);
   });
 
@@ -24,11 +24,11 @@ describe("chain", () => {
     expect(chain(2, x => x + 3, x => x * 2)).toBe(10);
   });
 
-  test("order matters", () => {
+  test("gives a different result when the order changes", () => {
     expect(chain(2, x => x * 2, x => x + 3)).toBe(7);
   });
 
-  test("strings", () => {
+  test("chains string functions", () => {
     expect(chain("a", s => `${s}b`, s => `${s}c`)).toBe("abc");
   });
 });

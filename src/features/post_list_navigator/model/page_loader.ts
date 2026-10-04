@@ -47,11 +47,11 @@ export class PostListNavigatorPageLoader {
 
   public createPostListFromHtml(pageNumber: number, html: string): PostList {
     const dom = new DOMParser().parseFromString(html, "text/html");
-    const rawThumbs = Array.from(dom.querySelectorAll<HTMLElement>(`.${RAW_THUMB_CLASS_NAME}`));
+    const rawThumbs = [...dom.querySelectorAll<HTMLElement>(`.${RAW_THUMB_CLASS_NAME}`)];
     const posts = rawThumbs.map(thumb => parseThumb(thumb, mintMedia));
     const thumbs = preparePostListThumbs(rawThumbs, this.onMobileDevice, this.galleryDisabled);
     const paginator = dom.getElementById("paginator");
-    return new PostList(pageNumber, thumbs, posts, paginator);
+    return new PostList({ pageIndex: pageNumber, thumbs, posts, paginator });
   }
 
   public reload(baseUrl: string, pageNumber: number): Promise<void> {

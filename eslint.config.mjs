@@ -19,6 +19,10 @@ const BOOLEAN_FLAG_PARAMETERS = [
   `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`,
   `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > TSParameterProperty > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`
 ].map(selector => ({ selector, message: BOOLEAN_FLAG_MESSAGE }));
+const CALLED_ONCE = {
+  selector: "CallExpression[callee.property.name='toHaveBeenCalledTimes'][arguments.length=1][arguments.0.value=1]",
+  message: "Use toHaveBeenCalledOnce() instead of toHaveBeenCalledTimes(1)."
+};
 
 export default defineConfig([
   {
@@ -59,7 +63,8 @@ export default defineConfig([
   {
     plugins: { unicorn },
     rules: {
-      "unicorn/numeric-separators-style": ["error", { onlyIfContainsSeparator: false, number: { minimumDigits: 4, groupLength: 3 } }]
+      "unicorn/numeric-separators-style": ["error", { onlyIfContainsSeparator: false, number: { minimumDigits: 4, groupLength: 3 } }],
+      "unicorn/prefer-spread": "error"
     }
   },
   {
@@ -82,6 +87,7 @@ export default defineConfig([
       "array-bracket-newline": "error",
       "array-bracket-spacing": "error",
       "array-callback-return": "error",
+      "@stylistic/arrow-parens": ["error", "as-needed"],
       "arrow-spacing": "error",
       "block-scoped-var": "error",
       "block-spacing": "error",
@@ -637,6 +643,18 @@ export default defineConfig([
     files: ["build/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.ts"],
     rules: {
       "no-console": "off"
+    }
+  },
+  {
+    files: ["**/*.test.ts"],
+    rules: {
+      "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, CALLED_ONCE]
+    }
+  },
+  {
+    files: ["src/assets/svg/svg.ts", "src/lib/search/testing/fruit_corpus.ts", "src/playground/search_performance/queries.ts"],
+    rules: {
+      "@stylistic/max-len": "off"
     }
   },
   {

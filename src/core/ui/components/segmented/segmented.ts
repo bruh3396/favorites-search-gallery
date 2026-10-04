@@ -46,7 +46,7 @@ export function createSegmented<T>(ownerDocument: Document, { options, onValueCh
   element.setAttribute("role", "radiogroup");
   element.append(...buttons);
   buttons.forEach((button, index) => button.addEventListener("click", () => report(index)));
-  element.addEventListener("keydown", (event) => {
+  element.addEventListener("keydown", event => {
     const step = KEY_STEPS[event.key];
     const from = buttons.indexOf(event.target as HTMLButtonElement);
 
@@ -64,7 +64,7 @@ export function createSegmented<T>(ownerDocument: Document, { options, onValueCh
   return {
     element,
     setValue: (value): void => {
-      checkedIndex = options.findIndex((option) => option.value === value);
+      checkedIndex = options.findIndex(option => option.value === value);
       showChecked(buttons, checkedIndex);
     },
     setDisabled: (disabled): void => {

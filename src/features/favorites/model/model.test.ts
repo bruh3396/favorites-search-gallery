@@ -33,7 +33,7 @@ function getSortedIds(favorites: Favorite[]): string[] {
 }
 
 function createModel(context: AppContext, onSearchResultsChanged: (results: Favorite[]) => void = (): void => { }): FavoritesModel {
-  return new FavoritesModel(context, { onSearchResultsChanged, onPlaceholderFilled: () => { } });
+  return new FavoritesModel(context, { onSearchResultsChanged, onPlaceholderFilled: (): void => { } });
 }
 
 async function store(context: AppContext, posts: Post[]): Promise<void> {
@@ -41,7 +41,16 @@ async function store(context: AppContext, posts: Post[]): Promise<void> {
   await context.ports.localFavorites.prepend(posts.map(post => post.id));
 }
 
-async function setup(posts: Post[], resultsPerPage?: number, onSearchResultsChanged?: (results: Favorite[]) => void, context = createContext(resultsPerPage)): Promise<{ context: AppContext; model: FavoritesModel }> {
+interface SetupOptions {
+  resultsPerPage?: number;
+  onSearchResultsChanged?: (results: Favorite[]) => void;
+  context?: AppContext;
+}
+
+async function setup(
+  posts: Post[],
+  { resultsPerPage, onSearchResultsChanged, context = createContext(resultsPerPage) }: SetupOptions = {}
+): Promise<{ context: AppContext; model: FavoritesModel }> {
   await store(context, posts);
   const model = createModel(context, onSearchResultsChanged);
 
@@ -50,182 +59,173 @@ async function setup(posts: Post[], resultsPerPage?: number, onSearchResultsChan
   return { context, model };
 }
 
+const FRUIT_POSTS = [createFavoritePost("1", "apple"), createFavoritePost("2", "banana"), createFavoritePost("3", "apple")];
+
+// A model of five apple favorites, searched and paginated two to a page.
+async function setupPages(): Promise<FavoritesModel> {
+  const { model } = await setup(createFavoritePosts("apple", "1", "2", "3", "4", "5"), { resultsPerPage: 2 });
+
+  model.paginate(model.searchFavorites("apple"));
+  return model;
+}
+
 describe("FavoritesModel", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
   });
 
-  describe("storage", () => {
-    test("favorites stored by one model load back into another sharing its ports", async() => {
-      const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
+  test("loads favorites stored by another model sharing its ports", async() => {
+    const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
 
-      expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2"]);
-      expect(model.getFavorite("1")?.id).toBe("1");
-      expect(await model.hasLocalFavorites()).toBe(true);
-    });
-
-    test("has no local favorites before any are stored", async() => {
-      expect(await createModel(createContext()).hasLocalFavorites()).toBe(false);
-    });
-
-    test("streams local favorites, reporting progress against the local total", async() => {
-      const context = createContext();
-      const progress: LoadProgress[] = [];
-
-      await store(context, createFavoritePosts("apple", "1", "2"));
-      await createModel(context).streamLocalFavorites(update => progress.push(update));
-
-      expect(progress).toEqual([{ loaded: 0, total: 2 }, { loaded: 2, total: 2 }]);
-    });
-
-    test("persists the ids of fetched favorites", async() => {
-      const context = createContext(100, createFavoritePosts("apple", "1", "2"));
-      const model = createModel(context);
-
-      await model.fetchAllFavorites(() => { });
-      await model.persistAllFavorites();
-
-      expect(await createModel(context).loadFavoriteIds()).toEqual(["1", "2"]);
-      expect(await context.ports.localPosts.getMany(["1", "2"])).toHaveLength(2);
-    });
-
-    test("reads local ids and the loaded favorites' tags", async() => {
-      const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
-
-      expect((await model.loadFavoriteIds()).sort()).toEqual(["1", "2"]);
-      expect((await model.getTagsForIds(["2"])).get("2")).toEqual(new Set(["banana"]));
-    });
-
-    test("deletes local favorites but keeps their posts", async() => {
-      const { context, model } = await setup(createFavoritePosts("apple", "1", "2", "3"));
-
-      await model.deleteLocalFavorites(["1", "3"]);
-      expect(await model.loadFavoriteIds()).toEqual(["2"]);
-      expect(await context.ports.localPosts.getMany(["1", "3"])).toHaveLength(2);
-    });
-
-    test("compressing keeps every favorite readable", async() => {
-      const { model } = await setup([createFavoritePost("1", "apple")]);
-
-      expect(model.getFavorite("1")?.tags.has("apple")).toBe(true);
-      model.compressFavorites();
-      expect(model.getFavorite("1")?.tags.has("apple")).toBe(true);
-    });
+    expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2"]);
+    expect(model.getFavorite("1")?.id).toBe("1");
+    expect(await model.hasLocalFavorites()).toBe(true);
   });
 
-  describe("fetching", () => {
-    test("fetches all favorites, streaming them into the collection and search results", async() => {
-      const model = createModel(createContext(100, createFavoritePosts("apple", "1", "2")));
-      const onSearchResultsFound = vi.fn();
-
-      await model.fetchAllFavorites(onSearchResultsFound);
-      expect(getSortedIds(onSearchResultsFound.mock.calls.flatMap(([results]) => results))).toEqual(["1", "2"]);
-      expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2"]);
-    });
-
-    test("stores new favorites ahead of the local ones, adding only never-stored ones to the collection", async() => {
-      const context = createContext(100, createFavoritePosts("apple", "3", "1", "2"));
-      const { model } = await setup(createFavoritePosts("apple", "1", "2"), undefined, undefined, context);
-      const { addedFavorites, prependedCount } = await model.pullNewFavorites();
-
-      expect(getSortedIds(addedFavorites)).toEqual(["3"]);
-      expect(prependedCount).toBe(1);
-      expect(await model.loadFavoriteIds()).toEqual(["3", "1", "2"]);
-      expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2", "3"]);
-    });
-
-    test("deletes the local favorites the remote list no longer has below the new ones", async() => {
-      const context = createContext(100, createFavoritePosts("apple", "4", "2"));
-      const { model } = await setup(createFavoritePosts("apple", "1", "2", "3"), undefined, undefined, context);
-      const { prependedCount } = await model.pullNewFavorites();
-
-      expect(await model.pruneRemovedFavorites(prependedCount)).toBe(2);
-      expect(await model.loadFavoriteIds()).toEqual(["4", "2"]);
-    });
+  test("has no local favorites before any are stored", async() => {
+    expect(await createModel(createContext()).hasLocalFavorites()).toBe(false);
   });
 
-  describe("refreshing", () => {
-    test("a stale favorite takes its refreshed tags, in search and in storage", async() => {
-      const scheduler = new MemoryScheduler();
-      const refreshed = createPost({ id: "900", tags: "apple cherry", width: 1, height: 1 });
-      const context = createAppContext({ ports: { scheduler, remotePosts: new MemoryRemotePosts(new MemoryClient([refreshed])) } });
-      const { model } = await setup([createPost({ id: "900", tags: "apple" })], undefined, undefined, context);
+  test("streams local favorites, reporting progress against the local total", async() => {
+    const context = createContext();
+    const progress: LoadProgress[] = [];
 
-      await vi.waitFor(() => expect(model.getFavorite("900")?.tags.has("cherry")).toBe(true));
-      scheduler.advance(POST_WRITE_DELAY);
+    await store(context, createFavoritePosts("apple", "1", "2"));
+    await createModel(context).streamLocalFavorites(update => progress.push(update));
 
-      expect(getSortedIds(model.searchFavorites("cherry"))).toEqual(["900"]);
-      expect((await context.ports.localPosts.getMany(["900"]))[0].tags).toBe("apple cherry");
-    });
+    expect(progress).toEqual([{ loaded: 0, total: 2 }, { loaded: 2, total: 2 }]);
   });
 
-  describe("search", () => {
-    const posts = [createFavoritePost("1", "apple"), createFavoritePost("2", "banana"), createFavoritePost("3", "apple")];
+  test("persists the ids of fetched favorites", async() => {
+    const context = createContext(100, createFavoritePosts("apple", "1", "2"));
+    const model = createModel(context);
 
-    test("searches the loaded favorites and broadcasts the results", async() => {
-      const onResults = vi.fn();
-      const { model } = await setup(posts, undefined, onResults);
+    await model.fetchAllFavorites(() => { });
+    await model.persistAllFavorites();
 
-      expect(getSortedIds(model.searchFavorites("apple"))).toEqual(["1", "3"]);
-      expect(getSortedIds(onResults.mock.lastCall?.[0] ?? [])).toEqual(["1", "3"]);
-      expect(model.getCurrentSearchQuery()).toBe("apple");
-      expect(getSortedIds(model.getCurrentSearchResults())).toEqual(["1", "3"]);
-    });
-
-    test("a pure search leaves the current search untouched", async() => {
-      const { model } = await setup(posts);
-
-      model.searchFavorites("apple");
-
-      expect(getSortedIds(model.searchFavoritesPure(model.getAllFavorites(), "banana"))).toEqual(["2"]);
-      expect(model.getCurrentSearchQuery()).toBe("apple");
-    });
-
-    test("re-runs the current query over all favorites or a given subset", async() => {
-      const { model } = await setup(posts);
-
-      model.searchFavorites("apple");
-
-      expect(getSortedIds(model.reSearchFavorites())).toEqual(["1", "3"]);
-      expect(getSortedIds(model.searchSpecificFavorites(model.getAllFavorites().filter(favorite => favorite.id !== "3")))).toEqual(["1"]);
-    });
-
-    test("inverts and shuffles the current results", async() => {
-      const { model } = await setup(posts);
-
-      model.searchFavorites("apple");
-
-      expect(getSortedIds(model.shuffleSearchResults())).toEqual(["1", "3"]);
-      expect(getSortedIds(model.invertSearchResults())).toEqual(["2"]);
-    });
+    expect(await createModel(context).loadFavoriteIds()).toEqual(["1", "2"]);
+    expect(await context.ports.localPosts.getMany(["1", "2"])).toHaveLength(2);
   });
 
-  describe("pagination", () => {
-    async function setupPages(): Promise<FavoritesModel> {
-      const { model } = await setup(createFavoritePosts("apple", "1", "2", "3", "4", "5"), 2);
+  test("reads local ids and the loaded favorites' tags", async() => {
+    const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
 
-      model.paginate(model.searchFavorites("apple"));
-      return model;
-    }
+    expect((await model.loadFavoriteIds()).sort()).toEqual(["1", "2"]);
+    expect((await model.getTagsForIds(["2"])).get("2")).toEqual(new Set(["banana"]));
+  });
 
-    test("pages by the resultsPerPage preference", async() => {
-      const model = await setupPages();
+  test("deletes local favorites but keeps their posts", async() => {
+    const { context, model } = await setup(createFavoritePosts("apple", "1", "2", "3"));
 
-      expect(model.currentPageFavorites()).toHaveLength(2);
-      expect(model.paginationContext().finalPage).toBe(3);
-      expect(model.hasOnlyOnePage()).toBe(false);
-    });
+    await model.deleteLocalFavorites(["1", "3"]);
+    expect(await model.loadFavoriteIds()).toEqual(["2"]);
+    expect(await context.ports.localPosts.getMany(["1", "3"])).toHaveLength(2);
+  });
 
-    test("selects pages directly, by step, and by wrapping step", async() => {
-      const model = await setupPages();
+  test("keeps every favorite readable after compressing", async() => {
+    const { model } = await setup([createFavoritePost("1", "apple")]);
 
-      expect(model.selectPage(3)).toBe(true);
-      expect(model.atFinalPage()).toBe(true);
-      expect(model.selectAdjacentPage("ArrowRight")).toBe(false);
-      expect(model.selectWrappedAdjacentPage("ArrowRight")).toBe(true);
-      expect(model.paginationContext().currentPage).toBe(1);
-      expect(model.selectAdjacentPage("ArrowRight")).toBe(true);
-      expect(model.adjacentPageFavorites()).toHaveLength(3);
-    });
+    expect(model.getFavorite("1")?.tags.has("apple")).toBe(true);
+    model.compressFavorites();
+    expect(model.getFavorite("1")?.tags.has("apple")).toBe(true);
+  });
+
+  test("fetches all favorites, streaming them into the collection and search results", async() => {
+    const model = createModel(createContext(100, createFavoritePosts("apple", "1", "2")));
+    const onSearchResultsFound = vi.fn();
+
+    await model.fetchAllFavorites(onSearchResultsFound);
+    expect(getSortedIds(onSearchResultsFound.mock.calls.flatMap(([results]) => results))).toEqual(["1", "2"]);
+    expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2"]);
+  });
+
+  test("stores new favorites ahead of the local ones, adding only never-stored ones to the collection", async() => {
+    const context = createContext(100, createFavoritePosts("apple", "3", "1", "2"));
+    const { model } = await setup(createFavoritePosts("apple", "1", "2"), { context });
+    const { addedFavorites, prependedCount } = await model.pullNewFavorites();
+
+    expect(getSortedIds(addedFavorites)).toEqual(["3"]);
+    expect(prependedCount).toBe(1);
+    expect(await model.loadFavoriteIds()).toEqual(["3", "1", "2"]);
+    expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2", "3"]);
+  });
+
+  test("deletes the local favorites the remote list no longer has below the new ones", async() => {
+    const context = createContext(100, createFavoritePosts("apple", "4", "2"));
+    const { model } = await setup(createFavoritePosts("apple", "1", "2", "3"), { context });
+    const { prependedCount } = await model.pullNewFavorites();
+
+    expect(await model.pruneRemovedFavorites(prependedCount)).toBe(2);
+    expect(await model.loadFavoriteIds()).toEqual(["4", "2"]);
+  });
+
+  test("gives a stale favorite its refreshed tags, in search and in storage", async() => {
+    const scheduler = new MemoryScheduler();
+    const refreshed = createPost({ id: "900", tags: "apple cherry", width: 1, height: 1 });
+    const context = createAppContext({ ports: { scheduler, remotePosts: new MemoryRemotePosts(new MemoryClient([refreshed])) } });
+    const { model } = await setup([createPost({ id: "900", tags: "apple" })], { context });
+
+    await vi.waitFor(() => expect(model.getFavorite("900")?.tags.has("cherry")).toBe(true));
+    scheduler.advance(POST_WRITE_DELAY);
+
+    expect(getSortedIds(model.searchFavorites("cherry"))).toEqual(["900"]);
+    expect((await context.ports.localPosts.getMany(["900"]))[0].tags).toBe("apple cherry");
+  });
+
+  test("searches the loaded favorites and broadcasts the results", async() => {
+    const onResults = vi.fn();
+    const { model } = await setup(FRUIT_POSTS, { onSearchResultsChanged: onResults });
+
+    expect(getSortedIds(model.searchFavorites("apple"))).toEqual(["1", "3"]);
+    expect(getSortedIds(onResults.mock.lastCall?.[0] ?? [])).toEqual(["1", "3"]);
+    expect(model.getCurrentSearchQuery()).toBe("apple");
+    expect(getSortedIds(model.getCurrentSearchResults())).toEqual(["1", "3"]);
+  });
+
+  test("leaves the current search untouched on a pure search", async() => {
+    const { model } = await setup(FRUIT_POSTS);
+
+    model.searchFavorites("apple");
+
+    expect(getSortedIds(model.searchFavoritesPure(model.getAllFavorites(), "banana"))).toEqual(["2"]);
+    expect(model.getCurrentSearchQuery()).toBe("apple");
+  });
+
+  test("re-runs the current query over all favorites or a given subset", async() => {
+    const { model } = await setup(FRUIT_POSTS);
+
+    model.searchFavorites("apple");
+
+    expect(getSortedIds(model.reSearchFavorites())).toEqual(["1", "3"]);
+    expect(getSortedIds(model.searchSpecificFavorites(model.getAllFavorites().filter(favorite => favorite.id !== "3")))).toEqual(["1"]);
+  });
+
+  test("inverts and shuffles the current results", async() => {
+    const { model } = await setup(FRUIT_POSTS);
+
+    model.searchFavorites("apple");
+
+    expect(getSortedIds(model.shuffleSearchResults())).toEqual(["1", "3"]);
+    expect(getSortedIds(model.invertSearchResults())).toEqual(["2"]);
+  });
+
+  test("pages by the resultsPerPage preference", async() => {
+    const model = await setupPages();
+
+    expect(model.currentPageFavorites()).toHaveLength(2);
+    expect(model.paginationContext().finalPage).toBe(3);
+    expect(model.hasOnlyOnePage()).toBe(false);
+  });
+
+  test("selects pages directly, by step, and by wrapping step", async() => {
+    const model = await setupPages();
+
+    expect(model.selectPage(3)).toBe(true);
+    expect(model.atFinalPage()).toBe(true);
+    expect(model.selectAdjacentPage("ArrowRight")).toBe(false);
+    expect(model.selectWrappedAdjacentPage("ArrowRight")).toBe(true);
+    expect(model.paginationContext().currentPage).toBe(1);
+    expect(model.selectAdjacentPage("ArrowRight")).toBe(true);
+    expect(model.adjacentPageFavorites()).toHaveLength(3);
   });
 });

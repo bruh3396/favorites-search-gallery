@@ -3,16 +3,18 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { createLocalKeyedValues } from "@/app/context/local_keyed_values";
 
 describe("createLocalKeyedValues", () => {
-  test("keeps every key under one fsg key", () => {
+  test("keeps every key under one favorites-search-gallery key", () => {
     const store = new MemoryLocalKeyedValues();
 
     createLocalKeyedValues(store).set("searchHistory", ["cat"]);
 
-    expect(store.get("fsg")).toEqual({ searchHistory: ["cat"] });
+    expect(store.get("favorites-search-gallery")).toEqual({ searchHistory: ["cat"] });
     expect(store.get("searchHistory")).toBeUndefined();
   });
 
-  test.each(["preferences", "searchHistory", "lastEditedSearchQuery", "aspectRatios", "searchSnippets"])("moves the bare %s key under fsg", (key) => {
+  const LEGACY_KEYS = ["preferences", "searchHistory", "lastEditedSearchQuery", "aspectRatios", "searchSnippets"];
+
+  test.each(LEGACY_KEYS)("moves the bare %s key under favorites-search-gallery", key => {
     const store = new MemoryLocalKeyedValues();
 
     store.set(key, ["kept"]);

@@ -25,7 +25,10 @@ function setup(filenameFormat = 0): Setup {
     batchSize: createPreference(0),
     filenameFormat: createPreference(filenameFormat),
     getSearchResults: (): PostMedia[] => [],
-    getTagCategories: (tagNames): Promise<TagCategoryMap> => Promise.resolve(new Map(tagNames.filter(tagName => tagName === "someone").map(tagName => [tagName, "artist"]))),
+    getTagCategories: (tagNames): Promise<TagCategoryMap> => {
+      const artists = tagNames.filter(tagName => tagName === "someone");
+      return Promise.resolve(new Map(artists.map(tagName => [tagName, "artist"])));
+    },
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set(["someone"])]))),
     fetchOriginal: (media): Promise<Blob> => {
       fetched.push(media.locator);
@@ -44,7 +47,11 @@ describe("DownloaderModel", () => {
   test("downloads the items into a saved zip, named by the chosen categories", async() => {
     const { model, fetched, saved } = setup(1);
     const progress: DownloaderProgress[] = [];
-    const result = await model.download([createItem("1"), createItem("2")], 0, new AbortController().signal, update => progress.push(update));
+    const result = await model.download([createItem("1"), createItem("2")], {
+      batchSize: 0,
+      signal: new AbortController().signal,
+      onProgress: update => progress.push(update)
+    });
 
     expect(result).toEqual({ successCount: 2, failureCount: 0, aborted: false });
     expect(fetched.sort()).toEqual(["media/1", "media/2"]);

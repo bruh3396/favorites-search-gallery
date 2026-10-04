@@ -49,7 +49,11 @@ export class DownloaderSessionFlow extends DownloaderFlow implements DownloaderI
     this.view.showStatus(`Downloading ${items.length}...`);
 
     try {
-      const result = await this.model.download(items, this.context.batchSize.value, controller.signal, progress => this.showProgress(progress));
+      const result = await this.model.download(items, {
+        batchSize: this.context.batchSize.value,
+        signal: controller.signal,
+        onProgress: progress => this.showProgress(progress)
+      });
 
       this.view.showStatus(this.model.summarize(result));
     } finally {

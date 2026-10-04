@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { FavoritesAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 
@@ -21,23 +21,23 @@ function drainRemaining(aspectRatios: FavoritesAspectRatios): string[] {
   return remaining;
 }
 
-let store: MemoryLocalKeyedValues;
-
 describe("FavoritesAspectRatios", () => {
-  beforeEach(() => {
-    store = new MemoryLocalKeyedValues();
-  });
+  test("returns nothing on a first visit", () => {
+    const store = new MemoryLocalKeyedValues();
 
-  test("knows nothing on a first visit", () => {
     expect(new FavoritesAspectRatios(store).getNext()).toBeUndefined();
   });
 
-  test("the next visit gets the collected aspect ratios back in thumb order", () => {
+  test("gives the next visit the collected aspect ratios in thumb order", () => {
+    const store = new MemoryLocalKeyedValues();
+
     new FavoritesAspectRatios(store).collect([createThumb(100, 200), document.createElement("div"), createThumb(300, 150)]);
     expect(drainRemaining(new FavoritesAspectRatios(store))).toEqual(["100/200", "300/150"]);
   });
 
   test("keeps only the first fifty thumbs", () => {
+    const store = new MemoryLocalKeyedValues();
+
     const thumbs = Array.from({ length: 60 }, (_, index) => createThumb(index + 1, 1));
 
     new FavoritesAspectRatios(store).collect(thumbs);

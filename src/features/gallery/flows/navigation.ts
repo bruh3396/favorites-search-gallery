@@ -42,7 +42,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
   }
 
   public navigateIfOpen(direction?: NavigationKey): void {
-    this.runForState<NavigationKey>({ open: (key) => this.navigate(key) }, direction);
+    this.runForState<NavigationKey>({ open: key => this.navigate(key) }, direction);
   }
 
   private display(item: PostMedia): void {

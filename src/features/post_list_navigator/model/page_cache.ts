@@ -51,7 +51,7 @@ export class PostListNavigatorPageCache {
   }
 
   private loadedPages(): PostList[] {
-    return Array.from(this.pages.keys())
+    return [...this.pages.keys()]
       .sort((a, b) => a - b)
       .map(n => this.get(n))
       .filter(page => page !== undefined);

@@ -10,12 +10,12 @@ import { setupRuntime } from "@/app/startup/runtime";
 
 const RUNS_IN: Record<AppMode, (preferences: Preferences) => boolean> = {
   favorites: () => true,
-  postList: (preferences) => preferences.postList.enabled.value
+  postList: preferences => preferences.postList.enabled.value
 };
 
 const CLAIM_VIEWPORT: Record<Device, (hostPage: HostPage) => void> = {
   desktop: () => { },
-  mobile: (hostPage) => hostPage.lockViewport()
+  mobile: hostPage => hostPage.lockViewport()
 };
 
 interface ContentHost {
@@ -23,8 +23,9 @@ interface ContentHost {
 }
 
 export function startApp(environment: Environment, targetPorts: Ports, contentHost: ContentHost): boolean {
-  const ports: Ports = { ...targetPorts, localKeyedValues: createLocalKeyedValues(targetPorts.localKeyedValues) };
-  const preferences = createPreferences(selectPreferenceDefaults(environment), ports.localKeyedValues);
+  const localKeyedValues = createLocalKeyedValues(targetPorts.localKeyedValues);
+  const ports: Ports = { ...targetPorts, localKeyedValues };
+  const preferences = createPreferences(selectPreferenceDefaults(environment), localKeyedValues);
 
   if (!RUNS_IN[environment.mode](preferences)) {
     return false;

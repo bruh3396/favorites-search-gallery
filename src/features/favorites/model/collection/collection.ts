@@ -1,6 +1,6 @@
+import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
 import { Collection } from "@/features/favorites/types/types";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
-import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
 import { IdentifiedList } from "@/lib/collection/identified_list";
 import { Post } from "@/core/domain/post/post";
 

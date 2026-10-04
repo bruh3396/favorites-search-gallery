@@ -21,11 +21,16 @@ export class PostListNavigatorNavigator {
     this.initialPageNumber = PostListNavigatorUrlContext.initialPageNumber();
     this.baseUrl = PostListNavigatorUrlContext.baseUrl();
     this.currentPageNumber = this.initialPageNumber;
-    const thumbs = Array.from(context.shell.getPageThumbs());
+    const thumbs = [...context.shell.getPageThumbs()];
 
     const posts = thumbs.map(thumb => parseThumb(thumb, mintMedia));
 
-    this.initialPostList = new PostList(this.initialPageNumber, thumbs, posts, context.shell.getPaginator());
+    this.initialPostList = new PostList({
+      pageIndex: this.initialPageNumber,
+      thumbs,
+      posts,
+      paginator: context.shell.getPaginator()
+    });
     this.pageLoader.markLoaded(this.initialPageNumber, this.initialPostList);
   }
 

@@ -1,7 +1,7 @@
-import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 
 export function sortByNewest(snippets: Snippet[]): Snippet[] {
-  return snippets.slice().sort((a, b) => b.createdAt - a.createdAt);
+  return [...snippets].sort((a, b) => b.createdAt - a.createdAt);
 }
 
 export function filterSnippets(snippets: Snippet[], text: string): Snippet[] {

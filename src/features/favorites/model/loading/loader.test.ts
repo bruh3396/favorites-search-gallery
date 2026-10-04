@@ -9,6 +9,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
+import { flushMicrotasks } from "@/testing/async";
 
 const SEARCHER_UPDATE_DELAY = 1_500;
 
@@ -61,7 +62,16 @@ function createCollection(log: string[]): Collection & { favorites: Favorite[] }
   return collection;
 }
 
-async function setup(sources: { local?: Post[]; stored?: Post[]; remotePages?: Post[][]; newPosts?: Post[]; removedIds?: string[]; stores?: Promise<void> } = {}): Promise<{
+interface LoaderSources {
+  local?: Post[];
+  stored?: Post[];
+  remotePages?: Post[][];
+  newPosts?: Post[];
+  removedIds?: string[];
+  stores?: Promise<void>;
+}
+
+async function setup(sources: LoaderSources = {}): Promise<{
   loader: FavoritesLoader;
   log: string[];
   collection: ReturnType<typeof createCollection>;
@@ -83,7 +93,7 @@ async function setup(sources: { local?: Post[]; stored?: Post[]; remotePages?: P
   const findRemovedCalls: [string[], number][] = [];
   const refreshedPosts: Post[] = [];
   const remoteFavorites: Pick<RemoteFavorites, "fetchAll" | "findNew" | "findRemoved"> = {
-    fetchAll: (onFavoritesFound) => {
+    fetchAll: onFavoritesFound => {
       (sources.remotePages ?? []).forEach(onFavoritesFound);
       return Promise.resolve();
     },
@@ -126,15 +136,13 @@ async function setup(sources: { local?: Post[]; stored?: Post[]; remotePages?: P
     collection,
     searcher,
     scheduler,
-    onPlaceholderFilled: favorite => filledPlaceholders.push(favorite.id)
+    onPlaceholderFilled: (favorite): void => {
+      filledPlaceholders.push(favorite.id);
+    }
   });
 
   await localFavorites.prepend(local.map(post => post.id));
   return { loader, log, collection, localFavorites, localTagCategories, scheduler, searcherUpdates, filledPlaceholders, findRemovedCalls, refreshedPosts };
-}
-
-function flushPromises(): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, 0));
 }
 
 describe("FavoritesLoader", () => {
@@ -189,13 +197,13 @@ describe("FavoritesLoader", () => {
     test("resolves only once every page is adopted, and refreshes a page only after adopting it", async() => {
       const stores = Promise.withResolvers<void>();
       const { loader, log } = await setup({ remotePages: [createPosts("1")], stores: stores.promise });
-      let resolved = false;
+      let isResolved = false;
       const fetching = loader.fetchAllFavorites(() => { }).then(() => {
-        resolved = true;
+        isResolved = true;
       });
 
-      await flushPromises();
-      expect(resolved).toBe(false);
+      await flushMicrotasks();
+      expect(isResolved).toBe(false);
       expect(log).not.toContain("refreshAll:1");
 
       stores.resolve();
@@ -293,7 +301,7 @@ describe("FavoritesLoader", () => {
       const { loader, localTagCategories } = await setup();
 
       loader.applyRefreshedPost({ post: createPost(), tagCategories: new Map([["alice", "artist"]]) });
-      await flushPromises();
+      await flushMicrotasks();
 
       expect(await localTagCategories.getMany(["alice"])).toEqual(new Map([["alice", "artist"]]));
     });
@@ -352,7 +360,7 @@ describe("FavoritesLoader", () => {
       const { loader, localTagCategories, searcherUpdates, scheduler } = await setup();
 
       loader.applyRefreshedPost({ post: createPost({ id: "9", tags: "alice" }), tagCategories: new Map([["alice", "artist"]]) });
-      await flushPromises();
+      await flushMicrotasks();
       scheduler.advance(SEARCHER_UPDATE_DELAY);
 
       expect(await localTagCategories.getMany(["alice"])).toEqual(new Map([["alice", "artist"]]));

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { createPost } from "@/testing/post";
 
@@ -10,14 +10,10 @@ function writeId(arena: FavoritesColumnarArena, id: number): number {
 }
 
 describe("FavoritesColumnarArena", () => {
-  let arena: FavoritesColumnarArena;
-
-  beforeEach(() => {
-    arena = new FavoritesColumnarArena();
-  });
-
   describe("isEmpty", () => {
     test("is true until the first allocation", () => {
+      const arena = new FavoritesColumnarArena();
+
       expect(arena.isEmpty).toBe(true);
       arena.allocate();
       expect(arena.isEmpty).toBe(false);
@@ -26,6 +22,8 @@ describe("FavoritesColumnarArena", () => {
 
   describe("allocate", () => {
     test("hands out sequential indices", () => {
+      const arena = new FavoritesColumnarArena();
+
       expect(arena.allocate()).toBe(0);
       expect(arena.allocate()).toBe(1);
       expect(arena.allocate()).toBe(2);
@@ -33,6 +31,7 @@ describe("FavoritesColumnarArena", () => {
     });
 
     test("grows arrays past the initial capacity while preserving data", () => {
+      const arena = new FavoritesColumnarArena();
       const beyondInitialCapacity = 1_025;
 
       for (let i = 0; i < beyondInitialCapacity; i += 1) {
@@ -48,6 +47,7 @@ describe("FavoritesColumnarArena", () => {
 
   describe("write", () => {
     test("round-trips scalar fields and tags through toPost", () => {
+      const arena = new FavoritesColumnarArena();
       const index = arena.allocate();
 
       arena.write(index, createPost({ id: "42", width: 100, height: 200, tags: "foo bar baz" }));
@@ -61,6 +61,7 @@ describe("FavoritesColumnarArena", () => {
     });
 
     test("keeps items independent", () => {
+      const arena = new FavoritesColumnarArena();
       const first = writeId(arena, 3);
       const second = writeId(arena, 7);
 
@@ -74,6 +75,7 @@ describe("FavoritesColumnarArena", () => {
 
   describe("media", () => {
     test("round-trips the written media", () => {
+      const arena = new FavoritesColumnarArena();
       const index = arena.allocate();
 
       arena.write(index, createPost({ id: "1", media: { kind: "video", locator: "12/abc123.mp4" } }));
@@ -82,6 +84,7 @@ describe("FavoritesColumnarArena", () => {
     });
 
     test("ignores the tags", () => {
+      const arena = new FavoritesColumnarArena();
       const index = arena.allocate();
 
       arena.write(index, createPost({ id: "1", tags: "apple mp4", media: { kind: "image", locator: "12/abc123.png" } }));
@@ -92,6 +95,7 @@ describe("FavoritesColumnarArena", () => {
 
   describe("compress", () => {
     test("preserves item data through a compress that spans a capacity growth", () => {
+      const arena = new FavoritesColumnarArena();
       const allocatedCount = 1_029;
 
       for (let i = 0; i < allocatedCount; i += 1) {
@@ -107,6 +111,7 @@ describe("FavoritesColumnarArena", () => {
     });
 
     test("keeps tags loadable after compress", () => {
+      const arena = new FavoritesColumnarArena();
       const first = writeId(arena, 1);
       const second = writeId(arena, 2);
 

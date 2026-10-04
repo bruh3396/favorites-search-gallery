@@ -5,7 +5,7 @@ const RATINGS = ["s", "q", "e"];
 const SIZES = [[640, 480], [480, 640], [800, 450], [600, 600]];
 
 function tagsFor(index: number): string {
-  return TAGS.filter((_tag, tagIndex) => (index + 1) % (tagIndex + 2) === 0).concat(TAGS[index % TAGS.length]).join(" ");
+  return [...TAGS.filter((_tag, tagIndex) => (index + 1) % (tagIndex + 2) === 0), TAGS[index % TAGS.length]].join(" ");
 }
 
 function imageFor(id: number, width: number, height: number): string {

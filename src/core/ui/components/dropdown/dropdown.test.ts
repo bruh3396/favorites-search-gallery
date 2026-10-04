@@ -26,7 +26,7 @@ describe("createDropdown", () => {
     const { element } = setup();
 
     expect(element.tagName).toBe("SELECT");
-    expect([...element.options].map((option) => option.textContent)).toEqual(["Score", "Date", "Random"]);
+    expect([...element.options].map(option => option.textContent)).toEqual(["Score", "Date", "Random"]);
     expect(element.selectedIndex).toBe(-1);
   });
 

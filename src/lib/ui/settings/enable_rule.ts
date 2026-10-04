@@ -20,7 +20,7 @@ export function bindEnableRule(settingElement: HTMLElement, rule: EnableRule | n
 
 export function enableWhen<E>(preference: Preference<E>, predicate: (value: E) => boolean): EnableRule {
   return {
-    subscribe: (recompute) => preference.on(recompute),
+    subscribe: recompute => preference.on(recompute),
     isEnabled: () => predicate(preference.value)
   };
 }

@@ -4,7 +4,7 @@ import { setupStyles } from "@/app/startup/style";
 
 export function setupRuntime(context: AppContext, root: HTMLElement): void {
   context.shell.mount(root);
-  context.domEvents.addEventListeners(context.shell, context.environment, context.events, context.featureBridge);
+  context.domEvents.addEventListeners(context);
   setupStyles(context);
   reloadOnRestartPreferences(context);
 }

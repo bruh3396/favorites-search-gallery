@@ -18,8 +18,8 @@ export class AutoplayControl {
       togglePause: (): void => intents.togglePause(),
       toggleDirection: (): void => intents.toggleDirection()
     };
-    shell.buttons.addEventListener(AutoplayConfig.menuActivationEvent[platform], (event) => this.onActivate(event));
-    shell.settingsMenu.addEventListener("change", (event) => this.onChange(event));
+    shell.buttons.addEventListener(AutoplayConfig.menuActivationEvent[platform], event => this.onActivate(event));
+    shell.settingsMenu.addEventListener("change", event => this.onChange(event));
 
     for (const [type, wasHeld] of AutoplayConfig.menuHoldEvents[platform]) {
       shell.menu.addEventListener(type, () => intents.holdMenu(wasHeld));

@@ -9,7 +9,7 @@ describe("Emitter", () => {
   test("delivers every emit to its listeners", () => {
     const { emitter, heard } = setup();
 
-    emitter.on((value) => heard.push(value));
+    emitter.on(value => heard.push(value));
     emitter.emit(1);
     emitter.emit(1);
     expect(heard).toEqual([1, 1]);
@@ -17,7 +17,7 @@ describe("Emitter", () => {
 
   test("stops a listener when its unsubscribe is called", () => {
     const { emitter, heard } = setup();
-    const off = emitter.on((value) => heard.push(value));
+    const off = emitter.on(value => heard.push(value));
 
     emitter.emit(1);
     off();
@@ -28,7 +28,7 @@ describe("Emitter", () => {
   test("delivers only the first emit to a once listener", () => {
     const { emitter, heard } = setup();
 
-    emitter.once((value) => heard.push(value));
+    emitter.once(value => heard.push(value));
     emitter.emit(1);
     emitter.emit(2);
     expect(heard).toEqual([1]);
@@ -38,7 +38,7 @@ describe("Emitter", () => {
     const { emitter, heard } = setup();
     const { on, emit } = emitter;
 
-    on((value) => heard.push(value));
+    on(value => heard.push(value));
     emit(3);
     expect(heard).toEqual([3]);
   });

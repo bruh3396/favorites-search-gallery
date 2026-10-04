@@ -24,7 +24,7 @@ type Log = (message: string) => void;
 
 function renderSwitchRow(ownerDocument: Document, log: Log): HTMLElement {
   const control = createSwitch(ownerDocument, {
-    onValueChange: (next) => {
+    onValueChange: next => {
       log(`Autoplay → ${next}`);
       control.setValue(next);
     }
@@ -38,7 +38,7 @@ function renderSegmentedRow(ownerDocument: Document, log: Log): HTMLElement {
   const control = createSegmented<string>(ownerDocument, {
     options: LAYOUTS,
     size: "small",
-    onValueChange: (next) => {
+    onValueChange: next => {
       log(`Layout → ${next}`);
       control.setValue(next);
     }
@@ -52,7 +52,7 @@ function renderDropdownRow(ownerDocument: Document, log: Log): HTMLElement {
   const control = createDropdown<string>(ownerDocument, {
     options: SORTS,
     size: "small",
-    onValueChange: (next) => {
+    onValueChange: next => {
       log(`Sort by → ${next}`);
       control.setValue(next);
     }
@@ -76,13 +76,13 @@ function renderDependentRows(ownerDocument: Document, log: Log): HTMLElement {
     step: 10,
     size: "small",
     scheduler: SCHEDULER,
-    onValueChange: (next) => {
+    onValueChange: next => {
       log(`Results per page → ${next}`);
       results.setValue(next);
     }
   });
   const infinite = createSwitch(ownerDocument, {
-    onValueChange: (next) => {
+    onValueChange: next => {
       log(`Infinite scroll → ${next}`);
       infinite.setValue(next);
       results.setDisabled(next);

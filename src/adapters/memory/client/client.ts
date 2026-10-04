@@ -10,7 +10,7 @@ export class MemoryClient {
   }
 
   public readPosts(): Post[] {
-    return Array.from(this.postsById.values());
+    return [...this.postsById.values()];
   }
 
   public readFavorites(): Post[] {

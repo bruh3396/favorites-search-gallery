@@ -166,7 +166,7 @@ describe("Rule34RemoteFavorites", () => {
       const run = remoteFavorites.fetchAll(() => { });
 
       await advanceAndSettle(scheduler, computeRetryDelay(0, FETCH_DELAY) - 1);
-      expect(fetchPage).toHaveBeenCalledTimes(1);
+      expect(fetchPage).toHaveBeenCalledOnce();
 
       await advanceAndSettle(scheduler, 1);
       expect(fetchPage).toHaveBeenCalledTimes(2);

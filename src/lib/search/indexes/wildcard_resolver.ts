@@ -25,8 +25,8 @@ export abstract class WildcardResolver<V> {
     const key = term.resolutionInputs.regex.source;
     const cached = this.cache.get(key);
 
-    if (cached !== undefined || this.cache.has(key)) {
-      return cached as V;
+    if (cached !== undefined) {
+      return cached;
     }
     const union = this.combine(this.wildcardIndex.matchingTerms(term));
 

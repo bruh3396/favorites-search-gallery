@@ -30,7 +30,7 @@ export class FavoritesSkeleton {
 
   public show(tile: (elements: HTMLElement[]) => void): void {
     if (this.items.length > 0) {
-      tile(this.items.map((item) => item.element));
+      tile(this.items.map(item => item.element));
     }
   }
 
@@ -45,10 +45,8 @@ export class FavoritesSkeleton {
     return Array.from(
       { length: SkeletonConfig.defaultItemCount },
       () => new FavoritesSkeletonItem(
-        this.randomSource,
-        layout,
-        this.aspectRatios.getNext(),
-        this.fallbackAspectRatioHeights
+        { layout, aspectRatio: this.aspectRatios.getNext() },
+        { randomSource: this.randomSource, fallbackAspectRatioHeights: this.fallbackAspectRatioHeights }
       )
     );
   }

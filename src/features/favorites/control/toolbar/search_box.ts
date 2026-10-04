@@ -100,7 +100,7 @@ export class FavoritesSearchBox {
     this.searchBox.addEventListener("input", () => this.history.editLastQuery(this.searchBox.value));
     this.subscribeToKeyboard();
     this.subscribeToGrowOnFocus();
-    this.events.app.hotkeyPressed.on((key) => this.handleHotkey(key));
+    this.events.app.hotkeyPressed.on(key => this.handleHotkey(key));
   }
 
   private handleHotkey(key: string): void {

@@ -109,7 +109,7 @@ export class FavoritesView {
   }
 
   public showSkeleton(): void {
-    this.skeleton.show((elements) => this.contentTiler.tile(elements));
+    this.skeleton.show(elements => this.contentTiler.tile(elements));
   }
 
   public suppressLinkOnHoveredThumb(event: EnhancedMouseEvent): void {
@@ -194,7 +194,7 @@ export class FavoritesView {
       create: () => this.elementTemplate.createBlankThumb(),
       bind: (root, favorite, favorited) => this.elementTemplate.bindThumb(root, favorite, favorited),
       setAsFavorited: (node, favorited) => this.elementTemplate.setThumbFavorited(node, favorited),
-      blankImage: (node) => this.elementTemplate.blankThumbImage(node)
+      blankImage: node => this.elementTemplate.blankThumbImage(node)
     });
   }
 }

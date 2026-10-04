@@ -31,15 +31,26 @@ export class AutoplayShell {
   constructor(platform: Device) {
     this.settingsButton = button(createElement("img", { id: "autoplay-settings-button" }), "toggleSettings", "Autoplay settings");
     this.playButton = button(createElement("img", { id: "autoplay-play-button" }), "togglePause", "Pause autoplay");
-    this.directionMask = createElement("div", { id: "autoplay-change-direction-mask-container", children: [iconWithId("changeDirectionMask", "autoplay-change-direction-mask")] });
-    this.directionButton = button(createElement("div", { id: "autoplay-change-direction-slot", children: [iconWithId("changeDirection", "autoplay-change-direction-button"), this.directionMask] }), "toggleDirection", "Change autoplay direction");
+    this.directionMask = createElement("div", {
+      id: "autoplay-change-direction-mask-container",
+      children: [iconWithId("changeDirectionMask", "autoplay-change-direction-mask")]
+    });
+    const directionSlot = createElement("div", {
+      id: "autoplay-change-direction-slot",
+      children: [iconWithId("changeDirection", "autoplay-change-direction-button"), this.directionMask]
+    });
+
+    this.directionButton = button(directionSlot, "toggleDirection", "Change autoplay direction");
     this.buttons = createElement("div", { id: "autoplay-buttons", children: [this.settingsButton, this.playButton, this.directionButton] });
     this.progressBars = {
       image: createElement("div", { id: "autoplay-image-progress-bar", className: "autoplay-progress-bar" }),
       minimumVideo: createElement("div", { id: "autoplay-video-progress-bar", className: "autoplay-progress-bar" })
     };
     this.durationFields = { image: FIELD_BUILDERS[platform]("image"), minimumVideo: FIELD_BUILDERS[platform]("minimumVideo") };
-    this.settingsMenu = createElement("div", { id: "autoplay-settings-menu", children: [row("image", this.durationFields.image), row("minimumVideo", this.durationFields.minimumVideo)] });
+    this.settingsMenu = createElement("div", {
+      id: "autoplay-settings-menu",
+      children: [row("image", this.durationFields.image), row("minimumVideo", this.durationFields.minimumVideo)]
+    });
     this.menu = createElement("div", {
       id: "autoplay-menu",
       className: "u-no-select gallery-sub-menu",
@@ -71,7 +82,8 @@ function row(kind: AutoplayDuration, field: DurationField): HTMLElement {
 }
 
 function numberField(kind: AutoplayDuration): HTMLInputElement {
-  return numberInput(DURATION_FIELDS[kind].id, AutoplayConfig.durationSeconds[kind].min, AutoplayConfig.durationSeconds[kind].max, 1);
+  const { min, max } = AutoplayConfig.durationSeconds[kind];
+  return numberInput(DURATION_FIELDS[kind].id, { min, max, step: 1 });
 }
 
 function selectField(kind: AutoplayDuration): HTMLSelectElement {

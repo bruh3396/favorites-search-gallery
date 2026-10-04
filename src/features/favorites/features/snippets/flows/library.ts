@@ -20,6 +20,11 @@ export class SnippetLibraryFlow extends SnippetFlow implements SnippetIntents {
     this.state = { editTarget: null, deleteTarget: null, failure: null, filterText: "" };
   }
 
+  public async load(): Promise<void> {
+    await this.model.loadSnippets();
+    this.render();
+  }
+
   public mount(container: HTMLElement): void {
     this.view.mount(container);
     this.render();

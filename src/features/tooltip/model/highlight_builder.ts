@@ -17,15 +17,23 @@ export function buildHighlights(query: string): SearchTermHighlight[] {
   return highlights;
 }
 
+interface Shade {
+  saturation: number;
+  lightness: number;
+}
+
+const BRIGHT: Shade = { saturation: 75, lightness: 70 };
+const DARK: Shade = { saturation: 75, lightness: 45 };
+
 function brightWarmCoolHslColor(index: number, total: number): string {
-  return warmCoolHslColor(index, total, 75, 70);
+  return warmCoolHslColor(index, total, BRIGHT);
 }
 
 function darkWarmCoolHslColor(index: number, total: number): string {
-  return warmCoolHslColor(index, total, 75, 45);
+  return warmCoolHslColor(index, total, DARK);
 }
 
-function warmCoolHslColor(index: number, total: number, saturation = 90, lightness = 70): string {
+function warmCoolHslColor(index: number, total: number, { saturation, lightness }: Shade): string {
   const half = Math.max(total, 1) / 2;
   const fractionOfHalf = index / half;
   const inFirstHalf = index < half;

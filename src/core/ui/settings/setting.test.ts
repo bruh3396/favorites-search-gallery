@@ -121,7 +121,7 @@ describe("createSetting", () => {
     const preference = createPreference<Layout>("row");
     const buttons = queryButtons(render(createLayoutSetting(preference, "segmented")));
 
-    expect(buttons.map((button) => button.textContent)).toEqual(["Column", "Row", "Square"]);
+    expect(buttons.map(button => button.textContent)).toEqual(["Column", "Row", "Square"]);
     expect(buttons[1].getAttribute("aria-checked")).toBe("true");
     buttons[2].click();
     expect(preference.value).toBe("square");
@@ -131,7 +131,7 @@ describe("createSetting", () => {
     const preference = createPreference<Layout>("row");
     const select = render(createLayoutSetting(preference, "dropdown")).querySelector("select");
 
-    expect([...select?.options ?? []].map((option) => option.textContent)).toEqual(["Column", "Row", "Square"]);
+    expect([...select?.options ?? []].map(option => option.textContent)).toEqual(["Column", "Row", "Square"]);
     expect(select?.selectedIndex).toBe(1);
   });
 

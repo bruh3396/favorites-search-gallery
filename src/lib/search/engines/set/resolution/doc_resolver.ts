@@ -10,14 +10,28 @@ import { WildcardDocResolver } from "@/lib/search/engines/set/resolution/wildcar
 import { WildcardSearchTerm } from "@/lib/search/terms/wildcard_search_term";
 import { union } from "@/utils/pure/set";
 
+export interface DocResolverDependencies<Doc> {
+  termIndex: InvertedIndex<Doc>;
+  metricIndex: MetricIndex<Doc>;
+  relativeMetricIndex: RelativeMetricIndex<Doc>;
+  positionIndex: PositionIndex<Doc>;
+  wildcardResolver: WildcardDocResolver<Doc>;
+}
+
 export class DocResolver<Doc> {
-  constructor(
-    private readonly termIndex: InvertedIndex<Doc>,
-    private readonly metricIndex: MetricIndex<Doc>,
-    private readonly relativeMetricIndex: RelativeMetricIndex<Doc>,
-    private readonly positionIndex: PositionIndex<Doc>,
-    private readonly wildcardResolver: WildcardDocResolver<Doc>
-  ) { }
+  private readonly termIndex: InvertedIndex<Doc>;
+  private readonly metricIndex: MetricIndex<Doc>;
+  private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
+  private readonly positionIndex: PositionIndex<Doc>;
+  private readonly wildcardResolver: WildcardDocResolver<Doc>;
+
+  constructor({ termIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver }: DocResolverDependencies<Doc>) {
+    this.termIndex = termIndex;
+    this.metricIndex = metricIndex;
+    this.relativeMetricIndex = relativeMetricIndex;
+    this.positionIndex = positionIndex;
+    this.wildcardResolver = wildcardResolver;
+  }
 
   public resolve(term: AbstractSearchTerm): ReadonlySet<Doc> {
     if (term instanceof NumericSearchTerm) {

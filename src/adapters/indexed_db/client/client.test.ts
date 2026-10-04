@@ -1,12 +1,14 @@
 import "fake-indexeddb/auto";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
+import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 
-let counter = 0;
+beforeEach(() => {
+  globalThis.indexedDB = new IDBFactory();
+});
 
 function createIndexedDb(): IndexedDbClient {
-  counter += 1;
-  return new IndexedDbClient(`client_test_${counter}`);
+  return new IndexedDbClient();
 }
 
 describe("IndexedDbClient", () => {

@@ -38,12 +38,12 @@ export class SnippetControl {
   }
 
   private addListeners(): void {
-    this.shell.list.addEventListener("click", (event) => this.onClick(event));
-    this.shell.editorActions.addEventListener("click", (event) => this.onClick(event));
+    this.shell.list.addEventListener("click", event => this.onClick(event));
+    this.shell.editorActions.addEventListener("click", event => this.onClick(event));
     this.shell.nameField.addEventListener("input", () => this.onNameInput());
     this.shell.queryField.addEventListener("input", () => this.intents.clearFailure());
-    this.shell.nameField.addEventListener("keydown", (event) => this.onKeyDown(event));
-    this.shell.queryField.addEventListener("keydown", (event) => this.onKeyDown(event));
+    this.shell.nameField.addEventListener("keydown", event => this.onKeyDown(event));
+    this.shell.queryField.addEventListener("keydown", event => this.onKeyDown(event));
   }
 
   private onClick(event: MouseEvent): void {

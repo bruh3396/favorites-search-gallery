@@ -107,7 +107,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       min: ThumbConfig.columnCountBounds.min,
       max: environment.device === "desktop" ? ThumbConfig.columnCountBounds.max.desktop : 10,
       step: 1,
-      enabledWhen: whenLayoutIs(preferences, (layout) => layout !== "row" && layout !== "native")
+      enabledWhen: whenLayoutIs(preferences, layout => layout !== "row" && layout !== "native")
     }),
     rowHeight: stepper({
       id: "row-size",
@@ -117,7 +117,7 @@ export function buildPostListSettingsCatalog(context: AppContext): PostListSetti
       min: ThumbConfig.rowHeightBounds.min,
       max: ThumbConfig.rowHeightBounds.max,
       step: 1,
-      enabledWhen: whenLayoutIs(preferences, (layout) => layout === "row")
+      enabledWhen: whenLayoutIs(preferences, layout => layout === "row")
     }),
     performanceProfile: dropdown<PerformanceProfile>({
       id: "performance-profile",

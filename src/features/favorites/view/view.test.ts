@@ -30,12 +30,22 @@ interface SetupOptions {
   linksToPostPage?: boolean;
 }
 
-function setup({ preferences = {}, environment: environmentOverrides = {}, localKeyedValues = new MemoryLocalKeyedValues(), linksToPostPage = false }: SetupOptions = {}): Setup {
+function setup({
+  preferences = {},
+  environment: environmentOverrides = {},
+  localKeyedValues = new MemoryLocalKeyedValues(),
+  linksToPostPage = false
+}: SetupOptions = {}): Setup {
   const environment = createEnvironment(environmentOverrides);
   const appShell = new Shell();
   const shell = new FavoritesShell(environment, appShell);
   const scheduler = new MemoryScheduler();
-  const context = createAppContext({ environment: environmentOverrides, preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } }, shell: appShell, ports: { localKeyedValues, scheduler } });
+  const context = createAppContext({
+    environment: environmentOverrides,
+    preferences: { ...preferences, favorites: { layout: "grid", ...preferences.favorites } },
+    shell: appShell,
+    ports: { localKeyedValues, scheduler }
+  });
   const view = new FavoritesView({ linksToPostPage }, { context, shell });
   const replaced = vi.fn<() => void>();
   const added = vi.fn<(favorites: Favorite[]) => void>();
@@ -58,7 +68,7 @@ function createState(overrides: Partial<PaginationState> = {}): PaginationState 
 }
 
 function readThumbIds(content: HTMLElement): string[] {
-  return Array.from(content.querySelectorAll<HTMLElement>(".post")).map(thumb => thumb.id);
+  return [...content.querySelectorAll<HTMLElement>(".post")].map(thumb => thumb.id);
 }
 
 function isFavorited(content: HTMLElement, id: string): boolean {
@@ -66,7 +76,7 @@ function isFavorited(content: HTMLElement, id: string): boolean {
 }
 
 function readPageLabels(shell: FavoritesShell): string[] {
-  return Array.from(shell.toolbar.pagination.querySelectorAll("button[data-action=page]")).map(button => button.textContent ?? "");
+  return [...shell.toolbar.pagination.querySelectorAll("button[data-action=page]")].map(button => button.textContent ?? "");
 }
 
 function isPopoverOpen(shell: FavoritesShell): boolean {
@@ -74,7 +84,7 @@ function isPopoverOpen(shell: FavoritesShell): boolean {
 }
 
 function hover(view: FavoritesView, target: Element): void {
-  target.addEventListener("mouseover", (event) => view.suppressLinkOnHoveredThumb(new EnhancedMouseEvent(event as MouseEvent)), { once: true });
+  target.addEventListener("mouseover", event => view.suppressLinkOnHoveredThumb(new EnhancedMouseEvent(event as MouseEvent)), { once: true });
   target.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
 }
 
@@ -85,178 +95,168 @@ describe("FavoritesView", () => {
     document.documentElement.removeAttribute("data-loading");
   });
 
-  describe("content", () => {
-    test("shows search results in place of what was there", () => {
-      const { view, content, replaced } = setup();
+  test("shows search results in place of what was there", () => {
+    const { view, content, replaced } = setup();
 
-      view.showSearchResults(createFavorites("1", "2"));
-      view.showSearchResults(createFavorites("3"), { fade: false });
-      expect(readThumbIds(content)).toEqual(["3"]);
-      expect(replaced).toHaveBeenCalledTimes(2);
-    });
-
-    test("adds favorites to the bottom", () => {
-      const { view, content, added } = setup();
-      const favorites = createFavorites("2");
-
-      view.showSearchResults(createFavorites("1"));
-      view.addToBottom(favorites);
-      expect(readThumbIds(content)).toEqual(["1", "2"]);
-      expect(added).toHaveBeenCalledWith(favorites);
-    });
-
-    test("marks a shown thumb as favorited or not", () => {
-      const { view, content } = setup({ environment: { ownsFavorites: false } });
-
-      view.showSearchResults(createFavorites("1"));
-      view.setFavorited("1", true);
-      expect(isFavorited(content, "1")).toBe(true);
-      view.setFavorited("1", false);
-      expect(isFavorited(content, "1")).toBe(false);
-    });
-
-    test("changes layout", () => {
-      const { view } = setup();
-
-      view.changeLayout("row");
-      expect(view.getLayout()).toBe("row");
-    });
-
-    test("reports the last thumb of each column", () => {
-      const { view } = setup({ preferences: { favorites: { layout: "column", columnCount: 2 } } });
-
-      view.showSearchResults(createFavorites("1", "2", "3", "4"), { fade: false });
-      expect(view.bottomEdgeElements().map(element => element.id).sort()).toEqual(["3", "4"]);
-    });
-
-    test("toggles the search inputs", () => {
-      const { view } = setup();
-
-      expect(view.toggleSearchInputs(false)).toBe(true);
-      expect(view.toggleSearchInputs(true)).toBe(false);
-    });
-
-    test("strips the link from the hovered thumb", () => {
-      const { view, content } = setup({ linksToPostPage: true });
-
-      view.showSearchResults(createFavorites("1"));
-      const link = content.querySelector("a") as HTMLAnchorElement;
-
-      expect(link.getAttribute("href")).toBe(new MemoryRemotePages().postUrl("1"));
-      hover(view, content.querySelector("img") as HTMLElement);
-      expect(link.getAttribute("href")).toBeNull();
-    });
+    view.showSearchResults(createFavorites("1", "2"));
+    view.showSearchResults(createFavorites("3"), { fade: false });
+    expect(readThumbIds(content)).toEqual(["3"]);
+    expect(replaced).toHaveBeenCalledTimes(2);
   });
 
-  describe("skeleton", () => {
-    test("fills the content with placeholders", () => {
-      const { view, content } = setup();
+  test("adds favorites to the bottom", () => {
+    const { view, content, added } = setup();
+    const favorites = createFavorites("2");
 
-      view.showSkeleton();
-      expect(content.querySelectorAll(".skeleton-item").length).toBeGreaterThan(0);
-    });
-
-    test("shapes the next visit's placeholders after the thumbs that loaded", async() => {
-      const localKeyedValues = new MemoryLocalKeyedValues();
-      const { view, content } = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
-
-      view.showSearchResults([createFavorite("1", 120, 240)]);
-      content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalWidth", { value: 120 }));
-      content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalHeight", { value: 240 }));
-      const collecting = view.collectAspectRatios();
-
-      content.querySelectorAll("img").forEach(image => image.dispatchEvent(new Event("load")));
-      await collecting;
-      document.body.replaceChildren();
-      const next = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
-
-      next.view.showSkeleton();
-      const first = next.content.querySelector<HTMLElement>(".skeleton-item");
-
-      expect([first?.style.width, first?.style.height]).toEqual(["120px", "240px"]);
-    });
+    view.showSearchResults(createFavorites("1"));
+    view.addToBottom(favorites);
+    expect(readThumbIds(content)).toEqual(["1", "2"]);
+    expect(added).toHaveBeenCalledWith(favorites);
   });
 
-  describe("pagination", () => {
-    test("draws and updates the paginator", () => {
-      const { view, shell } = setup();
+  test("marks a shown thumb as favorited or not", () => {
+    const { view, content } = setup({ environment: { ownsFavorites: false } });
 
-      view.renderPagination(createState());
-      view.updatePaginator(createState({ finalPage: 4, sequence: [1, 2, 3, 4] }));
-      expect(readPageLabels(shell)).toEqual(["1", "2", "3", "4"]);
-    });
-
-    test("hides and shows the paginator", () => {
-      const { view } = setup();
-
-      view.togglePaginator(false);
-      expect(document.documentElement.dataset.paginationHidden).toBeDefined();
-      view.togglePaginator(true);
-      expect(document.documentElement.dataset.paginationHidden).toBeUndefined();
-    });
-
-    test("opens and closes the go-to-page prompt", () => {
-      const { view, shell } = setup();
-      const field = shell.toolbar.pagination.querySelector("input") as HTMLInputElement;
-
-      view.toggleGotoPagePopover();
-      expect(isPopoverOpen(shell)).toBe(true);
-      expect(view.isGotoPagePopoverTarget(field)).toBe(true);
-      view.closeGotoPagePopover();
-      expect(isPopoverOpen(shell)).toBe(false);
-    });
+    view.showSearchResults(createFavorites("1"));
+    view.setFavorited("1", true);
+    expect(isFavorited(content, "1")).toBe(true);
+    view.setFavorited("1", false);
+    expect(isFavorited(content, "1")).toBe(false);
   });
 
-  describe("drawer", () => {
-    test("opens and shows a section", () => {
-      const { view, shell } = setup();
+  test("changes layout", () => {
+    const { view } = setup();
 
-      view.toggleDrawer(true);
-      view.showDrawerSection("snippets");
-      expect(shell.root.dataset.drawerOpen).toBeDefined();
-      expect(shell.drawer.snippets.root.dataset.hidden).toBeUndefined();
-    });
+    view.changeLayout("row");
+    expect(view.getLayout()).toBe("row");
   });
 
-  describe("status", () => {
-    test("shows and clears a status", () => {
-      const { view, shell } = setup();
+  test("reports the last thumb of each column", () => {
+    const { view } = setup({ preferences: { favorites: { layout: "column", columnCount: 2 } } });
 
-      view.setStatus("Peeling apples");
-      expect(shell.toolbar.loadStatus.textContent).toBe("Peeling apples");
-      view.clearStatus();
-      expect(shell.toolbar.loadStatus.textContent).toBe("");
-    });
+    view.showSearchResults(createFavorites("1", "2", "3", "4"), { fade: false });
+    expect(view.bottomEdgeElements().map(element => element.id).sort()).toEqual(["3", "4"]);
+  });
 
-    test("a temporary status clears itself", () => {
-      const { view, shell, scheduler } = setup();
+  test("toggles the search inputs", () => {
+    const { view } = setup();
 
-      view.setTemporaryStatus("Apple added");
-      expect(shell.toolbar.loadStatus.textContent).toBe("Apple added");
-      scheduler.advance(1_000);
-      expect(shell.toolbar.loadStatus.textContent).toBe("");
-    });
+    expect(view.toggleSearchInputs(false)).toBe(true);
+    expect(view.toggleSearchInputs(true)).toBe(false);
+  });
 
-    test("counts matches", () => {
-      const { view, shell } = setup();
+  test("strips the link from the hovered thumb", () => {
+    const { view, content } = setup({ linksToPostPage: true });
 
-      view.setMatchCount(2);
-      expect(shell.toolbar.resultsCount.textContent).toBe("2 Results");
-    });
+    view.showSearchResults(createFavorites("1"));
+    const link = content.querySelector("a") as HTMLAnchorElement;
 
-    test("reports fetching against the expected total", () => {
-      const { view, shell } = setup();
+    expect(link.getAttribute("href")).toBe(new MemoryRemotePages().postUrl("1"));
+    hover(view, content.querySelector("img") as HTMLElement);
+    expect(link.getAttribute("href")).toBeNull();
+  });
 
-      view.setExpectedTotalFavoriteCount(500);
-      view.updateFetchStatus(100, 3);
-      expect(shell.toolbar.loadStatus.textContent).toBe("Fetching - 100 / 500");
-    });
+  test("fills the content with placeholders", () => {
+    const { view, content } = setup();
 
-    test("reports loading progress", () => {
-      const { view, shell } = setup();
+    view.showSkeleton();
+    expect(content.querySelectorAll(".skeleton-item").length).toBeGreaterThan(0);
+  });
 
-      view.setLoadProgress({ loaded: 25, total: 100 });
-      expect(shell.toolbar.loadStatus.textContent).toBe("Loading favorites - 25 / 100");
-    });
+  test("shapes the next visit's placeholders after the thumbs that loaded", async() => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const { view, content } = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
+
+    view.showSearchResults([createFavorite("1", 120, 240)]);
+    content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalWidth", { value: 120 }));
+    content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalHeight", { value: 240 }));
+    const collecting = view.collectAspectRatios();
+
+    content.querySelectorAll("img").forEach(image => image.dispatchEvent(new Event("load")));
+    await collecting;
+    document.body.replaceChildren();
+    const next = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
+
+    next.view.showSkeleton();
+    const first = next.content.querySelector<HTMLElement>(".skeleton-item");
+
+    expect([first?.style.width, first?.style.height]).toEqual(["120px", "240px"]);
+  });
+
+  test("draws and updates the paginator", () => {
+    const { view, shell } = setup();
+
+    view.renderPagination(createState());
+    view.updatePaginator(createState({ finalPage: 4, sequence: [1, 2, 3, 4] }));
+    expect(readPageLabels(shell)).toEqual(["1", "2", "3", "4"]);
+  });
+
+  test("hides and shows the paginator", () => {
+    const { view } = setup();
+
+    view.togglePaginator(false);
+    expect(document.documentElement.dataset.paginationHidden).toBeDefined();
+    view.togglePaginator(true);
+    expect(document.documentElement.dataset.paginationHidden).toBeUndefined();
+  });
+
+  test("opens and closes the go-to-page prompt", () => {
+    const { view, shell } = setup();
+    const field = shell.toolbar.pagination.querySelector("input") as HTMLInputElement;
+
+    view.toggleGotoPagePopover();
+    expect(isPopoverOpen(shell)).toBe(true);
+    expect(view.isGotoPagePopoverTarget(field)).toBe(true);
+    view.closeGotoPagePopover();
+    expect(isPopoverOpen(shell)).toBe(false);
+  });
+
+  test("opens and shows a section", () => {
+    const { view, shell } = setup();
+
+    view.toggleDrawer(true);
+    view.showDrawerSection("snippets");
+    expect(shell.root.dataset.drawerOpen).toBeDefined();
+    expect(shell.drawer.snippets.root.dataset.hidden).toBeUndefined();
+  });
+
+  test("shows and clears a status", () => {
+    const { view, shell } = setup();
+
+    view.setStatus("Peeling apples");
+    expect(shell.toolbar.loadStatus.textContent).toBe("Peeling apples");
+    view.clearStatus();
+    expect(shell.toolbar.loadStatus.textContent).toBe("");
+  });
+
+  test("clears a temporary status by itself", () => {
+    const { view, shell, scheduler } = setup();
+
+    view.setTemporaryStatus("Apple added");
+    expect(shell.toolbar.loadStatus.textContent).toBe("Apple added");
+    scheduler.advance(1_000);
+    expect(shell.toolbar.loadStatus.textContent).toBe("");
+  });
+
+  test("counts matches", () => {
+    const { view, shell } = setup();
+
+    view.setMatchCount(2);
+    expect(shell.toolbar.resultsCount.textContent).toBe("2 Results");
+  });
+
+  test("reports fetching against the expected total", () => {
+    const { view, shell } = setup();
+
+    view.setExpectedTotalFavoriteCount(500);
+    view.updateFetchStatus(100, 3);
+    expect(shell.toolbar.loadStatus.textContent).toBe("Fetching - 100 / 500");
+  });
+
+  test("reports loading progress", () => {
+    const { view, shell } = setup();
+
+    view.setLoadProgress({ loaded: 25, total: 100 });
+    expect(shell.toolbar.loadStatus.textContent).toBe("Loading favorites - 25 / 100");
   });
 });

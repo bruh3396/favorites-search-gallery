@@ -40,7 +40,7 @@ export function createDropdown<T>(
   return {
     element,
     setValue: (value): void => {
-      selectedIndex = options.findIndex((option) => option.value === value);
+      selectedIndex = options.findIndex(option => option.value === value);
       element.selectedIndex = selectedIndex;
     },
     setDisabled: (disabled): void => {

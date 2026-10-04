@@ -5,7 +5,7 @@ export function profilePageUrl(id: string): string {
 }
 
 export function parseFavoriteCount(html: string): number {
-  const favoritesUrl = Array.from(new DOMParser().parseFromString(html, "text/html").querySelectorAll("a"))
+  const favoritesUrl = [...new DOMParser().parseFromString(html, "text/html").querySelectorAll("a")]
     .find(a => a.href.includes("page=favorites&s=view"));
 
   if (favoritesUrl === undefined || favoritesUrl.textContent === null) {

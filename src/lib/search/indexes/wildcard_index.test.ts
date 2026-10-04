@@ -5,57 +5,65 @@ import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser
 const terms = ["banana", "band", "bandana", "brand", "grand", "island", "orange", "sand"].slice().sort();
 
 function matches(index: WildcardIndex, pattern: string): string[] {
-  return index.matchingTerms(parseWildcardSearchTerm(pattern)).slice().sort();
+  return [...index.matchingTerms(parseWildcardSearchTerm(pattern))].sort();
+}
+
+function createIndex(): WildcardIndex {
+  return new WildcardIndex(terms);
 }
 
 describe("WildcardIndex", () => {
-  const index = new WildcardIndex(terms);
+  describe("matchingTerms", () => {
+    test("matches terms starting with the fragment for a prefix pattern", () => {
+      expect(matches(createIndex(), "ban*")).toEqual(["banana", "band", "bandana"]);
+    });
 
-  test("prefix pattern matches terms starting with the fragment", () => {
-    expect(matches(index, "ban*")).toEqual(["banana", "band", "bandana"]);
+    test("matches terms ending with the fragment for a suffix pattern", () => {
+      expect(matches(createIndex(), "*and")).toEqual(["band", "brand", "grand", "island", "sand"]);
+    });
+
+    test("matches terms containing the fragment for a substring pattern", () => {
+      expect(matches(createIndex(), "*an*")).toEqual(["banana", "band", "bandana", "brand", "grand", "island", "orange", "sand"]);
+    });
+
+    test("matches terms against the regex for a multi-star pattern", () => {
+      expect(matches(createIndex(), "b*d*a")).toEqual(["bandana"]);
+    });
+
+    test("returns nothing for a pattern with no matches", () => {
+      expect(matches(createIndex(), "zzz*")).toEqual([]);
+    });
+
+    test("returns nothing from an empty index", () => {
+      expect(matches(new WildcardIndex(), "ban*")).toEqual([]);
+    });
   });
 
-  test("suffix pattern matches terms ending with the fragment", () => {
-    expect(matches(index, "*and")).toEqual(["band", "brand", "grand", "island", "sand"]);
+  describe("add", () => {
+    test("makes a new term matchable", () => {
+      const index = new WildcardIndex(terms);
+
+      index.add("bandit");
+      expect(matches(index, "ban*")).toEqual(["banana", "band", "bandana", "bandit"]);
+    });
   });
 
-  test("substring pattern matches terms containing the fragment", () => {
-    expect(matches(index, "*an*")).toEqual(["banana", "band", "bandana", "brand", "grand", "island", "orange", "sand"]);
+  describe("remove", () => {
+    test("drops a term from matches", () => {
+      const index = new WildcardIndex(terms);
+
+      index.remove("band");
+      expect(matches(index, "ban*")).toEqual(["banana", "bandana"]);
+    });
   });
 
-  test("multi-star pattern matches terms against the regex", () => {
-    expect(matches(index, "b*d*a")).toEqual(["bandana"]);
-  });
+  describe("index", () => {
+    test("replaces the corpus", () => {
+      const index = new WildcardIndex(terms);
 
-  test("a pattern with no matches returns nothing", () => {
-    expect(matches(index, "zzz*")).toEqual([]);
-  });
-
-  test("empty index returns nothing", () => {
-    expect(matches(new WildcardIndex(), "ban*")).toEqual([]);
-  });
-});
-
-describe("WildcardIndex mutation", () => {
-  test("add makes a new term matchable", () => {
-    const index = new WildcardIndex(terms);
-
-    index.add("bandit");
-    expect(matches(index, "ban*")).toEqual(["banana", "band", "bandana", "bandit"]);
-  });
-
-  test("remove drops a term from matches", () => {
-    const index = new WildcardIndex(terms);
-
-    index.remove("band");
-    expect(matches(index, "ban*")).toEqual(["banana", "bandana"]);
-  });
-
-  test("index replaces the corpus", () => {
-    const index = new WildcardIndex(terms);
-
-    index.index(["kiwi", "kumquat"]);
-    expect(matches(index, "ban*")).toEqual([]);
-    expect(matches(index, "k*")).toEqual(["kiwi", "kumquat"]);
+      index.index(["kiwi", "kumquat"]);
+      expect(matches(index, "ban*")).toEqual([]);
+      expect(matches(index, "k*")).toEqual(["kiwi", "kumquat"]);
+    });
   });
 });

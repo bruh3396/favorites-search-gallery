@@ -2,12 +2,12 @@ import { IMAGE_SELECTOR, ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { sum } from "@/utils/pure/number";
 
 export function getItemsInContainer(container: HTMLElement | Document): HTMLElement[] {
-  return Array.from(container.querySelectorAll(ITEM_SELECTOR)).filter(item => item instanceof HTMLElement);
+  return [...container.querySelectorAll(ITEM_SELECTOR)].filter(item => item instanceof HTMLElement);
 }
 
 export function getThumbsInMatrix(container: HTMLElement): HTMLElement[] {
-  const columns = Array.from(container.children);
-  const matrix = columns.map(column => Array.from(column.querySelectorAll(ITEM_SELECTOR)));
+  const columns = [...container.children];
+  const matrix = columns.map(column => [...column.querySelectorAll(ITEM_SELECTOR)]);
   const itemCount = sum(matrix.map(column => column.length));
   const result: HTMLElement[] = [];
 

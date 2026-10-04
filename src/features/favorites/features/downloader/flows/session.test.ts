@@ -68,7 +68,7 @@ describe("DownloaderSessionFlow", () => {
     expect(container.contains(shell.actions)).toBe(true);
   });
 
-  test("enabling clears the waiting status and offers the results", () => {
+  test("clears the waiting status and offers the results once enabled", () => {
     const { session, shell } = setup();
 
     session.enable();
@@ -92,7 +92,7 @@ describe("DownloaderSessionFlow", () => {
     expect(shell.downloadButton.disabled).toBe(true);
   });
 
-  test("re-rendering before enable keeps waiting", () => {
+  test("keeps waiting on a re-render before enable", () => {
     const { session, shell } = setup();
 
     session.reRender();
@@ -100,7 +100,7 @@ describe("DownloaderSessionFlow", () => {
     expect(shell.downloadButton.textContent).toBe("Download Results");
   });
 
-  test("re-rendering picks up changed results", () => {
+  test("picks up changed results on a re-render", () => {
     const { session, shell, results } = setup();
 
     session.enable();
@@ -153,7 +153,7 @@ describe("DownloaderSessionFlow", () => {
     session.cancel();
   });
 
-  test("cancelling aborts the download without saving", async() => {
+  test("aborts the download without saving on cancel", async() => {
     const { session, shell, fetched, saved } = setup({ hang: true });
 
     session.enable();
@@ -167,7 +167,7 @@ describe("DownloaderSessionFlow", () => {
     expect(isShown(shell.downloadButton)).toBe(true);
   });
 
-  test("cancelling with no download in flight does nothing", () => {
+  test("ignores a cancel with no download in flight", () => {
     const { session, shell } = setup();
 
     session.enable();

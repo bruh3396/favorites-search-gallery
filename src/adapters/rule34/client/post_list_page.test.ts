@@ -10,16 +10,25 @@ const THUMBS = `
   <span class="thumb" id="s2"><a id="p2"><img src="https://example.com/thumbnail_2.jpg" title="banana"></a></span>
 `;
 
-describe("post list page", () => {
+describe("postListPageUrl", () => {
   test("addresses a page of a search by its post offset", () => {
     expect(postListPageUrl("apple banana", 2)).toBe("https://rule34.xxx/index.php?page=post&s=list&tags=apple%20banana&pid=84");
   });
+});
 
-  test("converts between page indexes and post offsets", () => {
+describe("postListPageOffset", () => {
+  test("converts a page index to its post offset", () => {
     expect(postListPageOffset(3)).toBe(126);
+  });
+});
+
+describe("postListPageIndex", () => {
+  test("converts a post offset to its page index", () => {
     expect(postListPageIndex(126)).toBe(3);
   });
+});
 
+describe("parsePostListPage", () => {
   test("reads each thumb as a post, in order, with the page's paginator", () => {
     const page = parsePostListPage(createPage(`${THUMBS}<div id="paginator">1 2 3</div>`), () => null);
 

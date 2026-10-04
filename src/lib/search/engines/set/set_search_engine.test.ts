@@ -28,136 +28,142 @@ function search(query: string, engineToSearch: SetSearchEngine<Doc> = createEngi
   return engineToSearch.search(query, candidates).map(item => item.name).sort();
 }
 
-describe("SearchEngine", () => {
-  test("empty query returns every candidate", () => {
-    expect(search("")).toEqual(["apple", "banana", "cherry"]);
+function getSortedNames(items: Doc[]): string[] {
+  return items.map(item => item.name).sort();
+}
+
+describe("SetSearchEngine", () => {
+  describe("search", () => {
+    test("returns every candidate for an empty query", () => {
+      expect(search("")).toEqual(["apple", "banana", "cherry"]);
+    });
+
+    test("matches an exact term", () => {
+      expect(search("red")).toEqual(["apple", "cherry"]);
+    });
+
+    test("excludes a negated exact term", () => {
+      expect(search("fruit -red")).toEqual(["banana"]);
+    });
+
+    test("intersects and terms", () => {
+      expect(search("red sweet")).toEqual(["apple"]);
+    });
+
+    test("unions an or group", () => {
+      expect(search("( red ~ yellow )")).toEqual(["apple", "banana", "cherry"]);
+    });
+
+    test("matches a prefix wildcard", () => {
+      expect(search("swe*")).toEqual(["apple", "banana"]);
+    });
+
+    test("matches a suffix wildcard", () => {
+      expect(search("*eet")).toEqual(["apple", "banana"]);
+    });
+
+    test("matches nothing for a positive wildcard that matches no term", () => {
+      expect(search("zzz*")).toEqual([]);
+    });
   });
 
-  test("exact term", () => {
-    expect(search("red")).toEqual(["apple", "cherry"]);
+  describe("complementOf", () => {
+    test("returns every indexed doc not in the current set", () => {
+      expect(getSortedNames(createEngine().complementOf([apple]))).toEqual(["banana", "cherry"]);
+    });
+
+    test("narrows the complement to docs matching the filter", () => {
+      expect(getSortedNames(createEngine().complementOf([apple], "red"))).toEqual(["cherry"]);
+    });
   });
 
-  test("negated exact term", () => {
-    expect(search("fruit -red")).toEqual(["banana"]);
+  describe("add", () => {
+    test("makes a new doc and its terms searchable, including by wildcard", () => {
+      const searchEngine = createEngine();
+      const mango = createDoc("mango", ["orange", "tropical"]);
+      const candidates = [...docs, mango];
+
+      expect(search("orange", searchEngine, candidates)).toEqual([]);
+      expect(search("trop*", searchEngine, candidates)).toEqual([]);
+
+      searchEngine.add([mango]);
+
+      expect(search("orange", searchEngine, candidates)).toEqual(["mango"]);
+      expect(search("trop*", searchEngine, candidates)).toEqual(["mango"]);
+    });
+
+    test("makes a new doc matchable by metric queries that already ran", () => {
+      const searchEngine = createEngine();
+      const durian = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
+      const candidates = [...docs, durian];
+
+      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
+      expect(search("width:>height", searchEngine, candidates)).toEqual([]);
+
+      searchEngine.add([durian]);
+
+      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
+      expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
+    });
   });
 
-  test("and terms", () => {
-    expect(search("red sweet")).toEqual(["apple"]);
+  describe("update", () => {
+    test("drops a doc's now-unreferenced terms from the wildcard resolver", () => {
+      const plum = createDoc("plum", ["red", "tart", "fruit"], { score: 30 });
+      const candidates = [apple, banana, plum];
+      const searchEngine = createEngine(candidates);
+
+      expect(search("tar*", searchEngine, candidates)).toEqual(["plum"]);
+
+      const oldTerms = new Set(plum.tags);
+
+      plum.tags.clear();
+      ["red", "fruit"].forEach(tag => plum.tags.add(tag));
+      searchEngine.update([{ doc: plum, oldTerms, newTerms: plum.tags }]);
+
+      expect(search("tar*", searchEngine, candidates)).toEqual([]);
+      expect(search("red", searchEngine, candidates)).toEqual(["apple", "plum"]);
+    });
+
+    test("makes a doc's newly introduced terms searchable, including by wildcard", () => {
+      const kiwi = createDoc("kiwi", ["green"]);
+      const candidates = [apple, kiwi];
+      const searchEngine = createEngine(candidates);
+      const oldTerms = new Set(kiwi.tags);
+
+      kiwi.tags.add("fuzzy");
+      searchEngine.update([{ doc: kiwi, oldTerms, newTerms: kiwi.tags }]);
+
+      expect(search("fuzzy", searchEngine, candidates)).toEqual(["kiwi"]);
+      expect(search("fuz*", searchEngine, candidates)).toEqual(["kiwi"]);
+    });
   });
 
-  test("or group", () => {
-    expect(search("( red ~ yellow )")).toEqual(["apple", "banana", "cherry"]);
-  });
+  describe("index", () => {
+    test("makes new docs matchable by metric queries that already ran", () => {
+      const searchEngine = createEngine();
+      const durian = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
+      const candidates = [...docs, durian];
 
-  test("prefix wildcard", () => {
-    expect(search("swe*")).toEqual(["apple", "banana"]);
-  });
+      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
+      expect(search("width:>height", searchEngine, candidates)).toEqual([]);
 
-  test("suffix wildcard", () => {
-    expect(search("*eet")).toEqual(["apple", "banana"]);
-  });
+      searchEngine.index([durian]);
 
-  test("a positive wildcard matching nothing yields nothing", () => {
-    expect(search("zzz*")).toEqual([]);
-  });
-});
+      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
+      expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
+    });
 
-describe("SearchEngine complementOf", () => {
-  function getSortedNames(items: Doc[]): string[] {
-    return items.map(item => item.name).sort();
-  }
+    test("rebuilds the corpus from a fresh set of docs", () => {
+      const searchEngine = new SetSearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric));
+      const kiwi = createDoc("kiwi", ["green", "fuzzy"]);
 
-  test("returns every indexed doc not in the current set", () => {
-    expect(getSortedNames(createEngine().complementOf([apple]))).toEqual(["banana", "cherry"]);
-  });
+      expect(search("green", searchEngine, [kiwi])).toEqual([]);
 
-  test("narrows the complement to docs matching the filter", () => {
-    expect(getSortedNames(createEngine().complementOf([apple], "red"))).toEqual(["cherry"]);
-  });
-});
+      searchEngine.index([kiwi]);
 
-describe("SearchEngine mutation", () => {
-  test("add makes a new doc and its terms searchable, including by wildcard", () => {
-    const searchEngine = createEngine();
-    const mango = createDoc("mango", ["orange", "tropical"]);
-    const candidates = [...docs, mango];
-
-    expect(search("orange", searchEngine, candidates)).toEqual([]);
-    expect(search("trop*", searchEngine, candidates)).toEqual([]);
-
-    searchEngine.add([mango]);
-
-    expect(search("orange", searchEngine, candidates)).toEqual(["mango"]);
-    expect(search("trop*", searchEngine, candidates)).toEqual(["mango"]);
-  });
-
-  test("update drops a doc's now-unreferenced terms from the wildcard resolver", () => {
-    const plum = createDoc("plum", ["red", "tart", "fruit"], { score: 30 });
-    const candidates = [apple, banana, plum];
-    const searchEngine = createEngine(candidates);
-
-    expect(search("tar*", searchEngine, candidates)).toEqual(["plum"]);
-
-    const oldTerms = new Set(plum.tags);
-
-    plum.tags.clear();
-    ["red", "fruit"].forEach(tag => plum.tags.add(tag));
-    searchEngine.update([{ doc: plum, oldTerms, newTerms: plum.tags }]);
-
-    expect(search("tar*", searchEngine, candidates)).toEqual([]);
-    expect(search("red", searchEngine, candidates)).toEqual(["apple", "plum"]);
-  });
-
-  test("update makes a doc's newly introduced terms searchable, including by wildcard", () => {
-    const kiwi = createDoc("kiwi", ["green"]);
-    const candidates = [apple, kiwi];
-    const searchEngine = createEngine(candidates);
-    const oldTerms = new Set(kiwi.tags);
-
-    kiwi.tags.add("fuzzy");
-    searchEngine.update([{ doc: kiwi, oldTerms, newTerms: kiwi.tags }]);
-
-    expect(search("fuzzy", searchEngine, candidates)).toEqual(["kiwi"]);
-    expect(search("fuz*", searchEngine, candidates)).toEqual(["kiwi"]);
-  });
-
-  test("add makes a new doc matchable by metric queries that already ran", () => {
-    const searchEngine = createEngine();
-    const durian = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
-    const candidates = [...docs, durian];
-
-    expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
-    expect(search("width:>height", searchEngine, candidates)).toEqual([]);
-
-    searchEngine.add([durian]);
-
-    expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
-    expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
-  });
-
-  test("index makes new docs matchable by metric queries that already ran", () => {
-    const searchEngine = createEngine();
-    const durian = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
-    const candidates = [...docs, durian];
-
-    expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
-    expect(search("width:>height", searchEngine, candidates)).toEqual([]);
-
-    searchEngine.index([durian]);
-
-    expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
-    expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
-  });
-
-  test("index rebuilds the corpus from a fresh set of docs", () => {
-    const searchEngine = new SetSearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric));
-    const kiwi = createDoc("kiwi", ["green", "fuzzy"]);
-
-    expect(search("green", searchEngine, [kiwi])).toEqual([]);
-
-    searchEngine.index([kiwi]);
-
-    expect(search("green", searchEngine, [kiwi])).toEqual(["kiwi"]);
-    expect(search("fuz*", searchEngine, [kiwi])).toEqual(["kiwi"]);
+      expect(search("green", searchEngine, [kiwi])).toEqual(["kiwi"]);
+      expect(search("fuz*", searchEngine, [kiwi])).toEqual(["kiwi"]);
+    });
   });
 });

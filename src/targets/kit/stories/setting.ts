@@ -30,7 +30,7 @@ function createPreference<T>({ id, initial, log }: { id: string; initial: T; log
 function renderAll(ownerDocument: Document, descriptors: readonly SettingDescriptor[]): HTMLElement {
   const group = ownerDocument.createElement("div");
 
-  group.append(...descriptors.map((descriptor) => createSetting(ownerDocument, { descriptor, size: "small", scheduler: SCHEDULER }).element));
+  group.append(...descriptors.map(descriptor => createSetting(ownerDocument, { descriptor, size: "small", scheduler: SCHEDULER }).element));
   return group;
 }
 

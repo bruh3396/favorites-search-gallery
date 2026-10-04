@@ -45,7 +45,7 @@ function renderStory(story: Story, log: (message: string) => void): HTMLElement 
   const section = createElement("section", "kit-Story");
   const variants = createElement("ul", "kit-Story-variants");
 
-  variants.append(...story.variants.map((variant) => renderVariant(variant, log)));
+  variants.append(...story.variants.map(variant => renderVariant(variant, log)));
   section.append(createElement("h2", "kit-Story-title", story.title), variants);
   return section;
 }
@@ -61,7 +61,7 @@ const FONTS = [
 function renderSchemeToggle(app: HTMLElement): HTMLElement {
   const item = createElement("label", "kit-Toolbar-item", "Dark");
   const scheme = createSwitch(document, {
-    onValueChange: (dark) => {
+    onValueChange: dark => {
       app.style.colorScheme = dark ? "dark" : "light";
       scheme.setValue(dark);
     }
@@ -77,7 +77,7 @@ function renderFontPicker(app: HTMLElement): HTMLElement {
   const font = createSegmented<string>(document, {
     options: FONTS,
     size: "small",
-    onValueChange: (family) => {
+    onValueChange: family => {
       app.style.setProperty("--fsg-font-family", family);
       font.setValue(family);
     }
@@ -107,7 +107,7 @@ function main(): void {
   };
 
   shadowRoot.adoptedStyleSheets = [createStyleSheet(UI_CSS), createStyleSheet(KIT_CSS)];
-  stories.append(...STORIES.map((story) => renderStory(story, log)));
+  stories.append(...STORIES.map(story => renderStory(story, log)));
   app.append(renderToolbar(app), stories, logOutput);
   shadowRoot.append(app);
 }

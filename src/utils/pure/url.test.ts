@@ -2,27 +2,27 @@ import { describe, expect, test } from "vitest";
 import { hasQueryParams, isUrl, readQueryParam, withHostname, withNoQueryParams, withoutQueryParam } from "@/utils/pure/url";
 
 describe("isUrl", () => {
-  test("https url", () => {
+  test("accepts an https url", () => {
     expect(isUrl("https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg")).toBe(true);
   });
 
-  test("http url", () => {
+  test("accepts an http url", () => {
     expect(isUrl("http://x.com/p")).toBe(true);
   });
 
-  test("url on a different host", () => {
+  test("accepts a url on a different host", () => {
     expect(isUrl("https://api-cdn.rule34.xxx/thumbnails/1227/thumbnail_a34f3df084d16d51bbd0f5c06c68279f.jpg")).toBe(true);
   });
 
-  test("compressed preview source is not a url", () => {
+  test("rejects a compressed preview source", () => {
     expect(isUrl("0123_123456abcde09")).toBe(false);
   });
 
-  test("empty string is not a url", () => {
+  test("rejects an empty string", () => {
     expect(isUrl("")).toBe(false);
   });
 
-  test("non-http scheme is not a url", () => {
+  test("rejects a non-http scheme", () => {
     expect(isUrl("ftp://x.com/p")).toBe(false);
   });
 });
@@ -30,31 +30,31 @@ describe("isUrl", () => {
 describe("readQueryParam", () => {
   const url = "https://rule34.xxx/index.php?page=favorites&s=view&id=12345&pid=42";
 
-  test("first param after ?", () => {
+  test("reads the first param after ?", () => {
     expect(readQueryParam(url, "page")).toBe("favorites");
   });
 
-  test("middle param", () => {
+  test("reads a middle param", () => {
     expect(readQueryParam(url, "id")).toBe("12345");
   });
 
-  test("last param", () => {
+  test("reads the last param", () => {
     expect(readQueryParam(url, "pid")).toBe("42");
   });
 
-  test("missing param", () => {
+  test("returns null for a missing param", () => {
     expect(readQueryParam(url, "missing")).toBeNull();
   });
 
-  test("param name is a substring of another param", () => {
+  test("ignores a param whose name contains the requested one", () => {
     expect(readQueryParam("https://x.com?id=1&pid=2", "id")).toBe("1");
   });
 
-  test("empty value", () => {
+  test("reads an empty value", () => {
     expect(readQueryParam("https://x.com?id=", "id")).toBe("");
   });
 
-  test("no query string", () => {
+  test("returns null without a query string", () => {
     expect(readQueryParam("https://x.com", "id")).toBeNull();
   });
 
@@ -66,19 +66,19 @@ describe("readQueryParam", () => {
 describe("hasQueryParams", () => {
   const url = "https://rule34.xxx/index.php?page=favorites&s=view&id=12345";
 
-  test("all params match", () => {
+  test("returns true when every param matches", () => {
     expect(hasQueryParams(url, { page: "favorites", s: "view" })).toBe(true);
   });
 
-  test("one param has a different value", () => {
+  test("returns false when one param has a different value", () => {
     expect(hasQueryParams(url, { page: "favorites", s: "list" })).toBe(false);
   });
 
-  test("one param is missing", () => {
+  test("returns false when one param is missing", () => {
     expect(hasQueryParams(url, { page: "favorites", tags: "all" })).toBe(false);
   });
 
-  test("empty params always match", () => {
+  test("returns true for no params", () => {
     expect(hasQueryParams("https://x.com", {})).toBe(true);
   });
 
@@ -114,7 +114,7 @@ describe("withoutQueryParam", () => {
     expect(withoutQueryParam("https://x.com/p?id=5", "id")).toBe("https://x.com/p");
   });
 
-  test("missing param leaves url unchanged", () => {
+  test("leaves the url unchanged for a missing param", () => {
     expect(withoutQueryParam("https://x.com/p?id=5", "missing")).toBe("https://x.com/p?id=5");
   });
 
@@ -127,12 +127,12 @@ describe("withoutQueryParam", () => {
   });
 });
 
-describe("withoutNoQueryParams", () => {
+describe("withNoQueryParams", () => {
   test("removes every param", () => {
     expect(withNoQueryParams("https://x.com/p?id=5&pid=2&tag=a")).toBe("https://x.com/p");
   });
 
-  test("url without a query string is unchanged", () => {
+  test("leaves a url without a query string unchanged", () => {
     expect(withNoQueryParams("https://x.com/p")).toBe("https://x.com/p");
   });
 

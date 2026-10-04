@@ -39,21 +39,21 @@ function evaluateIds(query: string): string[] {
   return createEvaluator(corpus).evaluate(parseSearchExpression(query)).map(doc => doc.id).sort();
 }
 
-describe("parseSearchExpression top-level AND", () => {
-  test("an empty query matches the whole corpus", () => {
+describe("parseSearchExpression", () => {
+  test("matches the whole corpus for an empty query", () => {
     expect(evaluateIds("")).toEqual(["1", "2", "3", "4", "5"]);
     expect(evaluateIds("   ")).toEqual(["1", "2", "3", "4", "5"]);
   });
 
-  test("a single term", () => {
+  test("matches a single term", () => {
     expect(evaluateIds("sweet")).toEqual(["1", "3", "5"]);
   });
 
-  test("space-separated terms intersect", () => {
+  test("intersects space-separated terms", () => {
     expect(evaluateIds("red sweet")).toEqual(["1"]);
   });
 
-  test("a negated top-level term subtracts", () => {
+  test("subtracts a negated top-level term", () => {
     expect(evaluateIds("sweet -small")).toEqual(["3"]);
   });
 
@@ -63,86 +63,78 @@ describe("parseSearchExpression top-level AND", () => {
 
     expect(evaluator.evaluate(parseSearchExpression("apple_(red)")).map(d => d.id)).toEqual(["a"]);
   });
-});
 
-describe("parseSearchExpression groups", () => {
-  test("a ~ group is an OR", () => {
+  test("parses a ~ group as an OR", () => {
     expect(evaluateIds("small ( red ~ blue )")).toEqual(["1", "5"]);
   });
 
-  test("a space group is an AND", () => {
+  test("parses a space group as an AND", () => {
     expect(evaluateIds("( red small )")).toEqual(["1"]);
   });
 
-  test("multiple top-level groups intersect", () => {
+  test("intersects multiple top-level groups", () => {
     expect(evaluateIds("( red ~ green ) ( sweet ~ sour )")).toEqual(["1", "2", "3", "4"]);
   });
 
-  test("a negated term inside an OR group", () => {
+  test("parses a negated term inside an OR group", () => {
     expect(evaluateIds("small ( -red ~ sweet )")).toEqual(["1", "4", "5"]);
   });
-});
 
-describe("parseSearchExpression negated groups", () => {
-  test("a negated OR group excludes anything matching either alternative", () => {
+  test("excludes anything matching either alternative of a negated OR group", () => {
     expect(evaluateIds("-( red ~ blue )")).toEqual(["3", "4"]);
   });
 
-  test("a negated AND group excludes only docs matching every member", () => {
+  test("excludes only docs matching every member of a negated AND group", () => {
     expect(evaluateIds("-( red sweet )")).toEqual(["2", "3", "4", "5"]);
   });
 
-  test("a negated group intersects with surrounding terms", () => {
+  test("intersects a negated group with surrounding terms", () => {
     expect(evaluateIds("sweet -( red ~ blue )")).toEqual(["3"]);
   });
 
-  test("a negated group nested inside another group", () => {
+  test("parses a negated group nested inside another group", () => {
     expect(evaluateIds("( sweet ~ -( green ~ blue ) )")).toEqual(["1", "2", "3", "5"]);
   });
 
-  test("a negated single-member group behaves like a negated term", () => {
+  test("parses a negated single-member group like a negated term", () => {
     expect(evaluateIds("-( red )")).toEqual(["3", "4", "5"]);
   });
-});
 
-describe("parseSearchExpression arbitrary nesting", () => {
-  test("an OR group nesting an AND group", () => {
+  test("parses an OR group nesting an AND group", () => {
     expect(evaluateIds("( sweet ~ ( green big ) )")).toEqual(["1", "3", "5"]);
   });
 
-  test("the deeply nested example", () => {
+  test("parses the deeply nested example", () => {
     expect(evaluateIds("small ( sweet ~ ( big ( red ~ green ) ) )")).toEqual(["1", "5"]);
   });
 
-  test("an AND group nesting an OR group", () => {
+  test("parses an AND group nesting an OR group", () => {
     expect(evaluateIds("( small ( red ~ green ) )")).toEqual(["1", "4"]);
   });
-});
 
-describe("parseSearchExpression rejects malformed input", () => {
-  test("a naked top-level ~", () => {
+  test("rejects a naked top-level ~", () => {
     expect(() => parseSearchExpression("red ~ blue")).toThrow(/'~' outside a group/);
   });
 
-  test("an unclosed group", () => {
+  test("rejects an unclosed group", () => {
     expect(() => parseSearchExpression("( red")).toThrow(/unclosed '\('/);
     expect(() => parseSearchExpression("( red ~ ( blue )")).toThrow(/unclosed '\('/);
   });
 
-  test("an unmatched close paren", () => {
+  test("rejects an unmatched close paren", () => {
     expect(() => parseSearchExpression("red )")).toThrow(/unmatched '\)'/);
   });
 
-  test("an empty group", () => {
+  test("rejects an empty group", () => {
     expect(() => parseSearchExpression("( )")).toThrow(/empty group/);
   });
 
-  test("mixing ~ and AND in one group", () => {
+  test("rejects mixing ~ and AND in one group", () => {
     expect(() => parseSearchExpression("( a ~ b c )")).toThrow(/mixed '~' and AND/);
     expect(() => parseSearchExpression("( a b ~ c )")).toThrow(/mixed '~' and AND/);
   });
 
-  test("a leading ~ inside a group", () => {
+  test("rejects a leading ~ inside a group", () => {
     expect(() => parseSearchExpression("( ~ red )")).toThrow(/no left-hand alternative/);
   });
 });

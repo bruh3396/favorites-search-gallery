@@ -11,6 +11,7 @@ import { FrozenCobaltRemoteTagCategories } from "@/adapters/frozen_cobalt/ports/
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
+import { IndexedDbLocalSnippets } from "@/adapters/indexed_db/ports/local_snippets/local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
 import { Media } from "@/core/domain/media/media";
 import { Ports } from "@/core/boundary/ports/ports";
@@ -54,7 +55,7 @@ function main(): void {
     },
     { scheduler, fetch: boundFetch }
   );
-  const indexedDbClient = new IndexedDbClient("rule34");
+  const indexedDbClient = new IndexedDbClient();
   const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34: rule34Client, page: new BrowserHostPage() });
 
   const ports: Ports = {
@@ -73,6 +74,7 @@ function main(): void {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDbClient),
     localKeyedValues: new BrowserLocalKeyedValues(),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     randomSource,
     scheduler

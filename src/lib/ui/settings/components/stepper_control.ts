@@ -68,10 +68,10 @@ export function buildStepper(config: StepperConfig): Stepper {
     render();
   };
 
-  display.addEventListener("click", (event) => {
+  display.addEventListener("click", event => {
     event.stopPropagation();
   });
-  display.addEventListener("keydown", (event) => {
+  display.addEventListener("keydown", event => {
     if (event.key === "Enter") {
       display.blur();
     }
@@ -130,7 +130,7 @@ function bindHold(button: HTMLButtonElement, step: () => void): void {
     timer = window.setTimeout(repeat, interval);
   };
 
-  button.addEventListener("pointerdown", (event) => {
+  button.addEventListener("pointerdown", event => {
     if (event.button !== 0) {
       return;
     }

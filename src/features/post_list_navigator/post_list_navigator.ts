@@ -51,18 +51,18 @@ async function start(components: PostListNavigatorComponents): Promise<void> {
 function setupFavoriteIndicator({ context, flows }: PostListNavigatorComponents): void {
   const { events, preferences } = context;
 
-  events.postList.pageChanged.on((thumbs) => flows.favoritesMarker.markExistingFavoritesIfEnabled(thumbs));
-  events.postList.moreResultsAdded.on((thumbs) => flows.favoritesMarker.markExistingFavoritesIfEnabled(thumbs));
-  events.app.favoriteAdded.on((id) => flows.favoritesMarker.registerFavorite(id));
-  preferences.postList.favoriteIndicator.on((enabled) => flows.option.toggleFavoriteIndicator(enabled));
+  events.postList.pageChanged.on(thumbs => flows.favoritesMarker.markExistingFavoritesIfEnabled(thumbs));
+  events.postList.moreResultsAdded.on(thumbs => flows.favoritesMarker.markExistingFavoritesIfEnabled(thumbs));
+  events.app.favoriteAdded.on(id => flows.favoritesMarker.registerFavorite(id));
+  preferences.postList.favoriteIndicator.on(enabled => flows.option.toggleFavoriteIndicator(enabled));
 }
 
 function subscribeToEvents({ context, view, flows }: PostListNavigatorComponents): void {
   const { events, preferences, domEvents } = context;
 
-  preferences.postList.layout.on((layout) => view.changeLayout(layout));
-  preferences.postList.infiniteScroll.on((value) => flows.option.toggleInfiniteScroll(value));
-  domEvents.document.click.on((event) => flows.postAction.triggerPostAction(event));
+  preferences.postList.layout.on(layout => view.changeLayout(layout));
+  preferences.postList.infiniteScroll.on(value => flows.option.toggleInfiniteScroll(value));
+  domEvents.document.click.on(event => flows.postAction.triggerPostAction(event));
   events.app.favoriteAdded.on(markActionBarFavorited);
   events.app.favoriteRemoved.on(markActionBarUnfavorited);
 }
@@ -71,9 +71,9 @@ function serveExternalRequests({ context, model, view, flows }: PostListNavigato
   const { featureBridge, preferences } = context;
 
   featureBridge.postList.searchQuery.serve(() => view.currentSearch());
-  featureBridge.postList.navigateToAdjacent.serve((direction) => flows.navigation.navigatePostLists(direction));
+  featureBridge.postList.navigateToAdjacent.serve(direction => flows.navigation.navigatePostLists(direction));
   featureBridge.postList.posts.serve(() => model.allPosts());
-  featureBridge.postList.post.serve((id) => model.getPost(id));
+  featureBridge.postList.post.serve(id => model.getPost(id));
   featureBridge.postList.usingInfiniteScroll.serve(() => preferences.postList.infiniteScroll.value);
   featureBridge.postList.layout.serve(() => view.getLayout());
 }

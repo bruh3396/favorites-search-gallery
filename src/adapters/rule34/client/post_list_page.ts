@@ -38,7 +38,7 @@ export function postListPageIndex(offset: number): number {
 
 export function parsePostListPage(page: ParentNode, mintMedia: Rule34MintMedia): Rule34PostListPage {
   return {
-    posts: Array.from(page.querySelectorAll<HTMLElement>(".thumb")).map(thumb => parseThumb(thumb, mintMedia)),
+    posts: [...page.querySelectorAll<HTMLElement>(".thumb")].map(thumb => parseThumb(thumb, mintMedia)),
     paginator: page.querySelector<HTMLElement>("#paginator")
   };
 }

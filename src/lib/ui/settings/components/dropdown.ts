@@ -55,7 +55,7 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
     menu.appendChild(optionButton);
   }
 
-  button.addEventListener("click", (event) => {
+  button.addEventListener("click", event => {
     event.stopPropagation();
     toggleOpen();
   });
@@ -64,14 +64,14 @@ export function buildDropdownRow<T extends string>(config: Partial<SelectSetting
 
   const row = controlRow(config, dropdown);
 
-  row.addEventListener("click", (event) => {
+  row.addEventListener("click", event => {
     if (config.enabled === false || dropdown.contains(event.target as Node)) {
       return;
     }
     toggleOpen();
   });
 
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", event => {
     if (!row.contains(event.target as Node)) {
       close();
     }

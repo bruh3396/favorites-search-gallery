@@ -25,7 +25,7 @@ function createRow(name: string, action: SnippetAction | null, buttons: SnippetA
   const row = document.createElement("div");
 
   row.dataset.snippetName = name;
-  row.append(...buttons.map((buttonAction) => {
+  row.append(...buttons.map(buttonAction => {
     const button = document.createElement("button");
 
     button.dataset.snippetAction = buttonAction;
@@ -68,8 +68,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("list", () => {
-  test("clicking a row uses its snippet", () => {
+describe("SnippetControl", () => {
+  test("uses a row's snippet when the row is clicked", () => {
     const { shell, calls } = setup();
 
     queryRow(shell, "fruits").click();
@@ -82,31 +82,29 @@ describe("list", () => {
     ["fruits", "requestDelete", "requestDelete:fruits"],
     ["veg", "cancelDelete", "cancelDelete"],
     ["veg", "delete", "delete:veg"]
-  ])("clicking %s's %s button fires only %s", (name, action, call) => {
+  ])("answers a click on %s's %s button with only %s", (name, action, call) => {
     const { shell, calls } = setup();
 
     queryButton(shell, name, action).click();
     expect(calls).toEqual([call]);
   });
 
-  test("clicking inside a button fires the button, not the row", () => {
+  test("fires the button, not the row, on a click inside the button", () => {
     const { shell, calls } = setup();
 
     (queryButton(shell, "fruits", "edit").firstElementChild as HTMLElement).click();
     expect(calls).toEqual(["edit:fruits"]);
   });
 
-  test("clicking an untagged part of the list does nothing", () => {
+  test("ignores a click on an untagged part of the list", () => {
     const { shell, calls } = setup();
 
     queryRow(shell, "veg").click();
     shell.list.click();
     expect(calls).toEqual([]);
   });
-});
 
-describe("editor", () => {
-  test("save sends the fields' name and query", () => {
+  test("saves the fields' name and query when save is clicked", () => {
     const { shell, calls } = setup();
 
     shell.nameField.value = "fruits";
@@ -115,21 +113,21 @@ describe("editor", () => {
     expect(calls).toEqual(["save:fruits:apple"]);
   });
 
-  test("results asks for a query from the search results", () => {
+  test("asks for a query from the search results when results is clicked", () => {
     const { shell, calls } = setup();
 
     shell.resultsButton.click();
     expect(calls).toEqual(["fillQueryFromResults"]);
   });
 
-  test("cancel asks to cancel the edit", () => {
+  test("asks to cancel the edit when cancel is clicked", () => {
     const { shell, calls } = setup();
 
     shell.cancelButton.click();
     expect(calls).toEqual(["cancelEdit"]);
   });
 
-  test("typing a name lowercases and underscores it", () => {
+  test("lowercases and underscores a typed name", () => {
     const { shell, calls } = setup();
 
     type(shell.nameField, "My Fruits");
@@ -137,63 +135,59 @@ describe("editor", () => {
     expect(calls).toEqual(["clearFailure"]);
   });
 
-  test("typing an already clean name keeps it", () => {
+  test("keeps a typed name that is already clean", () => {
     const { shell } = setup();
 
     type(shell.nameField, "fruits");
     expect(shell.nameField.value).toBe("fruits");
   });
 
-  test("typing a query reports the input", () => {
+  test("reports a typed query", () => {
     const { shell, calls } = setup();
 
     type(shell.queryField, "apple");
     expect(calls).toEqual(["clearFailure"]);
   });
 
-  test.each(["nameField", "queryField"] as const)("escape in %s consumes the key when an edit was cancelled", (field) => {
+  test.each(["nameField", "queryField"] as const)("consumes Escape in %s when it cancels an edit", field => {
     const { shell, calls } = setup(true);
 
     expect(press(shell[field], "Escape").defaultPrevented).toBe(true);
     expect(calls).toEqual(["cancelEdit"]);
   });
 
-  test("escape passes through when nothing was being edited", () => {
+  test("passes Escape through when nothing was being edited", () => {
     const { shell, calls } = setup(false);
 
     expect(press(shell.nameField, "Escape").defaultPrevented).toBe(false);
     expect(calls).toEqual(["cancelEdit"]);
   });
 
-  test("other keys do nothing", () => {
+  test("ignores other keys in the editor", () => {
     const { shell, calls } = setup(true);
 
     expect(press(shell.nameField, "Enter").defaultPrevented).toBe(false);
     expect(calls).toEqual([]);
   });
-});
 
-describe("filter", () => {
   test("reports what is typed into the filter", () => {
     const { shell, calls } = setup();
 
     type(shell.filter.querySelector("input") as HTMLInputElement, "fru");
     expect(calls).toEqual(["filter:fru"]);
   });
-});
 
-describe("actions", () => {
   test.each([
     [1, "exportToFile"],
     [2, "deleteAll"]
-  ])("action %i fires %s", (index, call) => {
+  ])("makes action %i fire %s", (index, call) => {
     const { control, calls } = setup();
 
     control.actions[index].click();
     expect(calls).toEqual([call]);
   });
 
-  test("import sends the chosen file's contents", async() => {
+  test("imports the chosen file's contents from the import action", async() => {
     const { control, calls } = setup();
     const spy = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(function choose(this: HTMLInputElement): void {
       Object.defineProperty(this, "files", { value: [new File(["[]"], "snippets.json")] });

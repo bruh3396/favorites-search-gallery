@@ -6,7 +6,7 @@ export function setTooltipsEnabled(enabled: boolean): void {
   toggleDataset(document.documentElement, "tooltips", enabled);
 }
 
-export function addTooltip(element: HTMLElement, text: string, position: TooltipPosition = "above", caret: boolean = true): void {
+export function addTooltip(element: HTMLElement, text: string, position: TooltipPosition = "above"): void {
   if (text === "") {
     delete element.dataset.tooltip;
     delete element.dataset.tooltipPos;
@@ -15,5 +15,5 @@ export function addTooltip(element: HTMLElement, text: string, position: Tooltip
   }
   element.dataset.tooltip = text;
   element.dataset.tooltipPos = position;
-  toggleDataset(element, "tooltipCaret", caret);
+  toggleDataset(element, "tooltipCaret", true);
 }

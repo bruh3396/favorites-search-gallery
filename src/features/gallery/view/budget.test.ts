@@ -1,10 +1,16 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { GALLERY_BUDGETS } from "@/features/gallery/view/budget";
 import { PostMedia } from "@/core/domain/post/post";
 
 const ITEMS = [{ id: "1" }] as PostMedia[];
 
-function createTargets(): { canvas: { clear: () => void }; warm: { cacheImages: () => Promise<void>; upscale: () => Promise<void> }; follow: { scrollToThumb: () => void } } {
+interface Targets {
+  canvas: { clear: () => void };
+  warm: { cacheImages: () => Promise<void>; upscale: () => Promise<void> };
+  follow: { scrollToThumb: () => void };
+}
+
+function createTargets(): Targets {
   return {
     canvas: { clear: vi.fn() },
     warm: { cacheImages: vi.fn(() => Promise.resolve()), upscale: vi.fn(() => Promise.resolve()) },
@@ -13,7 +19,7 @@ function createTargets(): { canvas: { clear: () => void }; warm: { cacheImages: 
 }
 
 describe("GALLERY_BUDGETS", () => {
-  it("keeps the canvas, preloads full images, and follows in content on a full budget", async() => {
+  test("keeps the canvas, preloads full images, and follows in content on a full budget", async() => {
     const targets = createTargets();
     const budget = GALLERY_BUDGETS.full;
 
@@ -27,7 +33,7 @@ describe("GALLERY_BUDGETS", () => {
     expect(targets.follow.scrollToThumb).toHaveBeenCalledWith("1");
   });
 
-  it("clears the canvas, only upscales thumbs, and stays put on a reduced budget", async() => {
+  test("clears the canvas, only upscales thumbs, and stays put on a reduced budget", async() => {
     const targets = createTargets();
     const budget = GALLERY_BUDGETS.reduced;
 
@@ -41,7 +47,7 @@ describe("GALLERY_BUDGETS", () => {
     expect(targets.follow.scrollToThumb).not.toHaveBeenCalled();
   });
 
-  it("paints upscaled thumbs smaller and slower on a reduced budget", () => {
+  test("paints upscaled thumbs smaller and slower on a reduced budget", () => {
     const { full, reduced } = GALLERY_BUDGETS;
 
     expect(reduced.upscale.canvasWidth).toBeLessThan(full.upscale.canvasWidth);

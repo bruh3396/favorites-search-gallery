@@ -51,7 +51,7 @@ describe("FavoritesChangelog", () => {
     expect(older.every(Boolean)).toBe(true);
   });
 
-  test("collapse all collapses every release, then expands them all", () => {
+  test("collapses every release on collapse all, then expands them all", () => {
     const { sections, collapseAll } = setup();
 
     collapseAll.click();
@@ -60,7 +60,7 @@ describe("FavoritesChangelog", () => {
     expect(readCollapsedStates(sections).some(Boolean)).toBe(false);
   });
 
-  test("collapse all tracks releases opened and closed by hand", () => {
+  test("tracks releases opened and closed by hand in collapse all", () => {
     const { sections, collapseAll } = setup();
 
     toggle(sections[0]);

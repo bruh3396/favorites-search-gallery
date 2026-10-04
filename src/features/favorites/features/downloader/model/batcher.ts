@@ -1,4 +1,4 @@
-import { Archiver, DownloaderProgress, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
+import { Archiver, DownloadOptions, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
 import { DownloaderConfig } from "@/config/downloader_config";
 import { PostMedia } from "@/core/domain/post/post";
 import { chunk } from "@/utils/pure/array";
@@ -12,7 +12,7 @@ export class DownloaderBatcher {
     this.saveBlob = saveBlob;
   }
 
-  public async download(items: PostMedia[], batchSize: number, signal: AbortSignal, onProgress: (progress: DownloaderProgress) => void): Promise<DownloaderResult> {
+  public async download(items: PostMedia[], { batchSize, signal, onProgress }: DownloadOptions): Promise<DownloaderResult> {
     const batches = chunk(items, batchSize);
     const result: DownloaderResult = { successCount: 0, failureCount: 0, aborted: false };
 
@@ -21,7 +21,7 @@ export class DownloaderBatcher {
         break;
       }
 
-      const blob = await this.archiver.archive(batch, signal, (filename) => {
+      const blob = await this.archiver.archive(batch, signal, filename => {
         if (filename === null) {
           result.failureCount += 1;
         } else {

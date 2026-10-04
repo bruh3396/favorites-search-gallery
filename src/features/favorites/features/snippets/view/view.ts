@@ -1,6 +1,7 @@
 import * as SnippetComponents from "@/features/favorites/features/snippets/view/components";
-import { Snippet, SnippetScene } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetEditor } from "@/features/favorites/features/snippets/view/editor";
+import { SnippetScene } from "@/features/favorites/features/snippets/types/types";
 import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
 
 export class SnippetView {

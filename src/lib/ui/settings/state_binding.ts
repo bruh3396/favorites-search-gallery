@@ -35,7 +35,7 @@ export class StateBinding<T> {
   }
 
   private initialize(): void {
-    this.preference?.on((next) => {
+    this.preference?.on(next => {
       if (next !== this.currentValue) {
         this.currentValue = next;
         this.rerender();

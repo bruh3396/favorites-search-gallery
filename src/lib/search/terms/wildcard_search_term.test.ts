@@ -5,27 +5,27 @@ import { prefixesOf, substringsOf } from "@/lib/search/testing/string";
 import { parseWildcardSearchTerm } from "@/lib/search/parsers/search_term_parser";
 
 describe("WildcardSearchTerm", () => {
-  test("empty", () => {
+  test("rejects a doc with no tags", () => {
     expect(parseWildcardSearchTerm("*").matches(searchableEmptyDoc)).toBe(false);
   });
 
-  test("empty negated", () => {
+  test("matches a doc with no tags when negated", () => {
     expect(parseWildcardSearchTerm("-*").matches(searchableEmptyDoc)).toBe(true);
   });
 
-  test("one tag", () => {
+  test("matches a doc with one tag", () => {
     expect(parseWildcardSearchTerm("*").matches(createSearchable(["apple"]))).toBe(true);
   });
 
-  test("match all", () => {
+  test("matches every doc with tags through *", () => {
     expect(parseWildcardSearchTerm("*").matches(searchableFruitDoc)).toBe(true);
   });
 
-  test("match none", () => {
+  test("matches no doc with tags through -*", () => {
     expect(parseWildcardSearchTerm("-*").matches(searchableFruitDoc)).toBe(false);
   });
 
-  test("matches prefix", () => {
+  test("matches every prefix", () => {
     for (const fruit of fruits) {
       for (const prefix of prefixesOf(fruit)) {
         expect(parseWildcardSearchTerm(`${prefix}*`).matches(searchableFruitDoc)).toBe(true);
@@ -33,7 +33,7 @@ describe("WildcardSearchTerm", () => {
     }
   });
 
-  test("matches double asterisk", () => {
+  test("matches every substring between asterisks", () => {
     for (const fruit of fruits) {
       for (const substring of substringsOf(fruit)) {
         expect(parseWildcardSearchTerm(`*${substring}*`).matches(searchableFruitDoc)).toBe(true);
@@ -44,13 +44,13 @@ describe("WildcardSearchTerm", () => {
     }
   });
 
-  test("matches inside", () => {
+  test("matches asterisks inside a tag", () => {
     expect(parseWildcardSearchTerm("*b*na*").matches(searchableFruitDoc)).toBe(true);
     expect(parseWildcardSearchTerm("*b*a*").matches(searchableFruitDoc)).toBe(true);
     expect(parseWildcardSearchTerm("*bna*").matches(searchableFruitDoc)).toBe(false);
   });
 
-  test("compare cost", () => {
+  test("ranks cost by pattern shape", () => {
     const startsWithTerm = parseWildcardSearchTerm("banana*");
     const endsWithTerm = parseWildcardSearchTerm("*banana");
     const substringTerm = parseWildcardSearchTerm("*bana*");

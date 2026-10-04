@@ -35,7 +35,7 @@ export function buildMultiSegmentedRow<T extends number>(config: Partial<MultiSe
     group.appendChild(button);
   }
 
-  const binding = new StateBinding(config, 0 as T, (value) => {
+  const binding = new StateBinding(config, 0 as T, value => {
     for (const [bit, button] of buttons) {
       const isSelected = (value & bit) === bit;
 

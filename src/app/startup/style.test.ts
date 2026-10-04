@@ -30,7 +30,7 @@ describe("setupStyles", () => {
     expect(hostPage.colorScheme).toBe("light");
   });
 
-  test("the theme follows its color scheme", async() => {
+  test("makes the theme follow its color scheme", async() => {
     const context = createAppContext({ shell: new Shell() });
 
     setupStyles(context);
@@ -40,7 +40,7 @@ describe("setupStyles", () => {
     await vi.waitFor(() => expect(document.documentElement.dataset.theme).not.toMatch(/-dark$/));
   });
 
-  test("hints start as their preference says, then follow it", () => {
+  test("shows hints as their preference says, then follows it", () => {
     const context = createAppContext({ shell: new Shell(), preferences: { favorites: { hintsEnabled: true } } });
 
     setupStyles(context);

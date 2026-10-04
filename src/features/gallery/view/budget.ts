@@ -11,7 +11,7 @@ const FULL_BUDGET: GalleryBudget = {
 
 const REDUCED_BUDGET: GalleryBudget = {
   upscale: { paintDelay: 100, canvasWidth: 500 },
-  releaseCanvas: (canvas) => canvas.clear(),
+  releaseCanvas: canvas => canvas.clear(),
   warm: (target, items) => target.upscale(items),
   follow: doNothing
 };

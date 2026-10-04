@@ -25,6 +25,10 @@ const wildcardTerms = [
   "*pp*e*"
 ];
 
+function parseMatchType(term: string): WildcardMatchType {
+  return parseWildcardSearchTerm(term).matchType;
+}
+
 describe("isWildcardTerm", () => {
   test("distinguishes wildcard terms from normal terms", () => {
     expect(normalTerms.every(term => !isWildcardTerm(term))).toBe(true);
@@ -33,12 +37,12 @@ describe("isWildcardTerm", () => {
 });
 
 describe("isMetricTerm", () => {
-  test("normal and wildcard terms are not metric terms", () => {
+  test("rejects normal and wildcard terms", () => {
     expect(normalTerms.every(term => !isMetricTerm(term))).toBe(true);
     expect(wildcardTerms.every(term => !isMetricTerm(term))).toBe(true);
   });
 
-  test("every metric and comparator", () => {
+  test("accepts every metric and comparator, and nothing else around them", () => {
     for (const metric of ["width", "height", "id", "score", "duration"]) {
       for (const comparator of [":", ":<", ":>"]) {
         expect(isMetricTerm(`${metric}${comparator}0`)).toBe(true);
@@ -51,11 +55,11 @@ describe("isMetricTerm", () => {
 });
 
 describe("isNumericTerm", () => {
-  test("bare numerics, negated or not, are numeric terms", () => {
+  test("accepts bare numerics, negated or not", () => {
     expect(["0", "7", "200", "-200"].every(term => isNumericTerm(term))).toBe(true);
   });
 
-  test("non-numerics are not numeric terms", () => {
+  test("rejects non-numerics", () => {
     expect(["", "-", "a12345", "100cal", "200*", "id:200", "mango"].every(term => !isNumericTerm(term))).toBe(true);
   });
 });
@@ -66,12 +70,12 @@ describe("parseSearchTerm", () => {
     expect(normalTerms.every(term => parseSearchTerm(term) instanceof ExactSearchTerm)).toBe(true);
   });
 
-  test("a bare numeric is a numeric term", () => {
+  test("parses a bare numeric as a numeric term", () => {
     expect(parseSearchTerm("200")).toBeInstanceOf(NumericSearchTerm);
     expect(parseSearchTerm("-200")).toBeInstanceOf(NumericSearchTerm);
   });
 
-  test("an explicit id metric stays a metric term and does not expand to the tag", () => {
+  test("keeps an explicit id metric a metric term, without expanding it to the tag", () => {
     const term = parseSearchTerm("id:200");
 
     expect(term).toBeInstanceOf(MetricSearchTerm);
@@ -79,27 +83,23 @@ describe("parseSearchTerm", () => {
   });
 });
 
-describe("wildcard match type", () => {
-  function parseMatchType(term: string): WildcardMatchType {
-    return parseWildcardSearchTerm(term).matchType;
-  }
-
-  test("a single trailing star is a prefix match", () => {
+describe("parseWildcardSearchTerm", () => {
+  test("classifies a single trailing star as a prefix match", () => {
     expect(parseMatchType("mango*")).toBe(WildcardMatchType.Prefix);
     expect(parseMatchType("m*")).toBe(WildcardMatchType.Prefix);
   });
 
-  test("a single leading star is a suffix match", () => {
+  test("classifies a single leading star as a suffix match", () => {
     expect(parseMatchType("*mango")).toBe(WildcardMatchType.Suffix);
     expect(parseMatchType("*o")).toBe(WildcardMatchType.Suffix);
   });
 
-  test("a leading and trailing star is a substring match", () => {
+  test("classifies a leading and trailing star as a substring match", () => {
     expect(parseMatchType("*mango*")).toBe(WildcardMatchType.Substring);
     expect(parseMatchType("*a*")).toBe(WildcardMatchType.Substring);
   });
 
-  test("internal stars are a multi star match", () => {
+  test("classifies internal stars as a multi star match", () => {
     expect(parseMatchType("man*go")).toBe(WildcardMatchType.MultiStar);
     expect(parseMatchType("*an*ngo")).toBe(WildcardMatchType.MultiStar);
     expect(parseMatchType("ch*r*")).toBe(WildcardMatchType.MultiStar);
@@ -113,13 +113,11 @@ describe("wildcard match type", () => {
     expect(parseMatchType("**mango**")).toBe(WildcardMatchType.Substring);
   });
 
-  test("a bare star is a prefix match on the empty prefix", () => {
+  test("classifies a bare star as a prefix match on the empty prefix", () => {
     expect(parseMatchType("*")).toBe(WildcardMatchType.Prefix);
   });
-});
 
-describe("wildcard regex", () => {
-  test("a pattern that is not a valid regex matches nothing", () => {
+  test("matches nothing for a pattern that is not a valid regex", () => {
     const term = parseWildcardSearchTerm("*[");
 
     expect(term.matches({ tags: new Set(["[", "a["]) })).toBe(false);

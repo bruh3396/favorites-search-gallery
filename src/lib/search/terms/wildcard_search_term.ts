@@ -15,6 +15,11 @@ export interface WildcardResolutionInputs {
   regex: RegExp;
 }
 
+export interface WildcardPattern {
+  matchType: WildcardMatchType;
+  regex: RegExp;
+}
+
 export class WildcardSearchTerm extends AbstractSearchTerm {
   public readonly matchType: WildcardMatchType;
   protected override readonly baseCost: number;
@@ -22,7 +27,7 @@ export class WildcardSearchTerm extends AbstractSearchTerm {
   private readonly prefix: string;
   private readonly substring: string;
 
-  constructor(value: string, isNegated: boolean, matchType: WildcardMatchType, regex: RegExp) {
+  constructor(value: string, isNegated: boolean, { matchType, regex }: WildcardPattern) {
     super(value, isNegated);
     this.baseCost = matchType;
     this.matchType = matchType;

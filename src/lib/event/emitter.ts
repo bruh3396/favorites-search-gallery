@@ -16,7 +16,7 @@ export class Emitter<V> {
   }
 
   public once(listener: Listener<V>): () => void {
-    const off = this.on((value) => {
+    const off = this.on(value => {
       off();
       listener(value);
     });

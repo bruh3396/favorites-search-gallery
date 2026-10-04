@@ -32,7 +32,7 @@ class VisibleThumbObserver {
   }
 
   public getVisible(): HTMLElement[] {
-    const entries = Array.from(this.visibleThumbs.values());
+    const entries = [...this.visibleThumbs.values()];
     return this.sortByDistanceFromCenter(entries)
       .map(entry => entry.target)
       .filter((target): target is HTMLElement => target instanceof HTMLElement);

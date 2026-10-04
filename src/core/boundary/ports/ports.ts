@@ -2,6 +2,7 @@ import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
+import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
@@ -19,6 +20,7 @@ export interface Ports {
   localFavorites: LocalFavorites;
   localKeyedValues: LocalKeyedValues;
   localPosts: LocalPosts;
+  localSnippets: LocalSnippets;
   localTagCategories: LocalTagCategories;
   navigator: Navigator;
   randomSource: RandomSource;

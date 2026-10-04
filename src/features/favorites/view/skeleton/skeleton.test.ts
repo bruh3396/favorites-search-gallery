@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { Layout } from "@/types/app";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
@@ -15,8 +15,10 @@ function createThumb(width: number, height: number): HTMLElement {
   return thumb;
 }
 
-function createSkeleton(layout: Layout): FavoritesSkeleton {
-  return new FavoritesSkeleton({ layout }, { store, randomSource: new MemoryRandomSource() });
+// Skeletons made by one setup share storage, so a second one is the next visit.
+function setup(): { createSkeleton: (layout: Layout) => FavoritesSkeleton } {
+  const store = new MemoryLocalKeyedValues();
+  return { createSkeleton: (layout: Layout): FavoritesSkeleton => new FavoritesSkeleton({ layout }, { store, randomSource: new MemoryRandomSource() }) };
 }
 
 function captureTiledElements(skeleton: FavoritesSkeleton): HTMLElement[] | undefined {
@@ -26,39 +28,42 @@ function captureTiledElements(skeleton: FavoritesSkeleton): HTMLElement[] | unde
   return tile.mock.calls[0]?.[0];
 }
 
-let store: MemoryLocalKeyedValues;
-
 describe("FavoritesSkeleton", () => {
-  beforeEach(() => {
-    store = new MemoryLocalKeyedValues();
+  describe("show", () => {
+    test("tiles the default number of placeholders", () => {
+      const { createSkeleton } = setup();
+
+      expect(captureTiledElements(createSkeleton("grid"))).toHaveLength(SkeletonConfig.defaultItemCount);
+    });
+
+    test("tiles every placeholder in the layout", () => {
+      const { createSkeleton } = setup();
+      const layouts = new Set(captureTiledElements(createSkeleton("row"))?.map(element => element.dataset.layout));
+
+      expect(layouts).toEqual(new Set(["row"]));
+    });
   });
 
-  test("tiles the default number of placeholders", () => {
-    expect(captureTiledElements(createSkeleton("grid"))).toHaveLength(SkeletonConfig.defaultItemCount);
-  });
+  describe("collectAspectRatios", () => {
+    test("stops showing and shapes the next visit's placeholders after the real thumbs", () => {
+      const { createSkeleton } = setup();
+      const skeleton = createSkeleton("native");
 
-  test("tiles every placeholder in the layout", () => {
-    const layouts = new Set(captureTiledElements(createSkeleton("row"))?.map(element => element.dataset.layout));
+      skeleton.collectAspectRatios([createThumb(120, 240), createThumb(200, 150)]);
+      const next = captureTiledElements(createSkeleton("native"))?.slice(0, 2);
+      const sizes = next?.map(element => [element.style.width, element.style.height]);
 
-    expect(layouts).toEqual(new Set(["row"]));
-  });
+      expect(captureTiledElements(skeleton)).toBeUndefined();
+      expect(sizes).toEqual([["120px", "240px"], ["200px", "150px"]]);
+    });
 
-  test("once real thumbs load, stops showing and shapes the next visit's placeholders after them", () => {
-    const skeleton = createSkeleton("native");
+    test("collects aspect ratios only once", () => {
+      const { createSkeleton } = setup();
+      const skeleton = createSkeleton("native");
 
-    skeleton.collectAspectRatios([createThumb(120, 240), createThumb(200, 150)]);
-    const next = captureTiledElements(createSkeleton("native"))?.slice(0, 2);
-    const sizes = next?.map(element => [element.style.width, element.style.height]);
-
-    expect(captureTiledElements(skeleton)).toBeUndefined();
-    expect(sizes).toEqual([["120px", "240px"], ["200px", "150px"]]);
-  });
-
-  test("collects aspect ratios only once", () => {
-    const skeleton = createSkeleton("native");
-
-    skeleton.collectAspectRatios([createThumb(120, 240)]);
-    skeleton.collectAspectRatios([createThumb(200, 150)]);
-    expect(captureTiledElements(createSkeleton("native"))?.[0].style.width).toBe("120px");
+      skeleton.collectAspectRatios([createThumb(120, 240)]);
+      skeleton.collectAspectRatios([createThumb(200, 150)]);
+      expect(captureTiledElements(createSkeleton("native"))?.[0].style.width).toBe("120px");
+    });
   });
 });

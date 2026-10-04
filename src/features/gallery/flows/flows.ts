@@ -1,14 +1,10 @@
-import { AppContext } from "@/app/context/context";
 import { GalleryActionsFlow } from "@/features/gallery/flows/actions";
-import { GalleryControl } from "@/features/gallery/control/control";
 import { GalleryFlowDependencies } from "@/features/gallery/flows/flow";
 import { GalleryKeyboardFlow } from "@/features/gallery/flows/keyboard";
-import { GalleryModel } from "@/features/gallery/model/model";
 import { GalleryMouseFlow } from "@/features/gallery/flows/mouse";
 import { GalleryNavigationFlow } from "@/features/gallery/flows/navigation";
 import { GalleryThumbsFlow } from "@/features/gallery/flows/thumbs";
 import { GalleryTouchFlow } from "@/features/gallery/flows/touch";
-import { GalleryView } from "@/features/gallery/view/view";
 
 export class GalleryFlows {
   public readonly actions: GalleryActionsFlow;
@@ -18,8 +14,8 @@ export class GalleryFlows {
   public readonly thumbs: GalleryThumbsFlow;
   public readonly touch: GalleryTouchFlow;
 
-  constructor(context: AppContext, model: GalleryModel, view: GalleryView, control: GalleryControl) {
-    const dependencies: GalleryFlowDependencies = { context, model, view, control, flows: this };
+  constructor(layers: Omit<GalleryFlowDependencies, "flows">) {
+    const dependencies: GalleryFlowDependencies = { ...layers, flows: this };
 
     this.actions = new GalleryActionsFlow(dependencies);
     this.keyboard = new GalleryKeyboardFlow(dependencies);

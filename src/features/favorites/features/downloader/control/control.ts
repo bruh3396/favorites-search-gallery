@@ -28,7 +28,7 @@ export class DownloaderControl {
     };
     shell.batchSizeRow.append(batchSizeControl(batchSize));
     shell.filenameFormatRow.append(filenameFormatControl(filenameFormat, filenameOptions));
-    shell.actions.addEventListener("click", (event) => this.onClick(event));
+    shell.actions.addEventListener("click", event => this.onClick(event));
   }
 
   private onClick(event: MouseEvent): void {

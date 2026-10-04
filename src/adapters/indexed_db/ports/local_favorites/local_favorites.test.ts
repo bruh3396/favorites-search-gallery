@@ -1,13 +1,15 @@
 import "fake-indexeddb/auto";
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
+import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 
-let counter = 0;
+beforeEach(() => {
+  globalThis.indexedDB = new IDBFactory();
+});
 
 function createIndexedDb(): IndexedDbClient {
-  counter += 1;
-  return new IndexedDbClient(`local_favorites_test_${counter}`);
+  return new IndexedDbClient();
 }
 
 function createLocalFavorites(ownerId = "1"): IndexedDbLocalFavorites {
@@ -54,7 +56,7 @@ describe("IndexedDbLocalFavorites", () => {
     expect(await favorites.getAll()).toEqual(["4", "2"]);
   });
 
-  test("removing leaves other owners alone", async() => {
+  test("leaves other owners alone when removing", async() => {
     const indexedDb = createIndexedDb();
     const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDb);
     const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDb);
@@ -70,15 +72,6 @@ describe("IndexedDbLocalFavorites", () => {
     const indexedDb = createIndexedDb();
     const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDb);
     const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDb);
-
-    await first.prepend(["1"]);
-
-    expect(await second.getAll()).toEqual([]);
-  });
-
-  test("keeps namespaces apart", async() => {
-    const first = createLocalFavorites();
-    const second = createLocalFavorites();
 
     await first.prepend(["1"]);
 

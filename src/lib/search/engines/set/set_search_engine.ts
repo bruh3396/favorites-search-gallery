@@ -24,7 +24,16 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...searchableMetrics], metricFor);
     this.positionIndex = new PositionIndex<Doc>();
     this.wildcardResolver = new WildcardDocResolver<Doc>(this.termIndex);
-    this.setEvaluator = new SetEvaluator<Doc>(this.termIndex, new DocResolver<Doc>(this.termIndex, this.metricIndex, this.relativeMetricIndex, this.positionIndex, this.wildcardResolver));
+    this.setEvaluator = new SetEvaluator<Doc>(
+      this.termIndex,
+      new DocResolver<Doc>({
+        termIndex: this.termIndex,
+        metricIndex: this.metricIndex,
+        relativeMetricIndex: this.relativeMetricIndex,
+        positionIndex: this.positionIndex,
+        wildcardResolver: this.wildcardResolver
+      })
+    );
     this.index(docs);
   }
 

@@ -22,7 +22,11 @@ describe("TooltipVisibility", () => {
 
   test("reads the setting at call time", () => {
     let isEnabled = false;
-    const tooltip = new TooltipVisibility({ onFavoritesPage: true, favoritesTooltipEnabled: (): boolean => isEnabled, postListTooltipEnabled: (): boolean => false });
+    const tooltip = new TooltipVisibility({
+      onFavoritesPage: true,
+      favoritesTooltipEnabled: (): boolean => isEnabled,
+      postListTooltipEnabled: (): boolean => false
+    });
 
     expect(tooltip.isEnabled()).toBe(false);
     isEnabled = true;

@@ -26,7 +26,7 @@ describe("NamespacedLocalKeyedValues", () => {
     expect(new NamespacedLocalKeyedValues("preferences", store).get("theme")).toBe("dark");
   });
 
-  test.each([null, 3, "text", [1, 2]])("treats a stored value that isn't an object as empty (%s)", (stored) => {
+  test.each([null, 3, "text", [1, 2]])("treats a stored value that isn't an object as empty (%s)", stored => {
     const store = new MemoryLocalKeyedValues();
 
     store.set("preferences", stored);

@@ -48,14 +48,14 @@ describe("FavoritesPagination", () => {
     document.body.replaceChildren();
   });
 
-  test("clicking a page number selects that page", () => {
+  test("selects a page when its number is clicked", () => {
     const { pagination, emitted } = setup();
 
     click(queryButton(pagination, "page", "2"));
     expect(emitted).toEqual(["page 2"]);
   });
 
-  test("clicking an arrow, or the icon inside it, steps in its direction", () => {
+  test("steps in an arrow's direction when it, or the icon inside it, is clicked", () => {
     const { pagination, emitted } = setup();
 
     click(queryButton(pagination, "step", "ArrowRight"));
@@ -63,14 +63,14 @@ describe("FavoritesPagination", () => {
     expect(emitted).toEqual(["step ArrowRight", "step ArrowLeft"]);
   });
 
-  test("clicking the ellipsis toggles the go-to-page prompt", () => {
+  test("toggles the go-to-page prompt when the ellipsis is clicked", () => {
     const { pagination, emitted } = setup();
 
     click(queryButton(pagination, "gotoToggle"));
     expect(emitted).toEqual(["goto toggled"]);
   });
 
-  test("the go button submits the typed page", () => {
+  test("submits the typed page when go is clicked", () => {
     const { pagination, emitted } = setup();
 
     gotoField(pagination).value = "7";
@@ -78,7 +78,7 @@ describe("FavoritesPagination", () => {
     expect(emitted).toEqual(["goto 7"]);
   });
 
-  test("the go button submits the first page when there is no go-to field", () => {
+  test("submits the first page when go is clicked without a go-to field", () => {
     const { pagination, emitted } = setup();
 
     gotoField(pagination).remove();
@@ -86,7 +86,7 @@ describe("FavoritesPagination", () => {
     expect(emitted).toEqual(["goto 1"]);
   });
 
-  test("Enter in the go-to field submits the typed page", () => {
+  test("submits the typed page on Enter in the go-to field", () => {
     const { pagination, emitted } = setup();
     const field = gotoField(pagination);
 

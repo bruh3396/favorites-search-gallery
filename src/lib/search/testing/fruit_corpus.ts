@@ -14,12 +14,12 @@ export const fruits = new Set([
   "pear", "persimmon", "pineapple", "plum", "pomegranate",
   "raspberry", "starfruit", "strawberry", "tangerine", "watermelon"
 ].sort());
-export const searchableFruitDoc = createSearchable(Array.from(fruits));
+export const searchableFruitDoc = createSearchable([...fruits]);
 
 function fruit(name: FruitName, tags: string[], metrics: Partial<Record<SearchableMetric, number>>): Fruit {
   return {
     name,
-    tags: new Set(tags.slice().sort()),
+    tags: new Set([...tags].sort()),
     getMetric: (metric: SearchableMetric): number => metrics[metric] ?? 0
   };
 }
@@ -37,7 +37,7 @@ export const fruitDocs: Fruit[] = [
   fruit("strawberry", ["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"], { score: 35, width: 180, height: 320, id: 909, duration: 320 })
 ];
 export const allDocNames = fruitDocs.map(item => item.name);
-export const allTerms = fruitDocs.flatMap(item => Array.from(item.tags));
+export const allTerms = fruitDocs.flatMap(item => [...item.tags]);
 export const index = new InvertedIndex<Fruit>(f => f.tags);
 
 fruitDocs.forEach(f => index.addDoc(f));

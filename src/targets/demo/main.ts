@@ -7,6 +7,7 @@ import { HostEnvironment } from "@/core/boundary/environment";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
+import { IndexedDbLocalSnippets } from "@/adapters/indexed_db/ports/local_snippets/local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
@@ -52,6 +53,7 @@ function createPorts(
     localFavorites: new IndexedDbLocalFavorites({ ownerId: "demo" }, indexedDbClient),
     localKeyedValues: new BrowserLocalKeyedValues(),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     randomSource: new BrowserRandomSource(),
     scheduler: new BrowserScheduler()
@@ -60,7 +62,7 @@ function createPorts(
 
 function main(): void {
   const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
-  const indexedDbClient = new IndexedDbClient("demo");
+  const indexedDbClient = new IndexedDbClient();
   const hostPage = new BrowserHostPage();
 
   startApp({

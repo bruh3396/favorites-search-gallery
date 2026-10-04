@@ -13,7 +13,7 @@ export class GalleryMainThreadUpscaler extends GalleryAbstractUpscaler {
     if (!(request.bitmap instanceof ImageBitmap) || !(canvas instanceof HTMLCanvasElement)) {
       return;
     }
-    setCanvasDimensions(canvas, request.bitmap.width, request.bitmap.height, this.upscaledCanvasWidth, this.maxUpscaledCanvasHeight);
+    setCanvasDimensions(canvas, request.bitmap, { targetWidth: this.upscaledCanvasWidth, maxHeight: this.maxUpscaledCanvasHeight });
     drawScaledBitmap(canvas.getContext("2d"), request.bitmap);
 
     if (request.isDisposable) {

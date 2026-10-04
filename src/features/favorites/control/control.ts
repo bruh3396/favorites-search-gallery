@@ -27,7 +27,7 @@ export class FavoritesControl {
 
     this.shell = shell;
 
-    FavoritesToolbar.setup(events, environment, preferences, shell.toolbar);
+    FavoritesToolbar.setup({ events, environment, preferences }, shell.toolbar);
     FavoritesDrawer.setup(preferences, shell);
     FavoritesPagination.setup(events, shell.toolbar.pagination);
     this.searchBox = new FavoritesSearchBox(events, shell.toolbar, context.ports.localKeyedValues);

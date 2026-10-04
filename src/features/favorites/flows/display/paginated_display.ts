@@ -1,13 +1,13 @@
 import { ContentDisplayOptions } from "@/types/ui";
 import { Display } from "@/features/favorites/types/types";
-import { Milestone } from "@/core/utils/async/milestone";
 import { Favorite } from "@/types/favorite";
 import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Media } from "@/core/domain/media/media";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { Milestone } from "@/core/utils/async/milestone";
 import { NavigationKey } from "@/types/input";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Shell } from "@/app/context/shell";
 import { preloadImage } from "@/utils/browser/image";
 import { sleep } from "@/lib/async/scheduling";

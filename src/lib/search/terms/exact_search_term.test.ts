@@ -40,27 +40,27 @@ const invalidCases = [
 ] as const;
 
 describe("ExactSearchTerm", () => {
-  test("empty", () => {
+  test("rejects an empty term", () => {
     expect(parseExactSearchTerm("").matches(searchableFruitDoc)).toBe(false);
   });
 
-  test("cost", () => {
+  test("costs less than its negated form", () => {
     expect(parseExactSearchTerm("foo").cost).toBeLessThan(parseExactSearchTerm("-foo").cost);
   });
 
-  test.each(positiveCases)("matches %s", (term, expected) => {
+  test.each(positiveCases)("matches %s against the fruit doc", (term, expected) => {
     expect(parseExactSearchTerm(term).matches(searchableFruitDoc)).toBe(expected);
   });
 
-  test.each(negatedCases)("negated %s", (term, expected) => {
+  test.each(negatedCases)("inverts the match for %s", (term, expected) => {
     expect(parseExactSearchTerm(term).matches(searchableFruitDoc)).toBe(expected);
   });
 
-  test.each(invalidCases)("invalid '%s'", (term, expected) => {
+  test.each(invalidCases)("rejects the invalid term '%s'", (term, expected) => {
     expect(parseExactSearchTerm(term).matches(searchableEmptyDoc)).toBe(expected);
   });
 
-  test("negated matches with empty set", () => {
+  test("matches a doc with no tags when negated", () => {
     expect(parseExactSearchTerm("-banana").matches(searchableEmptyDoc)).toBe(true);
   });
 });

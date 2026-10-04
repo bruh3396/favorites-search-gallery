@@ -14,11 +14,6 @@
       "count": 1
     }
   },
-  "src/adapters/rule34/client/favorite_actions.ts": {
-    "boundaries/dependencies": {
-      "count": 1
-    }
-  },
   "src/adapters/rule34/client/page_rate_limiter.ts": {
     "boundaries/dependencies": {
       "count": 1
@@ -39,7 +34,17 @@
       "count": 4
     }
   },
+  "src/adapters/rule34/ports/remote_favorite_actions/favorite_actions.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
   "src/adapters/rule34/ports/remote_favorites/all_favorites_fetcher.ts": {
+    "boundaries/dependencies": {
+      "count": 1
+    }
+  },
+  "src/adapters/rule34/ports/remote_favorites/removed_favorites_finder.test.ts": {
     "boundaries/dependencies": {
       "count": 1
     }
@@ -51,7 +56,7 @@
   },
   "src/app/layout/content_tiler.ts": {
     "variation/no-restricted-syntax": {
-      "count": 2
+      "count": 4
     }
   },
   "src/app/startup/app.ts": {
@@ -66,7 +71,7 @@
   },
   "src/app/startup/features.ts": {
     "variation/no-restricted-syntax": {
-      "count": 10
+      "count": 13
     }
   },
   "src/app/startup/style.ts": {
@@ -86,7 +91,7 @@
   },
   "src/features/favorites/control/control.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 4
     }
   },
   "src/features/favorites/control/drawer.ts": {
@@ -132,15 +137,10 @@
   },
   "src/features/favorites/control/toolbar/toolbar.ts": {
     "environment/no-restricted-syntax": {
-      "count": 5
+      "count": 7
     },
     "variation/no-restricted-syntax": {
       "count": 6
-    }
-  },
-  "src/features/favorites/favorites.test.ts": {
-    "variation/no-restricted-syntax": {
-      "count": 1
     }
   },
   "src/features/favorites/features/downloader/control/control.ts": {
@@ -165,14 +165,6 @@
   },
   "src/features/favorites/features/snippets/model/store.ts": {
     "outside/no-restricted-properties": {
-      "count": 5
-    }
-  },
-  "src/features/favorites/flows/action.ts": {
-    "environment/no-restricted-syntax": {
-      "count": 1
-    },
-    "variation/no-restricted-syntax": {
       "count": 4
     }
   },
@@ -198,22 +190,22 @@
   },
   "src/features/favorites/model/model.ts": {
     "environment/no-restricted-syntax": {
-      "count": 2
+      "count": 3
     }
   },
   "src/features/favorites/model/search/searcher.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
+      "count": 1
     }
   },
   "src/features/favorites/shell/shell.ts": {
     "environment/no-restricted-syntax": {
-      "count": 3
+      "count": 1
     }
   },
-  "src/features/favorites/shell/toolbar.ts": {
-    "environment/no-restricted-syntax": {
-      "count": 4
+  "src/features/favorites/view/link_suppressor.test.ts": {
+    "boundaries/dependencies": {
+      "count": 1
     }
   },
   "src/features/favorites/view/skeleton/skeleton.ts": {
@@ -244,10 +236,10 @@
   },
   "src/features/gallery/control/menu.ts": {
     "environment/no-restricted-syntax": {
-      "count": 14
+      "count": 10
     },
     "variation/no-restricted-syntax": {
-      "count": 4
+      "count": 2
     }
   },
   "src/features/gallery/control/tap_controls.ts": {
@@ -322,7 +314,7 @@
       "count": 1
     },
     "environment/no-restricted-syntax": {
-      "count": 18
+      "count": 20
     },
     "variation/no-restricted-syntax": {
       "count": 1
@@ -354,13 +346,13 @@
   "src/features/gallery/view/rendering/gallery_renderer.ts": {
     "environment/no-restricted-syntax": {
       "count": 2
+    },
+    "variation/no-restricted-syntax": {
+      "count": 5
     }
   },
   "src/features/gallery/view/rendering/gif/renderer.ts": {
     "environment/no-restricted-syntax": {
-      "count": 4
-    },
-    "variation/no-restricted-syntax": {
       "count": 1
     }
   },
@@ -375,19 +367,6 @@
   "src/features/gallery/view/rendering/image/renderer.ts": {
     "environment/no-restricted-syntax": {
       "count": 19
-    },
-    "variation/no-restricted-syntax": {
-      "count": 2
-    }
-  },
-  "src/features/gallery/view/rendering/video/renderer.ts": {
-    "environment/no-restricted-syntax": {
-      "count": 2
-    }
-  },
-  "src/features/gallery/view/rendering/video/video_controller.ts": {
-    "environment/no-restricted-syntax": {
-      "count": 9
     },
     "variation/no-restricted-syntax": {
       "count": 2
@@ -426,10 +405,10 @@
   },
   "src/features/post_list_navigator/model/navigator.ts": {
     "architecture/no-dom-types": {
-      "count": 6
+      "count": 10
     },
     "boundaries/dependencies": {
-      "count": 1
+      "count": 2
     }
   },
   "src/features/post_list_navigator/model/page_cache.ts": {
@@ -439,10 +418,10 @@
   },
   "src/features/post_list_navigator/model/page_loader.ts": {
     "architecture/no-dom-types": {
-      "count": 12
+      "count": 16
     },
     "boundaries/dependencies": {
-      "count": 2
+      "count": 3
     },
     "environment/no-restricted-syntax": {
       "count": 2

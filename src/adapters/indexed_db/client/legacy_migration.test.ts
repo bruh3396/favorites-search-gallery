@@ -72,7 +72,7 @@ describe("prepareLegacyMigration", () => {
       user1: [createLegacyPost("10"), createLegacyPost("20"), createLegacyPost("30")],
       user2: [createLegacyPost("40")]
     }, keyed: false });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "favorites", "1")).toEqual(["30", "20", "10"]);
     expect(await read(indexedDb, "favorites", "2")).toEqual(["40"]);
@@ -82,7 +82,7 @@ describe("prepareLegacyMigration", () => {
     await createLegacyDatabase({ name: "Posts", stores: {
       posts: [createLegacyPost("1", { duration: 12, deleted: false, fetchedAt: 5, extension: "png" })]
     }, keyed: true });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "posts", "1")).toEqual({
       id: "1",
@@ -102,7 +102,7 @@ describe("prepareLegacyMigration", () => {
   test("prefers a post from the Posts database over the same post in a favorites row", async() => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1", { score: 99 })] }, keyed: true });
     await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1", { score: 1 }), createLegacyPost("2")] }, keyed: false });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "posts", "1")).toMatchObject({ score: 99 });
     expect(await read(indexedDb, "posts", "2")).toMatchObject({ id: "2" });
@@ -115,7 +115,7 @@ describe("prepareLegacyMigration", () => {
         createLegacyPost("2", { fileURL: "https://x/thumbnails/9/thumbnail_bb.jpg", tags: "animated" })
       ]
     }, keyed: true });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "posts", "1")).toMatchObject({ media: { kind: "video", locator: "9/aa.mp4" } });
     expect(await read(indexedDb, "posts", "2")).toMatchObject({ media: { kind: "gif", locator: "9/bb" } });
@@ -128,7 +128,7 @@ describe("prepareLegacyMigration", () => {
         createLegacyPost("2", { fileURL: "", previewURL: "2075_9e223af24537", extension: "", tags: "video" })
       ]
     }, keyed: false });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "posts", "1")).toMatchObject({ media: { kind: "image", locator: "4461/929221e6e18e.jpeg" } });
     expect(await read(indexedDb, "posts", "2")).toMatchObject({ media: { kind: "video", locator: "2075/9e223af24537" } });
@@ -136,7 +136,7 @@ describe("prepareLegacyMigration", () => {
 
   test("skips posts whose media can't be read", async() => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1", { fileURL: "nonsense" })] }, keyed: true });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "posts", "1")).toBeUndefined();
   });
@@ -145,7 +145,7 @@ describe("prepareLegacyMigration", () => {
     await createLegacyDatabase({ name: "TagCategories", stores: {
       tagCategories: [{ id: "alice", category: "artist" }, { id: "bogus", category: "nope" }]
     }, keyed: false });
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     expect(await read(indexedDb, "tagCategories", "alice")).toBe("artist");
     expect(await read(indexedDb, "tagCategories", "bogus")).toBeUndefined();
@@ -156,27 +156,27 @@ describe("prepareLegacyMigration", () => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [] }, keyed: true });
     await createLegacyDatabase({ name: "TagCategories", stores: { tagCategories: [] }, keyed: false });
 
-    await read(new IndexedDbClient("rule34"), "favorites", "1");
+    await read(new IndexedDbClient(), "favorites", "1");
 
-    await vi.waitFor(async() => expect(await databaseNames()).toEqual(["fsg:rule34"]));
+    await vi.waitFor(async() => expect(await databaseNames()).toEqual(["favorites-search-gallery"]));
   });
 
   test("deletes legacy databases written after the migration without reading them", async() => {
-    const indexedDb = new IndexedDbClient("rule34");
+    const indexedDb = new IndexedDbClient();
 
     await indexedDb.runTransaction("favorites", "readwrite", store => store.put(["new"], "1"));
     await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("old")] }, keyed: false });
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("old")] }, keyed: true });
-    const reopened = new IndexedDbClient("rule34");
+    const reopened = new IndexedDbClient();
 
     expect(await read(reopened, "favorites", "1")).toEqual(["new"]);
     expect(await read(reopened, "posts", "old")).toBeUndefined();
-    await vi.waitFor(async() => expect(await databaseNames()).toEqual(["fsg:rule34"]));
+    await vi.waitFor(async() => expect(await databaseNames()).toEqual(["favorites-search-gallery"]));
   });
 
   test("creates only the new database when no legacy database exists", async() => {
-    await read(new IndexedDbClient("rule34"), "favorites", "1");
+    await read(new IndexedDbClient(), "favorites", "1");
 
-    expect(await databaseNames()).toEqual(["fsg:rule34"]);
+    expect(await databaseNames()).toEqual(["favorites-search-gallery"]);
   });
 });

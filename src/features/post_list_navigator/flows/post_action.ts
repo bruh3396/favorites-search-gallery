@@ -11,13 +11,13 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
       return;
     }
     handleActionBarClick(event.originalEvent, {
-      onFavoriteAdded: (id) => {
+      onFavoriteAdded: id => {
         this.context.ports.remoteFavoriteActions.add(id);
         this.context.events.app.favoriteAdded.emit(id);
       },
       onFavoriteRemoved: doNothing,
-      onPostOpened: (id) => this.context.ports.navigator.open(this.context.ports.remotePages.postUrl(id)),
-      onMediaDownloaded: (id) => this.download(id)
+      onPostOpened: id => this.context.ports.navigator.open(this.context.ports.remotePages.postUrl(id)),
+      onMediaDownloaded: id => this.download(id)
     });
   }
 

@@ -36,101 +36,101 @@ describe("toLowerUnderscored", () => {
 });
 
 describe("removeExtraWhitespace", () => {
-  test("empty", () => {
+  test("keeps an empty string", () => {
     expect(removeExtraWhitespace("")).toBe("");
   });
 
-  test("spaces only", () => {
+  test("empties a string of only spaces", () => {
     expect(removeExtraWhitespace("                      ")).toBe("");
   });
 
-  test("single space", () => {
+  test("empties a single space", () => {
     expect(removeExtraWhitespace(" ")).toBe("");
   });
 
-  test("single word", () => {
+  test("keeps a single word", () => {
     expect(removeExtraWhitespace("hello")).toBe("hello");
   });
 
-  test("multiple spaces", () => {
+  test("collapses multiple spaces", () => {
     expect(removeExtraWhitespace("hello     world")).toBe("hello world");
   });
 
-  test("leading and trailing spaces", () => {
+  test("trims leading and trailing spaces", () => {
     expect(removeExtraWhitespace("   hello world   ")).toBe("hello world");
   });
 
-  test("remove newlines", () => {
+  test("replaces newlines with a space", () => {
     expect(removeExtraWhitespace("remove extra\n\n\n\nwhitespace")).toBe("remove extra whitespace");
   });
 });
 
 describe("escapeParentheses", () => {
-  test("empty", () => {
+  test("keeps an empty string", () => {
     expect(escapeParentheses("")).toBe("");
   });
 
-  test("one parenthesis", () => {
+  test("escapes one parenthesis", () => {
     expect(escapeParentheses("(")).toBe("\\(");
   });
 
-  test("two parenthesis", () => {
+  test("escapes a pair of parentheses", () => {
     expect(escapeParentheses("()")).toBe("\\(\\)");
   });
 
-  test("multiple parenthesis", () => {
+  test("escapes multiple parentheses", () => {
     expect(escapeParentheses("(a)(b)(c)")).toBe("\\(a\\)\\(b\\)\\(c\\)");
   });
 
-  test("parenthesis with text", () => {
+  test("escapes parentheses around text", () => {
     expect(escapeParentheses("a(b)c")).toBe("a\\(b\\)c");
   });
 
-  test("back to back parenthesis", () => {
+  test("escapes back-to-back parentheses", () => {
     expect(escapeParentheses("()()")).toBe("\\(\\)\\(\\)");
   });
 });
 
-describe("removeNonNumeric", () => {
-  test("empty", () => {
+describe("removeNonNumericCharacters", () => {
+  test("keeps an empty string", () => {
     expect(removeNonNumericCharacters("")).toBe("");
   });
 
-  test("only letters", () => {
+  test("removes every letter", () => {
     expect(removeNonNumericCharacters("abc")).toBe("");
   });
 
-  test("only numbers", () => {
+  test("keeps only numbers", () => {
     expect(removeNonNumericCharacters("123")).toBe("123");
   });
 
-  test("letters and numbers", () => {
+  test("keeps the numbers among letters", () => {
     expect(removeNonNumericCharacters("abc123")).toBe("123");
   });
 
-  test("other", () => {
+  test("keeps the numbers among symbols", () => {
     expect(removeNonNumericCharacters("P12304")).toBe("12304");
     expect(removeNonNumericCharacters("_!@0#$%^1^&*()2(?:<")).toBe("012");
   });
 });
 
 describe("capitalize", () => {
-  test("empty", () => {
+  test("keeps an empty string", () => {
     expect(capitalize("")).toBe("");
   });
 
-  test("single character", () => {
+  test("capitalizes a single character", () => {
     expect(capitalize("a")).toBe("A");
     expect(capitalize("A")).toBe("A");
   });
 
-  test("word", () => {
+  test("capitalizes a word", () => {
     expect(capitalize("hello")).toBe("Hello");
     expect(capitalize("Hello")).toBe("Hello");
     expect(capitalize("World")).toBe("World");
   });
 
-  test("sentence", () => {
+  test("capitalizes only the first word of a sentence", () => {
     expect(capitalize("hello world")).toBe("Hello world");
     expect(capitalize("Hello world")).toBe("Hello world");
     expect(capitalize("hello World")).toBe("Hello World");
@@ -138,47 +138,49 @@ describe("capitalize", () => {
 });
 
 describe("removeLeadingModifiers", () => {
-  test("empty", () => {
+  test("keeps an empty string", () => {
     expect(removeLeadingModifiers("")).toBe("");
   });
 
-  test("no hyphen", () => {
+  test("keeps a tag without a hyphen", () => {
     expect(removeLeadingModifiers("apple")).toBe("apple");
     expect(removeLeadingModifiers("banana")).toBe("banana");
   });
 
-  test("one hyphen", () => {
+  test("removes one leading hyphen", () => {
     expect(removeLeadingModifiers("-apple")).toBe("apple");
     expect(removeLeadingModifiers("-banana")).toBe("banana");
   });
 
-  test("multiple hyphens", () => {
+  test("removes multiple leading hyphens", () => {
     expect(removeLeadingModifiers("---apple")).toBe("apple");
     expect(removeLeadingModifiers("--banana")).toBe("banana");
   });
 });
 
-test("spacesToUnderscores", () => {
-  expect(replaceSpacesWithUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
-  expect(replaceSpacesWithUnderscores("apple")).toBe("apple");
-  expect(replaceSpacesWithUnderscores("apple banana")).toBe("apple_banana");
-  expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
+describe("replaceSpacesWithUnderscores", () => {
+  test("replaces every space with an underscore", () => {
+    expect(replaceSpacesWithUnderscores("apple banana cherry")).toBe("apple_banana_cherry");
+    expect(replaceSpacesWithUnderscores("apple")).toBe("apple");
+    expect(replaceSpacesWithUnderscores("apple banana")).toBe("apple_banana");
+    expect(replaceSpacesWithUnderscores("apple_banana_cherry")).toBe("apple_banana_cherry");
+  });
 });
 
 describe("compareStrings", () => {
-  test("less than", () => {
+  test("returns -1 when the first string sorts first", () => {
     expect(compareStrings("apple", "banana")).toBe(-1);
   });
 
-  test("greater than", () => {
+  test("returns 1 when the first string sorts last", () => {
     expect(compareStrings("banana", "apple")).toBe(1);
   });
 
-  test("equal", () => {
+  test("returns 0 for equal strings", () => {
     expect(compareStrings("apple", "apple")).toBe(0);
   });
 
-  test("prefix sorts first", () => {
+  test("sorts a prefix first", () => {
     expect(compareStrings("app", "apple")).toBe(-1);
   });
 
@@ -192,33 +194,33 @@ describe("compareStrings", () => {
 });
 
 describe("snakeToCamelCase", () => {
-  test("empty", () => {
+  test("keeps an empty string", () => {
     expect(snakeToCamelCase("")).toBe("");
   });
 
-  test("single word", () => {
+  test("keeps a single word", () => {
     expect(snakeToCamelCase("surface")).toBe("surface");
   });
 
-  test("multiple words", () => {
+  test("joins multiple words in camel case", () => {
     expect(snakeToCamelCase("theme_surface_raised")).toBe("themeSurfaceRaised");
   });
 
-  test("underscore before a non-lowercase character is kept", () => {
+  test("keeps an underscore before a non-lowercase character", () => {
     expect(snakeToCamelCase("a_1_B")).toBe("a_1_B");
   });
 
-  test("trailing underscore is kept", () => {
+  test("keeps a trailing underscore", () => {
     expect(snakeToCamelCase("surface_")).toBe("surface_");
   });
 });
 
 describe("copyString", () => {
-  test("empty", () => {
+  test("copies an empty string", () => {
     expect(copyString("")).toBe("");
   });
 
-  test("equal to the original", () => {
+  test("returns a string equal to the original", () => {
     expect(copyString("baldurs_gate")).toBe("baldurs_gate");
   });
 
@@ -228,120 +230,120 @@ describe("copyString", () => {
 });
 
 describe("camelToKebabCase", () => {
-  test("empty", () => {
+  test("keeps an empty string", () => {
     expect(camelToKebabCase("")).toBe("");
   });
 
-  test("single word", () => {
+  test("keeps a single word", () => {
     expect(camelToKebabCase("surface")).toBe("surface");
   });
 
-  test("two words", () => {
+  test("hyphenates two words", () => {
     expect(camelToKebabCase("surfaceSunken")).toBe("surface-sunken");
   });
 
-  test("three words", () => {
+  test("hyphenates three words", () => {
     expect(camelToKebabCase("themeSurfaceRaised")).toBe("theme-surface-raised");
   });
 
-  test("leading uppercase", () => {
+  test("prefixes a hyphen for a leading uppercase letter", () => {
     expect(camelToKebabCase("ThemeSurface")).toBe("-theme-surface");
   });
 
-  test("consecutive uppercase", () => {
+  test("hyphenates each consecutive uppercase letter", () => {
     expect(camelToKebabCase("ariaHTML")).toBe("aria-h-t-m-l");
   });
 });
 
 describe("pluralSuffix", () => {
-  test("zero", () => {
+  test("returns s for zero", () => {
     expect(pluralSuffix(0)).toBe("s");
   });
 
-  test("one", () => {
+  test("returns nothing for one", () => {
     expect(pluralSuffix(1)).toBe("");
   });
 
-  test("many", () => {
+  test("returns s for many", () => {
     expect(pluralSuffix(2)).toBe("s");
     expect(pluralSuffix(50)).toBe("s");
   });
 
-  test("negative", () => {
+  test("returns s for a negative count", () => {
     expect(pluralSuffix(-1)).toBe("s");
   });
 });
 
 describe("isEmptyString", () => {
-  test("empty", () => {
+  test("returns true for an empty string", () => {
     expect(isEmptyString("")).toBe(true);
   });
 
-  test("single space", () => {
+  test("returns true for a single space", () => {
     expect(isEmptyString(" ")).toBe(true);
   });
 
-  test("multiple spaces", () => {
+  test("returns true for multiple spaces", () => {
     expect(isEmptyString("   ")).toBe(true);
   });
 
-  test("non-space character", () => {
+  test("returns false for a non-space character", () => {
     expect(isEmptyString("a")).toBe(false);
   });
 
-  test("word", () => {
+  test("returns false for a word", () => {
     expect(isEmptyString("apple")).toBe(false);
   });
 
-  test("sentence", () => {
+  test("returns false for a sentence", () => {
     expect(isEmptyString("apple pie")).toBe(false);
   });
 
-  test("tab character", () => {
+  test("returns true for a tab", () => {
     expect(isEmptyString("\t")).toBe(true);
   });
 
-  test("newline character", () => {
+  test("returns true for a newline", () => {
     expect(isEmptyString("\n")).toBe(true);
   });
 });
 
 describe("trigramsOf", () => {
-  test("empty", () => {
+  test("returns nothing for an empty string", () => {
     expect(trigramsOf("")).toEqual([]);
   });
 
-  test("shorter than three characters", () => {
+  test("returns nothing for fewer than three characters", () => {
     expect(trigramsOf("ab")).toEqual([]);
   });
 
-  test("exactly three characters", () => {
+  test("returns the string itself for exactly three characters", () => {
     expect(trigramsOf("fig")).toEqual(["fig"]);
   });
 
-  test("sliding window", () => {
+  test("slides a three-character window across the string", () => {
     expect(trigramsOf("banana")).toEqual(["ban", "ana", "nan", "ana"]);
   });
 });
 
 describe("isOnlyDigits", () => {
-  test("empty", () => {
+  test("returns false for an empty string", () => {
     expect(isOnlyDigits("")).toBe(false);
   });
 
-  test("only digits", () => {
+  test("returns true for only digits", () => {
     expect(isOnlyDigits("123")).toBe(true);
     expect(isOnlyDigits("1849202")).toBe(true);
     expect(isOnlyDigits("1234567890")).toBe(true);
   });
 
-  test("letters and digits", () => {
+  test("returns false for letters and digits", () => {
     expect(isOnlyDigits("123abc")).toBe(false);
     expect(isOnlyDigits("abc123")).toBe(false);
     expect(isOnlyDigits("1a2b3c")).toBe(false);
   });
 
-  test("special characters", () => {
+  test("returns false for special characters", () => {
     expect(isOnlyDigits("123!@#")).toBe(false);
     expect(isOnlyDigits("!@#123")).toBe(false);
     expect(isOnlyDigits("1!2@3#")).toBe(false);

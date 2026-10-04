@@ -12,13 +12,13 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly bitIndex: BitIndex<Doc>;
   private readonly metricIndex: MetricBitIndex<Doc>;
   private readonly wildcardResolver: WildcardPostingResolver<Doc>;
-  private readonly evaluator: BitEvaluator<Doc>;
+  private readonly bitEvaluator: BitEvaluator<Doc>;
 
   constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: SearchableMetric) => number, docs: Doc[] = []) {
     this.bitIndex = new BitIndex<Doc>(termsFor);
     this.metricIndex = new MetricBitIndex<Doc>(metricFor);
     this.wildcardResolver = new WildcardPostingResolver(this.bitIndex);
-    this.evaluator = new BitEvaluator(this.bitIndex, new PostingResolver(this.bitIndex, this.metricIndex, this.wildcardResolver));
+    this.bitEvaluator = new BitEvaluator(this.bitIndex, new PostingResolver(this.bitIndex, this.metricIndex, this.wildcardResolver));
     this.index(docs);
   }
 
@@ -28,7 +28,7 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     if (expression === undefined) {
       return [];
     }
-    const matches = this.evaluator.evaluate(expression);
+    const matches = this.bitEvaluator.evaluate(expression);
 
     if (candidates === undefined || candidates.length === this.bitIndex.size) {
       return matches;
@@ -65,6 +65,6 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
       return undefined;
     }
     const expression = tryParseSearchExpression(query);
-    return expression === undefined ? undefined : this.evaluator.evaluateToBitSet(expression);
+    return expression === undefined ? undefined : this.bitEvaluator.evaluateToBitSet(expression);
   }
 }

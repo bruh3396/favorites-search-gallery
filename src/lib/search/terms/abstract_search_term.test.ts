@@ -18,7 +18,7 @@ describe("AbstractSearchTerm", () => {
   });
 
   describe("cost", () => {
-    test("a negated term costs more than its positive form", () => {
+    test("costs more for a negated term than its positive form", () => {
       expect(parseExactSearchTerm("-banana").cost).toBeGreaterThan(parseExactSearchTerm("banana").cost);
     });
   });

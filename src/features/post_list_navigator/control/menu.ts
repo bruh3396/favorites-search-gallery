@@ -63,7 +63,7 @@ function buildSection(context: AppContext, section: SettingsSection): HTMLElemen
   return buildCollapsibleSection({
     title: section.title,
     collapsed: settingsCollapsed.value,
-    children: section.controls.map((control) => control()),
+    children: section.controls.map(control => control()),
     onToggle: settingsCollapsed.set
   });
 }

@@ -29,13 +29,13 @@ export class NamespacedLocalKeyedValues implements LocalKeyedValues {
 
   public moveIn(keys: string[]): void {
     const entries = { ...this.entries, ...this.readStored() };
-    const movable = keys.filter((key) => !(key in entries) && this.inner.get(key) !== undefined);
+    const movable = keys.filter(key => !(key in entries) && this.inner.get(key) !== undefined);
 
     if (movable.length === 0) {
       return;
     }
-    this.save({ ...entries, ...Object.fromEntries(movable.map((key) => [key, this.inner.get(key)])) });
-    movable.forEach((key) => this.inner.remove(key));
+    this.save({ ...entries, ...Object.fromEntries(movable.map(key => [key, this.inner.get(key)])) });
+    movable.forEach(key => this.inner.remove(key));
   }
 
   public clear(): void {

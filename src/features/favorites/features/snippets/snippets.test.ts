@@ -1,14 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { Snippets } from "@/features/favorites/features/snippets/snippets";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
 import { flushMicrotasks } from "@/testing/async";
-
-const STORAGE_KEY = "searchSnippets";
-
-let store: MemoryLocalKeyedValues;
 
 interface Setup {
   snippets: Snippets;
@@ -17,15 +14,17 @@ interface Setup {
   appended: string[];
   alerts: string[];
   saved: string[];
+  readStoredNames: () => Promise<string[]>;
 }
 
-function setup(stored: Snippet[] = [], results: string[] = []): Setup {
+async function setup(stored: Snippet[] = [], results: string[] = []): Promise<Setup> {
   const appended: string[] = [];
   const alerts: string[] = [];
   const saved: string[] = [];
   const container = document.createElement("div");
+  const localSnippets = new MemoryLocalSnippets();
 
-  store.set(STORAGE_KEY, stored);
+  await localSnippets.setMany(stored);
   vi.stubGlobal("alert", (message: string): number => alerts.push(message));
   vi.stubGlobal("confirm", (): boolean => true);
   vi.stubGlobal("fetch", (): Promise<Response> => Promise.resolve(new Response("[]")));
@@ -36,21 +35,27 @@ function setup(stored: Snippet[] = [], results: string[] = []): Setup {
   const snippets = new Snippets({
     appendToSearch: (text): number => appended.push(text),
     getSearchResults: (): Favorite[] => results.map(id => ({ id }) as Favorite),
-    store
+    localSnippets,
+    localKeyedValues: new MemoryLocalKeyedValues()
   });
   const section = snippets.buildDrawerSection();
 
+  await snippets.load();
   section.mount?.(container);
   document.body.append(container);
-  return { snippets, container, actions: section.actions ?? [], appended, alerts, saved };
+  return {
+    snippets,
+    container,
+    actions: section.actions ?? [],
+    appended,
+    alerts,
+    saved,
+    readStoredNames: async(): Promise<string[]> => (await localSnippets.getAll()).map(snippet => snippet.name)
+  };
 }
 
 function readNames(container: HTMLElement): string[] {
-  return Array.from(container.querySelectorAll<HTMLElement>("[data-snippet-name]")).map(row => row.dataset.snippetName ?? "");
-}
-
-function storedNames(): string[] {
-  return ((store.get(STORAGE_KEY) ?? []) as Snippet[]).map(snippet => snippet.name);
+  return [...container.querySelectorAll<HTMLElement>("[data-snippet-name]")].map(row => row.dataset.snippetName ?? "");
 }
 
 function click(container: HTMLElement, action: string, name?: string): void {
@@ -76,12 +81,8 @@ function type(field: HTMLInputElement | HTMLTextAreaElement, value: string): voi
   field.dispatchEvent(new Event("input"));
 }
 
-const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
-const veg = createSnippet("veg", "carrot", 0, 200);
-
-beforeEach(() => {
-  store = new MemoryLocalKeyedValues();
-});
+const fruits = createSnippet("fruits", "( apple ~ banana )", { createdAt: 100 });
+const veg = createSnippet("veg", "carrot", { createdAt: 200 });
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -89,81 +90,77 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("section", () => {
-  test("lists the stored snippets newest first", () => {
-    expect(readNames(setup([fruits, veg]).container)).toEqual(["veg", "fruits"]);
+describe("Snippets", () => {
+  test("lists the stored snippets newest first", async() => {
+    expect(readNames((await setup([fruits, veg])).container)).toEqual(["veg", "fruits"]);
   });
 
-  test("filters the list as the user types", () => {
-    const { container } = setup([fruits, veg]);
+  test("filters the list as the user types", async() => {
+    const { container } = await setup([fruits, veg]);
 
     type(queryFilterInput(container), "carrot");
     expect(readNames(container)).toEqual(["veg"]);
   });
 
-  test("suggests stored snippets to the search box", () => {
-    expect(setup([fruits]).snippets.suggestions("/").map(suggestion => suggestion.value)).toEqual(["/fruits"]);
+  test("suggests stored snippets to the search box", async() => {
+    expect((await setup([fruits])).snippets.suggestions("/").map(suggestion => suggestion.value)).toEqual(["/fruits"]);
   });
-});
 
-describe("rows", () => {
-  test("clicking a row appends its query to the search", () => {
-    const { container, appended } = setup([fruits]);
+  test("appends a clicked row's query to the search", async() => {
+    const { container, appended } = await setup([fruits]);
 
     click(container, "use");
     expect(appended).toEqual(["( apple ~ banana )"]);
   });
 
-  test("move to top makes the snippet the newest", () => {
-    const { container } = setup([fruits, veg]);
+  test("makes a snippet the newest when moved to the top", async() => {
+    const { container } = await setup([fruits, veg]);
 
     click(container, "moveToTop", "fruits");
     expect(readNames(container)).toEqual(["fruits", "veg"]);
   });
 
-  test("delete asks first, then removes the snippet", () => {
-    const { container } = setup([fruits]);
+  test("asks before deleting a snippet, then removes it", async() => {
+    const { container, readStoredNames } = await setup([fruits]);
 
     click(container, "requestDelete", "fruits");
     expect(container.textContent).toContain("Delete this snippet?");
     click(container, "delete", "fruits");
-    expect(storedNames()).toEqual([]);
+    expect(await readStoredNames()).toEqual([]);
     expect(container.textContent).toContain("No snippets yet");
   });
 
-  test("cancelling a delete keeps the snippet", () => {
-    const { container } = setup([fruits]);
+  test("keeps the snippet when a delete is cancelled", async() => {
+    const { container, readStoredNames } = await setup([fruits]);
 
     click(container, "requestDelete", "fruits");
     click(container, "cancelDelete", "fruits");
     expect(container.textContent).not.toContain("Delete this snippet?");
-    expect(storedNames()).toEqual(["fruits"]);
+    expect(await readStoredNames()).toEqual(["fruits"]);
   });
-});
 
-describe("editor", () => {
-  test("saves a new snippet", () => {
-    const { container } = setup();
+  test("saves a new snippet", async() => {
+    const { container, readStoredNames } = await setup();
 
     type(queryNameInput(container), "My Fruits");
     type(queryQueryTextarea(container), "apple");
     click(container, "save");
     expect(readNames(container)).toEqual(["my_fruits"]);
-    expect(storedNames()).toEqual(["my_fruits"]);
+    expect(await readStoredNames()).toEqual(["my_fruits"]);
   });
 
-  test("edits an existing snippet", () => {
-    const { container } = setup([fruits]);
+  test("edits an existing snippet", async() => {
+    const { container, readStoredNames } = await setup([fruits]);
 
     click(container, "edit", "fruits");
     expect(container.textContent).toContain("Editing /fruits");
     type(queryNameInput(container), "berries");
     click(container, "save");
-    expect(storedNames()).toEqual(["berries"]);
+    expect(await readStoredNames()).toEqual(["berries"]);
   });
 
-  test("escape cancels an edit", () => {
-    const { container } = setup([fruits]);
+  test("cancels an edit on Escape", async() => {
+    const { container } = await setup([fruits]);
 
     click(container, "edit", "fruits");
     queryNameInput(container).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
@@ -171,16 +168,16 @@ describe("editor", () => {
     expect(queryNameInput(container).value).toBe("");
   });
 
-  test("cancelling an edit returns to a new snippet", () => {
-    const { container } = setup([fruits]);
+  test("returns to a new snippet when an edit is cancelled", async() => {
+    const { container } = await setup([fruits]);
 
     click(container, "edit", "fruits");
     click(container, "cancelEdit");
     expect(container.textContent).toContain("New snippet");
   });
 
-  test("shows a failed save until the user types again", () => {
-    const { container } = setup();
+  test("shows a failed save until the user types again", async() => {
+    const { container } = await setup();
 
     click(container, "save");
     expect(container.textContent).toContain("A snippet needs a name");
@@ -188,24 +185,22 @@ describe("editor", () => {
     expect(container.textContent).not.toContain("A snippet needs a name");
   });
 
-  test("builds a query from the search results", () => {
-    const { container } = setup([], ["1", "2"]);
+  test("builds a query from the search results", async() => {
+    const { container } = await setup([], ["1", "2"]);
 
     click(container, "fillQueryFromResults");
     expect(queryQueryTextarea(container).value).toBe("( 1 ~ 2 )");
   });
 
-  test("alerts when there are no search results", () => {
-    const { container, alerts } = setup();
+  test("alerts when there are no search results", async() => {
+    const { container, alerts } = await setup();
 
     click(container, "fillQueryFromResults");
     expect(alerts).toEqual(["No search results to build a query from"]);
   });
-});
 
-describe("actions", () => {
-  test("import replaces the snippets with the chosen file's", async() => {
-    const { container, actions } = setup([fruits]);
+  test("replaces the snippets with an imported file's", async() => {
+    const { container, actions } = await setup([fruits]);
 
     vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(function choose(this: HTMLInputElement): void {
       Object.defineProperty(this, "files", { value: [new File([JSON.stringify([{ name: "veg", query: "carrot" }])], "snippets.json")] });
@@ -216,18 +211,18 @@ describe("actions", () => {
     expect(readNames(container)).toEqual(["veg"]);
   });
 
-  test("export saves the snippets to a json file", () => {
-    const { actions, saved } = setup([fruits]);
+  test("exports the snippets to a json file", async() => {
+    const { actions, saved } = await setup([fruits]);
 
     actions[1].click();
     expect(saved).toEqual(["snippets.json"]);
   });
 
-  test("delete all removes every snippet once confirmed", () => {
-    const { container, actions } = setup([fruits, veg]);
+  test("removes every snippet once delete all is confirmed", async() => {
+    const { container, actions, readStoredNames } = await setup([fruits, veg]);
 
     actions[2].click();
     expect(readNames(container)).toEqual([]);
-    expect(storedNames()).toEqual([]);
+    expect(await readStoredNames()).toEqual([]);
   });
 });

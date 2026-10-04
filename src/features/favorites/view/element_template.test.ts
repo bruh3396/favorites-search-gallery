@@ -70,7 +70,7 @@ describe("FavoritesElementTemplate", () => {
     expect(thumb.dataset.loading).toBeUndefined();
   });
 
-  test("a thumb rebound mid-load keeps loading for its new favorite", async() => {
+  test("keeps a thumb rebound mid-load loading for its new favorite", async() => {
     const { template, thumb, image, decode } = setup();
 
     template.bindThumb(thumb, createFavorite("1"), false);

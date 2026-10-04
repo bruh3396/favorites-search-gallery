@@ -95,7 +95,7 @@ export function buildSettingsCatalog(context: AppContext) {
       min: ThumbConfig.columnCountBounds.min,
       max: environment.device === "mobile" ? ThumbConfig.columnCountBounds.max.mobile : ThumbConfig.columnCountBounds.max.desktop,
       step: 1,
-      enabledWhen: whenLayout(preferences, (layout) => layout !== "row" && layout !== "native")
+      enabledWhen: whenLayout(preferences, layout => layout !== "row" && layout !== "native")
     }),
     rowHeight: stepper({
       id: "row-size",
@@ -105,7 +105,7 @@ export function buildSettingsCatalog(context: AppContext) {
       min: ThumbConfig.rowHeightBounds.min,
       max: ThumbConfig.rowHeightBounds.max,
       step: 1,
-      enabledWhen: whenLayout(preferences, (layout) => layout === "row")
+      enabledWhen: whenLayout(preferences, layout => layout === "row")
     }),
     header: toggle({
       id: "toggle-header",
@@ -317,7 +317,7 @@ function registerHotkey(events: Events, key: string | undefined, fire: () => voi
   if (key === undefined) {
     return;
   }
-  events.app.hotkeyPressed.on((pressed) => {
+  events.app.hotkeyPressed.on(pressed => {
     if (pressed === key.toLowerCase()) {
       fire();
     }
@@ -329,7 +329,7 @@ function whenLayout(preferences: Preferences, predicate: (layout: Layout) => boo
 }
 
 function whenNotInfiniteScroll(preferences: Preferences): EnableRule {
-  return enableWhen(preferences.favorites.infiniteScroll, (on) => !on);
+  return enableWhen(preferences.favorites.infiniteScroll, on => !on);
 }
 
 function whenNotFullscreenOnHover(preferences: Preferences): () => boolean {
@@ -337,7 +337,7 @@ function whenNotFullscreenOnHover(preferences: Preferences): () => boolean {
 }
 
 function whenPickingUpscaleQuality(preferences: Preferences): EnableRule {
-  return enableWhen(preferences.favorites.upscaleThumbs, (on) => on && !GalleryUpscaleConfig.dynamicQuality);
+  return enableWhen(preferences.favorites.upscaleThumbs, on => on && !GalleryUpscaleConfig.dynamicQuality);
 }
 
 function whenNotSortByRandom(preferences: Preferences): () => boolean {

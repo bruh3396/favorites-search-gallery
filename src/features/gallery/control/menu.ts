@@ -16,7 +16,7 @@ export function setup(context: AppContext, shell: GalleryShell): void {
     return;
   }
   shell.menuButtons.append(...buttonsFor(environment).filter(button => button.enabled).map(createButton));
-  shell.menuButtons.addEventListener("click", (event) => {
+  shell.menuButtons.addEventListener("click", event => {
     const action = actionOf(event.target);
 
     if (action !== null) {
@@ -26,18 +26,19 @@ export function setup(context: AppContext, shell: GalleryShell): void {
 }
 
 function buttonsFor(environment: Environment): GalleryMenuButton[] {
+  const onDesktop = environment.device === "desktop";
   return [
     { id: "exit-gallery", icon: Icons.EXIT, action: "exit", enabled: true, tooltip: "Exit (Escape, Right-Click, G)", color: "red" },
-    { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: environment.device === "desktop", tooltip: "Toggle Fullscreen (F)", color: "#0075FF" },
+    { id: "fullscreen-gallery", icon: Icons.FULLSCREEN_ENTER, action: "fullscreen", enabled: onDesktop, tooltip: "Toggle Fullscreen (F)", color: "#0075FF" },
     { id: "open-in-new-gallery", icon: Icons.OPEN_IN_NEW, action: "openPost", enabled: true, tooltip: "Open Post (Middle-Click, W)", color: "lightgreen" },
     { id: "open-image-gallery", icon: Icons.IMAGE, action: "openOriginal", enabled: true, tooltip: "Open Original (Ctrl + Left-Click, Q)", color: "magenta" },
     { id: "download-gallery", icon: Icons.DOWNLOAD, action: "download", enabled: true, tooltip: "Download (S)", color: "lightskyblue" },
     { id: "add-favorite-gallery", icon: Icons.HEART_PLUS, action: "addFavorite", enabled: true, tooltip: "Add Favorite (E)", color: "hotpink" },
     { id: "remove-favorite-gallery", icon: Icons.HEART_MINUS, action: "removeFavorite", enabled: false, tooltip: "Remove Favorite (X)", color: "red" },
     { id: "dock-gallery", icon: Icons.DOCK, action: "toggleDockPosition", enabled: false, tooltip: "Change Position", color: "" },
-    { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: environment.device === "desktop", tooltip: "Toggle Background (B)", color: "gold" },
+    { id: "toggle-background-gallery", icon: Icons.BULB, action: "toggleBackground", enabled: onDesktop, tooltip: "Toggle Background (B)", color: "gold" },
     { id: "search-gallery", icon: Icons.SEARCH, action: "search", enabled: false, tooltip: "Search", color: "cyan" },
-    { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: environment.device === "desktop", tooltip: "Pin Menu", color: "#0075FF" }
+    { id: "pin-gallery", icon: Icons.PIN, action: "pin", enabled: onDesktop, tooltip: "Pin Menu", color: "#0075FF" }
   ];
 }
 

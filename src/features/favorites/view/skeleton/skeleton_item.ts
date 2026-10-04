@@ -7,18 +7,27 @@ import { SkeletonConfig } from "@/config/skeleton_config";
 import { TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { toDimensions2D } from "@/utils/pure/geometry";
 
+export interface SkeletonItemConfiguration {
+  layout: Layout;
+  aspectRatio: string | undefined;
+}
+
+export interface SkeletonItemDependencies {
+  randomSource: RandomSource;
+  fallbackAspectRatioHeights: SeededSequence;
+}
+
 export class FavoritesSkeletonItem {
   public readonly element: HTMLElement;
 
-  constructor(randomSource: RandomSource, layout: Layout, aspectRatio: string | undefined, fallbackAspectRatioHeights: SeededSequence) {
+  constructor(configuration: SkeletonItemConfiguration, dependencies: SkeletonItemDependencies) {
     this.element = document.createElement("div");
     this.element.className = `skeleton-item ${TILE_CLASS_NAME}`;
-    this.setSize(randomSource, layout, aspectRatio, fallbackAspectRatioHeights);
-    this.configureAnimation(randomSource);
-
+    this.setSize(configuration, dependencies);
+    this.configureAnimation(dependencies.randomSource);
   }
 
-  private setSize(randomSource: RandomSource, layout: Layout, aspectRatio: string | undefined, fallbackAspectRatioHeights: SeededSequence): void {
+  private setSize({ layout, aspectRatio }: SkeletonItemConfiguration, { randomSource, fallbackAspectRatioHeights }: SkeletonItemDependencies): void {
     this.element.dataset.layout = layout;
 
     if (layout === "native") {

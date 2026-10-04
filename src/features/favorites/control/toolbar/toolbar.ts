@@ -23,7 +23,13 @@ const INVERT_ENABLED: Record<Device, boolean> = {
   mobile: false
 };
 
-export function setup(events: Events, environment: Environment, preferences: Preferences, slots: FavoritesToolbarSlots): void {
+export interface ToolbarDependencies {
+  events: Events;
+  environment: Environment;
+  preferences: Preferences;
+}
+
+export function setup({ events, environment, preferences }: ToolbarDependencies, slots: FavoritesToolbarSlots): void {
   buildButtons(events, environment, slots).forEach(insertButton);
   insertDrawerToggle(preferences, slots);
 }

@@ -22,7 +22,7 @@ export function findFirstIndexWhere(length: number, satisfiedAt: (index: number)
 }
 
 export function itemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
-  return valuesAround(startIndex, limit, index => isIndexInBounds(array, index), index => array[index]);
+  return valuesAround(startIndex, limit, { isInBounds: index => isIndexInBounds(array, index), at: index => array[index] });
 }
 
 export function wrappedItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {

@@ -30,7 +30,7 @@ export class GalleryView {
     this.budget = GALLERY_BUDGETS[context.environment.canvasBudget];
     this.ui = new GalleryUi(context.shell, context.ports.hostPage, shell.background);
     this.menu = new GalleryMenu(context.environment, shell.menu);
-    this.renderer = new GalleryRenderer(shell.root, context, favoriteFor, this.budget);
+    this.renderer = new GalleryRenderer({ galleryRoot: shell.root, context, favoriteFor, budget: this.budget });
     GalleryTutorial.mount(shell.tutorial);
   }
 

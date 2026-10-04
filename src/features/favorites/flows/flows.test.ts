@@ -49,7 +49,7 @@ function hasLoaded(context: AppContext): boolean {
 }
 
 function createModel(context: AppContext): FavoritesModel {
-  return new FavoritesModel(context, { onSearchResultsChanged: () => { }, onPlaceholderFilled: () => { } });
+  return new FavoritesModel(context, { onSearchResultsChanged: (): void => { }, onPlaceholderFilled: (): void => { } });
 }
 
 function createFruitPost(id: string): Post {
@@ -66,15 +66,16 @@ function setup(context: AppContext): FavoritesFlows {
   const view = new FavoritesView({ linksToPostPage: false }, { context, shell });
 
   view.setup({ onContentReplaced: () => { }, onContentAdded: () => { } });
-  return new FavoritesFlows(context, createModel(context), view, new FavoritesControl({ offersTutorial: false }, { context, shell }));
+  const control = new FavoritesControl({ offersTutorial: false }, { context, shell });
+  return new FavoritesFlows({ context, model: createModel(context), view, control });
 }
 
 function readThumbIds(context: AppContext): string[] {
-  return Array.from(context.shell.content.querySelectorAll<HTMLElement>(".post")).map(thumb => thumb.id).sort();
+  return [...context.shell.content.querySelectorAll<HTMLElement>(".post")].map(thumb => thumb.id).sort();
 }
 
 function readNewThumbIds(context: AppContext): string[] {
-  return Array.from(context.shell.content.querySelectorAll<HTMLElement>(".post[data-new-badge]")).map(thumb => thumb.id).sort();
+  return [...context.shell.content.querySelectorAll<HTMLElement>(".post[data-new-badge]")].map(thumb => thumb.id).sort();
 }
 
 function loadLocalIds(context: AppContext): Promise<string[]> {
@@ -86,8 +87,8 @@ describe("FavoritesFlows", () => {
     document.body.replaceChildren();
   });
 
-  describe("loading with no local favorites", () => {
-    test("fetches every remote favorite, shows the favorites, and stores them", async() => {
+  describe("loadAllFavorites", () => {
+    test("fetches every remote favorite, shows them, and stores them when none are local", async() => {
       const context = createContext("1", "2", "3");
 
       await setup(context).load.loadAllFavorites();
@@ -95,17 +96,15 @@ describe("FavoritesFlows", () => {
       expect(await loadLocalIds(context)).toEqual(["1", "2", "3"]);
     });
 
-    test("finishes loading without storing membership when the site refuses favorites", async() => {
+    test("finishes loading without storing membership when none are local and the site refuses favorites", async() => {
       const context = createRefusingContext();
 
       await setup(context).load.loadAllFavorites();
       expect(hasLoaded(context)).toBe(true);
       expect(await loadLocalIds(context)).toEqual([]);
     });
-  });
 
-  describe("loading with local favorites", () => {
-    test("shows the local favorites", async() => {
+    test("shows the local favorites when there are some", async() => {
       const context = createContext("1", "2", "3");
 
       await store(context, "1", "2", "3");

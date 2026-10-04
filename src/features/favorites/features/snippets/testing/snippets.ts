@@ -1,11 +1,12 @@
-import { Snippet, SnippetIntents, SnippetScene } from "@/features/favorites/features/snippets/types/types";
+import { SnippetIntents, SnippetScene } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
 
 export interface RecordedIntents {
   intents: SnippetIntents;
   calls: string[];
 }
 
-export function createSnippet(name: string, query: string, lastUsedAt: number = 0, createdAt: number = 0): Snippet {
+export function createSnippet(name: string, query: string, { lastUsedAt = 0, createdAt = 0 }: Partial<Snippet> = {}): Snippet {
   return { name, query, lastUsedAt, createdAt };
 }
 

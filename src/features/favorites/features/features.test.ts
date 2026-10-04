@@ -3,7 +3,8 @@ import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
 import { FavoritesFeatures } from "@/features/favorites/features/features";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Snippet } from "@/features/favorites/features/snippets/types/types";
+import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { createAppContext } from "@/testing/context";
@@ -21,13 +22,13 @@ function createFavorite(id: string): Favorite {
   return { id, media: { kind: "image", locator: `1/${id}.png` } } as Partial<Favorite> as Favorite;
 }
 
-function setup(snippets: Snippet[] = []): Setup {
+async function setup(snippets: Snippet[] = []): Promise<Setup> {
   const context = createAppContext();
   const results = [createFavorite("1"), createFavorite("2")];
   const appended: string[] = [];
-  const store = new MemoryLocalKeyedValues();
+  const localSnippets = new MemoryLocalSnippets();
 
-  store.set("searchSnippets", snippets);
+  await localSnippets.setMany(snippets);
   const features = new FavoritesFeatures(context, {
     downloader: {
       batchSize: context.preferences.favorites.downloadBatchSize,
@@ -40,11 +41,13 @@ function setup(snippets: Snippet[] = []): Setup {
     snippets: {
       appendToSearch: (text): number => appended.push(text),
       getSearchResults: (): Favorite[] => results,
-      store
+      localSnippets,
+      localKeyedValues: new MemoryLocalKeyedValues()
     }
   });
 
   features.setup();
+  await flushMicrotasks();
   return { context, features, results, appended };
 }
 
@@ -77,7 +80,7 @@ async function readSuggestionsAfterTyping(text: string): Promise<string[]> {
   input.selectionStart = text.length;
   input.dispatchEvent(new Event("input"));
   await flushMicrotasks();
-  return Array.from(document.querySelectorAll("li")).map(item => item.textContent ?? "");
+  return [...document.querySelectorAll("li")].map(item => item.textContent ?? "");
 }
 
 describe("FavoritesFeatures", () => {
@@ -86,54 +89,50 @@ describe("FavoritesFeatures", () => {
     vi.unstubAllGlobals();
   });
 
-  describe("downloader", () => {
-    test("waits for favorites to load before offering a download", async() => {
-      const { context, features } = setup();
-      const download = mountDownloader(features);
+  test("waits for favorites to load before offering a download", async() => {
+    const { context, features } = await setup();
+    const download = mountDownloader(features);
 
-      expect(download.disabled).toBe(true);
-      await reachFavoritesLoaded(context);
-      expect(download.disabled).toBe(false);
-      expect(download.textContent).toBe("Download 2 Results");
-    });
-
-    test("follows the search results", async() => {
-      const { context, features, results } = setup();
-      const download = mountDownloader(features);
-
-      await reachFavoritesLoaded(context);
-      results.pop();
-      context.events.favorites.searchResultsUpdated.emit(results);
-      expect(download.textContent).toBe("Download 1 Result");
-    });
-
-    test.each([
-      ["batch size", (context: AppContext): void => context.preferences.favorites.downloadBatchSize.set(1)],
-      ["filename format", (context: AppContext): void => context.preferences.favorites.downloadFilenameFormat.set(1)]
-    ])("redraws when the %s changes", async(_, change) => {
-      const { context, features, results } = setup();
-      const download = mountDownloader(features);
-
-      await reachFavoritesLoaded(context);
-      results.pop();
-      change(context);
-      expect(download.textContent).toBe("Download 1 Result");
-    });
+    expect(download.disabled).toBe(true);
+    await reachFavoritesLoaded(context);
+    expect(download.disabled).toBe(false);
+    expect(download.textContent).toBe("Download 2 Results");
   });
 
-  describe("snippets", () => {
-    test("builds a section listing the stored snippets, with its actions", () => {
-      const { features } = setup([createSnippet("fruits", "apple")]);
-      const container = mountSnippets(features);
+  test("makes the download follow the search results", async() => {
+    const { context, features, results } = await setup();
+    const download = mountDownloader(features);
 
-      expect(container.querySelector("[data-snippet-name]")?.getAttribute("data-snippet-name")).toBe("fruits");
-      expect(features.buildSnippetsSection().actions?.length).toBeGreaterThan(0);
-    });
+    await reachFavoritesLoaded(context);
+    results.pop();
+    context.events.favorites.searchResultsUpdated.emit(results);
+    expect(download.textContent).toBe("Download 1 Result");
+  });
 
-    test("suggests stored snippets in search boxes", async() => {
-      vi.stubGlobal("fetch", (): Promise<Response> => Promise.resolve(new Response("[]")));
-      setup([createSnippet("fruits", "apple")]);
-      expect(await readSuggestionsAfterTyping("/f")).toEqual(["/fruits (snippet)"]);
-    });
+  test.each([
+    ["batch size", (context: AppContext): void => context.preferences.favorites.downloadBatchSize.set(1)],
+    ["filename format", (context: AppContext): void => context.preferences.favorites.downloadFilenameFormat.set(1)]
+  ])("redraws the download when the %s changes", async(_, change) => {
+    const { context, features, results } = await setup();
+    const download = mountDownloader(features);
+
+    await reachFavoritesLoaded(context);
+    results.pop();
+    change(context);
+    expect(download.textContent).toBe("Download 1 Result");
+  });
+
+  test("builds a snippets section listing the stored snippets, with its actions", async() => {
+    const { features } = await setup([createSnippet("fruits", "apple")]);
+    const container = mountSnippets(features);
+
+    expect(container.querySelector("[data-snippet-name]")?.getAttribute("data-snippet-name")).toBe("fruits");
+    expect(features.buildSnippetsSection().actions?.length).toBeGreaterThan(0);
+  });
+
+  test("suggests stored snippets in search boxes", async() => {
+    vi.stubGlobal("fetch", (): Promise<Response> => Promise.resolve(new Response("[]")));
+    await setup([createSnippet("fruits", "apple")]);
+    expect(await readSuggestionsAfterTyping("/f")).toEqual(["/fruits (snippet)"]);
   });
 });

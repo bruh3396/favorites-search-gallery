@@ -15,84 +15,87 @@ positionIndex.build(fruitDocs);
 const wildcardResolver = new WildcardDocResolver<Fruit>(index);
 
 wildcardResolver.index(index.indexedTerms());
-const searcher = new SetEvaluator<Fruit>(index, new DocResolver<Fruit>(index, new MetricIndex<Fruit>([], () => 0), new RelativeMetricIndex<Fruit>([], () => 0), positionIndex, wildcardResolver));
+const metricIndex = new MetricIndex<Fruit>([], () => 0);
+const relativeMetricIndex = new RelativeMetricIndex<Fruit>([], () => 0);
+const docResolver = new DocResolver<Fruit>({ termIndex: index, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver });
+const searcher = new SetEvaluator<Fruit>(index, docResolver);
 
 function expectMatches(query: string, expectedNames: FruitName[]): void {
-  const expected = expectedNames.slice().sort();
+  const expected = [...expectedNames].sort();
   const actual = searcher.evaluate(parseSearchExpression(query), fruitDocs).map(item => item.name).sort();
 
   expect(actual, query).toEqual(expected);
 }
 
 describe("SetEvaluator", () => {
-  test("empty query returns every doc", () => {
+  test("returns every doc for an empty query", () => {
     expectMatches("", fruitDocs.map(doc => doc.name));
   });
 
-  test("a single exact term", () => {
+  test("matches a single exact term", () => {
     expectMatches("mango", ["mango"]);
     expectMatches("sweet", ["cherry", "grape", "mango", "blueberry", "pear", "strawberry"]);
   });
 
-  test("required terms intersect", () => {
+  test("intersects required terms", () => {
     expectMatches("sweet juicy", ["grape", "mango", "pear", "strawberry"]);
     expectMatches("red sweet", ["cherry", "strawberry"]);
   });
 
-  test("a negated term excludes matches", () => {
+  test("excludes the matches of a negated term", () => {
     expectMatches("sweet -red", ["grape", "mango", "blueberry", "pear"]);
   });
 
-  test("an or group unions its terms", () => {
+  test("unions the terms of an or group", () => {
     expectMatches("( red ~ yellow )", ["apple", "banana", "cherry", "strawberry"]);
   });
 
-  test("required terms narrow an or group", () => {
+  test("narrows an or group by required terms", () => {
     expectMatches("sweet ( red ~ green )", ["cherry", "grape", "pear", "strawberry"]);
   });
 
-  test("a mixed or group matches positives or non-negated", () => {
+  test("matches a mixed or group's positives or what its negated terms leave out", () => {
     expectMatches("juicy ( red ~ -antioxidants )", ["mango", "orange", "pear", "strawberry"]);
   });
 
-  test("an unknown term matches nothing", () => {
+  test("matches nothing for an unknown term", () => {
     expectMatches("dragonfruit", []);
     expectMatches("sweet dragonfruit", []);
   });
 
-  test("only negated terms", () => {
+  test("matches what a query of only negated terms leaves out", () => {
     expectMatches("-red", ["banana", "grape", "kiwi", "mango", "blueberry", "orange", "pear"]);
   });
 
-  test("only or groups", () => {
+  test("intersects a query of only or groups", () => {
     expectMatches("( sweet ~ tart ) ( juicy ~ small )", ["blueberry", "cherry", "grape", "mango", "kiwi", "pear", "strawberry"]);
   });
 
-  test("a wildcard term resolves to the union of its matching terms' docs", () => {
+  test("resolves a wildcard term to the union of its matching terms' docs", () => {
     expectMatches("smooth*", ["banana", "kiwi", "mango", "strawberry"]);
     expectMatches("antioxidant*", ["apple", "blueberry", "cherry", "grape", "strawberry"]);
   });
 
-  test("a negated wildcard excludes every doc it matches", () => {
+  test("excludes every doc a negated wildcard matches", () => {
     expectMatches("sweet -smooth*", ["blueberry", "cherry", "grape", "pear"]);
   });
 
-  test("a wildcard inside an or group unions with its siblings", () => {
+  test("unions a wildcard inside an or group with its siblings", () => {
     expectMatches("( vitamin-a ~ trop* )", ["kiwi", "mango"]);
   });
 
-  test("a wildcard matching nothing yields no matches", () => {
+  test("matches nothing for a wildcard that matches no term", () => {
     expectMatches("zzz*", []);
     expectMatches("sweet zzz*", []);
   });
 
-  test("a negated root expression matches every doc outside it", () => {
+  test("matches every doc outside a negated root expression", () => {
     const actual = searcher.evaluate(SearchExpression.not(parseSearchExpression("red")), fruitDocs).map(item => item.name).sort();
 
     expect(actual).toEqual(["banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
   });
 
-  test("a negated root still excludes its matches when the candidate list dwarfs the index", () => {
+  test("still excludes a negated root's matches when the candidate list dwarfs the index", () => {
     const unindexed: Fruit[] = Array.from({ length: fruitDocs.length * 3 }, () => ({ name: "apple", tags: new Set<string>(), getMetric: (): number => 0 }));
     const actual = searcher.evaluate(SearchExpression.not(parseSearchExpression("red")), [...fruitDocs, ...unindexed]).map(item => item.name).sort();
 

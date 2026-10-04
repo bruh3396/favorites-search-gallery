@@ -34,35 +34,35 @@ describe("FavoritesDrawer", () => {
   });
 
   describe("setup", () => {
-    test.each(FavoritesDrawerSectionNames)("clicking the %s tab makes it the active section", (name) => {
+    test.each(FavoritesDrawerSectionNames)("makes the %s tab the active section when it is clicked", name => {
       const { shell, preferences } = setup();
 
       shell.drawer[name].tab.click();
       expect(preferences.favorites.drawerActiveSection.value).toBe(name);
     });
 
-    test("tabs show their name as a tooltip when the sidebar has no labels", () => {
+    test("gives each tab its name as a tooltip when the sidebar has no labels", () => {
       FavoritesConfig.drawerSidebarLabelsEnabled = false;
       const { shell } = setup();
 
       expect(shell.drawer.snippets.tab.dataset.tooltip).toBe("Snippets");
     });
 
-    test("tabs have no tooltip when the sidebar shows labels", () => {
+    test("gives tabs no tooltip when the sidebar shows labels", () => {
       FavoritesConfig.drawerSidebarLabelsEnabled = true;
       const { shell } = setup();
 
       expect(shell.drawer.snippets.tab.dataset.tooltip).toBeUndefined();
     });
 
-    test("clicking the version opens the drawer on the changelog", () => {
+    test("opens the drawer on the changelog when the version is clicked", () => {
       const { shell, preferences } = setup();
 
       shell.toolbar.aboutVersion.click();
       expect(readDrawerState(preferences)).toEqual({ open: true, section: "change" });
     });
 
-    test("clicking help opens the drawer on help", () => {
+    test("opens the drawer on help when help is clicked", () => {
       const { shell, preferences } = setup();
 
       shell.toolbar.aboutHelp.click();
@@ -78,7 +78,7 @@ describe("FavoritesDrawer", () => {
 
       FavoritesDrawer.mount(shell, {
         help: {
-          mount: (container) => {
+          mount: container => {
             mountedInto = container;
           }, actions: [action]
         }
@@ -87,13 +87,13 @@ describe("FavoritesDrawer", () => {
       expect(shell.drawer.help.title.contains(action)).toBe(true);
     });
 
-    test("a section can have content without actions, or actions without content", () => {
+    test("mounts a section's content without actions, or its actions without content", () => {
       const { shell } = setup();
       const action = document.createElement("button");
       const content = document.createElement("p");
 
       FavoritesDrawer.mount(shell, {
-        settings: { mount: (container) => container.append(content) },
+        settings: { mount: container => container.append(content) },
         change: { actions: [action] }
       });
       expect(shell.drawer.settings.body.contains(content)).toBe(true);

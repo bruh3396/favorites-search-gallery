@@ -33,16 +33,20 @@ function setup({ failing = new Set<string>(), emptyBatches = new Set<number>(), 
   return { downloader, saved, archived };
 }
 
-async function download(downloader: DownloaderBatcher, items: PostMedia[], batchSize: number, signal = new AbortController().signal): Promise<{ result: Awaited<ReturnType<DownloaderBatcher["download"]>>; progress: DownloaderProgress[] }> {
+async function download(
+  downloader: DownloaderBatcher,
+  items: PostMedia[],
+  { batchSize, signal = new AbortController().signal }: { batchSize: number; signal?: AbortSignal }
+): Promise<{ result: Awaited<ReturnType<DownloaderBatcher["download"]>>; progress: DownloaderProgress[] }> {
   const progress: DownloaderProgress[] = [];
-  const result = await downloader.download(items, batchSize, signal, update => progress.push(update));
+  const result = await downloader.download(items, { batchSize, signal, onProgress: update => progress.push(update) });
   return { result, progress };
 }
 
 describe("DownloaderBatcher", () => {
   test("saves a single unbatched archive", async() => {
     const { downloader, saved, archived } = setup();
-    const { result } = await download(downloader, createItems(3), 0);
+    const { result } = await download(downloader, createItems(3), { batchSize: 0 });
 
     expect(archived).toEqual([["1", "2", "3"]]);
     expect(saved).toEqual(["favorites.zip"]);
@@ -52,7 +56,7 @@ describe("DownloaderBatcher", () => {
   test("splits into numbered, zero-padded batches", async() => {
     const { downloader, saved, archived } = setup();
 
-    await download(downloader, createItems(10), 1);
+    await download(downloader, createItems(10), { batchSize: 1 });
 
     expect(archived).toHaveLength(10);
     expect(saved[0]).toBe("favorites_01of10.zip");
@@ -61,7 +65,7 @@ describe("DownloaderBatcher", () => {
 
   test("reports running counts across batches", async() => {
     const { downloader } = setup({ failing: new Set(["2"]) });
-    const { result, progress } = await download(downloader, createItems(3), 2);
+    const { result, progress } = await download(downloader, createItems(3), { batchSize: 2 });
 
     expect(progress).toEqual([
       { filename: "1.png", currentBatch: 1, totalBatches: 2, totalItems: 3, successCount: 1, failureCount: 0 },
@@ -74,7 +78,7 @@ describe("DownloaderBatcher", () => {
   test("skips saving a batch that produced no archive", async() => {
     const { downloader, saved } = setup({ emptyBatches: new Set([1]) });
 
-    await download(downloader, createItems(2), 1);
+    await download(downloader, createItems(2), { batchSize: 1 });
 
     expect(saved).toEqual(["favorites_2of2.zip"]);
   });
@@ -82,7 +86,7 @@ describe("DownloaderBatcher", () => {
   test("stops before the next batch once aborted", async() => {
     const controller = new AbortController();
     const { downloader, archived } = setup({ onBatch: () => controller.abort() });
-    const { result } = await download(downloader, createItems(3), 1, controller.signal);
+    const { result } = await download(downloader, createItems(3), { batchSize: 1, signal: controller.signal });
 
     expect(archived).toEqual([["1"]]);
     expect(result.aborted).toBe(true);

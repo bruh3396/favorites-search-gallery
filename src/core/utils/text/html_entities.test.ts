@@ -2,11 +2,11 @@ import { describe, expect, test } from "vitest";
 import { decodeHtmlEntities } from "@/core/utils/text/html_entities";
 
 describe("decodeHtmlEntities", () => {
-  test("empty", () => {
+  test("returns an empty string unchanged", () => {
     expect(decodeHtmlEntities("")).toBe("");
   });
 
-  test("no entities", () => {
+  test("leaves text without entities unchanged", () => {
     expect(decodeHtmlEntities("baldurs_gate")).toBe("baldurs_gate");
   });
 

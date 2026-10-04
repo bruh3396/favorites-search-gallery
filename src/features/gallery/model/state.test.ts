@@ -25,7 +25,7 @@ describe("GalleryStateController", () => {
     expect(controller.isIdle).toBe(true);
   });
 
-  test("open() transitions to the open state", () => {
+  test("moves to the open state on open", () => {
     const controller = new GalleryStateController(false);
 
     controller.open();
@@ -34,7 +34,7 @@ describe("GalleryStateController", () => {
     expect(controller.isInGallery).toBe(true);
   });
 
-  test("close() transitions to the idle state", () => {
+  test("moves to the idle state on close", () => {
     const controller = createOpenController();
 
     controller.close();
@@ -43,7 +43,7 @@ describe("GalleryStateController", () => {
     expect(controller.isIdle).toBe(true);
   });
 
-  test("preview(true) transitions to the preview state from idle", () => {
+  test("moves from idle to the preview state when previews turn on", () => {
     const controller = new GalleryStateController(false);
 
     controller.preview(true);
@@ -52,7 +52,7 @@ describe("GalleryStateController", () => {
     expect(controller.isShowingPreviews).toBe(true);
   });
 
-  test("preview(false) transitions to the idle state from preview", () => {
+  test("moves from preview to the idle state when previews turn off", () => {
     const controller = new GalleryStateController(true);
 
     controller.preview(false);
@@ -61,7 +61,7 @@ describe("GalleryStateController", () => {
     expect(controller.isIdle).toBe(true);
   });
 
-  test("preview() has no effect while in the open state", () => {
+  test("ignores previews turning on or off while open", () => {
     const controller = createOpenController();
 
     controller.preview(true);

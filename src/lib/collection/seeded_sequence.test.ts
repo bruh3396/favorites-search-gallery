@@ -14,7 +14,7 @@ describe("nextInRange", () => {
     }
   });
 
-  test("empty range yields min", () => {
+  test("yields min for an empty range", () => {
     const sequence = new SeededSequence();
 
     expect(sequence.nextInRange(7, 7)).toBe(7);
@@ -27,7 +27,7 @@ describe("nextInRange", () => {
     expect(values.size).toBeGreaterThan(1);
   });
 
-  test("separate instances advance independently", () => {
+  test("advances separate instances independently", () => {
     const first = new SeededSequence();
     const second = new SeededSequence();
 

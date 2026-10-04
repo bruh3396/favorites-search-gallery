@@ -32,9 +32,9 @@ const implementations: { name: string; implementation: Searcher; supportsAST: bo
 ];
 
 for (const { name, implementation, supportsAST } of implementations) {
-  describe(`${name} end to end search cases`, () => {
+  describe(name, () => {
     const assertMatches: QueryAssertion = (query: string, expectedNames: FruitName[]): void => {
-      expect(implementation(query, fruitDocs).sort(), query).toEqual(expectedNames.slice().sort());
+      expect(implementation(query, fruitDocs).sort(), query).toEqual([...expectedNames].sort());
     };
 
     for (const group of searchCases) {

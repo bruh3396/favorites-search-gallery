@@ -21,7 +21,7 @@ function variant(label: string, { values, disabled = false, size }: MultiSelectS
       const control = createMultiSelect<string>(ownerDocument, {
         options: ACTIONS,
         size,
-        onValueChange: (next) => {
+        onValueChange: next => {
           log(`MultiSelect "${label}" → [${next.join(", ")}]`);
           control.setValue(next);
         }

@@ -60,7 +60,7 @@ describe("FavoritesControl", () => {
     expect(searchField.value).toBe("");
   });
 
-  test("a search button click searches, and a ctrl-click asks for the post list", () => {
+  test("searches on a search button click and asks for the post list on a ctrl-click", () => {
     const { context, control, searched } = setup();
     const postLists: string[] = [];
 
@@ -85,7 +85,7 @@ describe("FavoritesControl", () => {
     const downloader = document.createElement("div");
     const ownSections = ["settings", "change", "help"] as const;
 
-    control.mountDrawerSections({ download: { mount: (container) => container.append(downloader) } });
+    control.mountDrawerSections({ download: { mount: container => container.append(downloader) } });
 
     for (const name of ownSections) {
       expect(shell.drawer[name].body.childElementCount).toBeGreaterThan(0);

@@ -14,7 +14,7 @@ const createCursor = (...ids: string[]): ItemCursor<Identifiable> => {
   return cursor;
 };
 
-describe("Cursor", () => {
+describe("ItemCursor", () => {
   test("starts on the first item", () => {
     expect(createCursor("a", "b", "c").currentItem().id).toBe("a");
   });
@@ -48,176 +48,176 @@ describe("Cursor", () => {
     expect(one.currentItem().id).toBe("b");
     expect(two.currentItem().id).toBe("a");
   });
-});
 
-describe("Cursor boundaries", () => {
-  test("reports no boundary while moving inside the items", () => {
-    expect(createCursor("a", "b", "c").move(FORWARD)).toBe("none");
+  describe("move", () => {
+    test("reports no boundary while moving inside the items", () => {
+      expect(createCursor("a", "b", "c").move(FORWARD)).toBe("none");
+    });
+
+    test("reports the start when moving back from the first item", () => {
+      expect(createCursor("a", "b", "c").move(BACKWARD)).toBe("start");
+    });
+
+    test("reports the end when moving past the last item", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      cursor.jumpToLast();
+      expect(cursor.move(FORWARD)).toBe("end");
+    });
+
+    test("clamps to the first item when moving back from the start", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      cursor.move(BACKWARD);
+      expect(cursor.currentItem().id).toBe("a");
+    });
+
+    test("clamps to the last item when moving past the end", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      cursor.jumpToLast();
+      cursor.move(FORWARD);
+      expect(cursor.currentItem().id).toBe("c");
+    });
+
+    test("reports the boundary on every move held against an edge", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      expect(cursor.move(BACKWARD)).toBe("start");
+      expect(cursor.move(BACKWARD)).toBe("start");
+      expect(cursor.currentItem().id).toBe("a");
+    });
+
+    test("reports a boundary when a lone item is moved off either side", () => {
+      const cursor = createCursor("only");
+
+      expect(cursor.move(BACKWARD)).toBe("start");
+      expect(cursor.move(FORWARD)).toBe("end");
+      expect(cursor.currentItem().id).toBe("only");
+    });
   });
 
-  test("reports the start when moving back from the first item", () => {
-    expect(createCursor("a", "b", "c").move(BACKWARD)).toBe("start");
+  describe("pointTo", () => {
+    test("points at the item with the given id", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      cursor.pointTo(createItems("c")[0]);
+      expect(cursor.currentItem().id).toBe("c");
+    });
+
+    test("moves relative to the item pointed at", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      cursor.pointTo(createItems("c")[0]);
+      cursor.move(BACKWARD);
+      expect(cursor.currentItem().id).toBe("b");
+    });
+
+    test("throws for an id that is not indexed", () => {
+      const cursor = createCursor("a", "b", "c");
+
+      expect(() => cursor.pointTo(createItems("missing")[0])).toThrow("Could not find item with id: missing");
+    });
+
+    test("throws for an item that was skipped for having no id", () => {
+      const cursor = createCursor("a", "", "c");
+
+      expect(() => cursor.pointTo(createItems("")[0])).toThrow("Could not find item with id: ");
+    });
   });
 
-  test("reports the end when moving past the last item", () => {
-    const cursor = createCursor("a", "b", "c");
+  describe("indexItems", () => {
+    test("throws when navigating before any items are indexed", () => {
+      const cursor = new ItemCursor<Identifiable>();
 
-    cursor.jumpToLast();
-    expect(cursor.move(FORWARD)).toBe("end");
-  });
+      expect(() => cursor.currentItem()).toThrow("Tried to navigate without items");
+      expect(() => cursor.move(FORWARD)).toThrow("Tried to navigate without items");
+      expect(() => cursor.jumpToFirst()).toThrow("Tried to navigate without items");
+      expect(() => cursor.jumpToLast()).toThrow("Tried to navigate without items");
+    });
 
-  test("clamps to the first item when moving back from the start", () => {
-    const cursor = createCursor("a", "b", "c");
+    test("throws when navigating after the items are emptied", () => {
+      const cursor = createCursor("a", "b", "c");
 
-    cursor.move(BACKWARD);
-    expect(cursor.currentItem().id).toBe("a");
-  });
+      cursor.indexItems([]);
+      expect(() => cursor.currentItem()).toThrow("Tried to navigate without items");
+    });
 
-  test("clamps to the last item when moving past the end", () => {
-    const cursor = createCursor("a", "b", "c");
+    test("throws on a duplicate id", () => {
+      expect(() => createCursor("a", "b", "a")).toThrow("Duplicate item id: a");
+    });
 
-    cursor.jumpToLast();
-    cursor.move(FORWARD);
-    expect(cursor.currentItem().id).toBe("c");
-  });
+    test("indexes items without an id by position but not by lookup", () => {
+      const cursor = createCursor("a", "", "c");
 
-  test("reports the boundary on every move held against an edge", () => {
-    const cursor = createCursor("a", "b", "c");
+      cursor.pointTo(createItems("c")[0]);
+      cursor.move(BACKWARD);
+      expect(cursor.currentItem().id).toBe("");
+    });
 
-    expect(cursor.move(BACKWARD)).toBe("start");
-    expect(cursor.move(BACKWARD)).toBe("start");
-    expect(cursor.currentItem().id).toBe("a");
-  });
+    test("allows more than one item without an id", () => {
+      const cursor = createCursor("", "", "c");
 
-  test("reports a boundary when a lone item is moved off either side", () => {
-    const cursor = createCursor("only");
+      cursor.pointTo(createItems("c")[0]);
+      expect(cursor.currentItem().id).toBe("c");
+    });
 
-    expect(cursor.move(BACKWARD)).toBe("start");
-    expect(cursor.move(FORWARD)).toBe("end");
-    expect(cursor.currentItem().id).toBe("only");
-  });
-});
+    test("keeps the current position when re-indexing a longer list", () => {
+      const cursor = createCursor("a", "b", "c");
 
-describe("Cursor pointTo", () => {
-  test("points at the item with the given id", () => {
-    const cursor = createCursor("a", "b", "c");
+      cursor.jumpToLast();
+      cursor.indexItems(createItems("a", "b", "c", "d"));
+      expect(cursor.currentItem().id).toBe("c");
+    });
 
-    cursor.pointTo(createItems("c")[0]);
-    expect(cursor.currentItem().id).toBe("c");
-  });
+    test("resets to the first item when re-indexing drops the current position", () => {
+      const cursor = createCursor("a", "b", "c", "d", "e");
 
-  test("moves relative to the item pointed at", () => {
-    const cursor = createCursor("a", "b", "c");
+      cursor.jumpToLast();
+      cursor.indexItems(createItems("a", "b"));
+      expect(cursor.currentItem().id).toBe("a");
+    });
 
-    cursor.pointTo(createItems("c")[0]);
-    cursor.move(BACKWARD);
-    expect(cursor.currentItem().id).toBe("b");
-  });
+    test("keeps the last position when re-indexing to exactly that length", () => {
+      const cursor = createCursor("a", "b", "c");
 
-  test("throws for an id that is not indexed", () => {
-    const cursor = createCursor("a", "b", "c");
+      cursor.move(FORWARD);
+      cursor.indexItems(createItems("x", "y"));
+      expect(cursor.currentItem().id).toBe("y");
+    });
 
-    expect(() => cursor.pointTo(createItems("missing")[0])).toThrow("Could not find item with id: missing");
-  });
+    test("points at the replaced item when re-indexing keeps the position", () => {
+      const cursor = createCursor("a", "b", "c");
 
-  test("throws for an item that was skipped for having no id", () => {
-    const cursor = createCursor("a", "", "c");
+      cursor.jumpToLast();
+      cursor.indexItems(createItems("x", "y", "z"));
+      expect(cursor.currentItem().id).toBe("z");
+    });
 
-    expect(() => cursor.pointTo(createItems("")[0])).toThrow("Could not find item with id: ");
-  });
-});
+    test("forgets ids that are no longer indexed", () => {
+      const cursor = createCursor("a", "b", "c");
 
-describe("Cursor indexItems", () => {
-  test("throws when navigating before any items are indexed", () => {
-    const cursor = new ItemCursor<Identifiable>();
+      cursor.indexItems(createItems("x", "y"));
+      expect(() => cursor.pointTo(createItems("a")[0])).toThrow("Could not find item with id: a");
+    });
 
-    expect(() => cursor.currentItem()).toThrow("Tried to navigate without items");
-    expect(() => cursor.move(FORWARD)).toThrow("Tried to navigate without items");
-    expect(() => cursor.jumpToFirst()).toThrow("Tried to navigate without items");
-    expect(() => cursor.jumpToLast()).toThrow("Tried to navigate without items");
-  });
+    test("throws when the indexed source shrinks past the current position", () => {
+      const items = createItems("a", "b", "c");
+      const cursor = new ItemCursor<Identifiable>();
 
-  test("throws when navigating after the items are emptied", () => {
-    const cursor = createCursor("a", "b", "c");
+      cursor.indexItems(items);
+      cursor.jumpToLast();
+      items.pop();
+      expect(() => cursor.currentItem()).toThrow("Could not get item at index: 2");
+    });
 
-    cursor.indexItems([]);
-    expect(() => cursor.currentItem()).toThrow("Tried to navigate without items");
-  });
+    test("recovers after the items are emptied and indexed again", () => {
+      const cursor = createCursor("a", "b", "c");
 
-  test("throws on a duplicate id", () => {
-    expect(() => createCursor("a", "b", "a")).toThrow("Duplicate item id: a");
-  });
-
-  test("indexes items without an id by position but not by lookup", () => {
-    const cursor = createCursor("a", "", "c");
-
-    cursor.pointTo(createItems("c")[0]);
-    cursor.move(BACKWARD);
-    expect(cursor.currentItem().id).toBe("");
-  });
-
-  test("allows more than one item without an id", () => {
-    const cursor = createCursor("", "", "c");
-
-    cursor.pointTo(createItems("c")[0]);
-    expect(cursor.currentItem().id).toBe("c");
-  });
-
-  test("keeps the current position when re-indexing a longer list", () => {
-    const cursor = createCursor("a", "b", "c");
-
-    cursor.jumpToLast();
-    cursor.indexItems(createItems("a", "b", "c", "d"));
-    expect(cursor.currentItem().id).toBe("c");
-  });
-
-  test("resets to the first item when re-indexing drops the current position", () => {
-    const cursor = createCursor("a", "b", "c", "d", "e");
-
-    cursor.jumpToLast();
-    cursor.indexItems(createItems("a", "b"));
-    expect(cursor.currentItem().id).toBe("a");
-  });
-
-  test("keeps the last position when re-indexing to exactly that length", () => {
-    const cursor = createCursor("a", "b", "c");
-
-    cursor.move(FORWARD);
-    cursor.indexItems(createItems("x", "y"));
-    expect(cursor.currentItem().id).toBe("y");
-  });
-
-  test("points at the replaced item when re-indexing keeps the position", () => {
-    const cursor = createCursor("a", "b", "c");
-
-    cursor.jumpToLast();
-    cursor.indexItems(createItems("x", "y", "z"));
-    expect(cursor.currentItem().id).toBe("z");
-  });
-
-  test("forgets ids that are no longer indexed", () => {
-    const cursor = createCursor("a", "b", "c");
-
-    cursor.indexItems(createItems("x", "y"));
-    expect(() => cursor.pointTo(createItems("a")[0])).toThrow("Could not find item with id: a");
-  });
-
-  test("throws when the indexed source shrinks past the current position", () => {
-    const items = createItems("a", "b", "c");
-    const cursor = new ItemCursor<Identifiable>();
-
-    cursor.indexItems(items);
-    cursor.jumpToLast();
-    items.pop();
-    expect(() => cursor.currentItem()).toThrow("Could not get item at index: 2");
-  });
-
-  test("recovers after the items are emptied and indexed again", () => {
-    const cursor = createCursor("a", "b", "c");
-
-    cursor.jumpToLast();
-    cursor.indexItems([]);
-    cursor.indexItems(createItems("a", "b", "c"));
-    expect(cursor.currentItem().id).toBe("a");
+      cursor.jumpToLast();
+      cursor.indexItems([]);
+      cursor.indexItems(createItems("a", "b", "c"));
+      expect(cursor.currentItem().id).toBe("a");
+    });
   });
 });

@@ -12,23 +12,23 @@ export class GalleryMouseFlow extends GalleryFlow {
   }
 
   public handleClick(mouseEvent: EnhancedMouseEvent): void {
-    this.runForState({ open: (event) => this.handleClickInGallery(event) }, mouseEvent.originalEvent);
+    this.runForState({ open: event => this.handleClickInGallery(event) }, mouseEvent.originalEvent);
   }
 
   public handleDoubleClick(mouseEvent: MouseEvent): void {
-    this.runForState({ open: (event) => this.closeIfOverVideo(event) }, mouseEvent);
+    this.runForState({ open: event => this.closeIfOverVideo(event) }, mouseEvent);
   }
 
   public handleMouseDown(event: EnhancedMouseEvent): void {
     this.runForState({
-      preview: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent),
-      idle: (mouseEvent) => this.handleMouseDownOutsideGallery(mouseEvent),
-      open: (mouseEvent) => this.handleMouseDownInGallery(mouseEvent)
+      preview: mouseEvent => this.handleMouseDownOutsideGallery(mouseEvent),
+      idle: mouseEvent => this.handleMouseDownOutsideGallery(mouseEvent),
+      open: mouseEvent => this.handleMouseDownInGallery(mouseEvent)
     }, event);
   }
 
   public handleContextMenu(mouseEvent: MouseEvent): void {
-    this.runForState({ open: (event) => this.closeOnContextMenu(event) }, mouseEvent);
+    this.runForState({ open: event => this.closeOnContextMenu(event) }, mouseEvent);
   }
 
   public handleMouseMove(event: MouseEvent): void {
@@ -47,8 +47,8 @@ export class GalleryMouseFlow extends GalleryFlow {
 
   public handleWheel(wheelEvent: EnhancedWheelEvent): void {
     this.runForState({
-      preview: (event) => this.flows.actions.adjustBackgroundOpacity(event.originalEvent),
-      open: (event) => this.navigateOnWheel(event)
+      preview: event => this.flows.actions.adjustBackgroundOpacity(event.originalEvent),
+      open: event => this.navigateOnWheel(event)
     }, wheelEvent);
   }
 

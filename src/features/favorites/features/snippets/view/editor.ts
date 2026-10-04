@@ -1,4 +1,5 @@
-import { Snippet, SnippetScene } from "@/features/favorites/features/snippets/types/types";
+import { Snippet } from "@/core/domain/snippet/snippet";
+import { SnippetScene } from "@/features/favorites/features/snippets/types/types";
 import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
 import { toggleDataset } from "@/utils/browser/dataset";
 

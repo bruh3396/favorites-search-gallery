@@ -34,20 +34,20 @@ function setup(options: Partial<SettingsScreenOptions> = {}): SettingsScreen & {
   triggers: HTMLButtonElement[];
 } {
   const expanded = options.expanded ?? createPreference<readonly string[]>([]);
-  const descriptors = ["autoplay", "hints", "loop"].map((id) => createSwitchSetting(id));
+  const descriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
   const screen = createSettingsScreen(document, { layout: LAYOUT, descriptors, expanded, scheduler: SCHEDULER, ...options });
   return { ...screen, expanded, triggers: [...screen.element.querySelectorAll<HTMLButtonElement>("[aria-expanded]")] };
 }
 
 function readLabels(element: HTMLElement): string[] {
-  return [...element.querySelectorAll(".fsg-SettingRow-label")].map((label) => label.textContent ?? "");
+  return [...element.querySelectorAll(".fsg-SettingRow-label")].map(label => label.textContent ?? "");
 }
 
 describe("createSettingsScreen", () => {
   test("draws each section in layout order, its rows in the order it lists them", () => {
     const { triggers, element } = setup();
 
-    expect(triggers.map((trigger) => trigger.textContent)).toEqual(["General", "Gallery"]);
+    expect(triggers.map(trigger => trigger.textContent)).toEqual(["General", "Gallery"]);
     expect(readLabels(element)).toEqual(["hints", "autoplay", "loop"]);
   });
 
@@ -63,7 +63,7 @@ describe("createSettingsScreen", () => {
 
   test("opens the sections the preference lists, and follows it", () => {
     const { triggers, expanded } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-    const readExpandedStates = (): (string | null)[] => triggers.map((trigger) => trigger.getAttribute("aria-expanded"));
+    const readExpandedStates = (): (string | null)[] => triggers.map(trigger => trigger.getAttribute("aria-expanded"));
 
     expect(readExpandedStates()).toEqual(["false", "true"]);
     expanded.set(["general"]);
@@ -81,16 +81,16 @@ describe("createSettingsScreen", () => {
 
   test("draws sections and rows at the host's size", () => {
     const { element } = setup({ size: "small" });
-    const sizes = [...element.querySelectorAll<HTMLElement>("[data-size]")].map((sized) => sized.dataset.size);
+    const sizes = [...element.querySelectorAll<HTMLElement>("[data-size]")].map(sized => sized.dataset.size);
 
     expect(new Set(sizes)).toEqual(new Set(["small"]));
   });
 
   test("hides and shows every caption on request", () => {
-    const descriptors = ["autoplay", "hints", "loop"].map((id) => ({ ...createSwitchSetting(id), description: `About ${id}.` }));
+    const descriptors = ["autoplay", "hints", "loop"].map(id => ({ ...createSwitchSetting(id), description: `About ${id}.` }));
     const { element, setDescriptionsVisible } = setup({ descriptors });
     const captions = [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow-description")];
-    const readDescriptionHiddenStates = (): boolean[] => captions.map((caption) => caption.hidden);
+    const readDescriptionHiddenStates = (): boolean[] => captions.map(caption => caption.hidden);
 
     setDescriptionsVisible(false);
     expect(readDescriptionHiddenStates()).toEqual([true, true, true]);

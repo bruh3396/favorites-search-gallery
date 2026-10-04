@@ -17,7 +17,7 @@ function createDoc(id: number, tags: string[] = []): MetricSearchable {
 }
 
 describe("NumericSearchTerm", () => {
-  describe("positive", () => {
+  describe("matches", () => {
     test("matches a post whose id equals the number", () => {
       expect(parseNumericSearchTerm("200").matches(createDoc(200))).toBe(true);
     });
@@ -30,25 +30,23 @@ describe("NumericSearchTerm", () => {
       expect(parseNumericSearchTerm("200").matches(createDoc(200, ["200"]))).toBe(true);
     });
 
-    test("does not match when neither the id nor a tag equals the number", () => {
+    test("rejects a post when neither the id nor a tag equals the number", () => {
       expect(parseNumericSearchTerm("200").matches(createDoc(1, ["red", "blue"]))).toBe(false);
     });
 
-    test("does not match a different id with no matching tag", () => {
+    test("rejects a different id with no matching tag", () => {
       expect(parseNumericSearchTerm("200").matches(createDoc(201))).toBe(false);
     });
-  });
 
-  describe("negated", () => {
-    test("excludes a post whose id equals the number", () => {
+    test("excludes a post whose id equals the number when negated", () => {
       expect(parseNumericSearchTerm("-200").matches(createDoc(200))).toBe(false);
     });
 
-    test("excludes a post tagged with the number literally", () => {
+    test("excludes a post tagged with the number literally when negated", () => {
       expect(parseNumericSearchTerm("-200").matches(createDoc(1, ["200"]))).toBe(false);
     });
 
-    test("matches a post with neither the id nor the tag", () => {
+    test("matches a post with neither the id nor the tag when negated", () => {
       expect(parseNumericSearchTerm("-200").matches(createDoc(1, ["red"]))).toBe(true);
     });
   });

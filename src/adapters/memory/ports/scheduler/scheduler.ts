@@ -44,6 +44,9 @@ export class MemoryScheduler implements Scheduler {
   private nextDue(end: number): ScheduledTask | undefined {
     return this.scheduled
       .filter(scheduled => scheduled.dueAt <= end)
-      .reduce<ScheduledTask | undefined>((earliest, scheduled) => (earliest === undefined || scheduled.dueAt < earliest.dueAt ? scheduled : earliest), undefined);
+      .reduce<ScheduledTask | undefined>(
+        (earliest, scheduled) => (earliest === undefined || scheduled.dueAt < earliest.dueAt ? scheduled : earliest),
+        undefined
+      );
   }
 }

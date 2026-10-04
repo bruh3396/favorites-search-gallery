@@ -25,7 +25,7 @@ function variant(label: string, { value, min = 0, max = 100, step, disabled = fa
         step,
         size,
         scheduler: SCHEDULER,
-        onValueChange: (next) => {
+        onValueChange: next => {
           log(`Stepper "${label}" → ${next}`);
           control.setValue(next);
         }

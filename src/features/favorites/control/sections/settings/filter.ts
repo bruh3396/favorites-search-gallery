@@ -5,7 +5,7 @@ import { searchField } from "@/lib/ui/widgets/search_field";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 export function inputFilter(panel: HTMLElement, hideWhileFiltering: HTMLElement[] = []): HTMLElement {
-  const field = searchField("Search Settings", (value) => filterSettings(panel, value, hideWhileFiltering));
+  const field = searchField("Search Settings", value => filterSettings(panel, value, hideWhileFiltering));
   return createElement("div", { className: `${SettingsClass.filter} ${WidgetSelectors.separatorBelow}`, children: [field] });
 }
 
@@ -27,7 +27,7 @@ function filterSettings(panel: HTMLElement, query: string, hideWhileFiltering: H
 }
 
 function parseQuery(query: string): string[] {
-  return query.toLowerCase().split(/\s+/u).filter((term) => term !== "");
+  return query.toLowerCase().split(/\s+/u).filter(term => term !== "");
 }
 
 function filterSection(section: HTMLElement, terms: string[]): number {

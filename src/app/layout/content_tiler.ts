@@ -89,9 +89,9 @@ export class ContentTiler {
     this.currentTiler.activate();
     this.setColumnCount(columnCount.value);
     this.setRowHeight(rowHeight.value);
-    wheel.on((event) => this.changeItemSizeOnShiftScroll(event));
-    columnCount.on((count) => this.setColumnCount(count));
-    rowHeight.on((height) => this.setRowHeight(height));
+    wheel.on(event => this.changeItemSizeOnShiftScroll(event));
+    columnCount.on(count => this.setColumnCount(count));
+    rowHeight.on(height => this.setRowHeight(height));
   }
 
   public changeLayout(layout: Layout): void {

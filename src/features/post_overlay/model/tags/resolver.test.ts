@@ -17,7 +17,7 @@ function createCategoryMap(entries: [string, TagCategory][]): Map<string, TagCat
   return new Map(entries);
 }
 
-describe("PostOverlayTagsResolver.resolveAll", () => {
+describe("resolveAll", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });

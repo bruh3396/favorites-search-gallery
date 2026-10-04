@@ -22,7 +22,7 @@ export function buildSegmentedRow<T extends string | number>(config: Partial<Sel
     group.appendChild(button);
   }
 
-  const binding = new StateBinding(config, [...options.keys()][0], (value) => {
+  const binding = new StateBinding(config, [...options.keys()][0], value => {
     for (const [optionValue, button] of buttons) {
       toggleDataset(button, "selected", optionValue === value);
     }

@@ -30,7 +30,7 @@ function setup(): Setup {
 }
 
 function queryOptions(row: HTMLElement): HTMLButtonElement[] {
-  return Array.from(row.querySelectorAll("button"));
+  return [...row.querySelectorAll("button")];
 }
 
 describe("DownloaderControl", () => {

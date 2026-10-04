@@ -7,20 +7,20 @@ export function setup(events: Events, pagination: HTMLElement): void {
   const { pageSelected, pageStepped, gotoPageToggled, gotoPageSubmitted } = events.favorites;
   const submitGotoPage = (): void => gotoPageSubmitted.emit(gotoPageValue(pagination));
   const actions: Record<FavoritesPaginationAction, (value?: string) => void> = {
-    page: (page) => pageSelected.emit(Number(page)),
-    step: (direction) => pageStepped.emit(direction as NavigationKey),
+    page: page => pageSelected.emit(Number(page)),
+    step: direction => pageStepped.emit(direction as NavigationKey),
     gotoToggle: () => gotoPageToggled.emit(),
     gotoSubmit: submitGotoPage
   };
 
-  pagination.addEventListener("click", (event) => {
+  pagination.addEventListener("click", event => {
     const { action, value } = buttonOf(event.target)?.dataset ?? {};
 
     if (action !== undefined && action in actions) {
       actions[action as FavoritesPaginationAction](value);
     }
   });
-  pagination.addEventListener("keydown", (event) => {
+  pagination.addEventListener("keydown", event => {
     if (event.key === "Enter" && isGotoPageInput(event.target)) {
       submitGotoPage();
     }

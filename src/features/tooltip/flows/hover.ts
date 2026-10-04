@@ -12,9 +12,9 @@ export class TooltipHoverFlow extends TooltipFlow {
     if (event.thumb === null) {
       this.view.hide();
     } else {
-      const tags = getTagSetFromThumb(event.thumb, (id) => this.context.featureBridge.favorites.favorite.request(id));
+      const tags = getTagSetFromThumb(event.thumb, id => this.context.featureBridge.favorites.favorite.request(id));
 
-      this.view.show(event.thumb, tags, (tag) => this.model.colorForTag(tag));
+      this.view.show(event.thumb, tags, tag => this.model.colorForTag(tag));
     }
   }
 }

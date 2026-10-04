@@ -34,11 +34,11 @@ describe("GatedRemoteFavoriteActions", () => {
   });
 
   test("checks whether it is open on every call", async() => {
-    let open = false;
-    const { gated } = setup(() => open);
+    let isOpen = false;
+    const { gated } = setup(() => isOpen);
 
     expect(await gated.remove("1")).toBe("blocked");
-    open = true;
+    isOpen = true;
     expect(await gated.remove("1")).toBe("removed");
   });
 });

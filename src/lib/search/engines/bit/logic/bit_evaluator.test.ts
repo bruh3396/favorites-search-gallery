@@ -44,67 +44,59 @@ const corpus: Item[] = [
   createItem("5", "blue", "sweet", "small")
 ];
 
-describe("SearchExpression leaves", () => {
-  test("a lone positive term matches the docs carrying it", () => {
+describe("BitEvaluator", () => {
+  test("matches a lone positive term to the docs carrying it", () => {
     expect(evaluateIds(corpus, createLeaf("sweet"))).toEqual(["1", "3", "5"]);
   });
 
-  test("a term absent from the index matches nothing", () => {
+  test("matches nothing for a term absent from the index", () => {
     expect(evaluateIds(corpus, createLeaf("nonexistent"))).toEqual([]);
   });
 
-  test("a negated term matches every doc without it", () => {
+  test("matches every doc without a negated term", () => {
     expect(evaluateIds(corpus, createLeaf("-sweet"))).toEqual(["2", "4"]);
   });
-});
 
-describe("SearchExpression AND", () => {
-  test("intersects its children", () => {
+  test("intersects the children of an AND", () => {
     expect(evaluateIds(corpus, SearchExpression.and([createLeaf("red"), createLeaf("sweet")]))).toEqual(["1"]);
   });
 
-  test("is empty when children never co-occur", () => {
+  test("matches nothing for an AND whose children never co-occur", () => {
     expect(evaluateIds(corpus, SearchExpression.and([createLeaf("red"), createLeaf("green")]))).toEqual([]);
   });
 
-  test("an empty AND matches the whole corpus", () => {
+  test("matches the whole corpus for an empty AND", () => {
     expect(evaluateIds(corpus, SearchExpression.and([]))).toEqual(["1", "2", "3", "4", "5"]);
   });
 
-  test("folds a negated child as set subtraction", () => {
+  test("folds a negated child of an AND as set subtraction", () => {
     expect(evaluateIds(corpus, SearchExpression.and([createLeaf("sweet"), createLeaf("-small")]))).toEqual(["3"]);
   });
-});
 
-describe("SearchExpression OR", () => {
-  test("unions its children", () => {
+  test("unions the children of an OR", () => {
     expect(evaluateIds(corpus, SearchExpression.or([createLeaf("red"), createLeaf("blue")]))).toEqual(["1", "2", "5"]);
   });
 
-  test("an empty OR matches nothing", () => {
+  test("matches nothing for an empty OR", () => {
     expect(evaluateIds(corpus, SearchExpression.or([]))).toEqual([]);
   });
 
-  test("ignores a child that matches nothing", () => {
+  test("ignores a child of an OR that matches nothing", () => {
     expect(evaluateIds(corpus, SearchExpression.or([createLeaf("blue"), createLeaf("nonexistent")]))).toEqual(["5"]);
   });
-});
 
-describe("SearchExpression NOT", () => {
-  test("complements a subtree", () => {
+  test("complements a NOT subtree", () => {
     expect(evaluateIds(corpus, SearchExpression.not(createLeaf("sweet")))).toEqual(["2", "4"]);
   });
 
-  test("double negation is identity", () => {
+  test("treats double negation as identity", () => {
     expect(evaluateIds(corpus, SearchExpression.not(SearchExpression.not(createLeaf("sweet"))))).toEqual(["1", "3", "5"]);
   });
 
-  test("negating an OR is the complement of the union", () => {
+  test("complements the union for a negated OR", () => {
     expect(evaluateIds(corpus, SearchExpression.not(SearchExpression.or([createLeaf("red"), createLeaf("green")])))).toEqual(["5"]);
   });
-});
 
-describe("SearchExpression arbitrary nesting", () => {
   test("evaluates an OR of ANDs without cartesian expansion", () => {
     const expression = SearchExpression.or([
       SearchExpression.and([createLeaf("red"), createLeaf("big")]),
@@ -137,21 +129,19 @@ describe("SearchExpression arbitrary nesting", () => {
 
     expect(evaluateIds(corpus, expression)).toEqual(["2", "4"]);
   });
-});
 
-describe("SearchExpression single-positive AND", () => {
-  test("an AND wrapping one OR group equals the bare group", () => {
+  test("matches an AND wrapping one OR group like the bare group", () => {
     const group = SearchExpression.or([createLeaf("red"), createLeaf("blue")]);
 
     expect(evaluateIds(corpus, SearchExpression.and([group]))).toEqual(evaluateIds(corpus, group));
     expect(evaluateIds(corpus, SearchExpression.and([group]))).toEqual(["1", "2", "5"]);
   });
 
-  test("an AND wrapping one term equals the bare term", () => {
+  test("matches an AND wrapping one term like the bare term", () => {
     expect(evaluateIds(corpus, SearchExpression.and([createLeaf("sweet")]))).toEqual(["1", "3", "5"]);
   });
 
-  test("the short-circuited posting is not mutated by a later intersection", () => {
+  test("keeps a short-circuited posting unchanged by a later intersection", () => {
     const evaluator = createEvaluator(corpus);
     const wrapped = SearchExpression.and([createLeaf("sweet")]);
     const intersected = SearchExpression.and([createLeaf("sweet"), createLeaf("small")]);
@@ -161,12 +151,10 @@ describe("SearchExpression single-positive AND", () => {
     expect(evaluator.evaluate(wrapped).map(doc => doc.id).sort()).toEqual(["1", "3", "5"]);
   });
 
-  test("a single-positive AND with a negated sibling still subtracts", () => {
+  test("still subtracts a negated sibling from a single-positive AND", () => {
     expect(evaluateIds(corpus, SearchExpression.and([createLeaf("sweet"), createLeaf("-small")]))).toEqual(["3"]);
   });
-});
 
-describe("SearchExpression wildcard and metric leaves", () => {
   test("resolves a prefix wildcard leaf", () => {
     const items = [createItem("1", "apple"), createItem("2", "banana"), createItem("3", "cherry")];
 

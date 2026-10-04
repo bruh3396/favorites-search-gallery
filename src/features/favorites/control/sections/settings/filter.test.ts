@@ -82,7 +82,7 @@ describe("FavoritesSettingsFilter", () => {
     expect(listVisibleNames(rows)).toEqual(["layout"]);
   });
 
-  test("matching a section's title shows all of its settings", () => {
+  test("shows all of a section's settings when its title matches", () => {
     const { field, rows } = setup();
 
     type(field, "appearance");
@@ -126,7 +126,7 @@ describe("FavoritesSettingsFilter", () => {
     expect(listVisibleNames(extra)).toEqual(["unlabeled"]);
   });
 
-  test("clearing the search shows everything again", () => {
+  test("shows everything again once the search is cleared", () => {
     const { panel, field, rows, hidden } = setup();
 
     type(field, "nothing like this");

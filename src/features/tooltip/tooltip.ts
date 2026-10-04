@@ -33,16 +33,16 @@ function setupView({ context, view }: TooltipComponents): void {
 function subscribeToEvents({ context, model, flows }: TooltipComponents): void {
   const { domEvents, events, preferences, environment } = context;
 
-  domEvents.document.mouseover.on((event) => flows.hover.handleMouseOver(event));
+  domEvents.document.mouseover.on(event => flows.hover.handleMouseOver(event));
   domEvents.window.scrollend.on(() => flows.scroll.reposition());
 
   if (environment.mode === "favorites") {
-    events.favorites.searchRequested.on((query) => queueMacroTask(() => model.rebuildHighlights(query)));
-    preferences.favorites.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
+    events.favorites.searchRequested.on(query => queueMacroTask(() => model.rebuildHighlights(query)));
+    preferences.favorites.tooltipEnabled.on(value => flows.toggle.hideIfDisabled(value));
   }
 
   if (environment.mode === "postList") {
-    preferences.postList.tooltipEnabled.on((value) => flows.toggle.hideIfDisabled(value));
+    preferences.postList.tooltipEnabled.on(value => flows.toggle.hideIfDisabled(value));
   }
 }
 
