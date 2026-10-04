@@ -3,7 +3,7 @@ import { Identifiable } from "@/types/app";
 import { Paginator } from "@/lib/ui/paginator";
 
 const createItems = (count: number): Identifiable[] => Array.from({ length: count }, (_, i) => ({ id: String(i + 1) }));
-const idsOf = (results: Identifiable[]): string[] => results.map(r => r.id);
+const getIds = (results: Identifiable[]): string[] => results.map(r => r.id);
 
 const createPaginator = (count: number, perPage = 10, nearby = 2): Paginator<Identifiable> => {
   const paginator = new Paginator<Identifiable>({ nearbyPageCount: nearby }, (): number => perPage);
@@ -26,14 +26,14 @@ describe("Paginator", () => {
     test("returns the first page's slice by default", () => {
       const paginator = createPaginator(25, 10);
 
-      expect(idsOf(paginator.currentPageItems())).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
     });
 
     test("returns the slice for the selected page", () => {
       const paginator = createPaginator(25, 10);
 
       paginator.selectPage(3);
-      expect(idsOf(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25"]);
     });
 
     test("returns an empty page when there are no items", () => {
@@ -48,7 +48,7 @@ describe("Paginator", () => {
       const paginator = createPaginator(30, 10);
 
       paginator.selectPage(2);
-      expect(idsOf(paginator.adjacentPageItems())).toEqual([
+      expect(getIds(paginator.adjacentPageItems())).toEqual([
         "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
         "21", "22", "23", "24", "25", "26", "27", "28", "29", "30"
       ]);
@@ -57,7 +57,7 @@ describe("Paginator", () => {
     test("omits missing neighbors at the edges", () => {
       const paginator = createPaginator(25, 10);
 
-      expect(idsOf(paginator.adjacentPageItems())).toEqual(["11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
+      expect(getIds(paginator.adjacentPageItems())).toEqual(["11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
     });
   });
 
@@ -79,14 +79,14 @@ describe("Paginator", () => {
 
       paginator.selectPage(2);
       paginator.selectPage(-5);
-      expect(idsOf(paginator.currentPageItems())).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
     });
 
     test("clamps beyond the final page", () => {
       const paginator = createPaginator(25, 10);
 
       paginator.selectPage(99);
-      expect(idsOf(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25"]);
     });
   });
 
@@ -95,7 +95,7 @@ describe("Paginator", () => {
       const paginator = createPaginator(30, 10);
 
       paginator.selectAdjacentPage("ArrowRight");
-      expect(idsOf(paginator.currentPageItems())).toEqual(["11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["11", "12", "13", "14", "15", "16", "17", "18", "19", "20"]);
     });
 
     test("does not move past the final page", () => {
@@ -112,14 +112,14 @@ describe("Paginator", () => {
 
       paginator.selectPage(3);
       paginator.selectWrappedAdjacentPage("ArrowRight");
-      expect(idsOf(paginator.currentPageItems())).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]);
     });
 
     test("wraps from the first page to the last", () => {
       const paginator = createPaginator(25, 10);
 
       paginator.selectWrappedAdjacentPage("ArrowLeft");
-      expect(idsOf(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25"]);
     });
   });
 
@@ -128,7 +128,7 @@ describe("Paginator", () => {
       const paginator = createPaginator(30, 10);
 
       expect(paginator.selectPageContaining("25")).toBe(true);
-      expect(idsOf(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25", "26", "27", "28", "29", "30"]);
+      expect(getIds(paginator.currentPageItems())).toEqual(["21", "22", "23", "24", "25", "26", "27", "28", "29", "30"]);
     });
 
     test("returns false for an unknown id", () => {

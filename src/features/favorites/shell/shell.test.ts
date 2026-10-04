@@ -14,7 +14,7 @@ function setup(): Setup {
   return { appShell, shell: new FavoritesShell(environment, appShell) };
 }
 
-function slotsOf(shell: FavoritesShell): HTMLElement[] {
+function listSlots(shell: FavoritesShell): HTMLElement[] {
   const drawerSlots = Object.values(shell.drawer).flatMap(({ tab, root, title, body }) => [tab, root, title, body]);
   return [...Object.values(shell.toolbar), ...drawerSlots];
 }
@@ -23,13 +23,13 @@ describe("FavoritesShell", () => {
   test("mounts every slot it hands out inside the app shell", () => {
     const { appShell, shell } = setup();
 
-    for (const slot of slotsOf(shell)) {
+    for (const slot of listSlots(shell)) {
       expect(appShell.root.contains(slot)).toBe(true);
     }
   });
 
   test("hands out a distinct element for every slot", () => {
-    const slots = slotsOf(setup().shell);
+    const slots = listSlots(setup().shell);
 
     expect(new Set(slots).size).toBe(slots.length);
   });

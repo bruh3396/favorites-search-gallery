@@ -28,7 +28,7 @@ function createFavoritePosts(tags: string, ...ids: string[]): Post[] {
   return ids.map(id => createFavoritePost(id, tags));
 }
 
-function idsOf(favorites: Favorite[]): string[] {
+function getSortedIds(favorites: Favorite[]): string[] {
   return favorites.map(favorite => favorite.id).sort();
 }
 
@@ -59,7 +59,7 @@ describe("FavoritesModel", () => {
     test("favorites stored by one model load back into another sharing its ports", async() => {
       const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
 
-      expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
+      expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2"]);
       expect(model.getFavorite("1")?.id).toBe("1");
       expect(await model.hasLocalFavorites()).toBe(true);
     });
@@ -119,8 +119,8 @@ describe("FavoritesModel", () => {
       const onSearchResultsFound = vi.fn();
 
       await model.fetchAllFavorites(onSearchResultsFound);
-      expect(idsOf(onSearchResultsFound.mock.calls.flatMap(([results]) => results))).toEqual(["1", "2"]);
-      expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
+      expect(getSortedIds(onSearchResultsFound.mock.calls.flatMap(([results]) => results))).toEqual(["1", "2"]);
+      expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2"]);
     });
 
     test("stores new favorites ahead of the local ones, adding only never-stored ones to the collection", async() => {
@@ -128,10 +128,10 @@ describe("FavoritesModel", () => {
       const { model } = await setup(createFavoritePosts("apple", "1", "2"), undefined, undefined, context);
       const { addedFavorites, prependedCount } = await model.pullNewFavorites();
 
-      expect(idsOf(addedFavorites)).toEqual(["3"]);
+      expect(getSortedIds(addedFavorites)).toEqual(["3"]);
       expect(prependedCount).toBe(1);
       expect(await model.loadFavoriteIds()).toEqual(["3", "1", "2"]);
-      expect(idsOf(model.getAllFavorites())).toEqual(["1", "2", "3"]);
+      expect(getSortedIds(model.getAllFavorites())).toEqual(["1", "2", "3"]);
     });
 
     test("deletes the local favorites the remote list no longer has below the new ones", async() => {
@@ -154,7 +154,7 @@ describe("FavoritesModel", () => {
       await vi.waitFor(() => expect(model.getFavorite("900")?.tags.has("cherry")).toBe(true));
       scheduler.advance(POST_WRITE_DELAY);
 
-      expect(idsOf(model.searchFavorites("cherry"))).toEqual(["900"]);
+      expect(getSortedIds(model.searchFavorites("cherry"))).toEqual(["900"]);
       expect((await context.ports.localPosts.getMany(["900"]))[0].tags).toBe("apple cherry");
     });
   });
@@ -166,10 +166,10 @@ describe("FavoritesModel", () => {
       const onResults = vi.fn();
       const { model } = await setup(posts, undefined, onResults);
 
-      expect(idsOf(model.searchFavorites("apple"))).toEqual(["1", "3"]);
-      expect(idsOf(onResults.mock.lastCall?.[0] ?? [])).toEqual(["1", "3"]);
+      expect(getSortedIds(model.searchFavorites("apple"))).toEqual(["1", "3"]);
+      expect(getSortedIds(onResults.mock.lastCall?.[0] ?? [])).toEqual(["1", "3"]);
       expect(model.getCurrentSearchQuery()).toBe("apple");
-      expect(idsOf(model.getCurrentSearchResults())).toEqual(["1", "3"]);
+      expect(getSortedIds(model.getCurrentSearchResults())).toEqual(["1", "3"]);
     });
 
     test("a pure search leaves the current search untouched", async() => {
@@ -177,7 +177,7 @@ describe("FavoritesModel", () => {
 
       model.searchFavorites("apple");
 
-      expect(idsOf(model.searchFavoritesPure(model.getAllFavorites(), "banana"))).toEqual(["2"]);
+      expect(getSortedIds(model.searchFavoritesPure(model.getAllFavorites(), "banana"))).toEqual(["2"]);
       expect(model.getCurrentSearchQuery()).toBe("apple");
     });
 
@@ -186,8 +186,8 @@ describe("FavoritesModel", () => {
 
       model.searchFavorites("apple");
 
-      expect(idsOf(model.reSearchFavorites())).toEqual(["1", "3"]);
-      expect(idsOf(model.searchSpecificFavorites(model.getAllFavorites().filter(favorite => favorite.id !== "3")))).toEqual(["1"]);
+      expect(getSortedIds(model.reSearchFavorites())).toEqual(["1", "3"]);
+      expect(getSortedIds(model.searchSpecificFavorites(model.getAllFavorites().filter(favorite => favorite.id !== "3")))).toEqual(["1"]);
     });
 
     test("inverts and shuffles the current results", async() => {
@@ -195,8 +195,8 @@ describe("FavoritesModel", () => {
 
       model.searchFavorites("apple");
 
-      expect(idsOf(model.shuffleSearchResults())).toEqual(["1", "3"]);
-      expect(idsOf(model.invertSearchResults())).toEqual(["2"]);
+      expect(getSortedIds(model.shuffleSearchResults())).toEqual(["1", "3"]);
+      expect(getSortedIds(model.invertSearchResults())).toEqual(["2"]);
     });
   });
 

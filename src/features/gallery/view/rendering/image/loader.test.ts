@@ -9,7 +9,7 @@ function createItem(id: string): PostMedia {
   return { id, media: { kind: "image", locator: "" } };
 }
 
-function resolutionOf(request: ImageRequest): string {
+function describeResolution(request: ImageRequest): string {
   return request.isHighRes ? "high" : "low";
 }
 
@@ -23,7 +23,7 @@ describe("GalleryImageLoader", () => {
     fetchOutcome = (): Promise<boolean> => Promise.resolve(true);
     fetcher = {
       fetchBitmap: (fetched): Promise<boolean> => {
-        log.push(`fetch:${fetched.id}:${resolutionOf(fetched)}`);
+        log.push(`fetch:${fetched.id}:${describeResolution(fetched)}`);
         return fetchOutcome(fetched);
       },
       cancelFetch: (id): void => {
@@ -59,7 +59,7 @@ describe("GalleryImageLoader", () => {
   }
 
   function createLoader(budgeter: ImageBudgeter): GalleryImageLoader {
-    return new GalleryImageLoader(fetcher, budgeter, completed => log.push(`complete:${completed.id}:${resolutionOf(completed)}`));
+    return new GalleryImageLoader(fetcher, budgeter, completed => log.push(`complete:${completed.id}:${describeResolution(completed)}`));
   }
 
   describe("load", () => {

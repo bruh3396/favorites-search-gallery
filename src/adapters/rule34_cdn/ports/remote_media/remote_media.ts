@@ -14,8 +14,8 @@ export class Rule34CdnRemoteMedia implements RemoteMedia {
     return this.rule34Cdn.originalUrl(media.locator, media.kind);
   }
 
-  public resolveImageUrl(media: Media): Promise<string> {
-    return this.rule34Cdn.imageUrl(media.locator, media.kind);
+  public async fetchImage(media: Media, signal?: AbortSignal): Promise<Blob> {
+    return this.rule34Cdn.fetchFile(await this.rule34Cdn.imageUrl(media.locator, media.kind), signal);
   }
 
   public async fetchOriginal(media: Media, signal?: AbortSignal): Promise<Blob> {

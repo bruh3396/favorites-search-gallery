@@ -10,11 +10,13 @@ describe("MemoryRemoteMedia", () => {
 
     expect(await source.resolvePreviewUrl(IMAGE)).toBe(IMAGE.locator);
     expect(await source.resolveOriginalUrl(IMAGE)).toBe(IMAGE.locator);
-    expect(await source.resolveImageUrl(IMAGE)).toBe(IMAGE.locator);
   });
 
   test("reads the bytes the locator holds", async() => {
-    expect(await (await new MemoryRemoteMedia().fetchOriginal(IMAGE)).text()).toBe("bytes");
+    const source = new MemoryRemoteMedia();
+
+    expect(await (await source.fetchOriginal(IMAGE)).text()).toBe("bytes");
+    expect(await (await source.fetchImage(IMAGE)).text()).toBe("bytes");
   });
 
   test("has no durations", async() => {

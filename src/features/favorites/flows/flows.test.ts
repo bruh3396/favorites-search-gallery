@@ -22,7 +22,7 @@ let pageCounter = 0;
 
 function createContext(...remoteIds: string[]): AppContext {
   const remote = new MemoryClient(remoteIds.map(createFruitPost));
-  return createContextFor(new MemoryRemoteFavorites(remote), new MemoryRemotePosts(remote));
+  return createFlowsContext(new MemoryRemoteFavorites(remote), new MemoryRemotePosts(remote));
 }
 
 function createRefusingContext(): AppContext {
@@ -31,10 +31,10 @@ function createRefusingContext(): AppContext {
 
   remoteFavorites.fetchAll = (): Promise<void> => Promise.reject(new Error("refused"));
   remoteFavorites.findNew = (): Promise<Post[]> => Promise.reject(new Error("refused"));
-  return createContextFor(remoteFavorites, new MemoryRemotePosts(remote));
+  return createFlowsContext(remoteFavorites, new MemoryRemotePosts(remote));
 }
 
-function createContextFor(remoteFavorites: RemoteFavorites, remotePosts: RemotePosts): AppContext {
+function createFlowsContext(remoteFavorites: RemoteFavorites, remotePosts: RemotePosts): AppContext {
   pageCounter += 1;
   const id = `flows_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesOwnerId: id });
@@ -44,7 +44,7 @@ function createContextFor(remoteFavorites: RemoteFavorites, remotePosts: RemoteP
   return createAppContext({ environment, preferences: { favorites: { layout: "grid" } }, shell, ports: { remoteFavorites, remotePosts } });
 }
 
-function loadedFor(context: AppContext): boolean {
+function hasLoaded(context: AppContext): boolean {
   return context.milestones.favorites.favoritesLoaded.reached;
 }
 
@@ -69,15 +69,15 @@ function setup(context: AppContext): FavoritesFlows {
   return new FavoritesFlows(context, createModel(context), view, new FavoritesControl({ offersTutorial: false }, { context, shell }));
 }
 
-function idsOf(context: AppContext): string[] {
+function readThumbIds(context: AppContext): string[] {
   return Array.from(context.shell.content.querySelectorAll<HTMLElement>(".post")).map(thumb => thumb.id).sort();
 }
 
-function newIdsOf(context: AppContext): string[] {
+function readNewThumbIds(context: AppContext): string[] {
   return Array.from(context.shell.content.querySelectorAll<HTMLElement>(".post[data-new-badge]")).map(thumb => thumb.id).sort();
 }
 
-function localIdsFor(context: AppContext): Promise<string[]> {
+function loadLocalIds(context: AppContext): Promise<string[]> {
   return createModel(context).loadFavoriteIds().then(ids => ids.sort());
 }
 
@@ -91,16 +91,16 @@ describe("FavoritesFlows", () => {
       const context = createContext("1", "2", "3");
 
       await setup(context).load.loadAllFavorites();
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
-      expect(await localIdsFor(context)).toEqual(["1", "2", "3"]);
+      expect(readThumbIds(context)).toEqual(["1", "2", "3"]);
+      expect(await loadLocalIds(context)).toEqual(["1", "2", "3"]);
     });
 
     test("finishes loading without storing membership when the site refuses favorites", async() => {
       const context = createRefusingContext();
 
       await setup(context).load.loadAllFavorites();
-      expect(loadedFor(context)).toBe(true);
-      expect(await localIdsFor(context)).toEqual([]);
+      expect(hasLoaded(context)).toBe(true);
+      expect(await loadLocalIds(context)).toEqual([]);
     });
   });
 
@@ -110,8 +110,8 @@ describe("FavoritesFlows", () => {
 
       await store(context, "1", "2", "3");
       await setup(context).load.loadAllFavorites();
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
-      expect(newIdsOf(context)).toEqual([]);
+      expect(readThumbIds(context)).toEqual(["1", "2", "3"]);
+      expect(readNewThumbIds(context)).toEqual([]);
     });
 
     test("adds favorites made since the last visit, marked as new, and stores them", async() => {
@@ -119,9 +119,9 @@ describe("FavoritesFlows", () => {
 
       await store(context, "1", "2");
       await setup(context).load.loadAllFavorites();
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
-      expect(newIdsOf(context)).toEqual(["3"]);
-      expect(await localIdsFor(context)).toEqual(["1", "2", "3"]);
+      expect(readThumbIds(context)).toEqual(["1", "2", "3"]);
+      expect(readNewThumbIds(context)).toEqual(["3"]);
+      expect(await loadLocalIds(context)).toEqual(["1", "2", "3"]);
     });
 
     test("still shows and finishes loading the local favorites when the site refuses new ones", async() => {
@@ -129,8 +129,8 @@ describe("FavoritesFlows", () => {
 
       await store(context, "1", "2");
       await setup(context).load.loadAllFavorites();
-      expect(idsOf(context)).toEqual(["1", "2"]);
-      expect(loadedFor(context)).toBe(true);
+      expect(readThumbIds(context)).toEqual(["1", "2"]);
+      expect(hasLoaded(context)).toBe(true);
     });
   });
 });

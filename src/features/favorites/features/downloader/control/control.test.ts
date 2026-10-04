@@ -29,7 +29,7 @@ function setup(): Setup {
   return { shell, calls, batchSize, filenameFormat };
 }
 
-function optionsOf(row: HTMLElement): HTMLButtonElement[] {
+function queryOptions(row: HTMLElement): HTMLButtonElement[] {
   return Array.from(row.querySelectorAll("button"));
 }
 
@@ -38,20 +38,20 @@ describe("DownloaderControl", () => {
     const { shell } = setup();
 
     expect(DownloaderConfig.batchSizeOptions).toEqual([100, 250, 500, 1_000, 0]);
-    expect(optionsOf(shell.batchSizeRow).map(button => button.textContent)).toEqual(["100", "250", "500", "1000", "All"]);
+    expect(queryOptions(shell.batchSizeRow).map(button => button.textContent)).toEqual(["100", "250", "500", "1000", "All"]);
   });
 
   test("offers the filename options it was given", () => {
     const { shell } = setup();
 
-    expect(optionsOf(shell.filenameFormatRow).map(button => button.textContent)).toEqual(["Artist", "Character"]);
+    expect(queryOptions(shell.filenameFormatRow).map(button => button.textContent)).toEqual(["Artist", "Character"]);
   });
 
   test("writes chosen options to their preferences", () => {
     const { shell, batchSize, filenameFormat } = setup();
 
-    optionsOf(shell.batchSizeRow)[0].click();
-    optionsOf(shell.filenameFormatRow)[1].click();
+    queryOptions(shell.batchSizeRow)[0].click();
+    queryOptions(shell.filenameFormatRow)[1].click();
     expect([batchSize.value, filenameFormat.value]).toEqual([100, 2]);
   });
 

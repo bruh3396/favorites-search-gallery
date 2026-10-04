@@ -4,7 +4,7 @@ import { FavoritesCollection } from "@/features/favorites/model/collection/colle
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
 import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
 
-function idsOf(items: ArenaFavorite[]): string[] {
+function getIds(items: ArenaFavorite[]): string[] {
   return items.map(item => item.id);
 }
 
@@ -51,13 +51,13 @@ describe("FavoritesCollection", () => {
     test("appendDirty adds items to the end", () => {
       collection.setAll(createPosts("1", "2"));
       collection.appendDirty(createPosts("3"));
-      expect(idsOf(collection.getAll())).toEqual(["1", "2", "3"]);
+      expect(getIds(collection.getAll())).toEqual(["1", "2", "3"]);
     });
 
     test("prependDirty adds items to the front", () => {
       collection.setAll(createPosts("1", "2"));
       collection.prependDirty(createPosts("3"));
-      expect(idsOf(collection.getAll())).toEqual(["3", "1", "2"]);
+      expect(getIds(collection.getAll())).toEqual(["3", "1", "2"]);
     });
   });
 

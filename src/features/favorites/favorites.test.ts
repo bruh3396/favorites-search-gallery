@@ -79,7 +79,7 @@ function createContext(
 }
 
 function createFruitModel(context: AppContext): FavoritesModel {
-  return new FavoritesModel(context, { onSearchResultsChanged: () => { }, onPlaceholderFilled: () => { } });
+  return new FavoritesModel(context, { onSearchResultsChanged: (): void => { }, onPlaceholderFilled: (): void => { } });
 }
 
 async function store(context: AppContext): Promise<void> {
@@ -100,19 +100,19 @@ async function setup(options: SetupOptions = {}): Promise<AppContext> {
   return context;
 }
 
-function favoriteIdsOf(remote: MemoryClient): string[] {
+function readRemoteFavoriteIds(remote: MemoryClient): string[] {
   return remote.readFavorites().map(post => post.id);
 }
 
-function orderOf(context: AppContext): string[] {
+function readThumbOrder(context: AppContext): string[] {
   return Array.from(context.shell.content.querySelectorAll<HTMLElement>(".post")).map(thumb => thumb.id);
 }
 
-function idsOf(context: AppContext): string[] {
-  return orderOf(context).sort();
+function readSortedThumbIds(context: AppContext): string[] {
+  return readThumbOrder(context).sort();
 }
 
-function searchBoxOf(): HTMLTextAreaElement {
+function querySearchBox(): HTMLTextAreaElement {
   return document.getElementById(FavoritesId.searchBox) as HTMLTextAreaElement;
 }
 
@@ -133,15 +133,15 @@ function dispatchMouse(context: AppContext, type: "click" | "mousedown" | "mouse
   return target.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, ...init }));
 }
 
-function imageOf(context: AppContext, id: string): HTMLElement {
+function queryImage(context: AppContext, id: string): HTMLElement {
   return context.shell.content.querySelector(`[id="${id}"] img`) as HTMLElement;
 }
 
-function heartOf(context: AppContext, id: string): HTMLElement {
+function queryHeart(context: AppContext, id: string): HTMLElement {
   return context.shell.content.querySelector(`[id="${id}"] [data-action="favorite"]`) as HTMLElement;
 }
 
-function statusOf(): string | null {
+function readStatus(): string | null {
   return document.getElementById(FavoritesId.loadStatus)?.textContent ?? null;
 }
 
@@ -151,7 +151,7 @@ async function startFavoritesMidLoad(options: SetupOptions = {}): Promise<AppCon
   await store(context);
   vi.spyOn(context.ports.remoteFavorites, "findRemoved").mockReturnValue(new Promise(() => { }));
   startFavorites(context);
-  await vi.waitFor(() => expect(heartOf(context, "2")).not.toBeNull());
+  await vi.waitFor(() => expect(queryHeart(context, "2")).not.toBeNull());
   return context;
 }
 
@@ -169,7 +169,7 @@ describe("startFavorites", () => {
     test("shows the local favorites once they load", async() => {
       const context = await setup();
 
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
+      expect(readSortedThumbIds(context)).toEqual(["1", "2", "3"]);
       expect(context.shell.content.querySelector(".skeleton-item")).toBeNull();
     });
 
@@ -220,7 +220,7 @@ describe("startFavorites", () => {
 
       startFavorites(context);
       await loaded;
-      expect(statusOf()).toBe("Rule34 stopped sending favorites, try again later");
+      expect(readStatus()).toBe("Rule34 stopped sending favorites, try again later");
     });
   });
 
@@ -240,7 +240,7 @@ describe("startFavorites", () => {
       localKeyedValues.set("searchSnippets", [createSnippet("fruits", "apple")]);
       await setup({ localKeyedValues });
       (document.querySelector("[data-snippet-name=fruits]") as HTMLElement).click();
-      expect(searchBoxOf().value).toBe("apple");
+      expect(querySearchBox().value).toBe("apple");
     });
 
     test("a snippet query built from the search results finds those results", async() => {
@@ -250,7 +250,7 @@ describe("startFavorites", () => {
       (document.querySelector("[data-snippet-action=fillQueryFromResults]") as HTMLElement).click();
       context.events.favorites.searchRequested.emit("");
       context.events.favorites.searchRequested.emit((document.querySelector(".favorites-snippets-query-field") as HTMLTextAreaElement).value);
-      expect(idsOf(context)).toEqual(["1", "3"]);
+      expect(readSortedThumbIds(context)).toEqual(["1", "3"]);
     });
   });
 
@@ -259,7 +259,7 @@ describe("startFavorites", () => {
       ["a search request searches", (context): void => context.events.favorites.searchRequested.emit("apple"), ["1", "3"]],
       [
         "the search button searches what's typed", (context): void => {
-          searchBoxOf().value = "banana";
+          querySearchBox().value = "banana";
           context.events.favorites.searchButtonClicked.emit(new MouseEvent("click"));
         }, ["2"]
       ],
@@ -274,22 +274,22 @@ describe("startFavorites", () => {
       const context = await setup();
 
       trigger(context);
-      expect(idsOf(context)).toEqual(ids);
+      expect(readSortedThumbIds(context)).toEqual(ids);
     });
 
     test("the shuffle button reorders the same favorites", async() => {
       const context = await setup();
-      const before = orderOf(context);
+      const before = readThumbOrder(context);
 
       context.events.favorites.shuffleButtonClicked.emit(new MouseEvent("click"));
-      expect(orderOf(context)).not.toEqual(before);
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
+      expect(readThumbOrder(context)).not.toEqual(before);
+      expect(readSortedThumbIds(context)).toEqual(["1", "2", "3"]);
     });
 
     test.each<[string, (context: AppContext) => void, string]>([
       [
         "the clear button empties the search box", (context): void => {
-          searchBoxOf().value = "apple";
+          querySearchBox().value = "apple";
           context.events.favorites.clearButtonClicked.emit(new MouseEvent("click"));
         }, ""
       ],
@@ -299,7 +299,7 @@ describe("startFavorites", () => {
       const context = await setup();
 
       trigger(context);
-      expect(searchBoxOf().value).toBe(value);
+      expect(querySearchBox().value).toBe(value);
     });
 
     test("a post list request opens the post list", async() => {
@@ -320,7 +320,7 @@ describe("startFavorites", () => {
         const context = await setup({ preferences: { favorites: { resultsPerPage: 1 } } });
 
         trigger(context);
-        expect(orderOf(context)).toEqual([context.featureBridge.favorites.searchResults.request()[1].id]);
+        expect(readThumbOrder(context)).toEqual([context.featureBridge.favorites.searchResults.request()[1].id]);
       });
 
       test("toggling go-to-page opens its prompt, and submitting closes it", async() => {
@@ -382,29 +382,29 @@ describe("startFavorites", () => {
       const context = await setup({ environment: { blacklistedTags: "banana" } });
 
       change(context);
-      expect(idsOf(context)).toEqual(ids);
+      expect(readSortedThumbIds(context)).toEqual(ids);
     });
 
     test("the sort key orders the results", async() => {
       const context = await setup();
 
       context.preferences.favorites.sortKey.set("score");
-      expect(orderOf(context)).toEqual(["2", "3", "1"]);
+      expect(readThumbOrder(context)).toEqual(["2", "3", "1"]);
     });
 
     test("the sort direction reverses the results", async() => {
       const context = await setup();
-      const before = orderOf(context);
+      const before = readThumbOrder(context);
 
       context.preferences.favorites.sortAscending.set(true);
-      expect(orderOf(context)).toEqual([...before].reverse());
+      expect(readThumbOrder(context)).toEqual([...before].reverse());
     });
 
     test("results per page limits the shown favorites", async() => {
       const context = await setup();
 
       context.preferences.favorites.resultsPerPage.set(1);
-      expect(orderOf(context)).toHaveLength(1);
+      expect(readThumbOrder(context)).toHaveLength(1);
     });
 
     test("infinite scroll replaces the paginator", async() => {
@@ -412,7 +412,7 @@ describe("startFavorites", () => {
 
       context.preferences.favorites.infiniteScroll.set(true);
       expect(document.documentElement.dataset.paginationHidden).toBeDefined();
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
+      expect(readSortedThumbIds(context)).toEqual(["1", "2", "3"]);
     });
 
     test("turning infinite scroll off brings the paginator back", async() => {
@@ -420,7 +420,7 @@ describe("startFavorites", () => {
 
       context.preferences.favorites.infiniteScroll.set(false);
       expect(document.documentElement.dataset.paginationHidden).toBeUndefined();
-      expect(idsOf(context)).toEqual(["1", "2", "3"]);
+      expect(readSortedThumbIds(context)).toEqual(["1", "2", "3"]);
     });
 
     test("the drawer starts as its preferences say", async() => {
@@ -481,13 +481,13 @@ describe("startFavorites", () => {
       const navigator = new MemoryNavigator();
       const context = await setup({ ...options, navigator });
 
-      dispatchMouse(context, "mousedown", imageOf(context, "2"), init);
+      dispatchMouse(context, "mousedown", queryImage(context, "2"), init);
       expect(navigator.opened).toEqual([context.ports.remotePages.postUrl("2")]);
     });
 
     test.each<[string, (context: AppContext) => Element, MouseEventInit]>([
-      ["a click on a thumb, with the gallery", (context): Element => imageOf(context, "2"), { button: 0 }],
-      ["a ctrl-middle-click on a thumb", (context): Element => imageOf(context, "2"), { button: 1, ctrlKey: true }],
+      ["a click on a thumb, with the gallery", (context): Element => queryImage(context, "2"), { button: 0 }],
+      ["a ctrl-middle-click on a thumb", (context): Element => queryImage(context, "2"), { button: 1, ctrlKey: true }],
       ["a middle-click outside any thumb", (context): Element => context.shell.content, { button: 1 }]
     ])("on desktop, %s opens no post", async(_, targetOf, init) => {
       const navigator = new MemoryNavigator();
@@ -500,14 +500,14 @@ describe("startFavorites", () => {
     test("on desktop, clicking a thumb keeps the page from following its link", async() => {
       const context = await setup();
 
-      expect(dispatchMouse(context, "click", imageOf(context, "2"))).toBe(false);
+      expect(dispatchMouse(context, "click", queryImage(context, "2"))).toBe(false);
     });
 
     test("on desktop, a ctrl-click on a thumb opens its media", async() => {
       const navigator = new MemoryNavigator();
       const context = await setup({ navigator });
 
-      dispatchMouse(context, "click", imageOf(context, "2"), { ctrlKey: true });
+      dispatchMouse(context, "click", queryImage(context, "2"), { ctrlKey: true });
       await vi.waitFor(() => expect(navigator.opened).toEqual(["data:text/plain,2"]));
     });
 
@@ -515,7 +515,7 @@ describe("startFavorites", () => {
       const navigator = new MemoryNavigator();
       const context = await setup({ navigator, environment: { pointer: "touch" } });
 
-      dispatchMouse(context, "mousedown", imageOf(context, "2"), { button: 1 });
+      dispatchMouse(context, "mousedown", queryImage(context, "2"), { button: 1 });
       expect(navigator.opened).toEqual([]);
     });
 
@@ -528,31 +528,31 @@ describe("startFavorites", () => {
       remote.removeFavorite("2");
       const context = await setup({ remote, environment: { ownsFavorites: false, ...environment } });
 
-      dispatchMouse(context, "click", heartOf(context, "2"));
+      dispatchMouse(context, "click", queryHeart(context, "2"));
       await vi.waitFor(() => expect(hasFavorite(context, "2")).toBe(true));
-      expect(favoriteIdsOf(remote)).toContain("2");
+      expect(readRemoteFavoriteIds(remote)).toContain("2");
     });
 
     test("on their own favorites page, clicking a thumb's heart unfavorites and forgets it", async() => {
       const remote = createRemote();
       const context = await setup({ remote });
 
-      dispatchMouse(context, "click", heartOf(context, "2"));
+      dispatchMouse(context, "click", queryHeart(context, "2"));
       await vi.waitFor(() => expect(hasFavorite(context, "2")).toBe(false));
       await vi.waitFor(async() => expect(await createFruitModel(context).loadFavoriteIds()).toHaveLength(2));
-      expect(favoriteIdsOf(remote)).not.toContain("2");
+      expect(readRemoteFavoriteIds(remote)).not.toContain("2");
     });
 
     test("on their own favorites page, clicking a thumb's heart before favorites finish loading changes nothing and keeps showing the sync", async() => {
       const remote = createRemote();
       const context = await startFavoritesMidLoad({ remote });
 
-      dispatchMouse(context, "click", heartOf(context, "2"));
+      dispatchMouse(context, "click", queryHeart(context, "2"));
       await Promise.resolve();
 
       expect(hasFavorite(context, "2")).toBe(true);
-      expect(favoriteIdsOf(remote)).toContain("2");
-      expect(statusOf()).toBe("Syncing with Rule34");
+      expect(readRemoteFavoriteIds(remote)).toContain("2");
+      expect(readStatus()).toBe("Syncing with Rule34");
     });
 
     test("on someone else's favorites page, clicking a thumb's heart works before favorites finish loading", async() => {
@@ -561,25 +561,25 @@ describe("startFavorites", () => {
       remote.removeFavorite("2");
       const context = await startFavoritesMidLoad({ remote, environment: { ownsFavorites: false } });
 
-      dispatchMouse(context, "click", heartOf(context, "2"));
+      dispatchMouse(context, "click", queryHeart(context, "2"));
       await vi.waitFor(() => expect(hasFavorite(context, "2")).toBe(true));
-      expect(favoriteIdsOf(remote)).toContain("2");
+      expect(readRemoteFavoriteIds(remote)).toContain("2");
     });
 
     test("with touch, a swipe that ends on a thumb's heart does not favorite it", async() => {
       const context = await setup({ environment: { ownsFavorites: false, pointer: "touch" } });
 
       vi.spyOn(context.domEvents, "didSwipe").mockReturnValue(true);
-      dispatchMouse(context, "click", heartOf(context, "2"));
+      dispatchMouse(context, "click", queryHeart(context, "2"));
       expect(hasFavorite(context, "2")).toBe(false);
     });
 
     test("without the gallery, hovering a thumb takes its link away", async() => {
       const context = await setup({ features: ["favorites"] });
-      const link = imageOf(context, "2").closest("a") as HTMLAnchorElement;
+      const link = queryImage(context, "2").closest("a") as HTMLAnchorElement;
 
       expect(link.getAttribute("href")).toBe(context.ports.remotePages.postUrl("2"));
-      dispatchMouse(context, "mouseover", imageOf(context, "2"));
+      dispatchMouse(context, "mouseover", queryImage(context, "2"));
       expect(link.getAttribute("href")).toBeNull();
     });
   });

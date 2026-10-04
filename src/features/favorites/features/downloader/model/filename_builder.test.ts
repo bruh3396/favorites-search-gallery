@@ -25,51 +25,56 @@ const CATEGORIES: TagCategoryMap = new Map(Object.entries({
 
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
 const item: PostMedia = { id: "10146816", media: { kind: "image", locator: "1/10146816.jpg" } };
-const filenameFor = (tags: string[], categories: FilenameCategory[] = ALL): string => DownloaderFilename.build(item, new Set(tags), "jpeg", categories, CATEGORIES);
+const buildFilename = (tags: string[], categories: FilenameCategory[] = ALL): string => (
+  DownloaderFilename.build(item, new Set(tags), "jpeg", categories, CATEGORIES)
+);
 
 describe("buildFilename", () => {
   test("returns just the id when no categories are selected", () => {
-    expect(filenameFor(["artist_one", "character_one"], [])).toBe("10146816.jpeg");
+    expect(buildFilename(["artist_one", "character_one"], [])).toBe("10146816.jpeg");
   });
 
   test("appends the id after the selected segments", () => {
-    expect(filenameFor(["artist_one", "character_one", "copyright_one_(series)"])).toBe(["artist_one", "character_one", "copyright_one_(series)", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_one", "character_one", "copyright_one_(series)"]))
+      .toBe(["artist_one", "character_one", "copyright_one_(series)", "10146816.jpeg"].join(CAT));
   });
 
   test("joins multiple tags in one category with the tag separator", () => {
-    expect(filenameFor(["artist_one", "character_one", "character_two"], ["artist", "character"])).toBe(["artist_one", ["character_one", "character_two"].join(TAG), "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_one", "character_one", "character_two"], ["artist", "character"]))
+      .toBe(["artist_one", ["character_one", "character_two"].join(TAG), "10146816.jpeg"].join(CAT));
   });
 
   test("ignores tags outside the selected categories", () => {
-    expect(filenameFor(["artist_one", "general_one", "metadata_one"], ["artist"])).toBe(["artist_one", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_one", "general_one", "metadata_one"], ["artist"])).toBe(["artist_one", "10146816.jpeg"].join(CAT));
   });
 
   test("drops a missing category rather than emitting an empty segment", () => {
-    expect(filenameFor(["artist_one"], ["artist", "character"])).toBe(["artist_one", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_one"], ["artist", "character"])).toBe(["artist_one", "10146816.jpeg"].join(CAT));
   });
 
   test("falls back to the bare id when no selected category is present", () => {
-    expect(filenameFor(["general_one"], ALL)).toBe("10146816.jpeg");
+    expect(buildFilename(["general_one"], ALL)).toBe("10146816.jpeg");
   });
 
   test("supports artist and copyright without character", () => {
-    expect(filenameFor(["artist_one", "character_one", "copyright_one_(series)"], ["artist", "copyright"])).toBe(["artist_one", "copyright_one_(series)", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_one", "character_one", "copyright_one_(series)"], ["artist", "copyright"]))
+      .toBe(["artist_one", "copyright_one_(series)", "10146816.jpeg"].join(CAT));
   });
 
   test("drops a qualified duplicate when the base tag is present", () => {
-    expect(filenameFor(["character_one", "character_one_(qualified)"], ["character"])).toBe(["character_one", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["character_one", "character_one_(qualified)"], ["character"])).toBe(["character_one", "10146816.jpeg"].join(CAT));
   });
 
   test("keeps a qualified tag when its base is absent", () => {
-    expect(filenameFor(["artist_two_(qualified)"], ["artist"])).toBe(["artist_two_(qualified)", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_two_(qualified)"], ["artist"])).toBe(["artist_two_(qualified)", "10146816.jpeg"].join(CAT));
   });
 
   test("strips colons that are illegal on windows", () => {
-    expect(filenameFor(["copyright_two:_subtitle"], ["copyright"])).toBe(["copyright_two_subtitle", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["copyright_two:_subtitle"], ["copyright"])).toBe(["copyright_two_subtitle", "10146816.jpeg"].join(CAT));
   });
 
   test("strips apostrophes", () => {
-    expect(filenameFor(["artist_three's_name"], ["artist"])).toBe(["artist_threes_name", "10146816.jpeg"].join(CAT));
+    expect(buildFilename(["artist_three's_name"], ["artist"])).toBe(["artist_threes_name", "10146816.jpeg"].join(CAT));
   });
 
   test("caps length while preserving the id", () => {

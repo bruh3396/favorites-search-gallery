@@ -79,4 +79,45 @@ describe("NamespacedLocalKeyedValues", () => {
 
     expect(store.get("preferences")).toEqual({ columns: 5, theme: "dark" });
   });
+
+  describe("moveIn", () => {
+    test("moves keys of the wrapped store into the namespace", () => {
+      const { store, namespaced } = setup();
+
+      store.set("searchHistory", ["cat"]);
+      namespaced.moveIn(["searchHistory"]);
+
+      expect(namespaced.get("searchHistory")).toEqual(["cat"]);
+      expect(store.get("preferences")).toEqual({ searchHistory: ["cat"] });
+      expect(store.get("searchHistory")).toBeUndefined();
+    });
+
+    test("keeps what the namespace already holds and leaves the wrapped key", () => {
+      const { store, namespaced } = setup();
+
+      namespaced.set("searchHistory", ["dog"]);
+      store.set("searchHistory", ["cat"]);
+      namespaced.moveIn(["searchHistory"]);
+
+      expect(namespaced.get("searchHistory")).toEqual(["dog"]);
+      expect(store.get("searchHistory")).toEqual(["cat"]);
+    });
+
+    test("skips keys the wrapped store doesn't have", () => {
+      const { store, namespaced } = setup();
+
+      namespaced.moveIn(["searchHistory"]);
+
+      expect(store.get("preferences")).toBeUndefined();
+    });
+
+    test("leaves keys it wasn't given", () => {
+      const { store, namespaced } = setup();
+
+      store.set("otherScript", 1);
+      namespaced.moveIn(["searchHistory"]);
+
+      expect(store.get("otherScript")).toBe(1);
+    });
+  });
 });

@@ -21,11 +21,11 @@ function hover(suppressor: FavoritesLinkSuppressor, target: Element): void {
   target.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
 }
 
-function imageOf(thumb: HTMLElement): HTMLElement {
+function queryImage(thumb: HTMLElement): HTMLElement {
   return thumb.querySelector("img") as HTMLElement;
 }
 
-function linkOf(thumb: HTMLElement): string | null {
+function readHref(thumb: HTMLElement): string | null {
   return thumb.querySelector("a")?.getAttribute("href") ?? null;
 }
 
@@ -38,8 +38,8 @@ describe("FavoritesLinkSuppressor", () => {
     const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
 
-    hover(suppressor, imageOf(apple));
-    expect(linkOf(apple)).toBeNull();
+    hover(suppressor, queryImage(apple));
+    expect(readHref(apple)).toBeNull();
   });
 
   test("moving to another thumb gives the previous one its link back", () => {
@@ -47,19 +47,19 @@ describe("FavoritesLinkSuppressor", () => {
     const apple = createThumb("1");
     const banana = createThumb("2");
 
-    hover(suppressor, imageOf(apple));
-    hover(suppressor, imageOf(banana));
-    expect(linkOf(apple)).toBe(postPageUrl("1"));
-    expect(linkOf(banana)).toBeNull();
+    hover(suppressor, queryImage(apple));
+    hover(suppressor, queryImage(banana));
+    expect(readHref(apple)).toBe(postPageUrl("1"));
+    expect(readHref(banana)).toBeNull();
   });
 
   test("hovering the same thumb again or leaving the thumbs changes nothing", () => {
     const suppressor = new FavoritesLinkSuppressor(postPageUrl);
     const apple = createThumb("1");
 
-    hover(suppressor, imageOf(apple));
-    hover(suppressor, imageOf(apple));
+    hover(suppressor, queryImage(apple));
+    hover(suppressor, queryImage(apple));
     hover(suppressor, document.body);
-    expect(linkOf(apple)).toBeNull();
+    expect(readHref(apple)).toBeNull();
   });
 });

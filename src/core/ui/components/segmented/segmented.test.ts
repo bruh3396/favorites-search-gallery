@@ -26,11 +26,11 @@ function press(target: HTMLElement, key: string): KeyboardEvent {
   return event;
 }
 
-function checkedOf(radios: HTMLButtonElement[]): boolean[] {
+function readCheckedStates(radios: HTMLButtonElement[]): boolean[] {
   return radios.map((radio) => radio.getAttribute("aria-checked") === "true");
 }
 
-function tabStopsOf(radios: HTMLButtonElement[]): number[] {
+function readTabIndexes(radios: HTMLButtonElement[]): number[] {
   return radios.map((radio) => radio.tabIndex);
 }
 
@@ -50,8 +50,8 @@ describe("createSegmented", () => {
   test("starts with nothing checked and the first option as the tab stop", () => {
     const { radios } = setup();
 
-    expect(checkedOf(radios)).toEqual([false, false, false]);
-    expect(tabStopsOf(radios)).toEqual([0, -1, -1]);
+    expect(readCheckedStates(radios)).toEqual([false, false, false]);
+    expect(readTabIndexes(radios)).toEqual([0, -1, -1]);
   });
 
   test("is medium unless told otherwise", () => {
@@ -63,8 +63,8 @@ describe("createSegmented", () => {
     const { radios, setValue } = setup();
 
     setValue("row");
-    expect(checkedOf(radios)).toEqual([false, true, false]);
-    expect(tabStopsOf(radios)).toEqual([-1, 0, -1]);
+    expect(readCheckedStates(radios)).toEqual([false, true, false]);
+    expect(readTabIndexes(radios)).toEqual([-1, 0, -1]);
   });
 
   test("reports a clicked option without changing itself", () => {
@@ -73,7 +73,7 @@ describe("createSegmented", () => {
     setValue("column");
     radios[2].click();
     expect(onValueChange).toHaveBeenLastCalledWith("square");
-    expect(checkedOf(radios)).toEqual([true, false, false]);
+    expect(readCheckedStates(radios)).toEqual([true, false, false]);
   });
 
   test("does not report the option that is already checked", () => {

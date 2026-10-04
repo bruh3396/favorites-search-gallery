@@ -16,7 +16,7 @@ function setup(): Setup {
   return { view: new SnippetView(shell), shell };
 }
 
-function namesOf(shell: SnippetShell): string[] {
+function readNames(shell: SnippetShell): string[] {
   return Array.from(shell.list.querySelectorAll<HTMLElement>("[data-snippet-name]")).map(row => row.dataset.snippetName ?? "");
 }
 
@@ -35,7 +35,7 @@ describe("render", () => {
     const { view, shell } = setup();
 
     view.render(createScene({ rows: [veg, fruits] }));
-    expect(namesOf(shell)).toEqual(["veg", "fruits"]);
+    expect(readNames(shell)).toEqual(["veg", "fruits"]);
   });
 
   test("asks to confirm only the snippet pending deletion", () => {

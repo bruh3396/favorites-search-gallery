@@ -12,22 +12,22 @@ import { TermUpdate } from "@/lib/search/engines/search_engine";
 
 const SEARCHER_UPDATE_DELAY = 1_500;
 
-function idsOf(items: { id: string }[]): string {
+function joinIds(items: { id: string }[]): string {
   return items.map(item => item.id).join(",");
 }
 
-function tagsOf(post: Post): Set<string> {
+function splitTags(post: Post): Set<string> {
   return new Set(post.tags.split(" ").filter(tag => tag !== ""));
 }
 
 function createFavorite(post: Post): Favorite {
   const favorite = {
     id: post.id,
-    tags: tagsOf(post),
+    tags: splitTags(post),
     media: post.media,
     isNew: false,
     enrich: (enriched: Post): void => {
-      favorite.tags = tagsOf(enriched);
+      favorite.tags = splitTags(enriched);
       favorite.media = enriched.media;
     },
     markAsNew: (): void => {
@@ -41,17 +41,17 @@ function createCollection(log: string[]): Collection & { favorites: Favorite[] }
   const collection = {
     favorites: [] as Favorite[],
     append: (posts: Post[]): Favorite[] => {
-      log.push(`append:${idsOf(posts)}`);
+      log.push(`append:${joinIds(posts)}`);
       collection.favorites.push(...posts.map(createFavorite));
       return collection.favorites.slice(-posts.length);
     },
     appendDirty: (posts: Post[]): Favorite[] => {
-      log.push(`appendDirty:${idsOf(posts)}`);
+      log.push(`appendDirty:${joinIds(posts)}`);
       collection.favorites.push(...posts.map(createFavorite));
       return collection.favorites.slice(-posts.length);
     },
     prependDirty: (posts: Post[]): Favorite[] => {
-      log.push(`prependDirty:${idsOf(posts)}`);
+      log.push(`prependDirty:${joinIds(posts)}`);
       collection.favorites.unshift(...posts.map(createFavorite));
       return collection.favorites.slice(0, posts.length);
     },
@@ -99,21 +99,21 @@ async function setup(sources: { local?: Post[]; stored?: Post[]; remotePages?: P
       return Promise.resolve();
     },
     adopt: async posts => {
-      log.push(`adopt:${idsOf(posts)}`);
+      log.push(`adopt:${joinIds(posts)}`);
       await sources.stores;
       return posts.map(post => sources.stored?.find(stored => stored.id === post.id) ?? post);
     },
     refreshAll: posts => {
-      log.push(`refreshAll:${idsOf(posts)}`);
+      log.push(`refreshAll:${joinIds(posts)}`);
       refreshedPosts.push(...posts);
       return new Promise(() => { });
     }
   };
   const searcher: Searcher = {
-    add: favorites => log.push(`add:${idsOf(favorites)}`),
+    add: favorites => log.push(`add:${joinIds(favorites)}`),
     update: updates => searcherUpdates.push([...updates]),
     appendResults: favorites => {
-      log.push(`appendResults:${idsOf(favorites)}`);
+      log.push(`appendResults:${joinIds(favorites)}`);
       return favorites.slice(0, 1);
     }
   };
@@ -146,7 +146,7 @@ describe("FavoritesLoader", () => {
       await loader.streamLocalFavorites(update => progress.push(update));
 
       expect(progress).toEqual([{ loaded: 0, total: 2 }, { loaded: 1, total: 2 }, { loaded: 2, total: 2 }]);
-      expect(idsOf(collection.favorites)).toBe("1,2");
+      expect(joinIds(collection.favorites)).toBe("1,2");
     });
 
     test("refreshes every local post once, after streaming, without waiting", async() => {
@@ -171,7 +171,7 @@ describe("FavoritesLoader", () => {
       const found: string[] = [];
       const { loader } = await setup({ remotePages: [createPosts("1", "2"), createPosts("3")] });
 
-      await loader.fetchAllFavorites(results => found.push(idsOf(results)));
+      await loader.fetchAllFavorites(results => found.push(joinIds(results)));
 
       expect(found).toEqual(["1", "3"]);
     });
@@ -221,8 +221,8 @@ describe("FavoritesLoader", () => {
       log.length = 0;
       const { addedFavorites } = await loader.pullNewFavorites();
 
-      expect(idsOf(addedFavorites)).toBe("3");
-      expect(idsOf(collection.favorites)).toBe("3,1,2");
+      expect(joinIds(addedFavorites)).toBe("3");
+      expect(joinIds(collection.favorites)).toBe("3,1,2");
       expect(log).toEqual(["adopt:3", "prependDirty:3", "add:3", "refreshAll:3"]);
     });
 

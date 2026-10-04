@@ -57,15 +57,15 @@ function createState(overrides: Partial<PaginationState> = {}): PaginationState 
   return { currentPage: 1, finalPage: 3, totalCount: 300, sliceStart: 0, sliceEnd: 100, sequence: [1, 2, 3], ...overrides };
 }
 
-function idsOf(content: HTMLElement): string[] {
+function readThumbIds(content: HTMLElement): string[] {
   return Array.from(content.querySelectorAll<HTMLElement>(".post")).map(thumb => thumb.id);
 }
 
-function isFavoritedOf(content: HTMLElement, id: string): boolean {
+function isFavorited(content: HTMLElement, id: string): boolean {
   return content.querySelector<HTMLElement>(`[id="${id}"] [data-is-favorite]`) !== null;
 }
 
-function pagesOf(shell: FavoritesShell): string[] {
+function readPageLabels(shell: FavoritesShell): string[] {
   return Array.from(shell.toolbar.pagination.querySelectorAll("button[data-action=page]")).map(button => button.textContent ?? "");
 }
 
@@ -91,7 +91,7 @@ describe("FavoritesView", () => {
 
       view.showSearchResults(createFavorites("1", "2"));
       view.showSearchResults(createFavorites("3"), { fade: false });
-      expect(idsOf(content)).toEqual(["3"]);
+      expect(readThumbIds(content)).toEqual(["3"]);
       expect(replaced).toHaveBeenCalledTimes(2);
     });
 
@@ -101,7 +101,7 @@ describe("FavoritesView", () => {
 
       view.showSearchResults(createFavorites("1"));
       view.addToBottom(favorites);
-      expect(idsOf(content)).toEqual(["1", "2"]);
+      expect(readThumbIds(content)).toEqual(["1", "2"]);
       expect(added).toHaveBeenCalledWith(favorites);
     });
 
@@ -110,9 +110,9 @@ describe("FavoritesView", () => {
 
       view.showSearchResults(createFavorites("1"));
       view.setFavorited("1", true);
-      expect(isFavoritedOf(content, "1")).toBe(true);
+      expect(isFavorited(content, "1")).toBe(true);
       view.setFavorited("1", false);
-      expect(isFavoritedOf(content, "1")).toBe(false);
+      expect(isFavorited(content, "1")).toBe(false);
     });
 
     test("changes layout", () => {
@@ -183,7 +183,7 @@ describe("FavoritesView", () => {
 
       view.renderPagination(createState());
       view.updatePaginator(createState({ finalPage: 4, sequence: [1, 2, 3, 4] }));
-      expect(pagesOf(shell)).toEqual(["1", "2", "3", "4"]);
+      expect(readPageLabels(shell)).toEqual(["1", "2", "3", "4"]);
     });
 
     test("hides and shows the paginator", () => {

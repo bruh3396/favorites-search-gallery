@@ -10,28 +10,12 @@ export function preloadImage(url: string): void {
   new Image().src = url;
 }
 
-export async function loadImageBitmap(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
+export async function loadImageBitmap(url: string): Promise<ImageBitmap> {
   const image = new Image();
 
   await new Promise<void>((resolve, reject) => {
-    const abort = (): void => {
-      image.removeAttribute("src");
-      reject(new DOMException("Image load aborted", "AbortError"));
-    };
-
-    if (signal?.aborted === true) {
-      abort();
-      return;
-    }
-    signal?.addEventListener("abort", abort, { once: true });
-    image.onload = (): void => {
-      signal?.removeEventListener("abort", abort);
-      resolve();
-    };
-    image.onerror = (): void => {
-      signal?.removeEventListener("abort", abort);
-      reject(new Error(`Failed to load image: ${url}`));
-    };
+    image.onload = (): void => resolve();
+    image.onerror = (): void => reject(new Error(`Failed to load image: ${url}`));
     image.src = url;
   });
   return createImageBitmap(image);

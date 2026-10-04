@@ -27,7 +27,7 @@ async function settled<T>(scheduler: MemoryScheduler, pending: Promise<T>): Prom
   return pending;
 }
 
-function respondOkFor(okUrl: string): Fetch {
+function createFetchFindingOnly(okUrl: string): Fetch {
   return (url: string): Promise<Response> => Promise.resolve(new Response(null, { status: url === okUrl ? 200 : 404 }));
 }
 
@@ -71,7 +71,7 @@ describe("Rule34CdnClient", () => {
   });
 
   test("probes an image's extension once", async() => {
-    const { client, fetch, scheduler } = setup(respondOkFor("https://rule34.xxx/images//1234/a1b2c3.png"));
+    const { client, fetch, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.png"));
     const original = "https://rule34.xxx/images//1234/a1b2c3.png";
 
     expect(await settled(scheduler, client.originalUrl("1234/a1b2c3", "image"))).toBe(original);
@@ -83,7 +83,7 @@ describe("Rule34CdnClient", () => {
   });
 
   test("falls back to jpg when no probe finds the image", async() => {
-    const { client, scheduler } = setup(respondOkFor(""));
+    const { client, scheduler } = setup(createFetchFindingOnly(""));
 
     expect(await settled(scheduler, client.originalUrl("1234/a1b2c3", "image")))
       .toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
@@ -96,7 +96,7 @@ describe("Rule34CdnClient", () => {
   });
 
   test("rejects a file the host refuses", async() => {
-    const { client } = setup(respondOkFor(""));
+    const { client } = setup(createFetchFindingOnly(""));
 
     await expect(client.fetchFile("https://rule34.xxx/images//1234/a1b2c3.png")).rejects.toThrow("404");
   });

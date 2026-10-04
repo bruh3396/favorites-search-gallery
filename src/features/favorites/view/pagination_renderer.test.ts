@@ -26,37 +26,37 @@ function createState(overrides: Partial<PaginationState> = {}): PaginationState 
   return { currentPage: 1, finalPage: 9, totalCount: 900, sliceStart: 0, sliceEnd: 100, sequence: [1, 2, 3, "ellipsis", 9], ...overrides };
 }
 
-function pagesOf(container: HTMLElement): string[] {
+function readPageLabels(container: HTMLElement): string[] {
   return Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-action=page]")).map(button => button.textContent ?? "");
 }
 
-function selectedPageOf(container: HTMLElement): string | undefined {
+function readSelectedPage(container: HTMLElement): string | undefined {
   return Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-action=page]")).find(button => button.classList.contains("selected"))?.textContent ?? undefined;
 }
 
-function arrowsOf(container: HTMLElement): { previous: boolean; next: boolean } {
+function readArrowStates(container: HTMLElement): { previous: boolean; next: boolean } {
   const [previous, next] = Array.from(container.querySelectorAll<HTMLButtonElement>("button[data-action=step]"));
   return { previous: !previous.disabled, next: !next.disabled };
 }
 
-function ellipsisOf(container: HTMLElement): HTMLElement {
+function queryEllipsis(container: HTMLElement): HTMLElement {
   return container.querySelector("button[data-action=gotoToggle]") as HTMLElement;
 }
 
-function gotoFieldOf(container: HTMLElement): HTMLInputElement {
+function queryGotoInput(container: HTMLElement): HTMLInputElement {
   return container.querySelector("input") as HTMLInputElement;
 }
 
-function popoverOf(container: HTMLElement): HTMLElement {
+function queryPopover(container: HTMLElement): HTMLElement {
   return container.querySelector(`#${FavoritesId.gotoPagePopover}`) as HTMLElement;
 }
 
 function isPopoverOpen(container: HTMLElement): boolean {
-  return popoverOf(container).dataset.open !== undefined;
+  return queryPopover(container).dataset.open !== undefined;
 }
 
 function typeGotoPage(container: HTMLElement, text: string): string {
-  const field = gotoFieldOf(container);
+  const field = queryGotoInput(container);
 
   field.value = text;
   field.dispatchEvent(new FocusEvent("blur"));
@@ -73,17 +73,17 @@ describe("FavoritesPaginationRenderer", () => {
     test("starts with a single page and no range", () => {
       const { container, range } = setup();
 
-      expect(pagesOf(container)).toEqual(["1"]);
-      expect(arrowsOf(container)).toEqual({ previous: false, next: false });
+      expect(readPageLabels(container)).toEqual(["1"]);
+      expect(readArrowStates(container)).toEqual({ previous: false, next: false });
       expect(range.textContent).toBe("");
     });
 
     test("draws each page, the gaps between them, and marks the current page", () => {
       const { container } = setup({ currentPage: 2 });
 
-      expect(pagesOf(container)).toEqual(["1", "2", "3", "9"]);
-      expect(selectedPageOf(container)).toBe("2");
-      expect(ellipsisOf(container).textContent).toBe("...");
+      expect(readPageLabels(container)).toEqual(["1", "2", "3", "9"]);
+      expect(readSelectedPage(container)).toBe("2");
+      expect(queryEllipsis(container).textContent).toBe("...");
     });
 
     test("shows the range of favorites on the page, ending at the last favorite", () => {
@@ -101,13 +101,13 @@ describe("FavoritesPaginationRenderer", () => {
     ])("on page %i the arrows are %o", (currentPage, arrows) => {
       const { container } = setup({ currentPage });
 
-      expect(arrowsOf(container)).toEqual(arrows);
+      expect(readArrowStates(container)).toEqual(arrows);
     });
 
     test("the go-to field starts at the current page and stops at the last page", () => {
       const { container } = setup({ currentPage: 3 });
 
-      expect(gotoFieldOf(container).value).toBe("3");
+      expect(queryGotoInput(container).value).toBe("3");
       expect(typeGotoPage(container, "50")).toBe("9");
     });
 
@@ -117,7 +117,7 @@ describe("FavoritesPaginationRenderer", () => {
       renderer.toggleGotoPagePopover();
       renderer.render(createState({ currentPage: 5, sequence: [1, "ellipsis", 4, 5, 6, "ellipsis", 9] }));
       expect(isPopoverOpen(container)).toBe(false);
-      expect(gotoFieldOf(container).value).toBe("5");
+      expect(queryGotoInput(container).value).toBe("5");
     });
   });
 
@@ -135,7 +135,7 @@ describe("FavoritesPaginationRenderer", () => {
   describe("go-to-page popover", () => {
     test("toggling opens it with the field selected, then closes it", () => {
       const { renderer, container } = setup(createState());
-      const field = gotoFieldOf(container);
+      const field = queryGotoInput(container);
 
       renderer.toggleGotoPagePopover();
       expect(isPopoverOpen(container)).toBe(true);
@@ -155,15 +155,15 @@ describe("FavoritesPaginationRenderer", () => {
     test("the popover and the ellipsis count as its targets, pages don't", () => {
       const { renderer, container } = setup(createState());
 
-      expect(renderer.isGotoPagePopoverTarget(gotoFieldOf(container))).toBe(true);
-      expect(renderer.isGotoPagePopoverTarget(ellipsisOf(container))).toBe(true);
+      expect(renderer.isGotoPagePopoverTarget(queryGotoInput(container))).toBe(true);
+      expect(renderer.isGotoPagePopoverTarget(queryEllipsis(container))).toBe(true);
       expect(renderer.isGotoPagePopoverTarget(container.querySelector("button[data-action=page]") as Node)).toBe(false);
     });
 
     test("without an ellipsis, only the popover counts", () => {
       const { renderer, container } = setup(createState({ sequence: [1, 2] }));
 
-      expect(renderer.isGotoPagePopoverTarget(popoverOf(container))).toBe(true);
+      expect(renderer.isGotoPagePopoverTarget(queryPopover(container))).toBe(true);
       expect(renderer.isGotoPagePopoverTarget(container)).toBe(false);
     });
   });
@@ -171,13 +171,13 @@ describe("FavoritesPaginationRenderer", () => {
   describe("updatePaginator", () => {
     test("renumbers the pages without disturbing someone typing a page to go to", () => {
       const { renderer, container, range } = setup(createState());
-      const field = gotoFieldOf(container);
+      const field = queryGotoInput(container);
 
       renderer.toggleGotoPagePopover();
       field.focus();
       field.value = "7";
       renderer.updatePaginator(createState({ finalPage: 12, sliceStart: 50, sliceEnd: 100, sequence: [1, 2, 3, "ellipsis", 12] }));
-      expect(pagesOf(container)).toEqual(["1", "2", "3", "12"]);
+      expect(readPageLabels(container)).toEqual(["1", "2", "3", "12"]);
       expect(range.textContent).toBe("51 - 100");
       expect(document.activeElement).toBe(field);
       expect(field.value).toBe("7");
@@ -188,8 +188,8 @@ describe("FavoritesPaginationRenderer", () => {
       const { renderer, container } = setup(createState());
 
       renderer.updatePaginator(createState({ currentPage: 2, finalPage: 3, sequence: [1, 2, 3] }));
-      expect(pagesOf(container)).toEqual(["1", "2", "3"]);
-      expect(ellipsisOf(container)).toBeNull();
+      expect(readPageLabels(container)).toEqual(["1", "2", "3"]);
+      expect(queryEllipsis(container)).toBeNull();
       expect(container.firstElementChild?.id).toBe("previous-page");
       expect(container.lastElementChild?.id).toBe("next-page");
     });
@@ -205,14 +205,14 @@ describe("FavoritesPaginationRenderer", () => {
       const { renderer, container } = setup(createState({ currentPage: 9 }));
 
       renderer.updatePaginator(createState({ currentPage: 9, finalPage: 4, sequence: [1, 2, 3, 4] }));
-      expect(gotoFieldOf(container).value).toBe("4");
+      expect(queryGotoInput(container).value).toBe("4");
     });
 
     test("updates the arrows", () => {
       const { renderer, container } = setup(createState());
 
       renderer.updatePaginator(createState({ currentPage: 9, sequence: [1, "ellipsis", 7, 8, 9] }));
-      expect(arrowsOf(container)).toEqual({ previous: true, next: false });
+      expect(readArrowStates(container)).toEqual({ previous: true, next: false });
     });
   });
 });

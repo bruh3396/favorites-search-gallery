@@ -18,7 +18,7 @@ function setup(): Setup {
   };
 }
 
-function versionOf(section: HTMLElement): number[] {
+function readVersion(section: HTMLElement): number[] {
   const title = section.querySelector(`.${SettingsClass.sectionTitle}`)?.textContent ?? "";
   return title.replace(/^v/u, "").split(".").map(Number);
 }
@@ -28,7 +28,7 @@ function compareVersions(a: number[], b: number[]): number {
   return index === -1 ? 0 : a[index] - b[index];
 }
 
-function collapsedStatesOf(sections: HTMLElement[]): boolean[] {
+function readCollapsedStates(sections: HTMLElement[]): boolean[] {
   return sections.map(section => section.dataset.collapsed !== undefined);
 }
 
@@ -38,14 +38,14 @@ function toggle(section: HTMLElement): void {
 
 describe("FavoritesChangelog", () => {
   test("lists releases newest first", () => {
-    const versions = setup().sections.map(versionOf);
+    const versions = setup().sections.map(readVersion);
 
     expect(versions.length).toBeGreaterThan(1);
     expect([...versions].sort((a, b) => compareVersions(b, a))).toEqual(versions);
   });
 
   test("opens only the newest release", () => {
-    const [isNewest, ...older] = collapsedStatesOf(setup().sections);
+    const [isNewest, ...older] = readCollapsedStates(setup().sections);
 
     expect(isNewest).toBe(false);
     expect(older.every(Boolean)).toBe(true);
@@ -55,9 +55,9 @@ describe("FavoritesChangelog", () => {
     const { sections, collapseAll } = setup();
 
     collapseAll.click();
-    expect(collapsedStatesOf(sections).every(Boolean)).toBe(true);
+    expect(readCollapsedStates(sections).every(Boolean)).toBe(true);
     collapseAll.click();
-    expect(collapsedStatesOf(sections).some(Boolean)).toBe(false);
+    expect(readCollapsedStates(sections).some(Boolean)).toBe(false);
   });
 
   test("collapse all tracks releases opened and closed by hand", () => {

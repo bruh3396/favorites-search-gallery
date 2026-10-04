@@ -21,12 +21,12 @@ function setup(snippets: Snippet[] = []): Setup {
   return { model: new SnippetModel(storage), storage };
 }
 
-function namesOf(snippets: Snippet[]): string[] {
+function getNames(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function storedNamesOf(storage: MemoryLocalKeyedValues): string[] {
-  return namesOf((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
+function readStoredNames(storage: MemoryLocalKeyedValues): string[] {
+  return getNames((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
 }
 
 describe("reading", () => {
@@ -34,15 +34,15 @@ describe("reading", () => {
     const { model } = setup([fruits, veg]);
 
     expect(model.getSnippet("fruits")).toEqual(fruits);
-    expect(namesOf(model.getAllSnippets())).toEqual(["fruits", "veg"]);
+    expect(getNames(model.getAllSnippets())).toEqual(["fruits", "veg"]);
     expect(model.countSnippets()).toBe(2);
   });
 
   test("lists the matching snippets newest first", () => {
     const { model } = setup([fruits, veg]);
 
-    expect(namesOf(model.listSnippets(""))).toEqual(["veg", "fruits"]);
-    expect(namesOf(model.listSnippets("carrot"))).toEqual(["veg"]);
+    expect(getNames(model.listSnippets(""))).toEqual(["veg", "fruits"]);
+    expect(getNames(model.listSnippets("carrot"))).toEqual(["veg"]);
   });
 
   test("describes an empty list", () => {
@@ -57,9 +57,9 @@ describe("writing", () => {
 
     expect(model.addSnippet("fruits", "apple").ok).toBe(true);
     expect(model.updateSnippet("fruits", "berries", "apple").ok).toBe(true);
-    expect(storedNamesOf(storage)).toEqual(["berries"]);
+    expect(readStoredNames(storage)).toEqual(["berries"]);
     model.removeSnippet("berries");
-    expect(storedNamesOf(storage)).toEqual([]);
+    expect(readStoredNames(storage)).toEqual([]);
   });
 
   test("marks a snippet used and moves one to the top", () => {
@@ -68,14 +68,14 @@ describe("writing", () => {
     model.useSnippet("fruits");
     model.moveSnippetToTop("fruits");
     expect(model.getSnippet("fruits")?.lastUsedAt).toBeGreaterThan(0);
-    expect(namesOf(model.listSnippets(""))).toEqual(["fruits", "veg"]);
+    expect(getNames(model.listSnippets(""))).toEqual(["fruits", "veg"]);
   });
 
   test("replaces every snippet", () => {
     const { model, storage } = setup([fruits]);
 
     expect(model.replaceAllSnippets([{ name: "veg", query: "carrot" }])).toBe(1);
-    expect(storedNamesOf(storage)).toEqual(["veg"]);
+    expect(readStoredNames(storage)).toEqual(["veg"]);
   });
 });
 

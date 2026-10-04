@@ -17,11 +17,11 @@ function setup(): MultiSelect<Action> & { onValueChange: (next: readonly Action[
   return { ...multiSelect, onValueChange, toggles: [...multiSelect.element.querySelectorAll("button")] };
 }
 
-function pressedOf(toggles: HTMLButtonElement[]): boolean[] {
+function readPressedStates(toggles: HTMLButtonElement[]): boolean[] {
   return toggles.map((toggle) => toggle.getAttribute("aria-pressed") === "true");
 }
 
-function lockedOf(toggles: HTMLButtonElement[]): boolean[] {
+function readLockedStates(toggles: HTMLButtonElement[]): boolean[] {
   return toggles.map((toggle) => toggle.getAttribute("aria-disabled") === "true");
 }
 
@@ -32,7 +32,7 @@ describe("createMultiSelect", () => {
     expect(element.getAttribute("role")).toBe("group");
     expect(toggles.map((toggle) => toggle.textContent)).toEqual(["Favorite", "Download", "Open"]);
     expect(toggles.every((toggle) => toggle.type === "button" && toggle.tabIndex === 0)).toBe(true);
-    expect(pressedOf(toggles)).toEqual([false, false, false]);
+    expect(readPressedStates(toggles)).toEqual([false, false, false]);
   });
 
   test("is medium unless told otherwise", () => {
@@ -44,7 +44,7 @@ describe("createMultiSelect", () => {
     const { toggles, setValue } = setup();
 
     setValue(["open", "favorite"]);
-    expect(pressedOf(toggles)).toEqual([true, false, true]);
+    expect(readPressedStates(toggles)).toEqual([true, false, true]);
   });
 
   test("reports an added option in option order without changing itself", () => {
@@ -53,7 +53,7 @@ describe("createMultiSelect", () => {
     setValue(["open"]);
     toggles[0].click();
     expect(onValueChange).toHaveBeenLastCalledWith(["favorite", "open"]);
-    expect(pressedOf(toggles)).toEqual([false, false, true]);
+    expect(readPressedStates(toggles)).toEqual([false, false, true]);
   });
 
   test("reports a removed option", () => {
@@ -70,7 +70,7 @@ describe("createMultiSelect", () => {
     setValue(["download"]);
     toggles[1].click();
     expect(onValueChange).not.toHaveBeenCalled();
-    expect(lockedOf(toggles)).toEqual([false, true, false]);
+    expect(readLockedStates(toggles)).toEqual([false, true, false]);
     expect(toggles[1].disabled).toBe(false);
   });
 
@@ -79,7 +79,7 @@ describe("createMultiSelect", () => {
 
     setValue(["download"]);
     setValue(["download", "open"]);
-    expect(lockedOf(toggles)).toEqual([false, false, false]);
+    expect(readLockedStates(toggles)).toEqual([false, false, false]);
   });
 
   test("disables every option and ignores clicks while disabled", () => {

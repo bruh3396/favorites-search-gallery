@@ -56,7 +56,7 @@ function createTaggedEngine(items: TaggedItem[]): BitSearchEngine<TaggedItem> {
   return new BitSearchEngine<TaggedItem>(item => item.tags, () => 0, items);
 }
 
-function idsOf(items: TaggedItem[]): string[] {
+function getSortedIds(items: TaggedItem[]): string[] {
   return items.map(item => item.id).sort();
 }
 
@@ -73,8 +73,8 @@ describe("BitmapSearchEngine incremental mutation", () => {
     const engine = createTaggedEngine([createTaggedItem("1", "apple")]);
 
     engine.add([createTaggedItem("2", "cot")]);
-    expect(idsOf(engine.search("cot"))).toEqual(["2"]);
-    expect(idsOf(engine.search("( c* ~ a* )"))).toEqual(["1", "2"]);
+    expect(getSortedIds(engine.search("cot"))).toEqual(["2"]);
+    expect(getSortedIds(engine.search("( c* ~ a* )"))).toEqual(["1", "2"]);
     expect(engine.search("").length).toBe(2);
   });
 
@@ -85,7 +85,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
     engine.update([createCorrection(target, "apple")]);
 
     expect(engine.search("ct")).toEqual([]);
-    expect(idsOf(engine.search("apple"))).toEqual(["1"]);
+    expect(getSortedIds(engine.search("apple"))).toEqual(["1"]);
   });
 
   test("update drops a term no doc references and adds a new one, keeping wildcards correct", () => {
@@ -97,9 +97,9 @@ describe("BitmapSearchEngine incremental mutation", () => {
 
     expect(engine.search("unique")).toEqual([]);
     expect(engine.search("uni*")).toEqual([]);
-    expect(idsOf(engine.search("fresh"))).toEqual(["1"]);
-    expect(idsOf(engine.search("fre*"))).toEqual(["1"]);
-    expect(idsOf(engine.search("apple"))).toEqual(["1", "2"]);
+    expect(getSortedIds(engine.search("fresh"))).toEqual(["1"]);
+    expect(getSortedIds(engine.search("fre*"))).toEqual(["1"]);
+    expect(getSortedIds(engine.search("apple"))).toEqual(["1", "2"]);
   });
 
   test("a wildcard over terms untouched by an update still resolves correctly", () => {
@@ -112,10 +112,10 @@ describe("BitmapSearchEngine incremental mutation", () => {
 
     engine.update([createCorrection(banana, "cherry")]);
 
-    expect(idsOf(engine.search("ap*"))).toEqual(["1", "2"]);
-    expect(idsOf(engine.search("apple"))).toEqual(["1"]);
-    expect(idsOf(engine.search("apricot"))).toEqual(["2"]);
-    expect(idsOf(engine.search("cherry"))).toEqual(["3"]);
+    expect(getSortedIds(engine.search("ap*"))).toEqual(["1", "2"]);
+    expect(getSortedIds(engine.search("apple"))).toEqual(["1"]);
+    expect(getSortedIds(engine.search("apricot"))).toEqual(["2"]);
+    expect(getSortedIds(engine.search("cherry"))).toEqual(["3"]);
   });
 
   test("a batch of docs sharing a term does not corrupt wildcard resolution", () => {
@@ -123,12 +123,12 @@ describe("BitmapSearchEngine incremental mutation", () => {
     const shared = Array.from({ length: 20 }, (_, i) => createTaggedItem(String(i), "shared"));
 
     engine.add(shared);
-    expect(idsOf(engine.search("shar*")).length).toBe(20);
+    expect(getSortedIds(engine.search("shar*")).length).toBe(20);
 
     engine.update(shared.map(item => createCorrection(item, "moved")));
     expect(engine.search("shar*")).toEqual([]);
     expect(engine.search("shared")).toEqual([]);
-    expect(idsOf(engine.search("moved")).length).toBe(20);
+    expect(getSortedIds(engine.search("moved")).length).toBe(20);
   });
 
   test("grows capacity when adds exceed the initial width", () => {
@@ -145,14 +145,14 @@ describe("BitmapSearchEngine incremental mutation", () => {
     const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
     const engine = createTaggedEngine(items);
 
-    expect(idsOf(engine.search("apple", [items[0], items[2]]))).toEqual(["1", "3"]);
+    expect(getSortedIds(engine.search("apple", [items[0], items[2]]))).toEqual(["1", "3"]);
   });
 
   test("returns only the candidate subset for an empty query", () => {
     const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
     const engine = createTaggedEngine(items);
 
-    expect(idsOf(engine.search("", [items[0], items[2]]))).toEqual(["1", "3"]);
+    expect(getSortedIds(engine.search("", [items[0], items[2]]))).toEqual(["1", "3"]);
   });
 
   test("update ignores old terms that were never indexed", () => {
@@ -161,8 +161,8 @@ describe("BitmapSearchEngine incremental mutation", () => {
 
     engine.update([{ doc: target, oldTerms: new Set(["apple", "ghost"]), newTerms: new Set(["apple", "fresh"]) }]);
 
-    expect(idsOf(engine.search("apple"))).toEqual(["1", "2"]);
-    expect(idsOf(engine.search("fresh"))).toEqual(["1"]);
+    expect(getSortedIds(engine.search("apple"))).toEqual(["1", "2"]);
+    expect(getSortedIds(engine.search("fresh"))).toEqual(["1"]);
     expect(engine.search("ghost")).toEqual([]);
   });
 
@@ -173,7 +173,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
     engine.update([createCorrection(stranger, "fresh")]);
 
     expect(engine.search("fresh")).toEqual([]);
-    expect(idsOf(engine.search("apple"))).toEqual(["1"]);
+    expect(getSortedIds(engine.search("apple"))).toEqual(["1"]);
   });
 
   test("stays correct when a term crosses the sparse/dense threshold via add", () => {
@@ -182,7 +182,7 @@ describe("BitmapSearchEngine incremental mutation", () => {
 
     items.forEach((item, i) => {
       engine.add([item]);
-      expect(idsOf(engine.search("shared"))).toEqual(items.slice(0, i + 1).map(it => it.id).sort());
+      expect(getSortedIds(engine.search("shared"))).toEqual(items.slice(0, i + 1).map(it => it.id).sort());
     });
   });
 });
@@ -191,19 +191,19 @@ describe("BitmapSearchEngine complementOf", () => {
   const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "banana"), createTaggedItem("3", "apple"), createTaggedItem("4", "cherry")];
 
   test("returns every indexed doc not in the current set", () => {
-    expect(idsOf(createTaggedEngine(items).complementOf([items[0], items[1]]))).toEqual(["3", "4"]);
+    expect(getSortedIds(createTaggedEngine(items).complementOf([items[0], items[1]]))).toEqual(["3", "4"]);
   });
 
   test("narrows the complement to docs matching the filter", () => {
-    expect(idsOf(createTaggedEngine(items).complementOf([items[0]], "apple"))).toEqual(["3"]);
+    expect(getSortedIds(createTaggedEngine(items).complementOf([items[0]], "apple"))).toEqual(["3"]);
   });
 
   test("ignores current docs that were never indexed", () => {
-    expect(idsOf(createTaggedEngine(items).complementOf([createTaggedItem("stranger", "apple")]))).toEqual(["1", "2", "3", "4"]);
+    expect(getSortedIds(createTaggedEngine(items).complementOf([createTaggedItem("stranger", "apple")]))).toEqual(["1", "2", "3", "4"]);
   });
 
   test("a malformed filter leaves the complement unfiltered", () => {
-    expect(idsOf(createTaggedEngine(items).complementOf([items[0]], "( apple"))).toEqual(["2", "3", "4"]);
+    expect(getSortedIds(createTaggedEngine(items).complementOf([items[0]], "( apple"))).toEqual(["2", "3", "4"]);
   });
 });
 
@@ -213,23 +213,23 @@ describe("BitmapSearchEngine relative metric queries", () => {
     return { name, tags: new Set(), getMetric: (metric): number => metrics[metric] ?? 0 };
   };
 
-  function namesFor(engine: BitSearchEngine<MetricDoc>, query: string): string[] {
+  function searchNames(engine: BitSearchEngine<MetricDoc>, query: string): string[] {
     return engine.search(query).map(doc => doc.name).sort();
   }
 
   test("a repeated relative query returns the same docs", () => {
     const engine = new BitSearchEngine<MetricDoc>(doc => doc.tags, (doc, metric) => doc.getMetric(metric), [createSizedDoc("wide", 20, 10), createSizedDoc("tall", 10, 20)]);
 
-    expect(namesFor(engine, "width:>height")).toEqual(["wide"]);
-    expect(namesFor(engine, "width:>height")).toEqual(["wide"]);
+    expect(searchNames(engine, "width:>height")).toEqual(["wide"]);
+    expect(searchNames(engine, "width:>height")).toEqual(["wide"]);
   });
 
   test("a relative query sees docs added after it was first answered", () => {
     const engine = new BitSearchEngine<MetricDoc>(doc => doc.tags, (doc, metric) => doc.getMetric(metric), [createSizedDoc("wide", 20, 10)]);
 
-    expect(namesFor(engine, "width:>height")).toEqual(["wide"]);
+    expect(searchNames(engine, "width:>height")).toEqual(["wide"]);
     engine.add([createSizedDoc("wider", 30, 10)]);
-    expect(namesFor(engine, "width:>height")).toEqual(["wide", "wider"]);
+    expect(searchNames(engine, "width:>height")).toEqual(["wide", "wider"]);
   });
 });
 
@@ -246,48 +246,48 @@ describe("BitmapSearchEngine resolves bare numeric queries as favorite ids", () 
   ];
   const engine = new BitSearchEngine<MetricDoc>(doc => doc.tags, (doc, metric) => doc.getMetric(metric), docs);
 
-  function namesFor(query: string): string[] {
+  function searchNames(query: string): string[] {
     return engine.search(query).map(doc => doc.name).sort();
   }
 
   test("a bare numeric token matches the favorite with that id", () => {
-    expect(namesFor("200")).toEqual(["b"]);
+    expect(searchNames("200")).toEqual(["b"]);
   });
 
   test("a negated bare numeric token excludes that favorite", () => {
-    expect(namesFor("-200")).toEqual(["a", "c"]);
+    expect(searchNames("-200")).toEqual(["a", "c"]);
   });
 
   test("an unknown id matches nothing", () => {
-    expect(namesFor("999")).toEqual([]);
+    expect(searchNames("999")).toEqual([]);
   });
 
   test("a bare id combines with a tag term", () => {
-    expect(namesFor("apple 100")).toEqual(["a"]);
-    expect(namesFor("apple 300")).toEqual([]);
+    expect(searchNames("apple 100")).toEqual(["a"]);
+    expect(searchNames("apple 300")).toEqual([]);
   });
 
   test("an explicit id: metric term still works", () => {
-    expect(namesFor("id:300")).toEqual(["c"]);
+    expect(searchNames("id:300")).toEqual(["c"]);
   });
 });
 
 describe("BitmapSearchEngine nested-group queries", () => {
-  function namesFor(query: string): string[] {
+  function searchNames(query: string): string[] {
     return createFruitEngine().search(query).map(doc => doc.name).sort();
   }
 
   test("routes a group nested in a group through the expression path", () => {
-    expect(namesFor("red ( sweet ~ ( juicy tropical ) )")).toEqual(["cherry", "strawberry"]);
+    expect(searchNames("red ( sweet ~ ( juicy tropical ) )")).toEqual(["cherry", "strawberry"]);
   });
 
   test("an OR group nesting an AND group", () => {
-    expect(namesFor("( sweet ~ ( green tart ) )"))
+    expect(searchNames("( sweet ~ ( green tart ) )"))
       .toEqual(["blueberry", "cherry", "grape", "kiwi", "mango", "pear", "strawberry"]);
   });
 
   test("a non-nested single group", () => {
-    expect(namesFor("red ( sweet ~ juicy )")).toEqual(["cherry", "strawberry"]);
+    expect(searchNames("red ( sweet ~ juicy )")).toEqual(["cherry", "strawberry"]);
   });
 
   test("a malformed query returns no matches instead of throwing", () => {

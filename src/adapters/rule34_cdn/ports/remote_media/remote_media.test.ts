@@ -37,11 +37,13 @@ describe("Rule34CdnRemoteMedia", () => {
     expect(rule34Cdn.originalUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
   });
 
-  test("gives an image's URL from the locator and kind", async() => {
+  test("fetches the image's bytes from the locator and kind", async() => {
     const { source, rule34Cdn } = setup();
+    const signal = new AbortController().signal;
 
-    expect(await source.resolveImageUrl(VIDEO)).toBe(IMAGE);
+    expect(await (await source.fetchImage(VIDEO, signal)).text()).toBe("bytes");
     expect(rule34Cdn.imageUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
+    expect(rule34Cdn.fetchFile).toHaveBeenCalledWith(IMAGE, signal);
   });
 
   test("fetches the original's bytes", async() => {

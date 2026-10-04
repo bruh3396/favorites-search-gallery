@@ -4,7 +4,7 @@ import { IdentifiedList } from "@/lib/collection/identified_list";
 
 const createItem = (id: string): Identifiable => ({ id });
 const createItems = (...ids: string[]): Identifiable[] => ids.map(createItem);
-const idsOf = (results: Identifiable[]): string[] => results.map(r => r.id);
+const getIds = (results: Identifiable[]): string[] => results.map(r => r.id);
 
 describe("IdentifiedList", () => {
   let list: IdentifiedList<Identifiable>;
@@ -21,13 +21,13 @@ describe("IdentifiedList", () => {
   describe("setAll", () => {
     test("stores the given items", () => {
       list.setAll(createItems("1", "2"));
-      expect(idsOf(list.getAll())).toEqual(["1", "2"]);
+      expect(getIds(list.getAll())).toEqual(["1", "2"]);
     });
 
     test("replaces any existing items", () => {
       list.setAll(createItems("1", "2"));
       list.setAll(createItems("3"));
-      expect(idsOf(list.getAll())).toEqual(["3"]);
+      expect(getIds(list.getAll())).toEqual(["3"]);
     });
 
     test("drops replaced items from lookup by id", () => {
@@ -49,7 +49,7 @@ describe("IdentifiedList", () => {
     test("adds items to the end", () => {
       list.setAll(createItems("1", "2"));
       list.append(createItems("3", "4"));
-      expect(idsOf(list.getAll())).toEqual(["1", "2", "3", "4"]);
+      expect(getIds(list.getAll())).toEqual(["1", "2", "3", "4"]);
     });
 
     test("makes appended items findable by id", () => {
@@ -65,7 +65,7 @@ describe("IdentifiedList", () => {
     test("adds items to the front", () => {
       list.setAll(createItems("3", "4"));
       list.prepend(createItems("1", "2"));
-      expect(idsOf(list.getAll())).toEqual(["1", "2", "3", "4"]);
+      expect(getIds(list.getAll())).toEqual(["1", "2", "3", "4"]);
     });
 
     test("makes prepended items findable by id", () => {
@@ -97,7 +97,7 @@ describe("IdentifiedList", () => {
     test("returns a copy that does not mutate internal state", () => {
       list.setAll(createItems("1", "2"));
       list.getAll().push(createItem("3"));
-      expect(idsOf(list.getAll())).toEqual(["1", "2"]);
+      expect(getIds(list.getAll())).toEqual(["1", "2"]);
     });
   });
 

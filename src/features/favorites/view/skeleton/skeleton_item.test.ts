@@ -11,11 +11,11 @@ function createItem(layout: Layout, aspectRatio?: string, randomSource = new Mem
   return new FavoritesSkeletonItem(randomSource, layout, aspectRatio, new SeededSequence()).element;
 }
 
-function sizeOf(element: HTMLElement): { width: number; height: number } {
+function readSize(element: HTMLElement): { width: number; height: number } {
   return { width: parseFloat(element.style.width), height: parseFloat(element.style.height) };
 }
 
-function aspectRatioOf(element: HTMLElement): number[] {
+function readAspectRatio(element: HTMLElement): number[] {
   return element.style.getPropertyValue("aspect-ratio").split("/").map(Number);
 }
 
@@ -33,14 +33,14 @@ describe("FavoritesSkeletonItem", () => {
 
   describe("native layout", () => {
     test("is sized to a known aspect ratio", () => {
-      expect(sizeOf(createItem("native", "120/240"))).toEqual({ width: 120, height: 240 });
+      expect(readSize(createItem("native", "120/240"))).toEqual({ width: 120, height: 240 });
     });
 
     test.each<[number, "width" | "height", "width" | "height"]>([
       [0.2, "width", "height"],
       [0.8, "height", "width"]
     ])("without one, maxes out one side and picks the other (random %f)", (randomSource, maxed, picked) => {
-      const size = sizeOf(createItem("native", undefined, new MemoryRandomSource([randomSource])));
+      const size = readSize(createItem("native", undefined, new MemoryRandomSource([randomSource])));
 
       expect(size[maxed]).toBe(SkeletonConfig.discreteDimensionMax);
       expect(size[picked]).toBeGreaterThanOrEqual(SkeletonConfig.discreteDimensionMin);
@@ -50,11 +50,11 @@ describe("FavoritesSkeletonItem", () => {
 
   describe("other layouts", () => {
     test("take a known aspect ratio", () => {
-      expect(aspectRatioOf(createItem("row", "3/4"))).toEqual([3, 4]);
+      expect(readAspectRatio(createItem("row", "3/4"))).toEqual([3, 4]);
     });
 
     test("without one, take a fallback aspect ratio", () => {
-      const [width, height] = aspectRatioOf(createItem("column"));
+      const [width, height] = readAspectRatio(createItem("column"));
 
       expect(width).toBe(SkeletonConfig.fallbackAspectRatioWidth);
       expect(height).toBeGreaterThanOrEqual(SkeletonConfig.fallbackAspectRatioHeightMin);

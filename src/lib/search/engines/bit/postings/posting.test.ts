@@ -13,7 +13,7 @@ function createBitSet(...positions: number[]): BitSet {
   return set;
 }
 
-function positionsOf(set: BitSet): number[] {
+function gatherPositions(set: BitSet): number[] {
   return set.gather(Array.from({ length: set.size }, (_, i) => i));
 }
 
@@ -36,14 +36,14 @@ describe.each(cases)("$name", ({ make }) => {
   });
 
   test("seeds a working set with its positions", () => {
-    expect(positionsOf(make(3, 40, 70).toBitSet(SIZE))).toEqual([3, 40, 70]);
+    expect(gatherPositions(make(3, 40, 70).toBitSet(SIZE))).toEqual([3, 40, 70]);
   });
 
   test("andInto intersects the working set and reports emptiness", () => {
     const working = createBitSet(3, 40, 70, 90);
 
     expect(make(40, 70).andInto(working)).toBe(false);
-    expect(positionsOf(working)).toEqual([40, 70]);
+    expect(gatherPositions(working)).toEqual([40, 70]);
   });
 
   test("andInto reports empty when the intersection is empty", () => {
@@ -57,7 +57,7 @@ describe.each(cases)("$name", ({ make }) => {
     const working = createBitSet(3, 40, 70);
 
     expect(make(40).andNotInto(working)).toBe(false);
-    expect(positionsOf(working)).toEqual([3, 70]);
+    expect(gatherPositions(working)).toEqual([3, 70]);
   });
 
   test("andNotInto reports empty when it removes everything", () => {
@@ -71,7 +71,7 @@ describe.each(cases)("$name", ({ make }) => {
     const accumulator = createBitSet(1);
 
     make(40, 70).orInto(accumulator);
-    expect(positionsOf(accumulator)).toEqual([1, 40, 70]);
+    expect(gatherPositions(accumulator)).toEqual([1, 40, 70]);
   });
 
   test("orComplementInto sets every bit except where the accumulator was 0 and it carries the position", () => {
@@ -107,7 +107,7 @@ describe("EmptyPosting", () => {
     const working = createBitSet(3, 40);
 
     expect(empty.andNotInto(working)).toBe(false);
-    expect(positionsOf(working)).toEqual([3, 40]);
+    expect(gatherPositions(working)).toEqual([3, 40]);
   });
 
   test("andNotInto reports empty when the working set was already empty", () => {
@@ -118,7 +118,7 @@ describe("EmptyPosting", () => {
     const accumulator = createBitSet(1, 2);
 
     empty.orInto(accumulator);
-    expect(positionsOf(accumulator)).toEqual([1, 2]);
+    expect(gatherPositions(accumulator)).toEqual([1, 2]);
   });
 
   test("orComplementInto fills the accumulator, since the complement of nothing is everything", () => {
@@ -136,7 +136,7 @@ describe("dense and sparse agree", () => {
 
     createDensePosting(40, 70).andInto(denseWorking);
     createSparsePosting(40, 70).andInto(sparseWorking);
-    expect(positionsOf(denseWorking)).toEqual(positionsOf(sparseWorking));
+    expect(gatherPositions(denseWorking)).toEqual(gatherPositions(sparseWorking));
   });
 
   test("produce the same orComplementInto result", () => {
@@ -145,6 +145,6 @@ describe("dense and sparse agree", () => {
 
     createDensePosting(5, 40, 88).orComplementInto(denseAcc);
     createSparsePosting(5, 40, 88).orComplementInto(sparseAcc);
-    expect(positionsOf(denseAcc)).toEqual(positionsOf(sparseAcc));
+    expect(gatherPositions(denseAcc)).toEqual(gatherPositions(sparseAcc));
   });
 });

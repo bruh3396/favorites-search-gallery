@@ -20,7 +20,7 @@ function setup(): Setup {
   return { view: new DownloaderView(shell), shell };
 }
 
-function visibilityOf(shell: DownloaderShell): Visibility {
+function readVisibility(shell: DownloaderShell): Visibility {
   return {
     batchSize: shell.batchSizeRow.dataset.hidden === undefined,
     filenameFormat: shell.filenameFormatRow.dataset.hidden === undefined,
@@ -42,7 +42,7 @@ describe("DownloaderView", () => {
   test("starts waiting for favorites with everything hidden and download disabled", () => {
     const { shell } = setup();
 
-    expect(visibilityOf(shell)).toEqual({ batchSize: false, filenameFormat: false, download: false, cancel: false, progress: false });
+    expect(readVisibility(shell)).toEqual({ batchSize: false, filenameFormat: false, download: false, cancel: false, progress: false });
     expect(shell.downloadButton.disabled).toBe(true);
     expect(shell.downloadButton.textContent).toBe("Download Results");
     expect(shell.status.textContent).toBe("Waiting for favorites to load");
@@ -55,7 +55,7 @@ describe("DownloaderView", () => {
     const { view, shell } = setup();
 
     view.render({ phase, label: "Download 3 Results", enabled: true });
-    expect(visibilityOf(shell)).toEqual(expected);
+    expect(readVisibility(shell)).toEqual(expected);
   });
 
   test("labels and enables the download button", () => {

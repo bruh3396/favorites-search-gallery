@@ -22,7 +22,7 @@ const docs = [hd, sd, square];
 
 const metricFor = (item: Doc, metric: SearchableMetric): number => item.metrics[metric] ?? 0;
 
-function namesOf(set: ReadonlySet<Doc>): string[] {
+function getSortedNames(set: ReadonlySet<Doc>): string[] {
   return [...set].map(item => item.name).sort();
 }
 
@@ -46,44 +46,44 @@ describe("DocResolver", () => {
 
   describe("docsFor", () => {
     test("routes a wildcard term to the union of matching terms' docs", () => {
-      expect(namesOf(resolver.resolve(parseWildcardSearchTerm("re*")))).toEqual(["hd", "square"]);
+      expect(getSortedNames(resolver.resolve(parseWildcardSearchTerm("re*")))).toEqual(["hd", "square"]);
     });
 
     test("routes a non-metric term to the term index", () => {
-      expect(namesOf(resolver.resolve(parseSearchTerm("video")))).toEqual(["hd", "sd"]);
-      expect(namesOf(resolver.resolve(parseSearchTerm("red")))).toEqual(["hd", "square"]);
+      expect(getSortedNames(resolver.resolve(parseSearchTerm("video")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(resolver.resolve(parseSearchTerm("red")))).toEqual(["hd", "square"]);
     });
 
     test("an unknown term resolves to nothing", () => {
-      expect(namesOf(resolver.resolve(parseSearchTerm("missing")))).toEqual([]);
+      expect(getSortedNames(resolver.resolve(parseSearchTerm("missing")))).toEqual([]);
     });
 
     test("routes a constant metric term to the metric index", () => {
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("score:>40")))).toEqual(["hd", "square"]);
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:1080")))).toEqual(["square"]);
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("duration:<100")))).toEqual(["sd", "square"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("score:>40")))).toEqual(["hd", "square"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:1080")))).toEqual(["square"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("duration:<100")))).toEqual(["sd", "square"]);
     });
 
     test("resolves a relative metric term against the corpus", () => {
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
     });
 
     test("resolves an equal relative metric term", () => {
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:height")))).toEqual(["square"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:height")))).toEqual(["square"]);
     });
 
     test("resolves each relative term consistently", () => {
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("height:<width")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("height:<width")))).toEqual(["hd", "sd"]);
     });
 
     test("a tautological equality relative term matches every doc", () => {
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:width")))).toEqual(["hd", "sd", "square"]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:width")))).toEqual(["hd", "sd", "square"]);
     });
 
     test("a tautological inequality relative term matches nothing", () => {
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:>width")))).toEqual([]);
-      expect(namesOf(resolver.resolve(parseMetricSearchTerm("width:<width")))).toEqual([]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:>width")))).toEqual([]);
+      expect(getSortedNames(resolver.resolve(parseMetricSearchTerm("width:<width")))).toEqual([]);
     });
   });
 });

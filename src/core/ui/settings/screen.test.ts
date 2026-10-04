@@ -39,7 +39,7 @@ function setup(options: Partial<SettingsScreenOptions> = {}): SettingsScreen & {
   return { ...screen, expanded, triggers: [...screen.element.querySelectorAll<HTMLButtonElement>("[aria-expanded]")] };
 }
 
-function labelsOf(element: HTMLElement): string[] {
+function readLabels(element: HTMLElement): string[] {
   return [...element.querySelectorAll(".fsg-SettingRow-label")].map((label) => label.textContent ?? "");
 }
 
@@ -48,7 +48,7 @@ describe("createSettingsScreen", () => {
     const { triggers, element } = setup();
 
     expect(triggers.map((trigger) => trigger.textContent)).toEqual(["General", "Gallery"]);
-    expect(labelsOf(element)).toEqual(["hints", "autoplay", "loop"]);
+    expect(readLabels(element)).toEqual(["hints", "autoplay", "loop"]);
   });
 
   test("leaves out a section with no settings", () => {
@@ -63,11 +63,11 @@ describe("createSettingsScreen", () => {
 
   test("opens the sections the preference lists, and follows it", () => {
     const { triggers, expanded } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-    const expandedOf = (): (string | null)[] => triggers.map((trigger) => trigger.getAttribute("aria-expanded"));
+    const readExpandedStates = (): (string | null)[] => triggers.map((trigger) => trigger.getAttribute("aria-expanded"));
 
-    expect(expandedOf()).toEqual(["false", "true"]);
+    expect(readExpandedStates()).toEqual(["false", "true"]);
     expanded.set(["general"]);
-    expect(expandedOf()).toEqual(["true", "false"]);
+    expect(readExpandedStates()).toEqual(["true", "false"]);
   });
 
   test("writes a section's id into or out of the preference when it is toggled, keeping the others", () => {
@@ -89,12 +89,13 @@ describe("createSettingsScreen", () => {
   test("hides and shows every caption on request", () => {
     const descriptors = ["autoplay", "hints", "loop"].map((id) => ({ ...createSwitchSetting(id), description: `About ${id}.` }));
     const { element, setDescriptionsVisible } = setup({ descriptors });
-    const hiddenOf = (): boolean[] => [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow-description")].map((caption) => caption.hidden);
+    const captions = [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow-description")];
+    const readDescriptionHiddenStates = (): boolean[] => captions.map((caption) => caption.hidden);
 
     setDescriptionsVisible(false);
-    expect(hiddenOf()).toEqual([true, true, true]);
+    expect(readDescriptionHiddenStates()).toEqual([true, true, true]);
     setDescriptionsVisible(true);
-    expect(hiddenOf()).toEqual([false, false, false]);
+    expect(readDescriptionHiddenStates()).toEqual([false, false, false]);
   });
 
   test("stops following its preferences once disposed", () => {

@@ -45,7 +45,7 @@ function setup(stored: Snippet[] = [], results: string[] = []): Setup {
   return { snippets, container, actions: section.actions ?? [], appended, alerts, saved };
 }
 
-function namesOf(container: HTMLElement): string[] {
+function readNames(container: HTMLElement): string[] {
   return Array.from(container.querySelectorAll<HTMLElement>("[data-snippet-name]")).map(row => row.dataset.snippetName ?? "");
 }
 
@@ -59,15 +59,15 @@ function click(container: HTMLElement, action: string, name?: string): void {
   (scope.querySelector(`[data-snippet-action="${action}"]`) as HTMLElement).click();
 }
 
-function filterOf(container: HTMLElement): HTMLInputElement {
+function queryFilterInput(container: HTMLElement): HTMLInputElement {
   return container.querySelectorAll("input")[0];
 }
 
-function nameFieldOf(container: HTMLElement): HTMLInputElement {
+function queryNameInput(container: HTMLElement): HTMLInputElement {
   return container.querySelectorAll("input")[1];
 }
 
-function queryFieldOf(container: HTMLElement): HTMLTextAreaElement {
+function queryQueryTextarea(container: HTMLElement): HTMLTextAreaElement {
   return container.querySelector("textarea") as HTMLTextAreaElement;
 }
 
@@ -91,14 +91,14 @@ afterEach(() => {
 
 describe("section", () => {
   test("lists the stored snippets newest first", () => {
-    expect(namesOf(setup([fruits, veg]).container)).toEqual(["veg", "fruits"]);
+    expect(readNames(setup([fruits, veg]).container)).toEqual(["veg", "fruits"]);
   });
 
   test("filters the list as the user types", () => {
     const { container } = setup([fruits, veg]);
 
-    type(filterOf(container), "carrot");
-    expect(namesOf(container)).toEqual(["veg"]);
+    type(queryFilterInput(container), "carrot");
+    expect(readNames(container)).toEqual(["veg"]);
   });
 
   test("suggests stored snippets to the search box", () => {
@@ -118,7 +118,7 @@ describe("rows", () => {
     const { container } = setup([fruits, veg]);
 
     click(container, "moveToTop", "fruits");
-    expect(namesOf(container)).toEqual(["fruits", "veg"]);
+    expect(readNames(container)).toEqual(["fruits", "veg"]);
   });
 
   test("delete asks first, then removes the snippet", () => {
@@ -145,10 +145,10 @@ describe("editor", () => {
   test("saves a new snippet", () => {
     const { container } = setup();
 
-    type(nameFieldOf(container), "My Fruits");
-    type(queryFieldOf(container), "apple");
+    type(queryNameInput(container), "My Fruits");
+    type(queryQueryTextarea(container), "apple");
     click(container, "save");
-    expect(namesOf(container)).toEqual(["my_fruits"]);
+    expect(readNames(container)).toEqual(["my_fruits"]);
     expect(storedNames()).toEqual(["my_fruits"]);
   });
 
@@ -157,7 +157,7 @@ describe("editor", () => {
 
     click(container, "edit", "fruits");
     expect(container.textContent).toContain("Editing /fruits");
-    type(nameFieldOf(container), "berries");
+    type(queryNameInput(container), "berries");
     click(container, "save");
     expect(storedNames()).toEqual(["berries"]);
   });
@@ -166,9 +166,9 @@ describe("editor", () => {
     const { container } = setup([fruits]);
 
     click(container, "edit", "fruits");
-    nameFieldOf(container).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    queryNameInput(container).dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     expect(container.textContent).toContain("New snippet");
-    expect(nameFieldOf(container).value).toBe("");
+    expect(queryNameInput(container).value).toBe("");
   });
 
   test("cancelling an edit returns to a new snippet", () => {
@@ -184,7 +184,7 @@ describe("editor", () => {
 
     click(container, "save");
     expect(container.textContent).toContain("A snippet needs a name");
-    type(nameFieldOf(container), "fruits");
+    type(queryNameInput(container), "fruits");
     expect(container.textContent).not.toContain("A snippet needs a name");
   });
 
@@ -192,7 +192,7 @@ describe("editor", () => {
     const { container } = setup([], ["1", "2"]);
 
     click(container, "fillQueryFromResults");
-    expect(queryFieldOf(container).value).toBe("( 1 ~ 2 )");
+    expect(queryQueryTextarea(container).value).toBe("( 1 ~ 2 )");
   });
 
   test("alerts when there are no search results", () => {
@@ -213,7 +213,7 @@ describe("actions", () => {
     });
     actions[0].click();
     await flushMicrotasks();
-    expect(namesOf(container)).toEqual(["veg"]);
+    expect(readNames(container)).toEqual(["veg"]);
   });
 
   test("export saves the snippets to a json file", () => {
@@ -227,7 +227,7 @@ describe("actions", () => {
     const { container, actions } = setup([fruits, veg]);
 
     actions[2].click();
-    expect(namesOf(container)).toEqual([]);
+    expect(readNames(container)).toEqual([]);
     expect(storedNames()).toEqual([]);
   });
 });

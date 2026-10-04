@@ -33,7 +33,7 @@ function setup(...results: FrozenCobaltPostResult[]): Setup {
   return { remotePosts, frozenCobalt, scheduler };
 }
 
-async function fetchedFor(
+async function fetchRemotePost(
   { remotePosts, scheduler }: Setup,
   post: Pick<Post, "id" | "deleted">
 ): Promise<CategorizedPost> {
@@ -49,28 +49,28 @@ describe("FrozenCobaltRemotePosts", () => {
     const bundle = setup({ status: "ok", post: createFrozenCobaltPost("1") });
     const media = { kind: "image", locator: "https://example.com/1.png" };
 
-    expect((await fetchedFor(bundle, { id: "1" })).post).toMatchObject({ id: "1", width: 10, media });
+    expect((await fetchRemotePost(bundle, { id: "1" })).post).toMatchObject({ id: "1", width: 10, media });
   });
 
   test("rejects at once a post whose file can't be minted", async() => {
     const post = { ...createFrozenCobaltPost("1"), fileURL: "https://example.com/1.webm" };
     const bundle = setup({ status: "ok", post });
 
-    await expect(fetchedFor(bundle, { id: "1" })).rejects.toMatchObject({ reason: "unknown_file" });
+    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toMatchObject({ reason: "unknown_file" });
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledOnce();
   });
 
   test("rejects at once as unavailable a post Frozen Cobalt reports deleted", async() => {
     const bundle = setup({ status: "deleted", id: "1" });
 
-    await expect(fetchedFor(bundle, { id: "1" })).rejects.toEqual(new PostUnavailableError("1"));
+    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toEqual(new PostUnavailableError("1"));
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledOnce();
   });
 
   test("rejects as unavailable without asking a post already marked deleted", async() => {
     const bundle = setup({ status: "ok", post: createFrozenCobaltPost("1") });
 
-    await expect(fetchedFor(bundle, { id: "1", deleted: true })).rejects.toEqual(new PostUnavailableError("1"));
+    await expect(fetchRemotePost(bundle, { id: "1", deleted: true })).rejects.toEqual(new PostUnavailableError("1"));
     expect(bundle.frozenCobalt.fetchPost).not.toHaveBeenCalled();
   });
 
@@ -79,7 +79,7 @@ describe("FrozenCobaltRemotePosts", () => {
 
     bundle.frozenCobalt.fetchPost.mockRejectedValueOnce(new FrozenCobaltError("malformed", { subject: "1" }));
 
-    await expect(fetchedFor(bundle, { id: "1" })).rejects.toMatchObject({ reason: "malformed" });
+    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toMatchObject({ reason: "malformed" });
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledOnce();
   });
 
@@ -90,14 +90,14 @@ describe("FrozenCobaltRemotePosts", () => {
   ])("asks again after a $status result", async result => {
     const bundle = setup(result, { status: "ok", post: createFrozenCobaltPost("1") });
 
-    expect((await fetchedFor(bundle, { id: "1" })).post.id).toBe("1");
+    expect((await fetchRemotePost(bundle, { id: "1" })).post.id).toBe("1");
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledTimes(2);
   });
 
   test("retries a server error, then rejects when Frozen Cobalt keeps failing", async() => {
     const bundle = setup();
 
-    await expect(fetchedFor(bundle, { id: "1" })).rejects.toMatchObject({ reason: "server_error" });
+    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toMatchObject({ reason: "server_error" });
     expect(bundle.frozenCobalt.fetchPost.mock.calls.length).toBeGreaterThan(1);
   });
 });

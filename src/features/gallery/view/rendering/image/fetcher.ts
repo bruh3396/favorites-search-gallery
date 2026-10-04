@@ -7,7 +7,7 @@ import { loadImageBitmap } from "@/utils/browser/image";
 export class GalleryImageFetcher implements ImageFetcher {
   private readonly fetchQueue = new ThrottleQueue(10);
 
-  constructor(private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveImageUrl">) { }
+  constructor(private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "fetchImage">) { }
 
   public fetchBitmap(request: ImageRequest): Promise<boolean> {
     return request.isHighRes ? this.fetchHighResBitmap(request) : this.fetchLowResBitmap(request);
@@ -23,9 +23,9 @@ export class GalleryImageFetcher implements ImageFetcher {
     }
 
     try {
-      const url = await this.remoteMedia.resolveImageUrl(request.item.media);
+      const blob = await this.remoteMedia.fetchImage(request.item.media, request.abortController.signal);
 
-      request.complete(await loadImageBitmap(url, request.abortController.signal));
+      request.complete(await createImageBitmap(blob));
       return true;
     } catch (error) {
       if (error instanceof DOMException && error.name === "AbortError") {

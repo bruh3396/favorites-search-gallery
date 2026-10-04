@@ -20,7 +20,7 @@ function setup(respond: Fetch = (): Promise<Response> => Promise.resolve(new Res
   return { actions, fetch, scheduler };
 }
 
-function requestedUrlsOf(fetch: FetchMock): string[] {
+function readRequestedUrls(fetch: FetchMock): string[] {
   return fetch.mock.calls.map(([url]) => url);
 }
 
@@ -29,7 +29,7 @@ describe("Rule34FavoriteActions", () => {
     const { actions, fetch } = setup();
 
     expect(await actions.add("7")).toBe("added");
-    expect(requestedUrlsOf(fetch)).toEqual([postVoteUrl("7"), addFavoriteUrl("7")]);
+    expect(readRequestedUrls(fetch)).toEqual([postVoteUrl("7"), addFavoriteUrl("7")]);
   });
 
   test.each([
@@ -56,7 +56,7 @@ describe("Rule34FavoriteActions", () => {
     const { actions, fetch } = setup();
 
     expect(await actions.remove("8")).toBe(true);
-    expect(requestedUrlsOf(fetch)).toEqual([removeFavoriteUrl("8")]);
+    expect(readRequestedUrls(fetch)).toEqual([removeFavoriteUrl("8")]);
   });
 
   test("removing retries a network failure", async() => {
@@ -67,7 +67,7 @@ describe("Rule34FavoriteActions", () => {
 
     await advanceAndSettle(scheduler, 1_000);
     expect(await removed).toBe(true);
-    expect(requestedUrlsOf(fetch)).toEqual([removeFavoriteUrl("8"), removeFavoriteUrl("8")]);
+    expect(readRequestedUrls(fetch)).toEqual([removeFavoriteUrl("8"), removeFavoriteUrl("8")]);
   });
 
   test("removing a post cancels its add while the add waits its turn", async() => {
@@ -78,7 +78,7 @@ describe("Rule34FavoriteActions", () => {
     await actions.remove("2");
     expect(await first).toBe("added");
     expect(await second).toBeNull();
-    expect(requestedUrlsOf(fetch)).not.toContain(addFavoriteUrl("2"));
+    expect(readRequestedUrls(fetch)).not.toContain(addFavoriteUrl("2"));
   });
 
   test("adding a post cancels its remove while the remove waits its turn", async() => {
@@ -89,6 +89,6 @@ describe("Rule34FavoriteActions", () => {
     await actions.add("2");
     expect(await first).toBe(true);
     expect(await second).toBe(false);
-    expect(requestedUrlsOf(fetch)).not.toContain(removeFavoriteUrl("2"));
+    expect(readRequestedUrls(fetch)).not.toContain(removeFavoriteUrl("2"));
   });
 });

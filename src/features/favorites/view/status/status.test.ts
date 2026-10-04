@@ -19,16 +19,16 @@ function setup(): Setup {
   return { status: new FavoritesStatus(shell.toolbar, shell.toolbarRoot, scheduler), shell, scheduler };
 }
 
-function statusOf(shell: FavoritesShell): string | null {
+function readStatus(shell: FavoritesShell): string | null {
   return shell.toolbar.loadStatus.textContent;
 }
 
-function progressBarOf(shell: FavoritesShell): HTMLElement {
+function queryProgressBar(shell: FavoritesShell): HTMLElement {
   return shell.toolbarRoot.querySelector(`#${FavoritesId.loadProgressBar}`) as HTMLElement;
 }
 
-function progressOf(shell: FavoritesShell): string | null {
-  const bar = progressBarOf(shell);
+function readProgress(shell: FavoritesShell): string | null {
+  const bar = queryProgressBar(shell);
   return bar.dataset.visible === undefined ? null : (bar.firstElementChild as HTMLElement).style.width;
 }
 
@@ -36,7 +36,7 @@ describe("FavoritesStatus", () => {
   test("starts with a hidden progress bar", () => {
     const { shell } = setup();
 
-    expect(progressOf(shell)).toBeNull();
+    expect(readProgress(shell)).toBeNull();
   });
 
   test("shows a status until it's cleared", () => {
@@ -44,9 +44,9 @@ describe("FavoritesStatus", () => {
 
     status.setStatus("Peeling apples");
     scheduler.advance(60_000);
-    expect(statusOf(shell)).toBe("Peeling apples");
+    expect(readStatus(shell)).toBe("Peeling apples");
     status.clearStatus();
-    expect(statusOf(shell)).toBe("");
+    expect(readStatus(shell)).toBe("");
   });
 
   test("a temporary status clears itself after a second", () => {
@@ -54,9 +54,9 @@ describe("FavoritesStatus", () => {
 
     status.setTemporaryStatus("Apple added");
     scheduler.advance(999);
-    expect(statusOf(shell)).toBe("Apple added");
+    expect(readStatus(shell)).toBe("Apple added");
     scheduler.advance(1);
-    expect(statusOf(shell)).toBe("");
+    expect(readStatus(shell)).toBe("");
   });
 
   test("a new status outlasts an earlier temporary one", () => {
@@ -65,7 +65,7 @@ describe("FavoritesStatus", () => {
     status.setTemporaryStatus("Apple added");
     status.setStatus("Peeling apples");
     scheduler.advance(1_000);
-    expect(statusOf(shell)).toBe("Peeling apples");
+    expect(readStatus(shell)).toBe("Peeling apples");
   });
 
   test("counts results", () => {
@@ -82,9 +82,9 @@ describe("FavoritesStatus", () => {
       const { status, shell } = setup();
 
       status.updateFetchStatus(100, 7);
-      expect(statusOf(shell)).toBe("Fetching - 100");
+      expect(readStatus(shell)).toBe("Fetching - 100");
       expect(shell.toolbar.resultsCount.textContent).toBe("7 Results");
-      expect(progressOf(shell)).toBeNull();
+      expect(readProgress(shell)).toBeNull();
     });
 
     test("with an expected total, shows progress, then a time estimate", () => {
@@ -92,11 +92,11 @@ describe("FavoritesStatus", () => {
 
       status.setExpectedTotalFavoriteCount(600);
       status.updateFetchStatus(0, 0);
-      expect(statusOf(shell)).toBe("Fetching - 0 / 600");
+      expect(readStatus(shell)).toBe("Fetching - 0 / 600");
       scheduler.advance(2_000);
       status.updateFetchStatus(300, 0);
-      expect(statusOf(shell)).toBe("Fetching - 300 / 600 -   2s");
-      expect(progressOf(shell)).toBe("50%");
+      expect(readStatus(shell)).toBe("Fetching - 300 / 600 -   2s");
+      expect(readProgress(shell)).toBe("50%");
     });
 
     test("forgetting the expected total goes back to counting", () => {
@@ -105,7 +105,7 @@ describe("FavoritesStatus", () => {
       status.setExpectedTotalFavoriteCount(500);
       status.setExpectedTotalFavoriteCount(null);
       status.updateFetchStatus(100, 0);
-      expect(statusOf(shell)).toBe("Fetching - 100");
+      expect(readStatus(shell)).toBe("Fetching - 100");
     });
   });
 
@@ -114,16 +114,16 @@ describe("FavoritesStatus", () => {
       const { status, shell } = setup();
 
       status.setLoadProgress({ loaded: 25, total: 100 });
-      expect(statusOf(shell)).toBe("Loading favorites - 25 / 100");
-      expect(progressOf(shell)).toBe("25%");
+      expect(readStatus(shell)).toBe("Loading favorites - 25 / 100");
+      expect(readProgress(shell)).toBe("25%");
     });
 
     test("without a total, just says it's loading", () => {
       const { status, shell } = setup();
 
       status.setLoadProgress({ loaded: 0, total: 0 });
-      expect(statusOf(shell)).toBe("Loading favorites");
-      expect(progressOf(shell)).toBeNull();
+      expect(readStatus(shell)).toBe("Loading favorites");
+      expect(readProgress(shell)).toBeNull();
     });
   });
 
@@ -132,6 +132,6 @@ describe("FavoritesStatus", () => {
 
     status.setLoadProgress({ loaded: 25, total: 100 });
     status.clearStatus();
-    expect(progressOf(shell)).toBeNull();
+    expect(readProgress(shell)).toBeNull();
   });
 });

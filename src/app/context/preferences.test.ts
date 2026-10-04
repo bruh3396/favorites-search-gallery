@@ -5,7 +5,7 @@ import { Preference } from "@/lib/storage/preference";
 import { createEnvironment } from "@/testing/environment";
 import { selectPreferenceDefaults } from "@/app/context/preference_defaults";
 
-function allPreferencesOf(preferences: Preferences): Preference<unknown>[] {
+function listAllPreferences(preferences: Preferences): Preference<unknown>[] {
   const { reset: _reset, ...sections } = preferences;
   return Object.values(sections).flatMap(section => Object.values(section) as Preference<unknown>[]);
 }
@@ -13,7 +13,7 @@ function allPreferencesOf(preferences: Preferences): Preference<unknown>[] {
 describe("createPreferences", () => {
   test("stores every preference under its own key", () => {
     const store = new MemoryLocalKeyedValues();
-    const all = allPreferencesOf(createPreferences(selectPreferenceDefaults(createEnvironment()), store));
+    const all = listAllPreferences(createPreferences(selectPreferenceDefaults(createEnvironment()), store));
 
     all.forEach((preference, index) => preference.set(index));
 

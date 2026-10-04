@@ -35,7 +35,7 @@ function render(descriptor: SettingDescriptor): HTMLDivElement {
   return createSetting(document, { descriptor, scheduler: SCHEDULER }).element;
 }
 
-function buttonsOf(element: HTMLElement): HTMLButtonElement[] {
+function queryButtons(element: HTMLElement): HTMLButtonElement[] {
   return [...element.querySelectorAll("button")];
 }
 
@@ -74,7 +74,7 @@ function setupHeldNumber({ live }: { live: boolean }): {
   };
   const descriptor: NumberSetting = { id: "columns", kind: "number", label: "Columns", preference, min: 0, max: 10, step: 1, live };
   const element = createSetting(document, { descriptor, scheduler }).element;
-  return { input: element.querySelector("input")!, increment: buttonsOf(element)[1], preference, writes, scheduler };
+  return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, writes, scheduler };
 }
 
 describe("createSetting", () => {
@@ -88,7 +88,7 @@ describe("createSetting", () => {
     const descriptor = createSwitchSetting(createPreference(false));
     const { element } = createSetting(document, { descriptor, size: "small", scheduler: SCHEDULER });
 
-    expect([element.dataset.size, buttonsOf(element)[0].dataset.size]).toEqual(["small", "small"]);
+    expect([element.dataset.size, queryButtons(element)[0].dataset.size]).toEqual(["small", "small"]);
   });
 
   test("hides and shows its caption on request", () => {
@@ -101,7 +101,7 @@ describe("createSetting", () => {
 
   test("shows a switch's preference and follows it", () => {
     const preference = createPreference(false);
-    const [control] = buttonsOf(render(createSwitchSetting(preference)));
+    const [control] = queryButtons(render(createSwitchSetting(preference)));
 
     expect(control.getAttribute("aria-checked")).toBe("false");
     preference.set(true);
@@ -110,7 +110,7 @@ describe("createSetting", () => {
 
   test("writes the next value to the preference", () => {
     const preference = createPreference(false);
-    const [control] = buttonsOf(render(createSwitchSetting(preference)));
+    const [control] = queryButtons(render(createSwitchSetting(preference)));
 
     control.click();
     expect(preference.value).toBe(true);
@@ -119,7 +119,7 @@ describe("createSetting", () => {
 
   test("offers a choice's members in order, by their labels, as a segmented control", () => {
     const preference = createPreference<Layout>("row");
-    const buttons = buttonsOf(render(createLayoutSetting(preference, "segmented")));
+    const buttons = queryButtons(render(createLayoutSetting(preference, "segmented")));
 
     expect(buttons.map((button) => button.textContent)).toEqual(["Column", "Row", "Square"]);
     expect(buttons[1].getAttribute("aria-checked")).toBe("true");
@@ -140,7 +140,7 @@ describe("createSetting", () => {
     const descriptor: ChoicesSetting<Layout> = {
       id: "layouts", kind: "choices", label: "Layouts", preference, members: LAYOUTS, labels: LAYOUT_LABELS
     };
-    const buttons = buttonsOf(render(descriptor));
+    const buttons = queryButtons(render(descriptor));
 
     buttons[2].click();
     expect(preference.value).toEqual(["column", "square"]);
@@ -154,7 +154,7 @@ describe("createSetting", () => {
 
     expect(input?.value).toBe("10");
     expect(input?.getAttribute("aria-label")).toBe("Columns");
-    expect(buttonsOf(element)[1].disabled).toBe(true);
+    expect(queryButtons(element)[1].disabled).toBe(true);
   });
 
   test("previews a held number and writes it once, on release", () => {
@@ -178,7 +178,7 @@ describe("createSetting", () => {
 
   test("disables the control while enabledWhen is false, and follows the signals it reads", () => {
     const infiniteScroll = createPreference(true);
-    const [control] = buttonsOf(render(createSwitchSetting(createPreference(false), () => !infiniteScroll.value)));
+    const [control] = queryButtons(render(createSwitchSetting(createPreference(false), () => !infiniteScroll.value)));
 
     expect(control.disabled).toBe(true);
     infiniteScroll.set(false);
@@ -188,7 +188,7 @@ describe("createSetting", () => {
   test("stops following its preference once disposed", () => {
     const preference = createPreference(false);
     const setting = createSetting(document, { descriptor: createSwitchSetting(preference), scheduler: SCHEDULER });
-    const [control] = buttonsOf(setting.element);
+    const [control] = queryButtons(setting.element);
 
     setting.dispose();
     preference.set(true);

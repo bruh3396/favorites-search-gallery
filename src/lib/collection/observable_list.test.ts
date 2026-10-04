@@ -5,7 +5,7 @@ import { ObservableList } from "@/lib/collection/observable_list";
 
 const createItem = (id: string): Identifiable => ({ id });
 const createItems = (...ids: string[]): Identifiable[] => ids.map(createItem);
-const idsOf = (results: Identifiable[]): string[] => results.map(r => r.id);
+const getIds = (results: Identifiable[]): string[] => results.map(r => r.id);
 
 describe("ObservableList", () => {
   let results: ObservableList<Identifiable>;
@@ -44,7 +44,7 @@ describe("ObservableList", () => {
   describe("shuffle", () => {
     test("keeps the same set of results", () => {
       results.set(createItems("1", "2", "3"));
-      expect(idsOf(results.shuffle(new MemoryRandomSource())).sort()).toEqual(["1", "2", "3"]);
+      expect(getIds(results.shuffle(new MemoryRandomSource())).sort()).toEqual(["1", "2", "3"]);
     });
 
     test("notifies the onChanged listener", () => {
@@ -64,7 +64,7 @@ describe("ObservableList", () => {
       const added = createItems("3", "4");
 
       expect(results.append(added)).toBe(added);
-      expect(idsOf(results.get())).toEqual(["1", "2", "3", "4"]);
+      expect(getIds(results.get())).toEqual(["1", "2", "3", "4"]);
     });
 
     test("notifies the onChanged listener with the combined results", () => {
@@ -73,7 +73,7 @@ describe("ObservableList", () => {
       results = new ObservableList<Identifiable>(onChanged);
       results.set(createItems("1"));
       results.append(createItems("2"));
-      expect(idsOf(onChanged.mock.lastCall?.[0])).toEqual(["1", "2"]);
+      expect(getIds(onChanged.mock.lastCall?.[0])).toEqual(["1", "2"]);
     });
   });
 
@@ -83,7 +83,7 @@ describe("ObservableList", () => {
       const added = createItems("1", "2");
 
       expect(results.prepend(added)).toBe(added);
-      expect(idsOf(results.get())).toEqual(["1", "2", "3", "4"]);
+      expect(getIds(results.get())).toEqual(["1", "2", "3", "4"]);
     });
 
     test("notifies the onChanged listener with the combined results", () => {
@@ -92,7 +92,7 @@ describe("ObservableList", () => {
       results = new ObservableList<Identifiable>(onChanged);
       results.set(createItems("2"));
       results.prepend(createItems("1"));
-      expect(idsOf(onChanged.mock.lastCall?.[0])).toEqual(["1", "2"]);
+      expect(getIds(onChanged.mock.lastCall?.[0])).toEqual(["1", "2"]);
     });
   });
 });

@@ -37,7 +37,7 @@ function setup(remotePosts: Post[] = [], fetchDurationSeconds: RemoteMedia["fetc
   return { library, localPosts, scheduler, fetchDurationSeconds: fetchDuration, onRefreshed };
 }
 
-async function localIdsOf(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
+async function readLocalIds(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
   return (await localPosts.getMany(ids)).map(post => post.id);
 }
 
@@ -77,7 +77,7 @@ describe("FavoritesPostLibrary", () => {
     scheduler.advance(WRITE_DELAY);
 
     expect(onRefreshed.mock.calls[0][0]).toMatchObject({ post: { id: "2", tags: "apple" } });
-    expect(await localIdsOf(localPosts, ["2"])).toEqual(["2"]);
+    expect(await readLocalIds(localPosts, ["2"])).toEqual(["2"]);
   });
 
   test("fetches placeholders before stale posts", async() => {
@@ -152,10 +152,10 @@ describe("FavoritesPostLibrary", () => {
 
     await library.refreshAll([createPost()]);
     scheduler.advance(WRITE_DELAY - 1);
-    expect(await localIdsOf(localPosts, ["0"])).toEqual([]);
+    expect(await readLocalIds(localPosts, ["0"])).toEqual([]);
 
     scheduler.advance(1);
-    expect(await localIdsOf(localPosts, ["0"])).toEqual(["0"]);
+    expect(await readLocalIds(localPosts, ["0"])).toEqual(["0"]);
   });
 
   test("writes refreshed posts without waiting once a batch fills", async() => {
@@ -164,7 +164,7 @@ describe("FavoritesPostLibrary", () => {
 
     await library.refreshAll(ids.map(id => createPost({ id })));
 
-    expect(await localIdsOf(localPosts, ids)).toEqual(ids);
+    expect(await readLocalIds(localPosts, ids)).toEqual(ids);
   });
 
   test("reports but never writes a refreshed post without dimensions", async() => {
@@ -174,7 +174,7 @@ describe("FavoritesPostLibrary", () => {
     scheduler.advance(WRITE_DELAY);
 
     expect(onRefreshed).toHaveBeenCalledOnce();
-    expect(await localIdsOf(localPosts, ["0"])).toEqual([]);
+    expect(await readLocalIds(localPosts, ["0"])).toEqual([]);
   });
 
   test("fills a video's duration on its fetched copy", async() => {

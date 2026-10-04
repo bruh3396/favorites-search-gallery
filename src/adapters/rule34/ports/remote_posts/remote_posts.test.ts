@@ -20,7 +20,7 @@ function setup(fetchPostPage: FetchPostPage): { remotePosts: Rule34RemotePosts; 
   return { remotePosts: new Rule34RemotePosts({ rule34, scheduler, randomSource: new MemoryRandomSource([1]) }), scheduler };
 }
 
-async function fetchedFor(fetchPostPage: FetchPostPage): Promise<CategorizedPost> {
+async function fetchRemotePost(fetchPostPage: FetchPostPage): Promise<CategorizedPost> {
   const { remotePosts, scheduler } = setup(fetchPostPage);
   const fetched = remotePosts.fetch({ id: "42" });
 
@@ -33,7 +33,7 @@ describe("Rule34RemotePosts", () => {
   test("reads a post and its tag categories from the post's page", async() => {
     const fetchPostPage: FetchPostPage = vi.fn(() => Promise.resolve(PAGE));
 
-    expect(await fetchedFor(fetchPostPage)).toBe(PAGE);
+    expect(await fetchRemotePost(fetchPostPage)).toBe(PAGE);
     expect(fetchPostPage).toHaveBeenCalledWith("42");
   });
 
@@ -42,21 +42,21 @@ describe("Rule34RemotePosts", () => {
       .mockRejectedValueOnce(new Rule34Error("http", { status: 503 }))
       .mockResolvedValue(PAGE);
 
-    expect(await fetchedFor(fetchPostPage)).toBe(PAGE);
+    expect(await fetchRemotePost(fetchPostPage)).toBe(PAGE);
     expect(fetchPostPage).toHaveBeenCalledTimes(2);
   });
 
   test("gives up after three transient failures", async() => {
     const fetchPostPage: FetchPostPage = vi.fn(() => Promise.reject(new Rule34Error("network")));
 
-    await expect(fetchedFor(fetchPostPage)).rejects.toThrow(Rule34Error);
+    await expect(fetchRemotePost(fetchPostPage)).rejects.toThrow(Rule34Error);
     expect(fetchPostPage).toHaveBeenCalledTimes(3);
   });
 
   test("never retries a page it can't read", async() => {
     const fetchPostPage: FetchPostPage = vi.fn(() => Promise.reject(new Rule34Error("malformed")));
 
-    await expect(fetchedFor(fetchPostPage)).rejects.toThrow(Rule34Error);
+    await expect(fetchRemotePost(fetchPostPage)).rejects.toThrow(Rule34Error);
     expect(fetchPostPage).toHaveBeenCalledOnce();
   });
 });

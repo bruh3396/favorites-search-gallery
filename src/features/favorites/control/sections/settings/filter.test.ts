@@ -47,7 +47,7 @@ function type(field: HTMLInputElement, text: string): void {
   field.dispatchEvent(new Event("input"));
 }
 
-function visibleOf(elements: Record<string, HTMLElement>): string[] {
+function listVisibleNames(elements: Record<string, HTMLElement>): string[] {
   return Object.entries(elements).filter(([, element]) => element.dataset.filtered === undefined).map(([name]) => name);
 }
 
@@ -59,8 +59,8 @@ describe("FavoritesSettingsFilter", () => {
   test("shows everything before anything is typed", () => {
     const { panel, rows, sections, hidden } = setup();
 
-    expect(visibleOf(rows)).toEqual(["darkMode", "header", "layout", "autoplay"]);
-    expect(visibleOf(sections)).toEqual(["appearance", "gallery"]);
+    expect(listVisibleNames(rows)).toEqual(["darkMode", "header", "layout", "autoplay"]);
+    expect(listVisibleNames(sections)).toEqual(["appearance", "gallery"]);
     expect(isFlagged(panel, "filtering")).toBe(false);
     expect(isFlagged(hidden, "hidden")).toBe(false);
   });
@@ -69,31 +69,31 @@ describe("FavoritesSettingsFilter", () => {
     const { field, rows, sections } = setup();
 
     type(field, "DARK");
-    expect(visibleOf(rows)).toEqual(["darkMode"]);
-    expect(visibleOf(sections)).toEqual(["appearance"]);
+    expect(listVisibleNames(rows)).toEqual(["darkMode"]);
+    expect(listVisibleNames(sections)).toEqual(["appearance"]);
   });
 
   test("matches a setting by its description and its options", () => {
     const { field, rows } = setup();
 
     type(field, "traverse");
-    expect(visibleOf(rows)).toEqual(["autoplay"]);
+    expect(listVisibleNames(rows)).toEqual(["autoplay"]);
     type(field, "waterfall");
-    expect(visibleOf(rows)).toEqual(["layout"]);
+    expect(listVisibleNames(rows)).toEqual(["layout"]);
   });
 
   test("matching a section's title shows all of its settings", () => {
     const { field, rows } = setup();
 
     type(field, "appearance");
-    expect(visibleOf(rows)).toEqual(["darkMode", "header", "layout"]);
+    expect(listVisibleNames(rows)).toEqual(["darkMode", "header", "layout"]);
   });
 
   test("requires every typed word to match", () => {
     const { field, rows } = setup();
 
     type(field, "appearance  site");
-    expect(visibleOf(rows)).toEqual(["header"]);
+    expect(listVisibleNames(rows)).toEqual(["header"]);
   });
 
   test("hides the given elements while filtering", () => {
@@ -108,7 +108,7 @@ describe("FavoritesSettingsFilter", () => {
     const { panel, field, sections } = setup();
 
     type(field, "nothing like this");
-    expect(visibleOf(sections)).toEqual([]);
+    expect(listVisibleNames(sections)).toEqual([]);
     expect(isFlagged(panel, "empty")).toBe(true);
   });
 
@@ -121,9 +121,9 @@ describe("FavoritesSettingsFilter", () => {
       section("Mango", [extra.unlabeled])
     );
     type(field, "cherry");
-    expect(visibleOf(extra)).toEqual(["cherry"]);
+    expect(listVisibleNames(extra)).toEqual(["cherry"]);
     type(field, "mango");
-    expect(visibleOf(extra)).toEqual(["unlabeled"]);
+    expect(listVisibleNames(extra)).toEqual(["unlabeled"]);
   });
 
   test("clearing the search shows everything again", () => {
@@ -131,7 +131,7 @@ describe("FavoritesSettingsFilter", () => {
 
     type(field, "nothing like this");
     field.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    expect(visibleOf(rows)).toEqual(["darkMode", "header", "layout", "autoplay"]);
+    expect(listVisibleNames(rows)).toEqual(["darkMode", "header", "layout", "autoplay"]);
     expect(isFlagged(panel, "empty")).toBe(false);
     expect(isFlagged(hidden, "hidden")).toBe(false);
   });

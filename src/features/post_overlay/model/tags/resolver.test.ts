@@ -13,7 +13,7 @@ function setup(fetch: Fetch = (tagNames): ReturnType<Fetch> => Promise.resolve(n
   return { localTagCategories: new MemoryLocalTagCategories(), remoteTagCategories: { fetch: vi.fn<Fetch>(fetch) } };
 }
 
-function categoriesOf(entries: [string, TagCategory][]): Map<string, TagCategory> {
+function createCategoryMap(entries: [string, TagCategory][]): Map<string, TagCategory> {
   return new Map(entries);
 }
 
@@ -25,23 +25,24 @@ describe("PostOverlayTagsResolver.resolveAll", () => {
   test("skips the post's own id among its tags", async() => {
     const ports = setup();
 
-    expect(await PostOverlayTagsResolver.resolveAll(ports, "123", new Set(["123", "alice"]))).toEqual(categoriesOf([["alice", "artist"]]));
+    expect(await PostOverlayTagsResolver.resolveAll(ports, "123", new Set(["123", "alice"]))).toEqual(createCategoryMap([["alice", "artist"]]));
   });
 
   test("fetches only tags it has not stored, and stores them", async() => {
     const ports = setup();
 
-    await ports.localTagCategories.setMany(categoriesOf([["alice", "character"]]));
+    await ports.localTagCategories.setMany(createCategoryMap([["alice", "character"]]));
 
-    expect(await PostOverlayTagsResolver.resolveAll(ports, "1", new Set(["alice", "bob"]))).toEqual(categoriesOf([["alice", "character"], ["bob", "artist"]]));
+    expect(await PostOverlayTagsResolver.resolveAll(ports, "1", new Set(["alice", "bob"])))
+      .toEqual(createCategoryMap([["alice", "character"], ["bob", "artist"]]));
     expect(ports.remoteTagCategories.fetch).toHaveBeenCalledWith(["bob"]);
-    expect(await ports.localTagCategories.getMany(["bob"])).toEqual(categoriesOf([["bob", "artist"]]));
+    expect(await ports.localTagCategories.getMany(["bob"])).toEqual(createCategoryMap([["bob", "artist"]]));
   });
 
   test("does not fetch when every tag is stored", async() => {
     const ports = setup();
 
-    await ports.localTagCategories.setMany(categoriesOf([["alice", "character"]]));
+    await ports.localTagCategories.setMany(createCategoryMap([["alice", "character"]]));
     await PostOverlayTagsResolver.resolveAll(ports, "1", new Set(["alice"]));
 
     expect(ports.remoteTagCategories.fetch).not.toHaveBeenCalled();
@@ -51,7 +52,7 @@ describe("PostOverlayTagsResolver.resolveAll", () => {
     vi.spyOn(console, "error").mockImplementation(() => { });
     const ports = setup(() => Promise.reject(new Error("offline")));
 
-    expect(await PostOverlayTagsResolver.resolveAll(ports, "1", new Set(["alice"]))).toEqual(categoriesOf([["alice", "general"]]));
+    expect(await PostOverlayTagsResolver.resolveAll(ports, "1", new Set(["alice"]))).toEqual(createCategoryMap([["alice", "general"]]));
     expect(await ports.localTagCategories.getMany(["alice"])).toEqual(new Map());
   });
 });

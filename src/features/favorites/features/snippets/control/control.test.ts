@@ -51,12 +51,12 @@ function press(field: HTMLElement, key: string): KeyboardEvent {
   return event;
 }
 
-function rowOf(shell: SnippetShell, name: string): HTMLElement {
+function queryRow(shell: SnippetShell, name: string): HTMLElement {
   return shell.list.querySelector<HTMLElement>(`[data-snippet-name="${name}"]`) as HTMLElement;
 }
 
-function buttonOf(shell: SnippetShell, name: string, action: string): HTMLElement {
-  return rowOf(shell, name).querySelector<HTMLElement>(`[data-snippet-action="${action}"]`) as HTMLElement;
+function queryButton(shell: SnippetShell, name: string, action: string): HTMLElement {
+  return queryRow(shell, name).querySelector<HTMLElement>(`[data-snippet-action="${action}"]`) as HTMLElement;
 }
 
 beforeEach(() => {
@@ -72,7 +72,7 @@ describe("list", () => {
   test("clicking a row uses its snippet", () => {
     const { shell, calls } = setup();
 
-    rowOf(shell, "fruits").click();
+    queryRow(shell, "fruits").click();
     expect(calls).toEqual(["use:fruits"]);
   });
 
@@ -85,21 +85,21 @@ describe("list", () => {
   ])("clicking %s's %s button fires only %s", (name, action, call) => {
     const { shell, calls } = setup();
 
-    buttonOf(shell, name, action).click();
+    queryButton(shell, name, action).click();
     expect(calls).toEqual([call]);
   });
 
   test("clicking inside a button fires the button, not the row", () => {
     const { shell, calls } = setup();
 
-    (buttonOf(shell, "fruits", "edit").firstElementChild as HTMLElement).click();
+    (queryButton(shell, "fruits", "edit").firstElementChild as HTMLElement).click();
     expect(calls).toEqual(["edit:fruits"]);
   });
 
   test("clicking an untagged part of the list does nothing", () => {
     const { shell, calls } = setup();
 
-    rowOf(shell, "veg").click();
+    queryRow(shell, "veg").click();
     shell.list.click();
     expect(calls).toEqual([]);
   });

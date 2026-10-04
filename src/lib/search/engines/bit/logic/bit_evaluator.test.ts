@@ -32,7 +32,7 @@ function createLeaf(term: string): SearchExpression {
   return SearchExpression.term(parseSearchTerm(term));
 }
 
-function idsFor(items: Item[], expression: SearchExpression): string[] {
+function evaluateIds(items: Item[], expression: SearchExpression): string[] {
   return createEvaluator(items).evaluate(expression).map(doc => doc.id).sort();
 }
 
@@ -46,61 +46,61 @@ const corpus: Item[] = [
 
 describe("SearchExpression leaves", () => {
   test("a lone positive term matches the docs carrying it", () => {
-    expect(idsFor(corpus, createLeaf("sweet"))).toEqual(["1", "3", "5"]);
+    expect(evaluateIds(corpus, createLeaf("sweet"))).toEqual(["1", "3", "5"]);
   });
 
   test("a term absent from the index matches nothing", () => {
-    expect(idsFor(corpus, createLeaf("nonexistent"))).toEqual([]);
+    expect(evaluateIds(corpus, createLeaf("nonexistent"))).toEqual([]);
   });
 
   test("a negated term matches every doc without it", () => {
-    expect(idsFor(corpus, createLeaf("-sweet"))).toEqual(["2", "4"]);
+    expect(evaluateIds(corpus, createLeaf("-sweet"))).toEqual(["2", "4"]);
   });
 });
 
 describe("SearchExpression AND", () => {
   test("intersects its children", () => {
-    expect(idsFor(corpus, SearchExpression.and([createLeaf("red"), createLeaf("sweet")]))).toEqual(["1"]);
+    expect(evaluateIds(corpus, SearchExpression.and([createLeaf("red"), createLeaf("sweet")]))).toEqual(["1"]);
   });
 
   test("is empty when children never co-occur", () => {
-    expect(idsFor(corpus, SearchExpression.and([createLeaf("red"), createLeaf("green")]))).toEqual([]);
+    expect(evaluateIds(corpus, SearchExpression.and([createLeaf("red"), createLeaf("green")]))).toEqual([]);
   });
 
   test("an empty AND matches the whole corpus", () => {
-    expect(idsFor(corpus, SearchExpression.and([]))).toEqual(["1", "2", "3", "4", "5"]);
+    expect(evaluateIds(corpus, SearchExpression.and([]))).toEqual(["1", "2", "3", "4", "5"]);
   });
 
   test("folds a negated child as set subtraction", () => {
-    expect(idsFor(corpus, SearchExpression.and([createLeaf("sweet"), createLeaf("-small")]))).toEqual(["3"]);
+    expect(evaluateIds(corpus, SearchExpression.and([createLeaf("sweet"), createLeaf("-small")]))).toEqual(["3"]);
   });
 });
 
 describe("SearchExpression OR", () => {
   test("unions its children", () => {
-    expect(idsFor(corpus, SearchExpression.or([createLeaf("red"), createLeaf("blue")]))).toEqual(["1", "2", "5"]);
+    expect(evaluateIds(corpus, SearchExpression.or([createLeaf("red"), createLeaf("blue")]))).toEqual(["1", "2", "5"]);
   });
 
   test("an empty OR matches nothing", () => {
-    expect(idsFor(corpus, SearchExpression.or([]))).toEqual([]);
+    expect(evaluateIds(corpus, SearchExpression.or([]))).toEqual([]);
   });
 
   test("ignores a child that matches nothing", () => {
-    expect(idsFor(corpus, SearchExpression.or([createLeaf("blue"), createLeaf("nonexistent")]))).toEqual(["5"]);
+    expect(evaluateIds(corpus, SearchExpression.or([createLeaf("blue"), createLeaf("nonexistent")]))).toEqual(["5"]);
   });
 });
 
 describe("SearchExpression NOT", () => {
   test("complements a subtree", () => {
-    expect(idsFor(corpus, SearchExpression.not(createLeaf("sweet")))).toEqual(["2", "4"]);
+    expect(evaluateIds(corpus, SearchExpression.not(createLeaf("sweet")))).toEqual(["2", "4"]);
   });
 
   test("double negation is identity", () => {
-    expect(idsFor(corpus, SearchExpression.not(SearchExpression.not(createLeaf("sweet"))))).toEqual(["1", "3", "5"]);
+    expect(evaluateIds(corpus, SearchExpression.not(SearchExpression.not(createLeaf("sweet"))))).toEqual(["1", "3", "5"]);
   });
 
   test("negating an OR is the complement of the union", () => {
-    expect(idsFor(corpus, SearchExpression.not(SearchExpression.or([createLeaf("red"), createLeaf("green")])))).toEqual(["5"]);
+    expect(evaluateIds(corpus, SearchExpression.not(SearchExpression.or([createLeaf("red"), createLeaf("green")])))).toEqual(["5"]);
   });
 });
 
@@ -111,7 +111,7 @@ describe("SearchExpression arbitrary nesting", () => {
       SearchExpression.and([createLeaf("green"), createLeaf("small")])
     ]);
 
-    expect(idsFor(corpus, expression)).toEqual(["2", "4"]);
+    expect(evaluateIds(corpus, expression)).toEqual(["2", "4"]);
   });
 
   test("evaluates the deeply nested example from the query language discussion", () => {
@@ -126,7 +126,7 @@ describe("SearchExpression arbitrary nesting", () => {
       ])
     ]);
 
-    expect(idsFor(corpus, expression)).toEqual(["1", "5"]);
+    expect(evaluateIds(corpus, expression)).toEqual(["1", "5"]);
   });
 
   test("mixes negation into a nested tree", () => {
@@ -135,7 +135,7 @@ describe("SearchExpression arbitrary nesting", () => {
       SearchExpression.not(createLeaf("sweet"))
     ]);
 
-    expect(idsFor(corpus, expression)).toEqual(["2", "4"]);
+    expect(evaluateIds(corpus, expression)).toEqual(["2", "4"]);
   });
 });
 
@@ -143,12 +143,12 @@ describe("SearchExpression single-positive AND", () => {
   test("an AND wrapping one OR group equals the bare group", () => {
     const group = SearchExpression.or([createLeaf("red"), createLeaf("blue")]);
 
-    expect(idsFor(corpus, SearchExpression.and([group]))).toEqual(idsFor(corpus, group));
-    expect(idsFor(corpus, SearchExpression.and([group]))).toEqual(["1", "2", "5"]);
+    expect(evaluateIds(corpus, SearchExpression.and([group]))).toEqual(evaluateIds(corpus, group));
+    expect(evaluateIds(corpus, SearchExpression.and([group]))).toEqual(["1", "2", "5"]);
   });
 
   test("an AND wrapping one term equals the bare term", () => {
-    expect(idsFor(corpus, SearchExpression.and([createLeaf("sweet")]))).toEqual(["1", "3", "5"]);
+    expect(evaluateIds(corpus, SearchExpression.and([createLeaf("sweet")]))).toEqual(["1", "3", "5"]);
   });
 
   test("the short-circuited posting is not mutated by a later intersection", () => {
@@ -162,7 +162,7 @@ describe("SearchExpression single-positive AND", () => {
   });
 
   test("a single-positive AND with a negated sibling still subtracts", () => {
-    expect(idsFor(corpus, SearchExpression.and([createLeaf("sweet"), createLeaf("-small")]))).toEqual(["3"]);
+    expect(evaluateIds(corpus, SearchExpression.and([createLeaf("sweet"), createLeaf("-small")]))).toEqual(["3"]);
   });
 });
 
@@ -170,7 +170,7 @@ describe("SearchExpression wildcard and metric leaves", () => {
   test("resolves a prefix wildcard leaf", () => {
     const items = [createItem("1", "apple"), createItem("2", "banana"), createItem("3", "cherry")];
 
-    expect(idsFor(items, createLeaf("*a*"))).toEqual(["1", "2"]);
+    expect(evaluateIds(items, createLeaf("*a*"))).toEqual(["1", "2"]);
   });
 
   test("resolves a metric leaf inside a nested tree", () => {
@@ -180,6 +180,6 @@ describe("SearchExpression wildcard and metric leaves", () => {
       SearchExpression.or([createLeaf("x"), createLeaf("y")])
     ]);
 
-    expect(idsFor(items, expression)).toEqual(["bbbb", "cccccc"]);
+    expect(evaluateIds(items, expression)).toEqual(["bbbb", "cccccc"]);
   });
 });

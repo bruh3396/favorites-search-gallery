@@ -33,7 +33,7 @@ function createPage(index: number, size = 1): Post[] {
   return Array.from({ length: size }, (_, i) => createPost({ id: `page${index}-${i}` }));
 }
 
-function idsOf(posts: Post[]): string[] {
+function getPostIds(posts: Post[]): string[] {
   return posts.map(post => post.id);
 }
 
@@ -69,7 +69,7 @@ function setup(options: ClientOptions = {}): Setup {
   return { remoteFavorites, rule34, scheduler };
 }
 
-async function fetchAllFor(options: ClientOptions): Promise<Post[]> {
+async function fetchAllFavorites(options: ClientOptions): Promise<Post[]> {
   const { remoteFavorites, scheduler } = setup(options);
   const delivered: Post[] = [];
   const run = remoteFavorites.fetchAll(posts => delivered.push(...posts));
@@ -80,16 +80,16 @@ async function fetchAllFor(options: ClientOptions): Promise<Post[]> {
   return delivered;
 }
 
-async function findNewFor(options: ClientOptions, localIds: string[]): Promise<string[]> {
+async function findNewFavoriteIds(options: ClientOptions, localIds: string[]): Promise<string[]> {
   const { remoteFavorites, scheduler } = setup(options);
   const found = remoteFavorites.findNew(localIds);
 
   found.catch(() => { });
   await advanceAndSettle(scheduler, SETTLE_TIME);
-  return idsOf(await found);
+  return getPostIds(await found);
 }
 
-async function findRemovedFor(options: ClientOptions, localIds: string[], remoteStart = 0): Promise<string[]> {
+async function findRemovedFavoriteIds(options: ClientOptions, localIds: string[], remoteStart = 0): Promise<string[]> {
   const { remoteFavorites, scheduler } = setup(options);
   const found = remoteFavorites.findRemoved(localIds, remoteStart);
 
@@ -98,7 +98,7 @@ async function findRemovedFor(options: ClientOptions, localIds: string[], remote
   return found;
 }
 
-async function countFor(fetchCount: FetchCount): Promise<number | null> {
+async function fetchFavoriteCount(fetchCount: FetchCount): Promise<number | null> {
   const { remoteFavorites, scheduler } = setup({ fetchCount });
   const counted = remoteFavorites.fetchCount();
 
@@ -124,7 +124,7 @@ describe("Rule34RemoteFavorites", () => {
     test("counts the favorites of the page being viewed", async() => {
       const fetchCount = vi.fn(() => Promise.resolve(42));
 
-      expect(await countFor(fetchCount)).toBe(42);
+      expect(await fetchFavoriteCount(fetchCount)).toBe(42);
       expect(fetchCount).toHaveBeenCalledWith(PAGE_ID);
     });
 
@@ -133,13 +133,13 @@ describe("Rule34RemoteFavorites", () => {
         .mockRejectedValueOnce(new Rule34Error("network"))
         .mockResolvedValue(42);
 
-      expect(await countFor(fetchCount)).toBe(42);
+      expect(await fetchFavoriteCount(fetchCount)).toBe(42);
     });
 
     test("gives no count once the profile can't be read", async() => {
       const fetchCount = vi.fn<FetchCount>(() => Promise.reject(new Rule34Error("http", { status: 404 })));
 
-      expect(await countFor(fetchCount)).toBeNull();
+      expect(await fetchFavoriteCount(fetchCount)).toBeNull();
       expect(fetchCount).toHaveBeenCalledOnce();
     });
   });
@@ -148,7 +148,7 @@ describe("Rule34RemoteFavorites", () => {
     test("delivers every page of the viewed favorites until an empty page", async() => {
       const fetchPage = createPageFetch(2);
 
-      expect(idsOf(await fetchAllFor({ fetchPage }))).toEqual(["page0-0", "page1-0", "page2-0"]);
+      expect(getPostIds(await fetchAllFavorites({ fetchPage }))).toEqual(["page0-0", "page1-0", "page2-0"]);
       expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 0);
       expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 3);
     });
@@ -156,7 +156,7 @@ describe("Rule34RemoteFavorites", () => {
     test("starts from the favorites already on the page instead of fetching the first page", async() => {
       const fetchPage = createPageFetch(2);
 
-      expect(idsOf(await fetchAllFor({ fetchPage, firstPage: createPage(9) }))).toEqual(["page9-0", "page1-0", "page2-0"]);
+      expect(getPostIds(await fetchAllFavorites({ fetchPage, firstPage: createPage(9) }))).toEqual(["page9-0", "page1-0", "page2-0"]);
       expect(fetchPage).not.toHaveBeenCalledWith(PAGE_ID, 0);
     });
 
@@ -180,14 +180,14 @@ describe("Rule34RemoteFavorites", () => {
         pageIndex === 0 ? Promise.reject(new Rule34Error("http", { status: 403 })) : Promise.resolve(createPage(pageIndex))
       ));
 
-      await expect(fetchAllFor({ fetchPage })).rejects.toThrow(Rule34Error);
+      await expect(fetchAllFavorites({ fetchPage })).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledOnce();
     });
 
     test("gives up on a page after five transient failures", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 429 })));
 
-      await expect(fetchAllFor({ fetchPage })).rejects.toThrow(Rule34Error);
+      await expect(fetchAllFavorites({ fetchPage })).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
     });
   });
@@ -208,7 +208,7 @@ describe("Rule34RemoteFavorites", () => {
       const fetchPage = createPageFetch(0);
       const firstPage = [...createPage(8), ...createPage(9)];
 
-      expect(await findNewFor({ fetchPage, firstPage }, ["page9-0"])).toEqual(["page8-0"]);
+      expect(await findNewFavoriteIds({ fetchPage, firstPage }, ["page9-0"])).toEqual(["page8-0"]);
       expect(fetchPage).not.toHaveBeenCalled();
     });
 
@@ -218,14 +218,14 @@ describe("Rule34RemoteFavorites", () => {
         .mockRejectedValueOnce(new Rule34Error("http", { status: 503 }))
         .mockResolvedValue(createPage(0));
 
-      expect(await findNewFor({ fetchPage }, ["page0-0"])).toEqual([]);
+      expect(await findNewFavoriteIds({ fetchPage }, ["page0-0"])).toEqual([]);
       expect(fetchPage).toHaveBeenCalledTimes(3);
     });
 
     test("never retries a refused page", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
 
-      await expect(findNewFor({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
+      await expect(findNewFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledOnce();
     });
   });
@@ -233,31 +233,31 @@ describe("Rule34RemoteFavorites", () => {
   describe("findRemoved", () => {
     test("finds the local favorites the remote list no longer has", async() => {
       const remote = createPage(0, FAVORITES_PER_PAGE);
-      const localIds = idsOf(remote);
+      const localIds = getPostIds(remote);
       const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(remote.filter(post => post.id !== localIds[3])));
 
-      expect(await findRemovedFor({ fetchPage }, localIds)).toEqual([localIds[3]]);
+      expect(await findRemovedFavoriteIds({ fetchPage }, localIds)).toEqual([localIds[3]]);
     });
 
     test("finds removals below new favorites", async() => {
       const remote = createPage(0, 10);
-      const localIds = idsOf(remote).slice(2);
+      const localIds = getPostIds(remote).slice(2);
       const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(remote.filter(post => post.id !== localIds[3])));
 
-      expect(await findRemovedFor({ fetchPage }, localIds, 2)).toEqual([localIds[3]]);
+      expect(await findRemovedFavoriteIds({ fetchPage }, localIds, 2)).toEqual([localIds[3]]);
     });
 
     test("fetches the first page fresh instead of trusting the one on screen", async() => {
       const fetchPage = createPageFetch(0);
 
-      expect(await findRemovedFor({ fetchPage, firstPage: createPage(9) }, ["page0-0"])).toEqual([]);
+      expect(await findRemovedFavoriteIds({ fetchPage, firstPage: createPage(9) }, ["page0-0"])).toEqual([]);
       expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 0);
     });
 
     test("never retries a refused page", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
 
-      await expect(findRemovedFor({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
+      await expect(findRemovedFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledOnce();
     });
   });

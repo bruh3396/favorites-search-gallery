@@ -35,26 +35,26 @@ const corpus: Item[] = [
   createItem("5", "blue", "sweet", "small")
 ];
 
-function idsFor(query: string): string[] {
+function evaluateIds(query: string): string[] {
   return createEvaluator(corpus).evaluate(parseSearchExpression(query)).map(doc => doc.id).sort();
 }
 
 describe("parseSearchExpression top-level AND", () => {
   test("an empty query matches the whole corpus", () => {
-    expect(idsFor("")).toEqual(["1", "2", "3", "4", "5"]);
-    expect(idsFor("   ")).toEqual(["1", "2", "3", "4", "5"]);
+    expect(evaluateIds("")).toEqual(["1", "2", "3", "4", "5"]);
+    expect(evaluateIds("   ")).toEqual(["1", "2", "3", "4", "5"]);
   });
 
   test("a single term", () => {
-    expect(idsFor("sweet")).toEqual(["1", "3", "5"]);
+    expect(evaluateIds("sweet")).toEqual(["1", "3", "5"]);
   });
 
   test("space-separated terms intersect", () => {
-    expect(idsFor("red sweet")).toEqual(["1"]);
+    expect(evaluateIds("red sweet")).toEqual(["1"]);
   });
 
   test("a negated top-level term subtracts", () => {
-    expect(idsFor("sweet -small")).toEqual(["3"]);
+    expect(evaluateIds("sweet -small")).toEqual(["3"]);
   });
 
   test("preserves a literal glued-parenthesis term", () => {
@@ -67,55 +67,55 @@ describe("parseSearchExpression top-level AND", () => {
 
 describe("parseSearchExpression groups", () => {
   test("a ~ group is an OR", () => {
-    expect(idsFor("small ( red ~ blue )")).toEqual(["1", "5"]);
+    expect(evaluateIds("small ( red ~ blue )")).toEqual(["1", "5"]);
   });
 
   test("a space group is an AND", () => {
-    expect(idsFor("( red small )")).toEqual(["1"]);
+    expect(evaluateIds("( red small )")).toEqual(["1"]);
   });
 
   test("multiple top-level groups intersect", () => {
-    expect(idsFor("( red ~ green ) ( sweet ~ sour )")).toEqual(["1", "2", "3", "4"]);
+    expect(evaluateIds("( red ~ green ) ( sweet ~ sour )")).toEqual(["1", "2", "3", "4"]);
   });
 
   test("a negated term inside an OR group", () => {
-    expect(idsFor("small ( -red ~ sweet )")).toEqual(["1", "4", "5"]);
+    expect(evaluateIds("small ( -red ~ sweet )")).toEqual(["1", "4", "5"]);
   });
 });
 
 describe("parseSearchExpression negated groups", () => {
   test("a negated OR group excludes anything matching either alternative", () => {
-    expect(idsFor("-( red ~ blue )")).toEqual(["3", "4"]);
+    expect(evaluateIds("-( red ~ blue )")).toEqual(["3", "4"]);
   });
 
   test("a negated AND group excludes only docs matching every member", () => {
-    expect(idsFor("-( red sweet )")).toEqual(["2", "3", "4", "5"]);
+    expect(evaluateIds("-( red sweet )")).toEqual(["2", "3", "4", "5"]);
   });
 
   test("a negated group intersects with surrounding terms", () => {
-    expect(idsFor("sweet -( red ~ blue )")).toEqual(["3"]);
+    expect(evaluateIds("sweet -( red ~ blue )")).toEqual(["3"]);
   });
 
   test("a negated group nested inside another group", () => {
-    expect(idsFor("( sweet ~ -( green ~ blue ) )")).toEqual(["1", "2", "3", "5"]);
+    expect(evaluateIds("( sweet ~ -( green ~ blue ) )")).toEqual(["1", "2", "3", "5"]);
   });
 
   test("a negated single-member group behaves like a negated term", () => {
-    expect(idsFor("-( red )")).toEqual(["3", "4", "5"]);
+    expect(evaluateIds("-( red )")).toEqual(["3", "4", "5"]);
   });
 });
 
 describe("parseSearchExpression arbitrary nesting", () => {
   test("an OR group nesting an AND group", () => {
-    expect(idsFor("( sweet ~ ( green big ) )")).toEqual(["1", "3", "5"]);
+    expect(evaluateIds("( sweet ~ ( green big ) )")).toEqual(["1", "3", "5"]);
   });
 
   test("the deeply nested example", () => {
-    expect(idsFor("small ( sweet ~ ( big ( red ~ green ) ) )")).toEqual(["1", "5"]);
+    expect(evaluateIds("small ( sweet ~ ( big ( red ~ green ) ) )")).toEqual(["1", "5"]);
   });
 
   test("an AND group nesting an OR group", () => {
-    expect(idsFor("( small ( red ~ green ) )")).toEqual(["1", "4"]);
+    expect(evaluateIds("( small ( red ~ green ) )")).toEqual(["1", "4"]);
   });
 });
 

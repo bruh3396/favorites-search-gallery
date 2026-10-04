@@ -26,13 +26,13 @@ function setup(): Setup {
   return { pagination, emitted };
 }
 
-function buttonFor(pagination: HTMLElement, action: FavoritesPaginationAction, value?: string): HTMLButtonElement {
+function queryButton(pagination: HTMLElement, action: FavoritesPaginationAction, value?: string): HTMLButtonElement {
   const valueSelector = value === undefined ? "" : `[data-value="${value}"]`;
   return pagination.querySelector(`button[data-action="${action}"]${valueSelector}`) as HTMLButtonElement;
 }
 
 function gotoField(pagination: HTMLElement): HTMLInputElement {
-  return buttonFor(pagination, "gotoSubmit").parentElement?.querySelector("input") as HTMLInputElement;
+  return queryButton(pagination, "gotoSubmit").parentElement?.querySelector("input") as HTMLInputElement;
 }
 
 function click(element: Node): void {
@@ -51,22 +51,22 @@ describe("FavoritesPagination", () => {
   test("clicking a page number selects that page", () => {
     const { pagination, emitted } = setup();
 
-    click(buttonFor(pagination, "page", "2"));
+    click(queryButton(pagination, "page", "2"));
     expect(emitted).toEqual(["page 2"]);
   });
 
   test("clicking an arrow, or the icon inside it, steps in its direction", () => {
     const { pagination, emitted } = setup();
 
-    click(buttonFor(pagination, "step", "ArrowRight"));
-    click(buttonFor(pagination, "step", "ArrowLeft").firstElementChild as Element);
+    click(queryButton(pagination, "step", "ArrowRight"));
+    click(queryButton(pagination, "step", "ArrowLeft").firstElementChild as Element);
     expect(emitted).toEqual(["step ArrowRight", "step ArrowLeft"]);
   });
 
   test("clicking the ellipsis toggles the go-to-page prompt", () => {
     const { pagination, emitted } = setup();
 
-    click(buttonFor(pagination, "gotoToggle"));
+    click(queryButton(pagination, "gotoToggle"));
     expect(emitted).toEqual(["goto toggled"]);
   });
 
@@ -74,7 +74,7 @@ describe("FavoritesPagination", () => {
     const { pagination, emitted } = setup();
 
     gotoField(pagination).value = "7";
-    click(buttonFor(pagination, "gotoSubmit"));
+    click(queryButton(pagination, "gotoSubmit"));
     expect(emitted).toEqual(["goto 7"]);
   });
 
@@ -82,7 +82,7 @@ describe("FavoritesPagination", () => {
     const { pagination, emitted } = setup();
 
     gotoField(pagination).remove();
-    click(buttonFor(pagination, "gotoSubmit"));
+    click(queryButton(pagination, "gotoSubmit"));
     expect(emitted).toEqual(["goto 1"]);
   });
 
@@ -100,8 +100,8 @@ describe("FavoritesPagination", () => {
     const { pagination, emitted } = setup();
 
     click(pagination);
-    click(buttonFor(pagination, "page", "2").appendChild(document.createTextNode("2")));
-    pressEnter(buttonFor(pagination, "page", "2"));
+    click(queryButton(pagination, "page", "2").appendChild(document.createTextNode("2")));
+    pressEnter(queryButton(pagination, "page", "2"));
     pagination.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true }));
     expect(emitted).toEqual([]);
   });

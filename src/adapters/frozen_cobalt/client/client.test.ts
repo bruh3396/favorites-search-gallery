@@ -29,11 +29,11 @@ function setup(fetch: Fetch = createFetch(), identity?: FrozenCobaltIdentity): S
   return { frozenCobalt: new FrozenCobaltClient({ origin: ORIGIN, identity }, { scheduler, fetch }), scheduler, fetch };
 }
 
-function requestsOf(fetch: Fetch): { url: string; body: unknown }[] {
+function readRequests(fetch: Fetch): { url: string; body: unknown }[] {
   return fetch.mock.calls.map(([url, init]) => ({ url, body: JSON.parse(String(init.body)) as unknown }));
 }
 
-async function fetchedPostFor({ frozenCobalt, scheduler }: Setup, id: string): Promise<unknown> {
+async function fetchPostResult({ frozenCobalt, scheduler }: Setup, id: string): Promise<unknown> {
   const fetched = frozenCobalt.fetchPost(id);
 
   fetched.catch(() => { });
@@ -49,7 +49,7 @@ describe("FrozenCobaltClient", () => {
 
     await advanceAndSettle(scheduler, 10_000);
     expect(await fetched).toEqual([{ status: "deleted", id: "1" }, { status: "deleted", id: "2" }]);
-    expect(requestsOf(fetch)).toEqual([{ url: `${ORIGIN}/post`, body: { ids: ["1", "2"] } }]);
+    expect(readRequests(fetch)).toEqual([{ url: `${ORIGIN}/post`, body: { ids: ["1", "2"] } }]);
   });
 
   test("batches tag categories asked for together into one request", async() => {
@@ -59,25 +59,25 @@ describe("FrozenCobaltClient", () => {
 
     await advanceAndSettle(scheduler, 10_000);
     expect(await fetched).toHaveLength(2);
-    expect(requestsOf(fetch)).toEqual([{ url: `${ORIGIN}/tag`, body: { tagNames: ["apple", "alice"] } }]);
+    expect(readRequests(fetch)).toEqual([{ url: `${ORIGIN}/tag`, body: { tagNames: ["apple", "alice"] } }]);
   });
 
   test("rejects a post whose result is malformed", async() => {
     const bundle = setup(createFetch(() => ({ 1: { status: "ok", post: { id: "1" } } })));
 
-    await expect(fetchedPostFor(bundle, "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
+    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
   });
 
   test("rejects a post the response leaves out as malformed", async() => {
     const bundle = setup(createFetch(() => ({})));
 
-    await expect(fetchedPostFor(bundle, "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
+    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
   });
 
   test("rejects a response that isn't a JSON object as malformed", async() => {
     const bundle = setup(vi.fn(() => Promise.resolve(new Response("<html>"))));
 
-    await expect(fetchedPostFor(bundle, "1")).rejects.toMatchObject({
+    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({
       reason: "malformed",
       cause: expect.any(SyntaxError)
     });
@@ -86,14 +86,14 @@ describe("FrozenCobaltClient", () => {
   test("rejects with the status when the server answers with an error", async() => {
     const bundle = setup(vi.fn(() => Promise.resolve(new Response("", { status: 503 }))));
 
-    await expect(fetchedPostFor(bundle, "1")).rejects.toMatchObject({ reason: "http", status: 503 });
+    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "http", status: 503 });
   });
 
   test("rejects as a network failure when the request can't be sent", async() => {
     const offline = new TypeError("Failed to fetch");
     const bundle = setup(vi.fn(() => Promise.reject(offline)));
 
-    await expect(fetchedPostFor(bundle, "1")).rejects.toMatchObject({ reason: "network", cause: offline });
+    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "network", cause: offline });
   });
 
   test("aborts a request that outlasts the timeout", async() => {
@@ -101,7 +101,7 @@ describe("FrozenCobaltClient", () => {
       init.signal?.addEventListener("abort", () => reject(new Error("aborted")));
     }));
 
-    await expect(fetchedPostFor(setup(fetch), "1")).rejects.toMatchObject({ reason: "timeout" });
+    await expect(fetchPostResult(setup(fetch), "1")).rejects.toMatchObject({ reason: "timeout" });
   });
 
   test("identifies every request by the identity it was built with", async() => {

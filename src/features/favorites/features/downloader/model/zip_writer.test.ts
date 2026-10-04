@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { DownloaderZipWriter } from "@/features/favorites/features/downloader/model/zip_writer";
 import { crc32 as nodeCrc32 } from "zlib";
 
-async function entriesOf(blob: Blob): Promise<Map<string, Uint8Array>> {
+async function readEntries(blob: Blob): Promise<Map<string, Uint8Array>> {
   const bytes = new Uint8Array(await blob.arrayBuffer());
   const view = new DataView(bytes.buffer);
   const result = new Map<string, Uint8Array>();
@@ -32,7 +32,7 @@ describe("DownloaderZipWriter", () => {
     const payload = new TextEncoder().encode("hello world") as Uint8Array<ArrayBuffer>;
 
     writer.add("greeting.txt", payload);
-    const entries = await entriesOf(writer.finish());
+    const entries = await readEntries(writer.finish());
 
     expect([...entries.keys()]).toEqual(["greeting.txt"]);
     expect(new TextDecoder().decode(entries.get("greeting.txt"))).toBe("hello world");
@@ -45,7 +45,7 @@ describe("DownloaderZipWriter", () => {
 
     writer.add("a.bin", a);
     writer.add("b.bin", b);
-    const entries = await entriesOf(writer.finish());
+    const entries = await readEntries(writer.finish());
 
     expect([...entries.keys()]).toEqual(["a.bin", "b.bin"]);
     expect(entries.get("a.bin")).toEqual(a);
@@ -56,7 +56,7 @@ describe("DownloaderZipWriter", () => {
     const writer = new DownloaderZipWriter();
 
     writer.add("画像 🎨.png", new Uint8Array([1, 2, 3]) as Uint8Array<ArrayBuffer>);
-    const entries = await entriesOf(writer.finish());
+    const entries = await readEntries(writer.finish());
 
     expect([...entries.keys()]).toEqual(["画像 🎨.png"]);
   });

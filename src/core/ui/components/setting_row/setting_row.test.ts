@@ -8,7 +8,7 @@ function setup(options: Partial<SettingRowOptions> = {}): SettingRow & { control
   return { ...createSettingRow(document, { label: "Columns", ...options, control }), control };
 }
 
-function textOf(elements: readonly Element[] | null): string[] {
+function readTexts(elements: readonly Element[] | null): string[] {
   return (elements ?? []).map((element) => element.textContent ?? "");
 }
 
@@ -23,7 +23,7 @@ describe("createSettingRow", () => {
   test("names the control by its label, by reference rather than id", () => {
     const { element, control } = setup();
 
-    expect(textOf(control.ariaLabelledByElements)).toEqual(["Columns"]);
+    expect(readTexts(control.ariaLabelledByElements)).toEqual(["Columns"]);
     expect(element.querySelector("[id]")).toBeNull();
   });
 
@@ -31,7 +31,7 @@ describe("createSettingRow", () => {
     const { element, control } = setup({ description: "Thumbnails per row." });
 
     expect(element.querySelector(`.${SettingRowClass.description}`)?.textContent).toBe("Thumbnails per row.");
-    expect(textOf(control.ariaDescribedByElements)).toEqual(["Thumbnails per row."]);
+    expect(readTexts(control.ariaDescribedByElements)).toEqual(["Thumbnails per row."]);
   });
 
   test("has no description unless given one", () => {

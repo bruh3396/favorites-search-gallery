@@ -3,11 +3,11 @@ import { describe, expect, test } from "vitest";
 import { Identifiable } from "@/types/app";
 
 const createItems = (...ids: string[]): Identifiable[] => ids.map(id => ({ id }));
-const idsOf = (items2: Identifiable[]): string[] => items2.map(item => item.id);
+const getIds = (items2: Identifiable[]): string[] => items2.map(item => item.id);
 
 describe("clampedItemsAroundId", () => {
   test("returns the item then its neighbors outward", () => {
-    expect(idsOf(clampedItemsAroundId(createItems("a", "b", "c", "d", "e"), "c"))).toEqual(["c", "b", "d", "a", "e"]);
+    expect(getIds(clampedItemsAroundId(createItems("a", "b", "c", "d", "e"), "c"))).toEqual(["c", "b", "d", "a", "e"]);
   });
 
   test("returns nothing for an id that is not present", () => {
@@ -19,25 +19,25 @@ describe("clampedItemsAroundId", () => {
   });
 
   test("stops at the last item", () => {
-    expect(idsOf(clampedItemsAroundId(createItems("a", "b", "c", "d", "e"), "e"))).toEqual(["e", "d", "c", "b", "a"]);
+    expect(getIds(clampedItemsAroundId(createItems("a", "b", "c", "d", "e"), "e"))).toEqual(["e", "d", "c", "b", "a"]);
   });
 
   test("stops at the first item", () => {
-    expect(idsOf(clampedItemsAroundId(createItems("a", "b", "c", "d", "e"), "a"))).toEqual(["a", "b", "c", "d", "e"]);
+    expect(getIds(clampedItemsAroundId(createItems("a", "b", "c", "d", "e"), "a"))).toEqual(["a", "b", "c", "d", "e"]);
   });
 });
 
 describe("wrappingItemsAroundId", () => {
   test("wraps past the last item", () => {
-    expect(idsOf(wrappingItemsAroundId(createItems("a", "b", "c", "d", "e"), "e"))).toEqual(["e", "d", "a", "c", "b"]);
+    expect(getIds(wrappingItemsAroundId(createItems("a", "b", "c", "d", "e"), "e"))).toEqual(["e", "d", "a", "c", "b"]);
   });
 
   test("wraps past the first item", () => {
-    expect(idsOf(wrappingItemsAroundId(createItems("a", "b", "c", "d", "e"), "a"))).toEqual(["a", "e", "b", "d", "c"]);
+    expect(getIds(wrappingItemsAroundId(createItems("a", "b", "c", "d", "e"), "a"))).toEqual(["a", "e", "b", "d", "c"]);
   });
 
   test("never repeats an item when wrapping", () => {
-    expect(idsOf(wrappingItemsAroundId(createItems("a", "b", "c"), "a"))).toEqual(["a", "c", "b"]);
+    expect(getIds(wrappingItemsAroundId(createItems("a", "b", "c"), "a"))).toEqual(["a", "c", "b"]);
   });
 
   test("returns nothing for an id that is not present", () => {

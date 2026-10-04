@@ -17,41 +17,41 @@ const index = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metr
 
 index.build(new Set(docs));
 
-function scoresFor(operator: ":" | ":<" | ":>", value: number): number[] {
+function findMatchingScores(operator: ":" | ":<" | ":>", value: number): number[] {
   return [...index.docsMatching({ metric: "score", operator, value })].map(doc => doc.score).sort();
 }
 
 describe("MetricIndex", () => {
   test(":< returns docs below the value", () => {
-    expect(scoresFor(":<", 5)).toEqual([3]);
+    expect(findMatchingScores(":<", 5)).toEqual([3]);
   });
 
   test(":> returns docs above the value", () => {
-    expect(scoresFor(":>", 5)).toEqual([8]);
+    expect(findMatchingScores(":>", 5)).toEqual([8]);
   });
 
   test(": returns docs equal to the value", () => {
-    expect(scoresFor(":", 5)).toEqual([5, 5]);
+    expect(findMatchingScores(":", 5)).toEqual([5, 5]);
   });
 
   test(": returns nothing when no doc has the value", () => {
-    expect(scoresFor(":", 4)).toEqual([]);
+    expect(findMatchingScores(":", 4)).toEqual([]);
   });
 
   test(":< of the minimum returns nothing", () => {
-    expect(scoresFor(":<", 3)).toEqual([]);
+    expect(findMatchingScores(":<", 3)).toEqual([]);
   });
 
   test(":> of the maximum returns nothing", () => {
-    expect(scoresFor(":>", 8)).toEqual([]);
+    expect(findMatchingScores(":>", 8)).toEqual([]);
   });
 
   test(":< above the maximum returns every doc", () => {
-    expect(scoresFor(":<", 100)).toEqual([3, 5, 5, 8]);
+    expect(findMatchingScores(":<", 100)).toEqual([3, 5, 5, 8]);
   });
 
   test(":> below the minimum returns every doc", () => {
-    expect(scoresFor(":>", 0)).toEqual([3, 5, 5, 8]);
+    expect(findMatchingScores(":>", 0)).toEqual([3, 5, 5, 8]);
   });
 
   test("each metric is indexed independently", () => {

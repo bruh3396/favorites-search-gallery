@@ -63,16 +63,16 @@ describe("SearchEngine", () => {
 });
 
 describe("SearchEngine complementOf", () => {
-  function namesOf(items: Doc[]): string[] {
+  function getSortedNames(items: Doc[]): string[] {
     return items.map(item => item.name).sort();
   }
 
   test("returns every indexed doc not in the current set", () => {
-    expect(namesOf(createEngine().complementOf([apple]))).toEqual(["banana", "cherry"]);
+    expect(getSortedNames(createEngine().complementOf([apple]))).toEqual(["banana", "cherry"]);
   });
 
   test("narrows the complement to docs matching the filter", () => {
-    expect(namesOf(createEngine().complementOf([apple], "red"))).toEqual(["cherry"]);
+    expect(getSortedNames(createEngine().complementOf([apple], "red"))).toEqual(["cherry"]);
   });
 });
 

@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 const fruits = createSnippet("fruits", "( apple ~ banana )");
 const colors = createSnippet("colors", "( red ~ blue )");
 
-function buttonsOf(element: HTMLElement): HTMLButtonElement[] {
+function queryButtons(element: HTMLElement): HTMLButtonElement[] {
   return Array.from(element.querySelectorAll("button"));
 }
 
@@ -40,11 +40,11 @@ describe("row", () => {
   });
 
   test("tags its buttons with their actions", () => {
-    expect(buttonsOf(SnippetComponents.row(fruits)).map(button => button.dataset.snippetAction)).toEqual(["moveToTop", "edit", "requestDelete"]);
+    expect(queryButtons(SnippetComponents.row(fruits)).map(button => button.dataset.snippetAction)).toEqual(["moveToTop", "edit", "requestDelete"]);
   });
 
   test("marks only the delete action as dangerous", () => {
-    expect(buttonsOf(SnippetComponents.row(fruits)).map(button => button.dataset.danger !== undefined)).toEqual([false, false, true]);
+    expect(queryButtons(SnippetComponents.row(fruits)).map(button => button.dataset.danger !== undefined)).toEqual([false, false, true]);
   });
 });
 
@@ -57,7 +57,7 @@ describe("confirmRow", () => {
   });
 
   test("offers cancel and a dangerous delete", () => {
-    const buttons = buttonsOf(SnippetComponents.confirmRow(fruits));
+    const buttons = queryButtons(SnippetComponents.confirmRow(fruits));
 
     expect(buttons.map(button => button.dataset.snippetAction)).toEqual(["cancelDelete", "delete"]);
     expect(buttons.map(button => button.dataset.danger !== undefined)).toEqual([false, true]);

@@ -16,11 +16,11 @@ function setup(): Setup {
   return { drawer: new FavoritesDrawer(shell), shell };
 }
 
-function selectedTabsOf(shell: FavoritesShell): FavoritesDrawerSectionName[] {
+function readSelectedTabs(shell: FavoritesShell): FavoritesDrawerSectionName[] {
   return FavoritesDrawerSectionNames.filter(name => shell.drawer[name].tab.dataset.selected !== undefined);
 }
 
-function visibleSectionsOf(shell: FavoritesShell): FavoritesDrawerSectionName[] {
+function readVisibleSections(shell: FavoritesShell): FavoritesDrawerSectionName[] {
   return FavoritesDrawerSectionNames.filter(name => shell.drawer[name].root.dataset.hidden === undefined);
 }
 
@@ -39,7 +39,7 @@ describe("FavoritesDrawer", () => {
 
     drawer.showSection("snippets");
     drawer.showSection("help");
-    expect(selectedTabsOf(shell)).toEqual(["help"]);
-    expect(visibleSectionsOf(shell)).toEqual(["help"]);
+    expect(readSelectedTabs(shell)).toEqual(["help"]);
+    expect(readVisibleSections(shell)).toEqual(["help"]);
   });
 });

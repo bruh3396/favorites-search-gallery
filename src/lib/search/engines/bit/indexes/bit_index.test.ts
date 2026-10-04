@@ -120,14 +120,14 @@ describe("BitIndex", () => {
   });
 
   describe("unionOfPostings", () => {
-    function postingsFor(bitIndex: BitIndex<Doc>, ...terms: string[]): NonNullable<ReturnType<BitIndex<Doc>["postingFor"]>>[] {
+    function getPostings(bitIndex: BitIndex<Doc>, ...terms: string[]): NonNullable<ReturnType<BitIndex<Doc>["postingFor"]>>[] {
       return terms.map(term => bitIndex.postingFor(term)).filter(posting => posting !== undefined);
     }
 
     test("unions the docs of several postings", () => {
       const bitIndex = createIndex(corpus);
 
-      expect(bitIndex.docsFrom(bitIndex.unionOf(postingsFor(bitIndex, "sweet", "sour")))).toEqual([apple, lemon]);
+      expect(bitIndex.docsFrom(bitIndex.unionOf(getPostings(bitIndex, "sweet", "sour")))).toEqual([apple, lemon]);
     });
 
     test("is empty for no postings", () => {

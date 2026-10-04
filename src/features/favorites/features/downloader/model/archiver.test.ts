@@ -48,7 +48,7 @@ function setup({ failing = new Set<string>(), tags = new Map<string, Set<string>
   return { archiver, fetched, tagsSeen, categoriesSeen, categoryRequests };
 }
 
-async function entryNamesOf(blob: Blob): Promise<string[]> {
+async function readEntryNames(blob: Blob): Promise<string[]> {
   const bytes = new Uint8Array(await blob.arrayBuffer());
   const view = new DataView(bytes.buffer);
   const names: string[] = [];
@@ -82,7 +82,7 @@ describe("DownloaderArchiver", () => {
 
     expect(fetched.sort()).toEqual(["1", "2"]);
     expect(settled.sort()).toEqual(["1.png", "2.png"]);
-    expect((await entryNamesOf(blob as Blob)).sort()).toEqual(["1.png", "2.png"]);
+    expect((await readEntryNames(blob as Blob)).sort()).toEqual(["1.png", "2.png"]);
   });
 
   test("names each file's extension after its type", async() => {
@@ -115,7 +115,7 @@ describe("DownloaderArchiver", () => {
     const { blob, settled } = await archive(archiver, [createItem("1"), createItem("2")]);
 
     expect(settled.sort()).toEqual(["1.png", null]);
-    expect(await entryNamesOf(blob as Blob)).toEqual(["1.png"]);
+    expect(await readEntryNames(blob as Blob)).toEqual(["1.png"]);
     expect(error).toHaveBeenCalledWith("Failed to archive post 2", new Error("404 Not Found"));
   });
 

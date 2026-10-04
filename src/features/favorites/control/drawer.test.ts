@@ -22,7 +22,7 @@ function setup(): Setup {
   return { shell, preferences };
 }
 
-function drawerStateOf(preferences: Preferences): { open: boolean; section: FavoritesDrawerSectionName } {
+function readDrawerState(preferences: Preferences): { open: boolean; section: FavoritesDrawerSectionName } {
   return { open: preferences.favorites.drawerOpen.value, section: preferences.favorites.drawerActiveSection.value };
 }
 
@@ -59,14 +59,14 @@ describe("FavoritesDrawer", () => {
       const { shell, preferences } = setup();
 
       shell.toolbar.aboutVersion.click();
-      expect(drawerStateOf(preferences)).toEqual({ open: true, section: "change" });
+      expect(readDrawerState(preferences)).toEqual({ open: true, section: "change" });
     });
 
     test("clicking help opens the drawer on help", () => {
       const { shell, preferences } = setup();
 
       shell.toolbar.aboutHelp.click();
-      expect(drawerStateOf(preferences)).toEqual({ open: true, section: "help" });
+      expect(readDrawerState(preferences)).toEqual({ open: true, section: "help" });
     });
   });
 

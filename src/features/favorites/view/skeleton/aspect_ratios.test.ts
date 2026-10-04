@@ -12,7 +12,7 @@ function createThumb(width: number, height: number): HTMLElement {
   return thumb;
 }
 
-function remainingOf(aspectRatios: FavoritesAspectRatios): string[] {
+function drainRemaining(aspectRatios: FavoritesAspectRatios): string[] {
   const remaining: string[] = [];
 
   for (let next = aspectRatios.getNext(); next !== undefined; next = aspectRatios.getNext()) {
@@ -34,14 +34,14 @@ describe("FavoritesAspectRatios", () => {
 
   test("the next visit gets the collected aspect ratios back in thumb order", () => {
     new FavoritesAspectRatios(store).collect([createThumb(100, 200), document.createElement("div"), createThumb(300, 150)]);
-    expect(remainingOf(new FavoritesAspectRatios(store))).toEqual(["100/200", "300/150"]);
+    expect(drainRemaining(new FavoritesAspectRatios(store))).toEqual(["100/200", "300/150"]);
   });
 
   test("keeps only the first fifty thumbs", () => {
     const thumbs = Array.from({ length: 60 }, (_, index) => createThumb(index + 1, 1));
 
     new FavoritesAspectRatios(store).collect(thumbs);
-    const remaining = remainingOf(new FavoritesAspectRatios(store));
+    const remaining = drainRemaining(new FavoritesAspectRatios(store));
 
     expect(remaining).toHaveLength(50);
     expect(remaining.at(-1)).toBe("50/1");

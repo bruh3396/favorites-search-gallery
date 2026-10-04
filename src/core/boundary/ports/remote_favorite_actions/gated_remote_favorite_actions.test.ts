@@ -12,7 +12,7 @@ function setup(isOpen: () => boolean): { remote: MemoryClient; gated: GatedRemot
   return { remote, gated };
 }
 
-function favoriteIdsOf(remote: MemoryClient): string[] {
+function readFavoriteIds(remote: MemoryClient): string[] {
   return remote.readFavorites().map(post => post.id);
 }
 
@@ -22,7 +22,7 @@ describe("GatedRemoteFavoriteActions", () => {
 
     expect(await gated.add("2")).toBe("blocked");
     expect(await gated.remove("1")).toBe("blocked");
-    expect(favoriteIdsOf(remote)).toEqual(["1"]);
+    expect(readFavoriteIds(remote)).toEqual(["1"]);
   });
 
   test("adds and removes favorites while open", async() => {
@@ -30,7 +30,7 @@ describe("GatedRemoteFavoriteActions", () => {
 
     expect(await gated.add("2")).toBe("added");
     expect(await gated.remove("1")).toBe("removed");
-    expect(favoriteIdsOf(remote)).toEqual(["2"]);
+    expect(readFavoriteIds(remote)).toEqual(["2"]);
   });
 
   test("checks whether it is open on every call", async() => {

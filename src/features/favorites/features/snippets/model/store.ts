@@ -3,8 +3,6 @@ import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/util
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 
 const STORAGE_KEY = "searchSnippets";
-const LEGACY_STORAGE_KEY = "savedSearches";
-const GENERATED_NAME_PREFIX = "snippet_";
 
 export class SnippetStore {
   private readonly storage: LocalKeyedValues;
@@ -107,46 +105,8 @@ export class SnippetStore {
   }
 
   private load(): Map<string, Snippet> {
-    const stored = this.storage.get(STORAGE_KEY);
-    return stored === undefined ? this.migrate() : parseSnippets(stored);
+    return parseSnippets(this.storage.get(STORAGE_KEY));
   }
-
-  private migrate(): Map<string, Snippet> {
-    const legacy = this.storage.get(LEGACY_STORAGE_KEY);
-    const migrated = new Map<string, Snippet>();
-
-    if (!Array.isArray(legacy)) {
-      return migrated;
-    }
-    const now = Date.now();
-
-    legacy
-      .filter((entry): entry is string => typeof entry === "string" && !isEmptyString(entry))
-      .forEach((query, index) => {
-        const name = generateName(migrated);
-
-        migrated.set(name, {
-          name,
-          query: removeExtraWhitespace(query),
-          lastUsedAt: 0,
-          createdAt: now - index
-        });
-      });
-
-    if (migrated.size > 0) {
-      this.storage.set(STORAGE_KEY, Array.from(migrated.values()));
-    }
-    return migrated;
-  }
-}
-
-function generateName(taken: Map<string, Snippet>): string {
-  let counter = 1;
-
-  while (taken.has(`${GENERATED_NAME_PREFIX}${counter}`)) {
-    counter += 1;
-  }
-  return `${GENERATED_NAME_PREFIX}${counter}`;
 }
 
 function parseSnippets(value: unknown): Map<string, Snippet> {

@@ -11,12 +11,24 @@ type Searcher = (query: string, docs: Doc[]) => string[];
 
 const metricFor = (doc: Doc, metric: SearchableMetric): number => doc.getMetric?.(metric) ?? 0;
 const termsFor = (doc: Doc): Iterable<string> => doc.tags;
-const nameOf = (doc: Doc): string => doc.name;
+const getName = (doc: Doc): string => doc.name;
 
 const implementations: { name: string; implementation: Searcher; supportsAST: boolean }[] = [
-  { name: "SetSearchEngine", implementation: (query, docs) => new SetSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(nameOf), supportsAST: true },
-  { name: "BitSearchEngine", implementation: (query, docs) => new BitSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(nameOf), supportsAST: true },
-  { name: "SearchQuery", implementation: (query, docs) => parseSearchQuery<Doc>(query).filter(docs).map(nameOf), supportsAST: false }
+  {
+    name: "SetSearchEngine",
+    implementation: (query, docs) => new SetSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(getName),
+    supportsAST: true
+  },
+  {
+    name: "BitSearchEngine",
+    implementation: (query, docs) => new BitSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(getName),
+    supportsAST: true
+  },
+  {
+    name: "SearchQuery",
+    implementation: (query, docs) => parseSearchQuery<Doc>(query).filter(docs).map(getName),
+    supportsAST: false
+  }
 ];
 
 for (const { name, implementation, supportsAST } of implementations) {

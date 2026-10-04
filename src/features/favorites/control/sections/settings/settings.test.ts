@@ -24,21 +24,21 @@ function setup(expanded: Record<string, boolean> = {}, onMobileDevice = false, h
   const [collapseAll, reset] = actions;
 
   mount?.(container);
-  return { context, container, sections: sectionsOf(container), collapseAll, reset };
+  return { context, container, sections: mapSectionsByTitle(container), collapseAll, reset };
 }
 
-function sectionsOf(container: HTMLElement): Map<string, HTMLElement> {
+function mapSectionsByTitle(container: HTMLElement): Map<string, HTMLElement> {
   return new Map([...container.querySelectorAll<HTMLElement>(`.${SettingsClass.section}`)].map(section => [
     section.querySelector(`.${SettingsClass.sectionTitle}`)?.textContent ?? "",
     section
   ]));
 }
 
-function openSectionsOf(sections: Map<string, HTMLElement>): string[] {
+function listOpenSections(sections: Map<string, HTMLElement>): string[] {
   return [...sections].filter(([, section]) => section.dataset.collapsed === undefined).map(([title]) => title);
 }
 
-function expandedOf(context: AppContext): Record<string, boolean> {
+function readExpandedSections(context: AppContext): Record<string, boolean> {
   return context.preferences.favorites.settingsExpandedSections.value;
 }
 
@@ -46,13 +46,13 @@ describe("FavoritesSettings", () => {
   test("opens General by default and leaves the rest closed", () => {
     const { sections } = setup();
 
-    expect(openSectionsOf(sections)).toEqual(["General"]);
+    expect(listOpenSections(sections)).toEqual(["General"]);
   });
 
   test("opens the sections the user left open", () => {
     const { sections } = setup({ General: false, Layout: true });
 
-    expect(openSectionsOf(sections)).toEqual(["Layout"]);
+    expect(listOpenSections(sections)).toEqual(["Layout"]);
   });
 
   test("remembers a section being opened or closed", () => {
@@ -61,7 +61,7 @@ describe("FavoritesSettings", () => {
 
     header("Layout").click();
     header("General").click();
-    expect(expandedOf(context)).toEqual({ Layout: true, General: false });
+    expect(readExpandedSections(context)).toEqual({ Layout: true, General: false });
   });
 
   test("collapse all closes every section and remembers it, then opens them all", () => {
@@ -69,11 +69,11 @@ describe("FavoritesSettings", () => {
     const titles = [...sections.keys()];
 
     collapseAll.click();
-    expect(openSectionsOf(sections)).toEqual([]);
-    expect(expandedOf(context)).toEqual(Object.fromEntries(titles.map(title => [title, false])));
+    expect(listOpenSections(sections)).toEqual([]);
+    expect(readExpandedSections(context)).toEqual(Object.fromEntries(titles.map(title => [title, false])));
     collapseAll.click();
-    expect(openSectionsOf(sections)).toEqual(titles);
-    expect(expandedOf(context)).toEqual(Object.fromEntries(titles.map(title => [title, true])));
+    expect(listOpenSections(sections)).toEqual(titles);
+    expect(readExpandedSections(context)).toEqual(Object.fromEntries(titles.map(title => [title, true])));
   });
 
   test("the reset button asks for every setting to be reset", () => {

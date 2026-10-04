@@ -38,7 +38,7 @@ function createPage(): Page {
   };
 }
 
-function clearedFor(mode: AppMode): boolean {
+function clearsNativePage(mode: AppMode): boolean {
   const rule34 = createRule34();
 
   new Rule34HostPage({ mode }, { rule34, page: createPage() }).claimContent();
@@ -47,11 +47,11 @@ function clearedFor(mode: AppMode): boolean {
 
 describe("Rule34HostPage", () => {
   test("clears the favorites page", () => {
-    expect(clearedFor("favorites")).toBe(true);
+    expect(clearsNativePage("favorites")).toBe(true);
   });
 
   test("leaves the post list page alone", () => {
-    expect(clearedFor("postList")).toBe(false);
+    expect(clearsNativePage("postList")).toBe(false);
   });
 
   test("gives the app the browser page's content element", () => {

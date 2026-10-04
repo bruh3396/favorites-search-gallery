@@ -21,7 +21,7 @@ function createFavorite(id: string, rating: string, ...tags: string[]): Favorite
   return { id, tags: tagSet, consumeTags: () => tagSet, rating: RATINGS[rating], getMetric: () => Number(id) } as unknown as Favorite;
 }
 
-function idsOf(results: Favorite[]): string[] {
+function getIds(results: Favorite[]): string[] {
   return results.map(r => r.id);
 }
 
@@ -61,7 +61,7 @@ describe.each([
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "banana"), createFavorite("3", "s", "apple")];
 
       configureSearcher(favorites);
-      expect(idsOf(searcher.search(favorites, "apple")).sort()).toEqual(["1", "3"]);
+      expect(getIds(searcher.search(favorites, "apple")).sort()).toEqual(["1", "3"]);
     });
 
     test("records the query as the current search query", () => {
@@ -77,7 +77,7 @@ describe.each([
 
       configureSearcher(favorites);
       searcher.search(favorites, "apple");
-      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["1"]);
+      expect(getIds(searcher.getCurrentSearchResults())).toEqual(["1"]);
     });
 
     test("notifies the onSearchResultsChanged listener", () => {
@@ -86,28 +86,28 @@ describe.each([
 
       configureSearcher(favorites, {}, onChanged);
       searcher.search(favorites, "apple");
-      expect(idsOf(onChanged.mock.lastCall?.[0])).toEqual(["1"]);
+      expect(getIds(onChanged.mock.lastCall?.[0])).toEqual(["1"]);
     });
 
     test("appends the blacklist tags when the blacklist is active", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "apple", "blacklisted")];
 
       configureSearcher(favorites, { excludeBlacklist: true });
-      expect(idsOf(searcher.search(favorites, "apple"))).toEqual(["1"]);
+      expect(getIds(searcher.search(favorites, "apple"))).toEqual(["1"]);
     });
 
     test("matches using a metric comparison term", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "apple"), createFavorite("3", "s", "apple")];
 
       configureSearcher(favorites);
-      expect(idsOf(searcher.search(favorites, "score:>1")).sort()).toEqual(["2", "3"]);
+      expect(getIds(searcher.search(favorites, "score:>1")).sort()).toEqual(["2", "3"]);
     });
 
     test("does not apply the blacklist when it is inactive", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "apple", "blacklisted")];
 
       configureSearcher(favorites);
-      expect(idsOf(searcher.search(favorites, "apple")).sort()).toEqual(["1", "2"]);
+      expect(getIds(searcher.search(favorites, "apple")).sort()).toEqual(["1", "2"]);
     });
   });
 
@@ -116,7 +116,7 @@ describe.each([
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "banana")];
 
       configureSearcher(favorites);
-      expect(idsOf(searcher.searchPure(favorites, "apple"))).toEqual(["1"]);
+      expect(getIds(searcher.searchPure(favorites, "apple"))).toEqual(["1"]);
       expect(searcher.getCurrentSearchQuery()).toBe("");
       expect(searcher.getCurrentSearchResults()).toEqual([]);
     });
@@ -125,21 +125,21 @@ describe.each([
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "banana")];
 
       configureSearcher(favorites);
-      expect(idsOf(searcher.searchPure(favorites, "")).sort()).toEqual(["1", "2"]);
+      expect(getIds(searcher.searchPure(favorites, "")).sort()).toEqual(["1", "2"]);
     });
 
     test("appends the blacklist tags when the blacklist is active", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "apple", "blacklisted")];
 
       configureSearcher(favorites, { excludeBlacklist: true });
-      expect(idsOf(searcher.searchPure(favorites, "apple"))).toEqual(["1"]);
+      expect(getIds(searcher.searchPure(favorites, "apple"))).toEqual(["1"]);
     });
 
     test("filters by rating", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "e", "apple")];
 
       configureSearcher(favorites, { allowedRatings: 1 });
-      expect(idsOf(searcher.searchPure(favorites, "apple"))).toEqual(["1"]);
+      expect(getIds(searcher.searchPure(favorites, "apple"))).toEqual(["1"]);
     });
   });
 
@@ -148,7 +148,7 @@ describe.each([
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "e", "apple")];
 
       configureSearcher(favorites, { allowedRatings: 1 });
-      expect(idsOf(searcher.search(favorites, "apple"))).toEqual(["1"]);
+      expect(getIds(searcher.search(favorites, "apple"))).toEqual(["1"]);
     });
   });
 
@@ -164,7 +164,7 @@ describe.each([
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("3", "s", "apple"), createFavorite("2", "s", "apple")];
 
       configureSearcher(favorites, { sortKey, sortAscending });
-      expect(idsOf(searcher.search(favorites, "apple"))).toEqual(expected);
+      expect(getIds(searcher.search(favorites, "apple"))).toEqual(expected);
     });
 
     test("does not mutate the input array when reversing an ascending default sort", () => {
@@ -172,15 +172,15 @@ describe.each([
 
       configureSearcher(favorites, { sortKey: "default", sortAscending: true });
       searcher.search(favorites, "");
-      expect(idsOf(favorites)).toEqual(["1", "2", "3"]);
+      expect(getIds(favorites)).toEqual(["1", "2", "3"]);
     });
 
     test("random sortKey returns a shuffled copy without mutating the input array", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "apple"), createFavorite("3", "s", "apple")];
 
       configureSearcher(favorites, { sortKey: "random" });
-      expect(idsOf(searcher.search(favorites, "apple")).sort()).toEqual(["1", "2", "3"]);
-      expect(idsOf(favorites)).toEqual(["1", "2", "3"]);
+      expect(getIds(searcher.search(favorites, "apple")).sort()).toEqual(["1", "2", "3"]);
+      expect(getIds(favorites)).toEqual(["1", "2", "3"]);
     });
   });
 
@@ -190,7 +190,7 @@ describe.each([
 
       configureSearcher(favorites);
       searcher.search(favorites, "apple");
-      expect(idsOf(searcher.reSearch(favorites))).toEqual(["1"]);
+      expect(getIds(searcher.reSearch(favorites))).toEqual(["1"]);
       expect(searcher.getCurrentSearchQuery()).toBe("apple");
     });
   });
@@ -202,7 +202,7 @@ describe.each([
 
       configureSearcher(favorites);
       searcher.add([added]);
-      expect(idsOf(searcher.search([...favorites, added], "apple")).sort()).toEqual(["1", "2"]);
+      expect(getIds(searcher.search([...favorites, added], "apple")).sort()).toEqual(["1", "2"]);
     });
   });
 
@@ -216,8 +216,8 @@ describe.each([
       target.tags.clear();
       target.tags.add("apple");
       searcher.update([{ doc: target, oldTerms, newTerms: target.tags }]);
-      expect(idsOf(searcher.search(favorites, "ct"))).toEqual([]);
-      expect(idsOf(searcher.search(favorites, "apple"))).toEqual(["1"]);
+      expect(getIds(searcher.search(favorites, "ct"))).toEqual([]);
+      expect(getIds(searcher.search(favorites, "apple"))).toEqual(["1"]);
     });
   });
 
@@ -227,7 +227,7 @@ describe.each([
 
       configureSearcher(favorites);
       searcher.search(favorites, "apple");
-      expect(idsOf(searcher.invertResults()).sort()).toEqual(["2", "3"]);
+      expect(getIds(searcher.invertResults()).sort()).toEqual(["2", "3"]);
     });
 
     test("replaces the current results with the inverted set", () => {
@@ -236,7 +236,7 @@ describe.each([
       configureSearcher(favorites);
       searcher.search(favorites, "apple");
       searcher.invertResults();
-      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["2"]);
+      expect(getIds(searcher.getCurrentSearchResults())).toEqual(["2"]);
     });
 
     test("enforces the blacklist when off the user's own favorites page", () => {
@@ -244,7 +244,7 @@ describe.each([
 
       configureSearcher(favorites, { onOwnFavoritesPage: false });
       searcher.search(favorites, "apple");
-      expect(idsOf(searcher.invertResults())).toEqual([]);
+      expect(getIds(searcher.invertResults())).toEqual([]);
     });
   });
 
@@ -255,7 +255,7 @@ describe.each([
       configureSearcher(favorites);
       searcher.search([favorites[0]], "apple");
       searcher.appendResults([favorites[1]]);
-      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
+      expect(getIds(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
     });
   });
 
@@ -266,7 +266,7 @@ describe.each([
       configureSearcher(favorites);
       searcher.search([favorites[0]], "apple");
       searcher.prependResults([favorites[1]]);
-      expect(idsOf(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
+      expect(getIds(searcher.getCurrentSearchResults())).toEqual(["1", "2"]);
     });
   });
 
@@ -276,7 +276,7 @@ describe.each([
 
       configureSearcher(favorites);
       searcher.search(favorites, "apple");
-      expect(idsOf(searcher.shuffleSearchResults()).sort()).toEqual(["1", "2", "3"]);
+      expect(getIds(searcher.shuffleSearchResults()).sort()).toEqual(["1", "2", "3"]);
     });
   });
 });

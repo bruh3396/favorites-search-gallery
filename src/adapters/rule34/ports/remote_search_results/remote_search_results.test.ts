@@ -32,7 +32,7 @@ function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolv
   return { searchResults, scheduler, readPostListPage, fetchPostListPage };
 }
 
-async function fetchedFor(fetchPostListPage: FetchPostListPage): Promise<Post[]> {
+async function fetchFirstPage(fetchPostListPage: FetchPostListPage): Promise<Post[]> {
   const { searchResults, scheduler } = setup(fetchPostListPage);
   const fetched = searchResults.fetchPage(0);
 
@@ -70,14 +70,14 @@ describe("Rule34RemoteSearchResults", () => {
       .mockRejectedValueOnce(new Rule34Error("http", { status: 429 }))
       .mockResolvedValue(OTHER_PAGE);
 
-    expect(await fetchedFor(fetchPostListPage)).toBe(OTHER_PAGE);
+    expect(await fetchFirstPage(fetchPostListPage)).toBe(OTHER_PAGE);
     expect(fetchPostListPage).toHaveBeenCalledTimes(2);
   });
 
   test("never retries a page it can't read", async() => {
     const fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.reject(new Rule34Error("malformed")));
 
-    await expect(fetchedFor(fetchPostListPage)).rejects.toThrow(Rule34Error);
+    await expect(fetchFirstPage(fetchPostListPage)).rejects.toThrow(Rule34Error);
     expect(fetchPostListPage).toHaveBeenCalledOnce();
   });
 });

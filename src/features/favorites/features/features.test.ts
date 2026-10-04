@@ -67,7 +67,7 @@ function mountSnippets(features: FavoritesFeatures): HTMLElement {
   return container;
 }
 
-async function suggestionsFor(text: string): Promise<string[]> {
+async function readSuggestionsAfterTyping(text: string): Promise<string[]> {
   const input = document.createElement("input");
 
   document.body.append(input);
@@ -133,7 +133,7 @@ describe("FavoritesFeatures", () => {
     test("suggests stored snippets in search boxes", async() => {
       vi.stubGlobal("fetch", (): Promise<Response> => Promise.resolve(new Response("[]")));
       setup([createSnippet("fruits", "apple")]);
-      expect(await suggestionsFor("/f")).toEqual(["/fruits (snippet)"]);
+      expect(await readSuggestionsAfterTyping("/f")).toEqual(["/fruits (snippet)"]);
     });
   });
 });

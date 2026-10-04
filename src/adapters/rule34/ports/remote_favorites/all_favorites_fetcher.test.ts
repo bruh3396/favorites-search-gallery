@@ -12,7 +12,7 @@ function createPage(index: number): Post[] {
   return [createPost({ id: `page${index}` })];
 }
 
-function idsOf(batches: Post[][]): string[] {
+function flattenPostIds(batches: Post[][]): string[] {
   return batches.flat().map(post => post.id);
 }
 
@@ -84,7 +84,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     await pages.settle(3);
     await run;
 
-    expect(idsOf(delivered)).toEqual(["page0", "page1", "page2"]);
+    expect(flattenPostIds(delivered)).toEqual(["page0", "page1", "page2"]);
   });
 
   test("delivers in index order even when a later page completes first", async() => {
@@ -100,7 +100,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     expect(delivered).toHaveLength(0);
 
     await pages.settle(0);
-    expect(idsOf(delivered)).toEqual(["page0", "page1", "page2"]);
+    expect(flattenPostIds(delivered)).toEqual(["page0", "page1", "page2"]);
 
     await pages.settle(3);
     await run;
@@ -121,7 +121,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     await pages.settle(3);
     await run;
 
-    expect(idsOf(delivered)).toEqual(["first", "page1", "page2"]);
+    expect(flattenPostIds(delivered)).toEqual(["first", "page1", "page2"]);
   });
 
   test("retries a failed page and still delivers it in order", async() => {
@@ -132,7 +132,7 @@ describe("Rule34AllFavoritesFetcher", () => {
 
     await createFetcher(delivered, fetch, NO_DELAY).fetchAll();
 
-    expect(idsOf(delivered)).toEqual(["page0", "page1"]);
+    expect(flattenPostIds(delivered)).toEqual(["page0", "page1"]);
     const page0Attempts = fetch.mock.calls.filter(([index]) => index === 0).length;
 
     expect(page0Attempts).toBe(2);
@@ -143,7 +143,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     const fetch = vi.fn((index: number) => Promise.resolve(index >= 2 ? [] : createPage(index)));
 
     await createFetcher(delivered, fetch, NO_DELAY).fetchAll();
-    expect(idsOf(delivered)).toEqual(["page0", "page1"]);
+    expect(flattenPostIds(delivered)).toEqual(["page0", "page1"]);
   });
 
   test("waits for in-flight pages after the last page is found before finishing", async() => {
@@ -167,7 +167,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     }
     await run;
 
-    expect(idsOf(delivered)).toEqual(["page0"]);
+    expect(flattenPostIds(delivered)).toEqual(["page0"]);
   });
 
   test("passes the retry count to the delay function so backoff can grow", async() => {

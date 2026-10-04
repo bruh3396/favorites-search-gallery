@@ -19,7 +19,7 @@ function createSkeleton(layout: Layout): FavoritesSkeleton {
   return new FavoritesSkeleton({ layout }, { store, randomSource: new MemoryRandomSource() });
 }
 
-function tiledFor(skeleton: FavoritesSkeleton): HTMLElement[] | undefined {
+function captureTiledElements(skeleton: FavoritesSkeleton): HTMLElement[] | undefined {
   const tile = vi.fn<(elements: HTMLElement[]) => void>();
 
   skeleton.show(tile);
@@ -34,11 +34,11 @@ describe("FavoritesSkeleton", () => {
   });
 
   test("tiles the default number of placeholders", () => {
-    expect(tiledFor(createSkeleton("grid"))).toHaveLength(SkeletonConfig.defaultItemCount);
+    expect(captureTiledElements(createSkeleton("grid"))).toHaveLength(SkeletonConfig.defaultItemCount);
   });
 
   test("tiles every placeholder in the layout", () => {
-    const layouts = new Set(tiledFor(createSkeleton("row"))?.map(element => element.dataset.layout));
+    const layouts = new Set(captureTiledElements(createSkeleton("row"))?.map(element => element.dataset.layout));
 
     expect(layouts).toEqual(new Set(["row"]));
   });
@@ -47,10 +47,10 @@ describe("FavoritesSkeleton", () => {
     const skeleton = createSkeleton("native");
 
     skeleton.collectAspectRatios([createThumb(120, 240), createThumb(200, 150)]);
-    const next = tiledFor(createSkeleton("native"))?.slice(0, 2);
+    const next = captureTiledElements(createSkeleton("native"))?.slice(0, 2);
     const sizes = next?.map(element => [element.style.width, element.style.height]);
 
-    expect(tiledFor(skeleton)).toBeUndefined();
+    expect(captureTiledElements(skeleton)).toBeUndefined();
     expect(sizes).toEqual([["120px", "240px"], ["200px", "150px"]]);
   });
 
@@ -59,6 +59,6 @@ describe("FavoritesSkeleton", () => {
 
     skeleton.collectAspectRatios([createThumb(120, 240)]);
     skeleton.collectAspectRatios([createThumb(200, 150)]);
-    expect(tiledFor(createSkeleton("native"))?.[0].style.width).toBe("120px");
+    expect(captureTiledElements(createSkeleton("native"))?.[0].style.width).toBe("120px");
   });
 });

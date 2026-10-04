@@ -29,13 +29,13 @@ function createPostPage(size: string, file: string = IMAGE): string {
   `;
 }
 
-function postPageFor(html: string): CategorizedPost {
+function parsePostPageHtml(html: string): CategorizedPost {
   return parsePostPage(html, mintMedia);
 }
 
 describe("parsePostPage", () => {
   test("reads a deleted post and its tag categories", () => {
-    const { post, tagCategories } = postPageFor(createPostPage("1920x1080"));
+    const { post, tagCategories } = parsePostPageHtml(createPostPage("1920x1080"));
 
     expect(post).toMatchObject({
       id: "42",
@@ -50,22 +50,22 @@ describe("parsePostPage", () => {
   });
 
   test("mints the image's media from its file", () => {
-    expect(postPageFor(createPostPage("1920x1080")).post.media.locator).toBe(`${IMAGE_SOURCE} alice`);
+    expect(parsePostPageHtml(createPostPage("1920x1080")).post.media.locator).toBe(`${IMAGE_SOURCE} alice`);
   });
 
   test("mints a video's media from its source", () => {
-    expect(postPageFor(createPostPage("1920x1080", VIDEO)).post.media.locator).toBe(`${VIDEO_SOURCE} alice`);
+    expect(parsePostPageHtml(createPostPage("1920x1080", VIDEO)).post.media.locator).toBe(`${VIDEO_SOURCE} alice`);
   });
 
   test("mints the media from the original image link when the page shows no file", () => {
-    expect(postPageFor(createPostPage("1920x1080", ORIGINAL_LINK)).post.media.locator).toBe(`${ORIGINAL_HREF} alice`);
+    expect(parsePostPageHtml(createPostPage("1920x1080", ORIGINAL_LINK)).post.media.locator).toBe(`${ORIGINAL_HREF} alice`);
   });
 
   test("throws for a page without a file", () => {
-    expect(() => postPageFor(createPostPage("1920x1080", ""))).toThrow(Rule34Error);
+    expect(() => parsePostPageHtml(createPostPage("1920x1080", ""))).toThrow(Rule34Error);
   });
 
   test.each(["", "0x1080", "1920x"])("throws for a page without a usable size (%j)", size => {
-    expect(() => postPageFor(createPostPage(size))).toThrow(Rule34Error);
+    expect(() => parsePostPageHtml(createPostPage(size))).toThrow(Rule34Error);
   });
 });

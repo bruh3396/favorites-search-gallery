@@ -80,41 +80,41 @@ describe("parseSearchTerm", () => {
 });
 
 describe("wildcard match type", () => {
-  function matchTypeFor(term: string): WildcardMatchType {
+  function parseMatchType(term: string): WildcardMatchType {
     return parseWildcardSearchTerm(term).matchType;
   }
 
   test("a single trailing star is a prefix match", () => {
-    expect(matchTypeFor("mango*")).toBe(WildcardMatchType.Prefix);
-    expect(matchTypeFor("m*")).toBe(WildcardMatchType.Prefix);
+    expect(parseMatchType("mango*")).toBe(WildcardMatchType.Prefix);
+    expect(parseMatchType("m*")).toBe(WildcardMatchType.Prefix);
   });
 
   test("a single leading star is a suffix match", () => {
-    expect(matchTypeFor("*mango")).toBe(WildcardMatchType.Suffix);
-    expect(matchTypeFor("*o")).toBe(WildcardMatchType.Suffix);
+    expect(parseMatchType("*mango")).toBe(WildcardMatchType.Suffix);
+    expect(parseMatchType("*o")).toBe(WildcardMatchType.Suffix);
   });
 
   test("a leading and trailing star is a substring match", () => {
-    expect(matchTypeFor("*mango*")).toBe(WildcardMatchType.Substring);
-    expect(matchTypeFor("*a*")).toBe(WildcardMatchType.Substring);
+    expect(parseMatchType("*mango*")).toBe(WildcardMatchType.Substring);
+    expect(parseMatchType("*a*")).toBe(WildcardMatchType.Substring);
   });
 
   test("internal stars are a multi star match", () => {
-    expect(matchTypeFor("man*go")).toBe(WildcardMatchType.MultiStar);
-    expect(matchTypeFor("*an*ngo")).toBe(WildcardMatchType.MultiStar);
-    expect(matchTypeFor("ch*r*")).toBe(WildcardMatchType.MultiStar);
-    expect(matchTypeFor("*pp*e*")).toBe(WildcardMatchType.MultiStar);
-    expect(matchTypeFor("a*b*c")).toBe(WildcardMatchType.MultiStar);
+    expect(parseMatchType("man*go")).toBe(WildcardMatchType.MultiStar);
+    expect(parseMatchType("*an*ngo")).toBe(WildcardMatchType.MultiStar);
+    expect(parseMatchType("ch*r*")).toBe(WildcardMatchType.MultiStar);
+    expect(parseMatchType("*pp*e*")).toBe(WildcardMatchType.MultiStar);
+    expect(parseMatchType("a*b*c")).toBe(WildcardMatchType.MultiStar);
   });
 
   test("collapses duplicate stars before classifying", () => {
-    expect(matchTypeFor("mango**")).toBe(WildcardMatchType.Prefix);
-    expect(matchTypeFor("**mango")).toBe(WildcardMatchType.Suffix);
-    expect(matchTypeFor("**mango**")).toBe(WildcardMatchType.Substring);
+    expect(parseMatchType("mango**")).toBe(WildcardMatchType.Prefix);
+    expect(parseMatchType("**mango")).toBe(WildcardMatchType.Suffix);
+    expect(parseMatchType("**mango**")).toBe(WildcardMatchType.Substring);
   });
 
   test("a bare star is a prefix match on the empty prefix", () => {
-    expect(matchTypeFor("*")).toBe(WildcardMatchType.Prefix);
+    expect(parseMatchType("*")).toBe(WildcardMatchType.Prefix);
   });
 });
 

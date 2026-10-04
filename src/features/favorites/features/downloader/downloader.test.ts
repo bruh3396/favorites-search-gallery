@@ -16,12 +16,12 @@ function createItem(id: string): PostMedia {
   return { id, media: { kind: "image", locator: `1/${id}.png` } };
 }
 
-function actionButtonsOf(container: HTMLElement): [HTMLButtonElement, HTMLButtonElement] {
+function queryActionButtons(container: HTMLElement): [HTMLButtonElement, HTMLButtonElement] {
   const [download, cancel] = container.querySelectorAll<HTMLButtonElement>("[data-downloader-action]");
   return [download, cancel];
 }
 
-function statusOf(container: HTMLElement): string {
+function readStatus(container: HTMLElement): string {
   return container.querySelector("[role=status]")?.textContent ?? "";
 }
 
@@ -63,15 +63,15 @@ describe("Downloader", () => {
 
   test("mounts a section that waits for favorites to load", () => {
     const { container } = setup();
-    const [download] = actionButtonsOf(container);
+    const [download] = queryActionButtons(container);
 
-    expect(statusOf(container)).toBe("Waiting for favorites to load");
+    expect(readStatus(container)).toBe("Waiting for favorites to load");
     expect(download.disabled).toBe(true);
   });
 
   test("enabling offers the current search results", () => {
     const { container, downloader } = setup();
-    const [download] = actionButtonsOf(container);
+    const [download] = queryActionButtons(container);
 
     downloader.enable();
 
@@ -81,7 +81,7 @@ describe("Downloader", () => {
 
   test("re-rendering picks up changed search results", () => {
     const { container, downloader, results } = setup();
-    const [download] = actionButtonsOf(container);
+    const [download] = queryActionButtons(container);
 
     downloader.enable();
     results.pop();
@@ -92,11 +92,11 @@ describe("Downloader", () => {
 
   test("clicking download fetches every result's media and saves one zip", async() => {
     const { container, downloader, fetched, saved } = setup();
-    const [download] = actionButtonsOf(container);
+    const [download] = queryActionButtons(container);
 
     downloader.enable();
     download.click();
-    await vi.waitFor(() => expect(statusOf(container)).toBe("Done: 2 downloaded"));
+    await vi.waitFor(() => expect(readStatus(container)).toBe("Done: 2 downloaded"));
 
     expect(fetched.sort()).toEqual(["1/a.png", "1/b.png"]);
     expect(saved).toEqual(["favorites.zip"]);
@@ -104,13 +104,13 @@ describe("Downloader", () => {
 
   test("clicking cancel aborts the download without saving", async() => {
     const { container, downloader, fetched, saved } = setup({ hang: true });
-    const [download, cancel] = actionButtonsOf(container);
+    const [download, cancel] = queryActionButtons(container);
 
     downloader.enable();
     download.click();
     await vi.waitFor(() => expect(fetched).toHaveLength(2));
     cancel.click();
-    await vi.waitFor(() => expect(statusOf(container)).toBe("Cancelled: 0 downloaded"));
+    await vi.waitFor(() => expect(readStatus(container)).toBe("Cancelled: 0 downloaded"));
 
     expect(saved).toEqual([]);
   });

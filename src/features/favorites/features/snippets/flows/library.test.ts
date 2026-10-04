@@ -92,12 +92,12 @@ function setup({ snippets = [], results = [], confirmed = true }: Options = {}):
   return { library, storage, view, appended, alerts, confirms, saved };
 }
 
-function namesOf(snippets: Snippet[]): string[] {
+function getNames(snippets: Snippet[]): string[] {
   return snippets.map(snippet => snippet.name);
 }
 
-function storedNamesOf(storage: MemoryLocalKeyedValues): string[] {
-  return namesOf((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
+function readStoredNames(storage: MemoryLocalKeyedValues): string[] {
+  return getNames((storage.get(STORAGE_KEY) as Snippet[] | undefined) ?? []);
 }
 
 const fruits = createSnippet("fruits", "( apple ~ banana )", 0, 100);
@@ -157,7 +157,7 @@ describe("moveToTop", () => {
     const { library, view } = setup({ snippets: [fruits, veg] });
 
     library.moveToTop("fruits");
-    expect(namesOf(view.lastScene().rows)).toEqual(["fruits", "veg"]);
+    expect(getNames(view.lastScene().rows)).toEqual(["fruits", "veg"]);
   });
 });
 
@@ -186,8 +186,8 @@ describe("save", () => {
 
     view.name = "fruits";
     library.save("fruits", "apple");
-    expect(storedNamesOf(storage)).toEqual(["fruits"]);
-    expect(namesOf(view.lastScene().rows)).toEqual(["fruits"]);
+    expect(readStoredNames(storage)).toEqual(["fruits"]);
+    expect(getNames(view.lastScene().rows)).toEqual(["fruits"]);
     expect([view.name, view.query]).toEqual(["", ""]);
   });
 
@@ -196,7 +196,7 @@ describe("save", () => {
 
     library.edit("fruits");
     library.save("berries", "apple");
-    expect(storedNamesOf(storage)).toEqual(["berries"]);
+    expect(readStoredNames(storage)).toEqual(["berries"]);
     expect(view.lastScene()).toMatchObject({ editTarget: null, failure: null });
   });
 
@@ -268,7 +268,7 @@ describe("deleting one", () => {
 
     library.requestDelete("fruits");
     library.delete("fruits");
-    expect(storedNamesOf(storage)).toEqual(["veg"]);
+    expect(readStoredNames(storage)).toEqual(["veg"]);
     expect(view.lastScene()).toMatchObject({ rows: [veg], deleteTarget: null });
   });
 
@@ -299,7 +299,7 @@ describe("deleteAll", () => {
     library.requestDelete("veg");
     library.deleteAll();
     expect(confirms).toEqual(["Delete all 2 snippets?"]);
-    expect(storedNamesOf(storage)).toEqual([]);
+    expect(readStoredNames(storage)).toEqual([]);
     expect(view.name).toBe("");
     expect(view.lastScene()).toMatchObject({ rows: [], editTarget: null, deleteTarget: null });
   });
@@ -308,7 +308,7 @@ describe("deleteAll", () => {
     const { library, storage } = setup({ snippets: [fruits], confirmed: false });
 
     library.deleteAll();
-    expect(storedNamesOf(storage)).toEqual(["fruits"]);
+    expect(readStoredNames(storage)).toEqual(["fruits"]);
   });
 
   test("alerts when there is nothing to delete", () => {
@@ -342,7 +342,7 @@ describe("filter", () => {
     const { library, view } = setup({ snippets: [fruits, veg] });
 
     library.filter("carrot");
-    expect(namesOf(view.lastScene().rows)).toEqual(["veg"]);
+    expect(getNames(view.lastScene().rows)).toEqual(["veg"]);
   });
 });
 
@@ -364,8 +364,8 @@ describe("importFromFile", () => {
 
     library.importFromFile(contents);
     expect(confirms).toEqual([]);
-    expect(storedNamesOf(storage)).toEqual(["veg"]);
-    expect(namesOf(view.lastScene().rows)).toEqual(["veg"]);
+    expect(readStoredNames(storage)).toEqual(["veg"]);
+    expect(getNames(view.lastScene().rows)).toEqual(["veg"]);
   });
 
   test("replaces existing snippets once confirmed", () => {
@@ -374,7 +374,7 @@ describe("importFromFile", () => {
     library.edit("fruits");
     library.importFromFile(contents);
     expect(confirms).toEqual(["Replace all snippets with 1 from this file?"]);
-    expect(storedNamesOf(storage)).toEqual(["veg"]);
+    expect(readStoredNames(storage)).toEqual(["veg"]);
     expect(view.name).toBe("");
   });
 
@@ -382,7 +382,7 @@ describe("importFromFile", () => {
     const { library, storage } = setup({ snippets: [fruits], confirmed: false });
 
     library.importFromFile(contents);
-    expect(storedNamesOf(storage)).toEqual(["fruits"]);
+    expect(readStoredNames(storage)).toEqual(["fruits"]);
   });
 
   test("alerts when the file has no snippets", () => {
@@ -390,6 +390,6 @@ describe("importFromFile", () => {
 
     library.importFromFile("{not json");
     expect(alerts).toEqual(["No snippets found in that file"]);
-    expect(storedNamesOf(storage)).toEqual(["fruits"]);
+    expect(readStoredNames(storage)).toEqual(["fruits"]);
   });
 });
