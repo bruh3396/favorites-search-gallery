@@ -1,7 +1,7 @@
 import { randomBoolean, randomFloatInRange, randomIntInRange, roundToTwoDecimalPlaces } from "@/utils/pure/number";
 import { Dimensions2D } from "@/types/geometry";
 import { Layout } from "@/types/app";
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 import { SkeletonConfig } from "@/config/skeleton_config";
 import { TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";

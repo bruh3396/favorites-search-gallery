@@ -5,6 +5,10 @@ export class FavoritesSearchFlow extends FavoritesFlow {
     this.flows.display.display(this.model.searchFavorites(searchQuery));
   }
 
+  public showAllFavorites(): void {
+    this.searchFavorites("");
+  }
+
   public openPostList(searchQuery: string): void {
     this.context.ports.navigator.open(this.context.ports.remotePages.searchUrl(searchQuery));
   }

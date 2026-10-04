@@ -10,6 +10,7 @@ import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/loc
 import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
+import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
@@ -39,6 +40,7 @@ function createPorts(
   hostPage: BrowserHostPage
 ): Ports {
   return {
+    remoteFavoriteActions: new MemoryRemoteFavoriteActions(memoryClient),
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePosts: new MemoryRemotePosts(memoryClient),
     remoteSearchResults: new MemoryRemoteSearchResults(SEARCH_RESULTS, memoryClient),

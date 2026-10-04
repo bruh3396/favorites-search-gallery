@@ -1,6 +1,6 @@
 import { runTyped } from "#architecture/eslint/testing/typed_tester.mjs";
 
-const IMPORTS = "import type { LocalPosts } from \"@/core/boundary/ports/local_posts\";";
+const IMPORTS = "import type { LocalPosts } from \"@/core/boundary/ports/local_posts/local_posts\";";
 
 runTyped("no-local-posts-reads", {
   valid: [

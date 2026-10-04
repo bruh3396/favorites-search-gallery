@@ -1,4 +1,4 @@
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface CoalescingConfiguration {
   flushSize: number;

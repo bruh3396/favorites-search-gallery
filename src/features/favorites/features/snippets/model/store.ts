@@ -1,6 +1,6 @@
 import { SerializedSnippet, Snippet, SnippetResult } from "@/features/favorites/features/snippets/types/types";
 import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/utils/pure/string";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 
 const STORAGE_KEY = "searchSnippets";
 const LEGACY_STORAGE_KEY = "savedSearches";

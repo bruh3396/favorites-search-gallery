@@ -3,7 +3,7 @@ import { CORE_FEATURES, LEGACY_FEATURES } from "#architecture/eslint/imports/sel
 export const MESSAGES = {
   rule1: "rule 1: new code (core/, adapters/, targets/) may not import legacy folders; move the dependency first",
   rule2: "rule 2: core/domain may import only core/domain",
-  rule3: "rule 3: a port file may import only core/domain, the environment, and other port files",
+  rule3: "rule 3: a port folder (the port and its decorators) may import only core/domain, the environment, core/utils, and other ports",
   rule7: "rule 7: core may not import adapters/ or targets/",
   rule105: "rule 105: core/utils may import only core/domain, core/boundary, and core/utils",
   rule106: "rule 106: core/context may import only core/domain, core/boundary, and core/context"
@@ -27,7 +27,7 @@ export const POLICIES = [
   },
   {
     from: { element: { type: "core/boundary/ports" } },
-    disallow: [{ to: { element: { type: "!{core/domain,core/boundary,core/boundary/ports}" } } }],
+    disallow: [{ to: { element: { type: "!{core/domain,core/boundary,core/boundary/ports,core/utils}" } } }],
     message: MESSAGES.rule3
   },
   {

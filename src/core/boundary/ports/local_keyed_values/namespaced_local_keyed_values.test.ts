@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { NamespacedLocalKeyedValues } from "@/core/utils/storage/namespaced_local_keyed_values";
+import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 
 function setup(): { store: MemoryLocalKeyedValues; namespaced: NamespacedLocalKeyedValues } {
   const store = new MemoryLocalKeyedValues();

@@ -5,11 +5,11 @@ export const MESSAGES = {
 export const POLICIES = [
   {
     from: { element: { type: "!{core/boundary/ports,adapters/ports}" } },
-    disallow: [{ to: { element: { type: "core/boundary/ports", fileInternalPath: "local_posts.ts" } } }],
+    disallow: [{ to: { element: { type: "core/boundary/ports", fileInternalPath: "local_posts/local_posts.ts" } } }],
     message: MESSAGES.rule88
   },
   {
     from: { file: { path: "**/favorites/model/posts/library.ts" } },
-    allow: [{ to: { element: { type: "core/boundary/ports", fileInternalPath: "local_posts.ts" } } }]
+    allow: [{ to: { element: { type: "core/boundary/ports", fileInternalPath: "local_posts/local_posts.ts" } } }]
   }
 ];

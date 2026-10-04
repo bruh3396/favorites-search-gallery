@@ -1,4 +1,4 @@
-import { Navigator } from "@/core/boundary/ports/navigator";
+import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 
 export class BrowserNavigator implements Navigator {
   public open(url: string): void {

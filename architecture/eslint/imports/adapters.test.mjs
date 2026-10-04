@@ -5,7 +5,7 @@ runRule("rule8", {
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "adapters/rule34/client/client"],
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/domain/post"],
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/environment"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts/remote_posts"],
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/utils/utils"]
   ],
   invalid: [
@@ -45,13 +45,13 @@ runRule("rule11", {
   valid: [
     ["adapters/rule34/client/client.ts", "core/boundary/environment"],
     ["adapters/rule34/client/client.ts", "core/domain/post"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts"],
-    ["adapters/rule34/client/client.ts", "core/boundary/ports/scheduler"],
-    ["adapters/rule34/client/client.ts", "core/boundary/ports/random_source"]
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts/remote_posts"],
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/scheduler/scheduler"],
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/random_source/random_source"]
   ],
   invalid: [
-    ["adapters/rule34/client/client.ts", "core/boundary/ports/remote_posts"],
-    ["adapters/rule34/client/client.ts", "core/boundary/ports/navigator"]
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/remote_posts/remote_posts"],
+    ["adapters/rule34/client/client.ts", "core/boundary/ports/navigator/navigator"]
   ]
 });
 
@@ -74,13 +74,14 @@ runRule("rule12", {
 
 runRule("rule63", {
   valid: [
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts"],
-    ["adapters/memory/ports/local_posts/local_posts.ts", "core/boundary/ports/local_posts"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/scheduler"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/random_source"]
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts/remote_posts"],
+    ["adapters/memory/ports/local_posts/local_posts.ts", "core/boundary/ports/local_posts/local_posts"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/scheduler/scheduler"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/random_source/random_source"]
   ],
   invalid: [
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/local_posts"],
-    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/navigator"]
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/local_posts/local_posts"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/navigator/navigator"],
+    ["adapters/rule34/ports/remote_posts/remote_posts.ts", "core/boundary/ports/remote_posts/fallback_remote_posts"]
   ]
 });

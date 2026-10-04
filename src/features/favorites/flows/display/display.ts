@@ -12,7 +12,13 @@ export class FavoritesDisplayFlow extends FavoritesFlow {
 
   constructor(dependencies: FavoritesFlowDependencies) {
     super(dependencies);
-    this.paginatedDisplay = new FavoritesPaginatedDisplay(this.model, this.view, this.context.milestones.favorites.favoritesLoaded, this.context.shell, this.context.ports.remoteMedia);
+    this.paginatedDisplay = new FavoritesPaginatedDisplay({
+      model: this.model,
+      view: this.view,
+      favoritesLoaded: this.context.milestones.favorites.favoritesLoaded,
+      shell: this.context.shell,
+      remoteMedia: this.context.ports.remoteMedia
+    });
     this.infiniteDisplay = new FavoritesInfiniteDisplay(this.view, this.context.shell);
   }
 

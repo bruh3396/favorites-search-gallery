@@ -47,6 +47,7 @@
 
 .kit-Variant {
   display: grid;
+  align-content: start;
   justify-items: start;
   gap: 8px;
   min-inline-size: 120px;
@@ -58,6 +59,14 @@
 .kit-Variant-label {
   color: GrayText;
   font-size: 12px;
+}
+
+.kit-Panel {
+  inline-size: 360px;
+}
+
+.kit-Panel[data-size="small"] {
+  inline-size: 280px;
 }
 
 .kit-Log {

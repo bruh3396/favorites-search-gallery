@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { downloadMedia } from "@/lib/media/download";
 
 const MEDIA: Media = { kind: "image", locator: "1/7" };

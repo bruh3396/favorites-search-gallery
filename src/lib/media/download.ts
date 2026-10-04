@@ -1,5 +1,5 @@
 import { PostMedia } from "@/core/domain/post/post";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { downloadBlob } from "@/utils/browser/download";
 import { extensionOfMimeType } from "@/utils/pure/mime";
 

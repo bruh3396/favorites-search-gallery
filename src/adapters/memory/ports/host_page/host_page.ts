@@ -1,5 +1,5 @@
 import { ColorScheme } from "@/core/boundary/environment";
-import { HostPage } from "@/core/boundary/ports/host_page";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 
 export class MemoryHostPage implements HostPage {
   public headerVisible = true;

@@ -1,19 +1,21 @@
 .fsg-Dropdown {
+  block-size: var(--fsg-control-size-medium);
   margin: 0;
-  padding: 4px 8px;
+  padding: 0 8px;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-medium);
   background-color: var(--fsg-color-surface-sunken);
   color: inherit;
   font: inherit;
   font-size: var(--fsg-font-size-label);
-  line-height: 1.4;
+  line-height: 1;
   cursor: pointer;
   transition: border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
 .fsg-Dropdown[data-size="small"] {
-  padding: 2px 6px;
+  block-size: var(--fsg-control-size-small);
+  padding: 0 6px;
   font-size: var(--fsg-font-size-label-small);
 }
 

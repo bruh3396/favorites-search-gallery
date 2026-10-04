@@ -9,3 +9,5 @@
 @import "./components/stepper/stepper.css" layer(components);
 @import "./components/dropdown/dropdown.css" layer(components);
 @import "./components/setting_row/setting_row.css" layer(components);
+@import "./components/disclosure/disclosure.css" layer(components);
+@import "./settings/screen.css" layer(components);

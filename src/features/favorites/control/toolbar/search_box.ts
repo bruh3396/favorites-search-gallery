@@ -4,7 +4,7 @@ import { Events } from "@/app/context/events";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesSearchHistory } from "@/features/favorites/control/toolbar/search_history";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { buildButton } from "@/lib/ui/widgets/button";
 import { queueMacroTask } from "@/lib/async/scheduling";

@@ -1,31 +1,43 @@
-import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class MemoryRemoteFavorites implements RemoteFavorites {
-  constructor(private readonly memory: Pick<MemoryClient, "readFavorites" | "addFavorite" | "removeFavorite">) { }
+  constructor(private readonly memory: Pick<MemoryClient, "readFavorites">) { }
 
   public fetchCount(): Promise<number | null> {
     return Promise.resolve(this.memory.readFavorites().length);
   }
 
-  public fetchAllExcept(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    onFavoritesFound(this.memory.readFavorites().filter(post => !knownIds.has(post.id)));
+  public fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
+    onFavoritesFound(this.memory.readFavorites());
     return Promise.resolve();
   }
 
-  public findRemoved(storedIds: readonly string[]): Promise<string[] | null> {
-    const listedIds = new Set(this.memory.readFavorites().map(post => post.id));
-    return Promise.resolve(storedIds.filter(id => !listedIds.has(id)));
+  public findNew(localIds: readonly string[]): Promise<Post[]> {
+    return Promise.resolve(takeAboveLocalOrder(this.memory.readFavorites(), localIds));
   }
 
-  public add(id: string): Promise<AddFavoriteResult> {
-    this.memory.addFavorite(id);
-    return Promise.resolve("added");
+  public findRemoved(localIds: readonly string[]): Promise<string[]> {
+    const remoteIds = new Set(this.memory.readFavorites().map(post => post.id));
+    return Promise.resolve(localIds.filter(id => !remoteIds.has(id)));
   }
 
-  public remove(id: string): Promise<RemoveFavoriteResult> {
-    this.memory.removeFavorite(id);
-    return Promise.resolve("removed");
+}
+
+function takeAboveLocalOrder(remoteFavorites: Post[], localIds: readonly string[]): Post[] {
+  const localIndexById = new Map(localIds.map((id, index) => [id, index]));
+  let remoteStart = remoteFavorites.length;
+  let nextLocalIndex = Infinity;
+
+  for (let remoteIndex = remoteFavorites.length - 1; remoteIndex >= 0; remoteIndex -= 1) {
+    const localIndex = localIndexById.get(remoteFavorites[remoteIndex].id);
+
+    if (localIndex === undefined || localIndex >= nextLocalIndex) {
+      break;
+    }
+    nextLocalIndex = localIndex;
+    remoteStart = remoteIndex;
   }
+  return remoteFavorites.slice(0, remoteStart);
 }

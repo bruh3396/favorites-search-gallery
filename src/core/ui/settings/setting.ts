@@ -19,6 +19,7 @@ export interface SettingOptions {
 
 export interface Setting {
   readonly element: HTMLDivElement;
+  setDescriptionVisible: (visible: boolean) => void;
   dispose: () => void;
 }
 
@@ -35,7 +36,9 @@ interface Appearance {
 
 export function createSetting(ownerDocument: Document, { descriptor, size = "medium", scheduler }: SettingOptions): Setting {
   const control = createControl(ownerDocument, descriptor, { size, scheduler });
-  const { element } = createSettingRow(ownerDocument, { label: descriptor.label, description: descriptor.description, control: control.element });
+  const { element, setDescriptionVisible } = createSettingRow(ownerDocument, {
+    label: descriptor.label, description: descriptor.description, control: control.element, size
+  });
   const { enabledWhen } = descriptor;
   const disposers = [effect(control.showValue)];
 
@@ -44,6 +47,7 @@ export function createSetting(ownerDocument: Document, { descriptor, size = "med
   }
   return {
     element,
+    setDescriptionVisible,
     dispose: (): void => disposers.forEach((dispose) => dispose())
   };
 }

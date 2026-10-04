@@ -1,4 +1,5 @@
 import { ContentDisplayOptions, PaginationState } from "@/types/ui";
+import { FavoritesViewCallbacks, LoadProgress } from "@/features/favorites/types/types";
 import { AppContext } from "@/app/context/context";
 import { ContentTiler } from "@/app/layout/content_tiler";
 import { EnhancedMouseEvent } from "@/lib/event/input";
@@ -13,10 +14,10 @@ import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
 import { FavoritesThumbPool } from "@/features/favorites/view/thumb_pool";
-import { FavoritesViewCallbacks } from "@/features/favorites/types/types";
 import { Layout } from "@/types/app";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";
+import { waitForNextPaint } from "@/utils/browser/window";
 
 export interface FavoritesViewConfiguration {
   linksToPostPage: boolean;
@@ -163,8 +164,8 @@ export class FavoritesView {
     this.status.updateFetchStatus(completed, resultsCount);
   }
 
-  public setLoadProgress(loaded: number, total: number): void {
-    this.status.setLoadProgress(loaded, total);
+  public setLoadProgress(progress: LoadProgress): void {
+    this.status.setLoadProgress(progress);
   }
 
   public setExpectedTotalFavoriteCount(count: number | null): void {
@@ -173,6 +174,10 @@ export class FavoritesView {
 
   public clearStatus(): void {
     this.status.clearStatus();
+  }
+
+  public waitForNextPaint(): Promise<void> {
+    return waitForNextPaint();
   }
 
   public async collectAspectRatios(): Promise<void> {

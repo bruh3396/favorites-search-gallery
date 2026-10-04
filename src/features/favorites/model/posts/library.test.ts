@@ -5,7 +5,7 @@ import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_post
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { createPost } from "@/testing/post";
 
 const WRITE_DELAY = 2_000;
@@ -37,7 +37,7 @@ function setup(remotePosts: Post[] = [], fetchDurationSeconds: RemoteMedia["fetc
   return { library, localPosts, scheduler, fetchDurationSeconds: fetchDuration, onRefreshed };
 }
 
-async function storedIdsOf(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
+async function localIdsOf(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
   return (await localPosts.getMany(ids)).map(post => post.id);
 }
 
@@ -46,7 +46,7 @@ describe("FavoritesPostLibrary", () => {
     vi.restoreAllMocks();
   });
 
-  test("streams stored posts in batches of the given size", async() => {
+  test("streams local posts in batches of the given size", async() => {
     const { library, localPosts } = setup();
     const batches: string[][] = [];
 
@@ -77,7 +77,7 @@ describe("FavoritesPostLibrary", () => {
     scheduler.advance(WRITE_DELAY);
 
     expect(onRefreshed.mock.calls[0][0]).toMatchObject({ post: { id: "2", tags: "apple" } });
-    expect(await storedIdsOf(localPosts, ["2"])).toEqual(["2"]);
+    expect(await localIdsOf(localPosts, ["2"])).toEqual(["2"]);
   });
 
   test("fetches placeholders before stale posts", async() => {
@@ -96,13 +96,22 @@ describe("FavoritesPostLibrary", () => {
     expect(fetched).toEqual(["2", "1", "3"]);
   });
 
-  test("stores only posts that are not already stored", async() => {
+  test("adopting stores only posts that are not already stored", async() => {
     const { library, localPosts } = setup();
 
     await localPosts.setMany([createPost({ id: "1", score: 5 })]);
-    await library.storeMissing([createPost({ id: "1", score: 0 }), createPost({ id: "2" })]);
+    await library.adopt([createPost({ id: "1", score: 0 }), createPost({ id: "2" })]);
 
     expect((await localPosts.getMany(["1", "2"])).map(post => post.score)).toEqual([5, 0]);
+  });
+
+  test("adopting returns the stored copy of a post in place of the one given", async() => {
+    const { library, localPosts } = setup();
+
+    await localPosts.setMany([createPost({ id: "1", score: 5, fetchedAt: NOW })]);
+    const adopted = await library.adopt([createPost({ id: "2" }), createPost({ id: "1", score: 0 })]);
+
+    expect(adopted.map(post => [post.id, post.score, post.fetchedAt])).toEqual([["2", 0, undefined], ["1", 5, NOW]]);
   });
 
   test("leaves a fresh post alone", async() => {
@@ -143,10 +152,10 @@ describe("FavoritesPostLibrary", () => {
 
     await library.refreshAll([createPost()]);
     scheduler.advance(WRITE_DELAY - 1);
-    expect(await storedIdsOf(localPosts, ["0"])).toEqual([]);
+    expect(await localIdsOf(localPosts, ["0"])).toEqual([]);
 
     scheduler.advance(1);
-    expect(await storedIdsOf(localPosts, ["0"])).toEqual(["0"]);
+    expect(await localIdsOf(localPosts, ["0"])).toEqual(["0"]);
   });
 
   test("writes refreshed posts without waiting once a batch fills", async() => {
@@ -155,7 +164,7 @@ describe("FavoritesPostLibrary", () => {
 
     await library.refreshAll(ids.map(id => createPost({ id })));
 
-    expect(await storedIdsOf(localPosts, ids)).toEqual(ids);
+    expect(await localIdsOf(localPosts, ids)).toEqual(ids);
   });
 
   test("reports but never writes a refreshed post without dimensions", async() => {
@@ -165,7 +174,7 @@ describe("FavoritesPostLibrary", () => {
     scheduler.advance(WRITE_DELAY);
 
     expect(onRefreshed).toHaveBeenCalledOnce();
-    expect(await storedIdsOf(localPosts, ["0"])).toEqual([]);
+    expect(await localIdsOf(localPosts, ["0"])).toEqual([]);
   });
 
   test("fills a video's duration on its fetched copy", async() => {

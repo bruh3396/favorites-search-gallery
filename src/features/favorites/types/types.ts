@@ -25,7 +25,7 @@ export interface Arena {
 
 export interface PostLibrary {
   streamAll: (ids: string[], batchSize: number, onProgress: (posts: Post[]) => void) => Promise<void>;
-  storeMissing: (posts: Post[]) => Promise<void>;
+  adopt: (posts: Post[]) => Promise<Post[]>;
   refreshAll: (posts: Post[]) => Promise<void>;
 }
 
@@ -63,6 +63,16 @@ export type FavoritesPaginationAction = "page" | "step" | "gotoToggle" | "gotoSu
 export interface FavoritesModelCallbacks {
   onSearchResultsChanged: (results: Favorite[]) => void;
   onPlaceholderFilled: (favorite: Favorite) => void;
+}
+
+export interface PulledFavorites {
+  addedFavorites: Favorite[];
+  prependedCount: number;
+}
+
+export interface LoadProgress {
+  loaded: number;
+  total: number;
 }
 
 export interface FavoritesViewCallbacks {

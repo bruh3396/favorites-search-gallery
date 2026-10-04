@@ -24,7 +24,7 @@ export class GalleryThumbsFlow extends GalleryFlow {
   public async refreshInitialContent(): Promise<void> {
     const { environment, milestones } = this.context;
 
-    if (environment.mode === "postList" || (environment.mode === "favorites" && !(await milestones.favorites.storedFavoritesFound.wait()))) {
+    if (environment.mode === "postList" || (environment.mode === "favorites" && !(await milestones.favorites.localFavoritesFound.wait()))) {
       this.refresh();
     }
   }

@@ -1,35 +1,46 @@
-import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
 import { FilesystemClient } from "@/adapters/filesystem/client/client";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class FilesystemRemoteFavorites implements RemoteFavorites {
-  constructor(private readonly filesystem: Pick<FilesystemClient, "readPostFiles" | "countPostFiles" | "deletePostFile">) { }
+  constructor(private readonly filesystem: Pick<FilesystemClient, "readPostFiles" | "countPostFiles">) { }
 
   public fetchCount(): Promise<number | null> {
     return this.filesystem.countPostFiles();
   }
 
-  public async fetchAllExcept(knownIds: ReadonlySet<string>, onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    onFavoritesFound((await this.readNewestFirst()).filter(post => !knownIds.has(post.id)));
+  public async fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
+    onFavoritesFound(await this.readNewestFirst());
   }
 
-  public async findRemoved(storedIds: readonly string[]): Promise<string[] | null> {
-    const listedIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
-    return storedIds.filter(id => !listedIds.has(id));
+  public async findNew(localIds: readonly string[]): Promise<Post[]> {
+    return takeAboveLocalOrder(await this.readNewestFirst(), localIds);
   }
 
-  // A file holds a whole post and adding only knows the id, so adding only succeeds.
-  public add(): Promise<AddFavoriteResult> {
-    return Promise.resolve("added");
-  }
-
-  public async remove(id: string): Promise<RemoveFavoriteResult> {
-    await this.filesystem.deletePostFile(id);
-    return "removed";
+  public async findRemoved(localIds: readonly string[]): Promise<string[]> {
+    const remoteIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
+    return localIds.filter(id => !remoteIds.has(id));
   }
 
   private async readNewestFirst(): Promise<Post[]> {
     const files = await this.filesystem.readPostFiles();
     return files.sort((a, b) => b.modifiedAt - a.modifiedAt).map(file => file.post);
   }
+}
+
+function takeAboveLocalOrder(remoteFavorites: Post[], localIds: readonly string[]): Post[] {
+  const localIndexById = new Map(localIds.map((id, index) => [id, index]));
+  let remoteStart = remoteFavorites.length;
+  let nextLocalIndex = Infinity;
+
+  for (let remoteIndex = remoteFavorites.length - 1; remoteIndex >= 0; remoteIndex -= 1) {
+    const localIndex = localIndexById.get(remoteFavorites[remoteIndex].id);
+
+    if (localIndex === undefined || localIndex >= nextLocalIndex) {
+      break;
+    }
+    nextLocalIndex = localIndex;
+    remoteStart = remoteIndex;
+  }
+  return remoteFavorites.slice(0, remoteStart);
 }

@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { Favorite } from "@/types/favorite";
 import { FavoritesModel } from "@/features/favorites/model/model";
+import { LoadProgress } from "@/features/favorites/types/types";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
@@ -44,7 +45,7 @@ async function setup(posts: Post[], resultsPerPage?: number, onSearchResultsChan
   await store(context, posts);
   const model = createModel(context, onSearchResultsChanged);
 
-  await model.streamStoredFavorites(() => { });
+  await model.streamLocalFavorites(() => { });
   model.indexAllFavorites();
   return { context, model };
 }
@@ -60,50 +61,47 @@ describe("FavoritesModel", () => {
 
       expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
       expect(model.getFavorite("1")?.id).toBe("1");
-      expect(await model.countStoredFavorites()).toBe(2);
+      expect(await model.hasLocalFavorites()).toBe(true);
     });
 
-    test("streams stored favorites, reporting each batch's posts", async() => {
+    test("has no local favorites before any are stored", async() => {
+      expect(await createModel(createContext()).hasLocalFavorites()).toBe(false);
+    });
+
+    test("streams local favorites, reporting progress against the local total", async() => {
       const context = createContext();
-      const batches: string[][] = [];
+      const progress: LoadProgress[] = [];
 
       await store(context, createFavoritePosts("apple", "1", "2"));
-      await createModel(context).streamStoredFavorites(posts => batches.push(posts.map(post => post.id)));
+      await createModel(context).streamLocalFavorites(update => progress.push(update));
 
-      expect(batches).toEqual([["1", "2"]]);
+      expect(progress).toEqual([{ loaded: 0, total: 2 }, { loaded: 2, total: 2 }]);
     });
 
-    test("stores the ids of fetched favorites", async() => {
+    test("persists the ids of fetched favorites", async() => {
       const context = createContext(100, createFavoritePosts("apple", "1", "2"));
       const model = createModel(context);
 
       await model.fetchAllFavorites(() => { });
-      await model.storeFavorites(model.getAllFavorites());
+      await model.persistAllFavorites();
 
       expect(await createModel(context).loadFavoriteIds()).toEqual(["1", "2"]);
       expect(await context.ports.localPosts.getMany(["1", "2"])).toHaveLength(2);
     });
 
-    test("reads stored ids and the loaded favorites' tags", async() => {
+    test("reads local ids and the loaded favorites' tags", async() => {
       const { model } = await setup([createFavoritePost("1", "apple"), createFavoritePost("2", "banana")]);
 
       expect((await model.loadFavoriteIds()).sort()).toEqual(["1", "2"]);
       expect((await model.getTagsForIds(["2"])).get("2")).toEqual(new Set(["banana"]));
     });
 
-    test("deletes stored favorites but keeps their posts", async() => {
+    test("deletes local favorites but keeps their posts", async() => {
       const { context, model } = await setup(createFavoritePosts("apple", "1", "2", "3"));
 
-      await model.deleteStoredFavorites(["1", "3"]);
+      await model.deleteLocalFavorites(["1", "3"]);
       expect(await model.loadFavoriteIds()).toEqual(["2"]);
       expect(await context.ports.localPosts.getMany(["1", "3"])).toHaveLength(2);
-    });
-
-    test("finds the stored favorites the site no longer lists", async() => {
-      const context = createContext(100, createFavoritePosts("apple", "2"));
-      const { model } = await setup(createFavoritePosts("apple", "1", "2", "3"), undefined, undefined, context);
-
-      expect((await model.findUnfavoritedIds())?.sort()).toEqual(["1", "3"]);
     });
 
     test("compressing keeps every favorite readable", async() => {
@@ -125,17 +123,24 @@ describe("FavoritesModel", () => {
       expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
     });
 
-    test("fetches only favorites the collection has not seen", async() => {
-      const context = createContext(100, createFavoritePosts("apple", "1", "2"));
+    test("stores new favorites ahead of the local ones, adding only never-stored ones to the collection", async() => {
+      const context = createContext(100, createFavoritePosts("apple", "3", "1", "2"));
+      const { model } = await setup(createFavoritePosts("apple", "1", "2"), undefined, undefined, context);
+      const { addedFavorites, prependedCount } = await model.pullNewFavorites();
 
-      await store(context, createFavoritePosts("apple", "1"));
-      const model = createModel(context);
+      expect(idsOf(addedFavorites)).toEqual(["3"]);
+      expect(prependedCount).toBe(1);
+      expect(await model.loadFavoriteIds()).toEqual(["3", "1", "2"]);
+      expect(idsOf(model.getAllFavorites())).toEqual(["1", "2", "3"]);
+    });
 
-      await model.streamStoredFavorites(() => { });
-      const newFavorites = await model.fetchNewFavorites();
+    test("deletes the local favorites the remote list no longer has below the new ones", async() => {
+      const context = createContext(100, createFavoritePosts("apple", "4", "2"));
+      const { model } = await setup(createFavoritePosts("apple", "1", "2", "3"), undefined, undefined, context);
+      const { prependedCount } = await model.pullNewFavorites();
 
-      expect(idsOf(newFavorites)).toEqual(["2"]);
-      expect(idsOf(model.getAllFavorites())).toEqual(["1", "2"]);
+      expect(await model.pruneRemovedFavorites(prependedCount)).toBe(2);
+      expect(await model.loadFavoriteIds()).toEqual(["4", "2"]);
     });
   });
 
@@ -221,15 +226,6 @@ describe("FavoritesModel", () => {
       expect(model.paginationContext().currentPage).toBe(1);
       expect(model.selectAdjacentPage("ArrowRight")).toBe(true);
       expect(model.adjacentPageFavorites()).toHaveLength(3);
-    });
-
-    test("repaginates the current search results", async() => {
-      const model = await setupPages();
-
-      model.searchFavorites("banana");
-
-      expect(model.repaginateCurrentResults()).toEqual([]);
-      expect(model.hasOnlyOnePage()).toBe(true);
     });
   });
 });

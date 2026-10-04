@@ -1,4 +1,4 @@
-import { Rule34FavoriteActions, addFavoriteUrl, postVoteUrl, removeFavoriteUrl } from "@/adapters/rule34/client/favorite_actions";
+import { Rule34FavoriteActions, addFavoriteUrl, postVoteUrl, removeFavoriteUrl } from "@/adapters/rule34/ports/remote_favorite_actions/favorite_actions";
 import { describe, expect, test, vi } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";

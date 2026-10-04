@@ -59,7 +59,7 @@ runRule("rule18b", {
     ["features/favorites/shell/shell.ts", "features/favorites/view/view"],
     ["features/favorites/shell/shell.ts", "features/favorites/favorites"],
     ["features/favorites/shell/shell.ts", "core/context/context"],
-    ["features/favorites/shell/shell.ts", "core/boundary/ports/scheduler"],
+    ["features/favorites/shell/shell.ts", "core/boundary/ports/scheduler/scheduler"],
     ["features/favorites/shell/shell.ts", "app/context/events"]
   ]
 });

@@ -1,5 +1,5 @@
 import { Post } from "@/core/domain/post/post";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SortedArray } from "@/lib/collection/sorted_array";
 
 const PENDING_POLL_INTERVAL = 200;

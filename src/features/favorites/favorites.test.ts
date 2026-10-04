@@ -11,6 +11,7 @@ import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
+import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { Post } from "@/core/domain/post/post";
@@ -48,12 +49,28 @@ function createRemote(): MemoryClient {
   return new MemoryClient(createFruitPosts());
 }
 
-function createContext({ environment: environmentOverrides = {}, preferences = {}, features, localKeyedValues = new MemoryLocalKeyedValues(), hostPage = new MemoryHostPage(), navigator = new MemoryNavigator(), remote = createRemote() }: SetupOptions = {}, withShell = true): AppContext {
+function createContext(
+  { environment: environmentOverrides = {},
+    preferences = {},
+    features,
+    localKeyedValues = new MemoryLocalKeyedValues(),
+    hostPage = new MemoryHostPage(),
+    navigator = new MemoryNavigator(),
+    remote = createRemote() }: SetupOptions = {},
+  withShell = true
+): AppContext {
   pageCounter += 1;
   const id = `startup_test_${Date.now()}_${pageCounter}`;
   const environment = createEnvironment({ favoritesOwnerId: id, ...environmentOverrides });
   const shell = withShell ? new Shell() : undefined;
-  const ports = { localKeyedValues, hostPage, navigator, remoteFavorites: new MemoryRemoteFavorites(remote), remotePosts: new MemoryRemotePosts(remote) };
+  const ports = {
+    localKeyedValues,
+    hostPage,
+    navigator,
+    remoteFavorites: new MemoryRemoteFavorites(remote),
+    remoteFavoriteActions: new MemoryRemoteFavoriteActions(remote),
+    remotePosts: new MemoryRemotePosts(remote)
+  };
 
   if (shell !== undefined) {
     document.body.append(shell.root);
@@ -66,10 +83,10 @@ function createFruitModel(context: AppContext): FavoritesModel {
 }
 
 async function store(context: AppContext): Promise<void> {
-  const stored = createFruitPosts();
+  const local = createFruitPosts();
 
-  await context.ports.localPosts.setMany(stored);
-  await context.ports.localFavorites.prepend(stored.map(post => post.id));
+  await context.ports.localPosts.setMany(local);
+  await context.ports.localFavorites.prepend(local.map(post => post.id));
 }
 
 async function setup(options: SetupOptions = {}): Promise<AppContext> {
@@ -99,11 +116,11 @@ function searchBoxOf(): HTMLTextAreaElement {
   return document.getElementById(FavoritesId.searchBox) as HTMLTextAreaElement;
 }
 
-function isFavoritedOf(context: AppContext, id: string): boolean {
+function hasFavorite(context: AppContext, id: string): boolean {
   return context.shell.content.querySelector(`[id="${id}"] [data-is-favorite]`) !== null;
 }
 
-function isHiddenOf(id: string): boolean {
+function isHidden(id: string): boolean {
   return document.getElementById(id)?.dataset.hidden !== undefined;
 }
 
@@ -124,6 +141,20 @@ function heartOf(context: AppContext, id: string): HTMLElement {
   return context.shell.content.querySelector(`[id="${id}"] [data-action="favorite"]`) as HTMLElement;
 }
 
+function statusOf(): string | null {
+  return document.getElementById(FavoritesId.loadStatus)?.textContent ?? null;
+}
+
+async function startFavoritesMidLoad(options: SetupOptions = {}): Promise<AppContext> {
+  const context = createContext(options);
+
+  await store(context);
+  vi.spyOn(context.ports.remoteFavorites, "findRemoved").mockReturnValue(new Promise(() => { }));
+  startFavorites(context);
+  await vi.waitFor(() => expect(heartOf(context, "2")).not.toBeNull());
+  return context;
+}
+
 describe("startFavorites", () => {
   afterEach(() => {
     document.body.replaceChildren();
@@ -135,7 +166,7 @@ describe("startFavorites", () => {
   });
 
   describe("on the favorites page", () => {
-    test("shows the stored favorites once they load", async() => {
+    test("shows the local favorites once they load", async() => {
       const context = await setup();
 
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
@@ -156,6 +187,40 @@ describe("startFavorites", () => {
       await setup();
 
       expect(document.querySelector("[data-downloader-action]")?.textContent).toBe("Download 3 Results");
+    });
+
+    test("forgets local favorites unfavorited on Rule34 but keeps their posts", async() => {
+      const remote = createRemote();
+
+      remote.removeFavorite("2");
+      const context = await setup({ remote });
+
+      expect((await createFruitModel(context).loadFavoriteIds()).sort()).toEqual(["1", "3"]);
+      expect(await context.ports.localPosts.getMany(["2"])).toHaveLength(1);
+    });
+
+    test("keeps every local favorite when Rule34 refuses the removal check", async() => {
+      const context = createContext();
+
+      await store(context);
+      vi.spyOn(context.ports.remoteFavorites, "findRemoved").mockRejectedValue(new Error("refused"));
+      const loaded = context.milestones.favorites.favoritesLoaded.wait();
+
+      startFavorites(context);
+      await loaded;
+      expect(await createFruitModel(context).loadFavoriteIds()).toHaveLength(3);
+    });
+
+    test("finishes loading and says so when Rule34 refuses new favorites", async() => {
+      const context = createContext();
+
+      await store(context);
+      vi.spyOn(context.ports.remoteFavorites, "findNew").mockRejectedValue(new Error("refused"));
+      const loaded = context.milestones.favorites.favoritesLoaded.wait();
+
+      startFavorites(context);
+      await loaded;
+      expect(statusOf()).toBe("Rule34 stopped sending favorites, try again later");
     });
   });
 
@@ -273,72 +338,19 @@ describe("startFavorites", () => {
         const context = await setup({ environment: { ownsFavorites: false } });
 
         context.events.app.favoriteAdded.emit("2");
-        expect(isFavoritedOf(context, "2")).toBe(true);
+        expect(hasFavorite(context, "2")).toBe(true);
       });
 
       test("a removed favorite is unmarked and forgotten", async() => {
         const context = await setup();
 
         context.events.app.favoriteRemoved.emit("2");
-        expect(isFavoritedOf(context, "2")).toBe(false);
-        await vi.waitFor(async() => expect(await createFruitModel(context).countStoredFavorites()).toBe(2));
+        expect(hasFavorite(context, "2")).toBe(false);
+        await vi.waitFor(async() => expect(await createFruitModel(context).loadFavoriteIds()).toHaveLength(2));
       });
     });
 
-    describe("reconciling", () => {
-      test("forgets favorites unfavorited on the site but keeps their posts and the settings, without reloading", async() => {
-        const reload = vi.spyOn(window.location, "reload").mockReturnValue();
-        const remote = createRemote();
-        const context = await setup({ remote });
-        const resetPreferences = vi.spyOn(context.preferences, "reset");
-
-        remote.removeFavorite("2");
-        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
-        await vi.waitFor(async() => expect((await createFruitModel(context).loadFavoriteIds()).sort()).toEqual(["1", "3"]));
-
-        expect(await context.ports.localPosts.getMany(["2"])).toHaveLength(1);
-        expect(resetPreferences).not.toHaveBeenCalled();
-        expect(reload).not.toHaveBeenCalled();
-      });
-
-      test("keeps every favorite and stays on the page when nothing was unfavorited", async() => {
-        const reload = vi.spyOn(window.location, "reload").mockReturnValue();
-        const context = await setup();
-        const findRemoved = vi.spyOn(context.ports.remoteFavorites, "findRemoved");
-
-        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
-        await vi.waitFor(() => expect(findRemoved).toHaveBeenCalled());
-
-        expect(await createFruitModel(context).countStoredFavorites()).toBe(3);
-        expect(reload).not.toHaveBeenCalled();
-      });
-
-      test("keeps every favorite when the site refuses", async() => {
-        const reload = vi.spyOn(window.location, "reload").mockReturnValue();
-        const context = await setup();
-        const findRemoved = vi.spyOn(context.ports.remoteFavorites, "findRemoved").mockRejectedValue(new Error("refused"));
-
-        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
-        await vi.waitFor(() => expect(findRemoved).toHaveBeenCalled());
-
-        expect(await createFruitModel(context).countStoredFavorites()).toBe(3);
-        expect(reload).not.toHaveBeenCalled();
-      });
-
-      test("waits for favorites to finish loading before checking the site", async() => {
-        const context = createContext();
-
-        await store(context);
-        const findRemoved = vi.spyOn(context.ports.remoteFavorites, "findRemoved");
-        const loaded = context.milestones.favorites.favoritesLoaded.wait();
-
-        startFavorites(context);
-        context.events.favorites.reconcileButtonClicked.emit(new MouseEvent("click"));
-        await loaded;
-
-        expect(findRemoved).not.toHaveBeenCalled();
-      });
-
+    describe("resetting settings", () => {
       test("a settings reset asks first", async() => {
         const confirm = vi.fn(() => false);
 
@@ -415,8 +427,8 @@ describe("startFavorites", () => {
       await setup({ preferences: { favorites: { drawerOpen: true, drawerActiveSection: "help" } } });
 
       expect(document.getElementById(FavoritesId.root)?.dataset.drawerOpen).toBeDefined();
-      expect(isHiddenOf("favorites-drawer-section-help")).toBe(false);
-      expect(isHiddenOf("favorites-drawer-section-settings")).toBe(true);
+      expect(isHidden("favorites-drawer-section-help")).toBe(false);
+      expect(isHidden("favorites-drawer-section-settings")).toBe(true);
     });
 
     test("the paginator starts hidden under infinite scroll", async() => {
@@ -431,8 +443,8 @@ describe("startFavorites", () => {
       context.preferences.favorites.drawerOpen.set(true);
       context.preferences.favorites.drawerActiveSection.set("help");
       expect(document.getElementById(FavoritesId.root)?.dataset.drawerOpen).toBeDefined();
-      expect(isHiddenOf("favorites-drawer-section-help")).toBe(false);
-      expect(isHiddenOf("favorites-drawer-section-settings")).toBe(true);
+      expect(isHidden("favorites-drawer-section-help")).toBe(false);
+      expect(isHidden("favorites-drawer-section-settings")).toBe(true);
     });
 
     test("the host page's header starts as its preference says", async() => {
@@ -517,8 +529,8 @@ describe("startFavorites", () => {
       const context = await setup({ remote, environment: { ownsFavorites: false, ...environment } });
 
       dispatchMouse(context, "click", heartOf(context, "2"));
-      expect(isFavoritedOf(context, "2")).toBe(true);
-      await vi.waitFor(() => expect(favoriteIdsOf(remote)).toContain("2"));
+      await vi.waitFor(() => expect(hasFavorite(context, "2")).toBe(true));
+      expect(favoriteIdsOf(remote)).toContain("2");
     });
 
     test("on their own favorites page, clicking a thumb's heart unfavorites and forgets it", async() => {
@@ -526,9 +538,32 @@ describe("startFavorites", () => {
       const context = await setup({ remote });
 
       dispatchMouse(context, "click", heartOf(context, "2"));
-      expect(isFavoritedOf(context, "2")).toBe(false);
-      await vi.waitFor(async() => expect(await createFruitModel(context).countStoredFavorites()).toBe(2));
-      await vi.waitFor(() => expect(favoriteIdsOf(remote)).not.toContain("2"));
+      await vi.waitFor(() => expect(hasFavorite(context, "2")).toBe(false));
+      await vi.waitFor(async() => expect(await createFruitModel(context).loadFavoriteIds()).toHaveLength(2));
+      expect(favoriteIdsOf(remote)).not.toContain("2");
+    });
+
+    test("on their own favorites page, clicking a thumb's heart before favorites finish loading changes nothing and keeps showing the sync", async() => {
+      const remote = createRemote();
+      const context = await startFavoritesMidLoad({ remote });
+
+      dispatchMouse(context, "click", heartOf(context, "2"));
+      await Promise.resolve();
+
+      expect(hasFavorite(context, "2")).toBe(true);
+      expect(favoriteIdsOf(remote)).toContain("2");
+      expect(statusOf()).toBe("Syncing with Rule34");
+    });
+
+    test("on someone else's favorites page, clicking a thumb's heart works before favorites finish loading", async() => {
+      const remote = createRemote();
+
+      remote.removeFavorite("2");
+      const context = await startFavoritesMidLoad({ remote, environment: { ownsFavorites: false } });
+
+      dispatchMouse(context, "click", heartOf(context, "2"));
+      await vi.waitFor(() => expect(hasFavorite(context, "2")).toBe(true));
+      expect(favoriteIdsOf(remote)).toContain("2");
     });
 
     test("with touch, a swipe that ends on a thumb's heart does not favorite it", async() => {
@@ -536,7 +571,7 @@ describe("startFavorites", () => {
 
       vi.spyOn(context.domEvents, "didSwipe").mockReturnValue(true);
       dispatchMouse(context, "click", heartOf(context, "2"));
-      expect(isFavoritedOf(context, "2")).toBe(false);
+      expect(hasFavorite(context, "2")).toBe(false);
     });
 
     test("without the gallery, hovering a thumb takes its link away", async() => {
@@ -550,7 +585,7 @@ describe("startFavorites", () => {
   });
 
   describe("on a post list page", () => {
-    test("only serves the stored favorite ids, without touching the page", async() => {
+    test("only serves the local favorite ids, without touching the page", async() => {
       const context = createContext({ environment: { mode: "postList" } }, false);
 
       await store(context);

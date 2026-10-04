@@ -1,4 +1,4 @@
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export class MemoryRandomSource implements RandomSource {
   private readonly values: readonly number[];

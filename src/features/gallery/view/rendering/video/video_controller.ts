@@ -1,6 +1,6 @@
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { VideoClip } from "@/features/gallery/types/types";
 import { doNothing } from "@/utils/pure/function";
 import { isVideo } from "@/lib/media/media_type";

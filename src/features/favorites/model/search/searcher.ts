@@ -6,7 +6,7 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Searcher } from "@/features/favorites/types/types";
 import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";

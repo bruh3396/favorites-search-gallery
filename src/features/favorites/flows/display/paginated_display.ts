@@ -6,14 +6,27 @@ import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Media } from "@/core/domain/media/media";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { NavigationKey } from "@/types/input";
 import { Shell } from "@/app/context/shell";
 import { preloadImage } from "@/utils/browser/image";
 import { sleep } from "@/lib/async/scheduling";
 import { throttle } from "@/lib/async/rate_limiting";
 
+export interface FavoritesPaginatedDisplayDependencies {
+  readonly model: FavoritesModel;
+  readonly view: FavoritesView;
+  readonly favoritesLoaded: Milestone;
+  readonly shell: Shell;
+  readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl">;
+}
+
 export class FavoritesPaginatedDisplay implements Display {
+  private readonly model: FavoritesModel;
+  private readonly view: FavoritesView;
+  private readonly favoritesLoaded: Milestone;
+  private readonly shell: Shell;
+  private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl">;
   private hasAppendedFirstResults = false;
 
   private preloadImages = throttle(async(media: Media[]) => {
@@ -25,13 +38,13 @@ export class FavoritesPaginatedDisplay implements Display {
     }
   }, 2_000);
 
-  constructor(
-    private readonly model: FavoritesModel,
-    private readonly view: FavoritesView,
-    private readonly favoritesLoaded: Milestone,
-    private readonly shell: Shell,
-    private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl">
-  ) { }
+  constructor(dependencies: FavoritesPaginatedDisplayDependencies) {
+    this.model = dependencies.model;
+    this.view = dependencies.view;
+    this.favoritesLoaded = dependencies.favoritesLoaded;
+    this.shell = dependencies.shell;
+    this.remoteMedia = dependencies.remoteMedia;
+  }
 
   public initialize(results: Favorite[], options?: ContentDisplayOptions): void {
     this.view.togglePaginator(true);

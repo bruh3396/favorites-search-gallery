@@ -1,17 +1,17 @@
 import * as GalleryItemWindow from "@/features/gallery/model/item_window";
 import * as GalleryUpscaleQuality from "@/features/gallery/model/upscale_quality";
-import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
+import { AddFavoriteResult, RemoteFavoriteActions, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import { Boundary } from "@/types/boundary";
 import { GalleryState } from "@/types/app";
 import { GalleryStateController } from "@/features/gallery/model/state";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
 import { NavigationKey } from "@/types/input";
-import { Navigator } from "@/core/boundary/ports/navigator";
+import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
-import { RemotePages } from "@/core/boundary/ports/remote_pages";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { downloadMedia } from "@/lib/media/download";
 import { isVideo } from "@/lib/media/media_type";
 import { navigationDelta } from "@/lib/event/keys";
@@ -19,7 +19,7 @@ import { navigationDelta } from "@/lib/event/keys";
 interface GalleryModelPorts {
   navigator: Navigator;
   remotePages: Pick<RemotePages, "postUrl">;
-  remoteFavorites: Pick<RemoteFavorites, "add" | "remove">;
+  remoteFavoriteActions: RemoteFavoriteActions;
   remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl" | "fetchOriginal">;
 }
 
@@ -87,11 +87,11 @@ export class GalleryModel {
   }
 
   public addFavorite(): Promise<AddFavoriteResult> {
-    return this.ports.remoteFavorites.add(this.cursor.currentItem().id);
+    return this.ports.remoteFavoriteActions.add(this.cursor.currentItem().id);
   }
 
   public removeFavorite(): Promise<RemoveFavoriteResult> {
-    this.ports.remoteFavorites.remove(this.cursor.currentItem().id);
+    this.ports.remoteFavoriteActions.remove(this.cursor.currentItem().id);
     return Promise.resolve("removed");
   }
 

@@ -1,4 +1,4 @@
-import { LocalPosts } from "@/core/boundary/ports/local_posts";
+import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { Post } from "@/core/domain/post/post";
 
 export class MemoryLocalPosts implements LocalPosts {

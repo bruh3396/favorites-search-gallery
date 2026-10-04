@@ -9,8 +9,8 @@ import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { Post } from "@/core/domain/post/post";
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
-import { RemotePosts } from "@/core/boundary/ports/remote_posts";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Shell } from "@/app/context/shell";
 import { createAppContext } from "@/testing/context";
 import { createEnvironment } from "@/testing/environment";
@@ -29,7 +29,8 @@ function createRefusingContext(): AppContext {
   const remote = new MemoryClient([]);
   const remoteFavorites = new MemoryRemoteFavorites(remote);
 
-  remoteFavorites.fetchAllExcept = (): Promise<void> => Promise.reject(new Error("refused"));
+  remoteFavorites.fetchAll = (): Promise<void> => Promise.reject(new Error("refused"));
+  remoteFavorites.findNew = (): Promise<Post[]> => Promise.reject(new Error("refused"));
   return createContextFor(remoteFavorites, new MemoryRemotePosts(remote));
 }
 
@@ -76,7 +77,7 @@ function newIdsOf(context: AppContext): string[] {
   return Array.from(context.shell.content.querySelectorAll<HTMLElement>(".post[data-new-badge]")).map(thumb => thumb.id).sort();
 }
 
-function storedIdsFor(context: AppContext): Promise<string[]> {
+function localIdsFor(context: AppContext): Promise<string[]> {
   return createModel(context).loadFavoriteIds().then(ids => ids.sort());
 }
 
@@ -85,13 +86,13 @@ describe("FavoritesFlows", () => {
     document.body.replaceChildren();
   });
 
-  describe("loading with nothing stored", () => {
+  describe("loading with no local favorites", () => {
     test("fetches every remote favorite, shows the favorites, and stores them", async() => {
       const context = createContext("1", "2", "3");
 
       await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
-      expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
+      expect(await localIdsFor(context)).toEqual(["1", "2", "3"]);
     });
 
     test("finishes loading without storing membership when the site refuses favorites", async() => {
@@ -99,12 +100,12 @@ describe("FavoritesFlows", () => {
 
       await setup(context).load.loadAllFavorites();
       expect(loadedFor(context)).toBe(true);
-      expect(await storedIdsFor(context)).toEqual([]);
+      expect(await localIdsFor(context)).toEqual([]);
     });
   });
 
-  describe("loading with favorites stored", () => {
-    test("shows the stored favorites", async() => {
+  describe("loading with local favorites", () => {
+    test("shows the local favorites", async() => {
       const context = createContext("1", "2", "3");
 
       await store(context, "1", "2", "3");
@@ -120,10 +121,10 @@ describe("FavoritesFlows", () => {
       await setup(context).load.loadAllFavorites();
       expect(idsOf(context)).toEqual(["1", "2", "3"]);
       expect(newIdsOf(context)).toEqual(["3"]);
-      expect(await storedIdsFor(context)).toEqual(["1", "2", "3"]);
+      expect(await localIdsFor(context)).toEqual(["1", "2", "3"]);
     });
 
-    test("still shows and finishes loading the stored favorites when the site refuses new ones", async() => {
+    test("still shows and finishes loading the local favorites when the site refuses new ones", async() => {
       const context = createRefusingContext();
 
       await store(context, "1", "2");

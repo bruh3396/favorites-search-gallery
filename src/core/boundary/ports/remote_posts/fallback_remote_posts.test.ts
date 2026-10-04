@@ -1,7 +1,7 @@
 import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { Mock, describe, expect, test, vi } from "vitest";
-import { FallbackRemotePosts } from "@/core/boundary/composites/fallback_remote_posts";
-import { PostUnavailableError } from "@/core/boundary/ports/remote_posts";
+import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
+import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { createPost } from "@/testing/post";
 
 type Fetch = Mock<(post: Pick<Post, "id" | "deleted">) => Promise<CategorizedPost>>;

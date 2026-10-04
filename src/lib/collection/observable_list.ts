@@ -1,5 +1,5 @@
 import { Identifiable } from "@/types/app";
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { doNothing } from "@/utils/pure/function";
 import { shuffleInPlace as shuffleArray } from "@/utils/pure/array";
 

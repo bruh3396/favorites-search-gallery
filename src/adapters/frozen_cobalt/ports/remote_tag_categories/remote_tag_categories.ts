@@ -1,7 +1,7 @@
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
-import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
+import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
 import { decodeTagCategory } from "@/adapters/frozen_cobalt/client/decoder";
 
 export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {

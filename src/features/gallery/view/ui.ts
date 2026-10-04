@@ -1,7 +1,7 @@
 import * as GalleryFullscreenIcon from "@/features/gallery/view/fullscreen_icon";
 import * as Icons from "@/assets/svg/icons";
-import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
-import { HostPage } from "@/core/boundary/ports/host_page";
+import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Shell } from "@/app/context/shell";
 import { blurActiveElement } from "@/utils/browser/window";
 import { toggleDataset } from "@/utils/browser/dataset";
@@ -11,12 +11,14 @@ const ADD_FAVORITE_ICONS: Record<AddFavoriteResult, string | null> = {
   alreadyAdded: Icons.HEART_CHECK,
   loggedOut: Icons.ERROR,
   cancelled: null,
+  blocked: null,
   error: Icons.ERROR
 };
 
 const REMOVE_FAVORITE_ICONS: Record<RemoveFavoriteResult, string | null> = {
   removed: Icons.HEART_MINUS,
   cancelled: null,
+  blocked: null,
   error: null
 };
 

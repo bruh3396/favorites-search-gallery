@@ -4,7 +4,7 @@ import { mintMedia, readLocator } from "@/adapters/rule34_cdn/client/locator";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/extension_prober";
 import { Rule34CdnFileExtension } from "@/adapters/rule34_cdn/client/extension";
 import { Rule34CdnVideoDurationReader } from "@/adapters/rule34_cdn/client/video_duration";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34CdnClientDependencies {
   fetch: (url: string, init?: RequestInit) => Promise<Response>;

@@ -1,5 +1,5 @@
 import { Media } from "@/core/domain/media/media";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 
 export class Rule34CdnRemoteMedia implements RemoteMedia {

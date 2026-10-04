@@ -1,9 +1,11 @@
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
+import { DISCLOSURE_STORY } from "@/targets/kit/stories/disclosure";
 import { DROPDOWN_STORY } from "@/targets/kit/stories/dropdown";
 import KIT_CSS from "@/targets/kit/kit.css?inline";
 import { MULTI_SELECT_STORY } from "@/targets/kit/stories/multi_select";
 import { SEGMENTED_STORY } from "@/targets/kit/stories/segmented";
+import { SETTINGS_SCREEN_STORY } from "@/targets/kit/stories/settings_screen";
 import { SETTING_ROW_STORY } from "@/targets/kit/stories/setting_row";
 import { SETTING_STORY } from "@/targets/kit/stories/setting";
 import { STEPPER_STORY } from "@/targets/kit/stories/stepper";
@@ -12,7 +14,10 @@ import UI_CSS from "@/core/ui/styles.css?inline";
 import { createSegmented } from "@/core/ui/components/segmented/segmented";
 import { createSwitch } from "@/core/ui/components/switch/switch";
 
-const STORIES: Story[] = [SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, SETTING_ROW_STORY, SETTING_STORY];
+const STORIES: Story[] = [
+  SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, DISCLOSURE_STORY,
+  SETTING_ROW_STORY, SETTING_STORY, SETTINGS_SCREEN_STORY
+];
 
 function createStyleSheet(css: string): CSSStyleSheet {
   const sheet = new CSSStyleSheet();
@@ -53,7 +58,6 @@ const FONTS = [
   { value: "ui-monospace, monospace", label: "Mono" }
 ] as const;
 
-// Starts on the OS scheme; the switch then pins the root to one, the way the app's preference will.
 function renderSchemeToggle(app: HTMLElement): HTMLElement {
   const item = createElement("label", "kit-Toolbar-item", "Dark");
   const scheme = createSwitch(document, {
@@ -68,7 +72,6 @@ function renderSchemeToggle(app: HTMLElement): HTMLElement {
   return item;
 }
 
-// Overrides the font token on the root, so every component that inherits it follows.
 function renderFontPicker(app: HTMLElement): HTMLElement {
   const item = createElement("div", "kit-Toolbar-item", "Font");
   const font = createSegmented<string>(document, {
@@ -93,7 +96,6 @@ function renderToolbar(app: HTMLElement): HTMLElement {
   return toolbar;
 }
 
-// The kit mounts like the app will: a shadow root on the claimed content, the core stylesheet, an fsg-App root.
 function main(): void {
   const shadowRoot = new BrowserHostPage().claimContent().attachShadow({ mode: "open" });
   const app = createElement("div", "fsg-App kit-Page");

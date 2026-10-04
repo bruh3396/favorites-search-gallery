@@ -113,7 +113,7 @@ describe("FavoritesStatus", () => {
     test("shows how many have loaded out of the total", () => {
       const { status, shell } = setup();
 
-      status.setLoadProgress(25, 100);
+      status.setLoadProgress({ loaded: 25, total: 100 });
       expect(statusOf(shell)).toBe("Loading favorites - 25 / 100");
       expect(progressOf(shell)).toBe("25%");
     });
@@ -121,7 +121,7 @@ describe("FavoritesStatus", () => {
     test("without a total, just says it's loading", () => {
       const { status, shell } = setup();
 
-      status.setLoadProgress(0, 0);
+      status.setLoadProgress({ loaded: 0, total: 0 });
       expect(statusOf(shell)).toBe("Loading favorites");
       expect(progressOf(shell)).toBeNull();
     });
@@ -130,7 +130,7 @@ describe("FavoritesStatus", () => {
   test("clearing hides the progress bar", () => {
     const { status, shell } = setup();
 
-    status.setLoadProgress(25, 100);
+    status.setLoadProgress({ loaded: 25, total: 100 });
     status.clearStatus();
     expect(progressOf(shell)).toBeNull();
   });

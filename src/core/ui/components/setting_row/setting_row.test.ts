@@ -1,9 +1,9 @@
-import { SettingRowClass, SettingRowOptions, createSettingRow } from "@/core/ui/components/setting_row/setting_row";
+import { SettingRow, SettingRowClass, SettingRowOptions, createSettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { describe, expect, test } from "vitest";
 import SETTING_ROW_CSS from "@/core/ui/components/setting_row/setting_row.css?inline";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(options: Partial<SettingRowOptions> = {}): { element: HTMLDivElement; control: HTMLElement } {
+function setup(options: Partial<SettingRowOptions> = {}): SettingRow & { control: HTMLElement } {
   const control = options.control ?? document.createElement("button");
   return { ...createSettingRow(document, { label: "Columns", ...options, control }), control };
 }
@@ -39,6 +39,21 @@ describe("createSettingRow", () => {
 
     expect(element.querySelector(`.${SettingRowClass.description}`)).toBeNull();
     expect(control.ariaDescribedByElements ?? null).toBeNull();
+  });
+
+  test("is medium unless told otherwise", () => {
+    expect(setup().element.dataset.size).toBe("medium");
+    expect(setup({ size: "small" }).element.dataset.size).toBe("small");
+  });
+
+  test("hides and shows its description on request", () => {
+    const { element, setDescriptionVisible } = setup({ description: "Thumbnails per row." });
+    const description = element.querySelector<HTMLElement>(`.${SettingRowClass.description}`);
+
+    setDescriptionVisible(false);
+    expect(description?.hidden).toBe(true);
+    setDescriptionVisible(true);
+    expect(description?.hidden).toBe(false);
   });
 
   test("styles every class it sets", () => {

@@ -1,5 +1,5 @@
 import * as GalleryTutorial from "@/features/gallery/view/tutorial";
-import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites";
+import { AddFavoriteResult, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import { GalleryBudget, GalleryViewDependencies } from "@/features/gallery/types/types";
 import { AppContext } from "@/app/context/context";
 import { BoundaryEdge } from "@/types/boundary";

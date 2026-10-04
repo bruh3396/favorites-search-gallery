@@ -414,7 +414,7 @@ export default defineConfig([
             "is", "has", "should", "can", "was", "did", "will", "must", "on",
             "using", "requires", "needs", "allows", "in", "are", "supports",
             "overflows", "includes", "contains", "exceeds", "matches", "offers", "links",
-            "breaks"
+            "favorited"
           ]
         },
         { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },
@@ -643,6 +643,13 @@ export default defineConfig([
     files: ["src/types/errors.ts"],
     rules: {
       "max-classes-per-file": "off"
+    }
+  },
+  {
+    files: ["src/app/context/events.ts", "src/app/context/milestones.ts", "src/app/context/preferences.ts"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/explicit-module-boundary-types": "off"
     }
   },
   {

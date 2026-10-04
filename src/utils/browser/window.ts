@@ -1,5 +1,14 @@
 import { readQueryParam as readQueryParamFromUrl } from "@/utils/pure/url";
 
+const HIDDEN_PAGE_PAINT_TIMEOUT = 100;
+
+export function waitForNextPaint(): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, HIDDEN_PAGE_PAINT_TIMEOUT);
+    requestAnimationFrame(() => setTimeout(resolve));
+  });
+}
+
 export function toggleFullscreen(): void {
   if (document.fullscreenElement === null) {
     document.documentElement.requestFullscreen();

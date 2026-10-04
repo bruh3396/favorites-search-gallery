@@ -4,7 +4,7 @@ import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { Environment } from "@/core/boundary/environment";
-import { FallbackRemotePosts } from "@/core/boundary/composites/fallback_remote_posts";
+import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { FrozenCobaltRemoteTagCategories } from "@/adapters/frozen_cobalt/ports/remote_tag_categories/remote_tag_categories";
@@ -18,6 +18,7 @@ import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/host_page";
+import { Rule34RemoteFavoriteActions } from "@/adapters/rule34/ports/remote_favorite_actions/remote_favorite_actions";
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
@@ -57,6 +58,7 @@ function main(): void {
   const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34: rule34Client, page: new BrowserHostPage() });
 
   const ports: Ports = {
+    remoteFavoriteActions: new Rule34RemoteFavoriteActions({ fetch: boundFetch, scheduler, randomSource }),
     remoteFavorites: new Rule34RemoteFavorites({ rule34: rule34Client, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({
       primary: new FrozenCobaltRemotePosts({ frozenCobalt: frozenCobaltClient, mintMedia, scheduler, randomSource }),

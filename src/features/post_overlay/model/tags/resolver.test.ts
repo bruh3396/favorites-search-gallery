@@ -1,7 +1,7 @@
 import * as PostOverlayTagsResolver from "@/features/post_overlay/model/tags/resolver";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
+import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
 import { TagCategory } from "@/core/domain/tag/tag";
 
 type Fetch = RemoteTagCategories["fetch"];

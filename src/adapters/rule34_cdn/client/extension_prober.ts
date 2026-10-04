@@ -1,6 +1,6 @@
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Rule34CdnImageExtension } from "@/adapters/rule34_cdn/client/extension";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { fileUrl } from "@/adapters/rule34_cdn/client/addresses";
 
 export interface Rule34CdnExtensionProberDependencies {

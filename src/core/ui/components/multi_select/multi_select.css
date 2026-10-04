@@ -1,6 +1,7 @@
 .fsg-MultiSelect {
   display: inline-flex;
   flex: none;
+  block-size: var(--fsg-control-size-medium);
   overflow: hidden;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-medium);
@@ -8,10 +9,10 @@
 }
 
 .fsg-MultiSelect-option {
-  padding: 4px 12px;
+  padding: 0 12px;
   color: var(--fsg-color-on-surface-muted);
   font-size: var(--fsg-font-size-label);
-  line-height: 1.4;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -23,8 +24,12 @@
   border-inline-start: 1px solid var(--fsg-color-outline);
 }
 
+.fsg-MultiSelect[data-size="small"] {
+  block-size: var(--fsg-control-size-small);
+}
+
 .fsg-MultiSelect[data-size="small"] .fsg-MultiSelect-option {
-  padding: 2px 8px;
+  padding: 0 8px;
   font-size: var(--fsg-font-size-label-small);
 }
 

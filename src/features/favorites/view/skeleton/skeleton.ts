@@ -1,8 +1,8 @@
 import { FavoritesAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/app";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { SeededSequence } from "@/lib/collection/seeded_sequence";
 import { SkeletonConfig } from "@/config/skeleton_config";
 

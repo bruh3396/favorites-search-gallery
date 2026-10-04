@@ -1,5 +1,5 @@
 import { isEmptyString, removeExtraWhitespace } from "@/utils/pure/string";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { clamp } from "@/utils/pure/number";
 import { debounceLeading } from "@/lib/async/rate_limiting";
 import { isIndexInBounds } from "@/utils/pure/array";

@@ -1,5 +1,5 @@
-import { RandomSource } from "@/core/boundary/ports/random_source";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface RetryPolicy {
   attempts: number;

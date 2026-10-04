@@ -84,6 +84,21 @@ describe("createSetting", () => {
     expect(element.textContent).toBe("AutoplayPlays videos when opened.");
   });
 
+  test("draws the row and its control at one size", () => {
+    const descriptor = createSwitchSetting(createPreference(false));
+    const { element } = createSetting(document, { descriptor, size: "small", scheduler: SCHEDULER });
+
+    expect([element.dataset.size, buttonsOf(element)[0].dataset.size]).toEqual(["small", "small"]);
+  });
+
+  test("hides and shows its caption on request", () => {
+    const descriptor = { ...createSwitchSetting(createPreference(false)), description: "Plays videos when opened." };
+    const setting = createSetting(document, { descriptor, scheduler: SCHEDULER });
+
+    setting.setDescriptionVisible(false);
+    expect(setting.element.querySelector<HTMLElement>(".fsg-SettingRow-description")?.hidden).toBe(true);
+  });
+
   test("shows a switch's preference and follows it", () => {
     const preference = createPreference(false);
     const [control] = buttonsOf(render(createSwitchSetting(preference)));

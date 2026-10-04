@@ -1,4 +1,4 @@
-import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories";
+import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 export class MemoryRemoteTagCategories implements RemoteTagCategories {

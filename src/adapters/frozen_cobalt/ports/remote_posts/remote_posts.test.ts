@@ -6,7 +6,7 @@ import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_p
 import { Media } from "@/core/domain/media/media";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { PostUnavailableError } from "@/core/boundary/ports/remote_posts";
+import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { advanceAndSettle } from "@/testing/async";
 
 interface Setup {

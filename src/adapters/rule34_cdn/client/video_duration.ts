@@ -1,5 +1,5 @@
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34CdnVideoDurationReaderDependencies {
   fetch: (url: string, init?: RequestInit) => Promise<Response>;

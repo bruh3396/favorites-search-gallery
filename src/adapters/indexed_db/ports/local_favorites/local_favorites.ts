@@ -1,5 +1,5 @@
 import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/indexed_db/client/client";
-import { LocalFavorites } from "@/core/boundary/ports/local_favorites";
+import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 
 const STORE_NAME: IndexedDbStoreName = "favorites";
 

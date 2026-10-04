@@ -43,7 +43,7 @@ async function waitUntilPageIsReady(context: AppContext): Promise<void> {
   const { environment, milestones } = context;
 
   if (environment.mode === "favorites") {
-    await milestones.favorites.storedFavoritesFound.wait();
+    await milestones.favorites.localFavoritesFound.wait();
   }
 
   if (environment.mode === "postList") {

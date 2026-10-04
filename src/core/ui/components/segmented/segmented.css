@@ -2,6 +2,7 @@
   display: inline-flex;
   flex: none;
   gap: 2px;
+  block-size: var(--fsg-control-size-medium);
   padding: 2px;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-medium);
@@ -9,11 +10,11 @@
 }
 
 .fsg-Segmented-option {
-  padding: 4px 12px;
+  padding: 0 12px;
   border-radius: calc(var(--fsg-radius-medium) - 2px);
   color: var(--fsg-color-on-surface-muted);
   font-size: var(--fsg-font-size-label);
-  line-height: 1.4;
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
   transition:
@@ -21,8 +22,12 @@
     color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
+.fsg-Segmented[data-size="small"] {
+  block-size: var(--fsg-control-size-small);
+}
+
 .fsg-Segmented[data-size="small"] .fsg-Segmented-option {
-  padding: 2px 8px;
+  padding: 0 8px;
   font-size: var(--fsg-font-size-label-small);
 }
 

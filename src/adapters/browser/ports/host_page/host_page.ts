@@ -1,4 +1,4 @@
-import { HostPage } from "@/core/boundary/ports/host_page";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 
 const LOCKED_VIEWPORT = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
 

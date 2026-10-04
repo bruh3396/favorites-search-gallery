@@ -1,5 +1,5 @@
 import { Environment } from "@/core/boundary/environment";
-import { HostPage } from "@/core/boundary/ports/host_page";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { SettingsCatalog } from "@/features/favorites/control/sections/settings/catalog";
 import { SettingsControl } from "@/lib/ui/settings/controls";
 import { SettingsSection } from "@/features/favorites/types/types";

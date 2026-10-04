@@ -1,10 +1,27 @@
+/* Rows are the control's height plus a fixed gap, so every row of a size is the same height
+   unless a caption makes it taller (libadwaita rows). */
 .fsg-SettingRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 0;
-  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+  min-block-size: calc(var(--fsg-control-size-medium) + 12px);
+  padding: 6px 8px;
+  border-radius: var(--fsg-radius-medium);
+  transition:
+    opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-SettingRow[data-size="small"] {
+  min-block-size: calc(var(--fsg-control-size-small) + 12px);
+}
+
+/* Only where hover exists, so a tap on touch doesn't leave the row lit. */
+@media (hover: hover) {
+  .fsg-SettingRow:hover:has(:enabled) {
+    background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 10%, transparent);
+  }
 }
 
 .fsg-SettingRow[hidden] {
@@ -26,6 +43,10 @@
 
 .fsg-SettingRow-label {
   font-size: var(--fsg-font-size-label);
+}
+
+.fsg-SettingRow[data-size="small"] .fsg-SettingRow-label {
+  font-size: var(--fsg-font-size-label-small);
 }
 
 .fsg-SettingRow-description {

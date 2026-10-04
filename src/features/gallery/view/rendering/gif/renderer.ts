@@ -1,6 +1,6 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { PostMedia } from "@/core/domain/post/post";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Renderer } from "@/features/gallery/types/types";
 import { createElement } from "@/utils/browser/element";
 import { isGif } from "@/lib/media/media_type";

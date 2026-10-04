@@ -1,13 +1,13 @@
 .fsg-Switch {
-  --fsg-switch-thumb-size: 16px;
-  --fsg-switch-travel: 16px;
+  --fsg-switch-thumb-size: 22px;
+  --fsg-switch-travel: 22px;
 
   position: relative;
   display: inline-flex;
   flex: none;
   align-items: center;
-  inline-size: 38px;
-  block-size: 22px;
+  inline-size: 50px;
+  block-size: var(--fsg-control-size-medium);
   padding: 2px;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-full);
@@ -19,11 +19,11 @@
 }
 
 .fsg-Switch[data-size="small"] {
-  --fsg-switch-thumb-size: 12px;
-  --fsg-switch-travel: 14px;
+  --fsg-switch-thumb-size: 18px;
+  --fsg-switch-travel: 18px;
 
-  inline-size: 32px;
-  block-size: 18px;
+  inline-size: 42px;
+  block-size: var(--fsg-control-size-small);
 }
 
 .fsg-Switch[aria-checked="true"] {

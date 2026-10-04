@@ -1,4 +1,4 @@
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
 const STORAGE_KEY = "aspectRatios";

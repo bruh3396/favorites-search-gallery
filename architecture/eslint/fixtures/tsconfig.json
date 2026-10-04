@@ -7,5 +7,5 @@
     "skipLibCheck": true,
     "noResolve": true
   },
-  "include": ["src/features/favorites/model/model.ts", "src/app/context/context.ts", "src/app/context/events.ts", "src/app/context/feature_bridge.ts", "src/core/boundary/ports/local_posts.ts"]
+  "include": ["src/features/favorites/model/model.ts", "src/app/context/context.ts", "src/app/context/events.ts", "src/app/context/feature_bridge.ts", "src/core/boundary/ports/local_posts/local_posts.ts"]
 }

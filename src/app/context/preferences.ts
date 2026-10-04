@@ -6,15 +6,14 @@ import { LAYOUTS, Layout, PERFORMANCE_PROFILES, POST_OVERLAY_MODES, PerformanceP
 import { METRICS, RATINGS, Rating, SortKey } from "@/types/search";
 import { Preference, StoredPreference } from "@/lib/storage/preference";
 import { THEMES, Theme } from "@/lib/ui/theme/themes";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
-import { NamespacedLocalKeyedValues } from "@/core/utils/storage/namespaced_local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { PreferenceDefaults } from "@/app/context/preference_defaults";
 
 const NAMESPACE = "preferences";
 
 export type Preferences = ReturnType<typeof createPreferences>;
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function createPreferences(defaults: PreferenceDefaults, store: LocalKeyedValues) {
   const namespacedLocalKeyedValues = new NamespacedLocalKeyedValues(NAMESPACE, store);
   const preference = <T>(key: string, defaultValue: T, accepts?: Guard<T>): Preference<T> => {

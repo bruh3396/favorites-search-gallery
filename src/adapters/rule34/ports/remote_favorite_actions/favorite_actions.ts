@@ -1,7 +1,7 @@
 import { BASE_INDEX_URL, ORIGIN } from "@/adapters/rule34/client/urls";
 import { Rule34Fetch, request, send } from "@/adapters/rule34/client/request";
-import { RandomSource } from "@/core/boundary/ports/random_source";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { isTransient } from "@/adapters/rule34/client/error";
 import { retry } from "@/core/utils/async/retry";

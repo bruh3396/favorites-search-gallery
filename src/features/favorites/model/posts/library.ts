@@ -1,10 +1,10 @@
 import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { CoalescingExecutor } from "@/core/utils/async/coalescing";
-import { LocalPosts } from "@/core/boundary/ports/local_posts";
+import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { PostLibrary } from "@/features/favorites/types/types";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media";
-import { RemotePosts } from "@/core/boundary/ports/remote_posts";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { partition } from "@/utils/pure/array";
 
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
@@ -60,8 +60,10 @@ export class FavoritesPostLibrary implements PostLibrary {
     }
   }
 
-  public storeMissing(posts: Post[]): Promise<void> {
-    return this.localPosts.setManyIfAbsent(posts);
+  public async adopt(posts: Post[]): Promise<Post[]> {
+    await this.localPosts.setManyIfAbsent(posts);
+    const local = await this.getLocalById(posts.map(post => post.id));
+    return posts.map(post => local.get(post.id) ?? post);
   }
 
   public async refreshAll(posts: Post[]): Promise<void> {
@@ -71,8 +73,12 @@ export class FavoritesPostLibrary implements PostLibrary {
   }
 
   private async getManyOrPlaceholders(ids: string[]): Promise<Post[]> {
-    const stored = new Map((await this.localPosts.getMany(ids)).map(post => [post.id, post]));
-    return ids.map(id => stored.get(id) ?? createPlaceholder(id));
+    const local = await this.getLocalById(ids);
+    return ids.map(id => local.get(id) ?? createPlaceholder(id));
+  }
+
+  private async getLocalById(ids: string[]): Promise<Map<string, Post>> {
+    return new Map((await this.localPosts.getMany(ids)).map(post => [post.id, post]));
   }
 
   private async refresh(post: Post): Promise<void> {

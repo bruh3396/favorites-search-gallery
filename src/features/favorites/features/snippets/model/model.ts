@@ -3,7 +3,7 @@ import * as SnippetIdQuery from "@/features/favorites/features/snippets/model/id
 import * as SnippetListing from "@/features/favorites/features/snippets/model/listing";
 import * as SnippetTransfer from "@/features/favorites/features/snippets/model/transfer";
 import { SerializedSnippet, Snippet, SnippetFailureReason, SnippetResult } from "@/features/favorites/features/snippets/types/types";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
 export class SnippetModel {

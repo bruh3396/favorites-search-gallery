@@ -2,7 +2,7 @@ import { FrozenCobaltEndpoints, FrozenCobaltPostResult, FrozenCobaltTagResult, p
 import { CoalescingResolver } from "@/core/utils/async/coalescing";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface FrozenCobaltIdentity {
   userId: string;

@@ -6,7 +6,6 @@ import { PostMedia } from "@/core/domain/post/post";
 
 export type Events = ReturnType<typeof createEvents>;
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
 export function createEvents() {
   return {
     app: {
@@ -18,7 +17,6 @@ export function createEvents() {
     favorites: {
       clearButtonClicked: new Emitter<MouseEvent>(),
       invertButtonClicked: new Emitter<MouseEvent>(),
-      reconcileButtonClicked: new Emitter<MouseEvent>(),
       searchButtonClicked: new Emitter<MouseEvent>(),
       shuffleButtonClicked: new Emitter<MouseEvent>(),
       settingsResetRequested: new Emitter<void>(),

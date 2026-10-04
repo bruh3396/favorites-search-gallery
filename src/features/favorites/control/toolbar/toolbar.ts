@@ -11,11 +11,11 @@ interface ButtonConfig extends Partial<ButtonElement> {
   parent: HTMLElement;
 }
 
-type IconedButton = "reconcile" | "invert" | "shuffle";
+type IconedButton = "invert" | "shuffle";
 
 const BUTTON_ICONS: Record<Device, Record<IconedButton, IconName | null>> = {
-  desktop: { reconcile: null, invert: null, shuffle: null },
-  mobile: { reconcile: "reset", invert: "changeDirection", shuffle: "shuffle" }
+  desktop: { invert: null, shuffle: null },
+  mobile: { invert: "changeDirection", shuffle: "shuffle" }
 };
 
 const INVERT_ENABLED: Record<Device, boolean> = {
@@ -47,13 +47,6 @@ function buildButtons(events: Events, environment: Environment, slots: Favorites
       icon: "search",
       rightClickEnabled: true,
       event: events.favorites.searchButtonClicked
-    },
-    {
-      id: "reconcile-button",
-      parent: slots.buttons,
-      textContent: "RECONCILE",
-      icon: icons.reconcile,
-      event: events.favorites.reconcileButtonClicked
     },
     {
       id: "invert-button",

@@ -9,14 +9,8 @@ export class FavoritesInputFlow extends FavoritesFlow {
       return;
     }
     handleActionBarClick(event.originalEvent, {
-      onFavoriteAdded: (id) => {
-        this.model.addFavorite(id);
-        this.context.events.app.favoriteAdded.emit(id);
-      },
-      onFavoriteRemoved: (id) => {
-        this.model.removeFavorite(id);
-        this.context.events.app.favoriteRemoved.emit(id);
-      },
+      onFavoriteAdded: (id) => this.addFavorite(id),
+      onFavoriteRemoved: (id) => this.removeFavorite(id),
       onPostOpened: (id) => this.openPost(id),
       onMediaDownloaded: (id) => this.download(id)
     });
@@ -57,6 +51,22 @@ export class FavoritesInputFlow extends FavoritesFlow {
   public submitGotoPage(pageNumber: number): void {
     this.view.closeGotoPagePopover();
     this.flows.display.goToPage(pageNumber);
+  }
+
+  private async addFavorite(id: string): Promise<void> {
+    const result = await this.model.addFavorite(id);
+
+    if (result === "added" || result === "alreadyAdded") {
+      this.context.events.app.favoriteAdded.emit(id);
+    }
+  }
+
+  private async removeFavorite(id: string): Promise<void> {
+    const result = await this.model.removeFavorite(id);
+
+    if (result === "removed") {
+      this.context.events.app.favoriteRemoved.emit(id);
+    }
   }
 
   private download(id: string): void {

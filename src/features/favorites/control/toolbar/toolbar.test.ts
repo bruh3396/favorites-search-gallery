@@ -8,7 +8,7 @@ import { Shell } from "@/app/context/shell";
 import { createEnvironment } from "@/testing/environment";
 import { createPreferences } from "@/testing/preferences";
 
-type ButtonEvent = "search" | "reconcile" | "invert" | "scratch" | "shuffle";
+type ButtonEvent = "search" | "invert" | "scratch" | "shuffle";
 
 interface Setup {
   slots: FavoritesToolbarSlots;
@@ -29,10 +29,9 @@ function setup(onDesktopDevice = true): Setup {
 
 function recordButtonEvents(events: Events): ButtonEvent[] {
   const clicked: ButtonEvent[] = [];
-  const { searchButtonClicked, reconcileButtonClicked, invertButtonClicked, shuffleButtonClicked } = events.favorites;
+  const { searchButtonClicked, invertButtonClicked, shuffleButtonClicked } = events.favorites;
 
   searchButtonClicked.on(() => clicked.push("search"));
-  reconcileButtonClicked.on(() => clicked.push("reconcile"));
   invertButtonClicked.on(() => clicked.push("invert"));
   shuffleButtonClicked.on(() => clicked.push("shuffle"));
   return clicked;
@@ -47,18 +46,18 @@ function isActive(element: Element): boolean {
 }
 
 describe("FavoritesToolbar", () => {
-  test("on desktop, offers reconcile, invert, and shuffle, each with its own event", () => {
+  test("on desktop, offers invert and shuffle, each with its own event", () => {
     const { slots, clicked } = setup(true);
 
     clickEach(slots.buttons);
-    expect(clicked.sort()).toEqual(["invert", "reconcile", "shuffle"]);
+    expect(clicked.sort()).toEqual(["invert", "shuffle"]);
   });
 
-  test("on mobile, offers reconcile and shuffle, but not invert", () => {
+  test("on mobile, offers shuffle, but not invert", () => {
     const { slots, clicked } = setup(false);
 
     clickEach(slots.buttons);
-    expect(clicked.sort()).toEqual(["reconcile", "shuffle"]);
+    expect(clicked).toEqual(["shuffle"]);
   });
 
   test("the search button reports both left and right clicks", () => {

@@ -1,0 +1,8 @@
+.fsg-SettingsScreen {
+  display: flex;
+  flex-direction: column;
+}
+
+.fsg-SettingsScreen > * + * {
+  border-block-start: 1px solid var(--fsg-color-outline);
+}

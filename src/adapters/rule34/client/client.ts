@@ -4,13 +4,12 @@ import * as PostListPage from "@/adapters/rule34/client/post_list_page";
 import * as PostPage from "@/adapters/rule34/client/post_page";
 import * as ProfilePage from "@/adapters/rule34/client/profile_page";
 import { CategorizedPost, Post } from "@/core/domain/post/post";
-import { Rule34AddFavoriteAnswer, Rule34FavoriteActions } from "@/adapters/rule34/client/favorite_actions";
 import { Rule34Fetch, request } from "@/adapters/rule34/client/request";
 import { ColorScheme } from "@/core/boundary/environment";
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { pageRateLimiter } from "@/adapters/rule34/client/page_rate_limiter";
 
 export interface Rule34ClientDependencies {
@@ -21,16 +20,13 @@ export interface Rule34ClientDependencies {
 }
 
 export class Rule34Client {
-  private readonly favoriteActions: Rule34FavoriteActions;
   private readonly favoritesFetches = new Set<Promise<void>>();
   private readonly postListPaginators = new Map<number, HTMLElement>();
 
   constructor(
     private readonly dependencies: Rule34ClientDependencies,
     private readonly rateLimiter: Pick<RateLimiter, "run"> = pageRateLimiter
-  ) {
-    this.favoriteActions = new Rule34FavoriteActions(dependencies);
-  }
+  ) { }
 
   public readPageName(): CurrentPage.Rule34PageName | null {
     return CurrentPage.readPageName();
@@ -130,14 +126,6 @@ export class Rule34Client {
     this.favoritesFetches.add(settled);
     settled.then(() => this.favoritesFetches.delete(settled));
     return running;
-  }
-
-  public addFavorite(id: string): Promise<Rule34AddFavoriteAnswer | null> {
-    return this.favoriteActions.add(id);
-  }
-
-  public removeFavorite(id: string): Promise<boolean> {
-    return this.favoriteActions.remove(id);
   }
 
   private keepPaginator(pageIndex: number, page: PostListPage.Rule34PostListPage): Post[] {

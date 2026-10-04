@@ -1,8 +1,9 @@
 import { ProgressBar, buildProgressBar } from "@/lib/ui/widgets/progress_bar";
 import { FavoritesEta } from "@/features/favorites/view/status/eta";
 import { FavoritesId } from "@/features/favorites/types/selectors";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
 import { FavoritesToolbarSlots } from "@/types/favorites_ui";
+import { LoadProgress } from "@/features/favorites/types/types";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 const TEMPORARY_STATUS_TIMEOUT = 1_000;
 
@@ -57,7 +58,7 @@ export class FavoritesStatus {
     this.setResultsCount(resultsCount);
   }
 
-  public setLoadProgress(loaded: number, total: number): void {
+  public setLoadProgress({ loaded, total }: LoadProgress): void {
     if (total > 0) {
       this.progressBar.setProgress(loaded, total);
       this.progressBar.setVisible(true);

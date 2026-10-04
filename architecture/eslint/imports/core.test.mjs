@@ -24,20 +24,21 @@ runRule("rule2", {
     ["core/domain/post.ts", "core/boundary/environment"],
     ["core/domain/post.ts", "adapters/rule34/client/client"],
     ["core/domain/post.ts", "targets/target"],
-    ["core/domain/post.ts", "core/boundary/ports/scheduler"]
+    ["core/domain/post.ts", "core/boundary/ports/scheduler/scheduler"]
   ]
 });
 
 runRule("rule3", {
   valid: [
-    ["core/boundary/ports/navigator.ts", "core/domain/post"],
-    ["core/boundary/ports/navigator.ts", "core/boundary/environment"],
-    ["core/boundary/ports/navigator.ts", "core/boundary/ports/scheduler"]
+    ["core/boundary/ports/navigator/navigator.ts", "core/domain/post"],
+    ["core/boundary/ports/navigator/navigator.ts", "core/boundary/environment"],
+    ["core/boundary/ports/navigator/navigator.ts", "core/boundary/ports/scheduler/scheduler"],
+    ["core/boundary/ports/remote_posts/fallback_remote_posts.ts", "core/utils/utils"]
   ],
   invalid: [
-    ["core/boundary/ports/navigator.ts", "core/utils/utils"],
-    ["core/boundary/ports/navigator.ts", "core/context/context"],
-    ["core/boundary/ports/navigator.ts", "adapters/rule34/client/client"]
+    ["core/boundary/ports/navigator/navigator.ts", "core/context/context"],
+    ["core/boundary/ports/remote_posts/fallback_remote_posts.ts", "lib/lib"],
+    ["core/boundary/ports/navigator/navigator.ts", "adapters/rule34/client/client"]
   ]
 });
 
@@ -59,7 +60,7 @@ runRule("rule105", {
   valid: [
     ["core/utils/utils.ts", "core/domain/post"],
     ["core/utils/utils.ts", "core/boundary/environment"],
-    ["core/utils/utils.ts", "core/boundary/ports/scheduler"]
+    ["core/utils/utils.ts", "core/boundary/ports/scheduler/scheduler"]
   ],
   invalid: [
     ["core/utils/utils.ts", "core/context/context"],

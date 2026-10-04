@@ -1,5 +1,5 @@
 import { randomInt, valuesAround } from "@/utils/pure/number";
-import { RandomSource } from "@/core/boundary/ports/random_source";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export function isIndexInBounds<V>(array: V[], index: number): boolean {
   return index >= 0 && index < array.length;

@@ -1,7 +1,7 @@
 import { AppMode, Device, Environment } from "@/core/boundary/environment";
 import { Preferences, createPreferences } from "@/app/context/preferences";
 import { launchFeatures, selectFeatures } from "@/app/startup/features";
-import { HostPage } from "@/core/boundary/ports/host_page";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Ports } from "@/core/boundary/ports/ports";
 import { createAppContext } from "@/app/context/context";
 import { selectPreferenceDefaults } from "@/app/context/preference_defaults";

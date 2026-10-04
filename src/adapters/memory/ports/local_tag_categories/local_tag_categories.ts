@@ -1,4 +1,4 @@
-import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories";
+import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 export class MemoryLocalTagCategories implements LocalTagCategories {

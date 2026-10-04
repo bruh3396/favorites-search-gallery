@@ -1,4 +1,4 @@
-import { RemotePages } from "@/core/boundary/ports/remote_pages";
+import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 
 export class Rule34RemotePages implements RemotePages {

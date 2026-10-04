@@ -1,4 +1,4 @@
-import { Collection, PostLibrary, Searcher } from "@/features/favorites/types/types";
+import { Collection, LoadProgress, PostLibrary, Searcher } from "@/features/favorites/types/types";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/types/favorite";
@@ -7,7 +7,7 @@ import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/lo
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { TermUpdate } from "@/lib/search/engines/search_engine";
 
 const SEARCHER_UPDATE_DELAY = 1_500;
@@ -25,9 +25,13 @@ function createFavorite(post: Post): Favorite {
     id: post.id,
     tags: tagsOf(post),
     media: post.media,
+    isNew: false,
     enrich: (enriched: Post): void => {
       favorite.tags = tagsOf(enriched);
       favorite.media = enriched.media;
+    },
+    markAsNew: (): void => {
+      favorite.isNew = true;
     }
   };
   return favorite as unknown as Favorite;
@@ -57,7 +61,7 @@ function createCollection(log: string[]): Collection & { favorites: Favorite[] }
   return collection;
 }
 
-async function setup(sources: { stored?: Post[]; remotePages?: Post[][]; stores?: Promise<void> } = {}): Promise<{
+async function setup(sources: { local?: Post[]; stored?: Post[]; remotePages?: Post[][]; newPosts?: Post[]; removedIds?: string[]; stores?: Promise<void> } = {}): Promise<{
   loader: FavoritesLoader;
   log: string[];
   collection: ReturnType<typeof createCollection>;
@@ -66,34 +70,42 @@ async function setup(sources: { stored?: Post[]; remotePages?: Post[][]; stores?
   scheduler: MemoryScheduler;
   searcherUpdates: TermUpdate<Favorite>[][];
   filledPlaceholders: string[];
+  findRemovedCalls: [string[], number][];
+  refreshedPosts: Post[];
 }> {
   const log: string[] = [];
-  const stored = sources.stored ?? [];
+  const local = sources.local ?? [];
   const localFavorites = new MemoryLocalFavorites();
   const localTagCategories = new MemoryLocalTagCategories();
   const scheduler = new MemoryScheduler();
   const collection = createCollection(log);
   const searcherUpdates: TermUpdate<Favorite>[][] = [];
-  const remoteFavorites: Pick<RemoteFavorites, "fetchAllExcept"> = {
-    fetchAllExcept: (knownIds, onFavoritesFound) => {
-      (sources.remotePages ?? [])
-        .map(page => page.filter(post => !knownIds.has(post.id)))
-        .filter(page => page.length > 0)
-        .forEach(onFavoritesFound);
+  const findRemovedCalls: [string[], number][] = [];
+  const refreshedPosts: Post[] = [];
+  const remoteFavorites: Pick<RemoteFavorites, "fetchAll" | "findNew" | "findRemoved"> = {
+    fetchAll: (onFavoritesFound) => {
+      (sources.remotePages ?? []).forEach(onFavoritesFound);
       return Promise.resolve();
+    },
+    findNew: () => Promise.resolve(sources.newPosts ?? []),
+    findRemoved: (localIds, remoteStart) => {
+      findRemovedCalls.push([[...localIds], remoteStart]);
+      return Promise.resolve(sources.removedIds ?? []);
     }
   };
   const postLibrary: PostLibrary = {
     streamAll: (ids, _batchSize, onBatch) => {
-      ids.forEach(id => onBatch(stored.filter(post => post.id === id)));
+      ids.forEach(id => onBatch(local.filter(post => post.id === id)));
       return Promise.resolve();
     },
-    storeMissing: posts => {
-      log.push(`storeMissing:${idsOf(posts)}`);
-      return sources.stores ?? Promise.resolve();
+    adopt: async posts => {
+      log.push(`adopt:${idsOf(posts)}`);
+      await sources.stores;
+      return posts.map(post => sources.stored?.find(stored => stored.id === post.id) ?? post);
     },
     refreshAll: posts => {
       log.push(`refreshAll:${idsOf(posts)}`);
+      refreshedPosts.push(...posts);
       return new Promise(() => { });
     }
   };
@@ -117,8 +129,8 @@ async function setup(sources: { stored?: Post[]; remotePages?: Post[][]; stores?
     onPlaceholderFilled: favorite => filledPlaceholders.push(favorite.id)
   });
 
-  await localFavorites.prepend(stored.map(post => post.id));
-  return { loader, log, collection, localFavorites, localTagCategories, scheduler, searcherUpdates, filledPlaceholders };
+  await localFavorites.prepend(local.map(post => post.id));
+  return { loader, log, collection, localFavorites, localTagCategories, scheduler, searcherUpdates, filledPlaceholders, findRemovedCalls, refreshedPosts };
 }
 
 function flushPromises(): Promise<void> {
@@ -126,49 +138,59 @@ function flushPromises(): Promise<void> {
 }
 
 describe("FavoritesLoader", () => {
-  describe("streamStored", () => {
-    test("appends each stored batch in stored order and reports its posts", async() => {
-      const batches: string[] = [];
-      const { loader, collection } = await setup({ stored: createPosts("1", "2") });
+  describe("streamLocal", () => {
+    test("appends each local batch in local order and reports progress against the local total", async() => {
+      const progress: LoadProgress[] = [];
+      const { loader, collection } = await setup({ local: createPosts("1", "2") });
 
-      await loader.streamStored(posts => batches.push(idsOf(posts)));
+      await loader.streamLocalFavorites(update => progress.push(update));
 
-      expect(batches).toEqual(["1", "2"]);
+      expect(progress).toEqual([{ loaded: 0, total: 2 }, { loaded: 1, total: 2 }, { loaded: 2, total: 2 }]);
       expect(idsOf(collection.favorites)).toBe("1,2");
     });
 
-    test("refreshes every stored post once, after streaming, without waiting", async() => {
-      const { loader, log } = await setup({ stored: createPosts("1", "2") });
+    test("refreshes every local post once, after streaming, without waiting", async() => {
+      const { loader, log } = await setup({ local: createPosts("1", "2") });
 
-      await loader.streamStored(() => { });
+      await loader.streamLocalFavorites(() => { });
 
       expect(log).toEqual(["append:1", "append:2", "refreshAll:1,2"]);
     });
   });
 
   describe("fetchAll", () => {
-    test("adds each page to the collection and searcher, stores it, reports it, then refreshes it", async() => {
+    test("adopts each page, adds it to the collection and searcher, reports it, then refreshes it", async() => {
       const { loader, log } = await setup({ remotePages: [createPosts("1", "2")] });
 
-      await loader.fetchAll(() => { });
+      await loader.fetchAllFavorites(() => { });
 
-      expect(log).toEqual(["appendDirty:1,2", "add:1,2", "storeMissing:1,2", "appendResults:1,2", "refreshAll:1,2"]);
+      expect(log).toEqual(["adopt:1,2", "appendDirty:1,2", "add:1,2", "appendResults:1,2", "refreshAll:1,2"]);
     });
 
     test("reports only the favorites that match the current search", async() => {
       const found: string[] = [];
       const { loader } = await setup({ remotePages: [createPosts("1", "2"), createPosts("3")] });
 
-      await loader.fetchAll(results => found.push(idsOf(results)));
+      await loader.fetchAllFavorites(results => found.push(idsOf(results)));
 
       expect(found).toEqual(["1", "3"]);
     });
 
-    test("resolves only once every page is stored, and refreshes a page only after storing it", async() => {
+    test("shows and refreshes the stored copy of a post that was already stored", async() => {
+      const stored = createPost({ id: "1", tags: "a b", fetchedAt: 1 });
+      const { loader, collection, refreshedPosts } = await setup({ remotePages: [[createPost({ id: "1", tags: "a" })]], stored: [stored] });
+
+      await loader.fetchAllFavorites(() => { });
+
+      expect(collection.get("1")?.tags).toEqual(new Set(["a", "b"]));
+      expect(refreshedPosts).toEqual([stored]);
+    });
+
+    test("resolves only once every page is adopted, and refreshes a page only after adopting it", async() => {
       const stores = Promise.withResolvers<void>();
       const { loader, log } = await setup({ remotePages: [createPosts("1")], stores: stores.promise });
       let resolved = false;
-      const fetching = loader.fetchAll(() => { }).then(() => {
+      const fetching = loader.fetchAllFavorites(() => { }).then(() => {
         resolved = true;
       });
 
@@ -182,41 +204,87 @@ describe("FavoritesLoader", () => {
     });
   });
 
-  describe("fetchNew", () => {
-    test("fetches only favorites missing from the collection and returns them", async() => {
-      const { loader } = await setup({ stored: createPosts("1"), remotePages: [createPosts("2", "3", "1")] });
+  describe("pullNew", () => {
+    test("stores the new favorites' ids ahead of the local ones, moving re-favorites to the front", async() => {
+      const { loader, localFavorites } = await setup({ local: createPosts("1", "2", "3"), newPosts: createPosts("4", "2") });
 
-      await loader.streamStored(() => { });
+      await loader.streamLocalFavorites(() => { });
 
-      expect(idsOf(await loader.fetchNew())).toBe("2,3");
+      expect(await loader.pullNewFavorites()).toMatchObject({ prependedCount: 2 });
+      expect(await localFavorites.getAll()).toEqual(["4", "2", "1", "3"]);
     });
 
-    test("prepends new favorites, adds them to the searcher, and stores them before refreshing", async() => {
-      const { loader, log, collection } = await setup({ stored: createPosts("1"), remotePages: [createPosts("2"), createPosts("3")] });
+    test("adopts only never-stored favorites, then prepends them, adds them to the searcher, and refreshes them", async() => {
+      const { loader, log, collection } = await setup({ local: createPosts("1", "2"), newPosts: createPosts("3", "2") });
 
-      await loader.streamStored(() => { });
+      await loader.streamLocalFavorites(() => { });
       log.length = 0;
-      await loader.fetchNew();
+      const { addedFavorites } = await loader.pullNewFavorites();
 
-      expect(idsOf(collection.favorites)).toBe("2,3,1");
-      expect(log).toEqual(["prependDirty:2,3", "add:2,3", "storeMissing:2,3", "refreshAll:2,3"]);
+      expect(idsOf(addedFavorites)).toBe("3");
+      expect(idsOf(collection.favorites)).toBe("3,1,2");
+      expect(log).toEqual(["adopt:3", "prependDirty:3", "add:3", "refreshAll:3"]);
+    });
+
+    test("marks only the never-stored favorites as new", async() => {
+      const { loader, collection } = await setup({ local: createPosts("1", "2"), newPosts: createPosts("3", "2") });
+
+      await loader.streamLocalFavorites(() => { });
+      await loader.pullNewFavorites();
+
+      expect(collection.favorites.filter(favorite => favorite.isNew).map(favorite => favorite.id)).toEqual(["3"]);
+    });
+
+    test("shows and refreshes the stored copy of a re-favorite no longer in the local list", async() => {
+      const stored = createPost({ id: "2", tags: "a b", fetchedAt: 1 });
+      const { loader, collection, refreshedPosts } = await setup({ local: createPosts("1"), newPosts: [createPost({ id: "2", tags: "a" })], stored: [stored] });
+
+      await loader.streamLocalFavorites(() => { });
+      refreshedPosts.length = 0;
+      await loader.pullNewFavorites();
+
+      expect(collection.get("2")?.tags).toEqual(new Set(["a", "b"]));
+      expect(refreshedPosts).toEqual([stored]);
     });
 
     test("touches nothing when there are no new favorites", async() => {
-      const { loader, log } = await setup();
+      const { loader, log, localFavorites } = await setup({ local: createPosts("1") });
 
-      expect(await loader.fetchNew()).toEqual([]);
+      await loader.streamLocalFavorites(() => { });
+      log.length = 0;
+
+      expect(await loader.pullNewFavorites()).toEqual({ addedFavorites: [], prependedCount: 0 });
+      expect(log).toEqual([]);
+      expect(await localFavorites.getAll()).toEqual(["1"]);
+    });
+  });
+
+  describe("pruneRemoved", () => {
+    test("looks for removals in the local list below the new favorites", async() => {
+      const { loader, findRemovedCalls } = await setup({ local: createPosts("4", "1", "2") });
+
+      await loader.pruneRemovedFavorites(1);
+
+      expect(findRemovedCalls).toEqual([[["1", "2"], 1]]);
+    });
+
+    test("deletes the removed favorites from the local list only and reports how many", async() => {
+      const { loader, log, localFavorites } = await setup({ local: createPosts("1", "2", "3"), removedIds: ["1", "3"] });
+
+      expect(await loader.pruneRemovedFavorites(0)).toBe(2);
+      expect(await localFavorites.getAll()).toEqual(["2"]);
       expect(log).toEqual([]);
     });
   });
 
-  describe("storeMembership", () => {
-    test("stores the favorites' ids ahead of the stored ones", async() => {
-      const { loader, localFavorites } = await setup({ stored: createPosts("1") });
+  describe("persistMembership", () => {
+    test("persists the collection's ids in order", async() => {
+      const { loader, localFavorites } = await setup({ remotePages: [createPosts("1", "2")] });
 
-      await loader.storeMembership([createFavorite(createPost({ id: "2" }))]);
+      await loader.fetchAllFavorites(() => { });
+      await loader.persistFavoritesMembership();
 
-      expect(await localFavorites.getAll()).toEqual(["2", "1"]);
+      expect(await localFavorites.getAll()).toEqual(["1", "2"]);
     });
   });
 
@@ -224,26 +292,26 @@ describe("FavoritesLoader", () => {
     test("stores the refreshed post's tag categories", async() => {
       const { loader, localTagCategories } = await setup();
 
-      loader.applyRefreshed({ post: createPost(), tagCategories: new Map([["alice", "artist"]]) });
+      loader.applyRefreshedPost({ post: createPost(), tagCategories: new Map([["alice", "artist"]]) });
       await flushPromises();
 
       expect(await localTagCategories.getMany(["alice"])).toEqual(new Map([["alice", "artist"]]));
     });
 
     test("copies the refreshed post onto its favorite", async() => {
-      const { loader, collection } = await setup({ stored: [createPost({ id: "1", tags: "a" })] });
+      const { loader, collection } = await setup({ local: [createPost({ id: "1", tags: "a" })] });
 
-      await loader.streamStored(() => { });
-      loader.applyRefreshed({ post: createPost({ id: "1", tags: "a b" }), tagCategories: new Map() });
+      await loader.streamLocalFavorites(() => { });
+      loader.applyRefreshedPost({ post: createPost({ id: "1", tags: "a b" }), tagCategories: new Map() });
 
       expect(collection.get("1")?.tags).toEqual(new Set(["a", "b"]));
     });
 
     test("updates the searcher with the changed tags once the update delay passes", async() => {
-      const { loader, collection, scheduler, searcherUpdates } = await setup({ stored: [createPost({ id: "1", tags: "a" })] });
+      const { loader, collection, scheduler, searcherUpdates } = await setup({ local: [createPost({ id: "1", tags: "a" })] });
 
-      await loader.streamStored(() => { });
-      loader.applyRefreshed({ post: createPost({ id: "1", tags: "a b" }), tagCategories: new Map() });
+      await loader.streamLocalFavorites(() => { });
+      loader.applyRefreshedPost({ post: createPost({ id: "1", tags: "a b" }), tagCategories: new Map() });
       scheduler.advance(SEARCHER_UPDATE_DELAY - 1);
       expect(searcherUpdates).toEqual([]);
 
@@ -252,30 +320,30 @@ describe("FavoritesLoader", () => {
     });
 
     test("leaves the searcher alone when the tags did not change", async() => {
-      const { loader, scheduler, searcherUpdates } = await setup({ stored: [createPost({ id: "1", tags: "a" })] });
+      const { loader, scheduler, searcherUpdates } = await setup({ local: [createPost({ id: "1", tags: "a" })] });
 
-      await loader.streamStored(() => { });
-      loader.applyRefreshed({ post: createPost({ id: "1", tags: "a", score: 9 }), tagCategories: new Map() });
+      await loader.streamLocalFavorites(() => { });
+      loader.applyRefreshedPost({ post: createPost({ id: "1", tags: "a", score: 9 }), tagCategories: new Map() });
       scheduler.advance(SEARCHER_UPDATE_DELAY);
 
       expect(searcherUpdates).toEqual([]);
     });
 
     test("reports a placeholder once its post arrives", async() => {
-      const { loader, filledPlaceholders } = await setup({ stored: [createPost({ id: "1", media: { kind: "image", locator: "" } })] });
+      const { loader, filledPlaceholders } = await setup({ local: [createPost({ id: "1", media: { kind: "image", locator: "" } })] });
 
-      await loader.streamStored(() => { });
-      loader.applyRefreshed({ post: createPost({ id: "1", media: { kind: "image", locator: "1/a.jpg" } }), tagCategories: new Map() });
+      await loader.streamLocalFavorites(() => { });
+      loader.applyRefreshedPost({ post: createPost({ id: "1", media: { kind: "image", locator: "1/a.jpg" } }), tagCategories: new Map() });
 
       expect(filledPlaceholders).toEqual(["1"]);
     });
 
     test("does not report a refreshed favorite that was never a placeholder", async() => {
       const media = { kind: "image", locator: "1/a.jpg" } as const;
-      const { loader, filledPlaceholders } = await setup({ stored: [createPost({ id: "1", media })] });
+      const { loader, filledPlaceholders } = await setup({ local: [createPost({ id: "1", media })] });
 
-      await loader.streamStored(() => { });
-      loader.applyRefreshed({ post: createPost({ id: "1", media, score: 9 }), tagCategories: new Map() });
+      await loader.streamLocalFavorites(() => { });
+      loader.applyRefreshedPost({ post: createPost({ id: "1", media, score: 9 }), tagCategories: new Map() });
 
       expect(filledPlaceholders).toEqual([]);
     });
@@ -283,7 +351,7 @@ describe("FavoritesLoader", () => {
     test("still stores the tag categories of a post no longer in the collection", async() => {
       const { loader, localTagCategories, searcherUpdates, scheduler } = await setup();
 
-      loader.applyRefreshed({ post: createPost({ id: "9", tags: "alice" }), tagCategories: new Map([["alice", "artist"]]) });
+      loader.applyRefreshedPost({ post: createPost({ id: "9", tags: "alice" }), tagCategories: new Map([["alice", "artist"]]) });
       await flushPromises();
       scheduler.advance(SEARCHER_UPDATE_DELAY);
 

@@ -1,5 +1,5 @@
 import { AppMode, ColorScheme } from "@/core/boundary/environment";
-import { HostPage } from "@/core/boundary/ports/host_page";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 
 const TAKE_OVERS: Record<AppMode, (rule34: Pick<Rule34Client, "clearNativePage">) => void> = {

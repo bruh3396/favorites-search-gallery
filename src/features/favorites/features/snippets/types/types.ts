@@ -1,5 +1,5 @@
 import { Favorite } from "@/types/favorite";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 
 export interface SnippetsDependencies {
   appendToSearch: (text: string) => void;

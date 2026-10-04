@@ -1,6 +1,7 @@
 .fsg-Stepper {
   display: inline-flex;
   flex: none;
+  block-size: var(--fsg-control-size-medium);
   overflow: hidden;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-medium);
@@ -15,7 +16,7 @@
 .fsg-Stepper-input {
   inline-size: 6ch;
   margin: 0;
-  padding: 4px 8px;
+  padding: 0 8px;
   border: 0;
   border-inline: 1px solid var(--fsg-color-outline);
   background: none;
@@ -23,7 +24,7 @@
   font: inherit;
   font-size: var(--fsg-font-size-label);
   font-variant-numeric: tabular-nums;
-  line-height: 1.4;
+  line-height: 1;
   text-align: center;
   appearance: textfield;
 }
@@ -68,8 +69,12 @@
   cursor: not-allowed;
 }
 
+.fsg-Stepper[data-size="small"] {
+  block-size: var(--fsg-control-size-small);
+}
+
 .fsg-Stepper[data-size="small"] .fsg-Stepper-input {
-  padding: 2px 6px;
+  padding: 0 6px;
   font-size: var(--fsg-font-size-label-small);
 }
 

@@ -12,7 +12,7 @@ export class PostListNavigatorPostActionFlow extends PostListNavigatorFlow {
     }
     handleActionBarClick(event.originalEvent, {
       onFavoriteAdded: (id) => {
-        this.context.ports.remoteFavorites.add(id);
+        this.context.ports.remoteFavoriteActions.add(id);
         this.context.events.app.favoriteAdded.emit(id);
       },
       onFavoriteRemoved: doNothing,

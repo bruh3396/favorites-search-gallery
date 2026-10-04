@@ -1,9 +1,9 @@
 import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { RetryPolicy, retry } from "@/core/utils/async/retry";
-import { RandomSource } from "@/core/boundary/ports/random_source";
-import { RemotePosts } from "@/core/boundary/ports/remote_posts";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Rule34Client } from "@/adapters/rule34/client/client";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemotePostsDependencies {

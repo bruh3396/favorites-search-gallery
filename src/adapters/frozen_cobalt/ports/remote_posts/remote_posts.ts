@@ -1,11 +1,11 @@
 import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { FrozenCobaltError, isTransient } from "@/adapters/frozen_cobalt/client/error";
 import { FrozenCobaltMintMedia, decodePost } from "@/adapters/frozen_cobalt/client/decoder";
-import { PostUnavailableError, RemotePosts } from "@/core/boundary/ports/remote_posts";
+import { PostUnavailableError, RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { RetryPolicy, retry } from "@/core/utils/async/retry";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
-import { RandomSource } from "@/core/boundary/ports/random_source";
-import { Scheduler } from "@/core/boundary/ports/scheduler";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { assertNever } from "@/core/utils/guards/guards";
 
 export interface FrozenCobaltRemotePostsDependencies {

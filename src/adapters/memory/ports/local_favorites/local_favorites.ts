@@ -1,4 +1,4 @@
-import { LocalFavorites } from "@/core/boundary/ports/local_favorites";
+import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 
 export class MemoryLocalFavorites implements LocalFavorites {
   private ids: string[] = [];

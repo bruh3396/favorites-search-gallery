@@ -1,6 +1,7 @@
 import { AppMode, Pointer } from "@/core/boundary/environment";
 import { FavoritesFeatures, FavoritesFeaturesDependencies } from "@/features/favorites/features/features";
 import { AppContext } from "@/app/context/context";
+import { Favorite } from "@/types/favorite";
 import { FavoritesControl } from "@/features/favorites/control/control";
 import { FavoritesFlows } from "@/features/favorites/flows/flows";
 import { FavoritesModel } from "@/features/favorites/model/model";
@@ -40,7 +41,7 @@ function startOnFavoritesPage(context: AppContext): void {
   const view = new FavoritesView({ linksToPostPage }, { context, shell });
   const model = new FavoritesModel(context, {
     onSearchResultsChanged: context.events.favorites.searchResultsUpdated.emit,
-    onPlaceholderFilled: favorite => view.redrawThumb(favorite)
+    onPlaceholderFilled: (favorite: Favorite): void => view.redrawThumb(favorite)
   });
   const offersTutorial = context.environment.pointer === "touch";
   const control = new FavoritesControl({ offersTutorial }, { context, shell });
@@ -122,7 +123,6 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.favorites.clearButtonClicked.on(() => control.clearSearch());
   events.favorites.shuffleButtonClicked.on(() => flows.search.shuffleSearchResults());
   events.favorites.invertButtonClicked.on(() => flows.search.invertSearchResults());
-  events.favorites.reconcileButtonClicked.on(() => flows.action.reconcile());
   events.favorites.settingsResetRequested.on(() => flows.action.resetSettings());
   events.favorites.searchRequested.on((query) => flows.search.searchFavorites(query));
   events.favorites.postListRequested.on((query) => flows.search.openPostList(query));

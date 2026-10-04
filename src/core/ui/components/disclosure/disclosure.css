@@ -1,0 +1,57 @@
+.fsg-Disclosure {
+  display: flex;
+  flex-direction: column;
+}
+
+.fsg-Disclosure-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  inline-size: 100%;
+  padding: 8px;
+  font-size: var(--fsg-font-size-label);
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.fsg-Disclosure[data-size="small"] .fsg-Disclosure-trigger {
+  padding: 6px 8px;
+  font-size: var(--fsg-font-size-label-small);
+}
+
+.fsg-Disclosure-trigger:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 2px;
+}
+
+.fsg-Disclosure-trigger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.fsg-Disclosure-title {
+  min-inline-size: 0;
+}
+
+/* A chevron drawn from two borders: pointing down when closed, up when open. */
+.fsg-Disclosure-icon {
+  flex: none;
+  inline-size: 7px;
+  block-size: 7px;
+  margin-block-end: 3px;
+  border-inline-end: 1.5px solid var(--fsg-color-on-surface-muted);
+  border-block-end: 1.5px solid var(--fsg-color-on-surface-muted);
+  transform: rotate(45deg);
+  transition: transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Disclosure-trigger[aria-expanded="true"] .fsg-Disclosure-icon {
+  margin-block: 3px 0;
+  transform: rotate(-135deg);
+}
+
+.fsg-Disclosure-content[hidden] {
+  display: none;
+}

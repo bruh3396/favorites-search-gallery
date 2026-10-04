@@ -110,11 +110,6 @@
       "count": 3
     }
   },
-  "src/features/favorites/flows/display/paginated_display.ts": {
-    "@typescript-eslint/max-params": {
-      "count": 1
-    }
-  },
   "src/features/favorites/flows/flows.ts": {
     "@typescript-eslint/max-params": {
       "count": 1

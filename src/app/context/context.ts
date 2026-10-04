@@ -3,6 +3,7 @@ import { Milestones, createMilestones } from "@/app/context/milestones";
 import { DomEvents } from "@/app/context/dom_events";
 import { Environment } from "@/core/boundary/environment";
 import { FeatureBridge } from "@/app/context/feature_bridge";
+import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
 import { Features } from "@/core/context/features";
 import { Ports } from "@/core/boundary/ports/ports";
 import { Preferences } from "@/app/context/preferences";
@@ -39,5 +40,9 @@ export function createAppContext(
   const featureBridge = new FeatureBridge(environment);
   const domEvents = new DomEvents();
   const shell = new Shell();
-  return { environment, ports, preferences, features, events, milestones, featureBridge, domEvents, shell };
+  const remoteFavoriteActions = new GatedRemoteFavoriteActions({
+    remoteFavoriteActions: ports.remoteFavoriteActions,
+    isOpen: (): boolean => !environment.ownsFavorites || milestones.favorites.favoritesLoaded.reached
+  });
+  return { environment, ports: { ...ports, remoteFavoriteActions }, preferences, features, events, milestones, featureBridge, domEvents, shell };
 }

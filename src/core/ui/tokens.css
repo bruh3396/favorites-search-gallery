@@ -14,9 +14,12 @@
   --fsg-radius-medium: 8px;
   --fsg-radius-full: 999px;
 
+  --fsg-control-size-medium: 28px;
+  --fsg-control-size-small: 24px;
+
   --fsg-font-family: system-ui, sans-serif;
-  --fsg-font-size-label: 13px;
-  --fsg-font-size-label-small: 11px;
+  --fsg-font-size-label: 14px;
+  --fsg-font-size-label-small: 12px;
 
   --fsg-motion-duration-short: 150ms;
   --fsg-motion-easing-standard: ease;

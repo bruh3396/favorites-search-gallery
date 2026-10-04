@@ -255,7 +255,7 @@ describe("FavoritesView", () => {
     test("reports loading progress", () => {
       const { view, shell } = setup();
 
-      view.setLoadProgress(25, 100);
+      view.setLoadProgress({ loaded: 25, total: 100 });
       expect(shell.toolbar.loadStatus.textContent).toBe("Loading favorites - 25 / 100");
     });
   });
