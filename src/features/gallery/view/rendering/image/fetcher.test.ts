@@ -2,9 +2,9 @@ import { ImageRequest, LowResolutionImageRequest } from "@/features/gallery/type
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { GalleryImageFetcher } from "@/features/gallery/view/rendering/image/fetcher";
 import { Media } from "@/core/domain/media/media";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
-const ITEM: PostMedia = { id: "7", media: { kind: "video", locator: "7" } };
+const ITEM: MediaItem = { id: "7", media: { kind: "video", locator: "7" } };
 const IMAGE = new Blob(["image"]);
 
 interface Setup {

@@ -2,7 +2,7 @@ import { Archiver, Filenamer } from "@/features/favorites/features/downloader/ty
 import { ConcurrencyLimiter } from "@/lib/async/rate_limiting";
 import { DownloaderZipWriter } from "@/features/favorites/features/downloader/model/zip_writer";
 import { Media } from "@/core/domain/media/media";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { extensionOfMimeType } from "@/utils/pure/mime";
 
@@ -35,7 +35,7 @@ export class DownloaderArchiver implements Archiver {
     this.fetchOriginal = fetchOriginal;
   }
 
-  public async archive(items: PostMedia[], signal: AbortSignal, onItemSettled: (filename: string | null) => void): Promise<Blob | null> {
+  public async archive(items: MediaItem[], signal: AbortSignal, onItemSettled: (filename: string | null) => void): Promise<Blob | null> {
     const limiter = new ConcurrencyLimiter(CONCURRENCY);
     const zipWriter = new DownloaderZipWriter();
     const tagsById = await this.getTagsForIds(items.map(item => item.id));
@@ -64,7 +64,7 @@ export class DownloaderArchiver implements Archiver {
     return zipWriter.finish();
   }
 
-  private async addToArchive(item: PostMedia, { zipWriter, tagsById, tagCategories, signal }: ArchiveRun): Promise<string> {
+  private async addToArchive(item: MediaItem, { zipWriter, tagsById, tagCategories, signal }: ArchiveRun): Promise<string> {
     const blob = await this.fetchOriginal(item.media, signal);
     const tags = tagsById.get(item.id) ?? new Set<string>();
     const filename = this.filenamer.filenameFor(item, { tags, extension: extensionOfMimeType(blob.type), tagCategories });

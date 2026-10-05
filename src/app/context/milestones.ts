@@ -1,4 +1,4 @@
-import { Milestone } from "@/core/utils/async/milestone";
+import { Milestone } from "@/core/utils/reactive/milestone";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 
 export type Milestones = ReturnType<typeof createMilestones>;

@@ -1,5 +1,5 @@
 import { EnhancedKeyboardEvent, EnhancedMouseEvent, EnhancedWheelEvent } from "@/lib/event/input";
-import { Emitter } from "@/lib/event/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import { Environment } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
 import { FeatureBridge } from "@/app/context/feature_bridge";

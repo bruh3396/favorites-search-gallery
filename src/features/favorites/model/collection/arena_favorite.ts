@@ -1,4 +1,4 @@
-﻿import { Arena } from "@/features/favorites/types/types";
+import { Arena } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { Media } from "@/core/domain/media/media";
 import { Metric, Post } from "@/core/domain/post/post";

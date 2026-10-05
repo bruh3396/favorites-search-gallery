@@ -1,5 +1,5 @@
 import { GalleryConfig } from "@/config/gallery_config";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Renderer } from "@/features/gallery/types/types";
 import { createElement } from "@/utils/browser/element";
@@ -25,7 +25,7 @@ export class GalleryGifRenderer implements Renderer {
     this.root = createElement("div", { id: "gif-container", className: "gallery-image-frame", children: [this.gif] });
   }
 
-  public render(item: PostMedia): void {
+  public render(item: MediaItem): void {
     this.root.style.visibility = "visible";
     this.gif.src = "";
     this.shownId = item.id;
@@ -38,7 +38,7 @@ export class GalleryGifRenderer implements Renderer {
     this.shownId = undefined;
   }
 
-  public async cache(items: PostMedia[]): Promise<void> {
+  public async cache(items: MediaItem[]): Promise<void> {
     if (!GalleryConfig.gifPreloadingEnabled) {
       return;
     }
@@ -54,7 +54,7 @@ export class GalleryGifRenderer implements Renderer {
     }
   }
 
-  private async show(item: PostMedia): Promise<void> {
+  private async show(item: MediaItem): Promise<void> {
     const url = await this.remoteMedia.resolveOriginalUrl(item.media);
 
     if (this.shownId === item.id) {

@@ -1,5 +1,5 @@
 import { FilenameCategory, FilenameParts } from "@/features/favorites/features/downloader/types/types";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 const TAG_SEPARATOR = " ";
@@ -8,7 +8,7 @@ const MAX_LENGTH = 200;
 const STRIPPED_CHARACTERS = /[<>:"/\\|?*' -]/g;
 const TRAILING_QUALIFIER = /_\([^)]*\)$/;
 
-export function build(item: PostMedia, { tags, extension, tagCategories }: FilenameParts, categories: FilenameCategory[]): string {
+export function build(item: MediaItem, { tags, extension, tagCategories }: FilenameParts, categories: FilenameCategory[]): string {
   const segments: string[] = categories
     .map(category => buildCategorySegment(tags, category, tagCategories))
     .filter(segment => segment !== "");

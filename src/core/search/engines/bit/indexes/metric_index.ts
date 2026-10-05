@@ -1,7 +1,7 @@
-﻿import { MetricComparator } from "@/core/search/searchable";
-import { Metric } from "@/core/domain/post/post";
 import { BitSet } from "@/core/search/engines/bit/postings/bitset";
 import { DensePosting } from "@/core/search/engines/bit/postings/posting";
+import { Metric } from "@/core/domain/post/post";
+import { MetricComparator } from "@/core/search/searchable";
 import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { findFirstIndexWhere } from "@/core/utils/collection/array";
 

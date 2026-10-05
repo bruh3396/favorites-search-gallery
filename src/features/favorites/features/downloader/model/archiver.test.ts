@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { DownloaderArchiver } from "@/features/favorites/features/downloader/model/archiver";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 interface Setup {
@@ -11,7 +11,7 @@ interface Setup {
   categoryRequests: string[][];
 }
 
-function createItem(id: string, type = "image/png"): PostMedia {
+function createItem(id: string, type = "image/png"): MediaItem {
   return { id, media: { kind: "image", locator: `${id}|${type}` } };
 }
 
@@ -67,7 +67,7 @@ async function readEntryNames(blob: Blob): Promise<string[]> {
 
 async function archive(
   archiver: DownloaderArchiver,
-  items: PostMedia[],
+  items: MediaItem[],
   signal = new AbortController().signal
 ): Promise<{ blob: Blob | null; settled: (string | null)[] }> {
   const settled: (string | null)[] = [];

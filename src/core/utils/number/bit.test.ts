@@ -1,5 +1,32 @@
-import { bitWidth, packIntArray, readPackedInt } from "@/core/utils/number/bit";
+import { bitWidth, hashInt, packIntArray, readPackedInt } from "@/core/utils/number/bit";
 import { describe, expect, test } from "vitest";
+
+describe("hashInt", () => {
+  test("returns the same hash for the same value and seed", () => {
+    expect(hashInt(12_345, 99)).toBe(hashInt(12_345, 99));
+  });
+
+  test("returns an unsigned 32-bit integer", () => {
+    for (const value of [0, 1, 2 ** 31, (2 ** 32) - 1]) {
+      const hash = hashInt(value, 7);
+
+      expect(Number.isInteger(hash) && hash >= 0 && hash < 2 ** 32).toBe(true);
+    }
+  });
+
+  test("never hashes distinct values to the same hash under one seed", () => {
+    const hashes = new Set(Array.from({ length: 10_000 }, (_, value) => hashInt(value, 42)));
+
+    expect(hashes.size).toBe(10_000);
+  });
+
+  test("orders the same values differently under a different seed", () => {
+    const values = Array.from({ length: 20 }, (_, value) => value);
+    const orderBySeed = (seed: number): number[] => values.toSorted((a, b) => hashInt(a, seed) - hashInt(b, seed));
+
+    expect(orderBySeed(1)).not.toEqual(orderBySeed(2));
+  });
+});
 
 describe("bitWidth", () => {
   test("returns 0 for a count of 1 or fewer distinct values", () => {

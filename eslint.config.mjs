@@ -415,12 +415,21 @@ export default defineConfig([
         {
           selector: "variable",
           types: ["boolean"],
+          filter: {
+            regex: "(Changed|Enabled|Disabled|Visible|Hidden|Loaded|Ready|Done|Open|Active|Selected|Pending|Allowed|Required|Found|Empty|Valid)$",
+            match: true
+          },
+          format: ["camelCase"]
+        },
+        {
+          selector: "variable",
+          types: ["boolean"],
           format: ["PascalCase"],
           prefix: [
             "is", "has", "should", "can", "was", "did", "will", "must", "on",
             "using", "requires", "needs", "allows", "in", "are", "supports",
             "overflows", "includes", "contains", "exceeds", "matches", "offers", "links",
-            "favorited"
+            "favorited", "owns"
           ]
         },
         { selector: "parameter", format: ["camelCase"], leadingUnderscore: "allow" },

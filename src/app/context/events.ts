@@ -1,8 +1,8 @@
-import { Emitter } from "@/lib/event/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/types/favorite";
 import { GalleryAction } from "@/types/app";
 import { NavigationKey } from "@/types/input";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
 export type Events = ReturnType<typeof createEvents>;
 
@@ -36,7 +36,7 @@ export function createEvents() {
 
     gallery: {
       galleryClosed: new Emitter<void>(),
-      itemDisplayed: new Emitter<PostMedia>(),
+      itemDisplayed: new Emitter<MediaItem>(),
       galleryMenuButtonClicked: new Emitter<GalleryAction>(),
       interactionStopped: new Emitter<void>(),
       leftTapped: new Emitter<void>(),

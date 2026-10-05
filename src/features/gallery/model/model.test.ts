@@ -4,14 +4,14 @@ import { describe, expect, test, vi } from "vitest";
 import { GalleryModel } from "@/features/gallery/model/model";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { UpscaleQuality } from "@/types/app";
 import { createPreferences } from "@/testing/preferences";
 
 interface Setup {
   model: GalleryModel;
-  items: PostMedia[];
+  items: MediaItem[];
   navigator: MemoryNavigator;
   remoteFavoriteActions: { add: ReturnType<typeof vi.fn<RemoteFavoriteActions["add"]>>; remove: ReturnType<typeof vi.fn<RemoteFavoriteActions["remove"]>> };
   blobsRequested: Media[];
@@ -27,7 +27,7 @@ function createRemoteMedia(blobsRequested: Media[]): Pick<RemoteMedia, "resolveO
   };
 }
 
-function createItem(id: string, kind: MediaKind = "image"): PostMedia {
+function createItem(id: string, kind: MediaKind = "image"): MediaItem {
   return { id, media: { kind, locator: `1/${id}.png` } };
 }
 

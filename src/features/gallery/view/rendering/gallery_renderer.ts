@@ -9,7 +9,7 @@ import { GalleryGifRenderer } from "@/features/gallery/view/rendering/gif/render
 import { GalleryImageRenderer } from "@/features/gallery/view/rendering/image/renderer";
 import { GalleryVideoRenderer } from "@/features/gallery/view/rendering/video/renderer";
 import { Point } from "@/types/geometry";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { forceReflow } from "@/utils/browser/element";
 
 export interface GalleryRendererDependencies {
@@ -48,12 +48,12 @@ export class GalleryRenderer {
     this.videoRenderer.setup(onVideoEnded, onVolumeChanged);
   }
 
-  public render(item: PostMedia): void {
+  public render(item: MediaItem): void {
     this.hide();
     this.resolve(item).render(item);
   }
 
-  public nudge(item: PostMedia, direction: BoundaryEdge): void {
+  public nudge(item: MediaItem, direction: BoundaryEdge): void {
     const renderer = this.resolve(item);
 
     if (renderer === this.videoRenderer) {
@@ -70,7 +70,7 @@ export class GalleryRenderer {
     this.renderers.forEach(renderer => renderer.hide());
   }
 
-  public cache(items: PostMedia[]): void {
+  public cache(items: MediaItem[]): void {
     this.renderers.forEach(renderer => renderer.cache(items));
   }
 
@@ -94,11 +94,11 @@ export class GalleryRenderer {
     this.imageRenderer.zoomToPoint(point);
   }
 
-  public cacheImages(items: PostMedia[]): Promise<void> {
+  public cacheImages(items: MediaItem[]): Promise<void> {
     return this.imageRenderer.cache(items);
   }
 
-  public upscale(items: PostMedia[]): Promise<void> {
+  public upscale(items: MediaItem[]): Promise<void> {
     return this.imageRenderer.upscale(items);
   }
 
@@ -138,7 +138,7 @@ export class GalleryRenderer {
     this.videoRenderer.setVideoMuted(muted);
   }
 
-  private resolve(item: PostMedia): Renderer {
+  private resolve(item: MediaItem): Renderer {
     return isVideo(item) ? this.videoRenderer : isGif(item) ? this.gifRenderer : this.imageRenderer;
   }
 }

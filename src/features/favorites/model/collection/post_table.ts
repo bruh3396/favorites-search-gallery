@@ -1,6 +1,6 @@
-import { RatingBit, RatingMask } from "@/types/search";
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { Metric, Post, Rating } from "@/core/domain/post/post";
+import { RatingBit, RatingMask } from "@/types/search";
 import { grow } from "@/core/utils/collection/array";
 
 const DEFAULT_CAPACITY = 1_024;

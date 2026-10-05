@@ -1,4 +1,4 @@
-﻿import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { RatingBit, RatingMask, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile, UpscaleQuality } from "@/types/app";

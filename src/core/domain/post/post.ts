@@ -31,4 +31,4 @@ export type CategorizedPost = {
   tagCategories: TagCategoryMap;
 };
 
-export type PostMedia = Pick<Post, "id" | "media">;
+export type MediaItem = Pick<Post, "id" | "media">;

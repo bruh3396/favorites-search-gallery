@@ -1,18 +1,18 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { Downloader } from "@/features/favorites/features/downloader/downloader";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
 interface Setup {
   container: HTMLElement;
   downloader: Downloader;
-  results: PostMedia[];
+  results: MediaItem[];
   fetched: string[];
   saved: string[];
 }
 
-function createItem(id: string): PostMedia {
+function createItem(id: string): MediaItem {
   return { id, media: { kind: "image", locator: `1/${id}.png` } };
 }
 
@@ -43,7 +43,7 @@ function setup({ hang = false } = {}): Setup {
   const downloader = new Downloader({
     batchSize: createPreference(0),
     filenameFormat: createPreference(0),
-    getSearchResults: (): PostMedia[] => results,
+    getSearchResults: (): MediaItem[] => results,
     getTagCategories: (): Promise<TagCategoryMap> => Promise.resolve(new Map()),
     getTagsForIds: (ids): Promise<Map<string, Set<string>>> => Promise.resolve(new Map(ids.map(id => [id, new Set([`tag_${id}`])]))),
     fetchOriginal: (media, signal): Promise<Blob> => {

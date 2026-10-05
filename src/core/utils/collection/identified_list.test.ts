@@ -75,6 +75,14 @@ describe("IdentifiedList", () => {
       expect(getIds(list.getAll())).toEqual(["1", "2", "3", "4"]);
     });
 
+    test("moves an item whose id it already holds to the front", () => {
+      const list = new IdentifiedList<{ id: string }>();
+
+      list.setAll(createItems("1", "2", "3"));
+      list.prepend(createItems("2"));
+      expect(getIds(list.getAll())).toEqual(["2", "1", "3"]);
+    });
+
     test("makes prepended items findable by id", () => {
       const list = new IdentifiedList<{ id: string }>();
       const zero = createItem("0");

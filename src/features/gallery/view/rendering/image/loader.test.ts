@@ -2,7 +2,7 @@ import { BudgetedRequests, ImageBudgeter, ImageFetcher } from "@/features/galler
 import { describe, expect, test } from "vitest";
 import { GalleryImageLoader } from "@/features/gallery/view/rendering/image/loader";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { flushMicrotasks } from "@/testing/async";
 
 type FetchOutcome = (request: ImageRequest) => Promise<boolean>;
@@ -14,7 +14,7 @@ interface Setup {
   respondWith: (outcome: FetchOutcome) => void;
 }
 
-function createItem(id: string): PostMedia {
+function createItem(id: string): MediaItem {
   return { id, media: { kind: "image", locator: "" } };
 }
 

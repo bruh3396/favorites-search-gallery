@@ -1,5 +1,5 @@
 import { GalleryVideoController, GalleryVideoControllerConfiguration, GalleryVideoControllerDependencies } from "@/features/gallery/view/rendering/video/video_controller";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Renderer } from "@/features/gallery/types/types";
 import { div } from "@/utils/browser/element";
 
@@ -18,7 +18,7 @@ export class GalleryVideoRenderer implements Renderer {
     this.controller.setup(this.root, onVideoEnded, onVolumeChanged);
   }
 
-  public render(item: PostMedia): void {
+  public render(item: MediaItem): void {
     this.root.style.visibility = "visible";
     this.controller.playVideo(item);
   }
@@ -28,7 +28,7 @@ export class GalleryVideoRenderer implements Renderer {
     this.controller.stopAllVideos();
   }
 
-  public cache(items: PostMedia[]): void {
+  public cache(items: MediaItem[]): void {
     this.controller.preloadVideoPlayers(items);
   }
 

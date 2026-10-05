@@ -1,7 +1,7 @@
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { AppContext } from "@/app/context/context";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
-import { Emitter } from "@/lib/event/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import { EnhancedWheelEvent } from "@/lib/event/input";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
 import { Layout } from "@/types/app";

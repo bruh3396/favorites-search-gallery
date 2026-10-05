@@ -1,6 +1,6 @@
 import { GalleryAction, Layout } from "@/types/app";
 import { ImageRequest } from "@/features/gallery/types/image_request";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
 
 export type Resolution = "3840x2160" | "7680x4320" | "1920x1080";
@@ -11,7 +11,7 @@ export type BudgetedRequests = {
 };
 
 export interface ImageBudgeter {
-  partition: (items: PostMedia[]) => BudgetedRequests;
+  partition: (items: MediaItem[]) => BudgetedRequests;
 }
 
 export interface ImageFetcher {
@@ -21,9 +21,9 @@ export interface ImageFetcher {
 
 export interface Renderer {
   root: HTMLElement;
-  render: (item: PostMedia) => void;
+  render: (item: MediaItem) => void;
   hide: () => void;
-  cache: (items: PostMedia[]) => Promise<void> | void;
+  cache: (items: MediaItem[]) => Promise<void> | void;
 }
 
 export type VideoClip = {
@@ -43,8 +43,8 @@ export interface GalleryReleasableCanvas {
 }
 
 export interface GalleryWarmTarget {
-  cacheImages: (items: PostMedia[]) => Promise<void>;
-  upscale: (items: PostMedia[]) => Promise<void>;
+  cacheImages: (items: MediaItem[]) => Promise<void>;
+  upscale: (items: MediaItem[]) => Promise<void>;
 }
 
 export interface GalleryFollowTarget {
@@ -54,7 +54,7 @@ export interface GalleryFollowTarget {
 export interface GalleryBudget {
   upscale: { paintDelay: number; canvasWidth: number };
   releaseCanvas: (canvas: GalleryReleasableCanvas) => void;
-  warm: (target: GalleryWarmTarget, items: PostMedia[]) => Promise<void>;
+  warm: (target: GalleryWarmTarget, items: MediaItem[]) => Promise<void>;
   follow: (target: GalleryFollowTarget, id: string) => void;
 }
 

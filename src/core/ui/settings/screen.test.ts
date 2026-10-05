@@ -43,6 +43,12 @@ function readLabels(element: HTMLElement): string[] {
   return [...element.querySelectorAll(".fsg-SettingRow-label")].map(label => label.textContent ?? "");
 }
 
+function readVisibleLabels(element: HTMLElement): string[] {
+  return [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow")]
+    .filter(row => !row.hidden)
+    .map(row => row.querySelector(".fsg-SettingRow-label")?.textContent ?? "");
+}
+
 describe("createSettingsScreen", () => {
   test("draws each section in layout order, its rows in the order it lists them", () => {
     const { triggers, element } = setup();
@@ -96,6 +102,44 @@ describe("createSettingsScreen", () => {
     expect(readDescriptionHiddenStates()).toEqual([true, true, true]);
     setDescriptionsVisible(true);
     expect(readDescriptionHiddenStates()).toEqual([false, false, false]);
+  });
+
+  test("shows only the rows a query matches, and only the sections holding one", () => {
+    const { element, triggers, setQuery } = setup();
+
+    setQuery("hints");
+    expect(readVisibleLabels(element)).toEqual(["hints"]);
+    expect(triggers.map(trigger => trigger.closest<HTMLElement>(".fsg-Disclosure")?.hidden)).toEqual([false, true]);
+  });
+
+  test("shows every row again when the query is cleared", () => {
+    const { element, triggers, setQuery } = setup();
+
+    setQuery("loop");
+    setQuery("  ");
+    expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
+    expect(triggers.map(trigger => trigger.closest<HTMLElement>(".fsg-Disclosure")?.hidden)).toEqual([false, false]);
+  });
+
+  test("opens every section while searching, then restores the saved open sections", () => {
+    const { triggers, setQuery } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
+    const readExpandedStates = (): (string | null)[] => triggers.map(trigger => trigger.getAttribute("aria-expanded"));
+
+    setQuery("o");
+    expect(readExpandedStates()).toEqual(["true", "true"]);
+    setQuery("");
+    expect(readExpandedStates()).toEqual(["false", "true"]);
+  });
+
+  test("toggles a section while searching without saving it, and reopens it on the next query", () => {
+    const { triggers, expanded, setQuery } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
+
+    setQuery("o");
+    triggers[0].click();
+    expect(triggers[0].getAttribute("aria-expanded")).toBe("false");
+    expect(expanded.value).toEqual(["gallery"]);
+    setQuery("oo");
+    expect(triggers[0].getAttribute("aria-expanded")).toBe("true");
   });
 
   test("stops following its preferences once disposed", () => {

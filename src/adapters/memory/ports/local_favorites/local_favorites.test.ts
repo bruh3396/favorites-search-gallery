@@ -11,6 +11,15 @@ describe("MemoryLocalFavorites", () => {
     expect(await favorites.getAll()).toEqual(["4", "3", "2", "1"]);
   });
 
+  test("replaces every id it holds when setting all", async() => {
+    const favorites = new MemoryLocalFavorites();
+
+    await favorites.prepend(["2", "1"]);
+    await favorites.setAll(["4", "3"]);
+
+    expect(await favorites.getAll()).toEqual(["4", "3"]);
+  });
+
   test("moves an id it already holds to the front", async() => {
     const favorites = new MemoryLocalFavorites();
 

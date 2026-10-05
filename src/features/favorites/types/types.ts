@@ -1,4 +1,4 @@
-﻿import { RatingMask } from "@/types/search";
+import { RatingMask } from "@/types/search";
 import { Favorite } from "@/types/favorite";
 import { Media } from "@/core/domain/media/media";
 import { NavigationKey } from "@/types/input";

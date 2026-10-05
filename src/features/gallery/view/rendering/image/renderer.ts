@@ -13,7 +13,7 @@ import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { GalleryWorkerUpscalerWrapper } from "@/features/gallery/view/rendering/image/worker_upscaler_wrapper";
 import { ImageRequest } from "@/features/gallery/types/image_request";
 import { Point } from "@/types/geometry";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { isImage } from "@/lib/media/media_type";
@@ -28,7 +28,7 @@ export class GalleryImageRenderer implements Renderer {
   private readonly loader: GalleryImageLoader;
   private readonly upscaler: GalleryAbstractUpscaler;
   private readonly canvas: GalleryImageCanvas;
-  private activeItem: PostMedia | undefined;
+  private activeItem: MediaItem | undefined;
 
   constructor(context: AppContext, favoriteFor: (id: string) => Favorite | undefined, budget: GalleryBudget) {
     const { environment, shell } = context;
@@ -44,7 +44,7 @@ export class GalleryImageRenderer implements Renderer {
     this.activeItem = undefined;
   }
 
-  public render(item: PostMedia): void {
+  public render(item: MediaItem): void {
     this.root.style.visibility = "visible";
     this.paint(item);
   }
@@ -56,7 +56,7 @@ export class GalleryImageRenderer implements Renderer {
     this.canvas.release();
   }
 
-  public async cache(items: PostMedia[]): Promise<void> {
+  public async cache(items: MediaItem[]): Promise<void> {
     await this.waitForAllThumbsToLoadWithTimeout();
     const [images, animated] = partition(items, item => isImage(item));
     const rejected = this.loader.load(images);
@@ -64,7 +64,7 @@ export class GalleryImageRenderer implements Renderer {
     this.upscaler.fetchThenPaintAll(this.disposableRequests([...animated, ...rejected]));
   }
 
-  public async upscale(items: PostMedia[]): Promise<void> {
+  public async upscale(items: MediaItem[]): Promise<void> {
     await this.waitForAllThumbsToLoadWithTimeout();
     this.upscaler.fetchThenPaintAll(this.disposableRequests(items));
   }
@@ -143,7 +143,7 @@ export class GalleryImageRenderer implements Renderer {
     return new Upscaler(configuration, dependencies);
   }
 
-  private paint(item: PostMedia): void {
+  private paint(item: MediaItem): void {
     this.activeItem = item;
     const cached = this.loader.get(item.id);
 
@@ -162,7 +162,7 @@ export class GalleryImageRenderer implements Renderer {
     }
   }
 
-  private disposableRequests(items: PostMedia[]): ImageRequest[] {
+  private disposableRequests(items: MediaItem[]): ImageRequest[] {
     return items.map(item => new ImageRequest(item, true));
   }
 

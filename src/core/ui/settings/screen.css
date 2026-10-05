@@ -3,6 +3,6 @@
   flex-direction: column;
 }
 
-.fsg-SettingsScreen > * + * {
+.fsg-SettingsScreen > :not([hidden]) ~ :not([hidden]) {
   border-block-start: 1px solid var(--fsg-color-outline);
 }

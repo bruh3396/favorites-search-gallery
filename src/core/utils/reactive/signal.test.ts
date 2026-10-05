@@ -1,4 +1,4 @@
-import { Signal, effect } from "@/core/utils/reactive/signal";
+import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
 
 function setup<T>(initial: T): { signal: Signal<T>; seen: T[] } {
@@ -110,5 +110,103 @@ describe("effect", () => {
     effect(() => seen.push(1));
     signal.value = 2;
     expect(seen).toEqual([1]);
+  });
+});
+
+describe("computed", () => {
+  test("returns what its function returns for the current inputs", () => {
+    const price = new Signal(2);
+    const quantity = new Signal(3);
+    const total = computed(() => price.value * quantity.value);
+
+    expect(total.value).toBe(6);
+    quantity.value = 10;
+    expect(total.value).toBe(20);
+  });
+
+  test("runs its function only when read", () => {
+    const signal = new Signal(1);
+    let runCount = 0;
+    const doubled = computed(() => {
+      runCount += 1;
+      return signal.value * 2;
+    });
+
+    signal.value = 2;
+    signal.value = 3;
+    expect(runCount).toBe(0);
+    expect(doubled.value).toBe(6);
+    expect(runCount).toBe(1);
+  });
+
+  test("reuses its result until an input changes", () => {
+    const signal = new Signal(1);
+    let runCount = 0;
+    const doubled = computed(() => {
+      runCount += 1;
+      return [signal.value * 2];
+    });
+    const first = doubled.value;
+
+    expect(doubled.value).toBe(first);
+    signal.value = 2;
+    expect(doubled.value).toEqual([4]);
+    expect(runCount).toBe(2);
+  });
+
+  test("reruns an effect that read it when an input changes", () => {
+    const signal = new Signal(1);
+    const doubled = computed(() => signal.value * 2);
+    const seen: number[] = [];
+
+    effect(() => seen.push(doubled.value));
+    signal.value = 2;
+    expect(seen).toEqual([2, 4]);
+  });
+
+  test("never shows an effect a stale result beside a fresh input", () => {
+    const signal = new Signal(1);
+    const doubled = computed(() => signal.value * 2);
+    const seen: number[][] = [];
+
+    effect(() => seen.push([signal.value, doubled.value]));
+    signal.value = 2;
+    expect(seen).toEqual([[1, 2], [2, 4]]);
+  });
+
+  test("feeds another computed", () => {
+    const signal = new Signal(1);
+    const doubled = computed(() => signal.value * 2);
+    const quadrupled = computed(() => doubled.value * 2);
+    const seen: number[] = [];
+
+    effect(() => seen.push(quadrupled.value));
+    signal.value = 2;
+    expect(seen).toEqual([4, 8]);
+  });
+
+  test("follows only the signals its latest run read", () => {
+    const useLeft = new Signal(true);
+    const left = new Signal("a");
+    const right = new Signal("x");
+    const chosen = computed(() => (useLeft.value ? left.value : right.value));
+    const seen: string[] = [];
+
+    effect(() => seen.push(chosen.value));
+    right.value = "y";
+    useLeft.value = false;
+    left.value = "b";
+    expect(seen).toEqual(["a", "y"]);
+  });
+
+  test("peeks without making an effect depend on it", () => {
+    const signal = new Signal(1);
+    const doubled = computed(() => signal.value * 2);
+    const seen: number[] = [];
+
+    effect(() => seen.push(doubled.peek()));
+    signal.value = 2;
+    expect(seen).toEqual([2]);
+    expect(doubled.value).toBe(4);
   });
 });

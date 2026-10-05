@@ -2,7 +2,7 @@ import * as DownloaderFilename from "@/features/favorites/features/downloader/mo
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { describe, expect, test } from "vitest";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
 const CAT = " ";
 const TAG = " ";
@@ -23,7 +23,7 @@ const CATEGORIES: TagCategoryMap = new Map(Object.entries({
 } satisfies Record<string, TagCategory>));
 
 const ALL: FilenameCategory[] = ["artist", "character", "copyright"];
-const item: PostMedia = { id: "10146816", media: { kind: "image", locator: "1/10146816.jpg" } };
+const item: MediaItem = { id: "10146816", media: { kind: "image", locator: "1/10146816.jpg" } };
 const buildFilename = (tags: string[], categories: FilenameCategory[] = ALL): string => (
   DownloaderFilename.build(item, { tags: new Set(tags), extension: "jpeg", tagCategories: CATEGORIES }, categories)
 );

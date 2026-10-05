@@ -9,7 +9,7 @@ describe("isMetric", () => {
   });
 
   test("rejects sort keys that are not metrics", () => {
-    expect(isMetric("default")).toBe(false);
+    expect(isMetric("favorited")).toBe(false);
     expect(isMetric("random")).toBe(false);
   });
 

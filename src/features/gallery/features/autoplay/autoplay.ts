@@ -5,7 +5,7 @@ import { AutoplayModel } from "@/features/gallery/features/autoplay/model/model"
 import { AutoplayShell } from "@/features/gallery/features/autoplay/shell/shell";
 import { AutoplayView } from "@/features/gallery/features/autoplay/view/view";
 import { EnhancedKeyboardEvent } from "@/lib/event/input";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
 export class Autoplay {
   private readonly flows: AutoplayFlows;
@@ -35,7 +35,7 @@ export class Autoplay {
     this.flows.player.closeGallery();
   }
 
-  public display(item: PostMedia): void {
+  public display(item: MediaItem): void {
     this.flows.player.display(item);
   }
 

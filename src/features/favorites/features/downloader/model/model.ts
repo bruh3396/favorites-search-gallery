@@ -3,7 +3,7 @@ import { DownloadOptions, DownloaderContext, DownloaderProgress, DownloaderResul
 import { DownloaderArchiver } from "@/features/favorites/features/downloader/model/archiver";
 import { DownloaderBatcher } from "@/features/favorites/features/downloader/model/batcher";
 import { DownloaderFilenamer } from "@/features/favorites/features/downloader/model/filenamer";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
 export class DownloaderModel {
   private readonly filenamer: DownloaderFilenamer;
@@ -21,7 +21,7 @@ export class DownloaderModel {
     return this.filenamer.options();
   }
 
-  public download(items: PostMedia[], options: DownloadOptions): Promise<DownloaderResult> {
+  public download(items: MediaItem[], options: DownloadOptions): Promise<DownloaderResult> {
     return this.batcher.download(items, options);
   }
 

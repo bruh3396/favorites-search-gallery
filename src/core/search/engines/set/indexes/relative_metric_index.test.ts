@@ -1,4 +1,4 @@
-﻿import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { RelativeMetricIndex } from "@/core/search/engines/set/indexes/relative_metric_index";
 import { Metric } from "@/core/domain/post/post";

@@ -6,18 +6,18 @@ interface Setup {
   store: (tagString: string) => number;
 }
 
-// A pool plus a store() that writes each tag string at the next free index and returns that index.
+// A pool plus a store() that writes each tag string at the next free slot and returns that slot.
 function setup(): Setup {
   const tagPool = new TagPool();
-  let nextIndex = 0;
+  let nextSlot = 0;
 
   function store(tagString: string): number {
-    const index = nextIndex;
+    const slot = nextSlot;
 
-    tagPool.ensureCapacity(index + 1);
-    tagPool.write(index, tagString);
-    nextIndex += 1;
-    return index;
+    tagPool.ensureCapacity(slot + 1);
+    tagPool.write(slot, tagString);
+    nextSlot += 1;
+    return slot;
   }
   return { tagPool, store };
 }
@@ -97,17 +97,17 @@ describe("TagPool", () => {
     });
   });
 
-  describe("compress", () => {
+  describe("compact", () => {
     test("unpacks a Uint32-sized vocabulary", () => {
       const { tagPool, store } = setup();
 
       storeDistinctTags(store, 65_536);
-      tagPool.compress();
-      const index = store("tag-65536 tag-0");
+      tagPool.compact();
+      const slot = store("tag-65536 tag-0");
 
       expect(tagPool.read(0)).toBe("tag-0");
       expect(tagPool.read(65_535)).toBe("tag-65535");
-      expect(tagPool.read(index)).toBe("tag-65536 tag-0");
+      expect(tagPool.read(slot)).toBe("tag-65536 tag-0");
     });
 
     test("keeps tags loadable after packing the tag ids", () => {
@@ -116,7 +116,7 @@ describe("TagPool", () => {
       const second = store("baz qux");
       const third = store("foo");
 
-      tagPool.compress();
+      tagPool.compact();
       expect(tagPool.read(first)).toBe("foo bar baz");
       expect(tagPool.read(second)).toBe("baz qux");
       expect(tagPool.read(third)).toBe("foo");
@@ -129,7 +129,7 @@ describe("TagPool", () => {
       for (let i = 0; i < 5_000; i += 1) {
         indices.push(store(`tag-${i} shared-${i % 7}`));
       }
-      tagPool.compress();
+      tagPool.compact();
 
       for (let i = 0; i < indices.length; i += 1) {
         expect(tagPool.read(indices[i])).toBe(`tag-${i} shared-${i % 7}`);
@@ -140,7 +140,7 @@ describe("TagPool", () => {
       const { tagPool, store } = setup();
       const before = store("foo bar");
 
-      tagPool.compress();
+      tagPool.compact();
       const after = store("baz qux");
 
       expect(tagPool.read(before)).toBe("foo bar");
@@ -151,25 +151,25 @@ describe("TagPool", () => {
       const { tagPool, store } = setup();
       const before = store("foo bar");
 
-      tagPool.compress();
+      tagPool.compact();
       const after = store("foo baz");
 
       expect(tagPool.read(before)).toBe("foo bar");
       expect(tagPool.read(after)).toBe("foo baz");
     });
 
-    test("keeps a mix of pre- and post-compress tags loadable after a second compress", () => {
+    test("keeps a mix of pre- and post-compact tags loadable after a second compact", () => {
       const { tagPool, store } = setup();
       const first = store("foo bar");
 
       expect(tagPool.read(first)).toBe("foo bar");
-      tagPool.compress();
+      tagPool.compact();
       expect(tagPool.read(first)).toBe("foo bar");
       const second = store("bar baz qux");
 
       expect(tagPool.read(first)).toBe("foo bar");
       expect(tagPool.read(second)).toBe("bar baz qux");
-      tagPool.compress();
+      tagPool.compact();
       expect(tagPool.read(first)).toBe("foo bar");
       expect(tagPool.read(second)).toBe("bar baz qux");
     });

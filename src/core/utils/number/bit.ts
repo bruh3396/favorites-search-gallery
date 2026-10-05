@@ -7,6 +7,14 @@ export function bitWidth(count: number): number {
   return bits;
 }
 
+export function hashInt(value: number, seed: number): number {
+  let hash = (value ^ seed) >>> 0;
+
+  hash = Math.imul(hash ^ (hash >>> 16), 0x85_eb_ca_6b);
+  hash = Math.imul(hash ^ (hash >>> 13), 0xc2_b2_ae_35);
+  return (hash ^ (hash >>> 16)) >>> 0;
+}
+
 export function packIntArray(values: Uint16Array | Uint32Array, length: number, bitsPerValue: number): Uint8Array {
   const packed = new Uint8Array(Math.ceil((length * bitsPerValue) / 8));
 

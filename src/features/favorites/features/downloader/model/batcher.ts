@@ -1,5 +1,5 @@
 import { Archiver, DownloadOptions, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { chunk } from "@/core/utils/collection/array";
 
 const ARCHIVE_NAME = "favorites";
@@ -13,7 +13,7 @@ export class DownloaderBatcher {
     this.saveBlob = saveBlob;
   }
 
-  public async download(items: PostMedia[], { batchSize, signal, onProgress }: DownloadOptions): Promise<DownloaderResult> {
+  public async download(items: MediaItem[], { batchSize, signal, onProgress }: DownloadOptions): Promise<DownloaderResult> {
     const batches = chunk(items, batchSize);
     const result: DownloaderResult = { successCount: 0, failureCount: 0, aborted: false };
 

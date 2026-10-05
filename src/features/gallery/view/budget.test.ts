@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 import { GALLERY_BUDGETS } from "@/features/gallery/view/budget";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
-const ITEMS = [{ id: "1" }] as PostMedia[];
+const ITEMS = [{ id: "1" }] as MediaItem[];
 
 interface Targets {
   canvas: { clear: () => void };

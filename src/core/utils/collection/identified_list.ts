@@ -14,8 +14,10 @@ export class IdentifiedList<T extends { id: string }> {
   }
 
   public prepend(items: T[]): void {
+    const prependedIds = new Set(items.map(item => item.id));
+
     this.index(items);
-    this.items.unshift(...items);
+    this.items = [...items, ...this.items.filter(item => !prependedIds.has(item.id))];
   }
 
   public getAll(): T[] {

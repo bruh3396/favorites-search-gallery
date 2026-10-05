@@ -1,4 +1,4 @@
-﻿import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/post";
 import { RatingMask } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { Arena } from "@/features/favorites/types/types";

@@ -1,6 +1,6 @@
 import * as DownloaderFilename from "@/features/favorites/features/downloader/model/filename_builder";
 import { FilenameCategory, FilenameParts, Filenamer } from "@/features/favorites/features/downloader/types/types";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
 import { capitalize } from "@/core/utils/string/string";
 
@@ -13,7 +13,7 @@ export class DownloaderFilenamer implements Filenamer {
     this.filenameFormat = filenameFormat;
   }
 
-  public filenameFor(item: PostMedia, parts: FilenameParts): string {
+  public filenameFor(item: MediaItem, parts: FilenameParts): string {
     return DownloaderFilename.build(item, parts, this.selectedCategories());
   }
 

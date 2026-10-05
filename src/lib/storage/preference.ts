@@ -1,5 +1,5 @@
 import { Guard, sameKindAs } from "@/core/utils/guards/guards";
-import { Emitter } from "@/lib/event/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Signal } from "@/core/utils/reactive/signal";
 

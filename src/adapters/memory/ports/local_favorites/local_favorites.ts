@@ -7,6 +7,11 @@ export class MemoryLocalFavorites implements LocalFavorites {
     return Promise.resolve([...this.ids]);
   }
 
+  public setAll(postIds: string[]): Promise<void> {
+    this.ids = [...postIds];
+    return Promise.resolve();
+  }
+
   public prepend(postIds: string[]): Promise<void> {
     const added = new Set(postIds);
 

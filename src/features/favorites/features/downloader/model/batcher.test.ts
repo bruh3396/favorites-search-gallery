@@ -1,7 +1,7 @@
 import { Archiver, DownloaderProgress } from "@/features/favorites/features/downloader/types/types";
 import { describe, expect, test } from "vitest";
 import { DownloaderBatcher } from "@/features/favorites/features/downloader/model/batcher";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
 interface Setup {
   downloader: DownloaderBatcher;
@@ -9,7 +9,7 @@ interface Setup {
   archived: string[][];
 }
 
-function createItems(count: number): PostMedia[] {
+function createItems(count: number): MediaItem[] {
   return Array.from({ length: count }, (_, index) => ({ id: String(index + 1), media: { kind: "image", locator: "" } }));
 }
 
@@ -35,7 +35,7 @@ function setup({ failing = new Set<string>(), emptyBatches = new Set<number>(), 
 
 async function download(
   downloader: DownloaderBatcher,
-  items: PostMedia[],
+  items: MediaItem[],
   { batchSize, signal = new AbortController().signal }: { batchSize: number; signal?: AbortSignal }
 ): Promise<{ result: Awaited<ReturnType<DownloaderBatcher["download"]>>; progress: DownloaderProgress[] }> {
   const progress: DownloaderProgress[] = [];

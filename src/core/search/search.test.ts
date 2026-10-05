@@ -1,9 +1,9 @@
-﻿import { FruitName, fruitDocs } from "@/core/search/testing/fruit_corpus";
+import { FruitName, fruitDocs } from "@/core/search/testing/fruit_corpus";
 import { QueryAssertion, searchCases } from "@/core/search/testing/search_cases";
-import { Searchable } from "@/core/search/searchable";
-import { Metric } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
+import { Metric } from "@/core/domain/post/post";
+import { Searchable } from "@/core/search/searchable";
 import { SetSearchEngine } from "@/core/search/engines/set/set_search_engine";
 import { parseSearchQuery } from "@/core/search/parsers/search_term_group_parser";
 

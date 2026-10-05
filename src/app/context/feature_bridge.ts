@@ -1,5 +1,5 @@
 import { GalleryState, Layout } from "@/types/app";
-import { Post, PostMedia } from "@/core/domain/post/post";
+import { Post, MediaItem } from "@/core/domain/post/post";
 import { Environment } from "@/core/boundary/environment";
 import { Favorite } from "@/types/favorite";
 import { FeatureChannel } from "@/lib/event/feature_channel";
@@ -49,7 +49,7 @@ export class FeatureBridge {
     return this.environment.mode === "postList" ? this.postList.usingInfiniteScroll.request() : this.favorites.usingInfiniteScroll.request();
   }
 
-  public postMedia(id: string): PostMedia | undefined {
+  public postMedia(id: string): MediaItem | undefined {
     return this.environment.mode === "postList" ? this.postList.post.request(id) : this.favorites.favorite.request(id);
   }
 

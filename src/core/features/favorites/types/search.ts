@@ -1,15 +1,16 @@
 import { Metric, Rating } from "@/core/domain/post/post";
 
-export type SortKey = "default" | "random" | Metric;
+export type SortKey = "favorited" | "random" | Metric;
 
-export interface SortOrder {
+export interface Sort {
   key: SortKey;
   isAscending: boolean;
 }
 
 export interface SearchCriteria {
   query: string;
-  sortOrder: SortOrder;
+  sort: Sort;
   allowedRatings: ReadonlySet<Rating>;
-  excludesBlacklist: boolean;
+  blacklistQuery: string;
+  shuffleSeed: number;
 }

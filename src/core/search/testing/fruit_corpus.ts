@@ -1,4 +1,4 @@
-﻿import { MetricSearchable } from "@/core/search/searchable";
+import { MetricSearchable } from "@/core/search/searchable";
 import { Metric } from "@/core/domain/post/post";
 import { InvertedIndex } from "@/core/search/engines/set/indexes/inverted_index";
 import { createSearchable } from "@/core/search/testing/searchable";

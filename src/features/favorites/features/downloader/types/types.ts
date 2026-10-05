@@ -1,6 +1,6 @@
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { Media } from "@/core/domain/media/media";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
 
 export type FilenameCategory = Extract<TagCategory, "artist" | "character" | "copyright">;
@@ -27,7 +27,7 @@ export interface DownloaderResult {
 export interface DownloaderDependencies {
   batchSize: Preference<number>;
   filenameFormat: Preference<number>;
-  getSearchResults: () => PostMedia[];
+  getSearchResults: () => MediaItem[];
   getTagCategories: (tagNames: string[]) => Promise<TagCategoryMap>;
   getTagsForIds: (ids: string[]) => Promise<Map<string, Set<string>>>;
   fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
@@ -55,11 +55,11 @@ export interface DownloadOptions {
 }
 
 export interface Filenamer {
-  filenameFor: (item: PostMedia, parts: FilenameParts) => string;
+  filenameFor: (item: MediaItem, parts: FilenameParts) => string;
 }
 
 export interface Archiver {
-  archive: (items: PostMedia[], signal: AbortSignal, onItemSettled: (filename: string | null) => void) => Promise<Blob | null>;
+  archive: (items: MediaItem[], signal: AbortSignal, onItemSettled: (filename: string | null) => void) => Promise<Blob | null>;
 }
 
 export interface DownloaderScene {

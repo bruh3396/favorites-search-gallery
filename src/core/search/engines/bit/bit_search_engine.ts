@@ -1,4 +1,4 @@
-﻿import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
+import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
 import { BitEvaluator } from "@/core/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/search/engines/bit/indexes/bit_index";
 import { BitSet } from "@/core/search/engines/bit/postings/bitset";

@@ -1,7 +1,7 @@
 import { CachedRequest, GalleryImageCache } from "@/features/gallery/view/rendering/image/cache";
 import { ImageBudgeter, ImageFetcher } from "@/features/gallery/types/types";
 import { ImageRequest, LowResolutionImageRequest } from "@/features/gallery/types/image_request";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
 export class GalleryImageLoader {
   private readonly cache: GalleryImageCache;
@@ -14,14 +14,14 @@ export class GalleryImageLoader {
     this.cache = new GalleryImageCache(id => fetcher.cancelFetch(id));
   }
 
-  public load(items: PostMedia[]): PostMedia[] {
+  public load(items: MediaItem[]): MediaItem[] {
     const { accepted, rejected } = this.budgeter.partition(items);
 
     this.cache.sync(accepted).forEach(request => this.runRequest(request));
     return rejected.map(request => request.item);
   }
 
-  public loadImmediate(item: PostMedia): void {
+  public loadImmediate(item: MediaItem): void {
     const request = new ImageRequest(item);
 
     this.cache.storeAsLowResolution(request);

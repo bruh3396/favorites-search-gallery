@@ -3,7 +3,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Media } from "@/core/domain/media/media";
-import { Milestone } from "@/core/utils/async/milestone";
+import { Milestone } from "@/core/utils/reactive/milestone";
 import { NavigationKey } from "@/types/input";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Shell } from "@/app/context/shell";

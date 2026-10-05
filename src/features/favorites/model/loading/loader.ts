@@ -1,4 +1,4 @@
-﻿import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { Collection, LoadProgress, PostLibrary, PulledFavorites, Searcher } from "@/features/favorites/types/types";
 import { CoalescingExecutor } from "@/core/utils/async/coalescing";
 import { Favorite } from "@/types/favorite";

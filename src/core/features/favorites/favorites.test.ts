@@ -1,0 +1,120 @@
+import { describe, expect, test } from "vitest";
+import { Favorites } from "@/core/features/favorites/types/favorites";
+import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
+import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
+import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
+import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
+import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
+import { Post } from "@/core/domain/post/post";
+import { Preference } from "@/core/utils/reactive/preference";
+import { Signal } from "@/core/utils/reactive/signal";
+import { Sort } from "@/core/features/favorites/types/search";
+import { createPost } from "@/testing/post";
+import { createSearchCriteria } from "@/core/features/favorites/testing/criteria";
+import { startFavorites } from "@/core/features/favorites/favorites";
+
+function createPreference<T>(initial: T): Preference<T> {
+  const signal = new Signal(initial);
+  return {
+    get value(): T {
+      return signal.value;
+    },
+    peek: (): T => signal.peek(),
+    set: (value: T): void => {
+      signal.value = value;
+    }
+  };
+}
+
+async function setup(posts: Post[]): Promise<{
+  favorites: Favorites;
+  remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  localFavorites: MemoryLocalFavorites;
+}> {
+  const client = new MemoryClient(posts);
+  const remoteFavoriteActions = new ObservableRemoteFavoriteActions(new MemoryRemoteFavoriteActions(client));
+  const localFavorites = new MemoryLocalFavorites();
+  const favorites = startFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
+    localFavorites,
+    localPosts: new MemoryLocalPosts(),
+    localTagCategories: new MemoryLocalTagCategories(),
+    remoteFavorites: new MemoryRemoteFavorites(client),
+    remoteFavoriteActions,
+    remotePosts: new MemoryRemotePosts(client),
+    remoteTagCategories: new MemoryRemoteTagCategories(),
+    remoteMedia: new MemoryRemoteMedia(),
+    scheduler: new MemoryScheduler(),
+    randomSource: new MemoryRandomSource(),
+    preferences: {
+      sort: createPreference<Sort>({ key: "favorited", isAscending: false }),
+      allowedRatings: createPreference(createSearchCriteria().allowedRatings),
+      isBlacklistEnabled: createPreference(false),
+      resultsPerPage: createPreference(2),
+      isInfiniteScrollEnabled: createPreference(false)
+    },
+    waitForPaint: (): Promise<void> => Promise.resolve()
+  });
+
+  await favorites.finishedLoading.wait();
+  return { favorites, remoteFavoriteActions, localFavorites };
+}
+
+function createTaggedPosts(...tags: string[]): Post[] {
+  return tags.map((tag, index) => createPost({ id: String(index + 1), tags: tag }));
+}
+
+function getPostIds(favorites: Favorites): string[] {
+  return favorites.posts.value.map(post => post.id);
+}
+
+describe("startFavorites", () => {
+  test("loads the remote favorites and shows the first page", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple", "banana", "cherry"));
+
+    expect(favorites.loadState.value.phase).toBe("loaded");
+    expect(getPostIds(favorites)).toEqual(["1", "2"]);
+  });
+
+  test("searches through its intents and publishes the query", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple", "banana", "apple"));
+
+    favorites.intents.search("apple");
+    expect(favorites.query.value).toBe("apple");
+    expect(getPostIds(favorites)).toEqual(["1", "3"]);
+  });
+
+  test("advances to the next page", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple", "banana", "cherry"));
+
+    expect(await favorites.advance("forward")).toBe(true);
+    expect(getPostIds(favorites)).toEqual(["3"]);
+  });
+
+  test("finds a favorite's post", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple"));
+
+    expect(favorites.findPost("1")).toEqual(createPost({ id: "1", tags: "apple" }));
+    expect(favorites.findPost("2")).toBeUndefined();
+  });
+
+  test("records a favorite removed by another caller of the shared port", async() => {
+    const { favorites, remoteFavoriteActions } = await setup(createTaggedPosts("apple"));
+
+    await remoteFavoriteActions.remove("1");
+    expect(favorites.favoritedChanges.value).toEqual(new Map([["1", false]]));
+  });
+
+  test("deletes a removed favorite from the local favorites", async() => {
+    const { remoteFavoriteActions, localFavorites } = await setup(createTaggedPosts("apple", "banana"));
+
+    await remoteFavoriteActions.remove("1");
+    expect(await localFavorites.getAll()).toEqual(["2"]);
+  });
+});

@@ -1,4 +1,4 @@
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { VideoClip } from "@/features/gallery/types/types";
@@ -49,7 +49,7 @@ export class GalleryVideoController {
     }
   }
 
-  public preloadVideoPlayers(items: PostMedia[]): void {
+  public preloadVideoPlayers(items: MediaItem[]): void {
     if (this.videoPlayers.length === 1) {
       return;
     }
@@ -90,7 +90,7 @@ export class GalleryVideoController {
     this.getActiveVideoPlayer().play().catch();
   }
 
-  public playVideo(item: PostMedia): Promise<void> {
+  public playVideo(item: MediaItem): Promise<void> {
     this.setActiveVideoPlayer(item);
     this.toggleVideoContainer(true);
     this.stopAllVideos();
@@ -238,17 +238,17 @@ export class GalleryVideoController {
     video.removeAttribute("controls");
   }
 
-  private videoPlayerHasSource(video: HTMLVideoElement, item: PostMedia): boolean {
+  private videoPlayerHasSource(video: HTMLVideoElement, item: MediaItem): boolean {
     return video.dataset.id === item.id;
   }
 
-  private async preloadVideo(video: HTMLVideoElement, item: PostMedia): Promise<void> {
+  private async preloadVideo(video: HTMLVideoElement, item: MediaItem): Promise<void> {
     if (await this.setVideoSource(video, item)) {
       this.pauseVideo(video);
     }
   }
 
-  private async setVideoSource(video: HTMLVideoElement, item: PostMedia): Promise<boolean> {
+  private async setVideoSource(video: HTMLVideoElement, item: MediaItem): Promise<boolean> {
     if (this.videoPlayerHasSource(video, item)) {
       return true;
     }
@@ -268,7 +268,7 @@ export class GalleryVideoController {
     video.src = "";
   }
 
-  private applyVideoClip(video: HTMLVideoElement, item: PostMedia): void {
+  private applyVideoClip(video: HTMLVideoElement, item: MediaItem): void {
     const videoClip = this.videoClips.get(item.id);
 
     if (videoClip === undefined) {
@@ -283,7 +283,7 @@ export class GalleryVideoController {
     };
   }
 
-  private setActiveVideoPlayer(item: PostMedia): void {
+  private setActiveVideoPlayer(item: MediaItem): void {
     for (const video of this.videoPlayers) {
       video.removeAttribute("active");
     }

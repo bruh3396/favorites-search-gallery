@@ -8,7 +8,7 @@ import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { ItemCursor } from "@/lib/collection/item_cursor";
 import { NavigationKey } from "@/types/input";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { Preferences } from "@/app/context/preferences";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
@@ -24,29 +24,29 @@ interface GalleryModelPorts {
 }
 
 export class GalleryModel {
-  private readonly cursor: ItemCursor<PostMedia>;
+  private readonly cursor: ItemCursor<MediaItem>;
   private readonly state: GalleryStateController;
-  private getItemsAroundId: (id: string) => PostMedia[];
+  private getItemsAroundId: (id: string) => MediaItem[];
 
   constructor(preferences: Preferences, private readonly ports: GalleryModelPorts) {
-    this.cursor = new ItemCursor<PostMedia>();
+    this.cursor = new ItemCursor<MediaItem>();
     this.state = new GalleryStateController(preferences.gallery.previewEnabled.value);
-    this.getItemsAroundId = (): PostMedia[] => [];
+    this.getItemsAroundId = (): MediaItem[] => [];
   }
 
   public upscaleQualityFor(thumbWidth: number, viewportWidth: number): number | null {
     return GalleryUpscaleQuality.qualityFor(thumbWidth, viewportWidth, GalleryUpscaleConfig.dynamicQualityCutoffs);
   }
 
-  public setupWrappingWindow(getItems: () => PostMedia[]): void {
-    this.getItemsAroundId = (id): PostMedia[] => GalleryItemWindow.wrappingItemsAroundId(getItems(), id);
+  public setupWrappingWindow(getItems: () => MediaItem[]): void {
+    this.getItemsAroundId = (id): MediaItem[] => GalleryItemWindow.wrappingItemsAroundId(getItems(), id);
   }
 
-  public setupClampedWindow(getItems: () => PostMedia[]): void {
-    this.getItemsAroundId = (id): PostMedia[] => GalleryItemWindow.clampedItemsAroundId(getItems(), id);
+  public setupClampedWindow(getItems: () => MediaItem[]): void {
+    this.getItemsAroundId = (id): MediaItem[] => GalleryItemWindow.clampedItemsAroundId(getItems(), id);
   }
 
-  public getItemsAround(id: string): PostMedia[] {
+  public getItemsAround(id: string): MediaItem[] {
     return this.getItemsAroundId(id);
   }
 
@@ -62,11 +62,11 @@ export class GalleryModel {
     return this.cursor.move(navigationDelta(direction));
   }
 
-  public currentItem(): PostMedia {
+  public currentItem(): MediaItem {
     return this.cursor.currentItem();
   }
 
-  public indexItems(items: PostMedia[]): void {
+  public indexItems(items: MediaItem[]): void {
     this.cursor.indexItems(items);
   }
 
@@ -119,7 +119,7 @@ export class GalleryModel {
     this.state.preview(value);
   }
 
-  public open(item: PostMedia): void {
+  public open(item: MediaItem): void {
     this.cursor.pointTo(item);
     this.state.open();
   }

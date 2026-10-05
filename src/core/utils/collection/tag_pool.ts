@@ -2,29 +2,29 @@ import { bitWidth, packIntArray, readPackedInt } from "@/core/utils/number/bit";
 import { grow } from "@/core/utils/collection/array";
 import { internString } from "@/core/utils/string/interner";
 
-const DEFAULT_ITEM_COUNT = 1_024;
-const DEFAULT_TAG_COUNT = 1_024;
+const INITIAL_SLOT_COUNT = 1_024;
+const INITIAL_TAG_COUNT = 1_024;
 
 export class TagPool {
   private packedIds: Uint8Array | null = null;
-  private ids: Uint16Array | Uint32Array = new Uint16Array(DEFAULT_TAG_COUNT);
-  private offsets = new Uint32Array(DEFAULT_ITEM_COUNT);
-  private counts = new Uint16Array(DEFAULT_ITEM_COUNT);
+  private ids: Uint16Array | Uint32Array = new Uint16Array(INITIAL_TAG_COUNT);
+  private offsets = new Uint32Array(INITIAL_SLOT_COUNT);
+  private counts = new Uint16Array(INITIAL_SLOT_COUNT);
   private vocabulary: Map<string, number> | null = new Map<string, number>();
   private readonly reversedVocabulary: string[] = [];
   private bitsPerId = 0;
   private tagsLength = 0;
   private vocabularyLength = 0;
 
-  public write(index: number, tagString: string): void {
+  public write(slot: number, tagString: string): void {
     if (this.packedIds !== null) {
       this.unpackIds(this.packedIds);
     }
     const vocabulary = this.vocabulary ?? this.rebuildVocabulary();
     const tagNames = tagString.split(" ");
 
-    this.offsets[index] = this.tagsLength;
-    this.counts[index] = tagNames.length;
+    this.offsets[slot] = this.tagsLength;
+    this.counts[slot] = tagNames.length;
     this.ensureTagCapacity(this.tagsLength + tagNames.length);
 
     for (const tagName of tagNames) {
@@ -42,9 +42,9 @@ export class TagPool {
     }
   }
 
-  public read(index: number): string {
-    const offset = this.offsets[index];
-    const count = this.counts[index];
+  public read(slot: number): string {
+    const offset = this.offsets[slot];
+    const count = this.counts[slot];
     const tagNames: string[] = [];
 
     for (let i = 0; i < count; i += 1) {
@@ -72,7 +72,7 @@ export class TagPool {
     this.counts = this.counts.slice(0, count);
   }
 
-  public compress(): void {
+  public compact(): void {
     this.packIds();
     this.vocabulary = null;
   }

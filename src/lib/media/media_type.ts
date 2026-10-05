@@ -1,8 +1,8 @@
 import { MediaKind } from "@/core/domain/media/media";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 
-export const isVideo = (item: PostMedia): boolean => isKind(item, "video");
-export const isGif = (item: PostMedia): boolean => isKind(item, "gif");
-export const isImage = (item: PostMedia): boolean => isKind(item, "image");
+export const isVideo = (item: MediaItem): boolean => isKind(item, "video");
+export const isGif = (item: MediaItem): boolean => isKind(item, "gif");
+export const isImage = (item: MediaItem): boolean => isKind(item, "image");
 
-const isKind = (item: PostMedia, kind: MediaKind): boolean => item.media.kind === kind;
+const isKind = (item: MediaItem, kind: MediaKind): boolean => item.media.kind === kind;

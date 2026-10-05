@@ -12,7 +12,7 @@ import { GalleryRenderer } from "@/features/gallery/view/rendering/gallery_rende
 import { GalleryShell } from "@/features/gallery/shell/shell";
 import { GalleryUi } from "@/features/gallery/view/ui";
 import { Point } from "@/types/geometry";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { isInside } from "@/utils/browser/guards";
 import { queueMacroTask } from "@/lib/async/scheduling";
 import { toggleDisplay } from "@/lib/ui/toggles";
@@ -52,7 +52,7 @@ export class GalleryView {
     this.ui.close();
   }
 
-  public display(item: PostMedia): void {
+  public display(item: MediaItem): void {
     this.renderer.render(item);
   }
 
@@ -64,7 +64,7 @@ export class GalleryView {
     return this.ui.scrollToThumbAfterLoad(id);
   }
 
-  public showPreview(item: PostMedia): void {
+  public showPreview(item: MediaItem): void {
     this.shell.root.toggleAttribute("data-visible", true);
     this.renderer.render(item);
     this.renderer.toggleZoom(false);
@@ -82,7 +82,7 @@ export class GalleryView {
     this.renderer.toggleZoomCursor(value);
   }
 
-  public nudge(item: PostMedia, direction: BoundaryEdge): void {
+  public nudge(item: MediaItem, direction: BoundaryEdge): void {
     this.renderer.nudge(item, direction);
   }
 
@@ -94,7 +94,7 @@ export class GalleryView {
     return viewportWidth();
   }
 
-  public cache(items: PostMedia[]): void {
+  public cache(items: MediaItem[]): void {
     this.renderer.cache(items);
   }
 
@@ -106,15 +106,15 @@ export class GalleryView {
     this.renderer.zoomToPoint(point);
   }
 
-  public cacheImages(items: PostMedia[]): Promise<void> {
+  public cacheImages(items: MediaItem[]): Promise<void> {
     return this.renderer.cacheImages(items);
   }
 
-  public upscale(items: PostMedia[]): Promise<void> {
+  public upscale(items: MediaItem[]): Promise<void> {
     return this.renderer.upscale(items);
   }
 
-  public warm(items: PostMedia[]): Promise<void> {
+  public warm(items: MediaItem[]): Promise<void> {
     return this.budget.warm(this.renderer, items);
   }
 

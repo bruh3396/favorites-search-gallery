@@ -21,6 +21,10 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
     )).result ?? [];
   }
 
+  public async setAll(postIds: string[]): Promise<void> {
+    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => store.put(postIds, this.configuration.ownerId));
+  }
+
   public prepend(postIds: string[]): Promise<void> {
     return this.update(ids => {
       const added = new Set(postIds);

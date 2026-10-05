@@ -1,4 +1,4 @@
-﻿import { ACTION_BAR_MODES, ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { ACTION_BAR_MODES, ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
 import { FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
 import { Guard, oneOf } from "@/core/utils/guards/guards";

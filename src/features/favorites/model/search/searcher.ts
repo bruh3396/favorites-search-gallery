@@ -1,4 +1,4 @@
-﻿import { ALL_RATINGS, RatingMask, SortKey } from "@/types/search";
+import { ALL_RATINGS, RatingMask, SortKey } from "@/types/search";
 import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
 import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Searcher } from "@/features/favorites/types/types";

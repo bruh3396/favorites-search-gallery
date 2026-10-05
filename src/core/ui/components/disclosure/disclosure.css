@@ -3,6 +3,10 @@
   flex-direction: column;
 }
 
+.fsg-Disclosure[hidden] {
+  display: none;
+}
+
 .fsg-Disclosure-trigger {
   display: flex;
   align-items: center;

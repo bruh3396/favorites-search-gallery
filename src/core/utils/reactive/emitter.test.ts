@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Emitter } from "@/lib/event/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
 
 function setup(): { emitter: Emitter<number>; heard: number[] } {
   return { emitter: new Emitter<number>(), heard: [] };
@@ -36,10 +36,11 @@ describe("Emitter", () => {
 
   test("works when its methods are passed as callbacks", () => {
     const { emitter, heard } = setup();
-    const { on, emit } = emitter;
+    const { on, once, emit } = emitter;
 
     on(value => heard.push(value));
+    once(value => heard.push(value * 10));
     emit(3);
-    expect(heard).toEqual([3]);
+    expect(heard).toEqual([3, 30]);
   });
 });

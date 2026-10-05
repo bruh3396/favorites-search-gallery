@@ -5,7 +5,7 @@ import { DownloaderModel } from "@/features/favorites/features/downloader/model/
 import { DownloaderSessionFlow } from "@/features/favorites/features/downloader/flows/session";
 import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
 import { DownloaderView } from "@/features/favorites/features/downloader/view/view";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
@@ -19,12 +19,12 @@ interface Options {
 interface Setup {
   session: DownloaderSessionFlow;
   shell: DownloaderShell;
-  results: PostMedia[];
+  results: MediaItem[];
   fetched: string[];
   saved: string[];
 }
 
-function createItems(count: number): PostMedia[] {
+function createItems(count: number): MediaItem[] {
   return Array.from({ length: count }, (_, index) => ({ id: String(index), media: { kind: "image", locator: `media/${index}` } }));
 }
 
@@ -42,7 +42,7 @@ function setup({ itemCount = 3, batchSize = 0, hang = false, broken = false }: O
   const context: DownloaderContext = {
     batchSize: createPreference(batchSize),
     filenameFormat: createPreference(0),
-    getSearchResults: (): PostMedia[] => results,
+    getSearchResults: (): MediaItem[] => results,
     getTagCategories: (): Promise<TagCategoryMap> => Promise.resolve(new Map()),
     getTagsForIds: (): Promise<Map<string, Set<string>>> => (broken ? Promise.reject(new Error("boom")) : Promise.resolve(new Map())),
     fetchOriginal: (media, signal): Promise<Blob> => {

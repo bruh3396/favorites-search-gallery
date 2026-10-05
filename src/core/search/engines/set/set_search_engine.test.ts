@@ -1,4 +1,4 @@
-﻿import { Searchable } from "@/core/search/searchable";
+import { Searchable } from "@/core/search/searchable";
 import { Metric } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { SetSearchEngine } from "@/core/search/engines/set/set_search_engine";

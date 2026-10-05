@@ -1,11 +1,11 @@
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryFlow } from "@/features/gallery/flows/flow";
 import { NavigationKey } from "@/types/input";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { queueMacroTask } from "@/lib/async/scheduling";
 
 export class GalleryNavigationFlow extends GalleryFlow {
-  public open(item: PostMedia): void {
+  public open(item: MediaItem): void {
     this.disablePreview();
     this.model.open(item);
     this.view.open();
@@ -45,7 +45,7 @@ export class GalleryNavigationFlow extends GalleryFlow {
     this.runForState<NavigationKey>({ open: key => this.navigate(key) }, direction);
   }
 
-  private display(item: PostMedia): void {
+  private display(item: MediaItem): void {
     this.view.display(item);
     this.followInContent(item);
     this.context.events.gallery.itemDisplayed.emit(item);
@@ -56,13 +56,13 @@ export class GalleryNavigationFlow extends GalleryFlow {
     this.display(this.model.currentItem());
   }
 
-  private followInContent(item: PostMedia): void {
+  private followInContent(item: MediaItem): void {
     if (!this.usingColumnLayout()) {
       this.view.follow(item.id);
     }
   }
 
-  private cacheAdjacent(item: PostMedia): void {
+  private cacheAdjacent(item: MediaItem): void {
     if (GalleryConfig.preloadingEnabled) {
       queueMacroTask(() => {
         this.view.cache(this.model.getItemsAround(item.id));

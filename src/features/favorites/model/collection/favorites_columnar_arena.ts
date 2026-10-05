@@ -1,8 +1,8 @@
-﻿import { RatingMask } from "@/types/search";
+import { Metric, Post } from "@/core/domain/post/post";
 import { Arena } from "@/features/favorites/types/types";
 import { FavoritesPostTable } from "@/features/favorites/model/collection/post_table";
 import { Media } from "@/core/domain/media/media";
-import { Metric, Post } from "@/core/domain/post/post";
+import { RatingMask } from "@/types/search";
 import { TagPool } from "@/core/utils/collection/tag_pool";
 import { toTagSet } from "@/core/domain/tag/tag";
 
@@ -33,7 +33,7 @@ export class FavoritesColumnarArena implements Arena {
   public compress(): void {
     this.postTable.trim(this.favoriteCount);
     this.tagPool.trim(this.favoriteCount);
-    this.tagPool.compress();
+    this.tagPool.compact();
   }
 
   public id(index: number): number {

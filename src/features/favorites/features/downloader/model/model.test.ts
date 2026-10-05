@@ -1,7 +1,7 @@
 import { DownloaderContext, DownloaderProgress } from "@/features/favorites/features/downloader/types/types";
 import { describe, expect, test } from "vitest";
 import { DownloaderModel } from "@/features/favorites/features/downloader/model/model";
-import { PostMedia } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
@@ -13,7 +13,7 @@ interface Setup {
   saved: string[];
 }
 
-function createItem(id: string): PostMedia {
+function createItem(id: string): MediaItem {
   return { id, media: { kind: "image", locator: `media/${id}` } };
 }
 
@@ -23,7 +23,7 @@ function setup(filenameFormat = 0): Setup {
   const context: DownloaderContext = {
     batchSize: createPreference(0),
     filenameFormat: createPreference(filenameFormat),
-    getSearchResults: (): PostMedia[] => [],
+    getSearchResults: (): MediaItem[] => [],
     getTagCategories: (tagNames): Promise<TagCategoryMap> => {
       const artists = tagNames.filter(tagName => tagName === "someone");
       return Promise.resolve(new Map(artists.map(tagName => [tagName, "artist"])));
