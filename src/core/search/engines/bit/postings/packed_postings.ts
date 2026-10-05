@@ -30,7 +30,7 @@ export class PackedPostings {
     return this.slotByTerm.keys();
   }
 
-  public positionsFor(term: string): PositionArray | undefined {
+  public findPositions(term: string): PositionArray | undefined {
     const slot = this.slotByTerm.get(term);
     return slot === undefined ? undefined : this.positionsAt(slot);
   }

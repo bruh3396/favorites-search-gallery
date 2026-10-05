@@ -1,6 +1,8 @@
-import { StepperSize, createStepper } from "@/core/ui/components/stepper/stepper";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { ControlSize } from "@/core/ui/components/control";
+import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
+import { createStepper } from "@/core/ui/components/stepper/stepper";
 
 interface StepperState {
   value: number;
@@ -8,7 +10,7 @@ interface StepperState {
   max?: number;
   step?: number;
   disabled?: boolean;
-  size?: StepperSize;
+  size?: ControlSize;
 }
 
 const SCHEDULER = new BrowserScheduler();
@@ -18,6 +20,7 @@ function variant(label: string, { value, min = 0, max = 100, step, disabled = fa
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
+      const current = new Signal(value);
       const control = createStepper(ownerDocument, {
         label,
         min,
@@ -25,14 +28,13 @@ function variant(label: string, { value, min = 0, max = 100, step, disabled = fa
         step,
         size,
         scheduler: SCHEDULER,
+        value: current,
+        disabled: new Signal(disabled),
         onValueChange: next => {
           log(`Stepper "${label}" → ${next}`);
-          control.setValue(next);
+          current.value = next;
         }
       });
-
-      control.setValue(value);
-      control.setDisabled(disabled);
       return control.element;
     }
   };

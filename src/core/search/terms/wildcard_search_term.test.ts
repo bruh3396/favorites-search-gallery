@@ -1,7 +1,7 @@
 import { createSearchable, searchableEmptyDoc } from "@/core/search/testing/searchable";
 import { describe, expect, test } from "vitest";
 import { fruits, searchableFruitDoc } from "@/core/search/testing/fruit_corpus";
-import { prefixesOf, substringsOf } from "@/core/search/testing/string";
+import { listPrefixes, listSubstrings } from "@/core/search/testing/string";
 import { parseWildcardSearchTerm } from "@/core/search/parsers/search_term_parser";
 
 describe("WildcardSearchTerm", () => {
@@ -27,7 +27,7 @@ describe("WildcardSearchTerm", () => {
 
   test("matches every prefix", () => {
     for (const fruit of fruits) {
-      for (const prefix of prefixesOf(fruit)) {
+      for (const prefix of listPrefixes(fruit)) {
         expect(parseWildcardSearchTerm(`${prefix}*`).matches(searchableFruitDoc)).toBe(true);
       }
     }
@@ -35,7 +35,7 @@ describe("WildcardSearchTerm", () => {
 
   test("matches every substring between asterisks", () => {
     for (const fruit of fruits) {
-      for (const substring of substringsOf(fruit)) {
+      for (const substring of listSubstrings(fruit)) {
         expect(parseWildcardSearchTerm(`*${substring}*`).matches(searchableFruitDoc)).toBe(true);
         expect(parseWildcardSearchTerm(`**${substring}*`).matches(searchableFruitDoc)).toBe(true);
         expect(parseWildcardSearchTerm(`**${substring}***`).matches(searchableFruitDoc)).toBe(true);

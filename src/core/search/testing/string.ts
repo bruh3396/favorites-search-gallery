@@ -1,4 +1,4 @@
-export function prefixesOf(word: string): string[] {
+export function listPrefixes(word: string): string[] {
   const prefixes: string[] = [];
 
   for (let i = 1; i <= word.length; i += 1) {
@@ -7,7 +7,7 @@ export function prefixesOf(word: string): string[] {
   return prefixes;
 }
 
-export function substringsOf(word: string): string[] {
+export function listSubstrings(word: string): string[] {
   const substrings: string[] = [];
 
   for (let start = 0; start < word.length; start += 1) {

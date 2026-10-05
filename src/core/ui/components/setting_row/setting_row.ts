@@ -1,3 +1,7 @@
+import { Readable, effect } from "@/core/utils/reactive/signal";
+import { ControlSize } from "@/core/ui/components/control";
+import { doNothing } from "@/core/utils/function/function";
+
 export const SettingRowClass = {
   root: "fsg-SettingRow",
   text: "fsg-SettingRow-text",
@@ -5,23 +9,25 @@ export const SettingRowClass = {
   description: "fsg-SettingRow-description"
 } as const;
 
-export type SettingRowSize = "medium" | "small";
-
 export interface SettingRowOptions {
   label: string;
   description?: string;
+  descriptionVisible?: Readable<boolean>;
   control: HTMLElement;
-  size?: SettingRowSize;
+  size?: ControlSize;
 }
 
 export interface SettingRow {
   readonly element: HTMLDivElement;
-  setDescriptionVisible: (visible: boolean) => void;
+  dispose: () => void;
 }
 
 // One setting: its label and caption beside one control (libadwaita ActionRow, Primer FormControl).
 // The text names and describes the control by element reference, so no ids are needed.
-export function createSettingRow(ownerDocument: Document, { label, description, control, size = "medium" }: SettingRowOptions): SettingRow {
+export function createSettingRow(
+  ownerDocument: Document,
+  { label, description, descriptionVisible, control, size = "medium" }: SettingRowOptions
+): SettingRow {
   const element = ownerDocument.createElement("div");
   const text = ownerDocument.createElement("div");
   const labelElement = createText(ownerDocument, { className: SettingRowClass.label, content: label });
@@ -38,14 +44,16 @@ export function createSettingRow(ownerDocument: Document, { label, description, 
     control.ariaDescribedByElements = [descriptionElement];
   }
   element.append(text, control);
-  return {
-    element,
-    setDescriptionVisible: (visible): void => {
-      if (descriptionElement !== undefined) {
-        descriptionElement.hidden = !visible;
-      }
-    }
-  };
+  return { element, dispose: bindDescriptionVisible(descriptionElement, descriptionVisible) };
+}
+
+function bindDescriptionVisible(descriptionElement: HTMLSpanElement | undefined, visible: Readable<boolean> | undefined): () => void {
+  if (descriptionElement === undefined || visible === undefined) {
+    return doNothing;
+  }
+  return effect(() => {
+    descriptionElement.hidden = !visible.value;
+  });
 }
 
 function createDescription(ownerDocument: Document, description: string | undefined): HTMLSpanElement | undefined {

@@ -46,10 +46,10 @@ describe("FavoritesReindexer", () => {
 
   test("ignores a post missing from the collection", () => {
     const { reindexer, model } = setup();
-    const filled: Favorite[] = [];
+    const hydrated: Favorite[] = [];
 
-    model.filled.on(favorite => filled.push(favorite));
+    model.hydrated.on(favorite => hydrated.push(favorite));
     reindexer.reindex(createPost({ id: "9", media: MEDIA }));
-    expect(filled).toEqual([]);
+    expect(hydrated).toEqual([]);
   });
 });

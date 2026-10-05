@@ -1,0 +1,4 @@
+.fsg-StatusText {
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+}

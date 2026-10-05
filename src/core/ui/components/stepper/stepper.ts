@@ -1,12 +1,12 @@
-import { Control, ControlOptions } from "@/core/ui/control";
+import { Control, ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { StepGesture } from "@/core/ui/components/stepper/step_gesture";
+import { effect } from "@/core/utils/reactive/signal";
 
 export const StepperClass = {
   root: "fsg-Stepper",
   input: "fsg-Stepper-input",
   button: "fsg-Stepper-button"
 } as const;
-
-export type StepperSize = "medium" | "small";
 
 export interface StepperScheduler {
   schedule: (task: () => void, delay: number) => () => void;
@@ -17,17 +17,14 @@ export interface StepperOptions extends ControlOptions<number> {
   min: number;
   max: number;
   step?: number;
-  size?: StepperSize;
   scheduler: StepperScheduler;
   onValueCommit?: (value: number) => void;
 }
 
-export interface Stepper extends Control<number> {
+export interface Stepper extends Control {
   readonly element: HTMLDivElement;
 }
 
-const HOLD_DELAY = 400;
-const REPEAT_INTERVAL = 60;
 const OFFSET_PRECISION = 9;
 
 const KEY_DIRECTIONS: Readonly<Record<string, 1 | -1>> = {
@@ -37,71 +34,60 @@ const KEY_DIRECTIONS: Readonly<Record<string, 1 | -1>> = {
 
 export function createStepper(
   ownerDocument: Document,
-  { label, min, max, step = 1, size = "medium", scheduler, onValueChange, onValueCommit = (): void => undefined }: StepperOptions
+  {
+    label, min, max, step = 1, size = "medium", scheduler, value, disabled = NEVER_DISABLED, onValueChange, onValueCommit = (): void => undefined
+  }: StepperOptions
 ): Stepper {
   const element = ownerDocument.createElement("div");
   const input = createInput(ownerDocument, { label, min, max, step });
   const decrement = createButton(ownerDocument, { label: "Decrease", text: "−" });
   const increment = createButton(ownerDocument, { label: "Increase", text: "+" });
-  let current = min;
-  let isDisabled = false;
-  let cancelHold = (): void => undefined;
-  let gestureStart: number | null = null;
-
-  const report = (next: number): void => {
-    if (next !== current) {
+  const gesture = new StepGesture({
+    schedule: (task, delay): (() => void) => scheduler.schedule(task, delay),
+    getValue: (): number => value.peek(),
+    commit: onValueCommit
+  });
+  const reportIfChanged = (next: number): void => {
+    if (next !== value.peek()) {
       onValueChange(next);
     }
   };
-  const stepBy = (direction: 1 | -1): void => report(stepFrom(current, { direction, min, max, step }));
-  const show = (): void => {
+  const stepBy = (direction: 1 | -1): void => reportIfChanged(stepFrom(value.peek(), { direction, min, max, step }));
+  const showState = ({ current, isDisabled }: { current: number; isDisabled: boolean }): void => {
     input.value = String(current);
     input.disabled = isDisabled;
     decrement.disabled = isDisabled || current <= min;
     increment.disabled = isDisabled || current >= max;
   };
-  const begin = (): void => {
-    gestureStart ??= current;
-  };
-  const finish = (): void => {
-    cancelHold();
-    cancelHold = (): void => undefined;
-
-    if (gestureStart !== null && current !== gestureStart) {
-      onValueCommit(current);
+  const stepIfEnabled = (button: HTMLButtonElement, direction: 1 | -1): boolean => {
+    if (button.disabled) {
+      return false;
     }
-    gestureStart = null;
+    stepBy(direction);
+    return true;
   };
-  const hold = (button: HTMLButtonElement, direction: 1 | -1, delay: number): void => {
-    cancelHold = scheduler.schedule(() => {
-      if (button.disabled) {
-        return;
-      }
-      stepBy(direction);
-      hold(button, direction, REPEAT_INTERVAL);
-    }, delay);
-  };
+  const finishGesture = (): void => gesture.finish();
   const bindButton = (button: HTMLButtonElement, direction: 1 | -1): void => {
     button.addEventListener("pointerdown", event => {
       if (event.button !== 0 || button.disabled) {
         return;
       }
       event.preventDefault();
-      finish();
-      begin();
+      gesture.finish();
+      gesture.begin();
       stepBy(direction);
-      hold(button, direction, HOLD_DELAY);
+      gesture.repeat(() => stepIfEnabled(button, direction));
     });
     button.addEventListener("click", event => {
       if (event.detail === 0) {
-        begin();
+        gesture.begin();
         stepBy(direction);
-        finish();
+        gesture.finish();
       }
     });
 
     for (const type of ["pointerup", "pointerleave", "pointercancel"]) {
-      button.addEventListener(type, finish);
+      button.addEventListener(type, finishGesture);
     }
   };
 
@@ -115,39 +101,39 @@ export function createStepper(
 
     if (direction !== undefined) {
       event.preventDefault();
-      begin();
+      gesture.begin();
       stepBy(direction);
     }
   });
   input.addEventListener("keyup", event => {
     if (KEY_DIRECTIONS[event.key] !== undefined) {
-      finish();
+      gesture.finish();
     }
   });
-  input.addEventListener("blur", finish);
+  input.addEventListener("blur", finishGesture);
   input.addEventListener("change", () => {
     const typed = input.valueAsNumber;
 
-    show();
+    showState({ current: value.peek(), isDisabled: disabled.peek() });
 
     if (!Number.isNaN(typed)) {
-      begin();
-      report(Math.min(max, Math.max(min, typed)));
-      finish();
+      gesture.begin();
+      reportIfChanged(Math.min(max, Math.max(min, typed)));
+      gesture.finish();
     }
   });
 
-  show();
+  const disposeValue = effect(() => showState({ current: value.value, isDisabled: disabled.value }));
+  const disposeGestureEnd = effect(() => {
+    if (disabled.value) {
+      gesture.finish();
+    }
+  });
   return {
     element,
-    setValue: (value): void => {
-      current = value;
-      show();
-    },
-    setDisabled: (disabled): void => {
-      isDisabled = disabled;
-      finish();
-      show();
+    dispose: (): void => {
+      disposeValue();
+      disposeGestureEnd();
     }
   };
 }
@@ -158,7 +144,7 @@ function stepFrom(
 ): number {
   const offset = roundToPrecision((value - min) / step, OFFSET_PRECISION);
   const index = direction === 1 ? Math.floor(offset) + 1 : Math.ceil(offset) - 1;
-  const next = roundToPrecision(min + (index * step), decimalsOf(step));
+  const next = roundToPrecision(min + (index * step), countDecimals(step));
   return Math.min(max, Math.max(min, next));
 }
 
@@ -166,7 +152,7 @@ function roundToPrecision(value: number, decimals: number): number {
   return Number(value.toFixed(decimals));
 }
 
-function decimalsOf(step: number): number {
+function countDecimals(step: number): number {
   return String(step).split(".")[1]?.length ?? 0;
 }
 

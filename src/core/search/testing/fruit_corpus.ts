@@ -1,6 +1,6 @@
-import { MetricSearchable } from "@/core/search/searchable";
-import { Metric } from "@/core/domain/post/post";
 import { InvertedIndex } from "@/core/search/engines/set/indexes/inverted_index";
+import { Metric } from "@/core/domain/post/post";
+import { MetricSearchable } from "@/core/search/searchable";
 import { createSearchable } from "@/core/search/testing/searchable";
 
 export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";

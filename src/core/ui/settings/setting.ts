@@ -1,111 +1,107 @@
-import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SwitchSetting } from "@/core/ui/settings/descriptor";
+import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SwitchSetting } from "@/core/ui/settings/descriptor";
+import { Control, ControlChoice, ControlSize } from "@/core/ui/components/control";
+import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { StepperScheduler, createStepper } from "@/core/ui/components/stepper/stepper";
-import { Control } from "@/core/ui/control";
 import { assertNever } from "@/core/utils/guards/guards";
 import { createDropdown } from "@/core/ui/components/dropdown/dropdown";
 import { createMultiSelect } from "@/core/ui/components/multi_select/multi_select";
 import { createSegmented } from "@/core/ui/components/segmented/segmented";
 import { createSettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { createSwitch } from "@/core/ui/components/switch/switch";
-import { effect } from "@/core/utils/reactive/signal";
-
-export type SettingSize = "medium" | "small";
 
 export interface SettingOptions {
   descriptor: SettingDescriptor;
-  size?: SettingSize;
+  descriptionVisible?: Readable<boolean>;
+  size?: ControlSize;
   scheduler: StepperScheduler;
 }
 
 export interface Setting {
   readonly element: HTMLDivElement;
-  setDescriptionVisible: (visible: boolean) => void;
   dispose: () => void;
 }
 
-interface BoundControl {
-  readonly element: HTMLElement;
-  showValue: () => void;
-  setDisabled: (disabled: boolean) => void;
-}
-
-interface Appearance {
-  size: SettingSize;
+// What every control a setting builds is given, whatever its kind.
+interface SharedControlOptions {
+  size: ControlSize;
   scheduler: StepperScheduler;
 }
 
-export function createSetting(ownerDocument: Document, { descriptor, size = "medium", scheduler }: SettingOptions): Setting {
+export function createSetting(ownerDocument: Document, { descriptor, descriptionVisible, size = "medium", scheduler }: SettingOptions): Setting {
   const control = createControl(ownerDocument, descriptor, { size, scheduler });
-  const { element, setDescriptionVisible } = createSettingRow(ownerDocument, {
-    label: descriptor.label, description: descriptor.description, control: control.element, size
+  const row = createSettingRow(ownerDocument, {
+    label: descriptor.label, description: descriptor.description, descriptionVisible, control: control.element, size
   });
-  const { enabledWhen } = descriptor;
-  const disposers = [effect(control.showValue)];
-
-  if (enabledWhen !== undefined) {
-    disposers.push(effect(() => control.setDisabled(!enabledWhen())));
-  }
   return {
-    element,
-    setDescriptionVisible,
-    dispose: (): void => disposers.forEach(dispose => dispose())
+    element: row.element,
+    dispose: (): void => {
+      control.dispose();
+      row.dispose();
+    }
   };
 }
 
-function createControl(ownerDocument: Document, descriptor: SettingDescriptor, appearance: Appearance): BoundControl {
+function createControl(ownerDocument: Document, descriptor: SettingDescriptor, shared: SharedControlOptions): Control {
   switch (descriptor.kind) {
     case "switch":
-      return createSwitchControl(ownerDocument, descriptor, appearance);
+      return createSwitchControl(ownerDocument, descriptor, shared);
     case "choice":
-      return createChoiceControl(ownerDocument, descriptor, appearance);
+      return createChoiceControl(ownerDocument, descriptor, shared);
     case "choices":
-      return createChoicesControl(ownerDocument, descriptor, appearance);
+      return createChoicesControl(ownerDocument, descriptor, shared);
     case "number":
-      return createNumberControl(ownerDocument, descriptor, appearance);
+      return createNumberControl(ownerDocument, descriptor, shared);
     default:
       return assertNever(descriptor);
   }
 }
 
-function createSwitchControl(ownerDocument: Document, { preference }: SwitchSetting, { size }: Appearance): BoundControl {
-  return bind(createSwitch(ownerDocument, { size, onValueChange: next => preference.set(next) }), preference);
+function createSwitchControl(ownerDocument: Document, { preference, disabled }: SwitchSetting, { size }: SharedControlOptions): Control {
+  return createSwitch(ownerDocument, { value: preference, disabled, size, onValueChange: next => preference.set(next) });
 }
 
-function createChoiceControl(ownerDocument: Document, descriptor: ChoiceSetting, { size }: Appearance): BoundControl {
-  const { preference, variant } = descriptor;
-  const options = { options: optionsOf(descriptor), size, onValueChange: (next: string): void => preference.set(next) };
-  const control = variant === "segmented" ? createSegmented(ownerDocument, options) : createDropdown(ownerDocument, options);
-  return bind(control, preference);
+function createChoiceControl(ownerDocument: Document, descriptor: ChoiceSetting, { size }: SharedControlOptions): Control {
+  const { preference, disabled, control } = descriptor;
+  const options = { choices: createChoices(descriptor), value: preference, disabled, size, onValueChange: (next: string): void => preference.set(next) };
+  return control === "segmented" ? createSegmented(ownerDocument, options) : createDropdown(ownerDocument, options);
 }
 
-function createChoicesControl(ownerDocument: Document, descriptor: ChoicesSetting, { size }: Appearance): BoundControl {
-  const { preference } = descriptor;
-  return bind(createMultiSelect(ownerDocument, { options: optionsOf(descriptor), size, onValueChange: next => preference.set(next) }), preference);
+function createChoicesControl(ownerDocument: Document, descriptor: ChoicesSetting, { size }: SharedControlOptions): Control {
+  const { preference, disabled } = descriptor;
+  return createMultiSelect(ownerDocument, {
+    choices: createChoices(descriptor), value: preference, disabled, size, onValueChange: next => preference.set(next)
+  });
 }
 
+// A number that doesn't write on every step previews each step in a draft and writes the preference once, when the gesture ends.
 function createNumberControl(
   ownerDocument: Document,
-  { preference, label, min, max, step, live = false }: NumberSetting,
-  { size, scheduler }: Appearance
-): BoundControl {
-  const write = (next: number): void => preference.set(next);
-  const preview = (next: number): void => stepper.setValue(next);
-  const stepper = createStepper(ownerDocument, {
-    label, min, max, step, size, scheduler,
-    onValueChange: live ? write : preview,
-    onValueCommit: live ? undefined : write
+  { preference, disabled, label, min, max, step, writeOnEveryStep = false }: NumberSetting,
+  { size, scheduler }: SharedControlOptions
+): Control {
+  const draft = new Signal(preference.peek());
+  const disposeDraft = effect(() => {
+    draft.value = preference.value;
   });
-  return bind(stepper, preference);
-}
-
-function bind<T>(control: Control<T>, preference: SettingPreference<T>): BoundControl {
+  const write = (next: number): void => preference.set(next);
+  const preview = (next: number): void => {
+    draft.value = next;
+  };
+  const stepper = createStepper(ownerDocument, {
+    label, min, max, step, size, scheduler, disabled,
+    value: draft,
+    onValueChange: writeOnEveryStep ? write : preview,
+    onValueCommit: writeOnEveryStep ? undefined : write
+  });
   return {
-    element: control.element,
-    showValue: (): void => control.setValue(preference.value),
-    setDisabled: control.setDisabled
+    element: stepper.element,
+    dispose: (): void => {
+      stepper.dispose();
+      disposeDraft();
+    }
   };
 }
 
-function optionsOf({ members, labels }: ChoiceSetting | ChoicesSetting): { value: string; label: string }[] {
+function createChoices({ members, labels }: ChoiceSetting | ChoicesSetting): ControlChoice<string>[] {
   return members.map(member => ({ value: member, label: labels[member] }));
 }

@@ -50,7 +50,7 @@ export function pluralSuffix(count: number): string {
   return count === 1 ? "" : "s";
 }
 
-export function trigramsOf(value: string): string[] {
+export function computeTrigrams(value: string): string[] {
   const trigrams: string[] = [];
 
   for (let i = 0; i + 3 <= value.length; i += 1) {

@@ -9,10 +9,10 @@ import { TermUpdate } from "@/core/search/engines/search_engine";
 export class FavoritesCollection {
   private readonly list = new IdentifiedList<FavoritesArenaFavorite>();
   private readonly arena = new FavoritesColumnarArena();
-  private readonly filledFavorites = new Emitter<Favorite>();
+  private readonly hydratedFavorites = new Emitter<Favorite>();
 
-  public get filled(): Occurrence<Favorite> {
-    return this.filledFavorites;
+  public get hydrated(): Occurrence<Favorite> {
+    return this.hydratedFavorites;
   }
 
   public append(posts: Post[]): FavoritesArenaFavorite[] {
@@ -64,7 +64,7 @@ export class FavoritesCollection {
     const newTerms = favorite.tags;
 
     if (wasPlaceholder && favorite.media.locator !== "") {
-      this.filledFavorites.emit(favorite);
+      this.hydratedFavorites.emit(favorite);
     }
     return oldTerms.symmetricDifference(newTerms).size > 0 ? { doc: favorite, oldTerms, newTerms } : undefined;
   }

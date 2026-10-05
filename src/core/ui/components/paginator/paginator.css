@@ -1,0 +1,61 @@
+.fsg-Paginator {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.fsg-Paginator[hidden] {
+  display: none;
+}
+
+.fsg-Paginator-list {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fsg-Paginator-step,
+.fsg-Paginator-page {
+  min-inline-size: var(--fsg-control-size-medium);
+  block-size: var(--fsg-control-size-medium);
+  padding: 0 6px;
+  border-radius: var(--fsg-radius-medium);
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Paginator-step:hover:not(:disabled),
+.fsg-Paginator-page:hover:not([aria-current="page"]) {
+  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+}
+
+.fsg-Paginator-page[aria-current="page"] {
+  background: var(--fsg-color-accent);
+  color: var(--fsg-color-on-accent);
+  cursor: default;
+}
+
+.fsg-Paginator-step:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fsg-Paginator-step:focus-visible,
+.fsg-Paginator-page:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
+}
+
+.fsg-Paginator-gap {
+  padding: 0 4px;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+}

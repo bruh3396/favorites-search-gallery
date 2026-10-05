@@ -1,6 +1,6 @@
-import { Searchable } from "@/core/search/searchable";
-import { Metric } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
+import { Metric } from "@/core/domain/post/post";
+import { Searchable } from "@/core/search/searchable";
 import { SetSearchEngine } from "@/core/search/engines/set/set_search_engine";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };

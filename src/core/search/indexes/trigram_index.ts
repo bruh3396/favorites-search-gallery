@@ -1,4 +1,4 @@
-import { compareStrings, trigramsOf } from "@/core/utils/string/string";
+import { compareStrings, computeTrigrams } from "@/core/utils/string/string";
 import { findFirstIndexWhere, intersectSorted } from "@/core/utils/collection/array";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
 import { internString } from "@/core/utils/string/interner";
@@ -16,7 +16,7 @@ export class TrigramIndex {
   }
 
   public termsMatching(fragment: string): string[] {
-    return fragment.length < 3 ? this.terms.toArray() : this.candidatesOf(fragment);
+    return fragment.length < 3 ? this.terms.toArray() : this.findCandidates(fragment);
   }
 
   public termsMatchingAll(fragments: string[]): string[] {
@@ -27,7 +27,7 @@ export class TrigramIndex {
   public add(term: string): void {
     const shared = internString(term);
 
-    for (const trigram of trigramsOf(shared)) {
+    for (const trigram of computeTrigrams(shared)) {
       const key = internString(trigram);
       const bucket = this.termsByTrigram.get(key);
 
@@ -40,7 +40,7 @@ export class TrigramIndex {
   }
 
   public remove(term: string): void {
-    for (const trigram of trigramsOf(term)) {
+    for (const trigram of computeTrigrams(term)) {
       const bucket = this.termsByTrigram.get(trigram);
 
       if (bucket === undefined) {
@@ -58,19 +58,19 @@ export class TrigramIndex {
     }
   }
 
-  private candidatesOf(fragment: string): string[] {
-    return this.intersectAll(trigramsOf(fragment), trigram => this.termsByTrigram.get(trigram) ?? []);
+  private findCandidates(fragment: string): string[] {
+    return this.intersectAll(computeTrigrams(fragment), trigram => this.termsByTrigram.get(trigram) ?? []);
   }
 
   private candidatesOfAll(fragments: string[]): string[] {
-    return this.intersectAll(fragments, fragment => this.candidatesOf(fragment));
+    return this.intersectAll(fragments, fragment => this.findCandidates(fragment));
   }
 
-  private intersectAll<T>(sources: readonly T[], candidatesFor: (source: T) => string[]): string[] {
-    let candidates = candidatesFor(sources[0]);
+  private intersectAll<T>(sources: readonly T[], getCandidates: (source: T) => string[]): string[] {
+    let candidates = getCandidates(sources[0]);
 
     for (let i = 1; i < sources.length && candidates.length > 0; i += 1) {
-      candidates = intersectSorted(candidates, candidatesFor(sources[i]), compareStrings);
+      candidates = intersectSorted(candidates, getCandidates(sources[i]), compareStrings);
     }
     return candidates;
   }

@@ -1,30 +1,33 @@
-import { DisclosureSize, createDisclosure } from "@/core/ui/components/disclosure/disclosure";
+import { ControlSize } from "@/core/ui/components/control";
+import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
+import { createDisclosure } from "@/core/ui/components/disclosure/disclosure";
 
 interface DisclosureState {
   open: boolean;
   disabled?: boolean;
-  size?: DisclosureSize;
+  size?: ControlSize;
 }
 
-function variant(label: string, { open, disabled = false, size }: DisclosureState): Story["variants"][number] {
+function variant(label: string, { open: initial, disabled = false, size }: DisclosureState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
       const content = ownerDocument.createElement("p");
+      const open = new Signal(initial);
       const control = createDisclosure(ownerDocument, {
         title: "Appearance",
         content,
+        value: open,
+        disabled: new Signal(disabled),
         size,
         onValueChange: next => {
           log(`Disclosure "${label}" → ${next}`);
-          control.setValue(next);
+          open.value = next;
         }
       });
 
       content.textContent = "Whatever the section holds.";
-      control.setValue(open);
-      control.setDisabled(disabled);
       return control.element;
     }
   };

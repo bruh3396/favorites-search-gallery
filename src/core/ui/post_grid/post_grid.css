@@ -1,0 +1,89 @@
+.fsg-PostGrid {
+  --fsg-PostGrid-gap: 4px;
+
+  gap: var(--fsg-PostGrid-gap);
+}
+
+.fsg-PostGrid[data-layout="grid"],
+.fsg-PostGrid[data-layout="square"],
+.fsg-PostGrid[data-layout="column"] {
+  display: grid;
+  grid-template-columns: repeat(var(--fsg-PostGrid-columns), minmax(0, 1fr));
+  align-items: start;
+}
+
+.fsg-PostGrid-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fsg-PostGrid-gap);
+}
+
+.fsg-PostGrid[data-layout="row"] {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.fsg-PostGrid[data-layout="row"]::after {
+  content: "";
+  flex-grow: 999999;
+}
+
+.fsg-PostGrid[data-layout="native"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px 10px;
+}
+
+.fsg-Tile {
+  overflow: hidden;
+  aspect-ratio: var(--fsg-Tile-aspect-ratio, 1);
+  border-radius: var(--fsg-radius-medium);
+  background: var(--fsg-color-surface-sunken);
+}
+
+.fsg-PostGrid[data-layout="native"] .fsg-Tile {
+  aspect-ratio: auto;
+  border-radius: 0;
+  background: none;
+}
+
+.fsg-Tile[data-media-kind="video"] {
+  outline: 2px solid blue;
+}
+
+.fsg-Tile[data-media-kind="gif"] {
+  outline: 2px solid hotpink;
+}
+
+.fsg-Tile-link {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.fsg-Tile-preview {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Tile[data-loading] .fsg-Tile-preview {
+  opacity: 0;
+}
+
+.fsg-PostGrid[data-layout="native"] .fsg-Tile-preview {
+  inline-size: auto;
+  block-size: auto;
+  max-inline-size: 100%;
+}
+
+.fsg-PostGrid[data-layout="square"] .fsg-Tile {
+  aspect-ratio: 1;
+}
+
+.fsg-PostGrid[data-layout="row"] .fsg-Tile {
+  flex: 1 1 auto;
+  block-size: var(--fsg-PostGrid-row-height);
+}

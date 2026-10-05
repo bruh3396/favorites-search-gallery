@@ -1,50 +1,46 @@
-import { Control, ControlOptions } from "@/core/ui/control";
+import { Control, ControlChoice, ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { effect } from "@/core/utils/reactive/signal";
 
 export const DropdownClass = {
   root: "fsg-Dropdown"
 } as const;
 
-export type DropdownSize = "medium" | "small";
-
-export interface DropdownOption<T> {
-  value: T;
-  label: string;
-}
-
 export interface DropdownOptions<T> extends ControlOptions<T> {
-  options: readonly DropdownOption<T>[];
-  size?: DropdownSize;
+  choices: readonly ControlChoice<T>[];
 }
 
-export interface Dropdown<T> extends Control<T> {
+export interface Dropdown extends Control {
   readonly element: HTMLSelectElement;
 }
 
 export function createDropdown<T>(
   ownerDocument: Document,
-  { options, onValueChange, size = "medium" }: DropdownOptions<T>
-): Dropdown<T> {
+  { choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: DropdownOptions<T>
+): Dropdown {
   const element = ownerDocument.createElement("select");
-  let selectedIndex = -1;
+  const findSelectedIndex = (selected: T): number => choices.findIndex(choice => choice.value === selected);
 
   element.className = DropdownClass.root;
   element.dataset.size = size;
-  element.append(...options.map(({ label }, index) => createOption(ownerDocument, { label, index })));
-  element.selectedIndex = selectedIndex;
+  element.append(...choices.map(({ label }, index) => createOption(ownerDocument, { label, index })));
   element.addEventListener("change", () => {
     const chosenIndex = element.selectedIndex;
 
-    element.selectedIndex = selectedIndex;
-    onValueChange(options[chosenIndex].value);
+    element.selectedIndex = findSelectedIndex(value.peek());
+    onValueChange(choices[chosenIndex].value);
+  });
+
+  const disposeValue = effect(() => {
+    element.selectedIndex = findSelectedIndex(value.value);
+  });
+  const disposeDisabled = effect(() => {
+    element.disabled = disabled.value;
   });
   return {
     element,
-    setValue: (value): void => {
-      selectedIndex = options.findIndex(option => option.value === value);
-      element.selectedIndex = selectedIndex;
-    },
-    setDisabled: (disabled): void => {
-      element.disabled = disabled;
+    dispose: (): void => {
+      disposeValue();
+      disposeDisabled();
     }
   };
 }

@@ -1,5 +1,6 @@
-export interface SettingPreference<T> {
-  readonly value: T;
+import { Readable } from "@/core/utils/reactive/signal";
+
+export interface SettingPreference<T> extends Readable<T> {
   set(value: T): void;
 }
 
@@ -8,7 +9,7 @@ interface SettingBase {
   label: string;
   description?: string;
   keywords?: readonly string[];
-  enabledWhen?: () => boolean;
+  disabled?: Readable<boolean>;
 }
 
 export interface SwitchSetting extends SettingBase {
@@ -21,7 +22,7 @@ export interface ChoiceSetting<M extends string = string> extends SettingBase {
   preference: SettingPreference<M>;
   members: readonly M[];
   labels: Readonly<Record<M, string>>;
-  variant: "segmented" | "dropdown";
+  control: "segmented" | "dropdown";
 }
 
 export interface ChoicesSetting<M extends string = string> extends SettingBase {
@@ -37,7 +38,7 @@ export interface NumberSetting extends SettingBase {
   min: number;
   max: number;
   step: number;
-  live?: boolean;
+  writeOnEveryStep?: boolean;
 }
 
 export type SettingDescriptor = SwitchSetting | ChoiceSetting | ChoicesSetting | NumberSetting;

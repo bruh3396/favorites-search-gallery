@@ -1,15 +1,24 @@
-import { Switch, SwitchClass, createSwitch } from "@/core/ui/components/switch/switch";
+import { Switch, SwitchClass, SwitchOptions, createSwitch } from "@/core/ui/components/switch/switch";
 import { describe, expect, test, vi } from "vitest";
 import SWITCH_CSS from "@/core/ui/components/switch/switch.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(): Switch & { onValueChange: (next: boolean) => void } {
+interface Setup extends Switch {
+  value: Signal<boolean>;
+  disabled: Signal<boolean>;
+  onValueChange: (next: boolean) => void;
+}
+
+function setup(options: Partial<SwitchOptions> = {}): Setup {
+  const value = new Signal(false);
+  const disabled = new Signal(false);
   const onValueChange = vi.fn();
-  return { ...createSwitch(document, { onValueChange }), onValueChange };
+  return { ...createSwitch(document, { value, disabled, onValueChange, ...options }), value, disabled, onValueChange };
 }
 
 describe("createSwitch", () => {
-  test("is an unchecked switch button", () => {
+  test("is a switch button showing its value", () => {
     const { element } = setup();
 
     expect(element.getAttribute("role")).toBe("switch");
@@ -19,7 +28,7 @@ describe("createSwitch", () => {
 
   test("is medium unless told otherwise", () => {
     expect(setup().element.dataset.size).toBe("medium");
-    expect(createSwitch(document, { onValueChange: vi.fn(), size: "small" }).element.dataset.size).toBe("small");
+    expect(setup({ size: "small" }).element.dataset.size).toBe("small");
   });
 
   test("reports the flipped value on click without changing itself", () => {
@@ -30,30 +39,44 @@ describe("createSwitch", () => {
     expect(element.getAttribute("aria-checked")).toBe("false");
   });
 
-  test("flips from the value it was last told", () => {
-    const { element, onValueChange, setValue } = setup();
+  test("flips from its current value", () => {
+    const { element, value, onValueChange } = setup();
 
-    setValue(true);
+    value.value = true;
     element.click();
     expect(onValueChange).toHaveBeenLastCalledWith(false);
   });
 
-  test("shows what it is told", () => {
-    const { element, setValue } = setup();
+  test("follows its value", () => {
+    const { element, value } = setup();
 
-    setValue(true);
+    value.value = true;
     expect(element.getAttribute("aria-checked")).toBe("true");
-    setValue(false);
+    value.value = false;
     expect(element.getAttribute("aria-checked")).toBe("false");
   });
 
   test("ignores clicks while disabled", () => {
-    const { element, onValueChange, setDisabled } = setup();
+    const { element, disabled, onValueChange } = setup();
 
-    setDisabled(true);
+    disabled.value = true;
     element.click();
     expect(element.disabled).toBe(true);
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("is enabled unless given a disabled state", () => {
+    const { element } = createSwitch(document, { value: new Signal(false), onValueChange: vi.fn() });
+
+    expect(element.disabled).toBe(false);
+  });
+
+  test("stops following its value once disposed", () => {
+    const { element, value, dispose } = setup();
+
+    dispose();
+    value.value = true;
+    expect(element.getAttribute("aria-checked")).toBe("false");
   });
 
   test("styles every class it sets", () => {

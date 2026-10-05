@@ -24,14 +24,14 @@ export class PostingResolver<Doc> {
     }
 
     if (term instanceof MetricSearchTerm) {
-      return this.metricIndex.postingFor(term.comparison);
+      return this.metricIndex.getPosting(term.comparison);
     }
-    return this.bitIndex.postingFor(term.value) ?? EMPTY_POSTING;
+    return this.bitIndex.findPosting(term.value) ?? EMPTY_POSTING;
   }
 
   private postingForNumeric(term: NumericSearchTerm): Posting {
-    const taggedPosting = this.bitIndex.postingFor(term.value) ?? EMPTY_POSTING;
-    const idPosting = this.metricIndex.postingFor(term.idComparison);
+    const taggedPosting = this.bitIndex.findPosting(term.value) ?? EMPTY_POSTING;
+    const idPosting = this.metricIndex.getPosting(term.idComparison);
     return new DensePosting(this.bitIndex.unionOf([taggedPosting, idPosting]));
   }
 }

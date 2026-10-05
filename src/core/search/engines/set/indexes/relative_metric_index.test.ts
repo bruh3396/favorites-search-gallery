@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
+import { Metric } from "@/core/domain/post/post";
 import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { RelativeMetricIndex } from "@/core/search/engines/set/indexes/relative_metric_index";
-import { Metric } from "@/core/domain/post/post";
 
 type Doc = { name: string; metrics: Partial<Record<Metric, number>> };
 
@@ -15,7 +15,7 @@ const square = createDoc("square", { width: 1_080, height: 1_080 });
 const docs = [wide, tall, square];
 
 const metrics: Metric[] = ["width", "height"];
-const metricFor = (item: Doc, metric: Metric): number => item.metrics[metric] ?? 0;
+const getMetric = (item: Doc, metric: Metric): number => item.metrics[metric] ?? 0;
 
 function createComparison(metric: Metric, operator: MetricComparison["operator"], rightHandMetric: Metric): MetricComparison {
   return { metric, operator, value: 0, rightHandMetric, isRelative: true, isTautological: false } as MetricComparison;
@@ -26,79 +26,79 @@ function getSortedNames(set: ReadonlySet<Doc>): string[] {
 }
 
 function createIndex(): RelativeMetricIndex<Doc> {
-  const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
+  const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
   index.build(new Set(docs));
   return index;
 }
 
 describe("RelativeMetricIndex", () => {
-  describe("docsFor", () => {
+  describe("getDocs", () => {
     test("resolves greater-than across a pair", () => {
-      expect(getSortedNames(createIndex().docsFor(createComparison("width", ":>", "height")))).toEqual(["wide"]);
+      expect(getSortedNames(createIndex().getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
     });
 
     test("resolves less-than across a pair", () => {
-      expect(getSortedNames(createIndex().docsFor(createComparison("width", ":<", "height")))).toEqual(["tall"]);
+      expect(getSortedNames(createIndex().getDocs(createComparison("width", ":<", "height")))).toEqual(["tall"]);
     });
 
     test("resolves equality across a pair", () => {
-      expect(getSortedNames(createIndex().docsFor(createComparison("width", ":", "height")))).toEqual(["square"]);
+      expect(getSortedNames(createIndex().getDocs(createComparison("width", ":", "height")))).toEqual(["square"]);
     });
 
     test("resolves reverse-ordered inequality to the same docs (aliasing)", () => {
       const index = createIndex();
 
-      expect(getSortedNames(index.docsFor(createComparison("height", ":<", "width")))).toEqual(["wide"]);
-      expect(getSortedNames(index.docsFor(createComparison("height", ":>", "width")))).toEqual(["tall"]);
+      expect(getSortedNames(index.getDocs(createComparison("height", ":<", "width")))).toEqual(["wide"]);
+      expect(getSortedNames(index.getDocs(createComparison("height", ":>", "width")))).toEqual(["tall"]);
     });
 
     test("resolves reverse-ordered equality to the same docs (aliasing)", () => {
-      expect(getSortedNames(createIndex().docsFor(createComparison("height", ":", "width")))).toEqual(["square"]);
+      expect(getSortedNames(createIndex().getDocs(createComparison("height", ":", "width")))).toEqual(["square"]);
     });
 
     test("shares one Set object between reverse-ordered keys rather than duplicating it", () => {
       const index = createIndex();
 
-      expect(index.docsFor(createComparison("width", ":>", "height"))).toBe(index.docsFor(createComparison("height", ":<", "width")));
-      expect(index.docsFor(createComparison("width", ":<", "height"))).toBe(index.docsFor(createComparison("height", ":>", "width")));
-      expect(index.docsFor(createComparison("width", ":", "height"))).toBe(index.docsFor(createComparison("height", ":", "width")));
+      expect(index.getDocs(createComparison("width", ":>", "height"))).toBe(index.getDocs(createComparison("height", ":<", "width")));
+      expect(index.getDocs(createComparison("width", ":<", "height"))).toBe(index.getDocs(createComparison("height", ":>", "width")));
+      expect(index.getDocs(createComparison("width", ":", "height"))).toBe(index.getDocs(createComparison("height", ":", "width")));
     });
 
     test("partitions the collection between the three sets of a pair (trichotomy)", () => {
       const index = createIndex();
-      const greater = index.docsFor(createComparison("width", ":>", "height"));
-      const less = index.docsFor(createComparison("width", ":<", "height"));
-      const equal = index.docsFor(createComparison("width", ":", "height"));
+      const greater = index.getDocs(createComparison("width", ":>", "height"));
+      const less = index.getDocs(createComparison("width", ":<", "height"));
+      const equal = index.getDocs(createComparison("width", ":", "height"));
 
       expect(greater.size + less.size + equal.size).toBe(docs.length);
     });
 
     test("resolves to nothing before build", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
+      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
-      expect(getSortedNames(index.docsFor(createComparison("width", ":>", "height")))).toEqual([]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual([]);
     });
   });
 
   describe("ensureBuilt", () => {
     test("builds once and is idempotent", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
+      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
       index.ensureBuilt(new Set(docs));
       index.ensureBuilt(new Set());
-      expect(getSortedNames(index.docsFor(createComparison("width", ":>", "height")))).toEqual(["wide"]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
     });
   });
 
   describe("add", () => {
     test("does nothing before build, leaving the doc to a later build", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
+      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
       const extra = createDoc("extra", { width: 4_000, height: 100 });
 
       index.add(extra);
       index.build(new Set([...docs, extra]));
-      expect(getSortedNames(index.docsFor(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
     });
 
     test("places the doc into the right partition after build", () => {
@@ -106,36 +106,36 @@ describe("RelativeMetricIndex", () => {
       const extra = createDoc("extra", { width: 100, height: 4_000 });
 
       index.add(extra);
-      expect(getSortedNames(index.docsFor(createComparison("width", ":<", "height")))).toEqual(["extra", "tall"]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":<", "height")))).toEqual(["extra", "tall"]);
     });
   });
 
   describe("invalidate", () => {
     test("makes ensureBuilt rebuild from the given docs", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
+      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
       const extra = createDoc("extra", { width: 4_000, height: 100 });
 
       index.ensureBuilt(new Set(docs));
       index.invalidate();
       index.ensureBuilt(new Set([...docs, extra]));
-      expect(getSortedNames(index.docsFor(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
     });
   });
 
   describe("remove", () => {
     test("does nothing before build", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, metricFor);
+      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
       index.remove(wide);
       index.build(new Set(docs));
-      expect(getSortedNames(index.docsFor(createComparison("width", ":>", "height")))).toEqual(["wide"]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
     });
 
     test("drops the doc from every partition", () => {
       const index = createIndex();
 
       index.remove(wide);
-      expect(getSortedNames(index.docsFor(createComparison("width", ":>", "height")))).toEqual([]);
+      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual([]);
     });
   });
 });

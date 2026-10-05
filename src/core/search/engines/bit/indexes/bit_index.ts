@@ -13,7 +13,7 @@ export class BitIndex<Doc> {
   private readonly draft = new DraftPostings();
   private readonly postings = new DurablePostings();
 
-  constructor(private readonly termsFor: (doc: Doc) => Iterable<string>) { }
+  constructor(private readonly getTerms: (doc: Doc) => Iterable<string>) { }
 
   public get size(): number {
     return this.docs.size;
@@ -67,7 +67,7 @@ export class BitIndex<Doc> {
   }
 
   public add(docs: readonly Doc[]): string[] {
-    if (!this.docs.hasRoomFor(docs.length)) {
+    if (!this.docs.canFit(docs.length)) {
       this.build(this.docs.liveDocs(), this.docs.size + docs.length);
     }
     return this.mutate(() => {
@@ -84,15 +84,15 @@ export class BitIndex<Doc> {
   }
 
   public update(updates: readonly TermUpdate<Doc>[]): TermDelta {
-    return this.mutate(() => this.draft.applyUpdates(updates, doc => this.docs.positionOf(doc)));
+    return this.mutate(() => this.draft.applyUpdates(updates, doc => this.docs.findPosition(doc)));
   }
 
   public indexedTerms(): string[] {
     return this.postings.terms();
   }
 
-  public postingFor(term: string): Posting | undefined {
-    return this.postings.postingFor(term);
+  public findPosting(term: string): Posting | undefined {
+    return this.postings.findPosting(term);
   }
 
   private place(doc: Doc, position: number): string[] {
@@ -100,7 +100,7 @@ export class BitIndex<Doc> {
     this.algebra.occupy(position);
     const newTerms: string[] = [];
 
-    for (const term of this.termsFor(doc)) {
+    for (const term of this.getTerms(doc)) {
       if (this.draft.add(internString(term), position)) {
         newTerms.push(term);
       }

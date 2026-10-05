@@ -73,7 +73,7 @@ describe("FavoritesPostLibrary", () => {
     expect(streamed[1].fetchedAt).toBeUndefined();
   });
 
-  test("fills a placeholder with its fetched post and stores it", async() => {
+  test("hydrates a placeholder with its fetched post and stores it", async() => {
     const { library, localPosts, scheduler, onRefreshed } = setup([createPost({ ...DIMENSIONS, id: "2", tags: "apple" })]);
     const streamed: Post[] = [];
 

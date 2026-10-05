@@ -1,5 +1,5 @@
-import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { Metric } from "@/core/domain/post/post";
+import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { findFirstIndexWhere } from "@/core/utils/collection/array";
 
 type AbsoluteComparison = Pick<MetricComparison, "metric" | "operator" | "value">;
@@ -15,7 +15,7 @@ export class MetricIndex<Doc> {
 
   constructor(
     private readonly metrics: readonly Metric[],
-    private readonly metricFor: (doc: Doc, metric: Metric) => number
+    private readonly getMetric: (doc: Doc, metric: Metric) => number
   ) { }
 
   public ensureBuilt(docs: ReadonlySet<Doc>): void {
@@ -29,7 +29,7 @@ export class MetricIndex<Doc> {
       const entries: Entry<Doc>[] = [];
 
       for (const doc of docs) {
-        entries.push({ value: this.metricFor(doc, metric), doc });
+        entries.push({ value: this.getMetric(doc, metric), doc });
       }
       entries.sort((a, b) => a.value - b.value);
       this.entriesByMetric.set(metric, entries);
@@ -48,7 +48,7 @@ export class MetricIndex<Doc> {
 
     for (const metric of this.metrics) {
       const entries = this.entriesByMetric.get(metric) as Entry<Doc>[];
-      const value = this.metricFor(doc, metric);
+      const value = this.getMetric(doc, metric);
 
       entries.splice(this.lowerBound(entries, value), 0, { value, doc });
     }
@@ -61,7 +61,7 @@ export class MetricIndex<Doc> {
 
     for (const metric of this.metrics) {
       const entries = this.entriesByMetric.get(metric) as Entry<Doc>[];
-      const index = this.indexOfDoc(entries, this.metricFor(doc, metric), doc);
+      const index = this.indexOfDoc(entries, this.getMetric(doc, metric), doc);
 
       if (index !== -1) {
         entries.splice(index, 1);

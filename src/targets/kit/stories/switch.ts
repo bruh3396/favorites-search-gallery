@@ -1,28 +1,30 @@
-import { SwitchSize, createSwitch } from "@/core/ui/components/switch/switch";
+import { ControlSize } from "@/core/ui/components/control";
+import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
+import { createSwitch } from "@/core/ui/components/switch/switch";
 
 interface SwitchState {
   checked: boolean;
   disabled?: boolean;
-  size?: SwitchSize;
+  size?: ControlSize;
 }
 
-// Each variant closes the controlled loop itself: whatever the switch reports is told straight back to it.
-function variant(label: string, { checked, disabled = false, size }: SwitchState): Story["variants"][number] {
+function variant(label: string, { checked: initial, disabled = false, size }: SwitchState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
+      const checked = new Signal(initial);
       const control = createSwitch(ownerDocument, {
+        value: checked,
+        disabled: new Signal(disabled),
         size,
         onValueChange: next => {
           log(`Switch "${label}" → ${next}`);
-          control.setValue(next);
+          checked.value = next;
         }
       });
 
       control.element.setAttribute("aria-label", label);
-      control.setValue(checked);
-      control.setDisabled(disabled);
       return control.element;
     }
   };

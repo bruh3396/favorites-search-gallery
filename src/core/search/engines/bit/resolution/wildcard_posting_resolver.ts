@@ -16,7 +16,7 @@ export class WildcardPostingResolver<Doc> extends WildcardResolver<Posting | und
     const postings: Posting[] = [];
 
     for (const term of terms) {
-      const posting = this.bitIndex.postingFor(term);
+      const posting = this.bitIndex.findPosting(term);
 
       if (posting !== undefined) {
         postings.push(posting);

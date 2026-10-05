@@ -1,41 +1,38 @@
-import { Control, ControlOptions } from "@/core/ui/control";
+import { Control, ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { effect } from "@/core/utils/reactive/signal";
 
 export const SwitchClass = {
   root: "fsg-Switch",
   thumb: "fsg-Switch-thumb"
 } as const;
 
-export type SwitchSize = "medium" | "small";
+export type SwitchOptions = ControlOptions<boolean>;
 
-export interface SwitchOptions extends ControlOptions<boolean> {
-  size?: SwitchSize;
-}
-
-export interface Switch extends Control<boolean> {
+export interface Switch extends Control {
   readonly element: HTMLButtonElement;
 }
 
-export function createSwitch(ownerDocument: Document, { onValueChange, size = "medium" }: SwitchOptions): Switch {
+export function createSwitch(ownerDocument: Document, { value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: SwitchOptions): Switch {
   const thumb = ownerDocument.createElement("span");
   const element = ownerDocument.createElement("button");
-  let isChecked = false;
 
   thumb.className = SwitchClass.thumb;
   element.className = SwitchClass.root;
   element.type = "button";
   element.dataset.size = size;
   element.setAttribute("role", "switch");
-  element.setAttribute("aria-checked", "false");
   element.append(thumb);
-  element.addEventListener("click", () => onValueChange(!isChecked));
+  element.addEventListener("click", () => onValueChange(!value.peek()));
+
+  const disposeValue = effect(() => element.setAttribute("aria-checked", String(value.value)));
+  const disposeDisabled = effect(() => {
+    element.disabled = disabled.value;
+  });
   return {
     element,
-    setValue: (value): void => {
-      isChecked = value;
-      element.setAttribute("aria-checked", String(value));
-    },
-    setDisabled: (disabled): void => {
-      element.disabled = disabled;
+    dispose: (): void => {
+      disposeValue();
+      disposeDisabled();
     }
   };
 }

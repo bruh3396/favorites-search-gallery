@@ -16,7 +16,7 @@ export class MetricBitIndex<Doc> {
   private readonly axes = new Map<Metric, MetricAxis>();
   private readonly relativeCache = new Map<string, BitSet>();
 
-  constructor(private readonly metricFor: (doc: Doc, metric: Metric) => number) { }
+  constructor(private readonly getMetric: (doc: Doc, metric: Metric) => number) { }
 
   public build(width: number, docsByPosition: readonly Doc[]): void {
     this.width = width;
@@ -25,13 +25,13 @@ export class MetricBitIndex<Doc> {
     this.relativeCache.clear();
   }
 
-  public postingFor(comparison: MetricComparison): DensePosting {
+  public getPosting(comparison: MetricComparison): DensePosting {
     const bitSet = comparison.isRelative ? this.relativeBitset(comparison) : this.absoluteBitset(comparison);
     return new DensePosting(bitSet);
   }
 
   private absoluteBitset(comparison: MetricComparison): BitSet {
-    const axis = this.axisFor(comparison.metric);
+    const axis = this.getAxis(comparison.metric);
     const result = new BitSet(this.width);
     const [start, end] = this.matchingSpan(axis, comparison.operator, comparison.value);
 
@@ -64,7 +64,7 @@ export class MetricBitIndex<Doc> {
     return positions;
   }
 
-  private axisFor(metric: Metric): MetricAxis {
+  private getAxis(metric: Metric): MetricAxis {
     const cached = this.axes.get(metric);
 
     if (cached !== undefined) {
@@ -74,7 +74,7 @@ export class MetricBitIndex<Doc> {
     const positions = Int32Array.from(this.livePositions());
 
     for (const position of positions) {
-      valuesByPosition[position] = this.metricFor(this.docsByPosition[position], metric);
+      valuesByPosition[position] = this.getMetric(this.docsByPosition[position], metric);
     }
     const axis: MetricAxis = {
       valuesByPosition,
@@ -99,8 +99,8 @@ export class MetricBitIndex<Doc> {
   }
 
   private buildRelativeBitset(comparison: MetricComparison): BitSet {
-    const left = this.axisFor(comparison.metric).valuesByPosition;
-    const right = this.axisFor(comparison.rightHandMetric).valuesByPosition;
+    const left = this.getAxis(comparison.metric).valuesByPosition;
+    const right = this.getAxis(comparison.rightHandMetric).valuesByPosition;
     const matches = this.relativeComparator(comparison.operator);
     const result = new BitSet(this.width);
 

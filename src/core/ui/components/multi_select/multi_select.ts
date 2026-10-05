@@ -1,37 +1,35 @@
-import { Control, ControlOptions } from "@/core/ui/control";
+import { Control, ControlChoice, ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { effect } from "@/core/utils/reactive/signal";
 
 export const MultiSelectClass = {
   root: "fsg-MultiSelect",
   option: "fsg-MultiSelect-option"
 } as const;
 
-export type MultiSelectSize = "medium" | "small";
-
-export interface MultiSelectOption<T> {
-  value: T;
-  label: string;
-}
-
 export interface MultiSelectOptions<T> extends ControlOptions<readonly T[]> {
-  options: readonly MultiSelectOption<T>[];
-  size?: MultiSelectSize;
+  choices: readonly ControlChoice<T>[];
 }
 
-export interface MultiSelect<T> extends Control<readonly T[]> {
+export interface MultiSelect extends Control {
   readonly element: HTMLDivElement;
 }
 
 // WAI-ARIA APG toggle buttons in a group: each is its own tab stop. At least one stays pressed, so the last one
 // pressed can't be released; it stays focusable and says why through aria-disabled rather than native disabled.
-export function createMultiSelect<T>(ownerDocument: Document, { options, onValueChange, size = "medium" }: MultiSelectOptions<T>): MultiSelect<T> {
+export function createMultiSelect<T>(
+  ownerDocument: Document,
+  { choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: MultiSelectOptions<T>
+): MultiSelect {
   const element = ownerDocument.createElement("div");
-  const buttons = options.map(({ label }) => createOptionButton(ownerDocument, label));
-  let pressed: readonly boolean[] = options.map(() => false);
+  const buttons = choices.map(({ label }) => createChoiceButton(ownerDocument, label));
+  const getPressedFlags = (values: readonly T[]): readonly boolean[] => choices.map(choice => values.includes(choice.value));
   const toggle = (index: number): void => {
+    const pressed = getPressedFlags(value.peek());
+
     if (isLastPressed(pressed, index)) {
       return;
     }
-    onValueChange(options.filter((_, other) => (other === index ? !pressed[other] : pressed[other])).map(option => option.value));
+    onValueChange(choices.filter((_, other) => (other === index ? !pressed[other] : pressed[other])).map(choice => choice.value));
   };
 
   element.className = MultiSelectClass.root;
@@ -39,17 +37,20 @@ export function createMultiSelect<T>(ownerDocument: Document, { options, onValue
   element.setAttribute("role", "group");
   element.append(...buttons);
   buttons.forEach((button, index) => button.addEventListener("click", () => toggle(index)));
-  showPressed(buttons, pressed);
+
+  const disposeValue = effect(() => showPressed(buttons, getPressedFlags(value.value)));
+  const disposeDisabled = effect(() => {
+    const isDisabled = disabled.value;
+
+    for (const button of buttons) {
+      button.disabled = isDisabled;
+    }
+  });
   return {
     element,
-    setValue: (values): void => {
-      pressed = options.map(option => values.includes(option.value));
-      showPressed(buttons, pressed);
-    },
-    setDisabled: (disabled): void => {
-      for (const button of buttons) {
-        button.disabled = disabled;
-      }
+    dispose: (): void => {
+      disposeValue();
+      disposeDisabled();
     }
   };
 }
@@ -70,7 +71,7 @@ function showPressed(buttons: readonly HTMLButtonElement[], pressed: readonly bo
   });
 }
 
-function createOptionButton(ownerDocument: Document, label: string): HTMLButtonElement {
+function createChoiceButton(ownerDocument: Document, label: string): HTMLButtonElement {
   const button = ownerDocument.createElement("button");
 
   button.className = MultiSelectClass.option;

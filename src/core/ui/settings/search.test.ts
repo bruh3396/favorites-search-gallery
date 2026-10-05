@@ -2,14 +2,14 @@ import { describe, expect, test } from "vitest";
 import { indexSettings, matchSettings, splitQuery } from "@/core/ui/settings/search";
 import { SettingDescriptor } from "@/core/ui/settings/descriptor";
 
-const PREFERENCE = { value: false, set: (): void => undefined };
+const PREFERENCE = { value: false, peek: (): boolean => false, set: (): void => undefined };
 
 const DESCRIPTORS: SettingDescriptor[] = [
   { id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", preference: PREFERENCE },
   { id: "autoplay", kind: "switch", label: "Autoplay", keywords: ["video"], preference: PREFERENCE },
   {
-    id: "layout", kind: "choice", label: "Layout", variant: "segmented", members: ["column", "row"], labels: { column: "Column", row: "Row" },
-    preference: { value: "column", set: (): void => undefined }
+    id: "layout", kind: "choice", label: "Layout", control: "segmented", members: ["column", "row"], labels: { column: "Column", row: "Row" },
+    preference: { value: "column", peek: (): string => "column", set: (): void => undefined }
   }
 ];
 

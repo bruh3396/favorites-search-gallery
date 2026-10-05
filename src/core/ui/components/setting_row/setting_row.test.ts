@@ -1,6 +1,7 @@
 import { SettingRow, SettingRowClass, SettingRowOptions, createSettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { describe, expect, test } from "vitest";
 import SETTING_ROW_CSS from "@/core/ui/components/setting_row/setting_row.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
 function setup(options: Partial<SettingRowOptions> = {}): SettingRow & { control: HTMLElement } {
@@ -10,6 +11,10 @@ function setup(options: Partial<SettingRowOptions> = {}): SettingRow & { control
 
 function readTexts(elements: readonly Element[] | null): string[] {
   return (elements ?? []).map(element => element.textContent ?? "");
+}
+
+function findDescription(element: HTMLElement): HTMLElement | null {
+  return element.querySelector<HTMLElement>(`.${SettingRowClass.description}`);
 }
 
 describe("createSettingRow", () => {
@@ -30,14 +35,15 @@ describe("createSettingRow", () => {
   test("shows a description under the label and describes the control with it", () => {
     const { element, control } = setup({ description: "Thumbnails per row." });
 
-    expect(element.querySelector(`.${SettingRowClass.description}`)?.textContent).toBe("Thumbnails per row.");
+    expect(findDescription(element)?.textContent).toBe("Thumbnails per row.");
+    expect(findDescription(element)?.hidden).toBe(false);
     expect(readTexts(control.ariaDescribedByElements)).toEqual(["Thumbnails per row."]);
   });
 
   test("has no description unless given one", () => {
     const { element, control } = setup();
 
-    expect(element.querySelector(`.${SettingRowClass.description}`)).toBeNull();
+    expect(findDescription(element)).toBeNull();
     expect(control.ariaDescribedByElements ?? null).toBeNull();
   });
 
@@ -46,14 +52,22 @@ describe("createSettingRow", () => {
     expect(setup({ size: "small" }).element.dataset.size).toBe("small");
   });
 
-  test("hides and shows its description on request", () => {
-    const { element, setDescriptionVisible } = setup({ description: "Thumbnails per row." });
-    const description = element.querySelector<HTMLElement>(`.${SettingRowClass.description}`);
+  test("hides and shows its description as told", () => {
+    const descriptionVisible = new Signal(false);
+    const { element } = setup({ description: "Thumbnails per row.", descriptionVisible });
 
-    setDescriptionVisible(false);
-    expect(description?.hidden).toBe(true);
-    setDescriptionVisible(true);
-    expect(description?.hidden).toBe(false);
+    expect(findDescription(element)?.hidden).toBe(true);
+    descriptionVisible.value = true;
+    expect(findDescription(element)?.hidden).toBe(false);
+  });
+
+  test("stops following whether its description is visible once disposed", () => {
+    const descriptionVisible = new Signal(true);
+    const { element, dispose } = setup({ description: "Thumbnails per row.", descriptionVisible });
+
+    dispose();
+    descriptionVisible.value = false;
+    expect(findDescription(element)?.hidden).toBe(false);
   });
 
   test("styles every class it sets", () => {

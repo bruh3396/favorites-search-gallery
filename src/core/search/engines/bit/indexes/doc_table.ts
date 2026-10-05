@@ -16,7 +16,7 @@ export class DocTable<Doc> {
   }
 
   public reset(occupiedCount: number, minCapacity: number): void {
-    this.capacity = capacityFor(Math.max(occupiedCount, minCapacity));
+    this.capacity = computeCapacity(Math.max(occupiedCount, minCapacity));
     this.docs = new Array<Doc>(this.capacity);
     this.positionByDoc = new Map<Doc, number>();
     this.freeList = [];
@@ -27,7 +27,7 @@ export class DocTable<Doc> {
     }
   }
 
-  public hasRoomFor(count: number): boolean {
+  public canFit(count: number): boolean {
     return this.liveCount + count < this.capacity;
   }
 
@@ -41,7 +41,7 @@ export class DocTable<Doc> {
     this.liveCount += 1;
   }
 
-  public positionOf(doc: Doc): number | undefined {
+  public findPosition(doc: Doc): number | undefined {
     return this.positionByDoc.get(doc);
   }
 
@@ -61,7 +61,7 @@ export class DocTable<Doc> {
   }
 }
 
-function capacityFor(size: number): number {
+function computeCapacity(size: number): number {
   let capacity = MIN_CAPACITY;
 
   while (capacity <= size) {

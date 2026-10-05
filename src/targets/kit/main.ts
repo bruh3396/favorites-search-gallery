@@ -10,6 +10,7 @@ import { SETTING_ROW_STORY } from "@/targets/kit/stories/setting_row";
 import { SETTING_STORY } from "@/targets/kit/stories/setting";
 import { STEPPER_STORY } from "@/targets/kit/stories/stepper";
 import { SWITCH_STORY } from "@/targets/kit/stories/switch";
+import { Signal } from "@/core/utils/reactive/signal";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { createSegmented } from "@/core/ui/components/segmented/segmented";
 import { createSwitch } from "@/core/ui/components/switch/switch";
@@ -60,31 +61,33 @@ const FONTS = [
 
 function renderSchemeToggle(app: HTMLElement): HTMLElement {
   const item = createElement("label", "kit-Toolbar-item", "Dark");
+  const dark = new Signal(matchMedia("(prefers-color-scheme: dark)").matches);
   const scheme = createSwitch(document, {
-    onValueChange: dark => {
-      app.style.colorScheme = dark ? "dark" : "light";
-      scheme.setValue(dark);
+    value: dark,
+    onValueChange: next => {
+      app.style.colorScheme = next ? "dark" : "light";
+      dark.value = next;
     }
   });
 
-  scheme.setValue(matchMedia("(prefers-color-scheme: dark)").matches);
   item.append(scheme.element);
   return item;
 }
 
 function renderFontPicker(app: HTMLElement): HTMLElement {
   const item = createElement("div", "kit-Toolbar-item", "Font");
+  const family = new Signal<string>(FONTS[0].value);
   const font = createSegmented<string>(document, {
-    options: FONTS,
+    choices: FONTS,
     size: "small",
-    onValueChange: family => {
-      app.style.setProperty("--fsg-font-family", family);
-      font.setValue(family);
+    value: family,
+    onValueChange: next => {
+      app.style.setProperty("--fsg-font-family", next);
+      family.value = next;
     }
   });
 
   font.element.setAttribute("aria-label", "Font");
-  font.setValue(FONTS[0].value);
   item.append(font.element);
   return item;
 }

@@ -12,14 +12,14 @@ import { TermUpdate } from "@/core/search/engines/search_engine";
 export class FavoritesModel {
   private readonly collection = new FavoritesCollection();
   private readonly searchResults = new FavoritesResults();
-  private readonly searcher = new FavoritesSearcher({ ratingFor: (favorite: Favorite): Rating => this.collection.getRating(favorite.id) });
+  private readonly searcher = new FavoritesSearcher({ getRating: (favorite: Favorite): Rating => this.collection.getRating(favorite.id) });
 
   public get results(): Readable<ResultsState> {
     return this.searchResults.state;
   }
 
-  public get filled(): Occurrence<Favorite> {
-    return this.collection.filled;
+  public get hydrated(): Occurrence<Favorite> {
+    return this.collection.hydrated;
   }
 
   public append(posts: Post[]): Favorite[] {

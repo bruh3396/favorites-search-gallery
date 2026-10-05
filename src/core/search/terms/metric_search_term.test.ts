@@ -1,6 +1,6 @@
-import { Searchable } from "@/core/search/searchable";
-import { Metric } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
+import { Metric } from "@/core/domain/post/post";
+import { Searchable } from "@/core/search/searchable";
 import { parseMetricSearchTerm } from "@/core/search/parsers/search_term_parser";
 
 type MetricSearchable = Searchable & { getMetric: (metric: Metric) => number };

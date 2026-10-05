@@ -1,22 +1,32 @@
 import { Segmented, SegmentedClass, createSegmented } from "@/core/ui/components/segmented/segmented";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import SEGMENTED_CSS from "@/core/ui/components/segmented/segmented.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-type Layout = "column" | "row" | "square";
+type Layout = "column" | "row" | "square" | "none";
 
-const OPTIONS = [
+const CHOICES = [
   { value: "column", label: "Column" },
   { value: "row", label: "Row" },
   { value: "square", label: "Square" }
 ] as const;
 
-function setup(): Segmented<Layout> & { onValueChange: (next: Layout) => void; radios: HTMLButtonElement[] } {
+interface Setup extends Segmented {
+  value: Signal<Layout>;
+  disabled: Signal<boolean>;
+  onValueChange: (next: Layout) => void;
+  radios: HTMLButtonElement[];
+}
+
+function setup(initial: Layout = "none"): Setup {
+  const value = new Signal<Layout>(initial);
+  const disabled = new Signal(false);
   const onValueChange = vi.fn();
-  const segmented = createSegmented<Layout>(document, { options: OPTIONS, onValueChange });
+  const segmented = createSegmented<Layout>(document, { choices: CHOICES, value, disabled, onValueChange });
 
   document.body.append(segmented.element);
-  return { ...segmented, onValueChange, radios: [...segmented.element.querySelectorAll<HTMLButtonElement>("[role=radio]")] };
+  return { ...segmented, value, disabled, onValueChange, radios: [...segmented.element.querySelectorAll<HTMLButtonElement>("[role=radio]")] };
 }
 
 function press(target: HTMLElement, key: string): KeyboardEvent {
@@ -47,7 +57,7 @@ describe("createSegmented", () => {
     expect(radios.every(radio => radio.type === "button")).toBe(true);
   });
 
-  test("starts with nothing checked and the first option as the tab stop", () => {
+  test("checks nothing and makes the first option the tab stop while its value is not an option", () => {
     const { radios } = setup();
 
     expect(readCheckedStates(radios)).toEqual([false, false, false]);
@@ -55,31 +65,31 @@ describe("createSegmented", () => {
   });
 
   test("is medium unless told otherwise", () => {
+    const value = new Signal("row");
+
     expect(setup().element.dataset.size).toBe("medium");
-    expect(createSegmented(document, { options: OPTIONS, onValueChange: vi.fn(), size: "small" }).element.dataset.size).toBe("small");
+    expect(createSegmented(document, { choices: CHOICES, value, onValueChange: vi.fn(), size: "small" }).element.dataset.size).toBe("small");
   });
 
-  test("shows what it is told and makes only the checked option a tab stop", () => {
-    const { radios, setValue } = setup();
+  test("follows its value and makes only the checked option a tab stop", () => {
+    const { radios, value } = setup();
 
-    setValue("row");
+    value.value = "row";
     expect(readCheckedStates(radios)).toEqual([false, true, false]);
     expect(readTabIndexes(radios)).toEqual([-1, 0, -1]);
   });
 
   test("reports a clicked option without changing itself", () => {
-    const { radios, onValueChange, setValue } = setup();
+    const { radios, onValueChange } = setup("column");
 
-    setValue("column");
     radios[2].click();
     expect(onValueChange).toHaveBeenLastCalledWith("square");
     expect(readCheckedStates(radios)).toEqual([true, false, false]);
   });
 
   test("does not report the option that is already checked", () => {
-    const { radios, onValueChange, setValue } = setup();
+    const { radios, onValueChange } = setup("row");
 
-    setValue("row");
     radios[1].click();
     expect(onValueChange).not.toHaveBeenCalled();
   });
@@ -94,14 +104,13 @@ describe("createSegmented", () => {
     ["Home", "square", 0],
     ["End", "column", 2]
   ] as const)("%s from %s focuses and reports option %i", (key, from, to) => {
-    const { radios, onValueChange, setValue } = setup();
-    const index = OPTIONS.findIndex(option => option.value === from);
+    const { radios, onValueChange } = setup(from);
+    const index = CHOICES.findIndex(choice => choice.value === from);
 
-    setValue(from);
     radios[index].focus();
     expect(press(radios[index], key).defaultPrevented).toBe(true);
     expect(document.activeElement).toBe(radios[to]);
-    expect(onValueChange).toHaveBeenLastCalledWith(OPTIONS[to].value);
+    expect(onValueChange).toHaveBeenLastCalledWith(CHOICES[to].value);
   });
 
   test("ignores other keys", () => {
@@ -112,12 +121,20 @@ describe("createSegmented", () => {
   });
 
   test("disables every option and ignores clicks while disabled", () => {
-    const { radios, onValueChange, setDisabled } = setup();
+    const { radios, disabled, onValueChange } = setup();
 
-    setDisabled(true);
+    disabled.value = true;
     radios[1].click();
     expect(radios.every(radio => radio.disabled)).toBe(true);
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("stops following its value once disposed", () => {
+    const { radios, value, dispose } = setup("column");
+
+    dispose();
+    value.value = "row";
+    expect(readCheckedStates(radios)).toEqual([true, false, false]);
   });
 
   test("styles every class it sets", () => {

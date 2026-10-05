@@ -18,6 +18,7 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Sort } from "@/core/features/favorites/types/search";
 import { createPost } from "@/testing/post";
 import { createSearchCriteria } from "@/core/features/favorites/testing/criteria";
+import { flushMicrotasks } from "@/testing/async";
 import { startFavorites } from "@/core/features/favorites/favorites";
 
 function createPreference<T>(initial: T): Preference<T> {
@@ -33,14 +34,19 @@ function createPreference<T>(initial: T): Preference<T> {
   };
 }
 
-async function setup(posts: Post[]): Promise<{
+// A local id with no local post loads as a placeholder, which is hydrated once its post is fetched.
+async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } = {}): Promise<{
   favorites: Favorites;
   remoteFavoriteActions: ObservableRemoteFavoriteActions;
   localFavorites: MemoryLocalFavorites;
+  hydratedIds: string[];
 }> {
   const client = new MemoryClient(posts);
   const remoteFavoriteActions = new ObservableRemoteFavoriteActions(new MemoryRemoteFavoriteActions(client));
   const localFavorites = new MemoryLocalFavorites();
+  const hydratedIds: string[] = [];
+
+  await localFavorites.setAll(localIds);
   const favorites = startFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
@@ -62,8 +68,9 @@ async function setup(posts: Post[]): Promise<{
     waitForPaint: (): Promise<void> => Promise.resolve()
   });
 
+  favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
   await favorites.finishedLoading.wait();
-  return { favorites, remoteFavoriteActions, localFavorites };
+  return { favorites, remoteFavoriteActions, localFavorites, hydratedIds };
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
@@ -102,6 +109,14 @@ describe("startFavorites", () => {
 
     expect(favorites.findPost("1")).toEqual(createPost({ id: "1", tags: "apple" }));
     expect(favorites.findPost("2")).toBeUndefined();
+  });
+
+  test("publishes each placeholder once it is hydrated", async() => {
+    const remote = ["1", "2"].map(id => createPost({ id, media: { kind: "image", locator: `${id}.jpg` } }));
+    const { hydratedIds } = await setup(remote, { localIds: ["1", "2"] });
+
+    await flushMicrotasks();
+    expect(hydratedIds.toSorted()).toEqual(["1", "2"]);
   });
 
   test("records a favorite removed by another caller of the shared port", async() => {

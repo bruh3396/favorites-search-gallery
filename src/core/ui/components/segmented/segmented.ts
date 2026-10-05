@@ -1,23 +1,16 @@
-import { Control, ControlOptions } from "@/core/ui/control";
+import { Control, ControlChoice, ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { effect } from "@/core/utils/reactive/signal";
 
 export const SegmentedClass = {
   root: "fsg-Segmented",
   option: "fsg-Segmented-option"
 } as const;
 
-export type SegmentedSize = "medium" | "small";
-
-export interface SegmentedOption<T> {
-  value: T;
-  label: string;
-}
-
 export interface SegmentedOptions<T> extends ControlOptions<T> {
-  options: readonly SegmentedOption<T>[];
-  size?: SegmentedSize;
+  choices: readonly ControlChoice<T>[];
 }
 
-export interface Segmented<T> extends Control<T> {
+export interface Segmented extends Control {
   readonly element: HTMLDivElement;
 }
 
@@ -31,13 +24,16 @@ const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => numbe
   End: (_, count) => count - 1
 };
 
-export function createSegmented<T>(ownerDocument: Document, { options, onValueChange, size = "medium" }: SegmentedOptions<T>): Segmented<T> {
+export function createSegmented<T>(
+  ownerDocument: Document,
+  { choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: SegmentedOptions<T>
+): Segmented {
   const element = ownerDocument.createElement("div");
-  const buttons = options.map(({ label }) => createOptionButton(ownerDocument, label));
-  let checkedIndex = -1;
-  const report = (index: number): void => {
-    if (index !== checkedIndex) {
-      onValueChange(options[index].value);
+  const buttons = choices.map(({ label }) => createChoiceButton(ownerDocument, label));
+  const findCheckedIndex = (checked: T): number => choices.findIndex(choice => choice.value === checked);
+  const select = (index: number): void => {
+    if (index !== findCheckedIndex(value.peek())) {
+      onValueChange(choices[index].value);
     }
   };
 
@@ -45,7 +41,7 @@ export function createSegmented<T>(ownerDocument: Document, { options, onValueCh
   element.dataset.size = size;
   element.setAttribute("role", "radiogroup");
   element.append(...buttons);
-  buttons.forEach((button, index) => button.addEventListener("click", () => report(index)));
+  buttons.forEach((button, index) => button.addEventListener("click", () => select(index)));
   element.addEventListener("keydown", event => {
     const step = KEY_STEPS[event.key];
     const from = buttons.indexOf(event.target as HTMLButtonElement);
@@ -57,25 +53,27 @@ export function createSegmented<T>(ownerDocument: Document, { options, onValueCh
     const to = step(from, buttons.length);
 
     buttons[to].focus();
-    report(to);
+    select(to);
   });
 
-  showChecked(buttons, checkedIndex);
+  const disposeValue = effect(() => showChecked(buttons, findCheckedIndex(value.value)));
+  const disposeDisabled = effect(() => {
+    const isDisabled = disabled.value;
+
+    for (const button of buttons) {
+      button.disabled = isDisabled;
+    }
+  });
   return {
     element,
-    setValue: (value): void => {
-      checkedIndex = options.findIndex(option => option.value === value);
-      showChecked(buttons, checkedIndex);
-    },
-    setDisabled: (disabled): void => {
-      for (const button of buttons) {
-        button.disabled = disabled;
-      }
+    dispose: (): void => {
+      disposeValue();
+      disposeDisabled();
     }
   };
 }
 
-// Roving tabindex: only the checked option is a tab stop, or the first one while none is checked.
+// Roving tabindex: only the checked choice is a tab stop, or the first one while none is checked.
 function showChecked(buttons: readonly HTMLButtonElement[], checkedIndex: number): void {
   const tabStop = Math.max(checkedIndex, 0);
 
@@ -85,7 +83,7 @@ function showChecked(buttons: readonly HTMLButtonElement[], checkedIndex: number
   });
 }
 
-function createOptionButton(ownerDocument: Document, label: string): HTMLButtonElement {
+function createChoiceButton(ownerDocument: Document, label: string): HTMLButtonElement {
   const button = ownerDocument.createElement("button");
 
   button.className = SegmentedClass.option;

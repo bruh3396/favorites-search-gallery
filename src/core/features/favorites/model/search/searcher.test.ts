@@ -9,7 +9,7 @@ import { createSearchCriteria } from "@/core/features/favorites/testing/criteria
 function setup(posts: Post[]): { collection: FavoritesCollection; favorites: Favorite[]; searcher: FavoritesSearcher } {
   const collection = new FavoritesCollection();
   const favorites = collection.append(posts);
-  const searcher = new FavoritesSearcher({ ratingFor: (favorite: Favorite): Rating => collection.getRating(favorite.id) });
+  const searcher = new FavoritesSearcher({ getRating: (favorite: Favorite): Rating => collection.getRating(favorite.id) });
 
   searcher.index(favorites);
   return { collection, favorites, searcher };

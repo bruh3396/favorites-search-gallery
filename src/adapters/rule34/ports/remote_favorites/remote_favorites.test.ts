@@ -50,7 +50,6 @@ function createClient({
 }: ClientOptions): Rule34 & { prioritized: number } {
   const rule34 = {
     prioritized: 0,
-    readFavoritesPageId: (): string => PAGE_ID,
     readFirstFavoritesPage: (): Post[] | null => firstPage,
     fetchFavoritesPage: fetchPage,
     fetchFavoriteCount: fetchCount,
@@ -65,7 +64,8 @@ function createClient({
 function setup(options: ClientOptions = {}): Setup {
   const rule34 = createClient(options);
   const scheduler = new MemoryScheduler();
-  const remoteFavorites = new Rule34RemoteFavorites({ rule34, scheduler, randomSource: new MemoryRandomSource([1]) });
+  const rule34Document = { readFavoritesPageId: (): string => PAGE_ID };
+  const remoteFavorites = new Rule34RemoteFavorites({ rule34, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
   return { remoteFavorites, rule34, scheduler };
 }
 

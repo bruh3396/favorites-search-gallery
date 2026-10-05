@@ -29,12 +29,12 @@ export class DraftPostings {
     return false;
   }
 
-  public applyUpdates<Doc>(updates: readonly TermUpdate<Doc>[], positionOf: (doc: Doc) => number | undefined): TermDelta {
+  public applyUpdates<Doc>(updates: readonly TermUpdate<Doc>[], findPosition: (doc: Doc) => number | undefined): TermDelta {
     const touched = updates.reduce((acc, { oldTerms, newTerms }) => acc.union(oldTerms.symmetricDifference(newTerms)), new Set<string>());
     const preexisting = new Set<string>([...touched].filter(term => this.positionsByTerm.has(term)));
 
     for (const { doc, oldTerms, newTerms } of updates) {
-      const position = positionOf(doc);
+      const position = findPosition(doc);
 
       if (position !== undefined) {
         this.rePoint(position, oldTerms.difference(newTerms), newTerms.difference(oldTerms));

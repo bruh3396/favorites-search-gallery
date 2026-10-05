@@ -1,6 +1,6 @@
 import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SwitchSetting } from "@/core/ui/settings/descriptor";
+import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
-import { Signal } from "@/core/utils/reactive/signal";
 import { createSetting } from "@/core/ui/settings/setting";
 
 const LAYOUTS = ["column", "row", "square"] as const;
@@ -10,25 +10,29 @@ type Layout = (typeof LAYOUTS)[number];
 
 const SCHEDULER = { schedule: (): (() => void) => () => undefined };
 
-function createPreference<T>(initial: T): SettingPreference<T> & { signal: Signal<T> } {
+// Records every write, so a test can tell a preview from a write.
+function createPreference<T>(initial: T): SettingPreference<T> & { writes: T[] } {
   const signal = new Signal(initial);
+  const writes: T[] = [];
   return {
-    signal,
+    writes,
     get value(): T {
       return signal.value;
     },
+    peek: (): T => signal.peek(),
     set(value: T): void {
+      writes.push(value);
       signal.value = value;
     }
   };
 }
 
-function createSwitchSetting(preference: SettingPreference<boolean>, enabledWhen?: () => boolean): SwitchSetting {
-  return { id: "autoplay", kind: "switch", label: "Autoplay", preference, enabledWhen };
+function createSwitchSetting(preference: SettingPreference<boolean>, disabled?: Readable<boolean>): SwitchSetting {
+  return { id: "autoplay", kind: "switch", label: "Autoplay", preference, disabled };
 }
 
-function createLayoutSetting(preference: SettingPreference<Layout>, variant: ChoiceSetting["variant"]): ChoiceSetting<Layout> {
-  return { id: "layout", kind: "choice", label: "Layout", preference, members: LAYOUTS, labels: LAYOUT_LABELS, variant };
+function createLayoutSetting(preference: SettingPreference<Layout>, control: ChoiceSetting["control"]): ChoiceSetting<Layout> {
+  return { id: "layout", kind: "choice", label: "Layout", preference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
 }
 
 function render(descriptor: SettingDescriptor): HTMLDivElement {
@@ -43,25 +47,14 @@ function press(button: HTMLButtonElement): void {
   button.dispatchEvent(new PointerEvent("pointerdown", { button: 0 }));
 }
 
-// A number setting at 1 whose hold repeats only when the test runs the next task; records every write.
-function setupHeldNumber({ live }: { live: boolean }): {
+// A number setting at 1 whose hold repeats only when the test runs the next task.
+function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
   input: HTMLInputElement;
   increment: HTMLButtonElement;
-  preference: SettingPreference<number>;
-  writes: number[];
+  preference: SettingPreference<number> & { writes: number[] };
   scheduler: { runNext: () => void };
 } {
-  const stored = createPreference(1);
-  const writes: number[] = [];
-  const preference = {
-    get value(): number {
-      return stored.value;
-    },
-    set(value: number): void {
-      writes.push(value);
-      stored.set(value);
-    }
-  };
+  const preference = createPreference(1);
   let pending = (): void => undefined;
   const scheduler = {
     schedule: (task: () => void): (() => void) => {
@@ -72,9 +65,9 @@ function setupHeldNumber({ live }: { live: boolean }): {
     },
     runNext: (): void => pending()
   };
-  const descriptor: NumberSetting = { id: "columns", kind: "number", label: "Columns", preference, min: 0, max: 10, step: 1, live };
+  const descriptor: NumberSetting = { id: "columns", kind: "number", label: "Columns", preference, min: 0, max: 10, step: 1, writeOnEveryStep };
   const element = createSetting(document, { descriptor, scheduler }).element;
-  return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, writes, scheduler };
+  return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, scheduler };
 }
 
 describe("createSetting", () => {
@@ -91,12 +84,12 @@ describe("createSetting", () => {
     expect([element.dataset.size, queryButtons(element)[0].dataset.size]).toEqual(["small", "small"]);
   });
 
-  test("hides and shows its caption on request", () => {
+  test("hides and shows its caption as told", () => {
     const descriptor = { ...createSwitchSetting(createPreference(false)), description: "Plays videos when opened." };
-    const setting = createSetting(document, { descriptor, scheduler: SCHEDULER });
+    const descriptionVisible = new Signal(false);
+    const { element } = createSetting(document, { descriptor, descriptionVisible, scheduler: SCHEDULER });
 
-    setting.setDescriptionVisible(false);
-    expect(setting.element.querySelector<HTMLElement>(".fsg-SettingRow-description")?.hidden).toBe(true);
+    expect(element.querySelector<HTMLElement>(".fsg-SettingRow-description")?.hidden).toBe(true);
   });
 
   test("shows a switch's preference and follows it", () => {
@@ -158,27 +151,34 @@ describe("createSetting", () => {
   });
 
   test("previews a held number and writes it once, on release", () => {
-    const { input, increment, preference, writes, scheduler } = setupHeldNumber({ live: false });
+    const { input, increment, preference, scheduler } = setupHeldNumber({ writeOnEveryStep: false });
 
     press(increment);
     scheduler.runNext();
     expect([input.value, preference.value]).toEqual(["3", 1]);
     increment.dispatchEvent(new PointerEvent("pointerup"));
-    expect([input.value, writes]).toEqual(["3", [3]]);
+    expect([input.value, preference.writes]).toEqual(["3", [3]]);
   });
 
-  test("writes every step of a live number", () => {
-    const { increment, writes, scheduler } = setupHeldNumber({ live: true });
+  test("shows a number's preference when it changes elsewhere", () => {
+    const { input, preference } = setupHeldNumber({ writeOnEveryStep: false });
+
+    preference.set(7);
+    expect(input.value).toBe("7");
+  });
+
+  test("writes every step of a number that writes on every step", () => {
+    const { increment, preference, scheduler } = setupHeldNumber({ writeOnEveryStep: true });
 
     press(increment);
     scheduler.runNext();
     increment.dispatchEvent(new PointerEvent("pointerup"));
-    expect(writes).toEqual([2, 3]);
+    expect(preference.writes).toEqual([2, 3]);
   });
 
-  test("disables the control while enabledWhen is false, and follows the signals it reads", () => {
+  test("disables the control while its disabled state is true", () => {
     const infiniteScroll = createPreference(true);
-    const [control] = queryButtons(render(createSwitchSetting(createPreference(false), () => !infiniteScroll.value)));
+    const [control] = queryButtons(render(createSwitchSetting(createPreference(false), infiniteScroll)));
 
     expect(control.disabled).toBe(true);
     infiniteScroll.set(false);

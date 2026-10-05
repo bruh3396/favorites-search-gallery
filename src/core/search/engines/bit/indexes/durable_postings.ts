@@ -16,7 +16,7 @@ export class DurablePostings {
 
     for (const [term, positions] of entries) {
       if (positions.length > threshold) {
-        this.densePostings.set(term, new DensePosting(bitsetOf(positions, capacity)));
+        this.densePostings.set(term, new DensePosting(createBitset(positions, capacity)));
       } else {
         sparse.push([term, positions]);
         sparsePositions += positions.length;
@@ -30,13 +30,13 @@ export class DurablePostings {
     return [...this.densePostings.keys(), ...this.sparsePostings.terms()];
   }
 
-  public postingFor(term: string): Posting | undefined {
+  public findPosting(term: string): Posting | undefined {
     const dense = this.densePostings.get(term);
 
     if (dense !== undefined) {
       return dense;
     }
-    const sparse = this.sparsePostings.positionsFor(term);
+    const sparse = this.sparsePostings.findPositions(term);
     return sparse === undefined ? undefined : new SparsePosting(sparse);
   }
 
@@ -48,7 +48,7 @@ export class DurablePostings {
   }
 }
 
-function bitsetOf(positions: number[], capacity: number): BitSet {
+function createBitset(positions: number[], capacity: number): BitSet {
   const bits = new BitSet(capacity);
 
   for (const position of positions) {

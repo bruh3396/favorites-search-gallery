@@ -11,7 +11,7 @@ export class PositionIndex<Doc> {
     }
   }
 
-  public positionOf(doc: Doc): number {
+  public findPosition(doc: Doc): number {
     return this.index.get(doc) ?? -1;
   }
 
@@ -29,7 +29,7 @@ export class PositionIndex<Doc> {
 
   public sort(docs: Doc[]): Doc[] {
     return docs
-      .map(doc => ({ doc, position: this.positionOf(doc) }))
+      .map(doc => ({ doc, position: this.findPosition(doc) }))
       .sort((a, b) => a.position - b.position)
       .map(entry => entry.doc);
   }

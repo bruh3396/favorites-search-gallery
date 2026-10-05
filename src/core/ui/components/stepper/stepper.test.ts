@@ -1,6 +1,7 @@
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Stepper, StepperClass, StepperOptions, StepperScheduler, createStepper } from "@/core/ui/components/stepper/stepper";
 import STEPPER_CSS from "@/core/ui/components/stepper/stepper.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
 interface PendingTask {
@@ -37,18 +38,34 @@ function createScheduler(): StepperScheduler & { runNext: () => number } {
 
 type OnValueChange = Mock<(next: number) => void>;
 
-function setup(options: Partial<Omit<StepperOptions, "onValueChange">> & { onValueChange?: OnValueChange } = {}): Stepper & {
+type SetupOptions = Partial<Omit<StepperOptions, "value" | "disabled" | "onValueChange" | "scheduler">> & {
+  initial?: number;
+  // Writes each reported value back, closing the controlled loop the way a caller does.
+  writesBack?: boolean;
+};
+
+interface Setup extends Stepper {
+  value: Signal<number>;
+  disabled: Signal<boolean>;
   onValueChange: OnValueChange;
   scheduler: ReturnType<typeof createScheduler>;
   input: HTMLInputElement;
   decrement: HTMLButtonElement;
   increment: HTMLButtonElement;
-} {
-  const { onValueChange = vi.fn<(next: number) => void>(), ...rest } = options;
+}
+
+function setup({ initial = 0, writesBack = false, ...options }: SetupOptions = {}): Setup {
+  const value = new Signal(initial);
+  const disabled = new Signal(false);
+  const onValueChange = vi.fn<(next: number) => void>(next => {
+    if (writesBack) {
+      value.value = next;
+    }
+  });
   const scheduler = createScheduler();
-  const stepper = createStepper(document, { label: "Count", min: 0, max: 10, ...rest, onValueChange, scheduler });
+  const stepper = createStepper(document, { label: "Count", min: 0, max: 10, ...options, value, disabled, onValueChange, scheduler });
   const [decrement, increment] = stepper.element.querySelectorAll("button");
-  return { ...stepper, onValueChange, scheduler, input: stepper.element.querySelector("input")!, decrement, increment };
+  return { ...stepper, value, disabled, onValueChange, scheduler, input: stepper.element.querySelector("input")!, decrement, increment };
 }
 
 function press(button: HTMLButtonElement): void {
@@ -87,28 +104,25 @@ describe("createStepper", () => {
     expect(setup({ size: "small" }).element.dataset.size).toBe("small");
   });
 
-  test("shows what it is told and disables the button at each bound", () => {
-    const { input, decrement, increment, setValue } = setup();
+  test("follows its value and disables the button at each bound", () => {
+    const { input, decrement, increment, value } = setup();
 
-    setValue(0);
     expect([input.value, decrement.disabled, increment.disabled]).toEqual(["0", true, false]);
-    setValue(10);
+    value.value = 10;
     expect([input.value, decrement.disabled, increment.disabled]).toEqual(["10", false, true]);
   });
 
   test("reports one step on press without changing itself", () => {
-    const { input, increment, onValueChange, setValue } = setup();
+    const { input, increment, onValueChange } = setup({ initial: 4 });
 
-    setValue(4);
     press(increment);
     expect(onValueChange).toHaveBeenLastCalledWith(5);
     expect(input.value).toBe("4");
   });
 
   test("snaps an off-grid value onto the step grid", () => {
-    const { decrement, increment, onValueChange, setValue } = setup({ step: 5, max: 100 });
+    const { decrement, increment, onValueChange } = setup({ initial: 12, step: 5, max: 100 });
 
-    setValue(12);
     press(increment);
     expect(onValueChange).toHaveBeenLastCalledWith(15);
     press(decrement);
@@ -116,19 +130,17 @@ describe("createStepper", () => {
   });
 
   test("walks every decimal step up to the max and back down to the min", () => {
-    const { decrement, increment, onValueChange, setValue } = setup({ step: 0.1, max: 1, onValueChange: vi.fn((next: number) => setValue(next)) });
+    const { decrement, increment, onValueChange } = setup({ step: 0.1, max: 1, writesBack: true });
     const tenths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];
 
-    setValue(0);
     tenths.forEach(() => press(increment));
     tenths.forEach(() => press(decrement));
     expect(onValueChange.mock.calls.flat()).toEqual([...tenths, ...tenths.slice(0, -1).reverse(), 0]);
   });
 
-  test("repeats while held, from the last told value, after a pause", () => {
-    const { increment, onValueChange, scheduler, setValue } = setup({ onValueChange: vi.fn((next: number) => setValue(next)) });
+  test("repeats while held, from its current value, after a pause", () => {
+    const { increment, onValueChange, scheduler } = setup({ writesBack: true });
 
-    setValue(0);
     press(increment);
     expect(scheduler.runNext()).toBe(400);
     expect(scheduler.runNext()).toBe(60);
@@ -144,9 +156,8 @@ describe("createStepper", () => {
   });
 
   test("stops repeating at the bound", () => {
-    const { increment, onValueChange, scheduler, setValue } = setup({ max: 2, onValueChange: vi.fn((next: number) => setValue(next)) });
+    const { increment, onValueChange, scheduler } = setup({ initial: 1, max: 2, writesBack: true });
 
-    setValue(1);
     press(increment);
     scheduler.runNext();
     expect(onValueChange.mock.calls.flat()).toEqual([2]);
@@ -154,28 +165,25 @@ describe("createStepper", () => {
   });
 
   test("steps with the arrow keys instead of letting the input change itself", () => {
-    const { input, onValueChange, setValue } = setup();
+    const { input, onValueChange } = setup({ initial: 5 });
 
-    setValue(5);
     expect(keyDown(input, "ArrowUp").defaultPrevented).toBe(true);
     expect(onValueChange).toHaveBeenLastCalledWith(6);
     keyDown(input, "ArrowDown");
     expect(onValueChange).toHaveBeenLastCalledWith(4);
   });
 
-  test("reports a typed value clamped to the bounds, and shows the last told value until told otherwise", () => {
-    const { input, onValueChange, setValue } = setup();
+  test("reports a typed value clamped to the bounds, and shows its current value until it changes", () => {
+    const { input, onValueChange } = setup({ initial: 3 });
 
-    setValue(3);
     type(input, "42");
     expect(onValueChange).toHaveBeenLastCalledWith(10);
     expect(input.value).toBe("3");
   });
 
-  test("restores the last told value when the typed text is not a number or is unchanged", () => {
-    const { input, onValueChange, setValue } = setup();
+  test("restores its current value when the typed text is not a number or is unchanged", () => {
+    const { input, onValueChange } = setup({ initial: 3 });
 
-    setValue(3);
     type(input, "");
     type(input, "3");
     expect(onValueChange).not.toHaveBeenCalled();
@@ -184,9 +192,8 @@ describe("createStepper", () => {
 
   test("commits once, on release, the value a held press ends on", () => {
     const onValueCommit = vi.fn<(value: number) => void>();
-    const { increment, scheduler, setValue } = setup({ onValueCommit, onValueChange: vi.fn((next: number) => setValue(next)) });
+    const { increment, scheduler } = setup({ onValueCommit, writesBack: true });
 
-    setValue(0);
     press(increment);
     scheduler.runNext();
     scheduler.runNext();
@@ -197,9 +204,8 @@ describe("createStepper", () => {
 
   test("commits a held arrow key when it is released", () => {
     const onValueCommit = vi.fn<(value: number) => void>();
-    const { input, setValue } = setup({ onValueCommit, onValueChange: vi.fn((next: number) => setValue(next)) });
+    const { input } = setup({ initial: 5, onValueCommit, writesBack: true });
 
-    setValue(5);
     keyDown(input, "ArrowUp");
     keyDown(input, "ArrowUp");
     expect(onValueCommit).not.toHaveBeenCalled();
@@ -209,9 +215,8 @@ describe("createStepper", () => {
 
   test("commits a typed value and an assistive-technology click at once", () => {
     const onValueCommit = vi.fn<(value: number) => void>();
-    const { input, increment, setValue } = setup({ onValueCommit, onValueChange: vi.fn((next: number) => setValue(next)) });
+    const { input, increment } = setup({ initial: 3, onValueCommit, writesBack: true });
 
-    setValue(3);
     type(input, "8");
     increment.dispatchEvent(new MouseEvent("click", { detail: 0 }));
     expect(onValueCommit.mock.calls).toEqual([[8], [9]]);
@@ -219,24 +224,40 @@ describe("createStepper", () => {
 
   test("commits nothing when a gesture ends where it started", () => {
     const onValueCommit = vi.fn<(value: number) => void>();
-    const { increment, setValue } = setup({ onValueCommit });
+    const { increment } = setup({ initial: 4, onValueCommit });
 
-    setValue(4);
     press(increment);
     release(increment);
     expect(onValueCommit).not.toHaveBeenCalled();
   });
 
   test("disables everything and ignores presses while disabled", () => {
-    const { input, decrement, increment, onValueChange, setDisabled, setValue } = setup();
+    const { input, decrement, increment, disabled, onValueChange } = setup({ initial: 5 });
 
-    setValue(5);
-    setDisabled(true);
+    disabled.value = true;
     expect([input.disabled, decrement.disabled, increment.disabled]).toEqual([true, true, true]);
     press(increment);
     press(decrement);
     increment.click();
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("ends a held press when it becomes disabled, committing where it got to", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { increment, disabled, scheduler } = setup({ onValueCommit, writesBack: true });
+
+    press(increment);
+    disabled.value = true;
+    expect(onValueCommit.mock.calls).toEqual([[1]]);
+    expect(scheduler.runNext()).toBe(-1);
+  });
+
+  test("stops following its value once disposed", () => {
+    const { input, value, dispose } = setup({ initial: 3 });
+
+    dispose();
+    value.value = 7;
+    expect(input.value).toBe("3");
   });
 
   test("styles every class it sets", () => {

@@ -1,4 +1,5 @@
-import { Control, ControlOptions } from "@/core/ui/control";
+import { Control, ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { effect } from "@/core/utils/reactive/signal";
 
 export const DisclosureClass = {
   root: "fsg-Disclosure",
@@ -8,41 +9,45 @@ export const DisclosureClass = {
   content: "fsg-Disclosure-content"
 } as const;
 
-export type DisclosureSize = "medium" | "small";
-
 export interface DisclosureOptions extends ControlOptions<boolean> {
   title: string;
   content: HTMLElement;
-  size?: DisclosureSize;
 }
 
-export interface Disclosure extends Control<boolean> {
+export interface Disclosure extends Control {
   readonly element: HTMLDivElement;
 }
 
-export function createDisclosure(ownerDocument: Document, { title, content, size = "medium", onValueChange }: DisclosureOptions): Disclosure {
+export function createDisclosure(
+  ownerDocument: Document,
+  { title, content, value, disabled = NEVER_DISABLED, size = "medium", onValueChange }: DisclosureOptions
+): Disclosure {
   const element = ownerDocument.createElement("div");
   const trigger = createTrigger(ownerDocument, title);
   const region = ownerDocument.createElement("div");
-  let isOpen = false;
 
   element.className = DisclosureClass.root;
   element.dataset.size = size;
   region.className = DisclosureClass.content;
-  region.hidden = true;
   region.append(content);
   trigger.ariaControlsElements = [region];
-  trigger.addEventListener("click", () => onValueChange(!isOpen));
+  trigger.addEventListener("click", () => onValueChange(!value.peek()));
   element.append(trigger, region);
+
+  const disposeValue = effect(() => {
+    const isOpen = value.value;
+
+    trigger.setAttribute("aria-expanded", String(isOpen));
+    region.hidden = !isOpen;
+  });
+  const disposeDisabled = effect(() => {
+    trigger.disabled = disabled.value;
+  });
   return {
     element,
-    setValue: (value): void => {
-      isOpen = value;
-      trigger.setAttribute("aria-expanded", String(value));
-      region.hidden = !value;
-    },
-    setDisabled: (disabled): void => {
-      trigger.disabled = disabled;
+    dispose: (): void => {
+      disposeValue();
+      disposeDisabled();
     }
   };
 }
@@ -54,7 +59,6 @@ function createTrigger(ownerDocument: Document, title: string): HTMLButtonElemen
 
   trigger.className = DisclosureClass.trigger;
   trigger.type = "button";
-  trigger.setAttribute("aria-expanded", "false");
   titleElement.className = DisclosureClass.title;
   titleElement.textContent = title;
   icon.className = DisclosureClass.icon;

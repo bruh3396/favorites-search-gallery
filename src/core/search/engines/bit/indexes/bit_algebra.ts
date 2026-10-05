@@ -45,7 +45,7 @@ export class BitAlgebra<Doc> {
     const excluded = this.empty();
 
     for (const doc of docs) {
-      const position = this.table.positionOf(doc);
+      const position = this.table.findPosition(doc);
 
       if (position !== undefined) {
         excluded.set(position);

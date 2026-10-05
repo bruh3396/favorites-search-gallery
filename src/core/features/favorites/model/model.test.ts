@@ -92,11 +92,11 @@ describe("FavoritesModel", () => {
 
   test("announces a refreshed favorite that gained media", () => {
     const model = setup(createTaggedPosts("apple"));
-    const filled: string[] = [];
+    const hydrated: string[] = [];
 
-    model.filled.on(favorite => filled.push(favorite.id));
+    model.hydrated.on(favorite => hydrated.push(favorite.id));
     model.overwrite(createPost({ id: "1", media: { kind: "image", locator: "1/a.jpg" } }));
-    expect(filled).toEqual(["1"]);
+    expect(hydrated).toEqual(["1"]);
   });
 
   test("filters by the ratings it reads from the collection", () => {

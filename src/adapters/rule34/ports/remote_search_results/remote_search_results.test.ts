@@ -22,13 +22,9 @@ const OTHER_PAGE = [createPost({ id: "2" })];
 function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolve(OTHER_PAGE))): Setup {
   const scheduler = new MemoryScheduler();
   const readPostListPage = vi.fn((): Post[] => LANDING_PAGE);
-  const rule34 = {
-    readSearchQuery: (): string => "apple banana",
-    readPostListPageIndex: (): number => 2,
-    readPostListPage,
-    fetchPostListPage
-  };
-  const searchResults = new Rule34RemoteSearchResults({ rule34, scheduler, randomSource: new MemoryRandomSource([1]) });
+  const rule34 = { readPostListPage, fetchPostListPage };
+  const rule34Document = { readSearchQuery: (): string => "apple banana", readPostListPageIndex: (): number => 2 };
+  const searchResults = new Rule34RemoteSearchResults({ rule34, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
   return { searchResults, scheduler, readPostListPage, fetchPostListPage };
 }
 

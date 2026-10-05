@@ -1,10 +1,12 @@
 import { Fact } from "@/core/utils/reactive/milestone";
+import { Favorite } from "@/core/features/favorites/types/favorite";
 import { Listing } from "@/core/contracts/listing";
 import { LoadState } from "@/core/features/favorites/types/load";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
+import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Page } from "@/core/features/favorites/types/paging";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
@@ -60,6 +62,8 @@ export interface FavoritesIntents {
 
 export interface Favorites extends Listing {
   readonly intents: FavoritesIntents;
+  readonly posts: Readable<readonly Favorite[]>;
+  readonly hydrated: Occurrence<Favorite>;
   readonly finishedLoading: Fact;
   readonly page: Readable<Page>;
   readonly loadState: Readable<LoadState>;

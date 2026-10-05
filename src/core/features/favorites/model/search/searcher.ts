@@ -7,15 +7,15 @@ import { hashInt } from "@/core/utils/number/bit";
 import { isEmptyString } from "@/core/utils/string/string";
 
 export interface FavoritesSearcherDependencies {
-  ratingFor: (favorite: Favorite) => Rating;
+  getRating: (favorite: Favorite) => Rating;
 }
 
 export class FavoritesSearcher {
   private readonly engine = new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
-  private readonly ratingFor: (favorite: Favorite) => Rating;
+  private readonly getRating: (favorite: Favorite) => Rating;
 
-  constructor({ ratingFor }: FavoritesSearcherDependencies) {
-    this.ratingFor = ratingFor;
+  constructor({ getRating }: FavoritesSearcherDependencies) {
+    this.getRating = getRating;
   }
 
   public index(favorites: Favorite[]): void {
@@ -54,7 +54,7 @@ export class FavoritesSearcher {
   }
 
   private filterByRating(favorites: Favorite[], allowedRatings: ReadonlySet<Rating>): Favorite[] {
-    return allowedRatings.size === RATINGS.length ? favorites : favorites.filter(favorite => allowedRatings.has(this.ratingFor(favorite)));
+    return allowedRatings.size === RATINGS.length ? favorites : favorites.filter(favorite => allowedRatings.has(this.getRating(favorite)));
   }
 
   private sort(favorites: Favorite[], { sort: { key, isAscending }, shuffleSeed }: SearchCriteria): Favorite[] {

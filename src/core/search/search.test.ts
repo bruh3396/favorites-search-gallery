@@ -10,19 +10,19 @@ import { parseSearchQuery } from "@/core/search/parsers/search_term_group_parser
 type Doc = Searchable & { name: string; getMetric?: (metric: Metric) => number };
 type Searcher = (query: string, docs: Doc[]) => string[];
 
-const metricFor = (doc: Doc, metric: Metric): number => doc.getMetric?.(metric) ?? 0;
-const termsFor = (doc: Doc): Iterable<string> => doc.tags;
+const getMetric = (doc: Doc, metric: Metric): number => doc.getMetric?.(metric) ?? 0;
+const getTerms = (doc: Doc): Iterable<string> => doc.tags;
 const getName = (doc: Doc): string => doc.name;
 
 const implementations: { name: string; implementation: Searcher; supportsAST: boolean }[] = [
   {
     name: "SetSearchEngine",
-    implementation: (query, docs) => new SetSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(getName),
+    implementation: (query, docs) => new SetSearchEngine<Doc>(getTerms, getMetric, docs).search(query, docs).map(getName),
     supportsAST: true
   },
   {
     name: "BitSearchEngine",
-    implementation: (query, docs) => new BitSearchEngine<Doc>(termsFor, metricFor, docs).search(query, docs).map(getName),
+    implementation: (query, docs) => new BitSearchEngine<Doc>(getTerms, getMetric, docs).search(query, docs).map(getName),
     supportsAST: true
   },
   {

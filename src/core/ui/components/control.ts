@@ -1,0 +1,22 @@
+import { Readable, Signal } from "@/core/utils/reactive/signal";
+
+export const NEVER_DISABLED: Readable<boolean> = new Signal(false);
+
+export type ControlSize = "medium" | "small";
+
+export interface ControlChoice<T> {
+  value: T;
+  label: string;
+}
+
+export interface Control {
+  readonly element: HTMLElement;
+  dispose: () => void;
+}
+
+export interface ControlOptions<T> {
+  value: Readable<T>;
+  disabled?: Readable<boolean>;
+  size?: ControlSize;
+  onValueChange: (next: T) => void;
+}

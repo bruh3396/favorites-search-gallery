@@ -2,9 +2,9 @@ import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
 import { BitEvaluator } from "@/core/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/search/engines/bit/indexes/bit_index";
 import { BitSet } from "@/core/search/engines/bit/postings/bitset";
+import { Metric } from "@/core/domain/post/post";
 import { MetricBitIndex } from "@/core/search/engines/bit/indexes/metric_index";
 import { PostingResolver } from "@/core/search/engines/bit/resolution/posting_resolver";
-import { Metric } from "@/core/domain/post/post";
 import { WildcardPostingResolver } from "@/core/search/engines/bit/resolution/wildcard_posting_resolver";
 import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
@@ -14,9 +14,9 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardPostingResolver<Doc>;
   private readonly bitEvaluator: BitEvaluator<Doc>;
 
-  constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: Metric) => number, docs: Doc[] = []) {
-    this.bitIndex = new BitIndex<Doc>(termsFor);
-    this.metricIndex = new MetricBitIndex<Doc>(metricFor);
+  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: Doc[] = []) {
+    this.bitIndex = new BitIndex<Doc>(getTerms);
+    this.metricIndex = new MetricBitIndex<Doc>(getMetric);
     this.wildcardResolver = new WildcardPostingResolver(this.bitIndex);
     this.bitEvaluator = new BitEvaluator(this.bitIndex, new PostingResolver(this.bitIndex, this.metricIndex, this.wildcardResolver));
     this.index(docs);

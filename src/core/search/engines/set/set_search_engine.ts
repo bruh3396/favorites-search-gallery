@@ -17,10 +17,10 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardDocResolver<Doc>;
   private readonly setEvaluator: SetEvaluator<Doc>;
 
-  constructor(termsFor: (doc: Doc) => Iterable<string>, metricFor: (doc: Doc, metric: Metric) => number, docs: Doc[] = []) {
-    this.termIndex = new InvertedIndex<Doc>(termsFor);
-    this.metricIndex = new MetricIndex<Doc>([...METRICS], metricFor);
-    this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], metricFor);
+  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: Doc[] = []) {
+    this.termIndex = new InvertedIndex<Doc>(getTerms);
+    this.metricIndex = new MetricIndex<Doc>([...METRICS], getMetric);
+    this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], getMetric);
     this.positionIndex = new PositionIndex<Doc>();
     this.wildcardResolver = new WildcardDocResolver<Doc>(this.termIndex);
     this.setEvaluator = new SetEvaluator<Doc>(

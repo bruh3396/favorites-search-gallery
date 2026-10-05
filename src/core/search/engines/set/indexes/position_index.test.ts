@@ -6,15 +6,15 @@ function createDocs(...names: string[]): { name: string }[] {
 }
 
 describe("PositionIndex", () => {
-  describe("positionOf", () => {
+  describe("findPosition", () => {
     test("reflects build order", () => {
       const [a, b, c] = createDocs("a", "b", "c");
       const index = new PositionIndex<{ name: string }>();
 
       index.build([a, b, c]);
-      expect(index.positionOf(a)).toBe(0);
-      expect(index.positionOf(b)).toBe(1);
-      expect(index.positionOf(c)).toBe(2);
+      expect(index.findPosition(a)).toBe(0);
+      expect(index.findPosition(b)).toBe(1);
+      expect(index.findPosition(c)).toBe(2);
     });
 
     test("returns -1 for an unknown doc", () => {
@@ -22,7 +22,7 @@ describe("PositionIndex", () => {
       const index = new PositionIndex<{ name: string }>();
 
       index.build([]);
-      expect(index.positionOf(a)).toBe(-1);
+      expect(index.findPosition(a)).toBe(-1);
     });
   });
 
@@ -33,7 +33,7 @@ describe("PositionIndex", () => {
 
       index.build([a]);
       index.add(b);
-      expect(index.positionOf(b)).toBe(1);
+      expect(index.findPosition(b)).toBe(1);
     });
 
     test("ignores a doc already indexed", () => {
@@ -42,8 +42,8 @@ describe("PositionIndex", () => {
 
       index.build([a, b]);
       index.add(a);
-      expect(index.positionOf(a)).toBe(0);
-      expect(index.positionOf(b)).toBe(1);
+      expect(index.findPosition(a)).toBe(0);
+      expect(index.findPosition(b)).toBe(1);
     });
   });
 
@@ -74,8 +74,8 @@ describe("PositionIndex", () => {
 
       index.build([a, b]);
       index.build([b, a]);
-      expect(index.positionOf(b)).toBe(0);
-      expect(index.positionOf(a)).toBe(1);
+      expect(index.findPosition(b)).toBe(0);
+      expect(index.findPosition(a)).toBe(1);
     });
   });
 });

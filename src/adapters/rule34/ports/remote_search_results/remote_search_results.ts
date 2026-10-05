@@ -4,11 +4,13 @@ import { Post } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Rule34Client } from "@/adapters/rule34/client/client";
+import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemoteSearchResultsDependencies {
-  rule34: Pick<Rule34Client, "readSearchQuery" | "readPostListPageIndex" | "readPostListPage" | "fetchPostListPage">;
+  rule34: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
+  rule34Document: Pick<Rule34Document, "readSearchQuery" | "readPostListPageIndex">;
   scheduler: Scheduler;
   randomSource: RandomSource;
 }
@@ -24,8 +26,8 @@ export class Rule34RemoteSearchResults implements RemoteSearchResults {
   private initialPage: Post[] | null = null;
 
   constructor(private readonly dependencies: Rule34RemoteSearchResultsDependencies) {
-    this.searchQuery = dependencies.rule34.readSearchQuery();
-    this.initialPageIndex = dependencies.rule34.readPostListPageIndex();
+    this.searchQuery = dependencies.rule34Document.readSearchQuery();
+    this.initialPageIndex = dependencies.rule34Document.readPostListPageIndex();
     this.retryPolicy = {
       attempts: MAX_FETCH_ATTEMPTS,
       baseDelay: RETRY_BASE_DELAY,

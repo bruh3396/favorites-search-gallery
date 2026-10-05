@@ -19,6 +19,7 @@ function createPreference<T>(initial: T): SettingPreference<T> {
     get value(): T {
       return signal.value;
     },
+    peek: (): T => signal.peek(),
     set(value: T): void {
       signal.value = value;
     }
@@ -29,14 +30,18 @@ function createSwitchSetting(id: string, preference = createPreference(false)): 
   return { id, kind: "switch", label: id, preference };
 }
 
-function setup(options: Partial<SettingsScreenOptions> = {}): SettingsScreen & {
+interface Setup extends SettingsScreen {
   expanded: SettingPreference<readonly string[]>;
+  query: Signal<string>;
   triggers: HTMLButtonElement[];
-} {
+}
+
+function setup(options: Partial<SettingsScreenOptions> = {}): Setup {
   const expanded = options.expanded ?? createPreference<readonly string[]>([]);
+  const query = new Signal("");
   const descriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
-  const screen = createSettingsScreen(document, { layout: LAYOUT, descriptors, expanded, scheduler: SCHEDULER, ...options });
-  return { ...screen, expanded, triggers: [...screen.element.querySelectorAll<HTMLButtonElement>("[aria-expanded]")] };
+  const screen = createSettingsScreen(document, { layout: LAYOUT, descriptors, expanded, query, scheduler: SCHEDULER, ...options });
+  return { ...screen, expanded, query, triggers: [...screen.element.querySelectorAll<HTMLButtonElement>("[aria-expanded]")] };
 }
 
 function readLabels(element: HTMLElement): string[] {
@@ -47,6 +52,14 @@ function readVisibleLabels(element: HTMLElement): string[] {
   return [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow")]
     .filter(row => !row.hidden)
     .map(row => row.querySelector(".fsg-SettingRow-label")?.textContent ?? "");
+}
+
+function readSectionHiddenStates(triggers: HTMLButtonElement[]): (boolean | undefined)[] {
+  return triggers.map(trigger => trigger.closest<HTMLElement>(".fsg-Disclosure")?.hidden);
+}
+
+function readExpandedStates(triggers: HTMLButtonElement[]): (string | null)[] {
+  return triggers.map(trigger => trigger.getAttribute("aria-expanded"));
 }
 
 describe("createSettingsScreen", () => {
@@ -69,11 +82,10 @@ describe("createSettingsScreen", () => {
 
   test("opens the sections the preference lists, and follows it", () => {
     const { triggers, expanded } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-    const readExpandedStates = (): (string | null)[] => triggers.map(trigger => trigger.getAttribute("aria-expanded"));
 
-    expect(readExpandedStates()).toEqual(["false", "true"]);
+    expect(readExpandedStates(triggers)).toEqual(["false", "true"]);
     expanded.set(["general"]);
-    expect(readExpandedStates()).toEqual(["true", "false"]);
+    expect(readExpandedStates(triggers)).toEqual(["true", "false"]);
   });
 
   test("writes a section's id into or out of the preference when it is toggled, keeping the others", () => {
@@ -92,66 +104,67 @@ describe("createSettingsScreen", () => {
     expect(new Set(sizes)).toEqual(new Set(["small"]));
   });
 
-  test("hides and shows every caption on request", () => {
+  test("hides and shows every caption as told", () => {
     const descriptors = ["autoplay", "hints", "loop"].map(id => ({ ...createSwitchSetting(id), description: `About ${id}.` }));
-    const { element, setDescriptionsVisible } = setup({ descriptors });
+    const descriptionsVisible = new Signal(false);
+    const { element } = setup({ descriptors, descriptionsVisible });
     const captions = [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow-description")];
     const readDescriptionHiddenStates = (): boolean[] => captions.map(caption => caption.hidden);
 
-    setDescriptionsVisible(false);
     expect(readDescriptionHiddenStates()).toEqual([true, true, true]);
-    setDescriptionsVisible(true);
+    descriptionsVisible.value = true;
     expect(readDescriptionHiddenStates()).toEqual([false, false, false]);
   });
 
   test("shows only the rows a query matches, and only the sections holding one", () => {
-    const { element, triggers, setQuery } = setup();
+    const { element, triggers, query } = setup();
 
-    setQuery("hints");
+    query.value = "hints";
     expect(readVisibleLabels(element)).toEqual(["hints"]);
-    expect(triggers.map(trigger => trigger.closest<HTMLElement>(".fsg-Disclosure")?.hidden)).toEqual([false, true]);
+    expect(readSectionHiddenStates(triggers)).toEqual([false, true]);
   });
 
   test("shows every row again when the query is cleared", () => {
-    const { element, triggers, setQuery } = setup();
+    const { element, triggers, query } = setup();
 
-    setQuery("loop");
-    setQuery("  ");
+    query.value = "loop";
+    query.value = "  ";
     expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
-    expect(triggers.map(trigger => trigger.closest<HTMLElement>(".fsg-Disclosure")?.hidden)).toEqual([false, false]);
+    expect(readSectionHiddenStates(triggers)).toEqual([false, false]);
   });
 
   test("opens every section while searching, then restores the saved open sections", () => {
-    const { triggers, setQuery } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-    const readExpandedStates = (): (string | null)[] => triggers.map(trigger => trigger.getAttribute("aria-expanded"));
+    const { triggers, query } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
 
-    setQuery("o");
-    expect(readExpandedStates()).toEqual(["true", "true"]);
-    setQuery("");
-    expect(readExpandedStates()).toEqual(["false", "true"]);
+    query.value = "o";
+    expect(readExpandedStates(triggers)).toEqual(["true", "true"]);
+    query.value = "";
+    expect(readExpandedStates(triggers)).toEqual(["false", "true"]);
   });
 
   test("toggles a section while searching without saving it, and reopens it on the next query", () => {
-    const { triggers, expanded, setQuery } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
+    const { triggers, expanded, query } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
 
-    setQuery("o");
+    query.value = "o";
     triggers[0].click();
     expect(triggers[0].getAttribute("aria-expanded")).toBe("false");
     expect(expanded.value).toEqual(["gallery"]);
-    setQuery("oo");
+    query.value = "oo";
     expect(triggers[0].getAttribute("aria-expanded")).toBe("true");
   });
 
-  test("stops following its preferences once disposed", () => {
+  test("stops following its preferences and query once disposed", () => {
     const hints = createPreference(false);
     const descriptors = [createSwitchSetting("hints", hints), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
-    const { element, triggers, expanded, dispose } = setup({ descriptors });
+    const { element, triggers, expanded, query, dispose } = setup({ descriptors });
 
     dispose();
     expanded.set(["general"]);
     hints.set(true);
+    query.value = "loop";
     expect(triggers[0].getAttribute("aria-expanded")).toBe("false");
     expect(element.querySelector("[role=switch]")?.getAttribute("aria-checked")).toBe("false");
+    expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
   });
 
   test("styles every class it sets", () => {

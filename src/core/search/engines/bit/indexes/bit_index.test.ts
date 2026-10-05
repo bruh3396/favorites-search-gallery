@@ -18,12 +18,12 @@ function createIndex(docs: Doc[]): BitIndex<Doc> {
 }
 
 function resolveTermDocs(bitIndex: BitIndex<Doc>, term: string): Doc[] {
-  const posting = bitIndex.postingFor(term);
+  const posting = bitIndex.findPosting(term);
   return posting === undefined ? [] : bitIndex.docsFrom(posting.toBitSet(bitIndex.size));
 }
 
 function countTermDocs(bitIndex: BitIndex<Doc>, term: string): number {
-  return bitIndex.postingFor(term)?.cardinality ?? 0;
+  return bitIndex.findPosting(term)?.cardinality ?? 0;
 }
 
 const apple = createDoc("apple", "red", "fruit", "sweet");
@@ -49,7 +49,7 @@ describe("BitIndex", () => {
   });
 
   test("returns undefined for an unknown term", () => {
-    expect(createIndex(corpus).postingFor("purple")).toBeUndefined();
+    expect(createIndex(corpus).findPosting("purple")).toBeUndefined();
   });
 
   test("preserves corpus order when materializing", () => {
@@ -92,7 +92,7 @@ describe("BitIndex", () => {
     bitIndex.build([lemon]);
     expect(bitIndex.size).toBe(1);
     expect(bitIndex.indexedTerms().sort()).toEqual(["fruit", "sour", "yellow"]);
-    expect(bitIndex.postingFor("red")).toBeUndefined();
+    expect(bitIndex.findPosting("red")).toBeUndefined();
   });
 
   test("handles an empty corpus", () => {
@@ -118,8 +118,8 @@ describe("BitIndex", () => {
   });
 
   describe("unionOf", () => {
-    function getPostings(bitIndex: BitIndex<Doc>, ...terms: string[]): NonNullable<ReturnType<BitIndex<Doc>["postingFor"]>>[] {
-      return terms.map(term => bitIndex.postingFor(term)).filter(posting => posting !== undefined);
+    function getPostings(bitIndex: BitIndex<Doc>, ...terms: string[]): NonNullable<ReturnType<BitIndex<Doc>["findPosting"]>>[] {
+      return terms.map(term => bitIndex.findPosting(term)).filter(posting => posting !== undefined);
     }
 
     test("unions the docs of several postings", () => {

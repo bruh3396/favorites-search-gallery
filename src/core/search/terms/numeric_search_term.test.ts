@@ -1,6 +1,6 @@
-import { MetricSearchable } from "@/core/search/searchable";
-import { Metric } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
+import { Metric } from "@/core/domain/post/post";
+import { MetricSearchable } from "@/core/search/searchable";
 import { parseNumericSearchTerm } from "@/core/search/parsers/search_term_parser";
 
 function createDoc(id: number, tags: string[] = []): MetricSearchable {

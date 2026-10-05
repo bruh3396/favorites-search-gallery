@@ -1,20 +1,30 @@
 import { MultiSelect, MultiSelectClass, createMultiSelect } from "@/core/ui/components/multi_select/multi_select";
 import { describe, expect, test, vi } from "vitest";
 import MULTI_SELECT_CSS from "@/core/ui/components/multi_select/multi_select.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
 type Action = "favorite" | "download" | "open";
 
-const OPTIONS = [
+const CHOICES = [
   { value: "favorite", label: "Favorite" },
   { value: "download", label: "Download" },
   { value: "open", label: "Open" }
 ] as const;
 
-function setup(): MultiSelect<Action> & { onValueChange: (next: readonly Action[]) => void; toggles: HTMLButtonElement[] } {
+interface Setup extends MultiSelect {
+  value: Signal<readonly Action[]>;
+  disabled: Signal<boolean>;
+  onValueChange: (next: readonly Action[]) => void;
+  toggles: HTMLButtonElement[];
+}
+
+function setup(initial: readonly Action[] = []): Setup {
+  const value = new Signal(initial);
+  const disabled = new Signal(false);
   const onValueChange = vi.fn();
-  const multiSelect = createMultiSelect<Action>(document, { options: OPTIONS, onValueChange });
-  return { ...multiSelect, onValueChange, toggles: [...multiSelect.element.querySelectorAll("button")] };
+  const multiSelect = createMultiSelect<Action>(document, { choices: CHOICES, value, disabled, onValueChange });
+  return { ...multiSelect, value, disabled, onValueChange, toggles: [...multiSelect.element.querySelectorAll("button")] };
 }
 
 function readPressedStates(toggles: HTMLButtonElement[]): boolean[] {
@@ -36,38 +46,37 @@ describe("createMultiSelect", () => {
   });
 
   test("is medium unless told otherwise", () => {
+    const value = new Signal<readonly string[]>([]);
+
     expect(setup().element.dataset.size).toBe("medium");
-    expect(createMultiSelect(document, { options: OPTIONS, onValueChange: vi.fn(), size: "small" }).element.dataset.size).toBe("small");
+    expect(createMultiSelect(document, { choices: CHOICES, value, onValueChange: vi.fn(), size: "small" }).element.dataset.size).toBe("small");
   });
 
-  test("shows what it is told", () => {
-    const { toggles, setValue } = setup();
+  test("follows its value", () => {
+    const { toggles, value } = setup();
 
-    setValue(["open", "favorite"]);
+    value.value = ["open", "favorite"];
     expect(readPressedStates(toggles)).toEqual([true, false, true]);
   });
 
   test("reports an added option in option order without changing itself", () => {
-    const { toggles, onValueChange, setValue } = setup();
+    const { toggles, onValueChange } = setup(["open"]);
 
-    setValue(["open"]);
     toggles[0].click();
     expect(onValueChange).toHaveBeenLastCalledWith(["favorite", "open"]);
     expect(readPressedStates(toggles)).toEqual([false, false, true]);
   });
 
   test("reports a removed option", () => {
-    const { toggles, onValueChange, setValue } = setup();
+    const { toggles, onValueChange } = setup(["favorite", "download"]);
 
-    setValue(["favorite", "download"]);
     toggles[1].click();
     expect(onValueChange).toHaveBeenLastCalledWith(["favorite"]);
   });
 
   test("locks the last pressed option: it reports nothing and says so", () => {
-    const { toggles, onValueChange, setValue } = setup();
+    const { toggles, onValueChange } = setup(["download"]);
 
-    setValue(["download"]);
     toggles[1].click();
     expect(onValueChange).not.toHaveBeenCalled();
     expect(readLockedStates(toggles)).toEqual([false, true, false]);
@@ -75,20 +84,27 @@ describe("createMultiSelect", () => {
   });
 
   test("unlocks once another option is pressed", () => {
-    const { toggles, setValue } = setup();
+    const { toggles, value } = setup(["download"]);
 
-    setValue(["download"]);
-    setValue(["download", "open"]);
+    value.value = ["download", "open"];
     expect(readLockedStates(toggles)).toEqual([false, false, false]);
   });
 
   test("disables every option and ignores clicks while disabled", () => {
-    const { toggles, onValueChange, setDisabled } = setup();
+    const { toggles, disabled, onValueChange } = setup();
 
-    setDisabled(true);
+    disabled.value = true;
     toggles[0].click();
     expect(toggles.every(toggle => toggle.disabled)).toBe(true);
     expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("stops following its value once disposed", () => {
+    const { toggles, value, dispose } = setup(["open"]);
+
+    dispose();
+    value.value = ["favorite"];
+    expect(readPressedStates(toggles)).toEqual([false, false, true]);
   });
 
   test("styles every class it sets", () => {

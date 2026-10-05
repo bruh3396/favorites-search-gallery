@@ -1,4 +1,3 @@
-import { Searchable } from "@/core/search/searchable";
 import { METRICS, Metric } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { parseMetricSearchTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/core/search/parsers/search_term_parser";
@@ -7,6 +6,7 @@ import { InvertedIndex } from "@/core/search/engines/set/indexes/inverted_index"
 import { MetricIndex } from "@/core/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/core/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/search/engines/set/indexes/relative_metric_index";
+import { Searchable } from "@/core/search/searchable";
 import { WildcardDocResolver } from "@/core/search/engines/set/resolution/wildcard_doc_resolver";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>> };
@@ -20,7 +20,7 @@ const sd = createDoc("sd", ["video", "blue"], { width: 1_280, height: 720, score
 const square = createDoc("square", ["image", "red"], { width: 1_080, height: 1_080, score: 100, id: 2_000, duration: 0 });
 const docs = [hd, sd, square];
 
-const metricFor = (item: Doc, metric: Metric): number => item.metrics[metric] ?? 0;
+const getMetric = (item: Doc, metric: Metric): number => item.metrics[metric] ?? 0;
 
 function getSortedNames(set: ReadonlySet<Doc>): string[] {
   return [...set].map(item => item.name).sort();
@@ -28,8 +28,8 @@ function getSortedNames(set: ReadonlySet<Doc>): string[] {
 
 function createResolver(): DocResolver<Doc> {
   const termIndex = new InvertedIndex<Doc>(item => item.tags);
-  const metricIndex = new MetricIndex<Doc>([...METRICS], metricFor);
-  const relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], metricFor);
+  const metricIndex = new MetricIndex<Doc>([...METRICS], getMetric);
+  const relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], getMetric);
   const positionIndex = new PositionIndex<Doc>();
 
   docs.forEach(item => termIndex.addDoc(item));

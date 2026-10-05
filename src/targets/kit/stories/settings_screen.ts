@@ -1,9 +1,9 @@
 import { SettingDescriptor, SettingPreference } from "@/core/ui/settings/descriptor";
 import { SettingsLayout, createSettingsScreen } from "@/core/ui/settings/screen";
-import { Signal, effect } from "@/core/utils/reactive/signal";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
-import { SettingSize } from "@/core/ui/settings/setting";
+import { ControlSize } from "@/core/ui/components/control";
+import { Signal } from "@/core/utils/reactive/signal";
 
 const SCHEDULER = new BrowserScheduler();
 
@@ -34,6 +34,7 @@ function createPreference<T>({ id, initial, log }: { id: string; initial: T; log
     get value(): T {
       return signal.value;
     },
+    peek: (): T => signal.peek(),
     set(value: T): void {
       log(`${id} → ${String(value)}`);
       signal.value = value;
@@ -58,12 +59,12 @@ function createCatalog(log: Log): Catalog {
       preference: createPreference<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
     },
     {
-      id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", variant: "segmented",
+      id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
       preference: createPreference({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     { id: "columns", kind: "number", label: "Columns", preference: createPreference({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
     {
-      id: "sort", kind: "choice", label: "Sort layout", variant: "dropdown",
+      id: "sort", kind: "choice", label: "Sort layout", control: "dropdown",
       preference: createPreference({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     { id: "autoplay", kind: "switch", label: "Autoplay", preference: createPreference({ id: "autoplay", initial: true, log }) },
@@ -71,7 +72,7 @@ function createCatalog(log: Log): Catalog {
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
       preference: createPreference({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      enabledWhen: () => !infiniteScroll.value
+      disabled: infiniteScroll
     }
   ];
   return { descriptors, hints };
@@ -80,7 +81,7 @@ function createCatalog(log: Log): Catalog {
 // Both hosts lay out the same catalog, so a change in one shows in the other.
 function createHostVariants(): StoryVariant[] {
   let catalog: Catalog | undefined;
-  const host = (label: string, { layout, size, open }: { layout: SettingsLayout; size: SettingSize; open: string[] }): StoryVariant => ({
+  const host = (label: string, { layout, size, open }: { layout: SettingsLayout; size: ControlSize; open: string[] }): StoryVariant => ({
     label,
     render: (ownerDocument, log): HTMLElement => {
       const panel = ownerDocument.createElement("div");
@@ -88,9 +89,8 @@ function createHostVariants(): StoryVariant[] {
 
       catalog ??= createCatalog(log);
       const { descriptors, hints } = catalog;
-      const screen = createSettingsScreen(ownerDocument, { layout, descriptors, expanded, size, scheduler: SCHEDULER });
+      const screen = createSettingsScreen(ownerDocument, { layout, descriptors, expanded, size, scheduler: SCHEDULER, descriptionsVisible: hints });
 
-      effect(() => screen.setDescriptionsVisible(hints.value));
       panel.className = "kit-Panel";
       panel.dataset.size = size;
       panel.append(screen.element);

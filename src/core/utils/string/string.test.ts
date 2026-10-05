@@ -1,20 +1,20 @@
 import {
-    camelToKebabCase,
-    capitalize,
-    compareStrings,
-    copyString,
-    decodeHtmlEntities,
-    escapeParentheses,
-    isEmptyString,
-    isOnlyDigits,
-    pluralSuffix,
-    removeExtraWhitespace,
-    removeLeadingModifiers,
-    removeNonNumericCharacters,
-    replaceSpacesWithUnderscores,
-    snakeToCamelCase,
-    toLowerUnderscored,
-    trigramsOf
+  camelToKebabCase,
+  capitalize,
+  compareStrings,
+  computeTrigrams,
+  copyString,
+  decodeHtmlEntities,
+  escapeParentheses,
+  isEmptyString,
+  isOnlyDigits,
+  pluralSuffix,
+  removeExtraWhitespace,
+  removeLeadingModifiers,
+  removeNonNumericCharacters,
+  replaceSpacesWithUnderscores,
+  snakeToCamelCase,
+  toLowerUnderscored
 } from "@/core/utils/string/string";
 import { describe, expect, test } from "vitest";
 
@@ -309,21 +309,21 @@ describe("isEmptyString", () => {
   });
 });
 
-describe("trigramsOf", () => {
+describe("computeTrigrams", () => {
   test("returns nothing for an empty string", () => {
-    expect(trigramsOf("")).toEqual([]);
+    expect(computeTrigrams("")).toEqual([]);
   });
 
   test("returns nothing for fewer than three characters", () => {
-    expect(trigramsOf("ab")).toEqual([]);
+    expect(computeTrigrams("ab")).toEqual([]);
   });
 
   test("returns the string itself for exactly three characters", () => {
-    expect(trigramsOf("fig")).toEqual(["fig"]);
+    expect(computeTrigrams("fig")).toEqual(["fig"]);
   });
 
   test("slides a three-character window across the string", () => {
-    expect(trigramsOf("banana")).toEqual(["ban", "ana", "nan", "ana"]);
+    expect(computeTrigrams("banana")).toEqual(["ban", "ana", "nan", "ana"]);
   });
 });
 

@@ -1,4 +1,5 @@
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 import { createDropdown } from "@/core/ui/components/dropdown/dropdown";
 import { createSegmented } from "@/core/ui/components/segmented/segmented";
@@ -23,42 +24,42 @@ const SORTS = [
 type Log = (message: string) => void;
 
 function renderSwitchRow(ownerDocument: Document, log: Log): HTMLElement {
+  const autoplay = new Signal(true);
   const control = createSwitch(ownerDocument, {
+    value: autoplay,
     onValueChange: next => {
       log(`Autoplay → ${next}`);
-      control.setValue(next);
+      autoplay.value = next;
     }
   });
-
-  control.setValue(true);
   return createSettingRow(ownerDocument, { label: "Autoplay", control: control.element }).element;
 }
 
 function renderSegmentedRow(ownerDocument: Document, log: Log): HTMLElement {
+  const layout = new Signal<string>("column");
   const control = createSegmented<string>(ownerDocument, {
-    options: LAYOUTS,
+    choices: LAYOUTS,
     size: "small",
+    value: layout,
     onValueChange: next => {
       log(`Layout → ${next}`);
-      control.setValue(next);
+      layout.value = next;
     }
   });
-
-  control.setValue("column");
   return createSettingRow(ownerDocument, { label: "Layout", description: "How thumbnails are arranged.", control: control.element }).element;
 }
 
 function renderDropdownRow(ownerDocument: Document, log: Log): HTMLElement {
+  const sort = new Signal<string>("score");
   const control = createDropdown<string>(ownerDocument, {
-    options: SORTS,
+    choices: SORTS,
     size: "small",
+    value: sort,
     onValueChange: next => {
       log(`Sort by → ${next}`);
-      control.setValue(next);
+      sort.value = next;
     }
   });
-
-  control.setValue("score");
   return createSettingRow(ownerDocument, {
     label: "Sort by",
     description: "A long caption, to show it wrapping under the label while the control keeps its size on the right.",
@@ -66,9 +67,18 @@ function renderDropdownRow(ownerDocument: Document, log: Log): HTMLElement {
   }).element;
 }
 
-// The second row is enabled only while the first is off, the way enabledWhen will drive it.
+// The second row is disabled while the first is on: the switch's signal is the stepper's disabled state.
 function renderDependentRows(ownerDocument: Document, log: Log): HTMLElement {
   const group = ownerDocument.createElement("div");
+  const infiniteScroll = new Signal(false);
+  const resultsPerPage = new Signal(50);
+  const infinite = createSwitch(ownerDocument, {
+    value: infiniteScroll,
+    onValueChange: next => {
+      log(`Infinite scroll → ${next}`);
+      infiniteScroll.value = next;
+    }
+  });
   const results = createStepper(ownerDocument, {
     label: "Results per page",
     min: 10,
@@ -76,21 +86,14 @@ function renderDependentRows(ownerDocument: Document, log: Log): HTMLElement {
     step: 10,
     size: "small",
     scheduler: SCHEDULER,
+    value: resultsPerPage,
+    disabled: infiniteScroll,
     onValueChange: next => {
       log(`Results per page → ${next}`);
-      results.setValue(next);
-    }
-  });
-  const infinite = createSwitch(ownerDocument, {
-    onValueChange: next => {
-      log(`Infinite scroll → ${next}`);
-      infinite.setValue(next);
-      results.setDisabled(next);
+      resultsPerPage.value = next;
     }
   });
 
-  infinite.setValue(false);
-  results.setValue(50);
   group.append(
     createSettingRow(ownerDocument, { label: "Infinite scroll", control: infinite.element }).element,
     createSettingRow(ownerDocument, { label: "Results per page", description: "Disabled while infinite scroll is on.", control: results.element }).element
@@ -104,6 +107,6 @@ export const SETTING_ROW_STORY: Story = {
     { label: "Switch, no description", render: renderSwitchRow },
     { label: "Segmented", render: renderSegmentedRow },
     { label: "Dropdown, long caption", render: renderDropdownRow },
-    { label: "Enabled by another setting", render: renderDependentRows }
+    { label: "Disabled by another setting", render: renderDependentRows }
   ]
 };

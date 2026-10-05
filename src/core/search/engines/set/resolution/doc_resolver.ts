@@ -66,7 +66,7 @@ export class DocResolver<Doc> {
       return comparison.operator === ":" ? this.termIndex.allDocs() : new Set<Doc>();
     }
     this.relativeMetricIndex.ensureBuilt(this.termIndex.allDocs());
-    return this.relativeMetricIndex.docsFor(comparison);
+    return this.relativeMetricIndex.getDocs(comparison);
   }
 
   private docsForAbsoluteMetric(comparison: MetricComparison): ReadonlySet<Doc> {

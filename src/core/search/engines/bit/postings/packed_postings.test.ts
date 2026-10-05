@@ -21,7 +21,7 @@ function createPackedPostings(entries: Record<string, number[]>, isSparse: (leng
 }
 
 function sliceArray(p: PackedPostings, term: string): number[] | undefined {
-  const view = p.positionsFor(term);
+  const view = p.findPositions(term);
   return view === undefined ? undefined : [...view];
 }
 
@@ -49,23 +49,23 @@ describe("PackedPostings", () => {
   });
 
   test("returns undefined for an unknown term", () => {
-    expect(createPackedPostings({ a: [1] }).positionsFor("nope")).toBeUndefined();
+    expect(createPackedPostings({ a: [1] }).findPositions("nope")).toBeUndefined();
   });
 
   test("packs everything into a single backing buffer", () => {
     const p = createPackedPostings({ a: [1, 2], b: [3, 4, 5] });
-    const a = p.positionsFor("a")!;
-    const b = p.positionsFor("b")!;
+    const a = p.findPositions("a")!;
+    const b = p.findPositions("b")!;
 
     expect(a.buffer).toBe(b.buffer);
     expect(b.byteOffset).toBe(a.byteOffset + a.byteLength);
   });
 
   test("narrows the backing array to the smallest width that fits the max position", () => {
-    expect(createPackedPostings({ a: [0, 255] }).positionsFor("a")).toBeInstanceOf(Uint8Array);
-    expect(createPackedPostings({ a: [0, 256] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
-    expect(createPackedPostings({ a: [0, 65_535] }).positionsFor("a")).toBeInstanceOf(Uint16Array);
-    expect(createPackedPostings({ a: [0, 65_536] }).positionsFor("a")).toBeInstanceOf(Uint32Array);
+    expect(createPackedPostings({ a: [0, 255] }).findPositions("a")).toBeInstanceOf(Uint8Array);
+    expect(createPackedPostings({ a: [0, 256] }).findPositions("a")).toBeInstanceOf(Uint16Array);
+    expect(createPackedPostings({ a: [0, 65_535] }).findPositions("a")).toBeInstanceOf(Uint16Array);
+    expect(createPackedPostings({ a: [0, 65_536] }).findPositions("a")).toBeInstanceOf(Uint32Array);
   });
 
   test("only stores terms the predicate calls sparse", () => {
@@ -73,14 +73,14 @@ describe("PackedPostings", () => {
 
     expect(p.has("rare")).toBe(true);
     expect(p.has("common")).toBe(false);
-    expect(p.positionsFor("common")).toBeUndefined();
+    expect(p.findPositions("common")).toBeUndefined();
   });
 
   test("handles empty input", () => {
     const p = createPackedPostings({});
 
     expect(p.has("x")).toBe(false);
-    expect(p.positionsFor("x")).toBeUndefined();
+    expect(p.findPositions("x")).toBeUndefined();
   });
 
   test("rebuild replaces prior contents", () => {

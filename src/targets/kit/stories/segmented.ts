@@ -1,11 +1,13 @@
-import { SegmentedOption, SegmentedSize, createSegmented } from "@/core/ui/components/segmented/segmented";
+import { ControlChoice, ControlSize } from "@/core/ui/components/control";
+import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
+import { createSegmented } from "@/core/ui/components/segmented/segmented";
 
 interface SegmentedState {
-  options: readonly SegmentedOption<string>[];
+  choices: readonly ControlChoice<string>[];
   value: string;
   disabled?: boolean;
-  size?: SegmentedSize;
+  size?: ControlSize;
 }
 
 const LAYOUTS = [
@@ -19,23 +21,24 @@ const ORDERS = [
   { value: "ascending", label: "Ascending" }
 ] as const;
 
-// Each variant closes the controlled loop itself: whatever the group reports is told straight back to it.
-function variant(label: string, { options, value, disabled = false, size }: SegmentedState): Story["variants"][number] {
+// Each variant closes the controlled loop itself: whatever the group reports is written back to its value.
+function variant(label: string, { choices, value: initial, disabled = false, size }: SegmentedState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
+      const selected = new Signal(initial);
       const control = createSegmented(ownerDocument, {
-        options,
+        choices,
+        value: selected,
+        disabled: new Signal(disabled),
         size,
         onValueChange: next => {
           log(`Segmented "${label}" → ${next}`);
-          control.setValue(next);
+          selected.value = next;
         }
       });
 
       control.element.setAttribute("aria-label", label);
-      control.setValue(value);
-      control.setDisabled(disabled);
       return control.element;
     }
   };
@@ -44,9 +47,9 @@ function variant(label: string, { options, value, disabled = false, size }: Segm
 export const SEGMENTED_STORY: Story = {
   title: "Segmented",
   variants: [
-    variant("Three options", { options: LAYOUTS, value: "column" }),
-    variant("Two options", { options: ORDERS, value: "descending" }),
-    variant("Small", { options: LAYOUTS, value: "row", size: "small" }),
-    variant("Disabled", { options: LAYOUTS, value: "square", disabled: true })
+    variant("Three choices", { choices: LAYOUTS, value: "column" }),
+    variant("Two choices", { choices: ORDERS, value: "descending" }),
+    variant("Small", { choices: LAYOUTS, value: "row", size: "small" }),
+    variant("Disabled", { choices: LAYOUTS, value: "square", disabled: true })
   ]
 };

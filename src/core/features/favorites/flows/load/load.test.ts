@@ -114,15 +114,15 @@ describe("FavoritesLoadFlow", () => {
       expect(getIds(model.results.value.matches)).toEqual(["1"]);
     });
 
-    test("fills in and announces a restored placeholder once its post is refreshed", async() => {
+    test("hydrates and announces a restored placeholder once its post is refreshed", async() => {
       const { flow, model } = await setup({ local: [createPost({ id: "1" })], remote: [createPost({ id: "1", tags: "apple", media: MEDIA })] });
-      const filled: Favorite[] = [];
+      const hydrated: Favorite[] = [];
 
-      model.filled.on(favorite => filled.push(favorite));
+      model.hydrated.on(favorite => hydrated.push(favorite));
       await flow.load();
       await flushMicrotasks();
       expect(model.find("1")?.media).toEqual(MEDIA);
-      expect(getIds(filled)).toEqual(["1"]);
+      expect(getIds(hydrated)).toEqual(["1"]);
     });
   });
 });

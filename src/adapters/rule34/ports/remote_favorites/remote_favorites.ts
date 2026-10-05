@@ -5,15 +5,15 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Rule34AllFavoritesFetcher } from "@/adapters/rule34/ports/remote_favorites/all_favorites_fetcher";
 import { Rule34Client } from "@/adapters/rule34/client/client";
+import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/new_favorites_finder";
 import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/removed_favorites_finder";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemoteFavoritesDependencies {
-  rule34: Pick<Rule34Client,
-    "readFavoritesPageId" | "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" |
-    "prioritizeFavorites">;
+  rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
+  rule34Document: Pick<Rule34Document, "readFavoritesPageId">;
   scheduler: Scheduler;
   randomSource: RandomSource;
 }
@@ -30,7 +30,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   private readonly retryPolicy: RetryPolicy;
 
   constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
-    this.pageId = dependencies.rule34.readFavoritesPageId();
+    this.pageId = dependencies.rule34Document.readFavoritesPageId();
     this.firstPageFavorites = dependencies.rule34.readFirstFavoritesPage();
     this.retryPolicy = {
       attempts: MAX_FETCH_ATTEMPTS,

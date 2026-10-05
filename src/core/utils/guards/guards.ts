@@ -17,10 +17,10 @@ export function oneOf<T>(members: readonly T[]): Guard<T> {
 }
 
 export function sameKindAs<T>(example: T): Guard<T> {
-  return (raw): raw is T => kindOf(raw) === kindOf(example);
+  return (raw): raw is T => getKind(raw) === getKind(example);
 }
 
-function kindOf(value: unknown): string {
+function getKind(value: unknown): string {
   if (value === null) {
     return "null";
   }

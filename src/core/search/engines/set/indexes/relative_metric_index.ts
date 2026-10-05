@@ -1,5 +1,5 @@
-import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { Metric } from "@/core/domain/post/post";
+import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 
 const EMPTY: ReadonlySet<never> = new Set<never>();
 
@@ -17,7 +17,7 @@ export class RelativeMetricIndex<Doc> {
 
   constructor(
     private readonly metrics: readonly Metric[],
-    private readonly metricFor: (doc: Doc, metric: Metric) => number
+    private readonly getMetric: (doc: Doc, metric: Metric) => number
   ) { }
 
   public ensureBuilt(docs: ReadonlySet<Doc>): void {
@@ -63,7 +63,7 @@ export class RelativeMetricIndex<Doc> {
     }
   }
 
-  public docsFor(comparison: MetricComparison): ReadonlySet<Doc> {
+  public getDocs(comparison: MetricComparison): ReadonlySet<Doc> {
     return this.sets.get(this.key(comparison.metric, comparison.operator, comparison.rightHandMetric)) ?? EMPTY;
   }
 
@@ -87,8 +87,8 @@ export class RelativeMetricIndex<Doc> {
   }
 
   private partition(doc: Doc, { left, right, greater, less, equal }: MetricPair<Doc>): void {
-    const leftValue = this.metricFor(doc, left);
-    const rightValue = this.metricFor(doc, right);
+    const leftValue = this.getMetric(doc, left);
+    const rightValue = this.getMetric(doc, right);
 
     if (leftValue > rightValue) {
       greater.add(doc);

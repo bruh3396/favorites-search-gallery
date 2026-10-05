@@ -11,10 +11,12 @@ const DOM_TESTS = [
   "src/app/startup/features.test.ts",
   "src/app/startup/style.test.ts",
   "src/core/ui/**/*.test.ts",
+  "src/core/features/*/ui/**/*.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
-  "src/adapters/rule34/client/{client,current_page,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
+  "src/adapters/rule34/client/{client,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
+  "src/adapters/rule34/document/document.test.ts",
   "src/lib/media/download.test.ts",
   "src/lib/ui/**/*.test.ts",
   "src/utils/browser/**/*.test.ts"
@@ -34,7 +36,7 @@ export default defineConfig({
     exclude: EXCLUDED_TESTS,
     projects: [
       { extends: true, test: { name: "node", exclude: [...EXCLUDED_TESTS, ...DOM_TESTS] } },
-      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", css: { include: [/src\/core\/ui\/.+\.css/] } } }
+      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", css: { include: [/src\/core\/(features\/[^/]+\/)?ui\/.+\.css/] } } }
     ],
     isolate: false,
     pool: "threads",

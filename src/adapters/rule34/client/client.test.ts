@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -8,9 +8,16 @@ import { postPageUrl } from "@/adapters/rule34/client/post_page";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 
+type KeepPaginator = (pageIndex: number, paginator: HTMLElement | null) => void;
+
 interface Setup {
   client: Rule34Client;
-  fetch: ReturnType<typeof vi.fn<Fetch>>;
+  fetch: Mock<Fetch>;
+  keepPaginator: Mock<KeepPaginator>;
+}
+
+interface DocumentOptions {
+  isFirstFavoritesPage?: boolean;
 }
 
 const POST_PAGE = `
@@ -27,38 +34,29 @@ const POST_PAGE = `
   </ul>
 `;
 
-const replaceState = vi.fn<History["replaceState"]>();
-
 function createThumb(id: string): string {
   return `<span class="thumb" id="s${id}"><a id="p${id}"><img src="https://example.com/thumbnail_${id}.jpg" title="apple"></a></span>`;
 }
 
-function readPaginatorText(): string | null | undefined {
-  return document.querySelector("#paginator")?.textContent;
-}
-
-function readAddressOffset(): string | null {
-  return new URL(String(replaceState.mock.lastCall?.[2])).searchParams.get("pid");
-}
-
-function setup(respond: Fetch = (): Promise<Response> => Promise.resolve(new Response(POST_PAGE))): Setup {
+function setup(
+  respond: Fetch = (): Promise<Response> => Promise.resolve(new Response(POST_PAGE)),
+  { isFirstFavoritesPage = false }: DocumentOptions = {}
+): Setup {
   const fetch = vi.fn<Fetch>(respond);
+  const keepPaginator = vi.fn<KeepPaginator>();
   const mintMedia = ({ url }: { url: string }): Media => ({ kind: "image", locator: url });
-  const dependencies = { fetch, scheduler: new MemoryScheduler(), randomSource: new MemoryRandomSource(), mintMedia };
-  return { client: new Rule34Client(dependencies, { run: request => request() }), fetch };
+  const rule34Document = { isFirstFavoritesPage: (): boolean => isFirstFavoritesPage, keepPaginator };
+  const dependencies = { fetch, scheduler: new MemoryScheduler(), randomSource: new MemoryRandomSource(), mintMedia, rule34Document };
+  return { client: new Rule34Client(dependencies, { run: request => request() }), fetch, keepPaginator };
 }
 
 describe("Rule34Client", () => {
-  // The browser opened the first page of a search for apple.
+  // The browser opened a page holding one post and a paginator.
   beforeEach(() => {
-    vi.stubGlobal("location", { href: "https://rule34.xxx/index.php?page=post&s=list&tags=apple" });
-    vi.stubGlobal("history", { replaceState });
     document.body.innerHTML = `${createThumb("1")}<div id="paginator">landing</div>`;
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
-    replaceState.mockReset();
     document.body.replaceChildren();
   });
 
@@ -122,38 +120,37 @@ describe("Rule34Client", () => {
       expect((await client.fetchPostListPage("apple", 2)).map(post => post.id)).toEqual(["7"]);
       expect(fetch).toHaveBeenCalledWith("https://rule34.xxx/index.php?page=post&s=list&tags=apple&pid=84", undefined);
     });
+
+    test("hands the fetched page's paginator to the document", async() => {
+      const { client, keepPaginator } = setup(() => Promise.resolve(new Response(`${createThumb("7")}<div id="paginator">fetched</div>`)));
+
+      await client.fetchPostListPage("apple", 2);
+      expect(keepPaginator).toHaveBeenCalledWith(2, expect.objectContaining({ textContent: "fetched" }));
+    });
   });
 
   describe("readPostListPage", () => {
     test("reads the posts on the page the browser opened", () => {
       expect(setup().client.readPostListPage(0).map(post => post.id)).toEqual(["1"]);
     });
-  });
 
-  describe("reflectPostListPage", () => {
-    test("reflects a fetched page on the paginator and address, then the opened page again", async() => {
-      const { client } = setup(() => Promise.resolve(new Response(`${createThumb("7")}<div id="paginator">fetched</div>`)));
+    test("hands the opened page's paginator to the document", () => {
+      const { client, keepPaginator } = setup();
 
       client.readPostListPage(0);
-      await client.fetchPostListPage("apple", 2);
-      client.reflectPostListPage(2);
-      expect([readPaginatorText(), readAddressOffset()]).toEqual(["fetched", "84"]);
-      client.reflectPostListPage(0);
-      expect([readPaginatorText(), readAddressOffset()]).toEqual(["landing", "0"]);
-    });
-
-    test("still rewrites the address for a page whose paginator it never saw", () => {
-      setup().client.reflectPostListPage(5);
-      expect([readPaginatorText(), readAddressOffset()]).toEqual(["landing", "210"]);
+      expect(keepPaginator).toHaveBeenCalledWith(0, expect.objectContaining({ textContent: "landing" }));
     });
   });
 
-  describe("setPaginatorVisible", () => {
-    test("hides the paginator", () => {
-      const { client } = setup();
+  describe("readFirstFavoritesPage", () => {
+    test("reads the favorites on the page the browser opened", () => {
+      const { client } = setup(undefined, { isFirstFavoritesPage: true });
 
-      client.setPaginatorVisible(false);
-      expect(document.querySelector<HTMLElement>("#paginator")?.style.display).toBe("none");
+      expect(client.readFirstFavoritesPage()?.map(post => post.id)).toEqual(["1"]);
+    });
+
+    test("reads nothing past the first favorites page", () => {
+      expect(setup().client.readFirstFavoritesPage()).toBeNull();
     });
   });
 });

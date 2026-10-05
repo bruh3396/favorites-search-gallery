@@ -28,6 +28,7 @@ export function startFavorites(configuration: FavoritesConfiguration, dependenci
   return {
     posts: paging.posts,
     query: search.query,
+    hydrated: model.hydrated,
     finishedLoading,
     page: paging.page,
     loadState: load.state,
