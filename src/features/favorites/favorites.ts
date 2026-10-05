@@ -71,9 +71,9 @@ function setup(components: FavoritesComponents): void {
   serveFavoritesPageRequests(components);
 }
 
-function start({ context, view, flows }: FavoritesComponents): void {
+function start({ context, model, view, flows }: FavoritesComponents): void {
   view.togglePaginator(!context.preferences.favorites.infiniteScroll.value);
-  view.showSkeleton();
+  view.showSkeleton(model.getRecordedThumbSizes());
   flows.load.loadAllFavorites();
 }
 
@@ -91,7 +91,8 @@ function featureDependencies(context: AppContext, model: FavoritesModel, control
       appendToSearch: text => control.appendToSearch(text),
       getSearchResults: () => model.getCurrentSearchResults(),
       localSnippets: context.ports.localSnippets,
-      localKeyedValues: context.ports.localKeyedValues
+      localKeyedValues: context.ports.localKeyedValues,
+      scheduler: context.ports.scheduler
     }
   };
 }
@@ -135,15 +136,14 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.postOverlay.addTagToSearchRequested.on(tag => control.appendToSearch(tag));
   events.postOverlay.excludeTagFromSearchRequested.on(tag => control.excludeFromSearch(tag));
   events.app.favoriteAdded.on(id => view.setFavorited(id, true));
-  events.app.favoriteRemoved.on(id => flows.action.removeFavorite(id));
-  milestones.favorites.favoritesLoaded.wait().then(() => view.collectAspectRatios());
-}
+  events.app.favoriteRemoved.on(id => flows.action.removeFavorite(id));}
 
 function bindPreferences({ context, view }: FavoritesComponents): void {
   const { preferences, ports } = context;
 
   effect(() => view.toggleDrawer(preferences.favorites.drawerOpen.value));
   effect(() => view.showDrawerSection(preferences.favorites.drawerActiveSection.value));
+  effect(() => view.showDrawerLabels(preferences.favorites.drawerLabelsEnabled.value));
   effect(() => ports.hostPage.setHeaderVisible(preferences.favorites.headerEnabled.value));
 }
 

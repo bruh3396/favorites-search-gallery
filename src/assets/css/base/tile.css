@@ -2,7 +2,6 @@
 
 :root {
   --tile-columns: 6;
-  --fade-cascade-step: 40ms;
 }
 
 [data-layout="row"],
@@ -31,15 +30,6 @@
 [data-layout="column"] .tile[data-media-kind="gif"],
 [data-layout="square"] .tile[data-media-kind="gif"] {
   outline: var(--media-outline-size, 2px) solid hotpink;
-}
-
-.tile[data-fading] {
-  opacity: 0;
-}
-
-.tile[data-fading="play"] {
-  animation: thumb-fade-in 0.2s ease both;
-  animation-delay: calc(var(--fade-cascade-step) * var(--fade-cascade-index, 0));
 }
 
 /* #endregion */

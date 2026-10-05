@@ -1,7 +1,6 @@
 import * as FavoritesDrawer from "@/features/favorites/control/drawer";
 import { FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
-import { afterEach, describe, expect, test } from "vitest";
-import { FavoritesConfig } from "@/config/favorites_config";
+import { describe, expect, test } from "vitest";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { Preferences } from "@/app/context/preferences";
 import { Shell } from "@/app/context/shell";
@@ -26,33 +25,13 @@ function readDrawerState(preferences: Preferences): { open: boolean; section: Fa
   return { open: preferences.favorites.drawerOpen.value, section: preferences.favorites.drawerActiveSection.value };
 }
 
-const SIDEBAR_LABELS_ENABLED = FavoritesConfig.drawerSidebarLabelsEnabled;
-
 describe("FavoritesDrawer", () => {
-  afterEach(() => {
-    FavoritesConfig.drawerSidebarLabelsEnabled = SIDEBAR_LABELS_ENABLED;
-  });
-
   describe("setup", () => {
     test.each(FavoritesDrawerSectionNames)("makes the %s tab the active section when it is clicked", name => {
       const { shell, preferences } = setup();
 
       shell.drawer[name].tab.click();
       expect(preferences.favorites.drawerActiveSection.value).toBe(name);
-    });
-
-    test("gives each tab its name as a tooltip when the sidebar has no labels", () => {
-      FavoritesConfig.drawerSidebarLabelsEnabled = false;
-      const { shell } = setup();
-
-      expect(shell.drawer.snippets.tab.dataset.tooltip).toBe("Snippets");
-    });
-
-    test("gives tabs no tooltip when the sidebar shows labels", () => {
-      FavoritesConfig.drawerSidebarLabelsEnabled = true;
-      const { shell } = setup();
-
-      expect(shell.drawer.snippets.tab.dataset.tooltip).toBeUndefined();
     });
 
     test("opens the drawer on the changelog when the version is clicked", () => {

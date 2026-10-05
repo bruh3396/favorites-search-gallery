@@ -1,5 +1,6 @@
 import { FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
+import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 export class FavoritesDrawer {
@@ -15,6 +16,16 @@ export class FavoritesDrawer {
 
       toggleDataset(tab, "selected", name === active);
       toggleDataset(root, "hidden", name !== active);
+    }
+  }
+
+  public showLabels(shown: boolean): void {
+    toggleDataset(this.shell.root, "drawerIconOnly", !shown);
+
+    for (const name of FavoritesDrawerSectionNames) {
+      const { tab, label } = this.shell.drawer[name];
+
+      addTooltip(tab, shown ? "" : label, "right");
     }
   }
 }

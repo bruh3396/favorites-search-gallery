@@ -1,12 +1,11 @@
 import { DownloaderContext, DownloaderProgress } from "@/features/favorites/features/downloader/types/types";
 import { describe, expect, test } from "vitest";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderModel } from "@/features/favorites/features/downloader/model/model";
 import { PostMedia } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { createPreference } from "@/testing/preferences";
 
-const SEPARATOR = DownloaderConfig.filename.categorySeparator;
+const SEPARATOR = " ";
 
 interface Setup {
   model: DownloaderModel;

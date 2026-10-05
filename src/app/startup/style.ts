@@ -31,13 +31,16 @@ import TOOLBAR_CSS from "@/assets/css/favorites/toolbar.css";
 import TOOLTIP_CSS from "@/assets/css/tooltip.css";
 import TOOLTIP_HINT_CSS from "@/assets/css/base/tooltip_hint.css";
 import TUTORIAL_CSS from "@/assets/css/gallery/tutorial.css";
-import { ThumbConfig } from "@/config/thumb_config";
 import UTILITIES_CSS from "@/assets/css/base/utilities.css";
 import VARIABLES_CSS from "@/assets/css/base/variables.css";
 import WIDGETS_CSS from "@/assets/css/base/widgets.css";
 import { effect } from "@/core/utils/reactive/signal";
 import { setTooltipsEnabled } from "@/lib/ui/tooltip/tooltip";
 import { themeStyles } from "@/lib/ui/theme/builder";
+
+const DESKTOP_RIGHT_CONTENT_MARGIN = 15;
+const POST_LIST_TILE_GAP = 10;
+const FAVORITES_TILE_GAP = 6;
 
 const FAVORITES_CSS = TOOLBAR_CSS +
   SEARCH_FIELD_CSS +
@@ -78,9 +81,8 @@ function actionBarPreferences({ preferences, environment }: AppContext): Prefere
 }
 
 function insertBaseStyles(context: AppContext): void {
-  const fadeInCss = context.preferences.app.fadeThumbs.value ? ANIMATIONS_CSS : "";
   const platformCss = context.environment.device === "mobile" ? MOBILE_CSS + TUTORIAL_CSS : DESKTOP_CSS;
-  const galleryCss = context.features.has("gallery") ? GALLERY_CSS + AUTOPLAY_CSS : "";
+  const galleryCss = context.features.has("gallery") ? GALLERY_CSS + AUTOPLAY_CSS + ANIMATIONS_CSS : "";
   const tooltipCss = context.features.has("tooltip") ? TOOLTIP_CSS + TOOLTIP_HINT_CSS : "";
   const postListCss = context.environment.mode === "postList" ? POST_LIST_CSS + SETTINGS_CSS : "";
   const postOverlayCss = context.features.has("postOverlay") ? POST_OVERLAY_CSS : "";
@@ -104,7 +106,6 @@ function insertBaseStyles(context: AppContext): void {
     platformCss +
     galleryCss +
     postListCss +
-    fadeInCss +
     favoritesCss +
     postOverlayCss);
 }
@@ -119,8 +120,8 @@ function insertStyle(css: string): void {
 function applyTileVariables(context: AppContext): void {
   const { content } = context.shell;
   const outlineSize = context.environment.device === "mobile" ? 1 : 2;
-  const rightMargin = context.environment.device === "desktop" ? ThumbConfig.rightContentMargin : 0;
-  const tileGap = context.environment.mode === "postList" ? ThumbConfig.spacing.postList : ThumbConfig.spacing.favorites;
+  const rightMargin = context.environment.device === "desktop" ? DESKTOP_RIGHT_CONTENT_MARGIN : 0;
+  const tileGap = context.environment.mode === "postList" ? POST_LIST_TILE_GAP : FAVORITES_TILE_GAP;
 
   content.style.setProperty("--media-outline-size", `${outlineSize}px`);
   content.style.setProperty("--tile-gap", `${tileGap}px`);

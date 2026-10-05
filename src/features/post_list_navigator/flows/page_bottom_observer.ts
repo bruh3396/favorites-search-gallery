@@ -1,4 +1,4 @@
-import { FavoritesConfig } from "@/config/favorites_config";
+const BOTTOM_MARGIN = "150%";
 
 export class PostListNavigatorPageBottomObserver {
   private intersectionObserver: IntersectionObserver;
@@ -23,7 +23,7 @@ export class PostListNavigatorPageBottomObserver {
   private createIntersectionObserver(): IntersectionObserver {
     return new IntersectionObserver(this.onIntersectionChanged.bind(this), {
       threshold: [0.1],
-      rootMargin: `0% 0% ${FavoritesConfig.infiniteScrollMargin} 0%`
+      rootMargin: `0% 0% ${BOTTOM_MARGIN} 0%`
     });
   }
 

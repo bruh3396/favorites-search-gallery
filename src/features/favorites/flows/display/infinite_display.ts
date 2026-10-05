@@ -1,10 +1,10 @@
-import { ContentDisplayOptions } from "@/types/ui";
 import { Display } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoritesBottomEdgeObserver } from "@/features/favorites/flows/display/edge_observer";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Shell } from "@/app/context/shell";
+
+const BATCH_SIZE = 25;
 
 export class FavoritesInfiniteDisplay implements Display {
   private readonly bottomObserver: FavoritesBottomEdgeObserver;
@@ -18,10 +18,10 @@ export class FavoritesInfiniteDisplay implements Display {
     );
   }
 
-  public async initialize(newFavorites: Favorite[], options?: ContentDisplayOptions): Promise<void> {
+  public async initialize(newFavorites: Favorite[]): Promise<void> {
     this.favorites = newFavorites;
     this.displayedCount = 0;
-    this.view.showSearchResults(this.takeNextBatch(), options);
+    this.view.showSearchResults(this.takeNextBatch());
     await this.shell.waitForContentThumbsToLoad();
     this.bottomObserver.refresh();
   }
@@ -61,7 +61,7 @@ export class FavoritesInfiniteDisplay implements Display {
   }
 
   private takeNextBatch(): Favorite[] {
-    const batch = this.favorites.slice(this.displayedCount, this.displayedCount + FavoritesConfig.infiniteScrollSliceSize);
+    const batch = this.favorites.slice(this.displayedCount, this.displayedCount + BATCH_SIZE);
 
     this.displayedCount += batch.length;
     return batch;

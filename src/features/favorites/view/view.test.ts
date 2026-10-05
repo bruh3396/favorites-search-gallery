@@ -99,7 +99,7 @@ describe("FavoritesView", () => {
     const { view, content, replaced } = setup();
 
     view.showSearchResults(createFavorites("1", "2"));
-    view.showSearchResults(createFavorites("3"), { fade: false });
+    view.showSearchResults(createFavorites("3"));
     expect(readThumbIds(content)).toEqual(["3"]);
     expect(replaced).toHaveBeenCalledTimes(2);
   });
@@ -134,7 +134,7 @@ describe("FavoritesView", () => {
   test("reports the last thumb of each column", () => {
     const { view } = setup({ preferences: { favorites: { layout: "column", columnCount: 2 } } });
 
-    view.showSearchResults(createFavorites("1", "2", "3", "4"), { fade: false });
+    view.showSearchResults(createFavorites("1", "2", "3", "4"));
     expect(view.bottomEdgeElements().map(element => element.id).sort()).toEqual(["3", "4"]);
   });
 
@@ -159,28 +159,18 @@ describe("FavoritesView", () => {
   test("fills the content with placeholders", () => {
     const { view, content } = setup();
 
-    view.showSkeleton();
+    view.showSkeleton([]);
     expect(content.querySelectorAll(".skeleton-item").length).toBeGreaterThan(0);
   });
 
-  test("shapes the next visit's placeholders after the thumbs that loaded", async() => {
-    const localKeyedValues = new MemoryLocalKeyedValues();
-    const { view, content } = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
+  test("shapes the placeholders after the recorded sizes", () => {
+    const { view, content } = setup({ preferences: { favorites: { layout: "native" } } });
 
-    view.showSearchResults([createFavorite("1", 120, 240)]);
-    content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalWidth", { value: 120 }));
-    content.querySelectorAll("img").forEach(image => Object.defineProperty(image, "naturalHeight", { value: 240 }));
-    const collecting = view.collectAspectRatios();
+    view.showSkeleton([{ width: 120, height: 240 }]);
+    const items = content.querySelectorAll<HTMLElement>(".skeleton-item");
 
-    content.querySelectorAll("img").forEach(image => image.dispatchEvent(new Event("load")));
-    await collecting;
-    document.body.replaceChildren();
-    const next = setup({ preferences: { favorites: { layout: "native" } }, localKeyedValues });
-
-    next.view.showSkeleton();
-    const first = next.content.querySelector<HTMLElement>(".skeleton-item");
-
-    expect([first?.style.width, first?.style.height]).toEqual(["120px", "240px"]);
+    expect(items).toHaveLength(1);
+    expect([items[0]?.style.getPropertyValue("--thumb-width"), items[0]?.style.getPropertyValue("--thumb-height")]).toEqual(["125", "250"]);
   });
 
   test("draws and updates the paginator", () => {

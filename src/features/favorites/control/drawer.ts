@@ -1,9 +1,7 @@
 import { FavoritesDrawerContents, FavoritesDrawerSectionContent, FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
 import { FavoritesClass } from "@/features/favorites/types/selectors";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { Preferences } from "@/app/context/preferences";
-import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 
 export function setup(preferences: Preferences, shell: FavoritesShell): void {
   const { drawerOpen, drawerActiveSection } = preferences.favorites;
@@ -13,13 +11,7 @@ export function setup(preferences: Preferences, shell: FavoritesShell): void {
   };
 
   for (const name of FavoritesDrawerSectionNames) {
-    const { tab, label } = shell.drawer[name];
-
-    tab.addEventListener("click", () => drawerActiveSection.set(name));
-
-    if (!FavoritesConfig.drawerSidebarLabelsEnabled) {
-      addTooltip(tab, label, "right");
-    }
+    shell.drawer[name].tab.addEventListener("click", () => drawerActiveSection.set(name));
   }
   shell.toolbar.aboutVersion.addEventListener("click", () => open("change"));
   shell.toolbar.aboutHelp.addEventListener("click", () => open("help"));

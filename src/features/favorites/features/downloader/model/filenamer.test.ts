@@ -1,11 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderFilenamer } from "@/features/favorites/features/downloader/model/filenamer";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
-const SEPARATOR = DownloaderConfig.filename.categorySeparator;
+const SEPARATOR = " ";
 const CATEGORIES: TagCategoryMap = new Map([["artist_one", "artist"], ["character_one", "character"], ["copyright_one", "copyright"]]);
 const PARTS = { tags: new Set(CATEGORIES.keys()), extension: "png", tagCategories: CATEGORIES };
 const item: PostMedia = { id: "7", media: { kind: "image", locator: "1/7.jpg" } };

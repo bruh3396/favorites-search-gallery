@@ -1,7 +1,5 @@
-import { ContentDisplayOptions } from "@/types/ui";
 import { Display } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { Media } from "@/core/domain/media/media";
@@ -46,11 +44,11 @@ export class FavoritesPaginatedDisplay implements Display {
     this.remoteMedia = dependencies.remoteMedia;
   }
 
-  public initialize(results: Favorite[], options?: ContentDisplayOptions): void {
+  public initialize(results: Favorite[]): void {
     this.view.togglePaginator(true);
     this.model.paginate(results);
     this.model.selectPage(1);
-    this.renderCurrentPage(options);
+    this.renderCurrentPage();
   }
 
   public sync(): void {
@@ -84,13 +82,10 @@ export class FavoritesPaginatedDisplay implements Display {
     this.view.togglePaginator(false);
   }
 
-  private renderCurrentPage(options?: ContentDisplayOptions): void {
-    this.view.showSearchResults(this.model.currentPageFavorites(), options);
+  private renderCurrentPage(): void {
+    this.view.showSearchResults(this.model.currentPageFavorites());
     this.view.renderPagination(this.model.paginationContext());
-
-    if (FavoritesConfig.preloadThumbs) {
-      this.preloadImages(this.model.adjacentPageFavorites().map(favorite => favorite.media));
-    }
+    this.preloadImages(this.model.adjacentPageFavorites().map(favorite => favorite.media));
   }
 
   private appendMissingThumbsOnCurrentPage(): void {

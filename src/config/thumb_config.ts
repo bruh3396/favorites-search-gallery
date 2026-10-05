@@ -3,10 +3,5 @@ export const ThumbConfig = {
   columnCountBounds: {
     min: 1,
     max: { mobile: 6, desktop: 25 }
-  },
-  spacing: { postList: 10, favorites: 6 },
-  rightContentMargin: 15,
-  fadeCascadeStepDelay: 40,
-  actionBarStyle: "corner",
-  reTile: false
+  }
 };

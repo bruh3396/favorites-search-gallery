@@ -1,11 +1,9 @@
 import * as FavoritesDrawer from "@/features/favorites/shell/drawer";
 import * as FavoritesToolbar from "@/features/favorites/shell/toolbar";
 import { FavoritesDrawerSlots, FavoritesToolbarSlots } from "@/types/favorites_ui";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
-import { toggleDataset } from "@/utils/browser/dataset";
 
 export interface FavoritesShellConfiguration {
   version: string;
@@ -31,7 +29,6 @@ export class FavoritesShell {
     this.toolbarRoot = toolbar.root;
     this.toolbar = toolbar.slots;
     this.drawer = drawer.slots;
-    toggleDataset(this.root, "drawerIconOnly", !FavoritesConfig.drawerSidebarLabelsEnabled);
     shell.root.prepend(this.root);
     this.root.append(this.toolbarRoot, this.workspace);
     this.workspace.append(this.drawerTrack, this.contentPane);

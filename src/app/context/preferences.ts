@@ -23,7 +23,6 @@ export function createPreferences(defaults: PreferenceDefaults, store: Namespace
 
     app: {
       colorScheme: preference<ColorScheme>("appColorScheme", defaults.colorScheme, oneOf(COLOR_SCHEMES)),
-      fadeThumbs: preference<boolean>("appFadeThumbs", false),
       gradient: preference("appGradient", false),
       nativeFont: preference<boolean>("appNativeFont", true),
       performanceProfile: preference<PerformanceProfile>("appPerformanceProfile", "normal", oneOf(PERFORMANCE_PROFILES)),
@@ -36,6 +35,7 @@ export function createPreferences(defaults: PreferenceDefaults, store: Namespace
       downloadBatchSize: preference("favoritesDownloadBatchSize", 500),
       downloadFilenameFormat: preference("favoritesDownloadFilenameFormat", 3),
       drawerActiveSection: preference<FavoritesDrawerSectionName>("favoritesDrawerActiveView", "settings", oneOf(FavoritesDrawerSectionNames)),
+      drawerLabelsEnabled: preference("favoritesDrawerLabelsEnabled", false),
       drawerOpen: preference("favoritesDrawerOpen", false),
       excludeBlacklist: preference("favoritesExcludeBlacklist", false),
       headerEnabled: preference("favoritesHeaderEnabled", true),

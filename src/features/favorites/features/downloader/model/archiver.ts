@@ -1,11 +1,12 @@
 import { Archiver, Filenamer } from "@/features/favorites/features/downloader/types/types";
 import { ConcurrencyLimiter } from "@/lib/async/rate_limiting";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderZipWriter } from "@/features/favorites/features/downloader/model/zip_writer";
 import { Media } from "@/core/domain/media/media";
 import { PostMedia } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { extensionOfMimeType } from "@/utils/pure/mime";
+
+const CONCURRENCY = 5;
 
 interface ArchiverDependencies {
   filenamer: Filenamer;
@@ -35,7 +36,7 @@ export class DownloaderArchiver implements Archiver {
   }
 
   public async archive(items: PostMedia[], signal: AbortSignal, onItemSettled: (filename: string | null) => void): Promise<Blob | null> {
-    const limiter = new ConcurrencyLimiter(DownloaderConfig.concurrency);
+    const limiter = new ConcurrencyLimiter(CONCURRENCY);
     const zipWriter = new DownloaderZipWriter();
     const tagsById = await this.getTagsForIds(items.map(item => item.id));
     const tagCategories = await this.getTagCategories([...new Set([...tagsById.values()].flatMap(tags => [...tags]))]);

@@ -1,10 +1,15 @@
 .skeleton-item {
-  background: #555;
+  position: relative;
+  background-color: #636363;
   overflow: hidden;
   z-index: 0;
   animation: none !important;
   animation-delay: 0s !important;
   opacity: 1 !important;
+}
+
+.skeleton-item {
+  aspect-ratio: var(--thumb-width) / var(--thumb-height);
 }
 
 .skeleton-item[data-layout="column"],
@@ -17,20 +22,10 @@
   height: 100%;
 }
 
-.skeleton-item[data-animation="pulse"] {
-  position: relative;
-  background-color: #636363;
-}
-
-.skeleton-item[data-animation="pulse"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-color: #424242;
-  opacity: 0;
-  will-change: opacity;
-  animation: pulse var(--duration-skeleton) infinite cubic-bezier(0.42, 0, 0.58, 1);
-  animation-delay: var(--delay-skeleton);
+.skeleton-item[data-layout="native"] {
+  aspect-ratio: auto;
+  width: calc(var(--thumb-width) * 1px);
+  height: calc(var(--thumb-height) * 1px);
 }
 
 .post[data-loading]>a {
@@ -41,37 +36,68 @@
   opacity: 0;
 }
 
+.skeleton-item::after,
 .post[data-loading]>a::after {
   content: "";
   position: absolute;
   inset: 0;
-  z-index: 2;
   background-color: #424242;
   opacity: 0;
   will-change: opacity;
   animation: pulse var(--duration-skeleton) infinite cubic-bezier(0.42, 0, 0.58, 1);
+  animation-delay: var(--delay-skeleton);
   pointer-events: none;
 }
 
-.skeleton-item[data-animation="shimmer"] {
-  position: relative;
-  background-color: #636363;
+.post[data-loading]>a::after {
+  z-index: 2;
 }
 
-.skeleton-item[data-animation="shimmer"]::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.15) 50%,
-    transparent 100%
-  );
-  transform: translateX(-100%);
-  will-change: transform;
-  animation: shimmer var(--duration-skeleton) infinite linear;
-  animation-delay: var(--delay-skeleton);
+/*
+  Co-prime cycles (3 durations x 4 delays) keep neighboring tiles out of step.
+  The masonry layout deals tiles round-robin into columns, so nth-child counts
+  rows there; each column shifts both cycles (durations forward, delays back)
+  so a row doesn't pulse in unison.
+*/
+.tile {
+  --duration-skeleton: calc(0.6s + 0.1s * mod(var(--duration-step, 0) + var(--column-step, 0), 3));
+  --delay-skeleton: calc(0.05s * mod(var(--delay-step, 0) + 3 * var(--column-step, 0), 4));
+}
+
+.tile:nth-child(3n+2) {
+  --duration-step: 1;
+}
+
+.tile:nth-child(3n) {
+  --duration-step: 2;
+}
+
+.tile:nth-child(4n+2) {
+  --delay-step: 1;
+}
+
+.tile:nth-child(4n+3) {
+  --delay-step: 2;
+}
+
+.tile:nth-child(4n) {
+  --delay-step: 3;
+}
+
+[data-tiler-column]:nth-child(5n+2) {
+  --column-step: 1;
+}
+
+[data-tiler-column]:nth-child(5n+3) {
+  --column-step: 2;
+}
+
+[data-tiler-column]:nth-child(5n+4) {
+  --column-step: 3;
+}
+
+[data-tiler-column]:nth-child(5n) {
+  --column-step: 4;
 }
 
 @keyframes pulse {
@@ -84,10 +110,3 @@
     opacity: 1;
   }
 }
-
-@keyframes shimmer {
-  100% {
-    transform: translateX(100%);
-  }
-}
-

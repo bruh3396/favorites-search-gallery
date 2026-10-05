@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { Snippets } from "@/features/favorites/features/snippets/snippets";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
@@ -36,7 +37,8 @@ async function setup(stored: Snippet[] = [], results: string[] = []): Promise<Se
     appendToSearch: (text): number => appended.push(text),
     getSearchResults: (): Favorite[] => results.map(id => ({ id }) as Favorite),
     localSnippets,
-    localKeyedValues: new MemoryLocalKeyedValues()
+    localKeyedValues: new MemoryLocalKeyedValues(),
+    scheduler: new MemoryScheduler(1_000)
   });
   const section = snippets.buildDrawerSection();
 

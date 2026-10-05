@@ -6,9 +6,7 @@ import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper }
 import { AppContext } from "@/app/context/context";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Events } from "@/app/context/events";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
-import { GeneralConfig } from "@/config/general_config";
 import { Preferences } from "@/app/context/preferences";
 import { Theme } from "@/lib/ui/theme/themes";
 import { ThumbConfig } from "@/config/thumb_config";
@@ -18,7 +16,7 @@ import { buildToggleRow } from "@/lib/ui/settings/components/toggle";
 import { effect } from "@/core/utils/reactive/signal";
 import { themeOptions } from "@/lib/ui/theme/builder";
 
-type ToggleConfig = Partial<ToggleSetting> & Pick<ToggleSetting, "preference">;
+type ToggleConfig =Partial<ToggleSetting> & Pick<ToggleSetting, "preference">;
 
 export type SettingsCatalog = ReturnType<typeof buildSettingsCatalog>;
 export type SettingKey = keyof SettingsCatalog;
@@ -46,12 +44,6 @@ export function buildSettingsCatalog(context: AppContext) {
       label: "Native Font",
       tooltip: "Use native site font",
       preference: preferences.app.nativeFont
-    }, events),
-    fadeThumbs: toggle({
-      id: "fade-thumbs",
-      label: "Fade In Thumbnails",
-      tooltip: "Fade thumbnails in as they load (applies on reload)",
-      preference: preferences.app.fadeThumbs
     }, events),
     upscale: toggle({
       id: "upscale",
@@ -113,6 +105,12 @@ export function buildSettingsCatalog(context: AppContext) {
       tooltip: "Show site header",
       preference: preferences.favorites.headerEnabled
     }, events),
+    drawerLabels: toggle({
+      id: "toggle-drawer-labels",
+      label: "Drawer Labels",
+      tooltip: "Show labels in the drawer sidebar",
+      preference: preferences.favorites.drawerLabelsEnabled
+    }, events),
     gradient: toggle({
       id: "toggle-gradient",
       label: "Gradient",
@@ -160,7 +158,7 @@ export function buildSettingsCatalog(context: AppContext) {
       id: "enable-gallery-menu",
       label: "Menu",
       tooltip: "Show gallery sidebar",
-      enabled: features.has("gallery") && GeneralConfig.galleryMenuOptionEnabled,
+      enabled: features.has("gallery"),
       preference: preferences.gallery.menuEnabled
     }, events),
     enhanceSearchPages: toggle({
@@ -251,9 +249,9 @@ export function buildSettingsCatalog(context: AppContext) {
       label: "Results Per Page",
       tooltip: "Set search result count per page",
       preference: preferences.favorites.resultsPerPage,
-      min: FavoritesConfig.resultsPerPageBounds.min,
-      max: FavoritesConfig.resultsPerPageBounds.max,
-      step: FavoritesConfig.resultsPerPageStep,
+      min: 1,
+      max: 5_000,
+      step: 25,
       enabledWhen: whenNotInfiniteScroll(preferences)
     }),
     tooltip: toggle({

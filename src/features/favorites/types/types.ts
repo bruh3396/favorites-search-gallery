@@ -1,5 +1,4 @@
 import { Metric, Rating } from "@/types/search";
-import { ContentDisplayOptions } from "@/types/ui";
 import { Favorite } from "@/types/favorite";
 import { Media } from "@/core/domain/media/media";
 import { NavigationKey } from "@/types/input";
@@ -51,7 +50,7 @@ export interface ThumbOperations<Node> {
 }
 
 export interface Display {
-  initialize: (results: Favorite[], options?: ContentDisplayOptions) => void;
+  initialize: (results: Favorite[]) => void;
   sync: (newFavorites: Favorite[]) => void;
   advance: (direction: NavigationKey) => boolean;
   goToPage: (pageNumber: number) => void;

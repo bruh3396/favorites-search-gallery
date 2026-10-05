@@ -1,53 +1,37 @@
-import { FavoritesAspectRatios } from "@/features/favorites/view/skeleton/aspect_ratios";
+import { randomBoolean, randomIntInRange } from "@/utils/pure/number";
+import { Dimensions2D } from "@/types/geometry";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/app";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { SeededSequence } from "@/lib/collection/seeded_sequence";
-import { SkeletonConfig } from "@/config/skeleton_config";
 
-export interface FavoritesSkeletonConfiguration {
-  layout: Layout;
-}
-
-export interface FavoritesSkeletonDependencies {
-  store: LocalKeyedValues;
-  randomSource: RandomSource;
-}
+const RANDOM_ITEM_COUNT = 50;
+const THUMB_BOX = { longSide: 250, minShortSide: 125 };
 
 export class FavoritesSkeleton {
-  private readonly aspectRatios: FavoritesAspectRatios;
-  private readonly fallbackAspectRatioHeights: SeededSequence;
   private readonly randomSource: RandomSource;
-  private items: FavoritesSkeletonItem[];
 
-  constructor({ layout }: FavoritesSkeletonConfiguration, { store, randomSource }: FavoritesSkeletonDependencies) {
-    this.aspectRatios = new FavoritesAspectRatios(store);
+  constructor(randomSource: RandomSource) {
     this.randomSource = randomSource;
-    this.fallbackAspectRatioHeights = new SeededSequence();
-    this.items = this.createItems(layout);
   }
 
-  public show(tile: (elements: HTMLElement[]) => void): void {
-    if (this.items.length > 0) {
-      tile(this.items.map(item => item.element));
-    }
+  // One placeholder per recorded size, or random sizes when none were recorded.
+  public createElements(layout: Layout, recordedSizes: Dimensions2D[]): HTMLElement[] {
+    const sizes = recordedSizes.length > 0 ? recordedSizes.map(fitToThumbBox) : this.randomThumbSizes();
+    return sizes.map(size => new FavoritesSkeletonItem({ layout, size }).element);
   }
 
-  public collectAspectRatios(thumbs: HTMLElement[]): void {
-    if (this.items.length > 0) {
-      this.aspectRatios.collect(thumbs);
-      this.items = [];
-    }
+  private randomThumbSizes(): Dimensions2D[] {
+    return Array.from({ length: RANDOM_ITEM_COUNT }, () => this.randomThumbSize());
   }
 
-  private createItems(layout: Layout): FavoritesSkeletonItem[] {
-    return Array.from(
-      { length: SkeletonConfig.defaultItemCount },
-      () => new FavoritesSkeletonItem(
-        { layout, aspectRatio: this.aspectRatios.getNext() },
-        { randomSource: this.randomSource, fallbackAspectRatioHeights: this.fallbackAspectRatioHeights }
-      )
-    );
+  private randomThumbSize(): Dimensions2D {
+    const { longSide, minShortSide } = THUMB_BOX;
+    const shortSide = randomIntInRange(this.randomSource, minShortSide, longSide);
+    return randomBoolean(this.randomSource) ? { width: longSide, height: shortSide } : { width: shortSide, height: longSide };
   }
+}
+
+function fitToThumbBox({ width, height }: Dimensions2D): Dimensions2D {
+  const scale = THUMB_BOX.longSide / Math.max(width, height);
+  return { width: Math.round(width * scale), height: Math.round(height * scale) };
 }

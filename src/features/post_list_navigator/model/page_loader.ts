@@ -1,27 +1,17 @@
-import { AppContext } from "@/app/context/context";
 import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model/page_cache";
-import { RAW_THUMB_CLASS_NAME } from "@/lib/ui/thumb/selectors";
-import { fetchPostList } from "@/adapters/rule34/client/post_list_page";
-import { mintMedia } from "@/adapters/rule34_cdn/client/locator";
+import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { numbersAround } from "@/utils/pure/number";
-import { parseThumb } from "@/adapters/rule34/client/thumb";
-import { preparePostListThumbs } from "@/lib/ui/thumb/post_list_element";
 
 const PREFETCH_LENGTH = 3;
 
 export class PostListNavigatorPageLoader {
   private readonly cache: PostListNavigatorPageCache = new PostListNavigatorPageCache();
-  private readonly onMobileDevice: boolean;
-  private readonly galleryDisabled: boolean;
 
-  constructor(context: AppContext) {
-    this.onMobileDevice = context.environment.device === "mobile";
-    this.galleryDisabled = !context.features.has("gallery");
-  }
+  constructor(private readonly searchResults: RemoteSearchResults) { }
 
-  public load(baseUrl: string, pageNumber: number): Promise<void> {
+  public load(pageNumber: number): Promise<void> {
     if (pageNumber < 0 || this.cache.isLoaded(pageNumber)) {
       return Promise.resolve();
     }
@@ -30,9 +20,9 @@ export class PostListNavigatorPageLoader {
     if (pending !== undefined) {
       return pending;
     }
-    const loaded = fetchPostList(baseUrl, pageNumber)
-      .then((html: string) => {
-        this.cache.markLoaded(pageNumber, this.createPostListFromHtml(pageNumber, html));
+    const loaded = this.searchResults.fetchPage(pageNumber)
+      .then((posts) => {
+        this.cache.markLoaded(pageNumber, { pageIndex: pageNumber, posts, isLast: posts.length < this.searchResults.pageSize });
       }).catch(() => {
         this.cache.remove(pageNumber);
       });
@@ -41,30 +31,17 @@ export class PostListNavigatorPageLoader {
     return loaded;
   }
 
-  public preloadAround(baseUrl: string, currentPageNumber: number): void {
-    numbersAround(currentPageNumber, PREFETCH_LENGTH).forEach(n => this.load(baseUrl, n));
+  public preloadAround(currentPageNumber: number): void {
+    numbersAround(currentPageNumber, PREFETCH_LENGTH).forEach(n => this.load(n));
   }
 
-  public createPostListFromHtml(pageNumber: number, html: string): PostList {
-    const dom = new DOMParser().parseFromString(html, "text/html");
-    const rawThumbs = [...dom.querySelectorAll<HTMLElement>(`.${RAW_THUMB_CLASS_NAME}`)];
-    const posts = rawThumbs.map(thumb => parseThumb(thumb, mintMedia));
-    const thumbs = preparePostListThumbs(rawThumbs, this.onMobileDevice, this.galleryDisabled);
-    const paginator = dom.getElementById("paginator");
-    return new PostList({ pageIndex: pageNumber, thumbs, posts, paginator });
-  }
-
-  public reload(baseUrl: string, pageNumber: number): Promise<void> {
+  public reload(pageNumber: number): Promise<void> {
     this.cache.remove(pageNumber);
-    return this.load(baseUrl, pageNumber);
+    return this.load(pageNumber);
   }
 
   public get(pageNumber: number): PostList | undefined {
     return this.cache.get(pageNumber);
-  }
-
-  public allThumbs(): HTMLElement[] {
-    return this.cache.allThumbs();
   }
 
   public allPosts(): Post[] {
@@ -73,9 +50,5 @@ export class PostListNavigatorPageLoader {
 
   public getPost(id: string): Post | undefined {
     return this.cache.getPost(id);
-  }
-
-  public markLoaded(pageNumber: number, page: PostList): void {
-    this.cache.markLoaded(pageNumber, page);
   }
 }

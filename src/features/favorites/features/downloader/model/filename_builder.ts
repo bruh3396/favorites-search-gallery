@@ -1,8 +1,10 @@
 import { FilenameCategory, FilenameParts } from "@/features/favorites/features/downloader/types/types";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { PostMedia } from "@/core/domain/post/post";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 
+const TAG_SEPARATOR = " ";
+const CATEGORY_SEPARATOR = " ";
+const MAX_LENGTH = 200;
 const STRIPPED_CHARACTERS = /[<>:"/\\|?*' -]/g;
 const TRAILING_QUALIFIER = /_\([^)]*\)$/;
 
@@ -11,8 +13,8 @@ export function build(item: PostMedia, { tags, extension, tagCategories }: Filen
     .map(category => buildCategorySegment(tags, category, tagCategories))
     .filter(segment => segment !== "");
 
-  const suffix = segments.length === 0 ? item.id : `${DownloaderConfig.filename.categorySeparator}${item.id}`;
-  const name = capLength(segments.join(DownloaderConfig.filename.categorySeparator), suffix);
+  const suffix = segments.length === 0 ? item.id : `${CATEGORY_SEPARATOR}${item.id}`;
+  const name = capLength(segments.join(CATEGORY_SEPARATOR), suffix);
   return `${name}${suffix}.${extension}`;
 }
 
@@ -23,7 +25,7 @@ function buildCategorySegment(tags: Set<string>, category: FilenameCategory, tag
   return dropQualifiedDuplicates(tagsInCategory)
     .map(sanitizeForFilename)
     .filter(tag => tag !== "")
-    .join(DownloaderConfig.filename.tagSeparator);
+    .join(TAG_SEPARATOR);
 }
 
 function dropQualifiedDuplicates(tags: string[]): string[] {
@@ -40,9 +42,9 @@ function sanitizeForFilename(tag: string): string {
 }
 
 function capLength(name: string, suffix: string): string {
-  if (name.length + suffix.length <= DownloaderConfig.filename.maxLength) {
+  if (name.length + suffix.length <= MAX_LENGTH) {
     return name;
   }
-  const truncatedName = name.slice(0, Math.max(0, DownloaderConfig.filename.maxLength - suffix.length));
+  const truncatedName = name.slice(0, Math.max(0, MAX_LENGTH - suffix.length));
   return truncatedName.replace(/[^a-z0-9]+$/i, "");
 }

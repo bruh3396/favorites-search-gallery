@@ -1,7 +1,6 @@
 import { DiscreteRating, Rating, SortKey } from "@/types/search";
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { createPreferences } from "@/testing/preferences";
@@ -26,19 +25,9 @@ function getIds(results: Favorite[]): string[] {
   return results.map(r => r.id);
 }
 
-const DEFAULT_USE_BIT_SEARCH_ENGINE = FavoritesConfig.useBitSearchEngine;
-
-describe.each([
-  { engine: "bit", useBitSearchEngine: true },
-  { engine: "set", useBitSearchEngine: false }
-])("FavoritesSearcher ($engine engine)", ({ useBitSearchEngine }) => {
-  afterEach(() => {
-    FavoritesConfig.useBitSearchEngine = DEFAULT_USE_BIT_SEARCH_ENGINE;
-  });
-
-  // A searcher on this engine with the given favorites already indexed.
+describe("FavoritesSearcher", () => {
+  // A searcher with the given favorites already indexed.
   function createSearcher(favorites: Favorite[], overrides: SearcherOverrides = {}): FavoritesSearcher {
-    FavoritesConfig.useBitSearchEngine = useBitSearchEngine;
     const preferences = createPreferences({
       favorites: {
         excludeBlacklist: overrides.excludeBlacklist ?? false,

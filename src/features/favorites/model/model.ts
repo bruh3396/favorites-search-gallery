@@ -1,17 +1,20 @@
 import { AddFavoriteResult, RemoteFavoriteActions, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import { FavoritesModelCallbacks, LoadProgress, PulledFavorites } from "@/features/favorites/types/types";
 import { AppContext } from "@/app/context/context";
+import { Dimensions2D } from "@/types/geometry";
 import { Favorite } from "@/types/favorite";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesLoader } from "@/features/favorites/model/loading/loader";
 import { FavoritesPostLibrary } from "@/features/favorites/model/posts/library";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
+import { FavoritesThumbSizeRecorder } from "@/features/favorites/model/thumb_size_recorder";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+
+const NEARBY_PAGE_COUNT = 5;
 
 export class FavoritesModel {
   private readonly collection: FavoritesCollection;
@@ -21,6 +24,7 @@ export class FavoritesModel {
   private readonly remoteFavorites: RemoteFavorites;
   private readonly remoteFavoriteActions: RemoteFavoriteActions;
   private readonly localFavorites: LocalFavorites;
+  private readonly thumbSizeRecorder: FavoritesThumbSizeRecorder;
 
   constructor(context: AppContext, { onSearchResultsChanged, onPlaceholderFilled }: FavoritesModelCallbacks) {
     const { remoteFavorites, remotePosts, remoteMedia, localFavorites, localPosts, localTagCategories, scheduler } = context.ports;
@@ -53,8 +57,9 @@ export class FavoritesModel {
       scheduler,
       onPlaceholderFilled
     });
+    this.thumbSizeRecorder = new FavoritesThumbSizeRecorder({ ownerId: context.environment.favoritesOwnerId }, context.ports.localKeyedValues);
     this.paginator = new Paginator<Favorite>(
-      { nearbyPageCount: FavoritesConfig.nearbyPageCount },
+      { nearbyPageCount: NEARBY_PAGE_COUNT },
       (): number => context.preferences.favorites.resultsPerPage.value
     );
   }
@@ -109,6 +114,14 @@ export class FavoritesModel {
 
   public searchFavoritesPure(favorites: Favorite[], query: string): Favorite[] {
     return this.searcher.searchPure(favorites, query);
+  }
+
+  public recordFirstThumbSizes(): void {
+    this.thumbSizeRecorder.record(this.searcher.getCurrentSearchResults());
+  }
+
+  public getRecordedThumbSizes(): Dimensions2D[] {
+    return this.thumbSizeRecorder.getRecorded();
   }
 
   public reSearchFavorites(): Favorite[] {

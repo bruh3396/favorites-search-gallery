@@ -1,10 +1,11 @@
-import { ContentDisplayOptions, PaginationState } from "@/types/ui";
+import { PaginationState } from "@/types/ui";
 import { FavoritesViewCallbacks, LoadProgress } from "@/features/favorites/types/types";
 import { AppContext } from "@/app/context/context";
 import { ContentTiler } from "@/app/layout/content_tiler";
+import { Device } from "@/core/boundary/environment";
+import { Dimensions2D } from "@/types/geometry";
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { FavoritesDrawer } from "@/features/favorites/view/drawer";
 import { FavoritesDrawerSectionName } from "@/types/favorites_ui";
 import { FavoritesElementTemplate } from "@/features/favorites/view/element_template";
@@ -18,6 +19,9 @@ import { Layout } from "@/types/app";
 import { doNothing } from "@/utils/pure/function";
 import { toggleDataset } from "@/utils/browser/dataset";
 import { waitForNextPaint } from "@/utils/browser/window";
+
+const CONTENT_TOP_OFFSET: Record<Device, number> = { mobile: 10, desktop: 0 };
+const THUMB_POOL_MAX_RETAINED = 100;
 
 export interface FavoritesViewConfiguration {
   linksToPostPage: boolean;
@@ -49,10 +53,7 @@ export class FavoritesView {
     this.onContentAdded = doNothing;
     this.contentTiler = new ContentTiler(context);
     this.linkSuppressor = new FavoritesLinkSuppressor(id => ports.remotePages.postUrl(id));
-    this.skeleton = new FavoritesSkeleton(
-      { layout: this.getLayout() },
-      { store: ports.localKeyedValues, randomSource: ports.randomSource }
-    );
+    this.skeleton = new FavoritesSkeleton(ports.randomSource);
     this.status = new FavoritesStatus(shell.toolbar, shell.toolbarRoot, ports.scheduler);
     this.pagination = new FavoritesPaginationRenderer(shell.toolbar.pagination, shell.toolbar.rangeIndicator);
     this.drawer = new FavoritesDrawer(shell);
@@ -85,9 +86,9 @@ export class FavoritesView {
     return this.contentTiler.bottomEdgeElements();
   }
 
-  public showSearchResults(searchResults: Favorite[], options?: ContentDisplayOptions): void {
-    this.contentTiler.tile(this.thumbPool.resolve(searchResults), options);
-    window.scrollTo(0, FavoritesConfig.contentTopOffset[this.context.environment.device]);
+  public showSearchResults(searchResults: Favorite[]): void {
+    this.contentTiler.tile(this.thumbPool.resolve(searchResults));
+    window.scrollTo(0, CONTENT_TOP_OFFSET[this.context.environment.device]);
     this.onContentReplaced();
   }
 
@@ -108,8 +109,8 @@ export class FavoritesView {
     return toggleDataset(document.documentElement, "loading", !value);
   }
 
-  public showSkeleton(): void {
-    this.skeleton.show(elements => this.contentTiler.tile(elements));
+  public showSkeleton(recordedSizes: Dimensions2D[]): void {
+    this.contentTiler.tile(this.skeleton.createElements(this.getLayout(), recordedSizes));
   }
 
   public suppressLinkOnHoveredThumb(event: EnhancedMouseEvent): void {
@@ -148,6 +149,10 @@ export class FavoritesView {
     this.drawer.showSection(section);
   }
 
+  public showDrawerLabels(shown: boolean): void {
+    this.drawer.showLabels(shown);
+  }
+
   public setStatus(text: string): void {
     this.status.setStatus(text);
   }
@@ -180,14 +185,9 @@ export class FavoritesView {
     return waitForNextPaint();
   }
 
-  public async collectAspectRatios(): Promise<void> {
-    await this.context.shell.waitForContentThumbsToLoad();
-    this.skeleton.collectAspectRatios(this.context.shell.getContentThumbs());
-  }
-
   private createThumbPool(): FavoritesThumbPool<HTMLElement> {
     const configuration = {
-      maxRetained: FavoritesConfig.thumbPoolMaxRetained,
+      maxRetained: THUMB_POOL_MAX_RETAINED,
       defaultFavorited: this.context.environment.ownsFavorites
     };
     return new FavoritesThumbPool<HTMLElement>(configuration, {

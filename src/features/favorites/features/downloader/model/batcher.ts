@@ -1,7 +1,8 @@
 import { Archiver, DownloadOptions, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { PostMedia } from "@/core/domain/post/post";
 import { chunk } from "@/utils/pure/array";
+
+const ARCHIVE_NAME = "favorites";
 
 export class DownloaderBatcher {
   private readonly archiver: Archiver;
@@ -48,7 +49,7 @@ export class DownloaderBatcher {
 
 function batchFilename(batch: number, batchCount: number): string {
   if (batchCount <= 1) {
-    return `${DownloaderConfig.archiveName}.zip`;
+    return `${ARCHIVE_NAME}.zip`;
   }
-  return `${DownloaderConfig.archiveName}_${String(batch).padStart(String(batchCount).length, "0")}of${batchCount}.zip`;
+  return `${ARCHIVE_NAME}_${String(batch).padStart(String(batchCount).length, "0")}of${batchCount}.zip`;
 }

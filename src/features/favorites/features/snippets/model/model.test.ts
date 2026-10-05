@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetModel } from "@/features/favorites/features/snippets/model/model";
 import { createSnippet } from "@/features/favorites/features/snippets/testing/snippets";
@@ -15,7 +16,7 @@ const veg = createSnippet("veg", "carrot", { createdAt: 200 });
 
 async function setup(snippets: Snippet[] = []): Promise<Setup> {
   const localSnippets = new MemoryLocalSnippets();
-  const model = new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues() });
+  const model = new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues(), scheduler: new MemoryScheduler(1_000) });
 
   await localSnippets.setMany(snippets);
   await model.loadSnippets();
@@ -66,7 +67,7 @@ describe("SnippetModel", () => {
 
     model.useSnippet("fruits");
     model.moveSnippetToTop("fruits");
-    expect(model.getSnippet("fruits")?.lastUsedAt).toBeGreaterThan(0);
+    expect(model.getSnippet("fruits")?.lastUsedAt).toBe(1_000);
     expect(getNames(model.listSnippets(""))).toEqual(["fruits", "veg"]);
   });
 

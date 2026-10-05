@@ -1,4 +1,4 @@
-import { FavoritesConfig } from "@/config/favorites_config";
+const EDGE_MARGIN = "150%";
 
 class FavoritesEdgeObserver {
   private readonly onEdgeReached: () => Promise<boolean>;
@@ -39,12 +39,12 @@ class FavoritesEdgeObserver {
 
 export class FavoritesBottomEdgeObserver extends FavoritesEdgeObserver {
   constructor(onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
-    super(`0% 0% ${FavoritesConfig.infiniteScrollMargin} 0%`, onEdgeReached, getSentinels);
+    super(`0% 0% ${EDGE_MARGIN} 0%`, onEdgeReached, getSentinels);
   }
 }
 
 export class FavoritesTopEdgeObserver extends FavoritesEdgeObserver {
   constructor(onEdgeReached: () => Promise<boolean>, getSentinels: () => HTMLElement[]) {
-    super(`${FavoritesConfig.infiniteScrollMargin} 0% 0% 0%`, onEdgeReached, getSentinels);
+    super(`${EDGE_MARGIN} 0% 0% 0%`, onEdgeReached, getSentinels);
   }
 }

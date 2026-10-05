@@ -6,13 +6,12 @@ import { GalleryClass } from "@/features/gallery/types/selectors";
 import { GalleryConfig } from "@/config/gallery_config";
 import { GalleryMenuButton } from "@/features/gallery/types/types";
 import { GalleryShell } from "@/features/gallery/shell/shell";
-import { GeneralConfig } from "@/config/general_config";
 import { createElement } from "@/utils/browser/element";
 
 export function setup(context: AppContext, shell: GalleryShell): void {
   const { environment, events } = context;
 
-  if (!GeneralConfig.galleryMenuOptionEnabled || environment.device === "mobile") {
+  if (environment.device === "mobile") {
     return;
   }
   shell.menuButtons.append(...buttonsFor(environment).filter(button => button.enabled).map(createButton));

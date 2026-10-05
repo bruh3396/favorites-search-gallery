@@ -1,7 +1,8 @@
-import { SerializedSnippet, SnippetResult, SnippetStorage } from "@/features/favorites/features/snippets/types/types";
+import { SerializedSnippet, SnippetModelDependencies, SnippetResult } from "@/features/favorites/features/snippets/types/types";
 import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/utils/pure/string";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 
 const UNMOVED_STORAGE_KEY = "searchSnippets";
@@ -9,11 +10,13 @@ const UNMOVED_STORAGE_KEY = "searchSnippets";
 export class SnippetStore {
   private readonly localSnippets: LocalSnippets;
   private readonly localKeyedValues: LocalKeyedValues;
+  private readonly scheduler: Scheduler;
   private readonly snippets: Map<string, Snippet>;
 
-  constructor({ localSnippets, localKeyedValues }: SnippetStorage) {
+  constructor({ localSnippets, localKeyedValues, scheduler }: SnippetModelDependencies) {
     this.localSnippets = localSnippets;
     this.localKeyedValues = localKeyedValues;
+    this.scheduler = scheduler;
     this.snippets = new Map();
   }
 
@@ -37,7 +40,7 @@ export class SnippetStore {
   }
 
   public add(name: string, query: string): SnippetResult {
-    const result = this.insert({ name, query, lastUsedAt: 0, createdAt: Date.now() });
+    const result = this.insert({ name, query, lastUsedAt: 0, createdAt: this.scheduler.now() });
 
     if (result.ok) {
       this.localSnippets.setMany([result.snippet]);
@@ -81,7 +84,7 @@ export class SnippetStore {
     const snippet = this.snippets.get(name);
 
     if (snippet !== undefined) {
-      this.replace({ ...snippet, lastUsedAt: Date.now() });
+      this.replace({ ...snippet, lastUsedAt: this.scheduler.now() });
     }
   }
 
@@ -89,12 +92,12 @@ export class SnippetStore {
     const snippet = this.snippets.get(name);
 
     if (snippet !== undefined) {
-      this.replace({ ...snippet, createdAt: Date.now() });
+      this.replace({ ...snippet, createdAt: this.scheduler.now() });
     }
   }
 
   public replaceAll(entries: SerializedSnippet[]): number {
-    const now = Date.now();
+    const now = this.scheduler.now();
 
     this.snippets.clear();
 

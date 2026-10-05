@@ -4,7 +4,7 @@ import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model
 import { createPosts } from "@/testing/post";
 
 function createPostList(pageIndex: number, ...ids: string[]): PostList {
-  return new PostList({ pageIndex, thumbs: [], posts: createPosts(...ids), paginator: null });
+  return { pageIndex, posts: createPosts(...ids), isLast: false };
 }
 
 const getIds = (posts: { id: string }[]): string[] => posts.map(post => post.id);

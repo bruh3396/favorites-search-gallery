@@ -11,8 +11,12 @@ export class PostListNavigatorModel {
   private readonly favoriteIds: PostListNavigatorFavoriteIds;
 
   constructor(context: AppContext) {
-    this.navigator = new PostListNavigatorNavigator(context);
+    this.navigator = new PostListNavigatorNavigator(context.ports.remoteSearchResults);
     this.favoriteIds = new PostListNavigatorFavoriteIds();
+  }
+
+  public loadInitialPage(): Promise<PostList> {
+    return this.navigator.loadInitialPage();
   }
 
   public preloadAroundInitialPage(): void {
@@ -23,7 +27,7 @@ export class PostListNavigatorModel {
     return this.navigator.navigate(direction);
   }
 
-  public getMoreResults(): Promise<HTMLElement[]> {
+  public getMoreResults(): Promise<Post[]> {
     return this.navigator.getMoreResults();
   }
 
@@ -33,10 +37,6 @@ export class PostListNavigatorModel {
 
   public resetCurrentPageNumber(): void {
     this.navigator.resetCurrentPageNumber();
-  }
-
-  public allThumbs(): HTMLElement[] {
-    return this.navigator.allThumbs();
   }
 
   public allPosts(): Post[] {
@@ -63,7 +63,7 @@ export class PostListNavigatorModel {
     this.favoriteIds.remove(id);
   }
 
-  public filterFavorites(thumbs: HTMLElement[]): HTMLElement[] {
-    return thumbs.filter(thumb => this.favoriteIds.has(thumb.id));
+  public filterFavoriteIds(posts: Post[]): string[] {
+    return posts.map(post => post.id).filter(id => this.favoriteIds.has(id));
   }
 }

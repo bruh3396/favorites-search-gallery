@@ -1,19 +1,21 @@
 import { Favorite } from "@/types/favorite";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 
-export interface SnippetStorage {
+export interface SnippetModelDependencies {
   localSnippets: LocalSnippets;
   localKeyedValues: LocalKeyedValues;
+  scheduler: Scheduler;
 }
 
-export interface SnippetsDependencies extends SnippetStorage {
+export interface SnippetsDependencies extends SnippetModelDependencies {
   appendToSearch: (text: string) => void;
   getSearchResults: () => Favorite[];
 }
 
-export interface SnippetContext extends Omit<SnippetsDependencies, keyof SnippetStorage> {
+export interface SnippetContext extends Omit<SnippetsDependencies, keyof SnippetModelDependencies> {
   alert: (message: string) => void;
   confirm: (message: string) => boolean;
   saveBlob: (blob: Blob, filename: string) => void;

@@ -42,4 +42,21 @@ describe("FavoritesDrawer", () => {
     expect(readSelectedTabs(shell)).toEqual(["help"]);
     expect(readVisibleSections(shell)).toEqual(["help"]);
   });
+
+  test("shows icons only, with each tab's name as its tooltip, when labels are hidden", () => {
+    const { drawer, shell } = setup();
+
+    drawer.showLabels(false);
+    expect(shell.root.dataset.drawerIconOnly).toBeDefined();
+    expect(shell.drawer.snippets.tab.dataset.tooltip).toBe("Snippets");
+  });
+
+  test("shows labels without tooltips when labels are shown", () => {
+    const { drawer, shell } = setup();
+
+    drawer.showLabels(false);
+    drawer.showLabels(true);
+    expect(shell.root.dataset.drawerIconOnly).toBeUndefined();
+    expect(shell.drawer.snippets.tab.dataset.tooltip).toBeUndefined();
+  });
 });

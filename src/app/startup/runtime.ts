@@ -10,6 +10,5 @@ export function setupRuntime(context: AppContext, root: HTMLElement): void {
 }
 
 function reloadOnRestartPreferences({ preferences }: AppContext): void {
-  preferences.app.fadeThumbs.on(reloadWindow);
   preferences.app.performanceProfile.on(reloadWindow);
 }

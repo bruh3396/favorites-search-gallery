@@ -1,8 +1,9 @@
 import { DownloaderAction, DownloaderIntents } from "@/features/favorites/features/downloader/types/types";
 import { multiSegmented, segmented } from "@/lib/ui/settings/controls";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
 import { Preference } from "@/lib/storage/preference";
+
+const BATCH_SIZE_OPTIONS = [100, 250, 500, 1_000, 0];
 
 export interface DownloaderControlConfiguration {
   filenameOptions: Map<number, string>;
@@ -58,6 +59,6 @@ function batchSizeControl(batchSize: Preference<number>): HTMLElement {
     tooltip: "Split download into smaller chunks",
     tooltipPosition: "below",
     preference: batchSize,
-    options: new Map(DownloaderConfig.batchSizeOptions.map(size => [size, size === 0 ? "All" : String(size)]))
+    options: new Map(BATCH_SIZE_OPTIONS.map(size => [size, size === 0 ? "All" : String(size)]))
   })();
 }

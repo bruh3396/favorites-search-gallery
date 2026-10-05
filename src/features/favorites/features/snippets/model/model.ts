@@ -2,15 +2,15 @@ import * as SnippetFailure from "@/features/favorites/features/snippets/model/fa
 import * as SnippetIdQuery from "@/features/favorites/features/snippets/model/id_query";
 import * as SnippetListing from "@/features/favorites/features/snippets/model/listing";
 import * as SnippetTransfer from "@/features/favorites/features/snippets/model/transfer";
-import { SerializedSnippet, SnippetFailureReason, SnippetResult, SnippetStorage } from "@/features/favorites/features/snippets/types/types";
+import { SerializedSnippet, SnippetFailureReason, SnippetModelDependencies, SnippetResult } from "@/features/favorites/features/snippets/types/types";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
 export class SnippetModel {
   private readonly store: SnippetStore;
 
-  constructor(storage: SnippetStorage) {
-    this.store = new SnippetStore(storage);
+  constructor(dependencies: SnippetModelDependencies) {
+    this.store = new SnippetStore(dependencies);
   }
 
   public loadSnippets(): Promise<void> {

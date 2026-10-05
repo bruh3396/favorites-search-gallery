@@ -2,13 +2,11 @@ import { ALL_RATINGS, Rating, SearchableMetric, SortKey } from "@/types/search";
 import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
 import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/types/favorite";
-import { FavoritesConfig } from "@/config/favorites_config";
 import { ObservableList } from "@/lib/collection/observable_list";
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Searcher } from "@/features/favorites/types/types";
-import { SetSearchEngine } from "@/lib/search/engines/set/set_search_engine";
 import { chain } from "@/utils/pure/function";
 import { isEmptyString } from "@/utils/pure/string";
 import { negateTags } from "@/utils/pure/tag";
@@ -41,7 +39,7 @@ export class FavoritesSearcher implements Searcher {
     const termsFor = (favorite: Favorite): Set<string> => favorite.consumeTags();
     const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
 
-    this.engine = FavoritesConfig.useBitSearchEngine ? new BitSearchEngine<Favorite>(termsFor, metricFor) : new SetSearchEngine<Favorite>(termsFor, metricFor);
+    this.engine = new BitSearchEngine<Favorite>(termsFor, metricFor);
     this.results = new ObservableList<Favorite>(onSearchResultsChanged);
     this.excludeBlacklist = preferences.favorites.excludeBlacklist;
     this.allowedRatings = preferences.favorites.allowedRatings;

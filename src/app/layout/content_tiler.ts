@@ -1,10 +1,8 @@
 import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { AppContext } from "@/app/context/context";
 import { ColumnTiler } from "@/lib/ui/tilers/column_tiler";
-import { ContentDisplayOptions } from "@/types/ui";
 import { Emitter } from "@/lib/event/emitter";
 import { EnhancedWheelEvent } from "@/lib/event/input";
-import { Fader } from "@/app/layout/fader";
 import { GridTiler } from "@/lib/ui/tilers/grid_tiler";
 import { Layout } from "@/types/app";
 import { NativeTiler } from "@/lib/ui/tilers/native_tiler";
@@ -17,7 +15,6 @@ import { navigationDelta } from "@/lib/event/keys";
 
 interface ContentTilerConfiguration {
   maxColumnCount: number;
-  fadeThumbs: boolean;
 }
 
 interface ContentTilerDependencies {
@@ -29,11 +26,11 @@ interface ContentTilerDependencies {
   galleryOpened: () => boolean;
 }
 
-function resolveConfiguration({ environment, preferences }: AppContext): ContentTilerConfiguration {
+function resolveConfiguration({ environment }: AppContext): ContentTilerConfiguration {
   const { max } = ThumbConfig.columnCountBounds;
   const { device, mode } = environment;
   const maxColumnCount = mode === "favorites" ? max[device] : (device === "desktop" ? max.desktop : 10);
-  return { maxColumnCount, fadeThumbs: preferences.app.fadeThumbs.value };
+  return { maxColumnCount };
 }
 
 function resolveDependencies(context: AppContext): ContentTilerDependencies {
@@ -55,7 +52,6 @@ export class ContentTiler {
   private readonly columnTiler: ColumnTiler;
   private readonly tilers: AbstractTiler[];
   private readonly tilerMap: Map<Layout, AbstractTiler>;
-  private readonly fader: Fader;
   private currentLayout: Layout;
   private currentTiler: AbstractTiler;
 
@@ -75,10 +71,6 @@ export class ContentTiler {
       new NativeTiler(content)
     ];
     this.tilerMap = new Map(this.tilers.map(tiler => [tiler.layout, tiler]));
-    this.fader = new Fader(
-      { fadeThumbs: configuration.fadeThumbs },
-      { root: content, getColumnCount: (): number => columnCount.value }
-    );
     this.currentLayout = dependencies.layout.value;
     this.currentTiler = this.tilerMap.get(this.currentLayout) ?? this.columnTiler;
   }
@@ -116,26 +108,19 @@ export class ContentTiler {
     return this.currentLayout;
   }
 
-  public tile(items: HTMLElement[], options: ContentDisplayOptions = { fade: true }): void {
-    if (ThumbConfig.reTile && this.dependencies.content.childElementCount > 0 && this.currentTiler.reTile(items)) {
-      this.fader.clearFade(items);
+  public tile(items: HTMLElement[]): void {
+    if (this.dependencies.content.childElementCount > 0 && this.currentTiler.reTile(items)) {
       return;
     }
-
-    if (options.fade) {
-      this.fader.fadeInReplacement(items, () => this.currentTiler.tile(items));
-    } else {
-      this.fader.clearFade(items);
-      this.currentTiler.tile(items);
-    }
+    this.currentTiler.tile(items);
   }
 
   public addToBottom(items: HTMLElement[]): void {
-    this.fader.fadeIn(items, () => this.currentTiler.addItemsToBottom(items));
+    this.currentTiler.addItemsToBottom(items);
   }
 
   public addToTop(items: HTMLElement[]): void {
-    this.fader.fadeIn(items, () => this.currentTiler.addItemsToTop(items));
+    this.currentTiler.addItemsToTop(items);
   }
 
   public bottomEdgeElements(): HTMLElement[] {

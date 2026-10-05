@@ -12,6 +12,7 @@ export class FavoritesLoadFlow extends FavoritesFlow {
       this.view.setTemporaryStatus("Rule34 stopped sending favorites, try again later");
     }
     this.model.compressFavorites();
+    this.model.recordFirstThumbSizes();
     this.context.milestones.favorites.favoritesLoaded.reach();
   }
 }

@@ -4,6 +4,7 @@ import { Favorite } from "@/types/favorite";
 import { FavoritesFeatures } from "@/features/favorites/features/features";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { TagCategoryMap } from "@/core/domain/tag/tag";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
@@ -42,7 +43,8 @@ async function setup(snippets: Snippet[] = []): Promise<Setup> {
       appendToSearch: (text): number => appended.push(text),
       getSearchResults: (): Favorite[] => results,
       localSnippets,
-      localKeyedValues: new MemoryLocalKeyedValues()
+      localKeyedValues: new MemoryLocalKeyedValues(),
+      scheduler: new MemoryScheduler(1_000)
     }
   });
 

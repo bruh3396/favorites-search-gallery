@@ -1,6 +1,7 @@
-import { describe, expect, test, vi } from "vitest";
+import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetStore } from "@/features/favorites/features/snippets/model/store";
 
@@ -9,6 +10,7 @@ const UNMOVED_STORAGE_KEY = "searchSnippets";
 interface Setup {
   store: SnippetStore;
   localKeyedValues: MemoryLocalKeyedValues;
+  scheduler: MemoryScheduler;
   createStore: () => SnippetStore;
   loadStore: () => Promise<SnippetStore>;
   readPersisted: () => Promise<Snippet[]>;
@@ -22,10 +24,12 @@ const getReason = (result: { ok: boolean; reason?: string }): string | undefined
 function setup(): Setup {
   const localSnippets = new MemoryLocalSnippets();
   const localKeyedValues = new MemoryLocalKeyedValues();
-  const createStore = (): SnippetStore => new SnippetStore({ localSnippets, localKeyedValues });
+  const scheduler = new MemoryScheduler();
+  const createStore = (): SnippetStore => new SnippetStore({ localSnippets, localKeyedValues, scheduler });
   return {
     store: createStore(),
     localKeyedValues,
+    scheduler,
     createStore,
     loadStore: async(): Promise<SnippetStore> => {
       const store = createStore();
@@ -35,12 +39,6 @@ function setup(): Setup {
     },
     readPersisted: (): Promise<Snippet[]> => localSnippets.getAll()
   };
-}
-
-function runAtTime(now: number, run: () => void): void {
-  vi.useFakeTimers({ now });
-  run();
-  vi.useRealTimers();
 }
 
 describe("SnippetStore", () => {
@@ -164,23 +162,24 @@ describe("SnippetStore", () => {
     });
 
     test("keeps the creation time", () => {
-      const { store } = setup();
-      const created = store.add("fruits", "apple");
-      const createdAt = created.ok ? created.snippet.createdAt : 0;
+      const { store, scheduler } = setup();
 
+      scheduler.advance(100);
+      store.add("fruits", "apple");
+      scheduler.advance(100);
       store.update("fruits", "fruit", "banana");
-      expect(store.getAll()[0].createdAt).toBe(createdAt);
+      expect(store.getAll()[0].createdAt).toBe(100);
     });
 
     test("keeps the time of last use", () => {
-      const { store } = setup();
+      const { store, scheduler } = setup();
 
       store.add("fruits", "apple");
+      scheduler.advance(100);
       store.use("fruits");
-      const lastUsedAt = store.getAll()[0].lastUsedAt;
-
+      scheduler.advance(100);
       store.update("fruits", "fruit", "banana");
-      expect(store.getAll()[0].lastUsedAt).toBe(lastUsedAt);
+      expect(store.getAll()[0].lastUsedAt).toBe(100);
     });
 
     test("persists a rename", async() => {
@@ -399,9 +398,10 @@ describe("SnippetStore", () => {
     });
 
     test("resets the time of last use", () => {
-      const { store } = setup();
+      const { store, scheduler } = setup();
 
       store.add("fruits", "apple");
+      scheduler.advance(100);
       store.use("fruits");
       store.replaceAll([{ name: "fruits", query: "apple" }]);
       expect(store.getAll()[0].lastUsedAt).toBe(0);
@@ -424,19 +424,21 @@ describe("SnippetStore", () => {
 
   describe("use", () => {
     test("records the time of use", () => {
-      const { store } = setup();
+      const { store, scheduler } = setup();
 
       store.add("fruits", "apple");
+      scheduler.advance(100);
       store.use("fruits");
-      expect(store.getAll()[0].lastUsedAt).toBeGreaterThan(0);
+      expect(store.getAll()[0].lastUsedAt).toBe(100);
     });
 
     test("persists the time of use", async() => {
-      const { store, readPersisted } = setup();
+      const { store, scheduler, readPersisted } = setup();
 
       store.add("fruits", "apple");
+      scheduler.advance(100);
       store.use("fruits");
-      expect((await readPersisted())[0].lastUsedAt).toBeGreaterThan(0);
+      expect((await readPersisted())[0].lastUsedAt).toBe(100);
     });
 
     test("leaves the query alone", () => {
@@ -458,20 +460,25 @@ describe("SnippetStore", () => {
 
   describe("moveToTop", () => {
     test("makes the snippet the newest", () => {
-      const { store } = setup();
+      const { store, scheduler } = setup();
 
-      runAtTime(100, () => store.add("fruits", "apple"));
-      runAtTime(200, () => store.add("veg", "carrot"));
+      scheduler.advance(100);
+      store.add("fruits", "apple");
+      scheduler.advance(100);
+      store.add("veg", "carrot");
+      scheduler.advance(100);
       store.moveToTop("fruits");
-      expect(store.get("fruits")?.createdAt).toBeGreaterThan(200);
+      expect(store.get("fruits")?.createdAt).toBe(300);
     });
 
     test("persists the new creation time", async() => {
-      const { store, readPersisted } = setup();
+      const { store, scheduler, readPersisted } = setup();
 
-      runAtTime(100, () => store.add("fruits", "apple"));
+      scheduler.advance(100);
+      store.add("fruits", "apple");
+      scheduler.advance(100);
       store.moveToTop("fruits");
-      expect((await readPersisted())[0].createdAt).toBeGreaterThan(100);
+      expect((await readPersisted())[0].createdAt).toBe(200);
     });
 
     test("leaves the query alone", () => {
@@ -483,9 +490,11 @@ describe("SnippetStore", () => {
     });
 
     test("ignores an unknown name", () => {
-      const { store } = setup();
+      const { store, scheduler } = setup();
 
-      runAtTime(100, () => store.add("fruits", "apple"));
+      scheduler.advance(100);
+      store.add("fruits", "apple");
+      scheduler.advance(100);
       store.moveToTop("missing");
       expect(store.get("fruits")?.createdAt).toBe(100);
     });

@@ -1,7 +1,5 @@
-import { IconName, icon } from "@/lib/ui/icon";
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { PostOverlayClass } from "@/features/post_overlay/types/selectors";
-import { PostOverlayConfig } from "@/config/post_overlay_config";
 
 const DISPLAYED_CATEGORIES: readonly TagCategory[] = ["artist", "copyright", "character", "metadata"];
 
@@ -15,10 +13,6 @@ export function renderTags(target: HTMLElement, postId: string, categoryMap: Tag
     if (tagNames.length > 0) {
       target.appendChild(buildGroup(category, category, tagNames));
     }
-  }
-
-  if (PostOverlayConfig.tagHints) {
-    target.appendChild(buildHint());
   }
 }
 
@@ -52,24 +46,4 @@ function buildTag(category: string, item: string): HTMLElement {
   tag.dataset.tag = item;
   tag.textContent = item.replaceAll("_", " ");
   return tag;
-}
-
-function buildHint(): HTMLElement {
-  const hint = document.createElement("span");
-
-  hint.className = PostOverlayClass.hint;
-  hint.append(
-    buildHintItem("leftClick", "add"),
-    buildHintItem("rightClick", "exclude"),
-    buildHintItem("middleClick", "search")
-  );
-  return hint;
-}
-
-function buildHintItem(iconName: IconName, label: string): HTMLElement {
-  const item = document.createElement("span");
-
-  item.className = PostOverlayClass.hintItem;
-  item.append(icon(iconName), label);
-  return item;
 }

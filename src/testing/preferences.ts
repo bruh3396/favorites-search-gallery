@@ -16,7 +16,6 @@ export type PreferenceOverrides = {
 const DEFAULT_VALUES: Record<Section, Record<string, unknown>> = {
   app: {
     colorScheme: "light",
-    fadeThumbs: false,
     gradient: false,
     nativeFont: true,
     performanceProfile: "normal",
@@ -28,6 +27,7 @@ const DEFAULT_VALUES: Record<Section, Record<string, unknown>> = {
     downloadBatchSize: 500,
     downloadFilenameFormat: 3,
     drawerActiveSection: "settings",
+    drawerLabelsEnabled: false,
     drawerOpen: false,
     excludeBlacklist: false,
     headerEnabled: true,

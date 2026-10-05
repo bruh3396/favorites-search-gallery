@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/local_snippets";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetFlows } from "@/features/favorites/features/snippets/flows/flows";
 import { SnippetLibraryFlow } from "@/features/favorites/features/snippets/flows/library";
@@ -74,7 +75,7 @@ interface Setup {
 
 async function setup({ snippets = [], results = [], confirmed = true }: Options = {}): Promise<Setup> {
   const localSnippets = new MemoryLocalSnippets();
-  const model = new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues() });
+  const model = new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues(), scheduler: new MemoryScheduler(1_000) });
   const view = new FakeView();
   const appended: string[] = [];
   const alerts: string[] = [];
@@ -134,7 +135,7 @@ describe("SnippetLibraryFlow", () => {
         alert: (): void => undefined,
         confirm: (): boolean => true,
         saveBlob: (): void => undefined
-      }, new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues() }), view);
+      }, new SnippetModel({ localSnippets, localKeyedValues: new MemoryLocalKeyedValues(), scheduler: new MemoryScheduler(1_000) }), view);
 
       await localSnippets.setMany([fruits]);
       await library.load();
@@ -160,8 +161,8 @@ describe("SnippetLibraryFlow", () => {
 
       library.use("fruits");
       expect(appended).toEqual(["( apple ~ banana )"]);
-      expect(view.lastScene().rows[0].lastUsedAt).toBeGreaterThan(0);
-      expect((await localSnippets.getAll())[0].lastUsedAt).toBeGreaterThan(0);
+      expect(view.lastScene().rows[0].lastUsedAt).toBe(1_000);
+      expect((await localSnippets.getAll())[0].lastUsedAt).toBe(1_000);
     });
 
     test("ignores an unknown snippet", async() => {

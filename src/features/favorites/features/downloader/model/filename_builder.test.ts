@@ -1,12 +1,11 @@
 import * as DownloaderFilename from "@/features/favorites/features/downloader/model/filename_builder";
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { describe, expect, test } from "vitest";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { FilenameCategory } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
 
-const CAT = DownloaderConfig.filename.categorySeparator;
-const TAG = DownloaderConfig.filename.tagSeparator;
+const CAT = " ";
+const TAG = " ";
 
 const CATEGORIES: TagCategoryMap = new Map(Object.entries({
   "artist_one": "artist",
@@ -83,7 +82,7 @@ describe("build", () => {
     const name = DownloaderFilename.build(item, { tags: new Set(longTags), extension: "jpeg", tagCategories: categories }, ["character"]);
     const suffix = `${CAT}10146816.jpeg`;
 
-    expect(name.length).toBeLessThanOrEqual(DownloaderConfig.filename.maxLength + ".jpeg".length);
+    expect(name.length).toBeLessThanOrEqual(200 + ".jpeg".length);
     expect(name.endsWith(suffix)).toBe(true);
   });
 });

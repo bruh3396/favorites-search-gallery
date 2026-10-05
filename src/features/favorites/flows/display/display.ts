@@ -1,5 +1,4 @@
 import { FavoritesFlow, FavoritesFlowDependencies } from "@/features/favorites/flows/flow";
-import { ContentDisplayOptions } from "@/types/ui";
 import { Display } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
 import { FavoritesInfiniteDisplay } from "@/features/favorites/flows/display/infinite_display";
@@ -22,9 +21,9 @@ export class FavoritesDisplayFlow extends FavoritesFlow {
     this.infiniteDisplay = new FavoritesInfiniteDisplay(this.view, this.context.shell);
   }
 
-  public display(favorites: Favorite[], options?: ContentDisplayOptions): void {
+  public display(favorites: Favorite[]): void {
     this.view.setMatchCount(favorites.length);
-    this.activeDisplay().initialize(favorites, options);
+    this.activeDisplay().initialize(favorites);
   }
 
   public sync(favorites: Favorite[]): void {
@@ -41,7 +40,7 @@ export class FavoritesDisplayFlow extends FavoritesFlow {
   }
 
   public redisplayLatestResults(): void {
-    this.display(this.model.getCurrentSearchResults(), { fade: false });
+    this.display(this.model.getCurrentSearchResults());
   }
 
   public clear(): void {

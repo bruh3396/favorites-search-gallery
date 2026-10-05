@@ -3,7 +3,6 @@ import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
 import { IconName } from "@/lib/ui/icon";
-import { ThumbConfig } from "@/config/thumb_config";
 import { iconMaskStyles } from "@/lib/ui/icon_mask";
 
 export type ActionBarAction = "favorite" | "download" | "open";
@@ -18,6 +17,8 @@ export const ACTION_BAR_MODES = ["off", "hover", "always"] as const;
 export type ActionBarMode = (typeof ACTION_BAR_MODES)[number];
 
 export type ActionBarStyle = "corner" | "opaque" | "inset";
+
+const ACTION_BAR_STYLE: ActionBarStyle = "corner";
 
 export interface ActionBarCallbacks {
   onFavoriteAdded: (id: string) => void;
@@ -99,7 +100,7 @@ export function handleActionBarClick(event: MouseEvent | TouchEvent, callbacks: 
 
 export function setActionBarMode(mode: ActionBarMode): void {
   setDataset(document.documentElement, ActionBarDataset.mode, mode);
-  setDataset(document.documentElement, ActionBarDataset.style, ThumbConfig.actionBarStyle);
+  setDataset(document.documentElement, ActionBarDataset.style, ACTION_BAR_STYLE);
 }
 
 export function setActionBarButtons(buttons: number): void {

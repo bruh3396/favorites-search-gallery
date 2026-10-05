@@ -23,10 +23,6 @@ export class PostListNavigatorPageCache {
     return entry?.status === "loading" ? entry.loaded : undefined;
   }
 
-  public allThumbs(): HTMLElement[] {
-    return this.loadedPages().flatMap(page => page.thumbs);
-  }
-
   public allPosts(): Post[] {
     return this.loadedPages().flatMap(page => page.posts);
   }

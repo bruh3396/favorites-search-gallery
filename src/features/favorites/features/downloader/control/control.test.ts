@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { DownloaderConfig } from "@/config/downloader_config";
 import { DownloaderControl } from "@/features/favorites/features/downloader/control/control";
 import { DownloaderIntents } from "@/features/favorites/features/downloader/types/types";
 import { DownloaderShell } from "@/features/favorites/features/downloader/shell/shell";
@@ -37,7 +36,6 @@ describe("DownloaderControl", () => {
   test("offers every configured batch size, with zero meaning all", () => {
     const { shell } = setup();
 
-    expect(DownloaderConfig.batchSizeOptions).toEqual([100, 250, 500, 1_000, 0]);
     expect(queryOptions(shell.batchSizeRow).map(button => button.textContent)).toEqual(["100", "250", "500", "1000", "All"]);
   });
 

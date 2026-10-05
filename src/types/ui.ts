@@ -10,10 +10,6 @@ export interface PaginationState {
   sequence: PaginationSequence;
 }
 
-export interface ContentDisplayOptions {
-  fade: boolean;
-}
-
 export interface ShellPart<Slots> {
   root: HTMLElement;
   slots: Slots;

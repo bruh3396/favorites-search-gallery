@@ -27,7 +27,7 @@
   --gradient-rainbow: linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet);
 
   --duration-sidebar-transition: 0.15s ease;
-  --duration-skeleton: 1.5s;
+  --duration-skeleton: 0.7s;
 
   --delay-skeleton: 0s;
 }

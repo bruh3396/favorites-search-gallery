@@ -14,7 +14,7 @@ export class FavoritesSearchFlow extends FavoritesFlow {
   }
 
   public reSearchFavorites(): void {
-    this.flows.display.display(this.model.reSearchFavorites(), { fade: false });
+    this.flows.display.display(this.model.reSearchFavorites());
   }
 
   public shuffleSearchResults(): void {
