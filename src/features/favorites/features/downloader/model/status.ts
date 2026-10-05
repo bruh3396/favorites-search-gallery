@@ -1,5 +1,5 @@
 import { DownloaderProgress, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
-import { pluralSuffix } from "@/utils/pure/string";
+import { pluralSuffix } from "@/core/utils/string/string";
 
 export function label(itemCount: number, batchSize: number): string {
   if (itemCount === 0) {

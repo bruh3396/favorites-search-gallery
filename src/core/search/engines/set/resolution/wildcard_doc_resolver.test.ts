@@ -1,0 +1,124 @@
+import { describe, expect, test, vi } from "vitest";
+import { InvertedIndex } from "@/core/search/engines/set/indexes/inverted_index";
+import { WildcardDocResolver } from "@/core/search/engines/set/resolution/wildcard_doc_resolver";
+import { parseWildcardSearchTerm } from "@/core/search/parsers/search_term_parser";
+
+interface Doc {
+  id: string;
+  tags: string[];
+}
+
+function createDoc(id: string, ...tags: string[]): Doc {
+  return { id, tags };
+}
+
+const corpus: Doc[] = [
+  createDoc("banana", "banana"),
+  createDoc("bandana", "bandana"),
+  createDoc("cabana", "cabana"),
+  createDoc("canvas", "canvas"),
+  createDoc("brand", "brand")
+];
+
+interface Harness {
+  termIndex: InvertedIndex<Doc>;
+  resolver: WildcardDocResolver<Doc>;
+  unions: number;
+  resolveIds(pattern: string): string[];
+}
+
+function setup(docs: Doc[] = corpus): Harness {
+  const termIndex = new InvertedIndex<Doc>(d => d.tags);
+
+  termIndex.addDocs(docs);
+  const unionSpy = vi.spyOn(termIndex, "docsForTerm");
+  const resolver = new WildcardDocResolver(termIndex);
+
+  resolver.index(termIndex.indexedTerms());
+  unionSpy.mockClear();
+  return {
+    termIndex,
+    resolver,
+    get unions(): number {
+      return unionSpy.mock.calls.length;
+    },
+    resolveIds(pattern: string): string[] {
+      return [...resolver.resolve(parseWildcardSearchTerm(pattern))].map(d => d.id).sort();
+    }
+  };
+}
+
+describe("WildcardDocResolver", () => {
+  describe("resolve", () => {
+    test("resolves a prefix wildcard to the union of its terms' docs", () => {
+      expect(setup().resolveIds("ban*")).toEqual(["banana", "bandana"]);
+    });
+
+    test("resolves a suffix wildcard", () => {
+      expect(setup().resolveIds("*ana")).toEqual(["banana", "bandana", "cabana"]);
+    });
+
+    test("resolves a substring wildcard", () => {
+      expect(setup().resolveIds("*and*")).toEqual(["bandana", "brand"]);
+    });
+
+    test("resolves a multi-star wildcard through the regex path", () => {
+      expect(setup().resolveIds("b*na")).toEqual(["banana", "bandana"]);
+    });
+
+    test("returns an empty set when nothing matches", () => {
+      expect(setup().resolveIds("zzz*")).toEqual([]);
+    });
+
+    test("unions a pattern once and serves the same set on repeat", () => {
+      const h = setup();
+      const term = parseWildcardSearchTerm("ban*");
+      const first = h.resolver.resolve(term);
+      const second = h.resolver.resolve(term);
+
+      expect(second).toBe(first);
+      expect(h.unions).toBe(2);
+    });
+
+    test("caches the empty result without re-resolving", () => {
+      const h = setup();
+      const term = parseWildcardSearchTerm("zzz*");
+
+      expect(h.resolver.resolve(term).size).toBe(0);
+      h.resolver.resolve(term);
+      expect(h.unions).toBe(0);
+    });
+  });
+
+  describe("index", () => {
+    test("invalidates the cached union", () => {
+      const h = setup();
+
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      h.resolver.index(h.termIndex.indexedTerms());
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      expect(h.unions).toBe(4);
+    });
+  });
+
+  describe("add", () => {
+    test("makes a new term matchable and invalidates the cache", () => {
+      const h = setup();
+
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      h.termIndex.addDoc(createDoc("bang", "bang"));
+      h.resolver.add("bang");
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana", "bang"]);
+    });
+  });
+
+  describe("remove", () => {
+    test("drops a term and invalidates the cache", () => {
+      const h = setup();
+
+      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      h.resolver.remove("bandana");
+      expect(h.resolveIds("ban*")).toEqual(["banana"]);
+    });
+  });
+});

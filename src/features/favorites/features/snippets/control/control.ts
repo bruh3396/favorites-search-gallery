@@ -3,7 +3,7 @@ import { SnippetAction, SnippetIntents } from "@/features/favorites/features/sni
 import { SnippetShell } from "@/features/favorites/features/snippets/shell/shell";
 import { attachAutocomplete } from "@/lib/ui/autocomplete/autocomplete";
 import { searchField } from "@/lib/ui/widgets/search_field";
-import { toLowerUnderscored } from "@/utils/pure/string";
+import { toLowerUnderscored } from "@/core/utils/string/string";
 
 export class SnippetControl {
   public readonly actions: HTMLElement[];

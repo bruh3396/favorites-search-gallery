@@ -3,7 +3,7 @@ import { AbstractTiler } from "@/lib/ui/tilers/abstract_tiler";
 import { Layout } from "@/types/app";
 import { ThumbConfig } from "@/config/thumb_config";
 import { getItemsInContainer } from "@/lib/ui/thumb/query";
-import { rescaleGeometric } from "@/utils/pure/number";
+import { rescaleGeometric } from "@/core/utils/number/number";
 import { waitForThumbsToLoadInContainer } from "@/lib/ui/thumb/loading";
 
 export class RowTiler extends AbstractTiler {

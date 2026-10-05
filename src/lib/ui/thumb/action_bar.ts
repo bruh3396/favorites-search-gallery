@@ -1,4 +1,4 @@
-import { camelToKebabCase, capitalize } from "@/utils/pure/string";
+import { camelToKebabCase, capitalize } from "@/core/utils/string/string";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { ClickCode } from "@/types/input";
 import { ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";

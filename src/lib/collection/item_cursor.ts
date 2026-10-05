@@ -1,8 +1,7 @@
 import { Boundary } from "@/types/boundary";
-import { Identifiable } from "@/types/app";
-import { clamp } from "@/utils/pure/number";
+import { clamp } from "@/core/utils/number/number";
 
-export class ItemCursor<T extends Identifiable> {
+export class ItemCursor<T extends { id: string }> {
   private currentIndex: number = 0;
   private items: T[] = [];
   private readonly index: Map<string, number> = new Map();
@@ -35,7 +34,7 @@ export class ItemCursor<T extends Identifiable> {
     return item;
   }
 
-  public pointTo(item: Identifiable): void {
+  public pointTo(item: { id: string }): void {
     this.requireItems();
     const index = this.index.get(item.id);
 

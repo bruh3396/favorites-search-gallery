@@ -24,7 +24,7 @@ describe("parseThumb", () => {
       width: 0,
       height: 0,
       score: 0,
-      rating: "",
+      rating: "explicit",
       changedAt: 0,
       durationSeconds: 0,
       deleted: false,

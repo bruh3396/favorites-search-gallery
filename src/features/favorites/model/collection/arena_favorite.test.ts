@@ -1,4 +1,5 @@
-import { Metric, Rating } from "@/types/search";
+﻿import { Metric } from "@/core/domain/post/post";
+import { RatingMask } from "@/types/search";
 import { describe, expect, test } from "vitest";
 import { Arena } from "@/features/favorites/types/types";
 import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
@@ -6,7 +7,7 @@ import { FavoritesColumnarArena } from "@/features/favorites/model/collection/fa
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
-import { toTagSet } from "@/utils/pure/tag";
+import { toTagSet } from "@/core/domain/tag/tag";
 
 interface Slot {
   post: Post;
@@ -50,9 +51,9 @@ class TestArena implements Arena {
     return parseInt(this.slot(index).post.id, 10);
   }
 
-  public rating(index: number): Rating {
+  public rating(index: number): RatingMask {
     this.lastIndex = index;
-    return this.slot(index).post.rating === "s" ? 1 : 4;
+    return this.slot(index).post.rating === "safe" ? 1 : 4;
   }
 
   public getMetric(index: number, metric: Metric): number {
@@ -84,11 +85,6 @@ class TestArena implements Arena {
     this.slot(index).isNew = true;
   }
 
-  public setDurationSeconds(index: number, durationSeconds: number): void {
-    this.lastIndex = index;
-    this.slot(index).post.durationSeconds = durationSeconds;
-  }
-
   public cacheTagSet(index: number, tags: Set<string>): void {
     this.lastIndex = index;
     this.slot(index).cachedTags = tags;
@@ -105,15 +101,10 @@ class TestArena implements Arena {
     this.slot(index).cachedTags = undefined;
     return tags;
   }
-
-  public toPost(index: number): Post {
-    this.lastIndex = index;
-    return this.slot(index).post;
-  }
 }
 
 describe("ArenaFavorite", () => {
-  test("allocates its own slot and enriches on construction", () => {
+  test("allocates its own slot and writes the post on construction", () => {
     const arena = new TestArena();
     const item = new ArenaFavorite(createPost({ id: "42", tags: "apple banana" }), arena, false);
 
@@ -127,14 +118,14 @@ describe("ArenaFavorite", () => {
 
     arena.nextIndex = 3;
 
-    const item = new ArenaFavorite(createPost({ id: "7", tags: "a", rating: "s", score: 99 }), arena, false);
+    const item = new ArenaFavorite(createPost({ id: "7", tags: "a", score: 99 }), arena, false);
 
     expect(item.id).toBe("7");
+    expect(item.index).toBe(3);
     expect(item.tags).toEqual(new Set(["a"]));
-    expect(item.rating).toBe(1 satisfies Rating);
     expect(item.getMetric("score")).toBe(99);
     expect(item.getMetric("width")).toBe(0);
-    expect(item.post.id).toBe("7");
+    expect(item.isNew).toBe(false);
     expect(arena.lastIndex).toBe(3);
   });
 
@@ -154,33 +145,6 @@ describe("ArenaFavorite", () => {
     expect(arena.slot(0).cachedTags).toBeUndefined();
   });
 
-  test("writes setDurationSeconds and markAsNew back to the same slot", () => {
-    const arena = new TestArena();
-    const item = new ArenaFavorite(createPost({ id: "5" }), arena, false);
-
-    item.setDurationSeconds(123);
-    item.markAsNew();
-
-    expect(item.getMetric("duration")).toBe(123);
-    expect(item.isNew).toBe(true);
-  });
-
-  test("returns and clears the cached tags on consumeTags", () => {
-    const arena = new TestArena();
-    const item = new ArenaFavorite(createPost({ id: "1", tags: "one two" }), arena, true);
-
-    expect(item.consumeTags()).toEqual(new Set(["one", "two"]));
-    expect(arena.slot(0).cachedTags).toBeUndefined();
-  });
-
-  test("overwrites the backing post on enrich", () => {
-    const arena = new TestArena();
-    const item = new ArenaFavorite(createPost({ id: "3", score: 1 }), arena, false);
-
-    item.enrich(createPost({ id: "3", score: 500 }));
-    expect(item.getMetric("score")).toBe(500);
-  });
-
   test("keeps distinct items on independent slots", () => {
     const arena = new TestArena();
 
@@ -193,37 +157,25 @@ describe("ArenaFavorite", () => {
     expect(second.tags).toEqual(new Set(["two"]));
   });
 
-  test("round-trips fields, mutations, and tags through a real arena", () => {
+  test("round-trips fields and tags through a real arena", () => {
     const arena = new FavoritesColumnarArena();
-    const item0 = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", rating: "s", score: 99 }), arena, true);
-    const item1 = new ArenaFavorite(createPost({ id: "103", tags: "apple banana cherry", rating: "e", score: 3, height: 1_920, width: 1_080 }), arena, true);
+    const item0 = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", score: 99, durationSeconds: 123 }), arena, true);
+    const item1 = new ArenaFavorite(createPost({ id: "103", tags: "apple banana cherry", score: 3, height: 1_920, width: 1_080 }), arena, true);
 
     expect(item0.id).toBe("42");
-    expect(item0.rating).toBe(1 satisfies Rating);
     expect(item0.getMetric("score")).toBe(99);
+    expect(item0.getMetric("duration")).toBe(123);
     expect(item0.tags).toEqual(new Set(["apple", "banana"]));
 
     expect(item1.id).toBe("103");
-    expect(item1.rating).toBe(4 satisfies Rating);
     expect(item1.getMetric("score")).toBe(3);
     expect(item1.getMetric("width")).toBe(1_080);
     expect(item1.getMetric("height")).toBe(1_920);
-    expect(item1.pixelCount).toBe(1_080 * 1_920);
-    expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
-
-    item0.setDurationSeconds(123);
-    item0.markAsNew();
-
-    expect(item0.getMetric("duration")).toBe(123);
-    expect(item0.isNew).toBe(true);
-    expect(item0.consumeTags()).toEqual(new Set(["apple", "banana"]));
-
     expect(item1.getMetric("duration")).toBe(0);
-    expect(item1.isNew).toBe(false);
     expect(item1.tags).toEqual(new Set(["apple", "banana", "cherry"]));
   });
 
-  test("exposes every remaining getter through one item on a real arena", () => {
+  test("reads the media from a real arena", () => {
     const arena = new FavoritesColumnarArena();
     const item = new ArenaFavorite(createPost({ id: "1", tags: "cat", media: { kind: "video", locator: "12/abc123.mp4" } }), arena, true);
 

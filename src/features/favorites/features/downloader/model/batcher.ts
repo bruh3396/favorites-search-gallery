@@ -1,6 +1,6 @@
 import { Archiver, DownloadOptions, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
-import { chunk } from "@/utils/pure/array";
+import { chunk } from "@/core/utils/collection/array";
 
 const ARCHIVE_NAME = "favorites";
 

@@ -3,13 +3,14 @@ import { ITEM_CLASS_NAME, TILE_CLASS_NAME } from "@/lib/ui/thumb/selectors";
 import { setDataset, toggleDataset } from "@/utils/browser/dataset";
 import { Favorite } from "@/types/favorite";
 import { Media } from "@/core/domain/media/media";
-import { Post } from "@/core/domain/post/post";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 
 const PLACEHOLDER_ASPECT_RATIO = "1 / 1";
 
-function calculateAspectRatio({ width, height }: Pick<Post, "width" | "height">): string {
+function calculateAspectRatio(favorite: Favorite): string {
+  const width = favorite.getMetric("width");
+  const height = favorite.getMetric("height");
   return width > 0 && height > 0 ? `${width} / ${height}` : "";
 }
 
@@ -56,14 +57,13 @@ export class FavoritesElementTemplate {
   }
 
   public bindThumb(root: HTMLElement, favorite: Favorite, favorited: boolean): void {
-    const { post } = favorite;
     const container = root.children[0] as HTMLAnchorElement;
     const image = container.children[0] as HTMLImageElement;
 
     const isPlaceholder = favorite.media.locator === "";
 
     image.removeAttribute("src");
-    image.style.aspectRatio = isPlaceholder ? PLACEHOLDER_ASPECT_RATIO : calculateAspectRatio(post);
+    image.style.aspectRatio = isPlaceholder ? PLACEHOLDER_ASPECT_RATIO : calculateAspectRatio(favorite);
     setDataset(root, "mediaKind", favorite.media.kind);
     root.id = favorite.id;
     stampActionBarId(root);

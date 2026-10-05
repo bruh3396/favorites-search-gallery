@@ -1,10 +1,10 @@
-import { Metric, Rating } from "@/types/search";
+﻿import { RatingMask } from "@/types/search";
 import { Arena } from "@/features/favorites/types/types";
 import { FavoritesPostTable } from "@/features/favorites/model/collection/post_table";
 import { Media } from "@/core/domain/media/media";
-import { Post } from "@/core/domain/post/post";
-import { TagPool } from "@/lib/collection/tag_pool";
-import { toTagSet } from "@/utils/pure/tag";
+import { Metric, Post } from "@/core/domain/post/post";
+import { TagPool } from "@/core/utils/collection/tag_pool";
+import { toTagSet } from "@/core/domain/tag/tag";
 
 export class FavoritesColumnarArena implements Arena {
   public favoriteCount = 0;
@@ -40,7 +40,7 @@ export class FavoritesColumnarArena implements Arena {
     return this.postTable.id(index);
   }
 
-  public rating(index: number): Rating {
+  public rating(index: number): RatingMask {
     return this.postTable.rating(index);
   }
 
@@ -60,10 +60,6 @@ export class FavoritesColumnarArena implements Arena {
     this.postTable.markNew(index);
   }
 
-  public setDurationSeconds(index: number, durationSeconds: number): void {
-    this.postTable.setDurationSeconds(index, durationSeconds);
-  }
-
   public cacheTagSet(index: number, tags: Set<string>): void {
     this.tagSets.set(index, tags);
   }
@@ -77,9 +73,5 @@ export class FavoritesColumnarArena implements Arena {
 
     this.tagSets.delete(index);
     return tags;
-  }
-
-  public toPost(index: number): Post {
-    return this.postTable.toPost(index, this.tagPool.read(index));
   }
 }

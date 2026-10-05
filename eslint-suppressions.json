@@ -84,31 +84,6 @@
       "count": 3
     }
   },
-  "src/lib/search/engines/set/indexes/inverted_index.test.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/search/terms/abstract_search_term.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/search/terms/metric_search_term.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/search/terms/numeric_search_term.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
-  "src/lib/search/terms/wildcard_search_term.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/lib/ui/settings/components/section.ts": {
     "no-restricted-syntax": {
       "count": 1

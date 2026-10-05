@@ -11,11 +11,11 @@ interface Setup {
 }
 
 function createFavorite(id: string): Favorite {
-  return { id, media: { kind: "image", locator: `1/${id}.png` }, isNew: false, post: { width: 100, height: 200 } } as unknown as Favorite;
+  return { id, media: { kind: "image", locator: `1/${id}.png` }, isNew: false, getMetric: (metric: string) => (metric === "width" ? 100 : 200) } as unknown as Favorite;
 }
 
 function createPlaceholderFavorite(id: string): Favorite {
-  return { id, media: { kind: "image", locator: "" }, isNew: false, post: { width: 0, height: 0 } } as unknown as Favorite;
+  return { id, media: { kind: "image", locator: "" }, isNew: false, getMetric: () => 0 } as unknown as Favorite;
 }
 
 function setup(): Setup {

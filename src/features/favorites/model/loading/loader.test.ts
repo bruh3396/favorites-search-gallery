@@ -8,7 +8,7 @@ import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_cate
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { TermUpdate } from "@/lib/search/engines/search_engine";
+import { TermUpdate } from "@/core/search/engines/search_engine";
 import { flushMicrotasks } from "@/testing/async";
 
 const SEARCHER_UPDATE_DELAY = 1_500;
@@ -22,23 +22,10 @@ function splitTags(post: Post): Set<string> {
 }
 
 function createFavorite(post: Post): Favorite {
-  const favorite = {
-    id: post.id,
-    tags: splitTags(post),
-    media: post.media,
-    isNew: false,
-    enrich: (enriched: Post): void => {
-      favorite.tags = splitTags(enriched);
-      favorite.media = enriched.media;
-    },
-    markAsNew: (): void => {
-      favorite.isNew = true;
-    }
-  };
-  return favorite as unknown as Favorite;
+  return { id: post.id, tags: splitTags(post), media: post.media, isNew: false } as unknown as Favorite;
 }
 
-function createCollection(log: string[]): Collection & { favorites: Favorite[] } {
+function createCollection(log: string[]): Omit<Collection, "consumeTags" | "getRating"> & { favorites: Favorite[] } {
   const collection = {
     favorites: [] as Favorite[],
     append: (posts: Post[]): Favorite[] => {
@@ -57,7 +44,17 @@ function createCollection(log: string[]): Collection & { favorites: Favorite[] }
       return collection.favorites.slice(0, posts.length);
     },
     get: (id: string): Favorite | undefined => collection.favorites.find(favorite => favorite.id === id),
-    getAllIds: (): Set<string> => new Set(collection.favorites.map(favorite => favorite.id))
+    getAllIds: (): Set<string> => new Set(collection.favorites.map(favorite => favorite.id)),
+    write: (post: Post): void => {
+      const favorite = collection.favorites.find(candidate => candidate.id === post.id);
+
+      if (favorite !== undefined) {
+        Object.assign(favorite, { tags: splitTags(post), media: post.media });
+      }
+    },
+    markNew: (ids: string[]): void => {
+      collection.favorites.filter(favorite => ids.includes(favorite.id)).forEach(favorite => Object.assign(favorite, { isNew: true }));
+    }
   };
   return collection;
 }

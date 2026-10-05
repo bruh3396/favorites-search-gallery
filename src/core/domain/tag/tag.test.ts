@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { isTagCategory } from "@/core/domain/tag/tag";
+import { isTagCategory, toSortedTagSet, toTagSet } from "@/core/domain/tag/tag";
 
 describe("isTagCategory", () => {
   test("accepts every category", () => {
@@ -17,5 +17,18 @@ describe("isTagCategory", () => {
     expect(isTagCategory("Artist")).toBe(false);
     expect(isTagCategory(1)).toBe(false);
     expect(isTagCategory(null)).toBe(false);
+  });
+});
+
+describe("toTagSet", () => {
+  test("splits a space-joined string and yields an empty set for an empty string", () => {
+    expect([...toTagSet("red green blue")]).toEqual(["red", "green", "blue"]);
+    expect(toTagSet("").size).toBe(0);
+  });
+});
+
+describe("toSortedTagSet", () => {
+  test("sorts and drops empties", () => {
+    expect([...toSortedTagSet("  b   a ")]).toEqual(["a", "b"]);
   });
 });

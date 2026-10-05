@@ -17,7 +17,7 @@ import { PostMedia } from "@/core/domain/post/post";
 import { Shell } from "@/app/context/shell";
 import { div } from "@/utils/browser/element";
 import { isImage } from "@/lib/media/media_type";
-import { partition } from "@/utils/pure/array";
+import { partition } from "@/core/utils/collection/array";
 import { withTimeout } from "@/lib/async/scheduling";
 
 export class GalleryImageRenderer implements Renderer {

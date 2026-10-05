@@ -1,4 +1,4 @@
-import { clamp } from "@/utils/pure/number";
+import { clamp } from "@/core/utils/number/number";
 
 const TOP_MARGIN = 100;
 

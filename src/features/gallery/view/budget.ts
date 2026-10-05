@@ -1,6 +1,6 @@
 import { CanvasBudget } from "@/core/boundary/environment";
 import { GalleryBudget } from "@/features/gallery/types/types";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 
 const FULL_BUDGET: GalleryBudget = {
   upscale: { paintDelay: 25, canvasWidth: 900 },

@@ -23,7 +23,7 @@ export class FavoritesThumbSizeRecorder {
   public record(favorites: Favorite[]): void {
     const sizes = favorites
       .slice(0, RECORDED_COUNT)
-      .map(({ post }) => ({ width: post.width, height: post.height }))
+      .map(favorite => ({ width: favorite.getMetric("width"), height: favorite.getMetric("height") }))
       .filter(size => size.width > 0 && size.height > 0);
 
     this.localKeyedValues.set(STORAGE_KEY, { ownerId: this.ownerId, sizes });

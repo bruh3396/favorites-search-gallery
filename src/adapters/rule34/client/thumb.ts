@@ -4,7 +4,7 @@ import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
-import { removeExtraWhitespace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/core/utils/string/string";
 
 const NO_MEDIA: Media = { kind: "image", locator: "" };
 
@@ -16,7 +16,7 @@ export function parseThumb(thumb: HTMLElement, mintMedia: Rule34MintMedia): Post
     width: 0,
     height: 0,
     score: 0,
-    rating: "",
+    rating: "explicit",
     changedAt: 0,
     durationSeconds: 0,
     deleted: false,

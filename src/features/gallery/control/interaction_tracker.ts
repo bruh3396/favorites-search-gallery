@@ -1,7 +1,7 @@
 import { AppContext } from "@/app/context/context";
 import { GalleryConfig } from "@/config/gallery_config";
 import { Timeout } from "@/types/async";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 
 type Subscribe<T> = (handler: (value: T) => void, opts?: { signal?: AbortSignal }) => void;
 

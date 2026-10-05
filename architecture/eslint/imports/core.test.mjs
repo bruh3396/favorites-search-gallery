@@ -18,7 +18,8 @@ runRule("rule1", {
 
 runRule("rule2", {
   valid: [
-    ["core/domain/post.ts", "core/domain/tag"]
+    ["core/domain/post.ts", "core/domain/tag"],
+    ["core/domain/post.ts", "core/utils/utils"]
   ],
   invalid: [
     ["core/domain/post.ts", "core/boundary/environment"],
@@ -58,15 +59,28 @@ runRule("rule7", {
 
 runRule("rule105", {
   valid: [
-    ["core/utils/utils.ts", "core/domain/post"],
     ["core/utils/utils.ts", "core/boundary/environment"],
     ["core/utils/utils.ts", "core/boundary/ports/scheduler/scheduler"]
   ],
   invalid: [
+    ["core/utils/utils.ts", "core/domain/post"],
     ["core/utils/utils.ts", "core/context/context"],
+    ["core/utils/utils.ts", "core/search/search"],
     ["core/utils/utils.ts", "adapters/memory/ports/local_posts/local_posts"],
     ["core/utils/utils.ts", "targets/target"],
     ["core/utils/utils.test.ts", "adapters/rule34/client/client"]
+  ]
+});
+
+runRule("rule109", {
+  valid: [
+    ["core/search/search.ts", "core/domain/post"],
+    ["core/search/search.ts", "core/utils/utils"]
+  ],
+  invalid: [
+    ["core/search/search.ts", "core/boundary/environment"],
+    ["core/search/search.ts", "core/context/context"],
+    ["core/search/search.ts", "lib/lib"]
   ]
 });
 

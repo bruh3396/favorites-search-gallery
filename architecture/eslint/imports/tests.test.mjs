@@ -2,13 +2,13 @@ import { runAllowed, runRule } from "#architecture/eslint/testing/rule_tester.mj
 
 runRule("rule13", {
   valid: [
-    ["testing/post.ts", "lib/search/testing/tags"],
-    ["lib/search/testing/tags.ts", "testing/post"]
+    ["testing/post.ts", "core/search/testing/tags"],
+    ["core/search/testing/tags.ts", "testing/post"]
   ],
   invalid: [
     ["adapters/rule34/ports/remote_posts/remote_posts.ts", "testing/post"],
     ["core/utils/utils.ts", "testing/post"],
-    ["lib/lib.ts", "lib/search/testing/tags"],
+    ["lib/lib.ts", "core/search/testing/tags"],
     ["targets/target.ts", "testing/post"]
   ]
 });

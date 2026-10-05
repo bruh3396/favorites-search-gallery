@@ -1,5 +1,5 @@
 import { PaginationSequence } from "@/types/ui";
-import { numbersAround } from "@/utils/pure/number";
+import { numbersAround } from "@/core/utils/number/number";
 
 export function paginationSequence(currentPage: number, finalPage: number, nearbyCount: number): PaginationSequence {
   const nearbyPages = numbersAround(currentPage, nearbyCount, { min: 1, max: finalPage });

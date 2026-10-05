@@ -1,0 +1,76 @@
+import { AbstractSearchTerm } from "@/core/search/terms/abstract_search_term";
+import { InvertedIndex } from "@/core/search/engines/set/indexes/inverted_index";
+import { MetricComparison } from "@/core/search/parsers/metric_comparison";
+import { MetricIndex } from "@/core/search/engines/set/indexes/metric_index";
+import { MetricSearchTerm } from "@/core/search/terms/metric_search_term";
+import { NumericSearchTerm } from "@/core/search/terms/numeric_search_term";
+import { PositionIndex } from "@/core/search/engines/set/indexes/position_index";
+import { RelativeMetricIndex } from "@/core/search/engines/set/indexes/relative_metric_index";
+import { WildcardDocResolver } from "@/core/search/engines/set/resolution/wildcard_doc_resolver";
+import { WildcardSearchTerm } from "@/core/search/terms/wildcard_search_term";
+import { union } from "@/core/utils/collection/set";
+
+export interface DocResolverDependencies<Doc> {
+  termIndex: InvertedIndex<Doc>;
+  metricIndex: MetricIndex<Doc>;
+  relativeMetricIndex: RelativeMetricIndex<Doc>;
+  positionIndex: PositionIndex<Doc>;
+  wildcardResolver: WildcardDocResolver<Doc>;
+}
+
+export class DocResolver<Doc> {
+  private readonly termIndex: InvertedIndex<Doc>;
+  private readonly metricIndex: MetricIndex<Doc>;
+  private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
+  private readonly positionIndex: PositionIndex<Doc>;
+  private readonly wildcardResolver: WildcardDocResolver<Doc>;
+
+  constructor({ termIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver }: DocResolverDependencies<Doc>) {
+    this.termIndex = termIndex;
+    this.metricIndex = metricIndex;
+    this.relativeMetricIndex = relativeMetricIndex;
+    this.positionIndex = positionIndex;
+    this.wildcardResolver = wildcardResolver;
+  }
+
+  public resolve(term: AbstractSearchTerm): ReadonlySet<Doc> {
+    if (term instanceof NumericSearchTerm) {
+      return this.docsForNumeric(term);
+    }
+
+    if (term instanceof MetricSearchTerm) {
+      return this.docsForMetric(term.comparison);
+    }
+
+    if (term instanceof WildcardSearchTerm) {
+      return this.wildcardResolver.resolve(term);
+    }
+    return this.termIndex.docsForTerm(term.value) ?? new Set<Doc>();
+  }
+
+  public sortByPosition(docs: Doc[]): Doc[] {
+    return this.positionIndex.sort(docs);
+  }
+
+  private docsForNumeric(term: NumericSearchTerm): ReadonlySet<Doc> {
+    const taggedDocs = this.termIndex.docsForTerm(term.value) ?? new Set<Doc>();
+    return union(taggedDocs, this.docsForMetric(term.idComparison));
+  }
+
+  private docsForMetric(comparison: MetricComparison): ReadonlySet<Doc> {
+    return comparison.isRelative ? this.docsForRelativeMetric(comparison) : this.docsForAbsoluteMetric(comparison);
+  }
+
+  private docsForRelativeMetric(comparison: MetricComparison): ReadonlySet<Doc> {
+    if (comparison.isTautological) {
+      return comparison.operator === ":" ? this.termIndex.allDocs() : new Set<Doc>();
+    }
+    this.relativeMetricIndex.ensureBuilt(this.termIndex.allDocs());
+    return this.relativeMetricIndex.docsFor(comparison);
+  }
+
+  private docsForAbsoluteMetric(comparison: MetricComparison): ReadonlySet<Doc> {
+    this.metricIndex.ensureBuilt(this.termIndex.allDocs());
+    return this.metricIndex.docsMatching(comparison);
+  }
+}

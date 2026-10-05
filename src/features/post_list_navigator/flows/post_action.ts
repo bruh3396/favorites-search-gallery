@@ -1,6 +1,6 @@
 import { EnhancedMouseEvent } from "@/lib/event/input";
 import { PostListNavigatorFlow } from "@/features/post_list_navigator/flows/flow";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 import { downloadMedia } from "@/lib/media/download";
 import { handleActionBarClick } from "@/lib/ui/thumb/action_bar";
 

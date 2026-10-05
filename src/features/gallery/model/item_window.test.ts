@@ -1,9 +1,8 @@
 import { clampedItemsAroundId, wrappingItemsAroundId } from "@/features/gallery/model/item_window";
 import { describe, expect, test } from "vitest";
-import { Identifiable } from "@/types/app";
 
-const createItems = (...ids: string[]): Identifiable[] => ids.map(id => ({ id }));
-const getIds = (items2: Identifiable[]): string[] => items2.map(item => item.id);
+const createItems = (...ids: string[]): { id: string }[] => ids.map(id => ({ id }));
+const getIds = (items2: { id: string }[]): string[] => items2.map(item => item.id);
 
 describe("clampedItemsAroundId", () => {
   test("returns the item then its neighbors outward", () => {

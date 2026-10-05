@@ -1,5 +1,5 @@
-import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
-import { DiscreteRating, Rating, SortKey } from "@/types/search";
+﻿import { ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+import { RatingBit, RatingMask, SortKey } from "@/types/search";
 import { EnableRule, enableWhen } from "@/lib/ui/settings/enable_rule";
 import { Layout, PerformanceProfile, UpscaleQuality } from "@/types/app";
 import { SettingsControl, dropdown, multiSegmented, segmented, slider, stepper } from "@/lib/ui/settings/controls";
@@ -209,16 +209,16 @@ export function buildSettingsCatalog(context: AppContext) {
       enabled: environment.ownsFavorites,
       preference: preferences.favorites.excludeBlacklist
     }, events),
-    rating: multiSegmented<Rating>({
+    rating: multiSegmented<RatingMask>({
       id: "allowed-ratings",
-      label: "Rating",
+      label: "RatingMask",
       tooltip: "Choose which content ratings to include in search results",
       preference: preferences.favorites.allowedRatings,
       requireSelection: true,
-      options: new Map<Rating, string>([
-        [DiscreteRating.Explicit, "Explicit"],
-        [DiscreteRating.Questionable, "Questionable"],
-        [DiscreteRating.Safe, "Safe"]
+      options: new Map<RatingMask, string>([
+        [RatingBit.Explicit, "Explicit"],
+        [RatingBit.Questionable, "Questionable"],
+        [RatingBit.Safe, "Safe"]
       ])
     }),
     sortKey: dropdown<SortKey>({
@@ -232,7 +232,7 @@ export function buildSettingsCatalog(context: AppContext) {
         ["width", "Width"],
         ["height", "Height"],
         ["id", "Date Uploaded"],
-        ["lastChangedTimestamp", "Date Changed"],
+        ["changedAt", "Date Changed"],
         ["duration", "Duration"],
         ["random", "Random"]
       ])

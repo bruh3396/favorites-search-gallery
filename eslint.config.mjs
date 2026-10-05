@@ -652,7 +652,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/assets/svg/svg.ts", "src/lib/search/testing/fruit_corpus.ts", "src/playground/search_performance/queries.ts"],
+    files: ["src/assets/svg/svg.ts", "src/core/search/testing/fruit_corpus.ts", "src/playground/search_performance/queries.ts"],
     rules: {
       "@stylistic/max-len": "off"
     }
@@ -689,11 +689,11 @@ export default defineConfig([
       "src/**/wildcard_search_term.ts",
       "src/playground/search_performance/prefix_index.ts",
       "src/lib/ui/thumb/action_bar.ts",
-      "src/lib/search/engines/bit/**",
+      "src/core/search/engines/bit/**",
       "src/app/context/preferences.ts",
       "src/types/search.ts",
-      "src/utils/pure/bit.ts",
-      "src/utils/pure/bit.test.ts",
+      "src/core/utils/number/bit.ts",
+      "src/core/utils/number/bit.test.ts",
       "src/features/favorites/features/downloader/model/zip_writer.ts",
       "src/adapters/rule34/ports/remote_favorites/removed_favorites_finder.test.ts"
     ],

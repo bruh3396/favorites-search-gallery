@@ -1,5 +1,5 @@
 import Awesomplete, { AwesompleteSuggestion } from "awesomplete";
-import { isEmptyString, removeLeadingModifiers } from "@/utils/pure/string";
+import { isEmptyString, removeLeadingModifiers } from "@/core/utils/string/string";
 import { HOSTNAME } from "@/adapters/rule34/client/urls";
 import { fetchHtml } from "@/utils/browser/http";
 import { hideAwesomplete } from "@/lib/ui/autocomplete/awesomplete";

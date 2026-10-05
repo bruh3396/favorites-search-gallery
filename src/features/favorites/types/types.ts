@@ -1,25 +1,23 @@
-import { Metric, Rating } from "@/types/search";
+﻿import { RatingMask } from "@/types/search";
 import { Favorite } from "@/types/favorite";
 import { Media } from "@/core/domain/media/media";
 import { NavigationKey } from "@/types/input";
-import { Post } from "@/core/domain/post/post";
+import { Metric, Post } from "@/core/domain/post/post";
 import { SettingsControl } from "@/lib/ui/settings/controls";
-import { TermUpdate } from "@/lib/search/engines/search_engine";
+import { TermUpdate } from "@/core/search/engines/search_engine";
 
 export interface Arena {
   allocate: () => number;
   write: (index: number, post: Post) => void;
   id: (index: number) => number;
-  rating: (index: number) => Rating;
+  rating: (index: number) => RatingMask;
   getMetric: (index: number, metric: Metric) => number;
   media: (index: number) => Media;
   isNewFavorite: (index: number) => boolean;
   markNew: (index: number) => void;
-  setDurationSeconds: (index: number, durationSeconds: number) => void;
   cacheTagSet: (index: number, tags: Set<string>) => void;
   tagSet: (index: number) => Set<string>;
   consumeTagSet: (index: number) => Set<string>;
-  toPost: (index: number) => Post;
 }
 
 export interface PostLibrary {
@@ -34,6 +32,10 @@ export interface Collection {
   prependDirty: (posts: Post[]) => Favorite[];
   get: (id: string) => Favorite | undefined;
   getAllIds: () => Set<string>;
+  write: (post: Post) => void;
+  markNew: (ids: string[]) => void;
+  consumeTags: (id: string) => Set<string>;
+  getRating: (id: string) => RatingMask;
 }
 
 export interface Searcher {

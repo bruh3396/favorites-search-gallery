@@ -42,7 +42,7 @@ describe("parsePostPage", () => {
       width: 1_920,
       height: 1_080,
       score: 7,
-      rating: "e",
+      rating: "explicit",
       deleted: true,
       tags: "alice"
     });

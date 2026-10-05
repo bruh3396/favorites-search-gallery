@@ -1,9 +1,9 @@
-import { ACTION_BAR_MODES, ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
+﻿import { ACTION_BAR_MODES, ActionBarButton, ActionBarMode } from "@/lib/ui/thumb/action_bar";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
 import { FavoritesDrawerSectionName, FavoritesDrawerSectionNames } from "@/types/favorites_ui";
 import { Guard, oneOf } from "@/core/utils/guards/guards";
 import { LAYOUTS, Layout, PERFORMANCE_PROFILES, POST_OVERLAY_MODES, PerformanceProfile, PostOverlayMode } from "@/types/app";
-import { METRICS, RATINGS, Rating, SortKey } from "@/types/search";
+import { SORT_KEYS, RATING_MASKS, RatingMask, SortKey } from "@/types/search";
 import { Preference, StoredPreference } from "@/lib/storage/preference";
 import { THEMES, Theme } from "@/lib/ui/theme/themes";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
@@ -30,7 +30,7 @@ export function createPreferences(defaults: PreferenceDefaults, store: Namespace
     },
 
     favorites: {
-      allowedRatings: preference<Rating>("favoritesAllowedRatings", 7, oneOf(RATINGS)),
+      allowedRatings: preference<RatingMask>("favoritesAllowedRatings", 7, oneOf(RATING_MASKS)),
       columnCount: preference("favoritesColumnCount", defaults.favoritesColumnCount),
       downloadBatchSize: preference("favoritesDownloadBatchSize", 500),
       downloadFilenameFormat: preference("favoritesDownloadFilenameFormat", 3),
@@ -48,7 +48,7 @@ export function createPreferences(defaults: PreferenceDefaults, store: Namespace
       rowHeight: preference("favoritesRowHeight", 5),
       settingsExpandedSections: preference<Record<string, boolean>>("favoritesSettingsExpandedSections", {}),
       sortAscending: preference("favoritesSortAscending", false),
-      sortKey: preference<SortKey>("favoritesSortKey", "default", oneOf(METRICS)),
+      sortKey: preference<SortKey>("favoritesSortKey", "default", oneOf(SORT_KEYS)),
       tooltipEnabled: preference("favoritesTooltipEnabled", false),
       upscaleQuality: preference("favoritesUpscaleQuality", 1),
       upscaleThumbs: preference("favoritesUpscaleThumbs", true)

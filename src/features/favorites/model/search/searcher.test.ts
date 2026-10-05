@@ -1,24 +1,27 @@
-import { DiscreteRating, Rating, SortKey } from "@/types/search";
+import { RatingBit, RatingMask, SortKey } from "@/types/search";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/types/favorite";
 import { FavoritesSearcher } from "@/features/favorites/model/search/searcher";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { createPreferences } from "@/testing/preferences";
 
-const RATINGS: Record<string, Rating> = { s: DiscreteRating.Safe, q: DiscreteRating.Questionable, e: DiscreteRating.Explicit };
+const RATINGS: Record<string, RatingMask> = { s: RatingBit.Safe, q: RatingBit.Questionable, e: RatingBit.Explicit };
+const RATINGS_BY_FAVORITE = new WeakMap<Favorite, RatingMask>();
 
 interface SearcherOverrides {
   onOwnFavoritesPage?: boolean;
   excludeBlacklist?: boolean;
-  allowedRatings?: Rating;
+  allowedRatings?: RatingMask;
   sortKey?: SortKey;
   sortAscending?: boolean;
   onSearchResultsChanged?: (results: Favorite[]) => void;
 }
 
 function createFavorite(id: string, rating: string, ...tags: string[]): Favorite {
-  const tagSet = new Set(tags);
-  return { id, tags: tagSet, consumeTags: () => tagSet, rating: RATINGS[rating], getMetric: () => Number(id) } as unknown as Favorite;
+  const favorite = { id, tags: new Set(tags), getMetric: () => Number(id) } as unknown as Favorite;
+
+  RATINGS_BY_FAVORITE.set(favorite, RATINGS[rating]);
+  return favorite;
 }
 
 function getIds(results: Favorite[]): string[] {
@@ -42,7 +45,13 @@ describe("FavoritesSearcher", () => {
     };
 
     const onSearchResultsChanged = overrides.onSearchResultsChanged ?? vi.fn();
-    const searcher = new FavoritesSearcher(configuration, { preferences, randomSource: new MemoryRandomSource(), onSearchResultsChanged });
+    const searcher = new FavoritesSearcher(configuration, {
+      termsFor: favorite => favorite.tags,
+      ratingFor: favorite => RATINGS_BY_FAVORITE.get(favorite) ?? RatingBit.Explicit,
+      preferences,
+      randomSource: new MemoryRandomSource(),
+      onSearchResultsChanged
+    });
 
     searcher.index(favorites);
     return searcher;

@@ -1,8 +1,8 @@
-import { isEmptyString, removeExtraWhitespace } from "@/utils/pure/string";
+import { isEmptyString, removeExtraWhitespace } from "@/core/utils/string/string";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { clamp } from "@/utils/pure/number";
+import { clamp } from "@/core/utils/number/number";
 import { debounceLeading } from "@/lib/async/rate_limiting";
-import { isIndexInBounds } from "@/utils/pure/array";
+import { isIndexInBounds } from "@/core/utils/collection/array";
 
 const PERSIST_DELAY = 500;
 

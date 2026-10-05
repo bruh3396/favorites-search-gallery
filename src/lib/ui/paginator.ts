@@ -1,7 +1,6 @@
-import { Identifiable } from "@/types/app";
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
-import { clamp } from "@/utils/pure/number";
+import { clamp } from "@/core/utils/number/number";
 import { navigationDelta } from "@/lib/event/keys";
 import { paginationSequence } from "@/lib/ui/pagination";
 
@@ -9,7 +8,7 @@ export interface PaginatorConfiguration {
   nearbyPageCount: number;
 }
 
-export class Paginator<T extends Identifiable> {
+export class Paginator<T extends { id: string }> {
   private current = 1;
   private items: T[] = [];
 

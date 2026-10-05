@@ -1,5 +1,5 @@
 import { IMAGE_SELECTOR, ITEM_SELECTOR } from "@/lib/ui/thumb/selectors";
-import { sum } from "@/utils/pure/number";
+import { sum } from "@/core/utils/number/number";
 
 export function getItemsInContainer(container: HTMLElement | Document): HTMLElement[] {
   return [...container.querySelectorAll(ITEM_SELECTOR)].filter(item => item instanceof HTMLElement);

@@ -35,4 +35,3 @@ export type GalleryAction =
   | "none";
 
 export type MapToString<T extends readonly unknown[]> = { readonly [K in keyof T]: string };
-export type Identifiable = { id: string };

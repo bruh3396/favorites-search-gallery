@@ -1,6 +1,6 @@
 import { Favorite } from "@/types/favorite";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
-import { toSortedTagSet } from "@/utils/pure/tag";
+import { toSortedTagSet } from "@/core/domain/tag/tag";
 
 export function getTagsFromThumb(thumb: HTMLElement): string {
     const image = getImageFromThumb(thumb);

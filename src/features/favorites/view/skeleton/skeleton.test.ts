@@ -21,7 +21,7 @@ describe("FavoritesSkeleton", () => {
     });
 
     test("draws one placeholder per recorded size, fitted to the thumb box", () => {
-      const elements = new FavoritesSkeleton(new MemoryRandomSource()).createElements("native", [{ width: 1000, height: 2000 }, { width: 300, height: 150 }]);
+      const elements = new FavoritesSkeleton(new MemoryRandomSource()).createElements("native", [{ width: 1_000, height: 2_000 }, { width: 300, height: 150 }]);
 
       expect(elements.map(readSize)).toEqual([[125, 250], [250, 125]]);
     });

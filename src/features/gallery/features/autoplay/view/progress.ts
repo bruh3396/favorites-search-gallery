@@ -2,7 +2,7 @@ import { removeDataset, setDataset } from "@/utils/browser/dataset";
 import { AutoplayDuration } from "@/features/gallery/features/autoplay/types/types";
 import { AutoplayShell } from "@/features/gallery/features/autoplay/shell/shell";
 import { forceReflow } from "@/utils/browser/element";
-import { toSeconds } from "@/utils/pure/number";
+import { toSeconds } from "@/core/utils/number/number";
 
 export class AutoplayProgressView {
   private readonly bars: Record<AutoplayDuration, HTMLElement>;

@@ -8,7 +8,7 @@ import { FavoritesModel } from "@/features/favorites/model/model";
 import { FavoritesShell } from "@/features/favorites/shell/shell";
 import { FavoritesView } from "@/features/favorites/view/view";
 import { createElement } from "@/utils/browser/element";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 import { effect } from "@/core/utils/reactive/signal";
 
 interface FavoritesComponents {
@@ -136,7 +136,8 @@ function subscribeToEvents({ context, view, flows, control }: FavoritesComponent
   events.postOverlay.addTagToSearchRequested.on(tag => control.appendToSearch(tag));
   events.postOverlay.excludeTagFromSearchRequested.on(tag => control.excludeFromSearch(tag));
   events.app.favoriteAdded.on(id => view.setFavorited(id, true));
-  events.app.favoriteRemoved.on(id => flows.action.removeFavorite(id));}
+  events.app.favoriteRemoved.on(id => flows.action.removeFavorite(id));
+}
 
 function bindPreferences({ context, view }: FavoritesComponents): void {
   const { preferences, ports } = context;

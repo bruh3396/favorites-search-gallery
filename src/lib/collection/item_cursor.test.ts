@@ -1,14 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { Identifiable } from "@/types/app";
 import { ItemCursor } from "@/lib/collection/item_cursor";
 
 const FORWARD = 1;
 const BACKWARD = -1;
 
-const createItems = (...ids: string[]): Identifiable[] => ids.map(id => ({ id }));
+const createItems = (...ids: string[]): { id: string }[] => ids.map(id => ({ id }));
 
-const createCursor = (...ids: string[]): ItemCursor<Identifiable> => {
-  const cursor = new ItemCursor<Identifiable>();
+const createCursor = (...ids: string[]): ItemCursor<{ id: string }> => {
+  const cursor = new ItemCursor<{ id: string }>();
 
   cursor.indexItems(createItems(...ids));
   return cursor;
@@ -128,7 +127,7 @@ describe("ItemCursor", () => {
 
   describe("indexItems", () => {
     test("throws when navigating before any items are indexed", () => {
-      const cursor = new ItemCursor<Identifiable>();
+      const cursor = new ItemCursor<{ id: string }>();
 
       expect(() => cursor.currentItem()).toThrow("Tried to navigate without items");
       expect(() => cursor.move(FORWARD)).toThrow("Tried to navigate without items");
@@ -203,7 +202,7 @@ describe("ItemCursor", () => {
 
     test("throws when the indexed source shrinks past the current position", () => {
       const items = createItems("a", "b", "c");
-      const cursor = new ItemCursor<Identifiable>();
+      const cursor = new ItemCursor<{ id: string }>();
 
       cursor.indexItems(items);
       cursor.jumpToLast();

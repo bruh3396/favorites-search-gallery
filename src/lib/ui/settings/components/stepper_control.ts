@@ -1,4 +1,4 @@
-import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/utils/pure/number";
+import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/core/utils/number/number";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { createElement } from "@/utils/browser/element";
 import { icon } from "@/lib/ui/icon";

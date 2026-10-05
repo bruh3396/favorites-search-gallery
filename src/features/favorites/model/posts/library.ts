@@ -5,13 +5,13 @@ import { PostLibrary } from "@/features/favorites/types/types";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { partition } from "@/utils/pure/array";
+import { partition } from "@/core/utils/collection/array";
 
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
 
 function createPlaceholder(id: string): Post {
-  return { id, width: 0, height: 0, score: 0, rating: "", changedAt: 0, tags: "", media: { kind: "image", locator: "" } };
+  return { id, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: { kind: "image", locator: "" } };
 }
 
 function postIsPlaceholder(post: Post): boolean {

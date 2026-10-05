@@ -1,9 +1,9 @@
 import { FrozenCobaltPost, FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/client/schema";
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
-import { CategorizedPost } from "@/core/domain/post/post";
+import { CategorizedPost, Rating } from "@/core/domain/post/post";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { Media } from "@/core/domain/media/media";
-import { decodeHtmlEntities } from "@/core/utils/text/html_entities";
+import { decodeHtmlEntities } from "@/core/utils/string/string";
 
 const TAG_CATEGORY_BY_CODE: Record<NonNullable<FrozenCobaltTagCategoryCode>, TagCategory> = {
   0: "general",
@@ -13,6 +13,7 @@ const TAG_CATEGORY_BY_CODE: Record<NonNullable<FrozenCobaltTagCategoryCode>, Tag
   4: "character",
   5: "metadata"
 };
+const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
 export type FrozenCobaltMintMedia = (file: { url: string; tags: string }) => Media | null;
 
@@ -30,7 +31,7 @@ export function decodePost(post: FrozenCobaltPost, mintMedia: FrozenCobaltMintMe
       width: post.width,
       height: post.height,
       score: post.score,
-      rating: post.rating,
+      rating: decodeRating(post.rating),
       changedAt: post.change * 1_000,
       media,
       tags,
@@ -42,6 +43,10 @@ export function decodePost(post: FrozenCobaltPost, mintMedia: FrozenCobaltMintMe
 
 export function decodeTagCategory(code: FrozenCobaltTagCategoryCode): TagCategory {
   return code === null ? "general" : TAG_CATEGORY_BY_CODE[code];
+}
+
+function decodeRating(rating: string): Rating {
+  return RATING_BY_INITIAL[rating.charAt(0).toLowerCase()] ?? "explicit";
 }
 
 function decodeTagCategories(post: FrozenCobaltPost): TagCategoryMap {

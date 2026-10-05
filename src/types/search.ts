@@ -1,23 +1,14 @@
-export const RATINGS = [1, 2, 3, 4, 5, 6, 7] as const;
-export type Rating = (typeof RATINGS)[number];
-export const METRICS = ["default", "id", "score", "width", "height", "creationTimestamp", "lastChangedTimestamp", "random", "duration"] as const;
-export type Metric = (typeof METRICS)[number];
-export type SortKey = Metric;
-export type SearchableMetric = Exclude<Metric, "default" | "creationTimestamp" | "lastChangedTimestamp" | "random">;
-export type MetricComparator = ":" | ":<" | ":>";
+import { Metric } from "@/core/domain/post/post";
 
-export enum DiscreteRating {
+export const RATING_MASKS = [1, 2, 3, 4, 5, 6, 7] as const;
+export type RatingMask = (typeof RATING_MASKS)[number];
+export const SORT_KEYS = ["default", "random", "id", "score", "width", "height", "changedAt", "duration"] as const satisfies readonly ("default" | "random" | Metric)[];
+export type SortKey = (typeof SORT_KEYS)[number];
+
+export enum RatingBit {
   Explicit = 4,
   Questionable = 2,
   Safe = 1
 }
 
-export const ALL_RATINGS = DiscreteRating.Explicit | DiscreteRating.Questionable | DiscreteRating.Safe;
-
-export interface Searchable {
-  readonly tags: Set<string>;
-}
-
-export interface MetricSearchable extends Searchable {
-  getMetric: (metric: SearchableMetric) => number;
-}
+export const ALL_RATINGS = RatingBit.Explicit | RatingBit.Questionable | RatingBit.Safe;

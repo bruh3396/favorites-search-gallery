@@ -1,5 +1,5 @@
 import { GalleryFlow, GalleryFlowDependencies } from "@/features/gallery/flows/flow";
-import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
+import { clamp, roundToTwoDecimalPlaces } from "@/core/utils/number/number";
 import { GalleryAction } from "@/types/app";
 import { toggleFullscreen } from "@/utils/browser/window";
 import { vibrate } from "@/utils/browser/haptics";

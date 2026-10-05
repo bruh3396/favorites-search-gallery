@@ -1,4 +1,4 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+﻿import { CategorizedPost, Post } from "@/core/domain/post/post";
 import { Collection, LoadProgress, PostLibrary, PulledFavorites, Searcher } from "@/features/favorites/types/types";
 import { CoalescingExecutor } from "@/core/utils/async/coalescing";
 import { Favorite } from "@/types/favorite";
@@ -6,7 +6,7 @@ import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favo
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { TermUpdate } from "@/lib/search/engines/search_engine";
+import { TermUpdate } from "@/core/search/engines/search_engine";
 
 const STREAM_BATCH_SIZE = 1_000;
 const SEARCHER_UPDATE_COALESCING = { flushSize: 50, flushTimeout: 1_500 };
@@ -16,7 +16,7 @@ interface LoaderDependencies {
   localFavorites: Pick<LocalFavorites, "getAll" | "prepend" | "remove">;
   localTagCategories: LocalTagCategories;
   postLibrary: PostLibrary;
-  collection: Collection;
+  collection: Omit<Collection, "consumeTags" | "getRating">;
   searcher: Searcher;
   scheduler: Scheduler;
   onPlaceholderFilled: (favorite: Favorite) => void;
@@ -27,7 +27,7 @@ export class FavoritesLoader {
   private readonly localFavorites: Pick<LocalFavorites, "getAll" | "prepend" | "remove">;
   private readonly localTagCategories: LocalTagCategories;
   private readonly postLibrary: PostLibrary;
-  private readonly collection: Collection;
+  private readonly collection: Omit<Collection, "consumeTags" | "getRating">;
   private readonly searcher: Searcher;
   private readonly searcherUpdater: CoalescingExecutor<TermUpdate<Favorite>>;
   private readonly onPlaceholderFilled: (favorite: Favorite) => void;
@@ -75,7 +75,7 @@ export class FavoritesLoader {
     const addedPosts = newPosts.filter(post => !localIdSet.has(post.id));
     const addedFavorites = await this.prependAdoptedPosts(addedPosts);
 
-    addedFavorites.forEach(favorite => favorite.markAsNew());
+    this.collection.markNew(addedFavorites.map(favorite => favorite.id));
     await this.localFavorites.prepend(newPosts.map(post => post.id));
     return { addedFavorites, prependedCount: newPosts.length };
   }
@@ -105,7 +105,7 @@ export class FavoritesLoader {
     const oldTags = new Set(favorite.tags);
     const wasPlaceholder = favorite.media.locator === "";
 
-    favorite.enrich(post);
+    this.collection.write(post);
 
     if (oldTags.symmetricDifference(favorite.tags).size > 0) {
       this.searcherUpdater.schedule({ doc: favorite, oldTerms: oldTags, newTerms: favorite.tags });

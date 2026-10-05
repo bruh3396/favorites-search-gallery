@@ -1,5 +1,5 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
-import { Post } from "@/core/domain/post/post";
+import { Post, Rating } from "@/core/domain/post/post";
 
 const LEGACY_FAVORITES = "FavoritesV2";
 const LEGACY_POSTS = "Posts";
@@ -12,6 +12,7 @@ const COMPRESSED_PREVIEW = /^([^_/]+)_([^/.]+)$/;
 const EXTENSION_KINDS: Record<string, MediaKind> = { jpg: "image", png: "image", jpeg: "image", gif: "gif", mp4: "video" };
 const VIDEO_TAGS = ["video", "mp4"];
 const GIF_TAGS = ["gif", "animated", "animated_gif"];
+const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
 interface LegacyPost {
   id: string;
@@ -176,7 +177,7 @@ function convertPost(legacy: LegacyPost): Post | null {
     width: legacy.width,
     height: legacy.height,
     score: legacy.score,
-    rating: legacy.rating,
+    rating: RATING_BY_INITIAL[legacy.rating.charAt(0).toLowerCase()] ?? "explicit",
     changedAt: legacy.change * 1_000,
     media,
     tags: legacy.tags

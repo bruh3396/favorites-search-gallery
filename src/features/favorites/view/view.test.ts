@@ -56,7 +56,7 @@ function setup({
 }
 
 function createFavorite(id: string, width = 100, height = 200): Favorite {
-  return { id, media: { kind: "image", locator: "" }, isNew: false, post: { width, height } } as unknown as Favorite;
+  return { id, media: { kind: "image", locator: "" }, isNew: false, getMetric: (metric: string) => (metric === "width" ? width : height) } as unknown as Favorite;
 }
 
 function createFavorites(...ids: string[]): Favorite[] {

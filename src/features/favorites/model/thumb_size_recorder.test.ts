@@ -4,7 +4,7 @@ import { FavoritesThumbSizeRecorder } from "@/features/favorites/model/thumb_siz
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 
 function createFavorite(width: number, height: number): Favorite {
-  return { post: { width, height } } as unknown as Favorite;
+  return { getMetric: (metric: string) => (metric === "width" ? width : height) } as unknown as Favorite;
 }
 
 describe("FavoritesThumbSizeRecorder", () => {

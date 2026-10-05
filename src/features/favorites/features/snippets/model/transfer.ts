@@ -1,6 +1,6 @@
 import { SerializedSnippet } from "@/features/favorites/features/snippets/types/types";
 import { Snippet } from "@/core/domain/snippet/snippet";
-import { isEmptyString } from "@/utils/pure/string";
+import { isEmptyString } from "@/core/utils/string/string";
 
 export function serialize(snippets: Snippet[]): Blob {
   return new Blob([JSON.stringify(snippets.map(toExported), null, 2)], { type: "application/json" });

@@ -3,6 +3,7 @@ import { createPost, createPosts } from "@/testing/post";
 import { ArenaFavorite } from "@/features/favorites/model/collection/arena_favorite";
 import { FavoritesCollection } from "@/features/favorites/model/collection/collection";
 import { FavoritesColumnarArena } from "@/features/favorites/model/collection/favorites_columnar_arena";
+import { RatingBit } from "@/types/search";
 
 function getIds(items: ArenaFavorite[]): string[] {
   return items.map(item => item.id);
@@ -116,6 +117,66 @@ describe("FavoritesCollection", () => {
 
       collection.append([createPost({ id: "10", tags: "apple" }), createPost({ id: "20", tags: "banana" })]);
       expect(collection.getTags(["20", "30"])).toEqual(new Map([["20", new Set(["banana"])]]));
+    });
+  });
+
+  describe("write", () => {
+    test("overwrites the favorite's post", () => {
+      const collection = new FavoritesCollection();
+      const [favorite] = collection.append([createPost({ id: "1", tags: "apple", score: 1 })]);
+
+      collection.write(createPost({ id: "1", tags: "banana", score: 500 }));
+      expect(favorite.getMetric("score")).toBe(500);
+      expect(favorite.tags).toEqual(new Set(["apple"]));
+      expect(collection.consumeTags("1")).toEqual(new Set(["apple"]));
+      expect(favorite.tags).toEqual(new Set(["banana"]));
+    });
+
+    test("ignores a post that is not in the collection", () => {
+      const collection = new FavoritesCollection();
+
+      collection.append(createPosts("1"));
+      collection.write(createPost({ id: "2" }));
+      expect(collection.getAllIds()).toEqual(new Set(["1"]));
+    });
+  });
+
+  describe("markNew", () => {
+    test("marks only the given favorites as new", () => {
+      const collection = new FavoritesCollection();
+      const [first, second] = collection.append(createPosts("1", "2"));
+
+      collection.markNew(["2"]);
+      expect(first.isNew).toBe(false);
+      expect(second.isNew).toBe(true);
+    });
+  });
+
+  describe("consumeTags", () => {
+    test("returns the cached tags once, then reads them from the pool", () => {
+      const collection = new FavoritesCollection();
+      collection.append([createPost({ id: "1", tags: "one two" })]);
+      const cached = collection.consumeTags("1");
+
+      expect(cached).toEqual(new Set(["one", "two"]));
+      expect(collection.consumeTags("1")).not.toBe(cached);
+    });
+
+    test("throws for an id that is not in the collection", () => {
+      expect(() => new FavoritesCollection().consumeTags("1")).toThrow();
+    });
+  });
+
+  describe("getRating", () => {
+    test.each([
+      ["safe", RatingBit.Safe],
+      ["questionable", RatingBit.Questionable],
+      ["explicit", RatingBit.Explicit]
+    ] as const)("reads a %s rating as its bit", (rating, expected) => {
+      const collection = new FavoritesCollection();
+      collection.append([createPost({ id: "1", rating })]);
+
+      expect(collection.getRating("1")).toBe(expected);
     });
   });
 

@@ -1,4 +1,4 @@
-import { clamp } from "@/utils/pure/number";
+import { clamp } from "@/core/utils/number/number";
 import { createElement } from "@/utils/browser/element";
 import { toggleDataset } from "@/utils/browser/dataset";
 

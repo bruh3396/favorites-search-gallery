@@ -1,0 +1,21 @@
+import { AbstractSearchTerm } from "@/core/search/terms/abstract_search_term";
+import { Searchable } from "@/core/search/searchable";
+
+export class SearchQuery<Doc> {
+  constructor(
+    public readonly andTerms: AbstractSearchTerm[] = [],
+    public readonly orGroups: AbstractSearchTerm[][] = []
+  ) { }
+
+  public filter(items: (Doc & Searchable)[]): Doc[] {
+    return items.filter(item => this.matchesAndTerms(item) && this.matchesOrGroups(item));
+  }
+
+  private matchesAndTerms(item: Searchable): boolean {
+    return this.andTerms.every(term => term.matches(item));
+  }
+
+  private matchesOrGroups(item: Searchable): boolean {
+    return this.orGroups.every(orGroup => orGroup.some(term => term.matches(item)));
+  }
+}

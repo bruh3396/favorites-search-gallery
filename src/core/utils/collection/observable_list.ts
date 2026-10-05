@@ -1,0 +1,36 @@
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { doNothing } from "@/core/utils/function/function";
+import { shuffleInPlace as shuffleArray } from "@/core/utils/collection/array";
+
+export class ObservableList<T> {
+  private readonly onChanged: (items: T[]) => void;
+  private items: T[] = [];
+
+  constructor(onChanged: (items: T[]) => void = doNothing) {
+    this.onChanged = onChanged;
+  }
+
+  public get(): T[] {
+    return this.items;
+  }
+
+  public set(items: T[]): T[] {
+    this.items = items;
+    this.onChanged(this.items);
+    return this.items;
+  }
+
+  public shuffle(randomSource: RandomSource): T[] {
+    return this.set(shuffleArray(randomSource, this.items));
+  }
+
+  public append(items: T[]): T[] {
+    this.set([...this.items, ...items]);
+    return items;
+  }
+
+  public prepend(items: T[]): T[] {
+    this.set([...items, ...this.items]);
+    return items;
+  }
+}

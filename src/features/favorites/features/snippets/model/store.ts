@@ -1,5 +1,5 @@
 import { SerializedSnippet, SnippetModelDependencies, SnippetResult } from "@/features/favorites/features/snippets/types/types";
-import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/utils/pure/string";
+import { isEmptyString, removeExtraWhitespace, toLowerUnderscored } from "@/core/utils/string/string";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

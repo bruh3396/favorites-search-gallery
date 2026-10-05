@@ -3,7 +3,7 @@ import { FavoritesDrawerSectionContent } from "@/types/favorites_ui";
 import { SettingsClass } from "@/lib/ui/settings/classes";
 import { buildCollapsibleSection } from "@/lib/ui/settings/components/section";
 import { createElement } from "@/utils/browser/element";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 
 const releases = new Map<string, string[]>([
   [

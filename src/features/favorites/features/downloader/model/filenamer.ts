@@ -2,7 +2,7 @@ import * as DownloaderFilename from "@/features/favorites/features/downloader/mo
 import { FilenameCategory, FilenameParts, Filenamer } from "@/features/favorites/features/downloader/types/types";
 import { PostMedia } from "@/core/domain/post/post";
 import { Preference } from "@/lib/storage/preference";
-import { capitalize } from "@/utils/pure/string";
+import { capitalize } from "@/core/utils/string/string";
 
 const CATEGORIES: FilenameCategory[] = ["artist", "character", "copyright"];
 

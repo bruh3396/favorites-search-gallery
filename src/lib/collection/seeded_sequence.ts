@@ -1,4 +1,4 @@
-import { seededFloat } from "@/utils/pure/number";
+import { seededFloat } from "@/core/utils/number/number";
 
 export class SeededSequence {
   private seed = 100;

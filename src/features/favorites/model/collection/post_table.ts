@@ -1,7 +1,7 @@
-import { DiscreteRating, Metric, Rating } from "@/types/search";
+import { RatingBit, RatingMask } from "@/types/search";
 import { Media, MediaKind } from "@/core/domain/media/media";
-import { Post } from "@/core/domain/post/post";
-import { grow } from "@/utils/pure/array";
+import { Metric, Post, Rating } from "@/core/domain/post/post";
+import { grow } from "@/core/utils/collection/array";
 
 const DEFAULT_CAPACITY = 1_024;
 const MEDIA_KINDS: readonly MediaKind[] = ["image", "video", "gif"];
@@ -11,12 +11,10 @@ export class FavoritesPostTable {
   private widths = new Uint16Array(DEFAULT_CAPACITY);
   private heights = new Uint16Array(DEFAULT_CAPACITY);
   private scores = new Uint32Array(DEFAULT_CAPACITY);
-  private deleted = new Uint8Array(DEFAULT_CAPACITY);
   private isNew = new Uint8Array(DEFAULT_CAPACITY);
   private mediaKinds = new Uint8Array(DEFAULT_CAPACITY);
   private durationSeconds = new Uint16Array(DEFAULT_CAPACITY);
   private changedAts = new Float64Array(DEFAULT_CAPACITY);
-  private fetchedAts = new Float64Array(DEFAULT_CAPACITY);
   private ratings = new Uint8Array(DEFAULT_CAPACITY);
   private mediaLocators: string[] = [];
 
@@ -27,27 +25,9 @@ export class FavoritesPostTable {
     this.scores[index] = post.score;
     this.changedAts[index] = post.changedAt;
     this.durationSeconds[index] = post.durationSeconds ?? 0;
-    this.fetchedAts[index] = post.fetchedAt ?? 0;
     this.ratings[index] = toRatingValue(post.rating);
-    this.deleted[index] = post.deleted ? 1 : 0;
     this.mediaKinds[index] = MEDIA_KINDS.indexOf(post.media.kind);
     this.mediaLocators[index] = post.media.locator;
-  }
-
-  public toPost(index: number, tags: string): Post {
-    return {
-      id: String(this.ids[index]),
-      tags,
-      width: this.widths[index],
-      height: this.heights[index],
-      score: this.scores[index],
-      rating: toRatingString(this.ratings[index] as Rating),
-      changedAt: this.changedAts[index],
-      durationSeconds: this.durationSeconds[index],
-      fetchedAt: this.fetchedAts[index],
-      deleted: this.deleted[index] === 1,
-      media: this.media(index)
-    };
   }
 
   public getMetric(index: number, metric: Metric): number {
@@ -60,13 +40,10 @@ export class FavoritesPostTable {
         return this.heights[index];
       case "score":
         return this.scores[index];
-      case "lastChangedTimestamp":
+      case "changedAt":
         return this.changedAts[index];
       case "duration":
         return this.durationSeconds[index];
-      case "creationTimestamp":
-      case "default":
-      case "random":
       default:
         return 0;
     }
@@ -76,8 +53,8 @@ export class FavoritesPostTable {
     return this.ids[index];
   }
 
-  public rating(index: number): Rating {
-    return this.ratings[index] as Rating;
+  public rating(index: number): RatingMask {
+    return this.ratings[index] as RatingMask;
   }
 
   public media(index: number): Media {
@@ -92,10 +69,6 @@ export class FavoritesPostTable {
     this.isNew[index] = 1;
   }
 
-  public setDurationSeconds(index: number, durationSeconds: number): void {
-    this.durationSeconds[index] = durationSeconds;
-  }
-
   public ensureCapacity(required: number): void {
     if (required <= this.ids.length) {
       return;
@@ -107,12 +80,10 @@ export class FavoritesPostTable {
     this.widths = grow(this.widths, capacity);
     this.heights = grow(this.heights, capacity);
     this.scores = grow(this.scores, capacity);
-    this.deleted = grow(this.deleted, capacity);
     this.isNew = grow(this.isNew, capacity);
     this.mediaKinds = grow(this.mediaKinds, capacity);
     this.durationSeconds = grow(this.durationSeconds, capacity);
     this.changedAts = grow(this.changedAts, capacity);
-    this.fetchedAts = grow(this.fetchedAts, capacity);
     this.ratings = grow(this.ratings, capacity);
   }
 
@@ -124,35 +95,22 @@ export class FavoritesPostTable {
     this.widths = this.widths.slice(0, count);
     this.heights = this.heights.slice(0, count);
     this.scores = this.scores.slice(0, count);
-    this.deleted = this.deleted.slice(0, count);
     this.isNew = this.isNew.slice(0, count);
     this.mediaKinds = this.mediaKinds.slice(0, count);
     this.durationSeconds = this.durationSeconds.slice(0, count);
     this.changedAts = this.changedAts.slice(0, count);
-    this.fetchedAts = this.fetchedAts.slice(0, count);
     this.ratings = this.ratings.slice(0, count);
     this.mediaLocators.length = count;
   }
 }
 
-export function toRatingValue(rating: string): Rating {
-  switch (rating.charAt(0).toLowerCase()) {
-    case "s":
-      return DiscreteRating.Safe;
-    case "q":
-      return DiscreteRating.Questionable;
-    default:
-      return DiscreteRating.Explicit;
-  }
-}
-
-export function toRatingString(rating: Rating): string {
+export function toRatingValue(rating: Rating): RatingMask {
   switch (rating) {
-    case DiscreteRating.Safe:
-      return "s";
-    case DiscreteRating.Questionable:
-      return "q";
+    case "safe":
+      return RatingBit.Safe;
+    case "questionable":
+      return RatingBit.Questionable;
     default:
-      return "e";
+      return RatingBit.Explicit;
   }
 }

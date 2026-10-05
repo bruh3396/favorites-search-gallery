@@ -1,4 +1,4 @@
-import { removeNonNumericCharacters } from "@/utils/pure/string";
+import { removeNonNumericCharacters } from "@/core/utils/string/string";
 
 export function parseIdFromThumb(thumb: HTMLElement): string {
   const id = thumb.getAttribute("id");

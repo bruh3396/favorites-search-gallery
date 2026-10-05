@@ -4,7 +4,7 @@ import { Post } from "@/core/domain/post/post";
 import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/removed_favorites_finder";
 import { advanceAndSettle } from "@/testing/async";
 import { createPost } from "@/testing/post";
-import { seededFloat } from "@/utils/pure/number";
+import { seededFloat } from "@/core/utils/number/number";
 
 const PAGE_SIZE = 5;
 const FETCH_DELAY = 1_000;

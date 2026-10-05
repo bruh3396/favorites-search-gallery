@@ -2,7 +2,7 @@ import { Post } from "@/core/domain/post/post";
 import { PostList } from "@/features/post_list_navigator/types/post_list_page";
 import { PostListNavigatorPageCache } from "@/features/post_list_navigator/model/page_cache";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
-import { numbersAround } from "@/utils/pure/number";
+import { numbersAround } from "@/core/utils/number/number";
 
 const PREFETCH_LENGTH = 3;
 

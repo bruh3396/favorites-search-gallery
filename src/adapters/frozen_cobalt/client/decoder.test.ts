@@ -28,7 +28,7 @@ describe("decodePost", () => {
       width: 1_920,
       height: 1_080,
       score: 100,
-      rating: "e",
+      rating: "explicit",
       changedAt: 1_234_567_890_000,
       media,
       tags: "tag1 tag2",

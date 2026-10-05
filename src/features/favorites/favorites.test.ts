@@ -1,5 +1,5 @@
 /* eslint-disable no-spaced-func, func-call-spacing -- false positive: arrow function types inside test.each's generic confuse these rules */
-import { DiscreteRating, Rating } from "@/types/search";
+import { RatingBit, RatingMask } from "@/types/search";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { AppContext } from "@/app/context/context";
 import { EnhancedMouseEvent } from "@/lib/event/input";
@@ -24,9 +24,9 @@ import { createSnippet } from "@/features/favorites/features/snippets/testing/sn
 import { startFavorites } from "@/features/favorites/favorites";
 
 const FRUITS: Partial<Post>[] = [
-  { id: "1", tags: "apple", score: 5, rating: "s" },
-  { id: "2", tags: "banana", score: 30, rating: "e" },
-  { id: "3", tags: "apple cherry", score: 10, rating: "q" }
+  { id: "1", tags: "apple", score: 5, rating: "safe" },
+  { id: "2", tags: "banana", score: 30, rating: "explicit" },
+  { id: "3", tags: "apple cherry", score: 10, rating: "questionable" }
 ];
 
 interface SetupOptions {
@@ -371,7 +371,7 @@ describe("startFavorites", () => {
   });
 
   test.each<[string, (context: AppContext) => void, string[]]>([
-    ["filters the results by allowed rating", (context): void => context.preferences.favorites.allowedRatings.set(DiscreteRating.Explicit as Rating), ["2"]],
+    ["filters the results by allowed rating", (context): void => context.preferences.favorites.allowedRatings.set(RatingBit.Explicit as RatingMask), ["2"]],
     ["hides blacklisted favorites while the blacklist is excluded", (context): void => context.preferences.favorites.excludeBlacklist.set(true), ["1", "3"]]
   ])("%s", async(_, change, ids) => {
     const context = await setup({ environment: { blacklistedTags: "banana" } });

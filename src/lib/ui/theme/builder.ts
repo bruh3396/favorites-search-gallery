@@ -1,6 +1,6 @@
 import { THEMES, Theme } from "@/lib/ui/theme/themes";
 import { THEME_COLOR_KEYS, ThemeColors } from "@/lib/ui/theme/types";
-import { camelToKebabCase, capitalize } from "@/utils/pure/string";
+import { camelToKebabCase, capitalize } from "@/core/utils/string/string";
 
 export function themeStyles(): string {
   return Object.entries(THEMES)

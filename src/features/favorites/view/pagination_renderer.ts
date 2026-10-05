@@ -7,7 +7,7 @@ import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { addTooltip } from "@/lib/ui/tooltip/tooltip";
 import { createElement } from "@/utils/browser/element";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 
 const PaginationSelectors = {
   numberTraversalButtonClass: "favorites-pagination-btn",

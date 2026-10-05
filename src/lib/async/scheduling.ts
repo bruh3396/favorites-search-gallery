@@ -1,6 +1,6 @@
 import { PromiseTimeoutError } from "@/types/errors";
 import { Timeout } from "@/types/async";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 
 export class Timer {
   public waitTime: number;

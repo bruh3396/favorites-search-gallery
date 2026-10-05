@@ -1,6 +1,6 @@
 import { AutoplayConfig } from "@/config/autoplay_config";
 import { AutoplayDuration } from "@/features/gallery/features/autoplay/types/types";
-import { clamp } from "@/utils/pure/number";
+import { clamp } from "@/core/utils/number/number";
 
 export function parse(kind: AutoplayDuration, seconds: string, fallback: number): number {
   const value = parseFloat(seconds);

@@ -16,7 +16,7 @@ import { FavoritesSkeleton } from "@/features/favorites/view/skeleton/skeleton";
 import { FavoritesStatus } from "@/features/favorites/view/status/status";
 import { FavoritesThumbPool } from "@/features/favorites/view/thumb_pool";
 import { Layout } from "@/types/app";
-import { doNothing } from "@/utils/pure/function";
+import { doNothing } from "@/core/utils/function/function";
 import { toggleDataset } from "@/utils/browser/dataset";
 import { waitForNextPaint } from "@/utils/browser/window";
 

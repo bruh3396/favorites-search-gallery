@@ -1,7 +1,6 @@
-import { Post } from "@/core/domain/post/post";
+import { Post, RATINGS } from "@/core/domain/post/post";
 
 const TAGS = ["apple", "banana", "cherry", "durian", "elderberry", "fig", "grape", "kiwi", "lemon", "mango", "orange", "peach"];
-const RATINGS = ["s", "q", "e"];
 const SIZES = [[640, 480], [480, 640], [800, 450], [600, 600]];
 
 function tagsFor(index: number): string {

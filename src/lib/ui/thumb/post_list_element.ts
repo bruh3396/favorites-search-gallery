@@ -3,7 +3,7 @@ import { actionBarHtml, stampActionBarId } from "@/lib/ui/thumb/action_bar";
 import { getImageFromThumb } from "@/lib/ui/thumb/query";
 import { mintMedia } from "@/adapters/rule34_cdn/client/locator";
 import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
-import { removeNonNumericCharacters } from "@/utils/pure/string";
+import { removeNonNumericCharacters } from "@/core/utils/string/string";
 import { setDataset } from "@/utils/browser/dataset";
 
 export function preparePostListThumbs(thumbs: HTMLElement[], onMobileDevice: boolean, galleryDisabled: boolean): HTMLElement[] {

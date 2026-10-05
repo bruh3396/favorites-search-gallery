@@ -1,13 +1,14 @@
 import { TagCategoryMap, isTagCategory } from "@/core/domain/tag/tag";
 import { BASE_INDEX_URL } from "@/adapters/rule34/client/urls";
-import { CategorizedPost } from "@/core/domain/post/post";
+import { CategorizedPost, Rating } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
 import { Rule34Error } from "@/adapters/rule34/client/error";
 import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
-import { removeExtraWhitespace } from "@/utils/pure/string";
+import { removeExtraWhitespace } from "@/core/utils/string/string";
 
 const STATISTIC_ENTRY = /(\S+):\s+(\S+)/g;
 const DIMENSIONS = /^([1-9]\d*)(?:x|\/)([1-9]\d*)$/;
+const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
 export function postPageUrl(id: string): string {
   return `${BASE_INDEX_URL}post&s=view&id=${id}`;
@@ -91,9 +92,6 @@ function parseTags(dom: Document): string {
     .join(" ") || "");
 }
 
-function parseRating(statistics: Record<string, string>): string {
-  if (statistics.rating === undefined || statistics.rating === "") {
-    return "e";
-  }
-  return statistics.rating.charAt(0).toLowerCase();
+function parseRating(statistics: Record<string, string>): Rating {
+  return RATING_BY_INITIAL[statistics.rating?.charAt(0).toLowerCase() ?? ""] ?? "explicit";
 }

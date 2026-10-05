@@ -1,4 +1,4 @@
-import { capitalize, pluralSuffix } from "@/utils/pure/string";
+import { capitalize, pluralSuffix } from "@/core/utils/string/string";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { PulledFavorites } from "@/features/favorites/types/types";
 

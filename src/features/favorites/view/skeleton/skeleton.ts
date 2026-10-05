@@ -1,4 +1,4 @@
-import { randomBoolean, randomIntInRange } from "@/utils/pure/number";
+import { randomBoolean, randomIntInRange } from "@/core/utils/number/number";
 import { Dimensions2D } from "@/types/geometry";
 import { FavoritesSkeletonItem } from "@/features/favorites/view/skeleton/skeleton_item";
 import { Layout } from "@/types/app";

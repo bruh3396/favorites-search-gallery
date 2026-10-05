@@ -34,7 +34,7 @@ export class GalleryMemoryImageBudgeter extends GalleryAbstractImageBudgeter {
 
   constructor(
     { megabyteLimit, minimumCount }: GalleryMemoryImageBudgeterConfiguration,
-    private readonly getFavorite: (id: string) => Pick<Favorite, "pixelCount"> | undefined
+    private readonly getFavorite: (id: string) => Pick<Favorite, "getMetric"> | undefined
   ) {
     super();
     this.megabyteLimit = megabyteLimit;
@@ -59,6 +59,7 @@ export class GalleryMemoryImageBudgeter extends GalleryAbstractImageBudgeter {
   }
 
   private megabytes(request: ImageRequest): number {
-    return (this.getFavorite(request.id)?.pixelCount ?? 0) / PIXELS_PER_MEGABYTE;
+    const favorite = this.getFavorite(request.id);
+    return favorite === undefined ? 0 : favorite.getMetric("width") * favorite.getMetric("height") / PIXELS_PER_MEGABYTE;
   }
 }

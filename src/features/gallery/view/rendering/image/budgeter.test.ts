@@ -49,7 +49,7 @@ describe("GalleryMemoryImageBudgeter", () => {
   const BUDGET = { megabyteLimit: MEGABYTE_LIMIT, minimumCount: MINIMUM_COUNT };
 
   function createMemoryBudgeter(megabytesPerRequest: number): GalleryMemoryImageBudgeter {
-    return new GalleryMemoryImageBudgeter(BUDGET, () => ({ pixelCount: megabytesPerRequest * PIXELS_PER_MB }));
+    return new GalleryMemoryImageBudgeter(BUDGET, () => ({ getMetric: metric => (metric === "width" ? megabytesPerRequest * PIXELS_PER_MB : 1) }));
   }
 
   test("accepts every request when the total never reaches the limit", () => {

@@ -1,16 +1,16 @@
-import { ALL_RATINGS, Rating, SearchableMetric, SortKey } from "@/types/search";
-import { SearchEngine, TermUpdate } from "@/lib/search/engines/search_engine";
-import { BitSearchEngine } from "@/lib/search/engines/bit/bit_search_engine";
+﻿import { ALL_RATINGS, RatingMask, SortKey } from "@/types/search";
+import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
+import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
+import { Searcher } from "@/features/favorites/types/types";
 import { Favorite } from "@/types/favorite";
-import { ObservableList } from "@/lib/collection/observable_list";
+import { ObservableList } from "@/core/utils/collection/observable_list";
 import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { Searcher } from "@/features/favorites/types/types";
-import { chain } from "@/utils/pure/function";
-import { isEmptyString } from "@/utils/pure/string";
-import { negateTags } from "@/utils/pure/tag";
-import { shuffleInPlace } from "@/utils/pure/array";
+import { Metric } from "@/core/domain/post/post";
+import { chain } from "@/core/utils/function/function";
+import { isEmptyString } from "@/core/utils/string/string";
+import { shuffleInPlace } from "@/core/utils/collection/array";
 
 export interface FavoritesSearcherConfiguration {
   userIsOnTheirOwnFavoritesPage: boolean;
@@ -18,6 +18,8 @@ export interface FavoritesSearcherConfiguration {
 }
 
 export interface FavoritesSearcherDependencies {
+  termsFor: (favorite: Favorite) => Set<string>;
+  ratingFor: (favorite: Favorite) => RatingMask;
   preferences: Preferences;
   randomSource: RandomSource;
   onSearchResultsChanged: (results: Favorite[]) => void;
@@ -25,9 +27,10 @@ export interface FavoritesSearcherDependencies {
 
 export class FavoritesSearcher implements Searcher {
   private readonly engine: SearchEngine<Favorite>;
+  private readonly ratingFor: (favorite: Favorite) => RatingMask;
   private readonly results: ObservableList<Favorite>;
   private readonly excludeBlacklist: Preference<boolean>;
-  private readonly allowedRatings: Preference<Rating>;
+  private readonly allowedRatings: Preference<RatingMask>;
   private readonly sortKey: Preference<SortKey>;
   private readonly sortAscending: Preference<boolean>;
   private readonly userIsOnTheirOwnFavoritesPage: boolean;
@@ -35,18 +38,18 @@ export class FavoritesSearcher implements Searcher {
   private readonly randomSource: RandomSource;
   private currentSearchQuery: string;
 
-  constructor(configuration: FavoritesSearcherConfiguration, { preferences, randomSource, onSearchResultsChanged }: FavoritesSearcherDependencies) {
-    const termsFor = (favorite: Favorite): Set<string> => favorite.consumeTags();
-    const metricFor = (favorite: Favorite, metric: SearchableMetric): number => favorite.getMetric(metric);
+  constructor(configuration: FavoritesSearcherConfiguration, { termsFor, ratingFor, preferences, randomSource, onSearchResultsChanged }: FavoritesSearcherDependencies) {
+    const metricFor = (favorite: Favorite, metric: Metric): number => favorite.getMetric(metric);
 
     this.engine = new BitSearchEngine<Favorite>(termsFor, metricFor);
+    this.ratingFor = ratingFor;
     this.results = new ObservableList<Favorite>(onSearchResultsChanged);
     this.excludeBlacklist = preferences.favorites.excludeBlacklist;
     this.allowedRatings = preferences.favorites.allowedRatings;
     this.sortKey = preferences.favorites.sortKey;
     this.sortAscending = preferences.favorites.sortAscending;
     this.userIsOnTheirOwnFavoritesPage = configuration.userIsOnTheirOwnFavoritesPage;
-    this.negatedBlacklistedTags = negateTags(configuration.blacklistedTags);
+    this.negatedBlacklistedTags = configuration.blacklistedTags.replace(/(\S+)/g, "-$1");
     this.randomSource = randomSource;
     this.currentSearchQuery = "";
   }
@@ -135,7 +138,7 @@ export class FavoritesSearcher implements Searcher {
 
   private filterByRating(favorites: Favorite[]): Favorite[] {
     const allowedRatings = this.allowedRatings.value;
-    return allowedRatings === ALL_RATINGS ? favorites : favorites.filter(favorite => (favorite.rating & allowedRatings) > 0);
+    return allowedRatings === ALL_RATINGS ? favorites : favorites.filter(favorite => (this.ratingFor(favorite) & allowedRatings) > 0);
   }
 
   private sort(favorites: Favorite[]): Favorite[] {

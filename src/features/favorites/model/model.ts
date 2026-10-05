@@ -12,6 +12,7 @@ import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favo
 import { NavigationKey } from "@/types/input";
 import { PaginationState } from "@/types/ui";
 import { Paginator } from "@/lib/ui/paginator";
+import { RatingMask } from "@/types/search";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 const NEARBY_PAGE_COUNT = 5;
@@ -37,6 +38,8 @@ export class FavoritesModel {
       userIsOnTheirOwnFavoritesPage: context.environment.ownsFavorites,
       blacklistedTags: context.environment.blacklistedTags
     }, {
+      termsFor: (favorite): Set<string> => this.collection.consumeTags(favorite.id),
+      ratingFor: (favorite): RatingMask => this.collection.getRating(favorite.id),
       preferences: context.preferences,
       randomSource: context.ports.randomSource,
       onSearchResultsChanged

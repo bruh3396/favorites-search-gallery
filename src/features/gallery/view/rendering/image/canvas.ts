@@ -1,5 +1,5 @@
 import { GalleryBudget, Resolution } from "@/features/gallery/types/types";
-import { clamp, roundToTwoDecimalPlaces } from "@/utils/pure/number";
+import { clamp, roundToTwoDecimalPlaces } from "@/core/utils/number/number";
 import { clearCanvas, drawScaledBitmap } from "@/utils/browser/canvas";
 import { Environment } from "@/core/boundary/environment";
 import { GalleryConfig } from "@/config/gallery_config";

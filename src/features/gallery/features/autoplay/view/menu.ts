@@ -2,7 +2,7 @@ import * as Icons from "@/assets/svg/icons";
 import { AutoplayScene } from "@/features/gallery/features/autoplay/types/types";
 import { AutoplayShell } from "@/features/gallery/features/autoplay/shell/shell";
 import { createObjectUrlFromSvg } from "@/utils/browser/image";
-import { toSeconds } from "@/utils/pure/number";
+import { toSeconds } from "@/core/utils/number/number";
 import { toggleDataset } from "@/utils/browser/dataset";
 
 export class AutoplayMenuView {

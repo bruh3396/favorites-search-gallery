@@ -1,12 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { Identifiable } from "@/types/app";
 import { Paginator } from "@/lib/ui/paginator";
 
-const createItems = (count: number): Identifiable[] => Array.from({ length: count }, (_, i) => ({ id: String(i + 1) }));
-const getIds = (results: Identifiable[]): string[] => results.map(r => r.id);
+const createItems = (count: number): { id: string }[] => Array.from({ length: count }, (_, i) => ({ id: String(i + 1) }));
+const getIds = (results: { id: string }[]): string[] => results.map(r => r.id);
 
-const createPaginator = (count: number, perPage = 10, nearby = 2): Paginator<Identifiable> => {
-  const paginator = new Paginator<Identifiable>({ nearbyPageCount: nearby }, (): number => perPage);
+const createPaginator = (count: number, perPage = 10, nearby = 2): Paginator<{ id: string }> => {
+  const paginator = new Paginator<{ id: string }>({ nearbyPageCount: nearby }, (): number => perPage);
 
   paginator.paginate(createItems(count));
   return paginator;
@@ -15,7 +14,7 @@ const createPaginator = (count: number, perPage = 10, nearby = 2): Paginator<Ide
 describe("Paginator", () => {
   describe("paginate", () => {
     test("returns the items it was given", () => {
-      const paginator = new Paginator<Identifiable>({ nearbyPageCount: 2 }, (): number => 10);
+      const paginator = new Paginator<{ id: string }>({ nearbyPageCount: 2 }, (): number => 10);
       const next = createItems(3);
 
       expect(paginator.paginate(next)).toBe(next);
