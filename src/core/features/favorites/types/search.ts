@@ -1,6 +1,8 @@
-import { Metric, Rating } from "@/core/domain/post/post";
+import { METRICS, Rating } from "@/core/domain/post/post";
 
-export type SortKey = "favorited" | "random" | Metric;
+export const SORT_KEYS = ["favorited", "random", ...METRICS] as const;
+
+export type SortKey = (typeof SORT_KEYS)[number];
 
 export interface Sort {
   key: SortKey;

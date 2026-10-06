@@ -5,7 +5,8 @@ import { doNothing } from "@/core/utils/function/function";
 export const TileClass = {
   root: "fsg-Tile",
   link: "fsg-Tile-link",
-  preview: "fsg-Tile-preview"
+  preview: "fsg-Tile-preview",
+  actions: "fsg-Tile-actions"
 } as const;
 
 export interface Dimensions {
@@ -16,15 +17,17 @@ export interface Dimensions {
 export interface TileOptions {
   post: MediaItem;
   dimensions: Dimensions;
+  actions: readonly Node[];
   resolvePreviewUrl: (media: Media) => Promise<string>;
 }
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
-export function createTile(ownerDocument: Document, { post, dimensions, resolvePreviewUrl }: TileOptions): HTMLElement {
+export function createTile(ownerDocument: Document, { post, dimensions, actions, resolvePreviewUrl }: TileOptions): HTMLElement {
   const root = ownerDocument.createElement("div");
   const link = ownerDocument.createElement("a");
   const preview = ownerDocument.createElement("img");
+  const actionBar = ownerDocument.createElement("div");
 
   root.className = TileClass.root;
   root.dataset.mediaKind = post.media.kind;
@@ -34,8 +37,10 @@ export function createTile(ownerDocument: Document, { post, dimensions, resolveP
   preview.className = TileClass.preview;
   preview.decoding = "async";
   preview.alt = "";
+  actionBar.className = TileClass.actions;
   link.append(preview);
-  root.append(link);
+  actionBar.append(...actions);
+  root.append(link, actionBar);
 
   if (post.media.locator !== "") {
     showPreview(root, preview, resolvePreviewUrl(post.media)).catch(console.error);

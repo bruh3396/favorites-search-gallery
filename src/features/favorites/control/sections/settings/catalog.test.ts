@@ -3,7 +3,7 @@ import * as FavoritesSettingsCatalog from "@/features/favorites/control/sections
 import { Preference, booleanPreference } from "@/lib/storage/preference";
 import { afterEach, describe, expect, test } from "vitest";
 import { AppContext } from "@/app/context/context";
-import { Feature } from "@/core/context/features";
+import { Feature } from "@/app/context/features";
 import { GalleryUpscaleConfig } from "@/config/gallery_upscale_config";
 import { PreferenceOverrides } from "@/testing/preferences";
 import { createAppContext } from "@/testing/context";

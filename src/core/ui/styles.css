@@ -15,3 +15,4 @@
 @import "./components/status_text/status_text.css" layer(components);
 @import "./components/paginator/paginator.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
+@import "./components/slider/slider.css" layer(components);

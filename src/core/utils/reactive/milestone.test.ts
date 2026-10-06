@@ -1,6 +1,6 @@
 import { Milestone, when } from "@/core/utils/reactive/milestone";
+import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
-import { Signal } from "@/core/utils/reactive/signal";
 
 describe("Milestone", () => {
   test("is not reached at first", () => {
@@ -21,6 +21,17 @@ describe("Milestone", () => {
 
     milestone.reach(1);
     await expect(milestone.wait()).resolves.toBe(1);
+  });
+
+  test("reruns the effects that read it once reached", () => {
+    const milestone = new Milestone();
+    const seen: boolean[] = [];
+
+    effect(() => {
+      seen.push(milestone.reached);
+    });
+    milestone.reach();
+    expect(seen).toEqual([false, true]);
   });
 
   test("throws when reached twice", () => {

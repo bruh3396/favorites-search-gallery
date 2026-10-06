@@ -1,0 +1,9 @@
+.fsg-Slider {
+  display: flex;
+  align-items: center;
+}
+
+.fsg-Slider-input {
+  inline-size: 160px;
+  margin: 0;
+}

@@ -5,25 +5,29 @@ import { FavoritesLoadFlow } from "@/core/features/favorites/flows/load/load";
 import { FavoritesModel } from "@/core/features/favorites/model/model";
 import { FavoritesPagingFlow } from "@/core/features/favorites/flows/paging/paging";
 import { FavoritesSearchFlow } from "@/core/features/favorites/flows/search";
+import { FavoritesSkeletonFlow } from "@/core/features/favorites/flows/skeleton";
 import { LoadPhase } from "@/core/features/favorites/types/load";
 import { Post } from "@/core/domain/post/post";
 import { SearchCriteria } from "@/core/features/favorites/types/search";
 import { when } from "@/core/utils/reactive/milestone";
 
-const FINISHED_PHASES: ReadonlySet<LoadPhase> = new Set(["loaded", "interrupted"]);
-
 export function startFavorites(configuration: FavoritesConfiguration, dependencies: FavoritesDependencies): Favorites {
   const { remoteFavoriteActions } = dependencies;
+  const terminalPhases: ReadonlySet<LoadPhase> = new Set(["loaded", "interrupted"]);
   const model = new FavoritesModel();
   const search = new FavoritesSearchFlow(configuration, { ...dependencies, model });
   const load = new FavoritesLoadFlow({ ...dependencies, model, getSearchCriteria: (): SearchCriteria => search.getSearchCriteria() });
-  const finishedLoading = when(() => FINISHED_PHASES.has(load.state.value.phase));
+  const finishedLoading = when(() => terminalPhases.has(load.state.value.phase));
   const paging = new FavoritesPagingFlow({ ...dependencies, model, canWrap: (): boolean => finishedLoading.reached });
   const actions = new FavoritesActionsFlow(dependencies);
+  const skeleton = new FavoritesSkeletonFlow(dependencies);
 
   remoteFavoriteActions.added.on(id => actions.recordAddition(id));
   remoteFavoriteActions.removed.on(id => actions.recordRemoval(id));
   remoteFavoriteActions.removed.on(id => dependencies.localFavorites.remove([id]).catch(console.error));
+  finishedLoading.wait()
+    .then(() => skeleton.record(paging.posts.peek()))
+    .catch(console.error);
   load.load();
   return {
     posts: paging.posts,
@@ -33,6 +37,7 @@ export function startFavorites(configuration: FavoritesConfiguration, dependenci
     page: paging.page,
     loadState: load.state,
     favoritedChanges: actions.favoritedChanges,
+    skeletonDimensions: skeleton.recordedDimensions,
     findPost: (id: string): Post | undefined => model.findPost(id),
     advance: (direction: Direction): Promise<boolean> => Promise.resolve(paging.advance(direction)),
     intents: {

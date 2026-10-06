@@ -22,23 +22,32 @@ function readAspectRatio(tile: HTMLElement): string {
 
 describe("createTile", () => {
   test("draws the post as a linked preview", () => {
-    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, resolvePreviewUrl });
+    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
     expect(tile.className).toBe(TileClass.root);
     expect(tile.dataset.mediaKind).toBe("image");
     expect(getPreview(tile)).not.toBeNull();
   });
 
+  test("puts its actions beside the link", () => {
+    const action = document.createElement("button");
+    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [action], resolvePreviewUrl });
+
+    expect(action.parentElement?.className).toBe(TileClass.actions);
+    expect(action.closest(`.${TileClass.link}`)).toBeNull();
+    expect(tile.contains(action)).toBe(true);
+  });
+
   test("holds the post's shape before the preview arrives", () => {
-    expect(readAspectRatio(createTile(document, { post: IMAGE, dimensions: PORTRAIT, resolvePreviewUrl }))).toBe("1200 / 1800");
+    expect(readAspectRatio(createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl }))).toBe("1200 / 1800");
   });
 
   test("leaves the shape to the stylesheet while the dimensions are unknown", () => {
-    expect(readAspectRatio(createTile(document, { post: PLACEHOLDER, dimensions: UNKNOWN, resolvePreviewUrl }))).toBe("");
+    expect(readAspectRatio(createTile(document, { post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl }))).toBe("");
   });
 
   test("shows the preview and stops loading once it resolves", async() => {
-    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, resolvePreviewUrl });
+    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
     expect(tile.dataset.loading).toBe("");
     await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
@@ -47,7 +56,7 @@ describe("createTile", () => {
 
   test("stays loading without a preview for a placeholder", async() => {
     const resolve = vi.fn(resolvePreviewUrl);
-    const tile = createTile(document, { post: PLACEHOLDER, dimensions: UNKNOWN, resolvePreviewUrl: resolve });
+    const tile = createTile(document, { post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl: resolve });
 
     await Promise.resolve();
     expect(resolve).not.toHaveBeenCalled();

@@ -152,5 +152,12 @@ describe("Rule34Client", () => {
     test("reads nothing past the first favorites page", () => {
       expect(setup().client.readFirstFavoritesPage()).toBeNull();
     });
+
+    test("reads nothing once the page holds no favorites", () => {
+      const { client } = setup(undefined, { isFirstFavoritesPage: true });
+
+      document.body.replaceChildren();
+      expect(client.readFirstFavoritesPage()).toBeNull();
+    });
   });
 });

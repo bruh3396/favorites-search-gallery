@@ -1,3 +1,4 @@
+import { Dimensions } from "@/core/ui/post_grid/tile";
 import { Fact } from "@/core/utils/reactive/milestone";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { Listing } from "@/core/contracts/listing";
@@ -44,6 +45,7 @@ export interface FavoritesDependencies {
   scheduler: Scheduler;
   randomSource: RandomSource;
   preferences: FavoritesPreferences;
+  skeletonDimensions: Preference<readonly Dimensions[]>;
   waitForPaint: () => Promise<void>;
 }
 
@@ -68,4 +70,5 @@ export interface Favorites extends Listing {
   readonly page: Readable<Page>;
   readonly loadState: Readable<LoadState>;
   readonly favoritedChanges: Readable<ReadonlyMap<string, boolean>>;
+  readonly skeletonDimensions: readonly Dimensions[];
 }

@@ -10,6 +10,7 @@ const DOM_TESTS = [
   "src/features/*/flows/flows.test.ts",
   "src/app/startup/features.test.ts",
   "src/app/startup/style.test.ts",
+  "src/core/app/**/*.test.ts",
   "src/core/ui/**/*.test.ts",
   "src/core/features/*/ui/**/*.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",

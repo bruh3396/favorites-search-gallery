@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { Environment } from "@/core/boundary/environment";
-import { Feature } from "@/core/context/features";
+import { Feature } from "@/app/context/features";
 import { PerformanceProfile } from "@/types/app";
 import { createEnvironment } from "@/testing/environment";
 import { selectFeatures } from "@/app/startup/features";

@@ -30,6 +30,10 @@ export class MemoryScheduler implements Scheduler {
     return new Promise(resolve => this.schedule(resolve, duration));
   }
 
+  public waitForPaint(): Promise<void> {
+    return Promise.resolve();
+  }
+
   public advance(duration: number): void {
     const end = this.time + duration;
 

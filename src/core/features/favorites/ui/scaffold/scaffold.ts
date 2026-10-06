@@ -2,34 +2,38 @@ export const FavoritesScaffoldClass = {
   root: "fsg-FavoritesScaffold",
   header: "fsg-FavoritesScaffold-header",
   search: "fsg-FavoritesScaffold-search",
-  status: "fsg-FavoritesScaffold-status",
-  paginator: "fsg-FavoritesScaffold-paginator",
-  content: "fsg-FavoritesScaffold-content"
+  summary: "fsg-FavoritesScaffold-summary",
+  content: "fsg-FavoritesScaffold-content",
+  footer: "fsg-FavoritesScaffold-footer",
+  pager: "fsg-FavoritesScaffold-pager"
 } as const;
 
 export interface FavoritesScaffold {
   readonly element: HTMLElement;
   readonly search: HTMLElement;
-  readonly status: HTMLElement;
-  readonly paginator: HTMLElement;
+  readonly summary: HTMLElement;
   readonly content: HTMLElement;
+  readonly pager: HTMLElement;
 }
 
 export function createFavoritesScaffold(ownerDocument: Document): FavoritesScaffold {
-  const root = ownerDocument.createElement("main");
+  const root = ownerDocument.createElement("div");
   const header = ownerDocument.createElement("header");
   const search = ownerDocument.createElement("div");
-  const status = ownerDocument.createElement("div");
-  const paginator = ownerDocument.createElement("div");
-  const content = ownerDocument.createElement("div");
+  const summary = ownerDocument.createElement("div");
+  const content = ownerDocument.createElement("main");
+  const footer = ownerDocument.createElement("footer");
+  const pager = ownerDocument.createElement("div");
 
   root.className = FavoritesScaffoldClass.root;
   header.className = FavoritesScaffoldClass.header;
   search.className = FavoritesScaffoldClass.search;
-  status.className = FavoritesScaffoldClass.status;
-  paginator.className = FavoritesScaffoldClass.paginator;
+  summary.className = FavoritesScaffoldClass.summary;
   content.className = FavoritesScaffoldClass.content;
-  header.append(search, status, paginator);
-  root.append(header, content);
-  return { element: root, search, status, paginator, content };
+  footer.className = FavoritesScaffoldClass.footer;
+  pager.className = FavoritesScaffoldClass.pager;
+  header.append(search, summary);
+  footer.append(pager);
+  root.append(header, content, footer);
+  return { element: root, search, summary, content, pager };
 }

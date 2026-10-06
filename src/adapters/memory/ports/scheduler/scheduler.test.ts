@@ -81,4 +81,8 @@ describe("MemoryScheduler", () => {
     await flushMicrotasks();
     expect(wake).toHaveBeenCalledOnce();
   });
+
+  test("resolves a paint wait without advancing time", async() => {
+    await expect(new MemoryScheduler().waitForPaint()).resolves.toBeUndefined();
+  });
 });

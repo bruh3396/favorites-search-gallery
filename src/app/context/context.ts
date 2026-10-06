@@ -3,7 +3,7 @@ import { Milestones, createMilestones } from "@/app/context/milestones";
 import { DomEvents } from "@/app/context/dom_events";
 import { Environment } from "@/core/boundary/environment";
 import { FeatureBridge } from "@/app/context/feature_bridge";
-import { Features } from "@/core/context/features";
+import { Features } from "@/app/context/features";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
 import { Ports } from "@/core/boundary/ports/ports";
 import { Preferences } from "@/app/context/preferences";

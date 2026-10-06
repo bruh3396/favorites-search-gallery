@@ -6,7 +6,7 @@ import { EnhancedMouseEvent } from "@/lib/event/input";
 import { Environment } from "@/core/boundary/environment";
 import { FavoritesId } from "@/features/favorites/types/selectors";
 import { FavoritesModel } from "@/features/favorites/model/model";
-import { Feature } from "@/core/context/features";
+import { Feature } from "@/app/context/features";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";

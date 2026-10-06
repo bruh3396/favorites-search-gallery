@@ -1,4 +1,4 @@
-import { effect } from "@/core/utils/reactive/signal";
+import { Signal, effect } from "@/core/utils/reactive/signal";
 
 export interface Fact<V = void> {
   readonly reached: boolean;
@@ -7,18 +7,22 @@ export interface Fact<V = void> {
 
 export class Milestone<V = void> implements Fact<V> {
   private readonly deferred = Promise.withResolvers<V>();
-  private isReached = false;
+  private readonly isReached = new Signal(false);
 
   public get reached(): boolean {
-    return this.isReached;
+    return this.isReached.value;
+  }
+
+  public peek(): boolean {
+    return this.isReached.peek();
   }
 
   public reach(value: V): void {
-    if (this.isReached) {
+    if (this.isReached.peek()) {
       throw new Error("Milestone reached twice");
     }
-    this.isReached = true;
     this.deferred.resolve(value);
+    this.isReached.value = true;
   }
 
   public wait(): Promise<V> {
@@ -30,7 +34,7 @@ export function when(condition: () => boolean): Fact {
   const milestone = new Milestone();
 
   effect(() => {
-    if (!milestone.reached && condition()) {
+    if (!milestone.peek() && condition()) {
       milestone.reach();
     }
   });

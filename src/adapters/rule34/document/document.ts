@@ -8,6 +8,9 @@ const COOKIE_LIFETIME_SECONDS = 365 * 24 * 60 * 60;
 const HEADER_SELECTOR = "#header";
 const PAGINATOR_SELECTOR = "#paginator";
 const NATIVE_CONTENT_SELECTOR = "#content, div:has(.thumb)";
+const POST_LIST_SELECTOR = "#post-list";
+const POST_LIST_NATIVE_CHILDREN_SELECTOR = ":scope > :not(.sidebar)";
+const POST_LIST_CONTENT_CLASS = "content";
 const UNUSED_SCRIPT = /(?:fluidplayer|awesomplete)/;
 const UNUSED_GLOBALS = [
   "fluidPlayer", "webpackChunkfluid_player", "Awesomplete", "dashjs",
@@ -108,6 +111,21 @@ export class Rule34Document {
     removeUnusedScripts();
     releaseUnusedGlobals();
   }
+
+  public claimPostListContent(): HTMLElement | null {
+    const postList = document.querySelector<HTMLElement>(POST_LIST_SELECTOR);
+
+    if (postList === null) {
+      return null;
+    }
+    const claimed = document.createElement("div");
+
+    claimed.className = POST_LIST_CONTENT_CLASS;
+    claimed.style.flex = "1";
+    postList.querySelectorAll(POST_LIST_NATIVE_CHILDREN_SELECTOR).forEach(purgeNativeContent);
+    postList.append(claimed);
+    return claimed;
+  }
 }
 
 function readQueryParam(name: string): string | null {
@@ -150,7 +168,7 @@ function removeNativeContent(): void {
   }
 }
 
-function purgeNativeContent(content: HTMLElement): void {
+function purgeNativeContent(content: Element): void {
   for (const element of content.querySelectorAll("*")) {
     stripAttributes(element);
     element.remove();

@@ -13,4 +13,8 @@ export class BrowserScheduler implements Scheduler {
   public sleep(duration: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, duration));
   }
+
+  public waitForPaint(): Promise<void> {
+    return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve)));
+  }
 }

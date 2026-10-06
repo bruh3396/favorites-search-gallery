@@ -10,7 +10,6 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
     gap: 4px 16px;
   }
 
@@ -19,15 +18,20 @@
     flex: 1 1 240px;
   }
 
-  .fsg-FavoritesScaffold-status {
+  .fsg-FavoritesScaffold-summary {
     min-block-size: 1lh;
-  }
-
-  .fsg-FavoritesScaffold-paginator {
-    display: flex;
   }
 
   .fsg-FavoritesScaffold-content {
     display: block;
+  }
+
+  .fsg-FavoritesScaffold-footer {
+    display: flex;
+    justify-content: center;
+  }
+
+  .fsg-FavoritesScaffold-pager {
+    display: flex;
   }
 }

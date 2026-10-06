@@ -19,7 +19,7 @@ function setup({ pageNumber = 1, pageCount = 10 } = {}): Setup {
 }
 
 function readItems(element: HTMLElement): string[] {
-  return [...element.querySelectorAll("li")].map(item => item.textContent);
+  return [...element.querySelectorAll("li:not([hidden]) > :not([hidden])")].map(item => item.textContent);
 }
 
 function findButton(element: HTMLElement, label: string): HTMLButtonElement {
@@ -55,6 +55,15 @@ describe("createPaginator", () => {
     pageNumber.value = 4;
     expect(readItems(element)).toEqual(["1", "2", "3", "4", "5"]);
     expect(element.querySelector("[aria-current]")?.textContent).toBe("4");
+  });
+
+  test("keeps its page buttons across a page change", () => {
+    const { element, pageNumber } = setup({ pageNumber: 1, pageCount: 20 });
+    const buttons = [...element.querySelectorAll("button")];
+
+    pageNumber.value = 10;
+    expect([...element.querySelectorAll("button")]).toEqual(buttons);
+    expect(readItems(element)).toEqual(["1", "…", "8", "9", "10", "11", "12", "…", "20"]);
   });
 
   test("reports a clicked page", () => {

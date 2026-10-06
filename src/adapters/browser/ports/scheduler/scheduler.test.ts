@@ -44,4 +44,18 @@ describe("BrowserScheduler", () => {
     await vi.advanceTimersByTimeAsync(1);
     expect(wake).toHaveBeenCalledOnce();
   });
+
+  test("waits for the next frame to be drawn before resolving", async() => {
+    const frames: FrameRequestCallback[] = [];
+    const wake = vi.fn();
+
+    vi.stubGlobal("requestAnimationFrame", (frame: FrameRequestCallback): number => frames.push(frame));
+    new BrowserScheduler().waitForPaint().then(wake);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(wake).not.toHaveBeenCalled();
+    frames.forEach(frame => frame(0));
+    await vi.advanceTimersByTimeAsync(0);
+    expect(wake).toHaveBeenCalledOnce();
+    vi.unstubAllGlobals();
+  });
 });

@@ -1,74 +1,45 @@
-import { readBrowserEnvironment, readPreferredColorScheme } from "@/adapters/browser/environment/environment";
+import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
-import { HostEnvironment } from "@/core/boundary/environment";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
-import { IndexedDbLocalSnippets } from "@/adapters/indexed_db/ports/local_snippets/local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { MemoryRemoteSearchResults } from "@/adapters/memory/ports/remote_search_results/remote_search_results";
 import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
-import { Ports } from "@/core/boundary/ports/ports";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
-import { startApp } from "@/app/startup/app";
+import { readPreferredColorScheme } from "@/adapters/browser/environment/environment";
 
 const SAMPLE_POST_COUNT = 300;
-const SEARCH_RESULTS = { pageSize: 42, initialPageIndex: 0 };
+const FAVORITES_OWNER_ID = "demo";
 
-function createDemoHostEnvironment(): HostEnvironment {
+function createDemoDependencies(): FavoritesPageDependencies {
+  const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
+  const indexedDb = new IndexedDbClient();
   return {
-    mode: "favorites",
-    favoritesOwnerId: "demo",
-    ownsFavorites: true,
-    blacklistedTags: "",
-    colorScheme: readPreferredColorScheme()
-  };
-}
-
-function createPorts(
-  memoryClient: MemoryClient,
-  indexedDbClient: IndexedDbClient,
-  hostPage: BrowserHostPage
-): Ports {
-  return {
-    remoteFavoriteActions: new MemoryRemoteFavoriteActions(memoryClient),
-    remoteFavorites: new MemoryRemoteFavorites(memoryClient),
-    remotePosts: new MemoryRemotePosts(memoryClient),
-    remoteSearchResults: new MemoryRemoteSearchResults(SEARCH_RESULTS, memoryClient),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDb),
+    localPosts: new IndexedDbLocalPosts(indexedDb),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
+    localKeyedValues: new BrowserLocalKeyedValues(),
+    remoteFavorites: new MemoryRemoteFavorites(memory),
+    remoteFavoriteActions: new MemoryRemoteFavoriteActions(memory),
+    remotePosts: new MemoryRemotePosts(memory),
     remoteTagCategories: new MemoryRemoteTagCategories(),
     remoteMedia: new MemoryRemoteMedia(),
-    remotePages: new MemoryRemotePages(),
-    navigator: new MemoryNavigator(),
-    hostPage,
-    localFavorites: new IndexedDbLocalFavorites({ ownerId: "demo" }, indexedDbClient),
-    localKeyedValues: new BrowserLocalKeyedValues(),
-    localPosts: new IndexedDbLocalPosts(indexedDbClient),
-    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
-    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
-    randomSource: new BrowserRandomSource(),
-    scheduler: new BrowserScheduler()
+    scheduler: new BrowserScheduler(),
+    randomSource: new BrowserRandomSource()
   };
 }
 
-function main(): void {
-  const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
-  const indexedDbClient = new IndexedDbClient();
-  const hostPage = new BrowserHostPage();
-
-  startApp({
-      version: "demo",
-      ...readBrowserEnvironment(), ...createDemoHostEnvironment()
-    }, createPorts(memoryClient, indexedDbClient, hostPage), hostPage);
-}
-
-main();
+mountFavoritesPage(new BrowserHostPage().claimContent(), {
+  userOwnsFavorites: true,
+  blacklistedTags: "",
+  favoritesOwnerId: FAVORITES_OWNER_ID,
+  colorScheme: readPreferredColorScheme()
+}, createDemoDependencies());

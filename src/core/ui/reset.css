@@ -4,6 +4,10 @@
   box-sizing: border-box;
 }
 
+:where([class^="fsg-"], [class*=" fsg-"])[hidden] {
+  display: none !important;
+}
+
 :where(button[class^="fsg-"], button[class*=" fsg-"]) {
   margin: 0;
   padding: 0;

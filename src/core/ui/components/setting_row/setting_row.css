@@ -24,10 +24,6 @@
   }
 }
 
-.fsg-SettingRow[hidden] {
-  display: none;
-}
-
 /* Disabled means nothing in the control can be used. :has(:disabled) alone would also
    match a stepper whose + is disabled at its max. */
 .fsg-SettingRow:not(:has(:enabled)) {

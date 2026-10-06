@@ -19,7 +19,6 @@ export class FavoritesThumbSizeRecorder {
     this.localKeyedValues = localKeyedValues;
   }
 
-  // Records the post sizes of the first favorites, in order, for the next visit.
   public record(favorites: Favorite[]): void {
     const sizes = favorites
       .slice(0, RECORDED_COUNT)

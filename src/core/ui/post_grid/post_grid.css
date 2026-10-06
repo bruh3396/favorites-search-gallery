@@ -1,7 +1,12 @@
 .fsg-PostGrid {
   --fsg-PostGrid-gap: 4px;
 
+  container-type: inline-size;
   gap: var(--fsg-PostGrid-gap);
+}
+
+.fsg-PostGridSkeleton {
+  pointer-events: none;
 }
 
 .fsg-PostGrid[data-layout="grid"],
@@ -34,11 +39,20 @@
   gap: 25px 10px;
 }
 
+/* The loading surface outlasts data-loading by the preview's fade, so the preview fades in over the live pulse. */
 .fsg-Tile {
+  --fsg-Tile-loading-color: #636363;
+  --fsg-Tile-loading-pulse-color: #424242;
+  --fsg-Tile-pulse-duration: calc(0.6s + 0.1s * (var(--fsg-Tile-pulse-duration-step, 0) + var(--fsg-Tile-pulse-column-step, 0)));
+  --fsg-Tile-pulse-delay: calc(0.05s * (var(--fsg-Tile-pulse-delay-step, 0) + var(--fsg-Tile-pulse-column-step, 0)));
+
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
   aspect-ratio: var(--fsg-Tile-aspect-ratio, 1);
   border-radius: var(--fsg-radius-medium);
   background: var(--fsg-color-surface-sunken);
+  transition: background-color 0s linear var(--fsg-motion-duration-short);
 }
 
 .fsg-PostGrid[data-layout="native"] .fsg-Tile {
@@ -73,6 +87,99 @@
   opacity: 0;
 }
 
+.fsg-Tile[data-loading] {
+  background: var(--fsg-Tile-loading-color);
+}
+
+/* Beneath the preview; display flips to none only once the preview has faded in, which also stops the animation. */
+.fsg-Tile::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--fsg-Tile-loading-pulse-color);
+  opacity: 0;
+  will-change: opacity;
+  animation: fsg-Tile-pulse var(--fsg-Tile-pulse-duration) infinite cubic-bezier(0.42, 0, 0.58, 1);
+  animation-delay: var(--fsg-Tile-pulse-delay);
+  pointer-events: none;
+  transition: display 0s linear var(--fsg-motion-duration-short) allow-discrete;
+}
+
+.fsg-Tile:not([data-loading])::after {
+  display: none;
+}
+
+.fsg-Tile:nth-child(3n + 2) {
+  --fsg-Tile-pulse-duration-step: 1;
+}
+
+.fsg-Tile:nth-child(3n) {
+  --fsg-Tile-pulse-duration-step: 2;
+}
+
+.fsg-Tile:nth-child(4n + 2) {
+  --fsg-Tile-pulse-delay-step: 1;
+}
+
+.fsg-Tile:nth-child(4n + 3) {
+  --fsg-Tile-pulse-delay-step: 2;
+}
+
+.fsg-Tile:nth-child(4n) {
+  --fsg-Tile-pulse-delay-step: 3;
+}
+
+.fsg-PostGrid-column:nth-child(4n + 2) {
+  --fsg-Tile-pulse-column-step: 1;
+}
+
+.fsg-PostGrid-column:nth-child(4n + 3) {
+  --fsg-Tile-pulse-column-step: 2;
+}
+
+.fsg-PostGrid-column:nth-child(4n) {
+  --fsg-Tile-pulse-column-step: 3;
+}
+
+@keyframes fsg-Tile-pulse {
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fsg-Tile::after {
+    animation: none;
+  }
+}
+
+.fsg-Tile-actions {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Tile:hover .fsg-Tile-actions,
+.fsg-Tile-actions:focus-within {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .fsg-Tile-actions {
+    opacity: 1;
+  }
+}
+
 .fsg-PostGrid[data-layout="native"] .fsg-Tile-preview {
   inline-size: auto;
   block-size: auto;
@@ -85,5 +192,5 @@
 
 .fsg-PostGrid[data-layout="row"] .fsg-Tile {
   flex: 1 1 auto;
-  block-size: var(--fsg-PostGrid-row-height);
+  block-size: calc(100cqi / var(--fsg-PostGrid-size));
 }

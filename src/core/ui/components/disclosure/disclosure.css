@@ -3,10 +3,6 @@
   flex-direction: column;
 }
 
-.fsg-Disclosure[hidden] {
-  display: none;
-}
-
 .fsg-Disclosure-trigger {
   display: flex;
   align-items: center;
@@ -54,8 +50,4 @@
 .fsg-Disclosure-trigger[aria-expanded="true"] .fsg-Disclosure-icon {
   margin-block: 3px 0;
   transform: rotate(-135deg);
-}
-
-.fsg-Disclosure-content[hidden] {
-  display: none;
 }

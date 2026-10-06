@@ -2,7 +2,7 @@ import { PreferenceOverrides, createPreferences } from "@/testing/preferences";
 import { AppContext } from "@/app/context/context";
 import { DomEvents } from "@/app/context/dom_events";
 import { Environment } from "@/core/boundary/environment";
-import { Feature } from "@/core/context/features";
+import { Feature } from "@/app/context/features";
 import { FeatureBridge } from "@/app/context/feature_bridge";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
 import { MemoryClient } from "@/adapters/memory/client/client";

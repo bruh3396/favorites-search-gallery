@@ -61,6 +61,15 @@ function addContent(...ids: string[]): HTMLElement {
   return content;
 }
 
+function addPostList(...ids: string[]): HTMLElement {
+  const postList = document.createElement("div");
+
+  postList.id = "post-list";
+  postList.innerHTML = `<div class="sidebar"></div><div class="content">${ids.map(createThumb).join("")}</div><div id="paginator"></div>`;
+  document.body.append(postList);
+  return postList;
+}
+
 function readPaginatorText(): string | null | undefined {
   return document.querySelector("#paginator")?.textContent;
 }
@@ -287,6 +296,24 @@ describe("Rule34Document", () => {
       new Rule34Document().clearNativePage();
       expect(logged).toHaveBeenCalledOnce();
       expect("captchaProvider" in globals).toBe(false);
+    });
+  });
+
+  describe("claimPostListContent", () => {
+    test("replaces everything in the post list but the sidebar with an empty element", () => {
+      const postList = addPostList("1", "2");
+      const [sidebar, ...natives] = [...postList.children];
+      const claimed = new Rule34Document().claimPostListContent();
+
+      expect([...postList.children]).toEqual([sidebar, claimed]);
+      expect(claimed?.className).toBe("content");
+      expect(claimed?.style.flexGrow).toBe("1");
+      expect(claimed?.childElementCount).toBe(0);
+      expect(natives.map(native => [native.isConnected, native.attributes.length])).toEqual([[false, 0], [false, 0]]);
+    });
+
+    test("claims nothing when the page has no post list", () => {
+      expect(new Rule34Document().claimPostListContent()).toBeNull();
     });
   });
 });

@@ -1,0 +1,24 @@
+@layer components {
+  .fsg-FavoriteHeart {
+    display: grid;
+    place-items: center;
+    inline-size: var(--fsg-control-size-medium);
+    block-size: var(--fsg-control-size-medium);
+    border-radius: var(--fsg-radius-full);
+    background: color-mix(in srgb, black 55%, transparent);
+    color: white;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+  }
+
+  .fsg-FavoriteHeart[aria-pressed="true"] {
+    color: #ff4d6d;
+  }
+
+  .fsg-FavoriteHeart:focus-visible {
+    outline: 2px solid var(--fsg-color-accent);
+    outline-offset: 1px;
+  }
+}

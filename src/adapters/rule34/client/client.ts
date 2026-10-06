@@ -31,7 +31,8 @@ export class Rule34Client {
     if (!this.dependencies.rule34Document.isFirstFavoritesPage()) {
       return null;
     }
-    return parseFavoritesPage(document, this.dependencies.mintMedia);
+    const favorites = parseFavoritesPage(document, this.dependencies.mintMedia);
+    return favorites.length > 0 ? favorites : null;
   }
 
   public readPostListPage(pageIndex: number): Post[] {

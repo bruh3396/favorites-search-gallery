@@ -35,7 +35,7 @@
   "scripts": {
     "build": "node build/bin/build || (npm run compile-build && node build/bin/build)",
     "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground/playground.js",
-    "build:demo": "esbuild src/targets/demo/main.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"demo\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/demo/demo.js && node -e \"require('fs').copyFileSync('src/targets/demo/index.html','dist/demo/index.html')\"",
+    "build:demo": "npm run compile-build && node build/bin/build demo",
     "build:kit": "vite build --config src/targets/kit/vite.config.mts",
     "kit": "vite --config src/targets/kit/vite.config.mts",
     "typecheck": "tsc --project tsconfig.json --noEmit",

@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
+import { Dimensions } from "@/core/ui/post_grid/tile";
 import { Favorites } from "@/core/features/favorites/types/favorites";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
@@ -37,6 +39,7 @@ function createPreference<T>(initial: T): Preference<T> {
 // A local id with no local post loads as a placeholder, which is hydrated once its post is fetched.
 async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } = {}): Promise<{
   favorites: Favorites;
+  skeletonDimensions: Preference<readonly Dimensions[]>;
   remoteFavoriteActions: ObservableRemoteFavoriteActions;
   localFavorites: MemoryLocalFavorites;
   hydratedIds: string[];
@@ -45,6 +48,7 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
   const remoteFavoriteActions = new ObservableRemoteFavoriteActions(new MemoryRemoteFavoriteActions(client));
   const localFavorites = new MemoryLocalFavorites();
   const hydratedIds: string[] = [];
+  const skeletonDimensions = createPreference<readonly Dimensions[]>(DEFAULT_SKELETON_DIMENSIONS);
 
   await localFavorites.setAll(localIds);
   const favorites = startFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
@@ -65,12 +69,13 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
       resultsPerPage: createPreference(2),
       isInfiniteScrollEnabled: createPreference(false)
     },
+    skeletonDimensions,
     waitForPaint: (): Promise<void> => Promise.resolve()
   });
 
   favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
   await favorites.finishedLoading.wait();
-  return { favorites, remoteFavoriteActions, localFavorites, hydratedIds };
+  return { favorites, skeletonDimensions, remoteFavoriteActions, localFavorites, hydratedIds };
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
@@ -131,5 +136,13 @@ describe("startFavorites", () => {
 
     await remoteFavoriteActions.remove("1");
     expect(await localFavorites.getAll()).toEqual(["2"]);
+  });
+
+  test("publishes the skeleton recorded by the last load, then records the shapes of the favorites shown", async() => {
+    const { favorites, skeletonDimensions } = await setup([createPost({ id: "1", width: 4, height: 3 }), createPost({ id: "2", width: 1, height: 2 })]);
+
+    await flushMicrotasks();
+    expect(favorites.skeletonDimensions).toBe(DEFAULT_SKELETON_DIMENSIONS);
+    expect(skeletonDimensions.value).toEqual([{ width: 4, height: 3 }, { width: 1, height: 2 }]);
   });
 });

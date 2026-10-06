@@ -1,5 +1,5 @@
 import { AppMode, Device, Environment } from "@/core/boundary/environment";
-import { Feature, Features } from "@/core/context/features";
+import { Feature, Features } from "@/app/context/features";
 import { PERFORMANCE_PROFILES, PerformanceProfile } from "@/types/app";
 import { AppContext } from "@/app/context/context";
 import { startFavorites } from "@/features/favorites/favorites";

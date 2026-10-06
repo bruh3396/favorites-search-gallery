@@ -1,35 +1,37 @@
 import { TilerClass, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 
 function createTiles(count: number): HTMLElement[] {
   return Array.from({ length: count }, () => document.createElement("div"));
 }
 
 describe("applyTiling", () => {
-  test("writes the layout and its sizes to the root", () => {
+  test("writes the layout, the size, and the column count the size rounds to", () => {
     const root = document.createElement("div");
 
-    applyTiling(root, { layout: "row", columnCount: 4, rowHeightViewportPercent: 12.5 });
+    applyTiling(root, { layout: "row", size: 4.6 });
     expect(root.dataset.layout).toBe("row");
-    expect(root.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("4");
-    expect(root.style.getPropertyValue("--fsg-PostGrid-row-height")).toBe("12.5vw");
+    expect(root.style.getPropertyValue("--fsg-PostGrid-size")).toBe("4.6");
+    expect(root.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("5");
   });
 });
 
 describe("arrangeTiles", () => {
-  test("appends the tiles in order for a flowing layout", () => {
+  test("appends the tiles in order for a flowing layout, without asking for the column count", () => {
     const root = document.createElement("div");
     const tiles = createTiles(3);
+    const getColumnCount = vi.fn(() => 2);
 
-    arrangeTiles(root, tiles, { layout: "grid", columnCount: 2 });
+    arrangeTiles(root, tiles, { layout: "grid", getColumnCount });
     expect([...root.children]).toEqual(tiles);
+    expect(getColumnCount).not.toHaveBeenCalled();
   });
 
   test("deals the tiles round-robin into columns for the column layout", () => {
     const root = document.createElement("div");
     const tiles = createTiles(5);
 
-    arrangeTiles(root, tiles, { layout: "column", columnCount: 2 });
+    arrangeTiles(root, tiles, { layout: "column", getColumnCount: () => 2 });
     const [first, second] = root.children;
 
     expect(root.children).toHaveLength(2);
@@ -42,8 +44,8 @@ describe("arrangeTiles", () => {
     const root = document.createElement("div");
     const tiles = createTiles(3);
 
-    arrangeTiles(root, tiles, { layout: "column", columnCount: 2 });
-    arrangeTiles(root, tiles, { layout: "square", columnCount: 2 });
+    arrangeTiles(root, tiles, { layout: "column", getColumnCount: () => 2 });
+    arrangeTiles(root, tiles, { layout: "square", getColumnCount: () => 2 });
     expect([...root.children]).toEqual(tiles);
   });
 });

@@ -4,13 +4,15 @@ import SCAFFOLD_CSS from "@/core/features/favorites/ui/scaffold/scaffold.css?inl
 import { expectClassesStyled } from "@/testing/css";
 
 describe("createFavoritesScaffold", () => {
-  test("puts the search, the status, and the paginator in the header, above the content", () => {
-    const { element, search, status, paginator, content } = createFavoritesScaffold(document);
-    const header = element.querySelector(`.${FavoritesScaffoldClass.header}`);
+  test("puts the search and the summary in the header, the content in main, and the pager in the footer", () => {
+    const { element, search, summary, content, pager } = createFavoritesScaffold(document);
+    const [header, main, footer] = [...element.children];
 
     expect(element.className).toBe(FavoritesScaffoldClass.root);
-    expect([...header!.children]).toEqual([search, status, paginator]);
-    expect([...element.children]).toEqual([header, content]);
+    expect([header.tagName, main.tagName, footer.tagName]).toEqual(["HEADER", "MAIN", "FOOTER"]);
+    expect([...header.children]).toEqual([search, summary]);
+    expect(main).toBe(content);
+    expect([...footer.children]).toEqual([pager]);
   });
 
   test("styles every class it sets", () => {

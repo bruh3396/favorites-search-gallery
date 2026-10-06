@@ -5,8 +5,7 @@ export const DisclosureClass = {
   root: "fsg-Disclosure",
   trigger: "fsg-Disclosure-trigger",
   title: "fsg-Disclosure-title",
-  icon: "fsg-Disclosure-icon",
-  content: "fsg-Disclosure-content"
+  icon: "fsg-Disclosure-icon"
 } as const;
 
 export interface DisclosureOptions extends ControlOptions<boolean> {
@@ -28,7 +27,6 @@ export function createDisclosure(
 
   element.className = DisclosureClass.root;
   element.dataset.size = size;
-  region.className = DisclosureClass.content;
   region.append(content);
   trigger.ariaControlsElements = [region];
   trigger.addEventListener("click", () => onValueChange(!value.peek()));

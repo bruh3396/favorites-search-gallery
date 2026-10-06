@@ -4,6 +4,7 @@ import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/host_page";
 
 interface Rule34Document {
   clearNativePage: ReturnType<typeof vi.fn<() => void>>;
+  claimPostListContent: ReturnType<typeof vi.fn<() => HTMLElement | null>>;
   setHeaderVisible: ReturnType<typeof vi.fn<(visible: boolean) => void>>;
   setTheme: ReturnType<typeof vi.fn<(colorScheme: ColorScheme) => void>>;
   reflectPostListPage: ReturnType<typeof vi.fn<(pageIndex: number) => void>>;
@@ -18,10 +19,12 @@ interface Page {
 }
 
 const CONTENT = {} as HTMLElement;
+const POST_LIST_CONTENT = {} as HTMLElement;
 
-function createRule34Document(): Rule34Document {
+function createRule34Document(postListContent: HTMLElement | null = POST_LIST_CONTENT): Rule34Document {
   return {
     clearNativePage: vi.fn<() => void>(),
+    claimPostListContent: vi.fn<() => HTMLElement | null>(() => postListContent),
     setHeaderVisible: vi.fn<(visible: boolean) => void>(),
     setTheme: vi.fn<(colorScheme: ColorScheme) => void>(),
     reflectPostListPage: vi.fn<(pageIndex: number) => void>(),
@@ -54,8 +57,20 @@ describe("Rule34HostPage", () => {
     expect(clearsNativePage("postList")).toBe(false);
   });
 
-  test("gives the app the browser page's content element", () => {
+  test("gives the app the browser page's content element on the favorites page", () => {
     const hostPage = new Rule34HostPage({ mode: "favorites" }, { rule34Document: createRule34Document(), page: createPage() });
+
+    expect(hostPage.claimContent()).toBe(CONTENT);
+  });
+
+  test("gives the app the post list's content element", () => {
+    const hostPage = new Rule34HostPage({ mode: "postList" }, { rule34Document: createRule34Document(), page: createPage() });
+
+    expect(hostPage.claimContent()).toBe(POST_LIST_CONTENT);
+  });
+
+  test("falls back to the browser page's content element when the post list has none", () => {
+    const hostPage = new Rule34HostPage({ mode: "postList" }, { rule34Document: createRule34Document(null), page: createPage() });
 
     expect(hostPage.claimContent()).toBe(CONTENT);
   });

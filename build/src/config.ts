@@ -10,25 +10,36 @@ const SCRIPT_VERSION = resolveScriptVersion();
 
 export const OUT_FILE = "dist/userscript/favorites_search_gallery.js";
 export const META_FILE = "dist/userscript/meta.json";
-export const BUILD_OPTIONS: BuildOptions = {
-  entryPoints: ["src/targets/userscript/main.ts"],
+export const SHARED_BUILD_OPTIONS: BuildOptions = {
   bundle: true,
-  metafile: true,
-  outfile: OUT_FILE,
   format: "iife",
   target: ["esnext"],
   legalComments: "none",
   alias: {
     "@": resolve("src")
   },
-  banner: {
-    js: buildHeader(SCRIPT_VERSION)
-  },
-  define: buildDefine(SCRIPT_VERSION),
   plugins: [rawTsPlugin, inlineCssPlugin],
   loader: {
     ".svg": "text",
     ".css": "text",
     ".html": "text"
   }
+};
+export const BUILD_OPTIONS: BuildOptions = {
+  ...SHARED_BUILD_OPTIONS,
+  entryPoints: ["src/targets/userscript/main.ts"],
+  metafile: true,
+  outfile: OUT_FILE,
+  banner: {
+    js: buildHeader(SCRIPT_VERSION)
+  },
+  define: buildDefine(SCRIPT_VERSION)
+};
+export const DEMO_HTML_FILE = "src/targets/demo/index.html";
+export const DEMO_OUT_HTML_FILE = "dist/demo/index.html";
+export const DEMO_BUILD_OPTIONS: BuildOptions = {
+  ...SHARED_BUILD_OPTIONS,
+  entryPoints: ["src/targets/demo/main.ts"],
+  outfile: "dist/demo/demo.js",
+  define: buildDefine("demo")
 };
