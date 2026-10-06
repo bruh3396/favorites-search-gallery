@@ -1,13 +1,14 @@
-import { StatusTextClass, createStatusText } from "@/core/ui/components/status_text/status_text";
+import { StatusText, StatusTextClass } from "@/core/ui/components/status_text/status_text";
 import { describe, expect, test } from "vitest";
+import { h, render } from "@/core/ui/h/h";
 import STATUS_TEXT_CSS from "@/core/ui/components/status_text/status_text.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-describe("createStatusText", () => {
+describe("StatusText", () => {
   test("shows the text and follows it", () => {
     const text = new Signal("Peeling apples");
-    const { element } = createStatusText(document, { text });
+    const { result: element } = render(document, () => <StatusText text={text} />);
 
     expect(element.textContent).toBe("Peeling apples");
     text.value = "Apples peeled";
@@ -15,12 +16,12 @@ describe("createStatusText", () => {
   });
 
   test("announces changes to assistive technology", () => {
-    expect(createStatusText(document, { text: new Signal("") }).element.getAttribute("role")).toBe("status");
+    expect(render(document, () => <StatusText text={new Signal("")} />).result.getAttribute("role")).toBe("status");
   });
 
   test("stops following the text once disposed", () => {
     const text = new Signal("Peeling apples");
-    const { element, dispose } = createStatusText(document, { text });
+    const { result: element, dispose } = render(document, () => <StatusText text={text} />);
 
     dispose();
     text.value = "Apples peeled";

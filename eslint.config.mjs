@@ -35,7 +35,7 @@ export default defineConfig([
     ]
   },
   {
-    files: ["**/*.{mjs,cjs,ts}"],
+    files: ["**/*.{mjs,cjs,ts,tsx}"],
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: {
@@ -44,7 +44,7 @@ export default defineConfig([
   },
   tseslint.configs.recommended,
   {
-    files: ["src/**/*.ts"],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: {
         project: "./tsconfig.json",
@@ -53,8 +53,8 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/**/*.ts"],
-    ignores: ["src/**/*.test.ts", "src/**/testing/**"],
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/*.test.{ts,tsx}", "src/**/testing/**"],
     plugins: { functional },
     rules: {
       "functional/no-let": ["error", { allowInFunctions: true }]
@@ -649,13 +649,13 @@ export default defineConfig([
     }
   },
   {
-    files: ["build/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.ts"],
+    files: ["build/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
     rules: {
       "no-console": "off"
     }
   },
   {
-    files: ["**/*.test.ts"],
+    files: ["**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, CALLED_ONCE]
     }

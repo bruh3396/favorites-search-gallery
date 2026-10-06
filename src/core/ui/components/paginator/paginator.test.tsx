@@ -1,21 +1,24 @@
-import { Paginator, PaginatorClass, createPaginator } from "@/core/ui/components/paginator/paginator";
+import { Paginator, PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { h, render } from "@/core/ui/h/h";
 import PAGINATOR_CSS from "@/core/ui/components/paginator/paginator.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-interface Setup extends Paginator {
+interface Setup {
+  element: HTMLElement;
   pageNumber: Signal<number>;
   pageCount: Signal<number>;
   onPageChange: (pageNumber: number) => void;
+  dispose: () => void;
 }
 
 function setup({ pageNumber = 1, pageCount = 10 } = {}): Setup {
   const options = { pageNumber: new Signal(pageNumber), pageCount: new Signal(pageCount), onPageChange: vi.fn() };
-  const paginator = createPaginator(document, options);
+  const { result: element, dispose } = render(document, () => <Paginator {...options} />);
 
-  document.body.append(paginator.element);
-  return { ...paginator, ...options };
+  document.body.append(element);
+  return { ...options, element, dispose };
 }
 
 function readItems(element: HTMLElement): string[] {
@@ -30,7 +33,7 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-describe("createPaginator", () => {
+describe("Paginator", () => {
   test("is a labelled navigation landmark", () => {
     const { element } = setup();
 

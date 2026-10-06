@@ -1,26 +1,19 @@
-import { FavoritesConfiguration, FavoritesDependencies, FavoritesPreferences } from "@/core/features/favorites/types/favorites";
-import { Preference, PreferenceStore, StoredPreference } from "@/core/utils/reactive/preference";
-import { RATINGS, Rating } from "@/core/domain/post/post";
-import { SORT_KEYS, Sort } from "@/core/features/favorites/types/search";
-import { createGuardedCodec, createSetCodec } from "@/core/utils/codec/codec";
-import { hasFields, isBoolean, isNumber, oneOf } from "@/core/utils/guards/guards";
+import { FavoritesConfiguration, FavoritesDependencies } from "@/core/features/favorites/types/favorites";
 import { ColorScheme } from "@/core/boundary/environment";
-import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
-import { Dimensions } from "@/core/ui/post_grid/tile";
 import FAVORITES_UI_CSS from "@/core/features/favorites/ui/styles.css?inline";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
 import { RemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { createAppStores } from "@/core/app/app_store";
+import { createFavoritesPreferences } from "@/core/app/favorites_page/preferences";
 import { createFavoritesScreen } from "@/core/features/favorites/ui/screen/screen";
 import { createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { createSkeletonDimensions } from "@/core/app/favorites_page/skeleton_dimensions";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
+import { render } from "@/core/ui/h/h";
 import { startFavorites } from "@/core/features/favorites/favorites";
-
-const SKELETON_NAMESPACE = "favoritesSkeleton";
 
 export interface FavoritesPageConfiguration extends FavoritesConfiguration {
   favoritesOwnerId: string;
@@ -48,38 +41,11 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
     skeletonDimensions: createSkeletonDimensions(stores.app, favoritesOwnerId),
     waitForPaint: (): Promise<void> => ports.scheduler.waitForPaint()
   });
-  const screen = createFavoritesScreen(container.ownerDocument, {
+  const screen = render(container.ownerDocument, () => createFavoritesScreen({
     favorites,
     gridPreferences: createPostGridPreferences(stores.preferences),
     resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media)
-  });
+  }));
 
-  app.append(screen.element);
-}
-
-function createFavoritesPreferences(store: PreferenceStore): FavoritesPreferences {
-  return {
-    sort: new StoredPreference<Sort>(
-      { key: "favoritesSort", defaultValue: { key: "favorited", isAscending: false } },
-      { store, codec: createGuardedCodec(hasFields({ key: oneOf(SORT_KEYS), isAscending: isBoolean })) }
-    ),
-    allowedRatings: new StoredPreference<ReadonlySet<Rating>>(
-      { key: "favoritesAllowedRatings", defaultValue: new Set(RATINGS) },
-      { store, codec: createSetCodec(oneOf(RATINGS)) }
-    ),
-    isBlacklistEnabled: new StoredPreference({ key: "favoritesBlacklistEnabled", defaultValue: true }, { store }),
-    resultsPerPage: new StoredPreference({ key: "favoritesResultsPerPage", defaultValue: 50 }, { store }),
-    isInfiniteScrollEnabled: new StoredPreference({ key: "favoritesInfiniteScrollEnabled", defaultValue: false }, { store })
-  };
-}
-
-function createSkeletonDimensions(store: LocalKeyedValues, ownerId: string): Preference<readonly Dimensions[]> {
-  return new StoredPreference(
-    { key: ownerId, defaultValue: DEFAULT_SKELETON_DIMENSIONS },
-    { store: new NamespacedLocalKeyedValues(SKELETON_NAMESPACE, store), codec: createGuardedCodec(isDimensionsList) }
-  );
-}
-
-function isDimensionsList(stored: unknown): stored is readonly Dimensions[] {
-  return Array.isArray(stored) && stored.every(hasFields<Dimensions>({ width: isNumber, height: isNumber }));
+  app.append(screen.result);
 }

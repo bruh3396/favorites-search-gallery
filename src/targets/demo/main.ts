@@ -1,4 +1,4 @@
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page";
+import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";

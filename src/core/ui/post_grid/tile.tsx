@@ -1,6 +1,7 @@
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { doNothing } from "@/core/utils/function/function";
+import { h } from "@/core/ui/h/h";
 
 export const TileClass = {
   root: "fsg-Tile",
@@ -23,24 +24,16 @@ export interface TileOptions {
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
-export function createTile(ownerDocument: Document, { post, dimensions, actions, resolvePreviewUrl }: TileOptions): HTMLElement {
-  const root = ownerDocument.createElement("div");
-  const link = ownerDocument.createElement("a");
-  const preview = ownerDocument.createElement("img");
-  const actionBar = ownerDocument.createElement("div");
+export function Tile({ post, dimensions, actions, resolvePreviewUrl }: TileOptions): HTMLElement {
+  const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
+  const root = (
+    <div className={TileClass.root} dataset={{ mediaKind: post.media.kind, loading: "" }}>
+      <a className={TileClass.link}>{preview}</a>
+      <div className={TileClass.actions}>{actions}</div>
+    </div>
+  );
 
-  root.className = TileClass.root;
-  root.dataset.mediaKind = post.media.kind;
-  root.dataset.loading = "";
   showAspectRatio(root, dimensions);
-  link.className = TileClass.link;
-  preview.className = TileClass.preview;
-  preview.decoding = "async";
-  preview.alt = "";
-  actionBar.className = TileClass.actions;
-  link.append(preview);
-  actionBar.append(...actions);
-  root.append(link, actionBar);
 
   if (post.media.locator !== "") {
     showPreview(root, preview, resolvePreviewUrl(post.media)).catch(console.error);

@@ -1,5 +1,6 @@
-import { DEFAULT_SKELETON_DIMENSIONS, createPostGridSkeleton } from "@/core/ui/post_grid/skeleton";
-import { createPostGrid, createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeleton } from "@/core/ui/post_grid/skeleton";
+import { PostGrid, createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { h, render } from "@/core/ui/h/h";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
@@ -23,21 +24,18 @@ export function mountPostListPage(container: HTMLElement, configuration: PostLis
   const { remoteMedia, localKeyedValues } = dependencies;
   const { layout, size } = createPostGridPreferences(createAppStores(localKeyedValues).preferences);
   const app = mountAppRoot(container, { colorScheme: configuration.colorScheme, styles: [UI_CSS] });
-  const skeleton = createPostGridSkeleton(container.ownerDocument, {
-    isShown: new Signal(true),
-    dimensions: DEFAULT_SKELETON_DIMENSIONS,
-    layout,
-    size
-  });
-  const grid = createPostGrid(container.ownerDocument, {
-    posts: new Signal<readonly MediaItem[]>([]),
-    changed: new Emitter<MediaItem>(),
-    layout,
-    size,
-    getDimensions: () => ({ width: 1, height: 1 }),
-    createActions: () => [],
-    resolvePreviewUrl: media => remoteMedia.resolvePreviewUrl(media)
-  });
+  const screen = render(container.ownerDocument, () => [
+    h(PostGridSkeleton, { isShown: new Signal(true), dimensions: DEFAULT_SKELETON_DIMENSIONS, layout, size }),
+    h(PostGrid<MediaItem>, {
+      posts: new Signal<readonly MediaItem[]>([]),
+      changed: new Emitter<MediaItem>(),
+      layout,
+      size,
+      getDimensions: () => ({ width: 1, height: 1 }),
+      createActions: () => [],
+      resolvePreviewUrl: media => remoteMedia.resolvePreviewUrl(media)
+    })
+  ]);
 
-  app.append(skeleton.element, grid.element);
+  app.append(...screen.result);
 }

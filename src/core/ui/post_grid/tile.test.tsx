@@ -1,5 +1,6 @@
-import { TileClass, createTile } from "@/core/ui/post_grid/tile";
+import { Tile, TileClass, TileOptions } from "@/core/ui/post_grid/tile";
 import { describe, expect, test, vi } from "vitest";
+import { h, render } from "@/core/ui/h/h";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 
@@ -12,6 +13,10 @@ function resolvePreviewUrl(media: Media): Promise<string> {
   return Promise.resolve(`https://preview/${media.locator}`);
 }
 
+function drawTile(options: TileOptions): HTMLElement {
+  return render(document, () => <Tile {...options} />).result;
+}
+
 function getPreview(tile: HTMLElement): HTMLImageElement {
   return tile.querySelector(`.${TileClass.link} > .${TileClass.preview}`)!;
 }
@@ -20,9 +25,9 @@ function readAspectRatio(tile: HTMLElement): string {
   return tile.style.getPropertyValue("--fsg-Tile-aspect-ratio");
 }
 
-describe("createTile", () => {
+describe("Tile", () => {
   test("draws the post as a linked preview", () => {
-    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
     expect(tile.className).toBe(TileClass.root);
     expect(tile.dataset.mediaKind).toBe("image");
@@ -31,7 +36,7 @@ describe("createTile", () => {
 
   test("puts its actions beside the link", () => {
     const action = document.createElement("button");
-    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [action], resolvePreviewUrl });
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [action], resolvePreviewUrl });
 
     expect(action.parentElement?.className).toBe(TileClass.actions);
     expect(action.closest(`.${TileClass.link}`)).toBeNull();
@@ -39,15 +44,15 @@ describe("createTile", () => {
   });
 
   test("holds the post's shape before the preview arrives", () => {
-    expect(readAspectRatio(createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl }))).toBe("1200 / 1800");
+    expect(readAspectRatio(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl }))).toBe("1200 / 1800");
   });
 
   test("leaves the shape to the stylesheet while the dimensions are unknown", () => {
-    expect(readAspectRatio(createTile(document, { post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl }))).toBe("");
+    expect(readAspectRatio(drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl }))).toBe("");
   });
 
   test("shows the preview and stops loading once it resolves", async() => {
-    const tile = createTile(document, { post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
     expect(tile.dataset.loading).toBe("");
     await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
@@ -56,7 +61,7 @@ describe("createTile", () => {
 
   test("stays loading without a preview for a placeholder", async() => {
     const resolve = vi.fn(resolvePreviewUrl);
-    const tile = createTile(document, { post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl: resolve });
+    const tile = drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl: resolve });
 
     await Promise.resolve();
     expect(resolve).not.toHaveBeenCalled();

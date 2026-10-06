@@ -1,11 +1,13 @@
-import { Slider, SliderClass, createSlider } from "@/core/ui/components/slider/slider";
+import { Slider, SliderClass } from "@/core/ui/components/slider/slider";
 import { describe, expect, test, vi } from "vitest";
+import { h, render } from "@/core/ui/h/h";
 import SLIDER_CSS from "@/core/ui/components/slider/slider.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-interface Setup extends Slider {
+interface Setup {
   input: HTMLInputElement;
+  dispose: () => void;
   value: Signal<number>;
   disabled: Signal<boolean>;
   onValueChange: (next: number) => void;
@@ -17,9 +19,10 @@ function setup(): Setup {
   const disabled = new Signal(false);
   const onValueChange = vi.fn<(next: number) => void>();
   const onValueCommit = vi.fn<(value: number) => void>();
-  const slider = createSlider(document, { label: "Size", min: 1, max: 20, step: 0.5, value, disabled, onValueChange, onValueCommit });
-  const input = slider.element.querySelector("input")!;
-  return { ...slider, input, value, disabled, onValueChange, onValueCommit };
+  const { result, dispose } = render(document, () => (
+    <Slider label="Size" min={1} max={20} step={0.5} value={value} disabled={disabled} onValueChange={onValueChange} onValueCommit={onValueCommit} />
+  ));
+  return { input: result.querySelector("input")!, dispose, value, disabled, onValueChange, onValueCommit };
 }
 
 function drag(input: HTMLInputElement, to: number): void {
@@ -27,7 +30,7 @@ function drag(input: HTMLInputElement, to: number): void {
   input.dispatchEvent(new Event("input"));
 }
 
-describe("createSlider", () => {
+describe("Slider", () => {
   test("draws a labelled range input with its bounds", () => {
     const { input } = setup();
 

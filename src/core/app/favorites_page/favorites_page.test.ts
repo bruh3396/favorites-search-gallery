@@ -18,7 +18,7 @@ import { SliderClass } from "@/core/ui/components/slider/slider";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
-import { mountFavoritesPage } from "@/core/app/favorites_page";
+import { mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = []): ShadowRoot {
   const container = document.createElement("div");

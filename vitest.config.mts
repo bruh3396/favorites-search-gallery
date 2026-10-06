@@ -10,9 +10,9 @@ const DOM_TESTS = [
   "src/features/*/flows/flows.test.ts",
   "src/app/startup/features.test.ts",
   "src/app/startup/style.test.ts",
-  "src/core/app/**/*.test.ts",
-  "src/core/ui/**/*.test.ts",
-  "src/core/features/*/ui/**/*.test.ts",
+  "src/core/app/**/*.test.{ts,tsx}",
+  "src/core/ui/**/*.test.{ts,tsx}",
+  "src/core/features/*/ui/**/*.test.{ts,tsx}",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
@@ -54,8 +54,8 @@ export default defineConfig({
         lines: [80, 100]
       },
       all: true,
-      include: ["src/**/*.ts"],
-      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/playground/**", "src/**/testing/**", "build/**", "src/**/*.test.ts", "src/**/*.d.ts"]
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/playground/**", "src/**/testing/**", "build/**", "src/**/*.test.{ts,tsx}", "src/**/*.d.ts"]
     }
   }
 });

@@ -1,14 +1,17 @@
-import { PostGrid, PostGridClass, createPostGrid, createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { PostGrid, PostGridClass, createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
+import { h, render } from "@/core/ui/h/h";
 import { Dimensions } from "@/core/ui/post_grid/tile";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Layout } from "@/core/ui/post_grid/tiler";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Signal } from "@/core/utils/reactive/signal";
 
-interface Setup extends PostGrid {
+interface Setup {
+  element: HTMLElement;
+  dispose: () => void;
   posts: Signal<readonly MediaItem[]>;
   changed: Emitter<MediaItem>;
   layout: Signal<Layout>;
@@ -28,8 +31,10 @@ function setup(...ids: string[]): Setup {
   const changed = new Emitter<MediaItem>();
   const layout = new Signal<Layout>("grid");
   const size = new Signal(2);
-  const grid = createPostGrid(document, { posts, changed, layout, size, getDimensions, createActions, resolvePreviewUrl });
-  return { ...grid, posts, changed, layout, size };
+  const { result: element, dispose } = render(document, () => (
+    <PostGrid posts={posts} changed={changed} layout={layout} size={size} getDimensions={getDimensions} createActions={createActions} resolvePreviewUrl={resolvePreviewUrl} />
+  ));
+  return { element, dispose, posts, changed, layout, size };
 }
 
 function getDimensions(post: MediaItem): Dimensions {
@@ -43,7 +48,7 @@ function createActions(post: MediaItem): Node[] {
   return [action];
 }
 
-describe("createPostGrid", () => {
+describe("PostGrid", () => {
   test("draws a tile for each post", () => {
     const { element } = setup("1", "2", "3");
 
@@ -110,6 +115,34 @@ describe("createPostGrid", () => {
     changed.emit(createPost("1"));
     expect([...element.children]).toEqual([tile]);
     expect(element.dataset.layout).toBe("grid");
+  });
+
+  test("stops what a tile's actions follow once the tile is gone", () => {
+    const label = new Signal("a");
+    const posts = new Signal<readonly MediaItem[]>([createPost("1")]);
+    const seen: string[] = [];
+
+    render(document, () => (
+      <PostGrid
+        posts={posts}
+        changed={new Emitter<MediaItem>()}
+        layout={new Signal<Layout>("grid")}
+        size={new Signal(2)}
+        getDimensions={getDimensions}
+        createActions={() => [
+          <button>
+            {computed(() => {
+              seen.push(label.value);
+              return label.value;
+            })}
+          </button>
+        ]}
+        resolvePreviewUrl={resolvePreviewUrl}
+      />
+    ));
+    posts.value = [];
+    label.value = "b";
+    expect(seen).toEqual(["a"]);
   });
 });
 

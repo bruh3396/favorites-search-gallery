@@ -1,5 +1,5 @@
 import { AppMode, Environment } from "@/core/boundary/environment";
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page";
+import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
@@ -24,7 +24,7 @@ import { Rule34RemoteFavoriteActions } from "@/adapters/rule34/ports/remote_favo
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { mountPostListPage } from "@/core/app/post_list_page";
+import { mountPostListPage } from "@/core/app/post_list_page/post_list_page";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 

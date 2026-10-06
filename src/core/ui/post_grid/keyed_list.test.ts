@@ -1,4 +1,6 @@
 import { Mock, describe, expect, test, vi } from "vitest";
+import { Signal, effect } from "@/core/utils/reactive/signal";
+import { createScope, onCleanup } from "@/core/utils/reactive/scope";
 import { KeyedList } from "@/core/ui/post_grid/keyed_list";
 
 interface Item {
@@ -100,5 +102,63 @@ describe("KeyedList", () => {
       list.recreate({ id: "2" });
       expect(create).toHaveBeenCalledOnce();
     });
+
+    test("disposes the scope of the element it replaces", () => {
+      const { list, cleaned } = setupScoped();
+
+      list.reconcile(createItems("1"));
+      list.recreate({ id: "1" });
+      expect(cleaned).toEqual(["1"]);
+    });
+  });
+
+  describe("scopes", () => {
+    test("disposes the scope of an element whose key is gone", () => {
+      const { list, cleaned } = setupScoped();
+
+      list.reconcile(createItems("1", "2"));
+      list.reconcile(createItems("2"));
+      expect(cleaned).toEqual(["1"]);
+    });
+
+    test("disposes every element's scope with the scope it was made in", () => {
+      const { list, cleaned, dispose } = setupScoped();
+
+      list.reconcile(createItems("1", "2"));
+      dispose();
+      expect(cleaned).toEqual(["2", "1"]);
+    });
+
+    test("keeps an enclosing effect from depending on what an element reads while built", () => {
+      const read = new Signal(1);
+      const items = new Signal(createItems("1"));
+      const list = new KeyedList<Item>({
+        getKey: item => item.id,
+        create: (): HTMLElement => {
+          void read.value;
+          return document.createElement("div");
+        }
+      });
+      let runCount = 0;
+
+      effect(() => {
+        runCount += 1;
+        list.reconcile(items.value);
+      });
+      read.value = 2;
+      expect(runCount).toBe(1);
+    });
   });
 });
+
+function setupScoped(): { list: KeyedList<Item>; cleaned: string[]; dispose: () => void } {
+  const cleaned: string[] = [];
+  const { result: list, dispose } = createScope(() => new KeyedList<Item>({
+    getKey: item => item.id,
+    create: (item): HTMLElement => {
+      onCleanup(() => cleaned.push(item.id));
+      return document.createElement("div");
+    }
+  }));
+  return { list, cleaned, dispose };
+}

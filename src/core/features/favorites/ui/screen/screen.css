@@ -1,37 +1,37 @@
 @layer components {
-  .fsg-FavoritesScaffold {
+  .fsg-FavoritesScreen {
     display: flex;
     flex-direction: column;
     gap: 8px;
     padding-inline: 16px;
   }
 
-  .fsg-FavoritesScaffold-header {
+  .fsg-FavoritesScreen-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 4px 16px;
   }
 
-  .fsg-FavoritesScaffold-search {
+  .fsg-FavoritesScreen-search {
     display: flex;
     flex: 1 1 240px;
   }
 
-  .fsg-FavoritesScaffold-summary {
+  .fsg-FavoritesScreen-summary {
     min-block-size: 1lh;
   }
 
-  .fsg-FavoritesScaffold-content {
+  .fsg-FavoritesScreen-content {
     display: block;
   }
 
-  .fsg-FavoritesScaffold-footer {
+  .fsg-FavoritesScreen-footer {
     display: flex;
     justify-content: center;
   }
 
-  .fsg-FavoritesScaffold-pager {
+  .fsg-FavoritesScreen-pager {
     display: flex;
   }
 }

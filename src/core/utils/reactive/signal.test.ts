@@ -1,5 +1,6 @@
-import { Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { describe, expect, test } from "vitest";
+import { Signal, computed, effect, untracked } from "@/core/utils/reactive/signal";
+import { describe, expect, test, vi } from "vitest";
+import { createScope } from "@/core/utils/reactive/scope";
 
 function setup<T>(initial: T): { signal: Signal<T>; seen: T[] } {
   const signal = new Signal(initial);
@@ -208,5 +209,58 @@ describe("computed", () => {
     signal.value = 2;
     expect(seen).toEqual([2]);
     expect(doubled.value).toBe(4);
+  });
+
+  test("lets go of its inputs once nothing reads it", () => {
+    const signal = new Signal(1);
+    const unsubscribe = vi.spyOn(signal, "unsubscribe");
+    const doubled = computed(() => signal.value * 2);
+    const dispose = effect(() => doubled.value);
+
+    dispose();
+    expect(unsubscribe).toHaveBeenCalledOnce();
+    expect(doubled.value).toBe(2);
+    signal.value = 2;
+    expect(doubled.value).toBe(4);
+  });
+});
+
+describe("effect in a scope", () => {
+  test("stops when the scope it was created in is disposed", () => {
+    const signal = new Signal(1);
+    const seen: number[] = [];
+    const { dispose } = createScope(() => effect(() => seen.push(signal.value)));
+
+    dispose();
+    signal.value = 2;
+    expect(seen).toEqual([1]);
+  });
+
+  test("leaves its scope once disposed on its own", () => {
+    const signal = new Signal(1);
+    const seen: number[] = [];
+    const scope = createScope(() => effect(() => seen.push(signal.value)));
+
+    scope.result();
+    scope.dispose();
+    signal.value = 2;
+    expect(seen).toEqual([1]);
+  });
+});
+
+describe("untracked", () => {
+  test("returns what its function returns", () => {
+    expect(untracked(() => 1)).toBe(1);
+  });
+
+  test("keeps an enclosing effect from depending on what it reads", () => {
+    const tracked = new Signal(1);
+    const ignored = new Signal(1);
+    const seen: number[] = [];
+
+    effect(() => seen.push(tracked.value + untracked(() => ignored.value)));
+    ignored.value = 2;
+    tracked.value = 2;
+    expect(seen).toEqual([2, 4]);
   });
 });

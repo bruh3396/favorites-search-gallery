@@ -1,3 +1,5 @@
+import { onCleanup } from "@/core/utils/reactive/scope";
+
 export interface Readable<T> {
   readonly value: T;
   peek: () => T;
@@ -83,6 +85,10 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
     }
     this.cache = null;
 
+    if (this.readers.size === 0) {
+      this.untrack();
+    }
+
     for (const reader of [...this.readers]) {
       reader.invalidate(pending);
     }
@@ -99,6 +105,11 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
 
   public unsubscribe(reader: Reader): void {
     this.readers.delete(reader);
+
+    if (this.readers.size === 0) {
+      this.cache = null;
+      this.untrack();
+    }
   }
 
   private compute(): T {
@@ -177,9 +188,25 @@ class Effect implements Reader, Tracker {
 
 export function effect(fn: () => void): () => void {
   const created = new Effect(fn);
+  const detach = onCleanup(() => created.dispose());
 
   created.run();
-  return () => created.dispose();
+  return () => {
+    detach();
+    created.dispose();
+  };
+}
+
+export function untracked<T>(fn: () => T): T {
+  const previous = running;
+
+  running = null;
+
+  try {
+    return fn();
+  } finally {
+    running = previous;
+  }
 }
 
 export function computed<T>(fn: () => T): Readable<T> {

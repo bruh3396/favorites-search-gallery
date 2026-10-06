@@ -4,7 +4,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
-import { mountPostListPage } from "@/core/app/post_list_page";
+import { mountPostListPage } from "@/core/app/post_list_page/post_list_page";
 
 describe("mountPostListPage", () => {
   test("mounts the skeleton and the post grid in the app root inside the container", () => {

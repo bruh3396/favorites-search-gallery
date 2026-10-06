@@ -1,21 +1,24 @@
-import { SearchBox, SearchBoxClass, createSearchBox } from "@/core/ui/components/search_box/search_box";
+import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/search_box";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { h, render } from "@/core/ui/h/h";
 import SEARCH_BOX_CSS from "@/core/ui/components/search_box/search_box.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-interface Setup extends SearchBox {
+interface Setup {
+  element: HTMLElement;
   input: HTMLInputElement;
   query: Signal<string>;
   onSearch: (query: string) => void;
+  dispose: () => void;
 }
 
 function setup(initialQuery = ""): Setup {
   const options = { label: "Search favorites", query: new Signal(initialQuery), onSearch: vi.fn() };
-  const searchBox = createSearchBox(document, options);
+  const { result: element, dispose } = render(document, () => <SearchBox {...options} />);
 
-  document.body.append(searchBox.element);
-  return { ...searchBox, ...options, input: searchBox.element.querySelector("input")! };
+  document.body.append(element);
+  return { ...options, element, dispose, input: element.querySelector("input")! };
 }
 
 function type(input: HTMLInputElement, text: string): void {
@@ -31,7 +34,7 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 
-describe("createSearchBox", () => {
+describe("SearchBox", () => {
   test("is a search landmark around a labelled search field", () => {
     const { element, input } = setup();
 
