@@ -46,7 +46,7 @@ export function escapeParentheses(text: string): string {
   return text.replace(/([()])/g, "\\$&");
 }
 
-export function pluralSuffix(count: number): string {
+export function getPluralSuffix(count: number): string {
   return count === 1 ? "" : "s";
 }
 

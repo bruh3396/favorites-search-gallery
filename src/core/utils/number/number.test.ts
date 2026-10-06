@@ -2,8 +2,8 @@ import {
   average,
   clamp,
   daysToMilliseconds,
-  numbersAround,
-  numbersInRange,
+  getNumbersAround,
+  getNumbersInRange,
   randomBoolean,
   randomFloatInRange,
   randomInt,
@@ -327,58 +327,58 @@ describe("randomBoolean", () => {
   });
 });
 
-describe("numbersAround", () => {
+describe("getNumbersAround", () => {
   test("returns nothing for a count of 0 in an empty range", () => {
-    expect(numbersAround(0, 0, { min: 0, max: 0 })).toStrictEqual([]);
+    expect(getNumbersAround(0, 0, { min: 0, max: 0 })).toStrictEqual([]);
   });
 
   test("returns the center for a count of 1", () => {
-    expect(numbersAround(0, 1, { min: 0, max: 0 })).toStrictEqual([0]);
-    expect(numbersAround(0, 1, { min: -1, max: 1 })).toStrictEqual([0]);
-    expect(numbersAround(1, 1, { min: -1, max: 1 })).toStrictEqual([1]);
-    expect(numbersAround(-1, 1, { min: -1, max: 1 })).toStrictEqual([-1]);
+    expect(getNumbersAround(0, 1, { min: 0, max: 0 })).toStrictEqual([0]);
+    expect(getNumbersAround(0, 1, { min: -1, max: 1 })).toStrictEqual([0]);
+    expect(getNumbersAround(1, 1, { min: -1, max: 1 })).toStrictEqual([1]);
+    expect(getNumbersAround(-1, 1, { min: -1, max: 1 })).toStrictEqual([-1]);
   });
 
   test("returns two numbers, preferring below the center", () => {
-    expect(numbersAround(0, 2, { min: -1, max: 1 })).toStrictEqual([-1, 0]);
-    expect(numbersAround(0, 2, { min: -2, max: 2 })).toStrictEqual([-1, 0]);
-    expect(numbersAround(1, 2, { min: -2, max: 2 })).toStrictEqual([0, 1]);
-    expect(numbersAround(-1, 2, { min: -2, max: 2 })).toStrictEqual([-2, -1]);
-    expect(numbersAround(-2, 2, { min: -2, max: 2 })).toStrictEqual([-2, -1]);
+    expect(getNumbersAround(0, 2, { min: -1, max: 1 })).toStrictEqual([-1, 0]);
+    expect(getNumbersAround(0, 2, { min: -2, max: 2 })).toStrictEqual([-1, 0]);
+    expect(getNumbersAround(1, 2, { min: -2, max: 2 })).toStrictEqual([0, 1]);
+    expect(getNumbersAround(-1, 2, { min: -2, max: 2 })).toStrictEqual([-2, -1]);
+    expect(getNumbersAround(-2, 2, { min: -2, max: 2 })).toStrictEqual([-2, -1]);
   });
 
   test("returns the center and both neighbors for a count of 3", () => {
-    expect(numbersAround(0, 3, { min: -1, max: 1 })).toStrictEqual([-1, 0, 1]);
-    expect(numbersAround(0, 3, { min: -2, max: 2 })).toStrictEqual([-1, 0, 1]);
+    expect(getNumbersAround(0, 3, { min: -1, max: 1 })).toStrictEqual([-1, 0, 1]);
+    expect(getNumbersAround(0, 3, { min: -2, max: 2 })).toStrictEqual([-1, 0, 1]);
   });
 
   test("returns many numbers around the center in order", () => {
-    expect(numbersAround(40, 10, { min: 30, max: 100 })).toStrictEqual([40, 39, 41, 38, 42, 37, 43, 36, 44, 35].sort((a, b) => a - b));
+    expect(getNumbersAround(40, 10, { min: 30, max: 100 })).toStrictEqual([40, 39, 41, 38, 42, 37, 43, 36, 44, 35].sort((a, b) => a - b));
   });
 
   test("returns nothing for a count of 0", () => {
-    expect(numbersAround(40, 0, { min: 0, max: 100 })).toStrictEqual([]);
-    expect(numbersAround(40, 0, { min: 30, max: 100 })).toStrictEqual([]);
+    expect(getNumbersAround(40, 0, { min: 0, max: 100 })).toStrictEqual([]);
+    expect(getNumbersAround(40, 0, { min: 30, max: 100 })).toStrictEqual([]);
   });
 
   test("returns nothing when min exceeds max", () => {
-    expect(numbersAround(40, 10, { min: 100, max: 20 })).toStrictEqual([]);
+    expect(getNumbersAround(40, 10, { min: 100, max: 20 })).toStrictEqual([]);
   });
 });
 
-describe("numbersInRange", () => {
+describe("getNumbersInRange", () => {
   test("returns one number for an equal start and end", () => {
-    expect(numbersInRange(0, 0)).toStrictEqual([0]);
+    expect(getNumbersInRange(0, 0)).toStrictEqual([0]);
   });
 
   test("lists every number from start to end inclusive", () => {
-    expect(numbersInRange(0, 1)).toStrictEqual([0, 1]);
-    expect(numbersInRange(0, 0)).toStrictEqual([0]);
-    expect(numbersInRange(0, 1)).toStrictEqual([0, 1]);
-    expect(numbersInRange(1, 3)).toStrictEqual([1, 2, 3]);
-    expect(numbersInRange(5, 7)).toStrictEqual([5, 6, 7]);
-    expect(numbersInRange(-2, 2)).toStrictEqual([-2, -1, 0, 1, 2]);
-    expect(numbersInRange(3, 3)).toStrictEqual([3]);
-    expect(numbersInRange(10, 13)).toStrictEqual([10, 11, 12, 13]);
+    expect(getNumbersInRange(0, 1)).toStrictEqual([0, 1]);
+    expect(getNumbersInRange(0, 0)).toStrictEqual([0]);
+    expect(getNumbersInRange(0, 1)).toStrictEqual([0, 1]);
+    expect(getNumbersInRange(1, 3)).toStrictEqual([1, 2, 3]);
+    expect(getNumbersInRange(5, 7)).toStrictEqual([5, 6, 7]);
+    expect(getNumbersInRange(-2, 2)).toStrictEqual([-2, -1, 0, 1, 2]);
+    expect(getNumbersInRange(3, 3)).toStrictEqual([3]);
+    expect(getNumbersInRange(10, 13)).toStrictEqual([10, 11, 12, 13]);
   });
 });

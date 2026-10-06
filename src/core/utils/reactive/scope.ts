@@ -9,7 +9,7 @@ export interface Scoped<T> {
 
 class Scope {
   private readonly cleanups = new Set<Cleanup>();
-  private readonly values = new Map<Context<unknown>, unknown>();
+  private readonly values = new Map<ScopeContext<unknown>, unknown>();
 
   constructor(private readonly parent: Scope | null) { }
 
@@ -18,11 +18,11 @@ class Scope {
     return () => this.cleanups.delete(cleanup);
   }
 
-  public provide<T>(context: Context<T>, value: T): void {
+  public provide<T>(context: ScopeContext<T>, value: T): void {
     this.values.set(context, value);
   }
 
-  public find<T>(context: Context<T>): T | undefined {
+  public find<T>(context: ScopeContext<T>): T | undefined {
     return this.values.has(context) ? this.values.get(context) as T : this.parent?.find(context);
   }
 
@@ -40,7 +40,7 @@ class Scope {
 // eslint-disable-next-line functional/no-let
 let current: Scope | null = null;
 
-export class Context<T> {
+export class ScopeContext<T> {
   constructor(private readonly name: string) { }
 
   public provide(value: T): void {

@@ -56,7 +56,7 @@ function setup(sources: FetcherSources = {}): {
     remotePosts: new MemoryRemotePosts(new MemoryClient(sources.remotePosts ?? [])),
     remoteMedia: { fetchDurationSeconds: (): Promise<number> => Promise.resolve(0) },
     scheduler: new MemoryScheduler(),
-    onRefreshed: (post): void => {
+    onRefresh: (post): void => {
       refreshed.push(post);
     }
   });
@@ -114,7 +114,7 @@ describe("FavoritesFetcher", () => {
 
       await localPosts.setMany([createPost({ id: "1", tags: "apple banana" })]);
       await fetcher.fetchAll();
-      expect(model.find("1")?.tags).toEqual(new Set(["apple", "banana"]));
+      expect(model.findFavorite("1")?.tags).toEqual(new Set(["apple", "banana"]));
     });
 
     test("saves the membership in page order once every page is added", async() => {

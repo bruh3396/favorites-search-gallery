@@ -11,7 +11,7 @@ function setup(posts: Post[]): { collection: FavoritesCollection; favorites: Fav
   const favorites = collection.append(posts);
   const searcher = new FavoritesSearcher({ getRating: (favorite: Favorite): Rating => collection.getRating(favorite.id) });
 
-  searcher.index(favorites);
+  searcher.indexAll(favorites);
   return { collection, favorites, searcher };
 }
 
@@ -148,7 +148,7 @@ describe("FavoritesSearcher", () => {
       const { collection, favorites, searcher } = setup(createTaggedPosts("apple"));
       const added = collection.append([createPost({ id: "2", tags: "apple" })]);
 
-      searcher.add(added);
+      searcher.addToIndex(added);
       expect(getIds(searcher.match([...favorites, ...added], createSearchCriteria({ query: "apple" })))).toEqual(["1", "2"]);
     });
   });
@@ -158,7 +158,7 @@ describe("FavoritesSearcher", () => {
       const { collection, favorites, searcher } = setup(createTaggedPosts("apple"));
       const termUpdate = collection.overwrite(createPost({ id: "1", tags: "banana" }));
 
-      searcher.update(termUpdate === undefined ? [] : [termUpdate]);
+      searcher.updateIndex(termUpdate === undefined ? [] : [termUpdate]);
       expect(getIds(searcher.match(favorites, createSearchCriteria({ query: "banana" })))).toEqual(["1"]);
     });
   });

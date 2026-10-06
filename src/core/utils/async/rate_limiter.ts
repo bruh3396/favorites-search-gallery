@@ -1,6 +1,6 @@
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
-export interface RateLimit {
+export interface RateLimiterConfiguration {
   concurrency: number;
   ratePerSecond: number;
 }
@@ -11,8 +11,8 @@ export class RateLimiter {
   private active = 0;
   private nextStartAt = 0;
 
-  constructor(private readonly rateLimit: RateLimit, private readonly scheduler: Scheduler) {
-    this.interval = 1_000 / rateLimit.ratePerSecond;
+  constructor(private readonly configuration: RateLimiterConfiguration, private readonly scheduler: Scheduler) {
+    this.interval = 1_000 / configuration.ratePerSecond;
   }
 
   public async run<T>(task: () => Promise<T>): Promise<T> {
@@ -27,7 +27,7 @@ export class RateLimiter {
   }
 
   private acquireSlot(): Promise<void> {
-    if (this.active < this.rateLimit.concurrency) {
+    if (this.active < this.configuration.concurrency) {
       this.active += 1;
       return Promise.resolve();
     }

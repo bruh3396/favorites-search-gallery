@@ -9,7 +9,7 @@ describe("createFavoritesPreferences", () => {
 
     expect(preferences.sort.value).toEqual({ key: "favorited", isAscending: false });
     expect(preferences.allowedRatings.value).toEqual(new Set(RATINGS));
-    expect(preferences.isBlacklistEnabled.value).toBe(true);
+    expect(preferences.isBlacklistEnabled.value).toBe(false);
     expect(preferences.resultsPerPage.value).toBe(50);
     expect(preferences.isInfiniteScrollEnabled.value).toBe(false);
   });

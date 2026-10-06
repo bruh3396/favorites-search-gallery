@@ -1,24 +1,24 @@
-export const LAYOUTS = ["row", "square", "grid", "column", "native"] as const;
+export const GRID_LAYOUTS = ["row", "square", "grid", "column", "native"] as const;
 
-export type Layout = (typeof LAYOUTS)[number];
+export type GridLayout = (typeof GRID_LAYOUTS)[number];
 
 export const TilerClass = {
   column: "fsg-PostGrid-column"
 } as const;
 
 export interface Tiling {
-  layout: Layout;
+  layout: GridLayout;
   size: number;
 }
 
 export interface Arrangement {
-  layout: Layout;
+  layout: GridLayout;
   getColumnCount: () => number;
 }
 
 type Tiler = (root: HTMLElement, tiles: readonly HTMLElement[], getColumnCount: () => number) => void;
 
-const TILERS: Record<Layout, Tiler> = {
+const TILERS: Record<GridLayout, Tiler> = {
   row: appendInOrder,
   square: appendInOrder,
   grid: appendInOrder,

@@ -1,6 +1,6 @@
+import { Dimensions, Post } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
-import { Dimensions } from "@/core/ui/post_grid/tile";
 import { Favorites } from "@/core/features/favorites/types/favorites";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
@@ -14,7 +14,6 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_p
 import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
-import { Post } from "@/core/domain/post/post";
 import { Preference } from "@/core/utils/reactive/preference";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Sort } from "@/core/features/favorites/types/search";
@@ -128,7 +127,7 @@ describe("startFavorites", () => {
     const { favorites, remoteFavoriteActions } = await setup(createTaggedPosts("apple"));
 
     await remoteFavoriteActions.remove("1");
-    expect(favorites.favoritedChanges.value).toEqual(new Map([["1", false]]));
+    expect(favorites.favoritedById.value).toEqual(new Map([["1", false]]));
   });
 
   test("deletes a removed favorite from the local favorites", async() => {

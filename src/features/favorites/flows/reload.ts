@@ -1,4 +1,4 @@
-import { capitalize, pluralSuffix } from "@/core/utils/string/string";
+import { capitalize, getPluralSuffix } from "@/core/utils/string/string";
 import { FavoritesFlow } from "@/features/favorites/flows/flow";
 import { PulledFavorites } from "@/features/favorites/types/types";
 
@@ -38,11 +38,11 @@ export class FavoritesReloadFlow extends FavoritesFlow {
     const changes: string[] = [];
 
     if (addedCount > 0) {
-      changes.push(`saved ${addedCount} new favorite${pluralSuffix(addedCount)}`);
+      changes.push(`saved ${addedCount} new favorite${getPluralSuffix(addedCount)}`);
     }
 
     if (removedCount > 0) {
-      changes.push(`removed ${removedCount} unfavorited post${pluralSuffix(removedCount)}, reload to see the change`);
+      changes.push(`removed ${removedCount} unfavorited post${getPluralSuffix(removedCount)}, reload to see the change`);
     }
 
     if (changes.length === 0) {

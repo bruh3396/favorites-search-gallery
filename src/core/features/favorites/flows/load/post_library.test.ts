@@ -24,22 +24,22 @@ function setup(remotePosts: Post[] = [], fetchDurationSeconds: RemoteMedia["fetc
   localTagCategories: MemoryLocalTagCategories;
   scheduler: MemoryScheduler;
   fetchDurationSeconds: ReturnType<typeof vi.fn<RemoteMedia["fetchDurationSeconds"]>>;
-  onRefreshed: ReturnType<typeof vi.fn>;
+  onRefresh: ReturnType<typeof vi.fn>;
 } {
   const localPosts = new MemoryLocalPosts();
   const localTagCategories = new MemoryLocalTagCategories();
   const scheduler = new MemoryScheduler(NOW);
   const fetchDuration = vi.fn(fetchDurationSeconds);
-  const onRefreshed = vi.fn();
+  const onRefresh = vi.fn();
   const library = new FavoritesPostLibrary({
     localPosts,
     localTagCategories,
     remotePosts: new MemoryRemotePosts(new MemoryClient(remotePosts)),
     remoteMedia: { fetchDurationSeconds: fetchDuration },
     scheduler,
-    onRefreshed
+    onRefresh
   });
-  return { library, localPosts, localTagCategories, scheduler, fetchDurationSeconds: fetchDuration, onRefreshed };
+  return { library, localPosts, localTagCategories, scheduler, fetchDurationSeconds: fetchDuration, onRefresh };
 }
 
 async function readLocalIds(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
@@ -74,14 +74,14 @@ describe("FavoritesPostLibrary", () => {
   });
 
   test("hydrates a placeholder with its fetched post and stores it", async() => {
-    const { library, localPosts, scheduler, onRefreshed } = setup([createPost({ ...DIMENSIONS, id: "2", tags: "apple" })]);
+    const { library, localPosts, scheduler, onRefresh } = setup([createPost({ ...DIMENSIONS, id: "2", tags: "apple" })]);
     const streamed: Post[] = [];
 
     await library.stream(["2"], 10, posts => streamed.push(...posts));
     await library.refresh(streamed);
     scheduler.advance(WRITE_DELAY);
 
-    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ id: "2", tags: "apple" });
+    expect(onRefresh.mock.calls[0][0]).toMatchObject({ id: "2", tags: "apple" });
     expect(await readLocalIds(localPosts, ["2"])).toEqual(["2"]);
   });
 
@@ -120,36 +120,36 @@ describe("FavoritesPostLibrary", () => {
   });
 
   test("leaves a fresh post alone", async() => {
-    const { library, onRefreshed } = setup([createPost({ ...DIMENSIONS, score: 9 })]);
+    const { library, onRefresh } = setup([createPost({ ...DIMENSIONS, score: 9 })]);
 
     await library.refresh([createPost({ fetchedAt: NOW })]);
 
-    expect(onRefreshed).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 
   test("leaves a post fetched within 28 days alone", async() => {
-    const { library, onRefreshed } = setup([createPost(DIMENSIONS)]);
+    const { library, onRefresh } = setup([createPost(DIMENSIONS)]);
 
     await library.refresh([createPost({ fetchedAt: NOW - (28 * DAY) })]);
 
-    expect(onRefreshed).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 
   test("refreshes a post fetched over 28 days ago", async() => {
-    const { library, onRefreshed } = setup([createPost(DIMENSIONS)]);
+    const { library, onRefresh } = setup([createPost(DIMENSIONS)]);
 
     await library.refresh([createPost({ fetchedAt: NOW - (28 * DAY) - 1 })]);
 
-    expect(onRefreshed).toHaveBeenCalledOnce();
+    expect(onRefresh).toHaveBeenCalledOnce();
   });
 
   test("replaces a stale post with its fetched copy", async() => {
-    const { library, onRefreshed } = setup([createPost({ ...DIMENSIONS, score: 9 })]);
+    const { library, onRefresh } = setup([createPost({ ...DIMENSIONS, score: 9 })]);
 
     await library.refresh([createPost()]);
 
-    expect(onRefreshed).toHaveBeenCalledOnce();
-    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ score: 9, width: 100, fetchedAt: NOW });
+    expect(onRefresh).toHaveBeenCalledOnce();
+    expect(onRefresh.mock.calls[0][0]).toMatchObject({ score: 9, width: 100, fetchedAt: NOW });
   });
 
   test("stores the tag categories fetched with a stale post", async() => {
@@ -183,30 +183,30 @@ describe("FavoritesPostLibrary", () => {
   });
 
   test("reports but never writes a refreshed post without dimensions", async() => {
-    const { library, localPosts, scheduler, onRefreshed } = setup([createPost({ score: 9 })]);
+    const { library, localPosts, scheduler, onRefresh } = setup([createPost({ score: 9 })]);
 
     await library.refresh([createPost()]);
     scheduler.advance(WRITE_DELAY);
 
-    expect(onRefreshed).toHaveBeenCalledOnce();
+    expect(onRefresh).toHaveBeenCalledOnce();
     expect(await readLocalIds(localPosts, ["0"])).toEqual([]);
   });
 
   test("fills a video's duration on its fetched copy", async() => {
-    const { library, onRefreshed } = setup([createPost({ ...DIMENSIONS, ...UNTIMED_VIDEO, score: 9 })]);
+    const { library, onRefresh } = setup([createPost({ ...DIMENSIONS, ...UNTIMED_VIDEO, score: 9 })]);
 
     await library.refresh([createPost({ ...UNTIMED_VIDEO })]);
 
-    expect(onRefreshed).toHaveBeenCalledOnce();
-    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ score: 9, durationSeconds: 12 });
+    expect(onRefresh).toHaveBeenCalledOnce();
+    expect(onRefresh.mock.calls[0][0]).toMatchObject({ score: 9, durationSeconds: 12 });
   });
 
   test("still fills a video's duration when its fetch fails", async() => {
-    const { library, onRefreshed } = setup();
+    const { library, onRefresh } = setup();
 
     await library.refresh([createPost({ ...UNTIMED_VIDEO })]);
 
-    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ durationSeconds: 12 });
+    expect(onRefresh.mock.calls[0][0]).toMatchObject({ durationSeconds: 12 });
   });
 
   test("does not fetch the duration of a video that has one", async() => {
@@ -218,20 +218,20 @@ describe("FavoritesPostLibrary", () => {
   });
 
   test("keeps a stale video's known duration when its fetched copy has none", async() => {
-    const { library, fetchDurationSeconds, onRefreshed } = setup([createPost({ ...DIMENSIONS, media: UNTIMED_VIDEO.media, score: 9 })]);
+    const { library, fetchDurationSeconds, onRefresh } = setup([createPost({ ...DIMENSIONS, media: UNTIMED_VIDEO.media, score: 9 })]);
 
     await library.refresh([createPost({ ...UNTIMED_VIDEO, durationSeconds: 5 })]);
 
     expect(fetchDurationSeconds).not.toHaveBeenCalled();
-    expect(onRefreshed.mock.calls[0][0]).toMatchObject({ score: 9, durationSeconds: 5 });
+    expect(onRefresh.mock.calls[0][0]).toMatchObject({ score: 9, durationSeconds: 5 });
   });
 
   test("leaves a video alone when its duration fetch fails", async() => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { library, onRefreshed } = setup([], () => Promise.reject(new Error("offline")));
+    const { library, onRefresh } = setup([], () => Promise.reject(new Error("offline")));
 
     await library.refresh([createPost({ ...UNTIMED_VIDEO, fetchedAt: NOW })]);
 
-    expect(onRefreshed).not.toHaveBeenCalled();
+    expect(onRefresh).not.toHaveBeenCalled();
   });
 });

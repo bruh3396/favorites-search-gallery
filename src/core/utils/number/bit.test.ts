@@ -1,5 +1,5 @@
-import { bitWidth, hashInt, packIntArray, readPackedInt } from "@/core/utils/number/bit";
 import { describe, expect, test } from "vitest";
+import { getBitWidth, hashInt, packIntArray, readPackedInt } from "@/core/utils/number/bit";
 
 describe("hashInt", () => {
   test("returns the same hash for the same value and seed", () => {
@@ -28,21 +28,21 @@ describe("hashInt", () => {
   });
 });
 
-describe("bitWidth", () => {
+describe("getBitWidth", () => {
   test("returns 0 for a count of 1 or fewer distinct values", () => {
-    expect(bitWidth(0)).toBe(0);
-    expect(bitWidth(1)).toBe(0);
+    expect(getBitWidth(0)).toBe(0);
+    expect(getBitWidth(1)).toBe(0);
   });
 
   test("returns the bits needed to index count distinct values", () => {
-    expect(bitWidth(2)).toBe(1);
-    expect(bitWidth(3)).toBe(2);
-    expect(bitWidth(4)).toBe(2);
-    expect(bitWidth(5)).toBe(3);
-    expect(bitWidth(256)).toBe(8);
-    expect(bitWidth(257)).toBe(9);
-    expect(bitWidth(65_536)).toBe(16);
-    expect(bitWidth(65_537)).toBe(17);
+    expect(getBitWidth(2)).toBe(1);
+    expect(getBitWidth(3)).toBe(2);
+    expect(getBitWidth(4)).toBe(2);
+    expect(getBitWidth(5)).toBe(3);
+    expect(getBitWidth(256)).toBe(8);
+    expect(getBitWidth(257)).toBe(9);
+    expect(getBitWidth(65_536)).toBe(16);
+    expect(getBitWidth(65_537)).toBe(17);
   });
 });
 

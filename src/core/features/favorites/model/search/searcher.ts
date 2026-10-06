@@ -18,15 +18,15 @@ export class FavoritesSearcher {
     this.getRating = getRating;
   }
 
-  public index(favorites: Favorite[]): void {
+  public indexAll(favorites: Favorite[]): void {
     this.engine.index(favorites);
   }
 
-  public add(favorites: Favorite[]): void {
+  public addToIndex(favorites: Favorite[]): void {
     this.engine.add(favorites);
   }
 
-  public update(updates: readonly TermUpdate<Favorite>[]): void {
+  public updateIndex(updates: readonly TermUpdate<Favorite>[]): void {
     this.engine.update(updates);
   }
 

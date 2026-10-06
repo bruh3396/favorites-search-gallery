@@ -45,7 +45,7 @@ export function daysToMilliseconds(days: number): number {
   return days * 24 * 60 * 60 * 1_000;
 }
 
-export function valuesAround<V>(center: number, count: number, { isInBounds, at }: Neighborhood<V>): V[] {
+export function getValuesAround<V>(center: number, count: number, { isInBounds, at }: Neighborhood<V>): V[] {
   if (count <= 0 || !isInBounds(center)) {
     return [];
   }
@@ -74,14 +74,14 @@ export function valuesAround<V>(center: number, count: number, { isInBounds, at 
   return result;
 }
 
-export function numbersAround(initial: number, count: number, { min, max }: NumberRange = ALL_NON_NEGATIVE): number[] {
-  return valuesAround(initial, count, {
+export function getNumbersAround(initial: number, count: number, { min, max }: NumberRange = ALL_NON_NEGATIVE): number[] {
+  return getValuesAround(initial, count, {
     isInBounds: value => value >= min && value <= max,
     at: value => value
   }).sort((a, b) => a - b);
 }
 
-export function numbersInRange(start: number, end: number): number[] {
+export function getNumbersInRange(start: number, end: number): number[] {
   const result: number[] = [];
 
   for (let i = start; i <= end; i += 1) {

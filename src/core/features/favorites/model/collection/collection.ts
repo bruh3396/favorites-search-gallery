@@ -30,13 +30,13 @@ export class FavoritesCollection {
     return favorites;
   }
 
-  public find(id: string): FavoritesArenaFavorite | undefined {
+  public findFavorite(id: string): FavoritesArenaFavorite | undefined {
     return this.list.get(id);
   }
 
   public findPost(id: string): Post | undefined {
     const favorite = this.list.get(id);
-    return favorite === undefined ? undefined : this.arena.readPost(favorite.slot);
+    return favorite === undefined ? undefined : this.arena.getPost(favorite.slot);
   }
 
   public getAll(): FavoritesArenaFavorite[] {

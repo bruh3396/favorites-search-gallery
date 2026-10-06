@@ -47,7 +47,7 @@ export class FavoritesPostTable {
     }
   }
 
-  public readTaglessPost(slot: number): Omit<Post, "tags"> {
+  public getTaglessPost(slot: number): Omit<Post, "tags"> {
     const durationSeconds = this.durationSeconds[slot];
     return {
       id: String(this.ids[slot]),

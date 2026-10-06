@@ -1,4 +1,4 @@
-import { ControlOptions, NEVER_DISABLED } from "@/core/ui/components/control";
+import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
 import { computed } from "@/core/utils/reactive/signal";
 import { doNothing } from "@/core/utils/function/function";
 import { h } from "@/core/ui/h/h";
@@ -8,7 +8,7 @@ export const SliderClass = {
   input: "fsg-Slider-input"
 } as const;
 
-export interface SliderOptions extends ControlOptions<number> {
+export interface SliderProps extends ControlProps<number> {
   label: string;
   min: number;
   max: number;
@@ -26,7 +26,7 @@ export function Slider({
   disabled = NEVER_DISABLED,
   onValueChange,
   onValueCommit = doNothing
-}: SliderOptions): HTMLElement {
+}: SliderProps): HTMLElement {
   return (
     <div className={SliderClass.root} dataset={{ size }}>
       <input

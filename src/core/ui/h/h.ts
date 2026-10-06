@@ -1,5 +1,5 @@
-import { Context, Scoped, createScope } from "@/core/utils/reactive/scope";
 import { Readable, effect, untracked } from "@/core/utils/reactive/signal";
+import { ScopeContext, Scoped, createScope } from "@/core/utils/reactive/scope";
 
 export type Reactive<T> = T | Readable<T>;
 
@@ -21,7 +21,7 @@ interface AttributeProps {
 
 export type Props<E> = PropertyProps<E> & ListenerProps<E> & AttributeProps;
 
-const DocumentContext = new Context<Document>("document");
+const DocumentContext = new ScopeContext<Document>("document");
 
 export function render<T>(ownerDocument: Document, build: () => T): Scoped<T> {
   return createScope(() => {

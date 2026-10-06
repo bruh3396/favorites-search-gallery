@@ -4,12 +4,12 @@ export const AppRootClass = {
   root: "fsg-App"
 } as const;
 
-export interface AppRootOptions {
+export interface AppRootProps {
   colorScheme: ColorScheme;
   styles: readonly string[];
 }
 
-export function mountAppRoot(container: HTMLElement, { colorScheme, styles }: AppRootOptions): HTMLElement {
+export function mountAppRoot(container: HTMLElement, { colorScheme, styles }: AppRootProps): HTMLElement {
   const shadowRoot = container.attachShadow({ mode: "open" });
   const root = container.ownerDocument.createElement("div");
 

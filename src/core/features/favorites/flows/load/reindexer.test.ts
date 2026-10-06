@@ -29,7 +29,7 @@ describe("FavoritesReindexer", () => {
     const { reindexer, model } = setup([createPost({ id: "1", tags: "apple" })]);
 
     reindexer.reindex(createPost({ id: "1", tags: "apple banana" }));
-    expect(model.find("1")?.tags).toEqual(new Set(["apple", "banana"]));
+    expect(model.findFavorite("1")?.tags).toEqual(new Set(["apple", "banana"]));
   });
 
   test("makes the refreshed tags searchable once the update delay passes", () => {

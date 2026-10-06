@@ -9,12 +9,7 @@ export interface ControlChoice<T> {
   label: string;
 }
 
-export interface Control {
-  readonly element: HTMLElement;
-  dispose: () => void;
-}
-
-export interface ControlOptions<T> {
+export interface ControlProps<T> {
   value: Readable<T>;
   disabled?: Readable<boolean>;
   size?: ControlSize;

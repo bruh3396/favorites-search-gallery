@@ -6,12 +6,12 @@ type ActionsIntents = Pick<FavoritesIntents, "addFavorite" | "removeFavorite">;
 export type FavoritesActionsFlowDependencies = Pick<FavoritesDependencies, "remoteFavoriteActions">;
 
 export class FavoritesActionsFlow implements ActionsIntents {
-  private readonly changes = new Signal<ReadonlyMap<string, boolean>>(new Map());
+  private readonly favorited = new Signal<ReadonlyMap<string, boolean>>(new Map());
 
   constructor(private readonly dependencies: FavoritesActionsFlowDependencies) { }
 
-  public get favoritedChanges(): Readable<ReadonlyMap<string, boolean>> {
-    return this.changes;
+  public get favoritedById(): Readable<ReadonlyMap<string, boolean>> {
+    return this.favorited;
   }
 
   public async addFavorite(id: string): Promise<void> {
@@ -23,10 +23,10 @@ export class FavoritesActionsFlow implements ActionsIntents {
   }
 
   public recordAddition(id: string): void {
-    this.changes.value = new Map(this.changes.peek()).set(id, true);
+    this.favorited.value = new Map(this.favorited.peek()).set(id, true);
   }
 
   public recordRemoval(id: string): void {
-    this.changes.value = new Map(this.changes.peek()).set(id, false);
+    this.favorited.value = new Map(this.favorited.peek()).set(id, false);
   }
 }

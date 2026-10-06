@@ -1,7 +1,7 @@
 import { PostGrid, PostGridPreferences } from "@/core/ui/post_grid/post_grid";
-import { FavoriteHeart } from "@/core/features/favorites/ui/hearts/hearts";
 import { Favorites } from "@/core/features/favorites/types/favorites";
 import { Media } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { PostGridSkeleton } from "@/core/ui/post_grid/skeleton";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
@@ -21,20 +21,22 @@ export const FavoritesScreenClass = {
   pager: "fsg-FavoritesScreen-pager"
 } as const;
 
-export interface FavoritesScreenDependencies {
-  favorites: Pick<Favorites, "posts" | "query" | "hydrated" | "finishedLoading" | "page" | "loadState" | "favoritedChanges" | "skeletonDimensions" | "intents">;
+export interface FavoritesScreenProps {
+  favorites: Pick<Favorites, "posts" | "query" | "hydrated" | "finishedLoading" | "page" | "loadState" | "skeletonDimensions" | "intents">;
   gridPreferences: PostGridPreferences;
   resolvePreviewUrl: (media: Media) => Promise<string>;
+  getPostUrl: (post: MediaItem) => string;
+  onActivatePost: (post: MediaItem, event: MouseEvent) => void;
 }
 
-export function createFavoritesScreen(dependencies: FavoritesScreenDependencies): HTMLElement {
-  const { favorites, gridPreferences: { layout, size }, resolvePreviewUrl } = dependencies;
-  const { intents, favoritedChanges } = favorites;
+export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
+  const { favorites, gridPreferences: { layout, size }, resolvePreviewUrl, getPostUrl, onActivatePost } = props;
+  const { intents } = favorites;
   return (
     <div className={FavoritesScreenClass.root}>
       <header className={FavoritesScreenClass.header}>
         <div className={FavoritesScreenClass.search}>
-          <SearchBox label="Search favorites" query={favorites.query} onSearch={query => intents.search(query)} />
+          <SearchBox label="Search favorites" query={favorites.query} onSearch={intents.search} />
           <Slider label="Size" min={1} max={20} step={1} value={computed(() => 21 - size.value)} onValueChange={next => size.set(21 - next)} />
         </div>
         <div className={FavoritesScreenClass.summary}>
@@ -54,15 +56,10 @@ export function createFavoritesScreen(dependencies: FavoritesScreenDependencies)
           layout={layout}
           size={size}
           getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}
-          createActions={post => [
-            <FavoriteHeart
-              id={post.id}
-              favoritedChanges={favoritedChanges}
-              addFavorite={id => intents.addFavorite(id)}
-              removeFavorite={id => intents.removeFavorite(id)}
-            />
-          ]}
+          createActions={() => []}
           resolvePreviewUrl={resolvePreviewUrl}
+          getPostUrl={getPostUrl}
+          onActivatePost={onActivatePost}
         />
       </main>
       <footer className={FavoritesScreenClass.footer}>
@@ -70,7 +67,7 @@ export function createFavoritesScreen(dependencies: FavoritesScreenDependencies)
           <Paginator
             pageNumber={computed(() => favorites.page.value.pageNumber)}
             pageCount={computed(() => favorites.page.value.pageCount)}
-            onPageChange={pageNumber => intents.showPage(pageNumber)}
+            onPageChange={intents.showPage}
           />
         </div>
       </footer>

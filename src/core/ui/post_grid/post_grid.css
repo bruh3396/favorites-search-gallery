@@ -75,6 +75,10 @@
   block-size: 100%;
 }
 
+.fsg-Tile-link[tabindex] {
+  cursor: pointer;
+}
+
 .fsg-Tile-preview {
   display: block;
   inline-size: 100%;

@@ -34,7 +34,7 @@ describe("FavoritesCollection", () => {
       collection.append(createPosts("1", "2"));
       const [prepended] = collection.prependAsNew(createPosts("2"));
 
-      expect(prepended).toBe(collection.find("2"));
+      expect(prepended).toBe(collection.findFavorite("2"));
       expect(collection.getAll().map(favorite => [favorite.id, favorite.isNew])).toEqual([["2", true], ["1", false]]);
     });
   });
@@ -141,7 +141,7 @@ describe("FavoritesCollection", () => {
 
       collection.append([createPost({ id: "1", tags: "apple" })]);
       collection.compact();
-      expect(collection.find("1")?.tags).toEqual(new Set(["apple"]));
+      expect(collection.findFavorite("1")?.tags).toEqual(new Set(["apple"]));
     });
   });
 });

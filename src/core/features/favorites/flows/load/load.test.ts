@@ -95,7 +95,7 @@ describe("FavoritesLoadFlow", () => {
       expect(phases).toEqual(["starting", "restoring", "restoring", "pulling", "indexing", "pruning", "loaded"]);
     });
 
-    test("reports an interruption and saves no membership when Rule34 refuses the fetch", async() => {
+    test("reports an interruption and saves no membership when client refuses the fetch", async() => {
       const { flow, localFavorites, remoteFavorites } = await setup({ remote: createPosts("1") });
 
       vi.spyOn(remoteFavorites, "fetchAll").mockRejectedValue(new Error("refused"));
@@ -104,7 +104,7 @@ describe("FavoritesLoadFlow", () => {
       expect(await localFavorites.getAll()).toEqual([]);
     });
 
-    test("reports an interruption and still shows the restored favorites when Rule34 refuses the sync", async() => {
+    test("reports an interruption and still shows the restored favorites when client refuses the sync", async() => {
       const local = [createPost({ id: "1", media: MEDIA })];
       const { flow, model, remoteFavorites } = await setup({ local, remote: local });
 
@@ -121,7 +121,7 @@ describe("FavoritesLoadFlow", () => {
       model.hydrated.on(favorite => hydrated.push(favorite));
       await flow.load();
       await flushMicrotasks();
-      expect(model.find("1")?.media).toEqual(MEDIA);
+      expect(model.findFavorite("1")?.media).toEqual(MEDIA);
       expect(getIds(hydrated)).toEqual(["1"]);
     });
   });

@@ -27,7 +27,7 @@ describe("FavoritesPostTable", () => {
     });
   });
 
-  describe("readTaglessPost", () => {
+  describe("getTaglessPost", () => {
     test("reads back every written field except the tags", () => {
       const table = new FavoritesPostTable();
       const post = createPost({
@@ -42,14 +42,14 @@ describe("FavoritesPostTable", () => {
       });
 
       table.write(0, post);
-      expect(table.readTaglessPost(0)).toEqual({ ...post, tags: undefined });
+      expect(table.getTaglessPost(0)).toEqual({ ...post, tags: undefined });
     });
 
     test("leaves out a missing duration", () => {
       const table = new FavoritesPostTable();
 
       table.write(0, createPost({ id: "1" }));
-      expect(table.readTaglessPost(0)).not.toHaveProperty("durationSeconds");
+      expect(table.getTaglessPost(0)).not.toHaveProperty("durationSeconds");
     });
   });
 

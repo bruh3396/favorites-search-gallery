@@ -32,7 +32,7 @@ export interface FavoritesPostLibraryDependencies {
   remotePosts: RemotePosts;
   remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
   scheduler: Scheduler;
-  onRefreshed: (refreshed: Post) => void;
+  onRefresh: (refreshed: Post) => void;
 }
 
 export class FavoritesPostLibrary {
@@ -87,7 +87,7 @@ export class FavoritesPostLibrary {
     if (hasDimensions(refreshed)) {
       this.localPostsWriter.schedule(refreshed);
     }
-    this.dependencies.onRefreshed(refreshed);
+    this.dependencies.onRefresh(refreshed);
   }
 
   private saveTagCategories(tagCategories: CategorizedPost["tagCategories"]): void {

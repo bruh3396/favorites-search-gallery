@@ -1,4 +1,4 @@
-import { Dimensions } from "@/core/ui/post_grid/tile";
+import { Dimensions } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { FavoritesDependencies } from "@/core/features/favorites/types/favorites";
 

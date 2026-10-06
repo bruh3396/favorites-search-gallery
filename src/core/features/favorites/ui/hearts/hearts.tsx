@@ -5,15 +5,15 @@ export const FavoriteHeartClass = {
   root: "fsg-FavoriteHeart"
 } as const;
 
-export interface FavoriteHeartOptions {
+export interface FavoriteHeartProps {
   id: string;
-  favoritedChanges: Readable<ReadonlyMap<string, boolean>>;
+  favoritedById: Readable<ReadonlyMap<string, boolean>>;
   addFavorite: (id: string) => void;
   removeFavorite: (id: string) => void;
 }
 
-export function FavoriteHeart({ id, favoritedChanges, addFavorite, removeFavorite }: FavoriteHeartOptions): HTMLElement {
-  const isFavorited = computed(() => favoritedChanges.value.get(id) ?? true);
+export function FavoriteHeart({ id, favoritedById, addFavorite, removeFavorite }: FavoriteHeartProps): HTMLElement {
+  const isFavorited = computed(() => favoritedById.value.get(id) ?? true);
   return (
     <button
       className={FavoriteHeartClass.root}

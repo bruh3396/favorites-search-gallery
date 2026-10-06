@@ -25,7 +25,7 @@ export class FavoritesLoadFlow {
 
   constructor(dependencies: FavoritesLoadFlowDependencies) {
     const reindexer = new FavoritesReindexer(dependencies);
-    const postLibrary = new FavoritesPostLibrary({ ...dependencies, onRefreshed: (refreshed): void => reindexer.reindex(refreshed) });
+    const postLibrary = new FavoritesPostLibrary({ ...dependencies, onRefresh: (refreshed): void => reindexer.reindex(refreshed) });
     const pathDependencies = { ...dependencies, postLibrary, report: (state: LoadState): void => this.report(state) };
 
     this.dependencies = dependencies;

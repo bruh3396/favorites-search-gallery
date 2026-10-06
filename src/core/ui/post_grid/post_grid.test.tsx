@@ -1,21 +1,23 @@
+import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Mock, describe, expect, test, vi } from "vitest";
 import { PostGrid, PostGridClass, createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
 import { Signal, computed } from "@/core/utils/reactive/signal";
-import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { Dimensions } from "@/core/ui/post_grid/tile";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { Layout } from "@/core/ui/post_grid/tiler";
+import { GridLayout } from "@/core/ui/post_grid/tiler";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { TileClass } from "@/core/ui/post_grid/tile";
+import { doNothing } from "@/core/utils/function/function";
 
 interface Setup {
   element: HTMLElement;
   dispose: () => void;
   posts: Signal<readonly MediaItem[]>;
   changed: Emitter<MediaItem>;
-  layout: Signal<Layout>;
+  layout: Signal<GridLayout>;
   size: Signal<number>;
+  onActivatePost: Mock<(post: MediaItem, event: MouseEvent) => void>;
 }
 
 function createPost(id: string): MediaItem {
@@ -29,12 +31,23 @@ function resolvePreviewUrl(media: Media): Promise<string> {
 function setup(...ids: string[]): Setup {
   const posts = new Signal<readonly MediaItem[]>(ids.map(createPost));
   const changed = new Emitter<MediaItem>();
-  const layout = new Signal<Layout>("grid");
+  const layout = new Signal<GridLayout>("grid");
   const size = new Signal(2);
+  const onActivatePost = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
   const { result: element, dispose } = render(document, () => (
-    <PostGrid posts={posts} changed={changed} layout={layout} size={size} getDimensions={getDimensions} createActions={createActions} resolvePreviewUrl={resolvePreviewUrl} />
+    <PostGrid
+      posts={posts}
+      changed={changed}
+      layout={layout}
+      size={size}
+      getDimensions={getDimensions}
+      createActions={createActions}
+      resolvePreviewUrl={resolvePreviewUrl}
+      getPostUrl={post => `https://posts/${post.id}`}
+      onActivatePost={onActivatePost}
+    />
   ));
-  return { element, dispose, posts, changed, layout, size };
+  return { element, dispose, posts, changed, layout, size, onActivatePost };
 }
 
 function getDimensions(post: MediaItem): Dimensions {
@@ -67,6 +80,22 @@ describe("PostGrid", () => {
     const { element } = setup("1", "2");
 
     expect([...element.children].map(tile => tile.querySelector("button")?.dataset.postId)).toEqual(["1", "2"]);
+  });
+
+  test("links each tile to its post's page", () => {
+    const { element } = setup("1", "2");
+
+    const links = [...element.querySelectorAll<HTMLAnchorElement>(`.${TileClass.link}`)];
+
+    links.forEach(link => link.dispatchEvent(new Event("pointerdown")));
+    expect(links.map(link => link.href)).toEqual(["https://posts/1", "https://posts/2"]);
+  });
+
+  test("activates the post whose tile is clicked", () => {
+    const { element, posts, onActivatePost } = setup("1", "2");
+
+    element.querySelectorAll<HTMLElement>(`.${TileClass.link}`)[1].click();
+    expect(onActivatePost).toHaveBeenCalledExactlyOnceWith(posts.value[1], expect.any(MouseEvent));
   });
 
   test("redraws when the posts change, keeping the tiles of posts still shown", () => {
@@ -126,7 +155,7 @@ describe("PostGrid", () => {
       <PostGrid
         posts={posts}
         changed={new Emitter<MediaItem>()}
-        layout={new Signal<Layout>("grid")}
+        layout={new Signal<GridLayout>("grid")}
         size={new Signal(2)}
         getDimensions={getDimensions}
         createActions={() => [
@@ -138,6 +167,7 @@ describe("PostGrid", () => {
           </button>
         ]}
         resolvePreviewUrl={resolvePreviewUrl}
+        onActivatePost={doNothing}
       />
     ));
     posts.value = [];
@@ -154,11 +184,11 @@ describe("createPostGridPreferences", () => {
   });
 
   test("restores a stored layout and falls back to the default for one it doesn't recognise", () => {
-    const store = new MemoryLocalKeyedValues();
+    const storage = new MemoryLocalKeyedValues();
 
-    store.set("postGridLayout", "row");
-    expect(createPostGridPreferences(store).layout.value).toBe("row");
-    store.set("postGridLayout", "masonry");
-    expect(createPostGridPreferences(store).layout.value).toBe("column");
+    storage.set("postGridLayout", "row");
+    expect(createPostGridPreferences(storage).layout.value).toBe("row");
+    storage.set("postGridLayout", "masonry");
+    expect(createPostGridPreferences(storage).layout.value).toBe("column");
   });
 });

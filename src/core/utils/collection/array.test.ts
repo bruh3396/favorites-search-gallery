@@ -1,4 +1,4 @@
-import { chunk, findFirstIndexWhere, grow, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, itemsAround, partition, removeValue, shuffleInPlace, wrappedItemsAround } from "@/core/utils/collection/array";
+import { chunk, findFirstIndexWhere, getItemsAround, getWrappedItemsAround, grow, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, partition, removeValue, shuffleInPlace } from "@/core/utils/collection/array";
 import { describe, expect, test } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { randomInt } from "@/core/utils/number/number";
@@ -252,76 +252,76 @@ describe("shuffleInPlace", () => {
   });
 });
 
-describe("itemsAround", () => {
+describe("getItemsAround", () => {
   test("returns nothing for an empty array", () => {
     for (let i = 0; i < 10; i += 1) {
       const startIndex = randomInt(randomSource, 100);
       const limit = randomInt(randomSource, 100);
 
-      expect(itemsAround([], startIndex, limit)).toStrictEqual([]);
+      expect(getItemsAround([], startIndex, limit)).toStrictEqual([]);
     }
   });
 
   test("returns nothing for an index out of bounds", () => {
-    expect(itemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
+    expect(getItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
   });
 
   test("returns every item when the limit exceeds the length", () => {
-    expect(itemsAround([1, 2], 0, 3)).toStrictEqual([1, 2]);
+    expect(getItemsAround([1, 2], 0, 3)).toStrictEqual([1, 2]);
   });
 
   test("returns nothing for a zero limit", () => {
-    expect(itemsAround([1, 2], 0, 0)).toStrictEqual([]);
+    expect(getItemsAround([1, 2], 0, 0)).toStrictEqual([]);
   });
 
   test("alternates outward from the start index", () => {
-    expect(itemsAround([1, 2, 3, 4, 5], 2, 1)).toStrictEqual([3]);
-    expect(itemsAround([1, 2, 3, 4, 5], 2, 3)).toStrictEqual([3, 2, 4]);
-    expect(itemsAround([1, 2, 3, 4, 5], 0, 3)).toStrictEqual([1, 2, 3]);
-    expect(itemsAround([1, 2, 3, 4, 5], 4, 3)).toStrictEqual([5, 4, 3]);
-    expect(itemsAround([1, 2, 3, 4, 5], 2, 5)).toStrictEqual([3, 2, 4, 1, 5]);
-    expect(itemsAround([1, 2, 3, 4, 5], 2, 4)).toStrictEqual([3, 2, 4, 1]);
+    expect(getItemsAround([1, 2, 3, 4, 5], 2, 1)).toStrictEqual([3]);
+    expect(getItemsAround([1, 2, 3, 4, 5], 2, 3)).toStrictEqual([3, 2, 4]);
+    expect(getItemsAround([1, 2, 3, 4, 5], 0, 3)).toStrictEqual([1, 2, 3]);
+    expect(getItemsAround([1, 2, 3, 4, 5], 4, 3)).toStrictEqual([5, 4, 3]);
+    expect(getItemsAround([1, 2, 3, 4, 5], 2, 5)).toStrictEqual([3, 2, 4, 1, 5]);
+    expect(getItemsAround([1, 2, 3, 4, 5], 2, 4)).toStrictEqual([3, 2, 4, 1]);
   });
 });
 
-describe("wrappedItemsAround", () => {
+describe("getWrappedItemsAround", () => {
   test("returns nothing for an empty array", () => {
     for (let i = 0; i < 10; i += 1) {
       const startIndex = randomInt(randomSource, 100);
       const limit = randomInt(randomSource, 100);
 
-      expect(wrappedItemsAround([], startIndex, limit)).toStrictEqual([]);
+      expect(getWrappedItemsAround([], startIndex, limit)).toStrictEqual([]);
     }
   });
 
   test("returns nothing for an index out of bounds", () => {
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
   });
 
   test("returns every item when the limit exceeds the length", () => {
-    expect(wrappedItemsAround([1, 2], 0, 3)).toStrictEqual([1, 2]);
+    expect(getWrappedItemsAround([1, 2], 0, 3)).toStrictEqual([1, 2]);
   });
 
   test("returns nothing for a zero limit", () => {
-    expect(wrappedItemsAround([1, 2], 0, 0)).toStrictEqual([]);
+    expect(getWrappedItemsAround([1, 2], 0, 0)).toStrictEqual([]);
   });
 
   test("alternates outward from the start index, wrapping at the ends", () => {
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], 0, 5)).toStrictEqual([1, 5, 2, 4, 3]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], 2, 5)).toStrictEqual([3, 2, 4, 1, 5]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], 4, 5)).toStrictEqual([5, 4, 1, 3, 2]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], 0, 1)).toStrictEqual([1]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10)).toStrictEqual([10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
-    expect(wrappedItemsAround([42], 0, 3)).toStrictEqual([42]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5], 2, 10)).toStrictEqual([3, 2, 4, 1, 5]);
-    expect(wrappedItemsAround([], 2, 10)).toStrictEqual([]);
-    expect(wrappedItemsAround([], 0, 0)).toStrictEqual([]);
-    expect(wrappedItemsAround([1], 0, 0)).toStrictEqual([]);
-    expect(wrappedItemsAround([1], 0, 1)).toStrictEqual([1]);
-    expect(wrappedItemsAround([50], 0, 2)).toStrictEqual([50]);
-    expect(wrappedItemsAround([1, 2, 4, 5], 1, 3)).toStrictEqual([2, 1, 4]);
-    expect(wrappedItemsAround([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2)).toStrictEqual([5, 4]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], 0, 5)).toStrictEqual([1, 5, 2, 4, 3]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], 2, 5)).toStrictEqual([3, 2, 4, 1, 5]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], 4, 5)).toStrictEqual([5, 4, 1, 3, 2]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], 0, 1)).toStrictEqual([1]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], 9, 10)).toStrictEqual([10, 9, 1, 8, 2, 7, 3, 6, 4, 5]);
+    expect(getWrappedItemsAround([42], 0, 3)).toStrictEqual([42]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], -1, 3)).toStrictEqual([]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5], 2, 10)).toStrictEqual([3, 2, 4, 1, 5]);
+    expect(getWrappedItemsAround([], 2, 10)).toStrictEqual([]);
+    expect(getWrappedItemsAround([], 0, 0)).toStrictEqual([]);
+    expect(getWrappedItemsAround([1], 0, 0)).toStrictEqual([]);
+    expect(getWrappedItemsAround([1], 0, 1)).toStrictEqual([1]);
+    expect(getWrappedItemsAround([50], 0, 2)).toStrictEqual([50]);
+    expect(getWrappedItemsAround([1, 2, 4, 5], 1, 3)).toStrictEqual([2, 1, 4]);
+    expect(getWrappedItemsAround([1, 2, 3, 4, 5, 6, 7, 8, 9], 4, 2)).toStrictEqual([5, 4]);
   });
 });
 

@@ -1,4 +1,4 @@
-export function bitWidth(count: number): number {
+export function getBitWidth(count: number): number {
   let bits = 0;
 
   while ((1 << bits) < count) {

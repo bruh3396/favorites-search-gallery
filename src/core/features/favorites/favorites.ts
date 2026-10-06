@@ -1,5 +1,4 @@
 import { Favorites, FavoritesConfiguration, FavoritesDependencies } from "@/core/features/favorites/types/favorites";
-import { Direction } from "@/core/contracts/listing";
 import { FavoritesActionsFlow } from "@/core/features/favorites/flows/actions";
 import { FavoritesLoadFlow } from "@/core/features/favorites/flows/load/load";
 import { FavoritesModel } from "@/core/features/favorites/model/model";
@@ -36,10 +35,10 @@ export function startFavorites(configuration: FavoritesConfiguration, dependenci
     finishedLoading,
     page: paging.page,
     loadState: load.state,
-    favoritedChanges: actions.favoritedChanges,
+    favoritedById: actions.favoritedById,
     skeletonDimensions: skeleton.recordedDimensions,
-    findPost: (id: string): Post | undefined => model.findPost(id),
-    advance: (direction: Direction): Promise<boolean> => Promise.resolve(paging.advance(direction)),
+    findPost: (id): Post | undefined => model.findPost(id),
+    advance: (direction): Promise<boolean> => Promise.resolve(paging.advance(direction)),
     intents: {
       search: (query): void => search.search(query),
       shuffle: (): void => search.shuffle(),

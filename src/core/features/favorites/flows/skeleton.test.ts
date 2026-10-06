@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Dimensions } from "@/core/ui/post_grid/tile";
+import { Dimensions } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { FavoritesSkeletonFlow } from "@/core/features/favorites/flows/skeleton";
 import { Preference } from "@/core/utils/reactive/preference";

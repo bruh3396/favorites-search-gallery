@@ -10,20 +10,20 @@ export const PaginatorClass = {
   gap: "fsg-Paginator-gap"
 } as const;
 
-export interface PaginatorOptions {
+export interface PaginatorProps {
   pageNumber: Readable<number>;
   pageCount: Readable<number>;
   onPageChange: (pageNumber: number) => void;
 }
 
-interface StepButtonOptions {
+interface StepButtonProps {
   label: string;
   text: string;
   target: Readable<number>;
   pageCount: Readable<number>;
 }
 
-interface SlotOptions {
+interface SlotProps {
   term: Readable<PageTerm | undefined>;
   current: Readable<number>;
 }
@@ -33,7 +33,7 @@ const SLOT_COUNT = NEARBY_PAGE_COUNT + 4;
 
 // WAI-ARIA pagination: a labelled nav landmark, the current page marked with aria-current.
 // The items are a fixed pool of slots patched in place, so a page change keeps the focused button.
-export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorOptions): HTMLElement {
+export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
   const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, nearbyCount: NEARBY_PAGE_COUNT }));
 
   return (
@@ -60,7 +60,7 @@ function reportClickedPage(event: MouseEvent, onPageChange: (pageNumber: number)
   }
 }
 
-function StepButton({ label, text, target, pageCount }: StepButtonOptions): HTMLElement {
+function StepButton({ label, text, target, pageCount }: StepButtonProps): HTMLElement {
   return (
     <button
       className={PaginatorClass.step}
@@ -75,7 +75,7 @@ function StepButton({ label, text, target, pageCount }: StepButtonOptions): HTML
 }
 
 // A slot past the end of the sequence hides; a gap slot hides its button, so a stale page number is never visible or clickable.
-function Slot({ term, current }: SlotOptions): HTMLElement {
+function Slot({ term, current }: SlotProps): HTMLElement {
   const page = computed(() => typeof term.value === "number" ? term.value : null);
 
   return (

@@ -11,6 +11,7 @@ import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
@@ -32,6 +33,7 @@ function createDemoDependencies(): FavoritesPageDependencies {
     remotePosts: new MemoryRemotePosts(memory),
     remoteTagCategories: new MemoryRemoteTagCategories(),
     remoteMedia: new MemoryRemoteMedia(),
+    remotePages: new MemoryRemotePages(),
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource()
   };

@@ -5,10 +5,10 @@ export const StatusTextClass = {
   root: "fsg-StatusText"
 } as const;
 
-export interface StatusTextOptions {
+export interface StatusTextProps {
   text: Readable<string>;
 }
 
-export function StatusText({ text }: StatusTextOptions): HTMLElement {
+export function StatusText({ text }: StatusTextProps): HTMLElement {
   return <div className={StatusTextClass.root} role="status">{text}</div>;
 }

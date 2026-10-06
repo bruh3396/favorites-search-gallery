@@ -7,7 +7,7 @@ import { expectClassesStyled } from "@/testing/css";
 
 interface Setup {
   heart: HTMLElement;
-  favoritedChanges: Signal<ReadonlyMap<string, boolean>>;
+  favoritedById: Signal<ReadonlyMap<string, boolean>>;
   addFavorite: (id: string) => void;
   removeFavorite: (id: string) => void;
   dispose: () => void;
@@ -15,7 +15,7 @@ interface Setup {
 
 function setup(changes: [string, boolean][] = []): Setup {
   const options = {
-    favoritedChanges: new Signal<ReadonlyMap<string, boolean>>(new Map(changes)),
+    favoritedById: new Signal<ReadonlyMap<string, boolean>>(new Map(changes)),
     addFavorite: vi.fn(),
     removeFavorite: vi.fn()
   };
@@ -51,26 +51,26 @@ describe("FavoriteHeart", () => {
   });
 
   test("stays pressed until the removal goes through", () => {
-    const { heart, favoritedChanges } = setup();
+    const { heart, favoritedById } = setup();
 
     heart.click();
     expect(heart.getAttribute("aria-pressed")).toBe("true");
-    favoritedChanges.value = new Map([["1", false]]);
+    favoritedById.value = new Map([["1", false]]);
     expect(heart.getAttribute("aria-pressed")).toBe("false");
   });
 
   test("ignores changes to other favorites", () => {
-    const { heart, favoritedChanges } = setup();
+    const { heart, favoritedById } = setup();
 
-    favoritedChanges.value = new Map([["2", false]]);
+    favoritedById.value = new Map([["2", false]]);
     expect(heart.getAttribute("aria-pressed")).toBe("true");
   });
 
   test("stops following changes once disposed", () => {
-    const { heart, favoritedChanges, dispose } = setup();
+    const { heart, favoritedById, dispose } = setup();
 
     dispose();
-    favoritedChanges.value = new Map([["1", false]]);
+    favoritedById.value = new Map([["1", false]]);
     expect(heart.getAttribute("aria-pressed")).toBe("true");
   });
 

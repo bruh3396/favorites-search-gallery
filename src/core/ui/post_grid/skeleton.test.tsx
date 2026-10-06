@@ -1,4 +1,4 @@
-﻿import { PostGridSkeleton, PostGridSkeletonClass, PostGridSkeletonOptions } from "@/core/ui/post_grid/skeleton";
+import { PostGridSkeleton, PostGridSkeletonClass, PostGridSkeletonProps } from "@/core/ui/post_grid/skeleton";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import POST_GRID_CSS from "@/core/ui/post_grid/post_grid.css?inline";
@@ -8,7 +8,7 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }] }: Partial<PostGridSkeletonOptions> = {}):
+function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }] }: Partial<PostGridSkeletonProps> = {}):
 Scoped<HTMLElement> {
   return render(document, () => <PostGridSkeleton isShown={isShown} dimensions={dimensions} layout={new Signal("grid")} size={new Signal(2)} />);
 }

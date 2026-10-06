@@ -1,7 +1,7 @@
-import { randomInt, valuesAround } from "@/core/utils/number/number";
+import { getValuesAround, randomInt } from "@/core/utils/number/number";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
-export function isIndexInBounds<V>(array: V[], index: number): boolean {
+export function isIndexInBounds<V>(array: readonly V[], index: number): boolean {
   return index >= 0 && index < array.length;
 }
 
@@ -21,11 +21,11 @@ export function findFirstIndexWhere(length: number, satisfiedAt: (index: number)
   return low;
 }
 
-export function itemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
-  return valuesAround(startIndex, limit, { isInBounds: index => isIndexInBounds(array, index), at: index => array[index] });
+export function getItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
+  return getValuesAround(startIndex, limit, { isInBounds: index => isIndexInBounds(array, index), at: index => array[index] });
 }
 
-export function wrappedItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
+export function getWrappedItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
   if (!isIndexInBounds(array, startIndex) || limit === 0) {
     return [];
   }

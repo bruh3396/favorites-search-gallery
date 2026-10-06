@@ -6,9 +6,9 @@ import {
   copyString,
   decodeHtmlEntities,
   escapeParentheses,
+  getPluralSuffix,
   isEmptyString,
   isOnlyDigits,
-  pluralSuffix,
   removeExtraWhitespace,
   removeLeadingModifiers,
   removeNonNumericCharacters,
@@ -256,22 +256,22 @@ describe("camelToKebabCase", () => {
   });
 });
 
-describe("pluralSuffix", () => {
+describe("getPluralSuffix", () => {
   test("returns s for zero", () => {
-    expect(pluralSuffix(0)).toBe("s");
+    expect(getPluralSuffix(0)).toBe("s");
   });
 
   test("returns nothing for one", () => {
-    expect(pluralSuffix(1)).toBe("");
+    expect(getPluralSuffix(1)).toBe("");
   });
 
   test("returns s for many", () => {
-    expect(pluralSuffix(2)).toBe("s");
-    expect(pluralSuffix(50)).toBe("s");
+    expect(getPluralSuffix(2)).toBe("s");
+    expect(getPluralSuffix(50)).toBe("s");
   });
 
   test("returns s for a negative count", () => {
-    expect(pluralSuffix(-1)).toBe("s");
+    expect(getPluralSuffix(-1)).toBe("s");
   });
 });
 

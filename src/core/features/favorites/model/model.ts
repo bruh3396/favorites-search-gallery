@@ -30,8 +30,8 @@ export class FavoritesModel {
     return this.collection.prependAsNew(posts);
   }
 
-  public find(id: string): Favorite | undefined {
-    return this.collection.find(id);
+  public findFavorite(id: string): Favorite | undefined {
+    return this.collection.findFavorite(id);
   }
 
   public findPost(id: string): Post | undefined {
@@ -55,17 +55,17 @@ export class FavoritesModel {
   }
 
   public indexAll(): void {
-    this.searcher.index(this.collection.getAll());
+    this.searcher.indexAll(this.collection.getAll());
     this.collection.clearTagCache();
   }
 
   public addToIndex(favorites: Favorite[]): void {
-    this.searcher.add(favorites);
+    this.searcher.addToIndex(favorites);
     this.collection.clearTagCache();
   }
 
   public updateIndex(updates: readonly TermUpdate<Favorite>[]): void {
-    this.searcher.update(updates);
+    this.searcher.updateIndex(updates);
   }
 
   public search(criteria: SearchCriteria): void {

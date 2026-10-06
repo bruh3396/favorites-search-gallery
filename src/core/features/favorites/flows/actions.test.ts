@@ -30,7 +30,7 @@ describe("FavoritesActionsFlow", () => {
   test("starts with no changes", () => {
     const { flow } = setup();
 
-    expect(flow.favoritedChanges.value).toEqual(new Map());
+    expect(flow.favoritedById.value).toEqual(new Map());
   });
 
   test("removes a favorite remotely and marks it unfavorited", async() => {
@@ -38,7 +38,7 @@ describe("FavoritesActionsFlow", () => {
 
     await flow.removeFavorite("1");
     expect(readFavoriteIds(remote)).toEqual([]);
-    expect(flow.favoritedChanges.value).toEqual(new Map([["1", false]]));
+    expect(flow.favoritedById.value).toEqual(new Map([["1", false]]));
   });
 
   test("adds a favorite remotely and marks it favorited", async() => {
@@ -46,7 +46,7 @@ describe("FavoritesActionsFlow", () => {
 
     await flow.addFavorite("2");
     expect(readFavoriteIds(remote)).toEqual(["2", "1"]);
-    expect(flow.favoritedChanges.value).toEqual(new Map([["2", true]]));
+    expect(flow.favoritedById.value).toEqual(new Map([["2", true]]));
   });
 
   test("marks a favorite favorited again after it is re-added", async() => {
@@ -54,14 +54,14 @@ describe("FavoritesActionsFlow", () => {
 
     await flow.removeFavorite("1");
     await flow.addFavorite("1");
-    expect(flow.favoritedChanges.value).toEqual(new Map([["1", true]]));
+    expect(flow.favoritedById.value).toEqual(new Map([["1", true]]));
   });
 
   test("records a favorite removed by another caller of the port", async() => {
     const { flow, remoteFavoriteActions } = setup();
 
     await remoteFavoriteActions.remove("1");
-    expect(flow.favoritedChanges.value).toEqual(new Map([["1", false]]));
+    expect(flow.favoritedById.value).toEqual(new Map([["1", false]]));
   });
 
   test("changes nothing when the port is blocked", async() => {
@@ -70,6 +70,6 @@ describe("FavoritesActionsFlow", () => {
     await flow.removeFavorite("1");
     await flow.addFavorite("2");
     expect(readFavoriteIds(remote)).toEqual(["1"]);
-    expect(flow.favoritedChanges.value).toEqual(new Map());
+    expect(flow.favoritedById.value).toEqual(new Map());
   });
 });

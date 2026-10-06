@@ -1,4 +1,4 @@
-import { numbersAround } from "@/core/utils/number/number";
+import { getNumbersAround } from "@/core/utils/number/number";
 
 export type PageTerm = number | "gap";
 
@@ -9,7 +9,7 @@ export interface PageSequenceOptions {
 }
 
 export function getPageSequence({ pageNumber, pageCount, nearbyCount }: PageSequenceOptions): readonly PageTerm[] {
-  const nearbyPages = numbersAround(pageNumber, nearbyCount, { min: 1, max: pageCount });
+  const nearbyPages = getNumbersAround(pageNumber, nearbyCount, { min: 1, max: pageCount });
   const smallestNearby = nearbyPages[0] ?? 1;
   const largestNearby = nearbyPages[nearbyPages.length - 1] ?? 1;
   const leading: PageTerm[] = smallestNearby > 3 ? [1, "gap"] : listPages(1, smallestNearby - 1);

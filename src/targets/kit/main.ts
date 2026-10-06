@@ -1,4 +1,5 @@
 import { Story, StoryVariant } from "@/targets/kit/story";
+import { h, render } from "@/core/ui/h/h";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { DISCLOSURE_STORY } from "@/targets/kit/stories/disclosure";
 import { DROPDOWN_STORY } from "@/targets/kit/stories/dropdown";
@@ -10,10 +11,10 @@ import { SETTING_ROW_STORY } from "@/targets/kit/stories/setting_row";
 import { SETTING_STORY } from "@/targets/kit/stories/setting";
 import { STEPPER_STORY } from "@/targets/kit/stories/stepper";
 import { SWITCH_STORY } from "@/targets/kit/stories/switch";
+import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { Signal } from "@/core/utils/reactive/signal";
+import { Switch } from "@/core/ui/components/switch/switch";
 import UI_CSS from "@/core/ui/styles.css?inline";
-import { createSegmented } from "@/core/ui/components/segmented/segmented";
-import { createSwitch } from "@/core/ui/components/switch/switch";
 
 const STORIES: Story[] = [
   SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, DISCLOSURE_STORY,
@@ -62,22 +63,22 @@ const FONTS = [
 function renderSchemeToggle(app: HTMLElement): HTMLElement {
   const item = createElement("label", "kit-Toolbar-item", "Dark");
   const dark = new Signal(matchMedia("(prefers-color-scheme: dark)").matches);
-  const scheme = createSwitch(document, {
+  const { result: scheme } = render(document, () => h(Switch, {
     value: dark,
     onValueChange: next => {
       app.style.colorScheme = next ? "dark" : "light";
       dark.value = next;
     }
-  });
+  }));
 
-  item.append(scheme.element);
+  item.append(scheme);
   return item;
 }
 
 function renderFontPicker(app: HTMLElement): HTMLElement {
   const item = createElement("div", "kit-Toolbar-item", "Font");
   const family = new Signal<string>(FONTS[0].value);
-  const font = createSegmented<string>(document, {
+  const { result: font } = render(document, () => h(Segmented<string>, {
     choices: FONTS,
     size: "small",
     value: family,
@@ -85,10 +86,10 @@ function renderFontPicker(app: HTMLElement): HTMLElement {
       app.style.setProperty("--fsg-font-family", next);
       family.value = next;
     }
-  });
+  }));
 
-  font.element.setAttribute("aria-label", "Font");
-  item.append(font.element);
+  font.setAttribute("aria-label", "Font");
+  item.append(font);
   return item;
 }
 

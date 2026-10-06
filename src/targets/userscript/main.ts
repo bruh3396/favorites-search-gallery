@@ -22,6 +22,7 @@ import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/host_page";
 import { Rule34RemoteFavoriteActions } from "@/adapters/rule34/ports/remote_favorite_actions/remote_favorite_actions";
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
+import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { mountPostListPage } from "@/core/app/post_list_page/post_list_page";
@@ -102,13 +103,15 @@ function createFavoritesPorts(environment: Environment, dependencies: PageDepend
       fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
     }),
     remoteTagCategories: new FrozenCobaltRemoteTagCategories(frozenCobalt),
-    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn)
+    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
+    remotePages: new Rule34RemotePages(rule34)
   };
 }
 
-function composePostListPage(environment: Environment, { hostPage, rule34Cdn, localKeyedValues }: PageDependencies): void {
+function composePostListPage(environment: Environment, { hostPage, rule34, rule34Cdn, localKeyedValues }: PageDependencies): void {
   mountPostListPage(hostPage.claimContent(), { colorScheme: environment.colorScheme }, {
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
+    remotePages: new Rule34RemotePages(rule34),
     localKeyedValues
   });
 }

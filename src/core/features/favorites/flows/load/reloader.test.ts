@@ -49,7 +49,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [], query = "",
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: { fetchDurationSeconds: (): Promise<number> => Promise.resolve(0) },
     scheduler: new MemoryScheduler(),
-    onRefreshed: (post): void => {
+    onRefresh: (post): void => {
       refreshedIds.push(post.id);
     }
   });
@@ -94,7 +94,7 @@ describe("FavoritesReloader", () => {
       const { reloader, model, localIds } = await setup({ local: createPosts("1"), remote: [], unstoredIds: ["1"] });
 
       await reloader.reload(localIds);
-      expect(model.find("1")?.media.locator).toBe("");
+      expect(model.findFavorite("1")?.media.locator).toBe("");
     });
 
     test("reports indexing and indexes only once the page has painted", async() => {
@@ -129,7 +129,7 @@ describe("FavoritesReloader", () => {
       });
 
       await reloader.reload(localIds);
-      expect(model.find("2")?.tags).toEqual(new Set(["apple", "banana"]));
+      expect(model.findFavorite("2")?.tags).toEqual(new Set(["apple", "banana"]));
     });
 
     test("touches no storage when nothing is new", async() => {

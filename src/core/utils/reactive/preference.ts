@@ -6,7 +6,7 @@ export interface Preference<T> extends Readable<T> {
   set: (value: T) => void;
 }
 
-export interface PreferenceStore {
+export interface PreferenceStorage {
   get: (key: string) => unknown;
   set: (key: string, value: unknown) => void;
 }
@@ -17,7 +17,7 @@ export interface StoredPreferenceConfiguration<T> {
 }
 
 export interface StoredPreferenceDependencies<T> {
-  store: PreferenceStore;
+  storage: PreferenceStorage;
   codec?: Codec<T>;
 }
 
@@ -32,7 +32,7 @@ export class StoredPreference<T> implements Preference<T> {
     const { key, defaultValue } = configuration;
 
     this.codec = dependencies.codec ?? createGuardedCodec(sameKindAs(defaultValue));
-    this.current = new Signal(this.codec.decode(dependencies.store.get(key)) ?? defaultValue);
+    this.current = new Signal(this.codec.decode(dependencies.storage.get(key)) ?? defaultValue);
   }
 
   public get value(): T {
@@ -47,7 +47,7 @@ export class StoredPreference<T> implements Preference<T> {
     if (Object.is(value, this.current.peek())) {
       return;
     }
-    this.dependencies.store.set(this.configuration.key, this.codec.encode(value));
+    this.dependencies.storage.set(this.configuration.key, this.codec.encode(value));
     this.current.value = value;
   }
 }

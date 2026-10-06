@@ -1,5 +1,5 @@
 import { DownloaderProgress, DownloaderResult } from "@/features/favorites/features/downloader/types/types";
-import { pluralSuffix } from "@/core/utils/string/string";
+import { getPluralSuffix } from "@/core/utils/string/string";
 
 export function label(itemCount: number, batchSize: number): string {
   if (itemCount === 0) {
@@ -8,7 +8,7 @@ export function label(itemCount: number, batchSize: number): string {
   const batchCount = batchSize <= 0 ? 1 : Math.ceil(itemCount / batchSize);
 
   if (batchCount <= 1) {
-    return `Download ${itemCount} Result${pluralSuffix(itemCount)}`;
+    return `Download ${itemCount} Result${getPluralSuffix(itemCount)}`;
   }
   return `Download ${itemCount} Results · ${batchCount} zips`;
 }

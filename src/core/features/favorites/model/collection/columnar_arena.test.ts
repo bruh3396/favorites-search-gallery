@@ -19,14 +19,14 @@ describe("FavoritesColumnarArena", () => {
     });
   });
 
-  describe("readPost", () => {
+  describe("getPost", () => {
     test("reads back the written post", () => {
       const arena = new FavoritesColumnarArena();
       const slot = arena.allocate();
       const post = createPost({ id: "1", tags: "apple banana", score: 5 });
 
       arena.write(slot, post);
-      expect(arena.readPost(slot)).toEqual(post);
+      expect(arena.getPost(slot)).toEqual(post);
     });
   });
 

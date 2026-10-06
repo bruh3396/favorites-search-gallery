@@ -34,8 +34,8 @@ export class FavoritesColumnarArena implements Arena {
     this.cachedTags.clear();
   }
 
-  public readPost(slot: number): Post {
-    return { ...this.postTable.readTaglessPost(slot), tags: this.tagPool.read(slot) };
+  public getPost(slot: number): Post {
+    return { ...this.postTable.getTaglessPost(slot), tags: this.tagPool.read(slot) };
   }
 
   public getNumericId(slot: number): number {

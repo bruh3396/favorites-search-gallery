@@ -1,4 +1,4 @@
-import { Dimensions } from "@/core/ui/post_grid/tile";
+import { Dimensions, Rating } from "@/core/domain/post/post";
 import { Fact } from "@/core/utils/reactive/milestone";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { Listing } from "@/core/contracts/listing";
@@ -11,7 +11,6 @@ import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Page } from "@/core/features/favorites/types/paging";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { Rating } from "@/core/domain/post/post";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
@@ -69,6 +68,6 @@ export interface Favorites extends Listing {
   readonly finishedLoading: Fact;
   readonly page: Readable<Page>;
   readonly loadState: Readable<LoadState>;
-  readonly favoritedChanges: Readable<ReadonlyMap<string, boolean>>;
+  readonly favoritedById: Readable<ReadonlyMap<string, boolean>>;
   readonly skeletonDimensions: readonly Dimensions[];
 }

@@ -1,4 +1,4 @@
-import { Context, captureScope, createScope, onCleanup } from "@/core/utils/reactive/scope";
+import { ScopeContext, captureScope, createScope, onCleanup } from "@/core/utils/reactive/scope";
 import { describe, expect, test } from "vitest";
 
 describe("createScope", () => {
@@ -83,7 +83,7 @@ describe("captureScope", () => {
   });
 
   test("lets a later scope read what the captured scope provided", () => {
-    const name = new Context<string>("name");
+    const name = new ScopeContext<string>("name");
     const { result: createLater } = createScope(() => {
       name.provide("apple");
       return captureScope();
@@ -93,9 +93,9 @@ describe("captureScope", () => {
   });
 });
 
-describe("Context", () => {
+describe("ScopeContext", () => {
   test("reads the value provided by an enclosing scope", () => {
-    const name = new Context<string>("name");
+    const name = new ScopeContext<string>("name");
 
     expect(createScope(() => {
       name.provide("apple");
@@ -104,7 +104,7 @@ describe("Context", () => {
   });
 
   test("reads the nearest value provided", () => {
-    const name = new Context<string>("name");
+    const name = new ScopeContext<string>("name");
 
     expect(createScope(() => {
       name.provide("apple");
@@ -116,10 +116,10 @@ describe("Context", () => {
   });
 
   test("throws when nothing provided it", () => {
-    expect(() => createScope(() => new Context<string>("name").read())).toThrow("No name was provided to this scope");
+    expect(() => createScope(() => new ScopeContext<string>("name").read())).toThrow("No name was provided to this scope");
   });
 
   test("throws when provided outside a scope", () => {
-    expect(() => new Context<string>("name").provide("apple")).toThrow("name can only be provided inside a scope");
+    expect(() => new ScopeContext<string>("name").provide("apple")).toThrow("name can only be provided inside a scope");
   });
 });

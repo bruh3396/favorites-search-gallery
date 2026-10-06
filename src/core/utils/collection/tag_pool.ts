@@ -1,4 +1,4 @@
-import { bitWidth, packIntArray, readPackedInt } from "@/core/utils/number/bit";
+import { getBitWidth, packIntArray, readPackedInt } from "@/core/utils/number/bit";
 import { grow } from "@/core/utils/collection/array";
 import { internString } from "@/core/utils/string/interner";
 
@@ -92,7 +92,7 @@ export class TagPool {
   }
 
   private packIds(): void {
-    this.bitsPerId = Math.max(1, bitWidth(this.vocabularyLength));
+    this.bitsPerId = Math.max(1, getBitWidth(this.vocabularyLength));
     this.packedIds = packIntArray(this.ids, this.tagsLength, this.bitsPerId);
     this.ids = new Uint16Array(0);
   }

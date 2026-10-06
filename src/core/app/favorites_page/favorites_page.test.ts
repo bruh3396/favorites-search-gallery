@@ -10,6 +10,7 @@ import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random
 import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -33,6 +34,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remotePosts: new MemoryRemotePosts(client),
     remoteTagCategories: new MemoryRemoteTagCategories(),
     remoteMedia: new MemoryRemoteMedia(),
+    remotePages: new MemoryRemotePages(),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource(),
     localKeyedValues
