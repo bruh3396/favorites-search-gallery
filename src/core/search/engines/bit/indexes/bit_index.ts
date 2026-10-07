@@ -43,10 +43,6 @@ export class BitIndex<Doc> {
     return this.algebra.complementOf(bitset);
   }
 
-  public docComplementOf(docs: readonly Doc[], filter?: BitSet): Doc[] {
-    return this.algebra.docComplementOf(docs, filter);
-  }
-
   public unionOf(postings: readonly Posting[]): BitSet {
     return this.algebra.unionOf(postings);
   }

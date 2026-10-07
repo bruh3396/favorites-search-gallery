@@ -4,7 +4,6 @@ import { FavoritesDependencies } from "@/core/features/favorites/types/favorites
 import { FavoritesModel } from "@/core/features/favorites/model/model";
 import { FavoritesPostLibrary } from "@/core/features/favorites/flows/load/post_library";
 import { Post } from "@/core/domain/post/post";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
 
 interface FetchProgress {
   loadedCount: number;
@@ -15,7 +14,6 @@ interface FetchProgress {
 export interface FavoritesFetcherDependencies extends Pick<FavoritesDependencies, "localFavorites" | "remoteFavorites"> {
   model: FavoritesModel;
   postLibrary: FavoritesPostLibrary;
-  getSearchCriteria: () => SearchCriteria;
   report: (state: LoadState) => void;
 }
 
@@ -63,12 +61,11 @@ export class FavoritesFetcher {
   }
 
   private async ingest(posts: Post[]): Promise<Favorite[]> {
-    const { model, postLibrary, getSearchCriteria } = this.dependencies;
+    const { model, postLibrary } = this.dependencies;
     const adopted = await postLibrary.adopt(posts);
     const favorites = model.append(adopted);
 
-    model.addToIndex(favorites);
-    model.appendMatches(favorites, getSearchCriteria());
+    model.add(favorites);
     postLibrary.refresh(adopted).catch(console.error);
     return favorites;
   }

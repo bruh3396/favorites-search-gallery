@@ -141,7 +141,6 @@ export default defineConfig([
       "new-parens": "error",
       "no-array-constructor": "error",
       "no-async-promise-executor": "error",
-      "no-bitwise": "error",
       "no-buffer-constructor": "error",
       "no-caller": "error",
       "no-case-declarations": "error",
@@ -243,7 +242,7 @@ export default defineConfig([
       "no-process-exit": "error",
       "no-proto": "error",
       "no-prototype-builtins": "error",
-      "no-redeclare": "error",
+      "@typescript-eslint/no-redeclare": "error",
       "no-regex-spaces": "error",
       "no-restricted-exports": "error",
       "no-restricted-globals": "error",
@@ -687,27 +686,6 @@ export default defineConfig([
         { selector: "typeProperty", format: null },
         { selector: "typeLike", format: ["PascalCase"] }
       ]
-    }
-  },
-  {
-    files: [
-      "src/**/array.ts",
-      "src/features/favorites/model/search/searcher.ts",
-      "src/features/favorites/features/downloader/model/filenamer.ts",
-      "src/**/multi_segmented.ts",
-      "src/**/wildcard_search_term.ts",
-      "src/playground/search_performance/prefix_index.ts",
-      "src/lib/ui/thumb/action_bar.ts",
-      "src/core/search/engines/bit/**",
-      "src/app/context/preferences.ts",
-      "src/types/search.ts",
-      "src/core/utils/number/bit.ts",
-      "src/core/utils/number/bit.test.ts",
-      "src/features/favorites/features/downloader/model/zip_writer.ts",
-      "src/adapters/rule34/ports/remote_favorites/removed_favorites_finder.test.ts"
-    ],
-    rules: {
-      "no-bitwise": "off"
     }
   }
 ]);

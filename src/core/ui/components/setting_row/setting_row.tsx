@@ -21,9 +21,8 @@ export interface SettingRowProps {
 // The text names and describes the control by element reference, so no ids are needed.
 export function SettingRow({ label, description, descriptionVisible, control, size = "medium" }: SettingRowProps): HTMLElement {
   const labelElement = <span className={SettingRowClass.label}>{label}</span>;
-  const descriptionElement = description === undefined
-    ? undefined
-    : <span className={SettingRowClass.description} hidden={computed(() => descriptionVisible?.value === false)}>{description}</span>;
+  const hidden = computed(() => descriptionVisible?.value === false);
+  const descriptionElement = description === undefined ? undefined : <span className={SettingRowClass.description} hidden={hidden}>{description}</span>;
 
   control.ariaLabelledByElements = [labelElement];
 

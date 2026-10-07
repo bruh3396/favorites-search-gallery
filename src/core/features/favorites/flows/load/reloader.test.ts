@@ -13,8 +13,8 @@ import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
-import { createSearchCriteria } from "@/core/features/favorites/testing/criteria";
+import { Signal } from "@/core/utils/reactive/signal";
+import { createSearchRequest } from "@/core/features/favorites/testing/request";
 import { flushMicrotasks } from "@/testing/async";
 
 interface ReloaderSources {
@@ -36,7 +36,9 @@ async function setup({ local, remote, unstoredIds = [], stored = [], query = "",
   states: LoadState[];
   refreshedIds: string[];
 }> {
-  const model = new FavoritesModel();
+  const model = new FavoritesModel({ favoritedByDefault: true }, {
+    request: new Signal(createSearchRequest({ query })), paginationSettings: new Signal({ size: 1_000, infiniteScroll: false })
+  });
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();
   const client = new MemoryClient(remote);
@@ -58,7 +60,6 @@ async function setup({ local, remote, unstoredIds = [], stored = [], query = "",
     localFavorites,
     remoteFavorites,
     postLibrary,
-    getSearchCriteria: (): SearchCriteria => createSearchCriteria({ query }),
     report: (state): void => {
       states.push(state);
     },
@@ -82,7 +83,7 @@ describe("FavoritesReloader", () => {
       const { reloader, model, localIds, states } = await setup({ local: posts, remote: posts });
 
       await reloader.reload(localIds);
-      expect(getIds(model.getAll())).toEqual(["1", "2"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1", "2"]);
       expect(states.slice(0, 3)).toEqual([
         { phase: "restoring", loadedCount: 0, expectedCount: 2 },
         { phase: "restoring", loadedCount: 2, expectedCount: 2 },
@@ -94,7 +95,7 @@ describe("FavoritesReloader", () => {
       const { reloader, model, localIds } = await setup({ local: createPosts("1"), remote: [], unstoredIds: ["1"] });
 
       await reloader.reload(localIds);
-      expect(model.findFavorite("1")?.media.locator).toBe("");
+      expect(model.searchResults.value.find(favorite => favorite.id === "1")?.media.locator).toBe("");
     });
 
     test("reports indexing and indexes only once the page has painted", async() => {
@@ -105,11 +106,11 @@ describe("FavoritesReloader", () => {
 
       await flushMicrotasks();
       expect(states.at(-1)).toEqual({ phase: "indexing" });
-      expect(model.results.value.matches).toEqual([]);
+      expect(model.searchResults.value).toEqual([]);
 
       paint.resolve();
       await reloading;
-      expect(getIds(model.results.value.matches)).toEqual(["1"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1"]);
       expect(states.at(-1)).toEqual({ phase: "pruning" });
     });
 
@@ -129,7 +130,7 @@ describe("FavoritesReloader", () => {
       });
 
       await reloader.reload(localIds);
-      expect(model.findFavorite("2")?.tags).toEqual(new Set(["apple", "banana"]));
+      expect(model.searchResults.value.find(favorite => favorite.id === "2")?.tags).toEqual(new Set(["apple", "banana"]));
     });
 
     test("touches no storage when nothing is new", async() => {
@@ -155,22 +156,22 @@ describe("FavoritesReloader", () => {
       const { reloader, model, localIds } = await setup({ local: posts, remote: posts, query: "banana" });
 
       await reloader.reload(localIds);
-      expect(getIds(model.results.value.matches)).toEqual(["2"]);
+      expect(getIds(model.searchResults.value)).toEqual(["2"]);
     });
 
     test("puts favorites missing from the local ids first and marks them new", async() => {
       const { reloader, model, localIds } = await setup({ local: createPosts("1", "2"), remote: createPosts("3", "1", "2") });
 
       expect(await reloader.reload(localIds)).toEqual({ pulledCount: 1, removedCount: 0 });
-      expect(getIds(model.getAll())).toEqual(["3", "1", "2"]);
-      expect(model.getAll().map(favorite => favorite.isNew)).toEqual([true, false, false]);
+      expect(getIds(model.searchResults.value)).toEqual(["3", "1", "2"]);
+      expect(model.searchResults.value.map(favorite => favorite.isNew)).toEqual([true, false, false]);
     });
 
     test("moves a re-favorite to the front, marks it new, and counts it as added", async() => {
       const { reloader, model, localIds } = await setup({ local: createPosts("1", "2", "3"), remote: createPosts("4", "2", "1", "3") });
 
       expect(await reloader.reload(localIds)).toEqual({ pulledCount: 2, removedCount: 0 });
-      expect(model.getAll().map(favorite => [favorite.id, favorite.isNew])).toEqual([["4", true], ["2", true], ["1", false], ["3", false]]);
+      expect(model.searchResults.value.map(favorite => [favorite.id, favorite.isNew])).toEqual([["4", true], ["2", true], ["1", false], ["3", false]]);
     });
 
     test("stores the new part of the membership ahead of the local ids, moving re-favorites up", async() => {
@@ -185,7 +186,7 @@ describe("FavoritesReloader", () => {
 
       expect(await reloader.reload(localIds)).toEqual({ pulledCount: 0, removedCount: 1 });
       expect(await localFavorites.getAll()).toEqual(["1", "3"]);
-      expect(getIds(model.getAll())).toEqual(["1", "2", "3"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1", "2", "3"]);
     });
 
     test("still shows the restored favorites when pulling fails", async() => {
@@ -194,7 +195,7 @@ describe("FavoritesReloader", () => {
 
       vi.spyOn(remoteFavorites, "findNew").mockRejectedValue(new Error("refused"));
       await expect(reloader.reload(localIds)).rejects.toThrow("refused");
-      expect(getIds(model.results.value.matches)).toEqual(["1", "2"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1", "2"]);
     });
 
     test("keeps the pulled membership when pruning fails", async() => {

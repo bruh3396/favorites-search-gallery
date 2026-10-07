@@ -133,10 +133,12 @@ describe("KeyedList", () => {
       const read = new Signal(1);
       const items = new Signal(createItems("1"));
       const list = new KeyedList<Item>({
-        getKey: item => item.id,
+        getKey: (item): string => item.id,
         create: (): HTMLElement => {
-          void read.value;
-          return document.createElement("div");
+          const element = document.createElement("div");
+
+          element.textContent = String(read.value);
+          return element;
         }
       });
       let runCount = 0;
@@ -154,7 +156,7 @@ describe("KeyedList", () => {
 function setupScoped(): { list: KeyedList<Item>; cleaned: string[]; dispose: () => void } {
   const cleaned: string[] = [];
   const { result: list, dispose } = createScope(() => new KeyedList<Item>({
-    getKey: item => item.id,
+    getKey: (item): string => item.id,
     create: (item): HTMLElement => {
       onCleanup(() => cleaned.push(item.id));
       return document.createElement("div");

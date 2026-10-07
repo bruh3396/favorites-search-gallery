@@ -1,6 +1,6 @@
+import { RATINGS, getRatingBit } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { FavoritesPostTable } from "@/core/features/favorites/model/collection/post_table";
-import { RATINGS } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 
 describe("FavoritesPostTable", () => {
@@ -59,6 +59,15 @@ describe("FavoritesPostTable", () => {
 
       table.write(0, createPost({ id: "1", rating }));
       expect(table.getRating(0)).toBe(rating);
+    });
+  });
+
+  describe("getRatingBit", () => {
+    test.each(RATINGS)("reads the bit of a %s rating", rating => {
+      const table = new FavoritesPostTable();
+
+      table.write(0, createPost({ id: "1", rating }));
+      expect(table.getRatingBit(0)).toBe(getRatingBit(rating));
     });
   });
 

@@ -1,3 +1,4 @@
+import { Signal, effect } from "@/core/utils/reactive/signal";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/core/features/favorites/types/favorite";
@@ -13,8 +14,7 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { createSearchCriteria } from "@/core/features/favorites/testing/criteria";
-import { effect } from "@/core/utils/reactive/signal";
+import { createSearchRequest } from "@/core/features/favorites/testing/request";
 import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
@@ -30,7 +30,9 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
   localFavorites: MemoryLocalFavorites;
   remoteFavorites: MemoryRemoteFavorites;
 }> {
-  const model = new FavoritesModel();
+  const model = new FavoritesModel({ favoritedByDefault: true }, {
+    request: new Signal(createSearchRequest()), paginationSettings: new Signal({ size: 1_000, infiniteScroll: false })
+  });
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();
   const client = new MemoryClient(remote);
@@ -44,7 +46,6 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
     scheduler: new MemoryScheduler(),
-    getSearchCriteria: createSearchCriteria,
     waitForPaint: (): Promise<void> => Promise.resolve()
   });
 
@@ -79,7 +80,7 @@ describe("FavoritesLoadFlow", () => {
       const phases = recordPhases(flow);
 
       await flow.load();
-      expect(getIds(model.results.value.matches)).toEqual(["1", "2"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1", "2"]);
       expect(await localFavorites.getAll()).toEqual(["1", "2"]);
       expect(phases).toEqual(["starting", "fetching", "fetching", "fetching", "saving", "loaded"]);
     });
@@ -90,7 +91,7 @@ describe("FavoritesLoadFlow", () => {
       const phases = recordPhases(flow);
 
       await flow.load();
-      expect(getIds(model.results.value.matches)).toEqual(["2", "1"]);
+      expect(getIds(model.searchResults.value)).toEqual(["2", "1"]);
       expect(flow.state.value).toEqual({ phase: "loaded", pulledCount: 1, removedCount: 0 });
       expect(phases).toEqual(["starting", "restoring", "restoring", "pulling", "indexing", "pruning", "loaded"]);
     });
@@ -111,7 +112,7 @@ describe("FavoritesLoadFlow", () => {
       vi.spyOn(remoteFavorites, "findNew").mockRejectedValue(new Error("refused"));
       await flow.load();
       expect(flow.state.value).toEqual({ phase: "interrupted" });
-      expect(getIds(model.results.value.matches)).toEqual(["1"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1"]);
     });
 
     test("hydrates and announces a restored placeholder once its post is refreshed", async() => {
@@ -121,7 +122,7 @@ describe("FavoritesLoadFlow", () => {
       model.hydrated.on(favorite => hydrated.push(favorite));
       await flow.load();
       await flushMicrotasks();
-      expect(model.findFavorite("1")?.media).toEqual(MEDIA);
+      expect(model.searchResults.value.find(favorite => favorite.id === "1")?.media).toEqual(MEDIA);
       expect(getIds(hydrated)).toEqual(["1"]);
     });
   });

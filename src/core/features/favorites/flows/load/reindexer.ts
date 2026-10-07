@@ -18,7 +18,7 @@ export class FavoritesReindexer {
   constructor(dependencies: FavoritesReindexerDependencies) {
     this.dependencies = dependencies;
     this.termUpdater = new CoalescingExecutor(TERM_UPDATE_COALESCING, {
-      execute: (updates): void => dependencies.model.updateIndex(updates),
+      execute: (updates): void => dependencies.model.update(updates),
       scheduler: dependencies.scheduler
     });
   }

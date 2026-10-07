@@ -1,18 +1,22 @@
-import { METRICS, Rating } from "@/core/domain/post/post";
+import { METRICS } from "@/core/domain/post/post";
+import { SearchExpression } from "@/core/search/expressions/search_expression";
 
 export const SORT_KEYS = ["favorited", "random", ...METRICS] as const;
 
 export type SortKey = (typeof SORT_KEYS)[number];
 
-export interface Sort {
-  key: SortKey;
-  isAscending: boolean;
+export interface SearchSettings {
+  sortKey: SortKey;
+  isSortAscending: boolean;
+  allowedRatings: number;
+  isBlacklistEnabled: boolean;
 }
 
-export interface SearchCriteria {
-  query: string;
-  sort: Sort;
-  allowedRatings: ReadonlySet<Rating>;
-  blacklistQuery: string;
+export interface SearchRequest {
+  expression: SearchExpression | undefined;
+  sortKey: SortKey;
+  isSortAscending: boolean;
+  allowedRatings: number;
+  isShuffled: boolean;
   shuffleSeed: number;
 }

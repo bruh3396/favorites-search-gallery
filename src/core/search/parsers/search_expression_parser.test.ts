@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseSearchExpression, tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
+import { parseExclusions, parseSearchExpression, tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 import { BitEvaluator } from "@/core/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/search/engines/bit/indexes/bit_index";
 import { MetricBitIndex } from "@/core/search/engines/bit/indexes/metric_index";
@@ -136,6 +136,27 @@ describe("parseSearchExpression", () => {
 
   test("rejects a leading ~ inside a group", () => {
     expect(() => parseSearchExpression("( ~ red )")).toThrow(/no left-hand alternative/);
+  });
+});
+
+describe("parseExclusions", () => {
+  function evaluateExclusionIds(items: Item[], tags: string): string[] {
+    const exclusions = parseExclusions(tags);
+    return exclusions === undefined ? [] : createEvaluator(items).evaluate(exclusions).map(doc => doc.id).sort();
+  }
+
+  test("excludes docs with any of the tags", () => {
+    expect(evaluateExclusionIds(corpus, "red  blue")).toEqual(["3", "4"]);
+  });
+
+  test("excludes a tag literally instead of parsing it as syntax", () => {
+    const items = [createItem("a", "apple*"), createItem("b", "apple_pie")];
+
+    expect(evaluateExclusionIds(items, "apple*")).toEqual(["b"]);
+  });
+
+  test("returns undefined for no tags", () => {
+    expect(parseExclusions("   ")).toBeUndefined();
   });
 });
 

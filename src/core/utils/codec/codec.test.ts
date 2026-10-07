@@ -1,8 +1,39 @@
-import { createGuardedCodec, createSetCodec } from "@/core/utils/codec/codec";
+import { Codec, createFieldsCodec, createGuardedCodec, createSetCodec } from "@/core/utils/codec/codec";
 import { describe, expect, test } from "vitest";
-import { oneOf } from "@/core/utils/guards/guards";
+import { isBoolean, oneOf } from "@/core/utils/guards/guards";
 
 const COLORS = ["red", "blue"] as const;
+
+interface Palette {
+  main: (typeof COLORS)[number];
+  isMuted: boolean;
+}
+
+function createPaletteCodec(): Codec<Partial<Palette>> {
+  return createFieldsCodec<Palette>({ main: oneOf(COLORS), isMuted: isBoolean });
+}
+
+describe("createFieldsCodec", () => {
+  test("stores the fields as they are and decodes them back", () => {
+    const codec = createPaletteCodec();
+    const stored = codec.encode({ main: "red", isMuted: true });
+
+    expect(stored).toEqual({ main: "red", isMuted: true });
+    expect(codec.decode(stored)).toEqual({ main: "red", isMuted: true });
+  });
+
+  test("stores only the fields it has a guard for", () => {
+    expect(createPaletteCodec().encode({ main: "red", other: 1 } as Partial<Palette>)).toEqual({ main: "red" });
+  });
+
+  test("leaves out a field its guard rejects and keeps the rest", () => {
+    expect(createPaletteCodec().decode({ main: "green", isMuted: false })).toEqual({ isMuted: false });
+  });
+
+  test("decodes nothing from a value that isn't a record", () => {
+    expect(createPaletteCodec().decode(["red"])).toBeUndefined();
+  });
+});
 
 describe("createGuardedCodec", () => {
   test("decodes a value its guard accepts and stores it as is", () => {

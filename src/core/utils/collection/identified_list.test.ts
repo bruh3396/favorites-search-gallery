@@ -122,6 +122,33 @@ describe("IdentifiedList", () => {
     });
   });
 
+  describe("size", () => {
+    test("counts the items", () => {
+      const list = new IdentifiedList<{ id: string }>();
+
+      list.setAll(createItems("1", "2"));
+      list.append(createItems("3"));
+      expect(list.size).toBe(3);
+    });
+  });
+
+  describe("slice", () => {
+    test("returns the items in the given range", () => {
+      const list = new IdentifiedList<{ id: string }>();
+
+      list.setAll(createItems("1", "2", "3", "4"));
+      expect(getIds(list.slice(1, 3))).toEqual(["2", "3"]);
+    });
+
+    test("returns a copy that does not mutate internal state", () => {
+      const list = new IdentifiedList<{ id: string }>();
+
+      list.setAll(createItems("1", "2"));
+      list.slice(0, 2).push(createItem("3"));
+      expect(getIds(list.getAll())).toEqual(["1", "2"]);
+    });
+  });
+
   describe("getAllIds", () => {
     test("returns the ids of all items", () => {
       const list = new IdentifiedList<{ id: string }>();

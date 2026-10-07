@@ -41,24 +41,6 @@ export class BitAlgebra<Doc> {
     return universe;
   }
 
-  public docComplementOf(docs: readonly Doc[], filter?: BitSet): Doc[] {
-    const excluded = this.empty();
-
-    for (const doc of docs) {
-      const position = this.table.findPosition(doc);
-
-      if (position !== undefined) {
-        excluded.set(position);
-      }
-    }
-    const result = this.complementOf(excluded);
-
-    if (filter !== undefined) {
-      result.andInPlace(filter);
-    }
-    return this.docsFrom(result);
-  }
-
   public unionOf(postings: readonly Posting[]): BitSet {
     const union = this.empty();
 

@@ -57,16 +57,6 @@ describe("PositionIndex", () => {
     });
   });
 
-  describe("complementOf", () => {
-    test("returns the indexed docs not given, in position order", () => {
-      const [a, b, c, stranger] = createDocs("a", "b", "c", "stranger");
-      const index = new PositionIndex<{ name: string }>();
-
-      index.build([a, b, c]);
-      expect(index.complementOf([b, stranger])).toEqual([a, c]);
-    });
-  });
-
   describe("build", () => {
     test("replaces any prior positions", () => {
       const [a, b] = createDocs("a", "b");

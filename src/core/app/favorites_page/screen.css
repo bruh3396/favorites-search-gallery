@@ -22,16 +22,11 @@
     min-block-size: 1lh;
   }
 
+  .fsg-FavoritesScreen-pagination {
+    flex-basis: 100%;
+  }
+
   .fsg-FavoritesScreen-content {
     display: block;
-  }
-
-  .fsg-FavoritesScreen-footer {
-    display: flex;
-    justify-content: center;
-  }
-
-  .fsg-FavoritesScreen-pager {
-    display: flex;
   }
 }

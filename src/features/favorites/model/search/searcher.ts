@@ -8,9 +8,9 @@ import { Preference } from "@/lib/storage/preference";
 import { Preferences } from "@/app/context/preferences";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Metric } from "@/core/domain/post/post";
-import { chain } from "@/core/utils/function/function";
 import { isEmptyString } from "@/core/utils/string/string";
 import { shuffleInPlace } from "@/core/utils/collection/array";
+import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 export interface FavoritesSearcherConfiguration {
   userIsOnTheirOwnFavoritesPage: boolean;
@@ -61,7 +61,7 @@ export class FavoritesSearcher implements Searcher {
 
   public searchPure(favorites: Favorite[], searchQuery: string): Favorite[] {
     const query = this.usingBlacklist() ? `${searchQuery} ${this.negatedBlacklistedTags}` : searchQuery;
-    const matches = isEmptyString(query) ? favorites : this.engine.search(query, favorites);
+    const matches = isEmptyString(query) ? favorites : this.searchEngine(query, favorites);
     return this.filterByRating(matches);
   }
 
@@ -70,12 +70,7 @@ export class FavoritesSearcher implements Searcher {
   }
 
   public invertResults(): Favorite[] {
-    return chain(
-      this.engine.complementOf(this.results.get(), this.blacklistQuery()),
-      matches => this.filterByRating(matches),
-      matches => this.sort(matches),
-      matches => this.results.set(matches)
-    );
+    return [];
   }
 
   public appendResults(favorites: Favorite[]): Favorite[] {
@@ -87,7 +82,7 @@ export class FavoritesSearcher implements Searcher {
   }
 
   public index(favorites: Favorite[]): void {
-    this.engine.index(favorites);
+    this.engine.rebuild(favorites);
   }
 
   public add(favorites: Favorite[]): void {
@@ -118,22 +113,19 @@ export class FavoritesSearcher implements Searcher {
     return !this.userIsOnTheirOwnFavoritesPage || this.excludeBlacklist.value;
   }
 
-  private enforcingBlacklist(): boolean {
-    return !this.userIsOnTheirOwnFavoritesPage;
-  }
-
   private finalSearchQuery(): string {
     return this.usingBlacklist() ? `${this.currentSearchQuery} ${this.negatedBlacklistedTags}` : this.currentSearchQuery;
   }
 
   private findMatches(favorites: Favorite[]): Favorite[] {
     const query = this.finalSearchQuery();
-    const result = isEmptyString(query) ? favorites : this.engine.search(query, favorites);
+    const result = isEmptyString(query) ? favorites : this.searchEngine(query, favorites);
     return this.filterByRating(result);
   }
 
-  private blacklistQuery(): string | undefined {
-    return this.enforcingBlacklist() && !isEmptyString(this.negatedBlacklistedTags) ? this.negatedBlacklistedTags : undefined;
+  private searchEngine(query: string, favorites: Favorite[]): Favorite[] {
+    const expression = tryParseSearchExpression(query);
+    return expression === undefined ? [] : this.engine.search(expression, favorites);
   }
 
   private filterByRating(favorites: Favorite[]): Favorite[] {

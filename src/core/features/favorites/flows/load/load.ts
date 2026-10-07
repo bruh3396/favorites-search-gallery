@@ -6,14 +6,12 @@ import { FavoritesPostLibrary } from "@/core/features/favorites/flows/load/post_
 import { FavoritesReindexer } from "@/core/features/favorites/flows/load/reindexer";
 import { FavoritesReloader } from "@/core/features/favorites/flows/load/reloader";
 import { LoadState } from "@/core/features/favorites/types/load";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
 
 export interface FavoritesLoadFlowDependencies extends Pick<
   FavoritesDependencies,
   "localFavorites" | "localPosts" | "localTagCategories" | "remoteFavorites" | "remotePosts" | "remoteMedia" | "scheduler"
 > {
   model: FavoritesModel;
-  getSearchCriteria: () => SearchCriteria;
   waitForPaint: () => Promise<void>;
 }
 

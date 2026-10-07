@@ -1,35 +1,25 @@
-import { Dimensions, Rating } from "@/core/domain/post/post";
-import { Fact } from "@/core/utils/reactive/milestone";
+import { PaginationResult, PaginationSettings } from "@/core/features/favorites/types/pagination";
 import { Favorite } from "@/core/features/favorites/types/favorite";
-import { Listing } from "@/core/contracts/listing";
 import { LoadState } from "@/core/features/favorites/types/load";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
 import { Occurrence } from "@/core/utils/reactive/emitter";
-import { Page } from "@/core/features/favorites/types/paging";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Readable } from "@/core/utils/reactive/signal";
+import { RemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { Sort } from "@/core/features/favorites/types/search";
+import { SearchSettings } from "@/core/features/favorites/types/search";
 
 export interface FavoritesConfiguration {
   userOwnsFavorites: boolean;
   blacklistedTags: string;
-}
-
-export interface FavoritesPreferences {
-  sort: Preference<Sort>;
-  allowedRatings: Preference<ReadonlySet<Rating>>;
-  isBlacklistEnabled: Preference<boolean>;
-  resultsPerPage: Preference<number>;
-  isInfiniteScrollEnabled: Preference<boolean>;
 }
 
 export interface FavoritesDependencies {
@@ -43,31 +33,28 @@ export interface FavoritesDependencies {
   remoteMedia: RemoteMedia;
   scheduler: Scheduler;
   randomSource: RandomSource;
-  preferences: FavoritesPreferences;
-  skeletonDimensions: Preference<readonly Dimensions[]>;
+  searchSettings: Preference<SearchSettings>;
+  paginationSettings: Preference<PaginationSettings>;
   waitForPaint: () => Promise<void>;
 }
 
 export interface FavoritesIntents {
   search: (query: string) => void;
+  updateSearchSettings: (change: Partial<SearchSettings>) => void;
   shuffle: () => void;
   invert: () => void;
-  sortBy: (sort: Sort) => void;
-  allowRatings: (ratings: ReadonlySet<Rating>) => void;
-  setBlacklistEnabled: (enabled: boolean) => void;
-  showPage: (pageNumber: number) => void;
-  setInfiniteScrollEnabled: (enabled: boolean) => void;
-  addFavorite: (id: string) => void;
-  removeFavorite: (id: string) => void;
+  updatePaginationSettings: (change: Partial<PaginationSettings>) => void;
+  goToPage: (pageNumber: number) => void;
+  addFavorite: RemoteFavoriteActions["add"];
+  removeFavorite: RemoteFavoriteActions["remove"];
 }
 
-export interface Favorites extends Listing {
+export interface Favorites {
   readonly intents: FavoritesIntents;
-  readonly posts: Readable<readonly Favorite[]>;
+  readonly searchResults: Readable<readonly Favorite[]>;
+  readonly paginationResult: Readable<PaginationResult>;
   readonly hydrated: Occurrence<Favorite>;
-  readonly finishedLoading: Fact;
-  readonly page: Readable<Page>;
   readonly loadState: Readable<LoadState>;
-  readonly favoritedById: Readable<ReadonlyMap<string, boolean>>;
-  readonly skeletonDimensions: readonly Dimensions[];
+  readonly isFavorited: (id: string) => boolean;
+  readonly load: () => Promise<void>;
 }

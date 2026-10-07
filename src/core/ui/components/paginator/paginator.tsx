@@ -31,17 +31,14 @@ interface SlotProps {
 const NEARBY_PAGE_COUNT = 5;
 const SLOT_COUNT = NEARBY_PAGE_COUNT + 4;
 
-// WAI-ARIA pagination: a labelled nav landmark, the current page marked with aria-current.
-// The items are a fixed pool of slots patched in place, so a page change keeps the focused button.
 export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
   const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, nearbyCount: NEARBY_PAGE_COUNT }));
-
   return (
     <nav
       className={PaginatorClass.root}
       aria-label="Pagination"
       hidden={computed(() => pageCount.value <= 1)}
-      onClick={(event) => reportClickedPage(event, onPageChange)}
+      onClick={event => reportClickedPage(event, onPageChange)}
     >
       <StepButton label="Previous page" text="‹" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} />
       <ul className={PaginatorClass.list}>
@@ -74,10 +71,8 @@ function StepButton({ label, text, target, pageCount }: StepButtonProps): HTMLEl
   );
 }
 
-// A slot past the end of the sequence hides; a gap slot hides its button, so a stale page number is never visible or clickable.
 function Slot({ term, current }: SlotProps): HTMLElement {
-  const page = computed(() => typeof term.value === "number" ? term.value : null);
-
+  const page = computed(() => (typeof term.value === "number" ? term.value : null));
   return (
     <li hidden={computed(() => term.value === undefined)}>
       <button
@@ -85,7 +80,7 @@ function Slot({ term, current }: SlotProps): HTMLElement {
         type="button"
         hidden={computed(() => page.value === null)}
         dataset={{ pageNumber: computed(() => String(page.value ?? "")) }}
-        aria-current={computed(() => page.value !== null && page.value === current.value ? "page" : null)}
+        aria-current={computed(() => (page.value !== null && page.value === current.value ? "page" : null))}
       >
         {computed(() => String(page.value ?? ""))}
       </button>

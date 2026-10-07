@@ -218,33 +218,6 @@ describe("FavoritesSearcher", () => {
     });
   });
 
-  describe("invertResults", () => {
-    test("returns favorites absent from the current results", () => {
-      const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "banana"), createFavorite("3", "s", "fox")];
-      const searcher = createSearcher(favorites);
-
-      searcher.search(favorites, "apple");
-      expect(getIds(searcher.invertResults()).sort()).toEqual(["2", "3"]);
-    });
-
-    test("replaces the current results with the inverted set", () => {
-      const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "banana")];
-      const searcher = createSearcher(favorites);
-
-      searcher.search(favorites, "apple");
-      searcher.invertResults();
-      expect(getIds(searcher.getCurrentSearchResults())).toEqual(["2"]);
-    });
-
-    test("enforces the blacklist when off the user's own favorites page", () => {
-      const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "banana", "blacklisted")];
-      const searcher = createSearcher(favorites, { onOwnFavoritesPage: false });
-
-      searcher.search(favorites, "apple");
-      expect(getIds(searcher.invertResults())).toEqual([]);
-    });
-  });
-
   describe("appendResults", () => {
     test("appends matched favorites to the current results", () => {
       const favorites = [createFavorite("1", "s", "apple"), createFavorite("2", "s", "apple")];

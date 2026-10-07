@@ -1,71 +1,46 @@
-import { RATINGS, Rating } from "@/core/domain/post/post";
-import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
+import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/types/favorite";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
-import { TermUpdate } from "@/core/search/engines/search_engine";
+import { SearchEngine } from "@/core/search/engines/search_engine";
+import { SearchRequest } from "@/core/features/favorites/types/search";
 import { hashInt } from "@/core/utils/number/bit";
-import { isEmptyString } from "@/core/utils/string/string";
 
 export interface FavoritesSearcherDependencies {
-  getRating: (favorite: Favorite) => Rating;
+  engine: Pick<SearchEngine<Favorite>, "search">;
+  getRatingBit: (favorite: Favorite) => number;
 }
 
 export class FavoritesSearcher {
-  private readonly engine = new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
-  private readonly getRating: (favorite: Favorite) => Rating;
+  constructor(private readonly dependencies: FavoritesSearcherDependencies) { }
 
-  constructor({ getRating }: FavoritesSearcherDependencies) {
-    this.getRating = getRating;
+  public search(request: SearchRequest): Favorite[] {
+    const matched = this.match(request);
+    return request.isShuffled ? this.shuffle(matched, request.shuffleSeed) : this.sort(matched, request);
   }
 
-  public indexAll(favorites: Favorite[]): void {
-    this.engine.index(favorites);
+  public match({ expression, allowedRatings }: SearchRequest, candidates?: Favorite[]): Favorite[] {
+    return expression === undefined ? [] : this.filterByRating(this.dependencies.engine.search(expression, candidates), allowedRatings);
   }
 
-  public addToIndex(favorites: Favorite[]): void {
-    this.engine.add(favorites);
+  private filterByRating(favorites: Favorite[], allowedRatings: number): Favorite[] {
+    return allowedRatings === ALL_RATINGS_MASK ? favorites : favorites.filter(favorite => (this.dependencies.getRatingBit(favorite) & allowedRatings) !== 0);
   }
 
-  public updateIndex(updates: readonly TermUpdate<Favorite>[]): void {
-    this.engine.update(updates);
-  }
-
-  public search(favorites: Favorite[], criteria: SearchCriteria): Favorite[] {
-    return this.sort(this.match(favorites, criteria), criteria);
-  }
-
-  public match(favorites: Favorite[], criteria: SearchCriteria): Favorite[] {
-    const query = `${criteria.blacklistQuery} ${criteria.query}`;
-    const matches = isEmptyString(query) ? favorites : this.engine.search(query, favorites);
-    return this.filterByRating(matches, criteria.allowedRatings);
-  }
-
-  public invert(matches: Favorite[], criteria: SearchCriteria): Favorite[] {
-    const blacklistQuery = isEmptyString(criteria.blacklistQuery) ? undefined : criteria.blacklistQuery;
-    const complement = this.engine.complementOf(matches, blacklistQuery);
-    return this.sort(this.filterByRating(complement, criteria.allowedRatings), criteria);
-  }
-
-  public shuffle(favorites: Favorite[], seed: number): Favorite[] {
+  private shuffle(favorites: Favorite[], seed: number): Favorite[] {
     return favorites
       .map(favorite => ({ favorite, rank: hashInt(Number(favorite.id), seed) }))
       .sort((a, b) => a.rank - b.rank)
       .map(({ favorite }) => favorite);
   }
 
-  private filterByRating(favorites: Favorite[], allowedRatings: ReadonlySet<Rating>): Favorite[] {
-    return allowedRatings.size === RATINGS.length ? favorites : favorites.filter(favorite => allowedRatings.has(this.getRating(favorite)));
-  }
-
-  private sort(favorites: Favorite[], { sort: { key, isAscending }, shuffleSeed }: SearchCriteria): Favorite[] {
-    if (key === "random") {
+  private sort(favorites: Favorite[], { sortKey, isSortAscending, shuffleSeed }: SearchRequest): Favorite[] {
+    if (sortKey === "random") {
       return this.shuffle(favorites, shuffleSeed);
     }
 
-    if (key === "favorited") {
-      return isAscending ? favorites.toReversed() : [...favorites];
+    if (sortKey === "favorited") {
+      return isSortAscending ? favorites.toReversed() : favorites;
     }
-    const direction = isAscending ? 1 : -1;
-    return favorites.toSorted((a, b) => direction * (a.getMetric(key) - b.getMetric(key)));
+    const direction = isSortAscending ? 1 : -1;
+    return favorites.toSorted((a, b) => direction * (a.getMetric(sortKey) - b.getMetric(sortKey)));
   }
 }

@@ -1,12 +1,11 @@
 import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
 import { BitEvaluator } from "@/core/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/search/engines/bit/indexes/bit_index";
-import { BitSet } from "@/core/search/engines/bit/postings/bitset";
 import { Metric } from "@/core/domain/post/post";
 import { MetricBitIndex } from "@/core/search/engines/bit/indexes/metric_index";
 import { PostingResolver } from "@/core/search/engines/bit/resolution/posting_resolver";
+import { SearchExpression } from "@/core/search/expressions/search_expression";
 import { WildcardPostingResolver } from "@/core/search/engines/bit/resolution/wildcard_posting_resolver";
-import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly bitIndex: BitIndex<Doc>;
@@ -19,15 +18,10 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     this.metricIndex = new MetricBitIndex<Doc>(getMetric);
     this.wildcardResolver = new WildcardPostingResolver(this.bitIndex);
     this.bitEvaluator = new BitEvaluator(this.bitIndex, new PostingResolver(this.bitIndex, this.metricIndex, this.wildcardResolver));
-    this.index(docs);
+    this.rebuild(docs);
   }
 
-  public search(query: string, candidates?: Doc[]): Doc[] {
-    const expression = tryParseSearchExpression(query);
-
-    if (expression === undefined) {
-      return [];
-    }
+  public search(expression: SearchExpression, candidates?: Doc[]): Doc[] {
     const matches = this.bitEvaluator.evaluate(expression);
 
     if (candidates === undefined || candidates.length === this.bitIndex.size) {
@@ -37,11 +31,7 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     return matches.filter(doc => candidateSet.has(doc));
   }
 
-  public complementOf(current: Doc[], filter?: string): Doc[] {
-    return this.bitIndex.docComplementOf(current, this.bitSetFromQuery(filter));
-  }
-
-  public index(docs: Doc[]): void {
+  public rebuild(docs: Doc[]): void {
     this.bitIndex.build(docs);
     this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
     this.wildcardResolver.index(this.bitIndex.indexedTerms());
@@ -58,13 +48,5 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     added.forEach(term => this.wildcardResolver.add(term));
     removed.forEach(term => this.wildcardResolver.remove(term));
     this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
-  }
-
-  private bitSetFromQuery(query?: string): BitSet | undefined {
-    if (query === undefined) {
-      return undefined;
-    }
-    const expression = tryParseSearchExpression(query);
-    return expression === undefined ? undefined : this.bitEvaluator.evaluateToBitSet(expression);
   }
 }

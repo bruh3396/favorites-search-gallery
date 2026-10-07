@@ -1,5 +1,5 @@
+import { parseExactSearchTerm, parseSearchTerm } from "@/core/search/parsers/search_term_parser";
 import { SearchExpression } from "@/core/search/expressions/search_expression";
-import { parseSearchTerm } from "@/core/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/core/utils/string/string";
 
 const OPEN = "(";
@@ -18,6 +18,11 @@ export function tryParseSearchExpression(query: string): SearchExpression | unde
 export function parseSearchExpression(query: string): SearchExpression {
   const tokens = tokenize(normalize(query));
   return new Parser(tokens).parseTopLevel();
+}
+
+export function parseExclusions(tags: string): SearchExpression | undefined {
+  const exclusions = tokenize(normalize(tags)).map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag))));
+  return exclusions.length === 0 ? undefined : SearchExpression.and(exclusions);
 }
 
 function normalize(query: string): string {

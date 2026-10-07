@@ -262,12 +262,6 @@ describe("startFavorites", () => {
         context.events.favorites.searchButtonClicked.emit(new MouseEvent("click"));
       }, ["2"]
     ],
-    [
-      "shows what the search left out when the invert button is clicked", (context): void => {
-        context.events.favorites.searchRequested.emit("apple");
-        context.events.favorites.invertButtonClicked.emit(new MouseEvent("click"));
-      }, ["2"]
-    ],
     ["searches for a tag from the overlay's tag search", (context): void => context.events.postOverlay.searchForTagRequested.emit("banana"), ["2"]]
   ])("%s", async(_, trigger, ids) => {
     const context = await setup();

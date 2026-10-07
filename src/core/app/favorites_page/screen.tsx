@@ -1,7 +1,8 @@
+import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { PostGrid, PostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { Fact } from "@/core/utils/reactive/milestone";
 import { Favorites } from "@/core/features/favorites/types/favorites";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { PostGridSkeleton } from "@/core/ui/post_grid/skeleton";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
@@ -16,13 +17,14 @@ export const FavoritesScreenClass = {
   header: "fsg-FavoritesScreen-header",
   search: "fsg-FavoritesScreen-search",
   summary: "fsg-FavoritesScreen-summary",
-  content: "fsg-FavoritesScreen-content",
-  footer: "fsg-FavoritesScreen-footer",
-  pager: "fsg-FavoritesScreen-pager"
+  pagination: "fsg-FavoritesScreen-pagination",
+  content: "fsg-FavoritesScreen-content"
 } as const;
 
 export interface FavoritesScreenProps {
-  favorites: Pick<Favorites, "posts" | "query" | "hydrated" | "finishedLoading" | "page" | "loadState" | "skeletonDimensions" | "intents">;
+  favorites: Pick<Favorites, "searchResults" | "paginationResult" | "hydrated" | "loadState" | "intents">;
+  finishedLoading: Fact;
+  skeletonDimensions: readonly Dimensions[];
   gridPreferences: PostGridPreferences;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl: (post: MediaItem) => string;
@@ -30,28 +32,35 @@ export interface FavoritesScreenProps {
 }
 
 export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
-  const { favorites, gridPreferences: { layout, size }, resolvePreviewUrl, getPostUrl, onActivatePost } = props;
+  const { favorites, finishedLoading, skeletonDimensions, gridPreferences: { layout, size }, resolvePreviewUrl, getPostUrl, onActivatePost } = props;
   const { intents } = favorites;
   return (
     <div className={FavoritesScreenClass.root}>
       <header className={FavoritesScreenClass.header}>
         <div className={FavoritesScreenClass.search}>
-          <SearchBox label="Search favorites" query={favorites.query} onSearch={intents.search} />
+          <SearchBox label="Search favorites" onSearch={query => intents.search(query)} />
           <Slider label="Size" min={1} max={20} step={1} value={computed(() => 21 - size.value)} onValueChange={next => size.set(21 - next)} />
         </div>
         <div className={FavoritesScreenClass.summary}>
           <StatusText text={computed(() => describeLoadState(favorites.loadState.value))} />
         </div>
+        <div className={FavoritesScreenClass.pagination}>
+          <Paginator
+            pageNumber={computed(() => favorites.paginationResult.value.pageNumber)}
+            pageCount={computed(() => favorites.paginationResult.value.totalPages)}
+            onPageChange={pageNumber => intents.goToPage(pageNumber)}
+          />
+        </div>
       </header>
       <main className={FavoritesScreenClass.content}>
         <PostGridSkeleton
-          isShown={computed(() => !favorites.finishedLoading.reached && favorites.posts.value.length === 0)}
-          dimensions={favorites.skeletonDimensions}
+          isShown={computed(() => !finishedLoading.reached && favorites.searchResults.value.length === 0)}
+          dimensions={skeletonDimensions}
           layout={layout}
           size={size}
         />
         <PostGrid
-          posts={favorites.posts}
+          posts={computed(() => favorites.paginationResult.value.favorites)}
           changed={favorites.hydrated}
           layout={layout}
           size={size}
@@ -62,15 +71,6 @@ export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
           onActivatePost={onActivatePost}
         />
       </main>
-      <footer className={FavoritesScreenClass.footer}>
-        <div className={FavoritesScreenClass.pager}>
-          <Paginator
-            pageNumber={computed(() => favorites.page.value.pageNumber)}
-            pageCount={computed(() => favorites.page.value.pageCount)}
-            onPageChange={intents.showPage}
-          />
-        </div>
-      </footer>
     </div>
   );
 }

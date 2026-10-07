@@ -1,8 +1,8 @@
+import { RATINGS, getRatingBit } from "@/core/domain/post/post";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/model/collection/collection";
-import { RATINGS } from "@/core/domain/post/post";
 
 function getIds(favorites: { id: string }[]): string[] {
   return favorites.map(favorite => favorite.id);
@@ -31,38 +31,45 @@ describe("FavoritesCollection", () => {
     test("moves a favorite it already holds to the front as new", () => {
       const collection = new FavoritesCollection();
 
-      collection.append(createPosts("1", "2"));
+      const [, existing] = collection.append(createPosts("1", "2"));
       const [prepended] = collection.prependAsNew(createPosts("2"));
 
-      expect(prepended).toBe(collection.findFavorite("2"));
+      expect(prepended).toBe(existing);
       expect(collection.getAll().map(favorite => [favorite.id, favorite.isNew])).toEqual([["2", true], ["1", false]]);
     });
   });
 
-  describe("findPost", () => {
-    test("returns the favorite's post", () => {
+  describe("size", () => {
+    test("counts the favorites", () => {
       const collection = new FavoritesCollection();
-      const post = createPost({ id: "1", tags: "apple", score: 5 });
 
-      collection.append([post]);
-      expect(collection.findPost("1")).toEqual(post);
-    });
-
-    test("returns undefined for an id that is not in the collection", () => {
-      expect(new FavoritesCollection().findPost("1")).toBeUndefined();
+      collection.append(createPosts("1", "2"));
+      collection.prependAsNew(createPosts("3"));
+      expect(collection.size).toBe(3);
     });
   });
 
-  describe("getRating", () => {
-    test.each(RATINGS)("reads a %s rating", rating => {
+  describe("slice", () => {
+    test("returns the favorites in the given range", () => {
       const collection = new FavoritesCollection();
 
-      collection.append([createPost({ id: "1", rating })]);
-      expect(collection.getRating("1")).toBe(rating);
+      collection.append(createPosts("1", "2", "3", "4"));
+      expect(getIds(collection.slice(1, 3))).toEqual(["2", "3"]);
+    });
+  });
+
+  describe("getRatingBit", () => {
+    test.each(RATINGS)("reads the bit of a %s rating", rating => {
+      const collection = new FavoritesCollection();
+      const [favorite] = collection.append([createPost({ id: "1", rating })]);
+
+      expect(collection.getRatingBit(favorite)).toBe(getRatingBit(rating));
     });
 
-    test("throws for an id that is not in the collection", () => {
-      expect(() => new FavoritesCollection().getRating("1")).toThrow();
+    test("throws for a favorite that is not in the collection", () => {
+      const [stranger] = new FavoritesCollection().append(createPosts("1"));
+
+      expect(() => new FavoritesCollection().getRatingBit(stranger)).toThrow();
     });
   });
 
@@ -138,10 +145,10 @@ describe("FavoritesCollection", () => {
   describe("compact", () => {
     test("keeps every favorite readable", () => {
       const collection = new FavoritesCollection();
+      const [favorite] = collection.append([createPost({ id: "1", tags: "apple" })]);
 
-      collection.append([createPost({ id: "1", tags: "apple" })]);
       collection.compact();
-      expect(collection.findFavorite("1")?.tags).toEqual(new Set(["apple"]));
+      expect(favorite.tags).toEqual(new Set(["apple"]));
     });
   });
 });

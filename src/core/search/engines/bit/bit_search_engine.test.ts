@@ -2,6 +2,7 @@ import { Fruit, fruitDocs } from "@/core/search/testing/fruit_corpus";
 import { MetricSearchable, Searchable } from "@/core/search/searchable";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
+import { parseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 type MetricDoc = MetricSearchable & { name: string };
 
@@ -14,7 +15,7 @@ function createFruitEngine(): BitSearchEngine<Fruit> {
 }
 
 function searchFruitNames(query: string): string[] {
-  return createFruitEngine().search(query).map(doc => doc.name).sort();
+  return createFruitEngine().search(parseSearchExpression(query)).map(doc => doc.name).sort();
 }
 
 function createTaggedItem(id: string, ...tags: string[]): TaggedItem {
@@ -46,7 +47,7 @@ function createMetricEngine(docs: MetricDoc[]): BitSearchEngine<MetricDoc> {
 }
 
 function searchMetricNames(engine: BitSearchEngine<MetricDoc>, query: string): string[] {
-  return engine.search(query).map(doc => doc.name).sort();
+  return engine.search(parseSearchExpression(query)).map(doc => doc.name).sort();
 }
 
 // Three favorites, two tagged apple, whose ids are their only metric.
@@ -58,22 +59,20 @@ function createIdEngine(): BitSearchEngine<MetricDoc> {
   ]);
 }
 
-const COMPLEMENT_ITEMS = [createTaggedItem("1", "apple"), createTaggedItem("2", "banana"), createTaggedItem("3", "apple"), createTaggedItem("4", "cherry")];
-
 describe("BitSearchEngine", () => {
   describe("search", () => {
     test("returns the whole corpus for an empty query", () => {
-      expect(createFruitEngine().search("")).toEqual(fruitDocs);
+      expect(createFruitEngine().search(parseSearchExpression(""))).toEqual(fruitDocs);
     });
 
     test("returns results in corpus order", () => {
-      const result = createFruitEngine().search("sweet");
+      const result = createFruitEngine().search(parseSearchExpression("sweet"));
 
       expect(result.map(doc => doc.name)).toEqual(fruitDocs.filter(doc => doc.tags.has("sweet")).map(doc => doc.name));
     });
 
     test("returns nothing when a required term matches no doc", () => {
-      expect(createFruitEngine().search("red nonexistenttag")).toEqual([]);
+      expect(createFruitEngine().search(parseSearchExpression("red nonexistenttag"))).toEqual([]);
     });
 
     test("handles negated OR across a multi-word corpus without phantom matches", () => {
@@ -83,7 +82,7 @@ describe("BitSearchEngine", () => {
         tags: new Set([`n${i}`, i % 2 === 0 ? "even" : "odd", i < 50 ? "low" : "high"])
       }));
       const engine = new BitSearchEngine<Item>(post => post.tags, () => 0, posts);
-      const result = engine.search("low ( even ~ -high )");
+      const result = engine.search(parseSearchExpression("low ( even ~ -high )"));
 
       expect(result.map(p => p.id)).toEqual(posts.filter(p => p.id < 50).map(p => p.id));
       expect(result.every(p => p.id < 50)).toBe(true);
@@ -93,14 +92,14 @@ describe("BitSearchEngine", () => {
       const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
       const engine = createTaggedEngine(items);
 
-      expect(getSortedIds(engine.search("apple", [items[0], items[2]]))).toEqual(["1", "3"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apple"), [items[0], items[2]]))).toEqual(["1", "3"]);
     });
 
     test("returns only the candidate subset for an empty query", () => {
       const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
       const engine = createTaggedEngine(items);
 
-      expect(getSortedIds(engine.search("", [items[0], items[2]]))).toEqual(["1", "3"]);
+      expect(getSortedIds(engine.search(parseSearchExpression(""), [items[0], items[2]]))).toEqual(["1", "3"]);
     });
 
     test("returns the same docs for a repeated relative metric query", () => {
@@ -142,19 +141,15 @@ describe("BitSearchEngine", () => {
     test("matches a non-nested single group", () => {
       expect(searchFruitNames("red ( sweet ~ juicy )")).toEqual(["cherry", "strawberry"]);
     });
-
-    test("returns no matches for a malformed query instead of throwing", () => {
-      expect(createFruitEngine().search("( a ~ ( b c )")).toEqual([]);
-    });
   });
 
   describe("index", () => {
     test("re-indexes the corpus", () => {
       const engine = new BitSearchEngine<Fruit>(fruit => fruit.tags, () => 0, []);
 
-      expect(engine.search("red")).toEqual([]);
-      engine.index(fruitDocs);
-      expect(engine.search("red").length).toBeGreaterThan(0);
+      expect(engine.search(parseSearchExpression("red"))).toEqual([]);
+      engine.rebuild(fruitDocs);
+      expect(engine.search(parseSearchExpression("red")).length).toBeGreaterThan(0);
     });
   });
 
@@ -163,9 +158,9 @@ describe("BitSearchEngine", () => {
       const engine = createTaggedEngine([createTaggedItem("1", "apple")]);
 
       engine.add([createTaggedItem("2", "cot")]);
-      expect(getSortedIds(engine.search("cot"))).toEqual(["2"]);
-      expect(getSortedIds(engine.search("( c* ~ a* )"))).toEqual(["1", "2"]);
-      expect(engine.search("").length).toBe(2);
+      expect(getSortedIds(engine.search(parseSearchExpression("cot")))).toEqual(["2"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("( c* ~ a* )")))).toEqual(["1", "2"]);
+      expect(engine.search(parseSearchExpression("")).length).toBe(2);
     });
 
     test("grows capacity when adds exceed the initial width", () => {
@@ -174,8 +169,8 @@ describe("BitSearchEngine", () => {
       for (let i = 0; i < 200; i += 1) {
         engine.add([createTaggedItem(`x${i}`, "tag")]);
       }
-      expect(engine.search("tag").length).toBe(201);
-      expect(engine.search("").length).toBe(201);
+      expect(engine.search(parseSearchExpression("tag")).length).toBe(201);
+      expect(engine.search(parseSearchExpression("")).length).toBe(201);
     });
 
     test("stays correct when a term crosses the sparse/dense threshold", () => {
@@ -184,7 +179,7 @@ describe("BitSearchEngine", () => {
 
       items.forEach((item, i) => {
         engine.add([item]);
-        expect(getSortedIds(engine.search("shared"))).toEqual(items.slice(0, i + 1).map(it => it.id).sort());
+        expect(getSortedIds(engine.search(parseSearchExpression("shared")))).toEqual(items.slice(0, i + 1).map(it => it.id).sort());
       });
     });
 
@@ -204,8 +199,8 @@ describe("BitSearchEngine", () => {
 
       engine.update([createCorrection(target, "apple")]);
 
-      expect(engine.search("ct")).toEqual([]);
-      expect(getSortedIds(engine.search("apple"))).toEqual(["1"]);
+      expect(engine.search(parseSearchExpression("ct"))).toEqual([]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1"]);
     });
 
     test("drops a term no doc references and adds a new one, keeping wildcards correct", () => {
@@ -215,11 +210,11 @@ describe("BitSearchEngine", () => {
 
       engine.update([createCorrection(a, "apple", "fresh")]);
 
-      expect(engine.search("unique")).toEqual([]);
-      expect(engine.search("uni*")).toEqual([]);
-      expect(getSortedIds(engine.search("fresh"))).toEqual(["1"]);
-      expect(getSortedIds(engine.search("fre*"))).toEqual(["1"]);
-      expect(getSortedIds(engine.search("apple"))).toEqual(["1", "2"]);
+      expect(engine.search(parseSearchExpression("unique"))).toEqual([]);
+      expect(engine.search(parseSearchExpression("uni*"))).toEqual([]);
+      expect(getSortedIds(engine.search(parseSearchExpression("fresh")))).toEqual(["1"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("fre*")))).toEqual(["1"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1", "2"]);
     });
 
     test("still resolves a wildcard over terms it left untouched", () => {
@@ -232,10 +227,10 @@ describe("BitSearchEngine", () => {
 
       engine.update([createCorrection(banana, "cherry")]);
 
-      expect(getSortedIds(engine.search("ap*"))).toEqual(["1", "2"]);
-      expect(getSortedIds(engine.search("apple"))).toEqual(["1"]);
-      expect(getSortedIds(engine.search("apricot"))).toEqual(["2"]);
-      expect(getSortedIds(engine.search("cherry"))).toEqual(["3"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("ap*")))).toEqual(["1", "2"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apricot")))).toEqual(["2"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("cherry")))).toEqual(["3"]);
     });
 
     test("keeps wildcard resolution intact across a batch of docs sharing a term", () => {
@@ -243,12 +238,12 @@ describe("BitSearchEngine", () => {
       const shared = Array.from({ length: 20 }, (_, i) => createTaggedItem(String(i), "shared"));
 
       engine.add(shared);
-      expect(getSortedIds(engine.search("shar*")).length).toBe(20);
+      expect(getSortedIds(engine.search(parseSearchExpression("shar*"))).length).toBe(20);
 
       engine.update(shared.map(item => createCorrection(item, "moved")));
-      expect(engine.search("shar*")).toEqual([]);
-      expect(engine.search("shared")).toEqual([]);
-      expect(getSortedIds(engine.search("moved")).length).toBe(20);
+      expect(engine.search(parseSearchExpression("shar*"))).toEqual([]);
+      expect(engine.search(parseSearchExpression("shared"))).toEqual([]);
+      expect(getSortedIds(engine.search(parseSearchExpression("moved"))).length).toBe(20);
     });
 
     test("ignores old terms that were never indexed", () => {
@@ -257,9 +252,9 @@ describe("BitSearchEngine", () => {
 
       engine.update([{ doc: target, oldTerms: new Set(["apple", "ghost"]), newTerms: new Set(["apple", "fresh"]) }]);
 
-      expect(getSortedIds(engine.search("apple"))).toEqual(["1", "2"]);
-      expect(getSortedIds(engine.search("fresh"))).toEqual(["1"]);
-      expect(engine.search("ghost")).toEqual([]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1", "2"]);
+      expect(getSortedIds(engine.search(parseSearchExpression("fresh")))).toEqual(["1"]);
+      expect(engine.search(parseSearchExpression("ghost"))).toEqual([]);
     });
 
     test("ignores docs that were never indexed", () => {
@@ -268,26 +263,8 @@ describe("BitSearchEngine", () => {
 
       engine.update([createCorrection(stranger, "fresh")]);
 
-      expect(engine.search("fresh")).toEqual([]);
-      expect(getSortedIds(engine.search("apple"))).toEqual(["1"]);
-    });
-  });
-
-  describe("complementOf", () => {
-    test("returns every indexed doc not in the current set", () => {
-      expect(getSortedIds(createTaggedEngine(COMPLEMENT_ITEMS).complementOf([COMPLEMENT_ITEMS[0], COMPLEMENT_ITEMS[1]]))).toEqual(["3", "4"]);
-    });
-
-    test("narrows the complement to docs matching the filter", () => {
-      expect(getSortedIds(createTaggedEngine(COMPLEMENT_ITEMS).complementOf([COMPLEMENT_ITEMS[0]], "apple"))).toEqual(["3"]);
-    });
-
-    test("ignores current docs that were never indexed", () => {
-      expect(getSortedIds(createTaggedEngine(COMPLEMENT_ITEMS).complementOf([createTaggedItem("stranger", "apple")]))).toEqual(["1", "2", "3", "4"]);
-    });
-
-    test("leaves the complement unfiltered for a malformed filter", () => {
-      expect(getSortedIds(createTaggedEngine(COMPLEMENT_ITEMS).complementOf([COMPLEMENT_ITEMS[0]], "( apple"))).toEqual(["2", "3", "4"]);
+      expect(engine.search(parseSearchExpression("fresh"))).toEqual([]);
+      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1"]);
     });
   });
 });

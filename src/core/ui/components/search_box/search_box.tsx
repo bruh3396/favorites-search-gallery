@@ -1,4 +1,3 @@
-import { Readable, effect } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
 export const SearchBoxClass = {
@@ -8,18 +7,15 @@ export const SearchBoxClass = {
 
 export interface SearchBoxProps {
   label: string;
-  query: Readable<string>;
   onSearch: (query: string) => void;
 }
 
-export function SearchBox({ label, query, onSearch }: SearchBoxProps): HTMLElement {
+export function SearchBox({ label, onSearch }: SearchBoxProps): HTMLElement {
   const input = <input className={SearchBoxClass.input} type="search" placeholder={label} aria-label={label} /> as HTMLInputElement;
-
-  effect(() => showQuery(input, query.value));
   return (
     <search className={SearchBoxClass.root}>
       <form
-        onSubmit={(event) => {
+        onSubmit={event => {
           event.preventDefault();
           onSearch(input.value);
         }}
@@ -28,10 +24,4 @@ export function SearchBox({ label, query, onSearch }: SearchBoxProps): HTMLEleme
       </form>
     </search>
   );
-}
-
-function showQuery(input: HTMLInputElement, query: string): void {
-  if ((input.getRootNode() as Document | ShadowRoot).activeElement !== input) {
-    input.value = query;
-  }
 }

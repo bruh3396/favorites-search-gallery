@@ -69,6 +69,10 @@ export class FavoritesPostTable {
     return RATINGS[this.ratings[slot]];
   }
 
+  public getRatingBit(slot: number): number {
+    return 1 << this.ratings[slot];
+  }
+
   public getMedia(slot: number): Media {
     return { kind: MEDIA_KINDS[this.mediaKinds[slot]] ?? "image", locator: this.mediaLocators[slot] ?? "" };
   }

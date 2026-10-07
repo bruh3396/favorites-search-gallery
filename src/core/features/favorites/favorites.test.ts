@@ -1,6 +1,4 @@
-import { Dimensions, Post } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
-import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
 import { Favorites } from "@/core/features/favorites/types/favorites";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
@@ -14,13 +12,21 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_p
 import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
+import { PaginationSettings } from "@/core/features/favorites/types/pagination";
+import { Post } from "@/core/domain/post/post";
 import { Preference } from "@/core/utils/reactive/preference";
 import { Signal } from "@/core/utils/reactive/signal";
-import { Sort } from "@/core/features/favorites/types/search";
+import { createFavorites } from "@/core/features/favorites/favorites";
 import { createPost } from "@/testing/post";
-import { createSearchCriteria } from "@/core/features/favorites/testing/criteria";
+import { createSearchSettings } from "@/core/features/favorites/testing/request";
 import { flushMicrotasks } from "@/testing/async";
-import { startFavorites } from "@/core/features/favorites/favorites";
+
+interface Setup {
+  favorites: Favorites;
+  remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  localFavorites: MemoryLocalFavorites;
+  hydratedIds: string[];
+}
 
 function createPreference<T>(initial: T): Preference<T> {
   const signal = new Signal(initial);
@@ -36,21 +42,14 @@ function createPreference<T>(initial: T): Preference<T> {
 }
 
 // A local id with no local post loads as a placeholder, which is hydrated once its post is fetched.
-async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } = {}): Promise<{
-  favorites: Favorites;
-  skeletonDimensions: Preference<readonly Dimensions[]>;
-  remoteFavoriteActions: ObservableRemoteFavoriteActions;
-  localFavorites: MemoryLocalFavorites;
-  hydratedIds: string[];
-}> {
+async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } = {}): Promise<Setup> {
   const client = new MemoryClient(posts);
   const remoteFavoriteActions = new ObservableRemoteFavoriteActions(new MemoryRemoteFavoriteActions(client));
   const localFavorites = new MemoryLocalFavorites();
   const hydratedIds: string[] = [];
-  const skeletonDimensions = createPreference<readonly Dimensions[]>(DEFAULT_SKELETON_DIMENSIONS);
 
   await localFavorites.setAll(localIds);
-  const favorites = startFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
+  const favorites = createFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
@@ -60,59 +59,72 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
     remoteTagCategories: new MemoryRemoteTagCategories(),
     remoteMedia: new MemoryRemoteMedia(),
     scheduler: new MemoryScheduler(),
-    randomSource: new MemoryRandomSource(),
-    preferences: {
-      sort: createPreference<Sort>({ key: "favorited", isAscending: false }),
-      allowedRatings: createPreference(createSearchCriteria().allowedRatings),
-      isBlacklistEnabled: createPreference(false),
-      resultsPerPage: createPreference(2),
-      isInfiniteScrollEnabled: createPreference(false)
-    },
-    skeletonDimensions,
+    randomSource: new MemoryRandomSource([0.25, 0.5]),
+    searchSettings: createPreference(createSearchSettings()),
+    paginationSettings: createPreference<PaginationSettings>({ size: 2, infiniteScroll: false }),
     waitForPaint: (): Promise<void> => Promise.resolve()
   });
 
   favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
-  await favorites.finishedLoading.wait();
-  return { favorites, skeletonDimensions, remoteFavoriteActions, localFavorites, hydratedIds };
+  await favorites.load();
+  return { favorites, remoteFavoriteActions, localFavorites, hydratedIds };
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
   return tags.map((tag, index) => createPost({ id: String(index + 1), tags: tag }));
 }
 
-function getPostIds(favorites: Favorites): string[] {
-  return favorites.posts.value.map(post => post.id);
+function getResultIds(favorites: Favorites): string[] {
+  return favorites.searchResults.value.map(favorite => favorite.id);
 }
 
-describe("startFavorites", () => {
-  test("loads the remote favorites and shows the first page", async() => {
+describe("createFavorites", () => {
+  test("loads the remote favorites and shows them all", async() => {
     const { favorites } = await setup(createTaggedPosts("apple", "banana", "cherry"));
 
     expect(favorites.loadState.value.phase).toBe("loaded");
-    expect(getPostIds(favorites)).toEqual(["1", "2"]);
+    expect(getResultIds(favorites)).toEqual(["1", "2", "3"]);
   });
 
-  test("searches through its intents and publishes the query", async() => {
+  test("shows the favorites matching the typed query", async() => {
     const { favorites } = await setup(createTaggedPosts("apple", "banana", "apple"));
 
     favorites.intents.search("apple");
-    expect(favorites.query.value).toBe("apple");
-    expect(getPostIds(favorites)).toEqual(["1", "3"]);
+    expect(getResultIds(favorites)).toEqual(["1", "3"]);
   });
 
-  test("advances to the next page", async() => {
+  test("shows what the query left out once inverted", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple", "banana", "apple"));
+
+    favorites.intents.search("apple");
+    favorites.intents.invert();
+    expect(getResultIds(favorites)).toEqual(["2"]);
+  });
+
+  test("reorders the same favorites when shuffled", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple", "banana", "cherry", "date", "elderberry"));
+
+    favorites.intents.shuffle();
+    expect(getResultIds(favorites)).not.toEqual(["1", "2", "3", "4", "5"]);
+    expect(getResultIds(favorites).toSorted()).toEqual(["1", "2", "3", "4", "5"]);
+  });
+
+  test("shows the page of the results it went to", async() => {
     const { favorites } = await setup(createTaggedPosts("apple", "banana", "cherry"));
 
-    expect(await favorites.advance("forward")).toBe(true);
-    expect(getPostIds(favorites)).toEqual(["3"]);
+    favorites.intents.goToPage(2);
+    expect(favorites.paginationResult.value.favorites.map(favorite => favorite.id)).toEqual(["3"]);
   });
 
-  test("finds a favorite's post", async() => {
-    const { favorites } = await setup(createTaggedPosts("apple"));
+  test.each([
+    { action: "search", act: (favorites: Favorites): void => favorites.intents.search("a") },
+    { action: "page size change", act: (favorites: Favorites): void => favorites.intents.updatePaginationSettings({ size: 1 }) }
+  ])("goes back to the first page after a $action", async({ act }) => {
+    const { favorites } = await setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    expect(favorites.findPost("1")).toEqual(createPost({ id: "1", tags: "apple" }));
-    expect(favorites.findPost("2")).toBeUndefined();
+    favorites.intents.goToPage(2);
+    act(favorites);
+    expect(favorites.paginationResult.value.pageNumber).toBe(1);
   });
 
   test("publishes each placeholder once it is hydrated", async() => {
@@ -123,25 +135,32 @@ describe("startFavorites", () => {
     expect(hydratedIds.toSorted()).toEqual(["1", "2"]);
   });
 
+  test("treats every favorite on the user's own page as favorited", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple"));
+
+    expect(favorites.isFavorited("1")).toBe(true);
+  });
+
   test("records a favorite removed by another caller of the shared port", async() => {
     const { favorites, remoteFavoriteActions } = await setup(createTaggedPosts("apple"));
 
     await remoteFavoriteActions.remove("1");
-    expect(favorites.favoritedById.value).toEqual(new Map([["1", false]]));
+    expect(favorites.isFavorited("1")).toBe(false);
+  });
+
+  test("records a favorite added back through its intent", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple"));
+
+    await favorites.intents.removeFavorite("1");
+    await favorites.intents.addFavorite("1");
+    expect(favorites.isFavorited("1")).toBe(true);
   });
 
   test("deletes a removed favorite from the local favorites", async() => {
-    const { remoteFavoriteActions, localFavorites } = await setup(createTaggedPosts("apple", "banana"));
+    const { favorites, localFavorites } = await setup(createTaggedPosts("apple", "banana"));
 
-    await remoteFavoriteActions.remove("1");
-    expect(await localFavorites.getAll()).toEqual(["2"]);
-  });
-
-  test("publishes the skeleton recorded by the last load, then records the shapes of the favorites shown", async() => {
-    const { favorites, skeletonDimensions } = await setup([createPost({ id: "1", width: 4, height: 3 }), createPost({ id: "2", width: 1, height: 2 })]);
-
+    await favorites.intents.removeFavorite("1");
     await flushMicrotasks();
-    expect(favorites.skeletonDimensions).toBe(DEFAULT_SKELETON_DIMENSIONS);
-    expect(skeletonDimensions.value).toEqual([{ width: 4, height: 3 }, { width: 1, height: 2 }]);
+    expect(await localFavorites.getAll()).toEqual(["2"]);
   });
 });

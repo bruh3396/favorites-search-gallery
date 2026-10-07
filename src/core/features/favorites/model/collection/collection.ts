@@ -1,9 +1,9 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { Post, Rating } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { FavoritesArenaFavorite } from "@/core/features/favorites/model/collection/arena_favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/model/collection/columnar_arena";
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
+import { Post } from "@/core/domain/post/post";
 import { TermUpdate } from "@/core/search/engines/search_engine";
 
 export class FavoritesCollection {
@@ -13,6 +13,10 @@ export class FavoritesCollection {
 
   public get hydrated(): Occurrence<Favorite> {
     return this.hydratedFavorites;
+  }
+
+  public get size(): number {
+    return this.list.size;
   }
 
   public append(posts: Post[]): FavoritesArenaFavorite[] {
@@ -30,25 +34,20 @@ export class FavoritesCollection {
     return favorites;
   }
 
-  public findFavorite(id: string): FavoritesArenaFavorite | undefined {
-    return this.list.get(id);
-  }
-
-  public findPost(id: string): Post | undefined {
-    const favorite = this.list.get(id);
-    return favorite === undefined ? undefined : this.arena.getPost(favorite.slot);
-  }
-
   public getAll(): FavoritesArenaFavorite[] {
     return this.list.getAll();
+  }
+
+  public slice(start: number, end: number): FavoritesArenaFavorite[] {
+    return this.list.slice(start, end);
   }
 
   public getAllIds(): Set<string> {
     return this.list.getAllIds();
   }
 
-  public getRating(id: string): Rating {
-    return this.arena.getRating(this.getSlot(id));
+  public getRatingBit(favorite: Favorite): number {
+    return this.arena.getRatingBit(this.getSlot(favorite.id));
   }
 
   public overwrite(post: Post): TermUpdate<Favorite> | undefined {

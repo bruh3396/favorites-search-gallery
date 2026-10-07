@@ -2,6 +2,10 @@ export class IdentifiedList<T extends { id: string }> {
   private items: T[] = [];
   private readonly itemsById = new Map<string, T>();
 
+  public get size(): number {
+    return this.items.length;
+  }
+
   public setAll(items: T[]): void {
     this.items = items;
     this.itemsById.clear();
@@ -22,6 +26,10 @@ export class IdentifiedList<T extends { id: string }> {
 
   public getAll(): T[] {
     return [...this.items];
+  }
+
+  public slice(start: number, end: number): T[] {
+    return this.items.slice(start, end);
   }
 
   public get(id: string): T | undefined {

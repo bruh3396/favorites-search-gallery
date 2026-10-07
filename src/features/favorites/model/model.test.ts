@@ -200,15 +200,6 @@ describe("FavoritesModel", () => {
     expect(getSortedIds(model.searchSpecificFavorites(model.getAllFavorites().filter(favorite => favorite.id !== "3")))).toEqual(["1"]);
   });
 
-  test("inverts and shuffles the current results", async() => {
-    const { model } = await setup(FRUIT_POSTS);
-
-    model.searchFavorites("apple");
-
-    expect(getSortedIds(model.shuffleSearchResults())).toEqual(["1", "3"]);
-    expect(getSortedIds(model.invertSearchResults())).toEqual(["2"]);
-  });
-
   test("pages by the resultsPerPage preference", async() => {
     const model = await setupPages();
 

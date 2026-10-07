@@ -1,6 +1,6 @@
+import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { Signal, effect } from "@/core/utils/reactive/signal";
 
 describe("h", () => {
   test("creates the element with its properties", () => {

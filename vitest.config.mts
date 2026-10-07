@@ -37,7 +37,7 @@ export default defineConfig({
     exclude: EXCLUDED_TESTS,
     projects: [
       { extends: true, test: { name: "node", exclude: [...EXCLUDED_TESTS, ...DOM_TESTS] } },
-      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", css: { include: [/src\/core\/(features\/[^/]+\/)?ui\/.+\.css/] } } }
+      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", css: { include: [/src\/core\/.+\.css/] } } }
     ],
     isolate: false,
     pool: "threads",

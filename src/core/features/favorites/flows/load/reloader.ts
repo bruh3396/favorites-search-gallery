@@ -3,14 +3,12 @@ import { FavoritesDependencies } from "@/core/features/favorites/types/favorites
 import { FavoritesModel } from "@/core/features/favorites/model/model";
 import { FavoritesPostLibrary } from "@/core/features/favorites/flows/load/post_library";
 import { Post } from "@/core/domain/post/post";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
 
 const STREAM_BATCH_SIZE = 1_000;
 
 export interface FavoritesReloaderDependencies extends Pick<FavoritesDependencies, "localFavorites" | "remoteFavorites"> {
   model: FavoritesModel;
   postLibrary: FavoritesPostLibrary;
-  getSearchCriteria: () => SearchCriteria;
   report: (state: LoadState) => void;
   waitForPaint: () => Promise<void>;
 }
@@ -23,7 +21,7 @@ export class FavoritesReloader {
   }
 
   public async reload(localIds: string[]): Promise<LoadResult> {
-    const { model, postLibrary, getSearchCriteria, report, waitForPaint } = this.dependencies;
+    const { model, postLibrary, report, waitForPaint } = this.dependencies;
     const restored = await this.restore(localIds);
     let pulled: Post[] = [];
 
@@ -34,8 +32,8 @@ export class FavoritesReloader {
     } finally {
       report({ phase: "indexing" });
       await waitForPaint();
-      model.indexAll();
-      model.search(getSearchCriteria());
+      model.rebuild();
+      model.search();
       postLibrary.refresh([...pulled, ...restored]).catch(console.error);
     }
     report({ phase: "pruning" });

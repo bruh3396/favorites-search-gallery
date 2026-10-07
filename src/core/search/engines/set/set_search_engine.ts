@@ -5,9 +5,9 @@ import { InvertedIndex } from "@/core/search/engines/set/indexes/inverted_index"
 import { MetricIndex } from "@/core/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/core/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/search/engines/set/indexes/relative_metric_index";
+import { SearchExpression } from "@/core/search/expressions/search_expression";
 import { SetEvaluator } from "@/core/search/engines/set/logic/set_evaluator";
 import { WildcardDocResolver } from "@/core/search/engines/set/resolution/wildcard_doc_resolver";
-import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly termIndex: InvertedIndex<Doc>;
@@ -33,20 +33,14 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
         wildcardResolver: this.wildcardResolver
       })
     );
-    this.index(docs);
+    this.rebuild(docs);
   }
 
-  public search(query: string, candidates: Doc[]): Doc[] {
-    const expression = tryParseSearchExpression(query);
-    return expression === undefined ? [] : this.setEvaluator.evaluate(expression, candidates);
+  public search(expression: SearchExpression, candidates?: Doc[]): Doc[] {
+    return this.setEvaluator.evaluate(expression, candidates);
   }
 
-  public complementOf(current: Doc[], filter?: string): Doc[] {
-    const complement = this.positionIndex.complementOf(current);
-    return filter === undefined ? complement : this.search(filter, complement);
-  }
-
-  public index(docs: Doc[]): void {
+  public rebuild(docs: Doc[]): void {
     this.termIndex.addDocs(docs);
     this.wildcardResolver.index(this.termIndex.indexedTerms());
     this.positionIndex.build(docs);

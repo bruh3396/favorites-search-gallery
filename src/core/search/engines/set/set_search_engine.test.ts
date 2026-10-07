@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { Metric } from "@/core/domain/post/post";
 import { Searchable } from "@/core/search/searchable";
 import { SetSearchEngine } from "@/core/search/engines/set/set_search_engine";
+import { parseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
 
@@ -26,11 +27,7 @@ function createEngine(seed: Doc[] = docs): SetSearchEngine<Doc> {
 }
 
 function search(query: string, engineToSearch: SetSearchEngine<Doc> = createEngine(), candidates: Doc[] = docs): string[] {
-  return engineToSearch.search(query, candidates).map(item => item.name).sort();
-}
-
-function getSortedNames(items: Doc[]): string[] {
-  return items.map(item => item.name).sort();
+  return engineToSearch.search(parseSearchExpression(query), candidates).map(item => item.name).sort();
 }
 
 describe("SetSearchEngine", () => {
@@ -65,16 +62,6 @@ describe("SetSearchEngine", () => {
 
     test("matches nothing for a positive wildcard that matches no term", () => {
       expect(search("zzz*")).toEqual([]);
-    });
-  });
-
-  describe("complementOf", () => {
-    test("returns every indexed doc not in the current set", () => {
-      expect(getSortedNames(createEngine().complementOf([apple]))).toEqual(["banana", "cherry"]);
-    });
-
-    test("narrows the complement to docs matching the filter", () => {
-      expect(getSortedNames(createEngine().complementOf([apple], "red"))).toEqual(["cherry"]);
     });
   });
 
@@ -149,7 +136,7 @@ describe("SetSearchEngine", () => {
       expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
       expect(search("width:>height", searchEngine, candidates)).toEqual([]);
 
-      searchEngine.index([durian]);
+      searchEngine.rebuild([durian]);
 
       expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
       expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
@@ -161,7 +148,7 @@ describe("SetSearchEngine", () => {
 
       expect(search("green", searchEngine, [kiwi])).toEqual([]);
 
-      searchEngine.index([kiwi]);
+      searchEngine.rebuild([kiwi]);
 
       expect(search("green", searchEngine, [kiwi])).toEqual(["kiwi"]);
       expect(search("fuz*", searchEngine, [kiwi])).toEqual(["kiwi"]);

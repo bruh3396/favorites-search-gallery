@@ -42,6 +42,7 @@ async function showImage(image: HTMLImageElement, post: MediaItem, { current, re
   await preloadImage(image.ownerDocument, originalUrl);
 
   if (current.peek() === post) {
+    // eslint-disable-next-line require-atomic-updates -- the check above is the staleness guard
     image.src = originalUrl;
   }
 }

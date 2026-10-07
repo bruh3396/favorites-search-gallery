@@ -3,9 +3,11 @@ import { QueryAssertion, searchCases } from "@/core/search/testing/search_cases"
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Metric } from "@/core/domain/post/post";
+import { SearchEngine } from "@/core/search/engines/search_engine";
 import { Searchable } from "@/core/search/searchable";
 import { SetSearchEngine } from "@/core/search/engines/set/set_search_engine";
 import { parseSearchQuery } from "@/core/search/parsers/search_term_group_parser";
+import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 type Doc = Searchable & { name: string; getMetric?: (metric: Metric) => number };
 type Searcher = (query: string, docs: Doc[]) => string[];
@@ -14,15 +16,20 @@ const getMetric = (doc: Doc, metric: Metric): number => doc.getMetric?.(metric) 
 const getTerms = (doc: Doc): Iterable<string> => doc.tags;
 const getName = (doc: Doc): string => doc.name;
 
+function searchWithEngine(engine: SearchEngine<Doc>, query: string, docs: Doc[]): string[] {
+  const expression = tryParseSearchExpression(query);
+  return expression === undefined ? [] : engine.search(expression, docs).map(getName);
+}
+
 const implementations: { name: string; implementation: Searcher; supportsAST: boolean }[] = [
   {
     name: "SetSearchEngine",
-    implementation: (query, docs) => new SetSearchEngine<Doc>(getTerms, getMetric, docs).search(query, docs).map(getName),
+    implementation: (query, docs) => searchWithEngine(new SetSearchEngine<Doc>(getTerms, getMetric, docs), query, docs),
     supportsAST: true
   },
   {
     name: "BitSearchEngine",
-    implementation: (query, docs) => new BitSearchEngine<Doc>(getTerms, getMetric, docs).search(query, docs).map(getName),
+    implementation: (query, docs) => searchWithEngine(new BitSearchEngine<Doc>(getTerms, getMetric, docs), query, docs),
     supportsAST: true
   },
   {

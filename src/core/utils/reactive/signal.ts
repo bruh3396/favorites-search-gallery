@@ -12,6 +12,8 @@ interface Reader {
 interface Source {
   subscribe: (reader: Reader) => void;
   unsubscribe: (reader: Reader) => void;
+  /** Counts the changes to the source's value; a stale computed recomputes first. */
+  getVersion: () => number;
 }
 
 interface Tracker {
@@ -20,9 +22,19 @@ interface Tracker {
 
 // eslint-disable-next-line functional/no-let
 let running: Tracker | null = null;
+// eslint-disable-next-line functional/no-let
+let batchDepth = 0;
+const batchedEffects = new Set<Effect>();
+
+function runEffects(effects: Iterable<Effect>): void {
+  for (const pendingEffect of effects) {
+    pendingEffect.run();
+  }
+}
 
 export class Signal<T> implements Readable<T>, Source {
   private readonly readers = new Set<Reader>();
+  private version = 0;
 
   constructor(private current: T) { }
 
@@ -36,19 +48,24 @@ export class Signal<T> implements Readable<T>, Source {
       return;
     }
     this.current = next;
-    const pending = new Set<Effect>();
+    this.version += 1;
+    const pending = batchDepth > 0 ? batchedEffects : new Set<Effect>();
 
     for (const reader of [...this.readers]) {
       reader.invalidate(pending);
     }
 
-    for (const pendingEffect of pending) {
-      pendingEffect.run();
+    if (batchDepth === 0) {
+      runEffects(pending);
     }
   }
 
   public peek(): T {
     return this.current;
+  }
+
+  public getVersion(): number {
+    return this.version;
   }
 
   public subscribe(reader: Reader): void {
@@ -62,8 +79,10 @@ export class Signal<T> implements Readable<T>, Source {
 
 class Computed<T> implements Readable<T>, Source, Reader, Tracker {
   private readonly readers = new Set<Reader>();
-  private readonly sources = new Set<Source>();
+  private sources = new Set<Source>();
   private cache: { value: T } | null = null;
+  private stale = false;
+  private version = 0;
 
   constructor(private readonly fn: () => T) { }
 
@@ -73,17 +92,22 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
   }
 
   public peek(): T {
-    const cache = this.cache ?? { value: this.compute() };
+    if (this.cache === null || this.stale) {
+      this.refresh(this.compute());
+    }
+    return this.cache!.value;
+  }
 
-    this.cache = cache;
-    return cache.value;
+  public getVersion(): number {
+    this.peek();
+    return this.version;
   }
 
   public invalidate(pending: Set<Effect>): void {
-    if (this.cache === null) {
+    if (this.cache === null || this.stale) {
       return;
     }
-    this.cache = null;
+    this.stale = true;
 
     if (this.readers.size === 0) {
       this.untrack();
@@ -112,10 +136,19 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
     }
   }
 
+  private refresh(next: T): void {
+    if (this.cache === null || !Object.is(next, this.cache.value)) {
+      this.cache = { value: next };
+      this.version += 1;
+    }
+    this.stale = false;
+  }
+
   private compute(): T {
-    this.untrack();
+    const previousSources = this.sources;
     const previous = running;
 
+    this.sources = new Set();
     // eslint-disable-next-line consistent-this, @typescript-eslint/no-this-alias
     running = this;
 
@@ -123,6 +156,15 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
       return this.fn();
     } finally {
       running = previous;
+      this.release(previousSources);
+    }
+  }
+
+  private release(previousSources: Set<Source>): void {
+    for (const source of previousSources) {
+      if (!this.sources.has(source)) {
+        source.unsubscribe(this);
+      }
     }
   }
 
@@ -135,15 +177,17 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
 }
 
 class Effect implements Reader, Tracker {
-  private readonly sources = new Set<Source>();
+  /** Each source this effect read, with the version its last run saw (-1 until the run finishes). */
+  private sources = new Map<Source, number>();
   private active = true;
   private executing = false;
+  private hasRun = false;
 
   constructor(private readonly fn: () => void) { }
 
   public track(source: Source): void {
     source.subscribe(this);
-    this.sources.add(source);
+    this.sources.set(source, -1);
   }
 
   public invalidate(pending: Set<Effect>): void {
@@ -158,18 +202,26 @@ class Effect implements Reader, Tracker {
     if (this.executing) {
       throw new Error("An effect changed a signal it reads");
     }
-    this.untrack();
+
+    if (this.hasRun && !this.hasChangedSource()) {
+      return;
+    }
+    const previousSources = this.sources;
     const previous = running;
 
+    this.sources = new Map();
     // eslint-disable-next-line consistent-this, @typescript-eslint/no-this-alias
     running = this;
     this.executing = true;
+    this.hasRun = true;
 
     try {
       this.fn();
+      this.recordVersions();
     } finally {
       running = previous;
       this.executing = false;
+      this.release(previousSources);
     }
   }
 
@@ -178,8 +230,31 @@ class Effect implements Reader, Tracker {
     this.untrack();
   }
 
+  private hasChangedSource(): boolean {
+    for (const [source, version] of this.sources) {
+      if (source.getVersion() !== version) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private recordVersions(): void {
+    for (const source of this.sources.keys()) {
+      this.sources.set(source, source.getVersion());
+    }
+  }
+
+  private release(previousSources: Map<Source, number>): void {
+    for (const source of previousSources.keys()) {
+      if (!this.sources.has(source)) {
+        source.unsubscribe(this);
+      }
+    }
+  }
+
   private untrack(): void {
-    for (const source of this.sources) {
+    for (const source of this.sources.keys()) {
       source.unsubscribe(this);
     }
     this.sources.clear();
@@ -206,6 +281,23 @@ export function untracked<T>(fn: () => T): T {
     return fn();
   } finally {
     running = previous;
+  }
+}
+
+export function batch<T>(fn: () => T): T {
+  batchDepth += 1;
+
+  try {
+    return fn();
+  } finally {
+    batchDepth -= 1;
+
+    if (batchDepth === 0) {
+      const effects = [...batchedEffects];
+
+      batchedEffects.clear();
+      runEffects(effects);
+    }
   }
 }
 

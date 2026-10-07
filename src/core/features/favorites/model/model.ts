@@ -1,21 +1,57 @@
-import { Post, Rating } from "@/core/domain/post/post";
+import { PaginationResult, PaginationSettings } from "@/core/features/favorites/types/pagination";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
+import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/types/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/model/collection/collection";
-import { FavoritesResults } from "@/core/features/favorites/model/results/results";
 import { FavoritesSearcher } from "@/core/features/favorites/model/search/searcher";
 import { Occurrence } from "@/core/utils/reactive/emitter";
-import { Readable } from "@/core/utils/reactive/signal";
-import { ResultsState } from "@/core/features/favorites/types/results";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
+import { Post } from "@/core/domain/post/post";
+import { SearchRequest } from "@/core/features/favorites/types/search";
 import { TermUpdate } from "@/core/search/engines/search_engine";
+import { clamp } from "@/core/utils/number/number";
+import { paginate } from "@/core/features/favorites/model/pagination/pagination";
+
+export interface FavoritesModelConfiguration {
+  favoritedByDefault: boolean;
+}
+
+export interface FavoritesModelDependencies {
+  request: Readable<SearchRequest>;
+  paginationSettings: Readable<PaginationSettings>;
+}
 
 export class FavoritesModel {
-  private readonly collection = new FavoritesCollection();
-  private readonly searchResults = new FavoritesResults();
-  private readonly searcher = new FavoritesSearcher({ getRating: (favorite: Favorite): Rating => this.collection.getRating(favorite.id) });
+  private readonly collection: FavoritesCollection;
+  private readonly engine: BitSearchEngine<Favorite>;
+  private readonly searcher: FavoritesSearcher;
+  private readonly favorited: Signal<ReadonlyMap<string, boolean>>;
+  private readonly currentResults: Signal<Favorite[]>;
+  private readonly pageNumber: Signal<number>;
+  private readonly currentPagination: Readable<PaginationResult>;
 
-  public get results(): Readable<ResultsState> {
-    return this.searchResults.state;
+  constructor(
+    private readonly configuration: FavoritesModelConfiguration,
+    private readonly dependencies: FavoritesModelDependencies
+  ) {
+    this.collection = new FavoritesCollection();
+    this.engine = new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
+    this.favorited = new Signal<ReadonlyMap<string, boolean>>(new Map());
+    this.pageNumber = new Signal(1);
+    this.searcher = new FavoritesSearcher({
+      engine: this.engine, getRatingBit: (favorite): number => this.collection.getRatingBit(favorite)
+    });
+    this.currentResults = new Signal<Favorite[]>([]);
+    this.currentPagination = computed(() => paginate(dependencies.paginationSettings.value, {
+      pageNumber: this.pageNumber.value, results: this.currentResults.value
+    }));
+  }
+
+  public get searchResults(): Readable<Favorite[]> {
+    return this.currentResults;
+  }
+
+  public get paginationResult(): Readable<PaginationResult> {
+    return this.currentPagination;
   }
 
   public get hydrated(): Occurrence<Favorite> {
@@ -30,18 +66,6 @@ export class FavoritesModel {
     return this.collection.prependAsNew(posts);
   }
 
-  public findFavorite(id: string): Favorite | undefined {
-    return this.collection.findFavorite(id);
-  }
-
-  public findPost(id: string): Post | undefined {
-    return this.collection.findPost(id);
-  }
-
-  public getAll(): Favorite[] {
-    return this.collection.getAll();
-  }
-
   public getAllIds(): Set<string> {
     return this.collection.getAllIds();
   }
@@ -54,37 +78,39 @@ export class FavoritesModel {
     this.collection.compact();
   }
 
-  public indexAll(): void {
-    this.searcher.indexAll(this.collection.getAll());
+  public rebuild(): void {
+    this.engine.rebuild(this.collection.getAll());
     this.collection.clearTagCache();
   }
 
-  public addToIndex(favorites: Favorite[]): void {
-    this.searcher.addToIndex(favorites);
+  public add(favorites: Favorite[]): void {
+    this.engine.add(favorites);
     this.collection.clearTagCache();
+    // eslint-disable-next-line unicorn/prefer-spread
+    this.currentResults.value = this.currentResults.peek().concat(this.searcher.match(this.dependencies.request.peek(), favorites));
   }
 
-  public updateIndex(updates: readonly TermUpdate<Favorite>[]): void {
-    this.searcher.updateIndex(updates);
+  public update(updates: readonly TermUpdate<Favorite>[]): void {
+    this.engine.update(updates);
   }
 
-  public search(criteria: SearchCriteria): void {
-    this.searchResults.replace(this.searcher.search(this.collection.getAll(), criteria));
+  public search(): void {
+    this.currentResults.value = this.searcher.search(this.dependencies.request.peek());
   }
 
-  public appendMatches(favorites: Favorite[], criteria: SearchCriteria): void {
-    this.searchResults.append(this.searcher.match(favorites, criteria));
+  public goToPage(pageNumber: number): void {
+    this.pageNumber.value = clamp(pageNumber, 1, this.currentPagination.peek().totalPages);
   }
 
-  public invert(criteria: SearchCriteria): void {
-    this.searchResults.replace(this.searcher.invert(this.searchResults.state.peek().matches, criteria));
+  public isFavorited(id: string): boolean {
+    return this.favorited.value.get(id) ?? this.configuration.favoritedByDefault;
   }
 
-  public shuffle(seed: number): void {
-    this.searchResults.replace(this.searcher.shuffle(this.searchResults.state.peek().matches, seed));
+  public recordAddition(id: string): void {
+    this.favorited.value = new Map(this.favorited.peek()).set(id, true);
   }
 
-  public setPage(pageNumber: number): void {
-    this.searchResults.setPage(pageNumber);
+  public recordRemoval(id: string): void {
+    this.favorited.value = new Map(this.favorited.peek()).set(id, false);
   }
 }

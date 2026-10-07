@@ -13,8 +13,9 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_p
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { SearchCriteria } from "@/core/features/favorites/types/search";
-import { createSearchCriteria } from "@/core/features/favorites/testing/criteria";
+import { SearchRequest } from "@/core/features/favorites/types/search";
+import { Signal } from "@/core/utils/reactive/signal";
+import { createSearchRequest } from "@/core/features/favorites/testing/request";
 import { flushMicrotasks } from "@/testing/async";
 
 interface FetcherSources {
@@ -22,7 +23,7 @@ interface FetcherSources {
   count?: Promise<number | null>;
   pageFailure?: Error;
   remotePosts?: Post[];
-  query?: string;
+  request?: SearchRequest;
 }
 
 function createRemoteFavorites({ pages = [], count, pageFailure }: FetcherSources): RemoteFavorites {
@@ -40,12 +41,16 @@ function createRemoteFavorites({ pages = [], count, pageFailure }: FetcherSource
 function setup(sources: FetcherSources = {}): {
   fetcher: FavoritesFetcher;
   model: FavoritesModel;
+  request: Signal<SearchRequest>;
   localFavorites: MemoryLocalFavorites;
   localPosts: MemoryLocalPosts;
   states: LoadState[];
   refreshed: Post[];
 } {
-  const model = new FavoritesModel();
+  const request = new Signal(sources.request ?? createSearchRequest());
+  const model = new FavoritesModel({ favoritedByDefault: true }, {
+    request, paginationSettings: new Signal({ size: 1_000, infiniteScroll: false })
+  });
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();
   const states: LoadState[] = [];
@@ -65,12 +70,11 @@ function setup(sources: FetcherSources = {}): {
     localFavorites,
     remoteFavorites: createRemoteFavorites(sources),
     postLibrary,
-    getSearchCriteria: (): SearchCriteria => createSearchCriteria({ query: sources.query ?? "" }),
     report: (state): void => {
       states.push(state);
     }
   });
-  return { fetcher, model, localFavorites, localPosts, states, refreshed };
+  return { fetcher, model, request, localFavorites, localPosts, states, refreshed };
 }
 
 function getIds(favorites: readonly Favorite[]): string[] {
@@ -83,23 +87,32 @@ describe("FavoritesFetcher", () => {
       const { fetcher, model } = setup({ pages: [createPosts("1", "2"), createPosts("3")] });
 
       await fetcher.fetchAll();
-      expect(getIds(model.getAll())).toEqual(["1", "2", "3"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1", "2", "3"]);
     });
 
     test("shows only the fetched favorites matching the current search", async() => {
       const pages = [[createPost({ id: "1", tags: "apple" }), createPost({ id: "2", tags: "banana" })], [createPost({ id: "3", tags: "apple" })]];
-      const { fetcher, model } = setup({ pages, query: "apple" });
+      const { fetcher, model } = setup({ pages, request: createSearchRequest({ query: "apple" }) });
 
       await fetcher.fetchAll();
-      expect(getIds(model.results.value.matches)).toEqual(["1", "3"]);
+      expect(getIds(model.searchResults.value)).toEqual(["1", "3"]);
+    });
+
+    test("keeps the fetched favorites in arrival order after every page is added", async() => {
+      const pages = [[createPost({ id: "1", score: 1 }), createPost({ id: "3", score: 3 })], [createPost({ id: "2", score: 2 })]];
+      const { fetcher, model } = setup({ pages, request: createSearchRequest({ sortKey: "score", isSortAscending: false }) });
+
+      await fetcher.fetchAll();
+      expect(getIds(model.searchResults.value)).toEqual(["1", "3", "2"]);
     });
 
     test("makes the fetched favorites searchable", async() => {
-      const { fetcher, model } = setup({ pages: [[createPost({ id: "1", tags: "apple" }), createPost({ id: "2", tags: "banana" })]] });
+      const { fetcher, model, request } = setup({ pages: [[createPost({ id: "1", tags: "apple" }), createPost({ id: "2", tags: "banana" })]] });
 
       await fetcher.fetchAll();
-      model.search(createSearchCriteria({ query: "banana" }));
-      expect(getIds(model.results.value.matches)).toEqual(["2"]);
+      request.value = createSearchRequest({ query: "banana" });
+      model.search();
+      expect(getIds(model.searchResults.value)).toEqual(["2"]);
     });
 
     test("stores the posts it has never stored", async() => {
@@ -114,7 +127,7 @@ describe("FavoritesFetcher", () => {
 
       await localPosts.setMany([createPost({ id: "1", tags: "apple banana" })]);
       await fetcher.fetchAll();
-      expect(model.findFavorite("1")?.tags).toEqual(new Set(["apple", "banana"]));
+      expect(model.searchResults.value.find(favorite => favorite.id === "1")?.tags).toEqual(new Set(["apple", "banana"]));
     });
 
     test("saves the membership in page order once every page is added", async() => {

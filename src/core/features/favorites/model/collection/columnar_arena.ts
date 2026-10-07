@@ -1,4 +1,4 @@
-import { Metric, Post, Rating } from "@/core/domain/post/post";
+import { Metric, Post } from "@/core/domain/post/post";
 import { Arena } from "@/core/features/favorites/types/arena";
 import { FavoritesPostTable } from "@/core/features/favorites/model/collection/post_table";
 import { Media } from "@/core/domain/media/media";
@@ -42,8 +42,8 @@ export class FavoritesColumnarArena implements Arena {
     return this.postTable.getNumericId(slot);
   }
 
-  public getRating(slot: number): Rating {
-    return this.postTable.getRating(slot);
+  public getRatingBit(slot: number): number {
+    return this.postTable.getRatingBit(slot);
   }
 
   public getMetric(slot: number, metric: Metric): number {

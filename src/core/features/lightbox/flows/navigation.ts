@@ -2,48 +2,48 @@ import { LightboxDependencies, LightboxIntents } from "@/core/features/lightbox/
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { MediaItem } from "@/core/domain/post/post";
 
-export type LightboxNavigationFlowDependencies = Pick<LightboxDependencies, "mediaSequence">;
+export type LightboxNavigationFlowDependencies<T extends MediaItem> = Pick<LightboxDependencies<T>, "mediaSequence">;
 
-export class LightboxNavigationFlow implements LightboxIntents {
-  private readonly currentPost = new Signal<MediaItem | undefined>(undefined);
-  private readonly isOpenState = computed(() => this.currentPost.value !== undefined);
+export class LightboxNavigationFlow<T extends MediaItem> implements LightboxIntents<T> {
+  private readonly currentItem = new Signal<T | undefined>(undefined);
+  private readonly isOpenState = computed(() => this.currentItem.value !== undefined);
 
-  constructor(private readonly dependencies: LightboxNavigationFlowDependencies) { }
+  constructor(private readonly dependencies: LightboxNavigationFlowDependencies<T>) { }
 
   public get isOpen(): Readable<boolean> {
     return this.isOpenState;
   }
 
-  public get current(): Readable<MediaItem | undefined> {
-    return this.currentPost;
+  public get current(): Readable<T | undefined> {
+    return this.currentItem;
   }
 
-  public open(post: MediaItem): void {
-    this.currentPost.value = post;
+  public open(item: T): void {
+    this.currentItem.value = item;
   }
 
   public close(): void {
-    this.currentPost.value = undefined;
+    this.currentItem.value = undefined;
   }
 
   public showNext(): Promise<void> {
-    return this.showNeighbor(current => this.dependencies.mediaSequence.findNext(current));
+    return this.showNeighbor(current => this.dependencies.mediaSequence.getNext(current));
   }
 
   public showPrevious(): Promise<void> {
-    return this.showNeighbor(current => this.dependencies.mediaSequence.findPrevious(current));
+    return this.showNeighbor(current => this.dependencies.mediaSequence.getPrevious(current));
   }
 
-  private async showNeighbor(findNeighbor: (current: MediaItem) => Promise<MediaItem | undefined>): Promise<void> {
-    const current = this.currentPost.peek();
+  private async showNeighbor(getNeighbor: (current: T) => Promise<T | undefined>): Promise<void> {
+    const current = this.currentItem.peek();
 
     if (current === undefined) {
       return;
     }
-    const neighbor = await findNeighbor(current);
+    const neighbor = await getNeighbor(current);
 
-    if (neighbor !== undefined && this.currentPost.peek() === current) {
-      this.currentPost.value = neighbor;
+    if (neighbor !== undefined && this.currentItem.peek() === current) {
+      this.currentItem.value = neighbor;
     }
   }
 }

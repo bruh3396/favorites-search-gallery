@@ -17,7 +17,7 @@ export class SetEvaluator<Doc> {
     private readonly resolver: DocResolver<Doc>
   ) { }
 
-  public evaluate(expression: SearchExpression, docs: Doc[]): Doc[] {
+  public evaluate(expression: SearchExpression, docs?: Doc[]): Doc[] {
     const value = this.resolve(expression);
 
     if (value.isNegated) {
@@ -87,8 +87,8 @@ export class SetEvaluator<Doc> {
     return { positives, negatives };
   }
 
-  private materialize(candidates: ReadonlySet<Doc>, exclusions: ReadonlySet<Doc>, docs: Doc[]): Doc[] {
-    if (candidates.size <= docs.length * SELECTIVE_QUERY_FRACTION) {
+  private materialize(candidates: ReadonlySet<Doc>, exclusions: ReadonlySet<Doc>, docs?: Doc[]): Doc[] {
+    if (docs === undefined || candidates.size <= docs.length * SELECTIVE_QUERY_FRACTION) {
       const matches: Doc[] = [];
 
       for (const doc of candidates) {

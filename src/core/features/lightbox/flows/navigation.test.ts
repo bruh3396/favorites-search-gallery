@@ -1,24 +1,24 @@
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { LightboxNavigationFlow } from "@/core/features/lightbox/flows/navigation";
-import { MediaItem } from "@/core/domain/post/post";
-import { MediaSequence } from "@/core/features/lightbox/types/media_sequence";
+import { MediaSequence } from "@/core/contracts/media_sequence";
+import { Post } from "@/core/domain/post/post";
 
 const POSTS = createPosts("1", "2", "3");
 
-function findAt(item: MediaItem, offset: number): Promise<MediaItem | undefined> {
+function getAt(item: Post, offset: number): Promise<Post | undefined> {
   const index = POSTS.indexOf(item);
   return Promise.resolve(index === -1 ? undefined : POSTS[index + offset]);
 }
 
-function createMediaSequence(): MediaSequence {
+function createMediaSequence(): MediaSequence<Post> {
   return {
-    findNext: item => findAt(item, 1),
-    findPrevious: item => findAt(item, -1)
+    getNext: item => getAt(item, 1),
+    getPrevious: item => getAt(item, -1)
   };
 }
 
-function setup(): LightboxNavigationFlow {
+function setup(): LightboxNavigationFlow<Post> {
   return new LightboxNavigationFlow({ mediaSequence: createMediaSequence() });
 }
 

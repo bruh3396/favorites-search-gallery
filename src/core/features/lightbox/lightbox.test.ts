@@ -1,21 +1,21 @@
 import { describe, expect, test } from "vitest";
-import { MediaItem } from "@/core/domain/post/post";
-import { MediaSequence } from "@/core/features/lightbox/types/media_sequence";
+import { MediaSequence } from "@/core/contracts/media_sequence";
+import { Post } from "@/core/domain/post/post";
+import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPosts } from "@/testing/post";
-import { startLightbox } from "@/core/features/lightbox/lightbox";
 
 const POSTS = createPosts("1", "2");
 
-function createMediaSequence(): MediaSequence {
+function createMediaSequence(): MediaSequence<Post> {
   return {
-    findNext: (item): Promise<MediaItem | undefined> => Promise.resolve(POSTS[POSTS.indexOf(item) + 1]),
-    findPrevious: (item): Promise<MediaItem | undefined> => Promise.resolve(POSTS[POSTS.indexOf(item) - 1])
+    getNext: (item): Promise<Post | undefined> => Promise.resolve(POSTS[POSTS.indexOf(item) + 1]),
+    getPrevious: (item): Promise<Post | undefined> => Promise.resolve(POSTS[POSTS.indexOf(item) - 1])
   };
 }
 
-describe("startLightbox", () => {
+describe("createLightbox", () => {
   test("opens, steps through, and closes the sequence's posts", async() => {
-    const Lightbox = startLightbox({ mediaSequence: createMediaSequence() });
+    const Lightbox = createLightbox({ mediaSequence: createMediaSequence() });
 
     Lightbox.intents.open(POSTS[0]);
     await Lightbox.intents.showNext();
