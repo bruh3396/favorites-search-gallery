@@ -1,4 +1,4 @@
-import { chunk, findFirstIndexWhere, getItemsAround, getWrappedItemsAround, grow, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, partition, removeValue, shuffleInPlace } from "@/core/utils/collection/array";
+import { chunk, findFirstIndexWhere, getItemsAround, getWrappedItemsAround, grow, haveSameItems, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, partition, removeValue, shuffleInPlace } from "@/core/utils/collection/array";
 import { describe, expect, test } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { randomInt } from "@/core/utils/number/number";
@@ -30,6 +30,21 @@ describe("partition", () => {
   test("puts everything in one side when the predicate is constant", () => {
     expect(partition([1, 2, 3], () => true)).toEqual([[1, 2, 3], []]);
     expect(partition([1, 2, 3], () => false)).toEqual([[], [1, 2, 3]]);
+  });
+});
+
+describe("haveSameItems", () => {
+  const first = { id: 1 };
+  const second = { id: 2 };
+
+  test("returns true for the same items in the same order", () => {
+    expect(haveSameItems([first, second], [first, second])).toBe(true);
+  });
+
+  test("returns false for a different length, order, or item", () => {
+    expect(haveSameItems([first], [first, second])).toBe(false);
+    expect(haveSameItems([first, second], [second, first])).toBe(false);
+    expect(haveSameItems([first], [{ id: 1 }])).toBe(false);
   });
 });
 

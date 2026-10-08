@@ -1,9 +1,11 @@
 import { Codec, createGuardedCodec } from "@/core/utils/codec/codec";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
+import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { sameKindAs } from "@/core/utils/guards/guards";
 
 export interface Preference<T> extends Readable<T> {
   set: (value: T) => void;
+  readonly changed: Occurrence<T>;
 }
 
 export interface PreferenceStorage {
@@ -24,6 +26,7 @@ export interface StoredPreferenceDependencies<T> {
 export class StoredPreference<T> implements Preference<T> {
   private readonly codec: Codec<T>;
   private readonly current: Signal<T>;
+  private readonly changes = new Emitter<T>();
 
   constructor(
     private readonly configuration: StoredPreferenceConfiguration<T>,
@@ -49,5 +52,10 @@ export class StoredPreference<T> implements Preference<T> {
     }
     this.dependencies.storage.set(this.configuration.key, this.codec.encode(value));
     this.current.value = value;
+    this.changes.emit(value);
+  }
+
+  public get changed(): Occurrence<T> {
+    return this.changes;
   }
 }

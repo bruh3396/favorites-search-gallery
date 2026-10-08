@@ -12,7 +12,6 @@ import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { SliderClass } from "@/core/ui/components/slider/slider";
@@ -32,7 +31,6 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteFavorites: new MemoryRemoteFavorites(client),
     remoteFavoriteActions: new MemoryRemoteFavoriteActions(client),
     remotePosts: new MemoryRemotePosts(client),
-    remoteTagCategories: new MemoryRemoteTagCategories(),
     remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(),
     scheduler: new MemoryScheduler(),

@@ -1,38 +1,67 @@
-import { Favorites, FavoritesConfiguration, FavoritesDependencies } from "@/core/features/favorites/types/favorites";
-import { FavoritesLoadFlow } from "@/core/features/favorites/flows/load/load";
-import { FavoritesModel } from "@/core/features/favorites/model/model";
-import { FavoritesPaginationFlow } from "@/core/features/favorites/flows/pagination/pagination";
-import { FavoritesSearchFlow } from "@/core/features/favorites/flows/search/search";
+import { FavoritesActionIntents, FavoritesActions } from "@/core/features/favorites/actions/actions";
+import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
+import { Favorite } from "@/core/features/favorites/favorite";
+import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
+import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
+import { FavoritesLoader } from "@/core/features/favorites/load/loader";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
+import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
+import { LoadState } from "@/core/features/favorites/load/state";
+import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
+import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
+import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
+import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
+import { Occurrence } from "@/core/utils/reactive/emitter";
+import { PaginationSettings } from "@/core/features/favorites/search/pagination";
+import { Preference } from "@/core/utils/reactive/preference";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { Readable } from "@/core/utils/reactive/signal";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { SearchSettings } from "@/core/features/favorites/search/settings";
+
+export interface FavoritesConfiguration {
+  userOwnsFavorites: boolean;
+  blacklistedTags: string;
+}
+
+export interface FavoritesDependencies {
+  localFavorites: LocalFavorites;
+  localPosts: LocalPosts;
+  localTagCategories: LocalTagCategories;
+  remoteFavorites: RemoteFavorites;
+  remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  remotePosts: RemotePosts;
+  remoteMedia: RemoteMedia;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
+  paginationSettings: Pick<Preference<PaginationSettings>, "value" | "changed">;
+  waitForPaint: () => Promise<void>;
+}
+
+export interface Favorites {
+  readonly createSearchSession: (searchSettings: Preference<SearchSettings>) => FavoritesSearchSession;
+  readonly actions: FavoritesActionIntents;
+  readonly hydrated: Occurrence<Favorite>;
+  readonly loadState: Readable<LoadState>;
+  readonly isFavorited: (id: string) => boolean;
+  readonly load: () => Promise<void>;
+}
 
 export function createFavorites(configuration: FavoritesConfiguration, dependencies: FavoritesDependencies): Favorites {
-  const { remoteFavoriteActions, localFavorites, paginationSettings } = dependencies;
-  const goToFirstPage = (): void => model.goToPage(1);
-  const search = new FavoritesSearchFlow(configuration, {
-    searchSettings: dependencies.searchSettings, randomSource: dependencies.randomSource, search: (): void => model.search(), goToFirstPage
-  });
-  const model = new FavoritesModel({ favoritedByDefault: configuration.userOwnsFavorites }, { request: search.request, paginationSettings });
-  const pagination = new FavoritesPaginationFlow({ paginationSettings, goToFirstPage });
-  const load = new FavoritesLoadFlow({ ...dependencies, model });
-
-  remoteFavoriteActions.added.on(id => model.recordAddition(id));
-  remoteFavoriteActions.removed.on(id => model.recordRemoval(id));
-  remoteFavoriteActions.removed.on(id => localFavorites.remove([id]));
+  const collection = new FavoritesCollection();
+  const index = new FavoritesSearchIndex(new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric)));
+  const blacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, isForced: !configuration.userOwnsFavorites });
+  const actions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, dependencies);
+  const loader = new FavoritesLoader({ ...dependencies, collection, index });
   return {
-    intents: {
-      search: (query): void => search.search(query),
-      updateSearchSettings: (change): void => search.updateSettings(change),
-      invert: (): void => search.invert(),
-      shuffle: (): void => search.shuffle(),
-      updatePaginationSettings: (change): void => pagination.update(change),
-      goToPage: (page): void => model.goToPage(page),
-      addFavorite: id => remoteFavoriteActions.add(id),
-      removeFavorite: id => remoteFavoriteActions.remove(id)
-    },
-    searchResults: model.searchResults,
-    paginationResult: model.paginationResult,
-    hydrated: model.hydrated,
-    loadState: load.state,
-    isFavorited: id => model.isFavorited(id),
-    load: () => load.load()
+    createSearchSession: searchSettings => new FavoritesSearchSession({ ...dependencies, index, blacklist, searchSettings }),
+    actions,
+    hydrated: collection.hydrated,
+    loadState: loader.state,
+    isFavorited: id => actions.isFavorited(id),
+    load: () => loader.load()
   };
 }

@@ -1,9 +1,9 @@
-import { FavoritesConfiguration, FavoritesDependencies } from "@/core/features/favorites/types/favorites";
+import { FavoritesConfiguration, FavoritesDependencies, createFavorites } from "@/core/features/favorites/favorites";
 import { createPaginationSettings, createSearchSettings } from "@/core/app/favorites_page/preferences";
 import { createSkeletonDimensions, measureSkeletonDimensions } from "@/core/app/favorites_page/skeleton_dimensions";
 import { h, render } from "@/core/ui/h/h";
 import { ColorScheme } from "@/core/boundary/environment";
-import FAVORITES_UI_CSS from "@/core/features/favorites/ui/styles.css?inline";
+import FAVORITES_UI_CSS from "@/core/features/favorites/styles.css?inline";
 import { FavoritesScreen } from "@/core/app/favorites_page/screen";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
@@ -14,7 +14,6 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import SCREEN_CSS from "@/core/app/favorites_page/screen.css?inline";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createFavorites } from "@/core/features/favorites/favorites";
 import { createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
 import { doNothing } from "@/core/utils/function/function";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
@@ -25,7 +24,7 @@ export interface FavoritesPageConfiguration extends FavoritesConfiguration {
 }
 
 export interface FavoritesPageDependencies extends Omit<
-  FavoritesDependencies, "paginationSettings" | "remoteFavoriteActions" | "searchSettings" | "waitForPaint"> {
+  FavoritesDependencies, "paginationSettings" | "remoteFavoriteActions" | "waitForPaint"> {
   remoteFavoriteActions: RemoteFavoriteActions;
   remotePages: RemotePages;
   localKeyedValues: LocalKeyedValues;
@@ -38,31 +37,44 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   const storage = createAppStorage(localKeyedValues);
   const finishedLoading = new Milestone();
   const skeletonDimensions = createSkeletonDimensions(storage.app, favoritesOwnerId);
+  const paginationSettings = createPaginationSettings(storage.preferences);
+  const searchSettings = createSearchSettings(storage.preferences);
   const favorites = createFavorites(favoritesConfiguration, {
     ...ports,
     remoteFavoriteActions: new ObservableRemoteFavoriteActions(new GatedRemoteFavoriteActions({
       remoteFavoriteActions,
       isOpen: (): boolean => !favoritesConfiguration.userOwnsFavorites || finishedLoading.reached
     })),
-    searchSettings: createSearchSettings(storage.preferences),
-    paginationSettings: createPaginationSettings(storage.preferences),
+    paginationSettings,
     waitForPaint: (): Promise<void> => ports.scheduler.waitForPaint()
   });
-  const screen = render(container.ownerDocument, () => h(FavoritesScreen, {
+
+  // TODO: forced so the home tab opens on an empty query; replace with syncing the search box to session.settings once tabs exist.
+  searchSettings.set({ ...searchSettings.peek(), query: "" });
+  const session = favorites.createSearchSession(searchSettings);
+  // TODO: a second, unsaved session side by side to try out multiple sessions; replace with a tab strip that owns the sessions and disposes them.
+  const secondSession = favorites.createSearchSession(createSearchSettings({ get: () => undefined, set: doNothing }));
+  const gridPreferences = createPostGridPreferences(storage.preferences);
+  const renderScreen = (screenSession: typeof session): HTMLElement => render(container.ownerDocument, () => h(FavoritesScreen, {
     favorites,
+    session: screenSession,
+    paginationSettings,
     finishedLoading,
     skeletonDimensions: skeletonDimensions.peek(),
-    gridPreferences: createPostGridPreferences(storage.preferences),
+    gridPreferences,
     resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media),
     getPostUrl: post => remotePages.postUrl(post.id),
     onActivatePost: doNothing
-  }));
+  })).result;
+  const split = container.ownerDocument.createElement("div");
 
-  app.append(screen.result);
+  split.style.cssText = "display: grid; grid-template-columns: 1fr 1fr;";
+  split.append(renderScreen(session), renderScreen(secondSession));
+  app.append(split);
   favorites.load()
     .then(() => {
       finishedLoading.reach();
-      skeletonDimensions.set(measureSkeletonDimensions(favorites.searchResults.peek()));
+      skeletonDimensions.set(measureSkeletonDimensions(session.results.peek()));
     })
     .catch(console.error);
 }

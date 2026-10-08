@@ -2,7 +2,7 @@ import { Preference, StoredPreference } from "@/core/utils/reactive/preference";
 import { hasFields, isNumber } from "@/core/utils/guards/guards";
 import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
 import { Dimensions } from "@/core/domain/post/post";
-import { Favorite } from "@/core/features/favorites/types/favorite";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { createGuardedCodec } from "@/core/utils/codec/codec";

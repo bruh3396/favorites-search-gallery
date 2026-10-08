@@ -1,3 +1,4 @@
+/* eslint-disable functional/no-let */
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export interface Readable<T> {
@@ -12,7 +13,6 @@ interface Reader {
 interface Source {
   subscribe: (reader: Reader) => void;
   unsubscribe: (reader: Reader) => void;
-  /** Counts the changes to the source's value; a stale computed recomputes first. */
   getVersion: () => number;
 }
 
@@ -20,9 +20,7 @@ interface Tracker {
   track: (source: Source) => void;
 }
 
-// eslint-disable-next-line functional/no-let
 let running: Tracker | null = null;
-// eslint-disable-next-line functional/no-let
 let batchDepth = 0;
 const batchedEffects = new Set<Effect>();
 
@@ -84,7 +82,7 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
   private stale = false;
   private version = 0;
 
-  constructor(private readonly fn: () => T) { }
+  constructor(private readonly fn: () => T, private readonly equals: (previous: T, next: T) => boolean) { }
 
   public get value(): T {
     running?.track(this);
@@ -137,7 +135,7 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
   }
 
   private refresh(next: T): void {
-    if (this.cache === null || !Object.is(next, this.cache.value)) {
+    if (this.cache === null || !this.equals(this.cache.value, next)) {
       this.cache = { value: next };
       this.version += 1;
     }
@@ -301,6 +299,10 @@ export function batch<T>(fn: () => T): T {
   }
 }
 
-export function computed<T>(fn: () => T): Readable<T> {
-  return new Computed(fn);
+export interface ComputedOptions<T> {
+  equals?: (previous: T, next: T) => boolean;
+}
+
+export function computed<T>(fn: () => T, { equals = Object.is }: ComputedOptions<T> = {}): Readable<T> {
+  return new Computed(fn, equals);
 }

@@ -5,13 +5,13 @@ import { PostGridClass, createPostGridPreferences } from "@/core/ui/post_grid/po
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { Favorite } from "@/core/features/favorites/types/favorite";
-import { FavoritesIntents } from "@/core/features/favorites/types/favorites";
-import { LoadState } from "@/core/features/favorites/types/load";
+import { Favorite } from "@/core/features/favorites/favorite";
+import { LoadState } from "@/core/features/favorites/load/state";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Milestone } from "@/core/utils/reactive/milestone";
-import { PaginationResult } from "@/core/features/favorites/types/pagination";
+import { createPaginationSettings } from "@/core/app/favorites_page/preferences";
+import { PaginationResult } from "@/core/features/favorites/search/pagination";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import SCREEN_CSS from "@/core/app/favorites_page/screen.css?inline";
 import { SearchBoxClass } from "@/core/ui/components/search_box/search_box";
@@ -28,26 +28,14 @@ interface Setup {
   searchResults: Signal<readonly Favorite[]>;
   pageNumber: Signal<number>;
   finishedLoading: Milestone;
-  intents: FavoritesIntents;
+  submit: Mock<(query: string) => void>;
+  goToPage: Mock<(pageNumber: number) => void>;
   skeleton: HTMLElement;
   onActivatePost: Mock<(post: MediaItem, event: MouseEvent) => void>;
 }
 
 function createFavorite(id: string): Favorite {
-  return { id, media: { kind: "image", locator: `images/${id}` }, isNew: false, tags: new Set(), getMetric: () => 100 };
-}
-
-function createIntents(): FavoritesIntents {
-  return {
-    search: vi.fn(),
-    updateSearchSettings: vi.fn(),
-    shuffle: vi.fn(),
-    invert: vi.fn(),
-    updatePaginationSettings: vi.fn(),
-    goToPage: vi.fn(),
-    addFavorite: vi.fn(),
-    removeFavorite: vi.fn()
-  };
+  return { id, media: { kind: "image", locator: `images/${id}` }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 100 };
 }
 
 function paginateByTwo(results: readonly Favorite[], pageNumber: number): PaginationResult {
@@ -63,17 +51,23 @@ function setup(): Setup {
   const searchResults = new Signal<readonly Favorite[]>([]);
   const pageNumber = new Signal(1);
   const finishedLoading = new Milestone();
-  const intents = createIntents();
+  const submit = vi.fn<(query: string) => void>();
+  const goToPage = vi.fn<(pageNumber: number) => void>();
   const onActivatePost = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
   const favorites = {
-    searchResults,
-    paginationResult: computed(() => paginateByTwo(searchResults.value, pageNumber.value)),
     hydrated: new Emitter<Favorite>(),
-    loadState: new Signal<LoadState>({ phase: "starting" }),
-    intents
+    loadState: new Signal<LoadState>({ phase: "starting" })
+  };
+  const session = {
+    results: searchResults,
+    paginationResult: computed(() => paginateByTwo(searchResults.value, pageNumber.value)),
+    submit,
+    goToPage
   };
   const { result: element, dispose } = render(document, () => h(FavoritesScreen, {
     favorites,
+    session,
+    paginationSettings: createPaginationSettings(new MemoryLocalKeyedValues()),
     finishedLoading,
     skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
     gridPreferences: createPostGridPreferences(new MemoryLocalKeyedValues()),
@@ -82,7 +76,7 @@ function setup(): Setup {
     onActivatePost
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${PostGridSkeletonClass.root}`)!;
-  return { element, dispose, searchResults, pageNumber, finishedLoading, intents, skeleton, onActivatePost };
+  return { element, dispose, searchResults, pageNumber, finishedLoading, submit, goToPage, skeleton, onActivatePost };
 }
 
 function queryFavoriteLink(element: HTMLElement): HTMLAnchorElement {
@@ -107,7 +101,7 @@ describe("FavoritesScreen", () => {
     expect([...header.children].map(describeSlot)).toEqual([
       [FavoritesScreenClass.search, SearchBoxClass.root, SliderClass.root],
       [FavoritesScreenClass.summary, StatusTextClass.root],
-      [FavoritesScreenClass.pagination, PaginatorClass.root]
+      [FavoritesScreenClass.pagination, PaginatorClass.root, SliderClass.root]
     ]);
     expect(describeSlot(main)).toEqual([FavoritesScreenClass.content, `${PostGridClass.root} ${PostGridSkeletonClass.root}`, PostGridClass.root]);
   });
@@ -132,12 +126,12 @@ describe("FavoritesScreen", () => {
   });
 
   test("searches what is submitted in the search box", () => {
-    const { element, intents } = setup();
+    const { element, submit } = setup();
     const input = element.querySelector("input[type=search]") as HTMLInputElement;
 
     input.value = "cat";
     input.form!.dispatchEvent(new Event("submit"));
-    expect(intents.search).toHaveBeenCalledExactlyOnceWith("cat");
+    expect(submit).toHaveBeenCalledExactlyOnceWith("cat");
   });
 
   test("activates the favorite whose tile is clicked", () => {
@@ -169,11 +163,11 @@ describe("FavoritesScreen", () => {
   });
 
   test("goes to the page clicked in the paginator", () => {
-    const { element, searchResults, intents } = setup();
+    const { element, searchResults, goToPage } = setup();
 
     searchResults.value = ["1", "2", "3"].map(createFavorite);
     element.querySelector<HTMLButtonElement>(`.${PaginatorClass.page}[data-page-number="2"]`)!.click();
-    expect(intents.goToPage).toHaveBeenCalledExactlyOnceWith(2);
+    expect(goToPage).toHaveBeenCalledExactlyOnceWith(2);
   });
 
   test("stops following the favorites once disposed", () => {

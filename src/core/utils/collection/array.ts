@@ -5,6 +5,10 @@ export function isIndexInBounds<V>(array: readonly V[], index: number): boolean 
   return index >= 0 && index < array.length;
 }
 
+export function haveSameItems<V>(a: readonly V[], b: readonly V[]): boolean {
+  return a.length === b.length && a.every((item, index) => item === b[index]);
+}
+
 export function findFirstIndexWhere(length: number, satisfiedAt: (index: number) => boolean): number {
   let low = 0;
   let high = length;

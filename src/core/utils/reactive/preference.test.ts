@@ -50,6 +50,36 @@ describe("StoredPreference", () => {
     expect(storage.entries).toEqual({});
   });
 
+  test("tells its listeners what is set, after the effects see it", () => {
+    const preference = new StoredPreference({ key: "size", defaultValue: 6 }, { storage: createStorage() });
+    const seen: string[] = [];
+
+    effect(() => {
+      seen.push(`effect ${preference.value}`);
+    });
+    preference.changed.on(value => seen.push(`listener ${value} ${preference.value}`));
+    preference.set(8);
+    expect(seen).toEqual(["effect 6", "effect 8", "listener 8 8"]);
+  });
+
+  test("tells its listeners nothing when set to its current value", () => {
+    const preference = new StoredPreference({ key: "size", defaultValue: 6 }, { storage: createStorage() });
+    const seen: number[] = [];
+
+    preference.changed.on(value => seen.push(value));
+    preference.set(6);
+    expect(seen).toEqual([]);
+  });
+
+  test("stops telling a listener once it stops listening", () => {
+    const preference = new StoredPreference({ key: "size", defaultValue: 6 }, { storage: createStorage() });
+    const seen: number[] = [];
+
+    preference.changed.on(value => seen.push(value))();
+    preference.set(8);
+    expect(seen).toEqual([]);
+  });
+
   test("decodes and encodes through its codec", () => {
     const storage = createStorage({ colors: ["red"] });
     const codec = createSetCodec(oneOf(["red", "blue"] as const));

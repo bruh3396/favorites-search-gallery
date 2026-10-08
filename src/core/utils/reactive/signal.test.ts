@@ -188,6 +188,20 @@ describe("computed", () => {
     expect(seen).toEqual([true, false]);
   });
 
+  test("keeps its previous result and skips an effect when its equality says the new one is the same", () => {
+    const signal = new Signal([1, 2]);
+    const items = computed(() => signal.value.slice(0, 2), { equals: (previous, next) => previous.join() === next.join() });
+    const seen: number[][] = [];
+
+    effect(() => seen.push(items.value));
+    const first = items.value;
+
+    signal.value = [1, 2, 3];
+    expect(items.value).toBe(first);
+    signal.value = [4, 2, 3];
+    expect(seen).toEqual([[1, 2], [4, 2]]);
+  });
+
   test("skips an effect when a computed it reads through another stays the same", () => {
     const signal = new Signal(1);
     const isPositive = computed(() => signal.value > 0);

@@ -1,7 +1,7 @@
 import { createSkeletonDimensions, measureSkeletonDimensions } from "@/core/app/favorites_page/skeleton_dimensions";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
-import { Favorite } from "@/core/features/favorites/types/favorite";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 
 function createFavorite(width: number, height: number): Favorite {
@@ -9,6 +9,7 @@ function createFavorite(width: number, height: number): Favorite {
     id: `${width}x${height}`,
     media: { kind: "image", locator: "" },
     isNew: false,
+    ratingBit: 0,
     tags: new Set(),
     getMetric: metric => (metric === "width" ? width : height)
   };
