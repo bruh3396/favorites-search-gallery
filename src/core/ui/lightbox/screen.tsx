@@ -3,6 +3,7 @@ import { LightboxStage } from "@/core/ui/lightbox/stage";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { h } from "@/core/ui/h/h";
+import { selectSharpnessMode } from "@/core/ui/lightbox/sharpness_experiment";
 
 export const LightboxScreenClass = {
   root: "fsg-LightboxScreen"
@@ -10,15 +11,18 @@ export const LightboxScreenClass = {
 
 export interface LightboxScreenProps {
   current: Readable<MediaItem | undefined>;
+  neighbors: Readable<readonly MediaItem[]>;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   resolveOriginalUrl: (media: Media) => Promise<string>;
+  // TODO: temporary, for the sharpness experiment.
+  fetchOriginal?: (media: Media) => Promise<Blob>;
   onShowNext: () => void;
   onShowPrevious: () => void;
   onClose: () => void;
 }
 
 export function LightboxScreen(props: LightboxScreenProps): HTMLElement {
-  const { current, resolvePreviewUrl, resolveOriginalUrl, onClose } = props;
+  const { current, neighbors, resolvePreviewUrl, resolveOriginalUrl, fetchOriginal, onClose } = props;
   const dialog = (
     <dialog
       className={LightboxScreenClass.root}
@@ -28,7 +32,7 @@ export function LightboxScreen(props: LightboxScreenProps): HTMLElement {
       onKeydown={event => handleKey(event, props)}
       onClick={event => closeOnBackdrop(event, onClose)}
     >
-      <LightboxStage current={current} resolvePreviewUrl={resolvePreviewUrl} resolveOriginalUrl={resolveOriginalUrl} />
+      <LightboxStage current={current} neighbors={neighbors} resolvePreviewUrl={resolvePreviewUrl} resolveOriginalUrl={resolveOriginalUrl} fetchOriginal={fetchOriginal} />
     </dialog>
   ) as HTMLDialogElement;
 
@@ -51,6 +55,8 @@ function handleKey(event: KeyboardEvent, { onShowNext, onShowPrevious }: Lightbo
     event.preventDefault();
     action();
   }
+  // TODO: temporary, for the sharpness experiment.
+  selectSharpnessMode(event.key);
 }
 
 function closeOnBackdrop(event: MouseEvent, onClose: () => void): void {

@@ -1,8 +1,10 @@
-﻿import { createPost, createPosts } from "@/testing/post";
+import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { MediaSequence } from "@/core/contracts/media_sequence";
 import { Post } from "@/core/domain/post/post";
+import { doNothing } from "@/core/utils/function/function";
+import { flushMicrotasks } from "@/testing/async";
 
 const POSTS = createPosts("1", "2", "3");
 
@@ -11,6 +13,14 @@ function createMediaSequence(posts: readonly Post[]): MediaSequence<Post> {
     const index = posts.indexOf(item);
     return Promise.resolve(index === -1 ? undefined : posts[index + offset]);
   };
+  return {
+    getNext: item => getAt(item, 1),
+    getPrevious: item => getAt(item, -1)
+  };
+}
+
+function createWrappingSequence(posts: readonly Post[]): MediaSequence<Post> {
+  const getAt = (item: Post, offset: number): Promise<Post | undefined> => Promise.resolve(posts[(posts.indexOf(item) + offset + posts.length) % posts.length]);
   return {
     getNext: item => getAt(item, 1),
     getPrevious: item => getAt(item, -1)
@@ -121,6 +131,75 @@ describe("Lightbox", () => {
       lightbox.open(POSTS[0], createMediaSequence([POSTS[0]]));
       await showing;
       expect(lightbox.current.value).toBe(POSTS[0]);
+    });
+  });
+
+  describe("neighbors", () => {
+    test("publishes the posts on either side of the post opened", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[1], SEQUENCE);
+      await flushMicrotasks();
+      expect(lightbox.neighbors.value).toEqual([POSTS[0], POSTS[2]]);
+    });
+
+    test("leaves out a side the sequence has nothing on", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[0], SEQUENCE);
+      await flushMicrotasks();
+      expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
+    });
+
+    test("lists a post on both sides once", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[0], createWrappingSequence([POSTS[0], POSTS[1]]));
+      await flushMicrotasks();
+      expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
+    });
+
+    test("leaves out the post shown", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[0], createWrappingSequence([POSTS[0]]));
+      await flushMicrotasks();
+      expect(lightbox.neighbors.value).toEqual([]);
+    });
+
+    test("follows the post shown", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[1], SEQUENCE);
+      await lightbox.showNext();
+      expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
+    });
+
+    test("clears them on close", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[1], SEQUENCE);
+      await flushMicrotasks();
+      lightbox.close();
+      expect(lightbox.neighbors.value).toEqual([]);
+    });
+
+    test("ignores neighbors found for a post left since", async() => {
+      const lightbox = new Lightbox<Post>();
+      let finishSearching = doNothing;
+      const slow: MediaSequence<Post> = {
+        getNext: () => new Promise(resolve => {
+          finishSearching = () => resolve(POSTS[1]);
+        }),
+        getPrevious: () => Promise.resolve(undefined)
+      };
+
+      lightbox.open(POSTS[0], slow);
+      lightbox.open(POSTS[2], SEQUENCE);
+      await flushMicrotasks();
+      finishSearching();
+      await flushMicrotasks();
+      expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
     });
   });
 

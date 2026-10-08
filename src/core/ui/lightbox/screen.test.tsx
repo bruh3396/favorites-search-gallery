@@ -25,6 +25,7 @@ function setup(): Setup {
   const { result, dispose } = render(document, () => (
     <LightboxScreen
       current={current}
+      neighbors={new Signal<readonly MediaItem[]>([])}
       resolvePreviewUrl={media => Promise.resolve(`https://preview/${media.locator}`)}
       resolveOriginalUrl={media => Promise.resolve(`https://original/${media.locator}`)}
       onShowNext={onShowNext}

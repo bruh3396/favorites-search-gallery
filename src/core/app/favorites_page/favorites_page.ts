@@ -87,8 +87,11 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   split.append(renderScreen(pane), renderScreen(secondPane));
   app.append(split, render(container.ownerDocument, () => h(LightboxScreen, {
     current: lightbox.current,
+    neighbors: lightbox.neighbors,
     resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media),
     resolveOriginalUrl: media => ports.remoteMedia.resolveOriginalUrl(media),
+    // TODO: temporary, for the sharpness experiment.
+    fetchOriginal: media => ports.remoteMedia.fetchOriginal(media),
     onShowNext: () => lightbox.showNext().catch(console.error),
     onShowPrevious: () => lightbox.showPrevious().catch(console.error),
     onClose: () => lightbox.close()
