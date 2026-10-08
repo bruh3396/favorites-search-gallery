@@ -24,7 +24,7 @@ async function resolve(stale: Post, cached: Post | undefined): Promise<ParsedPos
   if (!postIsComplete(latest.post)) {
     return { post: stale, tagCategories: latest.tagCategories };
   }
-  const complete = { ...stale, ...withExtension(latest.post), fetchedAt: Date.now() };
+  const complete = { ...stale, ...withExtension(latest.post), previewURL: latest.post.previewURL || stale.previewURL, fetchedAt: Date.now() };
 
   PostStore.write(complete);
   return { post: complete, tagCategories: latest.tagCategories };

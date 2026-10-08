@@ -1,9 +1,10 @@
+import { imageUrlToThumbUrl, withRule34Hostname } from "@/lib/media/url";
+import { ORIGIN } from "@/lib/constants";
 import { ParsedPost } from "@/types/api";
 import { TagCategoryMap } from "@/types/search";
 import { isTagCategory } from "@/types/guards";
 import { removeExtraWhitespace } from "@/utils/pure/string";
 import { toDimensions2D } from "@/utils/pure/geometry";
-import { withRule34Hostname } from "@/lib/media/url";
 
 const statisticRegex = /(\S+):\s+(\S+)/g;
 
@@ -26,7 +27,7 @@ export function parsePostFromPostPage(html: string): ParsedPost {
       duration: 0,
       tags,
       fileURL: fileUrl,
-      previewURL: ""
+      previewURL: imageUrlToThumbUrl(fileUrl)
     },
     tagCategories: parseTagCategories(dom)
   };
@@ -64,8 +65,11 @@ function getStatistics(dom: Document): Record<string, string> {
 }
 
 function getFileUrl(dom: Document): string {
-  const image = dom.querySelector("#image");
-  return image instanceof HTMLImageElement ? withRule34Hostname(image.src) : "";
+  const file = dom.querySelector("#image")?.getAttribute("src") ??
+    dom.querySelector("video source")?.getAttribute("src") ??
+    dom.querySelector(".link-list a[href*='/images/']")?.getAttribute("href") ??
+    "";
+  return file === "" ? "" : withRule34Hostname(new URL(file, ORIGIN).href);
 }
 
 function getTags(dom: Document): string {

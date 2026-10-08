@@ -1,7 +1,9 @@
 import { DEFAULT_EXTENSION, extensionRegex } from "@/lib/media/constants";
-import { HOSTNAME, WIMG_HOSTNAME } from "@/lib/constants";
+import { HOSTNAME, WIMG_HOSTNAME, WIMG_ORIGIN } from "@/lib/constants";
 import { MediaExtension, MediaItem } from "@/types/media";
 import { withHostname, withNoQueryParams } from "@/utils/pure/url";
+
+const FILE_PATH = /\/(?:images|samples)\/+([^/]+)\/+(?:sample_)?([^/.?]+)/;
 
 export const imageUrl = (item: MediaItem): string => withNoQueryParams(thumbUrlToImageUrl(item.thumbUrl));
 export const videoUrl = (item: MediaItem): string => withExtension(imageUrl(item), "mp4");
@@ -14,4 +16,8 @@ export const withExtension = (url: string, extension: MediaExtension): string =>
 export const replaceExtension = (url: string, oldExtension: MediaExtension, newExtension: MediaExtension): string => url.replace(new RegExp(`\\.${oldExtension}(?=$|\\?)`), `.${newExtension}`);
 
 export const thumbUrlToImageUrl = (url: string): string => withRule34Hostname(url).replace("thumbnails", "images").replace("thumbnail_", "");
+export const imageUrlToThumbUrl = (url: string): string => {
+  const match = FILE_PATH.exec(url);
+  return match === null ? "" : `${WIMG_ORIGIN}/thumbnails//${match[1]}/thumbnail_${match[2]}.jpg`;
+};
 export const imageUrlToSampleUrl = (url: string): string => withExtension(url, DEFAULT_EXTENSION).replace("images", "samples").replace(/\/([^/]+)$/, "/sample_$1");

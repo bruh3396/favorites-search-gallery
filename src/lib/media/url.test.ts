@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { imageUrlToSampleUrl, replaceExtension, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url";
+import { imageUrlToSampleUrl, imageUrlToThumbUrl, replaceExtension, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url";
 
 describe("withRule34Hostname", () => {
   test("one subdomain", () => {
@@ -28,6 +28,25 @@ describe("thumbnailUrlToImageUrl", () => {
     const expected = "https://rule34.xxx/images/0123/123456abcde09.jpg?11187914";
 
     expect(thumbUrlToImageUrl(source)).toBe(expected);
+  });
+});
+
+describe("imageUrlToThumbUrl", () => {
+  test("derives the thumb of an image", () => {
+    expect(imageUrlToThumbUrl("https://rule34.xxx/images//0123/123456abcde09.png?11187914")).toBe("https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg");
+  });
+
+  test("derives the thumb of a video", () => {
+    expect(imageUrlToThumbUrl("https://us.rule34.xxx/images/0123/123456abcde09.mp4")).toBe("https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg");
+  });
+
+  test("derives the thumb of a sample", () => {
+    expect(imageUrlToThumbUrl("https://rule34.xxx/samples/0123/sample_123456abcde09.jpg")).toBe("https://wimg.rule34.xxx/thumbnails//0123/thumbnail_123456abcde09.jpg");
+  });
+
+  test("returns empty for an unrecognized url", () => {
+    expect(imageUrlToThumbUrl("")).toBe("");
+    expect(imageUrlToThumbUrl("https://rule34.xxx/index.php?page=post")).toBe("");
   });
 });
 

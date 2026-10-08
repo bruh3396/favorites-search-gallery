@@ -8,5 +8,5 @@ export function postIsComplete(post: Post): boolean {
 }
 
 export function postIsStale(post: Post): boolean {
-  return post.fetchedAt === undefined || Date.now() - post.fetchedAt > timeToLive;
+  return post.previewURL === "" || post.fetchedAt === undefined || Date.now() - post.fetchedAt > timeToLive;
 }

@@ -48,6 +48,12 @@ export class FavoritesElement {
     }
   }
 
+  public setThumbUrl(url: string): void {
+    if (url !== "" && this.image.src !== url) {
+      this.image.src = url;
+    }
+  }
+
   public setExtension(extension: MediaExtension | undefined): void {
     if (extension !== undefined) {
       setDataset(this.root, "extension", extension);

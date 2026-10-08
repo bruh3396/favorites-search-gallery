@@ -7,6 +7,10 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.23.3",
+    ["Fixed some favorites showing as gray boxes that open a broken link"]
+  ],
+  [
     "v1.23.2",
     ["Fixed Firefox thumb upscaling"]
   ],

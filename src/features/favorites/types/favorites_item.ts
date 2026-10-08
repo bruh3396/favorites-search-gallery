@@ -129,6 +129,7 @@ export class FavoritesItem implements Favorite {
     arena.deleted[this.index] = post.deleted ? 1 : 0;
     arena.encodedMediaExtensions[this.index] = encodeMediaExtension(post.extension ? internString(post.extension) as MediaExtension : post.extension);
     this.previewUrl = compressPreviewSource(post.previewURL);
+    this.element?.setThumbUrl(this.thumbUrl);
     this.element?.setAspectRatio(post.width, post.height);
     this.element?.setExtension(post.extension);
     const tagSpan = arena.storeTags(post.tags);
