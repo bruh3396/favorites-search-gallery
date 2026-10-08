@@ -1,7 +1,7 @@
 import { Favorites, createFavorites } from "@/core/features/favorites/favorites";
 import { describe, expect, test } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
+import { FavoritesSearchSession, FavoritesSearchSessionSettings } from "@/core/features/favorites/search/session";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -52,7 +52,7 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
   const remoteFavoriteActions = new ObservableRemoteFavoriteActions(new MemoryRemoteFavoriteActions(client));
   const localFavorites = new MemoryLocalFavorites();
   const hydratedIds: string[] = [];
-  const paginationSettings = createPreference<PaginationSettings>({ size: 2, infiniteScroll: false });
+  const paginationSettings = createPaginationSettings();
 
   await localFavorites.setAll(localIds);
   const favorites = createFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
@@ -65,14 +65,21 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
     remoteMedia: new MemoryRemoteMedia(),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource([0.25, 0.5]),
-    paginationSettings,
     waitForPaint: (): Promise<void> => Promise.resolve()
   });
-  const session = favorites.createSearchSession(createPreference(createSearchSettings()));
+  const session = favorites.createSearchSession({ searchSettings: createPreference(createSearchSettings()), paginationSettings });
 
   favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
   await favorites.load();
   return { favorites, session, paginationSettings, remoteFavoriteActions, localFavorites, hydratedIds };
+}
+
+function createPaginationSettings(): Preference<PaginationSettings> {
+  return createPreference<PaginationSettings>({ size: 2, infiniteScroll: false });
+}
+
+function createSessionSettings(): FavoritesSearchSessionSettings {
+  return { searchSettings: createPreference(createSearchSettings()), paginationSettings: createPaginationSettings() };
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
@@ -100,11 +107,20 @@ describe("createFavorites", () => {
 
   test("searches each session on its own", async() => {
     const { favorites, session } = await setup(createTaggedPosts("apple", "banana", "apple"));
-    const other = favorites.createSearchSession(createPreference(createSearchSettings()));
+    const other = favorites.createSearchSession(createSessionSettings());
 
     session.submit("apple");
     other.submit("banana");
     expect([getResultIds(session), getResultIds(other)]).toEqual([["1", "3"], ["2"]]);
+  });
+
+  test("pages each session by its own page size", async() => {
+    const { favorites, session } = await setup(createTaggedPosts("a", "a", "a"));
+    const paginationSettings = createPaginationSettings();
+    const other = favorites.createSearchSession({ ...createSessionSettings(), paginationSettings });
+
+    paginationSettings.set({ size: 3, infiniteScroll: false });
+    expect([session.paginationResult.value.totalPages, other.paginationResult.value.totalPages]).toEqual([2, 1]);
   });
 
   test("shows what the query left out once inverted", async() => {
@@ -130,7 +146,7 @@ describe("createFavorites", () => {
     expect(session.paginationResult.value.favorites.map(favorite => favorite.id)).toEqual(["3"]);
   });
 
-  test("goes back to the first page when the shared page size changes", async() => {
+  test("goes back to the first page when its page size changes", async() => {
     const { session, paginationSettings } = await setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
     session.goToPage(2);

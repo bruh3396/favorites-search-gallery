@@ -1,0 +1,31 @@
+.fsg-LightboxScreen {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.fsg-LightboxScreen::backdrop {
+  background: rgb(0 0 0 / 0.9);
+}
+
+.fsg-LightboxStage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.fsg-LightboxStage-image {
+  pointer-events: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

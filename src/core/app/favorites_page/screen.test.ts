@@ -99,9 +99,9 @@ describe("FavoritesScreen", () => {
     expect(element.className).toBe(FavoritesScreenClass.root);
     expect([header.tagName, header.className, main.tagName]).toEqual(["HEADER", FavoritesScreenClass.header, "MAIN"]);
     expect([...header.children].map(describeSlot)).toEqual([
-      [FavoritesScreenClass.search, SearchBoxClass.root, SliderClass.root],
+      [FavoritesScreenClass.search, SearchBoxClass.root, SliderClass.root, SliderClass.root],
       [FavoritesScreenClass.summary, StatusTextClass.root],
-      [FavoritesScreenClass.pagination, PaginatorClass.root, SliderClass.root]
+      [FavoritesScreenClass.pagination, PaginatorClass.root]
     ]);
     expect(describeSlot(main)).toEqual([FavoritesScreenClass.content, `${PostGridClass.root} ${PostGridSkeletonClass.root}`, PostGridClass.root]);
   });

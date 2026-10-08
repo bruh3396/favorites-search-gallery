@@ -19,6 +19,8 @@ export interface FavoritesSearchSessionDependencies {
   randomSource: RandomSource;
 }
 
+export type FavoritesSearchSessionSettings = Pick<FavoritesSearchSessionDependencies, "searchSettings" | "paginationSettings">;
+
 const SEED_RANGE = 2 ** 32;
 
 export class FavoritesSearchSession {

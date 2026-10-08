@@ -20,7 +20,7 @@ import { readPreferredColorScheme } from "@/adapters/browser/environment/environ
 const SAMPLE_POST_COUNT = 300;
 const FAVORITES_OWNER_ID = "demo";
 
-function createDemoDependencies(): FavoritesPageDependencies {
+function createDemoDependencies(hostPage: BrowserHostPage): FavoritesPageDependencies {
   const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
   const indexedDb = new IndexedDbClient();
   return {
@@ -35,13 +35,16 @@ function createDemoDependencies(): FavoritesPageDependencies {
     remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(),
     scheduler: new BrowserScheduler(),
-    randomSource: new BrowserRandomSource()
+    randomSource: new BrowserRandomSource(),
+    hostPage
   };
 }
 
-mountFavoritesPage(new BrowserHostPage().claimContent(), {
+const hostPage = new BrowserHostPage();
+
+mountFavoritesPage(hostPage.claimContent(), {
   userOwnsFavorites: true,
   blacklistedTags: "",
   favoritesOwnerId: FAVORITES_OWNER_ID,
   colorScheme: readPreferredColorScheme()
-}, createDemoDependencies());
+}, createDemoDependencies(hostPage));

@@ -2,6 +2,7 @@ import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/po
 import { describe, expect, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -35,7 +36,8 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remotePages: new MemoryRemotePages(),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource(),
-    localKeyedValues
+    localKeyedValues,
+    hostPage: new MemoryHostPage()
   });
   return container.shadowRoot!;
 }

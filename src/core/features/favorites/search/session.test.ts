@@ -29,7 +29,7 @@ interface Setup {
   paginationSettings: Preference<PaginationSettings>;
 }
 
-const UNPAGINATED: PaginationSettings = { size: 1000, infiniteScroll: false };
+const UNPAGINATED: PaginationSettings = { size: 1_000, infiniteScroll: false };
 const PAGES_OF_TWO: PaginationSettings = { size: 2, infiniteScroll: false };
 
 function createPreference<T>(initial: T): Preference<T> {

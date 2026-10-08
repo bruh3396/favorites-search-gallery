@@ -1,9 +1,11 @@
-import { LightboxStage, LightboxStageClass, LightboxStageProps } from "@/core/features/lightbox/ui/stage/stage";
+﻿import { LightboxStage, LightboxStageClass, LightboxStageProps } from "@/core/ui/lightbox/stage";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
+import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
+import { expectClassesStyled } from "@/testing/css";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
 const SECOND: MediaItem = { id: "2", media: { kind: "image", locator: "images/2" } };
@@ -31,6 +33,10 @@ function setup(options: Partial<Pick<LightboxStageProps, "resolveOriginalUrl">> 
 }
 
 describe("LightboxStage", () => {
+  test("styles every class it sets", () => {
+    expectClassesStyled(LightboxStageClass, LIGHTBOX_CSS);
+  });
+
   test("shows the preview while the original loads", async() => {
     const { image, current } = setup({ resolveOriginalUrl: () => new Promise(() => undefined) });
 

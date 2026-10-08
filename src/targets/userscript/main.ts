@@ -82,7 +82,7 @@ function composeFavoritesPage(environment: Environment, dependencies: PageDepend
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
-  }, { ...ports, scheduler, randomSource, localKeyedValues });
+  }, { ...ports, scheduler, randomSource, localKeyedValues, hostPage });
 }
 
 function createFavoritesPorts(environment: Environment, dependencies: PageDependencies): FavoritesPorts {
