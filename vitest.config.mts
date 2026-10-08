@@ -3,13 +3,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const EXCLUDED_TESTS = [...configDefaults.exclude, ".audit/**", "architecture/**", "src/playground/**"];
+const EXCLUDED_TESTS = [...configDefaults.exclude, ".*/**", "playground/**"];
 const DOM_TESTS = [
-  "src/features/*/{control,view,shell,features}/**/*.test.ts",
-  "src/features/*/*.test.ts",
-  "src/features/*/flows/flows.test.ts",
-  "src/app/startup/features.test.ts",
-  "src/app/startup/style.test.ts",
   "src/core/app/**/*.test.{ts,tsx}",
   "src/core/ui/**/*.test.{ts,tsx}",
   "src/core/features/**/*.test.tsx",
@@ -17,10 +12,7 @@ const DOM_TESTS = [
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
   "src/adapters/rule34/client/{client,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
-  "src/adapters/rule34/document/document.test.ts",
-  "src/lib/media/download.test.ts",
-  "src/lib/ui/**/*.test.ts",
-  "src/utils/browser/**/*.test.ts"
+  "src/adapters/rule34/document/document.test.ts"
 ];
 
 export default defineConfig({
@@ -55,7 +47,7 @@ export default defineConfig({
       },
       all: true,
       include: ["src/**/*.{ts,tsx}"],
-      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/playground/**", "src/**/testing/**", "build/**", "src/**/*.test.{ts,tsx}", "src/**/*.d.ts"]
+      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/**/testing/**", "build/**", "src/**/*.test.{ts,tsx}", "src/**/*.d.ts"]
     }
   }
 });

@@ -1,4 +1,4 @@
-src/playground/
+/playground/
 .env
 build/bin
 node_modules

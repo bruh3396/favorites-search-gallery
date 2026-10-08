@@ -2,7 +2,6 @@ import { BuildOptions } from "esbuild";
 import { buildDefine } from "./define";
 import { buildHeader } from "./header";
 import { inlineCssPlugin } from "./inline_css_plugin";
-import { rawTsPlugin } from "./raw_ts_plugin";
 import { resolve } from "path";
 import { resolveScriptVersion } from "./version";
 
@@ -18,7 +17,7 @@ export const SHARED_BUILD_OPTIONS: BuildOptions = {
   alias: {
     "@": resolve("src")
   },
-  plugins: [rawTsPlugin, inlineCssPlugin],
+  plugins: [inlineCssPlugin],
   loader: {
     ".svg": "text",
     ".css": "text",

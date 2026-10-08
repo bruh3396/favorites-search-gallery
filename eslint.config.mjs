@@ -648,7 +648,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["build/**/*.ts", "src/playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
+    files: ["build/**/*.ts", "playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
     rules: {
       "no-console": "off"
     }
@@ -660,22 +660,9 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/assets/svg/svg.ts", "src/core/search/testing/fruit_corpus.ts", "src/playground/search_performance/queries.ts"],
+    files: ["src/core/search/testing/fruit_corpus.ts", "playground/search_performance/queries.ts"],
     rules: {
       "@stylistic/max-len": "off"
-    }
-  },
-  {
-    files: ["src/types/errors.ts"],
-    rules: {
-      "max-classes-per-file": "off"
-    }
-  },
-  {
-    files: ["src/app/context/events.ts", "src/app/context/milestones.ts", "src/app/context/preferences.ts"],
-    rules: {
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "@typescript-eslint/explicit-module-boundary-types": "off"
     }
   },
   {

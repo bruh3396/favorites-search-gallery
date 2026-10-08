@@ -9,7 +9,7 @@ function mintMedia({ url, tags }: { url: string; tags: string }): Media | null {
   return url === "" ? null : { kind: "image", locator: `${url} ${tags}` };
 }
 
-function parseThumbHtml(thumb: string): Post {
+function parseThumbHtml(thumb: string): Post | null {
   const page = new DOMParser().parseFromString(`<html><body>${thumb}</body></html>`, "text/html");
   return parseThumb(page.body.firstElementChild as HTMLElement, mintMedia);
 }
@@ -35,22 +35,30 @@ describe("parseThumb", () => {
   test("repairs the truncated video tag and collapses whitespace", () => {
     const post = parseThumbHtml(`<span class="thumb" id="s1"><img src="${PREVIEW}" title="  vide   apple  video "></span>`);
 
-    expect(post.tags).toBe("video apple video");
+    expect(post?.tags).toBe("video apple video");
   });
 
   test("falls back to the Cloudflare lazy source when the image has no src", () => {
     const post = parseThumbHtml(`<span class="thumb" id="s1"><img data-cfsrc="${PREVIEW}" title="apple"></span>`);
 
-    expect(post.media.locator).toBe(`${PREVIEW} apple`);
+    expect(post?.media.locator).toBe(`${PREVIEW} apple`);
   });
 
   test("reads no media when the image has neither source", () => {
-    expect(parseThumbHtml("<span class=\"thumb\" id=\"s1\"><img title=\"apple\"></span>").media.locator).toBe("");
+    expect(parseThumbHtml("<span class=\"thumb\" id=\"s1\"><img title=\"apple\"></span>")?.media.locator).toBe("");
+  });
+
+  test("reads the id from the link when the thumb has none", () => {
+    expect(parseThumbHtml(`<span class="thumb"><a id="p7"><img src="${PREVIEW}"></a></span>`)?.id).toBe("7");
+  });
+
+  test("skips a thumb with no id", () => {
+    expect(parseThumbHtml(`<span class="thumb"><a href="index.php?page=post&id=7"><img src="${PREVIEW}"></a></span>`)).toBeNull();
   });
 
   test("reads a post list thumb", () => {
     const image = `<img src="${PREVIEW}" title="animated_gif">`;
-    const thumb = `<div class="thumb" id="s5"><a id="p5" href="index.php?page=post&id=5">${image}</a></div>`;
+    const thumb = `<div class="thumb" id="s5"><a id="p5">${image}</a></div>`;
 
     expect(parseThumbHtml(thumb)).toMatchObject({
       id: "5",

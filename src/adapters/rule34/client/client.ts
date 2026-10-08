@@ -5,11 +5,10 @@ import { favoritesPageOffset, favoritesPageUrl, parseFavoritesPage } from "@/ada
 import { parseFavoriteCount, profilePageUrl } from "@/adapters/rule34/client/profile_page";
 import { parsePostPage, postPageUrl } from "@/adapters/rule34/client/post_page";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { RateLimiter } from "@/lib/async/rate_limiting";
+import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { pageRateLimiter } from "@/adapters/rule34/client/page_rate_limiter";
 
 export interface Rule34ClientDependencies {
   fetch: Rule34Fetch;
@@ -19,13 +18,15 @@ export interface Rule34ClientDependencies {
   rule34Document: Pick<Rule34Document, "isFirstFavoritesPage" | "keepPaginator">;
 }
 
+const PAGE_RATE_LIMIT = { concurrency: 1, ratePerSecond: 0.33 };
+
 export class Rule34Client {
   private readonly favoritesFetches = new Set<Promise<void>>();
+  private readonly rateLimiter: RateLimiter;
 
-  constructor(
-    private readonly dependencies: Rule34ClientDependencies,
-    private readonly rateLimiter: Pick<RateLimiter, "run"> = pageRateLimiter
-  ) { }
+  constructor(private readonly dependencies: Rule34ClientDependencies) {
+    this.rateLimiter = new RateLimiter(PAGE_RATE_LIMIT, dependencies.scheduler);
+  }
 
   public readFirstFavoritesPage(): Post[] | null {
     if (!this.dependencies.rule34Document.isFirstFavoritesPage()) {

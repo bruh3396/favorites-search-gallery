@@ -1,17 +1,20 @@
+import { removeExtraWhitespace, removeNonNumericCharacters } from "@/core/utils/string/string";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
-import { getImageFromThumb } from "@/lib/ui/thumb/query";
-import { getTagsFromThumb } from "@/lib/ui/thumb/tag";
-import { parseIdFromThumb } from "@/lib/ui/thumb/post_id";
-import { removeExtraWhitespace } from "@/core/utils/string/string";
 
 const NO_MEDIA: Media = { kind: "image", locator: "" };
 
-export function parseThumb(thumb: HTMLElement, mintMedia: Rule34MintMedia): Post {
-  const tags = normalizeTags(thumb);
+export function parseThumb(thumb: HTMLElement, mintMedia: Rule34MintMedia): Post | null {
+  const id = parseId(thumb);
+
+  if (id === "") {
+    return null;
+  }
+  const image = thumb.querySelector("img");
+  const tags = normalizeTags(image?.title ?? "");
   return {
-    id: parseIdFromThumb(thumb),
+    id,
     tags,
     width: 0,
     height: 0,
@@ -20,12 +23,16 @@ export function parseThumb(thumb: HTMLElement, mintMedia: Rule34MintMedia): Post
     changedAt: 0,
     durationSeconds: 0,
     deleted: false,
-    media: mintMedia({ url: parsePreviewUrl(getImageFromThumb(thumb)), tags }) ?? NO_MEDIA
+    media: mintMedia({ url: parsePreviewUrl(image), tags }) ?? NO_MEDIA
   };
 }
 
-function normalizeTags(thumb: HTMLElement): string {
-  return removeExtraWhitespace(getTagsFromThumb(thumb).replace(/\bvide\b/g, "video"));
+function parseId(thumb: HTMLElement): string {
+  return removeNonNumericCharacters(thumb.id || (thumb.querySelector("a")?.id ?? ""));
+}
+
+function normalizeTags(tags: string): string {
+  return removeExtraWhitespace(tags.replace(/\bvide\b/g, "video"));
 }
 
 function parsePreviewUrl(image: HTMLImageElement | null): string {

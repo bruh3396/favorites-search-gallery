@@ -71,24 +71,39 @@ describe("Rule34FavoriteActions", () => {
   });
 
   test("cancels a post's waiting add when the post is removed", async() => {
-    const { actions, fetch } = setup();
+    const { actions, fetch, scheduler } = setup();
     const first = actions.add("1");
     const second = actions.add("2");
 
     await actions.remove("2");
+    await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe("added");
     expect(await second).toBeNull();
     expect(readRequestedUrls(fetch)).not.toContain(addFavoriteUrl("2"));
   });
 
   test("cancels a post's waiting remove when the post is added", async() => {
-    const { actions, fetch } = setup();
+    const { actions, fetch, scheduler } = setup();
     const first = actions.remove("1");
     const second = actions.remove("2");
 
     await actions.add("2");
+    await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe(true);
     expect(await second).toBe(false);
     expect(readRequestedUrls(fetch)).not.toContain(removeFavoriteUrl("2"));
+  });
+
+  test("ignores a second add of a post still waiting", async() => {
+    const { actions, fetch, scheduler } = setup();
+    const first = actions.add("1");
+    const waiting = actions.add("2");
+    const again = actions.add("2");
+
+    await advanceAndSettle(scheduler, 1_000);
+    expect(await first).toBe("added");
+    expect(await waiting).toBe("added");
+    expect(await again).toBeNull();
+    expect(readRequestedUrls(fetch).filter(url => url === addFavoriteUrl("2"))).toHaveLength(1);
   });
 });

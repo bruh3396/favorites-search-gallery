@@ -1,8 +1,8 @@
 import { BASE_INDEX_URL, ORIGIN } from "@/adapters/rule34/client/urls";
 import { Rule34Fetch, request, send } from "@/adapters/rule34/client/request";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { ThrottleQueue } from "@/lib/async/rate_limiting";
 import { isTransient } from "@/adapters/rule34/client/error";
 import { retry } from "@/core/utils/async/retry";
 
@@ -14,8 +14,10 @@ export interface Rule34FavoriteActionsDependencies {
   randomSource: RandomSource;
 }
 
-const ADD_THROTTLE = 200;
-const REMOVE_THROTTLE = 1_000;
+type Intent = "add" | "remove";
+
+const ADD_RATE_LIMIT = { concurrency: 1, ratePerSecond: 5 };
+const REMOVE_RATE_LIMIT = { concurrency: 1, ratePerSecond: 1 };
 const REMOVE_ATTEMPTS = 3;
 const REMOVE_RETRY_DELAY = 500;
 const ADD_ANSWERS: Record<number, Rule34AddFavoriteAnswer> = {
@@ -38,35 +40,49 @@ export function removeFavoriteUrl(id: string): string {
 }
 
 export class Rule34FavoriteActions {
-  private readonly addThrottle = new ThrottleQueue(ADD_THROTTLE);
-  private readonly removeThrottle = new ThrottleQueue(REMOVE_THROTTLE);
+  private readonly addLimiter: RateLimiter;
+  private readonly removeLimiter: RateLimiter;
+  private readonly intents = new Map<string, Intent>();
 
-  constructor(private readonly dependencies: Rule34FavoriteActionsDependencies) { }
-
-  public async add(id: string): Promise<Rule34AddFavoriteAnswer | null> {
-    this.removeThrottle.cancel(id);
-
-    if (!await this.addThrottle.wait(id)) {
-      return null;
-    }
-    send(this.dependencies.fetch, postVoteUrl(id)).catch(() => { });
-    const answer = await (await request(this.dependencies.fetch, addFavoriteUrl(id))).text();
-    return ADD_ANSWERS[parseInt(answer, 10)] ?? "error";
+  constructor(private readonly dependencies: Rule34FavoriteActionsDependencies) {
+    this.addLimiter = new RateLimiter(ADD_RATE_LIMIT, dependencies.scheduler);
+    this.removeLimiter = new RateLimiter(REMOVE_RATE_LIMIT, dependencies.scheduler);
   }
 
-  public async remove(id: string): Promise<boolean> {
-    this.addThrottle.cancel(id);
+  public add(id: string): Promise<Rule34AddFavoriteAnswer | null> {
+    this.intents.set(id, "add");
+    return this.addLimiter.run(async() => {
+      if (!this.claimIntent(id, "add")) {
+        return null;
+      }
+      send(this.dependencies.fetch, postVoteUrl(id)).catch(() => { });
+      const answer = await (await request(this.dependencies.fetch, addFavoriteUrl(id))).text();
+      return ADD_ANSWERS[parseInt(answer, 10)] ?? "error";
+    });
+  }
 
-    if (!await this.removeThrottle.wait(id)) {
+  public remove(id: string): Promise<boolean> {
+    this.intents.set(id, "remove");
+    return this.removeLimiter.run(async() => {
+      if (!this.claimIntent(id, "remove")) {
+        return false;
+      }
+      await retry(() => send(this.dependencies.fetch, removeFavoriteUrl(id), { redirect: "manual" }), {
+        attempts: REMOVE_ATTEMPTS,
+        baseDelay: REMOVE_RETRY_DELAY,
+        scheduler: this.dependencies.scheduler,
+        randomSource: this.dependencies.randomSource,
+        isRetryable: isTransient
+      });
+      return true;
+    });
+  }
+
+  private claimIntent(id: string, intent: Intent): boolean {
+    if (this.intents.get(id) !== intent) {
       return false;
     }
-    await retry(() => send(this.dependencies.fetch, removeFavoriteUrl(id), { redirect: "manual" }), {
-      attempts: REMOVE_ATTEMPTS,
-      baseDelay: REMOVE_RETRY_DELAY,
-      scheduler: this.dependencies.scheduler,
-      randomSource: this.dependencies.randomSource,
-      isRetryable: isTransient
-    });
+    this.intents.delete(id);
     return true;
   }
 }

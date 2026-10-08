@@ -18,6 +18,13 @@ describe("RateLimiter", () => {
     expect(task).toHaveBeenCalledTimes(3);
   });
 
+  test("starts a task without waiting when its turn has come", async() => {
+    const task = vi.fn(() => Promise.resolve());
+
+    await new RateLimiter({ concurrency: 1, ratePerSecond: 1 }, new MemoryScheduler()).run(task);
+    expect(task).toHaveBeenCalledOnce();
+  });
+
   test("runs no more tasks at once than its concurrency", async() => {
     const scheduler = new MemoryScheduler();
     const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);

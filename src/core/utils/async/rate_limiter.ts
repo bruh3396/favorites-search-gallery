@@ -49,6 +49,6 @@ export class RateLimiter {
     const startAt = Math.max(now, this.nextStartAt);
 
     this.nextStartAt = startAt + this.interval;
-    return this.scheduler.sleep(startAt - now);
+    return startAt === now ? Promise.resolve() : this.scheduler.sleep(startAt - now);
   }
 }

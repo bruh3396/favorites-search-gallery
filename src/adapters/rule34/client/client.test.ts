@@ -47,7 +47,7 @@ function setup(
   const mintMedia = ({ url }: { url: string }): Media => ({ kind: "image", locator: url });
   const rule34Document = { isFirstFavoritesPage: (): boolean => isFirstFavoritesPage, keepPaginator };
   const dependencies = { fetch, scheduler: new MemoryScheduler(), randomSource: new MemoryRandomSource(), mintMedia, rule34Document };
-  return { client: new Rule34Client(dependencies, { run: request => request() }), fetch, keepPaginator };
+  return { client: new Rule34Client(dependencies), fetch, keepPaginator };
 }
 
 describe("Rule34Client", () => {

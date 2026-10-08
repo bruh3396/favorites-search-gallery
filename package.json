@@ -1,7 +1,4 @@
 {
-  "imports": {
-    "#architecture/*": "./architecture/*"
-  },
   "devDependencies": {
     "@eslint/js": "^9.24.0",
     "@stylistic/eslint-plugin": "^5.10.0",
@@ -34,22 +31,18 @@
   },
   "scripts": {
     "build": "node build/bin/build || (npm run compile-build && node build/bin/build)",
-    "build:playground": "esbuild src/playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground/playground.js",
+    "build:playground": "esbuild playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground/playground.js",
     "build:demo": "npm run compile-build && node build/bin/build demo",
     "build:kit": "vite build --config src/targets/kit/vite.config.mts",
     "kit": "vite --config src/targets/kit/vite.config.mts",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test:coverage": "npx vitest --run --coverage",
     "test": "npx vitest --run",
-    "test:api": "npx vitest --run --config src/playground/vitest.config.mts src/playground/api/api.test.ts",
+    "test:api": "npx vitest --run --config playground/vitest.config.mts playground/api/api.test.ts",
     "lint": "npx eslint src/",
-    "architecture:typecheck": "tsc --project architecture/tsconfig/core.json",
-    "architecture:test": "npx vitest --run --config architecture/vitest.config.mjs",
-    "architecture:lint": "npx eslint --no-config-lookup --no-inline-config -c architecture/eslint/eslint.config.mjs --suppressions-location architecture/eslint/suppressions.json src/",
-    "architecture": "npm run architecture:test && npm run architecture:typecheck && npm run architecture:lint",
     "continuous-integration": "npm run build && npm run test:coverage && npm run typecheck",
     "release-checks:ci": "npm run compile-build && npm run continuous-integration && npm run lint",
-    "release-checks:local": "npm run release-checks:ci && npm run audit && npm run architecture && npm run test:api",
+    "release-checks:local": "npm run release-checks:ci && npm run test:api",
     "release": "python .scripts/release.py",
     "release:patch": "npm run release -- patch",
     "release:minor": "npm run release -- minor",

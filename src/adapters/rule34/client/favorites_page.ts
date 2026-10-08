@@ -14,7 +14,7 @@ export function favoritesPageOffset(pageIndex: number): number {
 }
 
 export function parseFavoritesPage(page: ParentNode, mintMedia: Rule34MintMedia): Post[] {
-  return extractFavoriteElements(page).map(thumb => parseThumb(thumb, mintMedia));
+  return extractFavoriteElements(page).map(thumb => parseThumb(thumb, mintMedia)).filter(post => post !== null);
 }
 
 function extractFavoriteElements(page: ParentNode): HTMLElement[] {

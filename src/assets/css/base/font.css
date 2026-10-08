@@ -1,4 +1,0 @@
-html:not([data-native-font]) #favorites-search-gallery,
-html:not([data-native-font]) #favorites-search-gallery * {
-  font-family: var(--font-ui);
-}
