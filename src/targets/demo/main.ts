@@ -13,7 +13,6 @@ import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { MemoryRemoteTagCategories } from "@/adapters/memory/ports/remote_tag_categories/remote_tag_categories";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
 import { readPreferredColorScheme } from "@/adapters/browser/environment/environment";
 
@@ -31,7 +30,6 @@ function createDemoDependencies(hostPage: BrowserHostPage): FavoritesPageDepende
     remoteFavorites: new MemoryRemoteFavorites(memory),
     remoteFavoriteActions: new MemoryRemoteFavoriteActions(memory),
     remotePosts: new MemoryRemotePosts(memory),
-    remoteTagCategories: new MemoryRemoteTagCategories(),
     remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(),
     scheduler: new BrowserScheduler(),

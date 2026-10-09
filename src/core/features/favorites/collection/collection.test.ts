@@ -97,7 +97,7 @@ describe("FavoritesCollection", () => {
       const [first, second] = collection.append(createPosts("1", "2"));
       const announced: Favorite[] = [];
 
-      collection.hydrated.on(favorite => announced.push(favorite));
+      collection.updates.on(favorite => announced.push(favorite));
       collection.overwrite(createPost({ id: "1", media: { kind: "image", locator: "1/a" } }));
       collection.overwrite(createPost({ id: "2", media: { kind: "image", locator: "2/a" } }));
       expect(announced).toEqual([first, second]);
@@ -108,7 +108,7 @@ describe("FavoritesCollection", () => {
       const announced: Favorite[] = [];
 
       collection.append([createPost({ id: "1", media: { kind: "image", locator: "1/a" } })]);
-      collection.hydrated.on(favorite => announced.push(favorite));
+      collection.updates.on(favorite => announced.push(favorite));
       collection.overwrite(createPost({ id: "1", media: { kind: "image", locator: "1/b" } }));
       expect(announced).toEqual([]);
     });

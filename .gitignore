@@ -1,6 +1,8 @@
 /playground/
+/checks/
 .env
-build/bin
+.ignore
+scripts/bin
 node_modules
 dist
 coverage

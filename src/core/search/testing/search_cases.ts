@@ -343,7 +343,7 @@ export const searchCases: SearchCaseGroup[] = [
       { query: "-width:<width", expected: allDocNames },
       { query: "-height:>height", expected: allDocNames },
       { query: "( red ~ -red )", expected: allDocNames },
-      { query: "( foo ~ -foo )", expected: allDocNames },
+      { query: "( apple ~ -apple )", expected: allDocNames },
       { query: "( -* ~ * )", expected: allDocNames },
       { query: "( height:0 ~ -height:0 )", expected: allDocNames }
     ]

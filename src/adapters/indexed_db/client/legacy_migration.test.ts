@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 
@@ -66,6 +66,10 @@ beforeEach(() => {
   globalThis.indexedDB = new IDBFactory();
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("prepareLegacyMigration", () => {
   test("moves each owner's favorites into the new store, newest first", async() => {
     await createLegacyDatabase({ name: "FavoritesV2", stores: {
@@ -76,6 +80,18 @@ describe("prepareLegacyMigration", () => {
 
     expect(await read(indexedDb, "favorites", "1")).toEqual(["30", "20", "10"]);
     expect(await read(indexedDb, "favorites", "2")).toEqual(["40"]);
+  });
+
+  test("skips favorites stores without an owner or rows", async() => {
+    await createLegacyDatabase({ name: "FavoritesV2", stores: {
+      user: [createLegacyPost("10")],
+      other1: [createLegacyPost("20")],
+      user3: []
+    }, keyed: false });
+    const indexedDb = new IndexedDbClient();
+
+    expect(await Promise.all(["", "1", "her1", "3"].map(key => read(indexedDb, "favorites", key)))).toEqual([undefined, undefined, undefined, undefined]);
+    expect(await read(indexedDb, "posts", "10")).toMatchObject({ id: "10" });
   });
 
   test("converts legacy posts to the new shape", async() => {
@@ -178,5 +194,65 @@ describe("prepareLegacyMigration", () => {
     await read(new IndexedDbClient(), "favorites", "1");
 
     expect(await databaseNames()).toEqual(["favorites-search-gallery"]);
+  });
+
+  test("skips the migration when the browser can't list its databases", async() => {
+    await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1")] }, keyed: false });
+    vi.spyOn(indexedDB, "databases").mockRejectedValue(new Error("unsupported"));
+
+    expect(await read(new IndexedDbClient(), "favorites", "1")).toBeUndefined();
+  });
+
+  test("reads nothing from a legacy database without stores", async() => {
+    await createLegacyDatabase({ name: "Posts", stores: {}, keyed: true });
+
+    expect(await read(new IndexedDbClient(), "posts", "1")).toBeUndefined();
+  });
+
+  test("converts unknown ratings and plain thumbnails with their defaults", async() => {
+    await createLegacyDatabase({ name: "Posts", stores: {
+      posts: [createLegacyPost("1", { rating: "unknown", fileURL: "https://x/thumbnails/9/thumbnail_aa.jpg" })]
+    }, keyed: true });
+    const indexedDb = new IndexedDbClient();
+
+    expect(await read(indexedDb, "posts", "1")).toMatchObject({ rating: "explicit", media: { kind: "image", locator: "9/aa" } });
+  });
+
+  test("skips tag categories without a category", async() => {
+    await createLegacyDatabase({ name: "TagCategories", stores: { tagCategories: [{ id: "alice" }] }, keyed: false });
+
+    expect(await read(new IndexedDbClient(), "tagCategories", "alice")).toBeUndefined();
+  });
+
+  test("rejects when a legacy database can't open", async() => {
+    await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1")] }, keyed: true });
+    const open = indexedDB.open.bind(indexedDB);
+    const failing: Partial<IDBOpenDBRequest> = { error: new DOMException("denied") };
+
+    vi.spyOn(indexedDB, "open").mockImplementation((name, version) => {
+      if (name !== "Posts") {
+        return open(name, version);
+      }
+      queueMicrotask(() => failing.onerror?.call(failing as IDBOpenDBRequest, new Event("error")));
+      return failing as IDBOpenDBRequest;
+    });
+
+    await expect(read(new IndexedDbClient(), "posts", "1")).rejects.toThrow("denied");
+  });
+
+  test("rejects when reading a legacy database aborts", async() => {
+    await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1")] }, keyed: true });
+    const transaction = IDBDatabase.prototype.transaction;
+
+    vi.spyOn(IDBDatabase.prototype, "transaction").mockImplementation(function(this: IDBDatabase, ...args) {
+      const opened = transaction.apply(this, args);
+
+      if (this.name === "Posts") {
+        queueMicrotask(() => opened.abort());
+      }
+      return opened;
+    });
+
+    await expect(read(new IndexedDbClient(), "posts", "1")).rejects.toBeNull();
   });
 });

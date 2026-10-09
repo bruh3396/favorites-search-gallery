@@ -1,12 +1,17 @@
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
-import { MediaSequence } from "@/core/contracts/media_sequence";
+import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { Post } from "@/core/domain/post/post";
 import { doNothing } from "@/core/utils/function/function";
 import { flushMicrotasks } from "@/testing/async";
 
 const POSTS = createPosts("1", "2", "3");
+
+function findPosition(posts: readonly Post[], item: Post): SequencePosition | undefined {
+  const index = posts.indexOf(item);
+  return index === -1 ? undefined : { index, total: posts.length };
+}
 
 function createMediaSequence(posts: readonly Post[]): MediaSequence<Post> {
   const getAt = (item: Post, offset: number): Promise<Post | undefined> => {
@@ -15,7 +20,8 @@ function createMediaSequence(posts: readonly Post[]): MediaSequence<Post> {
   };
   return {
     getNext: item => getAt(item, 1),
-    getPrevious: item => getAt(item, -1)
+    getPrevious: item => getAt(item, -1),
+    positionOf: item => findPosition(posts, item)
   };
 }
 
@@ -23,7 +29,8 @@ function createWrappingSequence(posts: readonly Post[]): MediaSequence<Post> {
   const getAt = (item: Post, offset: number): Promise<Post | undefined> => Promise.resolve(posts[(posts.indexOf(item) + offset + posts.length) % posts.length]);
   return {
     getNext: item => getAt(item, 1),
-    getPrevious: item => getAt(item, -1)
+    getPrevious: item => getAt(item, -1),
+    positionOf: item => findPosition(posts, item)
   };
 }
 
@@ -191,7 +198,8 @@ describe("Lightbox", () => {
         getNext: () => new Promise(resolve => {
           finishSearching = () => resolve(POSTS[1]);
         }),
-        getPrevious: () => Promise.resolve(undefined)
+        getPrevious: () => Promise.resolve(undefined),
+        positionOf: () => undefined
       };
 
       lightbox.open(POSTS[0], slow);
@@ -200,6 +208,38 @@ describe("Lightbox", () => {
       finishSearching();
       await flushMicrotasks();
       expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
+    });
+  });
+
+  describe("position", () => {
+    test("publishes where the post shown sits in the sequence", () => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[1], SEQUENCE);
+      expect(lightbox.position.value).toEqual({ index: 1, total: 3 });
+    });
+
+    test("follows the post shown", async() => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[1], SEQUENCE);
+      await lightbox.showNext();
+      expect(lightbox.position.value).toEqual({ index: 2, total: 3 });
+    });
+
+    test("is unknown for a post the sequence doesn't hold", () => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(createPost({ id: "9" }), SEQUENCE);
+      expect(lightbox.position.value).toBeUndefined();
+    });
+
+    test("is unknown while closed", () => {
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(POSTS[1], SEQUENCE);
+      lightbox.close();
+      expect(lightbox.position.value).toBeUndefined();
     });
   });
 

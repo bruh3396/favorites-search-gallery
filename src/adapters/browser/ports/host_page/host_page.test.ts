@@ -13,16 +13,20 @@ describe("BrowserHostPage", () => {
     document.head.replaceChildren();
     document.body.style.overflowY = "";
     document.documentElement.style.overflowY = "";
+    document.body.style.overflowX = "";
+    document.documentElement.style.width = "";
   });
 
   test("has no header of its own", () => {
     expect(new BrowserHostPage().hasHeader).toBe(false);
   });
 
-  test("has no paginator or search page to reflect", () => {
+  test("ignores the header, color scheme, paginator, and search page, having none", () => {
     const hostPage = new BrowserHostPage();
 
     expect(() => {
+      hostPage.setHeaderVisible();
+      hostPage.setColorScheme();
       hostPage.reflectSearchPage();
       hostPage.setPaginatorVisible();
     }).not.toThrow();
@@ -33,6 +37,12 @@ describe("BrowserHostPage", () => {
 
     expect(document.body.lastElementChild).toBe(content);
     content.remove();
+  });
+
+  test("lays the page out at full viewport width so the scrollbar overlays it", () => {
+    new BrowserHostPage().claimContent().remove();
+    expect(document.documentElement.style.width).toBe("100vw");
+    expect(document.body.style.overflowX).toBe("clip");
   });
 
   test("adds a locked viewport when the page has none", () => {

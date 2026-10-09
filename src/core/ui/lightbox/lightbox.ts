@@ -1,12 +1,15 @@
+import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { MediaItem } from "@/core/domain/post/post";
-import { MediaSequence } from "@/core/contracts/media_sequence";
+
+const NEIGHBOR_COUNT = 1;
 
 export class Lightbox<T extends MediaItem> {
   private readonly currentItem = new Signal<T | undefined>(undefined);
   private readonly isOpenState = computed(() => this.currentItem.value !== undefined);
   private readonly neighborItems = new Signal<readonly T[]>([]);
-  private sequence: MediaSequence<T> | undefined;
+  private readonly sequence = new Signal<MediaSequence<T> | undefined>(undefined);
+  private readonly positionState = computed(() => findPosition(this.currentItem.value, this.sequence.value));
 
   public get isOpen(): Readable<boolean> {
     return this.isOpenState;
@@ -20,14 +23,18 @@ export class Lightbox<T extends MediaItem> {
     return this.neighborItems;
   }
 
+  public get position(): Readable<SequencePosition | undefined> {
+    return this.positionState;
+  }
+
   public open(item: T, sequence: MediaSequence<T>): void {
-    this.sequence = sequence;
+    this.sequence.value = sequence;
     this.currentItem.value = item;
-    this.findNeighbors().catch(console.error);
+    this.publishNeighbors(NEIGHBOR_COUNT).catch(console.error);
   }
 
   public close(): void {
-    this.sequence = undefined;
+    this.sequence.value = undefined;
     this.currentItem.value = undefined;
     this.neighborItems.value = [];
   }
@@ -42,7 +49,7 @@ export class Lightbox<T extends MediaItem> {
 
   private async showNeighbor(getNeighbor: (sequence: MediaSequence<T>, current: T) => Promise<T | undefined>): Promise<void> {
     const current = this.currentItem.peek();
-    const sequence = this.sequence;
+    const sequence = this.sequence.peek();
 
     if (current === undefined || sequence === undefined) {
       return;
@@ -51,25 +58,48 @@ export class Lightbox<T extends MediaItem> {
 
     if (neighbor !== undefined && this.isShowing(current, sequence)) {
       this.currentItem.value = neighbor;
-      await this.findNeighbors();
+      await this.publishNeighbors(NEIGHBOR_COUNT);
     }
   }
 
-  private async findNeighbors(): Promise<void> {
-    const current = this.currentItem.peek();
-    const sequence = this.sequence;
+private async publishNeighbors(length: number): Promise<void> {
+  const current = this.currentItem.peek();
+  const sequence = this.sequence.peek();
 
-    if (current === undefined || sequence === undefined) {
-      return;
+  if (current === undefined || sequence === undefined) {
+    return;
+  }
+
+  const found: T[] = [];
+
+  let previous: T | undefined = current;
+  let next: T | undefined = current;
+
+  for (let i = 0; i < length; i += 1) {
+    [previous, next] = await Promise.all([
+      previous ? sequence.getPrevious(previous) : Promise.resolve(undefined),
+      next ? sequence.getNext(next) : Promise.resolve(undefined)
+    ]);
+
+    if (previous !== undefined) {
+      found.push(previous);
     }
-    const found: (T | undefined)[] = await Promise.all([sequence.getPrevious(current), sequence.getNext(current)]);
 
-    if (this.isShowing(current, sequence)) {
-      this.neighborItems.value = [...new Set(found)].filter((item): item is T => item !== undefined && item !== current);
+    if (next !== undefined) {
+      found.push(next);
     }
   }
+
+  if (this.isShowing(current, sequence)) {
+    this.neighborItems.value = [...new Set(found.filter(item => item !== current))];
+  }
+}
 
   private isShowing(item: T, sequence: MediaSequence<T>): boolean {
-    return this.currentItem.peek() === item && this.sequence === sequence;
+    return this.currentItem.peek() === item && this.sequence.peek() === sequence;
   }
+}
+
+function findPosition<T extends MediaItem>(item: T | undefined, sequence: MediaSequence<T> | undefined): SequencePosition | undefined {
+  return item === undefined || sequence === undefined ? undefined : sequence.positionOf(item);
 }

@@ -32,30 +32,30 @@ describe("FavoritesActions", () => {
   test.each([true, false])("returns the default %s for an untouched favorite", async favoritedByDefault => {
     const { actions } = await setup(favoritedByDefault);
 
-    expect(actions.isFavorited("1")).toBe(favoritedByDefault);
+    expect(actions.isFavorite("1")).toBe(favoritedByDefault);
   });
 
   test("returns the latest addition or removal", async() => {
     const { actions } = await setup();
 
     await actions.remove("1");
-    expect(actions.isFavorited("1")).toBe(false);
+    expect(actions.isFavorite("1")).toBe(false);
     await actions.add("1");
-    expect(actions.isFavorited("1")).toBe(true);
+    expect(actions.isFavorite("1")).toBe(true);
   });
 
   test("keeps the other favorites at the default", async() => {
     const { actions } = await setup();
 
     await actions.remove("1");
-    expect(actions.isFavorited("2")).toBe(true);
+    expect(actions.isFavorite("2")).toBe(true);
   });
 
   test("keeps a favorite whose removal fails", async() => {
     const { actions, localFavorites } = await setup(true, createAnsweringActions("added", "error"));
 
     expect(await actions.remove("1")).toBe("error");
-    expect(actions.isFavorited("1")).toBe(true);
+    expect(actions.isFavorite("1")).toBe(true);
     expect(await localFavorites.getAll()).toEqual(["1", "2"]);
   });
 
@@ -70,7 +70,7 @@ describe("FavoritesActions", () => {
     const { actions } = await setup();
     const seen: boolean[] = [];
     const stop = effect(() => {
-      seen.push(actions.isFavorited("1"));
+      seen.push(actions.isFavorite("1"));
     });
 
     await actions.remove("1");
@@ -82,7 +82,7 @@ describe("FavoritesActions", () => {
     const { actions } = await setup();
     const seen: boolean[] = [];
     const stop = effect(() => {
-      seen.push(actions.isFavorited("2"));
+      seen.push(actions.isFavorite("2"));
     });
 
     await actions.remove("1");
@@ -95,7 +95,7 @@ describe("FavoritesActions", () => {
 
     actions.dispose();
     await actions.remove("1");
-    expect(actions.isFavorited("1")).toBe(true);
+    expect(actions.isFavorite("1")).toBe(true);
     expect(await localFavorites.getAll()).toEqual(["1", "2"]);
   });
 });

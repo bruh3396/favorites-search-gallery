@@ -36,6 +36,14 @@ describe("decodePost", () => {
     });
   });
 
+  test.each([
+    ["q", "questionable"],
+    ["Safe", "safe"],
+    ["x", "explicit"]
+  ])("decodes rating %s as %s", (rating, expected) => {
+    expect(decodePost({ ...frozenCobaltPost, rating }, mintMedia).post.rating).toBe(expected);
+  });
+
   test("leaves the duration unknown, so a stored duration survives a refresh", () => {
     expect(decodePost(frozenCobaltPost, mintMedia).post).not.toHaveProperty("durationSeconds");
   });

@@ -161,6 +161,12 @@ describe("Rule34Document", () => {
 
       expect(new Rule34Document().readTheme()).toBe("dark");
     });
+
+    test("reads light without a dark theme cookie", () => {
+      visit("page=favorites&id=1");
+
+      expect(new Rule34Document().readTheme()).toBe("light");
+    });
   });
 
   describe("readTagBlacklist", () => {
@@ -210,6 +216,10 @@ describe("Rule34Document", () => {
       expect(paginator.style.display).toBe("none");
       rule34Document.setPaginatorVisible(true);
       expect(paginator.style.display).toBe("");
+    });
+
+    test("skips a page without a paginator", () => {
+      expect(() => new Rule34Document().setPaginatorVisible(false)).not.toThrow();
     });
   });
 

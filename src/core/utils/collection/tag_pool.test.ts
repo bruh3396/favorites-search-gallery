@@ -33,50 +33,50 @@ describe("TagPool", () => {
     test("loads a single stored tag", () => {
       const { tagPool, store } = setup();
 
-      expect(tagPool.read(store("foo"))).toBe("foo");
+      expect(tagPool.read(store("apple"))).toBe("apple");
     });
 
     test("loads multiple stored tags", () => {
       const { tagPool, store } = setup();
 
-      expect(tagPool.read(store("foo bar baz"))).toBe("foo bar baz");
+      expect(tagPool.read(store("apple banana cherry"))).toBe("apple banana cherry");
     });
 
     test("loads repeated tags", () => {
       const { tagPool, store } = setup();
 
-      expect(tagPool.read(store("foo bar foo"))).toBe("foo bar foo");
+      expect(tagPool.read(store("apple banana apple"))).toBe("apple banana apple");
     });
   });
 
   describe("write", () => {
     test("reuses existing tag ids", () => {
       const { tagPool, store } = setup();
-      const first = store("foo");
-      const second = store("foo");
+      const first = store("apple");
+      const second = store("apple");
 
-      expect(tagPool.read(first)).toBe("foo");
-      expect(tagPool.read(second)).toBe("foo");
+      expect(tagPool.read(first)).toBe("apple");
+      expect(tagPool.read(second)).toBe("apple");
     });
 
     test("stores tags for separate items", () => {
       const { tagPool, store } = setup();
-      const first = store("foo");
-      const second = store("bar");
+      const first = store("apple");
+      const second = store("banana");
 
-      expect(tagPool.read(first)).toBe("foo");
-      expect(tagPool.read(second)).toBe("bar");
+      expect(tagPool.read(first)).toBe("apple");
+      expect(tagPool.read(second)).toBe("banana");
     });
 
     test("keeps spans correct with different tag counts", () => {
       const { tagPool, store } = setup();
-      const first = store("foo bar");
-      const second = store("baz");
-      const third = store("qux quux corge");
+      const first = store("apple banana");
+      const second = store("cherry");
+      const third = store("date quux corge");
 
-      expect(tagPool.read(first)).toBe("foo bar");
-      expect(tagPool.read(second)).toBe("baz");
-      expect(tagPool.read(third)).toBe("qux quux corge");
+      expect(tagPool.read(first)).toBe("apple banana");
+      expect(tagPool.read(second)).toBe("cherry");
+      expect(tagPool.read(third)).toBe("date quux corge");
     });
 
     test("grows tag capacity past a single doubling in one store", () => {
@@ -112,14 +112,14 @@ describe("TagPool", () => {
 
     test("keeps tags loadable after packing the tag ids", () => {
       const { tagPool, store } = setup();
-      const first = store("foo bar baz");
-      const second = store("baz qux");
-      const third = store("foo");
+      const first = store("apple banana cherry");
+      const second = store("cherry date");
+      const third = store("apple");
 
       tagPool.compact();
-      expect(tagPool.read(first)).toBe("foo bar baz");
-      expect(tagPool.read(second)).toBe("baz qux");
-      expect(tagPool.read(third)).toBe("foo");
+      expect(tagPool.read(first)).toBe("apple banana cherry");
+      expect(tagPool.read(second)).toBe("cherry date");
+      expect(tagPool.read(third)).toBe("apple");
     });
 
     test("round-trips a large vocabulary", () => {
@@ -138,71 +138,71 @@ describe("TagPool", () => {
 
     test("unpacks to store and read new tags afterwards", () => {
       const { tagPool, store } = setup();
-      const before = store("foo bar");
+      const before = store("apple banana");
 
       tagPool.compact();
-      const after = store("baz qux");
+      const after = store("cherry date");
 
-      expect(tagPool.read(before)).toBe("foo bar");
-      expect(tagPool.read(after)).toBe("baz qux");
+      expect(tagPool.read(before)).toBe("apple banana");
+      expect(tagPool.read(after)).toBe("cherry date");
     });
 
     test("reuses existing tag ids for tags stored afterwards", () => {
       const { tagPool, store } = setup();
-      const before = store("foo bar");
+      const before = store("apple banana");
 
       tagPool.compact();
-      const after = store("foo baz");
+      const after = store("apple cherry");
 
-      expect(tagPool.read(before)).toBe("foo bar");
-      expect(tagPool.read(after)).toBe("foo baz");
+      expect(tagPool.read(before)).toBe("apple banana");
+      expect(tagPool.read(after)).toBe("apple cherry");
     });
 
     test("keeps a mix of pre- and post-compact tags loadable after a second compact", () => {
       const { tagPool, store } = setup();
-      const first = store("foo bar");
+      const first = store("apple banana");
 
-      expect(tagPool.read(first)).toBe("foo bar");
+      expect(tagPool.read(first)).toBe("apple banana");
       tagPool.compact();
-      expect(tagPool.read(first)).toBe("foo bar");
-      const second = store("bar baz qux");
+      expect(tagPool.read(first)).toBe("apple banana");
+      const second = store("banana cherry date");
 
-      expect(tagPool.read(first)).toBe("foo bar");
-      expect(tagPool.read(second)).toBe("bar baz qux");
+      expect(tagPool.read(first)).toBe("apple banana");
+      expect(tagPool.read(second)).toBe("banana cherry date");
       tagPool.compact();
-      expect(tagPool.read(first)).toBe("foo bar");
-      expect(tagPool.read(second)).toBe("bar baz qux");
+      expect(tagPool.read(first)).toBe("apple banana");
+      expect(tagPool.read(second)).toBe("banana cherry date");
     });
   });
 
   describe("trim", () => {
     test("keeps stored tags readable when trimming to the stored count", () => {
       const { tagPool, store } = setup();
-      const first = store("foo bar");
-      const second = store("baz");
+      const first = store("apple banana");
+      const second = store("cherry");
 
       tagPool.trim(2);
-      expect(tagPool.read(first)).toBe("foo bar");
-      expect(tagPool.read(second)).toBe("baz");
+      expect(tagPool.read(first)).toBe("apple banana");
+      expect(tagPool.read(second)).toBe("cherry");
     });
 
     test("grows again afterwards", () => {
       const { tagPool, store } = setup();
-      const first = store("foo");
+      const first = store("apple");
 
       tagPool.trim(1);
-      const second = store("bar");
+      const second = store("banana");
 
-      expect(tagPool.read(first)).toBe("foo");
-      expect(tagPool.read(second)).toBe("bar");
+      expect(tagPool.read(first)).toBe("apple");
+      expect(tagPool.read(second)).toBe("banana");
     });
 
     test("keeps stored tags readable when trimming to the current capacity", () => {
       const { tagPool, store } = setup();
-      const first = store("foo");
+      const first = store("apple");
 
       tagPool.trim(1_024);
-      expect(tagPool.read(first)).toBe("foo");
+      expect(tagPool.read(first)).toBe("apple");
     });
   });
 });

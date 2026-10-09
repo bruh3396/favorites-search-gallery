@@ -12,6 +12,7 @@ const PROBE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 50 };
 const PROBED_EXTENSIONS: readonly Rule34CdnImageExtension[] = ["jpeg", "png", "jpg"];
 const FALLBACK_EXTENSION: Rule34CdnImageExtension = "jpg";
 
+/** Thumb URLs omit the file extension, so probe the candidates with HEAD requests rather than calling the post API for every post. */
 export class Rule34CdnExtensionProber {
   private readonly limiter: RateLimiter;
   private readonly found = new Map<string, Rule34CdnImageExtension>();

@@ -1,7 +1,6 @@
 import { Post, getRatingBit } from "@/core/domain/post/post";
 import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
-import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
@@ -11,7 +10,7 @@ import { FavoritesSearchSession } from "@/core/features/favorites/search/session
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { PaginationSettings } from "@/core/features/favorites/search/pagination";
 import { Preference } from "@/core/utils/reactive/preference";
-import { SearchSettings } from "@/core/features/favorites/search/settings";
+import { SearchSettings } from "@/core/features/favorites/search/inputs";
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
 
@@ -50,8 +49,8 @@ function createPreference<T>(initial: T): Preference<T> {
 
 function setup(posts: Post[] = [], { blacklistedTags = "", settings = {}, pagination = UNPAGINATED }: Options = {}): Setup {
   const collection = new FavoritesCollection();
-  const index = new FavoritesSearchIndex(new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric)));
-  const blacklist = new FavoritesBlacklist({ blacklistedTags, isForced: false });
+  const index = new FavoritesSearchIndex();
+  const blacklist = new FavoritesBlacklist({ blacklistedTags, force: false });
   const searchSettings = createPreference(createSearchSettings(settings));
   const paginationSettings = createPreference(pagination);
 

@@ -11,6 +11,27 @@ function createIndexedDb(): IndexedDbClient {
   return new IndexedDbClient();
 }
 
+function openRaw(version: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open("favorites-search-gallery", version);
+
+    request.onsuccess = (): void => {
+      request.result.close();
+      resolve();
+    };
+    request.onerror = (): void => reject(request.error);
+  });
+}
+
+function deleteRaw(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase("favorites-search-gallery");
+
+    request.onsuccess = (): void => resolve();
+    request.onerror = (): void => reject(request.error);
+  });
+}
+
 describe("IndexedDbClient", () => {
   test("returns what the requests read once the transaction commits", async() => {
     const indexedDb = createIndexedDb();
@@ -44,5 +65,24 @@ describe("IndexedDbClient", () => {
     const request = await indexedDb.runTransaction("posts", "readonly", store => store.get("2"));
 
     expect(request.result).toBeUndefined();
+  });
+
+  test("rejects when the database can't open, then opens on a later transaction", async() => {
+    const indexedDb = createIndexedDb();
+
+    await openRaw(2);
+    await expect(indexedDb.runTransaction("posts", "readonly", store => store.count())).rejects.toThrow();
+    await deleteRaw();
+
+    expect((await indexedDb.runTransaction("posts", "readonly", store => store.count())).result).toBe(0);
+  });
+
+  test("lets a newer connection upgrade the database, then reopens", async() => {
+    const indexedDb = createIndexedDb();
+
+    await indexedDb.runTransaction("posts", "readwrite", store => store.add({ id: "1" }));
+    await deleteRaw();
+
+    expect((await indexedDb.runTransaction("posts", "readonly", store => store.count())).result).toBe(0);
   });
 });

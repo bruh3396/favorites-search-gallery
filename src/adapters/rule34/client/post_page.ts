@@ -8,6 +8,7 @@ import { removeExtraWhitespace } from "@/core/utils/string/string";
 
 const STATISTIC_ENTRY = /(\S+):\s+(\S+)/g;
 const DIMENSIONS = /^([1-9]\d*)(?:x|\/)([1-9]\d*)$/;
+const TAG_TYPE = /\btag-type-(\S+)/;
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
 export function postPageUrl(id: string): string {
@@ -40,7 +41,7 @@ function parseTagCategories(dom: Document): TagCategoryMap {
   const categoryMap: TagCategoryMap = new Map();
 
   for (const tag of [...dom.querySelectorAll(".tag")]) {
-    const category = tag.classList[0]?.replace("tag-type-", "") ?? "";
+    const category = TAG_TYPE.exec(tag.className)?.[1] ?? "general";
     const name = (tag.children[1]?.textContent ?? "").replaceAll(" ", "_");
 
     if (name === "") {

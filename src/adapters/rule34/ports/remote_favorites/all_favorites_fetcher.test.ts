@@ -199,6 +199,28 @@ describe("Rule34AllFavoritesFetcher", () => {
     expect(fetch.mock.calls.filter(([index]) => index === 1)).toHaveLength(1);
   });
 
+  test("waits for in-flight pages before rejecting", async() => {
+    const refused = new Error("refused");
+    let finishPage0: ResolvePosts = () => { };
+    const fetch = vi.fn((index: number) => (index === 0
+      ? new Promise<Post[]>(resolve => {
+        finishPage0 = resolve;
+      })
+      : Promise.reject(refused)));
+    let hasSettled = false;
+    const run = createCappedFetcher([], fetch, () => false).fetchAll().catch((error: unknown) => {
+      hasSettled = true;
+      throw error;
+    });
+
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    await yieldToEventLoop();
+    expect(hasSettled).toBe(false);
+
+    finishPage0(createPage(0));
+    await expect(run).rejects.toBe(refused);
+  });
+
   test("passes the failure count so retries can be capped", async() => {
     const delivered: Post[][] = [];
     const seenFailureCounts: number[] = [];

@@ -56,6 +56,10 @@ describe("parseThumb", () => {
     expect(parseThumbHtml(`<span class="thumb"><a href="index.php?page=post&id=7"><img src="${PREVIEW}"></a></span>`)).toBeNull();
   });
 
+  test("skips a thumb with neither an id nor a link", () => {
+    expect(parseThumbHtml(`<span class="thumb"><img src="${PREVIEW}"></span>`)).toBeNull();
+  });
+
   test("reads a post list thumb", () => {
     const image = `<img src="${PREVIEW}" title="animated_gif">`;
     const thumb = `<div class="thumb" id="s5"><a id="p5">${image}</a></div>`;

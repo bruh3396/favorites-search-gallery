@@ -1,12 +1,13 @@
-import { FavoritesSearchIndex, SearchRequest } from "@/core/features/favorites/search/index";
 import { PaginationResult, PaginationSettings, paginate } from "@/core/features/favorites/search/pagination";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { SearchExpression } from "@/core/search/expressions/search_expression";
-import { SearchSettings } from "@/core/features/favorites/search/settings";
+import { SearchRequest } from "./inputs";
+import { SearchSettings } from "@/core/features/favorites/search/inputs";
 import { clamp } from "@/core/utils/number/number";
 import { haveSameItems } from "@/core/utils/collection/array";
 import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";

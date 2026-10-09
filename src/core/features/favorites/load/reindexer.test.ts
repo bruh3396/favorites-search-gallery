@@ -51,7 +51,7 @@ describe("FavoritesReindexer", () => {
     const { reindexer, collection } = setup();
     const hydrated: Favorite[] = [];
 
-    collection.hydrated.on(favorite => hydrated.push(favorite));
+    collection.updates.on(favorite => hydrated.push(favorite));
     reindexer.reindex(createPost({ id: "9", media: MEDIA }));
     expect(hydrated).toEqual([]);
   });

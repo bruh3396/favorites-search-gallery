@@ -18,5 +18,8 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx"
+  ],
+  "exclude": [
+    "src/targets/electron/launcher.ts"
   ]
 }

@@ -1,25 +1,15 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { SearchEngine, TermUpdate } from "@/core/search/engines/search_engine";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
+import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { SearchExpression } from "@/core/search/expressions/search_expression";
-import { SortKey } from "@/core/features/favorites/search/settings";
+import { SearchRequest } from "@/core/features/favorites/search/inputs";
+import { TermUpdate } from "@/core/search/engines/search_engine";
 import { hashInt } from "@/core/utils/number/bit";
 
-export interface SearchRequest {
-  expression: SearchExpression | undefined;
-  sortKey: SortKey;
-  isSortAscending: boolean;
-  allowedRatings: number;
-  isShuffled: boolean;
-  shuffleSeed: number;
-}
-
 export class FavoritesSearchIndex {
+  private readonly engine = new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
   private readonly indexedFavorites = new Emitter<Favorite[]>();
   private readonly rebuilds = new Emitter<void>();
-
-  constructor(private readonly engine: SearchEngine<Favorite>) { }
 
   public get indexed(): Occurrence<Favorite[]> {
     return this.indexedFavorites;

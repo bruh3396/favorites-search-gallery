@@ -1,7 +1,6 @@
 import { Post, getRatingBit } from "@/core/domain/post/post";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
-import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
@@ -16,7 +15,7 @@ interface Setup {
 function setup(posts: Post[] = []): Setup {
   const collection = new FavoritesCollection();
   const favorites = collection.append(posts);
-  const index = new FavoritesSearchIndex(new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric)));
+  const index = new FavoritesSearchIndex();
 
   index.rebuild(favorites);
   return { collection, favorites, index };

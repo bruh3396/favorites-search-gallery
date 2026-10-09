@@ -11,7 +11,7 @@ const METADATA_BYTE_RANGES = [500_000, 1_000_000, 2_000_000, 4_000_000];
 
 export class Rule34CdnVideoDurationReader {
   private readonly limiter: RateLimiter;
-  private pool: HTMLVideoElement[] | undefined;
+  private readonly idleVideos: HTMLVideoElement[] = [];
 
   constructor(private readonly dependencies: Rule34CdnVideoDurationReaderDependencies) {
     this.limiter = new RateLimiter(RATE_LIMIT, dependencies.scheduler);
@@ -33,35 +33,28 @@ export class Rule34CdnVideoDurationReader {
   private async readRange(url: string, range: number): Promise<number> {
     const response = await this.dependencies.fetch(url, { headers: { Range: `bytes=0-${range}` } });
 
-    if (!response.ok && response.status !== 206) {
+    if (!response.ok) {
       throw new Error("Range request failed");
     }
     const blob = await response.blob();
-    const video = this.videos().find(v => !v.dataset.busy);
+    const video = this.idleVideos.pop() ?? createMetadataVideo();
 
-    if (video === undefined) {
-      throw new Error("No available video element in pool");
+    try {
+      return await loadDuration(video, blob);
+    } finally {
+      this.idleVideos.push(video);
     }
-    return loadDuration(video, blob);
-  }
-
-  private videos(): HTMLVideoElement[] {
-    this.pool ??= Array.from({ length: RATE_LIMIT.concurrency }, createMetadataVideo);
-    return this.pool;
   }
 }
 
 function loadDuration(video: HTMLVideoElement, blob: Blob): Promise<number> {
   return new Promise<number>((resolve, reject) => {
-    video.dataset.busy = "true";
     video.onloadedmetadata = (): void => {
       URL.revokeObjectURL(video.src);
-      video.dataset.busy = "";
       resolve(video.duration);
     };
     video.onerror = (): void => {
       URL.revokeObjectURL(video.src);
-      video.dataset.busy = "";
       reject(new Error("Failed to load video metadata"));
     };
     video.src = URL.createObjectURL(blob);

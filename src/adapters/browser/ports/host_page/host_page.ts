@@ -14,6 +14,7 @@ export class BrowserHostPage implements HostPage {
   public setPaginatorVisible(): void { }
 
   public claimContent(): HTMLElement {
+    this.overlayScrollbar();
     return document.body.appendChild(document.createElement("div"));
   }
 
@@ -35,6 +36,11 @@ export class BrowserHostPage implements HostPage {
 
   public unlockScroll(): void {
     this.scroller().style.overflowY = "";
+  }
+
+  private overlayScrollbar(): void {
+    document.documentElement.style.width = "100vw";
+    document.body.style.overflowX = "clip";
   }
 
   private scroller(): HTMLElement {

@@ -15,7 +15,6 @@ export interface FavoritesReloaderDependencies {
   index: Pick<FavoritesSearchIndex, "rebuild">;
   postLibrary: PostLibrary;
   report: (state: LoadState) => void;
-  waitForPaint: () => Promise<void>;
 }
 
 export class FavoritesReloader {
@@ -26,7 +25,7 @@ export class FavoritesReloader {
   }
 
   public async reload(localIds: string[]): Promise<LoadResult> {
-    const { collection, index, postLibrary, report, waitForPaint } = this.dependencies;
+    const { collection, index, postLibrary, report } = this.dependencies;
     const restored = await this.restore(localIds);
     let pulled: Post[] = [];
 
@@ -36,7 +35,6 @@ export class FavoritesReloader {
       pulled = await this.pullNew(localIds);
     } finally {
       report({ phase: "indexing" });
-      await waitForPaint();
       index.rebuild(collection.getAll());
       collection.clearTagCache();
       postLibrary.refresh([...pulled, ...restored]).catch(console.error);

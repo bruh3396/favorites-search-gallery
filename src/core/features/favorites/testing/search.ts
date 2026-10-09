@@ -1,8 +1,7 @@
-import { FavoritesSearchIndex, SearchRequest } from "@/core/features/favorites/search/index";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
-import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
-import { Favorite } from "@/core/features/favorites/favorite";
-import { SearchSettings } from "@/core/features/favorites/search/settings";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
+import { SearchRequest } from "../search/inputs";
+import { SearchSettings } from "@/core/features/favorites/search/inputs";
 import { parseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 interface SearchRequestOverrides extends Partial<SearchRequest> {
@@ -36,7 +35,7 @@ export function createSearchRequest({ query = "", ...overrides }: SearchRequestO
 }
 
 export function createSearchIndex(): FavoritesSearchIndex {
-  return new FavoritesSearchIndex(new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric)));
+  return new FavoritesSearchIndex();
 }
 
 export function searchIds(index: FavoritesSearchIndex, query = ""): string[] {

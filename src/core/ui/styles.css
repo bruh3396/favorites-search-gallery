@@ -17,3 +17,4 @@
 @import "./components/paginator/paginator.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
 @import "./components/slider/slider.css" layer(components);
+@import "./components/heart/heart.css" layer(components);

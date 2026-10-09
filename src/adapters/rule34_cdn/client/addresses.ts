@@ -10,4 +10,5 @@ export function previewUrl(locator: string): string {
 export function fileUrl(locator: string, extension: Rule34CdnFileExtension): string {
   const { directory, name } = readLocator(locator);
   return `${ORIGIN}/images//${directory}/${name}.${extension}`;
+  // return `${WIMG_ORIGIN}/images//${directory}/${name}.${extension}`;
 }

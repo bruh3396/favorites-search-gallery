@@ -24,7 +24,6 @@ export interface FavoritesLoaderDependencies {
   scheduler: Scheduler;
   collection: FavoritesCollection;
   index: FavoritesSearchIndex;
-  waitForPaint: () => Promise<void>;
 }
 
 export class FavoritesLoader {

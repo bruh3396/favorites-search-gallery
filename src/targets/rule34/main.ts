@@ -7,7 +7,6 @@ import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
-import { FrozenCobaltRemoteTagCategories } from "@/adapters/frozen_cobalt/ports/remote_tag_categories/remote_tag_categories";
 import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/indexed_db/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
@@ -45,7 +44,7 @@ interface PageDependencies {
 }
 
 type ComposePage = (environment: Environment, dependencies: PageDependencies) => void;
-type FavoritesPorts = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues">;
+type FavoritesPorts = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues" | "hostPage">;
 
 const PAGES: Record<AppMode, ComposePage> = {
   favorites: composeFavoritesPage,
@@ -102,7 +101,6 @@ function createFavoritesPorts(environment: Environment, dependencies: PageDepend
       primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
       fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
     }),
-    remoteTagCategories: new FrozenCobaltRemoteTagCategories(frozenCobalt),
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
     remotePages: new Rule34RemotePages(rule34)
   };

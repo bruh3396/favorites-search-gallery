@@ -4,7 +4,10 @@ import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 import { Rule34Error } from "@/adapters/rule34/client/error";
+import { favoritesPageOffset, favoritesPageUrl } from "@/adapters/rule34/client/favorites_page";
+import { postListUrlFromQuery } from "@/adapters/rule34/client/post_list_page";
 import { postPageUrl } from "@/adapters/rule34/client/post_page";
+import { profilePageUrl } from "@/adapters/rule34/client/profile_page";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 
@@ -33,6 +36,8 @@ const POST_PAGE = `
     <li class="tag-type-artist tag"><a>?</a><a>bob</a></li>
   </ul>
 `;
+
+const PROFILE_PAGE = `<a href="https://rule34.xxx/index.php?page=favorites&s=view&id=9">1234</a>`;
 
 function createThumb(id: string): string {
   return `<span class="thumb" id="s${id}"><a id="p${id}"><img src="https://example.com/thumbnail_${id}.jpg" title="apple"></a></span>`;
@@ -80,6 +85,36 @@ describe("Rule34Client", () => {
       const { client } = setup(() => Promise.resolve(new Response("<html></html>")));
 
       await expect(client.fetchPostPage("42")).rejects.toThrow(Rule34Error);
+    });
+  });
+
+  describe("postPageUrl", () => {
+    test("links a post's page", () => {
+      expect(setup().client.postPageUrl("42")).toBe(postPageUrl("42"));
+    });
+  });
+
+  describe("postListUrl", () => {
+    test("links the site's search for a query", () => {
+      expect(setup().client.postListUrl("apple")).toBe(postListUrlFromQuery("apple"));
+    });
+  });
+
+  describe("fetchFavoritesPage", () => {
+    test("fetches a page of an owner's favorites and reads its posts", async() => {
+      const { client, fetch } = setup(() => Promise.resolve(new Response(createThumb("7"))));
+
+      expect((await client.fetchFavoritesPage("9", 2)).map(post => post.id)).toEqual(["7"]);
+      expect(fetch).toHaveBeenCalledWith(favoritesPageUrl("9", favoritesPageOffset(2)), undefined);
+    });
+  });
+
+  describe("fetchFavoriteCount", () => {
+    test("reads the favorite count from the owner's profile page", async() => {
+      const { client, fetch } = setup(() => Promise.resolve(new Response(PROFILE_PAGE)));
+
+      expect(await client.fetchFavoriteCount("9")).toBe(1_234);
+      expect(fetch).toHaveBeenCalledWith(profilePageUrl("9"), undefined);
     });
   });
 

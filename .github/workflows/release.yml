@@ -28,11 +28,11 @@ jobs:
       - name: Verify version matches tag
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          built=$(grep -m1 '^// @version' dist/userscript/favorites_search_gallery.js | tr -d '\r' | awk '{print $3}')
+          built=$(grep -m1 '^// @version' dist/rule34/favorites_search_gallery.js | tr -d '\r' | awk '{print $3}')
           echo "tag=$tag built=$built"
           test "$tag" = "$built"
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/userscript/favorites_search_gallery.js
+          files: dist/rule34/favorites_search_gallery.js
           generate_release_notes: true

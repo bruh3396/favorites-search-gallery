@@ -94,6 +94,12 @@ describe("FrozenCobaltRemotePosts", () => {
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledTimes(2);
   });
 
+  test("rejects a result of an unknown status", async() => {
+    const bundle = setup({ status: "bogus" } as unknown as FrozenCobaltPostResult);
+
+    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toThrow("Unexpected value");
+  });
+
   test("retries a server error, then rejects when Frozen Cobalt keeps failing", async() => {
     const bundle = setup();
 

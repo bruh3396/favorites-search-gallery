@@ -36,7 +36,15 @@ describe("isTransient", () => {
     expect(isTransient(new FrozenCobaltError("http", { status }))).toBe(expected);
   });
 
-  test("is false for any other error", () => {
+  test("treats http without a status as permanent", () => {
+    expect(isTransient(new FrozenCobaltError("http"))).toBe(false);
+  });
+
+  test("treats any other error as permanent", () => {
     expect(isTransient(new Error("timeout"))).toBe(false);
+  });
+
+  test("throws for an unknown reason", () => {
+    expect(() => isTransient(new FrozenCobaltError("bogus" as FrozenCobaltErrorReason))).toThrow("bogus");
   });
 });

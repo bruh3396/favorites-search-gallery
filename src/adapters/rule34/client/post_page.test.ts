@@ -16,7 +16,9 @@ function mintMedia({ url, tags }: { url: string; tags: string }): Media | null {
   return url === "" ? null : { kind: "image", locator: `${url} ${tags}` };
 }
 
-function createPostPage(size: string, file: string = IMAGE): string {
+const ALICE = "<li class=\"tag-type-character tag\"><a>?</a><a>alice</a></li>";
+
+function createPostPage(size: string, file: string = IMAGE, tags: string = ALICE): string {
   return `
     <div id="stats"><ul>
       <li>Id: 42</li>
@@ -25,7 +27,7 @@ function createPostPage(size: string, file: string = IMAGE): string {
       <li>Score: 7</li>
     </ul></div>
     ${file}
-    <ul><li class="tag-type-character tag"><a>?</a><a>alice</a></li></ul>
+    <ul>${tags}</ul>
   `;
 }
 
@@ -47,6 +49,35 @@ describe("parsePostPage", () => {
       tags: "alice"
     });
     expect(tagCategories).toEqual(new Map([["alice", "character"]]));
+  });
+
+  test("files a tag of no known type as general", () => {
+    const tags = "<li class=\"tag\"><a>?</a><a>bob</a></li><li class=\"tag-type-bogus tag\"><a>?</a><a>carol</a></li>";
+
+    expect(parsePostPageHtml(createPostPage("1920x1080", IMAGE, tags)).tagCategories)
+      .toEqual(new Map([["bob", "general"], ["carol", "general"]]));
+  });
+
+  test("skips a tag without a name", () => {
+    const tags = "<li class=\"tag-type-artist tag\"><a>?</a></li><li class=\"tag-type-artist tag\"><a>?</a><a></a></li>";
+    const { post, tagCategories } = parsePostPageHtml(createPostPage("1920x1080", IMAGE, tags));
+
+    expect(post.tags).toBe("");
+    expect(tagCategories.size).toBe(0);
+  });
+
+  test.each(["Questionable", "Safe"])("reads the rating %s", rating => {
+    const html = createPostPage("1920x1080").replace("Explicit", rating);
+
+    expect(parsePostPageHtml(html).post.rating).toBe(rating.toLowerCase());
+  });
+
+  test("throws for a page with empty statistics", () => {
+    expect(() => parsePostPageHtml(`<div id="stats"></div>${IMAGE}`)).toThrow(Rule34Error);
+  });
+
+  test("throws for a page without statistics", () => {
+    expect(() => parsePostPageHtml(IMAGE)).toThrow(Rule34Error);
   });
 
   test("mints the image's media from its file", () => {

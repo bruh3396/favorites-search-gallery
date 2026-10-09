@@ -45,7 +45,7 @@ describe("ExactSearchTerm", () => {
   });
 
   test("costs less than its negated form", () => {
-    expect(parseExactSearchTerm("foo").cost).toBeLessThan(parseExactSearchTerm("-foo").cost);
+    expect(parseExactSearchTerm("apple").cost).toBeLessThan(parseExactSearchTerm("-apple").cost);
   });
 
   test.each(positiveCases)("matches %s against the fruit doc", (term, expected) => {

@@ -1,7 +1,7 @@
-import { Favorites, createFavorites } from "@/core/features/favorites/favorites";
+import { FavoritesSearchSession, FavoritesSearchSessionSettings } from "@/core/features/favorites/search/session";
+import { FavoritesService, createFavoritesService } from "@/core/features/favorites/favorites";
 import { describe, expect, test } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { FavoritesSearchSession, FavoritesSearchSessionSettings } from "@/core/features/favorites/search/session";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -22,7 +22,7 @@ import { createSearchSettings } from "@/core/features/favorites/testing/search";
 import { flushMicrotasks } from "@/testing/async";
 
 interface Setup {
-  favorites: Favorites;
+  favorites: FavoritesService;
   session: FavoritesSearchSession;
   paginationSettings: Preference<PaginationSettings>;
   remoteFavoriteActions: ObservableRemoteFavoriteActions;
@@ -55,7 +55,7 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
   const paginationSettings = createPaginationSettings();
 
   await localFavorites.setAll(localIds);
-  const favorites = createFavorites({ userOwnsFavorites: true, blacklistedTags: "" }, {
+  const favorites = createFavoritesService({ userOwnsFavorites: true, blacklistedTags: "" }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
@@ -64,12 +64,11 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
     scheduler: new MemoryScheduler(),
-    randomSource: new MemoryRandomSource([0.25, 0.5]),
-    waitForPaint: (): Promise<void> => Promise.resolve()
+    randomSource: new MemoryRandomSource([0.25, 0.5])
   });
   const session = favorites.createSearchSession({ searchSettings: createPreference(createSearchSettings()), paginationSettings });
 
-  favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
+  favorites.updates.on(favorite => hydratedIds.push(favorite.id));
   await favorites.load();
   return { favorites, session, paginationSettings, remoteFavoriteActions, localFavorites, hydratedIds };
 }
@@ -165,14 +164,14 @@ describe("createFavorites", () => {
   test("treats every favorite on the user's own page as favorited", async() => {
     const { favorites } = await setup(createTaggedPosts("apple"));
 
-    expect(favorites.isFavorited("1")).toBe(true);
+    expect(favorites.isFavorite("1")).toBe(true);
   });
 
   test("records a favorite removed by another caller of the shared port", async() => {
     const { favorites, remoteFavoriteActions } = await setup(createTaggedPosts("apple"));
 
     await remoteFavoriteActions.remove("1");
-    expect(favorites.isFavorited("1")).toBe(false);
+    expect(favorites.isFavorite("1")).toBe(false);
   });
 
   test("records a favorite added back through its intent", async() => {
@@ -180,7 +179,7 @@ describe("createFavorites", () => {
 
     await favorites.actions.remove("1");
     await favorites.actions.add("1");
-    expect(favorites.isFavorited("1")).toBe(true);
+    expect(favorites.isFavorite("1")).toBe(true);
   });
 
   test("deletes a removed favorite from the local favorites", async() => {

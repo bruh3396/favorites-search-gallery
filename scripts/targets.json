@@ -1,0 +1,24 @@
+{
+  "rule34": {
+    "userscript": true,
+    "bundles": [
+      { "entry": "src/targets/rule34/main.ts", "outfile": "dist/rule34/favorites_search_gallery.js" }
+    ]
+  },
+  "demo": {
+    "version": "demo",
+    "html": "src/targets/demo/index.html",
+    "bundles": [
+      { "entry": "src/targets/demo/main.ts", "outfile": "dist/demo/demo.js" }
+    ]
+  },
+  "electron": {
+    "version": "playground",
+    "html": "src/targets/electron/index.html",
+    "defaults": { "FAVORITES_OWNER_ID": "6" },
+    "bundles": [
+      { "entry": "src/targets/electron/main.ts", "outfile": "dist/electron/app.js" },
+      { "entry": "src/targets/electron/launcher.ts", "outfile": "dist/electron/launcher.js", "platform": "node", "external": ["electron"] }
+    ]
+  }
+}

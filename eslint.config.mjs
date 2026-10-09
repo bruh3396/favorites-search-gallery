@@ -47,7 +47,7 @@ export default defineConfig([
     files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parserOptions: {
-        project: "./tsconfig.json",
+        project: ["./tsconfig.json", "./src/targets/electron/tsconfig.json"],
         tsconfigRootDir: import.meta.dirname
       }
     }
@@ -648,7 +648,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["build/**/*.ts", "playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
+    files: ["scripts/**/*.ts", "playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
     rules: {
       "no-console": "off"
     }

@@ -1,6 +1,6 @@
 import { ALL_RATINGS_MASK, isRatingMask } from "@/core/domain/post/post";
 import { Preference, PreferenceStorage, StoredPreference } from "@/core/utils/reactive/preference";
-import { SORT_KEYS, SearchSettings } from "@/core/features/favorites/search/settings";
+import { SORT_KEYS, SearchSettings } from "@/core/features/favorites/search/inputs";
 import { isBoolean, oneOf, sameKindAs } from "@/core/utils/guards/guards";
 import { PaginationSettings } from "@/core/features/favorites/search/pagination";
 import { createFieldsCodec } from "@/core/utils/codec/codec";

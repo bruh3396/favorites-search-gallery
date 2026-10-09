@@ -1,13 +1,13 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { PostGrid, PostGridPreferences } from "@/core/ui/post_grid/post_grid";
 import { Fact } from "@/core/utils/reactive/milestone";
-import { Favorites } from "@/core/features/favorites/favorites";
 import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
+import { FavoritesService } from "@/core/features/favorites/favorites";
 import { Media } from "@/core/domain/media/media";
 import { PaginationSettings } from "@/core/features/favorites/search/pagination";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
-import { Preference } from "@/core/utils/reactive/preference";
 import { PostGridSkeleton } from "@/core/ui/post_grid/skeleton";
+import { Preference } from "@/core/utils/reactive/preference";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
 import { Slider } from "@/core/ui/components/slider/slider";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
@@ -29,7 +29,7 @@ const MAX_PAGE_SIZE = 100;
 const PAGE_SIZE_STEP = 10;
 
 export interface FavoritesScreenProps {
-  favorites: Pick<Favorites, "hydrated" | "loadState">;
+  favorites: Pick<FavoritesService, "updates" | "loadState">;
   session: Pick<FavoritesSearchSession, "results" | "paginationResult" | "submit" | "goToPage">;
   paginationSettings: Preference<PaginationSettings>;
   finishedLoading: Fact;
@@ -55,7 +55,7 @@ export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
             max={MAX_PAGE_SIZE}
             step={PAGE_SIZE_STEP}
             value={computed(() => paginationSettings.value.size)}
-            onValueChange={size => paginationSettings.set({ ...paginationSettings.peek(), size })}
+            onValueChange={s => paginationSettings.set({ ...paginationSettings.peek(), size: s })}
           />
         </div>
         <div className={FavoritesScreenClass.summary}>
@@ -78,7 +78,7 @@ export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
         />
         <PostGrid
           posts={computed(() => session.paginationResult.value.favorites)}
-          changed={favorites.hydrated}
+          changed={favorites.updates}
           layout={layout}
           size={size}
           getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}

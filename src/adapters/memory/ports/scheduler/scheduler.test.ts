@@ -25,6 +25,18 @@ describe("MemoryScheduler", () => {
     expect(order).toEqual(["early", "late"]);
   });
 
+  test("runs tasks due at once in the order they were scheduled", () => {
+    const scheduler = new MemoryScheduler();
+    const order: string[] = [];
+
+    scheduler.schedule(() => order.push("first"), 100);
+    scheduler.schedule(() => order.push("second"), 100);
+    scheduler.schedule(() => order.push("third"), 200);
+    scheduler.advance(200);
+
+    expect(order).toEqual(["first", "second", "third"]);
+  });
+
   test("runs a task scheduled by another task when it falls due in the same advance", () => {
     const scheduler = new MemoryScheduler();
     const task = vi.fn();

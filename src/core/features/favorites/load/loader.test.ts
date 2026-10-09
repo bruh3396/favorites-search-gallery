@@ -47,8 +47,7 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
     remoteFavorites,
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
-    scheduler: new MemoryScheduler(),
-    waitForPaint: (): Promise<void> => Promise.resolve()
+    scheduler: new MemoryScheduler()
   });
 
   await localPosts.setMany(local.filter(post => post.media.locator !== ""));
@@ -121,7 +120,7 @@ describe("FavoritesLoader", () => {
       const { flow, collection } = await setup({ local: [createPost({ id: "1" })], remote: [createPost({ id: "1", tags: "apple", media: MEDIA })] });
       const hydrated: Favorite[] = [];
 
-      collection.hydrated.on(favorite => hydrated.push(favorite));
+      collection.updates.on(favorite => hydrated.push(favorite));
       await flow.load();
       await flushMicrotasks();
       expect(collection.getAll().find(favorite => favorite.id === "1")?.media).toEqual(MEDIA);

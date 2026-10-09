@@ -1,7 +1,6 @@
-import { FavoritesActionIntents, FavoritesActions } from "@/core/features/favorites/actions/actions";
 import { FavoritesSearchSession, FavoritesSearchSessionSettings } from "@/core/features/favorites/search/session";
-import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
+import { FavoritesActions } from "@/core/features/favorites/actions/actions";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesLoader } from "@/core/features/favorites/load/loader";
@@ -34,30 +33,29 @@ export interface FavoritesDependencies {
   remoteMedia: RemoteMedia;
   scheduler: Scheduler;
   randomSource: RandomSource;
-  waitForPaint: () => Promise<void>;
 }
 
-export interface Favorites {
+export interface FavoritesService {
   readonly createSearchSession: (settings: FavoritesSearchSessionSettings) => FavoritesSearchSession;
-  readonly actions: FavoritesActionIntents;
-  readonly hydrated: Occurrence<Favorite>;
+  readonly actions: Pick<FavoritesActions, "add" | "remove">;
+  readonly updates: Occurrence<Favorite>;
   readonly loadState: Readable<LoadState>;
-  readonly isFavorited: (id: string) => boolean;
+  readonly isFavorite: (id: string) => boolean;
   readonly load: () => Promise<void>;
 }
 
-export function createFavorites(configuration: FavoritesConfiguration, dependencies: FavoritesDependencies): Favorites {
+export function createFavoritesService(configuration: FavoritesConfiguration, dependencies: FavoritesDependencies): FavoritesService {
   const collection = new FavoritesCollection();
-  const index = new FavoritesSearchIndex(new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric)));
-  const blacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, isForced: !configuration.userOwnsFavorites });
+  const searchIndex = new FavoritesSearchIndex();
+  const blacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
   const actions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, dependencies);
-  const loader = new FavoritesLoader({ ...dependencies, collection, index });
+  const loader = new FavoritesLoader({ ...dependencies, collection, index: searchIndex });
   return {
-    createSearchSession: settings => new FavoritesSearchSession({ ...dependencies, ...settings, index, blacklist }),
+    createSearchSession: settings => new FavoritesSearchSession({ ...dependencies, ...settings, index: searchIndex, blacklist }),
     actions,
-    hydrated: collection.hydrated,
+    updates: collection.updates,
     loadState: loader.state,
-    isFavorited: id => actions.isFavorited(id),
+    isFavorite: id => actions.isFavorite(id),
     load: () => loader.load()
   };
 }

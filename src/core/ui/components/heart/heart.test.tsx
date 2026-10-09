@@ -1,7 +1,7 @@
-import { FavoriteHeart, FavoriteHeartClass } from "@/core/features/favorites/hearts/heart";
+import { FavoriteHeart, FavoriteHeartClass } from "@/core/ui/components/heart/heart";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import HEARTS_CSS from "@/core/features/favorites/hearts/heart.css?inline";
+import HEARTS_CSS from "@/core/ui/components/heart/heart.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 

@@ -1,9 +1,9 @@
-import { configDefaults, defineConfig } from "vitest/config";
+﻿import { configDefaults, defineConfig } from "vitest/config";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const EXCLUDED_TESTS = [...configDefaults.exclude, ".*/**", "playground/**"];
+const EXCLUDED_TESTS = [...configDefaults.exclude, ".*/**", "playground/**", "checks/**"];
 const DOM_TESTS = [
   "src/core/app/**/*.test.{ts,tsx}",
   "src/core/ui/**/*.test.{ts,tsx}",
@@ -12,7 +12,8 @@ const DOM_TESTS = [
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
   "src/adapters/rule34/client/{client,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
-  "src/adapters/rule34/document/document.test.ts"
+  "src/adapters/rule34/document/document.test.ts",
+  "src/adapters/rule34_cdn/client/video_duration.test.ts"
 ];
 
 export default defineConfig({
@@ -47,7 +48,7 @@ export default defineConfig({
       },
       all: true,
       include: ["src/**/*.{ts,tsx}"],
-      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/**/testing/**", "build/**", "src/**/*.test.{ts,tsx}", "src/**/*.d.ts"]
+      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/**/testing/**", "scripts/**", "src/**/*.test.{ts,tsx}", "src/**/*.d.ts"]
     }
   }
 });

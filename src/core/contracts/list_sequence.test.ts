@@ -1,8 +1,8 @@
-﻿import { createPost, createPosts } from "@/testing/post";
+import { Signal, computed } from "@/core/utils/reactive/signal";
+import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { ListSequence } from "@/core/contracts/list_sequence";
 import { Post } from "@/core/domain/post/post";
-import { Signal } from "@/core/utils/reactive/signal";
 
 const POSTS = createPosts("1", "2", "3");
 
@@ -29,6 +29,30 @@ describe("ListSequence", () => {
     const sequence = new ListSequence({ wraps: true }, new Signal<readonly Post[]>(POSTS));
 
     expect(await sequence.getNext(createPost({ id: "9" }))).toBeUndefined();
+  });
+
+  describe("positionOf", () => {
+    test("returns the item's index and the list's length", () => {
+      const sequence = new ListSequence({ wraps: false }, new Signal<readonly Post[]>(POSTS));
+
+      expect(sequence.positionOf(POSTS[2])).toEqual({ index: 2, total: 3 });
+    });
+
+    test("returns nothing for an item the list doesn't hold", () => {
+      const sequence = new ListSequence({ wraps: false }, new Signal<readonly Post[]>(POSTS));
+
+      expect(sequence.positionOf(createPost({ id: "9" }))).toBeUndefined();
+    });
+
+    test("follows the list as it changes", () => {
+      const list = new Signal<readonly Post[]>(POSTS);
+      const sequence = new ListSequence({ wraps: false }, list);
+      const position = computed(() => sequence.positionOf(POSTS[0]));
+
+      expect(position.value).toEqual({ index: 0, total: 3 });
+      list.value = [POSTS[1], POSTS[0]];
+      expect(position.value).toEqual({ index: 1, total: 2 });
+    });
   });
 
   test("steps through the list as it is at each step", async() => {

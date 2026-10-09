@@ -34,7 +34,7 @@ export interface PostGridProps<T extends MediaItem> {
 
 export function createPostGridPreferences(storage: PreferenceStorage): PostGridPreferences {
   return {
-    layout: new StoredPreference<GridLayout>({ key: "postGridLayout", defaultValue: "column" }, { storage, codec: createGuardedCodec(oneOf(GRID_LAYOUTS)) }),
+    layout: new StoredPreference<GridLayout>({ key: "postGridLayout", defaultValue: "row" }, { storage, codec: createGuardedCodec(oneOf(GRID_LAYOUTS)) }),
     size: new StoredPreference({ key: "postGridSize", defaultValue: 6 }, { storage })
   };
 }

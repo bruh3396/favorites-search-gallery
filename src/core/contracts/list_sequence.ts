@@ -1,5 +1,5 @@
+import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { MediaItem } from "@/core/domain/post/post";
-import { MediaSequence } from "@/core/contracts/media_sequence";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface ListSequenceConfiguration {
@@ -15,6 +15,12 @@ export class ListSequence<T extends MediaItem> implements MediaSequence<T> {
 
   public getPrevious(item: T): Promise<T | undefined> {
     return Promise.resolve(this.getNeighbor(item, -1));
+  }
+
+  public positionOf(item: T): SequencePosition | undefined {
+    const items = this.list.value;
+    const index = items.indexOf(item);
+    return index === -1 ? undefined : { index, total: items.length };
   }
 
   private getNeighbor(item: T, offset: number): T | undefined {
