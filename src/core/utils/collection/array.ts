@@ -1,5 +1,6 @@
 import { getValuesAround, randomInt } from "@/core/utils/number/number";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { hashInt } from "@/core/utils/number/bit";
 
 export function isIndexInBounds<V>(array: readonly V[], index: number): boolean {
   return index >= 0 && index < array.length;
@@ -61,6 +62,13 @@ export function shuffleInPlace<V>(randomSource: RandomSource, array: V[]): V[] {
     [array[maxIndex], array[randomIndex]] = [array[randomIndex], array[maxIndex]];
   }
   return array;
+}
+
+export function shuffleDeterministically<T>(list: T[], seed: number, getKey: (item: T) => number): T[] {
+  return list
+    .map(item => ({ item, rank: hashInt(getKey(item), seed) }))
+    .sort((a, b) => a.rank - b.rank)
+    .map(({ item }) => item);
 }
 
 export function intersectSortedNumbers(a: number[], b: number[]): number[] {

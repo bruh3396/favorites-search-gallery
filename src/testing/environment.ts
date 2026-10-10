@@ -9,7 +9,7 @@ export function createEnvironment(overrides: Partial<Environment> = {}): Environ
     canvasBudget: "full",
     favoritesOwnerId: "1",
     ownsFavorites: true,
-    blacklistedTags: "",
+    blacklistedTags: [],
     colorScheme: "light",
     ...overrides
   };

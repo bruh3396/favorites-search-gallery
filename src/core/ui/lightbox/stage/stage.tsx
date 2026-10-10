@@ -1,115 +1,93 @@
+import { Media, MediaKind } from "@/core/domain/media/media";
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { BitmapCache } from "@/core/ui/lightbox/stage/bitmap_cache";
-import { Debouncer } from "@/core/utils/async/debouncer";
-import { Media } from "@/core/domain/media/media";
+import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
+import { GifRenderer } from "@/core/ui/lightbox/stage/gif_renderer";
+import { ImageRenderer } from "@/core/ui/lightbox/stage/image_renderer";
+import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
+import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { MediaItem } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { doNothing } from "@/core/utils/function/function";
+import { VideoRenderer } from "@/core/ui/lightbox/stage/video/video_renderer";
 import { h } from "@/core/ui/h/h";
-
-export const LightboxStageClass = {
-  root: "fsg-LightboxStage",
-  canvas: "fsg-LightboxStage-canvas"
-} as const;
+import { onCleanup } from "@/core/utils/reactive/scope";
 
 export interface LightboxStageProps {
-  current: Readable<MediaItem | undefined>;
-  neighbors: Readable<readonly MediaItem[]>;
-  resolvePreviewUrl: (media: Media) => Promise<string>;
-  resolveOriginalUrl: (media: Media) => Promise<string>;
-  fetchOriginal: (media: Media) => Promise<Blob>;
-  scheduler: Pick<Scheduler, "schedule">;
+  readonly current: Readable<MediaItem | undefined>;
+  readonly neighbors: Readable<readonly MediaItem[]>;
+  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
+  readonly resolveOriginalUrl: (media: Media) => Promise<string>;
+  readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  readonly bitmapDecoder: BitmapDecoder;
+  readonly scheduler: Pick<Scheduler, "schedule">;
 }
 
-interface Stage {
-  props: LightboxStageProps;
-  cache: BitmapCache;
-  originalLoads: Debouncer;
-  neighborLoads: Debouncer;
-}
-const SETTLE_DELAY = 200;
+type LightboxStageControllerDependencies = Omit<LightboxStageProps, "current" | "neighbors">;
+
+const NEIGHBOR_LIMIT = 20;
 
 export function LightboxStage(props: LightboxStageProps): HTMLElement {
-  const canvas = <canvas className={LightboxStageClass.canvas} /> as HTMLCanvasElement;
-  const stage: Stage = {
-    props,
-    cache: new BitmapCache(props.fetchOriginal),
-    originalLoads: new Debouncer({ delay: SETTLE_DELAY }, props.scheduler),
-    neighborLoads: new Debouncer({ delay: SETTLE_DELAY }, props.scheduler)
-  };
+  const { current, neighbors, ...dependencies } = props;
+  const controller = new LightboxStageController(dependencies);
+  const stopShowEffect = effect(() => controller.show(current.value));
+  const stopNeighborsEffect = effect(() => controller.updateNeighbors(neighbors.value, current.peek()));
 
-  effect(() => showPost(canvas, props.current.value, stage));
-  effect(() => preloadNeighbors(props.neighbors.value, stage));
-  return <div className={LightboxStageClass.root}>{canvas}</div>;
+  onCleanup(() => {
+    stopShowEffect();
+    stopNeighborsEffect();
+    controller.dispose();
+  });
+  return controller.root;
 }
 
-function preloadNeighbors(neighbors: readonly MediaItem[], { props, cache: originals, neighborLoads }: Stage): void {
-  const shown = props.current.peek();
+class LightboxStageController {
+  public readonly root: HTMLElement;
+  private readonly renderersByKind: Map<MediaKind, LightboxStageRenderer>;
+  private activeRenderer: LightboxStageRenderer | undefined;
 
-  originals.keepOnly(shown === undefined ? neighbors : [shown, ...neighbors]);
+  constructor({ resolvePreviewUrl, resolveOriginalUrl, fetchOriginal, bitmapDecoder, scheduler }: LightboxStageControllerDependencies) {
+    const imageRenderer = new ImageRenderer({
+      resolvePreviewUrl,
+      fetchOriginal,
+      bitmapDecoder,
+      scheduler
+    });
+    const gifRenderer = new GifRenderer({ resolveOriginalUrl });
+    const videoRenderer = new VideoRenderer({ resolveOriginalUrl, scheduler });
 
-  if (neighbors.length === 0) {
-    neighborLoads.cancel();
-    return;
+    this.renderersByKind = new Map<MediaKind, LightboxStageRenderer>([
+      ["image", imageRenderer],
+      ["gif", gifRenderer],
+      ["video", videoRenderer]
+    ]);
+    this.root = <div className={LightboxStageClass.root}>{this.renderers.map(renderer => renderer.root)}</div>;
   }
-  neighborLoads.debounce(() => neighbors.forEach(neighbor => originals.load(neighbor).catch(doNothing)));
-}
 
-function showPost(canvas: HTMLCanvasElement, post: MediaItem | undefined, stage: Stage): void {
-  clearCanvas(canvas);
-
-  if (post === undefined) {
-    stage.originalLoads.cancel();
-    return;
+  private get renderers(): readonly LightboxStageRenderer[] {
+    return [...this.renderersByKind.values()];
   }
-  showImage(canvas, post, stage).catch(console.error);
-}
 
-function loadOnceSettled(post: MediaItem, { cache, originalLoads }: Stage): Promise<ImageBitmap | undefined> {
-  if (cache.has(post.id)) {
-    return cache.load(post);
+  public show(item: MediaItem | undefined): void {
+    const nextRenderer = item === undefined ? undefined : this.renderersByKind.get(item.media.kind);
+
+    if (this.activeRenderer !== nextRenderer) {
+      this.activeRenderer?.clear();
+      this.activeRenderer = nextRenderer;
+    }
+
+    if (item !== undefined) {
+      nextRenderer!.show(item);
+    }
   }
-  return new Promise((resolve, reject) => originalLoads.debounce(() => cache.load(post).then(resolve, reject)));
-}
 
-async function showImage(canvas: HTMLCanvasElement, post: MediaItem, stage: Stage): Promise<void> {
-  const { props } = stage;
-  const isShown = (): boolean => props.current.peek() === post;
-  const original = loadOnceSettled(post, stage);
-  let wasOriginalDrawn = false;
+  public updateNeighbors(neighbors: readonly MediaItem[], current: MediaItem | undefined): void {
+    this.renderersByKind.forEach((renderer, kind) => {
+      const kindNeighbors = neighbors.filter(item => item.media.kind === kind && item.id !== current?.id).slice(0, NEIGHBOR_LIMIT);
 
-  loadPreview(canvas.ownerDocument, post.media, props.resolvePreviewUrl)
-    .then(preview => {
-      if (isShown() && !wasOriginalDrawn) {
-        drawBitmap(canvas, preview);
-      }
-      preview.close();
-    })
-    .catch(console.error);
-  const bitmap = await original;
-
-  if (bitmap !== undefined && isShown()) {
-    drawBitmap(canvas, bitmap);
-    wasOriginalDrawn = true;
+      renderer.setNeighbors(kindNeighbors);
+    });
   }
-}
 
-async function loadPreview(ownerDocument: Document, media: Media, resolvePreviewUrl: LightboxStageProps["resolvePreviewUrl"]): Promise<ImageBitmap> {
-  const image = ownerDocument.createElement("img");
-  const url = await resolvePreviewUrl(media);
-
-  image.src = url;
-  await image.decode();
-  return createImageBitmap(image);
-}
-
-function drawBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap): void {
-  canvas.width = bitmap.width;
-  canvas.height = bitmap.height;
-  canvas.getContext("2d")?.drawImage(bitmap, 0, 0);
-}
-
-function clearCanvas(canvas: HTMLCanvasElement): void {
-  canvas.width = 0;
-  canvas.height = 0;
+  public dispose(): void {
+    this.renderers.forEach(renderer => renderer.dispose());
+  }
 }

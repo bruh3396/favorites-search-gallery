@@ -1,16 +1,17 @@
+import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { doNothing } from "@/core/utils/function/function";
 
 interface Entry {
-  bitmap: Promise<ImageBitmap | undefined>;
-  abortController: AbortController;
+  readonly bitmap: Promise<ImageBitmap | undefined>;
+  readonly abortController: AbortController;
 }
 
 export class BitmapCache {
   private readonly cache = new Map<string, Entry>();
 
-  constructor(private readonly fetchOriginal: (media: Media) => Promise<Blob>) { }
+  constructor(private readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>, private readonly bitmapDecoder: BitmapDecoder) { }
 
   public has(id: string): boolean {
     return this.cache.has(id);
@@ -23,7 +24,7 @@ export class BitmapCache {
       return cached.bitmap;
     }
     const abortController = new AbortController();
-    const entry = { bitmap: this.decode(item.media, abortController.signal), abortController };
+    const entry = { bitmap: Promise.resolve().then(() => this.decode(item.media, abortController.signal)), abortController };
 
     this.cache.set(item.id, entry);
     entry.bitmap.catch(() => this.forget(item.id, entry));
@@ -44,7 +45,21 @@ export class BitmapCache {
 
   private async decode(media: Media, signal: AbortSignal): Promise<ImageBitmap | undefined> {
     try {
-      return createImageBitmap(await this.fetchOriginal(media));
+      if (signal.aborted) {
+        return undefined;
+      }
+      const blob = await this.fetchOriginal(media, signal);
+
+      if (signal.aborted) {
+        return undefined;
+      }
+      const bitmap = await this.bitmapDecoder.decode(blob);
+
+      if (signal.aborted) {
+        bitmap.close();
+        return undefined;
+      }
+      return bitmap;
     } catch (error) {
       if (signal.aborted) {
         return undefined;

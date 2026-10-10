@@ -14,12 +14,12 @@ interface FetchProgress {
 }
 
 export interface FavoritesFetcherDependencies {
-  localFavorites: LocalFavorites;
-  remoteFavorites: RemoteFavorites;
-  collection: Pick<FavoritesCollection, "append" | "getAllIds" | "clearTagCache">;
-  index: Pick<FavoritesSearchIndex, "add">;
-  postLibrary: PostLibrary;
-  report: (state: LoadState) => void;
+  readonly localFavorites: LocalFavorites;
+  readonly remoteFavorites: RemoteFavorites;
+  readonly collection: Pick<FavoritesCollection, "append" | "getAllIds" | "clearTagCache">;
+  readonly index: Pick<FavoritesSearchIndex, "add">;
+  readonly postLibrary: PostLibrary;
+  readonly report: (state: LoadState) => void;
 }
 
 export class FavoritesFetcher {

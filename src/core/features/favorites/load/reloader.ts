@@ -9,12 +9,13 @@ import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_f
 const STREAM_BATCH_SIZE = 1_000;
 
 export interface FavoritesReloaderDependencies {
-  localFavorites: LocalFavorites;
-  remoteFavorites: RemoteFavorites;
-  collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll" | "clearTagCache">;
-  index: Pick<FavoritesSearchIndex, "rebuild">;
-  postLibrary: PostLibrary;
-  report: (state: LoadState) => void;
+  readonly localFavorites: LocalFavorites;
+  readonly remoteFavorites: RemoteFavorites;
+  readonly collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll" | "clearTagCache">;
+  readonly index: Pick<FavoritesSearchIndex, "rebuild">;
+  readonly postLibrary: PostLibrary;
+  readonly waitForPaint: () => Promise<void>;
+  readonly report: (state: LoadState) => void;
 }
 
 export class FavoritesReloader {
@@ -25,7 +26,7 @@ export class FavoritesReloader {
   }
 
   public async reload(localIds: string[]): Promise<LoadResult> {
-    const { collection, index, postLibrary, report } = this.dependencies;
+    const { collection, index, postLibrary, report, waitForPaint } = this.dependencies;
     const restored = await this.restore(localIds);
     let pulled: Post[] = [];
 
@@ -35,6 +36,7 @@ export class FavoritesReloader {
       pulled = await this.pullNew(localIds);
     } finally {
       report({ phase: "indexing" });
+      await waitForPaint();
       index.rebuild(collection.getAll());
       collection.clearTagCache();
       postLibrary.refresh([...pulled, ...restored]).catch(console.error);

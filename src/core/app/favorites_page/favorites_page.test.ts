@@ -2,6 +2,7 @@ import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/po
 import { describe, expect, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
@@ -25,7 +26,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   const container = document.createElement("div");
   const client = new MemoryClient(posts);
 
-  mountFavoritesPage(container, { userOwnsFavorites: true, blacklistedTags: "", favoritesOwnerId: "1", colorScheme: "dark" }, {
+  mountFavoritesPage(container, { userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
@@ -33,6 +34,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteFavoriteActions: new MemoryRemoteFavoriteActions(client),
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
+    bitmapDecoder: new MemoryBitmapDecoder(),
     remotePages: new MemoryRemotePages(),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource(),

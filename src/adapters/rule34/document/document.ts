@@ -62,13 +62,13 @@ export class Rule34Document {
     return readCookie("theme") === "dark" ? "dark" : "light";
   }
 
-  public readTagBlacklist(): string {
+  public readTagBlacklist(): string[] {
     let tags = readCookie("tag_blacklist");
 
     for (let i = 0; i < TAG_BLACKLIST_ENCODINGS; i += 1) {
-      tags = decodeURIComponent(tags).replace(/(?:^| )-/, "");
+      tags = decodeURIComponent(tags);
     }
-    return tags;
+    return tags.split(/\s+/).filter(tag => tag !== "");
   }
 
   public setTheme(colorScheme: ColorScheme): void {

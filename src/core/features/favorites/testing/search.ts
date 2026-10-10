@@ -1,7 +1,6 @@
+import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/inputs";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { SearchRequest } from "../search/inputs";
-import { SearchSettings } from "@/core/features/favorites/search/inputs";
 import { parseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 interface SearchRequestOverrides extends Partial<SearchRequest> {

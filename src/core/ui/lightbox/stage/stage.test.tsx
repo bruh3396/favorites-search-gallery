@@ -1,7 +1,9 @@
-import { LightboxStage, LightboxStageClass, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
+import { LightboxStage, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
+import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -10,8 +12,9 @@ import { expectClassesStyled } from "@/testing/css";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
 const SECOND: MediaItem = { id: "2", media: { kind: "image", locator: "images/2" } };
+const FIRST_VIDEO: MediaItem = { id: "v1", media: { kind: "video", locator: "videos/1.mp4" } };
+const SECOND_VIDEO: MediaItem = { id: "v2", media: { kind: "video", locator: "videos/2.mp4" } };
 const ORIGINAL_ORIGIN = "https://original/";
-const PREVIEW_SIZE = { width: 100, height: 50 };
 const ORIGINAL_SIZE = { width: 1_200, height: 800 };
 
 interface FakeBitmap {
@@ -21,79 +24,93 @@ interface FakeBitmap {
   close: Mock<() => void>;
 }
 
-interface DecodedImage {
-  image: HTMLImageElement;
-  url: string;
-}
-
-type ResolveOriginalUrl = LightboxStageProps["resolveOriginalUrl"];
-type Decode = () => Promise<void>;
-
 interface Setup {
-  canvas: HTMLCanvasElement;
+  root: HTMLElement;
+  preview: HTMLImageElement;
+  original: HTMLCanvasElement;
   current: Signal<MediaItem | undefined>;
   neighbors: Signal<readonly MediaItem[]>;
   scheduler: MemoryScheduler;
+  fetchOriginal: Mock<LightboxStageProps["fetchOriginal"]>;
+  resolveOriginalUrl: Mock<LightboxStageProps["resolveOriginalUrl"]>;
+  decodeBitmap: Mock<BitmapDecoder["decode"]>;
   drawn: () => string[];
   bitmaps: FakeBitmap[];
-  decoded: DecodedImage[];
 }
 
-function resolveOriginalUrlNow(media: Media): Promise<string> {
-  return Promise.resolve(`${ORIGINAL_ORIGIN}${media.locator}`);
+interface FakeDrawing {
+  drawImage: Mock<(bitmap: FakeBitmap) => void>;
+  bitmaps: FakeBitmap[];
+  bitmapDecoder: BitmapDecoder;
+  decodeBitmap: Mock<BitmapDecoder["decode"]>;
 }
 
-function decodeNow(): Promise<void> {
-  return Promise.resolve();
-}
+type ResolvePreviewUrl = LightboxStageProps["resolvePreviewUrl"];
 
-// happy-dom neither decodes images nor draws: a bitmap remembers the image it was made from, and the canvas what it drew.
-function fakeDrawing(decode: Decode): { drawImage: Mock<(bitmap: FakeBitmap) => void>; bitmaps: FakeBitmap[]; decoded: DecodedImage[] } {
-  const drawImage = vi.fn<(bitmap: FakeBitmap) => void>();
-  const bitmaps: FakeBitmap[] = [];
-  const decoded: DecodedImage[] = [];
-  const createBitmap = (image: HTMLImageElement): Promise<FakeBitmap> => {
-    const bitmap = { ...(image.src.startsWith(ORIGINAL_ORIGIN) ? ORIGINAL_SIZE : PREVIEW_SIZE), source: image.src, close: vi.fn() };
-
-    bitmaps.push(bitmap);
-    return Promise.resolve(bitmap);
-  };
-  const spies = [
-    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D),
-    vi.spyOn(HTMLImageElement.prototype, "decode").mockImplementation(function(this: HTMLImageElement) {
-      decoded.push({ image: this, url: this.src });
-      return decode();
-    })
-  ];
-
-  vi.stubGlobal("createImageBitmap", createBitmap);
-  onTestFinished(() => {
-    spies.forEach(spy => spy.mockRestore());
-    vi.unstubAllGlobals();
-  });
-  return { drawImage, bitmaps, decoded };
-}
-
-function setup(resolveOriginalUrl: ResolveOriginalUrl = resolveOriginalUrlNow, decode: Decode = decodeNow): Setup {
-  const { drawImage, bitmaps, decoded } = fakeDrawing(decode);
-  const current = new Signal<MediaItem | undefined>(undefined);
-  const neighbors = new Signal<readonly MediaItem[]>([]);
-  const scheduler = new MemoryScheduler();
-  const { result } = render(document, () => (
-    <LightboxStage
-      current={current}
-      neighbors={neighbors}
-      resolvePreviewUrl={media => Promise.resolve(`https://preview/${media.locator}`)}
-      resolveOriginalUrl={resolveOriginalUrl}
-      scheduler={scheduler}
-    />
-  ));
-  const canvas = result.querySelector<HTMLCanvasElement>(`.${LightboxStageClass.canvas}`)!;
-  return { canvas, current, neighbors, scheduler, bitmaps, decoded, drawn: () => drawImage.mock.calls.map(([bitmap]) => bitmap.source) };
+function fetchOriginalNow(media: Media): Promise<Blob> {
+  return Promise.resolve(Object.assign(new Blob(), { source: `${ORIGINAL_ORIGIN}${media.locator}` }));
 }
 
 function pendForever<T>(): Promise<T> {
   return new Promise(() => undefined);
+}
+
+function fakeDrawing(): FakeDrawing {
+  const drawImage = vi.fn<(bitmap: FakeBitmap) => void>();
+  const bitmaps: FakeBitmap[] = [];
+  const decodeBitmap = vi.fn<BitmapDecoder["decode"]>(source => {
+    const blob = source as Blob & { source: string };
+    const bitmap = { ...ORIGINAL_SIZE, source: blob.source, close: vi.fn() };
+
+    bitmaps.push(bitmap);
+    return Promise.resolve(bitmap as unknown as ImageBitmap);
+  });
+  const bitmapDecoder = {
+    decode: decodeBitmap
+  };
+  const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+
+  onTestFinished(() => spy.mockRestore());
+  return { drawImage, bitmaps, bitmapDecoder, decodeBitmap };
+}
+
+function setup(
+  fetch: LightboxStageProps["fetchOriginal"] = fetchOriginalNow,
+  resolvePreviewUrl: ResolvePreviewUrl = media => Promise.resolve(`https://preview/${media.locator}`),
+  resolveOriginal: LightboxStageProps["resolveOriginalUrl"] = media => Promise.resolve(`${ORIGINAL_ORIGIN}${media.locator}`)
+): Setup {
+  const { drawImage, bitmaps, bitmapDecoder, decodeBitmap } = fakeDrawing();
+  const current = new Signal<MediaItem | undefined>(undefined);
+  const neighbors = new Signal<readonly MediaItem[]>([]);
+  const scheduler = new MemoryScheduler();
+  const fetchOriginal = vi.fn<LightboxStageProps["fetchOriginal"]>(fetch);
+  const resolveOriginalUrl = vi.fn<LightboxStageProps["resolveOriginalUrl"]>(resolveOriginal);
+  const { result } = render(document, () => (
+    <LightboxStage
+      current={current}
+      neighbors={neighbors}
+      resolvePreviewUrl={resolvePreviewUrl}
+      resolveOriginalUrl={resolveOriginalUrl}
+      fetchOriginal={fetchOriginal}
+      bitmapDecoder={bitmapDecoder}
+      scheduler={scheduler}
+    />
+  ));
+  const preview = result.querySelector<HTMLImageElement>(`img.${LightboxStageClass.media}`)!;
+  const original = result.querySelector<HTMLCanvasElement>(`canvas.${LightboxStageClass.media}`)!;
+  return {
+    root: result,
+    preview,
+    original,
+    current,
+    neighbors,
+    scheduler,
+    fetchOriginal,
+    resolveOriginalUrl,
+    decodeBitmap,
+    bitmaps,
+    drawn: () => drawImage.mock.calls.map(([bitmap]) => bitmap.source)
+  };
 }
 
 function flushPromises(): Promise<void> {
@@ -105,107 +122,226 @@ describe("LightboxStage", () => {
     expectClassesStyled(LightboxStageClass, LIGHTBOX_CSS);
   });
 
-  test("draws the preview while the original loads", async() => {
-    const { canvas, current, drawn } = setup(pendForever);
+  test("shows the preview image while the original is pending without decoding the preview", async() => {
+    const { preview, original, current, decodeBitmap } = setup(() => pendForever());
 
     current.value = FIRST;
-    await vi.waitFor(() => expect(drawn()).toEqual(["https://preview/images/1"]));
-    expect([canvas.width, canvas.height]).toEqual([PREVIEW_SIZE.width, PREVIEW_SIZE.height]);
+    await vi.waitFor(() => expect(preview.getAttribute("src")).toBe("https://preview/images/1"));
+    expect(preview.hidden).toBe(false);
+    expect(original.hidden).toBe(true);
+    expect(decodeBitmap).not.toHaveBeenCalled();
   });
 
   test("draws the original at its own size once it loads", async() => {
-    // TODO impl changed
-    // const { canvas, current, drawn } = setup();
+    const { preview, original, current, drawn } = setup();
 
-    // current.value = FIRST;
-    // await vi.waitFor(() => expect(drawn()).toContain("https://original/images/1"));
-    // await flushPromises();
-    // expect(drawn().at(-1)).toBe("https://original/images/1");
-    // expect([canvas.width, canvas.height]).toEqual([ORIGINAL_SIZE.width, ORIGINAL_SIZE.height]);
+    current.value = FIRST;
+    await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
+    expect([original.width, original.height]).toEqual([ORIGINAL_SIZE.width, ORIGINAL_SIZE.height]);
+    expect(preview.hidden).toBe(true);
+    expect(original.hidden).toBe(false);
   });
 
-  test("waits for quick steps to stop before loading the original", () => {
-  // TODO impl changed
-  //   const resolveOriginalUrl = vi.fn<ResolveOriginalUrl>(pendForever);
-  //   const { current, scheduler } = setup(resolveOriginalUrl);
+  test("ignores a preview URL that resolves after switching posts", async() => {
+    const finishResolving: Map<string, (url: string) => void> = new Map();
+    const resolvePreviewUrl: ResolvePreviewUrl = media => new Promise(resolve => finishResolving.set(media.locator, resolve));
+    const { current, preview } = setup(() => pendForever(), resolvePreviewUrl);
 
-  //   current.value = FIRST;
-  //   current.value = SECOND;
-  //   expect(resolveOriginalUrl.mock.calls.map(([media]) => media)).toEqual([FIRST.media]);
-  //   scheduler.advance(200);
-  //   expect(resolveOriginalUrl.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
+    current.value = FIRST;
+    await vi.waitFor(() => expect(finishResolving.has(FIRST.media.locator)).toBe(true));
+    current.value = SECOND;
+    await vi.waitFor(() => expect(finishResolving.has(SECOND.media.locator)).toBe(true));
+    finishResolving.get(SECOND.media.locator)!(`https://preview/${SECOND.media.locator}`);
+    await vi.waitFor(() => expect(preview.getAttribute("src")).toBe(`https://preview/${SECOND.media.locator}`));
+    finishResolving.get(FIRST.media.locator)!(`https://preview/${FIRST.media.locator}`);
+    await flushPromises();
+    expect(preview.getAttribute("src")).toBe(`https://preview/${SECOND.media.locator}`);
+    expect(preview.hidden).toBe(false);
+  });
+
+  test("keeps the original visible when the preview URL resolves late", async() => {
+    let finishResolving: ((url: string) => void) | undefined;
+    const resolvePreviewUrl: ResolvePreviewUrl = () => new Promise(resolve => {
+      finishResolving = resolve;
+    });
+    const { current, preview, original, drawn } = setup(fetchOriginalNow, resolvePreviewUrl);
+
+    current.value = FIRST;
+    await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
+    expect(preview.hidden).toBe(true);
+    expect(original.hidden).toBe(false);
+    finishResolving!(`https://preview/${FIRST.media.locator}`);
+    await flushPromises();
+    expect(preview.hidden).toBe(true);
+    expect(original.hidden).toBe(false);
+    expect(preview.getAttribute("src")).toBe(`https://preview/${FIRST.media.locator}`);
+  });
+
+  test("keeps the preview visible when the original fails", async() => {
+    const { preview, original, current } = setup(() => Promise.reject(new Error("unreachable")));
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    onTestFinished(() => consoleError.mockRestore());
+    current.value = FIRST;
+    await vi.waitFor(() => expect(preview.getAttribute("src")).toBe("https://preview/images/1"));
+    await flushPromises();
+    expect(preview.hidden).toBe(false);
+    expect(original.hidden).toBe(true);
+  });
+
+  test("waits for quick steps to stop before fetching the original", async() => {
+    const { current, scheduler, fetchOriginal } = setup(() => pendForever());
+
+    current.value = FIRST;
+    current.value = SECOND;
+    await flushPromises();
+    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media]);
+    scheduler.advance(200);
+    await flushPromises();
+    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
   });
 
   test("keeps a late original from replacing the post shown since", async() => {
-    // TODO fix
-    // const finishResolving: (() => void)[] = [];
-    // const { current, scheduler, drawn } = setup(media => new Promise(resolve => finishResolving.push(() => resolve(`${ORIGINAL_ORIGIN}${media.locator}`))));
+    const finishFetching: (() => void)[] = [];
+    const fetchOriginal: LightboxStageProps["fetchOriginal"] = media => new Promise(resolve => {
+      finishFetching.push(() => resolve(Object.assign(new Blob(), { source: `${ORIGINAL_ORIGIN}${media.locator}` })));
+    });
+    const { current, scheduler, drawn } = setup(fetchOriginal);
 
-    // current.value = FIRST;
-    // current.value = SECOND;
-    // scheduler.advance(200);
-    // finishResolving[0]();
-    // await flushPromises();
-    // expect(drawn()).not.toContain("https://original/images/1");
+    current.value = FIRST;
+    await flushPromises();
+    current.value = SECOND;
+    scheduler.advance(200);
+    await flushPromises();
+    finishFetching[0]();
+    await flushPromises();
+    expect(drawn()).not.toContain(`${ORIGINAL_ORIGIN}images/1`);
   });
 
   test("retries an original whose load failed", async() => {
-    // TODO impl changed
-    // const resolveOriginalUrl = vi.fn<ResolveOriginalUrl>(() => Promise.reject(new Error("unreachable")));
-    // const { current, scheduler } = setup(resolveOriginalUrl);
-    // const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const fetchOriginal = vi.fn<LightboxStageProps["fetchOriginal"]>()
+      .mockRejectedValueOnce(new Error("unreachable"))
+      .mockImplementation(fetchOriginalNow);
+    const { current, scheduler } = setup(fetchOriginal);
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    // onTestFinished(() => consoleError.mockRestore());
-    // current.value = FIRST;
-    // await flushPromises();
-    // current.value = undefined;
-    // scheduler.advance(200);
-    // current.value = FIRST;
-    // expect(resolveOriginalUrl).toHaveBeenCalledTimes(2);
+    onTestFinished(() => consoleError.mockRestore());
+    current.value = FIRST;
+    await flushPromises();
+    current.value = undefined;
+    scheduler.advance(200);
+    current.value = FIRST;
+    await flushPromises();
+    expect(fetchOriginal).toHaveBeenCalledTimes(2);
   });
 
-  test("loads the originals of the neighbors", () => {
-    // TODO impl changed
-    // const resolveOriginalUrl = vi.fn<ResolveOriginalUrl>(pendForever);
-    // const { neighbors } = setup(resolveOriginalUrl);
+  test("loads the originals of the neighbors", async() => {
+    const { neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
 
-    // neighbors.value = [FIRST, SECOND];
-    // expect(resolveOriginalUrl.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
+    neighbors.value = [FIRST, SECOND];
+    await flushPromises();
+    expect(fetchOriginal).not.toHaveBeenCalled();
+    scheduler.advance(200);
+    await flushPromises();
+    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
+  });
+
+  test("preloads the image neighbors within the stage limit", async() => {
+    const { neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
+    const items = Array.from({ length: 24 }, (_, index): MediaItem => ({
+      id: `${index}`,
+      media: { kind: index % 2 === 0 ? "image" : "video", locator: `media/${index}` }
+    }));
+
+    neighbors.value = items;
+    scheduler.advance(200);
+    await flushPromises();
+    const imageLocators = items.filter(item => item.media.kind === "image").slice(0, 20).map(item => item.media.locator);
+
+    expect(fetchOriginal.mock.calls.map(([media]) => media.locator)).toEqual(imageLocators);
   });
 
   test("reuses a neighbor's original once it is shown", async() => {
-    // TODO fix
-    // const resolveOriginalUrl = vi.fn(resolveOriginalUrlNow);
-    // const { current, neighbors, drawn } = setup(resolveOriginalUrl);
+    const { current, neighbors, scheduler, fetchOriginal, drawn } = setup();
 
-    // neighbors.value = [SECOND];
-    // current.value = SECOND;
-    // await vi.waitFor(() => expect(drawn()).toContain("https://original/images/2"));
-    // expect(resolveOriginalUrl).toHaveBeenCalledOnce();
+    neighbors.value = [SECOND];
+    scheduler.advance(200);
+    await flushPromises();
+    current.value = SECOND;
+    await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/2`));
+    expect(fetchOriginal).toHaveBeenCalledOnce();
   });
 
   test("cancels the download of a post no longer shown or next to it", async() => {
-    // TODO fix
-    // const { current, neighbors, decoded } = setup(resolveOriginalUrlNow, pendForever);
-    // const isDownloading = (url: string): boolean | undefined => decoded.find(entry => entry.url === url)?.image.hasAttribute("src");
+    const { current, neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
 
-    // current.value = FIRST;
-    // neighbors.value = [SECOND];
-    // await flushPromises();
-    // neighbors.value = [];
-    // expect([isDownloading("https://original/images/1"), isDownloading("https://original/images/2")]).toEqual([true, false]);
+    current.value = FIRST;
+    neighbors.value = [SECOND];
+    scheduler.advance(200);
+    await flushPromises();
+    neighbors.value = [];
+    const signalByLocator = new Map(fetchOriginal.mock.calls.map(([media, signal]) => [media.locator, signal]));
+
+    expect(signalByLocator.get(FIRST.media.locator)?.aborted).toBe(false);
+    expect(signalByLocator.get(SECOND.media.locator)?.aborted).toBe(true);
+  });
+
+  test("replaces a pending neighbor preload when the neighbors change", async() => {
+    const { neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
+
+    neighbors.value = [FIRST];
+    scheduler.advance(30);
+    neighbors.value = [SECOND];
+    scheduler.advance(74);
+    await flushPromises();
+    expect(fetchOriginal).not.toHaveBeenCalled();
+    scheduler.advance(1);
+    await flushPromises();
+    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([SECOND.media]);
+  });
+
+  test("shows the current video immediately and delays candidate preloading", async() => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    const pause = vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
+    const load = vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => undefined);
+    const { root, current, neighbors, scheduler, resolveOriginalUrl } = setup();
+
+    onTestFinished(() => {
+      play.mockRestore();
+      pause.mockRestore();
+      load.mockRestore();
+    });
+    current.value = FIRST_VIDEO;
+    neighbors.value = [SECOND_VIDEO];
+    const videos = [...root.querySelectorAll("video")];
+
+    expect(videos).toHaveLength(5);
+    expect(videos.filter(video => !video.hidden)).toHaveLength(1);
+    expect(resolveOriginalUrl.mock.calls.map(([media]) => media)).toEqual([FIRST_VIDEO.media]);
+    scheduler.advance(74);
+    expect(resolveOriginalUrl).toHaveBeenCalledOnce();
+    scheduler.advance(1);
+    expect(resolveOriginalUrl.mock.calls.map(([media]) => media)).toEqual([FIRST_VIDEO.media, SECOND_VIDEO.media]);
+    await vi.waitFor(() => expect(play).toHaveBeenCalledOnce());
+    expect(videos.filter(video => !video.hidden)).toHaveLength(1);
+
+    current.value = undefined;
+    expect(videos.every(video => video.hidden)).toBe(true);
+    expect(videos[0].parentElement?.hidden).toBe(true);
   });
 
   test("clears the canvas and frees the originals once no post is shown", async() => {
-    // TODO impl changed
-    // const { canvas, current, neighbors, bitmaps, drawn } = setup();
+    const { preview, original, current, neighbors, bitmaps, drawn } = setup();
 
-    // current.value = FIRST;
-    // await vi.waitFor(() => expect(drawn()).toContain("https://original/images/1"));
-    // current.value = undefined;
-    // neighbors.value = [];
-    // await flushPromises();
-    // expect([canvas.width, canvas.height]).toEqual([0, 0]);
-    // expect(bitmaps.every(bitmap => bitmap.close.mock.calls.length === 1)).toBe(true);
+    current.value = FIRST;
+    await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
+    current.value = undefined;
+    neighbors.value = [];
+    await flushPromises();
+    expect([original.width, original.height]).toEqual([0, 0]);
+    expect(original.hidden).toBe(true);
+    expect(preview.hidden).toBe(true);
+    expect(preview.hasAttribute("src")).toBe(false);
+    expect(bitmaps.every(bitmap => bitmap.close.mock.calls.length === 1)).toBe(true);
   });
 });

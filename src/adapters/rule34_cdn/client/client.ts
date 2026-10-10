@@ -1,4 +1,5 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
+import { WIMG_HOSTNAME } from "@/adapters/rule34/client/urls";
 import { fileUrl, previewUrl } from "@/adapters/rule34_cdn/client/addresses";
 import { mintMedia, readLocator } from "@/adapters/rule34_cdn/client/locator";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/extension_prober";
@@ -7,8 +8,8 @@ import { Rule34CdnVideoDurationReader } from "@/adapters/rule34_cdn/client/video
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34CdnClientDependencies {
-  fetch: (url: string, init?: RequestInit) => Promise<Response>;
-  scheduler: Scheduler;
+  readonly fetch: (url: string, init?: RequestInit) => Promise<Response>;
+  readonly scheduler: Scheduler;
 }
 
 const KIND_EXTENSIONS: Record<MediaKind, Rule34CdnFileExtension | null> = { image: null, video: "mp4", gif: "gif" };
@@ -45,6 +46,22 @@ export class Rule34CdnClient {
       throw new Error(`${url} answered ${response.status}`);
     }
     return response.blob();
+  }
+
+  public async fetchOriginal(locator: string, kind: MediaKind, signal?: AbortSignal): Promise<Blob> {
+    const url = await this.originalUrl(locator, kind);
+
+    try {
+      return await this.fetchFile(url, signal);
+    } catch (error) {
+      if (signal?.aborted || !(error instanceof TypeError)) {
+        throw error;
+      }
+
+      const fallbackUrl = new URL(url);
+      fallbackUrl.hostname = WIMG_HOSTNAME;
+      return this.fetchFile(fallbackUrl.href, signal);
+    }
   }
 
   public readVideoDurationSeconds(url: string): Promise<number> {

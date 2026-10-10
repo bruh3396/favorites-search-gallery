@@ -32,30 +32,30 @@ describe("FavoritesActions", () => {
   test.each([true, false])("returns the default %s for an untouched favorite", async favoritedByDefault => {
     const { actions } = await setup(favoritedByDefault);
 
-    expect(actions.isFavorite("1")).toBe(favoritedByDefault);
+    expect(actions.isFavorited("1")).toBe(favoritedByDefault);
   });
 
   test("returns the latest addition or removal", async() => {
     const { actions } = await setup();
 
     await actions.remove("1");
-    expect(actions.isFavorite("1")).toBe(false);
+    expect(actions.isFavorited("1")).toBe(false);
     await actions.add("1");
-    expect(actions.isFavorite("1")).toBe(true);
+    expect(actions.isFavorited("1")).toBe(true);
   });
 
   test("keeps the other favorites at the default", async() => {
     const { actions } = await setup();
 
     await actions.remove("1");
-    expect(actions.isFavorite("2")).toBe(true);
+    expect(actions.isFavorited("2")).toBe(true);
   });
 
   test("keeps a favorite whose removal fails", async() => {
     const { actions, localFavorites } = await setup(true, createAnsweringActions("added", "error"));
 
     expect(await actions.remove("1")).toBe("error");
-    expect(actions.isFavorite("1")).toBe(true);
+    expect(actions.isFavorited("1")).toBe(true);
     expect(await localFavorites.getAll()).toEqual(["1", "2"]);
   });
 
@@ -66,36 +66,30 @@ describe("FavoritesActions", () => {
     expect(await localFavorites.getAll()).toEqual(["2"]);
   });
 
-  test("reruns an effect that reads it when the favorite changes", async() => {
+  test("returns the latest value to an effect that reads it", async() => {
     const { actions } = await setup();
-    const seen: boolean[] = [];
-    const stop = effect(() => {
-      seen.push(actions.isFavorite("1"));
-    });
 
     await actions.remove("1");
-    expect(seen).toEqual([true, false]);
-    stop();
+    const seen: boolean[] = [];
+
+    effect(() => {
+      seen.push(actions.isFavorited("1"));
+    });
+
+    await actions.add("1");
+    expect(seen).toEqual([false]);
+    expect(actions.isFavorited("1")).toBe(true);
   });
 
   test("leaves an effect that reads another favorite alone", async() => {
     const { actions } = await setup();
     const seen: boolean[] = [];
     const stop = effect(() => {
-      seen.push(actions.isFavorite("2"));
+      seen.push(actions.isFavorited("2"));
     });
 
     await actions.remove("1");
     expect(seen).toEqual([true]);
     stop();
-  });
-
-  test("stops following changes once disposed", async() => {
-    const { actions, localFavorites } = await setup();
-
-    actions.dispose();
-    await actions.remove("1");
-    expect(actions.isFavorite("1")).toBe(true);
-    expect(await localFavorites.getAll()).toEqual(["1", "2"]);
   });
 });

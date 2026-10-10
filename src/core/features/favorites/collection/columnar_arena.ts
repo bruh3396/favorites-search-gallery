@@ -1,11 +1,11 @@
 import { Metric, Post } from "@/core/domain/post/post";
-import { Arena } from "@/core/features/favorites/collection/arena";
+import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/post_table";
 import { Media } from "@/core/domain/media/media";
 import { TagPool } from "@/core/utils/collection/tag_pool";
 import { toTagSet } from "@/core/domain/tag/tag";
 
-export class FavoritesColumnarArena implements Arena {
+export class FavoritesColumnarArena implements FavoritesArena {
   private favoriteCount = 0;
   private readonly postTable = new FavoritesPostTable();
   private readonly tagPool = new TagPool();

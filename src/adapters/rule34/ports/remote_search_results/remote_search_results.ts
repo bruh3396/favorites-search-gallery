@@ -1,18 +1,18 @@
-import { RetryPolicy, retry } from "@/core/utils/async/retry";
 import { POSTS_PER_POST_LIST_PAGE } from "@/adapters/rule34/client/post_list_page";
 import { Post } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
+import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemoteSearchResultsDependencies {
-  rule34: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
-  rule34Document: Pick<Rule34Document, "readSearchQuery" | "readPostListPageIndex">;
-  scheduler: Scheduler;
-  randomSource: RandomSource;
+  readonly rule34: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
+  readonly rule34Document: Pick<Rule34Document, "readSearchQuery" | "readPostListPageIndex">;
+  readonly scheduler: Scheduler;
+  readonly randomSource: RandomSource;
 }
 
 const MAX_FETCH_ATTEMPTS = 3;
@@ -22,19 +22,17 @@ export class Rule34RemoteSearchResults implements RemoteSearchResults {
   public readonly pageSize = POSTS_PER_POST_LIST_PAGE;
   public readonly initialPageIndex: number;
   private readonly searchQuery: string;
-  private readonly retryPolicy: RetryPolicy;
+  private readonly retry: Retry;
   private initialPage: Post[] | null = null;
 
   constructor(private readonly dependencies: Rule34RemoteSearchResultsDependencies) {
     this.searchQuery = dependencies.rule34Document.readSearchQuery();
     this.initialPageIndex = dependencies.rule34Document.readPostListPageIndex();
-    this.retryPolicy = {
-      attempts: MAX_FETCH_ATTEMPTS,
-      baseDelay: RETRY_BASE_DELAY,
+    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
       isRetryable: isTransient
-    };
+    });
   }
 
   public fetchPage(pageIndex: number): Promise<Post[]> {
@@ -42,6 +40,6 @@ export class Rule34RemoteSearchResults implements RemoteSearchResults {
       this.initialPage ??= this.dependencies.rule34.readPostListPage(pageIndex);
       return Promise.resolve(this.initialPage);
     }
-    return retry(() => this.dependencies.rule34.fetchPostListPage(this.searchQuery, pageIndex), this.retryPolicy);
+    return this.retry.retry(() => this.dependencies.rule34.fetchPostListPage(this.searchQuery, pageIndex));
   }
 }

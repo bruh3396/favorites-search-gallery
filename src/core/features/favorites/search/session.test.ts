@@ -15,7 +15,7 @@ import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
 
 interface Options {
-  blacklistedTags?: string;
+  blacklistedTags?: readonly string[];
   settings?: Partial<SearchSettings>;
   pagination?: PaginationSettings;
 }
@@ -47,7 +47,7 @@ function createPreference<T>(initial: T): Preference<T> {
   };
 }
 
-function setup(posts: Post[] = [], { blacklistedTags = "", settings = {}, pagination = UNPAGINATED }: Options = {}): Setup {
+function setup(posts: Post[] = [], { blacklistedTags = [], settings = {}, pagination = UNPAGINATED }: Options = {}): Setup {
   const collection = new FavoritesCollection();
   const index = new FavoritesSearchIndex();
   const blacklist = new FavoritesBlacklist({ blacklistedTags, force: false });
@@ -109,7 +109,7 @@ describe("FavoritesSearchSession", () => {
   });
 
   test("hides blacklisted favorites by its blacklist setting", () => {
-    const { session } = setup(createTaggedPosts("apple", "cherry"), { blacklistedTags: "apple" });
+    const { session } = setup(createTaggedPosts("apple", "cherry"), { blacklistedTags: ["apple"] });
 
     expect(getResultIds(session)).toEqual(["1", "2"]);
     session.updateSettings({ isBlacklistEnabled: true });
@@ -273,7 +273,7 @@ describe("FavoritesSearchSession", () => {
     });
 
     test("keeps the blacklist outside the inversion", () => {
-      const { session } = setup(createTaggedPosts("apple", "banana", "cherry"), { blacklistedTags: "apple", settings: { isBlacklistEnabled: true } });
+      const { session } = setup(createTaggedPosts("apple", "banana", "cherry"), { blacklistedTags: ["apple"], settings: { isBlacklistEnabled: true } });
 
       session.submit("banana");
       session.invert();

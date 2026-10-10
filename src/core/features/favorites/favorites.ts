@@ -19,28 +19,28 @@ import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface FavoritesConfiguration {
-  userOwnsFavorites: boolean;
-  blacklistedTags: string;
+  readonly userOwnsFavorites: boolean;
+  readonly blacklistedTags: readonly string[];
 }
 
 export interface FavoritesDependencies {
-  localFavorites: LocalFavorites;
-  localPosts: LocalPosts;
-  localTagCategories: LocalTagCategories;
-  remoteFavorites: RemoteFavorites;
-  remoteFavoriteActions: ObservableRemoteFavoriteActions;
-  remotePosts: RemotePosts;
-  remoteMedia: RemoteMedia;
-  scheduler: Scheduler;
-  randomSource: RandomSource;
+  readonly localFavorites: LocalFavorites;
+  readonly localPosts: LocalPosts;
+  readonly localTagCategories: LocalTagCategories;
+  readonly remoteFavorites: RemoteFavorites;
+  readonly remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  readonly remotePosts: RemotePosts;
+  readonly remoteMedia: RemoteMedia;
+  readonly scheduler: Scheduler;
+  readonly randomSource: RandomSource;
 }
 
 export interface FavoritesService {
   readonly createSearchSession: (settings: FavoritesSearchSessionSettings) => FavoritesSearchSession;
   readonly actions: Pick<FavoritesActions, "add" | "remove">;
-  readonly updates: Occurrence<Favorite>;
+  readonly hydrated: Occurrence<Favorite>;
   readonly loadState: Readable<LoadState>;
-  readonly isFavorite: (id: string) => boolean;
+  readonly isFavorited: (id: string) => boolean;
   readonly load: () => Promise<void>;
 }
 
@@ -53,9 +53,9 @@ export function createFavoritesService(configuration: FavoritesConfiguration, de
   return {
     createSearchSession: settings => new FavoritesSearchSession({ ...dependencies, ...settings, index: searchIndex, blacklist }),
     actions,
-    updates: collection.updates,
+    hydrated: collection.hydrated,
     loadState: loader.state,
-    isFavorite: id => actions.isFavorite(id),
+    isFavorited: id => actions.isFavorited(id),
     load: () => loader.load()
   };
 }

@@ -57,7 +57,15 @@ export default defineConfig([
     ignores: ["src/**/*.test.{ts,tsx}", "src/**/testing/**"],
     plugins: { functional },
     rules: {
-      "functional/no-let": ["error", { allowInFunctions: true }]
+      "functional/no-let": ["error", { allowInFunctions: true }],
+      "functional/type-declaration-immutability": ["error", {
+        rules: [{
+          identifiers: "^(?!I?Mutable).+",
+          immutability: "ReadonlyShallow",
+          comparator: "AtLeast"
+        }],
+        ignoreInterfaces: false
+      }]
     }
   },
   {
@@ -246,7 +254,12 @@ export default defineConfig([
       "no-regex-spaces": "error",
       "no-restricted-exports": "error",
       "no-restricted-globals": "error",
-      "no-restricted-imports": "error",
+      "no-restricted-imports": ["error", {
+        patterns: [{
+          regex: "^\\.{1,2}/",
+          message: "Use the @/ alias for internal imports."
+        }]
+      }],
       "no-restricted-modules": "error",
       "no-restricted-properties": "error",
       "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS],

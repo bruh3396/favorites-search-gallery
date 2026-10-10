@@ -29,15 +29,15 @@ const MAX_PAGE_SIZE = 100;
 const PAGE_SIZE_STEP = 10;
 
 export interface FavoritesScreenProps {
-  favorites: Pick<FavoritesService, "updates" | "loadState">;
-  session: Pick<FavoritesSearchSession, "results" | "paginationResult" | "submit" | "goToPage">;
-  paginationSettings: Preference<PaginationSettings>;
-  finishedLoading: Fact;
-  skeletonDimensions: readonly Dimensions[];
-  gridPreferences: PostGridPreferences;
-  resolvePreviewUrl: (media: Media) => Promise<string>;
-  getPostUrl: (post: MediaItem) => string;
-  onActivatePost: (post: MediaItem, event: MouseEvent) => void;
+  readonly favorites: Pick<FavoritesService, "hydrated" | "loadState">;
+  readonly session: Pick<FavoritesSearchSession, "results" | "paginationResult" | "submit" | "goToPage">;
+  readonly paginationSettings: Preference<PaginationSettings>;
+  readonly finishedLoading: Fact;
+  readonly skeletonDimensions: readonly Dimensions[];
+  readonly gridPreferences: PostGridPreferences;
+  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
+  readonly getPostUrl: (post: MediaItem) => string;
+  readonly onActivatePost: (post: MediaItem, event: MouseEvent) => void;
 }
 
 export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
@@ -78,7 +78,7 @@ export function FavoritesScreen(props: FavoritesScreenProps): HTMLElement {
         />
         <PostGrid
           posts={computed(() => session.paginationResult.value.favorites)}
-          changed={favorites.updates}
+          changed={favorites.hydrated}
           layout={layout}
           size={size}
           getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}

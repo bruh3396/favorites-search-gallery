@@ -1,4 +1,5 @@
 import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
+import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
@@ -27,7 +28,7 @@ const ENVIRONMENT: Environment = {
   mode: "favorites",
   favoritesOwnerId: FAVORITES_OWNER_ID,
   ownsFavorites: true,
-  blacklistedTags: "",
+  blacklistedTags: [],
   colorScheme: "dark",
   device: "desktop",
   pointer: "hover",
@@ -64,6 +65,7 @@ function createFavoritesPageDependencies(hostPage: BrowserHostPage): FavoritesPa
       fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
     }),
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
+    bitmapDecoder: new BrowserBitmapDecoder(),
     remotePages: new Rule34RemotePages(rule34),
     scheduler,
     randomSource,

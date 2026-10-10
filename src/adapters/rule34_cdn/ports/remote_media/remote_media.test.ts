@@ -11,6 +11,7 @@ interface Rule34Cdn {
   originalUrl: ReturnType<typeof vi.fn<(locator: string, kind: string) => Promise<string>>>;
   imageUrl: ReturnType<typeof vi.fn<(locator: string, kind: string) => Promise<string>>>;
   fetchFile: ReturnType<typeof vi.fn<(url: string, signal?: AbortSignal) => Promise<Blob>>>;
+  fetchOriginal: ReturnType<typeof vi.fn<(locator: string, kind: string, signal?: AbortSignal) => Promise<Blob>>>;
   readVideoDurationSeconds: ReturnType<typeof vi.fn<(url: string) => Promise<number>>>;
 }
 
@@ -20,6 +21,7 @@ function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
     originalUrl: vi.fn(() => Promise.resolve(ORIGINAL)),
     imageUrl: vi.fn(() => Promise.resolve(IMAGE)),
     fetchFile: vi.fn(() => Promise.resolve(new Blob(["bytes"]))),
+    fetchOriginal: vi.fn(() => Promise.resolve(new Blob(["bytes"]))),
     readVideoDurationSeconds: vi.fn(() => Promise.resolve(12))
   };
   return { source: new Rule34CdnRemoteMedia(rule34Cdn), rule34Cdn };
@@ -51,7 +53,7 @@ describe("Rule34CdnRemoteMedia", () => {
     const signal = new AbortController().signal;
 
     expect(await (await source.fetchOriginal(VIDEO, signal)).text()).toBe("bytes");
-    expect(rule34Cdn.fetchFile).toHaveBeenCalledWith(ORIGINAL, signal);
+    expect(rule34Cdn.fetchOriginal).toHaveBeenCalledWith("1234/a1b2c3", "video", signal);
   });
 
   test("reads the original's duration", async() => {

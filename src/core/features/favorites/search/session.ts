@@ -1,23 +1,22 @@
 import { PaginationResult, PaginationSettings, paginate } from "@/core/features/favorites/search/pagination";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
+import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/inputs";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { SearchExpression } from "@/core/search/expressions/search_expression";
-import { SearchRequest } from "./inputs";
-import { SearchSettings } from "@/core/features/favorites/search/inputs";
 import { clamp } from "@/core/utils/number/number";
 import { haveSameItems } from "@/core/utils/collection/array";
 import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 export interface FavoritesSearchSessionDependencies {
-  index: FavoritesSearchIndex;
-  blacklist: FavoritesBlacklist;
-  searchSettings: Preference<SearchSettings>;
-  paginationSettings: Pick<Preference<PaginationSettings>, "value" | "changed">;
-  randomSource: RandomSource;
+  readonly index: FavoritesSearchIndex;
+  readonly blacklist: FavoritesBlacklist;
+  readonly searchSettings: Preference<SearchSettings>;
+  readonly paginationSettings: Pick<Preference<PaginationSettings>, "value" | "changed">;
+  readonly randomSource: RandomSource;
 }
 
 export type FavoritesSearchSessionSettings = Pick<FavoritesSearchSessionDependencies, "searchSettings" | "paginationSettings">;

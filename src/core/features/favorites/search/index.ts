@@ -4,15 +4,15 @@ import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { SearchRequest } from "@/core/features/favorites/search/inputs";
 import { TermUpdate } from "@/core/search/engines/search_engine";
-import { hashInt } from "@/core/utils/number/bit";
+import { shuffleDeterministically } from "@/core/utils/collection/array";
 
 export class FavoritesSearchIndex {
   private readonly engine = new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
-  private readonly indexedFavorites = new Emitter<Favorite[]>();
+  private readonly indexes = new Emitter<Favorite[]>();
   private readonly rebuilds = new Emitter<void>();
 
   public get indexed(): Occurrence<Favorite[]> {
-    return this.indexedFavorites;
+    return this.indexes;
   }
 
   public get rebuilt(): Occurrence<void> {
@@ -21,7 +21,7 @@ export class FavoritesSearchIndex {
 
   public add(favorites: Favorite[]): void {
     this.engine.add(favorites);
-    this.indexedFavorites.emit(favorites);
+    this.indexes.emit(favorites);
   }
 
   public update(updates: readonly TermUpdate<Favorite>[]): void {
@@ -47,10 +47,7 @@ export class FavoritesSearchIndex {
   }
 
   private shuffle(favorites: Favorite[], seed: number): Favorite[] {
-    return favorites
-      .map(favorite => ({ favorite, rank: hashInt(Number(favorite.id), seed) }))
-      .sort((a, b) => a.rank - b.rank)
-      .map(({ favorite }) => favorite);
+    return shuffleDeterministically(favorites, seed, favorite => favorite.numericId);
   }
 
   private sort(favorites: Favorite[], { sortKey, isSortAscending, shuffleSeed }: SearchRequest): Favorite[] {

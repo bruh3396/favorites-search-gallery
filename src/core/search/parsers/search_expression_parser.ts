@@ -20,8 +20,8 @@ export function parseSearchExpression(query: string): SearchExpression {
   return new Parser(tokens).parseTopLevel();
 }
 
-export function parseExclusions(tags: string): SearchExpression | undefined {
-  const exclusions = tokenize(normalize(tags)).map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag))));
+export function parseExclusions(tags: readonly string[]): SearchExpression | undefined {
+  const exclusions = tags.map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag.toLowerCase()))));
   return exclusions.length === 0 ? undefined : SearchExpression.and(exclusions);
 }
 

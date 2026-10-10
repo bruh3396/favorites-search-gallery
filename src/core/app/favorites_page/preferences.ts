@@ -28,9 +28,9 @@ const SEARCH_SETTINGS_CODEC = createFieldsCodec<SearchSettings>({
 const DEFAULT_PAGINATION_SETTINGS: PaginationSettings = { size: 50, infiniteScroll: false };
 const PAGINATION_SETTINGS_CODEC = createFieldsCodec<PaginationSettings>({ size: isPageSize, infiniteScroll: isBoolean });
 
-export function createSearchSettings(storage: PreferenceStorage): Preference<SearchSettings> {
+export function createSearchSettings(storage: PreferenceStorage, key = "favoritesSearch"): Preference<SearchSettings> {
   return new StoredPreference(
-    { key: "favoritesSearch", defaultValue: DEFAULT_SEARCH_SETTINGS },
+    { key, defaultValue: DEFAULT_SEARCH_SETTINGS },
     {
       storage,
       codec: {

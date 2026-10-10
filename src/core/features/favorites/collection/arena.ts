@@ -1,7 +1,7 @@
 import { Metric, Post } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
 
-export interface Arena {
+export interface FavoritesArena {
   allocate: () => number;
   write: (slot: number, post: Post) => void;
   getNumericId: (slot: number) => number;

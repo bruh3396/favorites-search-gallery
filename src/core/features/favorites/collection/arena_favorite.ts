@@ -1,21 +1,25 @@
 import { Metric, Post } from "@/core/domain/post/post";
-import { Arena } from "@/core/features/favorites/collection/arena";
 import { Favorite } from "@/core/features/favorites/favorite";
+import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { Media } from "@/core/domain/media/media";
 
-export class FavoritesArenaFavorite implements Favorite {
+export class ArenaFavorite implements Favorite {
   public readonly slot: number;
-  private readonly arena: Arena;
+  private readonly arena: FavoritesArena;
 
-  constructor(post: Post, arena: Arena) {
+  constructor(post: Post, arena: FavoritesArena) {
     this.arena = arena;
     this.slot = arena.allocate();
     arena.write(this.slot, post);
     arena.cacheTags(this.slot, this.tags);
   }
 
+  public get numericId(): number {
+    return this.arena.getNumericId(this.slot);
+  }
+
   public get id(): string {
-    return String(this.arena.getNumericId(this.slot));
+    return String(this.numericId);
   }
 
   public get tags(): Set<string> {

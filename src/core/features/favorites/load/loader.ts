@@ -15,15 +15,15 @@ import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface FavoritesLoaderDependencies {
-  localFavorites: LocalFavorites;
-  localPosts: LocalPosts;
-  localTagCategories: LocalTagCategories;
-  remoteFavorites: RemoteFavorites;
-  remotePosts: RemotePosts;
-  remoteMedia: RemoteMedia;
-  scheduler: Scheduler;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+  readonly localFavorites: LocalFavorites;
+  readonly localPosts: LocalPosts;
+  readonly localTagCategories: LocalTagCategories;
+  readonly remoteFavorites: RemoteFavorites;
+  readonly remotePosts: RemotePosts;
+  readonly remoteMedia: RemoteMedia;
+  readonly scheduler: Scheduler;
+  readonly collection: FavoritesCollection;
+  readonly index: FavoritesSearchIndex;
 }
 
 export class FavoritesLoader {
@@ -39,7 +39,7 @@ export class FavoritesLoader {
 
     this.dependencies = dependencies;
     this.fetcher = new FavoritesFetcher(pathDependencies);
-    this.reloader = new FavoritesReloader(pathDependencies);
+    this.reloader = new FavoritesReloader({ ...pathDependencies, waitForPaint: dependencies.scheduler.waitForPaint.bind(dependencies.scheduler) });
   }
 
   public get state(): Readable<LoadState> {

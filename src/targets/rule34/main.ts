@@ -1,4 +1,5 @@
 import { AppMode, Environment } from "@/core/boundary/environment";
+import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
 import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
@@ -92,6 +93,7 @@ function createFavoritesPorts(environment: Environment, dependencies: PageDepend
   }, { scheduler, fetch });
   const indexedDb = new IndexedDbClient();
   return {
+    bitmapDecoder: new BrowserBitmapDecoder(),
     localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDb),
     localPosts: new IndexedDbLocalPosts(indexedDb),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDb),

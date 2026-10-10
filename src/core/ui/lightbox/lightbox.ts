@@ -1,15 +1,21 @@
+import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { MediaItem } from "@/core/domain/post/post";
 
-const NEIGHBOR_COUNT = 1;
+const MAX_NEIGHBOR_DISTANCE = 20;
 
 export class Lightbox<T extends MediaItem> {
   private readonly currentItem = new Signal<T | undefined>(undefined);
+  private readonly closes = new Emitter<T>();
   private readonly isOpenState = computed(() => this.currentItem.value !== undefined);
   private readonly neighborItems = new Signal<readonly T[]>([]);
   private readonly sequence = new Signal<MediaSequence<T> | undefined>(undefined);
   private readonly positionState = computed(() => findPosition(this.currentItem.value, this.sequence.value));
+
+  public get closed(): Occurrence<T> {
+    return this.closes;
+  }
 
   public get isOpen(): Readable<boolean> {
     return this.isOpenState;
@@ -30,13 +36,19 @@ export class Lightbox<T extends MediaItem> {
   public open(item: T, sequence: MediaSequence<T>): void {
     this.sequence.value = sequence;
     this.currentItem.value = item;
-    this.publishNeighbors(NEIGHBOR_COUNT).catch(console.error);
+    this.publishNeighbors(MAX_NEIGHBOR_DISTANCE).catch(console.error);
   }
 
   public close(): void {
+    const item = this.currentItem.peek();
+
     this.sequence.value = undefined;
     this.currentItem.value = undefined;
     this.neighborItems.value = [];
+
+    if (item !== undefined) {
+      this.closes.emit(item);
+    }
   }
 
   public showNext(): Promise<void> {
@@ -58,42 +70,45 @@ export class Lightbox<T extends MediaItem> {
 
     if (neighbor !== undefined && this.isShowing(current, sequence)) {
       this.currentItem.value = neighbor;
-      await this.publishNeighbors(NEIGHBOR_COUNT);
+      await this.publishNeighbors(MAX_NEIGHBOR_DISTANCE);
     }
   }
 
-private async publishNeighbors(length: number): Promise<void> {
-  const current = this.currentItem.peek();
-  const sequence = this.sequence.peek();
+  private async publishNeighbors(maxDistance: number): Promise<void> {
+    const current = this.currentItem.peek();
+    const sequence = this.sequence.peek();
 
-  if (current === undefined || sequence === undefined) {
-    return;
-  }
+    if (current === undefined || sequence === undefined) {
+      return;
+    }
+    const found = new Set<T>();
+    const addNeighbor = (item: T | undefined): void => {
+      if (item !== undefined && item !== current) {
+        found.add(item);
+      }
+    };
 
-  const found: T[] = [];
+    let previous: T | undefined = current;
+    let next: T | undefined = current;
 
-  let previous: T | undefined = current;
-  let next: T | undefined = current;
+    for (let distanceFromCurrent = 1; distanceFromCurrent <= maxDistance; distanceFromCurrent += 1) {
+      [previous, next] = await Promise.all([
+        previous === undefined ? undefined : sequence.getPrevious(previous),
+        next === undefined ? undefined : sequence.getNext(next)
+      ]);
 
-  for (let i = 0; i < length; i += 1) {
-    [previous, next] = await Promise.all([
-      previous ? sequence.getPrevious(previous) : Promise.resolve(undefined),
-      next ? sequence.getNext(next) : Promise.resolve(undefined)
-    ]);
+      addNeighbor(previous);
+      addNeighbor(next);
 
-    if (previous !== undefined) {
-      found.push(previous);
+      if (previous === undefined && next === undefined) {
+        break;
+      }
     }
 
-    if (next !== undefined) {
-      found.push(next);
+    if (this.isShowing(current, sequence)) {
+      this.neighborItems.value = [...found];
     }
   }
-
-  if (this.isShowing(current, sequence)) {
-    this.neighborItems.value = [...new Set(found.filter(item => item !== current))];
-  }
-}
 
   private isShowing(item: T, sequence: MediaSequence<T>): boolean {
     return this.currentItem.peek() === item && this.sequence.peek() === sequence;

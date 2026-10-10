@@ -7,7 +7,7 @@ const INFINITE = { size: 50, infiniteScroll: true };
 
 function createResults(count: number): Favorite[] {
   return Array.from({ length: count }, (_, index): Favorite => ({
-    id: String(index + 1), media: { kind: "image", locator: "" }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 0
+    id: String(index + 1), numericId: index + 1, media: { kind: "image", locator: "" }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 0
   }));
 }
 

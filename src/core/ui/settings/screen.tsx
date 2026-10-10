@@ -12,32 +12,32 @@ export const SettingsScreenClass = {
 } as const;
 
 export interface SettingSection {
-  id: string;
-  title: string;
-  settings: readonly string[];
+  readonly id: string;
+  readonly title: string;
+  readonly settings: readonly string[];
 }
 
 export type SettingsLayout = readonly SettingSection[];
 
 export interface SettingsScreenProps {
-  layout: SettingsLayout;
-  descriptors: readonly SettingDescriptor[];
-  expanded: SettingPreference<readonly string[]>;
-  descriptionsVisible?: Readable<boolean>;
-  query?: Readable<string>;
-  size?: ControlSize;
-  scheduler: StepperScheduler;
+  readonly layout: SettingsLayout;
+  readonly descriptors: readonly SettingDescriptor[];
+  readonly expanded: SettingPreference<readonly string[]>;
+  readonly descriptionsVisible?: Readable<boolean>;
+  readonly query?: Readable<string>;
+  readonly size?: ControlSize;
+  readonly scheduler: StepperScheduler;
 }
 
 interface SectionProps {
-  section: SettingSection;
-  descriptors: readonly SettingDescriptor[];
-  expanded: SettingPreference<readonly string[]>;
-  searching: Readable<boolean>;
-  matches: Readable<ReadonlySet<string>>;
-  descriptionsVisible: Readable<boolean> | undefined;
-  size: ControlSize;
-  scheduler: StepperScheduler;
+  readonly section: SettingSection;
+  readonly descriptors: readonly SettingDescriptor[];
+  readonly expanded: SettingPreference<readonly string[]>;
+  readonly searching: Readable<boolean>;
+  readonly matches: Readable<ReadonlySet<string>>;
+  readonly descriptionsVisible: Readable<boolean> | undefined;
+  readonly size: ControlSize;
+  readonly scheduler: StepperScheduler;
 }
 
 export function SettingsScreen({

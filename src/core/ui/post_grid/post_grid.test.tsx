@@ -1,6 +1,8 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { PostGrid, PostGridClass } from "@/core/ui/post_grid/post_grid";
+import { createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -177,20 +179,18 @@ describe("PostGrid", () => {
 
 describe("createPostGridPreferences", () => {
   test("starts in columns of size 6 when nothing is stored", () => {
-    // TODO test agasint test defaults not production ones
-    // const { layout, size } = createPostGridPreferences(new MemoryLocalKeyedValues());
+    const { layout, size } = createPostGridPreferences(new MemoryLocalKeyedValues());
 
-    // expect([layout.value, size.value]).toEqual(["column", 6]);
+    expect([layout.value, size.value]).toEqual(["row", 6]);
   });
 
   test("restores a stored layout and falls back to the default for one it doesn't recognise", () => {
-    // TODO test agasint test defaults not production ones
 
-    // const storage = new MemoryLocalKeyedValues();
+    const storage = new MemoryLocalKeyedValues();
 
-    // storage.set("postGridLayout", "row");
-    // expect(createPostGridPreferences(storage).layout.value).toBe("row");
-    // storage.set("postGridLayout", "masonry");
-    // expect(createPostGridPreferences(storage).layout.value).toBe("column");
+    storage.set("postGridLayout", "row");
+    expect(createPostGridPreferences(storage).layout.value).toBe("row");
+    storage.set("postGridLayout", "masonry");
+    expect(createPostGridPreferences(storage).layout.value).toBe("row");
   });
 });

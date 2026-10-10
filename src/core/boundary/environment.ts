@@ -9,7 +9,7 @@ export interface HostEnvironment {
   mode: AppMode;
   favoritesOwnerId: string;
   ownsFavorites: boolean;
-  blacklistedTags: string;
+  blacklistedTags: readonly string[];
   colorScheme: ColorScheme;
 }
 

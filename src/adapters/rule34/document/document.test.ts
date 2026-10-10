@@ -170,10 +170,20 @@ describe("Rule34Document", () => {
   });
 
   describe("readTagBlacklist", () => {
+    test.each([
+      ["", []],
+      ["%20%20apple%09banana%0A%20", ["apple", "banana"]],
+      ["apple*", ["apple*"]]
+    ])("splits decoded blacklist %s into tags", (cookie, expected) => {
+      visit("page=favorites&id=1", `tag_blacklist=${cookie}`);
+
+      expect(new Rule34Document().readTagBlacklist()).toEqual(expected);
+    });
+
     test("reads the decoded tag blacklist from the site's cookie", () => {
       visit("page=favorites&id=1", "tag_blacklist=apple%2520banana");
 
-      expect(new Rule34Document().readTagBlacklist()).toBe("apple banana");
+      expect(new Rule34Document().readTagBlacklist()).toEqual(["apple", "banana"]);
     });
   });
 

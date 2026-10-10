@@ -8,17 +8,17 @@ interface Visit {
   favoritesPageId?: string;
   userId?: string;
   theme?: ColorScheme;
-  tagBlacklist?: string;
+  tagBlacklist?: readonly string[];
 }
 
 function createRule34Document(visit: Visit): Parameters<typeof readRule34Environment>[0] {
-  const { pageName, favoritesPageId = "", userId = "", theme = "light", tagBlacklist = "" } = visit;
+  const { pageName, favoritesPageId = "", userId = "", theme = "light", tagBlacklist = [] } = visit;
   return {
     readPageName: () => pageName,
     readFavoritesPageId: () => favoritesPageId,
     readUserId: () => userId,
     readTheme: () => theme,
-    readTagBlacklist: () => tagBlacklist
+    readTagBlacklist: () => [...tagBlacklist]
   };
 }
 
@@ -48,7 +48,7 @@ describe("readRule34Environment", () => {
   });
 
   test("reads the tag blacklist and the site's theme", () => {
-    expect(readRule34Environment(createRule34Document({ pageName: "favorites", theme: "dark", tagBlacklist: "apple banana" })))
-      .toMatchObject({ colorScheme: "dark", blacklistedTags: "apple banana" });
+    expect(readRule34Environment(createRule34Document({ pageName: "favorites", theme: "dark", tagBlacklist: ["apple", "banana"] })))
+      .toMatchObject({ colorScheme: "dark", blacklistedTags: ["apple", "banana"] });
   });
 });

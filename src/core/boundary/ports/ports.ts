@@ -1,4 +1,5 @@
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
+import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
@@ -16,6 +17,7 @@ import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Ports {
+  bitmapDecoder: BitmapDecoder;
   hostPage: HostPage;
   localFavorites: LocalFavorites;
   localKeyedValues: LocalKeyedValues;

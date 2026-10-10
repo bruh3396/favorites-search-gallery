@@ -1,5 +1,6 @@
 import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
+import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
@@ -31,6 +32,7 @@ function createDemoDependencies(hostPage: BrowserHostPage): FavoritesPageDepende
     remoteFavoriteActions: new MemoryRemoteFavoriteActions(memory),
     remotePosts: new MemoryRemotePosts(memory),
     remoteMedia: new MemoryRemoteMedia(),
+    bitmapDecoder: new MemoryBitmapDecoder(),
     remotePages: new MemoryRemotePages(),
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
@@ -42,7 +44,7 @@ const hostPage = new BrowserHostPage();
 
 mountFavoritesPage(hostPage.claimContent(), {
   userOwnsFavorites: true,
-  blacklistedTags: "",
+  blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
   colorScheme: readPreferredColorScheme()
 }, createDemoDependencies(hostPage));

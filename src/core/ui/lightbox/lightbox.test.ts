@@ -1,5 +1,5 @@
 import { createPost, createPosts } from "@/testing/post";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { Post } from "@/core/domain/post/post";
@@ -152,8 +152,9 @@ describe("Lightbox", () => {
 
     test("leaves out a side the sequence has nothing on", async() => {
       const lightbox = new Lightbox<Post>();
+      const sequence = createMediaSequence([POSTS[0], POSTS[1]]);
 
-      lightbox.open(POSTS[0], SEQUENCE);
+      lightbox.open(POSTS[0], sequence);
       await flushMicrotasks();
       expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
     });
@@ -162,8 +163,18 @@ describe("Lightbox", () => {
       const lightbox = new Lightbox<Post>();
 
       lightbox.open(POSTS[0], createWrappingSequence([POSTS[0], POSTS[1]]));
-      await flushMicrotasks();
-      expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
+      await vi.waitFor(() => expect(lightbox.neighbors.value).toEqual([POSTS[1]]));
+    });
+
+    test("publishes posts up to twenty steps on each side", async() => {
+      const posts = createPosts(...Array.from({ length: 43 }, (_, index) => `${index}`));
+      const lightbox = new Lightbox<Post>();
+
+      lightbox.open(posts[21], createMediaSequence(posts));
+      await vi.waitFor(() => expect(lightbox.neighbors.value).toHaveLength(40));
+      expect(lightbox.neighbors.value).toEqual(
+        Array.from({ length: 20 }, (_, index) => [posts[20 - index], posts[22 + index]]).flat()
+      );
     });
 
     test("leaves out the post shown", async() => {
@@ -176,8 +187,9 @@ describe("Lightbox", () => {
 
     test("follows the post shown", async() => {
       const lightbox = new Lightbox<Post>();
+      const sequence = createMediaSequence([POSTS[1], POSTS[2]]);
 
-      lightbox.open(POSTS[1], SEQUENCE);
+      lightbox.open(POSTS[1], sequence);
       await lightbox.showNext();
       expect(lightbox.neighbors.value).toEqual([POSTS[1]]);
     });
@@ -196,14 +208,14 @@ describe("Lightbox", () => {
       let finishSearching = doNothing;
       const slow: MediaSequence<Post> = {
         getNext: () => new Promise(resolve => {
-          finishSearching = () => resolve(POSTS[1]);
+          finishSearching = () => resolve(POSTS[0]);
         }),
         getPrevious: () => Promise.resolve(undefined),
         positionOf: () => undefined
       };
 
       lightbox.open(POSTS[0], slow);
-      lightbox.open(POSTS[2], SEQUENCE);
+      lightbox.open(POSTS[2], createMediaSequence([POSTS[1], POSTS[2]]));
       await flushMicrotasks();
       finishSearching();
       await flushMicrotasks();

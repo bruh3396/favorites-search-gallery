@@ -27,12 +27,12 @@ function isStale(post: Post, now: number): boolean {
 }
 
 export interface PostLibraryDependencies {
-  localPosts: LocalPosts;
-  localTagCategories: LocalTagCategories;
-  remotePosts: RemotePosts;
-  remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
-  scheduler: Scheduler;
-  onRefresh: (refreshed: Post) => void;
+  readonly localPosts: LocalPosts;
+  readonly localTagCategories: LocalTagCategories;
+  readonly remotePosts: RemotePosts;
+  readonly remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
+  readonly scheduler: Scheduler;
+  readonly onRefresh: (refreshed: Post) => void;
 }
 
 export class PostLibrary {

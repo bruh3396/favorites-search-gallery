@@ -46,7 +46,6 @@ function createPreference<T>(initial: T): Preference<T> {
   };
 }
 
-// A local id with no local post loads as a placeholder, which is hydrated once its post is fetched.
 async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } = {}): Promise<Setup> {
   const client = new MemoryClient(posts);
   const remoteFavoriteActions = new ObservableRemoteFavoriteActions(new MemoryRemoteFavoriteActions(client));
@@ -55,7 +54,7 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
   const paginationSettings = createPaginationSettings();
 
   await localFavorites.setAll(localIds);
-  const favorites = createFavoritesService({ userOwnsFavorites: true, blacklistedTags: "" }, {
+  const favorites = createFavoritesService({ userOwnsFavorites: true, blacklistedTags: [] }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
@@ -68,7 +67,7 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
   });
   const session = favorites.createSearchSession({ searchSettings: createPreference(createSearchSettings()), paginationSettings });
 
-  favorites.updates.on(favorite => hydratedIds.push(favorite.id));
+  favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
   await favorites.load();
   return { favorites, session, paginationSettings, remoteFavoriteActions, localFavorites, hydratedIds };
 }
@@ -164,14 +163,14 @@ describe("createFavorites", () => {
   test("treats every favorite on the user's own page as favorited", async() => {
     const { favorites } = await setup(createTaggedPosts("apple"));
 
-    expect(favorites.isFavorite("1")).toBe(true);
+    expect(favorites.isFavorited("1")).toBe(true);
   });
 
   test("records a favorite removed by another caller of the shared port", async() => {
     const { favorites, remoteFavoriteActions } = await setup(createTaggedPosts("apple"));
 
     await remoteFavoriteActions.remove("1");
-    expect(favorites.isFavorite("1")).toBe(false);
+    expect(favorites.isFavorited("1")).toBe(false);
   });
 
   test("records a favorite added back through its intent", async() => {
@@ -179,7 +178,7 @@ describe("createFavorites", () => {
 
     await favorites.actions.remove("1");
     await favorites.actions.add("1");
-    expect(favorites.isFavorite("1")).toBe(true);
+    expect(favorites.isFavorited("1")).toBe(true);
   });
 
   test("deletes a removed favorite from the local favorites", async() => {

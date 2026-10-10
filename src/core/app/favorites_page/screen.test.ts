@@ -35,7 +35,7 @@ interface Setup {
 }
 
 function createFavorite(id: string): Favorite {
-  return { id, media: { kind: "image", locator: `images/${id}` }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 100 };
+  return { id, numericId: Number(id), media: { kind: "image", locator: `images/${id}` }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 100 };
 }
 
 function paginateByTwo(results: readonly Favorite[], pageNumber: number): PaginationResult {

@@ -120,7 +120,7 @@ describe("FavoritesLoader", () => {
       const { flow, collection } = await setup({ local: [createPost({ id: "1" })], remote: [createPost({ id: "1", tags: "apple", media: MEDIA })] });
       const hydrated: Favorite[] = [];
 
-      collection.updates.on(favorite => hydrated.push(favorite));
+      collection.hydrated.on(favorite => hydrated.push(favorite));
       await flow.load();
       await flushMicrotasks();
       expect(collection.getAll().find(favorite => favorite.id === "1")?.media).toEqual(MEDIA);

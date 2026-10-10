@@ -25,7 +25,7 @@ interface ReloaderSources {
   paint?: Promise<void>;
 }
 
-async function setup({ local, remote, unstoredIds = [], stored = [] }: ReloaderSources): Promise<{
+async function setup({ local, remote, unstoredIds = [], stored = [], paint = Promise.resolve() }: ReloaderSources): Promise<{
   reloader: FavoritesReloader;
   collection: FavoritesCollection;
   index: FavoritesSearchIndex;
@@ -60,6 +60,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [] }: ReloaderS
     localFavorites,
     remoteFavorites,
     postLibrary,
+    waitForPaint: (): Promise<void> => paint,
     report: (state): void => {
       states.push(state);
     }

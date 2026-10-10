@@ -1,44 +1,44 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoritesArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
+import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
 import { Post } from "@/core/domain/post/post";
 import { TermUpdate } from "@/core/search/engines/search_engine";
 
 export class FavoritesCollection {
-  private readonly list = new IdentifiedList<FavoritesArenaFavorite>();
+  private readonly list = new IdentifiedList<ArenaFavorite>();
   private readonly arena = new FavoritesColumnarArena();
-  private readonly updatedFavorites = new Emitter<Favorite>();
+  private readonly hydratedFavorites = new Emitter<Favorite>();
 
-  public get updates(): Occurrence<Favorite> {
-    return this.updatedFavorites;
+  public get hydrated(): Occurrence<Favorite> {
+    return this.hydratedFavorites;
   }
 
   public get size(): number {
     return this.list.size;
   }
 
-  public append(posts: Post[]): FavoritesArenaFavorite[] {
-    const favorites = posts.map(post => new FavoritesArenaFavorite(post, this.arena));
+  public append(posts: Post[]): ArenaFavorite[] {
+    const favorites = posts.map(post => new ArenaFavorite(post, this.arena));
 
     this.list.append(favorites);
     return favorites;
   }
 
-  public prependAsNew(posts: Post[]): FavoritesArenaFavorite[] {
-    const favorites = posts.map(post => this.list.get(post.id) ?? new FavoritesArenaFavorite(post, this.arena));
+  public prependAsNew(posts: Post[]): ArenaFavorite[] {
+    const favorites = posts.map(post => this.list.get(post.id) ?? new ArenaFavorite(post, this.arena));
 
     this.list.prepend(favorites);
     favorites.forEach(favorite => this.arena.markNew(favorite.slot));
     return favorites;
   }
 
-  public getAll(): FavoritesArenaFavorite[] {
+  public getAll(): ArenaFavorite[] {
     return this.list.getAll();
   }
 
-  public slice(start: number, end: number): FavoritesArenaFavorite[] {
+  public slice(start: number, end: number): ArenaFavorite[] {
     return this.list.slice(start, end);
   }
 
@@ -59,7 +59,7 @@ export class FavoritesCollection {
     const newTerms = favorite.tags;
 
     if (wasPlaceholder && favorite.media.locator !== "") {
-      this.updatedFavorites.emit(favorite);
+      this.hydratedFavorites.emit(favorite);
     }
     return oldTerms.symmetricDifference(newTerms).size > 0 ? { doc: favorite, oldTerms, newTerms } : undefined;
   }

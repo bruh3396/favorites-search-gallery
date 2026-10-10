@@ -1,17 +1,17 @@
-import { BASE_INDEX_URL, ORIGIN } from "@/adapters/rule34/client/urls";
+import { BASE_INDEX_URL, RULE34_ORIGIN } from "@/adapters/rule34/client/urls";
 import { Rule34Fetch, request, send } from "@/adapters/rule34/client/request";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
+import { Retry } from "@/core/utils/async/retry";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
-import { retry } from "@/core/utils/async/retry";
 
 export type Rule34AddFavoriteAnswer = "error" | "alreadyAdded" | "loggedOut" | "added";
 
 export interface Rule34FavoriteActionsDependencies {
-  fetch: Rule34Fetch;
-  scheduler: Scheduler;
-  randomSource: RandomSource;
+  readonly fetch: Rule34Fetch;
+  readonly scheduler: Scheduler;
+  readonly randomSource: RandomSource;
 }
 
 type Intent = "add" | "remove";
@@ -28,7 +28,7 @@ const ADD_ANSWERS: Record<number, Rule34AddFavoriteAnswer> = {
 };
 
 export function addFavoriteUrl(id: string): string {
-  return `${ORIGIN}/public/addfav.php?id=${id}`;
+  return `${RULE34_ORIGIN}/public/addfav.php?id=${id}`;
 }
 
 export function postVoteUrl(id: string): string {
@@ -42,11 +42,17 @@ export function removeFavoriteUrl(id: string): string {
 export class Rule34FavoriteActions {
   private readonly addLimiter: RateLimiter;
   private readonly removeLimiter: RateLimiter;
+  private readonly removeRetry: Retry;
   private readonly intents = new Map<string, Intent>();
 
   constructor(private readonly dependencies: Rule34FavoriteActionsDependencies) {
     this.addLimiter = new RateLimiter(ADD_RATE_LIMIT, dependencies.scheduler);
     this.removeLimiter = new RateLimiter(REMOVE_RATE_LIMIT, dependencies.scheduler);
+    this.removeRetry = new Retry({ attempts: REMOVE_ATTEMPTS, baseDelay: REMOVE_RETRY_DELAY }, {
+      scheduler: dependencies.scheduler,
+      randomSource: dependencies.randomSource,
+      isRetryable: isTransient
+    });
   }
 
   public add(id: string): Promise<Rule34AddFavoriteAnswer | null> {
@@ -67,13 +73,7 @@ export class Rule34FavoriteActions {
       if (!this.claimIntent(id, "remove")) {
         return false;
       }
-      await retry(() => send(this.dependencies.fetch, removeFavoriteUrl(id), { redirect: "manual" }), {
-        attempts: REMOVE_ATTEMPTS,
-        baseDelay: REMOVE_RETRY_DELAY,
-        scheduler: this.dependencies.scheduler,
-        randomSource: this.dependencies.randomSource,
-        isRetryable: isTransient
-      });
+      await this.removeRetry.retry(() => send(this.dependencies.fetch, removeFavoriteUrl(id), { redirect: "manual" }));
       return true;
     });
   }

@@ -6,10 +6,10 @@ export const FavoriteHeartClass = {
 } as const;
 
 export interface FavoriteHeartProps {
-  id: string;
-  isFavorited: (id: string) => boolean;
-  addFavorite: (id: string) => void;
-  removeFavorite: (id: string) => void;
+  readonly id: string;
+  readonly isFavorited: (id: string) => boolean;
+  readonly addFavorite: (id: string) => void;
+  readonly removeFavorite: (id: string) => void;
 }
 
 export function FavoriteHeart({ id, isFavorited: readIsFavorited, addFavorite, removeFavorite }: FavoriteHeartProps): HTMLElement {

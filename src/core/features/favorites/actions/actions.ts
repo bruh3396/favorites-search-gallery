@@ -4,26 +4,23 @@ import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_fa
 import { Signal } from "@/core/utils/reactive/signal";
 
 export interface FavoritesActionsConfiguration {
-  favoritedByDefault: boolean;
+  readonly favoritedByDefault: boolean;
 }
 
 export interface FavoritesActionsDependencies {
-  remoteFavoriteActions: ObservableRemoteFavoriteActions;
-  localFavorites: LocalFavorites;
+  readonly remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  readonly localFavorites: LocalFavorites;
 }
 
 export class FavoritesActions {
   private readonly favorited = new Map<string, Signal<boolean>>();
-  private readonly disposers: Array<() => void>;
 
   constructor(private readonly configuration: FavoritesActionsConfiguration, private readonly dependencies: FavoritesActionsDependencies) {
     const { remoteFavoriteActions, localFavorites } = dependencies;
 
-    this.disposers = [
-      remoteFavoriteActions.added.on(id => (this.getSignal(id).value = true)),
-      remoteFavoriteActions.removed.on(id => (this.getSignal(id).value = false)),
-      remoteFavoriteActions.removed.on(id => localFavorites.remove([id]))
-    ];
+    remoteFavoriteActions.added.on(id => (this.getSignal(id).value = true));
+    remoteFavoriteActions.removed.on(id => (this.getSignal(id).value = false));
+    remoteFavoriteActions.removed.on(id => localFavorites.remove([id]));
   }
 
   public add(id: string): Promise<AddFavoriteResult> {
@@ -34,14 +31,8 @@ export class FavoritesActions {
     return this.dependencies.remoteFavoriteActions.remove(id);
   }
 
-  public isFavorite(id: string): boolean {
-    return this.getSignal(id).value;
-  }
-
-  public dispose(): void {
-    for (const disposer of this.disposers) {
-      disposer();
-    }
+  public isFavorited(id: string): boolean {
+    return this.favorited.get(id)?.peek() ?? this.configuration.favoritedByDefault;
   }
 
   private getSignal(id: string): Signal<boolean> {

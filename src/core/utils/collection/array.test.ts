@@ -1,4 +1,4 @@
-import { chunk, findFirstIndexWhere, getItemsAround, getWrappedItemsAround, grow, haveSameItems, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, partition, removeValue, shuffleInPlace } from "@/core/utils/collection/array";
+import { chunk, findFirstIndexWhere, getItemsAround, getWrappedItemsAround, grow, haveSameItems, insertSorted, intersectSorted, intersectSortedNumbers, isIndexInBounds, partition, removeValue, shuffleDeterministically, shuffleInPlace } from "@/core/utils/collection/array";
 import { describe, expect, test } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { randomInt } from "@/core/utils/number/number";
@@ -264,6 +264,41 @@ describe("shuffleInPlace", () => {
     for (const num of numbers) {
       expect(numberSet.has(num)).toBe(true);
     }
+  });
+});
+
+describe("shuffleDeterministically", () => {
+  test("leaves an empty list empty", () => {
+    expect(shuffleDeterministically([], 42, x => x)).toStrictEqual([]);
+  });
+
+  test("leaves a single element in place", () => {
+    expect(shuffleDeterministically([1], 42, x => x)).toStrictEqual([1]);
+  });
+
+  test("produces the same order for the same seed and keys", () => {
+    const list = [1, 2, 3, 4, 5];
+
+    expect(shuffleDeterministically(list, 42, x => x))
+      .toStrictEqual(shuffleDeterministically(list, 42, x => x));
+  });
+
+  test("produces a different order for a different seed", () => {
+    const list = Array.from({ length: 100 }, (_, i) => i + 1);
+
+    expect(shuffleDeterministically(list, 42, x => x))
+      .not.toStrictEqual(shuffleDeterministically(list, 99, x => x));
+  });
+
+  test("preserves all elements without modifying the original list", () => {
+    const list = [1, 2, 3, 4, 5];
+    const original = [...list];
+
+    const shuffled = shuffleDeterministically(list, 42, x => x);
+
+    expect(shuffled).toHaveLength(list.length);
+    expect([...shuffled].sort((a, b) => a - b)).toStrictEqual(original);
+    expect(list).toStrictEqual(original);
   });
 });
 
