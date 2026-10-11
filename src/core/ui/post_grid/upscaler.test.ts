@@ -2,6 +2,7 @@ import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
 import { Upscaler } from "@/core/ui/post_grid/upscaler";
+import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
 
@@ -95,6 +96,34 @@ describe("Upscaler", () => {
 
     expect(canvas.hidden).toBe(false);
     expect(fetchImage).toHaveBeenCalledOnce();
+  });
+
+  test("logs a failed request and tries again on the next request", async() => {
+    const error = new Error("offline");
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { upscaler, fetchImage, drawImage } = setup(() => Promise.reject(error));
+
+    onTestFinished(() => log.mockRestore());
+    upscaler.upscale();
+    await vi.waitFor(() => expect(log).toHaveBeenCalledWith(error));
+    fetchImage.mockResolvedValue(new Blob());
+    upscaler.upscale();
+    await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
+  });
+
+  test("ignores the failure of a request it already aborted", async() => {
+    let fail: (error: Error) => void = () => undefined;
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { upscaler } = setup(() => new Promise((_, reject) => {
+      fail = reject;
+    }));
+
+    onTestFinished(() => log.mockRestore());
+    upscaler.upscale();
+    upscaler.dispose();
+    fail(new Error("aborted"));
+    await flushMicrotasks();
+    expect(log).not.toHaveBeenCalled();
   });
 
   test("aborts an in-flight request when disabled", () => {

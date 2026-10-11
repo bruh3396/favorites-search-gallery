@@ -77,6 +77,12 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
 }
 
 describe("Setting", () => {
+  test("refuses a descriptor of an unknown kind", () => {
+    const descriptor = { ...createSwitchSetting(createPreference(false)), kind: "slider" } as unknown as SettingDescriptor;
+
+    expect(() => renderSetting(descriptor)).toThrow("Unexpected value");
+  });
+
   test("labels the row and captions it from the descriptor", () => {
     const element = renderSetting({ ...createSwitchSetting(createPreference(false)), description: "Plays videos when opened." });
 

@@ -17,7 +17,7 @@ export class Resource<S, T> {
   private isDisposed = false;
 
   constructor(private readonly dependencies: ResourceDependencies<S, T>) {
-    this.disposeValue = dependencies.disposeValue ?? (() => { });
+    this.disposeValue = dependencies.disposeValue ?? ((): void => { });
     this.stopEffect = effect(() => this.loadSource(dependencies.source.value));
     onCleanup(() => this.dispose());
   }

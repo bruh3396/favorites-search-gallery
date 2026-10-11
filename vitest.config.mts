@@ -40,6 +40,7 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: [["text", { skipFull: true }], "html"],
+      thresholds: { 100: true },
       watermarks: {
         statements: [80, 100],
         branches: [80, 100],
@@ -48,7 +49,17 @@ export default defineConfig({
       },
       all: true,
       include: ["src/**/*.{ts,tsx}"],
-      exclude: [...(configDefaults.coverage?.exclude ?? []), "src/**/testing/**", "scripts/**", "src/**/*.test.{ts,tsx}", "src/**/*.d.ts"]
+      exclude: [
+        ...(configDefaults.coverage?.exclude ?? []),
+        "src/**/testing/**",
+        "src/targets/**",
+        "scripts/**",
+        "src/**/*.test.{ts,tsx}",
+        "src/**/*.d.ts",
+        // TODO: cover once the post list grid gets posts and the favorites pane gets add/remove actions (then test the favorites gate).
+        "src/core/app/post_list_page/post_list_page.ts",
+        "src/core/app/favorites_page/composer.ts"
+      ]
     }
   }
 });

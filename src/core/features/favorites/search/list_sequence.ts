@@ -1,5 +1,5 @@
 import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface ListSequenceConfiguration {

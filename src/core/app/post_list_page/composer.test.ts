@@ -1,14 +1,14 @@
 import { describe, expect, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
-import { PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
 import { Signal } from "@/core/utils/reactive/signal";
-import { mountPostListPage } from "@/core/app/post_list_page/post_list_page";
+import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
+import { mountPostListPage } from "@/core/app/post_list_page/composer";
 
 describe("mountPostListPage", () => {
   test("mounts the skeleton and the post grid in the app root inside the container", () => {
@@ -17,14 +17,14 @@ describe("mountPostListPage", () => {
     mountPostListPage(container, { colorScheme: "light" }, {
       bitmapDecoder: new MemoryBitmapDecoder(),
       visiblePosts: new Signal<readonly MediaItem[]>([]),
-      visibilityObserver: { observe: () => () => { } },
+      visibilityObserver: { observe: (): (() => void) => () => { } },
       remoteMedia: new MemoryRemoteMedia(),
       remotePages: new MemoryRemotePages(),
       localKeyedValues: new MemoryLocalKeyedValues()
     });
     const app = container.shadowRoot!.querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
-    expect([...app.children].map(child => child.classList.contains(PostGridSkeletonClass.root))).toEqual([true, false]);
+    expect([...app.children].map(child => child.classList.contains(SkeletonGridClass.root))).toEqual([true, false]);
     expect([...app.children].every(child => child.classList.contains(PostGridClass.root))).toBe(true);
   });
 
@@ -36,7 +36,7 @@ describe("mountPostListPage", () => {
     mountPostListPage(container, { colorScheme: "light" }, {
       bitmapDecoder: new MemoryBitmapDecoder(),
       visiblePosts: new Signal<readonly MediaItem[]>([]),
-      visibilityObserver: { observe: () => () => { } },
+      visibilityObserver: { observe: (): (() => void) => () => { } },
       remoteMedia: new MemoryRemoteMedia(),
       remotePages: new MemoryRemotePages(),
       localKeyedValues

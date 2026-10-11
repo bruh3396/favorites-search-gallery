@@ -1,4 +1,4 @@
-import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
+import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { FavoritesPane, FavoritesPaneClass } from "@/core/app/favorites_page/pane";
 import { FavoritesShell, FavoritesShellClass } from "@/core/app/favorites_page/shell";
 import { Mock, describe, expect, test, vi } from "vitest";
@@ -7,7 +7,7 @@ import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LoadState } from "@/core/features/favorites/load/state";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Milestone } from "@/core/utils/reactive/milestone";
@@ -19,6 +19,7 @@ import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { createPostGridSettings } from "@/core/app/preferences";
 import { createSearchSettings } from "@/core/app/favorites_page/preferences";
+import { doNothing } from "@/core/utils/function/function";
 import { expectClassesStyled } from "@/testing/css";
 
 const PAGE_SIZE = 2;
@@ -33,7 +34,7 @@ interface Setup {
   submit: Mock<(query: string) => void>;
   goToPage: Mock<(pageNumber: number) => void>;
   skeleton: HTMLElement;
-  onActivatePost: Mock<(post: MediaItem, event: MouseEvent) => void>;
+  onActivate: Mock<(post: MediaItem, event: MouseEvent) => void>;
 }
 
 function createFavorite(id: string): Favorite {
@@ -56,7 +57,7 @@ function setup(): Setup {
   const visiblePosts = new Signal<readonly Favorite[]>([]);
   const submit = vi.fn<(query: string) => void>();
   const goToPage = vi.fn<(pageNumber: number) => void>();
-  const onActivatePost = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
+  const onActivate = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
   const favorites = {
     hydrated: new Emitter<Favorite>(),
     loadState: new Signal<LoadState>({ phase: "starting" })
@@ -86,20 +87,21 @@ function setup(): Setup {
         fetchImage: () => Promise.resolve(new Blob()),
         resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
         getPostUrl: post => `https://posts/${post.id}`,
-        onActivatePost
+        onActivate,
+        onPointerEnter: doNothing
       })
     ]
   }));
-  const skeleton = element.querySelector<HTMLElement>(`.${PostGridSkeletonClass.root}`)!;
-  return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onActivatePost };
+  const skeleton = element.querySelector<HTMLElement>(`.${SkeletonGridClass.root}`)!;
+  return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onActivate };
 }
 
 function queryFavoriteLink(element: HTMLElement): HTMLAnchorElement {
-  return element.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${PostGridSkeletonClass.root}) .${TileClass.link}`)!;
+  return element.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!;
 }
 
 function readShownFavoriteUrls(element: HTMLElement): string[] {
-  return [...element.querySelectorAll<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${PostGridSkeletonClass.root}) .${TileClass.link}`)].map(link => {
+  return [...element.querySelectorAll<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)].map(link => {
     link.dispatchEvent(new Event("pointerdown"));
     return link.href;
   });
@@ -117,7 +119,7 @@ describe("FavoritesPane", () => {
     expect([header.tagName, header.className, content.tagName]).toEqual(["HEADER", FavoritesPaneClass.header, "DIV"]);
     expect(header.querySelector("input[type=search]")).not.toBeNull();
     expect(header.querySelector(`.${PaginatorClass.root}`)).not.toBeNull();
-    expect(describeSlot(content)).toEqual([FavoritesPaneClass.content, `${PostGridClass.root} ${PostGridSkeletonClass.root}`, PostGridClass.root]);
+    expect(describeSlot(content)).toEqual([FavoritesPaneClass.content, `${PostGridClass.root} ${SkeletonGridClass.root}`, PostGridClass.root]);
   });
 
   test("styles every class it sets", () => {
@@ -150,12 +152,12 @@ describe("FavoritesPane", () => {
   });
 
   test("activates the favorite whose tile is clicked", () => {
-    const { element, searchResults, onActivatePost } = setup();
+    const { element, searchResults, onActivate } = setup();
     const favorite = createFavorite("1");
 
     searchResults.value = [favorite];
     queryFavoriteLink(element).click();
-    expect(onActivatePost).toHaveBeenCalledExactlyOnceWith(favorite, expect.any(MouseEvent));
+    expect(onActivate).toHaveBeenCalledExactlyOnceWith(favorite, expect.any(MouseEvent));
   });
 
   test("links each favorite to its post's page", () => {

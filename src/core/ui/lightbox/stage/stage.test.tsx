@@ -5,7 +5,7 @@ import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decod
 import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
 import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
@@ -30,6 +30,7 @@ interface Setup {
   original: HTMLCanvasElement;
   current: Signal<MediaItem | undefined>;
   neighbors: Signal<readonly MediaItem[]>;
+  warmItems: Signal<readonly MediaItem[]>;
   scheduler: MemoryScheduler;
   fetchOriginal: Mock<LightboxStageProps["fetchOriginal"]>;
   resolveOriginalUrl: Mock<LightboxStageProps["resolveOriginalUrl"]>;
@@ -83,6 +84,7 @@ function setup(
   const { drawImage, bitmaps, bitmapDecoder, decodeBitmap } = fakeDrawing();
   const current = new Signal<MediaItem | undefined>(undefined);
   const neighbors = new Signal<readonly MediaItem[]>([]);
+  const warmItems = new Signal<readonly MediaItem[]>([]);
   const scheduler = new MemoryScheduler();
   const fetchOriginal = vi.fn<LightboxStageProps["fetchOriginal"]>(fetch);
   const resolveOriginalUrl = vi.fn<LightboxStageProps["resolveOriginalUrl"]>(resolveOriginal);
@@ -91,6 +93,7 @@ function setup(
     <LightboxStage
       current={current}
       neighbors={neighbors}
+      warmItems={warmItems}
       resolvePreviewUrl={resolvePreviewUrl}
       resolveOriginalUrl={resolveOriginalUrl}
       resolveOriginalImageFallbackUrl={resolveOriginalImageFallbackUrl}
@@ -107,6 +110,7 @@ function setup(
     original,
     current,
     neighbors,
+    warmItems,
     scheduler,
     fetchOriginal,
     resolveOriginalUrl,
@@ -275,6 +279,39 @@ describe("LightboxStage", () => {
     current.value = SECOND;
     await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/2`));
     expect(fetchOriginal).toHaveBeenCalledOnce();
+  });
+
+  test("loads the originals of warm items before the neighbors", async() => {
+    const { neighbors, warmItems, scheduler, fetchOriginal } = setup(() => pendForever());
+
+    neighbors.value = [FIRST];
+    warmItems.value = [SECOND];
+    scheduler.advance(75);
+    await flushPromises();
+    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([SECOND.media, FIRST.media]);
+  });
+
+  test("reuses a warm item's original once it is shown and the warm items clear", async() => {
+    const { current, warmItems, scheduler, fetchOriginal, drawn } = setup();
+
+    warmItems.value = [FIRST];
+    scheduler.advance(75);
+    await flushPromises();
+    current.value = FIRST;
+    warmItems.value = [];
+    await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
+    expect(fetchOriginal).toHaveBeenCalledOnce();
+  });
+
+  test("cancels the download of a warm item replaced while closed", async() => {
+    const { warmItems, scheduler, fetchOriginal } = setup(() => pendForever());
+
+    warmItems.value = [FIRST];
+    scheduler.advance(75);
+    await flushPromises();
+    warmItems.value = [SECOND];
+
+    expect(fetchOriginal.mock.calls[0][1].aborted).toBe(true);
   });
 
   test("cancels the download of a post no longer shown or next to it", async() => {

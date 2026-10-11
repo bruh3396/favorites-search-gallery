@@ -56,6 +56,13 @@ describe("Slider", () => {
     expect(onValueChange).toHaveBeenNthCalledWith(2, 6.5);
   });
 
+  test("ignores input that leaves the value unchanged", () => {
+    const { input, onValueChange } = setup();
+
+    drag(input, 5);
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
   test("commits the value once it is let go", () => {
     const { input, onValueCommit } = setup();
 

@@ -1,10 +1,10 @@
-import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeleton } from "@/core/ui/post_grid/skeleton";
+import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGrid } from "@/core/ui/post_grid/skeleton";
 import { h, render } from "@/core/ui/h/h";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
@@ -34,15 +34,12 @@ export function mountPostListPage(container: HTMLElement, configuration: PostLis
   const { layout, size, upscale } = createPostGridSettings(createAppStorage(localKeyedValues).preferences);
   const app = mountAppRoot(container, { colorScheme: configuration.colorScheme, styles: [UI_CSS] });
   const screen = render(container.ownerDocument, () => [
-    h(PostGridSkeleton, {
+    h(SkeletonGrid, {
       isShown: new Signal(true),
       dimensions: DEFAULT_SKELETON_DIMENSIONS,
       layout,
       size,
-      count: 42,
-      bitmapDecoder,
-      visibilityObserver,
-      fetchImage: (media, signal) => remoteMedia.fetchImage(media, signal)
+      count: 42
     }),
     h(PostGrid<MediaItem>, {
       posts: new Signal<readonly MediaItem[]>([]),
@@ -56,7 +53,7 @@ export function mountPostListPage(container: HTMLElement, configuration: PostLis
       createActions: () => [],
       resolvePreviewUrl: media => remoteMedia.resolvePreviewUrl(media),
       getPostUrl: post => remotePages.postUrl(post.id),
-      onActivatePost: doNothing
+      onActivate: doNothing
     })
   ]);
 

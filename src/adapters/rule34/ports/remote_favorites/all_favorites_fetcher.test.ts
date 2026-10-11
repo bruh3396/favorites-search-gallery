@@ -202,11 +202,9 @@ describe("Rule34AllFavoritesFetcher", () => {
   test("waits for in-flight pages before rejecting", async() => {
     const refused = new Error("refused");
     let finishPage0: ResolvePosts = () => { };
-    const fetch = vi.fn((index: number) => (index === 0
-      ? new Promise<Post[]>(resolve => {
-        finishPage0 = resolve;
-      })
-      : Promise.reject(refused)));
+    const fetch = vi.fn((index: number) => (index === 0 ? new Promise<Post[]>(resolve => {
+      finishPage0 = resolve;
+    }) : Promise.reject(refused)));
     let hasSettled = false;
     const run = createCappedFetcher([], fetch, () => false).fetchAll().catch((error: unknown) => {
       hasSettled = true;

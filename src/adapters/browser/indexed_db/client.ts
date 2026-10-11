@@ -50,12 +50,9 @@ export class IndexedDbClient {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DATABASE_NAME, VERSION);
 
-      request.onupgradeneeded = (event): void => {
-        createMissingStores(request.result);
-
-        if (event.oldVersion === 0 && request.transaction !== null) {
-          migration.writeToNewDatabase(request.transaction);
-        }
+      request.onupgradeneeded = (): void => {
+        createStores(request.result);
+        migration.writeToNewDatabase(request.transaction!);
       };
       request.onsuccess = (): void => {
         request.result.onversionchange = (): void => {
@@ -69,10 +66,8 @@ export class IndexedDbClient {
   }
 }
 
-function createMissingStores(database: IDBDatabase): void {
+function createStores(database: IDBDatabase): void {
   for (const [name, parameters] of Object.entries(SCHEMA)) {
-    if (!database.objectStoreNames.contains(name)) {
-      database.createObjectStore(name, parameters);
-    }
+    database.createObjectStore(name, parameters);
   }
 }

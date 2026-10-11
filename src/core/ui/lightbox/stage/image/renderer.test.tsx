@@ -1,8 +1,8 @@
-import { ImageRenderer, ImageRendererDependencies } from "@/core/ui/lightbox/stage/image/image_renderer";
+import { ImageRenderer, ImageRendererDependencies } from "@/core/ui/lightbox/stage/image/renderer";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { render } from "@/core/ui/h/h";
 
@@ -58,7 +58,13 @@ function setup(
 
   onTestFinished(() => spy.mockRestore());
   const resolveOriginalImageFallbackUrl = vi.fn<ImageRendererDependencies["resolveOriginalImageFallbackUrl"]>(media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`));
-  const { result: renderer } = render(document, () => new ImageRenderer({ resolvePreviewUrl, resolveOriginalImageFallbackUrl, fetchOriginal, bitmapDecoder: { decode }, scheduler }));
+  const { result: renderer } = render(document, () => new ImageRenderer({
+    resolvePreviewUrl,
+    resolveOriginalImageFallbackUrl,
+    fetchOriginal,
+    bitmapDecoder: { decode },
+    scheduler
+  }));
   const preview = renderer.root.querySelector<HTMLImageElement>("img")!;
   const original = renderer.root.querySelector<HTMLCanvasElement>("canvas")!;
   return { renderer, preview, original, scheduler, resolvePreviewUrl, fetchOriginal, decode, drawImage, bitmaps };

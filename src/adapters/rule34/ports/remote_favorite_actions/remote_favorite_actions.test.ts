@@ -12,7 +12,7 @@ interface Setup {
 function setup(addAnswer = "3"): Setup {
   const scheduler = new MemoryScheduler();
   const actions = new Rule34RemoteFavoriteActions({
-    fetch: () => Promise.resolve(new Response(addAnswer)),
+    fetch: (): Promise<Response> => Promise.resolve(new Response(addAnswer)),
     scheduler,
     randomSource: new MemoryRandomSource([1])
   });

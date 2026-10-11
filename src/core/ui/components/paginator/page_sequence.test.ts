@@ -23,6 +23,10 @@ describe("getPageSequence", () => {
     expect(getPageSequence({ pageNumber: 1, pageCount: 1, nearbyCount: 5 })).toEqual([1]);
   });
 
+  test("lists nothing when there are no pages", () => {
+    expect(getPageSequence({ pageNumber: 1, pageCount: 0, nearbyCount: 5 })).toEqual([]);
+  });
+
   test("lists every page without gaps when they all fit", () => {
     expect(getPageSequence({ pageNumber: 2, pageCount: 3, nearbyCount: 3 })).toEqual([1, 2, 3]);
     expect(getPageSequence({ pageNumber: 3, pageCount: 5, nearbyCount: 7 })).toEqual([1, 2, 3, 4, 5]);

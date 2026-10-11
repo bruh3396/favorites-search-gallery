@@ -1,4 +1,4 @@
-import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
+import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -54,7 +54,7 @@ function readAspectRatios(grid: Element): string[] {
 }
 
 function querySkeleton(root: ShadowRoot): Element {
-  return root.querySelector(`.${PostGridSkeletonClass.root}`)!;
+  return root.querySelector(`.${SkeletonGridClass.root}`)!;
 }
 
 describe("mountFavoritesPage", () => {
@@ -69,7 +69,7 @@ describe("mountFavoritesPage", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { postGridSize: 3 } });
-    const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${PostGridSkeletonClass.root})`)!;
+    const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
     expect(grid.style.getPropertyValue("--fsg-PostGrid-size")).toBe("3");
   });
@@ -106,7 +106,7 @@ describe("mountFavoritesPage", () => {
     localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
     const media = { kind: "image" as const, locator: "data:image/png;base64,AA==" };
     const root = mount(localKeyedValues, [createPost({ id: "1", media }), createPost({ id: "2", media })]);
-    const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${PostGridSkeletonClass.root})`)!;
+    const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
     Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
       configurable: true,

@@ -1,7 +1,7 @@
 import { MockInstance, describe, expect, onTestFinished, test, vi } from "vitest";
-import { MediaItem } from "@/core/domain/media/media";
-import { VideoElement } from "@/core/ui/lightbox/stage/video/video_element";
-import { VideoElementPool } from "@/core/ui/lightbox/stage/video/video_element_pool";
+import { MediaItem } from "@/core/domain/post/post";
+import { VideoElement } from "@/core/ui/lightbox/stage/video/element";
+import { VideoElementPool } from "@/core/ui/lightbox/stage/video/element_pool";
 import { render } from "@/core/ui/h/h";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "video", locator: "videos/1.mp4" } };

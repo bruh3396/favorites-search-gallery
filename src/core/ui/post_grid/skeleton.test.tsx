@@ -1,7 +1,7 @@
-import { PostGridSkeleton, PostGridSkeletonClass, PostGridSkeletonProps } from "@/core/ui/post_grid/skeleton";
+import { GridLayout, TilerClass } from "@/core/ui/post_grid/tiler";
+import { SkeletonGrid, SkeletonGridClass, SkeletonGridProps } from "@/core/ui/post_grid/skeleton";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import POST_GRID_CSS from "@/core/ui/post_grid/post_grid.css?inline";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Scoped } from "@/core/utils/reactive/scope";
@@ -9,22 +9,16 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }],
-  count = 50 }: Partial<PostGridSkeletonProps> = {}):
-  Scoped<HTMLElement> {
-  return render(document, () => <PostGridSkeleton
-    isShown={isShown}
-    dimensions={dimensions}
-    layout={new Signal("grid")}
-    size={new Signal(2)}
-    count={count}
-    bitmapDecoder={new MemoryBitmapDecoder()}
-    visibilityObserver={{ observe: () => () => { } }}
-    fetchImage={() => Promise.resolve(new Blob())}
-  />);
+function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }], layout = new Signal<GridLayout>("grid"),
+  size = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {
+  return render(document, () => <SkeletonGrid isShown={isShown} dimensions={dimensions} layout={layout} size={size} count={count} />);
 }
 
-describe("PostGridSkeleton", () => {
+function createSquares(count: number): { width: number; height: number }[] {
+  return Array.from({ length: count }, () => ({ width: 1, height: 1 }));
+}
+
+describe("SkeletonGrid", () => {
   test("draws a post grid of loading tiles shaped like the given dimensions", () => {
     const { result: element } = setup();
     const tiles = [...element.querySelectorAll<HTMLElement>(`.${TileClass.root}`)];
@@ -34,15 +28,27 @@ describe("PostGridSkeleton", () => {
   });
 
   test("draws at most 50 tiles", () => {
-    const { result: element } = setup({ dimensions: Array.from({ length: 60 }, () => ({ width: 1, height: 1 })), count: 100 });
+    const { result: element } = setup({ dimensions: createSquares(60), count: 100 });
 
     expect(element.querySelectorAll(`.${TileClass.root}`)).toHaveLength(50);
   });
 
   test("draws count tiles", () => {
-    const { result: element } = setup({ dimensions: Array.from({ length: 60 }, () => ({ width: 1, height: 1 })), count: 20 });
+    const { result: element } = setup({ dimensions: createSquares(60), count: 20 });
 
     expect(element.querySelectorAll(`.${TileClass.root}`)).toHaveLength(20);
+  });
+
+  test("tiles again when the layout or size changes", () => {
+    const layout = new Signal<GridLayout>("grid");
+    const size = new Signal(2);
+    const { result: element } = setup({ dimensions: createSquares(6), layout, size });
+
+    layout.value = "column";
+    expect(element.querySelectorAll(`.${TilerClass.column}`)).toHaveLength(2);
+    size.value = 3;
+    expect(element.querySelectorAll(`.${TilerClass.column}`)).toHaveLength(3);
+    expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("3");
   });
 
   test("shows and hides with its signal, hidden from assistive technology", () => {
@@ -54,16 +60,19 @@ describe("PostGridSkeleton", () => {
     expect(element.hidden).toBe(true);
   });
 
-  test("stops following its signal once disposed", () => {
+  test("stops following its signals once disposed", () => {
     const isShown = new Signal(true);
-    const { result: element, dispose } = setup({ isShown });
+    const size = new Signal(2);
+    const { result: element, dispose } = setup({ isShown, size });
 
     dispose();
     isShown.value = false;
+    size.value = 5;
     expect(element.hidden).toBe(false);
+    expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("2");
   });
 
   test("styles every class it sets", () => {
-    expectClassesStyled(PostGridSkeletonClass, POST_GRID_CSS);
+    expectClassesStyled(SkeletonGridClass, POST_GRID_CSS);
   });
 });

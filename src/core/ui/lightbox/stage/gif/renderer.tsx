@@ -1,7 +1,7 @@
 import { LightboxRendererClass, LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Signal, effect } from "@/core/utils/reactive/signal";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { Resource } from "@/core/utils/reactive/resource";
 import { h } from "@/core/ui/h/h";
 

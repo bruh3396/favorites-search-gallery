@@ -1,9 +1,8 @@
-import { LightboxRendererClass, LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
+import { LightboxRendererClass, LightboxStageRenderer, PreloadingRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
-import { PreloadingRenderer } from "@/core/ui/lightbox/stage/preloading_renderer";
+import { MediaItem } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { VideoElementPool } from "@/core/ui/lightbox/stage/video/video_element_pool";
+import { VideoElementPool } from "@/core/ui/lightbox/stage/video/element_pool";
 import { h } from "@/core/ui/h/h";
 
 export interface VideoRendererDependencies {

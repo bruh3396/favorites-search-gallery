@@ -59,6 +59,16 @@ describe("h", () => {
     expect(render(document, () => h(Greeting, { name: "Ann" })).result.outerHTML).toBe("<p>Hi Ann</p>");
   });
 
+  test("creates a bare element when given null props", () => {
+    expect(render(document, () => h("div", null)).result.outerHTML).toBe("<div></div>");
+  });
+
+  test("calls a component with empty props when given null", () => {
+    const Echo = (props: unknown): HTMLElement => h("p", {}, JSON.stringify(props));
+
+    expect(render(document, () => h(Echo, null)).result.textContent).toBe("{}");
+  });
+
   test("keeps an enclosing effect from depending on what a component reads while built", () => {
     const read = new Signal("a");
     const Reader = (): HTMLElement => h("p", {}, read.value);

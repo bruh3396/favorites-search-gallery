@@ -1,5 +1,4 @@
-import { Dimensions } from "@/core/domain/post/post";
-import { MediaItem } from "@/core/domain/media/media";
+import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
@@ -34,7 +33,8 @@ export interface PostGridProps<T extends MediaItem> {
   createActions: (post: T) => readonly Node[];
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl?: (post: T) => string;
-  onActivatePost: (post: T, event: MouseEvent) => void;
+  onActivate: (post: T, event: MouseEvent) => void;
+  onPointerEnter?: (post: T) => void;
 }
 
 export function PostGrid<T extends MediaItem>(props: PostGridProps<T>): HTMLElement {
@@ -44,7 +44,7 @@ export function PostGrid<T extends MediaItem>(props: PostGridProps<T>): HTMLElem
 class PostGridImplementation<T extends MediaItem> {
   private readonly root: HTMLElement;
   private readonly list: KeyedList<T>;
-  private readonly visibleTileTokens = new Map<string, symbol>();
+  private readonly visiblePostIds = new Set<string>();
 
   constructor(private readonly props: PostGridProps<T>) {
     this.root = <div className={PostGridClass.root} />;
@@ -59,7 +59,7 @@ class PostGridImplementation<T extends MediaItem> {
     onCleanup(changed.on(post => this.list.recreate(post)));
 
     if (scrollTo !== undefined) {
-      onCleanup(scrollTo.on(post => this.list.get(post)?.scrollIntoView({ block: "center", behavior: "smooth" })));
+      onCleanup(scrollTo.on(post => this.list.get(post)?.scrollIntoView({ block: "center", behavior: "instant" })));
     }
     return this.root;
   }
@@ -71,57 +71,48 @@ class PostGridImplementation<T extends MediaItem> {
       layout: this.props.settings.layout.value,
       getColumnCount: (): number => Math.round(this.props.settings.size.value)
     });
-    const postIds = new Set(posts.map(post => post.id));
-
-    for (const postId of this.visibleTileTokens.keys()) {
-      if (!postIds.has(postId)) {
-        this.visibleTileTokens.delete(postId);
-      }
-    }
     this.publishVisiblePosts(posts);
   }
 
-  private setPostVisibility(post: T, tileToken: symbol, isVisible: boolean): void {
-    if (isVisible) {
-      if (this.visibleTileTokens.get(post.id) === tileToken) {
-        return;
-      }
-      this.visibleTileTokens.set(post.id, tileToken);
-    } else {
-      if (this.visibleTileTokens.get(post.id) !== tileToken) {
-        return;
-      }
-      this.visibleTileTokens.delete(post.id);
+  private markVisible(post: T): void {
+    if (!this.visiblePostIds.has(post.id)) {
+      this.visiblePostIds.add(post.id);
+      this.publishVisiblePosts(this.props.posts.peek());
     }
-    this.publishVisiblePosts(this.props.posts.peek());
+  }
+
+  private markHidden(post: T): void {
+    if (this.visiblePostIds.delete(post.id)) {
+      this.publishVisiblePosts(this.props.posts.peek());
+    }
   }
 
   private publishVisiblePosts(posts: readonly T[]): void {
-    this.props.visiblePosts.value = posts.filter(post => this.visibleTileTokens.has(post.id));
+    this.props.visiblePosts.value = posts.filter(post => this.visiblePostIds.has(post.id));
   }
 
   private createPostList(): KeyedList<T> {
-    const { getDimensions, createActions, bitmapDecoder, visibilityObserver, fetchImage, resolvePreviewUrl, getPostUrl, onActivatePost, settings } = this.props;
+    const {
+      getDimensions, createActions, bitmapDecoder, visibilityObserver, fetchImage, resolvePreviewUrl, getPostUrl, onActivate, onPointerEnter, settings
+    } = this.props;
     return new KeyedList<T>({
       getKey: (post): string => post.id,
-      create: (post): HTMLElement => {
-        const tileToken = Symbol(post.id);
-        return (
-          <Tile
-            post={post}
-            dimensions={getDimensions(post)}
-            actions={createActions(post)}
-            upscale={settings.upscale}
-            bitmapDecoder={bitmapDecoder}
-            visibilityObserver={visibilityObserver}
-            onVisibilityChange={isVisible => this.setPostVisibility(post, tileToken, isVisible)}
-            fetchImage={fetchImage}
-            resolvePreviewUrl={resolvePreviewUrl}
-            href={getPostUrl?.(post)}
-            onActivate={event => onActivatePost(post, event)}
-          />
-        );
-      }
+      create: (post): HTMLElement => (
+        <Tile
+          post={post}
+          dimensions={getDimensions(post)}
+          actions={createActions(post)}
+          upscale={settings.upscale}
+          bitmapDecoder={bitmapDecoder}
+          visibilityObserver={visibilityObserver}
+          onVisibilityChange={isVisible => (isVisible ? this.markVisible(post) : this.markHidden(post))}
+          fetchImage={fetchImage}
+          resolvePreviewUrl={resolvePreviewUrl}
+          href={getPostUrl?.(post)}
+          onActivate={event => onActivate(post, event)}
+          onPointerEnter={() => onPointerEnter?.(post)}
+        />
+      )
     });
   }
 }

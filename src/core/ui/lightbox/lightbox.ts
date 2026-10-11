@@ -1,17 +1,23 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 
-const MAX_NEIGHBOR_DISTANCE = 20;
+export interface LightboxConfiguration {
+  readonly warmLimit: number;
+  readonly maxNeighborDistance: number;
+}
 
 export class Lightbox<T extends MediaItem> {
   private readonly currentItem = new Signal<T | undefined>(undefined);
   private readonly closes = new Emitter<T>();
   private readonly isOpenState = computed(() => this.currentItem.value !== undefined);
   private readonly neighborItems = new Signal<readonly T[]>([]);
+  private readonly warmItemsState = new Signal<readonly T[]>([]);
   private readonly sequence = new Signal<MediaSequence<T> | undefined>(undefined);
   private readonly positionState = computed(() => findPosition(this.currentItem.value, this.sequence.value));
+
+  constructor(private readonly configuration: LightboxConfiguration) { }
 
   public get closed(): Occurrence<T> {
     return this.closes;
@@ -33,10 +39,24 @@ export class Lightbox<T extends MediaItem> {
     return this.positionState;
   }
 
+  public get warmItems(): Readable<readonly T[]> {
+    return this.warmItemsState;
+  }
+
+  public warm(item: T): void {
+    const previous = this.warmItemsState.peek();
+
+    if (this.currentItem.peek() !== undefined || previous[0] === item) {
+      return;
+    }
+    this.warmItemsState.value = [item, ...previous.filter(warmItem => warmItem !== item)].slice(0, this.configuration.warmLimit);
+  }
+
   public open(item: T, sequence: MediaSequence<T>): void {
     this.sequence.value = sequence;
     this.currentItem.value = item;
-    this.publishNeighbors(MAX_NEIGHBOR_DISTANCE).catch(console.error);
+    this.warmItemsState.value = [];
+    this.publishNeighbors(item, sequence).catch(console.error);
   }
 
   public close(): void {
@@ -70,17 +90,11 @@ export class Lightbox<T extends MediaItem> {
 
     if (neighbor !== undefined && this.isShowing(current, sequence)) {
       this.currentItem.value = neighbor;
-      await this.publishNeighbors(MAX_NEIGHBOR_DISTANCE);
+      await this.publishNeighbors(neighbor, sequence);
     }
   }
 
-  private async publishNeighbors(maxDistance: number): Promise<void> {
-    const current = this.currentItem.peek();
-    const sequence = this.sequence.peek();
-
-    if (current === undefined || sequence === undefined) {
-      return;
-    }
+  private async publishNeighbors(current: T, sequence: MediaSequence<T>): Promise<void> {
     const found = new Set<T>();
     const addNeighbor = (item: T | undefined): void => {
       if (item !== undefined && item !== current) {
@@ -91,7 +105,7 @@ export class Lightbox<T extends MediaItem> {
     let previous: T | undefined = current;
     let next: T | undefined = current;
 
-    for (let distanceFromCurrent = 1; distanceFromCurrent <= maxDistance; distanceFromCurrent += 1) {
+    for (let distanceFromCurrent = 1; distanceFromCurrent <= this.configuration.maxNeighborDistance; distanceFromCurrent += 1) {
       [previous, next] = await Promise.all([
         previous === undefined ? undefined : sequence.getPrevious(previous),
         next === undefined ? undefined : sequence.getNext(next)

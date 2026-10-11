@@ -5,7 +5,7 @@
   gap: var(--fsg-PostGrid-gap);
 }
 
-.fsg-PostGridSkeleton {
+.fsg-SkeletonGrid {
   pointer-events: none;
 }
 
@@ -74,10 +74,7 @@
   display: block;
   inline-size: 100%;
   block-size: 100%;
-}
-
-.fsg-Tile-link[tabindex] {
-  cursor: pointer;
+  cursor: default;
 }
 
 .fsg-Tile-preview {

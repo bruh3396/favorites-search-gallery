@@ -6,7 +6,7 @@ import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { doNothing } from "@/core/utils/function/function";
@@ -34,7 +34,7 @@ function sequence(position: SequencePosition | undefined = { index: 0, total: 1 
 }
 
 function setup(): Setup {
-  const lightbox = new Lightbox<MediaItem>();
+  const lightbox = new Lightbox<MediaItem>({ warmLimit: 2, maxNeighborDistance: 2 });
   const onShowNext = vi.spyOn(lightbox, "showNext").mockResolvedValue();
   const onShowPrevious = vi.spyOn(lightbox, "showPrevious").mockResolvedValue();
   const onClose = vi.spyOn(lightbox, "close");
@@ -99,6 +99,16 @@ describe("LightboxScreen", () => {
     expect(dialog.open).toBe(false);
   });
 
+  test("stays open without reopening when the shown post changes", () => {
+    const { dialog, lightbox } = setup();
+    const showModal = vi.spyOn(dialog, "showModal");
+
+    lightbox.open(POST, sequence());
+    lightbox.open(VIDEO, sequence());
+    expect(dialog.open).toBe(true);
+    expect(showModal).toHaveBeenCalledOnce();
+  });
+
   test("reports a close when the browser dismisses it", async() => {
     const { dialog, lightbox, onClose } = setup();
 
@@ -121,6 +131,44 @@ describe("LightboxScreen", () => {
 
     pressKey(dialog.querySelector(`.${LightboxStageClass.root}`)!, "ArrowRight");
     expect(onShowNext).toHaveBeenCalledOnce();
+  });
+
+  test("leaves keys it doesn't use to the browser", () => {
+    const { dialog, onShowNext, onShowPrevious, onClose } = setup();
+
+    expect(pressKey(dialog, "x").defaultPrevented).toBe(false);
+    expect([onShowNext, onShowPrevious, onClose].map(action => action.mock.calls.length)).toEqual([0, 0, 0]);
+  });
+
+  test("asks for the next post on a wheel down and the previous one on a wheel up", () => {
+    const { dialog, onShowNext, onShowPrevious } = setup();
+    const down = new WheelEvent("wheel", { deltaY: 100, cancelable: true });
+
+    dialog.dispatchEvent(down);
+    dialog.dispatchEvent(new WheelEvent("wheel", { deltaY: -100 }));
+    expect(down.defaultPrevented).toBe(true);
+    expect([onShowNext.mock.calls.length, onShowPrevious.mock.calls.length]).toEqual([1, 1]);
+  });
+
+  test("leaves a ctrl wheel and a sideways wheel to the browser", () => {
+    const { dialog, onShowNext, onShowPrevious } = setup();
+    const zoom = new WheelEvent("wheel", { deltaY: 100, cancelable: true });
+
+    // happy-dom's WheelEvent extends UIEvent, so it drops ctrlKey from its init.
+    Object.defineProperty(zoom, "ctrlKey", { value: true });
+    dialog.dispatchEvent(zoom);
+    dialog.dispatchEvent(new WheelEvent("wheel", { deltaX: 100 }));
+    expect(zoom.defaultPrevented).toBe(false);
+    expect([onShowNext.mock.calls.length, onShowPrevious.mock.calls.length]).toEqual([0, 0]);
+  });
+
+  test("closes on a right click instead of opening the context menu", () => {
+    const { dialog, onClose } = setup();
+    const contextMenu = new MouseEvent("contextmenu", { cancelable: true });
+
+    dialog.dispatchEvent(contextMenu);
+    expect(contextMenu.defaultPrevented).toBe(true);
+    expect(onClose).toHaveBeenCalledOnce();
   });
 
   test("closes when its backdrop is clicked", () => {

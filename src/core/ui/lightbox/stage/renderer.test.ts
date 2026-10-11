@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { PreloadingRenderer } from "@/core/ui/lightbox/stage/preloading_renderer";
+import { PreloadingRenderer } from "@/core/ui/lightbox/stage/renderer";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
 const SECOND: MediaItem = { id: "2", media: { kind: "image", locator: "images/2" } };

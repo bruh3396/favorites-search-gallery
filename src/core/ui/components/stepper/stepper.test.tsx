@@ -178,6 +178,35 @@ describe("Stepper", () => {
     expect(onValueChange).toHaveBeenLastCalledWith(4);
   });
 
+  test("leaves keys other than the arrows to the input", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { input, onValueChange } = setup({ initial: 5, onValueCommit, writesBack: true });
+
+    expect(keyDown(input, "a").defaultPrevented).toBe(false);
+    expect(onValueChange).not.toHaveBeenCalled();
+    keyDown(input, "ArrowUp");
+    input.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift" }));
+    expect(onValueCommit).not.toHaveBeenCalled();
+  });
+
+  test("commits a held arrow key when the input loses focus", () => {
+    const onValueCommit = vi.fn<(value: number) => void>();
+    const { input } = setup({ initial: 5, onValueCommit, writesBack: true });
+
+    keyDown(input, "ArrowUp");
+    input.dispatchEvent(new FocusEvent("blur"));
+    expect(onValueCommit.mock.calls).toEqual([[6]]);
+  });
+
+  test("steps once for a pointer press and the click that follows it", () => {
+    const { increment, onValueChange } = setup({ initial: 4 });
+
+    press(increment);
+    release(increment);
+    increment.dispatchEvent(new MouseEvent("click", { detail: 1 }));
+    expect(onValueChange.mock.calls).toEqual([[5]]);
+  });
+
   test("reports a typed value clamped to the bounds, and shows its current value until it changes", () => {
     const { input, onValueChange } = setup({ initial: 3 });
 

@@ -17,7 +17,12 @@ function createAnsweringActions(addResult: AddFavoriteResult, removeResult: Remo
   };
 }
 
-async function setup(favoritedByDefault = true, remoteFavoriteActions = createAnsweringActions("added", "removed")): Promise<Setup> {
+interface SetupOptions {
+  favoritedByDefault?: boolean;
+  remoteFavoriteActions?: RemoteFavoriteActions;
+}
+
+async function setup({ favoritedByDefault = true, remoteFavoriteActions = createAnsweringActions("added", "removed") }: SetupOptions = {}): Promise<Setup> {
   const localFavorites = new MemoryLocalFavorites();
 
   await localFavorites.setAll(["1", "2"]);
@@ -30,7 +35,7 @@ async function setup(favoritedByDefault = true, remoteFavoriteActions = createAn
 
 describe("FavoritesActions", () => {
   test.each([true, false])("returns the default %s for an untouched favorite", async favoritedByDefault => {
-    const { actions } = await setup(favoritedByDefault);
+    const { actions } = await setup({ favoritedByDefault });
 
     expect(actions.isFavorited("1")).toBe(favoritedByDefault);
   });
@@ -52,7 +57,7 @@ describe("FavoritesActions", () => {
   });
 
   test("keeps a favorite whose removal fails", async() => {
-    const { actions, localFavorites } = await setup(true, createAnsweringActions("added", "error"));
+    const { actions, localFavorites } = await setup({ remoteFavoriteActions: createAnsweringActions("added", "error") });
 
     expect(await actions.remove("1")).toBe("error");
     expect(actions.isFavorited("1")).toBe(true);

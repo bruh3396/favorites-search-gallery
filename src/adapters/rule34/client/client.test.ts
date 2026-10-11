@@ -37,7 +37,7 @@ const POST_PAGE = `
   </ul>
 `;
 
-const PROFILE_PAGE = `<a href="https://rule34.xxx/index.php?page=favorites&s=view&id=9">1234</a>`;
+const PROFILE_PAGE = "<a href=\"https://rule34.xxx/index.php?page=favorites&s=view&id=9\">1234</a>";
 
 function createThumb(id: string): string {
   return `<span class="thumb" id="s${id}"><a id="p${id}"><img src="https://example.com/thumbnail_${id}.jpg" title="apple"></a></span>`;

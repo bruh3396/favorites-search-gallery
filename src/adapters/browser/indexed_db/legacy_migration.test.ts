@@ -244,7 +244,7 @@ describe("prepareLegacyMigration", () => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1")] }, keyed: true });
     const transaction = IDBDatabase.prototype.transaction;
 
-    vi.spyOn(IDBDatabase.prototype, "transaction").mockImplementation(function(this: IDBDatabase, ...args) {
+    vi.spyOn(IDBDatabase.prototype, "transaction").mockImplementation(function openTransaction(this: IDBDatabase, ...args) {
       const opened = transaction.apply(this, args);
 
       if (this.name === "Posts") {

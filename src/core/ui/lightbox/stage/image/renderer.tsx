@@ -1,12 +1,10 @@
 import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer";
+import { LightboxRendererClass, LightboxStageRenderer, PreloadingRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapCache } from "@/core/ui/lightbox/stage/image/bitmap_cache";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
-import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
-import { PreloadingRenderer } from "@/core/ui/lightbox/stage/preloading_renderer";
+import { MediaItem } from "@/core/domain/post/post";
 import { Resource } from "@/core/utils/reactive/resource";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { doNothing } from "@/core/utils/function/function";

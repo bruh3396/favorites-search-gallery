@@ -1,7 +1,7 @@
-import { GifRenderer, GifRendererDependencies } from "@/core/ui/lightbox/stage/gif/gif_renderer";
+import { GifRenderer, GifRendererDependencies } from "@/core/ui/lightbox/stage/gif/renderer";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { render } from "@/core/ui/h/h";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1.gif" } };

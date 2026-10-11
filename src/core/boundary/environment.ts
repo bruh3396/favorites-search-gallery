@@ -2,8 +2,7 @@ export type AppMode = "favorites" | "postList";
 export type Device = "desktop" | "mobile";
 export type Pointer = "hover" | "touch";
 export type CanvasBudget = "reduced" | "full";
-export const COLOR_SCHEMES = ["light", "dark"] as const;
-export type ColorScheme = (typeof COLOR_SCHEMES)[number];
+export type ColorScheme = "light" | "dark";
 
 export interface HostEnvironment {
   readonly mode: AppMode;

@@ -19,6 +19,10 @@ describe("FavoritesPostTable", () => {
       expect(table.getMetric(0, metric)).toBe(expected);
     });
 
+    test("refuses an unknown metric", () => {
+      expect(() => new FavoritesPostTable().getMetric(0, "views" as never)).toThrow("Unexpected value: views");
+    });
+
     test("reads a missing duration as 0", () => {
       const table = new FavoritesPostTable();
 
@@ -82,6 +86,13 @@ describe("FavoritesPostTable", () => {
     test("falls back to empty image media when none was ever written", () => {
       expect(new FavoritesPostTable().getMedia(0)).toEqual({ kind: "image", locator: "" });
     });
+
+    test("reads an unknown media kind as an image", () => {
+      const table = new FavoritesPostTable();
+
+      table.write(0, createPost({ id: "1", media: { kind: "flash" as never, locator: "1/a" } }));
+      expect(table.getMedia(0)).toEqual({ kind: "image", locator: "1/a" });
+    });
   });
 
   describe("write", () => {
@@ -103,6 +114,14 @@ describe("FavoritesPostTable", () => {
       table.trim(1);
       expect(table.getNumericId(0)).toBe(1);
       expect(table.getMedia(0)).toEqual({ kind: "video", locator: "a" });
+    });
+
+    test("keeps every slot when trimmed to its full capacity", () => {
+      const table = new FavoritesPostTable();
+
+      table.write(1_023, createPost({ id: "9" }));
+      table.trim(1_024);
+      expect(table.getNumericId(1_023)).toBe(9);
     });
   });
 });

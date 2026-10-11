@@ -119,6 +119,15 @@ describe("PostLibrary", () => {
     expect(adopted.map(post => [post.id, post.score, post.fetchedAt])).toEqual([["2", 0, undefined], ["1", 5, NOW]]);
   });
 
+  test("returns the given post when adopting finds no stored copy", async() => {
+    const { library, localPosts } = setup();
+    const post = createPost({ id: "1" });
+
+    vi.spyOn(localPosts, "setManyIfAbsent").mockResolvedValue();
+
+    expect(await library.adopt([post])).toEqual([post]);
+  });
+
   test("leaves a fresh post alone", async() => {
     const { library, onRefresh } = setup([createPost({ ...DIMENSIONS, score: 9 })]);
 

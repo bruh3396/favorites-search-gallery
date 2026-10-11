@@ -3,7 +3,7 @@ import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decod
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxStage } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SequencePosition } from "@/core/domain/media/media_sequence";
 import { h } from "@/core/ui/h/h";
@@ -25,7 +25,7 @@ export interface LightboxScreenProps<T extends MediaItem> {
 
 export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T>): HTMLElement {
   const { lightbox, resolvePreviewUrl, resolveOriginalUrl, resolveOriginalImageFallbackUrl, scheduler, fetchOriginal, bitmapDecoder } = props;
-  const { current, neighbors, position } = lightbox;
+  const { current, neighbors, warmItems, position } = lightbox;
   const onShowNext = (): void => {
     lightbox.showNext().catch(console.error);
   };
@@ -51,6 +51,7 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
       <LightboxStage
         current={current}
         neighbors={neighbors}
+        warmItems={warmItems}
         resolvePreviewUrl={resolvePreviewUrl}
         resolveOriginalUrl={resolveOriginalUrl}
         resolveOriginalImageFallbackUrl={resolveOriginalImageFallbackUrl}

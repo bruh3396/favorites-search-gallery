@@ -1,12 +1,12 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { Readable, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { GifRenderer } from "@/core/ui/lightbox/stage/gif/gif_renderer";
-import { ImageRenderer } from "@/core/ui/lightbox/stage/image/image_renderer";
+import { GifRenderer } from "@/core/ui/lightbox/stage/gif/renderer";
+import { ImageRenderer } from "@/core/ui/lightbox/stage/image/renderer";
 import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { VideoRenderer } from "@/core/ui/lightbox/stage/video/video_renderer";
+import { VideoRenderer } from "@/core/ui/lightbox/stage/video/renderer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
@@ -17,6 +17,7 @@ export const LightboxStageClass = {
 export interface LightboxStageProps {
   current: Readable<MediaItem | undefined>;
   neighbors: Readable<readonly MediaItem[]>;
+  warmItems: Readable<readonly MediaItem[]>;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   resolveOriginalUrl: (media: Media) => Promise<string>;
   resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
@@ -25,15 +26,15 @@ export interface LightboxStageProps {
   scheduler: Pick<Scheduler, "schedule">;
 }
 
-type LightboxStageControllerDependencies = Omit<LightboxStageProps, "current" | "neighbors">;
+type LightboxStageControllerDependencies = Omit<LightboxStageProps, "current" | "neighbors" | "warmItems">;
 
 const NEIGHBOR_LIMIT = 20;
 
 export function LightboxStage(props: LightboxStageProps): HTMLElement {
-  const { current, neighbors, ...dependencies } = props;
+  const { current, neighbors, warmItems, ...dependencies } = props;
   const controller = new LightboxStageController(dependencies);
   const stopShowEffect = effect(() => controller.show(current.value));
-  const stopNeighborsEffect = effect(() => controller.updateNeighbors(neighbors.value, current.peek()));
+  const stopNeighborsEffect = effect(() => controller.updateNeighbors([...warmItems.value, ...neighbors.value], current.peek()));
 
   onCleanup(() => {
     stopShowEffect();

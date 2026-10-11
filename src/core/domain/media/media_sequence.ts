@@ -1,4 +1,4 @@
-import { MediaItem } from "./media";
+import { MediaItem } from "@/core/domain/post/post";
 
 export interface SequencePosition {
   readonly index: number;

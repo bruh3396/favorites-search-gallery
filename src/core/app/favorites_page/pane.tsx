@@ -1,17 +1,17 @@
-import { Media, MediaItem } from "@/core/domain/media/media";
+import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { Dimensions } from "@/core/domain/post/post";
 import { Fact } from "@/core/utils/reactive/milestone";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
 import { FavoritesService } from "@/core/features/favorites/favorites";
+import { Media } from "@/core/domain/media/media";
 import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { PostGridPreferences } from "@/core/app/preferences";
-import { PostGridSkeleton } from "@/core/ui/post_grid/skeleton";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
+import { SkeletonGrid } from "@/core/ui/post_grid/skeleton";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 
@@ -37,13 +37,14 @@ export interface FavoritesPaneProps {
   fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl: (post: MediaItem) => string;
-  onActivatePost: (post: Favorite, event: MouseEvent) => void;
+  onActivate: (post: Favorite, event: MouseEvent) => void;
+  onPointerEnter: (post: Favorite) => void;
 }
 
 export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
   const { favorites, session, scrollTo, finishedLoading,
     skeletonDimensions, gridPreferences: { layout, size }, visiblePosts, bitmapDecoder, skeletonItemCount,
-    visibilityObserver, fetchImage, resolvePreviewUrl, getPostUrl, onActivatePost } = props;
+    visibilityObserver, fetchImage, resolvePreviewUrl, getPostUrl, onActivate, onPointerEnter } = props;
   return (
     <section className={FavoritesPaneClass.root}>
       <header className={FavoritesPaneClass.header}>
@@ -59,15 +60,12 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
         </div>
       </header>
       <div className={FavoritesPaneClass.content}>
-        <PostGridSkeleton
+        <SkeletonGrid
           isShown={computed(() => !finishedLoading.reached && session.results.value.length === 0)}
           dimensions={skeletonDimensions}
           layout={layout}
           size={size}
           count={skeletonItemCount}
-          bitmapDecoder={bitmapDecoder}
-          visibilityObserver={visibilityObserver}
-          fetchImage={fetchImage}
         />
         <PostGrid
           posts={computed(() => session.paginationResult.value.favorites)}
@@ -82,7 +80,8 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
           fetchImage={fetchImage}
           resolvePreviewUrl={resolvePreviewUrl}
           getPostUrl={getPostUrl}
-          onActivatePost={onActivatePost}
+          onActivate={onActivate}
+          onPointerEnter={onPointerEnter}
         />
       </div>
     </section>

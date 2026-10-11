@@ -1,5 +1,4 @@
-import { Dimensions } from "@/core/domain/post/post";
-import { MediaItem } from "@/core/domain/media/media";
+import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
@@ -29,17 +28,18 @@ export interface TileProps {
   resolvePreviewUrl: (media: Media) => Promise<string>;
   href?: string;
   onActivate: (event: MouseEvent) => void;
+  onPointerEnter?: () => void;
 }
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
-  const { post, dimensions, actions, upscale, href, onActivate } = props;
+  const { post, dimensions, actions, upscale, href, onActivate, onPointerEnter } = props;
   const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
   const canvas = <canvas className={TileClass.upscale} hidden /> as HTMLCanvasElement;
   const link =
-    <a className={TileClass.link} target="_blank" onClick={event => activateOnPlainClick(event, onActivate)}>
+    <a className={TileClass.link} target="_blank" onClick={event => activateOnPlainClick(event, onActivate)} onPointerenter={() => onPointerEnter?.()}>
       {preview}{canvas}
     </a> as HTMLAnchorElement;
   const root = (
@@ -128,7 +128,7 @@ async function showPreview(root: HTMLElement, preview: HTMLImageElement, url: Pr
   delete root.dataset.loading;
 }
 
-function setAspectRatio(root: HTMLElement, { width, height }: Dimensions): void {
+export function setAspectRatio(root: HTMLElement, { width, height }: Dimensions): void {
   if (width > 0 && height > 0) {
     root.style.setProperty(ASPECT_RATIO_PROPERTY, `${width} / ${height}`);
   }

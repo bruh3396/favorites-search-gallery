@@ -78,6 +78,21 @@ export class FavoritesPostTable {
     return { kind: MEDIA_KINDS[this.mediaKinds[slot]] ?? "image", locator: this.mediaLocators[slot] ?? "" };
   }
 
+  public trim(count: number): void {
+    if (count === this.ids.length) {
+      return;
+    }
+    this.ids = this.ids.slice(0, count);
+    this.widths = this.widths.slice(0, count);
+    this.heights = this.heights.slice(0, count);
+    this.scores = this.scores.slice(0, count);
+    this.mediaKinds = this.mediaKinds.slice(0, count);
+    this.durationSeconds = this.durationSeconds.slice(0, count);
+    this.changedAts = this.changedAts.slice(0, count);
+    this.ratings = this.ratings.slice(0, count);
+    this.mediaLocators.length = count;
+  }
+
   private ensureCapacity(required: number): void {
     if (required <= this.ids.length) {
       return;
@@ -92,20 +107,5 @@ export class FavoritesPostTable {
     this.durationSeconds = grow(this.durationSeconds, capacity);
     this.changedAts = grow(this.changedAts, capacity);
     this.ratings = grow(this.ratings, capacity);
-  }
-
-  public trim(count: number): void {
-    if (count === this.ids.length) {
-      return;
-    }
-    this.ids = this.ids.slice(0, count);
-    this.widths = this.widths.slice(0, count);
-    this.heights = this.heights.slice(0, count);
-    this.scores = this.scores.slice(0, count);
-    this.mediaKinds = this.mediaKinds.slice(0, count);
-    this.durationSeconds = this.durationSeconds.slice(0, count);
-    this.changedAts = this.changedAts.slice(0, count);
-    this.ratings = this.ratings.slice(0, count);
-    this.mediaLocators.length = count;
   }
 }

@@ -16,7 +16,7 @@ import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
@@ -29,7 +29,7 @@ import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_p
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
-import { mountPostListPage } from "@/core/app/post_list_page/post_list_page";
+import { mountPostListPage } from "@/core/app/post_list_page/composer";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 

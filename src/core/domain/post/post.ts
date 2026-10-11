@@ -41,3 +41,5 @@ export type CategorizedPost = {
 };
 
 export type Dimensions = Pick<Post, "width" | "height">;
+
+export type MediaItem = Pick<Post, "id" | "media">;

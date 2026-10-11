@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { LoadGate } from "@/core/ui/post_grid/load_gate";
-import { MediaItem } from "@/core/domain/media/media";
+import { MediaItem } from "@/core/domain/post/post";
 
 function createPost(id: string): MediaItem {
   return { id, media: { kind: "image", locator: `images/${id}` } };
@@ -52,6 +52,17 @@ describe("LoadGate", () => {
 
     currentLoaded();
     expect(gate.isOpen.value).toBe(true);
+  });
+
+  test("forgets a loaded post once it leaves the grid", () => {
+    const gate = new LoadGate();
+    const loaded = gate.onLoaded("1");
+
+    gate.setPosts([createPost("1")]);
+    loaded();
+    gate.setPosts([createPost("2")]);
+    gate.setPosts([createPost("1")]);
+    expect(gate.isOpen.value).toBe(false);
   });
 
   test("ignores completion from a post no longer in the grid", () => {

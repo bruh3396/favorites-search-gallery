@@ -129,6 +129,12 @@ describe("SettingsScreen", () => {
     expect(readSectionHiddenStates(triggers)).toEqual([false, true]);
   });
 
+  test("shows every row when given no query", () => {
+    const { element } = setup({ query: undefined });
+
+    expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
+  });
+
   test("shows every row again when the query is cleared", () => {
     const { element, triggers, query } = setup();
 

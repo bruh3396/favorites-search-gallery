@@ -59,7 +59,7 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   });
   const paginationSettings = createPaginationSettings(storage.preferences);
   const session = favoritesService.createSearchSession({ searchSettings: createSearchSettings(storage.preferences), paginationSettings });
-  const lightbox = new Lightbox<Favorite>();
+  const lightbox = new Lightbox<Favorite>({ warmLimit: 8, maxNeighborDistance: 20 });
   const scrollTo = new Emitter<Favorite>();
 
   lightbox.closed.on(item => {
@@ -74,7 +74,8 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
       skeletonItemCount: paginationSettings.peek().size, bitmapDecoder: ports.bitmapDecoder,
       visibilityObserver, fetchImage: (media, signal) => ports.remoteMedia.fetchImage(media, signal),
       resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media), getPostUrl: post => remotePages.postUrl(post.id),
-      onActivatePost: post => lightbox.open(post, session.createMediaSequence())
+      onActivate: post => lightbox.open(post, session.createMediaSequence()),
+      onPointerEnter: post => lightbox.warm(post)
     });
   }
 

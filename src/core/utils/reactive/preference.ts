@@ -42,6 +42,10 @@ export class StoredPreference<T> implements Preference<T> {
     return this.current.value;
   }
 
+  public get changed(): Occurrence<T> {
+    return this.changes;
+  }
+
   public peek(): T {
     return this.current.peek();
   }
@@ -53,9 +57,5 @@ export class StoredPreference<T> implements Preference<T> {
     this.dependencies.storage.set(this.configuration.key, this.codec.encode(value));
     this.current.value = value;
     this.changes.emit(value);
-  }
-
-  public get changed(): Occurrence<T> {
-    return this.changes;
   }
 }

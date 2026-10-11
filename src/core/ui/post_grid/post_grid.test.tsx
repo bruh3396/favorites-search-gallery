@@ -1,5 +1,4 @@
-import { Dimensions } from "@/core/domain/post/post";
-import { MediaItem } from "@/core/domain/media/media";
+import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { PostGrid, PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal, computed } from "@/core/utils/reactive/signal";
@@ -11,6 +10,8 @@ import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitm
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { doNothing } from "@/core/utils/function/function";
 
+type VisibilityListener = (visible: boolean) => void;
+
 interface Setup {
   element: HTMLElement;
   dispose: () => void;
@@ -20,8 +21,10 @@ interface Setup {
   layout: Signal<GridLayout>;
   size: Signal<number>;
   visiblePosts: Signal<readonly MediaItem[]>;
-  setVisible: (index: number, visible: boolean) => void;
-  onActivatePost: Mock<(post: MediaItem, event: MouseEvent) => void>;
+  showTile: (index: number) => void;
+  hideTile: (index: number) => void;
+  onActivate: Mock<(post: MediaItem, event: MouseEvent) => void>;
+  onPointerEnter: Mock<(post: MediaItem) => void>;
 }
 
 function createPost(id: string): MediaItem {
@@ -39,10 +42,11 @@ function setup(...ids: string[]): Setup {
   const layout = new Signal<GridLayout>("grid");
   const size = new Signal(2);
   const visiblePosts = new Signal<readonly MediaItem[]>([]);
-  const observers = new Map<Element, (visible: boolean) => void>();
-  const onActivatePost = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
+  const observers = new Map<Element, VisibilityListener>();
+  const onActivate = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
+  const onPointerEnter = vi.fn<(post: MediaItem) => void>();
   const visibilityObserver = {
-    observe: (element: Element, onVisibilityChange: (visible: boolean) => void): (() => void) => {
+    observe: (element: Element, onVisibilityChange: VisibilityListener): (() => void) => {
       observers.set(element, onVisibilityChange);
       return (): void => {
         observers.delete(element);
@@ -63,17 +67,14 @@ function setup(...ids: string[]): Setup {
       createActions={createActions}
       resolvePreviewUrl={resolvePreviewUrl}
       getPostUrl={post => `https://posts/${post.id}`}
-      onActivatePost={onActivatePost}
+      onActivate={onActivate}
+      onPointerEnter={onPointerEnter}
     />
   ));
-  const setVisible = (index: number, visible: boolean): void => {
-    const tile = element.children[index];
-
-    if (tile !== undefined) {
-      observers.get(tile)?.(visible);
-    }
-  };
-  return { element, dispose, posts, changed, scrollTo, layout, size, visiblePosts, setVisible, onActivatePost };
+  const getListener = (index: number): VisibilityListener | undefined => observers.get(element.children[index]!);
+  const showTile = (index: number): void => getListener(index)?.(true);
+  const hideTile = (index: number): void => getListener(index)?.(false);
+  return { element, dispose, posts, changed, scrollTo, layout, size, visiblePosts, showTile, hideTile, onActivate, onPointerEnter };
 }
 
 function getDimensions(post: MediaItem): Dimensions {
@@ -97,20 +98,30 @@ describe("PostGrid", () => {
   });
 
   test("publishes visible posts in grid order", () => {
-    const { visiblePosts, setVisible } = setup("1", "2");
+    const { visiblePosts, showTile, hideTile } = setup("1", "2");
 
-    setVisible(1, true);
+    showTile(1);
     expect(visiblePosts.value.map(post => post.id)).toEqual(["2"]);
-    setVisible(0, true);
+    showTile(0);
     expect(visiblePosts.value.map(post => post.id)).toEqual(["1", "2"]);
-    setVisible(1, false);
+    hideTile(1);
     expect(visiblePosts.value.map(post => post.id)).toEqual(["1"]);
   });
 
-  test("removes a post from the published list when its tile is removed", () => {
-    const { posts, visiblePosts, setVisible } = setup("1", "2");
+  test("publishes nothing new when a tile reports the visibility it already has", () => {
+    const { visiblePosts, showTile } = setup("1");
 
-    setVisible(0, true);
+    showTile(0);
+    const published = visiblePosts.value;
+
+    showTile(0);
+    expect(visiblePosts.value).toBe(published);
+  });
+
+  test("removes a post from the published list when its tile is removed", () => {
+    const { posts, visiblePosts, showTile } = setup("1", "2");
+
+    showTile(0);
     posts.value = [createPost("2")];
 
     expect(visiblePosts.value).toEqual([]);
@@ -138,10 +149,17 @@ describe("PostGrid", () => {
   });
 
   test("activates the post whose tile is clicked", () => {
-    const { element, posts, onActivatePost } = setup("1", "2");
+    const { element, posts, onActivate } = setup("1", "2");
 
     element.querySelectorAll<HTMLElement>(`.${TileClass.link}`)[1].click();
-    expect(onActivatePost).toHaveBeenCalledExactlyOnceWith(posts.value[1], expect.any(MouseEvent));
+    expect(onActivate).toHaveBeenCalledExactlyOnceWith(posts.value[1], expect.any(MouseEvent));
+  });
+
+  test("reports the post whose tile the pointer enters", () => {
+    const { element, posts, onPointerEnter } = setup("1", "2");
+
+    element.querySelectorAll<HTMLElement>(`.${TileClass.link}`)[1].dispatchEvent(new Event("pointerenter"));
+    expect(onPointerEnter).toHaveBeenCalledExactlyOnceWith(posts.value[1]);
   });
 
   test("redraws when the posts change, keeping the tiles of posts still shown", () => {
@@ -233,7 +251,7 @@ describe("PostGrid", () => {
           </button>
         ]}
         resolvePreviewUrl={resolvePreviewUrl}
-        onActivatePost={doNothing}
+        onActivate={doNothing}
       />
     ));
     posts.value = [];

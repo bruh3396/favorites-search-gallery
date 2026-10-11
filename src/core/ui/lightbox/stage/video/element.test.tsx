@@ -1,6 +1,6 @@
 import { Mock, MockInstance, describe, expect, onTestFinished, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
-import { VideoElement } from "@/core/ui/lightbox/stage/video/video_element";
+import { VideoElement } from "@/core/ui/lightbox/stage/video/element";
 import { render } from "@/core/ui/h/h";
 
 const FIRST: Media = { kind: "video", locator: "videos/first.mp4" };
@@ -53,6 +53,29 @@ describe("VideoElement", () => {
     const element = Reflect.get(video, "element") as HTMLVideoElement;
 
     expect([element.ownerDocument, element.controls, element.hasAttribute("src")]).toEqual([other, true, false]);
+  });
+
+  test("plays a paused video and pauses a playing one when clicked", () => {
+    const { element, play, pause } = setup();
+    const paused = vi.spyOn(HTMLMediaElement.prototype, "paused", "get").mockReturnValue(true);
+    const click = new MouseEvent("click", { cancelable: true });
+
+    element.dispatchEvent(click);
+    paused.mockReturnValue(false);
+    element.dispatchEvent(new MouseEvent("click"));
+
+    expect(click.defaultPrevented).toBe(true);
+    expect([play.mock.calls.length, pause.mock.calls.length]).toEqual([1, 1]);
+  });
+
+  test("leaves a ctrl-click to the browser", () => {
+    const { element, play, pause } = setup();
+    const click = new MouseEvent("click", { cancelable: true, ctrlKey: true });
+
+    element.dispatchEvent(click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect([play.mock.calls.length, pause.mock.calls.length]).toEqual([0, 0]);
   });
 
   test("assigns a resolved URL without playing an inactive video", async() => {
