@@ -9,9 +9,9 @@ import { isTransient } from "@/adapters/rule34/client/error";
 export type Rule34AddFavoriteAnswer = "error" | "alreadyAdded" | "loggedOut" | "added";
 
 export interface Rule34FavoriteActionsDependencies {
-  readonly fetch: Rule34Fetch;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
+  fetch: Rule34Fetch;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
 }
 
 type Intent = "add" | "remove";

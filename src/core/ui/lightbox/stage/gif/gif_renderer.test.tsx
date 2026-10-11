@@ -1,7 +1,7 @@
-import { GifRenderer, GifRendererDependencies } from "@/core/ui/lightbox/stage/gif_renderer";
+import { GifRenderer, GifRendererDependencies } from "@/core/ui/lightbox/stage/gif/gif_renderer";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
-import { MediaItem } from "@/core/domain/post/post";
+import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
+import { MediaItem } from "@/core/domain/media/media";
 import { render } from "@/core/ui/h/h";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1.gif" } };
@@ -32,8 +32,8 @@ describe("GifRenderer", () => {
   test("starts hidden with an async image in the stage root", () => {
     const { renderer, image } = setup();
 
-    expect(renderer.root.className).toBe(LightboxStageClass.renderer);
-    expect(image.className).toBe(LightboxStageClass.media);
+    expect(renderer.root.className).toBe(LightboxRendererClass.root);
+    expect(image.className).toBe(LightboxRendererClass.media);
     expect([image.alt, image.decoding]).toEqual(["", "async"]);
     expect([renderer.root.hidden, image.hidden, image.hasAttribute("src")]).toEqual([true, true, false]);
   });

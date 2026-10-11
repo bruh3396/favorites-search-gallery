@@ -14,7 +14,6 @@ function setup(): Setup {
   function store(tagString: string): number {
     const slot = nextSlot;
 
-    tagPool.ensureCapacity(slot + 1);
     tagPool.write(slot, tagString);
     nextSlot += 1;
     return slot;
@@ -66,6 +65,16 @@ describe("TagPool", () => {
 
       expect(tagPool.read(first)).toBe("apple");
       expect(tagPool.read(second)).toBe("banana");
+    });
+
+    test("grows slot capacity when writing beyond the initial capacity", () => {
+      const { tagPool, store } = setup();
+      let slot = -1;
+
+      for (let i = 0; i < 1_025; i += 1) {
+        slot = store(`tag-${i}`);
+      }
+      expect(tagPool.read(slot)).toBe("tag-1024");
     });
 
     test("keeps spans correct with different tag counts", () => {

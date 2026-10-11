@@ -15,7 +15,7 @@ export class PositionIndex<Doc> {
     return this.index.get(doc) ?? -1;
   }
 
-  public sort(docs: Doc[]): Doc[] {
+  public sort(docs: readonly Doc[]): readonly Doc[] {
     return docs
       .map(doc => ({ doc, position: this.findPosition(doc) }))
       .sort((a, b) => a.position - b.position)

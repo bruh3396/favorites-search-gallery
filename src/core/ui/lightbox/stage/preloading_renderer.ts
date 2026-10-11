@@ -1,5 +1,5 @@
 import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 const PRELOAD_SETTLE_DELAY = 75;

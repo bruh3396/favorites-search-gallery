@@ -1,4 +1,4 @@
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
+import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
 import { h } from "@/core/ui/h/h";
 
@@ -8,7 +8,9 @@ export class VideoElement {
   private isActive: boolean;
 
   constructor(private readonly resolveOriginalUrl: (media: Media) => Promise<string>) {
-    this.element = <video className={LightboxStageClass.media} controls preload="auto" hidden onClick={event => this.handleClick(event)} /> as HTMLVideoElement;
+    this.element = (
+      <video className={LightboxRendererClass.media} controls preload="auto" hidden onClick={event => this.handleClick(event)} />
+    ) as HTMLVideoElement;
     this.element.setAttribute("controlsList", "nofullscreen");
     this.version = 0;
     this.isActive = false;

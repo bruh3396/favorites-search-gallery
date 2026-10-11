@@ -14,8 +14,8 @@ export interface PreferenceStorage {
 }
 
 export interface StoredPreferenceConfiguration<T> {
-  key: string;
-  defaultValue: T;
+  readonly key: string;
+  readonly defaultValue: T;
 }
 
 export interface StoredPreferenceDependencies<T> {

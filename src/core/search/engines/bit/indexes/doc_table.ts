@@ -45,7 +45,7 @@ export class DocTable<Doc> {
     return this.positionByDoc.get(doc);
   }
 
-  public liveDocs(): Doc[] {
+  public liveDocs(): readonly Doc[] {
     const live: Doc[] = [];
 
     for (const doc of this.docs) {

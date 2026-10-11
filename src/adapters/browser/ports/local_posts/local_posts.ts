@@ -7,7 +7,7 @@ const STORE_NAME: IndexedDbStoreName = "posts";
 export class IndexedDbLocalPosts implements LocalPosts {
   constructor(private readonly indexedDb: IndexedDbClient) { }
 
-  public async getMany(ids: string[]): Promise<Post[]> {
+  public async getMany(ids: readonly string[]): Promise<readonly Readonly<Post>[]> {
     const requests = await this.indexedDb.runTransaction(
       STORE_NAME,
       "readonly",
@@ -16,11 +16,11 @@ export class IndexedDbLocalPosts implements LocalPosts {
     return requests.map(request => request.result).filter(post => post !== undefined);
   }
 
-  public async setMany(posts: Post[]): Promise<void> {
+  public async setMany(posts: readonly Readonly<Post>[]): Promise<void> {
     await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => posts.forEach(post => store.put(post)));
   }
 
-  public async setManyIfAbsent(posts: Post[]): Promise<void> {
+  public async setManyIfAbsent(posts: readonly Readonly<Post>[]): Promise<void> {
     await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => posts.forEach(post => {
       store.add(post).onerror = (event): void => {
         event.preventDefault();

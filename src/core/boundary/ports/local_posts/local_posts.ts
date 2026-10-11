@@ -1,7 +1,7 @@
 import { Post } from "@/core/domain/post/post";
 
 export interface LocalPosts {
-  getMany: (ids: string[]) => Promise<Post[]>;
-  setMany: (posts: Post[]) => Promise<void>;
-  setManyIfAbsent: (posts: Post[]) => Promise<void>;
+  getMany: (ids: readonly string[]) => Promise<readonly Readonly<Post>[]>;
+  setMany: (posts: readonly Readonly<Post>[]) => Promise<void>;
+  setManyIfAbsent: (posts: readonly Readonly<Post>[]) => Promise<void>;
 }

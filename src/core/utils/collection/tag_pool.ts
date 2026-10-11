@@ -17,6 +17,8 @@ export class TagPool {
   private vocabularyLength = 0;
 
   public write(slot: number, tagString: string): void {
+    this.ensureCapacity(slot + 1);
+
     if (this.packedIds !== null) {
       this.unpackIds(this.packedIds);
     }
@@ -53,17 +55,6 @@ export class TagPool {
     return tagNames.join(" ");
   }
 
-  public ensureCapacity(required: number): void {
-    if (required <= this.offsets.length) {
-      return;
-    }
-
-    const capacity = Math.max(this.offsets.length * 2, required);
-
-    this.offsets = grow(this.offsets, capacity);
-    this.counts = grow(this.counts, capacity);
-  }
-
   public trim(count: number): void {
     if (count === this.offsets.length) {
       return;
@@ -75,6 +66,17 @@ export class TagPool {
   public compact(): void {
     this.packIds();
     this.vocabulary = null;
+  }
+
+  private ensureCapacity(required: number): void {
+    if (required <= this.offsets.length) {
+      return;
+    }
+
+    const capacity = Math.max(this.offsets.length * 2, required);
+
+    this.offsets = grow(this.offsets, capacity);
+    this.counts = grow(this.counts, capacity);
   }
 
   private rebuildVocabulary(): Map<string, number> {

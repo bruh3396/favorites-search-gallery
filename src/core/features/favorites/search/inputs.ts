@@ -6,21 +6,21 @@ export const SORT_KEYS = ["favorited", "random", ...METRICS] as const;
 export type SortKey = (typeof SORT_KEYS)[number];
 
 export interface SearchSettings {
-  query: string;
-  isInverted: boolean;
-  sortKey: SortKey;
-  isSortAscending: boolean;
-  allowedRatings: number;
-  isBlacklistEnabled: boolean;
-  isShuffled: boolean;
-  shuffleSeed: number;
+  readonly query: string;
+  readonly isInverted: boolean;
+  readonly sortKey: SortKey;
+  readonly isSortAscending: boolean;
+  readonly allowedRatings: number;
+  readonly isBlacklistEnabled: boolean;
+  readonly isShuffled: boolean;
+  readonly shuffleSeed: number;
 }
 
 export interface SearchRequest {
-  expression: SearchExpression | undefined;
-  sortKey: SortKey;
-  isSortAscending: boolean;
-  allowedRatings: number;
-  isShuffled: boolean;
-  shuffleSeed: number;
+  readonly expression: SearchExpression | undefined;
+  readonly sortKey: SortKey;
+  readonly isSortAscending: boolean;
+  readonly allowedRatings: number;
+  readonly isShuffled: boolean;
+  readonly shuffleSeed: number;
 }

@@ -1,5 +1,5 @@
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { VideoElement } from "@/core/ui/lightbox/stage/video/video_element";
 
 export class VideoElementPool {

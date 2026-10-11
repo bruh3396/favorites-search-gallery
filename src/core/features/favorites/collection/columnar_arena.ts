@@ -6,18 +6,16 @@ import { TagPool } from "@/core/utils/collection/tag_pool";
 import { toTagSet } from "@/core/domain/tag/tag";
 
 export class FavoritesColumnarArena implements FavoritesArena {
-  private favoriteCount = 0;
+  private count = 0;
   private readonly postTable = new FavoritesPostTable();
   private readonly tagPool = new TagPool();
-  private readonly cachedTags = new Map<number, Set<string>>();
+  private readonly cachedTags = new Map<number, ReadonlySet<string>>();
   private readonly newSlots = new Set<number>();
 
   public allocate(): number {
-    const slot = this.favoriteCount;
+    const slot = this.count;
 
-    this.postTable.ensureCapacity(slot + 1);
-    this.tagPool.ensureCapacity(slot + 1);
-    this.favoriteCount += 1;
+    this.count += 1;
     return slot;
   }
 
@@ -28,8 +26,8 @@ export class FavoritesColumnarArena implements FavoritesArena {
   }
 
   public compact(): void {
-    this.postTable.trim(this.favoriteCount);
-    this.tagPool.trim(this.favoriteCount);
+    this.postTable.trim(this.count);
+    this.tagPool.trim(this.count);
     this.tagPool.compact();
     this.cachedTags.clear();
   }
@@ -54,7 +52,7 @@ export class FavoritesColumnarArena implements FavoritesArena {
     return this.postTable.getMedia(slot);
   }
 
-  public getTags(slot: number): Set<string> {
+  public getTags(slot: number): ReadonlySet<string> {
     return this.cachedTags.get(slot) ?? toTagSet(this.tagPool.read(slot));
   }
 
@@ -66,7 +64,7 @@ export class FavoritesColumnarArena implements FavoritesArena {
     this.newSlots.add(slot);
   }
 
-  public cacheTags(slot: number, tags: Set<string>): void {
+  public cacheTags(slot: number, tags: ReadonlySet<string>): void {
     this.cachedTags.set(slot, tags);
   }
 

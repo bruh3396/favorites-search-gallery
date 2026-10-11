@@ -1,5 +1,5 @@
 import { MockInstance, describe, expect, onTestFinished, test, vi } from "vitest";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { VideoElement } from "@/core/ui/lightbox/stage/video/video_element";
 import { VideoElementPool } from "@/core/ui/lightbox/stage/video/video_element_pool";
 import { render } from "@/core/ui/h/h";

@@ -3,7 +3,7 @@ import { ScopeContext, Scoped, createScope } from "@/core/utils/reactive/scope";
 
 export type Reactive<T> = T | Readable<T>;
 
-export type Child = Node | string | Readable<string> | readonly Child[] | null | undefined | false;
+export type Child = Readonly<Node> | string | Readable<string> | readonly Child[] | null | undefined | false;
 
 type PropertyProps<E> = {
   [K in keyof E as E[K] extends string | number | boolean ? K : never]?: Reactive<E[K]>;
@@ -56,10 +56,11 @@ function createElement(tag: string, props: object | null, children: readonly Chi
 export declare namespace h {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace JSX {
+    // eslint-disable-next-line functional/type-declaration-immutability
     type Element = HTMLElement;
-    type IntrinsicElements = { [K in keyof HTMLElementTagNameMap]: Props<HTMLElementTagNameMap[K]> & { children?: Child } };
+    type IntrinsicElements = { readonly [K in keyof HTMLElementTagNameMap]: Props<HTMLElementTagNameMap[K]> & { children?: Child } };
     interface ElementChildrenAttribute {
-      children: unknown;
+      readonly children: unknown;
     }
   }
 }

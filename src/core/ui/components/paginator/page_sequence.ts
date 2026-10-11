@@ -3,9 +3,9 @@ import { getNumbersAround } from "@/core/utils/number/number";
 export type PageTerm = number | "gap";
 
 export interface PageSequenceOptions {
-  pageNumber: number;
-  pageCount: number;
-  nearbyCount: number;
+  readonly pageNumber: number;
+  readonly pageCount: number;
+  readonly nearbyCount: number;
 }
 
 export function getPageSequence({ pageNumber, pageCount, nearbyCount }: PageSequenceOptions): readonly PageTerm[] {

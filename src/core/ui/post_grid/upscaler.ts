@@ -2,10 +2,10 @@ import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decod
 import { Media } from "@/core/domain/media/media";
 
 interface UpscalerDependencies {
-  readonly canvas: HTMLCanvasElement;
-  readonly media: Media;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  canvas: HTMLCanvasElement;
+  media: Media;
+  bitmapDecoder: BitmapDecoder;
+  fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
 }
 
 export class Upscaler {

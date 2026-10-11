@@ -1,8 +1,8 @@
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface RateLimiterConfiguration {
-  concurrency: number;
-  ratePerSecond: number;
+  readonly concurrency: number;
+  readonly ratePerSecond: number;
 }
 
 export class RateLimiter {

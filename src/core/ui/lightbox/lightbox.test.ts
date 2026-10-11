@@ -1,4 +1,4 @@
-import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
+import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test, vi } from "vitest";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
@@ -172,9 +172,7 @@ describe("Lightbox", () => {
 
       lightbox.open(posts[21], createMediaSequence(posts));
       await vi.waitFor(() => expect(lightbox.neighbors.value).toHaveLength(40));
-      expect(lightbox.neighbors.value).toEqual(
-        Array.from({ length: 20 }, (_, index) => [posts[20 - index], posts[22 + index]]).flat()
-      );
+      expect(lightbox.neighbors.value).toEqual(Array.from({ length: 20 }, (_, index) => [posts[20 - index], posts[22 + index]]).flat());
     });
 
     test("leaves out the post shown", async() => {

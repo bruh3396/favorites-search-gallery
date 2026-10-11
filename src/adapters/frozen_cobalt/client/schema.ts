@@ -7,28 +7,28 @@ const POST_FAILURE_STATUSES = ["rate_limited", "error", "deleted", "deferred"] a
 export type FrozenCobaltTagCategoryCode = typeof TAG_CATEGORY_CODES[number];
 
 export type FrozenCobaltPost = {
-  id: string;
-  width: number;
-  height: number;
-  score: number;
-  rating: string;
-  change: number;
-  fileURL: string;
-  tagCategories: Record<string, FrozenCobaltTagCategoryCode>;
+  readonly id: string;
+  readonly width: number;
+  readonly height: number;
+  readonly score: number;
+  readonly rating: string;
+  readonly change: number;
+  readonly fileURL: string;
+  readonly tagCategories: Record<string, FrozenCobaltTagCategoryCode>;
 };
 
 export type FrozenCobaltPostResult =
-  | { status: "ok"; post: FrozenCobaltPost }
-  | { status: typeof POST_FAILURE_STATUSES[number]; id: string };
+  | { readonly status: "ok"; readonly post: FrozenCobaltPost }
+  | { readonly status: typeof POST_FAILURE_STATUSES[number]; readonly id: string };
 
 export type FrozenCobaltTagResult =
-  | { status: "ok"; category: FrozenCobaltTagCategoryCode }
-  | { status: "rate_limited" };
+  | { readonly status: "ok"; readonly category: FrozenCobaltTagCategoryCode }
+  | { readonly status: "rate_limited" };
 
 export interface FrozenCobaltEndpoints {
-  ping: Record<string, never>;
-  post: { ids: string[] };
-  tag: { tagNames: string[] };
+  readonly ping: Record<string, never>;
+  readonly post: { ids: string[] };
+  readonly tag: { tagNames: string[] };
 }
 
 export function parseBatch(text: string): Record<string, unknown> {

@@ -1,8 +1,8 @@
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "./media";
 
 export interface SequencePosition {
-  index: number;
-  total: number | undefined;
+  readonly index: number;
+  readonly total: number | undefined;
 }
 
 export interface MediaSequence<T extends MediaItem> {

@@ -1,0 +1,26 @@
+@layer components {
+  .fsg-FavoritesPane {
+    flex: 1 1 0;
+    min-inline-size: 0;
+  }
+
+  .fsg-FavoritesPane-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 16px;
+  }
+
+  .fsg-FavoritesPane-search {
+    display: flex;
+    flex: 1 1 240px;
+  }
+
+  .fsg-FavoritesPane-pagination {
+    flex-basis: 100%;
+  }
+
+  .fsg-FavoritesPane-content {
+    display: block;
+  }
+}

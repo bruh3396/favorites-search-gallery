@@ -7,8 +7,8 @@ export interface FavoritesArena {
   getNumericId: (slot: number) => number;
   getMetric: (slot: number, metric: Metric) => number;
   getMedia: (slot: number) => Media;
-  getTags: (slot: number) => Set<string>;
+  getTags: (slot: number) => ReadonlySet<string>;
   isNew: (slot: number) => boolean;
   getRatingBit: (slot: number) => number;
-  cacheTags: (slot: number, tags: Set<string>) => void;
+  cacheTags: (slot: number, tags: ReadonlySet<string>) => void;
 }

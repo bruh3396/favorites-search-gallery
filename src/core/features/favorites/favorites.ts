@@ -1,4 +1,4 @@
-import { FavoritesSearchSession, FavoritesSearchSessionSettings } from "@/core/features/favorites/search/session";
+import { FavoritesSearchSession, FavoritesSearchSessionSettingDependencies } from "@/core/features/favorites/search/session";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesActions } from "@/core/features/favorites/actions/actions";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
@@ -24,24 +24,24 @@ export interface FavoritesConfiguration {
 }
 
 export interface FavoritesDependencies {
-  readonly localFavorites: LocalFavorites;
-  readonly localPosts: LocalPosts;
-  readonly localTagCategories: LocalTagCategories;
-  readonly remoteFavorites: RemoteFavorites;
-  readonly remoteFavoriteActions: ObservableRemoteFavoriteActions;
-  readonly remotePosts: RemotePosts;
-  readonly remoteMedia: RemoteMedia;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
+  localFavorites: LocalFavorites;
+  localPosts: LocalPosts;
+  localTagCategories: LocalTagCategories;
+  remoteFavorites: RemoteFavorites;
+  remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  remotePosts: RemotePosts;
+  remoteMedia: RemoteMedia;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
 }
 
 export interface FavoritesService {
-  readonly createSearchSession: (settings: FavoritesSearchSessionSettings) => FavoritesSearchSession;
   readonly actions: Pick<FavoritesActions, "add" | "remove">;
   readonly hydrated: Occurrence<Favorite>;
   readonly loadState: Readable<LoadState>;
-  readonly isFavorited: (id: string) => boolean;
-  readonly load: () => Promise<void>;
+  createSearchSession: (settings: FavoritesSearchSessionSettingDependencies) => FavoritesSearchSession;
+  isFavorited: (id: string) => boolean;
+  load: () => Promise<void>;
 }
 
 export function createFavoritesService(configuration: FavoritesConfiguration, dependencies: FavoritesDependencies): FavoritesService {
@@ -51,10 +51,10 @@ export function createFavoritesService(configuration: FavoritesConfiguration, de
   const actions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, dependencies);
   const loader = new FavoritesLoader({ ...dependencies, collection, index: searchIndex });
   return {
-    createSearchSession: settings => new FavoritesSearchSession({ ...dependencies, ...settings, index: searchIndex, blacklist }),
     actions,
     hydrated: collection.hydrated,
     loadState: loader.state,
+    createSearchSession: settings => new FavoritesSearchSession({ ...dependencies, ...settings, index: searchIndex, blacklist }),
     isFavorited: id => actions.isFavorited(id),
     load: () => loader.load()
   };

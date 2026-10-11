@@ -5,8 +5,8 @@ export const NEVER_DISABLED: Readable<boolean> = new Signal(false);
 export type ControlSize = "medium" | "small";
 
 export interface ControlChoice<T> {
-  value: T;
-  label: string;
+  readonly value: T;
+  readonly label: string;
 }
 
 export interface ControlProps<T> {

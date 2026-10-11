@@ -5,8 +5,8 @@ import { PostingResolver } from "@/core/search/engines/bit/resolution/posting_re
 import { SearchExpression } from "@/core/search/expressions/search_expression";
 
 interface Value {
-  posting: Posting;
-  isNegated: boolean;
+  readonly posting: Posting;
+  readonly isNegated: boolean;
 }
 
 export class BitEvaluator<Doc> {
@@ -15,7 +15,7 @@ export class BitEvaluator<Doc> {
     private readonly postingResolver: PostingResolver<Doc>
   ) { }
 
-  public evaluate(expression: SearchExpression): Doc[] {
+  public evaluate(expression: SearchExpression): readonly Doc[] {
     return this.bitIndex.docsFrom(this.evaluateToBitSet(expression));
   }
 

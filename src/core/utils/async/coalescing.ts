@@ -1,8 +1,8 @@
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface CoalescingConfiguration {
-  flushSize: number;
-  flushTimeout: number;
+  readonly flushSize: number;
+  readonly flushTimeout: number;
 }
 
 export interface CoalescingExecutorDependencies<T> {
@@ -11,7 +11,7 @@ export interface CoalescingExecutorDependencies<T> {
 }
 
 export interface CoalescingResolverDependencies<K, V> {
-  resolve: (coalesced: K[]) => Promise<Map<K, V>>;
+  resolve: (coalesced: K[]) => Promise<ReadonlyMap<K, V>>;
   scheduler: Scheduler;
 }
 
@@ -47,7 +47,7 @@ export class CoalescingExecutor<T> {
 export class CoalescingResolver<K, V> {
   private readonly deferred = new Map<K, PromiseWithResolvers<V>[]>();
   private readonly executor: CoalescingExecutor<K>;
-  private readonly resolve: (coalesced: K[]) => Promise<Map<K, V>>;
+  private readonly resolve: (coalesced: K[]) => Promise<ReadonlyMap<K, V>>;
 
   constructor(configuration: CoalescingConfiguration, dependencies: CoalescingResolverDependencies<K, V>) {
     this.resolve = dependencies.resolve;

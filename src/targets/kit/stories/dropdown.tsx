@@ -5,10 +5,10 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 
 interface DropdownState {
-  choices: readonly ControlChoice<string>[];
-  value: string;
-  disabled?: boolean;
-  size?: ControlSize;
+  readonly choices: readonly ControlChoice<string>[];
+  readonly value: string;
+  readonly disabled?: boolean;
+  readonly size?: ControlSize;
 }
 
 const SORTS = [

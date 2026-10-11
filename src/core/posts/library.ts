@@ -5,6 +5,7 @@ import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/l
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { TagCategory } from "@/core/domain/tag/tag";
 import { partition } from "@/core/utils/collection/array";
 
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
@@ -27,12 +28,12 @@ function isStale(post: Post, now: number): boolean {
 }
 
 export interface PostLibraryDependencies {
-  readonly localPosts: LocalPosts;
-  readonly localTagCategories: LocalTagCategories;
-  readonly remotePosts: RemotePosts;
-  readonly remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
-  readonly scheduler: Scheduler;
-  readonly onRefresh: (refreshed: Post) => void;
+  localPosts: LocalPosts;
+  localTagCategories: LocalTagCategories;
+  remotePosts: RemotePosts;
+  remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
+  scheduler: Scheduler;
+  onRefresh: (refreshed: Post) => void;
 }
 
 export class PostLibrary {
@@ -47,13 +48,13 @@ export class PostLibrary {
     });
   }
 
-  public async stream(ids: string[], batchSize: number, onBatch: (posts: Post[]) => void): Promise<void> {
+  public async stream(ids: readonly string[], batchSize: number, onBatch: (posts: Post[]) => void): Promise<void> {
     for (let i = 0; i < ids.length; i += batchSize) {
       onBatch(await this.getManyOrPlaceholders(ids.slice(i, i + batchSize)));
     }
   }
 
-  public async adopt(posts: Post[]): Promise<Post[]> {
+  public async adopt(posts: readonly Readonly<Post>[]): Promise<Post[]> {
     await this.dependencies.localPosts.setManyIfAbsent(posts);
     const local = await this.getLocalPostsById(posts.map(post => post.id));
     return posts.map(post => local.get(post.id) ?? post);
@@ -65,12 +66,12 @@ export class PostLibrary {
     await Promise.all([...placeholders, ...others].map(post => this.refreshOne(post)));
   }
 
-  private async getManyOrPlaceholders(ids: string[]): Promise<Post[]> {
+  private async getManyOrPlaceholders(ids: readonly string[]): Promise<Post[]> {
     const local = await this.getLocalPostsById(ids);
     return ids.map(id => local.get(id) ?? createPlaceholder(id));
   }
 
-  private async getLocalPostsById(ids: string[]): Promise<Map<string, Post>> {
+  private async getLocalPostsById(ids: readonly string[]): Promise<Map<string, Post>> {
     return new Map((await this.dependencies.localPosts.getMany(ids)).map(post => [post.id, post]));
   }
 
@@ -90,7 +91,7 @@ export class PostLibrary {
     this.dependencies.onRefresh(refreshed);
   }
 
-  private saveTagCategories(tagCategories: CategorizedPost["tagCategories"]): void {
+  private saveTagCategories(tagCategories: ReadonlyMap<string, TagCategory>): void {
     if (tagCategories.size > 0) {
       this.dependencies.localTagCategories.setMany(tagCategories).catch(console.error);
     }

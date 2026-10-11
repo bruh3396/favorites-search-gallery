@@ -1,4 +1,5 @@
-import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Dimensions } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -18,18 +19,18 @@ const MAX_TILE_COUNT = 50;
 export const DEFAULT_SKELETON_DIMENSIONS: readonly Dimensions[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
 
 export interface PostGridSkeletonProps {
-  readonly isShown: Readable<boolean>;
-  readonly dimensions: readonly Dimensions[];
-  readonly layout: Readable<GridLayout>;
-  readonly size: Readable<number>;
-  readonly count: number;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly visibilityObserver: VisibilityObserver;
-  readonly fetchImage: (media: MediaItem["media"], signal: AbortSignal) => Promise<Blob>;
+  isShown: Readable<boolean>;
+  dimensions: readonly Dimensions[];
+  layout: Readable<GridLayout>;
+  size: Readable<number>;
+  count: number;
+  bitmapDecoder: BitmapDecoder;
+  visibilityObserver: VisibilityObserver;
+  fetchImage: (media: MediaItem["media"], signal: AbortSignal) => Promise<Blob>;
 }
 
 interface SkeletonPost extends MediaItem {
-  dimensions: Dimensions;
+  readonly dimensions: Dimensions;
 }
 
 export function PostGridSkeleton({ isShown, dimensions, layout, size, count, bitmapDecoder,

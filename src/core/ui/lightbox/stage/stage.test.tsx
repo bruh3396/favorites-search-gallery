@@ -1,11 +1,11 @@
-import { LightboxStage, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
+import { LightboxStage, LightboxStageClass, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
+import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
@@ -99,8 +99,8 @@ function setup(
       scheduler={scheduler}
     />
   ));
-  const preview = result.querySelector<HTMLImageElement>(`img.${LightboxStageClass.media}`)!;
-  const original = result.querySelector<HTMLCanvasElement>(`canvas.${LightboxStageClass.media}`)!;
+  const preview = result.querySelector<HTMLImageElement>(`img.${LightboxRendererClass.media}`)!;
+  const original = result.querySelector<HTMLCanvasElement>(`canvas.${LightboxRendererClass.media}`)!;
   return {
     root: result,
     preview,
@@ -124,6 +124,7 @@ function flushPromises(): Promise<void> {
 describe("LightboxStage", () => {
   test("styles every class it sets", () => {
     expectClassesStyled(LightboxStageClass, LIGHTBOX_CSS);
+    expectClassesStyled(LightboxRendererClass, LIGHTBOX_CSS);
   });
 
   test("shows the preview image while the original is pending without decoding the preview", async() => {

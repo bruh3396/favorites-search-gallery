@@ -9,10 +9,10 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemoteSearchResultsDependencies {
-  readonly rule34: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
-  readonly rule34Document: Pick<Rule34Document, "readSearchQuery" | "readPostListPageIndex">;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
+  rule34: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
+  rule34Document: Pick<Rule34Document, "readSearchQuery" | "readPostListPageIndex">;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
 }
 
 const MAX_FETCH_ATTEMPTS = 3;

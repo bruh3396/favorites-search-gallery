@@ -7,8 +7,8 @@ const SELECTIVE_QUERY_FRACTION = 0.25;
 const EMPTY_EXCLUSIONS: ReadonlySet<never> = new Set<never>();
 
 interface Value<Doc> {
-  docs: ReadonlySet<Doc>;
-  isNegated: boolean;
+  readonly docs: ReadonlySet<Doc>;
+  readonly isNegated: boolean;
 }
 
 export class SetEvaluator<Doc> {
@@ -17,7 +17,7 @@ export class SetEvaluator<Doc> {
     private readonly resolver: DocResolver<Doc>
   ) { }
 
-  public evaluate(expression: SearchExpression, docs?: Doc[]): Doc[] {
+  public evaluate(expression: SearchExpression, docs?: readonly Doc[]): readonly Doc[] {
     const value = this.resolve(expression);
 
     if (value.isNegated) {
@@ -87,7 +87,7 @@ export class SetEvaluator<Doc> {
     return { positives, negatives };
   }
 
-  private materialize(candidates: ReadonlySet<Doc>, exclusions: ReadonlySet<Doc>, docs?: Doc[]): Doc[] {
+  private materialize(candidates: ReadonlySet<Doc>, exclusions: ReadonlySet<Doc>, docs?: readonly Doc[]): readonly Doc[] {
     if (docs === undefined || candidates.size <= docs.length * SELECTIVE_QUERY_FRACTION) {
       const matches: Doc[] = [];
 

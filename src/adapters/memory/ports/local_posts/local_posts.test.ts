@@ -1,6 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
+import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
+
+function mutateTags(post: Readonly<Post>, tags: string): void {
+  Object.assign(post, { tags });
+}
 
 describe("MemoryLocalPosts", () => {
   test("reads back what it wrote, in the order asked, skipping missing ids", async() => {
@@ -34,8 +39,8 @@ describe("MemoryLocalPosts", () => {
     const written = createPost({ id: "1", tags: "apple" });
 
     await posts.setMany([written]);
-    written.tags = "changed";
-    (await posts.getMany(["1"]))[0].tags = "changed";
+    mutateTags(written, "changed");
+    mutateTags((await posts.getMany(["1"]))[0], "changed");
 
     expect((await posts.getMany(["1"]))[0].tags).toBe("apple");
   });

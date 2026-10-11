@@ -5,7 +5,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 const NUMBERED = { size: 50, infiniteScroll: false };
 const INFINITE = { size: 50, infiniteScroll: true };
 
-function createResults(count: number): Favorite[] {
+function createResults(count: number): readonly Favorite[] {
   return Array.from({ length: count }, (_, index): Favorite => ({
     id: String(index + 1), numericId: index + 1, media: { kind: "image", locator: "" }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 0
   }));

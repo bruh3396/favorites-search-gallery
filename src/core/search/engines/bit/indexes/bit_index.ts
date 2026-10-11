@@ -31,7 +31,7 @@ export class BitIndex<Doc> {
     return this.algebra.empty();
   }
 
-  public docsFrom(bitset: BitSet): Doc[] {
+  public docsFrom(bitset: BitSet): readonly Doc[] {
     return this.algebra.docsFrom(bitset);
   }
 

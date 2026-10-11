@@ -50,7 +50,7 @@ describe("MemoryLocalFavorites", () => {
     const favorites = new MemoryLocalFavorites();
 
     await favorites.prepend(["1"]);
-    (await favorites.getAll()).push("2");
+    (await favorites.getAll() as string[]).push("2");
 
     expect(await favorites.getAll()).toEqual(["1"]);
   });

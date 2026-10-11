@@ -1,8 +1,8 @@
 import { Snippet } from "@/core/domain/snippet/snippet";
 
 export interface LocalSnippets {
-  getAll: () => Promise<Snippet[]>;
-  setMany: (snippets: Snippet[]) => Promise<void>;
-  deleteMany: (names: string[]) => Promise<void>;
-  replaceAll: (snippets: Snippet[]) => Promise<void>;
+  getAll: () => Promise<readonly Readonly<Snippet>[]>;
+  setMany: (snippets: readonly Readonly<Snippet>[]) => Promise<void>;
+  deleteMany: (names: readonly string[]) => Promise<void>;
+  replaceAll: (snippets: readonly Readonly<Snippet>[]) => Promise<void>;
 }

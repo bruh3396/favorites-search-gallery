@@ -1,4 +1,4 @@
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
+import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
@@ -6,8 +6,8 @@ import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/rand
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Environment } from "@/core/boundary/environment";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";

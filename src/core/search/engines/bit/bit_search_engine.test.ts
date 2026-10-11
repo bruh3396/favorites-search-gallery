@@ -8,6 +8,7 @@ type MetricDoc = MetricSearchable & { name: string };
 
 interface TaggedItem extends Searchable {
   id: string;
+  tags: Set<string>;
 }
 
 function createFruitEngine(): BitSearchEngine<Fruit> {
@@ -26,7 +27,7 @@ function createTaggedEngine(items: TaggedItem[]): BitSearchEngine<TaggedItem> {
   return new BitSearchEngine<TaggedItem>(item => item.tags, () => 0, items);
 }
 
-function getSortedIds(items: TaggedItem[]): string[] {
+function getSortedIds(items: readonly TaggedItem[]): string[] {
   return items.map(item => item.id).sort();
 }
 

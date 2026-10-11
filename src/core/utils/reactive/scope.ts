@@ -4,7 +4,7 @@ export type Cleanup = () => void;
 
 export interface Scoped<T> {
   readonly result: T;
-  dispose: Cleanup;
+  readonly dispose: Cleanup;
 }
 
 class Scope {

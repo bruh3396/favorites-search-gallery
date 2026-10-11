@@ -2,9 +2,9 @@ import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export interface ResourceDependencies<S, T> {
-  readonly source: Readable<S | undefined>;
-  readonly load: (source: S) => T | Promise<T>;
-  readonly disposeValue?: (value: T) => void;
+  source: Readable<S | undefined>;
+  load: (source: S) => T | Promise<T>;
+  disposeValue?: (value: T) => void;
 }
 
 export class Resource<S, T> {

@@ -9,9 +9,9 @@ import { TermUpdate } from "@/core/search/engines/search_engine";
 const TERM_UPDATE_COALESCING = { flushSize: 50, flushTimeout: 1_500 };
 
 export interface FavoritesReindexerDependencies {
-  readonly scheduler: Scheduler;
-  readonly collection: Pick<FavoritesCollection, "overwrite">;
-  readonly index: Pick<FavoritesSearchIndex, "update">;
+  scheduler: Scheduler;
+  collection: Pick<FavoritesCollection, "overwrite">;
+  index: Pick<FavoritesSearchIndex, "update">;
 }
 
 export class FavoritesReindexer {

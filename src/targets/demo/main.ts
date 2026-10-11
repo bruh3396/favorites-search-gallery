@@ -1,9 +1,10 @@
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
+import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
@@ -15,7 +16,6 @@ import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
 import { readPreferredColorScheme } from "@/adapters/browser/environment/environment";

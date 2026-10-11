@@ -4,7 +4,7 @@ import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decod
 import { ColorScheme } from "@/core/boundary/environment";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
@@ -21,12 +21,12 @@ export interface PostListPageConfiguration {
 }
 
 export interface PostListPageDependencies {
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly visiblePosts: Signal<readonly MediaItem[]>;
-  readonly visibilityObserver: VisibilityObserver;
-  readonly remoteMedia: RemoteMedia;
-  readonly remotePages: RemotePages;
-  readonly localKeyedValues: LocalKeyedValues;
+  bitmapDecoder: BitmapDecoder;
+  visiblePosts: Signal<readonly MediaItem[]>;
+  visibilityObserver: VisibilityObserver;
+  remoteMedia: RemoteMedia;
+  remotePages: RemotePages;
+  localKeyedValues: LocalKeyedValues;
 }
 
 export function mountPostListPage(container: HTMLElement, configuration: PostListPageConfiguration, dependencies: PostListPageDependencies): void {

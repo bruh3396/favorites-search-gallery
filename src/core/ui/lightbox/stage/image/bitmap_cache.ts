@@ -1,6 +1,6 @@
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { doNothing } from "@/core/utils/function/function";
 
 interface Entry {
@@ -9,9 +9,9 @@ interface Entry {
 }
 
 interface BitmapCacheDependencies {
-  readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
-  readonly bitmapDecoder: BitmapDecoder;
+  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
+  bitmapDecoder: BitmapDecoder;
 }
 
 export class BitmapCache {

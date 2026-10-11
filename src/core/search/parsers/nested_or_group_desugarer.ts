@@ -1,4 +1,4 @@
-type Alternative = string[];
+type Alternative = readonly string[];
 
 export function desugarNestedOrGroups(query: string): string {
   const tokens = query.split(" ");

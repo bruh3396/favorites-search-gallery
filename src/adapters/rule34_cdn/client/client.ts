@@ -7,8 +7,8 @@ import { Rule34CdnVideoDurationReader } from "@/adapters/rule34_cdn/client/video
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34CdnClientDependencies {
-  readonly fetch: (url: string, init?: RequestInit) => Promise<Response>;
-  readonly scheduler: Scheduler;
+  fetch: (url: string, init?: RequestInit) => Promise<Response>;
+  scheduler: Scheduler;
 }
 
 const KIND_EXTENSIONS: Record<MediaKind, Rule34CdnFileExtension | null> = { image: null, video: "mp4", gif: "gif" };

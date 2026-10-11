@@ -5,9 +5,9 @@ import { Story } from "@/targets/kit/story";
 import { Switch } from "@/core/ui/components/switch/switch";
 
 interface SwitchState {
-  checked: boolean;
-  disabled?: boolean;
-  size?: ControlSize;
+  readonly checked: boolean;
+  readonly disabled?: boolean;
+  readonly size?: ControlSize;
 }
 
 function variant(label: string, { checked: initial, disabled = false, size }: SwitchState): Story["variants"][number] {

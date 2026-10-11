@@ -19,6 +19,14 @@ const BOOLEAN_FLAG_PARAMETERS = [
   `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`,
   `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > TSParameterProperty > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`
 ].map(selector => ({ selector, message: BOOLEAN_FLAG_MESSAGE }));
+// readonly marks data; behavior (function members, Dependencies, Props) is never marked.
+const BEHAVIOR_MESSAGE = "Function members, Dependencies, and Props aren't marked readonly.";
+const READONLY_BEHAVIOR = [
+  "TSPropertySignature[readonly=true] > TSTypeAnnotation > TSFunctionType",
+  "TSInterfaceDeclaration[id.name=/(Dependencies|Props)$/] > TSInterfaceBody > TSPropertySignature[readonly=true]",
+  "TSTypeAliasDeclaration[id.name=/(Dependencies|Props)$/] > TSTypeLiteral > TSPropertySignature[readonly=true]",
+  "TSTypeAliasDeclaration[id.name=/(Dependencies|Props)$/] > TSMappedType[readonly=true]"
+].map(selector => ({ selector, message: BEHAVIOR_MESSAGE }));
 const CALLED_ONCE = {
   selector: "CallExpression[callee.property.name='toHaveBeenCalledTimes'][arguments.length=1][arguments.0.value=1]",
   message: "Use toHaveBeenCalledOnce() instead of toHaveBeenCalledTimes(1)."
@@ -60,7 +68,7 @@ export default defineConfig([
       "functional/no-let": ["error", { allowInFunctions: true }],
       "functional/type-declaration-immutability": ["error", {
         rules: [{
-          identifiers: "^(?!I?Mutable).+",
+          identifiers: "^(?!I?Mutable)(?!.*(Dependencies|Props)$).+",
           immutability: "ReadonlyShallow",
           comparator: "AtLeast"
         }],
@@ -262,7 +270,7 @@ export default defineConfig([
       }],
       "no-restricted-modules": "error",
       "no-restricted-properties": "error",
-      "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS],
+      "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, ...READONLY_BEHAVIOR],
       "@typescript-eslint/max-params": ["error", { max: 3 }],
       "no-return-assign": "error",
       "no-return-await": "error",

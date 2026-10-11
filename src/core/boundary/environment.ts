@@ -6,19 +6,19 @@ export const COLOR_SCHEMES = ["light", "dark"] as const;
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 export interface HostEnvironment {
-  mode: AppMode;
-  favoritesOwnerId: string;
-  ownsFavorites: boolean;
-  blacklistedTags: readonly string[];
-  colorScheme: ColorScheme;
+  readonly mode: AppMode;
+  readonly favoritesOwnerId: string;
+  readonly ownsFavorites: boolean;
+  readonly blacklistedTags: readonly string[];
+  readonly colorScheme: ColorScheme;
 }
 
 export interface RuntimeEnvironment {
-  device: Device;
-  pointer: Pointer;
-  canvasBudget: CanvasBudget;
+  readonly device: Device;
+  readonly pointer: Pointer;
+  readonly canvasBudget: CanvasBudget;
 }
 
 export interface Environment extends HostEnvironment, RuntimeEnvironment {
-  version: string;
+  readonly version: string;
 }

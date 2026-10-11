@@ -9,10 +9,10 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { assertNever } from "@/core/utils/guards/guards";
 
 export interface FrozenCobaltRemotePostsDependencies {
-  readonly frozenCobalt: Pick<FrozenCobaltClient, "fetchPost">;
-  readonly mintMedia: FrozenCobaltMintMedia;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
+  frozenCobalt: Pick<FrozenCobaltClient, "fetchPost">;
+  mintMedia: FrozenCobaltMintMedia;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
 }
 
 const MAX_FETCH_ATTEMPTS = 5;

@@ -5,9 +5,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 
 interface DisclosureState {
-  open: boolean;
-  disabled?: boolean;
-  size?: ControlSize;
+  readonly open: boolean;
+  readonly disabled?: boolean;
+  readonly size?: ControlSize;
 }
 
 function variant(label: string, { open: initial, disabled = false, size }: DisclosureState): Story["variants"][number] {

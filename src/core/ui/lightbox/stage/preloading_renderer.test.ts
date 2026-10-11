@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { PreloadingRenderer } from "@/core/ui/lightbox/stage/preloading_renderer";
 

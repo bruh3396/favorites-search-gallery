@@ -6,12 +6,12 @@ import { Stepper } from "@/core/ui/components/stepper/stepper";
 import { Story } from "@/targets/kit/story";
 
 interface StepperState {
-  value: number;
-  min?: number;
-  max?: number;
-  step?: number;
-  disabled?: boolean;
-  size?: ControlSize;
+  readonly value: number;
+  readonly min?: number;
+  readonly max?: number;
+  readonly step?: number;
+  readonly disabled?: boolean;
+  readonly size?: ControlSize;
 }
 
 const SCHEDULER = new BrowserScheduler();

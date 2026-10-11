@@ -17,7 +17,7 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardDocResolver<Doc>;
   private readonly setEvaluator: SetEvaluator<Doc>;
 
-  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: Doc[] = []) {
+  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: readonly Doc[] = []) {
     this.termIndex = new InvertedIndex<Doc>(getTerms);
     this.metricIndex = new MetricIndex<Doc>([...METRICS], getMetric);
     this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], getMetric);
@@ -36,11 +36,11 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     this.rebuild(docs);
   }
 
-  public search(expression: SearchExpression, candidates?: Doc[]): Doc[] {
+  public search(expression: SearchExpression, candidates?: readonly Doc[]): readonly Doc[] {
     return this.setEvaluator.evaluate(expression, candidates);
   }
 
-  public rebuild(docs: Doc[]): void {
+  public rebuild(docs: readonly Doc[]): void {
     this.termIndex.addDocs(docs);
     this.wildcardResolver.index(this.termIndex.indexedTerms());
     this.positionIndex.build(docs);
@@ -48,7 +48,7 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     this.relativeMetricIndex.invalidate();
   }
 
-  public add(docs: Doc[]): void {
+  public add(docs: readonly Doc[]): void {
     for (const doc of docs) {
       this.termIndex.addDoc(doc).forEach(term => this.wildcardResolver.add(term));
       this.positionIndex.add(doc);

@@ -4,6 +4,8 @@ import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
+import { ListSequence } from "@/core/features/favorites/search/list_sequence";
+import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { SearchExpression } from "@/core/search/expressions/search_expression";
@@ -12,20 +14,20 @@ import { haveSameItems } from "@/core/utils/collection/array";
 import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
 export interface FavoritesSearchSessionDependencies {
-  readonly index: FavoritesSearchIndex;
-  readonly blacklist: FavoritesBlacklist;
-  readonly searchSettings: Preference<SearchSettings>;
-  readonly paginationSettings: Pick<Preference<PaginationSettings>, "value" | "changed">;
-  readonly randomSource: RandomSource;
+  index: FavoritesSearchIndex;
+  blacklist: FavoritesBlacklist;
+  searchSettings: Preference<SearchSettings>;
+  paginationSettings: Pick<Preference<PaginationSettings>, "value" | "changed">;
+  randomSource: RandomSource;
 }
 
-export type FavoritesSearchSessionSettings = Pick<FavoritesSearchSessionDependencies, "searchSettings" | "paginationSettings">;
+export type FavoritesSearchSessionSettingDependencies = Pick<FavoritesSearchSessionDependencies, "searchSettings" | "paginationSettings">;
 
 const SEED_RANGE = 2 ** 32;
 
 export class FavoritesSearchSession {
   private readonly request: Readable<SearchRequest>;
-  private readonly currentResults: Signal<Favorite[]>;
+  private readonly currentResults: Signal<readonly Favorite[]>;
   private readonly pageNumber = new Signal(1);
   private readonly currentPagination: Readable<PaginationResult>;
   private readonly stopListening: Array<() => void>;
@@ -58,6 +60,10 @@ export class FavoritesSearchSession {
 
   public get paginationResult(): Readable<PaginationResult> {
     return this.currentPagination;
+  }
+
+  public createMediaSequence(): MediaSequence<Favorite> {
+    return new ListSequence<Favorite>({ wraps: !this.dependencies.paginationSettings.value.infiniteScroll }, this.results);
   }
 
   public submit(query: string): void {
@@ -111,7 +117,7 @@ export class FavoritesSearchSession {
     this.currentResults.value = this.dependencies.index.search(this.request.peek());
   }
 
-  private append(favorites: Favorite[]): void {
+  private append(favorites: readonly Favorite[]): void {
     const matched = this.dependencies.index.match(this.request.peek(), favorites);
 
     if (matched.length > 0) {

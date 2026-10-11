@@ -1,5 +1,5 @@
 import { AppMode, Environment } from "@/core/boundary/environment";
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
+import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
@@ -7,6 +7,7 @@ import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/rand
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
@@ -15,8 +16,7 @@ import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
-import { Favorite } from "@/core/features/favorites/favorite";
+import { MediaItem } from "@/core/domain/media/media";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
@@ -37,19 +37,19 @@ declare const SCRIPT_VERSION: string;
 declare const USE_LOCAL_SERVER: boolean;
 
 interface PageDependencies {
-  readonly fetch: typeof fetch;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
-  readonly mintMedia: (file: { url: string; tags: string }) => Media | null;
-  readonly rule34: Rule34Client;
-  readonly rule34Document: Rule34Document;
-  readonly rule34Cdn: Rule34CdnClient;
-  readonly hostPage: Rule34HostPage;
-  readonly localKeyedValues: LocalKeyedValues;
+  fetch: typeof fetch;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
+  mintMedia: (file: { url: string; tags: string }) => Media | null;
+  rule34: Rule34Client;
+  rule34Document: Rule34Document;
+  rule34Cdn: Rule34CdnClient;
+  hostPage: Rule34HostPage;
+  localKeyedValues: LocalKeyedValues;
 }
 
 type ComposePage = (environment: Environment, dependencies: PageDependencies) => void;
-type FavoritesPorts = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues" | "hostPage" | "visiblePosts">;
+type FavoritesPortDependencies = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues" | "hostPage" | "visiblePosts">;
 
 const PAGES: Record<AppMode, ComposePage> = {
   favorites: composeFavoritesPage,
@@ -89,7 +89,7 @@ function composeFavoritesPage(environment: Environment, dependencies: PageDepend
   }, { ...ports, scheduler, randomSource, localKeyedValues, hostPage, visiblePosts: new Signal<readonly Favorite[]>([]) });
 }
 
-function createFavoritesPorts(environment: Environment, dependencies: PageDependencies): FavoritesPorts {
+function createFavoritesPorts(environment: Environment, dependencies: PageDependencies): FavoritesPortDependencies {
   const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn } = dependencies;
   const frozenCobalt = new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",

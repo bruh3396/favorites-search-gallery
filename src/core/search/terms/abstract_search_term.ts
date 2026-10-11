@@ -1,8 +1,8 @@
 import { Searchable } from "@/core/search/searchable";
 
 export interface ParsedTerm {
-  value: string;
-  isNegated: boolean;
+  readonly value: string;
+  readonly isNegated: boolean;
 }
 
 export abstract class AbstractSearchTerm {

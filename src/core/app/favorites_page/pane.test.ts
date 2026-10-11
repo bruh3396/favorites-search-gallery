@@ -1,22 +1,24 @@
 import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
-import { FavoritesScreen, FavoritesScreenClass } from "@/core/app/favorites_page/screen";
+import { FavoritesPane, FavoritesPaneClass } from "@/core/app/favorites_page/pane";
+import { FavoritesShell, FavoritesShellClass } from "@/core/app/favorites_page/shell";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LoadState } from "@/core/features/favorites/load/state";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Milestone } from "@/core/utils/reactive/milestone";
+import PANE_CSS from "@/core/app/favorites_page/pane.css?inline";
 import { PaginationResult } from "@/core/features/favorites/search/pagination";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
-import SCREEN_CSS from "@/core/app/favorites_page/screen.css?inline";
+import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
-import { createPaginationSettings } from "../preferences";
 import { createPostGridSettings } from "@/core/app/preferences";
+import { createSearchSettings } from "@/core/app/favorites_page/preferences";
 import { expectClassesStyled } from "@/testing/css";
 
 const PAGE_SIZE = 2;
@@ -60,27 +62,33 @@ function setup(): Setup {
     loadState: new Signal<LoadState>({ phase: "starting" })
   };
   const session = {
+    settings: createSearchSettings(new MemoryLocalKeyedValues()),
     results: searchResults,
     paginationResult: computed(() => paginateByTwo(searchResults.value, pageNumber.value)),
     submit,
     goToPage
   };
-  const { result: element, dispose } = render(document, () => h(FavoritesScreen, {
+  const gridPreferences = createPostGridSettings(new MemoryLocalKeyedValues());
+  const { result: element, dispose } = render(document, () => h(FavoritesShell, {
     favorites,
-    session,
-    scrollTo: new Emitter<Favorite>(),
-    paginationSettings: createPaginationSettings(new MemoryLocalKeyedValues()),
-    finishedLoading,
-    skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
-    skeletonItemCount: 50,
-    gridPreferences: createPostGridSettings(new MemoryLocalKeyedValues()),
-    visiblePosts,
-    bitmapDecoder: new MemoryBitmapDecoder(),
-    visibilityObserver: { observe: () => () => { } },
-    fetchImage: () => Promise.resolve(new Blob()),
-    resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
-    getPostUrl: post => `https://posts/${post.id}`,
-    onActivatePost
+    panes: [
+      h(FavoritesPane, {
+        favorites,
+        session,
+        scrollTo: new Emitter<Favorite>(),
+        finishedLoading,
+        skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
+        skeletonItemCount: 50,
+        gridPreferences,
+        visiblePosts,
+        bitmapDecoder: new MemoryBitmapDecoder(),
+        visibilityObserver: { observe: () => (): void => { } },
+        fetchImage: () => Promise.resolve(new Blob()),
+        resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
+        getPostUrl: post => `https://posts/${post.id}`,
+        onActivatePost
+      })
+    ]
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${PostGridSkeletonClass.root}`)!;
   return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onActivatePost };
@@ -97,25 +105,24 @@ function readShownFavoriteUrls(element: HTMLElement): string[] {
   });
 }
 
-describe("FavoritesScreen", () => {
-  test("puts the search, the status, and the paginator in the header and the grid in main", () => {
+describe("FavoritesPane", () => {
+  test("puts load status in the shell and the search, paginator, and grid in the pane", () => {
     const { element } = setup();
-    const [header, main] = [...element.children];
+    const pane = element.querySelector<HTMLElement>(`.${FavoritesPaneClass.root}`)!;
+    const [header, content] = [...pane.children];
     const describeSlot = (slot: Element): string[] => [slot.className, ...[...slot.children].map(child => child.className)];
 
-    expect(element.className).toBe(FavoritesScreenClass.root);
-    expect([header.tagName, header.className, main.tagName]).toEqual(["HEADER", FavoritesScreenClass.header, "MAIN"]);
-    // TODO remove change detector tests
-    // expect([...header.children].map(describeSlot)).toEqual([
-    //   [FavoritesScreenClass.search, SearchBoxClass.root, SliderClass.root, SliderClass.root],
-    //   [FavoritesScreenClass.summary, StatusTextClass.root],
-    //   [FavoritesScreenClass.pagination, PaginatorClass.root]
-    // ]);
-    expect(describeSlot(main)).toEqual([FavoritesScreenClass.content, `${PostGridClass.root} ${PostGridSkeletonClass.root}`, PostGridClass.root]);
+    expect(element.className).toBe(FavoritesShellClass.root);
+    expect(element.querySelector(`.${FavoritesShellClass.status}`)).not.toBeNull();
+    expect([header.tagName, header.className, content.tagName]).toEqual(["HEADER", FavoritesPaneClass.header, "DIV"]);
+    expect(header.querySelector("input[type=search]")).not.toBeNull();
+    expect(header.querySelector(`.${PaginatorClass.root}`)).not.toBeNull();
+    expect(describeSlot(content)).toEqual([FavoritesPaneClass.content, `${PostGridClass.root} ${PostGridSkeletonClass.root}`, PostGridClass.root]);
   });
 
   test("styles every class it sets", () => {
-    expectClassesStyled(FavoritesScreenClass, SCREEN_CSS);
+    expectClassesStyled(FavoritesShellClass, SHELL_CSS);
+    expectClassesStyled(FavoritesPaneClass, PANE_CSS);
   });
 
   test("shows the skeleton until the first favorites arrive", () => {

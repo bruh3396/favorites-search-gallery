@@ -6,8 +6,8 @@ import { parseThumb } from "@/adapters/rule34/client/thumb";
 export const POSTS_PER_POST_LIST_PAGE = 42;
 
 export interface Rule34PostListPage {
-  posts: Post[];
-  paginator: HTMLElement | null;
+  readonly posts: Post[];
+  readonly paginator: HTMLElement | null;
 }
 
 export function postListUrlFromQuery(searchQuery: string): string {

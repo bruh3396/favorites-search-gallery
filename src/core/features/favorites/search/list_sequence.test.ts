@@ -1,7 +1,7 @@
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
-import { ListSequence } from "@/core/contracts/list_sequence";
+import { ListSequence } from "@/core/features/favorites/search/list_sequence";
 import { Post } from "@/core/domain/post/post";
 
 const POSTS = createPosts("1", "2", "3");

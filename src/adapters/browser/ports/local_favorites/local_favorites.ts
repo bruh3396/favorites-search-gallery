@@ -4,7 +4,7 @@ import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favo
 const STORE_NAME: IndexedDbStoreName = "favorites";
 
 export interface IndexedDbLocalFavoritesConfiguration {
-  ownerId: string;
+  readonly ownerId: string;
 }
 
 export class IndexedDbLocalFavorites implements LocalFavorites {
@@ -13,7 +13,7 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
     private readonly indexedDb: IndexedDbClient
   ) { }
 
-  public async getAll(): Promise<string[]> {
+  public async getAll(): Promise<readonly string[]> {
     return (await this.indexedDb.runTransaction(
       STORE_NAME,
       "readonly",
@@ -21,18 +21,18 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
     )).result ?? [];
   }
 
-  public async setAll(postIds: string[]): Promise<void> {
+  public async setAll(postIds: readonly string[]): Promise<void> {
     await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => store.put(postIds, this.configuration.ownerId));
   }
 
-  public prepend(postIds: string[]): Promise<void> {
+  public prepend(postIds: readonly string[]): Promise<void> {
     return this.update(ids => {
       const added = new Set(postIds);
       return [...added, ...ids.filter(id => !added.has(id))];
     });
   }
 
-  public remove(postIds: string[]): Promise<void> {
+  public remove(postIds: readonly string[]): Promise<void> {
     const removed = new Set(postIds);
     return this.update(ids => ids.filter(id => !removed.has(id)));
   }

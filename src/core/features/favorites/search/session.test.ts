@@ -116,6 +116,52 @@ describe("FavoritesSearchSession", () => {
     expect(getResultIds(session)).toEqual(["2"]);
   });
 
+  describe("createMediaSequence", () => {
+    test("walks all results and wraps in paginated mode", async() => {
+      const { session } = setup(createTaggedPosts("a", "a", "a"), { pagination: PAGES_OF_TWO });
+      const [first, second, last] = session.results.peek();
+      const sequence = session.createMediaSequence();
+
+      expect(getPageIds(session)).toEqual(["1", "2"]);
+      expect(sequence.positionOf(last)).toEqual({ index: 2, total: 3 });
+      expect(await sequence.getNext(second)).toBe(last);
+      expect(await sequence.getNext(last)).toBe(first);
+      expect(await sequence.getPrevious(first)).toBe(last);
+    });
+
+    test("stops at the ends in infinite scroll mode", async() => {
+      const { session } = setup(createTaggedPosts("a", "a", "a"), { pagination: { size: 2, infiniteScroll: true } });
+      const [first, , last] = session.results.peek();
+      const sequence = session.createMediaSequence();
+
+      expect(await sequence.getNext(last)).toBeUndefined();
+      expect(await sequence.getPrevious(first)).toBeUndefined();
+    });
+
+    test("uses the pagination mode at the time each sequence is created", async() => {
+      const { session, paginationSettings } = setup(createTaggedPosts("a", "a"), { pagination: PAGES_OF_TWO });
+      const [first, last] = session.results.peek();
+      const paginated = session.createMediaSequence();
+
+      paginationSettings.set({ size: 2, infiniteScroll: true });
+      const infinite = session.createMediaSequence();
+
+      expect(await paginated.getNext(last)).toBe(first);
+      expect(await infinite.getNext(last)).toBeUndefined();
+    });
+
+    test("follows the session's results after a new search", () => {
+      const { session } = setup(createTaggedPosts("apple", "banana", "apple"));
+      const [, banana, apple] = session.results.peek();
+      const sequence = session.createMediaSequence();
+
+      session.submit("apple");
+
+      expect(sequence.positionOf(apple)).toEqual({ index: 1, total: 2 });
+      expect(sequence.positionOf(banana)).toBeUndefined();
+    });
+  });
+
   describe("submit", () => {
     test("shows the favorites matching the query", () => {
       const { session } = setup(createTaggedPosts("apple", "banana", "apple"));

@@ -1,4 +1,5 @@
-import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Dimensions } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { PostGrid, PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal, computed } from "@/core/utils/reactive/signal";
@@ -220,7 +221,7 @@ describe("PostGrid", () => {
         settings={{ layout: new Signal<GridLayout>("grid"), size: new Signal(2), upscale: new Signal(false) }}
         visiblePosts={new Signal<readonly MediaItem[]>([])}
         bitmapDecoder={new MemoryBitmapDecoder()}
-        visibilityObserver={{ observe: () => () => { } }}
+        visibilityObserver={{ observe: () => ():void => { } }}
         fetchImage={() => Promise.resolve(new Blob())}
         getDimensions={getDimensions}
         createActions={() => [

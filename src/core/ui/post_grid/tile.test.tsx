@@ -2,7 +2,7 @@ import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { Signal } from "@/core/utils/reactive/signal";
 import { doNothing } from "@/core/utils/function/function";

@@ -1,0 +1,24 @@
+@layer components {
+  .fsg-FavoritesShell {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-inline: 16px;
+  }
+
+  .fsg-FavoritesShell-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 16px;
+  }
+
+  .fsg-FavoritesShell-status {
+    min-block-size: 1lh;
+  }
+
+  .fsg-FavoritesShell-panes {
+    display: flex;
+    gap: 16px;
+  }
+}

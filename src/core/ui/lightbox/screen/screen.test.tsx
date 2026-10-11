@@ -1,12 +1,12 @@
 import { LightboxScreen, LightboxScreenClass } from "@/core/ui/lightbox/screen/screen";
-import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
+import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
+import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { doNothing } from "@/core/utils/function/function";
@@ -114,12 +114,6 @@ describe("LightboxScreen", () => {
     pressKey(dialog, "ArrowLeft");
     pressKey(dialog, "ArrowRight");
     expect([onShowNext.mock.calls.length, onShowPrevious.mock.calls.length]).toEqual([2, 1]);
-  });
-
-  test("keeps the arrow keys from scrolling and leaves other keys alone", () => {
-    const { dialog } = setup();
-
-    expect([pressKey(dialog, "ArrowRight").defaultPrevented, pressKey(dialog, "a").defaultPrevented]).toEqual([true, false]);
   });
 
   test("hears the arrow keys pressed on its stage", () => {

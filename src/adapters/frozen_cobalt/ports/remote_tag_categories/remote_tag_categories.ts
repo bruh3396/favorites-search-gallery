@@ -1,13 +1,13 @@
-import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
+import { TagCategory } from "@/core/domain/tag/tag";
 import { decodeTagCategory } from "@/adapters/frozen_cobalt/client/decoder";
 
 export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {
   constructor(private readonly frozenCobalt: Pick<FrozenCobaltClient, "fetchTagCategory">) { }
 
-  public async fetch(tagNames: string[]): Promise<TagCategoryMap> {
+  public async fetch(tagNames: readonly string[]): Promise<ReadonlyMap<string, TagCategory>> {
     const settled = await Promise.allSettled(tagNames.map(tagName => this.fetchCategory(tagName)));
     return new Map(settled.flatMap(result => (result.status === "fulfilled" ? [result.value] : [])));
   }

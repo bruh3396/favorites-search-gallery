@@ -3,9 +3,9 @@ import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decod
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxStage } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { SequencePosition } from "@/core/contracts/media_sequence";
+import { SequencePosition } from "@/core/domain/media/media_sequence";
 import { h } from "@/core/ui/h/h";
 
 export const LightboxScreenClass = {
@@ -14,13 +14,13 @@ export const LightboxScreenClass = {
 } as const;
 
 export interface LightboxScreenProps<T extends MediaItem> {
-  readonly lightbox: Lightbox<T>;
-  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
-  readonly resolveOriginalUrl: (media: Media) => Promise<string>;
-  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
-  readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly scheduler: Pick<Scheduler, "schedule">;
+  lightbox: Lightbox<T>;
+  resolvePreviewUrl: (media: Media) => Promise<string>;
+  resolveOriginalUrl: (media: Media) => Promise<string>;
+  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
+  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  bitmapDecoder: BitmapDecoder;
+  scheduler: Pick<Scheduler, "schedule">;
 }
 
 export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T>): HTMLElement {

@@ -6,9 +6,9 @@ export type Rule34ErrorReason =
   | "malformed";
 
 export interface Rule34ErrorDetails {
-  subject?: string;
-  status?: number;
-  cause?: unknown;
+  readonly subject?: string;
+  readonly status?: number;
+  readonly cause?: unknown;
 }
 
 export class Rule34Error extends Error {

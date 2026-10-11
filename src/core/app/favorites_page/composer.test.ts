@@ -1,6 +1,7 @@
 import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
@@ -15,16 +16,14 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { Signal } from "@/core/utils/reactive/signal";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
-import { SliderClass } from "@/core/ui/components/slider/slider";
+import { Signal } from "@/core/utils/reactive/signal";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
-import { mountFavoritesPage } from "@/core/app/favorites_page/favorites_page";
+import { mountFavoritesPage } from "@/core/app/favorites_page/composer";
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = []): ShadowRoot {
   const container = document.createElement("div");
@@ -66,11 +65,13 @@ describe("mountFavoritesPage", () => {
     expect(app.querySelector("input[type=search]")).not.toBeNull();
   });
 
-  test("draws the grid size kept in the app's preferences", () => {
+  test("uses the grid size kept in the app's preferences", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { postGridSize: 3 } });
-    expect(mount(localKeyedValues).querySelector<HTMLInputElement>(`.${SliderClass.input}`)!.value).toBe("18");
+    const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${PostGridSkeletonClass.root})`)!;
+
+    expect(grid.style.getPropertyValue("--fsg-PostGrid-size")).toBe("3");
   });
 
   test("records the shapes of the loaded favorites for the next load's skeleton", async() => {

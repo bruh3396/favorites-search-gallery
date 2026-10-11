@@ -7,19 +7,19 @@ import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/posts/library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
-interface FetchProgress {
+interface MutableFetchProgress {
   loadedCount: number;
   expectedCount: number | null;
   isFetching: boolean;
 }
 
 export interface FavoritesFetcherDependencies {
-  readonly localFavorites: LocalFavorites;
-  readonly remoteFavorites: RemoteFavorites;
-  readonly collection: Pick<FavoritesCollection, "append" | "getAllIds" | "clearTagCache">;
-  readonly index: Pick<FavoritesSearchIndex, "add">;
-  readonly postLibrary: PostLibrary;
-  readonly report: (state: LoadState) => void;
+  localFavorites: LocalFavorites;
+  remoteFavorites: RemoteFavorites;
+  collection: Pick<FavoritesCollection, "append" | "getAllIds" | "clearTagCache">;
+  index: Pick<FavoritesSearchIndex, "add">;
+  postLibrary: PostLibrary;
+  report: (state: LoadState) => void;
 }
 
 export class FavoritesFetcher {
@@ -31,7 +31,7 @@ export class FavoritesFetcher {
 
   public async fetchAll(): Promise<LoadResult> {
     const { remoteFavorites, localFavorites, collection, report } = this.dependencies;
-    const progress: FetchProgress = { loadedCount: 0, expectedCount: null, isFetching: true };
+    const progress: MutableFetchProgress = { loadedCount: 0, expectedCount: null, isFetching: true };
     const reportProgress = (): void => {
       if (progress.isFetching) {
         report({ phase: "fetching", loadedCount: progress.loadedCount, expectedCount: progress.expectedCount });
@@ -65,7 +65,7 @@ export class FavoritesFetcher {
     return { pulledCount: 0, removedCount: 0 };
   }
 
-  private async ingest(posts: Post[]): Promise<Favorite[]> {
+  private async ingest(posts: readonly Readonly<Post>[]): Promise<readonly Favorite[]> {
     const { collection, index, postLibrary } = this.dependencies;
     const adopted = await postLibrary.adopt(posts);
     const favorites = collection.append(adopted);

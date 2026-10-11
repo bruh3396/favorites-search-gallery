@@ -7,9 +7,9 @@ export interface RetryConfiguration {
 }
 
 export interface RetryDependencies {
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
-  readonly isRetryable: (error: unknown) => boolean;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
+  isRetryable: (error: unknown) => boolean;
 }
 
 export class Retry {

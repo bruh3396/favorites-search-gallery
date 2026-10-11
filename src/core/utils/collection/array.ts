@@ -64,7 +64,7 @@ export function shuffleInPlace<V>(randomSource: RandomSource, array: V[]): V[] {
   return array;
 }
 
-export function shuffleDeterministically<T>(list: T[], seed: number, getKey: (item: T) => number): T[] {
+export function shuffleDeterministically<T>(list: readonly T[], seed: number, getKey: (item: T) => number): T[] {
   return list
     .map(item => ({ item, rank: hashInt(getKey(item), seed) }))
     .sort((a, b) => a.rank - b.rank)

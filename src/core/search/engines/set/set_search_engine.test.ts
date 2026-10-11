@@ -4,7 +4,7 @@ import { Searchable } from "@/core/search/searchable";
 import { SetSearchEngine } from "@/core/search/engines/set/set_search_engine";
 import { parseSearchExpression } from "@/core/search/parsers/search_expression_parser";
 
-type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
+type Doc = Searchable & { name: string; tags: Set<string>; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
 
 function createDoc(name: string, tags: string[], metrics: Partial<Record<Metric, number>> = {}): Doc {
   return {

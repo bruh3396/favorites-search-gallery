@@ -11,9 +11,9 @@ export type FrozenCobaltErrorReason =
   | "unknown_file";
 
 export interface FrozenCobaltErrorDetails {
-  subject?: string;
-  status?: number;
-  cause?: unknown;
+  readonly subject?: string;
+  readonly status?: number;
+  readonly cause?: unknown;
 }
 
 export class FrozenCobaltError extends Error {

@@ -8,7 +8,7 @@ import { createSearchRequest } from "@/core/features/favorites/testing/search";
 
 interface Setup {
   collection: FavoritesCollection;
-  favorites: Favorite[];
+  favorites: readonly Favorite[];
   index: FavoritesSearchIndex;
 }
 
@@ -83,7 +83,7 @@ describe("FavoritesSearchIndex", () => {
 
     test("announces no added favorites", () => {
       const { favorites, index } = setup(createTaggedPosts("apple"));
-      const announced: Favorite[][] = [];
+      const announced: Array<readonly Favorite[]> = [];
 
       index.indexed.on(added => announced.push(added));
       index.rebuild(favorites);

@@ -2,8 +2,8 @@ import { Post } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34RemovedFavoritesFinderConfiguration {
-  pageSize: number;
-  fetchDelay: number;
+  readonly pageSize: number;
+  readonly fetchDelay: number;
 }
 
 export interface Rule34RemovedFavoritesFinderDependencies {
@@ -12,20 +12,20 @@ export interface Rule34RemovedFavoritesFinderDependencies {
 }
 
 interface LocalList {
-  ids: readonly string[];
-  indexById: ReadonlyMap<string, number>;
-  remoteStart: number;
+  readonly ids: readonly string[];
+  readonly indexById: ReadonlyMap<string, number>;
+  readonly remoteStart: number;
 }
 
 interface RemotePage {
-  index: number;
-  ids: string[];
+  readonly index: number;
+  readonly ids: string[];
 }
 
 interface Checkpoint {
-  page: RemotePage;
-  localIndex: number;
-  removedAbove: number;
+  readonly page: RemotePage;
+  readonly localIndex: number;
+  readonly removedAbove: number;
 }
 
 export class Rule34RemovedFavoritesFinder {

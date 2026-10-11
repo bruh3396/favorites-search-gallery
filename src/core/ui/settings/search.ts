@@ -1,8 +1,8 @@
 import { SettingDescriptor } from "@/core/ui/settings/descriptor";
 
 export interface SearchableSection {
-  title: string;
-  descriptors: readonly SettingDescriptor[];
+  readonly title: string;
+  readonly descriptors: readonly SettingDescriptor[];
 }
 
 export type SettingsIndex = ReadonlyMap<string, string>;

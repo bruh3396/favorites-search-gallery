@@ -2,7 +2,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 interface ScheduledTask {
   task: () => void;
-  dueAt: number;
+  readonly dueAt: number;
 }
 
 export class MemoryScheduler implements Scheduler {

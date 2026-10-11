@@ -1,17 +1,17 @@
 export type LoadState =
-  | { phase: "starting" }
-  | { phase: "fetching"; loadedCount: number; expectedCount: number | null }
-  | { phase: "restoring"; loadedCount: number; expectedCount: number }
-  | { phase: "saving" }
-  | { phase: "pulling" }
-  | { phase: "indexing" }
-  | { phase: "pruning" }
-  | { phase: "loaded"; pulledCount: number; removedCount: number }
-  | { phase: "interrupted" };
+  | { readonly phase: "starting" }
+  | { readonly phase: "fetching"; readonly loadedCount: number; readonly expectedCount: number | null }
+  | { readonly phase: "restoring"; readonly loadedCount: number; readonly expectedCount: number }
+  | { readonly phase: "saving" }
+  | { readonly phase: "pulling" }
+  | { readonly phase: "indexing" }
+  | { readonly phase: "pruning" }
+  | { readonly phase: "loaded"; readonly pulledCount: number; readonly removedCount: number }
+  | { readonly phase: "interrupted" };
 
 export type LoadPhase = LoadState["phase"];
 
 export interface LoadResult {
-  pulledCount: number;
-  removedCount: number;
+  readonly pulledCount: number;
+  readonly removedCount: number;
 }

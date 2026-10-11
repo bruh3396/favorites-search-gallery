@@ -9,15 +9,15 @@ export enum WildcardMatchType {
 }
 
 export interface WildcardResolutionInputs {
-  matchType: WildcardMatchType;
-  fragment: string;
-  fragments: string[];
-  regex: RegExp;
+  readonly matchType: WildcardMatchType;
+  readonly fragment: string;
+  readonly fragments: string[];
+  readonly regex: RegExp;
 }
 
 export interface WildcardPattern {
-  matchType: WildcardMatchType;
-  regex: RegExp;
+  readonly matchType: WildcardMatchType;
+  readonly regex: RegExp;
 }
 
 export class WildcardSearchTerm extends AbstractSearchTerm {

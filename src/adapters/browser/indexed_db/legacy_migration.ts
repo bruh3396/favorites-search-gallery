@@ -15,36 +15,36 @@ const GIF_TAGS = ["gif", "animated", "animated_gif"];
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
 interface LegacyPost {
-  id: string;
-  width: number;
-  height: number;
-  score: number;
-  rating: string;
-  change: number;
-  fileURL: string;
-  previewURL?: string;
-  tags: string;
-  duration?: number;
-  deleted?: boolean;
-  extension?: string;
-  fetchedAt?: number;
+  readonly id: string;
+  readonly width: number;
+  readonly height: number;
+  readonly score: number;
+  readonly rating: string;
+  readonly change: number;
+  readonly fileURL: string;
+  readonly previewURL?: string;
+  readonly tags: string;
+  readonly duration?: number;
+  readonly deleted?: boolean;
+  readonly extension?: string;
+  readonly fetchedAt?: number;
 }
 
 interface LegacyFile {
-  directory: string;
-  name: string;
-  extension: string;
+  readonly directory: string;
+  readonly name: string;
+  readonly extension: string;
 }
 
 interface LegacyTagCategory {
-  id: string;
-  category: string;
+  readonly id: string;
+  readonly category: string;
 }
 
 interface LegacyData {
-  posts: LegacyPost[];
-  favorites: Map<string, LegacyPost[]>;
-  tagCategories: LegacyTagCategory[];
+  readonly posts: LegacyPost[];
+  readonly favorites: Map<string, LegacyPost[]>;
+  readonly tagCategories: LegacyTagCategory[];
 }
 
 export interface LegacyMigration {
@@ -172,7 +172,7 @@ function convertPost(legacy: LegacyPost): Post | null {
   if (media === null) {
     return null;
   }
-  const post: Post = {
+  return {
     id: legacy.id,
     width: legacy.width,
     height: legacy.height,
@@ -180,21 +180,11 @@ function convertPost(legacy: LegacyPost): Post | null {
     rating: RATING_BY_INITIAL[legacy.rating.charAt(0).toLowerCase()] ?? "explicit",
     changedAt: legacy.change * 1_000,
     media,
-    tags: legacy.tags
+    tags: legacy.tags,
+    ...(legacy.duration === undefined ? {} : { durationSeconds: legacy.duration }),
+    ...(legacy.deleted === undefined ? {} : { deleted: legacy.deleted }),
+    ...(legacy.fetchedAt === undefined ? {} : { fetchedAt: legacy.fetchedAt })
   };
-
-  if (legacy.duration !== undefined) {
-    post.durationSeconds = legacy.duration;
-  }
-
-  if (legacy.deleted !== undefined) {
-    post.deleted = legacy.deleted;
-  }
-
-  if (legacy.fetchedAt !== undefined) {
-    post.fetchedAt = legacy.fetchedAt;
-  }
-  return post;
 }
 
 function mintMedia(legacy: LegacyPost): Media | null {

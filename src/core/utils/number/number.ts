@@ -1,8 +1,8 @@
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export interface NumberRange {
-  min: number;
-  max: number;
+  readonly min: number;
+  readonly max: number;
 }
 
 export interface Neighborhood<V> {

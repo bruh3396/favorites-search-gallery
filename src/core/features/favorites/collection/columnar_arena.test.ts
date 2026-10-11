@@ -47,6 +47,19 @@ describe("FavoritesColumnarArena", () => {
   });
 
   describe("write", () => {
+    test("grows storage when writing beyond the initial capacity", () => {
+      const arena = new FavoritesColumnarArena();
+      let slot = -1;
+
+      for (let i = 0; i < 1_025; i += 1) {
+        slot = arena.allocate();
+      }
+      const post = createPost({ id: "1025", tags: "apple banana" });
+
+      arena.write(slot, post);
+      expect(arena.getPost(slot)).toEqual(post);
+    });
+
     test("drops the cached tags so they cannot go stale", () => {
       const { arena, slot } = setup("apple");
 

@@ -1,9 +1,9 @@
-import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaItem } from "@/core/domain/media/media";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface ListSequenceConfiguration {
-  wraps: boolean;
+  readonly wraps: boolean;
 }
 
 export class ListSequence<T extends MediaItem> implements MediaSequence<T> {

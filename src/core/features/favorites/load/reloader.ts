@@ -9,13 +9,13 @@ import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_f
 const STREAM_BATCH_SIZE = 1_000;
 
 export interface FavoritesReloaderDependencies {
-  readonly localFavorites: LocalFavorites;
-  readonly remoteFavorites: RemoteFavorites;
-  readonly collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll" | "clearTagCache">;
-  readonly index: Pick<FavoritesSearchIndex, "rebuild">;
-  readonly postLibrary: PostLibrary;
-  readonly waitForPaint: () => Promise<void>;
-  readonly report: (state: LoadState) => void;
+  localFavorites: LocalFavorites;
+  remoteFavorites: RemoteFavorites;
+  collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll" | "clearTagCache">;
+  index: Pick<FavoritesSearchIndex, "rebuild">;
+  postLibrary: PostLibrary;
+  waitForPaint: () => Promise<void>;
+  report: (state: LoadState) => void;
 }
 
 export class FavoritesReloader {
@@ -25,7 +25,7 @@ export class FavoritesReloader {
     this.dependencies = dependencies;
   }
 
-  public async reload(localIds: string[]): Promise<LoadResult> {
+  public async reload(localIds: readonly string[]): Promise<LoadResult> {
     const { collection, index, postLibrary, report, waitForPaint } = this.dependencies;
     const restored = await this.restore(localIds);
     let pulled: Post[] = [];
@@ -46,7 +46,7 @@ export class FavoritesReloader {
     return { pulledCount: pulled.length, removedCount };
   }
 
-  private async restore(localIds: string[]): Promise<Post[]> {
+  private async restore(localIds: readonly string[]): Promise<Post[]> {
     const { collection, postLibrary, report } = this.dependencies;
     const restored: Post[] = [];
     const reportProgress = (): void => report({ phase: "restoring", loadedCount: restored.length, expectedCount: localIds.length });
@@ -60,7 +60,7 @@ export class FavoritesReloader {
     return restored;
   }
 
-  private async pullNew(localIds: string[]): Promise<Post[]> {
+  private async pullNew(localIds: readonly string[]): Promise<Post[]> {
     const { collection, postLibrary, remoteFavorites, localFavorites } = this.dependencies;
     const pulled = await remoteFavorites.findNew(localIds);
 

@@ -10,14 +10,14 @@ function createDoc(id: string, ...tags: string[]): Doc {
   return { id, tags };
 }
 
-function createIndex(docs: Doc[]): BitIndex<Doc> {
+function createIndex(docs: readonly Doc[]): BitIndex<Doc> {
   const bitIndex = new BitIndex<Doc>(d => d.tags);
 
   bitIndex.build(docs);
   return bitIndex;
 }
 
-function resolveTermDocs(bitIndex: BitIndex<Doc>, term: string): Doc[] {
+function resolveTermDocs(bitIndex: BitIndex<Doc>, term: string): readonly Doc[] {
   const posting = bitIndex.findPosting(term);
   return posting === undefined ? [] : bitIndex.docsFrom(posting.toBitSet(bitIndex.size));
 }

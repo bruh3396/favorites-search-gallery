@@ -6,8 +6,8 @@ import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 import { findFirstIndexWhere } from "@/core/utils/collection/array";
 
 interface MetricAxis {
-  valuesByPosition: Float64Array;
-  positionsSortedByValue: Int32Array;
+  readonly valuesByPosition: Float64Array;
+  readonly positionsSortedByValue: Int32Array;
 }
 
 export class MetricBitIndex<Doc> {

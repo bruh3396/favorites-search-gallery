@@ -1,7 +1,7 @@
+import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
 import { Upscaler } from "@/core/ui/post_grid/upscaler";
-import { describe, expect, onTestFinished, test, vi } from "vitest";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
 
@@ -32,6 +32,8 @@ function setup(
   decode: BitmapDecoder["decode"] = () => Promise.resolve(createBitmap() as unknown as ImageBitmap)
 ): Setup {
   const canvas = document.createElement("canvas");
+
+  canvas.hidden = true;
   const drawImage = vi.fn();
   const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext")
     .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);

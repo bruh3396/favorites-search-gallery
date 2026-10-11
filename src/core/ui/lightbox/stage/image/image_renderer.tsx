@@ -1,11 +1,11 @@
 import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer";
 import { Signal, effect } from "@/core/utils/reactive/signal";
-import { BitmapCache } from "@/core/ui/lightbox/stage/bitmap_cache";
+import { BitmapCache } from "@/core/ui/lightbox/stage/image/bitmap_cache";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
+import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { PreloadingRenderer } from "@/core/ui/lightbox/stage/preloading_renderer";
 import { Resource } from "@/core/utils/reactive/resource";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
@@ -15,11 +15,11 @@ import { h } from "@/core/ui/h/h";
 const SETTLE_DELAY = 200;
 
 export interface ImageRendererDependencies {
-  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
-  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
-  readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly scheduler: Pick<Scheduler, "schedule">;
+  resolvePreviewUrl: (media: Media) => Promise<string>;
+  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
+  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  bitmapDecoder: BitmapDecoder;
+  scheduler: Pick<Scheduler, "schedule">;
 }
 
 export class ImageRenderer extends PreloadingRenderer implements LightboxStageRenderer {
@@ -35,9 +35,9 @@ export class ImageRenderer extends PreloadingRenderer implements LightboxStageRe
 
   constructor(dependencies: ImageRendererDependencies) {
     super(dependencies.scheduler);
-    this.preview = <img className={LightboxStageClass.media} alt="" decoding="async" /> as HTMLImageElement;
-    this.original = <canvas className={LightboxStageClass.media} /> as HTMLCanvasElement;
-    this.root = <div className={LightboxStageClass.renderer}>{this.preview}{this.original}</div>;
+    this.preview = <img className={LightboxRendererClass.media} alt="" decoding="async" /> as HTMLImageElement;
+    this.original = <canvas className={LightboxRendererClass.media} /> as HTMLCanvasElement;
+    this.root = <div className={LightboxRendererClass.root}>{this.preview}{this.original}</div>;
     this.bitmapCache = new BitmapCache({
       fetchOriginal: dependencies.fetchOriginal,
       resolveOriginalImageFallbackUrl: dependencies.resolveOriginalImageFallbackUrl,

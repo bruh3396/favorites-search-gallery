@@ -15,15 +15,15 @@ import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface FavoritesLoaderDependencies {
-  readonly localFavorites: LocalFavorites;
-  readonly localPosts: LocalPosts;
-  readonly localTagCategories: LocalTagCategories;
-  readonly remoteFavorites: RemoteFavorites;
-  readonly remotePosts: RemotePosts;
-  readonly remoteMedia: RemoteMedia;
-  readonly scheduler: Scheduler;
-  readonly collection: FavoritesCollection;
-  readonly index: FavoritesSearchIndex;
+  localFavorites: LocalFavorites;
+  localPosts: LocalPosts;
+  localTagCategories: LocalTagCategories;
+  remoteFavorites: RemoteFavorites;
+  remotePosts: RemotePosts;
+  remoteMedia: RemoteMedia;
+  scheduler: Scheduler;
+  collection: FavoritesCollection;
+  index: FavoritesSearchIndex;
 }
 
 export class FavoritesLoader {

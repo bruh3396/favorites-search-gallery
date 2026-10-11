@@ -2,9 +2,9 @@ import { Post } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34NewFavoritesFinderConfiguration {
-  pageSize: number;
-  minimumLocalRunLength: number;
-  fetchDelay: number;
+  readonly pageSize: number;
+  readonly minimumLocalRunLength: number;
+  readonly fetchDelay: number;
 }
 
 export interface Rule34NewFavoritesFinderDependencies {
@@ -13,8 +13,8 @@ export interface Rule34NewFavoritesFinderDependencies {
 }
 
 interface LocalRun {
-  remoteStart: number;
-  length: number;
+  readonly remoteStart: number;
+  readonly length: number;
 }
 
 export class Rule34NewFavoritesFinder {

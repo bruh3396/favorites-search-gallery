@@ -1,15 +1,14 @@
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
-import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
+import { LightboxRendererClass, LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { PreloadingRenderer } from "@/core/ui/lightbox/stage/preloading_renderer";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { VideoElementPool } from "@/core/ui/lightbox/stage/video/video_element_pool";
 import { h } from "@/core/ui/h/h";
 
 export interface VideoRendererDependencies {
-  readonly resolveOriginalUrl: (media: Media) => Promise<string>;
-  readonly scheduler: Pick<Scheduler, "schedule">;
+  resolveOriginalUrl: (media: Media) => Promise<string>;
+  scheduler: Pick<Scheduler, "schedule">;
 }
 
 const VIDEO_POOL_CAPACITY = 5;
@@ -23,7 +22,7 @@ export class VideoRenderer extends PreloadingRenderer implements LightboxStageRe
   constructor(dependencies: VideoRendererDependencies) {
     super(dependencies.scheduler);
     this.pool = new VideoElementPool(VIDEO_POOL_CAPACITY, dependencies.resolveOriginalUrl);
-    this.root = <div className={LightboxStageClass.renderer} hidden>{this.pool.videoElements}</div>;
+    this.root = <div className={LightboxRendererClass.root} hidden>{this.pool.videoElements}</div>;
   }
 
   public show(item: MediaItem): void {

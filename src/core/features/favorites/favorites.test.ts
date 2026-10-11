@@ -1,4 +1,4 @@
-import { FavoritesSearchSession, FavoritesSearchSessionSettings } from "@/core/features/favorites/search/session";
+import { FavoritesSearchSession, FavoritesSearchSessionSettingDependencies } from "@/core/features/favorites/search/session";
 import { FavoritesService, createFavoritesService } from "@/core/features/favorites/favorites";
 import { describe, expect, test } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -76,7 +76,7 @@ function createPaginationSettings(): Preference<PaginationSettings> {
   return createPreference<PaginationSettings>({ size: 2, infiniteScroll: false });
 }
 
-function createSessionSettings(): FavoritesSearchSessionSettings {
+function createSessionSettings(): FavoritesSearchSessionSettingDependencies {
   return { searchSettings: createPreference(createSearchSettings()), paginationSettings: createPaginationSettings() };
 }
 

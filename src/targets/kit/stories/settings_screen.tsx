@@ -44,8 +44,8 @@ function createPreference<T>({ id, initial, log }: { id: string; initial: T; log
 }
 
 interface Catalog {
-  descriptors: SettingDescriptor[];
-  hints: SettingPreference<boolean>;
+  readonly descriptors: SettingDescriptor[];
+  readonly hints: SettingPreference<boolean>;
 }
 
 function createCatalog(log: Log): Catalog {

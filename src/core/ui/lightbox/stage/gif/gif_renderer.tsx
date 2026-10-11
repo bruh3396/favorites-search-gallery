@@ -1,13 +1,12 @@
+import { LightboxRendererClass, LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Signal, effect } from "@/core/utils/reactive/signal";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
-import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Resource } from "@/core/utils/reactive/resource";
 import { h } from "@/core/ui/h/h";
 
 export interface GifRendererDependencies {
-  readonly resolveOriginalUrl: (media: Media) => Promise<string>;
+  resolveOriginalUrl: (media: Media) => Promise<string>;
 }
 
 export class GifRenderer implements LightboxStageRenderer {
@@ -18,8 +17,8 @@ export class GifRenderer implements LightboxStageRenderer {
   private readonly stopRenderEffect: () => void;
 
   constructor(dependencies: GifRendererDependencies) {
-    this.image = <img className={LightboxStageClass.media} alt="" decoding="async" /> as HTMLImageElement;
-    this.root = <div className={LightboxStageClass.renderer}>{this.image}</div>;
+    this.image = <img className={LightboxRendererClass.media} alt="" decoding="async" /> as HTMLImageElement;
+    this.root = <div className={LightboxRendererClass.root}>{this.image}</div>;
     this.urlResource = new Resource({
       source: this.current,
       load: (item): Promise<string> => dependencies.resolveOriginalUrl(item.media).catch(error => {

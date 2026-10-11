@@ -13,7 +13,7 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardPostingResolver<Doc>;
   private readonly bitEvaluator: BitEvaluator<Doc>;
 
-  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: Doc[] = []) {
+  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: readonly Doc[] = []) {
     this.bitIndex = new BitIndex<Doc>(getTerms);
     this.metricIndex = new MetricBitIndex<Doc>(getMetric);
     this.wildcardResolver = new WildcardPostingResolver(this.bitIndex);
@@ -21,7 +21,7 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     this.rebuild(docs);
   }
 
-  public search(expression: SearchExpression, candidates?: Doc[]): Doc[] {
+  public search(expression: SearchExpression, candidates?: readonly Doc[]): readonly Doc[] {
     const matches = this.bitEvaluator.evaluate(expression);
 
     if (candidates === undefined || candidates.length === this.bitIndex.size) {
@@ -31,13 +31,13 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     return matches.filter(doc => candidateSet.has(doc));
   }
 
-  public rebuild(docs: Doc[]): void {
+  public rebuild(docs: readonly Doc[]): void {
     this.bitIndex.build(docs);
     this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
     this.wildcardResolver.index(this.bitIndex.indexedTerms());
   }
 
-  public add(docs: Doc[]): void {
+  public add(docs: readonly Doc[]): void {
     this.bitIndex.add(docs).forEach(term => this.wildcardResolver.add(term));
     this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());
   }

@@ -2,6 +2,7 @@ import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/searc
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import SEARCH_BOX_CSS from "@/core/ui/components/search_box/search_box.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
 interface Setup {
@@ -11,7 +12,7 @@ interface Setup {
 }
 
 function setup(): Setup {
-  const options = { label: "Search favorites", onSearch: vi.fn() };
+  const options = { label: "Search favorites", query: new Signal(""), onSearch: vi.fn() };
   const { result: element } = render(document, () => <SearchBox {...options} />);
 
   document.body.append(element);

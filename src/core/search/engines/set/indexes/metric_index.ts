@@ -5,8 +5,8 @@ import { findFirstIndexWhere } from "@/core/utils/collection/array";
 type AbsoluteComparison = Pick<MetricComparison, "metric" | "operator" | "value">;
 
 interface Entry<Doc> {
-  value: number;
-  doc: Doc;
+  readonly value: number;
+  readonly doc: Doc;
 }
 
 export class MetricIndex<Doc> {

@@ -1,7 +1,7 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
+import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 
 const MAX_NEIGHBOR_DISTANCE = 20;
 

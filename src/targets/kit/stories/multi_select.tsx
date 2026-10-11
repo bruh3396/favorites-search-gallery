@@ -5,9 +5,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 
 interface MultiSelectState {
-  values: readonly string[];
-  disabled?: boolean;
-  size?: ControlSize;
+  readonly values: readonly string[];
+  readonly disabled?: boolean;
+  readonly size?: ControlSize;
 }
 
 const ACTIONS = [

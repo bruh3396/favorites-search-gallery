@@ -22,7 +22,7 @@ export class ArenaFavorite implements Favorite {
     return String(this.numericId);
   }
 
-  public get tags(): Set<string> {
+  public get tags(): ReadonlySet<string> {
     return this.arena.getTags(this.slot);
   }
 

@@ -23,7 +23,7 @@ export class BitAlgebra<Doc> {
     return new BitSet(this.table.width);
   }
 
-  public docsFrom(bitset: BitSet): Doc[] {
+  public docsFrom(bitset: BitSet): readonly Doc[] {
     return bitset.gather(this.table.allDocs());
   }
 

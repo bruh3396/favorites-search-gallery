@@ -1,6 +1,6 @@
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 
-type Entries = Record<string, unknown>;
+type Entries = Readonly<Record<string, unknown>>;
 
 export class NamespacedLocalKeyedValues implements LocalKeyedValues {
   private readonly inner: LocalKeyedValues;
@@ -27,7 +27,7 @@ export class NamespacedLocalKeyedValues implements LocalKeyedValues {
     this.save(rest);
   }
 
-  public moveIn(keys: string[]): void {
+  public moveIn(keys: readonly string[]): void {
     const entries = { ...this.entries, ...this.readStored() };
     const movable = keys.filter(key => !(key in entries) && this.inner.get(key) !== undefined);
 

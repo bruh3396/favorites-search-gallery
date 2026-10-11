@@ -4,11 +4,11 @@ import { MetricComparison } from "@/core/search/parsers/metric_comparison";
 const EMPTY: ReadonlySet<never> = new Set<never>();
 
 interface MetricPair<Doc> {
-  left: Metric;
-  right: Metric;
-  greater: Set<Doc>;
-  less: Set<Doc>;
-  equal: Set<Doc>;
+  readonly left: Metric;
+  readonly right: Metric;
+  readonly greater: Set<Doc>;
+  readonly less: Set<Doc>;
+  readonly equal: Set<Doc>;
 }
 
 export class RelativeMetricIndex<Doc> {

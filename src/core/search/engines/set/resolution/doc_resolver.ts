@@ -48,7 +48,7 @@ export class DocResolver<Doc> {
     return this.termIndex.docsForTerm(term.value) ?? new Set<Doc>();
   }
 
-  public sortByPosition(docs: Doc[]): Doc[] {
+  public sortByPosition(docs: readonly Doc[]): readonly Doc[] {
     return this.positionIndex.sort(docs);
   }
 

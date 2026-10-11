@@ -1,25 +1,28 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { Readable, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { GifRenderer } from "@/core/ui/lightbox/stage/gif_renderer";
-import { ImageRenderer } from "@/core/ui/lightbox/stage/image_renderer";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
+import { GifRenderer } from "@/core/ui/lightbox/stage/gif/gif_renderer";
+import { ImageRenderer } from "@/core/ui/lightbox/stage/image/image_renderer";
 import { LightboxStageRenderer } from "@/core/ui/lightbox/stage/renderer";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { VideoRenderer } from "@/core/ui/lightbox/stage/video/video_renderer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
+export const LightboxStageClass = {
+  root: "fsg-LightboxStage"
+} as const;
+
 export interface LightboxStageProps {
-  readonly current: Readable<MediaItem | undefined>;
-  readonly neighbors: Readable<readonly MediaItem[]>;
-  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
-  readonly resolveOriginalUrl: (media: Media) => Promise<string>;
-  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
-  readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly scheduler: Pick<Scheduler, "schedule">;
+  current: Readable<MediaItem | undefined>;
+  neighbors: Readable<readonly MediaItem[]>;
+  resolvePreviewUrl: (media: Media) => Promise<string>;
+  resolveOriginalUrl: (media: Media) => Promise<string>;
+  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
+  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  bitmapDecoder: BitmapDecoder;
+  scheduler: Pick<Scheduler, "schedule">;
 }
 
 type LightboxStageControllerDependencies = Omit<LightboxStageProps, "current" | "neighbors">;

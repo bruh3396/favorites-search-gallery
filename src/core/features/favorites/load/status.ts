@@ -1,6 +1,6 @@
 import { LoadPhase, LoadState } from "@/core/features/favorites/load/state";
 
-type Describers = { [Phase in LoadPhase]: (state: Extract<LoadState, { phase: Phase }>) => string };
+type Describers = { readonly [Phase in LoadPhase]: (state: Extract<LoadState, { phase: Phase }>) => string };
 
 const DESCRIBERS: Describers = {
   starting: () => "Starting",

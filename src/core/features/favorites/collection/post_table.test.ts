@@ -84,12 +84,11 @@ describe("FavoritesPostTable", () => {
     });
   });
 
-  describe("ensureCapacity", () => {
-    test("keeps written data readable after growing", () => {
+  describe("write", () => {
+    test("grows capacity and keeps written data readable", () => {
       const table = new FavoritesPostTable();
 
       table.write(0, createPost({ id: "5", score: 9 }));
-      table.ensureCapacity(5_000);
       table.write(4_999, createPost({ id: "6" }));
       expect(table.getMetric(0, "score")).toBe(9);
       expect(table.getNumericId(4_999)).toBe(6);

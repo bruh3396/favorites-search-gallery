@@ -1,4 +1,5 @@
-import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Dimensions } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
@@ -21,19 +22,19 @@ export interface PostGridSettings {
 }
 
 export interface PostGridProps<T extends MediaItem> {
-  readonly posts: Readable<readonly T[]>;
-  readonly changed: Occurrence<T>;
-  readonly scrollTo?: Occurrence<T>;
-  readonly settings: PostGridSettings;
-  readonly visiblePosts: Signal<readonly T[]>;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly visibilityObserver: VisibilityObserver;
-  readonly fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  readonly getDimensions: (post: T) => Dimensions;
-  readonly createActions: (post: T) => readonly Node[];
-  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
-  readonly getPostUrl?: (post: T) => string;
-  readonly onActivatePost: (post: T, event: MouseEvent) => void;
+  posts: Readable<readonly T[]>;
+  changed: Occurrence<T>;
+  scrollTo?: Occurrence<T>;
+  settings: PostGridSettings;
+  visiblePosts: Signal<readonly T[]>;
+  bitmapDecoder: BitmapDecoder;
+  visibilityObserver: VisibilityObserver;
+  fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  getDimensions: (post: T) => Dimensions;
+  createActions: (post: T) => readonly Node[];
+  resolvePreviewUrl: (media: Media) => Promise<string>;
+  getPostUrl?: (post: T) => string;
+  onActivatePost: (post: T, event: MouseEvent) => void;
 }
 
 export function PostGrid<T extends MediaItem>(props: PostGridProps<T>): HTMLElement {

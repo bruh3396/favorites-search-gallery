@@ -12,10 +12,10 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemoteFavoritesDependencies {
-  readonly rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
-  readonly rule34Document: Pick<Rule34Document, "readFavoritesPageId">;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
+  rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
+  rule34Document: Pick<Rule34Document, "readFavoritesPageId">;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
 }
 
 const FETCH_DELAY = 1_000;

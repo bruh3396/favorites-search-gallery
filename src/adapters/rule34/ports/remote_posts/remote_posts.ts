@@ -7,9 +7,9 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isTransient } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemotePostsDependencies {
-  readonly rule34: Pick<Rule34Client, "fetchPostPage">;
-  readonly scheduler: Scheduler;
-  readonly randomSource: RandomSource;
+  rule34: Pick<Rule34Client, "fetchPostPage">;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
 }
 
 const MAX_FETCH_ATTEMPTS = 3;

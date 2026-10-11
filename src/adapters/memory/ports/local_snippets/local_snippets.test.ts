@@ -47,8 +47,8 @@ describe("MemoryLocalSnippets", () => {
     const written = createSnippet("fruits");
 
     await snippets.setMany([written]);
-    written.query = "changed";
-    (await snippets.getAll())[0].query = "changed";
+    Object.assign(written, { query: "changed" });
+    Object.assign((await snippets.getAll())[0], { query: "changed" });
 
     expect(await snippets.getAll()).toEqual([createSnippet("fruits")]);
   });

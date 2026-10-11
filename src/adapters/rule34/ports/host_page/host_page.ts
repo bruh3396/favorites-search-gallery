@@ -3,7 +3,7 @@ import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Rule34Document } from "@/adapters/rule34/document/document";
 
 export interface Rule34HostPageConfiguration {
-  mode: AppMode;
+  readonly mode: AppMode;
 }
 
 export interface Rule34HostPageDependencies {

@@ -5,8 +5,8 @@ import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { createPost } from "@/testing/post";
 
-function spyOnCachedTags(arena: FavoritesArena): Map<number, Set<string>> {
-  const cached = new Map<number, Set<string>>();
+function spyOnCachedTags(arena: FavoritesArena): Map<number, ReadonlySet<string>> {
+  const cached = new Map<number, ReadonlySet<string>>();
   const cacheTags = arena.cacheTags.bind(arena);
 
   arena.cacheTags = (slot, tags): void => {

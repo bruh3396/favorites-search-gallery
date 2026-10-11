@@ -8,8 +8,8 @@ export interface FavoritesActionsConfiguration {
 }
 
 export interface FavoritesActionsDependencies {
-  readonly remoteFavoriteActions: ObservableRemoteFavoriteActions;
-  readonly localFavorites: LocalFavorites;
+  remoteFavoriteActions: ObservableRemoteFavoriteActions;
+  localFavorites: LocalFavorites;
 }
 
 export class FavoritesActions {

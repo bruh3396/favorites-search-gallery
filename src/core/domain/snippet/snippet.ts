@@ -1,6 +1,6 @@
 export interface Snippet {
-  name: string;
-  query: string;
-  lastUsedAt: number;
-  createdAt: number;
+  readonly name: string;
+  readonly query: string;
+  readonly lastUsedAt: number;
+  readonly createdAt: number;
 }

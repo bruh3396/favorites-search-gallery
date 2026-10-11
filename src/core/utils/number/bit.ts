@@ -29,8 +29,8 @@ export function readPackedInt(packed: Uint8Array, index: number, bitsPerValue: n
 }
 
 interface BitSpan {
-  offset: number;
-  count: number;
+  readonly offset: number;
+  readonly count: number;
 }
 
 function writeBits(bytes: Uint8Array, { offset, count }: BitSpan, value: number): void {

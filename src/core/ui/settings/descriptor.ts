@@ -5,40 +5,40 @@ export interface SettingPreference<T> extends Readable<T> {
 }
 
 interface SettingBase {
-  id: string;
-  label: string;
-  description?: string;
-  keywords?: readonly string[];
-  disabled?: Readable<boolean>;
+  readonly id: string;
+  readonly label: string;
+  readonly description?: string;
+  readonly keywords?: readonly string[];
+  readonly disabled?: Readable<boolean>;
 }
 
 export interface SwitchSetting extends SettingBase {
-  kind: "switch";
-  preference: SettingPreference<boolean>;
+  readonly kind: "switch";
+  readonly preference: SettingPreference<boolean>;
 }
 
 export interface ChoiceSetting<M extends string = string> extends SettingBase {
-  kind: "choice";
-  preference: SettingPreference<M>;
-  members: readonly M[];
-  labels: Readonly<Record<M, string>>;
-  control: "segmented" | "dropdown";
+  readonly kind: "choice";
+  readonly preference: SettingPreference<M>;
+  readonly members: readonly M[];
+  readonly labels: Readonly<Record<M, string>>;
+  readonly control: "segmented" | "dropdown";
 }
 
 export interface ChoicesSetting<M extends string = string> extends SettingBase {
-  kind: "choices";
-  preference: SettingPreference<readonly M[]>;
-  members: readonly M[];
-  labels: Readonly<Record<M, string>>;
+  readonly kind: "choices";
+  readonly preference: SettingPreference<readonly M[]>;
+  readonly members: readonly M[];
+  readonly labels: Readonly<Record<M, string>>;
 }
 
 export interface NumberSetting extends SettingBase {
-  kind: "number";
-  preference: SettingPreference<number>;
-  min: number;
-  max: number;
-  step: number;
-  writeOnEveryStep?: boolean;
+  readonly kind: "number";
+  readonly preference: SettingPreference<number>;
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+  readonly writeOnEveryStep?: boolean;
 }
 
 export type SettingDescriptor = SwitchSetting | ChoiceSetting | ChoicesSetting | NumberSetting;

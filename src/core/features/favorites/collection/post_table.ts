@@ -17,6 +17,7 @@ export class FavoritesPostTable {
   private mediaLocators: string[] = [];
 
   public write(slot: number, post: Post): void {
+    this.ensureCapacity(slot + 1);
     this.ids[slot] = parseInt(post.id, 10);
     this.widths[slot] = post.width;
     this.heights[slot] = post.height;
@@ -77,7 +78,7 @@ export class FavoritesPostTable {
     return { kind: MEDIA_KINDS[this.mediaKinds[slot]] ?? "image", locator: this.mediaLocators[slot] ?? "" };
   }
 
-  public ensureCapacity(required: number): void {
+  private ensureCapacity(required: number): void {
     if (required <= this.ids.length) {
       return;
     }

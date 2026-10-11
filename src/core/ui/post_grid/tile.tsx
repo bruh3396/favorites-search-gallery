@@ -1,12 +1,13 @@
-import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Dimensions } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { Media } from "@/core/domain/media/media";
+import { Upscaler } from "@/core/ui/post_grid/upscaler";
+import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { doNothing } from "@/core/utils/function/function";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
-import { Upscaler } from "@/core/ui/post_grid/upscaler";
 
 export const TileClass = {
   root: "fsg-Tile",
@@ -17,17 +18,17 @@ export const TileClass = {
 } as const;
 
 export interface TileProps {
-  readonly post: MediaItem;
-  readonly dimensions: Dimensions;
-  readonly actions: readonly Node[];
-  readonly upscale: Readable<boolean>;
-  readonly bitmapDecoder: BitmapDecoder;
-  readonly visibilityObserver: VisibilityObserver;
-  readonly onVisibilityChange: (visible: boolean) => void;
-  readonly fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
-  readonly href?: string;
-  readonly onActivate: (event: MouseEvent) => void;
+  post: MediaItem;
+  dimensions: Dimensions;
+  actions: readonly Node[];
+  upscale: Readable<boolean>;
+  bitmapDecoder: BitmapDecoder;
+  visibilityObserver: VisibilityObserver;
+  onVisibilityChange: (visible: boolean) => void;
+  fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  resolvePreviewUrl: (media: Media) => Promise<string>;
+  href?: string;
+  onActivate: (event: MouseEvent) => void;
 }
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";

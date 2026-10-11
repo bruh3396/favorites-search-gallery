@@ -1,5 +1,5 @@
-import { TagCategoryMap } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 export interface RemoteTagCategories {
-  fetch: (tagNames: string[]) => Promise<TagCategoryMap>;
+  fetch: (tagNames: readonly string[]) => Promise<ReadonlyMap<string, TagCategory>>;
 }

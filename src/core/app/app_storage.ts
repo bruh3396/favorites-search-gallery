@@ -6,8 +6,8 @@ const APP_NAMESPACE = "favorites-search-gallery";
 const PREFERENCES_NAMESPACE = "preferences";
 
 export interface AppStorage {
-  app: LocalKeyedValues;
-  preferences: PreferenceStorage;
+  readonly app: LocalKeyedValues;
+  readonly preferences: PreferenceStorage;
 }
 
 export function createAppStorage(localKeyedValues: LocalKeyedValues): AppStorage {

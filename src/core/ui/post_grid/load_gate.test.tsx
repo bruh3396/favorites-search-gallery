@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { LoadGate } from "@/core/ui/post_grid/load_gate";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 
 function createPost(id: string): MediaItem {
   return { id, media: { kind: "image", locator: `images/${id}` } };

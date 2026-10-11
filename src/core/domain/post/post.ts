@@ -22,24 +22,22 @@ export function isRatingMask(value: unknown): value is number {
 }
 
 export type Post = {
-  id: string;
-  width: number;
-  height: number;
-  score: number;
-  rating: Rating;
-  changedAt: number;
-  media: Media;
-  tags: string;
-  durationSeconds?: number;
-  deleted?: boolean;
-  fetchedAt?: number;
+  readonly id: string;
+  readonly width: number;
+  readonly height: number;
+  readonly score: number;
+  readonly rating: Rating;
+  readonly changedAt: number;
+  readonly media: Media;
+  readonly tags: string;
+  readonly durationSeconds?: number;
+  readonly deleted?: boolean;
+  readonly fetchedAt?: number;
 };
 
 export type CategorizedPost = {
-  post: Post;
-  tagCategories: TagCategoryMap;
+  readonly post: Post;
+  readonly tagCategories: TagCategoryMap;
 };
-
-export type MediaItem = Pick<Post, "id" | "media">;
 
 export type Dimensions = Pick<Post, "width" | "height">;

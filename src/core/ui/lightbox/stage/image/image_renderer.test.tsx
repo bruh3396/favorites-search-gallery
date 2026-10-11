@@ -1,8 +1,8 @@
-import { ImageRenderer, ImageRendererDependencies } from "@/core/ui/lightbox/stage/image_renderer";
+import { ImageRenderer, ImageRendererDependencies } from "@/core/ui/lightbox/stage/image/image_renderer";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
-import { MediaItem } from "@/core/domain/post/post";
+import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
+import { MediaItem } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { render } from "@/core/ui/h/h";
 
@@ -68,8 +68,8 @@ describe("ImageRenderer", () => {
   test("starts hidden with its image and canvas in the stage root", () => {
     const { renderer, preview, original } = setup();
 
-    expect(renderer.root.className).toBe(LightboxStageClass.renderer);
-    expect([preview.className, original.className]).toEqual([LightboxStageClass.media, LightboxStageClass.media]);
+    expect(renderer.root.className).toBe(LightboxRendererClass.root);
+    expect([preview.className, original.className]).toEqual([LightboxRendererClass.media, LightboxRendererClass.media]);
     expect([preview.alt, preview.decoding]).toEqual(["", "async"]);
     expect([renderer.root.hidden, preview.hidden, original.hidden, original.width, original.height]).toEqual([true, true, true, 0, 0]);
   });

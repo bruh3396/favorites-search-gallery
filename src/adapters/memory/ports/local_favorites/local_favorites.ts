@@ -3,23 +3,23 @@ import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favo
 export class MemoryLocalFavorites implements LocalFavorites {
   private ids: string[] = [];
 
-  public getAll(): Promise<string[]> {
+  public getAll(): Promise<readonly string[]> {
     return Promise.resolve([...this.ids]);
   }
 
-  public setAll(postIds: string[]): Promise<void> {
+  public setAll(postIds: readonly string[]): Promise<void> {
     this.ids = [...postIds];
     return Promise.resolve();
   }
 
-  public prepend(postIds: string[]): Promise<void> {
+  public prepend(postIds: readonly string[]): Promise<void> {
     const added = new Set(postIds);
 
     this.ids = [...added, ...this.ids.filter(id => !added.has(id))];
     return Promise.resolve();
   }
 
-  public remove(postIds: string[]): Promise<void> {
+  public remove(postIds: readonly string[]): Promise<void> {
     const removed = new Set(postIds);
 
     this.ids = this.ids.filter(id => !removed.has(id));

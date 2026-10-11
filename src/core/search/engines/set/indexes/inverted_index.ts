@@ -21,7 +21,7 @@ export class InvertedIndex<Doc> {
     return this.docs;
   }
 
-  public addDocs(docs: Doc[]): void {
+  public addDocs(docs: readonly Doc[]): void {
     this.maintainingSortOrder = false;
     docs.forEach(doc => this.addDoc(doc));
     this.maintainingSortOrder = true;

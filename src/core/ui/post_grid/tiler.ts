@@ -7,12 +7,12 @@ export const TilerClass = {
 } as const;
 
 export interface Tiling {
-  layout: GridLayout;
-  size: number;
+  readonly layout: GridLayout;
+  readonly size: number;
 }
 
 export interface Arrangement {
-  layout: GridLayout;
+  readonly layout: GridLayout;
   getColumnCount: () => number;
 }
 

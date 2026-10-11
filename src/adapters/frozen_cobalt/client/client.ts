@@ -5,14 +5,14 @@ import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface FrozenCobaltIdentity {
-  userId: string;
-  version: string;
-  platform: string;
+  readonly userId: string;
+  readonly version: string;
+  readonly platform: string;
 }
 
 export interface FrozenCobaltClientConfiguration {
-  origin: string;
-  identity?: FrozenCobaltIdentity;
+  readonly origin: string;
+  readonly identity?: FrozenCobaltIdentity;
 }
 
 export interface FrozenCobaltClientDependencies {
@@ -21,7 +21,7 @@ export interface FrozenCobaltClientDependencies {
 }
 
 type FrozenCobaltEndpoint = keyof FrozenCobaltEndpoints;
-type Resolved = Map<string, unknown>;
+type Resolved = ReadonlyMap<string, unknown>;
 
 const REQUEST_TIMEOUT = 10_000;
 const REQUEST_COALESCING = { flushSize: 50, flushTimeout: 2_000 };

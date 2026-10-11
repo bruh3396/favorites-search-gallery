@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
+import { TagCategoryMap } from "@/core/domain/tag/tag";
 
 describe("MemoryLocalTagCategories", () => {
   test("reads back what it wrote, skipping missing tags", async() => {
@@ -25,7 +26,7 @@ describe("MemoryLocalTagCategories", () => {
 
     await tagCategories.setMany(written);
     written.clear();
-    (await tagCategories.getMany(["alice"])).clear();
+    (await tagCategories.getMany(["alice"]) as TagCategoryMap).clear();
 
     expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
   });

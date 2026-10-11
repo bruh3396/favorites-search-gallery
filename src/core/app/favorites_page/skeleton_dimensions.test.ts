@@ -7,7 +7,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 function createFavorite(width: number, height: number): Favorite {
   return {
     id: `${width}x${height}`,
-    numericId: width * 100 + height,
+    numericId: (width * 100) + height,
     media: { kind: "image", locator: "" },
     isNew: false,
     ratingBit: 0,

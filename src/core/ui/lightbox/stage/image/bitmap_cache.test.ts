@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
-import { BitmapCache } from "@/core/ui/lightbox/stage/bitmap_cache";
+import { BitmapCache } from "@/core/ui/lightbox/stage/image/bitmap_cache";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
 const SECOND: MediaItem = { id: "2", media: { kind: "image", locator: "images/2" } };
