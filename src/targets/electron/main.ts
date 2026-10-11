@@ -4,6 +4,7 @@ import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Environment } from "@/core/boundary/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
@@ -39,7 +40,7 @@ const ENVIRONMENT: Environment = {
   version: "playground"
 };
 
-function createFavoritesPageDependencies(hostPage: BrowserHostPage): FavoritesPageDependencies {
+function createFavoritesPageDependencies(): FavoritesPageDependencies {
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
@@ -74,7 +75,7 @@ function createFavoritesPageDependencies(hostPage: BrowserHostPage): FavoritesPa
     remotePages: new Rule34RemotePages(rule34),
     scheduler,
     randomSource,
-    hostPage
+    viewport: new BrowserViewport()
   };
 }
 
@@ -85,4 +86,4 @@ mountFavoritesPage(hostPage.claimContent(), {
   blacklistedTags: ENVIRONMENT.blacklistedTags,
   favoritesOwnerId: ENVIRONMENT.favoritesOwnerId,
   colorScheme: ENVIRONMENT.colorScheme
-}, createFavoritesPageDependencies(hostPage));
+}, createFavoritesPageDependencies());

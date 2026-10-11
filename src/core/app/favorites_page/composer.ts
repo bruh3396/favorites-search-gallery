@@ -11,7 +11,6 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesPane } from "@/core/app/favorites_page/pane";
 import { FavoritesShell } from "@/core/app/favorites_page/shell";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
-import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxScreen } from "@/core/ui/lightbox/screen/screen";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
@@ -22,6 +21,7 @@ import { RemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_act
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import UI_CSS from "@/core/ui/styles.css?inline";
+import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createSearchSettings } from "@/core/app/favorites_page/preferences";
@@ -39,12 +39,12 @@ export interface FavoritesPageDependencies extends Omit<FavoritesDependencies, "
   visibilityObserver: VisibilityObserver;
   remotePages: RemotePages;
   localKeyedValues: LocalKeyedValues;
-  hostPage: Pick<HostPage, "lockScroll" | "unlockScroll">;
+  viewport: Pick<Viewport, "lockScroll" | "unlockScroll">;
 }
 
 export function mountFavoritesPage(container: HTMLElement, configuration: FavoritesPageConfiguration, dependencies: FavoritesPageDependencies): void {
   const { favoritesOwnerId, colorScheme, ...favoritesConfiguration } = configuration;
-  const { remoteFavoriteActions, remotePages, localKeyedValues, hostPage, visibilityObserver, visiblePosts, ...ports } = dependencies;
+  const { remoteFavoriteActions, remotePages, localKeyedValues, viewport, visibilityObserver, visiblePosts, ...ports } = dependencies;
   const app = mountAppRoot(container, { colorScheme, styles: [UI_CSS, FAVORITES_UI_CSS, SHELL_CSS, PANE_CSS] });
   const storage = createAppStorage(localKeyedValues);
   const gridPreferences = createPostGridSettings(storage.preferences);
@@ -90,7 +90,7 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
 
   app.append(shell, lightboxScreen);
 
-  effect(() => (lightbox.isOpen.value ? hostPage.lockScroll() : hostPage.unlockScroll()));
+  effect(() => (lightbox.isOpen.value ? viewport.lockScroll() : viewport.unlockScroll()));
   favoritesService.load()
     .then(() => {
       finishedLoading.reach();

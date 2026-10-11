@@ -5,6 +5,7 @@ import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -45,11 +46,12 @@ interface PageDependencies {
   rule34Document: Rule34Document;
   rule34Cdn: Rule34CdnClient;
   hostPage: Rule34HostPage;
+  viewport: BrowserViewport;
   localKeyedValues: LocalKeyedValues;
 }
 
 type ComposePage = (environment: Environment, dependencies: PageDependencies) => void;
-type FavoritesPortDependencies = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues" | "hostPage" | "visiblePosts">;
+type FavoritesPortDependencies = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues" | "viewport" | "visiblePosts">;
 
 const PAGES: Record<AppMode, ComposePage> = {
   favorites: composeFavoritesPage,
@@ -74,11 +76,14 @@ function createPageDependencies(environment: Environment, rule34Document: Rule34
   const rule34 = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
   const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
   const localKeyedValues = new BrowserLocalKeyedValues();
-  return { fetch: boundFetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, hostPage, localKeyedValues };
+  return {
+    fetch: boundFetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn,
+    hostPage, viewport: new BrowserViewport(), localKeyedValues
+  };
 }
 
 function composeFavoritesPage(environment: Environment, dependencies: PageDependencies): void {
-  const { scheduler, randomSource, localKeyedValues, hostPage } = dependencies;
+  const { scheduler, randomSource, localKeyedValues, hostPage, viewport } = dependencies;
   const ports = createFavoritesPorts(environment, dependencies);
 
   mountFavoritesPage(hostPage.claimContent(), {
@@ -86,7 +91,7 @@ function composeFavoritesPage(environment: Environment, dependencies: PageDepend
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
-  }, { ...ports, scheduler, randomSource, localKeyedValues, hostPage, visiblePosts: new Signal<readonly Favorite[]>([]) });
+  }, { ...ports, scheduler, randomSource, localKeyedValues, viewport, visiblePosts: new Signal<readonly Favorite[]>([]) });
 }
 
 function createFavoritesPorts(environment: Environment, dependencies: PageDependencies): FavoritesPortDependencies {

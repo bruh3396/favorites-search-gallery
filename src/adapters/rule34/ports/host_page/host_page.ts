@@ -11,7 +11,7 @@ export interface Rule34HostPageDependencies {
     Rule34Document,
     "clearNativePage" | "claimPostListContent" | "setHeaderVisible" | "setTheme" | "reflectPostListPage" | "setPaginatorVisible"
   >;
-  page: Pick<HostPage, "lockViewport" | "lockScroll" | "unlockScroll"> & { claimContent: () => HTMLElement };
+  page: { claimContent: () => HTMLElement };
 }
 
 const CLAIMS: Record<AppMode, (dependencies: Rule34HostPageDependencies) => HTMLElement> = {
@@ -48,17 +48,5 @@ export class Rule34HostPage implements HostPage {
 
   public claimContent(): HTMLElement {
     return CLAIMS[this.configuration.mode](this.dependencies);
-  }
-
-  public lockViewport(): void {
-    this.dependencies.page.lockViewport();
-  }
-
-  public lockScroll(): void {
-    this.dependencies.page.lockScroll();
-  }
-
-  public unlockScroll(): void {
-    this.dependencies.page.unlockScroll();
   }
 }

@@ -6,7 +6,4 @@ export interface HostPage {
   setColorScheme: (colorScheme: ColorScheme) => void;
   reflectSearchPage: (pageIndex: number) => void;
   setPaginatorVisible: (visible: boolean) => void;
-  lockViewport: () => void;
-  lockScroll: () => void;
-  unlockScroll: () => void;
 }

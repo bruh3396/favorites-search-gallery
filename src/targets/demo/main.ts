@@ -3,6 +3,7 @@ import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
@@ -23,7 +24,7 @@ import { readPreferredColorScheme } from "@/adapters/browser/environment/environ
 const SAMPLE_POST_COUNT = 300;
 const FAVORITES_OWNER_ID = "demo";
 
-function createDemoDependencies(hostPage: BrowserHostPage): FavoritesPageDependencies {
+function createDemoDependencies(): FavoritesPageDependencies {
   const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
   const indexedDb = new IndexedDbClient();
   return {
@@ -41,7 +42,7 @@ function createDemoDependencies(hostPage: BrowserHostPage): FavoritesPageDepende
     remotePages: new MemoryRemotePages(),
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
-    hostPage
+    viewport: new BrowserViewport()
   };
 }
 
@@ -52,4 +53,4 @@ mountFavoritesPage(hostPage.claimContent(), {
   blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
   colorScheme: readPreferredColorScheme()
-}, createDemoDependencies(hostPage));
+}, createDemoDependencies());

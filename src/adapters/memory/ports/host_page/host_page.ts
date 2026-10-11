@@ -4,11 +4,8 @@ import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 export class MemoryHostPage implements HostPage {
   public headerVisible = true;
   public colorScheme: ColorScheme = "light";
-  public viewportLocked = false;
-  public scrollLocked = false;
   public searchPageIndex: number | null = null;
   public paginatorVisible = true;
-  public content: HTMLElement | null = null;
 
   constructor(public readonly hasHeader = false) { }
 
@@ -28,22 +25,5 @@ export class MemoryHostPage implements HostPage {
 
   public setPaginatorVisible(visible: boolean): void {
     this.paginatorVisible = visible;
-  }
-
-  public claimContent(): HTMLElement {
-    this.content ??= document.createElement("div");
-    return this.content;
-  }
-
-  public lockViewport(): void {
-    this.viewportLocked = true;
-  }
-
-  public lockScroll(): void {
-    this.scrollLocked = true;
-  }
-
-  public unlockScroll(): void {
-    this.scrollLocked = false;
   }
 }

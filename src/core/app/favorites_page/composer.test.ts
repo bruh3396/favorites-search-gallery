@@ -4,7 +4,6 @@ import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -16,6 +15,7 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryViewport } from "@/adapters/memory/ports/viewport/viewport";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
@@ -44,7 +44,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     randomSource: new MemoryRandomSource(),
     visiblePosts: new Signal<readonly Favorite[]>([]),
     localKeyedValues,
-    hostPage: new MemoryHostPage()
+    viewport: new MemoryViewport()
   });
   return container.shadowRoot!;
 }

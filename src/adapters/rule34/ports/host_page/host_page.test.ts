@@ -13,9 +13,6 @@ interface Rule34Document {
 
 interface Page {
   claimContent: ReturnType<typeof vi.fn<() => HTMLElement>>;
-  lockViewport: ReturnType<typeof vi.fn<() => void>>;
-  lockScroll: ReturnType<typeof vi.fn<() => void>>;
-  unlockScroll: ReturnType<typeof vi.fn<() => void>>;
 }
 
 const CONTENT = {} as HTMLElement;
@@ -34,10 +31,7 @@ function createRule34Document(postListContent: HTMLElement | null = POST_LIST_CO
 
 function createPage(): Page {
   return {
-    claimContent: vi.fn<() => HTMLElement>(() => CONTENT),
-    lockViewport: vi.fn<() => void>(),
-    lockScroll: vi.fn<() => void>(),
-    unlockScroll: vi.fn<() => void>()
+    claimContent: vi.fn<() => HTMLElement>(() => CONTENT)
   };
 }
 
@@ -106,17 +100,5 @@ describe("Rule34HostPage", () => {
     hostPage.setPaginatorVisible(false);
     hostPage.setPaginatorVisible(true);
     expect(rule34Document.setPaginatorVisible.mock.calls).toEqual([[false], [true]]);
-  });
-
-  test("leaves the viewport and scrolling to the browser page", () => {
-    const page = createPage();
-    const hostPage = new Rule34HostPage({ mode: "favorites" }, { rule34Document: createRule34Document(), page });
-
-    hostPage.lockViewport();
-    hostPage.lockScroll();
-    hostPage.unlockScroll();
-    expect(page.lockViewport).toHaveBeenCalledOnce();
-    expect(page.lockScroll).toHaveBeenCalledOnce();
-    expect(page.unlockScroll).toHaveBeenCalledOnce();
   });
 });

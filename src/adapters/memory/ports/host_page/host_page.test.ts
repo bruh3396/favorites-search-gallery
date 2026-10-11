@@ -45,31 +45,4 @@ describe("MemoryHostPage", () => {
     hostPage.setPaginatorVisible(false);
     expect(hostPage.paginatorVisible).toBe(false);
   });
-
-  test("hands out one detached content element, however often it is claimed", () => {
-    const hostPage = new MemoryHostPage();
-    const content = hostPage.claimContent();
-
-    expect(content.isConnected).toBe(false);
-    expect(hostPage.claimContent()).toBe(content);
-    expect(hostPage.content).toBe(content);
-  });
-
-  test("remembers its viewport being locked", () => {
-    const hostPage = new MemoryHostPage();
-
-    expect(hostPage.viewportLocked).toBe(false);
-    hostPage.lockViewport();
-    expect(hostPage.viewportLocked).toBe(true);
-  });
-
-  test("remembers whether its scrolling is locked", () => {
-    const hostPage = new MemoryHostPage();
-
-    expect(hostPage.scrollLocked).toBe(false);
-    hostPage.lockScroll();
-    expect(hostPage.scrollLocked).toBe(true);
-    hostPage.unlockScroll();
-    expect(hostPage.scrollLocked).toBe(false);
-  });
 });
