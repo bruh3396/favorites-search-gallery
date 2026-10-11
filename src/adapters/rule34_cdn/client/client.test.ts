@@ -111,22 +111,17 @@ describe("Rule34CdnClient", () => {
     expect(await (await client.fetchFile("https://wimg.rule34.xxx/images//1234/a1b2c3.png")).text()).toBe("bytes");
    });
 
-  test("retries a failed original from the wimg host", async() => {
-    const fetch = vi.fn<Fetch>()
-      .mockRejectedValueOnce(new TypeError("Failed to fetch"))
-      .mockImplementationOnce(respondWithBytes);
+  test("propagates a failed original fetch", async() => {
+    const fetch = vi.fn<Fetch>(() => Promise.reject(new TypeError("Failed to fetch")));
     const { client } = setup(fetch);
     const signal = new AbortController().signal;
 
-    expect(await (await client.fetchOriginal("1234/a1b2c3", "video", signal)).text()).toBe("bytes");
-    expect(fetch.mock.calls.map(([url]) => url)).toEqual([
-      "https://rule34.xxx/images//1234/a1b2c3.mp4",
-      "https://wimg.rule34.xxx/images//1234/a1b2c3.mp4"
-    ]);
-    expect(fetch.mock.calls.map(([, init]) => init?.signal)).toEqual([signal, signal]);
+    await expect(client.fetchOriginal("1234/a1b2c3", "video", signal)).rejects.toThrow("Failed to fetch");
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual(["https://rule34.xxx/images//1234/a1b2c3.mp4"]);
+    expect(fetch.mock.calls.map(([, init]) => init?.signal)).toEqual([signal]);
    });
 
-  test("does not retry an original after an HTTP error", async() => {
+  test("propagates an HTTP error for an original", async() => {
     const { client, fetch } = setup(createFetchFindingOnly(""));
 
     await expect(client.fetchOriginal("1234/a1b2c3", "video")).rejects.toThrow("404");
@@ -137,6 +132,7 @@ describe("Rule34CdnClient", () => {
     const fetch = vi.fn<Fetch>(() => Promise.reject(new TypeError("Failed to fetch")));
     const { client } = setup(fetch);
     const controller = new AbortController();
+
     controller.abort();
 
     await expect(client.fetchOriginal("1234/a1b2c3", "video", controller.signal)).rejects.toThrow("Failed to fetch");

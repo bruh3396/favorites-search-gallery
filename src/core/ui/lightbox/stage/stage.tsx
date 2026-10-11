@@ -16,6 +16,7 @@ export interface LightboxStageProps {
   readonly neighbors: Readable<readonly MediaItem[]>;
   readonly resolvePreviewUrl: (media: Media) => Promise<string>;
   readonly resolveOriginalUrl: (media: Media) => Promise<string>;
+  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
   readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
   readonly bitmapDecoder: BitmapDecoder;
   readonly scheduler: Pick<Scheduler, "schedule">;
@@ -44,9 +45,11 @@ class LightboxStageController {
   private readonly renderersByKind: Map<MediaKind, LightboxStageRenderer>;
   private activeRenderer: LightboxStageRenderer | undefined;
 
-  constructor({ resolvePreviewUrl, resolveOriginalUrl, fetchOriginal, bitmapDecoder, scheduler }: LightboxStageControllerDependencies) {
+  constructor(dependencies: LightboxStageControllerDependencies) {
+    const { resolvePreviewUrl, resolveOriginalUrl, resolveOriginalImageFallbackUrl, fetchOriginal, bitmapDecoder, scheduler } = dependencies;
     const imageRenderer = new ImageRenderer({
       resolvePreviewUrl,
+      resolveOriginalImageFallbackUrl,
       fetchOriginal,
       bitmapDecoder,
       scheduler

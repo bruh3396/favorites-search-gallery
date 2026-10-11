@@ -1,8 +1,8 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
-import { IndexedDbLocalPosts } from "@/adapters/indexed_db/ports/local_posts/local_posts";
+import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
+import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { createPost } from "@/testing/post";
 
 beforeEach(() => {

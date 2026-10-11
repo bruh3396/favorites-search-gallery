@@ -57,7 +57,8 @@ function setup(
   const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(drawingContext);
 
   onTestFinished(() => spy.mockRestore());
-  const { result: renderer } = render(document, () => new ImageRenderer({ resolvePreviewUrl, fetchOriginal, bitmapDecoder: { decode }, scheduler }));
+  const resolveOriginalImageFallbackUrl = vi.fn<ImageRendererDependencies["resolveOriginalImageFallbackUrl"]>(media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`));
+  const { result: renderer } = render(document, () => new ImageRenderer({ resolvePreviewUrl, resolveOriginalImageFallbackUrl, fetchOriginal, bitmapDecoder: { decode }, scheduler }));
   const preview = renderer.root.querySelector<HTMLImageElement>("img")!;
   const original = renderer.root.querySelector<HTMLCanvasElement>("canvas")!;
   return { renderer, preview, original, scheduler, resolvePreviewUrl, fetchOriginal, decode, drawImage, bitmaps };

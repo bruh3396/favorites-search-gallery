@@ -1,4 +1,4 @@
-import { LegacyMigration, prepareLegacyMigration } from "@/adapters/indexed_db/client/legacy_migration";
+import { LegacyMigration, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
 
 const DATABASE_NAME = "favorites-search-gallery";
 const VERSION = 1;

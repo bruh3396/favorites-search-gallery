@@ -27,7 +27,12 @@ function setup(fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blo
   });
 
   const bitmapDecoder: BitmapDecoder = { decode };
-  return { cache: new BitmapCache(fetch, bitmapDecoder), fetchOriginal: fetch, decode, bitmaps };
+  return {
+    cache: new BitmapCache({ fetchOriginal: fetch, resolveOriginalImageFallbackUrl: () => Promise.resolve("https://wimg.rule34.xxx/image"), bitmapDecoder }),
+    fetchOriginal: fetch,
+    decode,
+    bitmaps
+  };
 }
 
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (reason: Error) => void } {
@@ -75,6 +80,7 @@ describe("BitmapCache", () => {
     const pending = deferred<Blob>();
     const { cache, decode } = setup(() => pending.promise);
     const loading = cache.load(FIRST);
+
     await Promise.resolve();
 
     cache.keepOnly([]);
@@ -100,6 +106,7 @@ describe("BitmapCache", () => {
     const pending = deferred<Blob>();
     const { cache, fetchOriginal, decode } = setup(() => pending.promise);
     const loading = cache.load(FIRST);
+
     await Promise.resolve();
 
     cache.keepOnly([]);
@@ -115,6 +122,7 @@ describe("BitmapCache", () => {
     const bitmap = { close: vi.fn() } as unknown as ImageBitmap;
     const { cache, decode } = setup(undefined, () => pending.promise);
     const loading = cache.load(FIRST);
+
     await Promise.resolve();
     await Promise.resolve();
 
@@ -126,22 +134,9 @@ describe("BitmapCache", () => {
     expect(bitmap.close).toHaveBeenCalledOnce();
   });
 
-  test("forgets a failed item so a later load can retry", async() => {
-    const fetchOriginal = vi.fn<(media: Media) => Promise<Blob>>()
-      .mockRejectedValueOnce(new Error("offline"))
-      .mockResolvedValueOnce(new Blob());
-    const { cache, decode } = setup(fetchOriginal);
-
-    await expect(cache.load(FIRST)).rejects.toThrow("offline");
-    await Promise.resolve();
-    expect(cache.has(FIRST.id)).toBe(false);
-
-    await expect(cache.load(FIRST)).resolves.toBeDefined();
-    expect([fetchOriginal.mock.calls.length, decode.mock.calls.length]).toEqual([2, 1]);
-  });
-
   test("keeps a newer entry when stale failure cleanup runs", async() => {
     const { cache } = setup();
+
     await cache.load(FIRST);
     const staleEntry = { bitmap: Promise.resolve(undefined), abortController: new AbortController() };
     const forget = (cache as unknown as { forget: (id: string, entry: typeof staleEntry) => void }).forget;

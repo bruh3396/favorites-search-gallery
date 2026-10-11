@@ -13,17 +13,18 @@ export const LightboxScreenClass = {
   position: "fsg-LightboxScreen-position"
 } as const;
 
-export interface LightboxScreenProps {
-  readonly lightbox: Lightbox<MediaItem>;
+export interface LightboxScreenProps<T extends MediaItem> {
+  readonly lightbox: Lightbox<T>;
   readonly resolvePreviewUrl: (media: Media) => Promise<string>;
   readonly resolveOriginalUrl: (media: Media) => Promise<string>;
+  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
   readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
   readonly bitmapDecoder: BitmapDecoder;
   readonly scheduler: Pick<Scheduler, "schedule">;
 }
 
-export function LightboxScreen(props: LightboxScreenProps): HTMLElement {
-  const { lightbox, resolvePreviewUrl, resolveOriginalUrl, scheduler, fetchOriginal, bitmapDecoder } = props;
+export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T>): HTMLElement {
+  const { lightbox, resolvePreviewUrl, resolveOriginalUrl, resolveOriginalImageFallbackUrl, scheduler, fetchOriginal, bitmapDecoder } = props;
   const { current, neighbors, position } = lightbox;
   const onShowNext = (): void => {
     lightbox.showNext().catch(console.error);
@@ -39,7 +40,7 @@ export function LightboxScreen(props: LightboxScreenProps): HTMLElement {
       autofocus
       tabIndex={-1}
       onClose={event => reportDismissal(event.currentTarget, current, onClose)}
-      onKeydown={event => handleKey(event, event.currentTarget, onShowNext, onShowPrevious)}
+      onKeydown={event => handleKey(event, { dialog: event.currentTarget, onShowNext, onShowPrevious, onClose })}
       onWheel={event => handleWheel(event, onShowNext, onShowPrevious)}
       onClick={event => handleClick(event, onClose)}
       onContextmenu={event => {
@@ -52,6 +53,7 @@ export function LightboxScreen(props: LightboxScreenProps): HTMLElement {
         neighbors={neighbors}
         resolvePreviewUrl={resolvePreviewUrl}
         resolveOriginalUrl={resolveOriginalUrl}
+        resolveOriginalImageFallbackUrl={resolveOriginalImageFallbackUrl}
         scheduler={scheduler}
         fetchOriginal={fetchOriginal}
         bitmapDecoder={bitmapDecoder}
@@ -82,12 +84,26 @@ function formatPosition(position: SequencePosition | undefined): string {
   return position.total === undefined ? shown : `${shown} / ${position.total.toLocaleString()}`;
 }
 
-function handleKey(event: KeyboardEvent, dialog: HTMLDialogElement, onShowNext: () => void, onShowPrevious: () => void): void {
-  const action = { ArrowRight: onShowNext, ArrowLeft: onShowPrevious }[event.key];
+function handleKey(event: KeyboardEvent, props: {
+  dialog: HTMLDialogElement;
+  onShowNext: () => void;
+  onShowPrevious: () => void;
+  onClose: () => void;
+}): void {
+  const action = {
+    ArrowRight: props.onShowNext,
+    d: props.onShowNext,
+    D: props.onShowNext,
+    ArrowLeft: props.onShowPrevious,
+    a: props.onShowPrevious,
+    A: props.onShowPrevious,
+    Backspace: props.onClose,
+    Delete: props.onClose
+  }[event.key];
 
   if (action !== undefined) {
     event.preventDefault();
-    dialog.focus({ preventScroll: true });
+    props.dialog.focus({ preventScroll: true });
     action();
   }
 }

@@ -1,4 +1,4 @@
-import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/indexed_db/client/client";
+import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/browser/indexed_db/client";
 import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
 import { Snippet } from "@/core/domain/snippet/snippet";
 

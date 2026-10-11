@@ -39,6 +39,20 @@ describe("Rule34CdnRemoteMedia", () => {
     expect(rule34Cdn.originalUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
   });
 
+  test("gives the WIMG original image fallback URL", async() => {
+    const { source, rule34Cdn } = setup();
+
+    expect(await source.resolveOriginalImageFallbackUrl(VIDEO)).toBe("https://wimg.rule34.xxx/1234/a1b2c3.mp4");
+    expect(rule34Cdn.originalUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
+  });
+
+  test("gives an image-compatible URL from the locator and kind", async() => {
+    const { source, rule34Cdn } = setup();
+
+    expect(await source.resolveImageUrl(VIDEO)).toBe(IMAGE);
+    expect(rule34Cdn.imageUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
+  });
+
   test("fetches the image's bytes from the locator and kind", async() => {
     const { source, rule34Cdn } = setup();
     const signal = new AbortController().signal;

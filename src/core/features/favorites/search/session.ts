@@ -1,4 +1,4 @@
-import { PaginationResult, PaginationSettings, paginate } from "@/core/features/favorites/search/pagination";
+import { PaginationResult, PaginationSettings, getPageSize, paginate } from "@/core/features/favorites/search/pagination";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
 import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/inputs";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -86,6 +86,14 @@ export class FavoritesSearchSession {
   public dispose(): void {
     for (const stop of this.stopListening) {
       stop();
+    }
+  }
+
+  public reveal<T extends { id: string }>(item: T): void {
+    const index = this.currentResults.peek().findIndex(favorite => favorite.id === item.id);
+
+    if (index >= 0) {
+      this.goToPage(Math.floor(index / getPageSize(this.dependencies.paginationSettings.value)) + 1);
     }
   }
 

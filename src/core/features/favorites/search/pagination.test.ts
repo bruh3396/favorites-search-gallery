@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { getPageSize, paginate } from "@/core/features/favorites/search/pagination";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { paginate } from "@/core/features/favorites/search/pagination";
 
 const NUMBERED = { size: 50, infiniteScroll: false };
 const INFINITE = { size: 50, infiniteScroll: true };
@@ -10,6 +10,17 @@ function createResults(count: number): Favorite[] {
     id: String(index + 1), numericId: index + 1, media: { kind: "image", locator: "" }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 0
   }));
 }
+
+describe("getPageSize", () => {
+  test("uses the configured size for numbered pages", () => {
+    expect(getPageSize(NUMBERED)).toBe(50);
+    expect(getPageSize({ size: 0, infiniteScroll: false })).toBe(1);
+  });
+
+  test("uses 25 for infinite scrolling regardless of the configured size", () => {
+    expect(getPageSize(INFINITE)).toBe(25);
+  });
+});
 
 describe("paginate", () => {
   test.each([

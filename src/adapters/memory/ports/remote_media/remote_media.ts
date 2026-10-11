@@ -10,6 +10,14 @@ export class MemoryRemoteMedia implements RemoteMedia {
     return Promise.resolve(media.locator);
   }
 
+  public resolveOriginalImageFallbackUrl(media: Media): Promise<string> {
+    return this.resolveOriginalUrl(media);
+  }
+
+  public resolveImageUrl(media: Media): Promise<string> {
+    return Promise.resolve(media.locator);
+  }
+
   public fetchImage(media: Media, signal?: AbortSignal): Promise<Blob> {
     return this.fetchOriginal(media, signal);
   }

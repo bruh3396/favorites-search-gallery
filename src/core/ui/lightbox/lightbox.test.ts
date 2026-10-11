@@ -1,7 +1,7 @@
+import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test, vi } from "vitest";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
-import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { Post } from "@/core/domain/post/post";
 import { doNothing } from "@/core/utils/function/function";
 import { flushMicrotasks } from "@/testing/async";

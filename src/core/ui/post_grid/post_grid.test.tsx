@@ -1,13 +1,12 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { PostGrid, PostGridClass } from "@/core/ui/post_grid/post_grid";
-import { createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { GridLayout } from "@/core/ui/post_grid/tiler";
 import { Media } from "@/core/domain/media/media";
+import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { doNothing } from "@/core/utils/function/function";
 
@@ -16,8 +15,11 @@ interface Setup {
   dispose: () => void;
   posts: Signal<readonly MediaItem[]>;
   changed: Emitter<MediaItem>;
+  scrollTo: Emitter<MediaItem>;
   layout: Signal<GridLayout>;
   size: Signal<number>;
+  visiblePosts: Signal<readonly MediaItem[]>;
+  setVisible: (index: number, visible: boolean) => void;
   onActivatePost: Mock<(post: MediaItem, event: MouseEvent) => void>;
 }
 
@@ -32,15 +34,30 @@ function resolvePreviewUrl(media: Media): Promise<string> {
 function setup(...ids: string[]): Setup {
   const posts = new Signal<readonly MediaItem[]>(ids.map(createPost));
   const changed = new Emitter<MediaItem>();
+  const scrollTo = new Emitter<MediaItem>();
   const layout = new Signal<GridLayout>("grid");
   const size = new Signal(2);
+  const visiblePosts = new Signal<readonly MediaItem[]>([]);
+  const observers = new Map<Element, (visible: boolean) => void>();
   const onActivatePost = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
+  const visibilityObserver = {
+    observe: (element: Element, onVisibilityChange: (visible: boolean) => void): (() => void) => {
+      observers.set(element, onVisibilityChange);
+      return (): void => {
+        observers.delete(element);
+      };
+    }
+  };
   const { result: element, dispose } = render(document, () => (
     <PostGrid
       posts={posts}
       changed={changed}
-      layout={layout}
-      size={size}
+      scrollTo={scrollTo}
+      settings={{ layout, size, upscale: new Signal(false) }}
+      visiblePosts={visiblePosts}
+      bitmapDecoder={new MemoryBitmapDecoder()}
+      visibilityObserver={visibilityObserver}
+      fetchImage={() => Promise.resolve(new Blob())}
       getDimensions={getDimensions}
       createActions={createActions}
       resolvePreviewUrl={resolvePreviewUrl}
@@ -48,7 +65,14 @@ function setup(...ids: string[]): Setup {
       onActivatePost={onActivatePost}
     />
   ));
-  return { element, dispose, posts, changed, layout, size, onActivatePost };
+  const setVisible = (index: number, visible: boolean): void => {
+    const tile = element.children[index];
+
+    if (tile !== undefined) {
+      observers.get(tile)?.(visible);
+    }
+  };
+  return { element, dispose, posts, changed, scrollTo, layout, size, visiblePosts, setVisible, onActivatePost };
 }
 
 function getDimensions(post: MediaItem): Dimensions {
@@ -69,6 +93,26 @@ describe("PostGrid", () => {
     expect(element.className).toBe(PostGridClass.root);
     expect(element.dataset.layout).toBe("grid");
     expect(element.children).toHaveLength(3);
+  });
+
+  test("publishes visible posts in grid order", () => {
+    const { visiblePosts, setVisible } = setup("1", "2");
+
+    setVisible(1, true);
+    expect(visiblePosts.value.map(post => post.id)).toEqual(["2"]);
+    setVisible(0, true);
+    expect(visiblePosts.value.map(post => post.id)).toEqual(["1", "2"]);
+    setVisible(1, false);
+    expect(visiblePosts.value.map(post => post.id)).toEqual(["1"]);
+  });
+
+  test("removes a post from the published list when its tile is removed", () => {
+    const { posts, visiblePosts, setVisible } = setup("1", "2");
+
+    setVisible(0, true);
+    posts.value = [createPost("2")];
+
+    expect(visiblePosts.value).toEqual([]);
   });
 
   test("shapes each tile after its post's dimensions", () => {
@@ -135,6 +179,23 @@ describe("PostGrid", () => {
     expect(element.children[1]).toBe(second);
   });
 
+  test("scrolls to the shown tile matching a requested post", () => {
+    const { element, posts, scrollTo } = setup("1", "2");
+
+    posts.value = [createPost("2"), createPost("3")];
+    const scrollIntoView = vi.fn();
+
+    element.children[1].scrollIntoView = scrollIntoView;
+    scrollTo.emit(createPost("3"));
+    expect(scrollIntoView).toHaveBeenCalledOnce();
+  });
+
+  test("ignores scroll requests for posts it does not show", () => {
+    const { scrollTo } = setup("1");
+
+    expect(() => scrollTo.emit(createPost("2"))).not.toThrow();
+  });
+
   test("stops redrawing once disposed", () => {
     const { element, posts, changed, layout, dispose } = setup("1");
     const [tile] = [...element.children];
@@ -156,8 +217,11 @@ describe("PostGrid", () => {
       <PostGrid
         posts={posts}
         changed={new Emitter<MediaItem>()}
-        layout={new Signal<GridLayout>("grid")}
-        size={new Signal(2)}
+        settings={{ layout: new Signal<GridLayout>("grid"), size: new Signal(2), upscale: new Signal(false) }}
+        visiblePosts={new Signal<readonly MediaItem[]>([])}
+        bitmapDecoder={new MemoryBitmapDecoder()}
+        visibilityObserver={{ observe: () => () => { } }}
+        fetchImage={() => Promise.resolve(new Blob())}
         getDimensions={getDimensions}
         createActions={() => [
           <button>
@@ -174,23 +238,5 @@ describe("PostGrid", () => {
     posts.value = [];
     label.value = "b";
     expect(seen).toEqual(["a"]);
-  });
-});
-
-describe("createPostGridPreferences", () => {
-  test("starts in columns of size 6 when nothing is stored", () => {
-    const { layout, size } = createPostGridPreferences(new MemoryLocalKeyedValues());
-
-    expect([layout.value, size.value]).toEqual(["row", 6]);
-  });
-
-  test("restores a stored layout and falls back to the default for one it doesn't recognise", () => {
-
-    const storage = new MemoryLocalKeyedValues();
-
-    storage.set("postGridLayout", "row");
-    expect(createPostGridPreferences(storage).layout.value).toBe("row");
-    storage.set("postGridLayout", "masonry");
-    expect(createPostGridPreferences(storage).layout.value).toBe("row");
   });
 });

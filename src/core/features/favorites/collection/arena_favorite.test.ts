@@ -1,7 +1,7 @@
 import { RATINGS, getRatingBit } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
-import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
+import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { createPost } from "@/testing/post";
 

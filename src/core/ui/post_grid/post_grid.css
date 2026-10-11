@@ -70,6 +70,7 @@
 }
 
 .fsg-Tile-link {
+  position: relative;
   display: block;
   inline-size: 100%;
   block-size: 100%;
@@ -85,6 +86,14 @@
   block-size: 100%;
   object-fit: cover;
   transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Tile-upscale {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
 }
 
 .fsg-Tile[data-loading] .fsg-Tile-preview {

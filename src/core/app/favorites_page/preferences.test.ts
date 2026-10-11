@@ -1,7 +1,7 @@
-import { createPaginationSettings, createSearchSettings } from "@/core/app/favorites_page/preferences";
 import { describe, expect, test } from "vitest";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { createSearchSettings } from "@/core/app/favorites_page/preferences";
 
 const STORED_SEARCH = {
   query: "apple",
@@ -42,25 +42,5 @@ describe("createSearchSettings", () => {
     expect(createSearchSettings(store).value).toMatchObject({
       query: "", sortKey: "favorited", isSortAscending: true, allowedRatings: ALL_RATINGS_MASK, shuffleSeed: 0
     });
-  });
-});
-
-describe("createPaginationSettings", () => {
-  test("starts with 50 results per page when nothing is stored", () => {
-    expect(createPaginationSettings(new MemoryLocalKeyedValues()).value).toEqual({ size: 50, infiniteScroll: false });
-  });
-
-  test("restores the stored settings", () => {
-    const store = new MemoryLocalKeyedValues();
-
-    createPaginationSettings(store).set({ size: 100, infiniteScroll: true });
-    expect(createPaginationSettings(store).value).toEqual({ size: 100, infiniteScroll: true });
-  });
-
-  test.each([0, 1.5, "100"])("falls back to the default size for a stored size of %o", size => {
-    const store = new MemoryLocalKeyedValues();
-
-    store.set("favoritesPagination", { size, infiniteScroll: true });
-    expect(createPaginationSettings(store).value).toEqual({ size: 50, infiniteScroll: true });
   });
 });

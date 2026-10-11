@@ -16,6 +16,7 @@ const SETTLE_DELAY = 200;
 
 export interface ImageRendererDependencies {
   readonly resolvePreviewUrl: (media: Media) => Promise<string>;
+  readonly resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
   readonly fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
   readonly bitmapDecoder: BitmapDecoder;
   readonly scheduler: Pick<Scheduler, "schedule">;
@@ -37,7 +38,11 @@ export class ImageRenderer extends PreloadingRenderer implements LightboxStageRe
     this.preview = <img className={LightboxStageClass.media} alt="" decoding="async" /> as HTMLImageElement;
     this.original = <canvas className={LightboxStageClass.media} /> as HTMLCanvasElement;
     this.root = <div className={LightboxStageClass.renderer}>{this.preview}{this.original}</div>;
-    this.bitmapCache = new BitmapCache(dependencies.fetchOriginal, dependencies.bitmapDecoder);
+    this.bitmapCache = new BitmapCache({
+      fetchOriginal: dependencies.fetchOriginal,
+      resolveOriginalImageFallbackUrl: dependencies.resolveOriginalImageFallbackUrl,
+      bitmapDecoder: dependencies.bitmapDecoder
+    });
     this.originalLoadTask = createDebouncedTask({ delay: SETTLE_DELAY, leading: true }, dependencies.scheduler, (item, resolve, reject) => {
       this.bitmapCache.load(item).then(resolve, reject);
     });

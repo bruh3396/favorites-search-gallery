@@ -387,6 +387,36 @@ describe("FavoritesSearchSession", () => {
     });
   });
 
+  describe("reveal", () => {
+    test("shows the numbered page containing the favorite", () => {
+      const { session } = setup(createTaggedPosts("a", "a", "a", "a", "a"), { pagination: PAGES_OF_TWO });
+
+      session.reveal(session.results.peek()[4]);
+
+      expect(session.paginationResult.value.pageNumber).toBe(3);
+      expect(getPageIds(session)).toEqual(["5"]);
+    });
+
+    test("grows the infinite scroll prefix to include the favorite", () => {
+      const posts = Array.from({ length: 30 }, (_, index) => createPost({ id: String(index + 1) }));
+      const { session } = setup(posts, { pagination: { size: 2, infiniteScroll: true } });
+
+      session.reveal(session.results.peek()[27]);
+
+      expect(session.paginationResult.value.pageNumber).toBe(2);
+      expect(getPageIds(session)).toHaveLength(30);
+    });
+
+    test("leaves the current page alone when the favorite is absent", () => {
+      const { session } = setup(createTaggedPosts("a", "a", "a"), { pagination: PAGES_OF_TWO });
+
+      session.goToPage(2);
+      session.reveal({ ...session.results.peek()[0], id: "missing" });
+
+      expect(session.paginationResult.value.pageNumber).toBe(2);
+    });
+  });
+
   describe("when favorites are indexed", () => {
     test("keeps the searched results in place and appends the arrivals in arrival order", () => {
       const { session, collection, index } = setup(createScoredPosts(1, 3, 2), { settings: { sortKey: "score" } });

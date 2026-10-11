@@ -1,4 +1,4 @@
-import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/indexed_db/client/client";
+import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/browser/indexed_db/client";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { Post } from "@/core/domain/post/post";
 

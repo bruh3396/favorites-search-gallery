@@ -1,4 +1,4 @@
-import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/indexed_db/client/client";
+import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/browser/indexed_db/client";
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 

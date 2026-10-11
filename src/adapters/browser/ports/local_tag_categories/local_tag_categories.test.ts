@@ -1,8 +1,8 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
-import { IndexedDbLocalTagCategories } from "@/adapters/indexed_db/ports/local_tag_categories/local_tag_categories";
+import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
+import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
 
 beforeEach(() => {
   globalThis.indexedDB = new IDBFactory();

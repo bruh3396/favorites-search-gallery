@@ -1,6 +1,6 @@
+import { CategorizedPost, Rating } from "@/core/domain/post/post";
 import { FrozenCobaltPost, FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/client/schema";
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
-import { CategorizedPost, Rating } from "@/core/domain/post/post";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { Media } from "@/core/domain/media/media";
 import { decodeHtmlEntities } from "@/core/utils/string/string";

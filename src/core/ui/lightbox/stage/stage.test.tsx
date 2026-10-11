@@ -33,6 +33,7 @@ interface Setup {
   scheduler: MemoryScheduler;
   fetchOriginal: Mock<LightboxStageProps["fetchOriginal"]>;
   resolveOriginalUrl: Mock<LightboxStageProps["resolveOriginalUrl"]>;
+  resolveOriginalImageFallbackUrl: Mock<LightboxStageProps["resolveOriginalImageFallbackUrl"]>;
   decodeBitmap: Mock<BitmapDecoder["decode"]>;
   drawn: () => string[];
   bitmaps: FakeBitmap[];
@@ -85,12 +86,14 @@ function setup(
   const scheduler = new MemoryScheduler();
   const fetchOriginal = vi.fn<LightboxStageProps["fetchOriginal"]>(fetch);
   const resolveOriginalUrl = vi.fn<LightboxStageProps["resolveOriginalUrl"]>(resolveOriginal);
+  const resolveOriginalImageFallbackUrl = vi.fn<LightboxStageProps["resolveOriginalImageFallbackUrl"]>(media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`));
   const { result } = render(document, () => (
     <LightboxStage
       current={current}
       neighbors={neighbors}
       resolvePreviewUrl={resolvePreviewUrl}
       resolveOriginalUrl={resolveOriginalUrl}
+      resolveOriginalImageFallbackUrl={resolveOriginalImageFallbackUrl}
       fetchOriginal={fetchOriginal}
       bitmapDecoder={bitmapDecoder}
       scheduler={scheduler}
@@ -107,6 +110,7 @@ function setup(
     scheduler,
     fetchOriginal,
     resolveOriginalUrl,
+    resolveOriginalImageFallbackUrl,
     decodeBitmap,
     bitmaps,
     drawn: () => drawImage.mock.calls.map(([bitmap]) => bitmap.source)

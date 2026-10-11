@@ -1,29 +1,46 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
+import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
+import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { Media } from "@/core/domain/media/media";
 import { doNothing } from "@/core/utils/function/function";
 import { h } from "@/core/ui/h/h";
+import { onCleanup } from "@/core/utils/reactive/scope";
+import { Upscaler } from "@/core/ui/post_grid/upscaler";
 
 export const TileClass = {
   root: "fsg-Tile",
   link: "fsg-Tile-link",
   preview: "fsg-Tile-preview",
+  upscale: "fsg-Tile-upscale",
   actions: "fsg-Tile-actions"
 } as const;
 
 export interface TileProps {
-  post: MediaItem;
-  dimensions: Dimensions;
-  actions: readonly Node[];
-  resolvePreviewUrl: (media: Media) => Promise<string>;
-  href?: string;
-  onActivate: (event: MouseEvent) => void;
+  readonly post: MediaItem;
+  readonly dimensions: Dimensions;
+  readonly actions: readonly Node[];
+  readonly upscale: Readable<boolean>;
+  readonly bitmapDecoder: BitmapDecoder;
+  readonly visibilityObserver: VisibilityObserver;
+  readonly onVisibilityChange: (visible: boolean) => void;
+  readonly fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  readonly resolvePreviewUrl: (media: Media) => Promise<string>;
+  readonly href?: string;
+  readonly onActivate: (event: MouseEvent) => void;
 }
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
-export function Tile({ post, dimensions, actions, resolvePreviewUrl, href, onActivate }: TileProps): HTMLElement {
+export function Tile(props: TileProps): HTMLElement {
+  const { post, dimensions, actions, upscale, href, onActivate } = props;
+  const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
-  const link = <a className={TileClass.link} target="_blank" onClick={event => activateOnPlainClick(event, onActivate)}>{preview}</a> as HTMLAnchorElement;
+  const canvas = <canvas className={TileClass.upscale} hidden /> as HTMLCanvasElement;
+  const link =
+    <a className={TileClass.link} target="_blank" onClick={event => activateOnPlainClick(event, onActivate)}>
+      {preview}{canvas}
+    </a> as HTMLAnchorElement;
   const root = (
     <div className={TileClass.root} dataset={{ mediaKind: post.media.kind, loading: "" }}>
       {link}
@@ -31,20 +48,52 @@ export function Tile({ post, dimensions, actions, resolvePreviewUrl, href, onAct
     </div>
   );
 
-  showAspectRatio(root, dimensions);
+  setAspectRatio(root, dimensions);
+  const unobserve = props.visibilityObserver.observe(root, isVisible => {
+    visible.value = isVisible;
+    props.onVisibilityChange(isVisible);
+  });
+
+  onCleanup(() => {
+    unobserve();
+    props.onVisibilityChange(false);
+  });
 
   if (href !== undefined) {
     setHrefOnInteraction(link, href);
   }
 
   if (post.media.locator !== "") {
-    showPreview(root, preview, resolvePreviewUrl(post.media)).catch(console.error);
+    loadPreview(root, preview, props);
+    const upscaler = new Upscaler({ canvas, media: post.media, bitmapDecoder: props.bitmapDecoder, fetchImage: props.fetchImage });
+
+    effect(() => {
+      const upscalingEnabled = upscale.value;
+      const isVisible = visible.value;
+
+      if (!upscalingEnabled) {
+        upscaler.disable();
+      } else if (isVisible) {
+        upscaler.upscale();
+      } else {
+        upscaler.dispose();
+      }
+    });
+    onCleanup(() => upscaler.dispose());
   }
   return root;
 }
 
+function loadPreview(root: HTMLElement, preview: HTMLImageElement, props: TileProps): Promise<void> {
+  return showPreview(root, preview, props.resolvePreviewUrl(props.post.media))
+    .catch(error => {
+      console.error(error);
+    });
+}
+
 function activateOnPlainClick(event: MouseEvent, onActivate: (event: MouseEvent) => void): void {
   if (event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+    event.preventDefault();
     onActivate(event);
   }
 }
@@ -73,12 +122,12 @@ async function showPreview(root: HTMLElement, preview: HTMLImageElement, url: Pr
   await preview.decode().catch(doNothing);
 
   if (root.style.getPropertyValue(ASPECT_RATIO_PROPERTY) === "") {
-    showAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
+    setAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
   }
   delete root.dataset.loading;
 }
 
-function showAspectRatio(root: HTMLElement, { width, height }: Dimensions): void {
+function setAspectRatio(root: HTMLElement, { width, height }: Dimensions): void {
   if (width > 0 && height > 0) {
     root.style.setProperty(ASPECT_RATIO_PROPERTY, `${width} / ${height}`);
   }

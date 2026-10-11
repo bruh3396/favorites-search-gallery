@@ -1,6 +1,6 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
 import { Post } from "@/core/domain/post/post";

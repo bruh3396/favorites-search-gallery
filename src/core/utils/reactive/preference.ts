@@ -1,6 +1,6 @@
 import { Codec, createGuardedCodec } from "@/core/utils/codec/codec";
-import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
+import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { sameKindAs } from "@/core/utils/guards/guards";
 
 export interface Preference<T> extends Readable<T> {

@@ -1,5 +1,5 @@
-import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
+import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
 
 describe("BrowserBitmapDecoder", () => {
   test("decodes the provided source with the browser API", async() => {

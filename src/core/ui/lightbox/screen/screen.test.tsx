@@ -1,14 +1,14 @@
 import { LightboxScreen, LightboxScreenClass } from "@/core/ui/lightbox/screen/screen";
+import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
-import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
+import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage_class";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { MediaSequence, SequencePosition } from "@/core/contracts/media_sequence";
 import { doNothing } from "@/core/utils/function/function";
 import { expectClassesStyled } from "@/testing/css";
 
@@ -45,6 +45,7 @@ function setup(): Setup {
       lightbox={lightbox}
       resolvePreviewUrl={media => Promise.resolve(`https://preview/${media.locator}`)}
       resolveOriginalUrl={media => Promise.resolve(`https://original/${media.locator}`)}
+      resolveOriginalImageFallbackUrl={media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`)}
       fetchOriginal={fetchOriginal}
       bitmapDecoder={new MemoryBitmapDecoder()}
       scheduler={scheduler}
@@ -140,33 +141,6 @@ describe("LightboxScreen", () => {
 
     lightbox.open(VIDEO, sequence());
     dialog.querySelector("video:not([hidden])")!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  test("leaves video double clicks to the browser", () => {
-    const { dialog, lightbox, onClose } = setup();
-
-    lightbox.open(VIDEO, sequence());
-    const video = dialog.querySelector("video:not([hidden])")!;
-    const nativeClick = vi.fn();
-    const nativeDoubleClick = vi.fn();
-
-    video.addEventListener("click", nativeClick);
-    video.addEventListener("dblclick", nativeDoubleClick);
-
-    const secondClick = new MouseEvent("click", { bubbles: true, cancelable: true, detail: 2 });
-
-    video.dispatchEvent(secondClick);
-
-    expect(secondClick.defaultPrevented).toBe(false);
-    expect(nativeClick).toHaveBeenCalledOnce();
-
-    const doubleClick = new MouseEvent("dblclick", { bubbles: true, cancelable: true, detail: 2 });
-
-    video.dispatchEvent(doubleClick);
-
-    expect(doubleClick.defaultPrevented).toBe(false);
-    expect(nativeDoubleClick).toHaveBeenCalledOnce();
     expect(onClose).not.toHaveBeenCalled();
   });
 

@@ -1,8 +1,8 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
-import { IndexedDbLocalSnippets } from "@/adapters/indexed_db/ports/local_snippets/local_snippets";
+import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
+import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/local_snippets";
 import { Snippet } from "@/core/domain/snippet/snippet";
 
 beforeEach(() => {

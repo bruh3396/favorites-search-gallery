@@ -1,6 +1,7 @@
 import { PostGridSkeleton, PostGridSkeletonClass, PostGridSkeletonProps } from "@/core/ui/post_grid/skeleton";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import POST_GRID_CSS from "@/core/ui/post_grid/post_grid.css?inline";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Scoped } from "@/core/utils/reactive/scope";
@@ -8,9 +9,19 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }] }: Partial<PostGridSkeletonProps> = {}):
-Scoped<HTMLElement> {
-  return render(document, () => <PostGridSkeleton isShown={isShown} dimensions={dimensions} layout={new Signal("grid")} size={new Signal(2)} />);
+function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }],
+  count = 50 }: Partial<PostGridSkeletonProps> = {}):
+  Scoped<HTMLElement> {
+  return render(document, () => <PostGridSkeleton
+    isShown={isShown}
+    dimensions={dimensions}
+    layout={new Signal("grid")}
+    size={new Signal(2)}
+    count={count}
+    bitmapDecoder={new MemoryBitmapDecoder()}
+    visibilityObserver={{ observe: () => () => { } }}
+    fetchImage={() => Promise.resolve(new Blob())}
+  />);
 }
 
 describe("PostGridSkeleton", () => {
@@ -23,9 +34,15 @@ describe("PostGridSkeleton", () => {
   });
 
   test("draws at most 50 tiles", () => {
-    const { result: element } = setup({ dimensions: Array.from({ length: 60 }, () => ({ width: 1, height: 1 })) });
+    const { result: element } = setup({ dimensions: Array.from({ length: 60 }, () => ({ width: 1, height: 1 })), count: 100 });
 
     expect(element.querySelectorAll(`.${TileClass.root}`)).toHaveLength(50);
+  });
+
+  test("draws count tiles", () => {
+    const { result: element } = setup({ dimensions: Array.from({ length: 60 }, () => ({ width: 1, height: 1 })), count: 20 });
+
+    expect(element.querySelectorAll(`.${TileClass.root}`)).toHaveLength(20);
   });
 
   test("shows and hides with its signal, hidden from assistive technology", () => {

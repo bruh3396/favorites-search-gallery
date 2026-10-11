@@ -1,5 +1,4 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
-import { WIMG_HOSTNAME } from "@/adapters/rule34/client/urls";
 import { fileUrl, previewUrl } from "@/adapters/rule34_cdn/client/addresses";
 import { mintMedia, readLocator } from "@/adapters/rule34_cdn/client/locator";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/extension_prober";
@@ -50,18 +49,7 @@ export class Rule34CdnClient {
 
   public async fetchOriginal(locator: string, kind: MediaKind, signal?: AbortSignal): Promise<Blob> {
     const url = await this.originalUrl(locator, kind);
-
-    try {
-      return await this.fetchFile(url, signal);
-    } catch (error) {
-      if (signal?.aborted || !(error instanceof TypeError)) {
-        throw error;
-      }
-
-      const fallbackUrl = new URL(url);
-      fallbackUrl.hostname = WIMG_HOSTNAME;
-      return this.fetchFile(fallbackUrl.href, signal);
-    }
+    return this.fetchFile(url, signal);
   }
 
   public readVideoDurationSeconds(url: string): Promise<number> {

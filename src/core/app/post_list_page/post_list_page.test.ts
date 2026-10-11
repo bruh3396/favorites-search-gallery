@@ -1,10 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
+import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
+import { MediaItem } from "@/core/domain/post/post";
+import { Signal } from "@/core/utils/reactive/signal";
 import { mountPostListPage } from "@/core/app/post_list_page/post_list_page";
 
 describe("mountPostListPage", () => {
@@ -12,9 +15,12 @@ describe("mountPostListPage", () => {
     const container = document.createElement("div");
 
     mountPostListPage(container, { colorScheme: "light" }, {
+      bitmapDecoder: new MemoryBitmapDecoder(),
+      visiblePosts: new Signal<readonly MediaItem[]>([]),
+      visibilityObserver: { observe: () => () => { } },
       remoteMedia: new MemoryRemoteMedia(),
       remotePages: new MemoryRemotePages(),
-      localKeyedValues: new MemoryLocalKeyedValues()
+      localKeyedValues: new MemoryLocalKeyedValues(),
     });
     const app = container.shadowRoot!.querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
@@ -27,7 +33,14 @@ describe("mountPostListPage", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { postGridLayout: "row" } });
-    mountPostListPage(container, { colorScheme: "light" }, { remoteMedia: new MemoryRemoteMedia(), remotePages: new MemoryRemotePages(), localKeyedValues });
+    mountPostListPage(container, { colorScheme: "light" }, {
+      bitmapDecoder: new MemoryBitmapDecoder(),
+      visiblePosts: new Signal<readonly MediaItem[]>([]),
+      visibilityObserver: { observe: () => () => { } },
+      remoteMedia: new MemoryRemoteMedia(),
+      remotePages: new MemoryRemotePages(),
+      localKeyedValues,
+    });
     expect(container.shadowRoot!.querySelector<HTMLElement>(`.${PostGridClass.root}`)!.dataset.layout).toBe("row");
   });
 });

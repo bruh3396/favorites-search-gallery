@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
+import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 
 type Row = Record<string, unknown>;
 

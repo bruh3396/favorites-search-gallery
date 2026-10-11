@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { IndexedDbClient } from "@/adapters/indexed_db/client/client";
+import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 
 beforeEach(() => {
   globalThis.indexedDB = new IDBFactory();

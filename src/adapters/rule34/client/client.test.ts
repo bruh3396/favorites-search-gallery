@@ -1,10 +1,10 @@
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { favoritesPageOffset, favoritesPageUrl } from "@/adapters/rule34/client/favorites_page";
 import { Media } from "@/core/domain/media/media";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 import { Rule34Error } from "@/adapters/rule34/client/error";
-import { favoritesPageOffset, favoritesPageUrl } from "@/adapters/rule34/client/favorites_page";
 import { postListUrlFromQuery } from "@/adapters/rule34/client/post_list_page";
 import { postPageUrl } from "@/adapters/rule34/client/post_page";
 import { profilePageUrl } from "@/adapters/rule34/client/profile_page";

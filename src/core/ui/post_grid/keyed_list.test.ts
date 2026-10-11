@@ -112,6 +112,17 @@ describe("KeyedList", () => {
     });
   });
 
+  describe("get", () => {
+    test("finds the current element by item key and ignores removed items", () => {
+      const { list } = setup();
+      const [first] = list.reconcile(createItems("1", "2"));
+
+      expect(list.get({ id: "1" })).toBe(first);
+      list.reconcile(createItems("2"));
+      expect(list.get({ id: "1" })).toBeUndefined();
+    });
+  });
+
   describe("scopes", () => {
     test("disposes the scope of an element whose key is gone", () => {
       const { list, cleaned } = setupScoped();

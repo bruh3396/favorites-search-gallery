@@ -31,6 +31,10 @@ export class KeyedList<T> {
     return [...elements.values()].map(({ result }) => result);
   }
 
+  public get(item: T): HTMLElement | undefined {
+    return this.elements.get(this.dependencies.getKey(item))?.result;
+  }
+
   public recreate(item: T): void {
     const key = this.dependencies.getKey(item);
     const previous = this.elements.get(key);

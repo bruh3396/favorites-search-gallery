@@ -1,8 +1,8 @@
 import { DEFAULT_SKELETON_DIMENSIONS, PostGridSkeletonClass } from "@/core/ui/post_grid/skeleton";
-import { describe, expect, test } from "vitest";
+import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
+import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
@@ -15,7 +15,11 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { Signal } from "@/core/utils/reactive/signal";
+import { Favorite } from "@/core/features/favorites/favorite";
+import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { Post } from "@/core/domain/post/post";
+import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { SliderClass } from "@/core/ui/components/slider/slider";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { createPost } from "@/testing/post";
@@ -35,9 +39,11 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
     bitmapDecoder: new MemoryBitmapDecoder(),
+    visibilityObserver: { observe: () => (): void => { } },
     remotePages: new MemoryRemotePages(),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource(),
+    visiblePosts: new Signal<readonly Favorite[]>([]),
     localKeyedValues,
     hostPage: new MemoryHostPage()
   });
@@ -89,5 +95,49 @@ describe("mountFavoritesPage", () => {
 
     localKeyedValues.set("favorites-search-gallery", { favoritesSkeleton: { 2: [{ width: 4, height: 3 }] } });
     expect(readAspectRatios(querySkeleton(mount(localKeyedValues)))).toHaveLength(DEFAULT_SKELETON_DIMENSIONS.length);
+  });
+
+  test("reveals the lightbox's last favorite before scrolling to its tile", async() => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const previousScrollIntoView = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollIntoView");
+    const scrolls: Array<{ target: HTMLElement; shown: Element | null; page: string | null }> = [];
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
+    const media = { kind: "image" as const, locator: "data:image/png;base64,AA==" };
+    const root = mount(localKeyedValues, [createPost({ id: "1", media }), createPost({ id: "2", media })]);
+    const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${PostGridSkeletonClass.root})`)!;
+
+    Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
+      configurable: true,
+      value(this: HTMLElement): void {
+        scrolls.push({
+          target: this,
+          shown: grid.querySelector(`.${TileClass.root}`),
+          page: root.querySelector(`.${PaginatorClass.page}[aria-current="page"]`)?.textContent ?? null
+        });
+      }
+    });
+    onTestFinished(() => {
+      if (previousScrollIntoView === undefined) {
+        Reflect.deleteProperty(HTMLElement.prototype, "scrollIntoView");
+      } else {
+        Object.defineProperty(HTMLElement.prototype, "scrollIntoView", previousScrollIntoView);
+      }
+    });
+
+    await flushMicrotasks();
+    const firstTile = grid.querySelector(`.${TileClass.root}`)!;
+
+    firstTile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
+    const dialog = root.querySelector("dialog")!;
+
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    await flushMicrotasks();
+    dialog.click();
+
+    expect(scrolls).toHaveLength(1);
+    expect(scrolls[0].page).toBe("2");
+    expect(scrolls[0].target).toBe(scrolls[0].shown);
+    expect(scrolls[0].target).not.toBe(firstTile);
   });
 });

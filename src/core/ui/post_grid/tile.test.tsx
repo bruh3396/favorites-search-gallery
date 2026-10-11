@@ -3,6 +3,8 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
+import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
+import { Signal } from "@/core/utils/reactive/signal";
 import { doNothing } from "@/core/utils/function/function";
 
 const IMAGE: MediaItem = { id: "123", media: { kind: "image", locator: "images/123" } };
@@ -14,8 +16,22 @@ function resolvePreviewUrl(media: Media): Promise<string> {
   return Promise.resolve(`https://preview/${media.locator}`);
 }
 
-function drawTile(options: Omit<TileProps, "onActivate"> & Partial<Pick<TileProps, "onActivate">>): HTMLElement {
-  return render(document, () => <Tile onActivate={doNothing} {...options} />).result;
+type TileOptions = Omit<TileProps, "onActivate" | "upscale" |
+  "bitmapDecoder" | "visibilityObserver" | "onVisibilityChange" | "fetchImage"> &
+  Partial<Pick<TileProps, "onActivate" | "onVisibilityChange" | "upscale" | "visibilityObserver">>;
+
+function drawTile(options: TileOptions): HTMLElement {
+  return render(document, () => (
+    <Tile
+      upscale={new Signal(false)}
+      bitmapDecoder={new MemoryBitmapDecoder()}
+      visibilityObserver={{ observe: () => () => { } }}
+      onVisibilityChange={doNothing}
+      fetchImage={() => Promise.resolve(new Blob())}
+      onActivate={doNothing}
+      {...options}
+    />
+  )).result;
 }
 
 function getLink(tile: HTMLElement): HTMLAnchorElement {
@@ -117,6 +133,22 @@ describe("Tile", () => {
 
   test("leaves the shape to the stylesheet while the dimensions are unknown", () => {
     expect(readAspectRatio(drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl }))).toBe("");
+  });
+
+  test("reports visibility changes", () => {
+    let reportVisibility: (visible: boolean) => void = doNothing;
+    const onVisibilityChange = vi.fn();
+    const visibilityObserver = {
+      observe: (_element: Element, onVisibility: (visible: boolean) => void): (() => void) => {
+        reportVisibility = onVisibility;
+        return doNothing;
+      }
+    };
+
+    drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, visibilityObserver, onVisibilityChange });
+    reportVisibility(true);
+
+    expect(onVisibilityChange).toHaveBeenCalledExactlyOnceWith(true);
   });
 
   test("shows the preview and stops loading once it resolves", async() => {

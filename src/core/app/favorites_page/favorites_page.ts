@@ -1,11 +1,14 @@
 /* eslint-disable no-warning-comments */
 import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
-import { createPaginationSettings, createSearchSettings } from "@/core/app/favorites_page/preferences";
+import { Signal, effect } from "@/core/utils/reactive/signal";
+import { createPaginationSettings, createPostGridSettings } from "@/core/app/preferences";
 import { createSkeletonDimensions, measureSkeletonDimensions } from "@/core/app/favorites_page/skeleton_dimensions";
 import { h, render } from "@/core/ui/h/h";
 import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { ColorScheme } from "@/core/boundary/environment";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import FAVORITES_UI_CSS from "@/core/features/favorites/styles.css?inline";
+import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesScreen } from "@/core/app/favorites_page/screen";
 import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
@@ -14,7 +17,6 @@ import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxScreen } from "@/core/ui/lightbox/screen/screen";
 import { ListSequence } from "@/core/contracts/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { MediaItem } from "@/core/domain/post/post";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
 import { PaginationSettings } from "@/core/features/favorites/search/pagination";
@@ -23,9 +25,9 @@ import { RemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_act
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import SCREEN_CSS from "@/core/app/favorites_page/screen.css?inline";
 import UI_CSS from "@/core/ui/styles.css?inline";
+import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createPostGridPreferences } from "@/core/ui/post_grid/post_grid";
-import { effect } from "@/core/utils/reactive/signal";
+import { createSearchSettings } from "@/core/app/favorites_page/preferences";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export interface FavoritesPageConfiguration extends FavoritesConfiguration {
@@ -35,7 +37,9 @@ export interface FavoritesPageConfiguration extends FavoritesConfiguration {
 
 export interface FavoritesPageDependencies extends Omit<FavoritesDependencies, "remoteFavoriteActions" | "waitForPaint"> {
   readonly remoteFavoriteActions: RemoteFavoriteActions;
+  readonly visiblePosts: Signal<readonly Favorite[]>;
   readonly bitmapDecoder: BitmapDecoder;
+  readonly visibilityObserver: VisibilityObserver;
   readonly remotePages: RemotePages;
   readonly localKeyedValues: LocalKeyedValues;
   readonly hostPage: Pick<HostPage, "lockScroll" | "unlockScroll">;
@@ -43,13 +47,13 @@ export interface FavoritesPageDependencies extends Omit<FavoritesDependencies, "
 
 export function mountFavoritesPage(container: HTMLElement, configuration: FavoritesPageConfiguration, dependencies: FavoritesPageDependencies): void {
   const { favoritesOwnerId, colorScheme, ...favoritesConfiguration } = configuration;
-  const { remoteFavoriteActions, remotePages, localKeyedValues, hostPage, ...ports } = dependencies;
+  const { remoteFavoriteActions, remotePages, localKeyedValues, hostPage, visibilityObserver, visiblePosts, ...ports } = dependencies;
   const app = mountAppRoot(container, { colorScheme, styles: [UI_CSS, FAVORITES_UI_CSS, SCREEN_CSS] });
   const storage = createAppStorage(localKeyedValues);
+  const gridPreferences = createPostGridSettings(storage.preferences);
   const finishedLoading = new Milestone();
   const skeletonDimensions = createSkeletonDimensions(storage.app, favoritesOwnerId);
   const searchSettingsOne = createSearchSettings(storage.preferences);
-  const searchSettingsTwo = createSearchSettings(storage.preferences, "favoritesSearchSecond");
   const favoritesService = createFavoritesService(favoritesConfiguration, {
     ...ports,
     remoteFavoriteActions: new ObservableRemoteFavoriteActions(new GatedRemoteFavoriteActions({
@@ -62,34 +66,40 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   const paginationSettingsOne = createPaginationSettings(storage.preferences);
 
   searchSettingsOne.set({ ...searchSettingsOne.peek(), query: "" });
-  searchSettingsTwo.set({ ...searchSettingsTwo.peek(), query: "" });
   const sessionOne = favoritesService.createSearchSession({ searchSettings: searchSettingsOne, paginationSettings: paginationSettingsOne });
-  const lightbox = new Lightbox<MediaItem>();
+  const lightbox = new Lightbox<Favorite>();
+  const scrollTo = new Emitter<Favorite>();
+
+  lightbox.closed.on(item => {
+    sessionOne.reveal(item);
+    scrollTo.emit(item);
+  });
 
   function createFavoritesScreen(session: FavoritesSearchSession, paginationSettings: Preference<PaginationSettings>): HTMLElement {
     return render(container.ownerDocument, () => h(FavoritesScreen, {
       favorites: favoritesService,
       session,
+      scrollTo,
       paginationSettings,
-      gridPreferences: createPostGridPreferences(storage.preferences),
+      gridPreferences,
+      visiblePosts,
       finishedLoading,
       skeletonDimensions: skeletonDimensions.peek(),
+      skeletonItemCount: paginationSettings.peek().size,
+      bitmapDecoder: ports.bitmapDecoder,
+      visibilityObserver,
+      fetchImage: (media, signal) => ports.remoteMedia.fetchImage(media, signal),
       resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media),
       getPostUrl: post => remotePages.postUrl(post.id),
-      onActivatePost: (post, event) => {
-        if (event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) {
-          return;
-        }
-        event.preventDefault();
-        lightbox.open(post, new ListSequence<MediaItem>({ wraps: !paginationSettings.peek().infiniteScroll }, session.results));
-      }
+      onActivatePost: (post, event) => lightbox.open(post, new ListSequence<Favorite>({ wraps: !paginationSettings.peek().infiniteScroll }, session.results))
     })).result;
   }
 
-  const lightboxScreen = render(container.ownerDocument, () => h(LightboxScreen, {
+  const lightboxScreen = render(container.ownerDocument, () => h(LightboxScreen<Favorite>, {
     lightbox,
     resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media),
     resolveOriginalUrl: media => ports.remoteMedia.resolveOriginalUrl(media),
+    resolveOriginalImageFallbackUrl: media => ports.remoteMedia.resolveOriginalImageFallbackUrl(media),
     fetchOriginal: (media, signal) => ports.remoteMedia.fetchOriginal(media, signal),
     bitmapDecoder: ports.bitmapDecoder,
     scheduler: ports.scheduler
