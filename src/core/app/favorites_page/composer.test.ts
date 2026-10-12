@@ -1,4 +1,5 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
+import { ExitIndicator, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { MemoryClient } from "@/adapters/memory/client/client";
@@ -22,7 +23,6 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
-import { ExitIndicator, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = [], {
   morpher = new MemoryMorpher(),
@@ -193,5 +193,20 @@ describe("mountFavoritesPage", () => {
     await flushMicrotasks();
     expect(navigator.opened).toEqual(["https://originals/1.png"]);
     expect(root.querySelector("dialog")!.open).toBe(false);
+  });
+
+  test("opens the lightbox favorite's original on a Ctrl click and its post on a middle click", async() => {
+    const navigator = new MemoryNavigator();
+    const posts = [createPost({ id: "1", media: { kind: "image", locator: "https://originals/1.png" } })];
+    const root = mount(new MemoryLocalKeyedValues(), posts, { navigator });
+
+    await flushMicrotasks();
+    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
+    const dialog = root.querySelector("dialog")!;
+
+    dialog.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }));
+    dialog.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, cancelable: true, button: 1 }));
+    await flushMicrotasks();
+    expect([navigator.opened, dialog.open]).toEqual([["#post-1", "https://originals/1.png"], true]);
   });
 });

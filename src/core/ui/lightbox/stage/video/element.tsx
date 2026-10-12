@@ -69,7 +69,7 @@ export class VideoElement {
   }
 
   private handleClick(event: MouseEvent): void {
-    if (event.ctrlKey) {
+    if (event.ctrlKey || event.metaKey) {
       return;
     }
     event.preventDefault();

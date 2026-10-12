@@ -23,6 +23,8 @@ interface Setup {
   onShowNext: Mock<() => Promise<void>>;
   onShowPrevious: Mock<() => Promise<void>>;
   onClose: Mock<() => void>;
+  onCtrlClick: Mock<(item: MediaItem) => void>;
+  onMiddleClick: Mock<(item: MediaItem) => void>;
   morpher: MemoryMorpher;
   place: HTMLElement;
 }
@@ -44,6 +46,8 @@ function setup({ morphs = true } = {}): Setup {
   const decodeOriginal = vi.fn<(media: Media, signal: AbortSignal) => Promise<ImageBitmap>>(() => new Promise(doNothing));
   const morpher = new MemoryMorpher();
   const place = document.createElement("div");
+  const onCtrlClick = vi.fn<(item: MediaItem) => void>();
+  const onMiddleClick = vi.fn<(item: MediaItem) => void>();
   const { result, dispose } = render(document, () => (
     <LightboxScreen
       lightbox={lightbox}
@@ -53,6 +57,8 @@ function setup({ morphs = true } = {}): Setup {
       scheduler={scheduler}
       morpher={morphs ? morpher : undefined}
       locateItem={() => place}
+      onCtrlClick={onCtrlClick}
+      onMiddleClick={onMiddleClick}
     />
   ));
 
@@ -61,7 +67,9 @@ function setup({ morphs = true } = {}): Setup {
     dispose();
     result.remove();
   });
-  return { dialog: result as HTMLDialogElement, lightbox, scheduler, decodeOriginal, onShowNext, onShowPrevious, onClose, morpher, place };
+  return {
+    dialog: result as HTMLDialogElement, lightbox, scheduler, decodeOriginal, onShowNext, onShowPrevious, onClose, onCtrlClick, onMiddleClick, morpher, place
+  };
 }
 
 function findPositionLabel(dialog: HTMLDialogElement): HTMLElement {
@@ -234,6 +242,51 @@ describe("LightboxScreen", () => {
     lightbox.open(VIDEO, sequence());
     dialog.querySelector("video:not([hidden])")!.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(onClose).not.toHaveBeenCalled();
+  });
+
+  test("reports a Ctrl or Meta click with the shown post and stays open", () => {
+    const { dialog, lightbox, onClose, onCtrlClick } = setup();
+    const ctrlClick = new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true });
+
+    lightbox.open(POST, sequence());
+    dialog.dispatchEvent(ctrlClick);
+    dialog.querySelector("img")!.dispatchEvent(new MouseEvent("click", { bubbles: true, metaKey: true }));
+    expect([onCtrlClick.mock.calls, ctrlClick.defaultPrevented, onClose.mock.calls.length, dialog.open]).toEqual([[[POST], [POST]], true, 0, true]);
+  });
+
+  test("reports a Ctrl click on its video without closing", () => {
+    const { dialog, lightbox, onClose, onCtrlClick } = setup();
+
+    lightbox.open(VIDEO, sequence());
+    dialog.querySelector("video:not([hidden])")!.dispatchEvent(new MouseEvent("click", { bubbles: true, ctrlKey: true }));
+    expect([onCtrlClick.mock.calls, onClose.mock.calls.length]).toEqual([[[VIDEO]], 0]);
+  });
+
+  test("reports a middle click with the shown post and stays open", () => {
+    const { dialog, lightbox, onClose, onMiddleClick } = setup();
+    const middleClick = new MouseEvent("auxclick", { bubbles: true, cancelable: true, button: 1 });
+
+    lightbox.open(POST, sequence());
+    dialog.dispatchEvent(middleClick);
+    expect([onMiddleClick.mock.calls, middleClick.defaultPrevented, onClose.mock.calls.length, dialog.open]).toEqual([[[POST]], true, 0, true]);
+  });
+
+  test("prevents autoscroll on a middle press and leaves other presses alone", () => {
+    const { dialog } = setup();
+    const middle = new MouseEvent("mousedown", { cancelable: true, button: 1 });
+    const left = new MouseEvent("mousedown", { cancelable: true, button: 0 });
+
+    dialog.dispatchEvent(middle);
+    dialog.dispatchEvent(left);
+    expect([middle.defaultPrevented, left.defaultPrevented]).toEqual([true, false]);
+  });
+
+  test("ignores an auxiliary click that isn't the middle button", () => {
+    const { dialog, lightbox, onMiddleClick } = setup();
+
+    lightbox.open(POST, sequence());
+    dialog.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, button: 2 }));
+    expect(onMiddleClick).not.toHaveBeenCalled();
   });
 
   test("shows the post's place counted from one, out of the total", () => {

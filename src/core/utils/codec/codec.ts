@@ -5,7 +5,9 @@ export interface Codec<T> {
   encode: (value: T) => unknown;
 }
 
-export function createFieldsCodec<T extends object>(fields: { [K in keyof T]: Guard<T[K]> }): Codec<Partial<T>> {
+export type FieldGuards<T extends object> = { [K in keyof T]: Guard<T[K]> };
+
+export function createFieldsCodec<T extends object>(fields: FieldGuards<T>): Codec<Partial<T>> {
   const entries = Object.entries(fields as Record<string, Guard<unknown>>);
   const pickAccepted = (record: Record<string, unknown>): Partial<T> => Object.fromEntries(entries
     .filter(([key, accepts]) => accepts(record[key]))
@@ -13,6 +15,14 @@ export function createFieldsCodec<T extends object>(fields: { [K in keyof T]: Gu
   return {
     decode: (stored): Partial<T> | undefined => (isRecord(stored) ? pickAccepted(stored) : undefined),
     encode: (value): unknown => pickAccepted(value as Record<string, unknown>)
+  };
+}
+
+export function createRecordCodec<T extends object>(defaultValue: T, fields: FieldGuards<T>): Codec<T> {
+  const codec = createFieldsCodec(fields);
+  return {
+    decode: (stored): T => ({ ...defaultValue, ...codec.decode(stored) }),
+    encode: (value): unknown => codec.encode(value)
   };
 }
 

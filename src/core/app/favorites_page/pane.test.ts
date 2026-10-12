@@ -19,8 +19,7 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
-import { createPostGridSettings } from "@/core/app/preferences";
-import { createSearchSettings } from "@/core/app/favorites_page/preferences";
+import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { doNothing } from "@/core/utils/function/function";
 import { expectClassesStyled } from "@/testing/css";
 
@@ -64,14 +63,15 @@ function setup(): Setup {
     hydrated: new Emitter<Favorite>(),
     loadState: new Signal<LoadState>({ phase: "starting" })
   };
+  const preferences = createAppPreferences(new MemoryLocalKeyedValues());
   const session = {
-    settings: createSearchSettings(new MemoryLocalKeyedValues()),
+    settings: preferences.favoritesSearch,
     results: searchResults,
     paginationResult: computed(() => paginateByTwo(searchResults.value, pageNumber.value)),
     submit,
     goToPage
   };
-  const gridPreferences = createPostGridSettings(new MemoryLocalKeyedValues());
+  const gridPreferences = pickPostGridPreferences(preferences);
   const { result: element, dispose } = render(document, () => h(FavoritesShell, {
     favorites,
     panes: [

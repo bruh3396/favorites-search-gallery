@@ -1,4 +1,4 @@
-import { Codec, createFieldsCodec, createGuardedCodec, createSetCodec } from "@/core/utils/codec/codec";
+import { Codec, createFieldsCodec, createGuardedCodec, createRecordCodec, createSetCodec } from "@/core/utils/codec/codec";
 import { describe, expect, test } from "vitest";
 import { isBoolean, oneOf } from "@/core/utils/guards/guards";
 
@@ -32,6 +32,24 @@ describe("createFieldsCodec", () => {
 
   test("decodes nothing from a value that isn't a record", () => {
     expect(createPaletteCodec().decode(["red"])).toBeUndefined();
+  });
+});
+
+describe("createRecordCodec", () => {
+  const DEFAULT_PALETTE: Palette = { main: "red", isMuted: false };
+
+  test("fills each missing or rejected field from the default", () => {
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).decode({ main: "green", isMuted: true }))
+      .toEqual({ main: "red", isMuted: true });
+  });
+
+  test("decodes the default from a value that isn't a record", () => {
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).decode(undefined)).toEqual(DEFAULT_PALETTE);
+  });
+
+  test("stores only the fields it has a guard for", () => {
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).encode({ main: "blue", isMuted: true, other: 1 } as Palette))
+      .toEqual({ main: "blue", isMuted: true });
   });
 });
 

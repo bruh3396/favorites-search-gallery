@@ -1,9 +1,8 @@
 import { Media } from "@/core/domain/media/media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
-const MAX_CANVAS_WIDTH = 700;
-const MAX_CANVAS_HEIGHT = 16_000;
-
+export const MAX_CANVAS_WIDTH = 500;
+export const MAX_CANVAS_HEIGHT = 16_000;
 export const UPSCALE_DELAY = 300;
 
 interface UpscalerDependencies {

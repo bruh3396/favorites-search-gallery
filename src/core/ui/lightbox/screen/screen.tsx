@@ -21,6 +21,8 @@ export interface LightboxScreenProps<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   morpher?: Morpher;
   locateItem: (item: T) => Element | undefined;
+  onCtrlClick?: (item: T) => void;
+  onMiddleClick?: (item: T) => void;
 }
 
 export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T>): HTMLElement {
@@ -31,6 +33,18 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
   };
   const onShowPrevious = (): void => {
     lightbox.showPrevious().catch(console.error);
+  };
+  const withCurrent = (onItem: ((item: T) => void) | undefined): (() => void) | undefined => {
+    if (onItem === undefined) {
+      return undefined;
+    }
+    return () => {
+      const item = current.peek();
+
+      if (item !== undefined) {
+        onItem(item);
+      }
+    };
   };
   let readShownMedia: () => MorphSource | undefined;
   const onClose = (): void => closeIntoPage(readShownMedia(), props);
@@ -47,7 +61,9 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
       onClose={event => reportDismissal(event.currentTarget, current, () => lightbox.close())}
       onKeydown={event => handleKey(event, { dialog: event.currentTarget, onShowNext, onShowPrevious, onClose })}
       onWheel={event => handleWheel(event, onShowNext, onShowPrevious)}
-      onClick={event => handleClick(event, onClose)}
+      onClick={event => handleClick(event, onClose, withCurrent(props.onCtrlClick))}
+      onMousedown={event => preventAutoscroll(event)}
+      onAuxclick={event => handleAuxClick(event, withCurrent(props.onMiddleClick))}
       onContextmenu={event => {
         event.preventDefault();
         onClose();
@@ -128,12 +144,34 @@ function handleKey(event: KeyboardEvent, props: {
   }
 }
 
-function handleClick(event: MouseEvent, onClose: () => void): void {
+function handleClick(event: MouseEvent, onClose: () => void, onCtrlClick?: () => void): void {
+  if ((event.ctrlKey || event.metaKey) && onCtrlClick !== undefined) {
+    event.preventDefault();
+    onCtrlClick();
+    return;
+  }
+
   if (event.target instanceof HTMLVideoElement) {
     return;
   }
 
   onClose();
+}
+
+const MIDDLE_BUTTON = 1;
+
+function preventAutoscroll(event: MouseEvent): void {
+  if (event.button === MIDDLE_BUTTON) {
+    event.preventDefault();
+  }
+}
+
+function handleAuxClick(event: MouseEvent, onMiddleClick?: () => void): void {
+  if (event.button !== MIDDLE_BUTTON || onMiddleClick === undefined) {
+    return;
+  }
+  event.preventDefault();
+  onMiddleClick();
 }
 
 function reportDismissal(dialog: HTMLDialogElement, current: Readable<MediaItem | undefined>, onClose: () => void): void {

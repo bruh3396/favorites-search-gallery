@@ -75,7 +75,8 @@ function fly(standIn: HTMLCanvasElement, start: Box, target: Element): void {
     startTime ??= time;
     const progress = Math.min((time - startTime) / MORPH_DURATION, 1);
 
-    place(standIn, interpolate(start, target.getBoundingClientRect(), easeOut(progress)));    requestAnimationFrame(progress < 1 ? step : (): void => standIn.remove());
+    place(standIn, interpolate(start, target.getBoundingClientRect(), easeOut(progress)));
+    requestAnimationFrame(progress < 1 ? step : (): void => standIn.remove());
   };
 
   requestAnimationFrame(step);

@@ -12,7 +12,7 @@ import { Signal } from "@/core/utils/reactive/signal";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createPostGridSettings } from "@/core/app/preferences";
+import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { doNothing } from "@/core/utils/function/function";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
@@ -30,7 +30,7 @@ export interface PostListPageDependencies {
 
 export function mountPostListPage(container: HTMLElement, configuration: PostListPageConfiguration, dependencies: PostListPageDependencies): void {
   const { visibilityObserver, scheduler, remoteMedia, remotePages, localKeyedValues } = dependencies;
-  const { layout, size, upscale } = createPostGridSettings(createAppStorage(localKeyedValues).preferences);
+  const { layout, size, upscale } = pickPostGridPreferences(createAppPreferences(createAppStorage(localKeyedValues).preferences));
   const app = mountAppRoot(container, { colorScheme: configuration.colorScheme, styles: [UI_CSS] });
   const screen = render(container.ownerDocument, () => [
     h(SkeletonGrid, {

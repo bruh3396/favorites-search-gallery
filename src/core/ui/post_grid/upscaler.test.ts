@@ -1,4 +1,4 @@
-import { UPSCALE_DELAY, Upscaler } from "@/core/ui/post_grid/upscaler";
+import { MAX_CANVAS_HEIGHT, MAX_CANVAS_WIDTH, UPSCALE_DELAY, Upscaler } from "@/core/ui/post_grid/upscaler";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -50,7 +50,7 @@ function setup(decode: DecodeImage = () => Promise.resolve(createBitmap() as unk
   return { upscaler, scheduler, canvas, decodeImage, drawImage, upscaleNow };
 }
 
-function createBitmap(width = 640, height = 480): FakeBitmap {
+function createBitmap(width = MAX_CANVAS_WIDTH / 2, height = MAX_CANVAS_WIDTH / 4): FakeBitmap {
   return { width, height, close: vi.fn() };
 }
 
@@ -76,8 +76,8 @@ describe("Upscaler", () => {
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
 
-    expect(drawImage).toHaveBeenCalledExactlyOnceWith(bitmap as unknown as ImageBitmap, 0, 0, 640, 480);
-    expect([canvas.width, canvas.height, canvas.hidden]).toEqual([640, 480, false]);
+    expect(drawImage).toHaveBeenCalledExactlyOnceWith(bitmap as unknown as ImageBitmap, 0, 0, bitmap.width, bitmap.height);
+    expect([canvas.width, canvas.height, canvas.hidden]).toEqual([bitmap.width, bitmap.height, false]);
     expect(bitmap.close).toHaveBeenCalledOnce();
   });
 
@@ -102,11 +102,13 @@ describe("Upscaler", () => {
   });
 
   test("scales a wide image down to the maximum width", async() => {
-    expect(await drawnSize(createBitmap(3_600, 2_400))).toEqual([700, 467]);
+    expect(await drawnSize(createBitmap(MAX_CANVAS_WIDTH * 6, MAX_CANVAS_WIDTH * 4))).toEqual([MAX_CANVAS_WIDTH, Math.round(MAX_CANVAS_WIDTH * 4 / 6)]);
   });
 
   test("scales a tall image down to the maximum height", async() => {
-    expect(await drawnSize(createBitmap(800, 32_000))).toEqual([400, 16_000]);
+    const width = Math.min(MAX_CANVAS_WIDTH, MAX_CANVAS_HEIGHT / 40);
+
+    expect(await drawnSize(createBitmap(width * 2, MAX_CANVAS_HEIGHT * 2))).toEqual([width, MAX_CANVAS_HEIGHT]);
   });
 
   test("does not start another request while one is in flight", () => {
