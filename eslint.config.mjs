@@ -27,6 +27,20 @@ const READONLY_BEHAVIOR = [
   "TSTypeAliasDeclaration[id.name=/(Dependencies|Props)$/] > TSTypeLiteral > TSPropertySignature[readonly=true]",
   "TSTypeAliasDeclaration[id.name=/(Dependencies|Props)$/] > TSMappedType[readonly=true]"
 ].map(selector => ({ selector, message: BEHAVIOR_MESSAGE }));
+// Core holds references to the elements it builds; searching the tree couples it to markup it may not own.
+const DOM_SEARCH_MESSAGE = "Don't search the DOM in core: keep a reference to the element, or ask the component that owns it.";
+const DOM_SEARCHES = [
+  "querySelector",
+  "querySelectorAll",
+  "closest",
+  "getElementById",
+  "getElementsByClassName",
+  "getElementsByTagName",
+  "getElementsByTagNameNS",
+  "getElementsByName",
+  "elementFromPoint",
+  "elementsFromPoint"
+].map(property => ({ property, message: DOM_SEARCH_MESSAGE }));
 const CALLED_ONCE = {
   selector: "CallExpression[callee.property.name='toHaveBeenCalledTimes'][arguments.length=1][arguments.0.value=1]",
   message: "Use toHaveBeenCalledOnce() instead of toHaveBeenCalledTimes(1)."
@@ -678,6 +692,13 @@ export default defineConfig([
     files: ["**/*.test.{ts,tsx}"],
     rules: {
       "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, CALLED_ONCE]
+    }
+  },
+  {
+    files: ["src/core/**/*.{ts,tsx}"],
+    ignores: ["src/**/*.test.{ts,tsx}", "src/**/testing/**"],
+    rules: {
+      "no-restricted-properties": ["error", ...DOM_SEARCHES]
     }
   },
   {

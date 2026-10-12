@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 function createLocalPosts(): IndexedDbLocalPosts {
-  return new IndexedDbLocalPosts(new IndexedDbClient());
+  return new IndexedDbLocalPosts(new IndexedDbClient(() => null));
 }
 
 describe("IndexedDbLocalPosts", () => {

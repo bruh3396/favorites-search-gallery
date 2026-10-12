@@ -1,3 +1,4 @@
+import { NO_MEDIA } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 
 export function createPost(overrides: Partial<Post> = {}): Post {
@@ -9,7 +10,7 @@ export function createPost(overrides: Partial<Post> = {}): Post {
     score: 0,
     rating: "explicit",
     changedAt: 0,
-    media: { kind: "image", locator: "" },
+    media: NO_MEDIA,
     ...overrides
   };
 }

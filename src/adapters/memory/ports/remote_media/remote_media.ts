@@ -10,20 +10,16 @@ export class MemoryRemoteMedia implements RemoteMedia {
     return Promise.resolve(media.locator);
   }
 
-  public resolveOriginalImageFallbackUrl(media: Media): Promise<string> {
-    return this.resolveOriginalUrl(media);
-  }
-
   public resolveImageUrl(media: Media): Promise<string> {
     return Promise.resolve(media.locator);
   }
 
-  public fetchImage(media: Media, signal?: AbortSignal): Promise<Blob> {
-    return this.fetchOriginal(media, signal);
+  public decodeImage(): Promise<ImageBitmap> {
+    return this.decodeOriginal();
   }
 
-  public async fetchOriginal(media: Media, signal?: AbortSignal): Promise<Blob> {
-    return (await fetch(media.locator, { signal })).blob();
+  public decodeOriginal(): Promise<ImageBitmap> {
+    return Promise.resolve({ width: 1, height: 1, close: (): void => undefined } as ImageBitmap);
   }
 
   public fetchDurationSeconds(): Promise<number> {

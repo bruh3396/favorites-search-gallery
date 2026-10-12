@@ -1,4 +1,3 @@
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
@@ -19,7 +18,6 @@ import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 
 export interface Ports {
-  readonly bitmapDecoder: BitmapDecoder;
   readonly hostPage: HostPage;
   readonly localFavorites: LocalFavorites;
   readonly localKeyedValues: LocalKeyedValues;

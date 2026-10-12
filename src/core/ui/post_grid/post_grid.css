@@ -77,6 +77,11 @@
   cursor: default;
 }
 
+.fsg-Tile-link,
+.fsg-Tile-preview {
+  -webkit-user-drag: none;
+}
+
 .fsg-Tile-preview {
   display: block;
   inline-size: 100%;
@@ -166,6 +171,58 @@
 @media (prefers-reduced-motion: reduce) {
   .fsg-Tile::after {
     animation: none;
+  }
+}
+
+.fsg-Tile[data-highlight="glow"] {
+  z-index: 1;
+  animation: fsg-Tile-glow 1.4s ease-out;
+}
+
+@keyframes fsg-Tile-glow {
+  0%,
+  25% {
+    box-shadow: 0 0 0 3px var(--fsg-color-accent), 0 0 24px 8px color-mix(in srgb, var(--fsg-color-accent) 80%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 3px transparent, 0 0 24px 8px transparent;
+  }
+}
+
+.fsg-Tile[data-highlight="blink"] {
+  animation: fsg-Tile-blink 1.2s steps(1);
+}
+
+@keyframes fsg-Tile-blink {
+  0%,
+  34%,
+  68% {
+    opacity: 0.2;
+  }
+
+  17%,
+  51%,
+  85%,
+  100% {
+    opacity: 1;
+  }
+}
+
+.fsg-Tile[data-highlight="sheen"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(110deg, transparent 30%, rgb(255 255 255 / 0.75) 50%, transparent 70%);
+  translate: -120%;
+  animation: fsg-Tile-sheen 800ms ease-in-out 2;
+  pointer-events: none;
+}
+
+@keyframes fsg-Tile-sheen {
+  to {
+    translate: 120%;
   }
 }
 

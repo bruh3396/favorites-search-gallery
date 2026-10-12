@@ -1,14 +1,15 @@
 import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
-import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
+import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
+import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
+import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Environment } from "@/core/boundary/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
@@ -23,7 +24,6 @@ import { Rule34RemoteFavoriteActions } from "@/adapters/rule34/ports/remote_favo
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
-import { Signal } from "@/core/utils/reactive/signal";
 
 declare const USE_LOCAL_SERVER: boolean;
 declare const FAVORITES_OWNER_ID: string;
@@ -44,7 +44,7 @@ function createFavoritesPageDependencies(): FavoritesPageDependencies {
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
-  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler });
+  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
   const mintMedia = (file: { url: string; tags: string }): Media | null => rule34Cdn.mintMedia(file);
   const rule34Document = {
     isFirstFavoritesPage: (): boolean => false,
@@ -56,7 +56,7 @@ function createFavoritesPageDependencies(): FavoritesPageDependencies {
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: ENVIRONMENT.favoritesOwnerId, version: ENVIRONMENT.version, platform: ENVIRONMENT.device }
   }, { scheduler, fetch: boundFetch });
-  const indexedDb = new IndexedDbClient();
+  const indexedDb = new IndexedDbClient(mintMedia);
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: ENVIRONMENT.favoritesOwnerId }, indexedDb),
     localPosts: new IndexedDbLocalPosts(indexedDb),
@@ -64,18 +64,18 @@ function createFavoritesPageDependencies(): FavoritesPageDependencies {
     localKeyedValues: new BrowserLocalKeyedValues(),
     remoteFavorites: new Rule34RemoteFavorites({ rule34, rule34Document, scheduler, randomSource }),
     remoteFavoriteActions: new Rule34RemoteFavoriteActions({ fetch: boundFetch, scheduler, randomSource }),
-    visiblePosts: new Signal<readonly Favorite[]>([]),
     remotePosts: new FallbackRemotePosts({
       primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
       fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
     }),
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
-    bitmapDecoder: new BrowserBitmapDecoder(),
     visibilityObserver: new BrowserVisibilityObserver(),
     remotePages: new Rule34RemotePages(rule34),
     scheduler,
     randomSource,
-    viewport: new BrowserViewport()
+    viewport: new BrowserViewport(),
+    morpher: new BrowserMorpher(),
+    navigator: new BrowserNavigator()
   };
 }
 

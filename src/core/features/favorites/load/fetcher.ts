@@ -4,7 +4,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/collec
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { Post } from "@/core/domain/post/post";
-import { PostLibrary } from "@/core/posts/library";
+import { PostLibrary } from "@/core/features/favorites/load/library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 interface MutableFetchProgress {

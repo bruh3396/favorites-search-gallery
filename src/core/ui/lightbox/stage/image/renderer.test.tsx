@@ -1,6 +1,5 @@
 import { ImageRenderer, ImageRendererDependencies } from "@/core/ui/lightbox/stage/image/renderer";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -23,8 +22,7 @@ interface Setup {
   original: HTMLCanvasElement;
   scheduler: MemoryScheduler;
   resolvePreviewUrl: Mock<ImageRendererDependencies["resolvePreviewUrl"]>;
-  fetchOriginal: Mock<ImageRendererDependencies["fetchOriginal"]>;
-  decode: Mock<BitmapDecoder["decode"]>;
+  decodeOriginal: Mock<ImageRendererDependencies["decodeOriginal"]>;
   drawImage: Mock<(bitmap: FakeBitmap) => void>;
   bitmaps: FakeBitmap[];
 }
@@ -38,36 +36,28 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
 }
 
 function setup(
-  fetch: ImageRendererDependencies["fetchOriginal"] = media => Promise.resolve(Object.assign(new Blob(), { locator: media.locator })),
+  decode?: ImageRendererDependencies["decodeOriginal"],
   previewUrl: ImageRendererDependencies["resolvePreviewUrl"] = media => Promise.resolve(`https://preview/${media.locator}`),
   context: "available" | "missing" = "available"
 ): Setup {
   const scheduler = new MemoryScheduler();
   const resolvePreviewUrl = vi.fn(previewUrl);
-  const fetchOriginal = vi.fn(fetch);
   const bitmaps: FakeBitmap[] = [];
-  const decode = vi.fn<BitmapDecoder["decode"]>(source => {
-    const bitmap = { width: 320, height: 240, locator: (source as Blob & { locator: string }).locator, close: vi.fn() };
+  const decodeOriginal = vi.fn<ImageRendererDependencies["decodeOriginal"]>(decode ?? ((media): Promise<ImageBitmap> => {
+    const bitmap = { width: 320, height: 240, locator: media.locator, close: vi.fn() };
 
     bitmaps.push(bitmap);
     return Promise.resolve(bitmap as unknown as ImageBitmap);
-  });
+  }));
   const drawImage = vi.fn<(bitmap: FakeBitmap) => void>();
   const drawingContext = context === "available" ? { drawImage } as unknown as CanvasRenderingContext2D : null;
   const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(drawingContext);
 
   onTestFinished(() => spy.mockRestore());
-  const resolveOriginalImageFallbackUrl = vi.fn<ImageRendererDependencies["resolveOriginalImageFallbackUrl"]>(media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`));
-  const { result: renderer } = render(document, () => new ImageRenderer({
-    resolvePreviewUrl,
-    resolveOriginalImageFallbackUrl,
-    fetchOriginal,
-    bitmapDecoder: { decode },
-    scheduler
-  }));
+  const { result: renderer } = render(document, () => new ImageRenderer({ resolvePreviewUrl, decodeOriginal, scheduler }));
   const preview = renderer.root.querySelector<HTMLImageElement>("img")!;
   const original = renderer.root.querySelector<HTMLCanvasElement>("canvas")!;
-  return { renderer, preview, original, scheduler, resolvePreviewUrl, fetchOriginal, decode, drawImage, bitmaps };
+  return { renderer, preview, original, scheduler, resolvePreviewUrl, decodeOriginal, drawImage, bitmaps };
 }
 
 describe("ImageRenderer", () => {
@@ -136,28 +126,28 @@ describe("ImageRenderer", () => {
   });
 
   test("waits for quick navigation to settle before loading the next original", async() => {
-    const { renderer, scheduler, fetchOriginal } = setup(() => new Promise(() => undefined));
+    const { renderer, scheduler, decodeOriginal } = setup(() => new Promise(() => undefined));
 
     renderer.show(FIRST);
-    await vi.waitFor(() => expect(fetchOriginal).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(decodeOriginal).toHaveBeenCalledOnce());
     renderer.show(SECOND);
     scheduler.advance(199);
-    expect(fetchOriginal).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
     scheduler.advance(1);
-    await vi.waitFor(() => expect(fetchOriginal).toHaveBeenCalledTimes(2));
-    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
+    await vi.waitFor(() => expect(decodeOriginal).toHaveBeenCalledTimes(2));
+    expect(decodeOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
   });
 
   test("preloads neighbors and reuses a cached bitmap when shown", async() => {
-    const { renderer, scheduler, fetchOriginal, drawImage } = setup();
+    const { renderer, scheduler, decodeOriginal, drawImage } = setup();
 
     renderer.setNeighbors([SECOND]);
     scheduler.advance(200);
-    await vi.waitFor(() => expect(fetchOriginal).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(decodeOriginal).toHaveBeenCalledOnce());
     await vi.waitFor(() => expect(drawImage).not.toHaveBeenCalled());
     renderer.show(SECOND);
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
-    expect(fetchOriginal).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
   });
 
   test("retains current and neighbor bitmaps and releases removed neighbors", async() => {
@@ -179,14 +169,14 @@ describe("ImageRenderer", () => {
   });
 
   test("clears the image and canvas and cancels a pending original", async() => {
-    const { renderer, preview, original, scheduler, fetchOriginal, bitmaps } = setup();
+    const { renderer, preview, original, scheduler, decodeOriginal, bitmaps } = setup();
 
     renderer.show(FIRST);
     await vi.waitFor(() => expect(bitmaps).toHaveLength(1));
     renderer.show(SECOND);
     renderer.clear();
     scheduler.advance(200);
-    expect(fetchOriginal).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
     expect([renderer.root.hidden, preview.hidden, original.hidden]).toEqual([true, true, true]);
     expect(preview.hasAttribute("src")).toBe(false);
     expect([original.width, original.height]).toEqual([0, 0]);
@@ -194,14 +184,14 @@ describe("ImageRenderer", () => {
   });
 
   test("disposes pending preloads and releases the current bitmap", async() => {
-    const { renderer, scheduler, fetchOriginal, bitmaps, preview, original } = setup();
+    const { renderer, scheduler, decodeOriginal, bitmaps, preview, original } = setup();
 
     renderer.show(FIRST);
     await vi.waitFor(() => expect(bitmaps).toHaveLength(1));
     renderer.setNeighbors([SECOND]);
     renderer.dispose();
     scheduler.advance(200);
-    expect(fetchOriginal).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
     await vi.waitFor(() => expect(bitmaps[0].close).toHaveBeenCalledOnce());
     expect([renderer.root.hidden, preview.hidden, original.hidden]).toEqual([true, true, true]);
   });

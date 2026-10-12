@@ -2,9 +2,9 @@ import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer
 import { LightboxRendererClass, LightboxStageRenderer, PreloadingRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Signal, effect } from "@/core/utils/reactive/signal";
 import { BitmapCache } from "@/core/ui/lightbox/stage/image/bitmap_cache";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
+import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
 import { Resource } from "@/core/utils/reactive/resource";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { doNothing } from "@/core/utils/function/function";
@@ -14,9 +14,7 @@ const SETTLE_DELAY = 200;
 
 export interface ImageRendererDependencies {
   resolvePreviewUrl: (media: Media) => Promise<string>;
-  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
-  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  bitmapDecoder: BitmapDecoder;
+  decodeOriginal: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
 }
 
@@ -36,11 +34,7 @@ export class ImageRenderer extends PreloadingRenderer implements LightboxStageRe
     this.preview = <img className={LightboxRendererClass.media} alt="" decoding="async" /> as HTMLImageElement;
     this.original = <canvas className={LightboxRendererClass.media} /> as HTMLCanvasElement;
     this.root = <div className={LightboxRendererClass.root}>{this.preview}{this.original}</div>;
-    this.bitmapCache = new BitmapCache({
-      fetchOriginal: dependencies.fetchOriginal,
-      resolveOriginalImageFallbackUrl: dependencies.resolveOriginalImageFallbackUrl,
-      bitmapDecoder: dependencies.bitmapDecoder
-    });
+    this.bitmapCache = new BitmapCache({ decodeOriginal: dependencies.decodeOriginal });
     this.originalLoadTask = createDebouncedTask({ delay: SETTLE_DELAY, leading: true }, dependencies.scheduler, (item, resolve, reject) => {
       this.bitmapCache.load(item).then(resolve, reject);
     });
@@ -53,6 +47,10 @@ export class ImageRenderer extends PreloadingRenderer implements LightboxStageRe
       load: (item): Promise<ImageBitmap | undefined> => this.loadOnceSettled(item)
     });
     this.stopRenderEffect = effect(() => this.render());
+  }
+
+  public get shownMedia(): MorphSource {
+    return this.original.hidden ? this.preview : this.original;
   }
 
   public show(item: MediaItem): void {

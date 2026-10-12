@@ -1,4 +1,4 @@
-﻿import { configDefaults, defineConfig } from "vitest/config";
+import { configDefaults, defineConfig } from "vitest/config";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -8,10 +8,13 @@ const DOM_TESTS = [
   "src/core/app/**/*.test.{ts,tsx}",
   "src/core/ui/**/*.test.{ts,tsx}",
   "src/core/features/**/*.test.tsx",
+  "src/adapters/browser/image/image.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/viewport/viewport.test.ts",
+  "src/adapters/browser/ports/morpher/morpher.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
+  "src/adapters/memory/ports/morpher/morpher.test.ts",
   "src/adapters/rule34/client/{client,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
   "src/adapters/rule34/document/document.test.ts",
   "src/adapters/rule34_cdn/client/video_duration.test.ts"
@@ -58,7 +61,7 @@ export default defineConfig({
         "src/**/*.test.{ts,tsx}",
         "src/**/*.d.ts",
         // TODO: cover once the post list grid gets posts and the favorites pane gets add/remove actions (then test the favorites gate).
-        "src/core/app/post_list_page/post_list_page.ts",
+        "src/core/app/post_list_page/composer.ts",
         "src/core/app/favorites_page/composer.ts"
       ]
     }

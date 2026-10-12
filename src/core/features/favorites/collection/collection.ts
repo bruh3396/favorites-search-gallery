@@ -5,6 +5,7 @@ import { FavoritesColumnarArena } from "@/core/features/favorites/collection/col
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
 import { Post } from "@/core/domain/post/post";
 import { TermUpdate } from "@/core/search/engines/search_engine";
+import { hasMedia } from "@/core/domain/media/media";
 
 export class FavoritesCollection {
   private readonly list = new IdentifiedList<ArenaFavorite>();
@@ -53,12 +54,12 @@ export class FavoritesCollection {
       return undefined;
     }
     const oldTerms = favorite.tags;
-    const wasPlaceholder = favorite.media.locator === "";
+    const wasMediaAvailable = hasMedia(favorite.media);
 
     this.arena.write(favorite.slot, post);
     const newTerms = favorite.tags;
 
-    if (wasPlaceholder && favorite.media.locator !== "") {
+    if (!wasMediaAvailable && hasMedia(favorite.media)) {
       this.hydratedFavorites.emit(favorite);
     }
     return oldTerms.symmetricDifference(newTerms).size > 0 ? { doc: favorite, oldTerms, newTerms } : undefined;

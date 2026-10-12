@@ -1,4 +1,4 @@
-import { LegacyMigration, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
+import { LegacyMigration, LegacyMintMedia, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
 
 const DATABASE_NAME = "favorites-search-gallery";
 const VERSION = 1;
@@ -14,6 +14,8 @@ export type IndexedDbStoreName = keyof typeof SCHEMA;
 
 export class IndexedDbClient {
   private connection: Promise<IDBDatabase> | undefined;
+
+  constructor(private readonly mintLegacyMedia: LegacyMintMedia) {}
 
   public async runTransaction<T>(
     storeName: IndexedDbStoreName,
@@ -39,7 +41,7 @@ export class IndexedDbClient {
   }
 
   private async migrateAndOpen(): Promise<IDBDatabase> {
-    const migration = await prepareLegacyMigration(DATABASE_NAME);
+    const migration = await prepareLegacyMigration(DATABASE_NAME, this.mintLegacyMedia);
     const database = await this.openWithMigration(migration);
 
     migration.deleteLegacyDatabases();

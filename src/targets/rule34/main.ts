@@ -1,14 +1,15 @@
 import { AppMode, Environment } from "@/core/boundary/environment";
 import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
-import { BrowserBitmapDecoder } from "@/adapters/browser/ports/bitmap_decoder/bitmap_decoder";
+import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
+import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
+import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
@@ -17,7 +18,6 @@ import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
@@ -29,7 +29,6 @@ import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { Signal } from "@/core/utils/reactive/signal";
 import { mountPostListPage } from "@/core/app/post_list_page/composer";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
@@ -51,7 +50,6 @@ interface PageDependencies {
 }
 
 type ComposePage = (environment: Environment, dependencies: PageDependencies) => void;
-type FavoritesPortDependencies = Omit<FavoritesPageDependencies, "scheduler" | "randomSource" | "localKeyedValues" | "viewport" | "visiblePosts">;
 
 const PAGES: Record<AppMode, ComposePage> = {
   favorites: composeFavoritesPage,
@@ -71,7 +69,7 @@ function createPageDependencies(environment: Environment, rule34Document: Rule34
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
-  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler });
+  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
   const mintMedia = (file: { url: string; tags: string }): Media | null => rule34Cdn.mintMedia(file);
   const rule34 = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
   const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
@@ -83,26 +81,28 @@ function createPageDependencies(environment: Environment, rule34Document: Rule34
 }
 
 function composeFavoritesPage(environment: Environment, dependencies: PageDependencies): void {
-  const { scheduler, randomSource, localKeyedValues, hostPage, viewport } = dependencies;
-  const ports = createFavoritesPorts(environment, dependencies);
-
-  mountFavoritesPage(hostPage.claimContent(), {
+  mountFavoritesPage(dependencies.hostPage.claimContent(), {
     userOwnsFavorites: environment.ownsFavorites,
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
-  }, { ...ports, scheduler, randomSource, localKeyedValues, viewport, visiblePosts: new Signal<readonly Favorite[]>([]) });
+  }, createFavoritesDependencies(environment, dependencies));
 }
 
-function createFavoritesPorts(environment: Environment, dependencies: PageDependencies): FavoritesPortDependencies {
-  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn } = dependencies;
+function createFavoritesDependencies(environment: Environment, dependencies: PageDependencies): FavoritesPageDependencies {
+  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, localKeyedValues, viewport } = dependencies;
   const frozenCobalt = new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: rule34Document.readUserId(), version: environment.version, platform: environment.device }
   }, { scheduler, fetch });
-  const indexedDb = new IndexedDbClient();
+  const indexedDb = new IndexedDbClient(mintMedia);
   return {
-    bitmapDecoder: new BrowserBitmapDecoder(),
+    scheduler,
+    randomSource,
+    localKeyedValues,
+    viewport,
+    morpher: new BrowserMorpher(),
+    navigator: new BrowserNavigator(),
     localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDb),
     localPosts: new IndexedDbLocalPosts(indexedDb),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
@@ -118,11 +118,10 @@ function createFavoritesPorts(environment: Environment, dependencies: PageDepend
   };
 }
 
-function composePostListPage(environment: Environment, { hostPage, rule34, rule34Cdn, localKeyedValues }: PageDependencies): void {
+function composePostListPage(environment: Environment, { hostPage, rule34, rule34Cdn, localKeyedValues, scheduler }: PageDependencies): void {
   mountPostListPage(hostPage.claimContent(), { colorScheme: environment.colorScheme }, {
-    bitmapDecoder: new BrowserBitmapDecoder(),
+    scheduler,
     visibilityObserver: new BrowserVisibilityObserver(),
-    visiblePosts: new Signal<readonly MediaItem[]>([]),
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
     remotePages: new Rule34RemotePages(rule34),
     localKeyedValues

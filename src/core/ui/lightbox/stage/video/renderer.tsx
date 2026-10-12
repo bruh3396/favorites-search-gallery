@@ -1,6 +1,7 @@
 import { LightboxRendererClass, LightboxStageRenderer, PreloadingRenderer } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
+import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { VideoElementPool } from "@/core/ui/lightbox/stage/video/element_pool";
 import { h } from "@/core/ui/h/h";
@@ -22,6 +23,10 @@ export class VideoRenderer extends PreloadingRenderer implements LightboxStageRe
     super(dependencies.scheduler);
     this.pool = new VideoElementPool(VIDEO_POOL_CAPACITY, dependencies.resolveOriginalUrl);
     this.root = <div className={LightboxRendererClass.root} hidden>{this.pool.videoElements}</div>;
+  }
+
+  public get shownMedia(): MorphSource | undefined {
+    return this.pool.activeVideo;
   }
 
   public show(item: MediaItem): void {

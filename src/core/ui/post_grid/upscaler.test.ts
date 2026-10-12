@@ -1,7 +1,7 @@
+import { UPSCALE_DELAY, Upscaler } from "@/core/ui/post_grid/upscaler";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
-import { Upscaler } from "@/core/ui/post_grid/upscaler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
@@ -12,12 +12,15 @@ interface FakeBitmap {
   close: () => void;
 }
 
+type DecodeImage = (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+
 interface Setup {
   upscaler: Upscaler;
+  scheduler: MemoryScheduler;
   canvas: HTMLCanvasElement;
-  fetchImage: ReturnType<typeof vi.fn<(media: Media, signal: AbortSignal) => Promise<Blob>>>;
-  decode: ReturnType<typeof vi.fn<BitmapDecoder["decode"]>>;
+  decodeImage: ReturnType<typeof vi.fn<DecodeImage>>;
   drawImage: ReturnType<typeof vi.fn>;
+  upscaleNow: () => void;
 }
 
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
@@ -28,66 +31,97 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
   return { promise, resolve };
 }
 
-function setup(
-  fetch: (media: Media, signal: AbortSignal) => Promise<Blob> = () => Promise.resolve(new Blob()),
-  decode: BitmapDecoder["decode"] = () => Promise.resolve(createBitmap() as unknown as ImageBitmap)
-): Setup {
+function setup(decode: DecodeImage = () => Promise.resolve(createBitmap() as unknown as ImageBitmap)): Setup {
   const canvas = document.createElement("canvas");
 
   canvas.hidden = true;
   const drawImage = vi.fn();
   const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext")
     .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
-  const fetchImage = vi.fn(fetch);
-  const decodeBitmap = vi.fn(decode);
-  const upscaler = new Upscaler({
-    canvas,
-    media: MEDIA,
-    bitmapDecoder: { decode: decodeBitmap },
-    fetchImage
-  });
+  const decodeImage = vi.fn(decode);
+  const scheduler = new MemoryScheduler();
+  const upscaler = new Upscaler({ canvas, media: MEDIA, decodeImage, scheduler });
+  const upscaleNow = (): void => {
+    upscaler.upscale();
+    scheduler.advance(UPSCALE_DELAY);
+  };
 
   onTestFinished(() => getContext.mockRestore());
-  return { upscaler, canvas, fetchImage, decode: decodeBitmap, drawImage };
+  return { upscaler, scheduler, canvas, decodeImage, drawImage, upscaleNow };
 }
 
-function createBitmap(): FakeBitmap {
-  return { width: 640, height: 480, close: vi.fn() };
+function createBitmap(width = 640, height = 480): FakeBitmap {
+  return { width, height, close: vi.fn() };
+}
+
+async function drawnSize(bitmap: FakeBitmap): Promise<number[]> {
+  const { canvas, drawImage, upscaleNow } = setup(() => Promise.resolve(bitmap as unknown as ImageBitmap));
+
+  upscaleNow();
+  await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
+  expect(drawImage).toHaveBeenCalledWith(bitmap, 0, 0, canvas.width, canvas.height);
+  return [canvas.width, canvas.height];
 }
 
 describe("Upscaler", () => {
-  test("fetches and draws the image when upscaling is requested", async() => {
-    const pendingFetch = deferred<Blob>();
+  test("decodes and draws the image when upscaling is requested", async() => {
+    const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
-    const { upscaler, canvas, fetchImage, decode, drawImage } = setup(() => pendingFetch.promise, () => Promise.resolve(bitmap as unknown as ImageBitmap));
+    const { canvas, decodeImage, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
 
-    upscaler.upscale();
-    expect(fetchImage).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal));
+    upscaleNow();
+    expect(decodeImage).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal));
     expect(canvas.hidden).toBe(true);
 
-    pendingFetch.resolve(new Blob());
+    pendingDecode.resolve(bitmap as unknown as ImageBitmap);
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
 
-    expect(decode).toHaveBeenCalledOnce();
-    expect(drawImage).toHaveBeenCalledExactlyOnceWith(bitmap as unknown as ImageBitmap, 0, 0);
+    expect(drawImage).toHaveBeenCalledExactlyOnceWith(bitmap as unknown as ImageBitmap, 0, 0, 640, 480);
     expect([canvas.width, canvas.height, canvas.hidden]).toEqual([640, 480, false]);
     expect(bitmap.close).toHaveBeenCalledOnce();
   });
 
-  test("does not start another request while one is in flight", () => {
-    const pendingFetch = deferred<Blob>();
-    const { upscaler, fetchImage } = setup(() => pendingFetch.promise);
+  test("waits for the tile to stay in view before decoding", () => {
+    const { upscaler, scheduler, decodeImage } = setup();
 
     upscaler.upscale();
     upscaler.upscale();
-
-    expect(fetchImage).toHaveBeenCalledOnce();
+    scheduler.advance(UPSCALE_DELAY - 1);
+    expect(decodeImage).not.toHaveBeenCalled();
+    scheduler.advance(1);
+    expect(decodeImage).toHaveBeenCalledOnce();
   });
 
-  test("hides and shows a completed image without fetching it again", async() => {
-    const { upscaler, canvas, fetchImage, drawImage } = setup();
+  test("never decodes a tile left before the delay passes", () => {
+    const { upscaler, scheduler, decodeImage } = setup();
 
     upscaler.upscale();
+    upscaler.dispose();
+    scheduler.advance(UPSCALE_DELAY);
+    expect(decodeImage).not.toHaveBeenCalled();
+  });
+
+  test("scales a wide image down to the maximum width", async() => {
+    expect(await drawnSize(createBitmap(3_600, 2_400))).toEqual([700, 467]);
+  });
+
+  test("scales a tall image down to the maximum height", async() => {
+    expect(await drawnSize(createBitmap(800, 32_000))).toEqual([400, 16_000]);
+  });
+
+  test("does not start another request while one is in flight", () => {
+    const { decodeImage, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
+
+    upscaleNow();
+    upscaleNow();
+
+    expect(decodeImage).toHaveBeenCalledOnce();
+  });
+
+  test("hides and shows a completed image without decoding it again", async() => {
+    const { upscaler, canvas, decodeImage, drawImage, upscaleNow } = setup();
+
+    upscaleNow();
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
     upscaler.disable();
     expect(canvas.hidden).toBe(true);
@@ -95,31 +129,31 @@ describe("Upscaler", () => {
     upscaler.upscale();
 
     expect(canvas.hidden).toBe(false);
-    expect(fetchImage).toHaveBeenCalledOnce();
+    expect(decodeImage).toHaveBeenCalledOnce();
   });
 
   test("logs a failed request and tries again on the next request", async() => {
     const error = new Error("offline");
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { upscaler, fetchImage, drawImage } = setup(() => Promise.reject(error));
+    const { decodeImage, drawImage, upscaleNow } = setup(() => Promise.reject(error));
 
     onTestFinished(() => log.mockRestore());
-    upscaler.upscale();
+    upscaleNow();
     await vi.waitFor(() => expect(log).toHaveBeenCalledWith(error));
-    fetchImage.mockResolvedValue(new Blob());
-    upscaler.upscale();
+    decodeImage.mockResolvedValue(createBitmap() as unknown as ImageBitmap);
+    upscaleNow();
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
   });
 
   test("ignores the failure of a request it already aborted", async() => {
     let fail: (error: Error) => void = () => undefined;
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { upscaler } = setup(() => new Promise((_, reject) => {
+    const { upscaler, upscaleNow } = setup(() => new Promise((_, reject) => {
       fail = reject;
     }));
 
     onTestFinished(() => log.mockRestore());
-    upscaler.upscale();
+    upscaleNow();
     upscaler.dispose();
     fail(new Error("aborted"));
     await flushMicrotasks();
@@ -127,11 +161,10 @@ describe("Upscaler", () => {
   });
 
   test("aborts an in-flight request when disabled", () => {
-    const pendingFetch = deferred<Blob>();
-    const { upscaler, fetchImage, canvas } = setup(() => pendingFetch.promise);
+    const { upscaler, decodeImage, canvas, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
 
-    upscaler.upscale();
-    const signal = fetchImage.mock.calls[0][1];
+    upscaleNow();
+    const signal = decodeImage.mock.calls[0][1];
 
     upscaler.disable();
 
@@ -140,22 +173,16 @@ describe("Upscaler", () => {
   });
 
   test("aborts a request and closes its bitmap if the result arrives later", async() => {
-    const pendingFetch = deferred<Blob>();
     const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
-    const { upscaler, canvas, fetchImage, decode, drawImage } = setup(
-      () => pendingFetch.promise,
-      () => pendingDecode.promise
-    );
+    const { upscaler, canvas, decodeImage, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
 
-    upscaler.upscale();
-    const signal = fetchImage.mock.calls[0][1];
+    upscaleNow();
+    const signal = decodeImage.mock.calls[0][1];
 
     upscaler.dispose();
 
     expect(signal.aborted).toBe(true);
-    pendingFetch.resolve(new Blob());
-    await vi.waitFor(() => expect(decode).toHaveBeenCalledOnce());
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);
     await vi.waitFor(() => expect(bitmap.close).toHaveBeenCalledOnce());
 

@@ -1,9 +1,7 @@
 import { removeExtraWhitespace, removeNonNumericCharacters } from "@/core/utils/string/string";
-import { Media } from "@/core/domain/media/media";
+import { NO_MEDIA } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
-
-const NO_MEDIA: Media = { kind: "image", locator: "" };
 
 export function parseThumb(thumb: HTMLElement, mintMedia: Rule34MintMedia): Post | null {
   const id = parseId(thumb);

@@ -17,7 +17,7 @@ export function createPostGridSettings(storage: PreferenceStorage): PostGridPref
   return {
     layout: new StoredPreference<GridLayout>({ key: "postGridLayout", defaultValue: "column" }, { storage, codec: createGuardedCodec(oneOf(GRID_LAYOUTS)) }),
     size: new StoredPreference({ key: "postGridSize", defaultValue: 6 }, { storage }),
-    upscale: new StoredPreference({ key: "postGridUpscale", defaultValue: false }, { storage })
+    upscale: new StoredPreference({ key: "postGridUpscale", defaultValue: true }, { storage })
   };
 }
 

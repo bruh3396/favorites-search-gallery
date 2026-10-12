@@ -7,7 +7,7 @@ import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxStageClass } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
-import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
+import { MemoryMorpher } from "@/adapters/memory/ports/morpher/morpher";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { doNothing } from "@/core/utils/function/function";
 import { expectClassesStyled } from "@/testing/css";
@@ -19,10 +19,12 @@ interface Setup {
   dialog: HTMLDialogElement;
   lightbox: Lightbox<MediaItem>;
   scheduler: MemoryScheduler;
-  fetchOriginal: Mock<(media: Media, signal: AbortSignal) => Promise<Blob>>;
+  decodeOriginal: Mock<(media: Media, signal: AbortSignal) => Promise<ImageBitmap>>;
   onShowNext: Mock<() => Promise<void>>;
   onShowPrevious: Mock<() => Promise<void>>;
   onClose: Mock<() => void>;
+  morpher: MemoryMorpher;
+  place: HTMLElement;
 }
 
 function sequence(position: SequencePosition | undefined = { index: 0, total: 1 }): MediaSequence<MediaItem> {
@@ -33,22 +35,24 @@ function sequence(position: SequencePosition | undefined = { index: 0, total: 1 
   };
 }
 
-function setup(): Setup {
+function setup({ morphs = true } = {}): Setup {
   const lightbox = new Lightbox<MediaItem>({ warmLimit: 2, maxNeighborDistance: 2 });
   const onShowNext = vi.spyOn(lightbox, "showNext").mockResolvedValue();
   const onShowPrevious = vi.spyOn(lightbox, "showPrevious").mockResolvedValue();
   const onClose = vi.spyOn(lightbox, "close");
   const scheduler = new MemoryScheduler();
-  const fetchOriginal = vi.fn<(media: Media, signal: AbortSignal) => Promise<Blob>>(() => new Promise(doNothing));
+  const decodeOriginal = vi.fn<(media: Media, signal: AbortSignal) => Promise<ImageBitmap>>(() => new Promise(doNothing));
+  const morpher = new MemoryMorpher();
+  const place = document.createElement("div");
   const { result, dispose } = render(document, () => (
     <LightboxScreen
       lightbox={lightbox}
       resolvePreviewUrl={media => Promise.resolve(`https://preview/${media.locator}`)}
       resolveOriginalUrl={media => Promise.resolve(`https://original/${media.locator}`)}
-      resolveOriginalImageFallbackUrl={media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`)}
-      fetchOriginal={fetchOriginal}
-      bitmapDecoder={new MemoryBitmapDecoder()}
+      decodeOriginal={decodeOriginal}
       scheduler={scheduler}
+      morpher={morphs ? morpher : undefined}
+      locateItem={() => place}
     />
   ));
 
@@ -57,7 +61,7 @@ function setup(): Setup {
     dispose();
     result.remove();
   });
-  return { dialog: result as HTMLDialogElement, lightbox, scheduler, fetchOriginal, onShowNext, onShowPrevious, onClose };
+  return { dialog: result as HTMLDialogElement, lightbox, scheduler, decodeOriginal, onShowNext, onShowPrevious, onClose, morpher, place };
 }
 
 function findPositionLabel(dialog: HTMLDialogElement): HTMLElement {
@@ -83,11 +87,11 @@ describe("LightboxScreen", () => {
   });
 
   test("loads the open post's original on its stage", async() => {
-    const { lightbox, scheduler, fetchOriginal } = setup();
+    const { lightbox, scheduler, decodeOriginal } = setup();
 
     lightbox.open(POST, sequence());
     scheduler.advance(200);
-    await vi.waitFor(() => expect(fetchOriginal).toHaveBeenCalledWith(POST.media, expect.any(AbortSignal)));
+    await vi.waitFor(() => expect(decodeOriginal).toHaveBeenCalledWith(POST.media, expect.any(AbortSignal)));
   });
 
   test("opens while a post is open and closes once none is", () => {
@@ -109,12 +113,58 @@ describe("LightboxScreen", () => {
     expect(showModal).toHaveBeenCalledOnce();
   });
 
-  test("reports a close when the browser dismisses it", async() => {
-    const { dialog, lightbox, onClose } = setup();
+  test("reports a close without a morph when the browser dismisses it", async() => {
+    const { dialog, lightbox, onClose, morpher } = setup();
 
     lightbox.open(POST, sequence());
     dialog.close();
     await vi.waitFor(() => expect(onClose).toHaveBeenCalledOnce());
+    expect(morpher.morphs).toEqual([]);
+  });
+
+  test("morphs the shown image into the item's place as it closes", () => {
+    const { dialog, lightbox, morpher, place } = setup();
+
+    lightbox.open(POST, sequence());
+    dialog.click();
+    expect(morpher.morphs).toEqual([{ source: expect.any(HTMLImageElement), target: place }]);
+    expect(dialog.open).toBe(false);
+  });
+
+  test("morphs the playing video into the item's place as it closes", () => {
+    const { dialog, lightbox, morpher } = setup();
+
+    lightbox.open(VIDEO, sequence());
+    const video = dialog.querySelector("video:not([hidden])");
+
+    dialog.click();
+    expect(morpher.morphs.map(morph => morph.source)).toEqual([video]);
+  });
+
+  test("morphs on Escape instead of letting the browser close it", () => {
+    const { dialog, lightbox, morpher } = setup();
+    const cancel = new Event("cancel", { cancelable: true });
+
+    lightbox.open(POST, sequence());
+    dialog.dispatchEvent(cancel);
+    expect(cancel.defaultPrevented).toBe(true);
+    expect(morpher.morphs).toHaveLength(1);
+  });
+
+  test("closes without a morph when nothing is shown", () => {
+    const { dialog, onClose, morpher } = setup();
+
+    dialog.click();
+    expect(onClose).toHaveBeenCalledOnce();
+    expect(morpher.morphs).toEqual([]);
+  });
+
+  test("closes without a morph when it has no morpher", () => {
+    const { dialog, lightbox, onClose, morpher } = setup({ morphs: false });
+
+    lightbox.open(POST, sequence());
+    dialog.click();
+    expect([onClose.mock.calls.length, dialog.open, morpher.morphs]).toEqual([1, false, []]);
   });
 
   test("asks for the next post on the right arrow and the previous one on the left", () => {

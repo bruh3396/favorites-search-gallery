@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 function createIndexedDb(): IndexedDbClient {
-  return new IndexedDbClient();
+  return new IndexedDbClient(() => null);
 }
 
 function createLocalFavorites(ownerId = "1"): IndexedDbLocalFavorites {

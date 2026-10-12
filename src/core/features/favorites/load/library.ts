@@ -1,4 +1,5 @@
 import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { NO_MEDIA, hasMedia } from "@/core/domain/media/media";
 import { CoalescingExecutor } from "@/core/utils/async/coalescing";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
@@ -12,11 +13,11 @@ const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const POST_TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
 
 function createPlaceholder(id: string): Post {
-  return { id, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: { kind: "image", locator: "" } };
+  return { id, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: NO_MEDIA };
 }
 
 function isPlaceholder(post: Post): boolean {
-  return post.media.locator === "";
+  return !hasMedia(post.media);
 }
 
 function hasDimensions(post: Post): boolean {

@@ -18,6 +18,16 @@
   background: rgb(0 0 0 / 0.9);
 }
 
+/* .fsg-LightboxStage {
+  transition: scale 95ms linear;
+}
+
+@starting-style {
+  .fsg-LightboxScreen[open] .fsg-LightboxStage {
+    scale: 0.96;
+  }
+} */
+
 .fsg-LightboxScreen-position {
   position: absolute;
   top: 16px;

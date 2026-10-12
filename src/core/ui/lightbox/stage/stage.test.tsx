@@ -1,12 +1,12 @@
-import { LightboxStage, LightboxStageClass, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
+import { LightboxStage, LightboxStageClass, LightboxStageController, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
 import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
@@ -32,63 +32,50 @@ interface Setup {
   neighbors: Signal<readonly MediaItem[]>;
   warmItems: Signal<readonly MediaItem[]>;
   scheduler: MemoryScheduler;
-  fetchOriginal: Mock<LightboxStageProps["fetchOriginal"]>;
+  decodeOriginal: Mock<LightboxStageProps["decodeOriginal"]>;
   resolveOriginalUrl: Mock<LightboxStageProps["resolveOriginalUrl"]>;
-  resolveOriginalImageFallbackUrl: Mock<LightboxStageProps["resolveOriginalImageFallbackUrl"]>;
-  decodeBitmap: Mock<BitmapDecoder["decode"]>;
   drawn: () => string[];
   bitmaps: FakeBitmap[];
-}
-
-interface FakeDrawing {
-  drawImage: Mock<(bitmap: FakeBitmap) => void>;
-  bitmaps: FakeBitmap[];
-  bitmapDecoder: BitmapDecoder;
-  decodeBitmap: Mock<BitmapDecoder["decode"]>;
+  readShownMedia: () => MorphSource | undefined;
 }
 
 type ResolvePreviewUrl = LightboxStageProps["resolvePreviewUrl"];
+type DecodeOriginal = LightboxStageProps["decodeOriginal"];
 
-function fetchOriginalNow(media: Media): Promise<Blob> {
-  return Promise.resolve(Object.assign(new Blob(), { source: `${ORIGINAL_ORIGIN}${media.locator}` }));
+function decodeOriginalNow(media: Media): Promise<ImageBitmap> {
+  const bitmap = { ...ORIGINAL_SIZE, source: `${ORIGINAL_ORIGIN}${media.locator}`, close: vi.fn() };
+  return Promise.resolve(bitmap as unknown as ImageBitmap);
 }
 
 function pendForever<T>(): Promise<T> {
   return new Promise(() => undefined);
 }
 
-function fakeDrawing(): FakeDrawing {
+function stubDrawing(): Mock<(bitmap: FakeBitmap) => void> {
   const drawImage = vi.fn<(bitmap: FakeBitmap) => void>();
-  const bitmaps: FakeBitmap[] = [];
-  const decodeBitmap = vi.fn<BitmapDecoder["decode"]>(source => {
-    const blob = source as Blob & { source: string };
-    const bitmap = { ...ORIGINAL_SIZE, source: blob.source, close: vi.fn() };
-
-    bitmaps.push(bitmap);
-    return Promise.resolve(bitmap as unknown as ImageBitmap);
-  });
-  const bitmapDecoder = {
-    decode: decodeBitmap
-  };
   const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
 
   onTestFinished(() => spy.mockRestore());
-  return { drawImage, bitmaps, bitmapDecoder, decodeBitmap };
+  return drawImage;
 }
 
 function setup(
-  fetch: LightboxStageProps["fetchOriginal"] = fetchOriginalNow,
+  decode: DecodeOriginal = decodeOriginalNow,
   resolvePreviewUrl: ResolvePreviewUrl = media => Promise.resolve(`https://preview/${media.locator}`),
   resolveOriginal: LightboxStageProps["resolveOriginalUrl"] = media => Promise.resolve(`${ORIGINAL_ORIGIN}${media.locator}`)
 ): Setup {
-  const { drawImage, bitmaps, bitmapDecoder, decodeBitmap } = fakeDrawing();
+  const drawImage = stubDrawing();
+  const bitmaps: FakeBitmap[] = [];
   const current = new Signal<MediaItem | undefined>(undefined);
   const neighbors = new Signal<readonly MediaItem[]>([]);
   const warmItems = new Signal<readonly MediaItem[]>([]);
   const scheduler = new MemoryScheduler();
-  const fetchOriginal = vi.fn<LightboxStageProps["fetchOriginal"]>(fetch);
+  const decodeOriginal = vi.fn<DecodeOriginal>((media, signal) => decode(media, signal).then(bitmap => {
+    bitmaps.push(bitmap as unknown as FakeBitmap);
+    return bitmap;
+  }));
   const resolveOriginalUrl = vi.fn<LightboxStageProps["resolveOriginalUrl"]>(resolveOriginal);
-  const resolveOriginalImageFallbackUrl = vi.fn<LightboxStageProps["resolveOriginalImageFallbackUrl"]>(media => Promise.resolve(`https://wimg.rule34.xxx/${media.locator}`));
+  let readShownMedia = (): MorphSource | undefined => undefined;
   const { result } = render(document, () => (
     <LightboxStage
       current={current}
@@ -96,10 +83,11 @@ function setup(
       warmItems={warmItems}
       resolvePreviewUrl={resolvePreviewUrl}
       resolveOriginalUrl={resolveOriginalUrl}
-      resolveOriginalImageFallbackUrl={resolveOriginalImageFallbackUrl}
-      fetchOriginal={fetchOriginal}
-      bitmapDecoder={bitmapDecoder}
+      decodeOriginal={decodeOriginal}
       scheduler={scheduler}
+      exposeShownMedia={read => {
+        readShownMedia = read;
+      }}
     />
   ));
   const preview = result.querySelector<HTMLImageElement>(`img.${LightboxRendererClass.media}`)!;
@@ -112,12 +100,11 @@ function setup(
     neighbors,
     warmItems,
     scheduler,
-    fetchOriginal,
+    decodeOriginal,
     resolveOriginalUrl,
-    resolveOriginalImageFallbackUrl,
-    decodeBitmap,
     bitmaps,
-    drawn: () => drawImage.mock.calls.map(([bitmap]) => bitmap.source)
+    drawn: () => drawImage.mock.calls.map(([bitmap]) => bitmap.source),
+    readShownMedia: () => readShownMedia()
   };
 }
 
@@ -131,14 +118,13 @@ describe("LightboxStage", () => {
     expectClassesStyled(LightboxRendererClass, LIGHTBOX_CSS);
   });
 
-  test("shows the preview image while the original is pending without decoding the preview", async() => {
-    const { preview, original, current, decodeBitmap } = setup(() => pendForever());
+  test("shows the preview image while the original is pending", async() => {
+    const { preview, original, current } = setup(() => pendForever());
 
     current.value = FIRST;
     await vi.waitFor(() => expect(preview.getAttribute("src")).toBe("https://preview/images/1"));
     expect(preview.hidden).toBe(false);
     expect(original.hidden).toBe(true);
-    expect(decodeBitmap).not.toHaveBeenCalled();
   });
 
   test("draws the original at its own size once it loads", async() => {
@@ -173,7 +159,7 @@ describe("LightboxStage", () => {
     const resolvePreviewUrl: ResolvePreviewUrl = () => new Promise(resolve => {
       finishResolving = resolve;
     });
-    const { current, preview, original, drawn } = setup(fetchOriginalNow, resolvePreviewUrl);
+    const { current, preview, original, drawn } = setup(decodeOriginalNow, resolvePreviewUrl);
 
     current.value = FIRST;
     await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
@@ -199,23 +185,23 @@ describe("LightboxStage", () => {
   });
 
   test("waits for quick steps to stop before fetching the original", async() => {
-    const { current, scheduler, fetchOriginal } = setup(() => pendForever());
+    const { current, scheduler, decodeOriginal } = setup(() => pendForever());
 
     current.value = FIRST;
     current.value = SECOND;
     await flushPromises();
-    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media]);
+    expect(decodeOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media]);
     scheduler.advance(200);
     await flushPromises();
-    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
+    expect(decodeOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
   });
 
   test("keeps a late original from replacing the post shown since", async() => {
     const finishFetching: (() => void)[] = [];
-    const fetchOriginal: LightboxStageProps["fetchOriginal"] = media => new Promise(resolve => {
-      finishFetching.push(() => resolve(Object.assign(new Blob(), { source: `${ORIGINAL_ORIGIN}${media.locator}` })));
+    const decodeOriginal: DecodeOriginal = media => new Promise(resolve => {
+      finishFetching.push(() => resolve(decodeOriginalNow(media)));
     });
-    const { current, scheduler, drawn } = setup(fetchOriginal);
+    const { current, scheduler, drawn } = setup(decodeOriginal);
 
     current.value = FIRST;
     await flushPromises();
@@ -228,10 +214,10 @@ describe("LightboxStage", () => {
   });
 
   test("retries an original whose load failed", async() => {
-    const fetchOriginal = vi.fn<LightboxStageProps["fetchOriginal"]>()
+    const decode = vi.fn<DecodeOriginal>()
       .mockRejectedValueOnce(new Error("unreachable"))
-      .mockImplementation(fetchOriginalNow);
-    const { current, scheduler } = setup(fetchOriginal);
+      .mockImplementation(decodeOriginalNow);
+    const { current, scheduler, decodeOriginal } = setup(decode);
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     onTestFinished(() => consoleError.mockRestore());
@@ -241,58 +227,43 @@ describe("LightboxStage", () => {
     scheduler.advance(200);
     current.value = FIRST;
     await flushPromises();
-    expect(fetchOriginal).toHaveBeenCalledTimes(2);
+    expect(decodeOriginal).toHaveBeenCalledTimes(2);
   });
 
   test("loads the originals of the neighbors", async() => {
-    const { neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
+    const { neighbors, scheduler, decodeOriginal } = setup(() => pendForever());
 
     neighbors.value = [FIRST, SECOND];
     await flushPromises();
-    expect(fetchOriginal).not.toHaveBeenCalled();
+    expect(decodeOriginal).not.toHaveBeenCalled();
     scheduler.advance(200);
     await flushPromises();
-    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
-  });
-
-  test("preloads the image neighbors within the stage limit", async() => {
-    const { neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
-    const items = Array.from({ length: 24 }, (_, index): MediaItem => ({
-      id: `${index}`,
-      media: { kind: index % 2 === 0 ? "image" : "video", locator: `media/${index}` }
-    }));
-
-    neighbors.value = items;
-    scheduler.advance(200);
-    await flushPromises();
-    const imageLocators = items.filter(item => item.media.kind === "image").slice(0, 20).map(item => item.media.locator);
-
-    expect(fetchOriginal.mock.calls.map(([media]) => media.locator)).toEqual(imageLocators);
+    expect(decodeOriginal.mock.calls.map(([media]) => media)).toEqual([FIRST.media, SECOND.media]);
   });
 
   test("reuses a neighbor's original once it is shown", async() => {
-    const { current, neighbors, scheduler, fetchOriginal, drawn } = setup();
+    const { current, neighbors, scheduler, decodeOriginal, drawn } = setup();
 
     neighbors.value = [SECOND];
     scheduler.advance(200);
     await flushPromises();
     current.value = SECOND;
     await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/2`));
-    expect(fetchOriginal).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
   });
 
   test("loads the originals of warm items before the neighbors", async() => {
-    const { neighbors, warmItems, scheduler, fetchOriginal } = setup(() => pendForever());
+    const { neighbors, warmItems, scheduler, decodeOriginal } = setup(() => pendForever());
 
     neighbors.value = [FIRST];
     warmItems.value = [SECOND];
     scheduler.advance(75);
     await flushPromises();
-    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([SECOND.media, FIRST.media]);
+    expect(decodeOriginal.mock.calls.map(([media]) => media)).toEqual([SECOND.media, FIRST.media]);
   });
 
   test("reuses a warm item's original once it is shown and the warm items clear", async() => {
-    const { current, warmItems, scheduler, fetchOriginal, drawn } = setup();
+    const { current, warmItems, scheduler, decodeOriginal, drawn } = setup();
 
     warmItems.value = [FIRST];
     scheduler.advance(75);
@@ -300,46 +271,46 @@ describe("LightboxStage", () => {
     current.value = FIRST;
     warmItems.value = [];
     await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
-    expect(fetchOriginal).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
   });
 
   test("cancels the download of a warm item replaced while closed", async() => {
-    const { warmItems, scheduler, fetchOriginal } = setup(() => pendForever());
+    const { warmItems, scheduler, decodeOriginal } = setup(() => pendForever());
 
     warmItems.value = [FIRST];
     scheduler.advance(75);
     await flushPromises();
     warmItems.value = [SECOND];
 
-    expect(fetchOriginal.mock.calls[0][1].aborted).toBe(true);
+    expect(decodeOriginal.mock.calls[0][1].aborted).toBe(true);
   });
 
   test("cancels the download of a post no longer shown or next to it", async() => {
-    const { current, neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
+    const { current, neighbors, scheduler, decodeOriginal } = setup(() => pendForever());
 
     current.value = FIRST;
     neighbors.value = [SECOND];
     scheduler.advance(200);
     await flushPromises();
     neighbors.value = [];
-    const signalByLocator = new Map(fetchOriginal.mock.calls.map(([media, signal]) => [media.locator, signal]));
+    const signalByLocator = new Map(decodeOriginal.mock.calls.map(([media, signal]) => [media.locator, signal]));
 
     expect(signalByLocator.get(FIRST.media.locator)?.aborted).toBe(false);
     expect(signalByLocator.get(SECOND.media.locator)?.aborted).toBe(true);
   });
 
   test("replaces a pending neighbor preload when the neighbors change", async() => {
-    const { neighbors, scheduler, fetchOriginal } = setup(() => pendForever());
+    const { neighbors, scheduler, decodeOriginal } = setup(() => pendForever());
 
     neighbors.value = [FIRST];
     scheduler.advance(30);
     neighbors.value = [SECOND];
     scheduler.advance(74);
     await flushPromises();
-    expect(fetchOriginal).not.toHaveBeenCalled();
+    expect(decodeOriginal).not.toHaveBeenCalled();
     scheduler.advance(1);
     await flushPromises();
-    expect(fetchOriginal.mock.calls.map(([media]) => media)).toEqual([SECOND.media]);
+    expect(decodeOriginal.mock.calls.map(([media]) => media)).toEqual([SECOND.media]);
   });
 
   test("shows the current video immediately and delays candidate preloading", async() => {
@@ -372,6 +343,37 @@ describe("LightboxStage", () => {
     expect(videos[0].parentElement?.hidden).toBe(true);
   });
 
+  test("exposes the preview as its shown media until the original is drawn", async() => {
+    const { preview, original, current, drawn, readShownMedia } = setup();
+
+    current.value = FIRST;
+    expect(readShownMedia()).toBe(preview);
+    await vi.waitFor(() => expect(drawn()).toContain(`${ORIGINAL_ORIGIN}images/1`));
+    expect(readShownMedia()).toBe(original);
+  });
+
+  test("exposes the active video as its shown media", () => {
+    const { root, current, readShownMedia } = setup();
+
+    current.value = FIRST_VIDEO;
+    expect(readShownMedia()).toBe(root.querySelector("video:not([hidden])"));
+  });
+
+  test("exposes the GIF as its shown media", () => {
+    const { root, current, readShownMedia } = setup();
+
+    current.value = { id: "g1", media: { kind: "gif", locator: "gifs/1.gif" } };
+    expect(readShownMedia()).toBe(root.querySelector(`div:not([hidden]) > img.${LightboxRendererClass.media}`));
+  });
+
+  test("exposes no shown media once no post is shown", () => {
+    const { current, readShownMedia } = setup();
+
+    current.value = FIRST;
+    current.value = undefined;
+    expect(readShownMedia()).toBeUndefined();
+  });
+
   test("clears the canvas and frees the originals once no post is shown", async() => {
     const { preview, original, current, neighbors, bitmaps, drawn } = setup();
 
@@ -385,5 +387,28 @@ describe("LightboxStage", () => {
     expect(preview.hidden).toBe(true);
     expect(preview.hasAttribute("src")).toBe(false);
     expect(bitmaps.every(bitmap => bitmap.close.mock.calls.length === 1)).toBe(true);
+  });
+});
+
+describe("LightboxStageController", () => {
+  test("preloads each kind's neighbors up to the neighbor limit", async() => {
+    const scheduler = new MemoryScheduler();
+    const decodeOriginal = vi.fn<DecodeOriginal>(() => pendForever());
+    const { result: controller } = render(document, () => new LightboxStageController({ neighborLimit: 2 }, {
+      resolvePreviewUrl: (media): Promise<string> => Promise.resolve(`https://preview/${media.locator}`),
+      resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`${ORIGINAL_ORIGIN}${media.locator}`),
+      decodeOriginal,
+      scheduler
+    }));
+    const items = Array.from({ length: 6 }, (_, index): MediaItem => ({
+      id: `${index}`,
+      media: { kind: index % 2 === 0 ? "image" : "video", locator: `media/${index}` }
+    }));
+
+    onTestFinished(() => controller.dispose());
+    controller.updateNeighbors(items, undefined);
+    scheduler.advance(200);
+    await flushPromises();
+    expect(decodeOriginal.mock.calls.map(([media]) => media.locator)).toEqual(["media/0", "media/2"]);
   });
 });

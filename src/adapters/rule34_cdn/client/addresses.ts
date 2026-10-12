@@ -12,3 +12,10 @@ export function fileUrl(locator: string, extension: Rule34CdnFileExtension): str
   return `${ORIGIN}/images//${directory}/${name}.${extension}`;
   // return `${WIMG_ORIGIN}/images//${directory}/${name}.${extension}`;
 }
+
+export function wimgUrl(url: string): string {
+  const moved = new URL(url);
+
+  moved.host = new URL(WIMG_ORIGIN).host;
+  return moved.href;
+}

@@ -1,15 +1,16 @@
+import { Media, NO_MEDIA } from "@/core/domain/media/media";
 import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
-import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Upscaler } from "@/core/ui/post_grid/upscaler";
 import { doNothing } from "@/core/utils/function/function";
 
 const IMAGE: MediaItem = { id: "123", media: { kind: "image", locator: "images/123" } };
-const PLACEHOLDER: MediaItem = { id: "456", media: { kind: "image", locator: "" } };
+const PLACEHOLDER: MediaItem = { id: "456", media: NO_MEDIA };
 const PORTRAIT = { width: 1_200, height: 1_800 };
 const UNKNOWN = { width: 0, height: 0 };
 
@@ -17,19 +18,19 @@ function resolvePreviewUrl(media: Media): Promise<string> {
   return Promise.resolve(`https://preview/${media.locator}`);
 }
 
-type TileOptions = Omit<TileProps, "onActivate" | "upscale" |
-  "bitmapDecoder" | "visibilityObserver" | "onVisibilityChange" | "fetchImage"> &
-  Partial<Pick<TileProps, "onActivate" | "onVisibilityChange" | "upscale" | "visibilityObserver">>;
+type TileOptions = Omit<TileProps, "onPlainClick" | "upscale" |
+  "visibilityObserver" | "onVisibilityChange" | "decodeImage" | "scheduler"> &
+  Partial<Pick<TileProps, "onPlainClick" | "onVisibilityChange" | "upscale" | "visibilityObserver">>;
 
 function drawTile(options: TileOptions): HTMLElement {
   return render(document, () => (
     <Tile
       upscale={new Signal(false)}
-      bitmapDecoder={new MemoryBitmapDecoder()}
       visibilityObserver={{ observe: () => () => { } }}
       onVisibilityChange={doNothing}
-      fetchImage={() => Promise.resolve(new Blob())}
-      onActivate={doNothing}
+      decodeImage={() => new MemoryRemoteMedia().decodeImage()}
+      scheduler={new MemoryScheduler()}
+      onPlainClick={doNothing}
       {...options}
     />
   )).result;
@@ -106,33 +107,53 @@ describe("Tile", () => {
     expect(getLink(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl })).hasAttribute("tabindex")).toBe(false);
   });
 
-  test("activates on a plain click", () => {
-    const onActivate = vi.fn();
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, onActivate });
+  test("reports a plain click", () => {
+    const onPlainClick = vi.fn();
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, onPlainClick });
 
     clickLink(tile);
-    expect(onActivate).toHaveBeenCalledExactlyOnceWith(expect.any(MouseEvent));
+    expect(onPlainClick).toHaveBeenCalledOnce();
   });
 
-  test("leaves modified and non-primary clicks to the browser", () => {
-    const onActivate = vi.fn();
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, onActivate });
+  test("reports a Ctrl or Meta click instead of following the link", () => {
+    const onPlainClick = vi.fn();
+    const onCtrlClick = vi.fn();
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, onPlainClick, onCtrlClick });
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true });
 
-    clickLink(tile, { ctrlKey: true });
+    getLink(tile).dispatchEvent(click);
     clickLink(tile, { metaKey: true });
+    expect(click.defaultPrevented).toBe(true);
+    expect(onCtrlClick).toHaveBeenCalledTimes(2);
+    expect(onPlainClick).not.toHaveBeenCalled();
+  });
+
+  test("leaves other modified and non-primary clicks to the browser", () => {
+    const onPlainClick = vi.fn();
+    const onCtrlClick = vi.fn();
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, onPlainClick, onCtrlClick });
+
     clickLink(tile, { shiftKey: true });
     clickLink(tile, { altKey: true });
     clickLink(tile, { button: 1 });
-    expect(onActivate).not.toHaveBeenCalled();
+    expect(onPlainClick).not.toHaveBeenCalled();
+    expect(onCtrlClick).not.toHaveBeenCalled();
   });
 
-  test("doesn't activate when an action is clicked", () => {
-    const onActivate = vi.fn();
+  test("leaves a Ctrl click to the browser without a Ctrl click handler", () => {
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true });
+
+    getLink(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl })).dispatchEvent(click);
+    expect(click.defaultPrevented).toBe(false);
+  });
+
+  test("ignores clicks on an action", () => {
+    const onPlainClick = vi.fn();
     const action = document.createElement("button");
 
-    drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [action], resolvePreviewUrl, onActivate });
+    drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [action], resolvePreviewUrl, onPlainClick });
     action.click();
-    expect(onActivate).not.toHaveBeenCalled();
+    expect(onPlainClick).not.toHaveBeenCalled();
   });
 
   test("holds the post's shape before the preview arrives", () => {

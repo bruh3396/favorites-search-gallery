@@ -19,6 +19,10 @@ export class VideoElementPool {
     return this.elements.map(video => video.root);
   }
 
+  public get activeVideo(): HTMLVideoElement | undefined {
+    return this.activeElement?.root;
+  }
+
   public update(current: MediaItem | undefined, neighbors: readonly MediaItem[]): void {
     const targets = this.chooseTargets(current, neighbors);
 

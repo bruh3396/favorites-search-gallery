@@ -5,7 +5,7 @@ import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_cate
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { PostLibrary } from "@/core/posts/library";
+import { PostLibrary } from "@/core/features/favorites/load/library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";

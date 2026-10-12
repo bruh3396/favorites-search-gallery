@@ -1,11 +1,12 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { KeyedList } from "@/core/ui/post_grid/keyed_list";
 import { Media } from "@/core/domain/media/media";
 import { Occurrence } from "@/core/utils/reactive/emitter";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Tile } from "@/core/ui/post_grid/tile";
+import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
@@ -24,16 +25,18 @@ export interface PostGridProps<T extends MediaItem> {
   posts: Readable<readonly T[]>;
   changed: Occurrence<T>;
   scrollTo?: Occurrence<T>;
+  tileLocator?: TileLocator<T>;
   settings: PostGridSettings;
   visiblePosts: Signal<readonly T[]>;
-  bitmapDecoder: BitmapDecoder;
   visibilityObserver: VisibilityObserver;
-  fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  scheduler: Pick<Scheduler, "schedule">;
   getDimensions: (post: T) => Dimensions;
   createActions: (post: T) => readonly Node[];
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl?: (post: T) => string;
-  onActivate: (post: T, event: MouseEvent) => void;
+  onPlainClick: (post: T) => void;
+  onCtrlClick?: (post: T) => void;
   onPointerEnter?: (post: T) => void;
 }
 
@@ -52,7 +55,7 @@ class PostGridImplementation<T extends MediaItem> {
   }
 
   public create(): HTMLElement {
-    const { posts, changed, scrollTo, settings } = this.props;
+    const { posts, changed, scrollTo, tileLocator, settings } = this.props;
 
     effect(() => applyTiling(this.root, { layout: settings.layout.value, size: settings.size.value }));
     effect(() => this.reconcilePosts(posts.value));
@@ -60,6 +63,10 @@ class PostGridImplementation<T extends MediaItem> {
 
     if (scrollTo !== undefined) {
       onCleanup(scrollTo.on(post => this.list.get(post)?.scrollIntoView({ block: "center", behavior: "instant" })));
+    }
+
+    if (tileLocator !== undefined) {
+      onCleanup(tileLocator.attach(post => this.list.get(post)));
     }
     return this.root;
   }
@@ -93,7 +100,8 @@ class PostGridImplementation<T extends MediaItem> {
 
   private createPostList(): KeyedList<T> {
     const {
-      getDimensions, createActions, bitmapDecoder, visibilityObserver, fetchImage, resolvePreviewUrl, getPostUrl, onActivate, onPointerEnter, settings
+      getDimensions, createActions, visibilityObserver, decodeImage, scheduler, resolvePreviewUrl, getPostUrl,
+      onPlainClick, onCtrlClick, onPointerEnter, settings
     } = this.props;
     return new KeyedList<T>({
       getKey: (post): string => post.id,
@@ -103,13 +111,14 @@ class PostGridImplementation<T extends MediaItem> {
           dimensions={getDimensions(post)}
           actions={createActions(post)}
           upscale={settings.upscale}
-          bitmapDecoder={bitmapDecoder}
           visibilityObserver={visibilityObserver}
           onVisibilityChange={isVisible => (isVisible ? this.markVisible(post) : this.markHidden(post))}
-          fetchImage={fetchImage}
+          decodeImage={decodeImage}
+          scheduler={scheduler}
           resolvePreviewUrl={resolvePreviewUrl}
           href={getPostUrl?.(post)}
-          onActivate={event => onActivate(post, event)}
+          onPlainClick={() => onPlainClick(post)}
+          onCtrlClick={onCtrlClick === undefined ? undefined : (): void => onCtrlClick(post)}
           onPointerEnter={() => onPointerEnter?.(post)}
         />
       )

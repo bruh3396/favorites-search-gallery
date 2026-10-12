@@ -5,75 +5,68 @@ import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/r
 const VIDEO: Media = { kind: "video", locator: "1234/a1b2c3" };
 const ORIGINAL = "https://original/1234/a1b2c3.mp4";
 const IMAGE = "https://original/1234/a1b2c3.jpg";
+const BITMAP = { close: (): void => undefined } as ImageBitmap;
 
 interface Rule34Cdn {
-  previewUrl: ReturnType<typeof vi.fn<(locator: string) => string>>;
-  originalUrl: ReturnType<typeof vi.fn<(locator: string, kind: string) => Promise<string>>>;
-  imageUrl: ReturnType<typeof vi.fn<(locator: string, kind: string) => Promise<string>>>;
-  fetchFile: ReturnType<typeof vi.fn<(url: string, signal?: AbortSignal) => Promise<Blob>>>;
-  fetchOriginal: ReturnType<typeof vi.fn<(locator: string, kind: string, signal?: AbortSignal) => Promise<Blob>>>;
-  readVideoDurationSeconds: ReturnType<typeof vi.fn<(url: string) => Promise<number>>>;
+  previewUrl: ReturnType<typeof vi.fn<(media: Media) => string>>;
+  originalUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
+  imageUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
+  decodeImage: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>>;
+  decodeOriginal: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>>;
+  readVideoDurationSeconds: ReturnType<typeof vi.fn<(media: Media) => Promise<number>>>;
 }
 
 function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
   const rule34Cdn: Rule34Cdn = {
-    previewUrl: vi.fn((locator: string) => `https://preview/${locator}`),
+    previewUrl: vi.fn((media: Media) => `https://preview/${media.locator}`),
     originalUrl: vi.fn(() => Promise.resolve(ORIGINAL)),
     imageUrl: vi.fn(() => Promise.resolve(IMAGE)),
-    fetchFile: vi.fn(() => Promise.resolve(new Blob(["bytes"]))),
-    fetchOriginal: vi.fn(() => Promise.resolve(new Blob(["bytes"]))),
+    decodeImage: vi.fn(() => Promise.resolve(BITMAP)),
+    decodeOriginal: vi.fn(() => Promise.resolve(BITMAP)),
     readVideoDurationSeconds: vi.fn(() => Promise.resolve(12))
   };
   return { source: new Rule34CdnRemoteMedia(rule34Cdn), rule34Cdn };
 }
 
 describe("Rule34CdnRemoteMedia", () => {
-  test("gives a preview's URL from the locator", async() => {
+  test("gives a preview's URL", async() => {
     expect(await setup().source.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
   });
 
-  test("gives an original's URL from the locator and kind", async() => {
+  test("gives an original's URL", async() => {
     const { source, rule34Cdn } = setup();
 
     expect(await source.resolveOriginalUrl(VIDEO)).toBe(ORIGINAL);
-    expect(rule34Cdn.originalUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
+    expect(rule34Cdn.originalUrl).toHaveBeenCalledWith(VIDEO);
   });
 
-  test("gives the WIMG original image fallback URL", async() => {
-    const { source, rule34Cdn } = setup();
-
-    expect(await source.resolveOriginalImageFallbackUrl(VIDEO)).toBe("https://wimg.rule34.xxx/1234/a1b2c3.mp4");
-    expect(rule34Cdn.originalUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
-  });
-
-  test("gives an image-compatible URL from the locator and kind", async() => {
+  test("gives an image-compatible URL", async() => {
     const { source, rule34Cdn } = setup();
 
     expect(await source.resolveImageUrl(VIDEO)).toBe(IMAGE);
-    expect(rule34Cdn.imageUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
+    expect(rule34Cdn.imageUrl).toHaveBeenCalledWith(VIDEO);
   });
 
-  test("fetches the image's bytes from the locator and kind", async() => {
+  test("decodes the image", async() => {
     const { source, rule34Cdn } = setup();
     const signal = new AbortController().signal;
 
-    expect(await (await source.fetchImage(VIDEO, signal)).text()).toBe("bytes");
-    expect(rule34Cdn.imageUrl).toHaveBeenCalledWith("1234/a1b2c3", "video");
-    expect(rule34Cdn.fetchFile).toHaveBeenCalledWith(IMAGE, signal);
+    expect(await source.decodeImage(VIDEO, signal)).toBe(BITMAP);
+    expect(rule34Cdn.decodeImage).toHaveBeenCalledWith(VIDEO, signal);
   });
 
-  test("fetches the original's bytes", async() => {
+  test("decodes the original", async() => {
     const { source, rule34Cdn } = setup();
     const signal = new AbortController().signal;
 
-    expect(await (await source.fetchOriginal(VIDEO, signal)).text()).toBe("bytes");
-    expect(rule34Cdn.fetchOriginal).toHaveBeenCalledWith("1234/a1b2c3", "video", signal);
+    expect(await source.decodeOriginal(VIDEO, signal)).toBe(BITMAP);
+    expect(rule34Cdn.decodeOriginal).toHaveBeenCalledWith(VIDEO, signal);
   });
 
   test("reads the original's duration", async() => {
     const { source, rule34Cdn } = setup();
 
     expect(await source.fetchDurationSeconds(VIDEO)).toBe(12);
-    expect(rule34Cdn.readVideoDurationSeconds).toHaveBeenCalledWith(ORIGINAL);
+    expect(rule34Cdn.readVideoDurationSeconds).toHaveBeenCalledWith(VIDEO);
   });
 });

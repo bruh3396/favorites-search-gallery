@@ -1,6 +1,5 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Signal, computed } from "@/core/utils/reactive/signal";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Fact } from "@/core/utils/reactive/milestone";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
@@ -10,8 +9,10 @@ import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { PostGridPreferences } from "@/core/app/preferences";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton";
+import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 
@@ -27,24 +28,26 @@ export interface FavoritesPaneProps {
   favorites: Pick<FavoritesService, "hydrated">;
   session: Pick<FavoritesSearchSession, "settings" | "results" | "paginationResult" | "submit" | "goToPage">;
   scrollTo: Occurrence<Favorite>;
+  tileLocator: TileLocator<Favorite>;
   finishedLoading: Fact;
   skeletonDimensions: readonly Dimensions[];
   skeletonItemCount: number;
   gridPreferences: PostGridPreferences;
   visiblePosts: Signal<readonly Favorite[]>;
-  bitmapDecoder: BitmapDecoder;
   visibilityObserver: VisibilityObserver;
-  fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl: (post: MediaItem) => string;
-  onActivate: (post: Favorite, event: MouseEvent) => void;
+  onPlainClick: (post: Favorite) => void;
+  onCtrlClick: (post: Favorite) => void;
   onPointerEnter: (post: Favorite) => void;
 }
 
 export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
-  const { favorites, session, scrollTo, finishedLoading,
-    skeletonDimensions, gridPreferences: { layout, size }, visiblePosts, bitmapDecoder, skeletonItemCount,
-    visibilityObserver, fetchImage, resolvePreviewUrl, getPostUrl, onActivate, onPointerEnter } = props;
+  const { favorites, session, scrollTo, tileLocator, finishedLoading,
+    skeletonDimensions, gridPreferences: { layout, size }, visiblePosts, skeletonItemCount,
+    visibilityObserver, decodeImage, scheduler, resolvePreviewUrl, getPostUrl, onPlainClick, onCtrlClick, onPointerEnter } = props;
   return (
     <section className={FavoritesPaneClass.root}>
       <header className={FavoritesPaneClass.header}>
@@ -71,16 +74,18 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
           posts={computed(() => session.paginationResult.value.favorites)}
           changed={favorites.hydrated}
           scrollTo={scrollTo}
+          tileLocator={tileLocator}
           settings={props.gridPreferences}
           visiblePosts={visiblePosts}
           getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}
           createActions={() => []}
-          bitmapDecoder={bitmapDecoder}
           visibilityObserver={visibilityObserver}
-          fetchImage={fetchImage}
+          decodeImage={decodeImage}
+          scheduler={scheduler}
           resolvePreviewUrl={resolvePreviewUrl}
           getPostUrl={getPostUrl}
-          onActivate={onActivate}
+          onPlainClick={onPlainClick}
+          onCtrlClick={onCtrlClick}
           onPointerEnter={onPointerEnter}
         />
       </div>

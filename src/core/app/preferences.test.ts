@@ -6,7 +6,7 @@ describe("createPostGridSettings", () => {
   test("starts with the defaults when nothing is stored", () => {
     const { layout, size, upscale } = createPostGridSettings(new MemoryLocalKeyedValues());
 
-    expect([layout.value, size.value, upscale.value]).toEqual(["column", 6, false]);
+    expect([layout.value, size.value, upscale.value]).toEqual(["column", 6, true]);
   });
 
   test("restores a stored layout and falls back to the default for one it doesn't recognize", () => {

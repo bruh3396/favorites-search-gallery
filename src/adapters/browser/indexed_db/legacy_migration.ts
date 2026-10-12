@@ -1,5 +1,5 @@
-import { Media, MediaKind } from "@/core/domain/media/media";
 import { Post, Rating } from "@/core/domain/post/post";
+import { Media } from "@/core/domain/media/media";
 
 const LEGACY_FAVORITES = "FavoritesV2";
 const LEGACY_POSTS = "Posts";
@@ -7,11 +7,7 @@ const LEGACY_TAG_CATEGORIES = "TagCategories";
 const LEGACY_DATABASES = [LEGACY_FAVORITES, LEGACY_POSTS, LEGACY_TAG_CATEGORIES];
 const OWNER_PREFIX = "user";
 const TAG_CATEGORIES = ["general", "artist", "unknown", "copyright", "character", "metadata"];
-const FILE_URL = /\/(thumbnails|samples|images)\/+([^/]+)\/+(?:thumbnail_|sample_)?([^/.?]+)(?:\.([a-z0-9]+))?/i;
 const COMPRESSED_PREVIEW = /^([^_/]+)_([^/.]+)$/;
-const EXTENSION_KINDS: Record<string, MediaKind> = { jpg: "image", png: "image", jpeg: "image", gif: "gif", mp4: "video" };
-const VIDEO_TAGS = ["video", "mp4"];
-const GIF_TAGS = ["gif", "animated", "animated_gif"];
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
 interface LegacyPost {
@@ -30,12 +26,6 @@ interface LegacyPost {
   readonly fetchedAt?: number;
 }
 
-interface LegacyFile {
-  readonly directory: string;
-  readonly name: string;
-  readonly extension: string;
-}
-
 interface LegacyTagCategory {
   readonly id: string;
   readonly category: string;
@@ -47,6 +37,8 @@ interface LegacyData {
   readonly tagCategories: LegacyTagCategory[];
 }
 
+export type LegacyMintMedia = (file: { url: string; tags: string }) => Media | null;
+
 export interface LegacyMigration {
   writeToNewDatabase: (transaction: IDBTransaction) => void;
   deleteLegacyDatabases: () => void;
@@ -57,7 +49,7 @@ const NO_MIGRATION: LegacyMigration = {
   deleteLegacyDatabases: () => undefined
 };
 
-export async function prepareLegacyMigration(newDatabaseName: string): Promise<LegacyMigration> {
+export async function prepareLegacyMigration(newDatabaseName: string, mintMedia: LegacyMintMedia): Promise<LegacyMigration> {
   const databaseNames = await listDatabaseNames();
 
   if (databaseNames === null) {
@@ -76,7 +68,7 @@ export async function prepareLegacyMigration(newDatabaseName: string): Promise<L
   }
   const legacy = await readLegacy(legacyDatabases);
   return {
-    writeToNewDatabase: (transaction): void => writeToTarget(transaction, legacy),
+    writeToNewDatabase: (transaction): void => writeToTarget(transaction, legacy, mintMedia),
     deleteLegacyDatabases
   };
 }
@@ -134,13 +126,13 @@ function readDatabase(name: string): Promise<Map<string, unknown[]>> {
   });
 }
 
-function writeToTarget(transaction: IDBTransaction, legacy: LegacyData): void {
+function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedia: LegacyMintMedia): void {
   const posts = transaction.objectStore("posts");
   const favorites = transaction.objectStore("favorites");
   const tagCategories = transaction.objectStore("tagCategories");
   const allPosts = [...legacy.posts, ...[...legacy.favorites.values()].flat()];
 
-  for (const post of allPosts.map(convertPost)) {
+  for (const post of allPosts.map(legacyPost => convertPost(legacyPost, mintMedia))) {
     if (post !== null) {
       addIfAbsent(posts, post);
     }
@@ -166,8 +158,8 @@ function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): 
   };
 }
 
-function convertPost(legacy: LegacyPost): Post | null {
-  const media = mintMedia(legacy);
+function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | null {
+  const media = mintLegacyMedia(legacy, mintMedia);
 
   if (media === null) {
     return null;
@@ -187,44 +179,18 @@ function convertPost(legacy: LegacyPost): Post | null {
   };
 }
 
-function mintMedia(legacy: LegacyPost): Media | null {
-  const file = locateFile(legacy);
+function mintLegacyMedia({ fileURL, previewURL = "", extension = "", tags }: LegacyPost, mintMedia: LegacyMintMedia): Media | null {
+  const media = mintMedia({ url: fileURL, tags }) ?? mintMedia({ url: expandCompressedPreview(previewURL), tags });
 
-  if (file === null) {
-    return null;
+  if (media === null || media.locator.includes(".")) {
+    return media;
   }
-  const extension = file.extension in EXTENSION_KINDS ? file.extension : legacy.extension ?? "";
-  const kind = EXTENSION_KINDS[extension];
-
-  if (kind !== undefined) {
-    return { kind, locator: `${file.directory}/${file.name}.${extension}` };
-  }
-  return { kind: guessKind(legacy.tags), locator: `${file.directory}/${file.name}` };
+  return mintMedia({ url: `/images/${media.locator}.${extension}`, tags });
 }
 
-function locateFile({ fileURL, previewURL = "" }: LegacyPost): LegacyFile | null {
-  const urlMatch = FILE_URL.exec(fileURL);
-
-  if (urlMatch !== null) {
-    const [, folder, directory, name, rawExtension = ""] = urlMatch;
-    return { directory, name, extension: folder === "images" ? rawExtension.toLowerCase() : "" };
-  }
-  const previewMatch = COMPRESSED_PREVIEW.exec(previewURL);
-
-  if (previewMatch === null) {
-    return null;
-  }
-  const [, directory, name] = previewMatch;
-  return { directory, name, extension: "" };
-}
-
-function guessKind(tags: string): MediaKind {
-  const tagList = tags.split(" ");
-
-  if (VIDEO_TAGS.some(tag => tagList.includes(tag))) {
-    return "video";
-  }
-  return GIF_TAGS.some(tag => tagList.includes(tag)) ? "gif" : "image";
+function expandCompressedPreview(previewURL: string): string {
+  const match = COMPRESSED_PREVIEW.exec(previewURL);
+  return match === null ? "" : `/thumbnails/${match[1]}/thumbnail_${match[2]}.jpg`;
 }
 
 function isLegacyPost(value: unknown): value is LegacyPost {

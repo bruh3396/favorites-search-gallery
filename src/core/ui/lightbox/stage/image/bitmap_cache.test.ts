@@ -1,64 +1,30 @@
-import { describe, expect, onTestFinished, test, vi } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { BitmapCache } from "@/core/ui/lightbox/stage/image/bitmap_cache";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
-import { flushMicrotasks } from "@/testing/async";
 
 const FIRST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
 const SECOND: MediaItem = { id: "2", media: { kind: "image", locator: "images/2" } };
-const FALLBACK_URL = "https://wimg.rule34.xxx/image";
 
 interface FakeBitmap {
   close: () => void;
 }
 
-interface LoadedImage {
-  image: HTMLImageElement;
-  url: string;
-}
+type DecodeOriginal = (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
 
-// Settles each image as told the moment its source is set, since happy-dom loads no images.
-function stubImageLoads(outcome: "load" | "error" | "pending"): { images: LoadedImage[] } {
-  const images: LoadedImage[] = [];
-  const setSource = vi.spyOn(HTMLImageElement.prototype, "src", "set").mockImplementation(function settleImage(this: HTMLImageElement, url: string) {
-    images.push({ image: this, url });
-
-    if (outcome !== "pending") {
-      this.dispatchEvent(new Event(outcome));
-    }
-  });
-
-  onTestFinished(() => setSource.mockRestore());
-  return { images };
-}
-
-function setup(
-  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob> = () => Promise.resolve(new Blob()),
-  decodeResult: (source: ImageBitmapSource) => Promise<ImageBitmap> = () => Promise.resolve({ close: vi.fn() } as unknown as ImageBitmap),
-  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string> = () => Promise.resolve(FALLBACK_URL)
-): {
+function setup(decodeResult: DecodeOriginal = () => Promise.resolve({ close: vi.fn() } as unknown as ImageBitmap)): {
   cache: BitmapCache;
-  fetchOriginal: ReturnType<typeof vi.fn<(media: Media, signal: AbortSignal) => Promise<Blob>>>;
-  decode: ReturnType<typeof vi.fn<(source: ImageBitmapSource) => Promise<ImageBitmap>>>;
+  decodeOriginal: ReturnType<typeof vi.fn<DecodeOriginal>>;
   bitmaps: FakeBitmap[];
 } {
-  const fetch = vi.fn(fetchOriginal);
   const bitmaps: FakeBitmap[] = [];
-  const decode = vi.fn<(source: ImageBitmapSource) => Promise<ImageBitmap>>(source => {
-    return decodeResult(source).then(bitmap => {
+  const decodeOriginal = vi.fn<DecodeOriginal>((media, signal) => {
+    return decodeResult(media, signal).then(bitmap => {
       bitmaps.push(bitmap as unknown as FakeBitmap);
       return bitmap;
     });
   });
-
-  const bitmapDecoder: BitmapDecoder = { decode };
-  return {
-    cache: new BitmapCache({ fetchOriginal: fetch, resolveOriginalImageFallbackUrl, bitmapDecoder }),
-    fetchOriginal: fetch,
-    decode,
-    bitmaps
-  };
+  return { cache: new BitmapCache({ decodeOriginal }), decodeOriginal, bitmaps };
 }
 
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: (reason: Error) => void } {
@@ -73,7 +39,7 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void; reje
 
 describe("BitmapCache", () => {
   test("loads a bitmap once for each item and reuses it by id", async() => {
-    const { cache, fetchOriginal, decode, bitmaps } = setup();
+    const { cache, decodeOriginal, bitmaps } = setup();
 
     expect(cache.has(FIRST.id)).toBe(false);
     const firstLoad = cache.load(FIRST);
@@ -84,7 +50,7 @@ describe("BitmapCache", () => {
     const bitmap = await firstLoad;
 
     expect(bitmap).toBe(bitmaps[0] as unknown as ImageBitmap);
-    expect([fetchOriginal.mock.calls.length, decode.mock.calls.length]).toEqual([1, 1]);
+    expect(decodeOriginal).toHaveBeenCalledExactlyOnceWith(FIRST.media, expect.any(AbortSignal));
   });
 
   test("removes items outside the kept set and closes their bitmaps", async() => {
@@ -103,8 +69,8 @@ describe("BitmapCache", () => {
   });
 
   test("returns undefined when a removed item fails to load", async() => {
-    const pending = deferred<Blob>();
-    const { cache, decode } = setup(() => pending.promise);
+    const pending = deferred<ImageBitmap>();
+    const { cache, decodeOriginal } = setup(() => pending.promise);
     const loading = cache.load(FIRST);
 
     await Promise.resolve();
@@ -113,40 +79,24 @@ describe("BitmapCache", () => {
     pending.reject(new Error("aborted fetch"));
 
     await expect(loading).resolves.toBeUndefined();
-    expect(decode).not.toHaveBeenCalled();
+    expect(decodeOriginal.mock.calls[0][1].aborted).toBe(true);
     expect(cache.has(FIRST.id)).toBe(false);
   });
 
-  test("does not fetch when removed before its load starts", async() => {
-    const { cache, fetchOriginal, decode } = setup();
+  test("does not decode when removed before its load starts", async() => {
+    const { cache, decodeOriginal } = setup();
     const loading = cache.load(FIRST);
 
     cache.keepOnly([]);
 
     await expect(loading).resolves.toBeUndefined();
-    expect(fetchOriginal).not.toHaveBeenCalled();
-    expect(decode).not.toHaveBeenCalled();
-  });
-
-  test("does not decode when removed after its fetch completes", async() => {
-    const pending = deferred<Blob>();
-    const { cache, fetchOriginal, decode } = setup(() => pending.promise);
-    const loading = cache.load(FIRST);
-
-    await Promise.resolve();
-
-    cache.keepOnly([]);
-    pending.resolve(new Blob());
-
-    await expect(loading).resolves.toBeUndefined();
-    expect(fetchOriginal.mock.calls[0][1].aborted).toBe(true);
-    expect(decode).not.toHaveBeenCalled();
+    expect(decodeOriginal).not.toHaveBeenCalled();
   });
 
   test("closes a bitmap when removed while decoding", async() => {
     const pending = deferred<ImageBitmap>();
     const bitmap = { close: vi.fn() } as unknown as ImageBitmap;
-    const { cache, decode } = setup(undefined, () => pending.promise);
+    const { cache, decodeOriginal } = setup(() => pending.promise);
     const loading = cache.load(FIRST);
 
     await Promise.resolve();
@@ -156,68 +106,15 @@ describe("BitmapCache", () => {
     pending.resolve(bitmap);
 
     await expect(loading).resolves.toBeUndefined();
-    expect(decode).toHaveBeenCalledOnce();
+    expect(decodeOriginal).toHaveBeenCalledOnce();
     expect(bitmap.close).toHaveBeenCalledOnce();
   });
 
-  test("falls back to the fallback image when fetching the original fails", async() => {
-    const { images } = stubImageLoads("load");
-    const { cache, decode } = setup(() => Promise.reject(new Error("CORS")));
-
-    await cache.load(FIRST);
-    expect(images.map(image => image.url)).toEqual([FALLBACK_URL]);
-    expect(decode).toHaveBeenCalledExactlyOnceWith(images[0].image);
-  });
-
-  test("goes straight to the fallback image for an item that needed it before", async() => {
-    stubImageLoads("load");
-    const { cache, fetchOriginal } = setup(() => Promise.reject(new Error("CORS")));
-
-    await cache.load(FIRST);
-    cache.keepOnly([]);
-    await cache.load(FIRST);
-    expect(fetchOriginal).toHaveBeenCalledOnce();
-  });
-
-  test("rejects and forgets an item whose fallback image fails too", async() => {
-    stubImageLoads("error");
-    const { cache } = setup(() => Promise.reject(new Error("CORS")));
-
-    await expect(cache.load(FIRST)).rejects.toThrow(`Could not load original image: ${FALLBACK_URL}`);
-    expect(cache.has(FIRST.id)).toBe(false);
-  });
-
   test("rejects and forgets an item that fails to decode", async() => {
-    const { cache } = setup(undefined, () => Promise.reject(new Error("EncodingError")));
+    const { cache } = setup(() => Promise.reject(new Error("EncodingError")));
 
     await expect(cache.load(FIRST)).rejects.toThrow("EncodingError");
     expect(cache.has(FIRST.id)).toBe(false);
-  });
-
-  test("stops loading the fallback image when removed", async() => {
-    const { images } = stubImageLoads("pending");
-    const { cache, decode } = setup(() => Promise.reject(new Error("CORS")));
-    const loading = cache.load(FIRST);
-
-    await vi.waitFor(() => expect(images).toHaveLength(1));
-    cache.keepOnly([]);
-
-    await expect(loading).resolves.toBeUndefined();
-    expect(decode).not.toHaveBeenCalled();
-  });
-
-  test("doesn't start the fallback image when removed while its URL resolves", async() => {
-    const { images } = stubImageLoads("load");
-    const url = deferred<string>();
-    const { cache, decode } = setup(() => Promise.reject(new Error("CORS")), undefined, () => url.promise);
-    const loading = cache.load(FIRST);
-
-    await flushMicrotasks();
-    cache.keepOnly([]);
-    url.resolve(FALLBACK_URL);
-
-    await expect(loading).resolves.toBeUndefined();
-    expect([images.length, decode.mock.calls.length]).toEqual([0, 0]);
   });
 
   test("keeps a newer entry when stale failure cleanup runs", async() => {

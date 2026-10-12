@@ -8,7 +8,7 @@ beforeEach(() => {
 });
 
 function createIndexedDb(): IndexedDbClient {
-  return new IndexedDbClient();
+  return new IndexedDbClient(() => null);
 }
 
 function openRaw(version: number): Promise<void> {

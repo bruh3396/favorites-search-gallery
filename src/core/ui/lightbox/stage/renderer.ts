@@ -1,5 +1,6 @@
 import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer";
 import { MediaItem } from "@/core/domain/post/post";
+import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export const LightboxRendererClass = {
@@ -9,6 +10,7 @@ export const LightboxRendererClass = {
 
 export interface LightboxStageRenderer {
   readonly root: HTMLElement;
+  readonly shownMedia: MorphSource | undefined;
   show(item: MediaItem): void;
   clear(): void;
   setNeighbors(items: readonly MediaItem[]): void;

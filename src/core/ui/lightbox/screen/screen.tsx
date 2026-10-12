@@ -1,5 +1,5 @@
+import { MorphSource, Morpher } from "@/core/boundary/ports/morpher/morpher";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxStage } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
@@ -17,14 +17,14 @@ export interface LightboxScreenProps<T extends MediaItem> {
   lightbox: Lightbox<T>;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   resolveOriginalUrl: (media: Media) => Promise<string>;
-  resolveOriginalImageFallbackUrl: (media: Media) => Promise<string>;
-  fetchOriginal: (media: Media, signal: AbortSignal) => Promise<Blob>;
-  bitmapDecoder: BitmapDecoder;
+  decodeOriginal: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
+  morpher?: Morpher;
+  locateItem: (item: T) => Element | undefined;
 }
 
 export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T>): HTMLElement {
-  const { lightbox, resolvePreviewUrl, resolveOriginalUrl, resolveOriginalImageFallbackUrl, scheduler, fetchOriginal, bitmapDecoder } = props;
+  const { lightbox, resolvePreviewUrl, resolveOriginalUrl, decodeOriginal, scheduler } = props;
   const { current, neighbors, warmItems, position } = lightbox;
   const onShowNext = (): void => {
     lightbox.showNext().catch(console.error);
@@ -32,14 +32,19 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
   const onShowPrevious = (): void => {
     lightbox.showPrevious().catch(console.error);
   };
-  const onClose = (): void => lightbox.close();
+  let readShownMedia: () => MorphSource | undefined;
+  const onClose = (): void => closeIntoPage(readShownMedia(), props);
   const dialog = (
     <dialog
       className={LightboxScreenClass.root}
       aria-label="Gallery"
       autofocus
       tabIndex={-1}
-      onClose={event => reportDismissal(event.currentTarget, current, onClose)}
+      onCancel={event => {
+        event.preventDefault();
+        onClose();
+      }}
+      onClose={event => reportDismissal(event.currentTarget, current, () => lightbox.close())}
       onKeydown={event => handleKey(event, { dialog: event.currentTarget, onShowNext, onShowPrevious, onClose })}
       onWheel={event => handleWheel(event, onShowNext, onShowPrevious)}
       onClick={event => handleClick(event, onClose)}
@@ -54,10 +59,11 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
         warmItems={warmItems}
         resolvePreviewUrl={resolvePreviewUrl}
         resolveOriginalUrl={resolveOriginalUrl}
-        resolveOriginalImageFallbackUrl={resolveOriginalImageFallbackUrl}
+        decodeOriginal={decodeOriginal}
         scheduler={scheduler}
-        fetchOriginal={fetchOriginal}
-        bitmapDecoder={bitmapDecoder}
+        exposeShownMedia={read => {
+          readShownMedia = read;
+        }}
       />
       <div className={LightboxScreenClass.position} hidden={computed(() => position.value === undefined)}>
         {computed(() => formatPosition(position.value))}
@@ -75,6 +81,19 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
     }
   });
   return dialog;
+}
+
+function closeIntoPage<T extends MediaItem>(media: MorphSource | undefined, { lightbox, morpher, locateItem }: LightboxScreenProps<T>): void {
+  const item = lightbox.current.peek();
+
+  if (item === undefined || media === undefined || morpher === undefined) {
+    lightbox.close();
+    return;
+  }
+  morpher.morph(media, () => {
+    lightbox.close();
+    return locateItem(item);
+  });
 }
 
 function formatPosition(position: SequencePosition | undefined): string {

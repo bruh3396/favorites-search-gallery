@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 function createLocalTagCategories(): IndexedDbLocalTagCategories {
-  return new IndexedDbLocalTagCategories(new IndexedDbClient());
+  return new IndexedDbLocalTagCategories(new IndexedDbClient(() => null));
 }
 
 describe("IndexedDbLocalTagCategories", () => {

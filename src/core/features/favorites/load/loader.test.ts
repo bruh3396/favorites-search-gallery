@@ -17,6 +17,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { effect } from "@/core/utils/reactive/signal";
 import { flushMicrotasks } from "@/testing/async";
+import { hasMedia } from "@/core/domain/media/media";
 
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
 
@@ -50,7 +51,7 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
     scheduler: new MemoryScheduler()
   });
 
-  await localPosts.setMany(local.filter(post => post.media.locator !== ""));
+  await localPosts.setMany(local.filter(post => hasMedia(post.media)));
   await localFavorites.prepend(local.map(post => post.id));
   return { flow, collection, index, localFavorites, remoteFavorites };
 }

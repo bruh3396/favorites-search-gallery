@@ -1,13 +1,13 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { Favorite } from "@/core/features/favorites/favorite";
-import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
+import { MemoryMorpher } from "@/adapters/memory/ports/morpher/morpher";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
@@ -19,17 +19,20 @@ import { MemoryViewport } from "@/adapters/memory/ports/viewport/viewport";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
-import { Signal } from "@/core/utils/reactive/signal";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
-import { mountFavoritesPage } from "@/core/app/favorites_page/composer";
+import { ExitIndicator, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 
-function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = []): ShadowRoot {
+function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = [], {
+  morpher = new MemoryMorpher(),
+  navigator = new MemoryNavigator(),
+  returnIndicator = undefined as ExitIndicator | undefined
+} = {}): ShadowRoot {
   const container = document.createElement("div");
   const client = new MemoryClient(posts);
 
-  mountFavoritesPage(container, { userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
+  mountFavoritesPage(container, { userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark", returnIndicator }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
@@ -37,14 +40,14 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteFavoriteActions: new MemoryRemoteFavoriteActions(client),
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
-    bitmapDecoder: new MemoryBitmapDecoder(),
     visibilityObserver: { observe: () => (): void => { } },
     remotePages: new MemoryRemotePages(),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource(),
-    visiblePosts: new Signal<readonly Favorite[]>([]),
     localKeyedValues,
-    viewport: new MemoryViewport()
+    viewport: new MemoryViewport(),
+    morpher,
+    navigator
   });
   return container.shadowRoot!;
 }
@@ -140,5 +143,55 @@ describe("mountFavoritesPage", () => {
     expect(scrolls[0].page).toBe("2");
     expect(scrolls[0].target).toBe(scrolls[0].shown);
     expect(scrolls[0].target).not.toBe(firstTile);
+  });
+
+  test("morphs the lightbox's media into its favorite's tile on close", async() => {
+    const morpher = new MemoryMorpher();
+    const posts = [createPost({ id: "1", media: { kind: "image", locator: "data:image/png;base64,AA==" } })];
+    const root = mount(new MemoryLocalKeyedValues(), posts, { morpher });
+
+    await flushMicrotasks();
+    const tile = root.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
+
+    tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
+    root.querySelector("dialog")!.click();
+    expect(morpher.morphs).toEqual([{ source: expect.any(HTMLImageElement), target: tile }]);
+  });
+
+  test("highlights the closed favorite's tile instead of morphing when the indicator is a highlight", async() => {
+    const morpher = new MemoryMorpher();
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher, returnIndicator: "glow" });
+
+    await flushMicrotasks();
+    const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
+
+    tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
+    root.querySelector("dialog")!.click();
+    expect([tile.dataset.highlight, morpher.morphs]).toEqual(["glow", []]);
+  });
+
+  test("closes plainly without a morph or highlight when the indicator is none", async() => {
+    const morpher = new MemoryMorpher();
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher, returnIndicator: "none" });
+
+    await flushMicrotasks();
+    const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
+
+    tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
+    root.querySelector("dialog")!.click();
+    expect([tile.dataset.highlight, morpher.morphs, root.querySelector("dialog")!.open]).toEqual([undefined, [], false]);
+  });
+
+  test("opens a favorite's original when its tile is Ctrl-clicked", async() => {
+    const navigator = new MemoryNavigator();
+    const posts = [createPost({ id: "1", media: { kind: "image", locator: "https://originals/1.png" } })];
+    const root = mount(new MemoryLocalKeyedValues(), posts, { navigator });
+
+    await flushMicrotasks();
+    root.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!
+      .dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }));
+    await flushMicrotasks();
+    expect(navigator.opened).toEqual(["https://originals/1.png"]);
+    expect(root.querySelector("dialog")!.open).toBe(false);
   });
 });

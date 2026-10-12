@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 function createLocalSnippets(): IndexedDbLocalSnippets {
-  return new IndexedDbLocalSnippets(new IndexedDbClient());
+  return new IndexedDbLocalSnippets(new IndexedDbClient(() => null));
 }
 
 function createSnippet(name: string, query = "apple"): Snippet {

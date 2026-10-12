@@ -1,40 +1,32 @@
 import { Media } from "@/core/domain/media/media";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
-import { WIMG_HOSTNAME } from "@/adapters/rule34/client/urls";
 
 export class Rule34CdnRemoteMedia implements RemoteMedia {
   constructor(private readonly rule34Cdn: Pick<Rule34CdnClient,
-    "previewUrl" | "originalUrl" | "imageUrl" | "fetchFile" | "fetchOriginal" | "readVideoDurationSeconds">) { }
+    "previewUrl" | "originalUrl" | "imageUrl" | "decodeImage" | "decodeOriginal" | "readVideoDurationSeconds">) { }
 
   public resolvePreviewUrl(media: Media): Promise<string> {
-    return Promise.resolve(this.rule34Cdn.previewUrl(media.locator));
+    return Promise.resolve(this.rule34Cdn.previewUrl(media));
   }
 
   public resolveOriginalUrl(media: Media): Promise<string> {
-    return this.rule34Cdn.originalUrl(media.locator, media.kind);
-  }
-
-  public async resolveOriginalImageFallbackUrl(media: Media): Promise<string> {
-    const url = new URL(await this.resolveOriginalUrl(media));
-
-    url.hostname = WIMG_HOSTNAME;
-    return url.href;
+    return this.rule34Cdn.originalUrl(media);
   }
 
   public resolveImageUrl(media: Media): Promise<string> {
-    return this.rule34Cdn.imageUrl(media.locator, media.kind);
+    return this.rule34Cdn.imageUrl(media);
   }
 
-  public async fetchImage(media: Media, signal?: AbortSignal): Promise<Blob> {
-    return this.rule34Cdn.fetchFile(await this.rule34Cdn.imageUrl(media.locator, media.kind), signal);
+  public decodeImage(media: Media, signal?: AbortSignal): Promise<ImageBitmap> {
+    return this.rule34Cdn.decodeImage(media, signal);
   }
 
-  public fetchOriginal(media: Media, signal?: AbortSignal): Promise<Blob> {
-    return this.rule34Cdn.fetchOriginal(media.locator, media.kind, signal);
+  public decodeOriginal(media: Media, signal?: AbortSignal): Promise<ImageBitmap> {
+    return this.rule34Cdn.decodeOriginal(media, signal);
   }
 
-  public async fetchDurationSeconds(media: Media): Promise<number> {
-    return this.rule34Cdn.readVideoDurationSeconds(await this.resolveOriginalUrl(media));
+  public fetchDurationSeconds(media: Media): Promise<number> {
+    return this.rule34Cdn.readVideoDurationSeconds(media);
   }
 }

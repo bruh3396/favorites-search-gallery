@@ -8,8 +8,9 @@ import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LoadState } from "@/core/features/favorites/load/state";
 import { MediaItem } from "@/core/domain/post/post";
-import { MemoryBitmapDecoder } from "@/adapters/memory/ports/bitmap_decoder/bitmap_decoder";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import PANE_CSS from "@/core/app/favorites_page/pane.css?inline";
 import { PaginationResult } from "@/core/features/favorites/search/pagination";
@@ -17,6 +18,7 @@ import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
+import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { createPostGridSettings } from "@/core/app/preferences";
 import { createSearchSettings } from "@/core/app/favorites_page/preferences";
 import { doNothing } from "@/core/utils/function/function";
@@ -34,7 +36,7 @@ interface Setup {
   submit: Mock<(query: string) => void>;
   goToPage: Mock<(pageNumber: number) => void>;
   skeleton: HTMLElement;
-  onActivate: Mock<(post: MediaItem, event: MouseEvent) => void>;
+  onPlainClick: Mock<(post: MediaItem) => void>;
 }
 
 function createFavorite(id: string): Favorite {
@@ -57,7 +59,7 @@ function setup(): Setup {
   const visiblePosts = new Signal<readonly Favorite[]>([]);
   const submit = vi.fn<(query: string) => void>();
   const goToPage = vi.fn<(pageNumber: number) => void>();
-  const onActivate = vi.fn<(post: MediaItem, event: MouseEvent) => void>();
+  const onPlainClick = vi.fn<(post: MediaItem) => void>();
   const favorites = {
     hydrated: new Emitter<Favorite>(),
     loadState: new Signal<LoadState>({ phase: "starting" })
@@ -77,23 +79,25 @@ function setup(): Setup {
         favorites,
         session,
         scrollTo: new Emitter<Favorite>(),
+        tileLocator: new TileLocator<Favorite>(),
         finishedLoading,
         skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
         skeletonItemCount: 50,
         gridPreferences,
         visiblePosts,
-        bitmapDecoder: new MemoryBitmapDecoder(),
         visibilityObserver: { observe: () => (): void => { } },
-        fetchImage: () => Promise.resolve(new Blob()),
+        decodeImage: () => new MemoryRemoteMedia().decodeImage(),
+        scheduler: new MemoryScheduler(),
         resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
         getPostUrl: post => `https://posts/${post.id}`,
-        onActivate,
+        onPlainClick,
+        onCtrlClick: doNothing,
         onPointerEnter: doNothing
       })
     ]
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${SkeletonGridClass.root}`)!;
-  return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onActivate };
+  return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onPlainClick };
 }
 
 function queryFavoriteLink(element: HTMLElement): HTMLAnchorElement {
@@ -151,13 +155,13 @@ describe("FavoritesPane", () => {
     expect(submit).toHaveBeenCalledExactlyOnceWith("cat");
   });
 
-  test("activates the favorite whose tile is clicked", () => {
-    const { element, searchResults, onActivate } = setup();
+  test("reports the favorite whose tile is clicked", () => {
+    const { element, searchResults, onPlainClick } = setup();
     const favorite = createFavorite("1");
 
     searchResults.value = [favorite];
     queryFavoriteLink(element).click();
-    expect(onActivate).toHaveBeenCalledExactlyOnceWith(favorite, expect.any(MouseEvent));
+    expect(onPlainClick).toHaveBeenCalledExactlyOnceWith(favorite);
   });
 
   test("links each favorite to its post's page", () => {

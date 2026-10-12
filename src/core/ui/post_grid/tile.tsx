@@ -1,7 +1,7 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Media, hasMedia } from "@/core/domain/media/media";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
-import { BitmapDecoder } from "@/core/boundary/ports/bitmap_decoder/bitmap_decoder";
-import { Media } from "@/core/domain/media/media";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Upscaler } from "@/core/ui/post_grid/upscaler";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { doNothing } from "@/core/utils/function/function";
@@ -21,25 +21,26 @@ export interface TileProps {
   dimensions: Dimensions;
   actions: readonly Node[];
   upscale: Readable<boolean>;
-  bitmapDecoder: BitmapDecoder;
   visibilityObserver: VisibilityObserver;
   onVisibilityChange: (visible: boolean) => void;
-  fetchImage: (media: Media, signal: AbortSignal) => Promise<Blob>;
+  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   href?: string;
-  onActivate: (event: MouseEvent) => void;
+  onPlainClick: () => void;
+  onCtrlClick?: () => void;
   onPointerEnter?: () => void;
 }
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
-  const { post, dimensions, actions, upscale, href, onActivate, onPointerEnter } = props;
+  const { post, dimensions, actions, upscale, href, onPlainClick, onCtrlClick, onPointerEnter } = props;
   const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
   const canvas = <canvas className={TileClass.upscale} hidden /> as HTMLCanvasElement;
   const link =
-    <a className={TileClass.link} target="_blank" onClick={event => activateOnPlainClick(event, onActivate)} onPointerenter={() => onPointerEnter?.()}>
+    <a className={TileClass.link} target="_blank" onClick={event => handleClick(event, onPlainClick, onCtrlClick)} onPointerenter={() => onPointerEnter?.()}>
       {preview}{canvas}
     </a> as HTMLAnchorElement;
   const root = (
@@ -64,9 +65,9 @@ export function Tile(props: TileProps): HTMLElement {
     setHrefOnInteraction(link, href);
   }
 
-  if (post.media.locator !== "") {
+  if (hasMedia(post.media)) {
     loadPreview(root, preview, props);
-    const upscaler = new Upscaler({ canvas, media: post.media, bitmapDecoder: props.bitmapDecoder, fetchImage: props.fetchImage });
+    const upscaler = new Upscaler({ canvas, media: post.media, decodeImage: props.decodeImage, scheduler: props.scheduler });
 
     effect(() => {
       const upscalingEnabled = upscale.value;
@@ -92,10 +93,19 @@ function loadPreview(root: HTMLElement, preview: HTMLImageElement, props: TilePr
     });
 }
 
-function activateOnPlainClick(event: MouseEvent, onActivate: (event: MouseEvent) => void): void {
-  if (event.button === 0 && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) {
+function handleClick(event: MouseEvent, onPlainClick: () => void, onCtrlClick?: () => void): void {
+  if (event.button !== 0 || event.shiftKey || event.altKey) {
+    return;
+  }
+
+  if (event.ctrlKey || event.metaKey) {
+    if (onCtrlClick !== undefined) {
+      event.preventDefault();
+      onCtrlClick();
+    }
+  } else {
     event.preventDefault();
-    onActivate(event);
+    onPlainClick();
   }
 }
 
