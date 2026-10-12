@@ -44,7 +44,15 @@ describe("Rule34CdnImageDecoder", () => {
 
     expect(await decoder.decode(FILE_URL, signal)).toBe(BITMAP);
     expect(loadImage).toHaveBeenCalledExactlyOnceWith(WIMG_URL, signal);
-    expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(IMAGE);
+    expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(IMAGE, undefined);
+  });
+
+  test("passes its options to the bitmap decode", async() => {
+    const { decoder, decodeBitmap } = setup();
+    const options: ImageBitmapOptions = { resizeWidth: 100 };
+
+    await decoder.decode(FILE_URL, undefined, options);
+    expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(expect.any(Blob), options);
   });
 
   test("falls back to WIMG when the host answers with an error", async() => {

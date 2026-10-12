@@ -3,12 +3,12 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export const MAX_CANVAS_WIDTH = 500;
 export const MAX_CANVAS_HEIGHT = 16_000;
-export const UPSCALE_DELAY = 1_000;
+export const UPSCALE_DELAY = 400;
 
 interface UpscalerDependencies {
   canvas: HTMLCanvasElement;
   media: Media;
-  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  decodeImage: (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
 }
 
@@ -65,7 +65,7 @@ export class Upscaler {
     const controller = new AbortController();
 
     this.abortController = controller;
-    this.dependencies.decodeImage(this.dependencies.media, controller.signal)
+    this.dependencies.decodeImage(this.dependencies.media, MAX_CANVAS_WIDTH, controller.signal)
       .then(bitmap => {
         if (controller.signal.aborted || version !== this.requestVersion) {
           bitmap.close();

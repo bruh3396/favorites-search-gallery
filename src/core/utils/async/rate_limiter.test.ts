@@ -48,6 +48,54 @@ describe("RateLimiter", () => {
     expect(await ran).toBe("done");
   });
 
+  test("drops a waiting task when its signal aborts", async() => {
+    const scheduler = new MemoryScheduler();
+    const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
+    const first = Promise.withResolvers<void>();
+    const controller = new AbortController();
+    const dropped = vi.fn(() => Promise.resolve());
+    const next = vi.fn(() => Promise.resolve());
+
+    limiter.run(() => first.promise);
+    const waiting = limiter.run(dropped, controller.signal);
+
+    limiter.run(next);
+    controller.abort(new Error("left"));
+    await expect(waiting).rejects.toThrow("left");
+    first.resolve();
+    await advanceAndSettle(scheduler, 100);
+    expect(dropped).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  test("rejects a task whose signal already aborted without taking a slot", async() => {
+    const scheduler = new MemoryScheduler();
+    const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
+    const task = vi.fn(() => Promise.resolve());
+    const next = vi.fn(() => Promise.resolve());
+
+    await expect(limiter.run(task, AbortSignal.abort(new Error("gone")))).rejects.toThrow("gone");
+    limiter.run(next);
+    await advanceAndSettle(scheduler, 0);
+    expect(task).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledOnce();
+  });
+
+  test("skips a task whose signal aborts while it waits for its turn", async() => {
+    const scheduler = new MemoryScheduler();
+    const limiter = new RateLimiter({ concurrency: 2, ratePerSecond: 1 }, scheduler);
+    const controller = new AbortController();
+    const task = vi.fn(() => Promise.resolve());
+
+    limiter.run(() => Promise.resolve());
+    const waiting = limiter.run(task, controller.signal);
+
+    controller.abort(new Error("left"));
+    await advanceAndSettle(scheduler, 1_000);
+    await expect(waiting).rejects.toThrow("left");
+    expect(task).not.toHaveBeenCalled();
+  });
+
   test("frees the slot when a task fails", async() => {
     const scheduler = new MemoryScheduler();
     const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);

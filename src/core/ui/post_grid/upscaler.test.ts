@@ -12,7 +12,7 @@ interface FakeBitmap {
   close: () => void;
 }
 
-type DecodeImage = (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+type DecodeImage = (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
 
 interface Setup {
   upscaler: Upscaler;
@@ -64,13 +64,13 @@ async function drawnSize(bitmap: FakeBitmap): Promise<number[]> {
 }
 
 describe("Upscaler", () => {
-  test("decodes and draws the image when upscaling is requested", async() => {
+  test("decodes the image at the maximum width and draws it when upscaling is requested", async() => {
     const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
     const { canvas, decodeImage, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
 
     upscaleNow();
-    expect(decodeImage).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal));
+    expect(decodeImage).toHaveBeenCalledExactlyOnceWith(MEDIA, MAX_CANVAS_WIDTH, expect.any(AbortSignal));
     expect(canvas.hidden).toBe(true);
 
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);
@@ -166,7 +166,7 @@ describe("Upscaler", () => {
     const { upscaler, decodeImage, canvas, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
 
     upscaleNow();
-    const signal = decodeImage.mock.calls[0][1];
+    const signal = decodeImage.mock.calls[0][2];
 
     upscaler.disable();
 
@@ -180,7 +180,7 @@ describe("Upscaler", () => {
     const { upscaler, canvas, decodeImage, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
 
     upscaleNow();
-    const signal = decodeImage.mock.calls[0][1];
+    const signal = decodeImage.mock.calls[0][2];
 
     upscaler.dispose();
 

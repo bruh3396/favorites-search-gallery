@@ -46,7 +46,7 @@ export function mountPostListPage(container: HTMLElement, configuration: PostLis
       settings: { layout, size, upscale },
       visiblePosts: new Signal<readonly MediaItem[]>([]),
       visibilityObserver,
-      decodeImage: (media, signal) => remoteMedia.decodeImage(media, signal),
+      decodeImage: (media, width, signal) => remoteMedia.decodeImage(media, width, signal),
       scheduler,
       getDimensions: () => ({ width: 1, height: 1 }),
       createActions: () => [],

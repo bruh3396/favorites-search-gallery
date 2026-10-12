@@ -30,7 +30,8 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   morpher = new MemoryMorpher(),
   navigator = new MemoryNavigator(),
   fileSaver = new MemoryFileSaver(),
-  returnIndicator = undefined as ExitIndicator | undefined
+  returnIndicator = undefined as ExitIndicator | undefined,
+  scheduler = new MemoryScheduler()
 } = {}): ShadowRoot {
   const container = document.createElement("div");
   const client = new MemoryClient(posts);
@@ -45,7 +46,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver: { observe: () => (): void => { } },
     remotePages: new MemoryRemotePages(),
-    scheduler: new MemoryScheduler(),
+    scheduler,
     randomSource: new MemoryRandomSource(),
     localKeyedValues,
     viewport: new MemoryViewport(),
@@ -147,6 +148,30 @@ describe("mountFavoritesPage", () => {
     expect(scrolls[0].page).toBe("2");
     expect(scrolls[0].target).toBe(scrolls[0].shown);
     expect(scrolls[0].target).not.toBe(firstTile);
+  });
+
+  test("switches the grid to the lightbox favorite's page once it settles, while the lightbox stays open", async() => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const scheduler = new MemoryScheduler();
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
+    const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })], { scheduler });
+    const readPage = (): string | null | undefined => root.querySelector(`.${PaginatorClass.page}[aria-current="page"]`)?.textContent;
+    const pressArrowRight = (): void => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    };
+
+    await flushMicrotasks();
+    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
+    pressArrowRight();
+    await flushMicrotasks();
+    scheduler.advance(74);
+    pressArrowRight();
+    await flushMicrotasks();
+    scheduler.advance(74);
+    expect(readPage()).toBe("1");
+    scheduler.advance(1);
+    expect([readPage(), root.querySelector("dialog")!.open]).toEqual(["3", true]);
   });
 
   test("morphs the lightbox's media into its favorite's tile on close", async() => {

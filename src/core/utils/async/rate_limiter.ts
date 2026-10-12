@@ -15,23 +15,40 @@ export class RateLimiter {
     this.interval = 1_000 / configuration.ratePerSecond;
   }
 
-  public async run<T>(task: () => Promise<T>): Promise<T> {
-    await this.acquireSlot();
+  public async run<T>(task: () => Promise<T>, signal?: AbortSignal): Promise<T> {
+    await this.acquireSlot(signal);
 
     try {
       await this.waitForTurn();
+      signal?.throwIfAborted();
       return await task();
     } finally {
       this.releaseSlot();
     }
   }
 
-  private acquireSlot(): Promise<void> {
+  private acquireSlot(signal?: AbortSignal): Promise<void> {
+    if (signal?.aborted === true) {
+      return Promise.reject(signal.reason);
+    }
+
     if (this.active < this.configuration.concurrency) {
       this.active += 1;
       return Promise.resolve();
     }
-    return new Promise(resolve => this.waiting.push(resolve));
+    return new Promise((resolve, reject) => {
+      const grant = (): void => {
+        signal?.removeEventListener("abort", leave);
+        resolve();
+      };
+      const leave = (): void => {
+        this.waiting.splice(this.waiting.indexOf(grant), 1);
+        reject(signal?.reason);
+      };
+
+      this.waiting.push(grant);
+      signal?.addEventListener("abort", leave, { once: true });
+    });
   }
 
   private releaseSlot(): void {

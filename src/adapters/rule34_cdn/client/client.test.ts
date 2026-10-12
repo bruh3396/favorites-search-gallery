@@ -6,6 +6,7 @@ import { advanceAndSettle } from "@/testing/async";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type FetchMock = ReturnType<typeof vi.fn<Fetch>>;
+type DecodeBitmap = (source: ImageBitmapSource, options?: ImageBitmapOptions) => Promise<ImageBitmap>;
 
 const BITMAP = { close: (): void => undefined } as ImageBitmap;
 
@@ -17,18 +18,20 @@ interface Setup {
   client: Rule34CdnClient;
   fetch: FetchMock;
   scheduler: MemoryScheduler;
+  decodeBitmap: ReturnType<typeof vi.fn<DecodeBitmap>>;
 }
 
 function setup(respond: Fetch = respondWithBytes): Setup {
   const fetch = vi.fn<Fetch>(respond);
   const scheduler = new MemoryScheduler();
+  const decodeBitmap = vi.fn<DecodeBitmap>(() => Promise.resolve(BITMAP));
   const client = new Rule34CdnClient({
     fetch,
     scheduler,
     loadImage: (): Promise<HTMLImageElement> => Promise.reject(new Error("Could not load image")),
-    decodeBitmap: (): Promise<ImageBitmap> => Promise.resolve(BITMAP)
+    decodeBitmap
   });
-  return { client, fetch, scheduler };
+  return { client, fetch, scheduler, decodeBitmap };
 }
 
 async function settled<T>(scheduler: MemoryScheduler, pending: Promise<T>): Promise<T> {
@@ -141,7 +144,24 @@ describe("Rule34CdnClient", () => {
   test("decodes a video's image from the jpg beside it", async() => {
     const { client, fetch } = setup();
 
-    expect(await client.decodeImage(media("video", "1234/a1b2c3"))).toBe(BITMAP);
+    expect(await client.decodeImage(media("video", "1234/a1b2c3"), 500)).toBe(BITMAP);
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.jpg", { signal: undefined });
+  });
+
+  test("downloads at most four images to decode at once", async() => {
+    const { client, fetch, scheduler } = setup(() => new Promise(() => undefined));
+
+    for (const name of ["a", "b", "c", "d", "e"]) {
+      client.decodeImage(media("image", `1234/${name}.png`), 500);
+    }
+    await advanceAndSettle(scheduler, 1_000);
+    expect(fetch).toHaveBeenCalledTimes(4);
+  });
+
+  test("decodes an image already scaled to the width asked for", async() => {
+    const { client, decodeBitmap } = setup();
+
+    await client.decodeImage(media("image", "1234/a1b2c3.png"), 500);
+    expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(expect.any(Blob), { resizeWidth: 500, resizeQuality: "high" });
   });
 });

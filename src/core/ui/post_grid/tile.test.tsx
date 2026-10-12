@@ -235,6 +235,30 @@ describe("Tile", () => {
     expect(disable).toHaveBeenCalledOnce();
   });
 
+  test("cancels upscaling while paused without hiding a finished upscale, and resumes after", () => {
+    const upscale = vi.spyOn(Upscaler.prototype, "upscale").mockImplementation(doNothing);
+    const dispose = vi.spyOn(Upscaler.prototype, "dispose").mockImplementation(doNothing);
+    const disable = vi.spyOn(Upscaler.prototype, "disable").mockImplementation(doNothing);
+    const upscalePaused = new Signal(false);
+    const visibilityObserver = {
+      observe: (_element: Element, onVisibility: (visible: boolean) => void): (() => void) => {
+        onVisibility(true);
+        return doNothing;
+      }
+    };
+
+    onTestFinished(() => {
+      vi.restoreAllMocks();
+    });
+    drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, upscale: new Signal(true), upscalePaused, visibilityObserver });
+    upscale.mockClear();
+    dispose.mockClear();
+    upscalePaused.value = true;
+    expect([dispose.mock.calls.length, disable.mock.calls.length, upscale.mock.calls.length]).toEqual([1, 0, 0]);
+    upscalePaused.value = false;
+    expect(upscale).toHaveBeenCalledOnce();
+  });
+
   test("stays loading without a preview for a placeholder", async() => {
     const resolve = vi.fn(resolvePreviewUrl);
     const tile = drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl: resolve });

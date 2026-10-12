@@ -18,8 +18,8 @@ export class Rule34CdnRemoteMedia implements RemoteMedia {
     return this.rule34Cdn.imageUrl(media);
   }
 
-  public decodeImage(media: Media, signal?: AbortSignal): Promise<ImageBitmap> {
-    return this.rule34Cdn.decodeImage(media, signal);
+  public decodeImage(media: Media, width: number, signal?: AbortSignal): Promise<ImageBitmap> {
+    return this.rule34Cdn.decodeImage(media, width, signal);
   }
 
   public decodeOriginal(media: Media, signal?: AbortSignal): Promise<ImageBitmap> {

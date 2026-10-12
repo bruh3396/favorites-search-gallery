@@ -51,17 +51,18 @@ describe("loadImage", () => {
 });
 
 describe("decodeBitmap", () => {
-  test("decodes the source with the browser API", async() => {
+  test("decodes the source with the browser API and its options", async() => {
     const bitmap = { close: vi.fn() } as unknown as ImageBitmap;
-    const createImageBitmap = vi.fn<(source: ImageBitmapSource) => Promise<ImageBitmap>>(() => Promise.resolve(bitmap));
+    const createImageBitmap = vi.fn<(source: ImageBitmapSource, options?: ImageBitmapOptions) => Promise<ImageBitmap>>(() => Promise.resolve(bitmap));
     const source = new Blob(["image bytes"]);
+    const options: ImageBitmapOptions = { resizeWidth: 100 };
 
     vi.stubGlobal("createImageBitmap", createImageBitmap);
     onTestFinished(() => {
       vi.unstubAllGlobals();
     });
 
-    await expect(decodeBitmap(source)).resolves.toBe(bitmap);
-    expect(createImageBitmap).toHaveBeenCalledExactlyOnceWith(source);
+    await expect(decodeBitmap(source, options)).resolves.toBe(bitmap);
+    expect(createImageBitmap).toHaveBeenCalledExactlyOnceWith(source, options);
   });
 });

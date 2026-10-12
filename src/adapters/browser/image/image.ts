@@ -31,6 +31,6 @@ export function loadImage(url: string, signal?: AbortSignal): Promise<HTMLImageE
   });
 }
 
-export function decodeBitmap(source: ImageBitmapSource): Promise<ImageBitmap> {
-  return createImageBitmap(source);
+export function decodeBitmap(source: ImageBitmapSource, options?: ImageBitmapOptions): Promise<ImageBitmap> {
+  return createImageBitmap(source, options);
 }

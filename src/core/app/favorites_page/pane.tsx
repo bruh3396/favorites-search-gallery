@@ -1,5 +1,5 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
-import { Signal, computed } from "@/core/utils/reactive/signal";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { Fact } from "@/core/utils/reactive/milestone";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
@@ -33,9 +33,10 @@ export interface FavoritesPaneProps {
   skeletonDimensions: readonly Dimensions[];
   skeletonItemCount: number;
   gridPreferences: PostGridPreferences;
+  upscalePaused?: Readable<boolean>;
   visiblePosts: Signal<readonly Favorite[]>;
   visibilityObserver: VisibilityObserver;
-  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  decodeImage: (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl: (post: MediaItem) => string;
@@ -76,6 +77,7 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
           scrollTo={scrollTo}
           tileLocator={tileLocator}
           settings={props.gridPreferences}
+          upscalePaused={props.upscalePaused}
           visiblePosts={visiblePosts}
           getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}
           createActions={() => []}

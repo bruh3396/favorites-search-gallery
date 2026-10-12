@@ -27,9 +27,10 @@ export interface PostGridProps<T extends MediaItem> {
   scrollTo?: Occurrence<T>;
   tileLocator?: TileLocator<T>;
   settings: PostGridSettings;
+  upscalePaused?: Readable<boolean>;
   visiblePosts: Signal<readonly T[]>;
   visibilityObserver: VisibilityObserver;
-  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  decodeImage: (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
   getDimensions: (post: T) => Dimensions;
   createActions: (post: T) => readonly Node[];
@@ -101,7 +102,7 @@ class PostGridImplementation<T extends MediaItem> {
   private createPostList(): KeyedList<T> {
     const {
       getDimensions, createActions, visibilityObserver, decodeImage, scheduler, resolvePreviewUrl, getPostUrl,
-      onPlainClick, onCtrlClick, onPointerEnter, settings
+      onPlainClick, onCtrlClick, onPointerEnter, settings, upscalePaused
     } = this.props;
     return new KeyedList<T>({
       getKey: (post): string => post.id,
@@ -111,6 +112,7 @@ class PostGridImplementation<T extends MediaItem> {
           dimensions={getDimensions(post)}
           actions={createActions(post)}
           upscale={settings.upscale}
+          upscalePaused={upscalePaused}
           visibilityObserver={visibilityObserver}
           onVisibilityChange={isVisible => (isVisible ? this.markVisible(post) : this.markHidden(post))}
           decodeImage={decodeImage}

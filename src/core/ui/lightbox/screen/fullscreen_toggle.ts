@@ -27,7 +27,6 @@ export class FullscreenToggle {
     }
   }
 
-  // The document reports a shadow host in place of its fullscreen descendant, so only the element's own root can name it.
   private holdsFullscreen(): boolean {
     return (this.element.getRootNode() as Document | ShadowRoot).fullscreenElement === this.element;
   }

@@ -28,11 +28,13 @@ import UI_CSS from "@/core/ui/styles.css?inline";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
+import { createDebouncedTask } from "@/core/utils/async/debouncer";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export type ExitIndicator = "none" | "zoom" | TileHighlight;
 
 const LIGHTBOX_EXIT_INDICATOR: ExitIndicator = "zoom";
+const SETTLED_ITEM_DELAY = 75;
 
 export interface FavoritesPageConfiguration extends FavoritesConfiguration {
   readonly favoritesOwnerId: string;
@@ -95,10 +97,10 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
 
   function createFavoritesPane(): HTMLElement {
     return h(FavoritesPane, {
-      favorites: favoritesService, session, scrollTo, tileLocator, gridPreferences,
+      favorites: favoritesService, session, scrollTo, tileLocator, gridPreferences, upscalePaused: lightbox.isOpen,
       visiblePosts, finishedLoading, skeletonDimensions: skeletonDimensions.peek(),
       skeletonItemCount: paginationSettings.peek().size,
-      visibilityObserver, scheduler: ports.scheduler, decodeImage: (media, signal) => ports.remoteMedia.decodeImage(media, signal),
+      visibilityObserver, scheduler: ports.scheduler, decodeImage: (media, width, signal) => ports.remoteMedia.decodeImage(media, width, signal),
       resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media), getPostUrl: post => remotePages.postUrl(post.id),
       onPlainClick: post => lightbox.open(post, session.createMediaSequence()),
       onCtrlClick: openOriginal,
@@ -131,6 +133,17 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   app.append(shell, lightboxScreen);
 
   effect(() => (lightbox.isOpen.value ? viewport.lockScroll() : viewport.unlockScroll()));
+  const revealSettledItem = createDebouncedTask({ delay: SETTLED_ITEM_DELAY, leading: false }, ports.scheduler, (item: Favorite) => session.reveal(item));
+
+  effect(() => {
+    const item = lightbox.current.value;
+
+    if (item === undefined) {
+      revealSettledItem.cancel();
+    } else {
+      revealSettledItem(item);
+    }
+  });
   favoritesService.load()
     .then(() => {
       finishedLoading.reach();

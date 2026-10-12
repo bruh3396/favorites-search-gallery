@@ -21,9 +21,10 @@ export interface TileProps {
   dimensions: Dimensions;
   actions: readonly Node[];
   upscale: Readable<boolean>;
+  upscalePaused?: Readable<boolean>;
   visibilityObserver: VisibilityObserver;
   onVisibilityChange: (visible: boolean) => void;
-  decodeImage: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
+  decodeImage: (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   href?: string;
@@ -73,7 +74,9 @@ export function Tile(props: TileProps): HTMLElement {
       const upscalingEnabled = upscale.value;
       const isVisible = visible.value;
 
-      if (!upscalingEnabled) {
+      if (props.upscalePaused?.value === true) {
+        upscaler.dispose();
+      } else if (!upscalingEnabled) {
         upscaler.disable();
       } else if (isVisible) {
         upscaler.upscale();

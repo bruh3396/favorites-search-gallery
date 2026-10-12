@@ -1,5 +1,5 @@
-import { LightboxAutoplay } from "@/core/ui/lightbox/autoplay/autoplay";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
+import { LightboxAutoplay } from "@/core/ui/lightbox/autoplay/autoplay";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";

@@ -3,7 +3,7 @@ import { wimgUrl } from "@/adapters/rule34_cdn/client/addresses";
 export interface Rule34CdnImageDecoderDependencies {
   fetch: (url: string, init?: RequestInit) => Promise<Response>;
   loadImage: (url: string, signal?: AbortSignal) => Promise<HTMLImageElement>;
-  decodeBitmap: (source: ImageBitmapSource) => Promise<ImageBitmap>;
+  decodeBitmap: (source: ImageBitmapSource, options?: ImageBitmapOptions) => Promise<ImageBitmap>;
 }
 
 /** Some files the bare host won't serve to a fetch still load from WIMG through an image element. */
@@ -12,8 +12,8 @@ export class Rule34CdnImageDecoder {
 
   constructor(private readonly dependencies: Rule34CdnImageDecoderDependencies) { }
 
-  public async decode(url: string, signal?: AbortSignal): Promise<ImageBitmap> {
-    return this.dependencies.decodeBitmap(await this.load(url, signal));
+  public async decode(url: string, signal?: AbortSignal, options?: ImageBitmapOptions): Promise<ImageBitmap> {
+    return this.dependencies.decodeBitmap(await this.load(url, signal), options);
   }
 
   private async load(url: string, signal?: AbortSignal): Promise<ImageBitmapSource> {

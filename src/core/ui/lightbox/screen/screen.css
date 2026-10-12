@@ -21,7 +21,7 @@
 }
 
 .fsg-LightboxScreen::backdrop {
-  background: black;
+  background: rgb(0 0 0 / 50%);
 }
 
 .fsg-LightboxScreen-content {

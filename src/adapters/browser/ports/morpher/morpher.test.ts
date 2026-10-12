@@ -44,8 +44,17 @@ function findStandIn(): HTMLCanvasElement | null {
   return document.body.querySelector<HTMLCanvasElement>(":scope > canvas");
 }
 
-function readPlacement(element: HTMLElement): string[] {
-  return ["left", "top", "width", "height"].map(property => element.style.getPropertyValue(property));
+function readVisibleBox(element: HTMLElement): number[] {
+  const [left, top, width, height] = ["left", "top", "width", "height"].map(property => parseFloat(element.style.getPropertyValue(property)));
+  const [translateX, translateY, scale] = (/translate\((\S+)px, (\S+)px\) scale\((\S+)\)/).exec(element.style.transform)!.slice(1).map(Number);
+  const [insetY, insetX] = (/inset\((\S+)px (\S+)px/).exec(element.style.clipPath)!.slice(1).map(Number);
+  const box = [
+    left + translateX + (insetX * scale),
+    top + translateY + (insetY * scale),
+    (width - (2 * insetX)) * scale,
+    (height - (2 * insetY)) * scale
+  ];
+  return box.map(value => Math.round(value * 1_000) / 1_000);
 }
 
 describe("BrowserMorpher", () => {
@@ -59,8 +68,22 @@ describe("BrowserMorpher", () => {
       return target;
     });
     onTestFinished(() => standIn?.remove());
-    expect([standIn!.width, standIn!.height]).toEqual([600, 600]);
-    expect(readPlacement(standIn!)).toEqual(["10px", "70px", "300px", "300px"]);
+    expect([standIn!.width, standIn!.height]).toEqual([300, 300]);
+    expect(readVisibleBox(standIn!)).toEqual([10, 70, 300, 300]);
+  });
+
+  test("draws the stand-in no larger than the source's own pixels", () => {
+    stubFrames();
+    const source = createSource();
+
+    source.width = 150;
+    source.height = 150;
+    new BrowserMorpher().morph(source, createTarget);
+    const standIn = findStandIn()!;
+
+    onTestFinished(() => standIn.remove());
+    expect([standIn.width, standIn.height]).toEqual([150, 150]);
+    expect(readVisibleBox(standIn)).toEqual([10, 70, 300, 300]);
   });
 
   test("flies the stand-in onto the target, then removes it", () => {
@@ -70,11 +93,35 @@ describe("BrowserMorpher", () => {
     const standIn = findStandIn()!;
 
     runFrame(0);
-    expect(readPlacement(standIn)).toEqual(["10px", "70px", "300px", "300px"]);
+    expect(readVisibleBox(standIn)).toEqual([10, 70, 300, 300]);
     runFrame(MORPH_DURATION);
-    expect(readPlacement(standIn)).toEqual(["50px", "60px", "100px", "120px"]);
+    expect(readVisibleBox(standIn)).toEqual([50, 60, 100, 120]);
     runFrame(MORPH_DURATION + 16);
     expect(findStandIn()).toBeNull();
+  });
+
+  test("hides the target during the flight and restores its visibility on landing", () => {
+    const runFrame = stubFrames();
+    const target = createTarget();
+
+    target.style.setProperty("visibility", "visible", "important");
+    new BrowserMorpher().morph(createSource(), () => target);
+    runFrame(0);
+    expect(target.style.visibility).toBe("hidden");
+    runFrame(MORPH_DURATION);
+    runFrame(MORPH_DURATION + 16);
+    expect([target.style.visibility, target.style.getPropertyPriority("visibility")]).toEqual(["visible", "important"]);
+  });
+
+  test("restores the target's visibility when it leaves the page mid-flight", () => {
+    const runFrame = stubFrames();
+    const target = createTarget();
+
+    new BrowserMorpher().morph(createSource(), () => target);
+    runFrame(0);
+    target.remove();
+    runFrame(MORPH_DURATION / 2);
+    expect(target.style.visibility).toBe("");
   });
 
   test("lands on the target where it is now when it moves mid-flight", () => {
@@ -88,7 +135,7 @@ describe("BrowserMorpher", () => {
     runFrame(0);
     moveTo(target, { left: 50, top: -500, width: 100, height: 120 });
     runFrame(MORPH_DURATION);
-    expect(readPlacement(standIn)).toEqual(["50px", "-500px", "100px", "120px"]);
+    expect(readVisibleBox(standIn)).toEqual([50, -500, 100, 120]);
   });
 
   test("drops the stand-in when the target leaves the page mid-flight", () => {

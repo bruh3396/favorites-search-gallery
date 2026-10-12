@@ -12,7 +12,7 @@ interface Rule34Cdn {
   previewUrl: ReturnType<typeof vi.fn<(media: Media) => string>>;
   originalUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
   imageUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
-  decodeImage: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>>;
+  decodeImage: ReturnType<typeof vi.fn<(media: Media, width: number, signal?: AbortSignal) => Promise<ImageBitmap>>>;
   decodeOriginal: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>>;
   fetchOriginal: ReturnType<typeof vi.fn<(media: Media) => Promise<Blob>>>;
   readVideoDurationSeconds: ReturnType<typeof vi.fn<(media: Media) => Promise<number>>>;
@@ -54,8 +54,8 @@ describe("Rule34CdnRemoteMedia", () => {
     const { source, rule34Cdn } = setup();
     const signal = new AbortController().signal;
 
-    expect(await source.decodeImage(VIDEO, signal)).toBe(BITMAP);
-    expect(rule34Cdn.decodeImage).toHaveBeenCalledWith(VIDEO, signal);
+    expect(await source.decodeImage(VIDEO, 500, signal)).toBe(BITMAP);
+    expect(rule34Cdn.decodeImage).toHaveBeenCalledWith(VIDEO, 500, signal);
   });
 
   test("decodes the original", async() => {
