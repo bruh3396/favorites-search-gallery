@@ -4,7 +4,7 @@ import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 
 export class Rule34CdnRemoteMedia implements RemoteMedia {
   constructor(private readonly rule34Cdn: Pick<Rule34CdnClient,
-    "previewUrl" | "originalUrl" | "imageUrl" | "decodeImage" | "decodeOriginal" | "readVideoDurationSeconds">) { }
+    "previewUrl" | "originalUrl" | "imageUrl" | "decodeImage" | "decodeOriginal" | "fetchOriginal" | "readVideoDurationSeconds">) { }
 
   public resolvePreviewUrl(media: Media): Promise<string> {
     return Promise.resolve(this.rule34Cdn.previewUrl(media));
@@ -24,6 +24,10 @@ export class Rule34CdnRemoteMedia implements RemoteMedia {
 
   public decodeOriginal(media: Media, signal?: AbortSignal): Promise<ImageBitmap> {
     return this.rule34Cdn.decodeOriginal(media, signal);
+  }
+
+  public fetchOriginal(media: Media): Promise<Blob> {
+    return this.rule34Cdn.fetchOriginal(media);
   }
 
   public fetchDurationSeconds(media: Media): Promise<number> {

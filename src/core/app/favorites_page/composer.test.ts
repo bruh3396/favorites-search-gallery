@@ -2,7 +2,9 @@ import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_g
 import { ExitIndicator, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
+import { LightboxButtonClass } from "@/core/ui/lightbox/controls/button/button";
 import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -27,6 +29,7 @@ import { flushMicrotasks } from "@/testing/async";
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = [], {
   morpher = new MemoryMorpher(),
   navigator = new MemoryNavigator(),
+  fileSaver = new MemoryFileSaver(),
   returnIndicator = undefined as ExitIndicator | undefined
 } = {}): ShadowRoot {
   const container = document.createElement("div");
@@ -47,7 +50,8 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     localKeyedValues,
     viewport: new MemoryViewport(),
     morpher,
-    navigator
+    navigator,
+    fileSaver
   });
   return container.shadowRoot!;
 }
@@ -135,7 +139,7 @@ describe("mountFavoritesPage", () => {
     firstTile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
     const dialog = root.querySelector("dialog")!;
 
-    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
     await flushMicrotasks();
     dialog.click();
 
@@ -208,5 +212,16 @@ describe("mountFavoritesPage", () => {
     dialog.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, cancelable: true, button: 1 }));
     await flushMicrotasks();
     expect([navigator.opened, dialog.open]).toEqual([["#post-1", "https://originals/1.png"], true]);
+  });
+
+  test("saves the lightbox favorite's original, named by its id, from the download button", async() => {
+    const fileSaver = new MemoryFileSaver();
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { fileSaver });
+
+    await flushMicrotasks();
+    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
+    root.querySelector<HTMLElement>(`.${LightboxButtonClass.root}[data-icon="download"]`)!.click();
+    await flushMicrotasks();
+    expect(fileSaver.saved.map(saved => saved.name)).toEqual(["1"]);
   });
 });

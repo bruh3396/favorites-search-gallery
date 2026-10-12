@@ -1,68 +1,7 @@
-.fsg-LightboxScreen {
-  width: 100vw;
-  height: 100dvh;
-  max-width: none;
-  max-height: none;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  overflow: hidden;
-}
-
-.fsg-LightboxScreen:focus-visible {
-  outline: none;
-}
-
-.fsg-LightboxScreen::backdrop {
-  background: rgb(0 0 0 / 0.9);
-}
-
-/* .fsg-LightboxStage {
-  transition: scale 95ms linear;
-}
-
-@starting-style {
-  .fsg-LightboxScreen[open] .fsg-LightboxStage {
-    scale: 0.96;
-  }
-} */
-
-.fsg-LightboxScreen-position {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: rgb(0 0 0 / 0.6);
-  color: rgb(255 255 255 / 0.9);
-  font: 500 14px/1.4 ui-monospace, monospace;
-  font-variant-numeric: tabular-nums;
-  pointer-events: none;
-}
-
-.fsg-LightboxScreen-position[hidden] {
-  display: none;
-}
-
-.fsg-LightboxStage,
-.fsg-LightboxRenderer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-.fsg-LightboxStage[hidden],
-.fsg-LightboxRenderer[hidden] {
-  display: none;
-}
-
-.fsg-LightboxMedia {
-  pointer-events: auto;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+@import "./screen/screen.css";
+@import "./stage/stage.css";
+@import "./overlay/overlay.css";
+@import "./controls/button/button.css";
+@import "./controls/arrow/arrow.css";
+@import "./controls/position/position.css";
+@import "./controls/autoplay_bar/autoplay_bar.css";

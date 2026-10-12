@@ -1,0 +1,30 @@
+.fsg-LightboxAutoplayBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 3px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.fsg-LightboxAutoplayBar[hidden] {
+  display: none;
+}
+
+.fsg-LightboxAutoplayBar-fill {
+  height: 100%;
+  background: white;
+  transform-origin: left;
+  animation: fsg-LightboxAutoplayBar-fill linear forwards;
+}
+
+@keyframes fsg-LightboxAutoplayBar-fill {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}

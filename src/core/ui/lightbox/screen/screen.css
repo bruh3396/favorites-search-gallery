@@ -1,0 +1,45 @@
+.fsg-LightboxScreen {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.fsg-LightboxScreen:focus-visible {
+  outline: none;
+}
+
+.fsg-LightboxScreen[data-idle="true"] {
+  cursor: none;
+}
+
+.fsg-LightboxScreen::backdrop {
+  background: black;
+}
+
+.fsg-LightboxScreen-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.fsg-LightboxScreen-content::backdrop {
+  background: black;
+}
+
+.fsg-LightboxStage {
+  transition: scale 95ms linear;
+}
+
+@starting-style {
+  .fsg-LightboxScreen[open] .fsg-LightboxStage {
+    scale: 0.96;
+  }
+}

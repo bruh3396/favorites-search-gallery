@@ -10,6 +10,7 @@ import FAVORITES_UI_CSS from "@/core/features/favorites/styles.css?inline";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesPane } from "@/core/app/favorites_page/pane";
 import { FavoritesShell } from "@/core/app/favorites_page/shell";
+import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
 import { LightboxScreen } from "@/core/ui/lightbox/screen/screen";
@@ -31,7 +32,7 @@ import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export type ExitIndicator = "none" | "zoom" | TileHighlight;
 
-const LIGHTBOX_EXIT_INDICATOR: ExitIndicator = "glow";
+const LIGHTBOX_EXIT_INDICATOR: ExitIndicator = "zoom";
 
 export interface FavoritesPageConfiguration extends FavoritesConfiguration {
   readonly favoritesOwnerId: string;
@@ -47,11 +48,12 @@ export interface FavoritesPageDependencies extends Omit<FavoritesDependencies, "
   viewport: Pick<Viewport, "lockScroll" | "unlockScroll">;
   morpher: Morpher;
   navigator: Navigator;
+  fileSaver: FileSaver;
 }
 
 export function mountFavoritesPage(container: HTMLElement, configuration: FavoritesPageConfiguration, dependencies: FavoritesPageDependencies): void {
   const { favoritesOwnerId, colorScheme, returnIndicator = LIGHTBOX_EXIT_INDICATOR, ...favoritesConfiguration } = configuration;
-  const { remoteFavoriteActions, remotePages, localKeyedValues, viewport, morpher, navigator, visibilityObserver, ...ports } = dependencies;
+  const { remoteFavoriteActions, remotePages, localKeyedValues, viewport, morpher, navigator, fileSaver, visibilityObserver, ...ports } = dependencies;
   const app = mountAppRoot(container, { colorScheme, styles: [UI_CSS, FAVORITES_UI_CSS, SHELL_CSS, PANE_CSS] });
   const storage = createAppStorage(localKeyedValues);
   const preferences = createAppPreferences(storage.preferences);
@@ -84,6 +86,12 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   const openOriginal = (post: Favorite): void => {
     ports.remoteMedia.resolveOriginalUrl(post.media).then(url => navigator.open(url)).catch(console.error);
   };
+  const openPostPage = (post: Favorite): void => navigator.open(remotePages.postUrl(post.id));
+  const downloadOriginal = (post: Favorite): void => {
+    ports.remoteMedia.fetchOriginal(post.media)
+      .then(file => fileSaver.save(file, nameDownload(post.id, file)))
+      .catch(() => openOriginal(post));
+  };
 
   function createFavoritesPane(): HTMLElement {
     return h(FavoritesPane, {
@@ -102,8 +110,19 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   const lightboxScreen = render(container.ownerDocument, () => h(LightboxScreen<Favorite>, {
     lightbox, scheduler: ports.scheduler, morpher: returnIndicator === "zoom" ? morpher : undefined,
     locateItem: item => tileLocator.locate(item),
+    favorites: {
+      isFavorited: post => favoritesService.isFavorited(post.id),
+      addFavorite: post => {
+        favoritesService.actions.add(post.id).catch(console.error);
+      },
+      removeFavorite: post => {
+        favoritesService.actions.remove(post.id).catch(console.error);
+      }
+    },
     onCtrlClick: openOriginal,
-    onMiddleClick: post => navigator.open(remotePages.postUrl(post.id)),
+    onMiddleClick: openPostPage,
+    onDownload: downloadOriginal,
+    onOpenPostPage: openPostPage,
     resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media),
     resolveOriginalUrl: media => ports.remoteMedia.resolveOriginalUrl(media),
     decodeOriginal: (media, signal) => ports.remoteMedia.decodeOriginal(media, signal)
@@ -118,4 +137,9 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
       skeletonDimensions.set(measureSkeletonDimensions(session.results.peek()));
     })
     .catch(console.error);
+}
+
+function nameDownload(id: string, file: Blob): string {
+  const subtype = file.type.split("/")[1];
+  return subtype === undefined || subtype === "" ? id : `${id}.${subtype}`;
 }

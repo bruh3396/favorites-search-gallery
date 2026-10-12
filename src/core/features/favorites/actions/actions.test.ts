@@ -71,19 +71,18 @@ describe("FavoritesActions", () => {
     expect(await localFavorites.getAll()).toEqual(["2"]);
   });
 
-  test("returns the latest value to an effect that reads it", async() => {
+  test("reruns an effect that reads it when it changes", async() => {
     const { actions } = await setup();
 
     await actions.remove("1");
     const seen: boolean[] = [];
-
-    effect(() => {
+    const stop = effect(() => {
       seen.push(actions.isFavorited("1"));
     });
 
     await actions.add("1");
-    expect(seen).toEqual([false]);
-    expect(actions.isFavorited("1")).toBe(true);
+    expect(seen).toEqual([false, true]);
+    stop();
   });
 
   test("leaves an effect that reads another favorite alone", async() => {

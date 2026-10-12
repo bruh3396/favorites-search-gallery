@@ -6,6 +6,7 @@ const VIDEO: Media = { kind: "video", locator: "1234/a1b2c3" };
 const ORIGINAL = "https://original/1234/a1b2c3.mp4";
 const IMAGE = "https://original/1234/a1b2c3.jpg";
 const BITMAP = { close: (): void => undefined } as ImageBitmap;
+const FILE = new Blob(["video"], { type: "video/mp4" });
 
 interface Rule34Cdn {
   previewUrl: ReturnType<typeof vi.fn<(media: Media) => string>>;
@@ -13,6 +14,7 @@ interface Rule34Cdn {
   imageUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
   decodeImage: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>>;
   decodeOriginal: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>>;
+  fetchOriginal: ReturnType<typeof vi.fn<(media: Media) => Promise<Blob>>>;
   readVideoDurationSeconds: ReturnType<typeof vi.fn<(media: Media) => Promise<number>>>;
 }
 
@@ -23,6 +25,7 @@ function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
     imageUrl: vi.fn(() => Promise.resolve(IMAGE)),
     decodeImage: vi.fn(() => Promise.resolve(BITMAP)),
     decodeOriginal: vi.fn(() => Promise.resolve(BITMAP)),
+    fetchOriginal: vi.fn(() => Promise.resolve(FILE)),
     readVideoDurationSeconds: vi.fn(() => Promise.resolve(12))
   };
   return { source: new Rule34CdnRemoteMedia(rule34Cdn), rule34Cdn };
@@ -61,6 +64,13 @@ describe("Rule34CdnRemoteMedia", () => {
 
     expect(await source.decodeOriginal(VIDEO, signal)).toBe(BITMAP);
     expect(rule34Cdn.decodeOriginal).toHaveBeenCalledWith(VIDEO, signal);
+  });
+
+  test("fetches the original's file", async() => {
+    const { source, rule34Cdn } = setup();
+
+    expect(await source.fetchOriginal(VIDEO)).toBe(FILE);
+    expect(rule34Cdn.fetchOriginal).toHaveBeenCalledWith(VIDEO);
   });
 
   test("reads the original's duration", async() => {

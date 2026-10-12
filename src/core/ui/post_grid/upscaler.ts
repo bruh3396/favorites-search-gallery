@@ -3,7 +3,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export const MAX_CANVAS_WIDTH = 500;
 export const MAX_CANVAS_HEIGHT = 16_000;
-export const UPSCALE_DELAY = 300;
+export const UPSCALE_DELAY = 1_000;
 
 interface UpscalerDependencies {
   canvas: HTMLCanvasElement;

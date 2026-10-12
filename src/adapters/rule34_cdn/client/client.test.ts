@@ -125,6 +125,19 @@ describe("Rule34CdnClient", () => {
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.mp4", { signal });
   });
 
+  test("fetches an original's file", async() => {
+    const { client, fetch } = setup();
+
+    expect(await (await client.fetchOriginal(media("video", "1234/a1b2c3"))).text()).toBe("bytes");
+    expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.mp4");
+  });
+
+  test("rejects an original the host won't serve", async() => {
+    const { client } = setup(createFetchFindingOnly(""));
+
+    await expect(client.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
+  });
+
   test("decodes a video's image from the jpg beside it", async() => {
     const { client, fetch } = setup();
 

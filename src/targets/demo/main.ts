@@ -2,6 +2,7 @@ import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favori
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
+import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
@@ -41,7 +42,8 @@ function createDemoDependencies(): FavoritesPageDependencies {
     randomSource: new BrowserRandomSource(),
     viewport: new BrowserViewport(),
     morpher: new BrowserMorpher(),
-    navigator: new BrowserNavigator()
+    navigator: new BrowserNavigator(),
+    fileSaver: new BrowserFileSaver(document)
   };
 }
 

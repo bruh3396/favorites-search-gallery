@@ -6,5 +6,6 @@ export interface RemoteMedia {
   resolveImageUrl: (media: Media) => Promise<string>;
   decodeImage: (media: Media, signal?: AbortSignal) => Promise<ImageBitmap>;
   decodeOriginal: (media: Media, signal?: AbortSignal) => Promise<ImageBitmap>;
+  fetchOriginal: (media: Media) => Promise<Blob>;
   fetchDurationSeconds: (media: Media) => Promise<number>;
 }

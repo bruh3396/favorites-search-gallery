@@ -22,6 +22,10 @@ export class MemoryRemoteMedia implements RemoteMedia {
     return Promise.resolve({ width: 1, height: 1, close: (): void => undefined } as ImageBitmap);
   }
 
+  public fetchOriginal(media: Media): Promise<Blob> {
+    return Promise.resolve(new Blob([media.locator]));
+  }
+
   public fetchDurationSeconds(): Promise<number> {
     return Promise.resolve(0);
   }

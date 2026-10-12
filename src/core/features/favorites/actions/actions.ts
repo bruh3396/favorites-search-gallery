@@ -32,7 +32,7 @@ export class FavoritesActions {
   }
 
   public isFavorited(id: string): boolean {
-    return this.favorited.get(id)?.peek() ?? this.configuration.favoritedByDefault;
+    return this.getSignal(id).value;
   }
 
   private getSignal(id: string): Signal<boolean> {

@@ -1,0 +1,62 @@
+.fsg-LightboxOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-LightboxOverlay[data-shown="false"] {
+  opacity: 0;
+}
+
+.fsg-LightboxOverlay-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 16px 48px;
+  background: linear-gradient(rgb(0 0 0 / 0.7), transparent);
+}
+
+.fsg-LightboxOverlay-slot {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.fsg-LightboxOverlay-slot > * {
+  pointer-events: auto;
+}
+
+.fsg-LightboxOverlay[data-shown="false"] .fsg-LightboxOverlay-slot > * {
+  pointer-events: none;
+}
+
+.fsg-LightboxOverlay-topStart {
+  justify-content: flex-start;
+}
+
+.fsg-LightboxOverlay-topEnd {
+  justify-content: flex-end;
+}
+
+.fsg-LightboxOverlay-start,
+.fsg-LightboxOverlay-end {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 7.5%;
+  justify-content: center;
+}
+
+.fsg-LightboxOverlay-start {
+  left: 0;
+}
+
+.fsg-LightboxOverlay-end {
+  right: 0;
+}

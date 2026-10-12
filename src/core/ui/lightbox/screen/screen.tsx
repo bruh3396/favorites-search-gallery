@@ -1,17 +1,28 @@
+import { LightboxAutoplay, LightboxAutoplayConfiguration } from "@/core/ui/lightbox/autoplay/autoplay";
 import { MorphSource, Morpher } from "@/core/boundary/ports/morpher/morpher";
+import { OverlayVisibility, OverlayVisibilityConfiguration } from "@/core/ui/lightbox/overlay/visibility";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { FullscreenToggle } from "@/core/ui/lightbox/screen/fullscreen_toggle";
 import { Lightbox } from "@/core/ui/lightbox/lightbox";
+import { LightboxControls } from "@/core/ui/lightbox/controls/controls";
+import { LightboxFavoriteButtonProps } from "@/core/ui/lightbox/controls/favorite_button/favorite_button";
+import { LightboxKeys } from "@/core/ui/lightbox/screen/keys";
 import { LightboxStage } from "@/core/ui/lightbox/stage/stage";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { SequencePosition } from "@/core/domain/media/media_sequence";
+import { closeIntoPage } from "@/core/ui/lightbox/screen/close";
+import { createPointerListeners } from "@/core/ui/lightbox/screen/pointer";
 import { h } from "@/core/ui/h/h";
+import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const LightboxScreenClass = {
   root: "fsg-LightboxScreen",
-  position: "fsg-LightboxScreen-position"
+  content: "fsg-LightboxScreen-content"
 } as const;
+
+const OVERLAY_VISIBILITY: OverlayVisibilityConfiguration = { idleDelay: 1_000, shortDelay: 1_000 };
+const AUTOPLAY: LightboxAutoplayConfiguration = { interval: 3_000 };
 
 export interface LightboxScreenProps<T extends MediaItem> {
   lightbox: Lightbox<T>;
@@ -21,36 +32,54 @@ export interface LightboxScreenProps<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   morpher?: Morpher;
   locateItem: (item: T) => Element | undefined;
+  favorites?: Omit<LightboxFavoriteButtonProps<T>, "current">;
   onCtrlClick?: (item: T) => void;
   onMiddleClick?: (item: T) => void;
+  onDownload?: (item: T) => void;
+  onOpenPostPage?: (item: T) => void;
 }
 
 export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T>): HTMLElement {
-  const { lightbox, resolvePreviewUrl, resolveOriginalUrl, decodeOriginal, scheduler } = props;
-  const { current, neighbors, warmItems, position } = lightbox;
+  const { lightbox, scheduler } = props;
+  const { current } = lightbox;
   const onShowNext = (): void => {
     lightbox.showNext().catch(console.error);
   };
   const onShowPrevious = (): void => {
     lightbox.showPrevious().catch(console.error);
   };
-  const withCurrent = (onItem: ((item: T) => void) | undefined): (() => void) | undefined => {
-    if (onItem === undefined) {
-      return undefined;
-    }
-    return () => {
-      const item = current.peek();
+  const withCurrent = (onItem: ((item: T) => void) | undefined): (() => void) | undefined => onItem && (() => {
+    const item = current.peek();
 
-      if (item !== undefined) {
-        onItem(item);
-      }
-    };
-  };
+    if (item !== undefined) {
+      onItem(item);
+    }
+  });
   let readShownMedia: () => MorphSource | undefined;
   const onClose = (): void => closeIntoPage(readShownMedia(), props);
+  const visibility = new OverlayVisibility(OVERLAY_VISIBILITY, scheduler);
+  const autoplay = new LightboxAutoplay(AUTOPLAY, { current, showNext: onShowNext, scheduler });
+  const content = (
+    <div className={LightboxScreenClass.content}>
+      <LightboxStage
+        current={current}
+        neighbors={lightbox.neighbors}
+        warmItems={lightbox.warmItems}
+        resolvePreviewUrl={props.resolvePreviewUrl}
+        resolveOriginalUrl={props.resolveOriginalUrl}
+        decodeOriginal={props.decodeOriginal}
+        scheduler={scheduler}
+        exposeShownMedia={read => {
+          readShownMedia = read;
+        }}
+      />
+    </div>
+  ) as HTMLElement;
+  const fullscreen = new FullscreenToggle(content);
   const dialog = (
     <dialog
       className={LightboxScreenClass.root}
+      dataset={{ idle: computed(() => String(!visibility.shown.value)) }}
       aria-label="Gallery"
       autofocus
       tabIndex={-1}
@@ -59,135 +88,58 @@ export function LightboxScreen<T extends MediaItem>(props: LightboxScreenProps<T
         onClose();
       }}
       onClose={event => reportDismissal(event.currentTarget, current, () => lightbox.close())}
-      onKeydown={event => handleKey(event, { dialog: event.currentTarget, onShowNext, onShowPrevious, onClose })}
-      onWheel={event => handleWheel(event, onShowNext, onShowPrevious)}
-      onClick={event => handleClick(event, onClose, withCurrent(props.onCtrlClick))}
-      onMousedown={event => preventAutoscroll(event)}
-      onAuxclick={event => handleAuxClick(event, withCurrent(props.onMiddleClick))}
-      onContextmenu={event => {
-        event.preventDefault();
-        onClose();
-      }}
+      {...createPointerListeners({
+        visibility, onShowNext, onShowPrevious, onClose, onCtrlClick: withCurrent(props.onCtrlClick), onMiddleClick: withCurrent(props.onMiddleClick)
+      })}
     >
-      <LightboxStage
-        current={current}
-        neighbors={neighbors}
-        warmItems={warmItems}
-        resolvePreviewUrl={resolvePreviewUrl}
-        resolveOriginalUrl={resolveOriginalUrl}
-        decodeOriginal={decodeOriginal}
-        scheduler={scheduler}
-        exposeShownMedia={read => {
-          readShownMedia = read;
-        }}
-      />
-      <div className={LightboxScreenClass.position} hidden={computed(() => position.value === undefined)}>
-        {computed(() => formatPosition(position.value))}
-      </div>
+      {content}
     </dialog>
   ) as HTMLDialogElement;
+  const keys = new LightboxKeys({ dialog, onShowNext, onShowPrevious, onClose, onToggleAutoplay: () => autoplay.toggle() });
 
+  // Media events don't bubble, so only a capturing listener hears the video end.
+  content.addEventListener("ended", event => {
+    if (event.target === readShownMedia()) {
+      autoplay.finishVideo();
+    }
+  }, true);
+  content.append(<LightboxControls
+      visibility={visibility}
+      current={current}
+      position={lightbox.position}
+      autoplay={autoplay}
+      fullscreen={fullscreen}
+      favorites={props.favorites}
+      onDownload={withCurrent(props.onDownload)}
+      onOpenPostPage={withCurrent(props.onOpenPostPage)}
+      onClose={onClose}
+      onShowNext={onShowNext}
+      onShowPrevious={onShowPrevious}
+    />);
   effect(() => {
-    const isClosed = current.value === undefined;
-
-    if (isClosed) {
+    if (current.value === undefined) {
+      keys.stop();
+      visibility.hide();
+      autoplay.stop();
+      fullscreen.exit();
       dialog.close();
     } else if (!dialog.open) {
+      keys.listen();
       dialog.showModal();
+      dialog.focus({ preventScroll: true });
+      visibility.show();
     }
   });
-  return dialog;
-}
-
-function closeIntoPage<T extends MediaItem>(media: MorphSource | undefined, { lightbox, morpher, locateItem }: LightboxScreenProps<T>): void {
-  const item = lightbox.current.peek();
-
-  if (item === undefined || media === undefined || morpher === undefined) {
-    lightbox.close();
-    return;
-  }
-  morpher.morph(media, () => {
-    lightbox.close();
-    return locateItem(item);
+  onCleanup(() => {
+    keys.stop();
+    visibility.hide();
+    autoplay.dispose();
   });
-}
-
-function formatPosition(position: SequencePosition | undefined): string {
-  if (position === undefined) {
-    return "";
-  }
-  const shown = (position.index + 1).toLocaleString();
-  return position.total === undefined ? shown : `${shown} / ${position.total.toLocaleString()}`;
-}
-
-function handleKey(event: KeyboardEvent, props: {
-  dialog: HTMLDialogElement;
-  onShowNext: () => void;
-  onShowPrevious: () => void;
-  onClose: () => void;
-}): void {
-  const action = {
-    ArrowRight: props.onShowNext,
-    d: props.onShowNext,
-    D: props.onShowNext,
-    ArrowLeft: props.onShowPrevious,
-    a: props.onShowPrevious,
-    A: props.onShowPrevious,
-    Backspace: props.onClose,
-    Delete: props.onClose
-  }[event.key];
-
-  if (action !== undefined) {
-    event.preventDefault();
-    props.dialog.focus({ preventScroll: true });
-    action();
-  }
-}
-
-function handleClick(event: MouseEvent, onClose: () => void, onCtrlClick?: () => void): void {
-  if ((event.ctrlKey || event.metaKey) && onCtrlClick !== undefined) {
-    event.preventDefault();
-    onCtrlClick();
-    return;
-  }
-
-  if (event.target instanceof HTMLVideoElement) {
-    return;
-  }
-
-  onClose();
-}
-
-const MIDDLE_BUTTON = 1;
-
-function preventAutoscroll(event: MouseEvent): void {
-  if (event.button === MIDDLE_BUTTON) {
-    event.preventDefault();
-  }
-}
-
-function handleAuxClick(event: MouseEvent, onMiddleClick?: () => void): void {
-  if (event.button !== MIDDLE_BUTTON || onMiddleClick === undefined) {
-    return;
-  }
-  event.preventDefault();
-  onMiddleClick();
+  return dialog;
 }
 
 function reportDismissal(dialog: HTMLDialogElement, current: Readable<MediaItem | undefined>, onClose: () => void): void {
   if (!dialog.open && current.peek() !== undefined) {
     onClose();
-  }
-}
-
-function handleWheel(event: WheelEvent, onShowNext: () => void, onShowPrevious: () => void): void {
-  if (event.ctrlKey || event.deltaY === 0) return;
-
-  event.preventDefault();
-
-  if (event.deltaY > 0) {
-    onShowNext();
-  } else {
-    onShowPrevious();
   }
 }

@@ -18,7 +18,7 @@ export class Rule34CdnClient {
   private readonly videoDurationReader: Rule34CdnVideoDurationReader;
   private readonly imageDecoder: Rule34CdnImageDecoder;
 
-  constructor(dependencies: Rule34CdnClientDependencies) {
+  constructor(private readonly dependencies: Rule34CdnClientDependencies) {
     this.extensionProber = new Rule34CdnExtensionProber(dependencies);
     this.videoDurationReader = new Rule34CdnVideoDurationReader(dependencies);
     this.imageDecoder = new Rule34CdnImageDecoder(dependencies);
@@ -46,6 +46,16 @@ export class Rule34CdnClient {
 
   public async decodeOriginal(media: Media, signal?: AbortSignal): Promise<ImageBitmap> {
     return this.imageDecoder.decode(await this.originalUrl(media), signal);
+  }
+
+  public async fetchOriginal(media: Media): Promise<Blob> {
+    const url = await this.originalUrl(media);
+    const response = await this.dependencies.fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`${url} answered ${response.status}`);
+    }
+    return response.blob();
   }
 
   public async readVideoDurationSeconds(media: Media): Promise<number> {

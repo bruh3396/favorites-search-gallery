@@ -1,12 +1,12 @@
 import { LightboxStage, LightboxStageClass, LightboxStageController, LightboxStageProps } from "@/core/ui/lightbox/stage/stage";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import LIGHTBOX_CSS from "@/core/ui/lightbox/lightbox.css?inline";
 import { LightboxRendererClass } from "@/core/ui/lightbox/stage/renderer";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
+import STAGE_CSS from "@/core/ui/lightbox/stage/stage.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
@@ -114,8 +114,8 @@ function flushPromises(): Promise<void> {
 
 describe("LightboxStage", () => {
   test("styles every class it sets", () => {
-    expectClassesStyled(LightboxStageClass, LIGHTBOX_CSS);
-    expectClassesStyled(LightboxRendererClass, LIGHTBOX_CSS);
+    expectClassesStyled(LightboxStageClass, STAGE_CSS);
+    expectClassesStyled(LightboxRendererClass, STAGE_CSS);
   });
 
   test("shows the preview image while the original is pending", async() => {
