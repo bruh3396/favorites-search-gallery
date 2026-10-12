@@ -1,4 +1,5 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGrid } from "@/core/ui/post_grid/skeleton";
+import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -12,7 +13,6 @@ import { Signal } from "@/core/utils/reactive/signal";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { doNothing } from "@/core/utils/function/function";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 

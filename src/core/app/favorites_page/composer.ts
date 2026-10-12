@@ -1,5 +1,5 @@
+import { DEFAULT_LIGHTBOX_CONFIGURATION, createLightboxService } from "@/core/features/lightbox/lightbox";
 import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
-import { Signal, effect } from "@/core/utils/reactive/signal";
 import { TileHighlight, highlightTile } from "@/core/ui/post_grid/tile_highlighter";
 import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { createSkeletonDimensions, measureSkeletonDimensions } from "@/core/app/favorites_page/skeleton_dimensions";
@@ -12,8 +12,7 @@ import { FavoritesPane } from "@/core/app/favorites_page/pane";
 import { FavoritesShell } from "@/core/app/favorites_page/shell";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { GatedRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/gated_remote_favorite_actions";
-import { Lightbox } from "@/core/ui/lightbox/lightbox";
-import { LightboxScreen } from "@/core/ui/lightbox/screen/screen";
+import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { Morpher } from "@/core/boundary/ports/morpher/morpher";
@@ -23,18 +22,17 @@ import PANE_CSS from "@/core/app/favorites_page/pane.css?inline";
 import { RemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createDebouncedTask } from "@/core/utils/async/debouncer";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export type ExitIndicator = "none" | "zoom" | TileHighlight;
 
 const LIGHTBOX_EXIT_INDICATOR: ExitIndicator = "zoom";
-const SETTLED_ITEM_DELAY = 75;
 
 export interface FavoritesPageConfiguration extends FavoritesConfiguration {
   readonly favoritesOwnerId: string;
@@ -56,7 +54,7 @@ export interface FavoritesPageDependencies extends Omit<FavoritesDependencies, "
 export function mountFavoritesPage(container: HTMLElement, configuration: FavoritesPageConfiguration, dependencies: FavoritesPageDependencies): void {
   const { favoritesOwnerId, colorScheme, returnIndicator = LIGHTBOX_EXIT_INDICATOR, ...favoritesConfiguration } = configuration;
   const { remoteFavoriteActions, remotePages, localKeyedValues, viewport, morpher, navigator, fileSaver, visibilityObserver, ...ports } = dependencies;
-  const app = mountAppRoot(container, { colorScheme, styles: [UI_CSS, FAVORITES_UI_CSS, SHELL_CSS, PANE_CSS] });
+  const app = mountAppRoot(container, { colorScheme, styles: [UI_CSS, FAVORITES_UI_CSS, LIGHTBOX_CSS, SHELL_CSS, PANE_CSS] });
   const storage = createAppStorage(localKeyedValues);
   const preferences = createAppPreferences(storage.preferences);
   const gridPreferences = pickPostGridPreferences(preferences);
@@ -72,10 +70,13 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
   });
   const paginationSettings = preferences.favoritesPagination;
   const session = favoritesService.createSearchSession({ searchSettings: preferences.favoritesSearch, paginationSettings });
-  const lightbox = new Lightbox<Favorite>({ warmLimit: 8, maxNeighborDistance: 20 });
+  const lightbox = createLightboxService<Favorite>(DEFAULT_LIGHTBOX_CONFIGURATION, {
+    remoteMedia: ports.remoteMedia, remotePages, navigator, fileSaver, viewport, scheduler: ports.scheduler
+  });
   const scrollTo = new Emitter<Favorite>();
   const tileLocator = new TileLocator<Favorite>();
 
+  lightbox.settled.on(item => session.reveal(item));
   lightbox.closed.on(item => {
     session.reveal(item);
     scrollTo.emit(item);
@@ -85,16 +86,6 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
     }
   });
 
-  const openOriginal = (post: Favorite): void => {
-    ports.remoteMedia.resolveOriginalUrl(post.media).then(url => navigator.open(url)).catch(console.error);
-  };
-  const openPostPage = (post: Favorite): void => navigator.open(remotePages.postUrl(post.id));
-  const downloadOriginal = (post: Favorite): void => {
-    ports.remoteMedia.fetchOriginal(post.media)
-      .then(file => fileSaver.save(file, nameDownload(post.id, file)))
-      .catch(() => openOriginal(post));
-  };
-
   function createFavoritesPane(): HTMLElement {
     return h(FavoritesPane, {
       favorites: favoritesService, session, scrollTo, tileLocator, gridPreferences, upscalePaused: lightbox.isOpen,
@@ -103,56 +94,27 @@ export function mountFavoritesPage(container: HTMLElement, configuration: Favori
       visibilityObserver, scheduler: ports.scheduler, decodeImage: (media, width, signal) => ports.remoteMedia.decodeImage(media, width, signal),
       resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media), getPostUrl: post => remotePages.postUrl(post.id),
       onPlainClick: post => lightbox.open(post, session.createMediaSequence()),
-      onCtrlClick: openOriginal,
+      onCtrlClick: post => lightbox.actions.openOriginal(post),
       onPointerEnter: post => lightbox.warm(post)
     });
   }
 
   const shell = render(container.ownerDocument, () => h(FavoritesShell, { favorites: favoritesService, panes: [createFavoritesPane()] })).result;
-  const lightboxScreen = render(container.ownerDocument, () => h(LightboxScreen<Favorite>, {
-    lightbox, scheduler: ports.scheduler, morpher: returnIndicator === "zoom" ? morpher : undefined,
+  const lightboxScreen = render(container.ownerDocument, () => lightbox.createScreen({
+    morpher: returnIndicator === "zoom" ? morpher : undefined,
     locateItem: item => tileLocator.locate(item),
     favorites: {
       isFavorited: post => favoritesService.isFavorited(post.id),
-      addFavorite: post => {
-        favoritesService.actions.add(post.id).catch(console.error);
-      },
-      removeFavorite: post => {
-        favoritesService.actions.remove(post.id).catch(console.error);
-      }
-    },
-    onCtrlClick: openOriginal,
-    onMiddleClick: openPostPage,
-    onDownload: downloadOriginal,
-    onOpenPostPage: openPostPage,
-    resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media),
-    resolveOriginalUrl: media => ports.remoteMedia.resolveOriginalUrl(media),
-    decodeOriginal: (media, signal) => ports.remoteMedia.decodeOriginal(media, signal)
+      addFavorite: post => favoritesService.actions.add(post.id).catch(console.error),
+      removeFavorite: post => favoritesService.actions.remove(post.id).catch(console.error)
+    }
   })).result;
 
   app.append(shell, lightboxScreen);
-
-  effect(() => (lightbox.isOpen.value ? viewport.lockScroll() : viewport.unlockScroll()));
-  const revealSettledItem = createDebouncedTask({ delay: SETTLED_ITEM_DELAY, leading: false }, ports.scheduler, (item: Favorite) => session.reveal(item));
-
-  effect(() => {
-    const item = lightbox.current.value;
-
-    if (item === undefined) {
-      revealSettledItem.cancel();
-    } else {
-      revealSettledItem(item);
-    }
-  });
   favoritesService.load()
     .then(() => {
       finishedLoading.reach();
       skeletonDimensions.set(measureSkeletonDimensions(session.results.peek()));
     })
     .catch(console.error);
-}
-
-function nameDownload(id: string, file: Blob): string {
-  const subtype = file.type.split("/")[1];
-  return subtype === undefined || subtype === "" ? id : `${id}.${subtype}`;
 }

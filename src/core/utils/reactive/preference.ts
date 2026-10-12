@@ -43,7 +43,7 @@ export function defineRecordPreference<T extends object>(defaultValue: T, fields
 export function createPreferences<T extends object>(schema: PreferenceSchema<T>, storage: PreferenceStorage): Preferences<T> {
   const definitions = Object.entries(schema) as Array<[string, PreferenceDefinition<unknown>]>;
   return Object.fromEntries(definitions
-    .map(([key, { defaultValue, codec }]) => [key, new StoredPreference({ key, defaultValue }, { storage, codec })])) as Preferences<T>;
+    .map(([key, { defaultValue, codec }]) => [key, new StoredPreference({ key, defaultValue }, { storage, codec })])) as unknown as Preferences<T>;
 }
 
 export class StoredPreference<T> implements Preference<T> {

@@ -8,6 +8,8 @@ const DOM_TESTS = [
   "src/core/app/**/*.test.{ts,tsx}",
   "src/core/ui/**/*.test.{ts,tsx}",
   "src/core/features/**/*.test.tsx",
+  "src/core/features/*/ui/**/*.test.ts",
+  "src/core/features/lightbox/lightbox.test.ts",
   "src/adapters/browser/image/image.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/viewport/viewport.test.ts",

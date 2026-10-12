@@ -148,14 +148,14 @@ describe("Rule34CdnClient", () => {
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.jpg", { signal: undefined });
   });
 
-  test("downloads at most four images to decode at once", async() => {
+  test("downloads at most three images to decode at once", async() => {
     const { client, fetch, scheduler } = setup(() => new Promise(() => undefined));
 
     for (const name of ["a", "b", "c", "d", "e"]) {
       client.decodeImage(media("image", `1234/${name}.png`), 500);
     }
     await advanceAndSettle(scheduler, 1_000);
-    expect(fetch).toHaveBeenCalledTimes(4);
+    expect(fetch).toHaveBeenCalledTimes(3);
   });
 
   test("decodes an image already scaled to the width asked for", async() => {

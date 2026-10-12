@@ -113,6 +113,23 @@ describe("BrowserMorpher", () => {
     expect([target.style.visibility, target.style.getPropertyPriority("visibility")]).toEqual(["visible", "important"]);
   });
 
+  test("flies to an SVG target without changing its visibility", () => {
+    const runFrame = stubFrames();
+    const target = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+    document.body.append(target);
+
+    new BrowserMorpher().morph(createSource(), () => target);
+    runFrame(0);
+
+    expect(target.getAttribute("visibility")).toBeNull();
+
+    runFrame(MORPH_DURATION);
+    runFrame(MORPH_DURATION + 16);
+
+    expect(findStandIn()).toBeNull();
+  });
+
   test("restores the target's visibility when it leaves the page mid-flight", () => {
     const runFrame = stubFrames();
     const target = createTarget();

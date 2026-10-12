@@ -2,7 +2,7 @@ import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_g
 import { ExitIndicator, mountFavoritesPage } from "@/core/app/favorites_page/composer";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { LightboxButtonClass } from "@/core/ui/lightbox/controls/button/button";
+import { LightboxButtonClass } from "@/core/features/lightbox/ui/controls/button/button";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";

@@ -3,6 +3,7 @@ import { FavoritesPane, FavoritesPaneClass } from "@/core/app/favorites_page/pan
 import { FavoritesShell, FavoritesShellClass } from "@/core/app/favorites_page/shell";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
+import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -19,7 +20,6 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
-import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { doNothing } from "@/core/utils/function/function";
 import { expectClassesStyled } from "@/testing/css";
 
