@@ -1,4 +1,4 @@
-import { LightboxPointerListeners, createPointerListeners } from "@/core/features/lightbox/ui/screen/pointer";
+import { LightboxPointerListeners, LightboxPointerZoom, createPointerListeners } from "@/core/features/lightbox/ui/screen/pointer";
 import { describe, expect, test, vi } from "vitest";
 
 type Action = ReturnType<typeof vi.fn<() => void>>;
@@ -12,9 +12,35 @@ interface Setup {
   close: Action;
   onCtrlClick: Action;
   onMiddleClick: Action;
+  zoom: FakeZoom;
+}
+
+interface FakeZoom extends LightboxPointerZoom {
+  zoomed: boolean;
+  toggledAt: MouseEvent[];
+  factors: number[];
+  pans: [number, number][];
+}
+
+function createFakeZoom(): FakeZoom {
+  const zoom: FakeZoom = {
+    zoomed: false,
+    toggledAt: [],
+    factors: [],
+    pans: [],
+    isZoomed: () => zoom.zoomed,
+    toggleAt: event => zoom.toggledAt.push(event),
+    zoomByAt: factor => zoom.factors.push(factor),
+    zoomOut: (): void => {
+      zoom.zoomed = false;
+    },
+    panBy: (deltaX, deltaY) => zoom.pans.push([deltaX, deltaY])
+  };
+  return zoom;
 }
 
 function setup(): Setup {
+  const zoom = createFakeZoom();
   const show = vi.fn<() => void>();
   const hideSoon = vi.fn<() => void>();
   const showNext = vi.fn<() => void>();
@@ -22,8 +48,16 @@ function setup(): Setup {
   const close = vi.fn<() => void>();
   const onCtrlClick = vi.fn<() => void>();
   const onMiddleClick = vi.fn<() => void>();
-  const listeners = createPointerListeners({ visibility: { show, hideSoon }, showNext, showPrevious, close, onCtrlClick, onMiddleClick });
-  return { listeners, show, hideSoon, showNext, showPrevious, close, onCtrlClick, onMiddleClick };
+  const listeners = createPointerListeners({ visibility: { show, hideSoon }, zoom, showNext, showPrevious, close, onCtrlClick, onMiddleClick });
+  return { listeners, show, hideSoon, showNext, showPrevious, close, onCtrlClick, onMiddleClick, zoom };
+}
+
+function drag(listeners: LightboxPointerListeners, points: readonly [number, number][]): void {
+  const [[startX, startY], ...rest] = points;
+
+  listeners.onPointerdown(new PointerEvent("pointerdown", { button: 0, clientX: startX, clientY: startY }));
+  rest.forEach(([clientX, clientY]) => listeners.onPointermove(new PointerEvent("pointermove", { pointerType: "mouse", buttons: 1, clientX, clientY })));
+  listeners.onPointerup();
 }
 
 function clickOn(target: Element, init: MouseEventInit = {}): MouseEvent {
@@ -50,6 +84,88 @@ describe("createPointerListeners", () => {
 
     listeners.onClick(clickOn(document.createElement("video")));
     expect(close).not.toHaveBeenCalled();
+  });
+
+  test("zooms on a Shift click instead of closing", () => {
+    const { listeners, close, zoom } = setup();
+    const shiftClick = clickOn(document.createElement("img"), { shiftKey: true });
+
+    listeners.onClick(shiftClick);
+    expect([zoom.toggledAt, close.mock.calls.length]).toEqual([[shiftClick], 0]);
+  });
+
+  test("zooms out on a click while zoomed instead of closing", () => {
+    const { listeners, close, zoom } = setup();
+
+    zoom.zoomed = true;
+    listeners.onClick(clickOn(document.createElement("img")));
+    expect([zoom.zoomed, close.mock.calls.length]).toEqual([false, 0]);
+  });
+
+  test("pans by each move of a drag while zoomed", () => {
+    const { listeners, zoom } = setup();
+
+    zoom.zoomed = true;
+    drag(listeners, [[0, 0], [10, 0], [15, -5]]);
+    expect(zoom.pans).toEqual([[10, 0], [5, -5]]);
+  });
+
+  test("ignores the click that ends a drag, and only that one", () => {
+    const { listeners, close } = setup();
+
+    drag(listeners, [[0, 0], [10, 0]]);
+    listeners.onClick(clickOn(document.createElement("img")));
+    listeners.onClick(clickOn(document.createElement("img")));
+    expect(close).toHaveBeenCalledOnce();
+  });
+
+  test("keeps the pointer through a drag while zoomed", () => {
+    const { listeners, zoom } = setup();
+    const target = document.createElement("div");
+    const setPointerCapture = vi.fn<(pointerId: number) => void>();
+
+    zoom.zoomed = true;
+    target.setPointerCapture = setPointerCapture;
+    target.addEventListener("pointermove", event => listeners.onPointermove(event));
+    listeners.onPointerdown(new PointerEvent("pointerdown", { button: 0 }));
+    target.dispatchEvent(new PointerEvent("pointermove", { pointerType: "mouse", pointerId: 7, clientX: 10 }));
+    expect(setPointerCapture.mock.calls).toEqual([[7]]);
+  });
+
+  test("stops a drag the browser cancels", () => {
+    const { listeners, zoom } = setup();
+
+    zoom.zoomed = true;
+    listeners.onPointerdown(new PointerEvent("pointerdown", { button: 0 }));
+    listeners.onPointercancel();
+    listeners.onPointermove(new PointerEvent("pointermove", { pointerType: "mouse", clientX: 10 }));
+    expect(zoom.pans).toEqual([]);
+  });
+
+  test("never drags with another button", () => {
+    const { listeners, close } = setup();
+
+    listeners.onPointerdown(new PointerEvent("pointerdown", { button: 2 }));
+    listeners.onPointermove(new PointerEvent("pointermove", { pointerType: "mouse", clientX: 10 }));
+    listeners.onPointerup();
+    listeners.onClick(clickOn(document.createElement("img")));
+    expect(close).toHaveBeenCalledOnce();
+  });
+
+  test("keeps the browser from dragging the image away", () => {
+    const { listeners } = setup();
+    const dragStart = new Event("dragstart", { cancelable: true }) as DragEvent;
+
+    listeners.onDragstart(dragStart);
+    expect(dragStart.defaultPrevented).toBe(true);
+  });
+
+  test("treats a press that barely moves as a click", () => {
+    const { listeners, close, zoom } = setup();
+
+    drag(listeners, [[0, 0], [3, 0]]);
+    listeners.onClick(clickOn(document.createElement("img")));
+    expect([close.mock.calls.length, zoom.pans]).toEqual([1, []]);
   });
 
   test("reports a Ctrl or Meta click instead of closing, even on a video", () => {
@@ -97,15 +213,34 @@ describe("createPointerListeners", () => {
     expect([down.defaultPrevented, showNext.mock.calls.length, showPrevious.mock.calls.length]).toEqual([true, 1, 1]);
   });
 
-  test("leaves a ctrl wheel and a sideways wheel to the browser", () => {
+  test("leaves a sideways wheel to the browser while fitted", () => {
     const { listeners, showNext, showPrevious } = setup();
-    const zoom = new WheelEvent("wheel", { deltaY: 100, cancelable: true });
+    const sideways = new WheelEvent("wheel", { deltaX: 100, cancelable: true });
+
+    listeners.onWheel(sideways);
+    expect([sideways.defaultPrevented, showNext.mock.calls.length, showPrevious.mock.calls.length]).toEqual([false, 0, 0]);
+  });
+
+  test("zooms in on a Ctrl wheel up and back out by as much on a Ctrl wheel down, instead of stepping", () => {
+    const { listeners, showNext, zoom } = setup();
+    const up = new WheelEvent("wheel", { deltaY: -100, cancelable: true });
+    const down = new WheelEvent("wheel", { deltaY: 100 });
 
     // happy-dom's WheelEvent extends UIEvent, so it drops ctrlKey from its init.
-    Object.defineProperty(zoom, "ctrlKey", { value: true });
-    listeners.onWheel(zoom);
-    listeners.onWheel(new WheelEvent("wheel", { deltaX: 100 }));
-    expect([zoom.defaultPrevented, showNext.mock.calls.length, showPrevious.mock.calls.length]).toEqual([false, 0, 0]);
+    [up, down].forEach(event => Object.defineProperty(event, "ctrlKey", { value: true }));
+    listeners.onWheel(up);
+    listeners.onWheel(down);
+    expect(zoom.factors[0] * zoom.factors[1]).toBeCloseTo(1);
+    expect([zoom.factors[0] > 1, up.defaultPrevented, showNext.mock.calls.length]).toEqual([true, true, 0]);
+  });
+
+  test("pans with the wheel while zoomed instead of stepping", () => {
+    const { listeners, showNext, zoom } = setup();
+    const wheel = new WheelEvent("wheel", { deltaX: 20, deltaY: 100, cancelable: true });
+
+    zoom.zoomed = true;
+    listeners.onWheel(wheel);
+    expect([zoom.pans, wheel.defaultPrevented, showNext.mock.calls.length]).toEqual([[[-20, -100]], true, 0]);
   });
 
   test("shows the controls when the mouse moves to a new place, ignoring touch", () => {

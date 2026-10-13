@@ -1,0 +1,16 @@
+.fsg-LightboxZoomChip {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgb(0 0 0 / 0.7);
+  color: rgb(255 255 255 / 0.9);
+  font: 600 13px/1.4 ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.fsg-LightboxZoomChip[hidden] {
+  display: none;
+}

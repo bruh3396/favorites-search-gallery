@@ -53,7 +53,11 @@
   stroke: none;
 }
 
-.fsg-LightboxButton[data-icon="pause"][aria-pressed="true"] {
+.fsg-LightboxButton[hidden] {
+  display: none;
+}
+
+.fsg-LightboxButton:is([data-icon="pause"], [data-icon="zoomOut"])[aria-pressed="true"] {
   background: rgb(255 255 255 / 0.15);
 }
 

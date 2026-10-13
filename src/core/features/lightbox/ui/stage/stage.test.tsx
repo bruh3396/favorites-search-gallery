@@ -1,4 +1,5 @@
 import { LightboxStage, LightboxStageClass } from "@/core/features/lightbox/ui/stage/stage";
+import { FIT_VIEW } from "@/core/features/lightbox/zoom/zoom";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { LightboxStageRendererClass } from "@/core/features/lightbox/ui/stage/renderer";
 import { Media } from "@/core/domain/media/media";
@@ -26,6 +27,7 @@ interface FakeBitmap {
 }
 
 interface Setup {
+  stage: LightboxStage;
   root: HTMLElement;
   preview: HTMLImageElement;
   original: HTMLCanvasElement;
@@ -85,6 +87,7 @@ function setup(
   const preview = result.querySelector<HTMLImageElement>(`img.${LightboxStageRendererClass.media}`)!;
   const original = result.querySelector<HTMLCanvasElement>(`canvas.${LightboxStageRendererClass.media}`)!;
   return {
+    stage,
     root: result,
     preview,
     original,
@@ -406,5 +409,64 @@ describe("LightboxStage", () => {
     scheduler.advance(200);
     await flushPromises();
     expect(decodeOriginal.mock.calls.map(([media]) => media.locator)).toEqual(["media/0", "media/2"]);
+  });
+
+  describe("measureZoomFrame", () => {
+    test("reports its own size and the shown media's natural size", async() => {
+      const { stage, root, current, original } = setup();
+
+      Object.defineProperties(root, { clientWidth: { value: 1_000 }, clientHeight: { value: 500 } });
+      current.value = FIRST;
+      await vi.waitFor(() => expect(original.hidden).toBe(false));
+      expect(stage.measureZoomFrame()).toEqual({ width: 1_000, height: 500, mediaWidth: ORIGINAL_SIZE.width, mediaHeight: ORIGINAL_SIZE.height });
+    });
+
+    test("reads the natural size of a preview and a video, and none with nothing shown", () => {
+      const { stage, current, preview, readShownMedia } = setup(() => pendForever());
+      const readMediaSize = (): number[] => [stage.measureZoomFrame().mediaWidth, stage.measureZoomFrame().mediaHeight];
+      const sizes: number[][] = [readMediaSize()];
+
+      Object.defineProperties(preview, { naturalWidth: { value: 300 }, naturalHeight: { value: 200 } });
+      current.value = FIRST;
+      sizes.push(readMediaSize());
+      current.value = FIRST_VIDEO;
+      Object.defineProperties(readShownMedia()!, { videoWidth: { value: 640 }, videoHeight: { value: 360 } });
+      sizes.push(readMediaSize());
+      expect(sizes).toEqual([[0, 0], [300, 200], [640, 360]]);
+    });
+  });
+
+  describe("showZoomView", () => {
+    test("moves and scales itself to the view, gliding only through a gliding change of scale", () => {
+      const { stage, root } = setup();
+      const shown: (string | undefined)[][] = [];
+      const record = (): void => {
+        shown.push([root.style.transform, root.dataset.zoomMotion]);
+      };
+
+      stage.showZoomView({ scale: 2, x: -10, y: -20 }, true);
+      record();
+      stage.showZoomView({ scale: 2, x: -30, y: -20 }, true);
+      record();
+      stage.showZoomView({ scale: 3, x: -30, y: -20 }, false);
+      record();
+      stage.showZoomView(FIT_VIEW, true);
+      record();
+      expect(shown).toEqual([
+        ["translate(-10px, -20px) scale(2)", "glide"],
+        ["translate(-30px, -20px) scale(2)", "instant"],
+        ["translate(-30px, -20px) scale(3)", "instant"],
+        ["", "glide"]
+      ]);
+    });
+
+    test("drops the view at once when another item shows", () => {
+      const { stage, root, current } = setup(() => pendForever());
+
+      current.value = FIRST;
+      stage.showZoomView({ scale: 2, x: -10, y: -20 }, true);
+      current.value = SECOND;
+      expect([root.style.transform, root.dataset.zoomMotion]).toEqual(["", "instant"]);
+    });
   });
 });

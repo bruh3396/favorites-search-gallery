@@ -1,4 +1,5 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
+import { FIT_VIEW, ZoomFrame, ZoomView } from "@/core/features/lightbox/zoom/zoom";
 import { Readable, effect } from "@/core/utils/reactive/signal";
 import { GifRenderer } from "@/core/features/lightbox/ui/stage/gif/renderer";
 import { ImageRenderer } from "@/core/features/lightbox/ui/stage/image/renderer";
@@ -33,6 +34,7 @@ export class LightboxStage {
   private readonly renderersByKind: Map<MediaKind, LightboxStageRenderer>;
   private readonly stopEffects: ReadonlyArray<() => void>;
   private activeRenderer: LightboxStageRenderer | undefined;
+  private shownScale = 1;
 
   constructor(private readonly configuration: LightboxStageConfiguration, dependencies: LightboxStageDependencies) {
     const { current, neighbors, warmItems, remoteMedia, scheduler } = dependencies;
@@ -60,6 +62,19 @@ export class LightboxStage {
     return [...this.renderersByKind.values()];
   }
 
+  public measureZoomFrame(): ZoomFrame {
+    const [mediaWidth, mediaHeight] = readNaturalSize(this.shownMedia);
+    return { width: this.root.clientWidth, height: this.root.clientHeight, mediaWidth, mediaHeight };
+  }
+
+  public showZoomView(view: ZoomView, glides: boolean): void {
+    const previousScale = this.shownScale;
+
+    this.shownScale = view.scale;
+    this.root.dataset.zoomMotion = glides && view.scale !== previousScale ? "glide" : "instant";
+    this.root.style.transform = view === FIT_VIEW ? "" : `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
+  }
+
   public dispose(): void {
     this.stopEffects.forEach(stop => stop());
     this.renderers.forEach(renderer => renderer.dispose());
@@ -67,6 +82,10 @@ export class LightboxStage {
 
   private show(item: MediaItem | undefined): void {
     const nextRenderer = item === undefined ? undefined : this.renderersByKind.get(item.media.kind);
+
+    this.shownScale = 1;
+    this.root.dataset.zoomMotion = "instant";
+    this.root.style.transform = "";
 
     if (this.activeRenderer !== nextRenderer) {
       this.activeRenderer?.clear();
@@ -85,4 +104,15 @@ export class LightboxStage {
       renderer.setNeighbors(kindNeighbors);
     });
   }
+}
+
+export function readNaturalSize(media: MorphSource | undefined): [width: number, height: number] {
+  if (media instanceof HTMLImageElement) {
+    return [media.naturalWidth, media.naturalHeight];
+  }
+
+  if (media instanceof HTMLVideoElement) {
+    return [media.videoWidth, media.videoHeight];
+  }
+  return [media?.width ?? 0, media?.height ?? 0];
 }

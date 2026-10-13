@@ -5,9 +5,14 @@ import { h, render } from "@/core/ui/h/h";
 import { LightboxArrowClass } from "@/core/features/lightbox/ui/controls/arrow/arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/autoplay";
 import { LightboxButtonClass } from "@/core/features/lightbox/ui/controls/button/button";
+import { LightboxMinimapClass } from "@/core/features/lightbox/ui/minimap/minimap";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
 import { LightboxOverlayClass } from "@/core/features/lightbox/ui/overlay/overlay";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/controls/position/position";
+import { LightboxStageClass } from "@/core/features/lightbox/ui/stage/stage";
+import { LightboxStageRendererClass } from "@/core/features/lightbox/ui/stage/renderer";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
+import { LightboxZoomChipClass } from "@/core/features/lightbox/ui/zoom_chip/zoom_chip";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryMorpher } from "@/adapters/memory/ports/morpher/morpher";
@@ -56,6 +61,7 @@ function setup(): Setup {
     },
     scheduler
   });
+  const zoom = new LightboxZoom({ minimumScale: 2 }, { current: navigation.current });
   const decodeOriginal = vi.fn<(media: Media, signal?: AbortSignal) => Promise<ImageBitmap>>(() => new Promise(doNothing));
   const morpher = new MemoryMorpher();
   const place = document.createElement("div");
@@ -67,6 +73,7 @@ function setup(): Setup {
     <LightboxScreen
       navigation={navigation}
       autoplay={autoplay}
+      zoom={zoom}
       actions={{ openOriginal, openPostPage, download }}
       remoteMedia={{
         resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
@@ -85,6 +92,7 @@ function setup(): Setup {
   onTestFinished(() => {
     dispose();
     autoplay.dispose();
+    zoom.dispose();
     result.remove();
   });
   return {
@@ -112,7 +120,100 @@ function pressKey(target: Element, key: string): KeyboardEvent {
   return event;
 }
 
-describe("LightboxScreen", () => {
+function layOutLargeImage(dialog: HTMLDialogElement): HTMLElement {
+  const stageRoot = dialog.querySelector<HTMLElement>(`.${LightboxStageClass.root}`)!;
+  const preview = dialog.querySelector<HTMLImageElement>(`img.${LightboxStageRendererClass.media}`)!;
+
+  Object.defineProperties(stageRoot, { clientWidth: { value: 1_000 }, clientHeight: { value: 500 } });
+  Object.defineProperties(preview, { naturalWidth: { value: 4_000 }, naturalHeight: { value: 2_000 } });
+  return stageRoot;
+}
+
+describe("LightboxScreen", () => {  test("zooms from its button and from a Shift click, and zooms out on a plain click", () => {
+    const { dialog, navigation, onClose } = setup();
+    const zoomedStates: (string | undefined)[] = [];
+
+    navigation.open(POST, sequence());
+    layOutLargeImage(dialog);
+    findButton(dialog, "zoomIn")!.click();
+    zoomedStates.push(dialog.dataset.zoomed);
+    dialog.click();
+    zoomedStates.push(dialog.dataset.zoomed);
+    dialog.dispatchEvent(new MouseEvent("click", { shiftKey: true, clientX: 100, clientY: 100, bubbles: true }));
+    zoomedStates.push(dialog.dataset.zoomed);
+    expect([zoomedStates, onClose.mock.calls.length]).toEqual([["true", "false", "true"], 0]);
+  });
+
+  test("shows a zoom-in cursor while Shift is held and a zoom-out cursor once zoomed", () => {
+    const { dialog, navigation } = setup();
+    const cursors: (string | undefined)[] = [];
+
+    navigation.open(POST, sequence());
+    layOutLargeImage(dialog);
+    cursors.push(dialog.dataset.zoomCursor);
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, bubbles: true }));
+    cursors.push(dialog.dataset.zoomCursor);
+    dialog.dispatchEvent(new MouseEvent("click", { shiftKey: true, clientX: 100, clientY: 100, bubbles: true }));
+    cursors.push(dialog.dataset.zoomCursor);
+    dialog.dispatchEvent(new KeyboardEvent("keyup", { key: "Shift", bubbles: true }));
+    cursors.push(dialog.dataset.zoomCursor);
+    expect(cursors).toEqual(["none", "in", "out", "none"]);
+  });
+
+  test("shows no zoom cursor on a video while Shift is held", () => {
+    const { dialog, navigation } = setup();
+
+    navigation.open(VIDEO, sequence());
+    dialog.dispatchEvent(new KeyboardEvent("keydown", { key: "Shift", shiftKey: true, bubbles: true }));
+    expect(dialog.dataset.zoomCursor).toBe("none");
+  });
+
+  test("pans the zoomed image by dragging it", () => {
+    const { dialog, navigation } = setup();
+
+    navigation.open(POST, sequence());
+    const stageRoot = layOutLargeImage(dialog);
+
+    findButton(dialog, "zoomIn")!.click();
+    dialog.dispatchEvent(new PointerEvent("pointerdown", { button: 0, clientX: 500, clientY: 250, bubbles: true }));
+    movePointer(dialog, { clientX: 520, clientY: 260 });
+    dialog.dispatchEvent(new PointerEvent("pointerup", { bubbles: true }));
+    expect(stageRoot.style.transform).toBe("translate(-1480px, -740px) scale(4)");
+  });
+
+  test("zooms at the pointer on a Ctrl wheel at once, then pans with the plain wheel instead of stepping", () => {
+    const { dialog, navigation, onShowNext } = setup();
+    const ctrlWheel = new WheelEvent("wheel", { deltaY: -100 });
+    const readTranslation = (root: HTMLElement): string => root.style.transform.replace(/ scale\(.*\)/, "");
+
+    navigation.open(POST, sequence());
+    const stageRoot = layOutLargeImage(dialog);
+
+    // happy-dom's WheelEvent extends UIEvent, so it drops ctrlKey and the pointer's place from its init.
+    Object.defineProperties(ctrlWheel, { ctrlKey: { value: true }, clientX: { value: 0 }, clientY: { value: 0 } });
+    dialog.dispatchEvent(ctrlWheel);
+    const zoomedTranslation = readTranslation(stageRoot);
+
+    dialog.dispatchEvent(new WheelEvent("wheel", { deltaY: 100 }));
+    expect([zoomedTranslation, dialog.dataset.zoomed, stageRoot.dataset.zoomMotion, onShowNext.mock.calls.length])
+      .toEqual(["translate(0px, 0px)", "true", "instant", 0]);
+    expect(readTranslation(stageRoot)).toMatch(/^translate\(0px, -\d/);
+  });
+
+  test("shows the zoom chip and minimap only while zoomed", () => {
+    const { dialog, navigation } = setup();
+    const findHidden = (): boolean[] => [LightboxZoomChipClass.root, LightboxMinimapClass.root]
+      .map(className => dialog.querySelector<HTMLElement>(`.${className}`)!.hidden);
+    const states = [findHidden()];
+
+    navigation.open(POST, sequence());
+    layOutLargeImage(dialog);
+    findButton(dialog, "zoomIn")!.click();
+    states.push(findHidden());
+    dialog.click();
+    states.push(findHidden());
+    expect(states).toEqual([[true, true], [false, false], [true, true]]);
+  });
   test("draws a labelled dialog that stays closed until a post is open", () => {
     const { dialog } = setup();
 

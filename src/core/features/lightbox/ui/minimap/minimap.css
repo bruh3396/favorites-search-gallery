@@ -1,0 +1,26 @@
+.fsg-LightboxMinimap {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.fsg-LightboxMinimap[hidden] {
+  display: none;
+}
+
+.fsg-LightboxMinimap-image {
+  display: block;
+  max-width: 140px;
+  max-height: 140px;
+}
+
+.fsg-LightboxMinimap-region {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid white;
+  box-shadow: 0 0 0 999px rgb(0 0 0 / 0.35);
+}

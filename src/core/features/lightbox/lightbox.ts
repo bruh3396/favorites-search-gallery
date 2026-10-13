@@ -3,6 +3,7 @@ import { LightboxActions, LightboxActionsDependencies } from "@/core/features/li
 import { LightboxAutoplay, LightboxAutoplayConfiguration } from "@/core/features/lightbox/autoplay/autoplay";
 import { LightboxNavigation, LightboxNavigationConfiguration } from "@/core/features/lightbox/navigation/navigation";
 import { LightboxScreen, LightboxScreenProps } from "@/core/features/lightbox/ui/screen/screen";
+import { LightboxZoom, LightboxZoomConfiguration } from "@/core/features/lightbox/zoom/zoom";
 import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
 import { Readable, effect } from "@/core/utils/reactive/signal";
 import { LightboxOverlayVisibilityConfiguration } from "@/core/features/lightbox/ui/overlay/visibility";
@@ -16,6 +17,7 @@ import { h } from "@/core/ui/h/h";
 export interface LightboxConfiguration extends LightboxNavigationConfiguration {
   readonly settleDelay: number;
   readonly autoplay: LightboxAutoplayConfiguration;
+  readonly zoom: LightboxZoomConfiguration;
   readonly overlay: LightboxOverlayVisibilityConfiguration;
 }
 
@@ -45,6 +47,7 @@ export const DEFAULT_LIGHTBOX_CONFIGURATION: LightboxConfiguration = {
   maxNeighborDistance: 20,
   settleDelay: 75,
   autoplay: { interval: 3_000 },
+  zoom: { minimumScale: 2 },
   overlay: { idleDelay: 1_000, hideSoonDelay: 1_000 }
 };
 
@@ -58,6 +61,7 @@ export function createLightboxService<T extends MediaItem>(configuration: Lightb
     },
     scheduler
   });
+  const zoom = new LightboxZoom(configuration.zoom, { current: navigation.current });
   const actions = new LightboxActions(dependencies);
   const settled = new Emitter<T>();
   const settle = createDebouncedTask({ delay: configuration.settleDelay, leading: false }, scheduler, (item: T) => settled.emit(item));
@@ -84,7 +88,7 @@ export function createLightboxService<T extends MediaItem>(configuration: Lightb
     warm: item => navigation.warm(item),
     close: () => navigation.close(),
     createScreen: options => h(LightboxScreen<T>, {
-      ...options, navigation, autoplay, actions, remoteMedia, overlay: configuration.overlay, scheduler
+      ...options, navigation, autoplay, zoom, actions, remoteMedia, overlay: configuration.overlay, scheduler
     })
   };
 }

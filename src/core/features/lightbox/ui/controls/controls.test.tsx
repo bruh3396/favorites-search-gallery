@@ -9,6 +9,7 @@ import { LightboxButtonClass } from "@/core/features/lightbox/ui/controls/button
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/ui/overlay/visibility";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/controls/position/position";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { ZoomDirection } from "@/core/features/lightbox/zoom/zoom";
 import { doNothing } from "@/core/utils/function/function";
 
 type Action = ReturnType<typeof vi.fn<() => void>>;
@@ -18,7 +19,9 @@ interface Setup {
   isPlaying: Signal<boolean>;
   countdown: Signal<AutoplayCountdown | undefined>;
   isFullscreen: Signal<boolean>;
+  toggleDirection: Signal<ZoomDirection | undefined>;
   toggleAutoplay: Action;
+  toggleZoom: Action;
   toggleFullscreen: Action;
   close: Action;
   showNext: Action;
@@ -31,7 +34,9 @@ function setup(overrides: Partial<LightboxControlsProps<string>> = {}): Setup {
   const isPlaying = new Signal(false);
   const countdown = new Signal<AutoplayCountdown | undefined>(undefined);
   const isFullscreen = new Signal(false);
+  const toggleDirection = new Signal<ZoomDirection | undefined>("in");
   const toggleAutoplay = vi.fn<() => void>();
+  const toggleZoom = vi.fn<() => void>();
   const toggleFullscreen = vi.fn<() => void>();
   const close = vi.fn<() => void>();
   const showNext = vi.fn<() => void>();
@@ -44,6 +49,7 @@ function setup(overrides: Partial<LightboxControlsProps<string>> = {}): Setup {
       current={new Signal<string | undefined>("1")}
       position={new Signal({ index: 36, total: 1_204 })}
       autoplay={{ isPlaying, countdown: countdown as Readable<AutoplayCountdown | undefined>, toggle: toggleAutoplay }}
+      zoom={{ toggleDirection, toggle: toggleZoom }}
       fullscreen={{ isFullscreen, toggle: toggleFullscreen }}
       favorites={{ isFavorited: () => false, addFavorite: doNothing, removeFavorite: doNothing }}
       download={download}
@@ -57,7 +63,7 @@ function setup(overrides: Partial<LightboxControlsProps<string>> = {}): Setup {
 
   onTestFinished(dispose);
   return {
-    root: result as HTMLElement, isPlaying, countdown, isFullscreen, toggleAutoplay, toggleFullscreen, close, showNext, showPrevious, download,
+    root: result as HTMLElement, isPlaying, countdown, isFullscreen, toggleDirection, toggleAutoplay, toggleZoom, toggleFullscreen, close, showNext, showPrevious, download,
     openPostPage
   };
 }
@@ -84,13 +90,13 @@ describe("LightboxControls", () => {
   });
 
   test("calls back from its buttons and arrows", () => {
-    const { root, toggleAutoplay, toggleFullscreen, close, showNext, showPrevious, download, openPostPage } = setup();
+    const { root, toggleAutoplay, toggleZoom, toggleFullscreen, close, showNext, showPrevious, download, openPostPage } = setup();
 
-    ["play", "download", "fullscreen", "postPage", "close"].forEach(icon => findButton(root, icon)!.click());
+    ["play", "download", "zoomIn", "fullscreen", "postPage", "close"].forEach(icon => findButton(root, icon)!.click());
     root.querySelector<HTMLElement>(`.${LightboxArrowClass.root}[data-direction="previous"]`)!.click();
     root.querySelector<HTMLElement>(`.${LightboxArrowClass.root}[data-direction="next"]`)!.click();
-    expect([toggleAutoplay, toggleFullscreen, close, showNext, showPrevious, download, openPostPage].map(action => action.mock.calls.length))
-      .toEqual([1, 1, 1, 1, 1, 1, 1]);
+    expect([toggleAutoplay, toggleZoom, toggleFullscreen, close, showNext, showPrevious, download, openPostPage].map(action => action.mock.calls.length))
+      .toEqual([1, 1, 1, 1, 1, 1, 1, 1]);
   });
 
   test("shows a pressed pause button while autoplay plays", () => {
@@ -108,6 +114,19 @@ describe("LightboxControls", () => {
     expect(bar.hidden).toBe(false);
   });
 
+  test("shows a pressed zoom-out button while zoomed", () => {
+    const { root, toggleDirection } = setup();
+
+    toggleDirection.value = "out";
+    expect(findButton(root, "zoomOut")?.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("hides the zoom button for media it can't zoom", () => {
+    const { root, toggleDirection } = setup();
+
+    toggleDirection.value = undefined;
+    expect(findButton(root, "zoomIn")!.hidden).toBe(true);
+  });
   test("offers to leave fullscreen while in it", () => {
     const { root, isFullscreen } = setup();
 

@@ -5,3 +5,5 @@
 @import "./ui/controls/arrow/arrow.css" layer(components);
 @import "./ui/controls/position/position.css" layer(components);
 @import "./ui/controls/autoplay_bar/autoplay_bar.css" layer(components);
+@import "./ui/zoom_chip/zoom_chip.css" layer(components);
+@import "./ui/minimap/minimap.css" layer(components);

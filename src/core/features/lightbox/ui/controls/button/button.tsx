@@ -11,12 +11,13 @@ export interface LightboxButtonProps {
   icon: Reactive<LightboxIcon>;
   label: string;
   pressed?: Readable<boolean>;
+  hidden?: Readable<boolean>;
   onClick: () => void;
 }
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 
-export function LightboxButton({ icon, label, pressed, onClick }: LightboxButtonProps): HTMLElement {
+export function LightboxButton({ icon, label, pressed, hidden, onClick }: LightboxButtonProps): HTMLElement {
   const readIcon = (): LightboxIcon => (typeof icon === "string" ? icon : icon.value);
   const button = (
     <button
@@ -25,6 +26,7 @@ export function LightboxButton({ icon, label, pressed, onClick }: LightboxButton
       aria-label={label}
       aria-pressed={pressed === undefined ? undefined : computed(() => String(pressed.value))}
       title={label}
+      hidden={hidden ?? false}
       dataset={{ icon: computed(readIcon) }}
       onClick={() => onClick()}
     />

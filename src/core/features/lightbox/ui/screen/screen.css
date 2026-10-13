@@ -16,8 +16,24 @@
   outline: none;
 }
 
+.fsg-LightboxScreen[data-zoomed="true"] {
+  cursor: grab;
+}
+
+.fsg-LightboxScreen[data-zoomed="true"]:active {
+  cursor: grabbing;
+}
+
 .fsg-LightboxScreen[data-idle="true"] {
   cursor: none;
+}
+
+.fsg-LightboxScreen[data-zoom-cursor="in"] {
+  cursor: zoom-in;
+}
+
+.fsg-LightboxScreen[data-zoom-cursor="out"] {
+  cursor: zoom-out;
 }
 
 .fsg-LightboxScreen::backdrop {
@@ -28,6 +44,8 @@
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  transition: scale 65ms linear;
 }
 
 .fsg-LightboxScreen-content::backdrop {
@@ -35,11 +53,15 @@
 }
 
 .fsg-LightboxStage {
-  transition: scale 65ms linear;
+  transform-origin: 0 0;
+}
+
+.fsg-LightboxStage[data-zoom-motion="glide"] {
+  transition: transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
 @starting-style {
-  .fsg-LightboxScreen[open] .fsg-LightboxStage {
+  .fsg-LightboxScreen[open] .fsg-LightboxScreen-content {
     scale: 0.96;
   }
 }

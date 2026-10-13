@@ -8,14 +8,20 @@ import { LightboxFullscreen } from "@/core/features/lightbox/ui/screen/fullscree
 import { LightboxOverlay } from "@/core/features/lightbox/ui/overlay/overlay";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/ui/overlay/visibility";
 import { LightboxPosition } from "@/core/features/lightbox/ui/controls/position/position";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { SequencePosition } from "@/core/domain/media/media_sequence";
 import { h } from "@/core/ui/h/h";
+
+export interface LightboxZoomControl extends Pick<LightboxZoom, "toggleDirection"> {
+  toggle: () => void;
+}
 
 export interface LightboxControlsProps<T> {
   visibility: LightboxOverlayVisibility;
   current: Readable<T | undefined>;
   position: Readable<SequencePosition | undefined>;
   autoplay: Pick<LightboxAutoplay, "isPlaying" | "countdown" | "toggle">;
+  zoom: LightboxZoomControl;
   fullscreen: Pick<LightboxFullscreen, "isFullscreen" | "toggle">;
   favorites?: Omit<LightboxFavoriteButtonProps<T>, "current">;
   download?: () => void;
@@ -26,7 +32,7 @@ export interface LightboxControlsProps<T> {
 }
 
 export function LightboxControls<T>(props: LightboxControlsProps<T>): HTMLElement {
-  const { autoplay, fullscreen, download, openPostPage } = props;
+  const { autoplay, zoom, fullscreen, download, openPostPage } = props;
   return (
     <LightboxOverlay
       visibility={props.visibility}
@@ -41,6 +47,13 @@ export function LightboxControls<T>(props: LightboxControlsProps<T>): HTMLElemen
         />,
         props.favorites && <LightboxFavoriteButton current={props.current} {...props.favorites} />,
         download && <LightboxButton icon="download" label="Download" onClick={download} />,
+        <LightboxButton
+          icon={computed(() => (zoom.toggleDirection.value === "out" ? "zoomOut" : "zoomIn"))}
+          label="Zoom"
+          pressed={computed(() => zoom.toggleDirection.value === "out")}
+          hidden={computed(() => zoom.toggleDirection.value === undefined)}
+          onClick={() => zoom.toggle()}
+        />,
         <LightboxButton
           icon={computed(() => (fullscreen.isFullscreen.value ? "exitFullscreen" : "fullscreen"))}
           label="Fullscreen"
