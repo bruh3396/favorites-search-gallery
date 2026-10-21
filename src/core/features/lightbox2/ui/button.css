@@ -14,13 +14,21 @@
     scale var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
-.fsg-LightboxButton:hover {
+.fsg-LightboxButton:hover:enabled {
   background: rgb(255 255 255 / 0.09);
 }
 
-.fsg-LightboxButton:active {
+.fsg-LightboxButton:active:enabled {
   background: rgb(255 255 255 / 0.16);
   scale: 0.9;
+}
+
+.fsg-LightboxButton:disabled {
+  cursor: default;
+}
+
+.fsg-LightboxButton:disabled .fsg-LightboxButton-icon {
+  opacity: 0.35;
 }
 
 .fsg-LightboxButton:focus-visible {
@@ -41,6 +49,6 @@
   transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
-.fsg-LightboxButton:is(:hover, :focus-visible) .fsg-LightboxButton-icon {
+.fsg-LightboxButton:enabled:is(:hover, :focus-visible) .fsg-LightboxButton-icon {
   opacity: 1;
 }

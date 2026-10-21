@@ -1,0 +1,31 @@
+.fsg-LightboxViewport {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.fsg-LightboxViewport[data-zoomed] {
+  touch-action: none;
+}
+
+.fsg-LightboxViewport[data-cursor="zoom-in"] {
+  cursor: zoom-in;
+}
+
+.fsg-LightboxViewport[data-cursor="grab"] {
+  cursor: grab;
+}
+
+.fsg-LightboxViewport[data-dragging] {
+  cursor: grabbing;
+}
+
+.fsg-LightboxViewport-content {
+  width: 100%;
+  height: 100%;
+  transform-origin: 0 0;
+}
+
+.fsg-LightboxViewport-content[data-glides] {
+  transition: transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}

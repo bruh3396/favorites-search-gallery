@@ -9,6 +9,7 @@ import { Preference } from "@/core/utils/reactive/preference";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { createLightboxView } from "@/core/features/lightbox2/view";
 
 const SETTLE_DELAY = 75;
@@ -16,6 +17,7 @@ const RETENTION_CAPACITY = 8;
 
 export interface LightboxDependencies {
   scheduler: Pick<Scheduler, "schedule">;
+  sizeObserver: SizeObserver;
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
   actions: LightboxActions;
   volume: Preference<number>;
@@ -46,6 +48,7 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
       { keymap: DEFAULT_LIGHTBOX_KEYMAP },
       {
         scheduler: dependencies.scheduler,
+        sizeObserver: dependencies.sizeObserver,
         remoteMedia: dependencies.remoteMedia,
         actions: dependencies.actions,
         navigation,

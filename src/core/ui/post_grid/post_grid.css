@@ -1,5 +1,5 @@
 .fsg-PostGrid {
-  --fsg-PostGrid-gap: 4px;
+  --fsg-PostGrid-gap: 8px;
 
   container-type: inline-size;
   gap: var(--fsg-PostGrid-gap);

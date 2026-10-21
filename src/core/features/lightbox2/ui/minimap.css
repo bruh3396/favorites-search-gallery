@@ -1,0 +1,33 @@
+.fsg-LightboxMinimap {
+  position: absolute;
+  inset-inline-end: 16px;
+  inset-block-end: 16px;
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 3px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.fsg-LightboxMinimap[data-dragging] {
+  cursor: grabbing;
+}
+
+.fsg-LightboxMinimap[hidden] {
+  display: none;
+}
+
+.fsg-LightboxMinimap-image {
+  display: block;
+  max-inline-size: 160px;
+  max-block-size: 160px;
+}
+
+.fsg-LightboxMinimap-region {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1.5px solid white;
+  box-shadow: 0 0 0 999px rgb(0 0 0 / 0.35);
+}

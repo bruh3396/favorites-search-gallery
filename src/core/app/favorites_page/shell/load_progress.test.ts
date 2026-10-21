@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { measureLoadProgress } from "@/core/app/favorites_page/load_progress";
+import { measureLoadProgress } from "@/core/app/favorites_page/shell/load_progress";
 
 describe("measureLoadProgress", () => {
   test("returns the share counted so far while fetching or restoring", () => {

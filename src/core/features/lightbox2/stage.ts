@@ -4,6 +4,7 @@ import { LightboxVideoPool } from "@/core/features/lightbox2/video_pool";
 import { MediaItem } from "@/core/domain/post/post";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { ZoomSize } from "@/core/features/lightbox2/zoom";
 import { onCleanup } from "@/core/utils/reactive/scope";
 import { createLightboxVideo, playVideo } from "@/core/features/lightbox2/ui/video";
 
@@ -24,6 +25,7 @@ export class LightboxStage<T extends MediaItem> {
   public readonly image: Readable<ImageBitmap | undefined>;
   public readonly gif: Readable<HTMLImageElement | undefined>;
   public readonly video: Readable<HTMLVideoElement | undefined>;
+  public readonly mediaSize: Readable<ZoomSize | undefined>;
   private readonly videoPool: LightboxVideoPool;
   private readonly volume: Preference<number>;
   private readonly muted: Preference<boolean>;
@@ -54,6 +56,15 @@ export class LightboxStage<T extends MediaItem> {
     this.image = showCurrent(bitmapCache, currentItem);
     this.gif = showCurrent(gifCache, currentItem);
     this.video = showCurrent(videoCache, currentItem);
+    this.mediaSize = computed(() => {
+      const image = this.image.value;
+      const gif = this.gif.value;
+
+      if (image !== undefined) {
+        return { width: image.width, height: image.height };
+      }
+      return gif === undefined ? undefined : { width: gif.naturalWidth, height: gif.naturalHeight };
+    });
     effect(() => bitmapCache.retain(retainedItems.value));
     effect(() => gifCache.retain(retainedItems.value));
     effect(() => videoCache.retain(retainedItems.value));

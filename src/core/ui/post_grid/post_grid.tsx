@@ -1,7 +1,7 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
-import { KeyedList } from "@/core/ui/post_grid/keyed_list";
+import { KeyedList } from "@/core/ui/h/keyed_list";
 import { Media } from "@/core/domain/media/media";
 import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

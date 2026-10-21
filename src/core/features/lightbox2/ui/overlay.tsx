@@ -9,6 +9,7 @@ export const LightboxOverlayClass = {
 } as const;
 
 export interface LightboxOverlayProps {
+  topEdge?: Child;
   topStart?: Child;
   topEnd?: Child;
   startEdge?: Child;
@@ -29,6 +30,7 @@ export function LightboxOverlay(props: LightboxOverlayProps): HTMLElement {
         {slot(LightboxOverlayClass.slot, props.topStart)}
         {slot(LightboxOverlayClass.slot, props.topEnd)}
       </div>
+      {props.topEdge}
     </div>
   ) as HTMLElement;
 }

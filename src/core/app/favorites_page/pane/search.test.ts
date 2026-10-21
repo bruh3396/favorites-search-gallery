@@ -1,9 +1,10 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
-import { FavoritesPane, FavoritesPaneClass } from "@/core/app/favorites_page/pane";
+import { FavoritesSearch, FavoritesSearchClass } from "@/core/app/favorites_page/pane/search";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
+import { DEFAULT_SEARCH_SETTINGS } from "@/core/features/favorites/search/inputs";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MediaItem } from "@/core/domain/post/post";
@@ -11,7 +12,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Milestone } from "@/core/utils/reactive/milestone";
-import PANE_CSS from "@/core/app/favorites_page/pane.css?inline";
+import SEARCH_CSS from "@/core/app/favorites_page/pane/search.css?inline";
 import { PaginationResult } from "@/core/features/favorites/search/pagination";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
@@ -29,7 +30,7 @@ interface Setup {
   pageNumber: Signal<number>;
   finishedLoading: Milestone;
   visiblePosts: Signal<readonly Favorite[]>;
-  submit: Mock<(query: string) => void>;
+  onSearch: Mock<(query: string) => void>;
   goToPage: Mock<(pageNumber: number) => void>;
   skeleton: HTMLElement;
   onPlainClick: Mock<(post: MediaItem) => void>;
@@ -53,20 +54,19 @@ function setup(): Setup {
   const pageNumber = new Signal(1);
   const finishedLoading = new Milestone();
   const visiblePosts = new Signal<readonly Favorite[]>([]);
-  const submit = vi.fn<(query: string) => void>();
+  const onSearch = vi.fn<(query: string) => void>();
   const goToPage = vi.fn<(pageNumber: number) => void>();
   const onPlainClick = vi.fn<(post: MediaItem) => void>();
   const favorites = { hydrated: new Emitter<Favorite>() };
   const preferences = createAppPreferences(new MemoryLocalKeyedValues());
   const session = {
-    settings: preferences.favoritesSearch,
+    settings: new Signal(DEFAULT_SEARCH_SETTINGS),
     results: searchResults,
     paginationResult: computed(() => paginateByTwo(searchResults.value, pageNumber.value)),
-    submit,
     goToPage
   };
   const gridPreferences = pickPostGridPreferences(preferences);
-  const { result: element, dispose } = render(document, () => h(FavoritesPane, {
+  const { result: element, dispose } = render(document, () => h(FavoritesSearch, {
     favorites,
     session,
     scrollTo: new Emitter<Favorite>(),
@@ -81,12 +81,13 @@ function setup(): Setup {
     scheduler: new MemoryScheduler(),
     resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
     getPostUrl: post => `https://posts/${post.id}`,
+    onSearch,
     onPlainClick,
     onCtrlClick: doNothing,
     onPointerEnter: doNothing
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${SkeletonGridClass.root}`)!;
-  return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onPlainClick };
+  return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, onSearch, goToPage, skeleton, onPlainClick };
 }
 
 function queryFavoriteLink(element: HTMLElement): HTMLAnchorElement {
@@ -100,9 +101,13 @@ function readShownFavoriteUrls(element: HTMLElement): string[] {
   });
 }
 
-describe("FavoritesPane", () => {
+function readCount(element: HTMLElement): string {
+  return element.querySelector(`.${FavoritesSearchClass.count}`)!.textContent!;
+}
+
+describe("FavoritesSearch", () => {
   test("styles every class it sets", () => {
-    expectClassesStyled(FavoritesPaneClass, PANE_CSS);
+    expectClassesStyled(FavoritesSearchClass, SEARCH_CSS);
   });
 
   test("shows the skeleton until the first favorites arrive", () => {
@@ -120,13 +125,40 @@ describe("FavoritesPane", () => {
     expect(skeleton.hidden).toBe(true);
   });
 
-  test("searches what is submitted in the search box", () => {
-    const { element, submit } = setup();
+  test("reports what is submitted in the search box", () => {
+    const { element, onSearch } = setup();
     const input = element.querySelector("input[type=search]") as HTMLInputElement;
 
     input.value = "cat";
     input.form!.dispatchEvent(new Event("submit"));
-    expect(submit).toHaveBeenCalledExactlyOnceWith("cat");
+    expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
+  });
+
+  test("counts the results while favorites load", () => {
+    const { element, searchResults } = setup();
+
+    searchResults.value = ["1", "2", "3"].map(createFavorite);
+    expect(readCount(element)).toBe("3 results");
+  });
+
+  test("shows the count inside the search field", () => {
+    const { element } = setup();
+
+    expect(element.querySelector("search form")!.contains(element.querySelector(`.${FavoritesSearchClass.count}`))).toBe(true);
+  });
+
+  test("formats a large number of results", () => {
+    const { element, searchResults } = setup();
+
+    searchResults.value = Array.from({ length: 1_200 }, (_, index) => createFavorite(String(index + 1)));
+    expect(readCount(element)).toBe(`${(1_200).toLocaleString()} results`);
+  });
+
+  test("counts a single result in the singular", () => {
+    const { element, searchResults } = setup();
+
+    searchResults.value = [createFavorite("1")];
+    expect(readCount(element)).toBe("1 result");
   });
 
   test("reports the favorite whose tile is clicked", () => {

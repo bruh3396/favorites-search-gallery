@@ -1,4 +1,3 @@
-import { DEFAULT_SEARCH_SETTINGS, SEARCH_SETTINGS_GUARDS, SearchSettings } from "@/core/features/favorites/search/inputs";
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/tiler";
 import { Preference, PreferenceStorage, Preferences, createPreferences, definePreference, defineRecordPreference } from "@/core/utils/reactive/preference";
 import { isBoolean, isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
@@ -9,7 +8,6 @@ export interface AppPreferenceValues {
   readonly postGridSize: number;
   readonly postGridUpscale: boolean;
   readonly favoritesPagination: PaginationSettings;
-  readonly favoritesSearch: SearchSettings;
   readonly lightboxVolume: number;
   readonly lightboxMuted: boolean;
 }
@@ -31,7 +29,6 @@ export function createAppPreferences(storage: PreferenceStorage): AppPreferences
       { size: 50, infiniteScroll: false },
       { size: isPageSize, infiniteScroll: isBoolean }
     ),
-    favoritesSearch: defineRecordPreference(DEFAULT_SEARCH_SETTINGS, SEARCH_SETTINGS_GUARDS),
     lightboxVolume: definePreference(1, isInUnitInterval),
     lightboxMuted: definePreference(false)
   }, storage);

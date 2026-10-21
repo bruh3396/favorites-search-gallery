@@ -1,0 +1,47 @@
+@layer components {
+  .fsg-FavoritesSearch {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .fsg-FavoritesSearch-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+  .fsg-FavoritesSearch-search {
+    display: flex;
+    flex: 1 1 240px;
+    min-inline-size: 0;
+  }
+
+  .fsg-FavoritesSearch-count {
+    display: flex;
+    flex: none;
+    align-items: center;
+    margin-block: 8px;
+    padding: 0 16px 0 12px;
+    border-inline-start: 1px solid var(--fsg-color-outline);
+    color: var(--fsg-color-on-surface-muted);
+    white-space: nowrap;
+    font-size: var(--fsg-font-size-label);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fsg-FavoritesSearch-body {
+    flex: 1 1 0;
+    min-block-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .fsg-FavoritesSearch-footer {
+    display: flex;
+    justify-content: center;
+  }
+}

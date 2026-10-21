@@ -11,14 +11,16 @@ export interface LightboxButtonProps {
   icon: Reactive<LightboxIcon>;
   label: string;
   pressed?: Readable<boolean>;
+  disabled?: Reactive<boolean>;
   onClick: () => void;
 }
 
-export function LightboxButton({ icon, label, pressed, onClick }: LightboxButtonProps): HTMLElement {
+export function LightboxButton({ icon, label, pressed, disabled = false, onClick }: LightboxButtonProps): HTMLElement {
   const button = (
     <button
       className={LightboxButtonClass.root}
       type="button"
+      disabled={disabled}
       aria-label={label}
       aria-pressed={pressed === undefined ? null : computed(() => String(pressed.value))}
       title={label}

@@ -1,17 +1,30 @@
 .fsg-SearchBox {
   display: block;
   flex: 1 1 auto;
-  max-inline-size: 480px;
+}
+
+.fsg-SearchBox-field {
+  display: flex;
+  align-items: stretch;
+  box-sizing: border-box;
+  block-size: var(--fsg-control-size-large);
+  overflow: hidden;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-full);
+  background: var(--fsg-color-surface-sunken);
+}
+
+.fsg-SearchBox-field:focus-within {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
 }
 
 .fsg-SearchBox-input {
-  box-sizing: border-box;
-  inline-size: 100%;
-  block-size: var(--fsg-control-size-medium);
-  padding: 0 10px;
-  border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-medium);
-  background: var(--fsg-color-surface-sunken);
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  padding: 0 16px;
+  border: 0;
+  background: none;
   color: inherit;
   font: inherit;
   font-size: var(--fsg-font-size-label);
@@ -22,6 +35,5 @@
 }
 
 .fsg-SearchBox-input:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
-  outline-offset: 1px;
+  outline: none;
 }

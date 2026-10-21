@@ -28,15 +28,18 @@ export class TabManager<T> {
     return this.currentActiveId;
   }
 
-  public open(id: string, value: T, { closable = true }: TabOptions = {}): void {
+  public open(id: string, value: T, { closable = true }: TabOptions = {}): Tab<T> {
     if (this.currentTabs.peek().some(tab => tab.id === id)) {
       throw new Error(`Tab already exists: ${id}`);
     }
-    this.currentTabs.value = [...this.currentTabs.peek(), { id, value, closable }];
+    const tab = { id, value, closable };
+
+    this.currentTabs.value = [...this.currentTabs.peek(), tab];
 
     if (this.currentActiveId.peek() === null) {
       this.currentActiveId.value = id;
     }
+    return tab;
   }
 
   public activate(id: string): void {

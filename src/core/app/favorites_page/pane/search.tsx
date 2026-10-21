@@ -16,16 +16,18 @@ import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 
-export const FavoritesPaneClass = {
-  root: "fsg-FavoritesPane",
-  header: "fsg-FavoritesPane-header",
-  search: "fsg-FavoritesPane-search",
-  pagination: "fsg-FavoritesPane-pagination"
+export const FavoritesSearchClass = {
+  root: "fsg-FavoritesSearch",
+  header: "fsg-FavoritesSearch-header",
+  search: "fsg-FavoritesSearch-search",
+  count: "fsg-FavoritesSearch-count",
+  body: "fsg-FavoritesSearch-body",
+  footer: "fsg-FavoritesSearch-footer"
 } as const;
 
-export interface FavoritesPaneProps {
+export interface FavoritesSearchProps {
   favorites: Pick<FavoritesService, "hydrated">;
-  session: Pick<FavoritesSearchSession, "settings" | "results" | "paginationResult" | "submit" | "goToPage">;
+  session: Pick<FavoritesSearchSession, "settings" | "results" | "paginationResult" | "goToPage">;
   scrollTo: Occurrence<Favorite>;
   tileLocator: TileLocator<Favorite>;
   finishedLoading: Fact;
@@ -39,30 +41,33 @@ export interface FavoritesPaneProps {
   scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl: (post: MediaItem) => string;
+  onSearch: (query: string) => void;
   onPlainClick: (post: Favorite) => void;
   onCtrlClick: (post: Favorite) => void;
   onPointerEnter: (post: Favorite) => void;
 }
 
-export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
+export function FavoritesSearch(props: FavoritesSearchProps): HTMLElement {
   const { favorites, session, scrollTo, tileLocator, finishedLoading,
     skeletonDimensions, gridPreferences: { layout, size }, visiblePosts, skeletonItemCount,
-    visibilityObserver, decodeStill, scheduler, resolvePreviewUrl, getPostUrl, onPlainClick, onCtrlClick, onPointerEnter } = props;
+    visibilityObserver, decodeStill, scheduler, resolvePreviewUrl, getPostUrl, onSearch, onPlainClick, onCtrlClick, onPointerEnter } = props;
   return (
-    <section className={FavoritesPaneClass.root}>
-      <header className={FavoritesPaneClass.header}>
-        <div className={FavoritesPaneClass.search}>
-          <SearchBox label="Search favorites" query={computed(() => session.settings.value.query)} onSearch={query => session.submit(query)} />
-        </div>
-        <div className={FavoritesPaneClass.pagination}>
-          <Paginator
-            pageNumber={computed(() => session.paginationResult.value.pageNumber)}
-            pageCount={computed(() => session.paginationResult.value.totalPages)}
-            onPageChange={pageNumber => session.goToPage(pageNumber)}
+    <section className={FavoritesSearchClass.root}>
+      <header className={FavoritesSearchClass.header}>
+        <div className={FavoritesSearchClass.search}>
+          <SearchBox
+            label="Search favorites"
+            query={computed(() => session.settings.value.query)}
+            trailing={
+              <span className={FavoritesSearchClass.count}>
+                {computed(() => describeResultCount(session.paginationResult.value.totalResults))}
+              </span>
+            }
+            onSearch={onSearch}
           />
         </div>
       </header>
-      <div>
+      <div className={FavoritesSearchClass.body}>
         <SkeletonGrid
           isShown={computed(() => !finishedLoading.reached && session.results.value.length === 0)}
           dimensions={skeletonDimensions}
@@ -90,6 +95,17 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
           onPointerEnter={onPointerEnter}
         />
       </div>
+      <footer className={FavoritesSearchClass.footer}>
+        <Paginator
+          pageNumber={computed(() => session.paginationResult.value.pageNumber)}
+          pageCount={computed(() => session.paginationResult.value.totalPages)}
+          onPageChange={pageNumber => session.goToPage(pageNumber)}
+        />
+      </footer>
     </section>
   );
+}
+
+function describeResultCount(count: number): string {
+  return count === 1 ? "1 result" : `${count.toLocaleString()} results`;
 }

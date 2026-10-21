@@ -14,8 +14,9 @@
   outline: none;
 }
 
-.fsg-LightboxDialog[data-idle] {
-  cursor: none;
+.fsg-LightboxDialog[data-idle],
+.fsg-LightboxDialog[data-idle] * {
+  cursor: none !important;
 }
 
 .fsg-LightboxDialog[data-idle] .fsg-LightboxOverlay {

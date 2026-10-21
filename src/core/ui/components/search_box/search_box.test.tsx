@@ -11,8 +11,8 @@ interface Setup {
   onSearch: (query: string) => void;
 }
 
-function setup(): Setup {
-  const options = { label: "Search favorites", query: new Signal(""), onSearch: vi.fn() };
+function setup(trailing?: HTMLElement): Setup {
+  const options = { label: "Search favorites", query: new Signal(""), trailing, onSearch: vi.fn() };
   const { result: element } = render(document, () => <SearchBox {...options} />);
 
   document.body.append(element);
@@ -58,6 +58,13 @@ describe("SearchBox", () => {
     type(input, "");
     submit(input);
     expect(onSearch).toHaveBeenLastCalledWith("");
+  });
+
+  test("shows trailing content inside the field", () => {
+    const trailing = document.createElement("span");
+    const { input } = setup(trailing);
+
+    expect(input.form!.contains(trailing)).toBe(true);
   });
 
   test("styles every class it sets", () => {

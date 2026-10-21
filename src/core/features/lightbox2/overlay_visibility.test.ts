@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox2/overlay_visibility";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 
-const IDLE_DELAY = 2_000;
+const IDLE_DELAY = 750;
 const LEAVE_DELAY = 1_000;
 
 function setup(): { visibility: LightboxOverlayVisibility; scheduler: MemoryScheduler } {

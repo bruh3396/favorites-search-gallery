@@ -16,4 +16,6 @@
 @import "./components/progress_line/progress_line.css" layer(components);
 @import "./components/paginator/paginator.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
+@import "./components/tab_strip/tab_strip.css" layer(components);
+@import "./components/tabs/tabs.css" layer(components);
 @import "./components/slider/slider.css" layer(components);

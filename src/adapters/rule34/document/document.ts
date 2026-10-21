@@ -108,6 +108,7 @@ export class Rule34Document {
 
   public clearNativePage(): void {
     removeNativeContent();
+    removeHeaderMargin();
     removeUnusedScripts();
     releaseUnusedGlobals();
   }
@@ -165,6 +166,14 @@ function removeNativeContent(): void {
 
   if (content !== null) {
     purgeNativeContent(content);
+  }
+}
+
+function removeHeaderMargin(): void {
+  const header = document.querySelector<HTMLElement>(HEADER_SELECTOR);
+
+  if (header !== null) {
+    header.style.marginBottom = "0";
   }
 }
 

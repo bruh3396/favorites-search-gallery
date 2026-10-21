@@ -287,6 +287,13 @@ describe("Rule34Document", () => {
       expect(content.attributes).toHaveLength(0);
     });
 
+    test("removes the margin below the site's header", () => {
+      const header = addHeader();
+
+      new Rule34Document().clearNativePage();
+      expect(header.style.marginBottom).toBe("0px");
+    });
+
     test("does nothing to content when the page has none", () => {
       expect(() => new Rule34Document().clearNativePage()).not.toThrow();
     });

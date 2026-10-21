@@ -1,7 +1,7 @@
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, effect } from "@/core/utils/reactive/signal";
 import { createScope, onCleanup } from "@/core/utils/reactive/scope";
-import { KeyedList } from "@/core/ui/post_grid/keyed_list";
+import { KeyedList } from "@/core/ui/h/keyed_list";
 
 interface Item {
   id: string;

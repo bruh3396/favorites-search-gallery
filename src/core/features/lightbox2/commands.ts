@@ -1,3 +1,4 @@
-export type LightboxCommand = "showNext" | "showPrevious" | "togglePause" | "toggleMute" | "toggleFullscreen" | "download" | "openPostPage" | "close";
+export type LightboxCommand = "showNext" | "showPrevious" | "toggleAutoplay" | "togglePause" | "toggleMute" |
+"toggleFullscreen" | "toggleZoom" | "dismiss" | "download" | "openPostPage" | "openOriginal" | "close";
 
-export type LightboxCommands = Readonly<Record<LightboxCommand, () => void>>;
+export type LightboxCommandHandlers = Readonly<Record<LightboxCommand, () => void>>;

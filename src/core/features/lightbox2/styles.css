@@ -3,7 +3,12 @@
 @import "./ui/image.css" layer(components);
 @import "./ui/gif.css" layer(components);
 @import "./ui/video.css" layer(components);
+@import "./ui/viewport.css" layer(components);
 @import "./ui/overlay.css" layer(components);
+@import "./ui/toolbar.css" layer(components);
 @import "./ui/button.css" layer(components);
 @import "./ui/arrow.css" layer(components);
 @import "./ui/position.css" layer(components);
+@import "./ui/zoom_chip.css" layer(components);
+@import "./ui/minimap.css" layer(components);
+@import "./ui/autoplay_bar.css" layer(components);

@@ -1,4 +1,4 @@
-import { createSkeletonDimensions, measureSkeletonDimensions } from "@/core/app/favorites_page/skeleton_dimensions";
+import { createSkeletonDimensions, measureSkeletonDimensions } from "@/core/app/favorites_page/storage/skeleton_dimensions";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
 import { Favorite } from "@/core/features/favorites/favorite";

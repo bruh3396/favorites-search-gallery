@@ -1,4 +1,4 @@
-import { Workspace, restoreWorkspace, persistWorkspace } from "@/core/app/favorites_page/workspace";
+import { Workspace, persistWorkspace, restoreWorkspace } from "@/core/app/favorites_page/workspace/stored_workspace";
 import { describe, expect, test } from "vitest";
 import { DEFAULT_SEARCH_SETTINGS } from "@/core/features/favorites/search/inputs";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";

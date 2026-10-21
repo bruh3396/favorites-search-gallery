@@ -22,6 +22,12 @@ describe("TabManager", () => {
       ]);
     });
 
+    test("returns the tab it opened", () => {
+      const manager = new TabManager<string>({ dispose: vi.fn() });
+
+      expect(manager.open("first", "search one", { closable: false })).toEqual({ id: "first", value: "search one", closable: false });
+    });
+
     test("rejects a duplicate ID without replacing or disposing the existing tab", () => {
       const dispose = vi.fn();
       const manager = new TabManager<string>({ dispose });
