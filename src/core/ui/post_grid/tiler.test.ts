@@ -35,7 +35,7 @@ describe("arrangeTiles", () => {
     const [first, second] = root.children;
 
     expect(root.children).toHaveLength(2);
-    expect(first.className).toBe(TilerClass.column);
+    expect(first.classList.contains(TilerClass.column)).toBe(true);
     expect([...first.children]).toEqual([tiles[0], tiles[2], tiles[4]]);
     expect([...second.children]).toEqual([tiles[1], tiles[3]]);
   });

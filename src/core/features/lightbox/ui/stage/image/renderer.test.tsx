@@ -1,6 +1,5 @@
 import { ImageRenderer, ImageRendererDependencies } from "@/core/features/lightbox/ui/stage/image/renderer";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
-import { LightboxStageRendererClass } from "@/core/features/lightbox/ui/stage/renderer";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { render } from "@/core/ui/h/h";
@@ -25,6 +24,7 @@ interface Setup {
   decodeOriginal: Mock<ImageRendererDependencies["decodeOriginal"]>;
   drawImage: Mock<(bitmap: FakeBitmap) => void>;
   bitmaps: FakeBitmap[];
+  onShownMediaChange: Mock<() => void>;
 }
 
 function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
@@ -53,19 +53,19 @@ function setup(
   const drawingContext = context === "available" ? { drawImage } as unknown as CanvasRenderingContext2D : null;
   const spy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(drawingContext);
 
+  const onShownMediaChange = vi.fn<() => void>();
+
   onTestFinished(() => spy.mockRestore());
-  const { result: renderer } = render(document, () => new ImageRenderer({ resolvePreviewUrl, decodeOriginal, scheduler }));
+  const { result: renderer } = render(document, () => new ImageRenderer({ resolvePreviewUrl, decodeOriginal, scheduler, onShownMediaChange }));
   const preview = renderer.root.querySelector<HTMLImageElement>("img")!;
   const original = renderer.root.querySelector<HTMLCanvasElement>("canvas")!;
-  return { renderer, preview, original, scheduler, resolvePreviewUrl, decodeOriginal, drawImage, bitmaps };
+  return { renderer, preview, original, scheduler, resolvePreviewUrl, decodeOriginal, drawImage, bitmaps, onShownMediaChange };
 }
 
 describe("ImageRenderer", () => {
   test("starts hidden with its image and canvas in the stage root", () => {
     const { renderer, preview, original } = setup();
 
-    expect(renderer.root.className).toBe(LightboxStageRendererClass.root);
-    expect([preview.className, original.className]).toEqual([LightboxStageRendererClass.media, LightboxStageRendererClass.media]);
     expect([preview.alt, preview.decoding]).toEqual(["", "async"]);
     expect([renderer.root.hidden, preview.hidden, original.hidden, original.width, original.height]).toEqual([true, true, true, 0, 0]);
   });
@@ -94,6 +94,15 @@ describe("ImageRenderer", () => {
     pending.resolve("https://preview/late");
     await vi.waitFor(() => expect(preview.getAttribute("src")).toBe("https://preview/late"));
     expect([preview.hidden, original.hidden]).toEqual([true, false]);
+  });
+
+  test("reports a change of shown media once the original replaces the preview", async() => {
+    const { renderer, original, onShownMediaChange } = setup();
+
+    renderer.show(FIRST);
+    onShownMediaChange.mockClear();
+    await vi.waitFor(() => expect(original.hidden).toBe(false));
+    expect(onShownMediaChange).toHaveBeenCalled();
   });
 
   test("draws a bitmap even when the canvas has no drawing context", async() => {

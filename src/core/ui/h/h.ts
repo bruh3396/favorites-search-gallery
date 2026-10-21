@@ -30,6 +30,10 @@ export function render<T>(ownerDocument: Document, build: () => T): Scoped<T> {
   });
 }
 
+export function currentDocument(): Document {
+  return DocumentContext.read();
+}
+
 export type Component<P> = (props: P) => HTMLElement;
 
 export function h<P>(component: Component<P>, props: P): HTMLElement;

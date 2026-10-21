@@ -1,22 +1,10 @@
 import { RATINGS, getRatingBit } from "@/core/domain/post/post";
 import { describe, expect, test } from "vitest";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
-import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { createPost } from "@/testing/post";
 
-function spyOnCachedTags(arena: FavoritesArena): Map<number, ReadonlySet<string>> {
-  const cached = new Map<number, ReadonlySet<string>>();
-  const cacheTags = arena.cacheTags.bind(arena);
-
-  arena.cacheTags = (slot, tags): void => {
-    cached.set(slot, tags);
-    cacheTags(slot, tags);
-  };
-  return cached;
-}
-
-describe("FavoritesArenaFavorite", () => {
+describe("ArenaFavorite", () => {
   test("allocates its own slot and writes the post into it", () => {
     const arena = new FavoritesColumnarArena();
 
@@ -27,14 +15,6 @@ describe("FavoritesArenaFavorite", () => {
     expect(favorite.id).toBe("42");
     expect(favorite.tags).toEqual(new Set(["apple", "banana"]));
     expect(favorite.getMetric("score")).toBe(99);
-  });
-
-  test("caches its parsed tags on construction", () => {
-    const arena = new FavoritesColumnarArena();
-    const cached = spyOnCachedTags(arena);
-
-    new ArenaFavorite(createPost({ id: "1", tags: "apple" }), arena);
-    expect(cached.get(0)).toEqual(new Set(["apple"]));
   });
 
   test("reads media and the new flag from the arena", () => {

@@ -26,11 +26,11 @@ export function findFirstIndexWhere(length: number, satisfiedAt: (index: number)
   return low;
 }
 
-export function getItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
+export function getItemsAround<V>(array: readonly V[], startIndex: number, limit: number): V[] {
   return getValuesAround(startIndex, limit, { isInBounds: index => isIndexInBounds(array, index), at: index => array[index] });
 }
 
-export function getWrappedItemsAround<V>(array: V[], startIndex: number, limit: number): V[] {
+export function getWrappedItemsAround<V>(array: readonly V[], startIndex: number, limit: number): V[] {
   if (!isIndexInBounds(array, startIndex) || limit === 0) {
     return [];
   }

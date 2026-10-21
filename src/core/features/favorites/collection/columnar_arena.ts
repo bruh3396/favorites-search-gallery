@@ -1,15 +1,13 @@
 import { Metric, Post } from "@/core/domain/post/post";
-import { FavoritesArena } from "@/core/features/favorites/collection/arena";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/post_table";
 import { Media } from "@/core/domain/media/media";
 import { TagPool } from "@/core/utils/collection/tag_pool";
 import { toTagSet } from "@/core/domain/tag/tag";
 
-export class FavoritesColumnarArena implements FavoritesArena {
+export class FavoritesColumnarArena {
   private count = 0;
   private readonly postTable = new FavoritesPostTable();
   private readonly tagPool = new TagPool();
-  private readonly cachedTags = new Map<number, ReadonlySet<string>>();
   private readonly newSlots = new Set<number>();
 
   public allocate(): number {
@@ -22,14 +20,12 @@ export class FavoritesColumnarArena implements FavoritesArena {
   public write(slot: number, post: Post): void {
     this.postTable.write(slot, post);
     this.tagPool.write(slot, post.tags);
-    this.cachedTags.delete(slot);
   }
 
   public compact(): void {
     this.postTable.trim(this.count);
     this.tagPool.trim(this.count);
     this.tagPool.compact();
-    this.cachedTags.clear();
   }
 
   public getPost(slot: number): Post {
@@ -53,7 +49,7 @@ export class FavoritesColumnarArena implements FavoritesArena {
   }
 
   public getTags(slot: number): ReadonlySet<string> {
-    return this.cachedTags.get(slot) ?? toTagSet(this.tagPool.read(slot));
+    return toTagSet(this.tagPool.read(slot));
   }
 
   public isNew(slot: number): boolean {
@@ -62,13 +58,5 @@ export class FavoritesColumnarArena implements FavoritesArena {
 
   public markNew(slot: number): void {
     this.newSlots.add(slot);
-  }
-
-  public cacheTags(slot: number, tags: ReadonlySet<string>): void {
-    this.cachedTags.set(slot, tags);
-  }
-
-  public clearTagCache(): void {
-    this.cachedTags.clear();
   }
 }

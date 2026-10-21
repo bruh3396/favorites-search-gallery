@@ -1,17 +1,16 @@
 import { Metric, Post } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoritesArena } from "@/core/features/favorites/collection/arena";
+import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { Media } from "@/core/domain/media/media";
 
 export class ArenaFavorite implements Favorite {
   public readonly slot: number;
-  private readonly arena: FavoritesArena;
+  private readonly arena: FavoritesColumnarArena;
 
-  constructor(post: Post, arena: FavoritesArena) {
+  constructor(post: Post, arena: FavoritesColumnarArena) {
     this.arena = arena;
     this.slot = arena.allocate();
     arena.write(this.slot, post);
-    arena.cacheTags(this.slot, this.tags);
   }
 
   public get numericId(): number {

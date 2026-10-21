@@ -1,0 +1,31 @@
+.fsg-ProgressLine {
+  position: relative;
+  block-size: 2px;
+  overflow: hidden;
+}
+
+.fsg-ProgressLine-bar {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: calc(var(--fsg-ProgressLine-fraction) * 100%);
+  background: var(--fsg-color-accent);
+  transition: inline-size var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-ProgressLine:not([aria-valuenow]) .fsg-ProgressLine-bar {
+  inline-size: 22%;
+  animation: fsg-ProgressLine-sweep 1.6s ease-in-out infinite;
+}
+
+@keyframes fsg-ProgressLine-sweep {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(455%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fsg-ProgressLine:not([aria-valuenow]) .fsg-ProgressLine-bar {
+    inset-inline-start: 39%;
+    animation: none;
+  }
+}

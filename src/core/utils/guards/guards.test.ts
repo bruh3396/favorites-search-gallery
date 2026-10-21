@@ -1,4 +1,4 @@
-import { assertNever, hasFields, isBoolean, isNumber, isOneOf, isRecord, oneOf, sameKindAs } from "@/core/utils/guards/guards";
+import { assertNever, hasFields, isBoolean, isInUnitInterval, isNumber, isOneOf, isRecord, oneOf, sameKindAs } from "@/core/utils/guards/guards";
 import { describe, expect, test } from "vitest";
 
 describe("isNumber", () => {
@@ -10,6 +10,12 @@ describe("isNumber", () => {
 describe("isBoolean", () => {
   test("accepts only booleans", () => {
     expect([false, 0, "true"].map(isBoolean)).toEqual([true, false, false]);
+  });
+});
+
+describe("isInUnitInterval", () => {
+  test("accepts only numbers from zero to one", () => {
+    expect([0, 0.5, 1, -0.1, 1.1, NaN, Infinity, "0.5"].map(isInUnitInterval)).toEqual([true, true, true, false, false, false, false, false]);
   });
 });
 

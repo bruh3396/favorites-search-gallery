@@ -1,4 +1,4 @@
-import { Codec, createFieldsCodec, createGuardedCodec, createRecordCodec, createSetCodec } from "@/core/utils/codec/codec";
+import { Codec, createFieldsCodec, createGuardedCodec, createListCodec, createRecordCodec, createSetCodec } from "@/core/utils/codec/codec";
 import { describe, expect, test } from "vitest";
 import { isBoolean, oneOf } from "@/core/utils/guards/guards";
 
@@ -43,8 +43,8 @@ describe("createRecordCodec", () => {
       .toEqual({ main: "red", isMuted: true });
   });
 
-  test("decodes the default from a value that isn't a record", () => {
-    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).decode(undefined)).toEqual(DEFAULT_PALETTE);
+  test("decodes nothing from a value that isn't a record", () => {
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).decode("red")).toBeUndefined();
   });
 
   test("stores only the fields it has a guard for", () => {
@@ -80,5 +80,23 @@ describe("createSetCodec", () => {
     ["an array with a rejected member", ["red", "green"]]
   ])("decodes nothing from %s", (_, stored) => {
     expect(createSetCodec(oneOf(COLORS)).decode(stored)).toBeUndefined();
+  });
+});
+
+describe("createListCodec", () => {
+  test("stores each entry with its codec and decodes them back", () => {
+    const codec = createListCodec(createPaletteCodec());
+    const stored = codec.encode([{ main: "red", other: 1 } as Partial<Palette>, { isMuted: true }]);
+
+    expect(stored).toEqual([{ main: "red" }, { isMuted: true }]);
+    expect(codec.decode(stored)).toEqual([{ main: "red" }, { isMuted: true }]);
+  });
+
+  test("drops an entry its codec rejects and keeps the rest", () => {
+    expect(createListCodec(createGuardedCodec(oneOf(COLORS))).decode(["red", "green", "blue"])).toEqual(["red", "blue"]);
+  });
+
+  test("decodes nothing from a non-array", () => {
+    expect(createListCodec(createGuardedCodec(oneOf(COLORS))).decode({ 0: "red" })).toBeUndefined();
   });
 });

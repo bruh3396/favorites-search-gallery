@@ -1,4 +1,5 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
+import { LightboxSessionPart } from "@/core/features/lightbox/ui/screen/session";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface LightboxOverlayVisibilityConfiguration {
@@ -6,7 +7,7 @@ export interface LightboxOverlayVisibilityConfiguration {
   readonly hideSoonDelay: number;
 }
 
-export class LightboxOverlayVisibility {
+export class LightboxOverlayVisibility implements LightboxSessionPart {
   private readonly shownState = new Signal(false);
   private isHeld = false;
   private cancelHide: (() => void) | undefined;
@@ -15,6 +16,14 @@ export class LightboxOverlayVisibility {
 
   public get shown(): Readable<boolean> {
     return this.shownState;
+  }
+
+  public start(): void {
+    this.show();
+  }
+
+  public stop(): void {
+    this.hide();
   }
 
   public show(): void {

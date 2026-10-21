@@ -8,35 +8,39 @@ import { ListSequence } from "@/core/features/favorites/search/list_sequence";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { SearchExpression } from "@/core/search/expressions/search_expression";
+import { buildSearchRequest } from "@/core/features/favorites/search/request";
 import { clamp } from "@/core/utils/number/number";
 import { haveSameItems } from "@/core/utils/collection/array";
-import { tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
+
+export interface FavoritesSearchSessionConfiguration {
+  readonly searchSettings: SearchSettings;
+}
 
 export interface FavoritesSearchSessionDependencies {
   index: FavoritesSearchIndex;
   blacklist: FavoritesBlacklist;
-  searchSettings: Preference<SearchSettings>;
   paginationSettings: Pick<Preference<PaginationSettings>, "value" | "changed">;
   randomSource: RandomSource;
 }
 
-export type FavoritesSearchSessionSettingDependencies = Pick<FavoritesSearchSessionDependencies, "searchSettings" | "paginationSettings">;
+export type FavoritesSearchSessionSettingDependencies = Pick<FavoritesSearchSessionDependencies, "paginationSettings">;
 
 const SEED_RANGE = 2 ** 32;
 
 export class FavoritesSearchSession {
+  private readonly currentSettings: Signal<SearchSettings>;
   private readonly request: Readable<SearchRequest>;
-  private readonly currentResults: Signal<readonly Favorite[]>;
+  private readonly currentResults = new Signal<readonly Favorite[]>([]);
   private readonly pageNumber = new Signal(1);
   private readonly currentPagination: Readable<PaginationResult>;
   private readonly stopListening: Array<() => void>;
+  private hasStarted = false;
 
-  constructor(private readonly dependencies: FavoritesSearchSessionDependencies) {
-    const { index, searchSettings, paginationSettings } = dependencies;
+  constructor(configuration: FavoritesSearchSessionConfiguration, private readonly dependencies: FavoritesSearchSessionDependencies) {
+    const { index, paginationSettings } = dependencies;
 
-    this.request = computed(() => this.buildRequest(searchSettings.value));
-    this.currentResults = new Signal(index.search(this.request.peek()));
+    this.currentSettings = new Signal(configuration.searchSettings);
+    this.request = computed(() => buildSearchRequest(this.currentSettings.value, dependencies.blacklist));
     const pagination = computed(() => paginate(paginationSettings.value, this.currentResults.value, this.pageNumber.value));
     const pageFavorites = computed(() => pagination.value.favorites, { equals: haveSameItems });
 
@@ -51,7 +55,7 @@ export class FavoritesSearchSession {
   }
 
   public get settings(): Readable<SearchSettings> {
-    return this.dependencies.searchSettings;
+    return this.currentSettings;
   }
 
   public get results(): Readable<readonly Favorite[]> {
@@ -66,12 +70,19 @@ export class FavoritesSearchSession {
     return new ListSequence<Favorite>({ wraps: !this.dependencies.paginationSettings.value.infiniteScroll }, this.results);
   }
 
+  public start(): void {
+    if (!this.hasStarted) {
+      this.hasStarted = true;
+      this.refresh();
+    }
+  }
+
   public submit(query: string): void {
     this.run({ query, isShuffled: false });
   }
 
   public invert(): void {
-    this.run({ isInverted: !this.dependencies.searchSettings.peek().isInverted });
+    this.run({ isInverted: !this.currentSettings.peek().isInverted });
   }
 
   public shuffle(): void {
@@ -80,7 +91,7 @@ export class FavoritesSearchSession {
 
   public updateSettings(change: Partial<SearchSettings>): void {
     const sortWasChanged = change.sortKey !== undefined || change.isSortAscending !== undefined;
-    const isShuffled = this.dependencies.searchSettings.peek().isShuffled && !sortWasChanged;
+    const isShuffled = this.currentSettings.peek().isShuffled && !sortWasChanged;
 
     this.run({ ...change, isShuffled });
   }
@@ -104,41 +115,29 @@ export class FavoritesSearchSession {
   }
 
   private run(change: Partial<SearchSettings>): void {
-    const { searchSettings } = this.dependencies;
-
     batch(() => {
-      searchSettings.set({ ...searchSettings.peek(), ...change });
+      this.currentSettings.value = { ...this.currentSettings.peek(), ...change };
       this.refresh();
       this.pageNumber.value = 1;
     });
   }
 
   private refresh(): void {
-    this.currentResults.value = this.dependencies.index.search(this.request.peek());
+    if (this.hasStarted) {
+      this.currentResults.value = this.dependencies.index.search(this.request.peek());
+    }
   }
 
   private append(favorites: readonly Favorite[]): void {
+    if (!this.hasStarted) {
+      return;
+    }
     const matched = this.dependencies.index.match(this.request.peek(), favorites);
 
     if (matched.length > 0) {
       // eslint-disable-next-line unicorn/prefer-spread
       this.currentResults.value = this.currentResults.peek().concat(matched);
     }
-  }
-
-  private buildRequest(settings: SearchSettings): SearchRequest {
-    const { sortKey, isSortAscending, allowedRatings, isShuffled, shuffleSeed } = settings;
-    return { expression: this.buildExpression(settings), sortKey, isSortAscending, allowedRatings, isShuffled, shuffleSeed };
-  }
-
-  private buildExpression(settings: SearchSettings): SearchExpression | undefined {
-    const search = tryParseSearchExpression(settings.query);
-
-    if (search === undefined) {
-      return undefined;
-    }
-    const matches = settings.isInverted ? SearchExpression.not(search) : search;
-    return this.dependencies.blacklist.apply(matches, settings);
   }
 
   private drawSeed(): number {

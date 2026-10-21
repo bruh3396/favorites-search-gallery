@@ -1,4 +1,4 @@
-import { FavoritesSearchSession, FavoritesSearchSessionSettingDependencies } from "@/core/features/favorites/search/session";
+import { FavoritesSearchSession } from "@/core/features/favorites/search/session";
 import { FavoritesService, createFavoritesService } from "@/core/features/favorites/favorites";
 import { describe, expect, test } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -65,7 +65,7 @@ async function setup(posts: Post[], { localIds = [] }: { localIds?: string[] } =
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource([0.25, 0.5])
   });
-  const session = favorites.createSearchSession({ searchSettings: createPreference(createSearchSettings()), paginationSettings });
+  const session = createStartedSession(favorites, paginationSettings);
 
   favorites.hydrated.on(favorite => hydratedIds.push(favorite.id));
   await favorites.load();
@@ -76,8 +76,11 @@ function createPaginationSettings(): Preference<PaginationSettings> {
   return createPreference<PaginationSettings>({ size: 2, infiniteScroll: false });
 }
 
-function createSessionSettings(): FavoritesSearchSessionSettingDependencies {
-  return { searchSettings: createPreference(createSearchSettings()), paginationSettings: createPaginationSettings() };
+function createStartedSession(favorites: FavoritesService, paginationSettings = createPaginationSettings()): FavoritesSearchSession {
+  const session = favorites.createSearchSession({ searchSettings: createSearchSettings() }, { paginationSettings });
+
+  session.start();
+  return session;
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
@@ -88,7 +91,7 @@ function getResultIds(session: FavoritesSearchSession): string[] {
   return session.results.value.map(favorite => favorite.id);
 }
 
-describe("createFavorites", () => {
+describe("createFavoritesService", () => {
   test("loads the remote favorites and shows them all", async() => {
     const { favorites, session } = await setup(createTaggedPosts("apple", "banana", "cherry"));
 
@@ -105,7 +108,7 @@ describe("createFavorites", () => {
 
   test("searches each session on its own", async() => {
     const { favorites, session } = await setup(createTaggedPosts("apple", "banana", "apple"));
-    const other = favorites.createSearchSession(createSessionSettings());
+    const other = createStartedSession(favorites);
 
     session.submit("apple");
     other.submit("banana");
@@ -115,7 +118,7 @@ describe("createFavorites", () => {
   test("pages each session by its own page size", async() => {
     const { favorites, session } = await setup(createTaggedPosts("a", "a", "a"));
     const paginationSettings = createPaginationSettings();
-    const other = favorites.createSearchSession({ ...createSessionSettings(), paginationSettings });
+    const other = createStartedSession(favorites, paginationSettings);
 
     paginationSettings.set({ size: 3, infiniteScroll: false });
     expect([session.paginationResult.value.totalPages, other.paginationResult.value.totalPages]).toEqual([2, 1]);

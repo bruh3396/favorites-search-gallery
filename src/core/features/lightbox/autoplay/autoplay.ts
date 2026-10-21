@@ -8,7 +8,7 @@ export interface LightboxAutoplayConfiguration {
 
 export interface LightboxAutoplayDependencies {
   current: Readable<MediaItem | undefined>;
-  showNext: () => void;
+  showNext: () => Promise<void>;
   scheduler: Pick<Scheduler, "schedule">;
 }
 
@@ -19,11 +19,18 @@ export interface AutoplayCountdown {
 export class LightboxAutoplay {
   private readonly isPlayingState = new Signal(false);
   private readonly countdownState = new Signal<AutoplayCountdown | undefined>(undefined);
-  private readonly stopEffect: () => void;
+  private readonly stopEffects: readonly (() => void)[];
   private cancelStep: (() => void) | undefined;
 
   constructor(private readonly configuration: LightboxAutoplayConfiguration, private readonly dependencies: LightboxAutoplayDependencies) {
-    this.stopEffect = effect(() => this.scheduleStep(dependencies.current.value, { isPlaying: this.isPlayingState.value }));
+    this.stopEffects = [
+      effect(() => this.scheduleStep(dependencies.current.value, { isPlaying: this.isPlayingState.value })),
+      effect(() => {
+        if (dependencies.current.value === undefined) {
+          this.stop();
+        }
+      })
+    ];
   }
 
   public get isPlaying(): Readable<boolean> {
@@ -38,19 +45,19 @@ export class LightboxAutoplay {
     this.isPlayingState.value = !this.isPlayingState.peek();
   }
 
-  public stop(): void {
-    this.isPlayingState.value = false;
-  }
-
   public showNextAfterVideo(): void {
     if (this.isPlayingState.peek() && this.dependencies.current.peek()?.media.kind === "video") {
-      this.dependencies.showNext();
+      this.showNext();
     }
   }
 
   public dispose(): void {
-    this.stopEffect();
+    this.stopEffects.forEach(stopEffect => stopEffect());
     this.cancelStep?.();
+  }
+
+  private stop(): void {
+    this.isPlayingState.value = false;
   }
 
   private scheduleStep(item: MediaItem | undefined, { isPlaying }: { isPlaying: boolean }): void {
@@ -64,6 +71,10 @@ export class LightboxAutoplay {
     const { interval } = this.configuration;
 
     this.countdownState.value = { duration: interval };
-    this.cancelStep = this.dependencies.scheduler.schedule(() => this.dependencies.showNext(), interval);
+    this.cancelStep = this.dependencies.scheduler.schedule(() => this.showNext(), interval);
+  }
+
+  private showNext(): void {
+    this.dependencies.showNext().catch(console.error);
   }
 }

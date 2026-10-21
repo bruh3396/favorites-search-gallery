@@ -1,10 +1,11 @@
-import { LightboxStage, LightboxStageClass } from "@/core/features/lightbox/ui/stage/stage";
-import { FIT_VIEW } from "@/core/features/lightbox/zoom/zoom";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
+import { FIT_VIEW } from "@/core/features/lightbox/zoom/zoom";
+import { LightboxStage, LightboxStageClass } from "@/core/features/lightbox/ui/stage/stage";
 import { LightboxStageRendererClass } from "@/core/features/lightbox/ui/stage/renderer";
 import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import STAGE_CSS from "@/core/features/lightbox/ui/stage/stage.css?inline";
@@ -37,6 +38,7 @@ interface Setup {
   scheduler: MemoryScheduler;
   decodeOriginal: Mock<RemoteMedia["decodeOriginal"]>;
   resolveOriginalUrl: Mock<RemoteMedia["resolveOriginalUrl"]>;
+  sizeObserver: MemorySizeObserver;
   drawn: () => string[];
   bitmaps: FakeBitmap[];
   readShownMedia: () => MorphSource | undefined;
@@ -78,8 +80,9 @@ function setup(
     return bitmap;
   }));
   const resolveOriginalUrl = vi.fn<RemoteMedia["resolveOriginalUrl"]>(resolveOriginal);
+  const sizeObserver = new MemorySizeObserver();
   const { result: stage } = render(document, () => new LightboxStage({ maxNeighborsPerKind: 15 }, {
-    current, neighbors, warmItems, remoteMedia: { resolvePreviewUrl, resolveOriginalUrl, decodeOriginal }, scheduler
+    current, neighbors, warmItems, remoteMedia: { resolvePreviewUrl, resolveOriginalUrl, decodeOriginal }, scheduler, sizeObserver
   }));
   const result = stage.root;
 
@@ -97,6 +100,7 @@ function setup(
     scheduler,
     decodeOriginal,
     resolveOriginalUrl,
+    sizeObserver,
     bitmaps,
     drawn: () => drawImage.mock.calls.map(([bitmap]) => bitmap.source),
     readShownMedia: () => stage.shownMedia
@@ -397,7 +401,8 @@ describe("LightboxStage", () => {
         resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`${ORIGINAL_ORIGIN}${media.locator}`),
         decodeOriginal
       },
-      scheduler
+      scheduler,
+      sizeObserver: new MemorySizeObserver()
     }));
     const items = Array.from({ length: 6 }, (_, index): MediaItem => ({
       id: `${index}`,
@@ -411,28 +416,51 @@ describe("LightboxStage", () => {
     expect(decodeOriginal.mock.calls.map(([media]) => media.locator)).toEqual(["media/0", "media/2"]);
   });
 
-  describe("measureZoomFrame", () => {
-    test("reports its own size and the shown media's natural size", async() => {
-      const { stage, root, current, original } = setup();
+  describe("frame", () => {
+    test("reports its observed size and the original's size once it replaces the preview", async() => {
+      const { stage, root, current, original, sizeObserver } = setup();
+      const frames = [stage.frame.value];
 
-      Object.defineProperties(root, { clientWidth: { value: 1_000 }, clientHeight: { value: 500 } });
+      sizeObserver.resize(root, { width: 1_000, height: 500 });
+      frames.push(stage.frame.value);
       current.value = FIRST;
       await vi.waitFor(() => expect(original.hidden).toBe(false));
-      expect(stage.measureZoomFrame()).toEqual({ width: 1_000, height: 500, mediaWidth: ORIGINAL_SIZE.width, mediaHeight: ORIGINAL_SIZE.height });
+      frames.push(stage.frame.value);
+      expect(frames).toEqual([
+        { width: 0, height: 0, mediaWidth: 0, mediaHeight: 0 },
+        { width: 1_000, height: 500, mediaWidth: 0, mediaHeight: 0 },
+        { width: 1_000, height: 500, mediaWidth: ORIGINAL_SIZE.width, mediaHeight: ORIGINAL_SIZE.height }
+      ]);
     });
 
-    test("reads the natural size of a preview and a video, and none with nothing shown", () => {
+    test("measures a preview, a GIF, or a video again once it loads", () => {
       const { stage, current, preview, readShownMedia } = setup(() => pendForever());
-      const readMediaSize = (): number[] => [stage.measureZoomFrame().mediaWidth, stage.measureZoomFrame().mediaHeight];
-      const sizes: number[][] = [readMediaSize()];
+      const readMediaSize = (): number[] => [stage.frame.value.mediaWidth, stage.frame.value.mediaHeight];
+      const sizes: number[][] = [];
 
-      Object.defineProperties(preview, { naturalWidth: { value: 300 }, naturalHeight: { value: 200 } });
       current.value = FIRST;
+      Object.defineProperties(preview, { naturalWidth: { value: 300 }, naturalHeight: { value: 200 } });
+      preview.dispatchEvent(new Event("load"));
+      sizes.push(readMediaSize());
+      current.value = { id: "g1", media: { kind: "gif", locator: "gifs/1.gif" } };
+      Object.defineProperties(readShownMedia()!, { naturalWidth: { value: 500 }, naturalHeight: { value: 400 } });
+      readShownMedia()!.dispatchEvent(new Event("load"));
       sizes.push(readMediaSize());
       current.value = FIRST_VIDEO;
       Object.defineProperties(readShownMedia()!, { videoWidth: { value: 640 }, videoHeight: { value: 360 } });
+      readShownMedia()!.dispatchEvent(new Event("loadedmetadata"));
       sizes.push(readMediaSize());
-      expect(sizes).toEqual([[0, 0], [300, 200], [640, 360]]);
+      current.value = undefined;
+      sizes.push(readMediaSize());
+      expect(sizes).toEqual([[300, 200], [500, 400], [640, 360], [0, 0]]);
+    });
+
+    test("stops observing its size once disposed", () => {
+      const { stage, root, sizeObserver } = setup();
+
+      stage.dispose();
+      sizeObserver.resize(root, { width: 1_000, height: 500 });
+      expect(stage.frame.value.width).toBe(0);
     });
   });
 

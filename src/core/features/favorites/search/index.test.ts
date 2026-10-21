@@ -55,10 +55,10 @@ describe("FavoritesSearchIndex", () => {
 
   describe("update", () => {
     test("matches a favorite by its refreshed tags", () => {
-      const { collection, index } = setup(createTaggedPosts("apple"));
-      const refreshed = collection.overwrite(createPost({ id: "1", tags: "banana" }));
+      const { favorites: [favorite], collection, index } = setup(createTaggedPosts("apple"));
 
-      index.update(refreshed === undefined ? [] : [refreshed]);
+      collection.overwrite(createPost({ id: "1", tags: "banana" }));
+      index.update([{ doc: favorite, oldTerms: new Set(["apple"]), newTerms: favorite.tags }]);
       expect(getIds(index.search(createSearchRequest({ query: "banana" })))).toEqual(["1"]);
     });
   });

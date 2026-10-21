@@ -1,0 +1,31 @@
+.fsg-LightboxDialog {
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+}
+
+.fsg-LightboxDialog:focus-visible {
+  outline: none;
+}
+
+.fsg-LightboxDialog[data-idle] {
+  cursor: none;
+}
+
+.fsg-LightboxDialog[data-idle] .fsg-LightboxOverlay {
+  opacity: 0;
+}
+
+.fsg-LightboxDialog[data-idle] .fsg-LightboxOverlay-slot {
+  pointer-events: none;
+}
+
+.fsg-LightboxDialog::backdrop {
+  background: black;
+}

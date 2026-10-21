@@ -20,13 +20,14 @@ export function describeLoadState(state: LoadState): string {
 }
 
 function describeProgress(loadedCount: number, expectedCount: number | null): string {
-  return expectedCount === null ? `${loadedCount}` : `${loadedCount} / ${expectedCount}`;
+  const loaded = loadedCount.toLocaleString();
+  return expectedCount === null ? loaded : `${loaded} / ${expectedCount.toLocaleString()}`;
 }
 
 function describeChanges(pulledCount: number, removedCount: number): string {
   const changes = [
-    pulledCount > 0 ? `${pulledCount} new` : null,
-    removedCount > 0 ? `${removedCount} removed` : null
+    pulledCount > 0 ? `${pulledCount.toLocaleString()} new` : null,
+    removedCount > 0 ? `${removedCount.toLocaleString()} removed` : null
   ].filter(change => change !== null);
   return changes.join(", ");
 }

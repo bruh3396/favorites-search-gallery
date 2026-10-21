@@ -48,7 +48,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [], paint = Pro
     localPosts,
     localTagCategories: new MemoryLocalTagCategories(),
     remotePosts: new MemoryRemotePosts(client),
-    remoteMedia: { fetchDurationSeconds: (): Promise<number> => Promise.resolve(0) },
+    remoteMedia: { probeDurationSeconds: (): Promise<number> => Promise.resolve(0) },
     scheduler: new MemoryScheduler(),
     onRefresh: (post): void => {
       refreshedIds.push(post.id);

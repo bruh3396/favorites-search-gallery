@@ -17,10 +17,11 @@ interface Setup {
   current: Signal<MediaItem | undefined>;
 }
 
-function setup(item: MediaItem | undefined = IMAGE): Setup {
+function setup(item: MediaItem | undefined = IMAGE, frame: ZoomFrame = TALL_FRAME): Setup {
   const current = new Signal<MediaItem | undefined>(item);
   const zoom = new LightboxZoom({ minimumScale: 2 }, { current });
 
+  zoom.setFrame(frame);
   onTestFinished(() => zoom.dispose());
   return { zoom, current };
 }
@@ -40,122 +41,146 @@ describe("LightboxZoom", () => {
     const { zoom } = setup();
     const directions = [zoom.toggleDirection.value];
 
-    zoom.toggle(TALL_FRAME);
+    zoom.toggle();
     directions.push(zoom.toggleDirection.value, setup(VIDEO).zoom.toggleDirection.value);
     expect(directions).toEqual(["in", "out", undefined]);
+  });
+
+  describe("setFrame", () => {
+    test("keeps the view inside a frame that shrinks", () => {
+      const { zoom } = setup(IMAGE, LARGE_FRAME);
+
+      zoom.toggle({ x: 1_000, y: 500 });
+      zoom.setFrame({ ...LARGE_FRAME, width: 500, height: 250 });
+      expect([zoom.view.value.x, zoom.view.value.y, zoom.glides.value]).toEqual([-1_500, -750, false]);
+    });
+
+    test("measures magnification against the media shown now", () => {
+      const { zoom } = setup(IMAGE, LARGE_FRAME);
+
+      zoom.toggle();
+      zoom.setFrame({ ...LARGE_FRAME, mediaWidth: 8_000, mediaHeight: 4_000 });
+      expect(zoom.magnification.value).toBe(0.5);
+    });
+
+    test("zooms out when the frame loses its size", () => {
+      const { zoom } = setup();
+
+      zoom.toggle();
+      zoom.setFrame({ ...TALL_FRAME, width: 0, height: 0 });
+      expect(zoom.isZoomed.value).toBe(false);
+    });
   });
 
   describe("toggle", () => {
     test("zooms to actual pixels, keeping the pointed-at spot under the pointer", () => {
       const { zoom } = setup();
 
-      zoom.toggle(TALL_FRAME, { x: 500, y: 250 });
+      zoom.toggle({ x: 500, y: 250 });
       expect(zoom.view.value.scale).toBe(4);
-      expect(zoom.view.value.x).toBe(500 - 500 * 4);
+      expect(zoom.view.value.x).toBe(500 - (500 * 4));
     });
 
     test("zooms an image smaller than the frame to the minimum scale", () => {
-      const { zoom } = setup();
+      const { zoom } = setup(IMAGE, SMALL_FRAME);
 
-      zoom.toggle(SMALL_FRAME);
+      zoom.toggle();
       expect(zoom.view.value.scale).toBe(2);
     });
 
     test("keeps the image's edges past the frame's edges", () => {
       const { zoom } = setup();
 
-      zoom.toggle(TALL_FRAME, { x: 0, y: 0 });
+      zoom.toggle({ x: 0, y: 0 });
       expect([zoom.view.value.x, zoom.view.value.y]).toEqual([-375 * 4, 0]);
     });
 
     test("zooms back out when zoomed", () => {
       const { zoom } = setup();
 
-      zoom.toggle(TALL_FRAME);
-      zoom.toggle(TALL_FRAME);
+      zoom.toggle();
+      zoom.toggle();
       expect([zoom.view.value, zoom.isZoomed.value]).toEqual([FIT_VIEW, false]);
     });
 
     test("ignores a video, media that hasn't loaded, and a frame with no size", () => {
       const video = setup(VIDEO).zoom;
-      const unloaded = setup().zoom;
-      const unlaidOut = setup().zoom;
+      const unloaded = setup(IMAGE, { ...TALL_FRAME, mediaWidth: 0, mediaHeight: 0 }).zoom;
+      const unlaidOut = setup(IMAGE, { ...TALL_FRAME, width: 0, height: 0 }).zoom;
 
-      video.toggle(TALL_FRAME);
-      unloaded.toggle({ ...TALL_FRAME, mediaWidth: 0, mediaHeight: 0 });
-      unlaidOut.toggle({ ...TALL_FRAME, width: 0, height: 0 });
+      [video, unloaded, unlaidOut].forEach(zoom => zoom.toggle());
       expect([video, unloaded, unlaidOut].map(zoom => zoom.isZoomed.value)).toEqual([false, false, false]);
     });
   });
 
   describe("zoomBy", () => {
     test("scales the view by the factor, keeping the pointed-at spot under the pointer", () => {
-      const { zoom } = setup();
+      const { zoom } = setup(IMAGE, LARGE_FRAME);
 
-      zoom.zoomBy(LARGE_FRAME, 1.5, { x: 0, y: 0 });
-      zoom.zoomBy(LARGE_FRAME, 2, { x: 0, y: 0 });
+      zoom.zoomBy(1.5, { x: 0, y: 0 });
+      zoom.zoomBy(2, { x: 0, y: 0 });
       expect(zoom.view.value).toEqual({ scale: 3, x: 0, y: 0 });
     });
 
     test("stops at twice the scale a toggle zooms to", () => {
-      const { zoom } = setup();
+      const { zoom } = setup(IMAGE, LARGE_FRAME);
 
-      zoom.zoomBy(LARGE_FRAME, 100);
+      zoom.zoomBy(100);
       expect(zoom.view.value.scale).toBe(8);
     });
 
     test("fits again once the scale gets back down to fitted", () => {
-      const { zoom } = setup();
+      const { zoom } = setup(IMAGE, LARGE_FRAME);
 
-      zoom.zoomBy(LARGE_FRAME, 1.5);
-      zoom.zoomBy(LARGE_FRAME, 0.5);
+      zoom.zoomBy(1.5);
+      zoom.zoomBy(0.5);
       expect([zoom.view.value, zoom.isZoomed.value]).toEqual([FIT_VIEW, false]);
     });
 
     test("ignores a video", () => {
       const { zoom } = setup(VIDEO);
 
-      zoom.zoomBy(TALL_FRAME, 2);
+      zoom.zoomBy(2);
       expect(zoom.isZoomed.value).toBe(false);
     });
   });
 
   describe("panBy", () => {
     test("moves the view, stopping at the image's edges", () => {
-      const { zoom } = setup();
+      const { zoom } = setup(IMAGE, LARGE_FRAME);
 
-      zoom.toggle(LARGE_FRAME);
-      zoom.panBy(LARGE_FRAME, 100, -50);
+      zoom.toggle();
+      zoom.panBy(100, -50);
       expect([zoom.view.value.x, zoom.view.value.y]).toEqual([-1_400, -800]);
-      zoom.panBy(LARGE_FRAME, 10_000, 10_000);
+      zoom.panBy(10_000, 10_000);
       expect([zoom.view.value.x, zoom.view.value.y]).toEqual([0, 0]);
     });
 
     test("keeps an axis the image doesn't fill centered", () => {
       const { zoom } = setup();
 
-      zoom.toggle(TALL_FRAME, { x: 500, y: 250 });
-      zoom.panBy(TALL_FRAME, 100, 0);
+      zoom.toggle({ x: 500, y: 250 });
+      zoom.panBy(100, 0);
       expect(zoom.view.value.x).toBe(-375 * 4);
     });
 
     test("does nothing while fitted", () => {
       const { zoom } = setup();
 
-      zoom.panBy(TALL_FRAME, 100, 100);
+      zoom.panBy(100, 100);
       expect(zoom.view.value).toEqual(FIT_VIEW);
     });
   });
 
   test("glides through a toggle and a zoom out, but follows the wheel and drags at once", () => {
-    const { zoom } = setup();
+    const { zoom } = setup(IMAGE, LARGE_FRAME);
     const glides: boolean[] = [];
 
-    zoom.toggle(LARGE_FRAME);
+    zoom.toggle();
     glides.push(zoom.glides.value);
-    zoom.panBy(LARGE_FRAME, 10, 0);
+    zoom.panBy(10, 0);
     glides.push(zoom.glides.value);
-    zoom.zoomBy(LARGE_FRAME, 1.5);
+    zoom.zoomBy(1.5);
     glides.push(zoom.glides.value);
     zoom.zoomOut();
     glides.push(zoom.glides.value);
@@ -166,21 +191,22 @@ describe("LightboxZoom", () => {
     const { zoom } = setup();
     const magnifications: (number | undefined)[] = [zoom.magnification.value];
 
-    zoom.toggle(TALL_FRAME);
+    zoom.toggle();
     magnifications.push(zoom.magnification.value);
-    zoom.zoomBy(TALL_FRAME, 2);
+    zoom.zoomBy(2);
     magnifications.push(zoom.magnification.value);
     expect(magnifications).toEqual([undefined, 1, 2]);
   });
 
   test("reports the part of the image in view, as fractions of it, only while zoomed", () => {
-    const { zoom } = setup();
+    const { zoom } = setup(IMAGE, LARGE_FRAME);
     const regions = [zoom.visibleRegion.value];
 
-    zoom.toggle(LARGE_FRAME);
+    zoom.toggle();
     regions.push(zoom.visibleRegion.value);
     zoom.zoomOut();
-    zoom.toggle(TALL_FRAME);
+    zoom.setFrame(TALL_FRAME);
+    zoom.toggle();
     regions.push(zoom.visibleRegion.value);
     expect(regions).toEqual([
       undefined,
@@ -192,7 +218,7 @@ describe("LightboxZoom", () => {
   test("fits again after stepping to another item, even when stepping back", () => {
     const { zoom, current } = setup();
 
-    zoom.toggle(TALL_FRAME);
+    zoom.toggle();
     current.value = GIF;
     current.value = IMAGE;
     expect(zoom.isZoomed.value).toBe(false);

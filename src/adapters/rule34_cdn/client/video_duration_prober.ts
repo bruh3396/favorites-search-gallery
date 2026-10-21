@@ -1,7 +1,7 @@
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
-export interface Rule34CdnVideoDurationReaderDependencies {
+export interface Rule34CdnVideoDurationProberDependencies {
   fetch: (url: string, init?: RequestInit) => Promise<Response>;
   scheduler: Scheduler;
 }
@@ -9,28 +9,28 @@ export interface Rule34CdnVideoDurationReaderDependencies {
 const RATE_LIMIT = { concurrency: 3, ratePerSecond: 5 };
 const METADATA_BYTE_RANGES = [500_000, 1_000_000, 2_000_000, 4_000_000];
 
-export class Rule34CdnVideoDurationReader {
+export class Rule34CdnVideoDurationProber {
   private readonly limiter: RateLimiter;
   private readonly idleVideos: HTMLVideoElement[] = [];
 
-  constructor(private readonly dependencies: Rule34CdnVideoDurationReaderDependencies) {
+  constructor(private readonly dependencies: Rule34CdnVideoDurationProberDependencies) {
     this.limiter = new RateLimiter(RATE_LIMIT, dependencies.scheduler);
   }
 
-  public readSeconds(url: string): Promise<number> {
-    return this.limiter.run(() => this.readWithIncreasingByteRanges(url));
+  public probeSeconds(url: string): Promise<number> {
+    return this.limiter.run(() => this.probeWithIncreasingByteRanges(url));
   }
 
-  private readWithIncreasingByteRanges(url: string): Promise<number> {
+  private probeWithIncreasingByteRanges(url: string): Promise<number> {
     let chain = Promise.reject<number>(new Error());
 
     for (const range of METADATA_BYTE_RANGES) {
-      chain = chain.catch(() => this.readRange(url, range));
+      chain = chain.catch(() => this.probeRange(url, range));
     }
-    return chain.catch(() => Promise.reject(new Error(`Unable to read video duration: ${url}`)));
+    return chain.catch(() => Promise.reject(new Error(`Unable to probe video duration: ${url}`)));
   }
 
-  private async readRange(url: string, range: number): Promise<number> {
+  private async probeRange(url: string, range: number): Promise<number> {
     const response = await this.dependencies.fetch(url, { headers: { Range: `bytes=0-${range}` } });
 
     if (!response.ok) {

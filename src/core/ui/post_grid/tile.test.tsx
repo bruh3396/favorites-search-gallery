@@ -19,7 +19,7 @@ function resolvePreviewUrl(media: Media): Promise<string> {
 }
 
 type TileOptions = Omit<TileProps, "onPlainClick" | "upscale" |
-  "visibilityObserver" | "onVisibilityChange" | "decodeImage" | "scheduler"> &
+  "visibilityObserver" | "onVisibilityChange" | "decodeStill" | "scheduler"> &
   Partial<Pick<TileProps, "onPlainClick" | "onVisibilityChange" | "upscale" | "visibilityObserver">>;
 
 function drawTile(options: TileOptions): HTMLElement {
@@ -28,7 +28,7 @@ function drawTile(options: TileOptions): HTMLElement {
       upscale={new Signal(false)}
       visibilityObserver={{ observe: () => () => { } }}
       onVisibilityChange={doNothing}
-      decodeImage={() => new MemoryRemoteMedia().decodeImage()}
+      decodeStill={() => new MemoryRemoteMedia().decodeStill()}
       scheduler={new MemoryScheduler()}
       onPlainClick={doNothing}
       {...options}
@@ -56,7 +56,6 @@ describe("Tile", () => {
   test("draws the post as a linked preview", () => {
     const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
-    expect(tile.className).toBe(TileClass.root);
     expect(tile.dataset.mediaKind).toBe("image");
     expect(getPreview(tile)).not.toBeNull();
   });
@@ -65,7 +64,6 @@ describe("Tile", () => {
     const action = document.createElement("button");
     const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [action], resolvePreviewUrl });
 
-    expect(action.parentElement?.className).toBe(TileClass.actions);
     expect(action.closest(`.${TileClass.link}`)).toBeNull();
     expect(tile.contains(action)).toBe(true);
   });

@@ -8,5 +8,6 @@ export interface SequencePosition {
 export interface MediaSequence<T extends MediaItem> {
   getNext: (item: T) => Promise<T | undefined>;
   getPrevious: (item: T) => Promise<T | undefined>;
+  getNeighbors: (item: T, count: number) => Promise<readonly T[]>;
   positionOf: (item: T) => SequencePosition | undefined;
 }

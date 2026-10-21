@@ -7,11 +7,18 @@ import { advanceAndSettle } from "@/testing/async";
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type FetchMock = ReturnType<typeof vi.fn<Fetch>>;
 type DecodeBitmap = (source: ImageBitmapSource, options?: ImageBitmapOptions) => Promise<ImageBitmap>;
+type LoadImage = (url: string, signal?: AbortSignal) => Promise<HTMLImageElement>;
 
 const BITMAP = { close: (): void => undefined } as ImageBitmap;
+const GIF_ORIGINAL = "https://rule34.xxx/images//1234/a1b2c3.gif";
+const GIF_ON_WIMG = "https://wimg.rule34.xxx/images//1234/a1b2c3.gif";
 
 function respondWithBytes(): Promise<Response> {
   return Promise.resolve(new Response("bytes"));
+}
+
+function rejectEveryImage(): Promise<HTMLImageElement> {
+  return Promise.reject(new Error("Could not load image"));
 }
 
 interface Setup {
@@ -19,19 +26,24 @@ interface Setup {
   fetch: FetchMock;
   scheduler: MemoryScheduler;
   decodeBitmap: ReturnType<typeof vi.fn<DecodeBitmap>>;
+  loadImage: ReturnType<typeof vi.fn<LoadImage>>;
 }
 
-function setup(respond: Fetch = respondWithBytes): Setup {
+function setup(respond: Fetch = respondWithBytes, load: LoadImage = rejectEveryImage): Setup {
   const fetch = vi.fn<Fetch>(respond);
   const scheduler = new MemoryScheduler();
   const decodeBitmap = vi.fn<DecodeBitmap>(() => Promise.resolve(BITMAP));
-  const client = new Rule34CdnClient({
-    fetch,
-    scheduler,
-    loadImage: (): Promise<HTMLImageElement> => Promise.reject(new Error("Could not load image")),
-    decodeBitmap
-  });
-  return { client, fetch, scheduler, decodeBitmap };
+  const loadImage = vi.fn<LoadImage>(load);
+  const client = new Rule34CdnClient({ fetch, scheduler, loadImage, decodeBitmap });
+  return { client, fetch, scheduler, decodeBitmap, loadImage };
+}
+
+function createDecodableImage(): HTMLImageElement {
+  return Object.assign(document.createElement("img"), { decode: vi.fn(() => Promise.resolve()) });
+}
+
+function createLoadFindingOnly(okUrl: string, image: HTMLImageElement): LoadImage {
+  return (url: string): Promise<HTMLImageElement> => (url === okUrl ? Promise.resolve(image) : rejectEveryImage());
 }
 
 async function settled<T>(scheduler: MemoryScheduler, pending: Promise<T>): Promise<T> {
@@ -72,18 +84,18 @@ describe("Rule34CdnClient", () => {
     expect(await client.originalUrl(media("gif", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
   });
 
-  test("addresses a video's image as the jpg beside it", async() => {
+  test("addresses a video's still as the jpg beside it", async() => {
     const { client, fetch } = setup();
 
-    expect(await client.imageUrl(media("video", "1234/a1b2c3.mp4"))).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
+    expect(await client.stillUrl(media("video", "1234/a1b2c3.mp4"))).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  test("addresses an image's or gif's image as its original", async() => {
+  test("addresses an image's or gif's still as its original", async() => {
     const { client } = setup();
 
-    expect(await client.imageUrl(media("image", "1234/a1b2c3.png"))).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
-    expect(await client.imageUrl(media("gif", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
+    expect(await client.stillUrl(media("image", "1234/a1b2c3.png"))).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
+    expect(await client.stillUrl(media("gif", "1234/a1b2c3"))).toBe(GIF_ORIGINAL);
   });
 
   test("probes an image's extension once", async() => {
@@ -114,18 +126,19 @@ describe("Rule34CdnClient", () => {
 
   test("rejects a video duration the host won't serve", async() => {
     const { client, scheduler } = setup(createFetchFindingOnly(""));
-    const duration = client.readVideoDurationSeconds(media("video", "1234/a1b2c3"));
+    const duration = client.probeDurationSeconds(media("video", "1234/a1b2c3"));
 
     duration.catch(() => { });
-    await expect(settled(scheduler, duration)).rejects.toThrow("Unable to read video duration: https://rule34.xxx/images//1234/a1b2c3.mp4");
+    await expect(settled(scheduler, duration)).rejects.toThrow("Unable to probe video duration: https://rule34.xxx/images//1234/a1b2c3.mp4");
   });
 
-  test("decodes an original from its file", async() => {
-    const { client, fetch } = setup();
+  test("decodes a still at full size without a width", async() => {
+    const { client, fetch, decodeBitmap } = setup();
     const signal = new AbortController().signal;
 
-    expect(await client.decodeOriginal(media("video", "1234/a1b2c3"), signal)).toBe(BITMAP);
-    expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.mp4", { signal });
+    expect(await client.decodeStill(media("image", "1234/a1b2c3.png"), signal)).toBe(BITMAP);
+    expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.png", { signal });
+    expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(expect.any(Blob), undefined);
   });
 
   test("fetches an original's file", async() => {
@@ -141,27 +154,46 @@ describe("Rule34CdnClient", () => {
     await expect(client.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
   });
 
-  test("decodes a video's image from the jpg beside it", async() => {
+  test("decodes a video's still from the jpg beside it", async() => {
     const { client, fetch } = setup();
 
-    expect(await client.decodeImage(media("video", "1234/a1b2c3"), 500)).toBe(BITMAP);
+    expect(await client.decodeStill(media("video", "1234/a1b2c3"), undefined, 500)).toBe(BITMAP);
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.jpg", { signal: undefined });
   });
 
-  test("downloads at most three images to decode at once", async() => {
-    const { client, fetch, scheduler } = setup(() => new Promise(() => undefined));
-
-    for (const name of ["a", "b", "c", "d", "e"]) {
-      client.decodeImage(media("image", `1234/${name}.png`), 500);
-    }
-    await advanceAndSettle(scheduler, 1_000);
-    expect(fetch).toHaveBeenCalledTimes(3);
-  });
-
-  test("decodes an image already scaled to the width asked for", async() => {
+  test("decodes a still already scaled to the width asked for", async() => {
     const { client, decodeBitmap } = setup();
 
-    await client.decodeImage(media("image", "1234/a1b2c3.png"), 500);
+    await client.decodeStill(media("image", "1234/a1b2c3.png"), undefined, 500);
     expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(expect.any(Blob), { resizeWidth: 500, resizeQuality: "high" });
+  });
+
+  test("loads an original from its host, decoded", async() => {
+    const image = createDecodableImage();
+    const { client, loadImage } = setup(respondWithBytes, createLoadFindingOnly(GIF_ORIGINAL, image));
+    const signal = new AbortController().signal;
+
+    expect(await client.loadOriginal(media("gif", "1234/a1b2c3"), signal)).toBe(image);
+    expect(loadImage).toHaveBeenCalledExactlyOnceWith(GIF_ORIGINAL, signal);
+    expect(image.decode).toHaveBeenCalledOnce();
+  });
+
+  test("loads an original from WIMG when its host fails", async() => {
+    const image = createDecodableImage();
+    const { client, loadImage } = setup(respondWithBytes, createLoadFindingOnly(GIF_ON_WIMG, image));
+
+    expect(await client.loadOriginal(media("gif", "1234/a1b2c3"))).toBe(image);
+    expect(loadImage.mock.calls.map(([url]) => url)).toEqual([GIF_ORIGINAL, GIF_ON_WIMG]);
+  });
+
+  test("rejects an aborted original without trying WIMG", async() => {
+    const controller = new AbortController();
+    const { client, loadImage } = setup(respondWithBytes, () => {
+      controller.abort();
+      return rejectEveryImage();
+    });
+
+    await expect(client.loadOriginal(media("gif", "1234/a1b2c3"), controller.signal)).rejects.toThrow("Could not load image");
+    expect(loadImage).toHaveBeenCalledOnce();
   });
 });

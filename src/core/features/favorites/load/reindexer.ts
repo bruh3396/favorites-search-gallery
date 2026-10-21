@@ -27,10 +27,16 @@ export class FavoritesReindexer {
   }
 
   public reindex(post: Post): void {
-    const termUpdate = this.dependencies.collection.overwrite(post);
+    const overwrite = this.dependencies.collection.overwrite(post);
 
-    if (termUpdate !== undefined) {
-      this.termUpdater.schedule(termUpdate);
+    if (overwrite === undefined) {
+      return;
+    }
+    const { favorite, previousTags } = overwrite;
+    const tags = favorite.tags;
+
+    if (previousTags.symmetricDifference(tags).size > 0) {
+      this.termUpdater.schedule({ doc: favorite, oldTerms: previousTags, newTerms: tags });
     }
   }
 }

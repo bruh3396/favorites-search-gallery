@@ -1,10 +1,10 @@
 import { describe, expect, onTestFinished, test } from "vitest";
-import { LightboxShiftKey } from "@/core/features/lightbox/ui/screen/shift_key";
+import { LightboxShiftKey } from "@/core/features/lightbox/input/shift_key";
 
 function setup(): LightboxShiftKey {
-  const shiftKey = new LightboxShiftKey();
+  const shiftKey = new LightboxShiftKey(document);
 
-  shiftKey.start(document);
+  shiftKey.start();
   onTestFinished(() => shiftKey.stop());
   return shiftKey;
 }

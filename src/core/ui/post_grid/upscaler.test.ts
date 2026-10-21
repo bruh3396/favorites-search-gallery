@@ -12,13 +12,13 @@ interface FakeBitmap {
   close: () => void;
 }
 
-type DecodeImage = (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
+type DecodeStill = (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
 
 interface Setup {
   upscaler: Upscaler;
   scheduler: MemoryScheduler;
   canvas: HTMLCanvasElement;
-  decodeImage: ReturnType<typeof vi.fn<DecodeImage>>;
+  decodeStill: ReturnType<typeof vi.fn<DecodeStill>>;
   drawImage: ReturnType<typeof vi.fn>;
   upscaleNow: () => void;
 }
@@ -31,23 +31,23 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
   return { promise, resolve };
 }
 
-function setup(decode: DecodeImage = () => Promise.resolve(createBitmap() as unknown as ImageBitmap)): Setup {
+function setup(decode: DecodeStill = () => Promise.resolve(createBitmap() as unknown as ImageBitmap)): Setup {
   const canvas = document.createElement("canvas");
 
   canvas.hidden = true;
   const drawImage = vi.fn();
   const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext")
     .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
-  const decodeImage = vi.fn(decode);
+  const decodeStill = vi.fn(decode);
   const scheduler = new MemoryScheduler();
-  const upscaler = new Upscaler({ canvas, media: MEDIA, decodeImage, scheduler });
+  const upscaler = new Upscaler({ canvas, media: MEDIA, decodeStill, scheduler });
   const upscaleNow = (): void => {
     upscaler.upscale();
     scheduler.advance(UPSCALE_DELAY);
   };
 
   onTestFinished(() => getContext.mockRestore());
-  return { upscaler, scheduler, canvas, decodeImage, drawImage, upscaleNow };
+  return { upscaler, scheduler, canvas, decodeStill, drawImage, upscaleNow };
 }
 
 function createBitmap(width = MAX_CANVAS_WIDTH / 2, height = MAX_CANVAS_WIDTH / 4): FakeBitmap {
@@ -67,10 +67,10 @@ describe("Upscaler", () => {
   test("decodes the image at the maximum width and draws it when upscaling is requested", async() => {
     const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
-    const { canvas, decodeImage, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
+    const { canvas, decodeStill, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
 
     upscaleNow();
-    expect(decodeImage).toHaveBeenCalledExactlyOnceWith(MEDIA, MAX_CANVAS_WIDTH, expect.any(AbortSignal));
+    expect(decodeStill).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal), MAX_CANVAS_WIDTH);
     expect(canvas.hidden).toBe(true);
 
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);
@@ -82,23 +82,23 @@ describe("Upscaler", () => {
   });
 
   test("waits for the tile to stay in view before decoding", () => {
-    const { upscaler, scheduler, decodeImage } = setup();
+    const { upscaler, scheduler, decodeStill } = setup();
 
     upscaler.upscale();
     upscaler.upscale();
     scheduler.advance(UPSCALE_DELAY - 1);
-    expect(decodeImage).not.toHaveBeenCalled();
+    expect(decodeStill).not.toHaveBeenCalled();
     scheduler.advance(1);
-    expect(decodeImage).toHaveBeenCalledOnce();
+    expect(decodeStill).toHaveBeenCalledOnce();
   });
 
   test("never decodes a tile left before the delay passes", () => {
-    const { upscaler, scheduler, decodeImage } = setup();
+    const { upscaler, scheduler, decodeStill } = setup();
 
     upscaler.upscale();
     upscaler.dispose();
     scheduler.advance(UPSCALE_DELAY);
-    expect(decodeImage).not.toHaveBeenCalled();
+    expect(decodeStill).not.toHaveBeenCalled();
   });
 
   test("scales a wide image down to the maximum width", async() => {
@@ -112,16 +112,16 @@ describe("Upscaler", () => {
   });
 
   test("does not start another request while one is in flight", () => {
-    const { decodeImage, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
+    const { decodeStill, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
 
     upscaleNow();
     upscaleNow();
 
-    expect(decodeImage).toHaveBeenCalledOnce();
+    expect(decodeStill).toHaveBeenCalledOnce();
   });
 
   test("hides and shows a completed image without decoding it again", async() => {
-    const { upscaler, canvas, decodeImage, drawImage, upscaleNow } = setup();
+    const { upscaler, canvas, decodeStill, drawImage, upscaleNow } = setup();
 
     upscaleNow();
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
@@ -131,18 +131,18 @@ describe("Upscaler", () => {
     upscaler.upscale();
 
     expect(canvas.hidden).toBe(false);
-    expect(decodeImage).toHaveBeenCalledOnce();
+    expect(decodeStill).toHaveBeenCalledOnce();
   });
 
   test("logs a failed request and tries again on the next request", async() => {
     const error = new Error("offline");
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { decodeImage, drawImage, upscaleNow } = setup(() => Promise.reject(error));
+    const { decodeStill, drawImage, upscaleNow } = setup(() => Promise.reject(error));
 
     onTestFinished(() => log.mockRestore());
     upscaleNow();
     await vi.waitFor(() => expect(log).toHaveBeenCalledWith(error));
-    decodeImage.mockResolvedValue(createBitmap() as unknown as ImageBitmap);
+    decodeStill.mockResolvedValue(createBitmap() as unknown as ImageBitmap);
     upscaleNow();
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
   });
@@ -163,10 +163,10 @@ describe("Upscaler", () => {
   });
 
   test("aborts an in-flight request when disabled", () => {
-    const { upscaler, decodeImage, canvas, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
+    const { upscaler, decodeStill, canvas, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
 
     upscaleNow();
-    const signal = decodeImage.mock.calls[0][2];
+    const signal = decodeStill.mock.calls[0][1];
 
     upscaler.disable();
 
@@ -177,10 +177,10 @@ describe("Upscaler", () => {
   test("aborts a request and closes its bitmap if the result arrives later", async() => {
     const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
-    const { upscaler, canvas, decodeImage, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
+    const { upscaler, canvas, decodeStill, drawImage, upscaleNow } = setup(() => pendingDecode.promise);
 
     upscaleNow();
-    const signal = decodeImage.mock.calls[0][2];
+    const signal = decodeStill.mock.calls[0][1];
 
     upscaler.dispose();
 

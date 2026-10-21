@@ -10,23 +10,22 @@ export class MemoryRemoteMedia implements RemoteMedia {
     return Promise.resolve(media.locator);
   }
 
-  public resolveImageUrl(media: Media): Promise<string> {
-    return Promise.resolve(media.locator);
-  }
-
-  public decodeImage(): Promise<ImageBitmap> {
-    return this.decodeOriginal();
-  }
-
-  public decodeOriginal(): Promise<ImageBitmap> {
+  public decodeStill(): Promise<ImageBitmap> {
     return Promise.resolve({ width: 1, height: 1, close: (): void => undefined } as ImageBitmap);
+  }
+
+  public loadOriginal(media: Media): Promise<HTMLImageElement> {
+    const image = document.createElement("img");
+
+    image.src = media.locator;
+    return Promise.resolve(image);
   }
 
   public fetchOriginal(media: Media): Promise<Blob> {
     return Promise.resolve(new Blob([media.locator]));
   }
 
-  public fetchDurationSeconds(): Promise<number> {
+  public probeDurationSeconds(): Promise<number> {
     return Promise.resolve(0);
   }
 }

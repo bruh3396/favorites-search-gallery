@@ -1,6 +1,7 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
+import { LightboxSessionPart } from "@/core/features/lightbox/ui/screen/session";
 
-export class LightboxFullscreen {
+export class LightboxFullscreen implements LightboxSessionPart {
   private readonly isFullscreenState = new Signal(false);
 
   constructor(private readonly element: HTMLElement) {
@@ -11,6 +12,12 @@ export class LightboxFullscreen {
 
   public get isFullscreen(): Readable<boolean> {
     return this.isFullscreenState;
+  }
+
+  public start(): void { }
+
+  public stop(): void {
+    this.exit();
   }
 
   public toggle(): void {

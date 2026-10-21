@@ -20,8 +20,7 @@ export const FavoritesPaneClass = {
   root: "fsg-FavoritesPane",
   header: "fsg-FavoritesPane-header",
   search: "fsg-FavoritesPane-search",
-  pagination: "fsg-FavoritesPane-pagination",
-  content: "fsg-FavoritesPane-content"
+  pagination: "fsg-FavoritesPane-pagination"
 } as const;
 
 export interface FavoritesPaneProps {
@@ -36,7 +35,7 @@ export interface FavoritesPaneProps {
   upscalePaused?: Readable<boolean>;
   visiblePosts: Signal<readonly Favorite[]>;
   visibilityObserver: VisibilityObserver;
-  decodeImage: (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
+  decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   getPostUrl: (post: MediaItem) => string;
@@ -48,7 +47,7 @@ export interface FavoritesPaneProps {
 export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
   const { favorites, session, scrollTo, tileLocator, finishedLoading,
     skeletonDimensions, gridPreferences: { layout, size }, visiblePosts, skeletonItemCount,
-    visibilityObserver, decodeImage, scheduler, resolvePreviewUrl, getPostUrl, onPlainClick, onCtrlClick, onPointerEnter } = props;
+    visibilityObserver, decodeStill, scheduler, resolvePreviewUrl, getPostUrl, onPlainClick, onCtrlClick, onPointerEnter } = props;
   return (
     <section className={FavoritesPaneClass.root}>
       <header className={FavoritesPaneClass.header}>
@@ -63,7 +62,7 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
           />
         </div>
       </header>
-      <div className={FavoritesPaneClass.content}>
+      <div>
         <SkeletonGrid
           isShown={computed(() => !finishedLoading.reached && session.results.value.length === 0)}
           dimensions={skeletonDimensions}
@@ -82,7 +81,7 @@ export function FavoritesPane(props: FavoritesPaneProps): HTMLElement {
           getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}
           createActions={() => []}
           visibilityObserver={visibilityObserver}
-          decodeImage={decodeImage}
+          decodeStill={decodeStill}
           scheduler={scheduler}
           resolvePreviewUrl={resolvePreviewUrl}
           getPostUrl={getPostUrl}

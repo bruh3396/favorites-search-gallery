@@ -12,6 +12,27 @@ describe("LightboxOverlayVisibility", () => {
     expect(setup().visibility.shown.value).toBe(false);
   });
 
+  describe("start", () => {
+    test("shows until the idle delay passes", () => {
+      const { visibility, scheduler } = setup();
+
+      visibility.start();
+      expect(visibility.shown.value).toBe(true);
+      scheduler.advance(2_000);
+      expect(visibility.shown.value).toBe(false);
+    });
+  });
+
+  describe("stop", () => {
+    test("hides at once", () => {
+      const { visibility } = setup();
+
+      visibility.start();
+      visibility.stop();
+      expect(visibility.shown.value).toBe(false);
+    });
+  });
+
   describe("show", () => {
     test("shows until the idle delay passes", () => {
       const { visibility, scheduler } = setup();

@@ -55,7 +55,7 @@ function setup(sources: FetcherSources = {}): {
     localPosts,
     localTagCategories: new MemoryLocalTagCategories(),
     remotePosts: new MemoryRemotePosts(new MemoryClient(sources.remotePosts ?? [])),
-    remoteMedia: { fetchDurationSeconds: (): Promise<number> => Promise.resolve(0) },
+    remoteMedia: { probeDurationSeconds: (): Promise<number> => Promise.resolve(0) },
     scheduler: new MemoryScheduler(),
     onRefresh: (post): void => {
       refreshed.push(post);

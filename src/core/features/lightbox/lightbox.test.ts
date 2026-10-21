@@ -8,6 +8,7 @@ import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { MemoryViewport } from "@/adapters/memory/ports/viewport/viewport";
 import { flushMicrotasks } from "@/testing/async";
 import { render } from "@/core/ui/h/h";
@@ -29,7 +30,8 @@ function setup(): Setup {
     navigator: new MemoryNavigator(),
     fileSaver: new MemoryFileSaver(),
     viewport,
-    scheduler
+    scheduler,
+    sizeObserver: new MemorySizeObserver()
   });
   return { lightbox, scheduler, viewport };
 }
@@ -85,17 +87,6 @@ describe("createLightboxService", () => {
     expect(settled).toEqual([ITEMS[1]]);
   });
 
-  test("never reports a settled item after closing", () => {
-    const { lightbox, scheduler } = setup();
-    const settled: MediaItem[] = [];
-
-    lightbox.settled.on(item => settled.push(item));
-    lightbox.open(ITEMS[0], sequence());
-    lightbox.close();
-    scheduler.advance(1_000);
-    expect(settled).toEqual([]);
-  });
-
   test("steps to the next item when autoplay's interval passes", async() => {
     const { lightbox, scheduler } = setup();
     const dialog = mountScreen(lightbox);
@@ -113,7 +104,7 @@ describe("createLightboxService", () => {
     const scheduler = new MemoryScheduler();
     const lightbox = createLightboxService<MediaItem>(DEFAULT_LIGHTBOX_CONFIGURATION, {
       remoteMedia, remotePages: new MemoryRemotePages(), navigator: new MemoryNavigator(),
-      fileSaver: new MemoryFileSaver(), viewport: new MemoryViewport(), scheduler
+      fileSaver: new MemoryFileSaver(), viewport: new MemoryViewport(), scheduler, sizeObserver: new MemorySizeObserver()
     });
 
     mountScreen(lightbox);

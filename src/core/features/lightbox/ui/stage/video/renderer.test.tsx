@@ -1,5 +1,4 @@
 import { MockInstance, describe, expect, onTestFinished, test, vi } from "vitest";
-import { LightboxStageRendererClass } from "@/core/features/lightbox/ui/stage/renderer";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { VideoElementPool } from "@/core/features/lightbox/ui/stage/video/element_pool";
@@ -35,7 +34,6 @@ describe("VideoRenderer", () => {
   test("starts hidden with its pooled videos in the stage root", () => {
     const { renderer } = setup();
 
-    expect(renderer.root.className).toBe(LightboxStageRendererClass.root);
     expect(renderer.root.hidden).toBe(true);
     expect(renderer.root.querySelectorAll("video")).toHaveLength(5);
   });

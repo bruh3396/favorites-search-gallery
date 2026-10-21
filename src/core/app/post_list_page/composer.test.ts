@@ -21,8 +21,8 @@ describe("mountPostListPage", () => {
     });
     const app = container.shadowRoot!.querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
-    expect([...app.children].map(child => child.classList.contains(SkeletonGridClass.root))).toEqual([true, false]);
-    expect([...app.children].every(child => child.classList.contains(PostGridClass.root))).toBe(true);
+    expect(app.querySelector(`.${SkeletonGridClass.root}`)).not.toBeNull();
+    expect(app.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)).not.toBeNull();
   });
 
   test("lays the grid out in the layout kept in the app's preferences", () => {

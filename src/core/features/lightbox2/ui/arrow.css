@@ -1,0 +1,50 @@
+.fsg-LightboxArrow {
+  display: grid;
+  place-items: center;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+}
+
+.fsg-LightboxArrow:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: -2px;
+}
+
+.fsg-LightboxArrow-plate {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: 8px;
+  opacity: 0.8;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    scale var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-LightboxArrow:is(:hover, :focus-visible) .fsg-LightboxArrow-plate {
+  background: rgb(255 255 255 / 0.09);
+  opacity: 1;
+}
+
+.fsg-LightboxArrow:active .fsg-LightboxArrow-plate {
+  background: rgb(255 255 255 / 0.16);
+  scale: 0.9;
+}
+
+.fsg-LightboxArrow-icon {
+  inline-size: 24px;
+  block-size: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 1px 3px black);
+}

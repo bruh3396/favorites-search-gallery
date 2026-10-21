@@ -73,23 +73,12 @@ describe("FavoritesCollection", () => {
       expect(favorite.getMetric("score")).toBe(500);
     });
 
-    test("reports the term update when the tags changed", () => {
+    test("returns the favorite with the tags it had before", () => {
       const collection = new FavoritesCollection();
       const [favorite] = collection.append([createPost({ id: "1", tags: "apple" })]);
 
-      expect(collection.overwrite(createPost({ id: "1", tags: "banana" }))).toEqual({
-        doc: favorite,
-        oldTerms: new Set(["apple"]),
-        newTerms: new Set(["banana"])
-      });
+      expect(collection.overwrite(createPost({ id: "1", tags: "banana" }))).toEqual({ favorite, previousTags: new Set(["apple"]) });
       expect(favorite.tags).toEqual(new Set(["banana"]));
-    });
-
-    test("reports no term update when the tags are unchanged", () => {
-      const collection = new FavoritesCollection();
-
-      collection.append([createPost({ id: "1", tags: "apple" })]);
-      expect(collection.overwrite(createPost({ id: "1", tags: "apple", score: 5 }))).toBeUndefined();
     });
 
     test("announces a favorite each time it gains media", () => {
@@ -111,18 +100,6 @@ describe("FavoritesCollection", () => {
       collection.hydrated.on(favorite => announced.push(favorite));
       collection.overwrite(createPost({ id: "1", media: { kind: "image", locator: "1/b" } }));
       expect(announced).toEqual([]);
-    });
-  });
-
-  describe("clearTagCache", () => {
-    test("keeps every favorite's tags readable", () => {
-      const collection = new FavoritesCollection();
-      const [favorite] = collection.append([createPost({ id: "1", tags: "apple" })]);
-      const cached = favorite.tags;
-
-      collection.clearTagCache();
-      expect(favorite.tags).not.toBe(cached);
-      expect(favorite.tags).toEqual(new Set(["apple"]));
     });
   });
 

@@ -3,6 +3,11 @@ import { Readable, Signal } from "@/core/utils/reactive/signal";
 export interface Tab<T> {
   readonly id: string;
   readonly value: T;
+  readonly closable: boolean;
+}
+
+export interface TabOptions {
+  readonly closable?: boolean;
 }
 
 export interface TabManagerDependencies<T> {
@@ -11,6 +16,7 @@ export interface TabManagerDependencies<T> {
 
 export class TabManager<T> {
   private readonly currentTabs = new Signal<readonly Tab<T>[]>([]);
+  private readonly currentActiveId = new Signal<string | null>(null);
 
   constructor(private readonly dependencies: TabManagerDependencies<T>) { }
 
@@ -18,20 +24,41 @@ export class TabManager<T> {
     return this.currentTabs;
   }
 
-  public open(id: string, value: T): void {
+  public get activeId(): Readable<string | null> {
+    return this.currentActiveId;
+  }
+
+  public open(id: string, value: T, { closable = true }: TabOptions = {}): void {
     if (this.currentTabs.peek().some(tab => tab.id === id)) {
       throw new Error(`Tab already exists: ${id}`);
     }
-    this.currentTabs.value = [...this.currentTabs.peek(), { id, value }];
+    this.currentTabs.value = [...this.currentTabs.peek(), { id, value, closable }];
+
+    if (this.currentActiveId.peek() === null) {
+      this.currentActiveId.value = id;
+    }
+  }
+
+  public activate(id: string): void {
+    if (this.currentTabs.peek().some(tab => tab.id === id)) {
+      this.currentActiveId.value = id;
+    }
   }
 
   public close(id: string): void {
-    const tab = this.currentTabs.peek().find(candidate => candidate.id === id);
+    const tabs = this.currentTabs.peek();
+    const index = tabs.findIndex(candidate => candidate.id === id);
 
-    if (tab === undefined) {
+    if (index === -1 || !tabs[index].closable) {
       return;
     }
-    this.currentTabs.value = this.currentTabs.peek().filter(candidate => candidate.id !== id);
-    this.dependencies.dispose(tab.value);
+    const remaining = tabs.filter(candidate => candidate.id !== id);
+
+    this.currentTabs.value = remaining;
+
+    if (this.currentActiveId.peek() === id) {
+      this.currentActiveId.value = (remaining[index] ?? remaining[index - 1])?.id ?? null;
+    }
+    this.dependencies.dispose(tabs[index].value);
   }
 }

@@ -1,13 +1,11 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { FavoritesPane, FavoritesPaneClass } from "@/core/app/favorites_page/pane";
-import { FavoritesShell, FavoritesShellClass } from "@/core/app/favorites_page/shell";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { LoadState } from "@/core/features/favorites/load/state";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
@@ -17,7 +15,6 @@ import PANE_CSS from "@/core/app/favorites_page/pane.css?inline";
 import { PaginationResult } from "@/core/features/favorites/search/pagination";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
-import SHELL_CSS from "@/core/app/favorites_page/shell.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { doNothing } from "@/core/utils/function/function";
@@ -59,10 +56,7 @@ function setup(): Setup {
   const submit = vi.fn<(query: string) => void>();
   const goToPage = vi.fn<(pageNumber: number) => void>();
   const onPlainClick = vi.fn<(post: MediaItem) => void>();
-  const favorites = {
-    hydrated: new Emitter<Favorite>(),
-    loadState: new Signal<LoadState>({ phase: "starting" })
-  };
+  const favorites = { hydrated: new Emitter<Favorite>() };
   const preferences = createAppPreferences(new MemoryLocalKeyedValues());
   const session = {
     settings: preferences.favoritesSearch,
@@ -72,29 +66,24 @@ function setup(): Setup {
     goToPage
   };
   const gridPreferences = pickPostGridPreferences(preferences);
-  const { result: element, dispose } = render(document, () => h(FavoritesShell, {
+  const { result: element, dispose } = render(document, () => h(FavoritesPane, {
     favorites,
-    panes: [
-      h(FavoritesPane, {
-        favorites,
-        session,
-        scrollTo: new Emitter<Favorite>(),
-        tileLocator: new TileLocator<Favorite>(),
-        finishedLoading,
-        skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
-        skeletonItemCount: 50,
-        gridPreferences,
-        visiblePosts,
-        visibilityObserver: { observe: () => (): void => { } },
-        decodeImage: () => new MemoryRemoteMedia().decodeImage(),
-        scheduler: new MemoryScheduler(),
-        resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
-        getPostUrl: post => `https://posts/${post.id}`,
-        onPlainClick,
-        onCtrlClick: doNothing,
-        onPointerEnter: doNothing
-      })
-    ]
+    session,
+    scrollTo: new Emitter<Favorite>(),
+    tileLocator: new TileLocator<Favorite>(),
+    finishedLoading,
+    skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
+    skeletonItemCount: 50,
+    gridPreferences,
+    visiblePosts,
+    visibilityObserver: { observe: () => (): void => { } },
+    decodeStill: () => new MemoryRemoteMedia().decodeStill(),
+    scheduler: new MemoryScheduler(),
+    resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
+    getPostUrl: post => `https://posts/${post.id}`,
+    onPlainClick,
+    onCtrlClick: doNothing,
+    onPointerEnter: doNothing
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${SkeletonGridClass.root}`)!;
   return { element, dispose, searchResults, pageNumber, finishedLoading, visiblePosts, submit, goToPage, skeleton, onPlainClick };
@@ -112,22 +101,7 @@ function readShownFavoriteUrls(element: HTMLElement): string[] {
 }
 
 describe("FavoritesPane", () => {
-  test("puts load status in the shell and the search, paginator, and grid in the pane", () => {
-    const { element } = setup();
-    const pane = element.querySelector<HTMLElement>(`.${FavoritesPaneClass.root}`)!;
-    const [header, content] = [...pane.children];
-    const describeSlot = (slot: Element): string[] => [slot.className, ...[...slot.children].map(child => child.className)];
-
-    expect(element.className).toBe(FavoritesShellClass.root);
-    expect(element.querySelector(`.${FavoritesShellClass.status}`)).not.toBeNull();
-    expect([header.tagName, header.className, content.tagName]).toEqual(["HEADER", FavoritesPaneClass.header, "DIV"]);
-    expect(header.querySelector("input[type=search]")).not.toBeNull();
-    expect(header.querySelector(`.${PaginatorClass.root}`)).not.toBeNull();
-    expect(describeSlot(content)).toEqual([FavoritesPaneClass.content, `${PostGridClass.root} ${SkeletonGridClass.root}`, PostGridClass.root]);
-  });
-
   test("styles every class it sets", () => {
-    expectClassesStyled(FavoritesShellClass, SHELL_CSS);
     expectClassesStyled(FavoritesPaneClass, PANE_CSS);
   });
 

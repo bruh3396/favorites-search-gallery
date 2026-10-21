@@ -2,6 +2,7 @@ import { MediaSequence, SequencePosition } from "@/core/domain/media/media_seque
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test, vi } from "vitest";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { doNothing } from "@/core/utils/function/function";
 import { effect } from "@/core/utils/reactive/signal";
@@ -37,8 +38,8 @@ function createWrappingSequence(posts: readonly Post[]): MediaSequence<Post> {
 
 const SEQUENCE = createMediaSequence(POSTS);
 
-function createNavigation(): LightboxNavigation<Post> {
-  return new LightboxNavigation<Post>({ maxWarmItems: 2, maxNeighborDistance: 2 });
+function createNavigation(scheduler = new MemoryScheduler()): LightboxNavigation<Post> {
+  return new LightboxNavigation<Post>({ maxWarmItems: 2, maxNeighborDistance: 2, settleDelay: 75 }, scheduler);
 }
 
 describe("LightboxNavigation", () => {
@@ -154,6 +155,35 @@ describe("LightboxNavigation", () => {
       lightbox.open(POSTS[0], createMediaSequence([POSTS[0]]));
       await showing;
       expect(lightbox.current.value).toBe(POSTS[0]);
+    });
+  });
+
+  describe("settled", () => {
+    test("announces the post shown once navigation pauses", async() => {
+      const scheduler = new MemoryScheduler();
+      const lightbox = createNavigation(scheduler);
+      const settled: Post[] = [];
+
+      lightbox.settled.on(item => settled.push(item));
+      lightbox.open(POSTS[0], SEQUENCE);
+      scheduler.advance(74);
+      await lightbox.showNext();
+      scheduler.advance(74);
+      expect(settled).toEqual([]);
+      scheduler.advance(1);
+      expect(settled).toEqual([POSTS[1]]);
+    });
+
+    test("announces nothing after closing", () => {
+      const scheduler = new MemoryScheduler();
+      const lightbox = createNavigation(scheduler);
+      const settled: Post[] = [];
+
+      lightbox.settled.on(item => settled.push(item));
+      lightbox.open(POSTS[0], SEQUENCE);
+      lightbox.close();
+      scheduler.advance(1_000);
+      expect(settled).toEqual([]);
     });
   });
 

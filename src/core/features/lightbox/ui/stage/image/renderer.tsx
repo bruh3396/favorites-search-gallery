@@ -16,6 +16,7 @@ export interface ImageRendererDependencies {
   resolvePreviewUrl: (media: Media) => Promise<string>;
   decodeOriginal: (media: Media, signal: AbortSignal) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
+  onShownMediaChange: () => void;
 }
 
 export class ImageRenderer extends PreloadingRenderer implements LightboxStageRenderer {
@@ -46,7 +47,10 @@ export class ImageRenderer extends PreloadingRenderer implements LightboxStageRe
       source: this.current,
       load: (item): Promise<ImageBitmap | undefined> => this.loadOnceSettled(item)
     });
-    this.stopRenderEffect = effect(() => this.render());
+    this.stopRenderEffect = effect(() => {
+      this.render();
+      dependencies.onShownMediaChange();
+    });
   }
 
   public get shownMedia(): MorphSource {

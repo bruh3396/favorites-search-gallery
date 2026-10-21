@@ -50,6 +50,27 @@ describe("LightboxFullscreen", () => {
     });
   });
 
+  describe("start", () => {
+    test("leaves fullscreen alone", () => {
+      const { toggle, requestFullscreen, exitFullscreen, enterFullscreen } = setup();
+
+      toggle.start();
+      enterFullscreen();
+      toggle.start();
+      expect([requestFullscreen.mock.calls.length, exitFullscreen.mock.calls.length]).toEqual([0, 0]);
+    });
+  });
+
+  describe("stop", () => {
+    test("leaves fullscreen", () => {
+      const { toggle, exitFullscreen, enterFullscreen } = setup();
+
+      enterFullscreen();
+      toggle.stop();
+      expect(exitFullscreen).toHaveBeenCalledOnce();
+    });
+  });
+
   describe("exit", () => {
     test("leaves fullscreen only when its element holds it", () => {
       const { toggle, exitFullscreen, enterFullscreen } = setup();

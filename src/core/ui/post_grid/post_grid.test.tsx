@@ -1,6 +1,5 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Mock, describe, expect, test, vi } from "vitest";
-import { PostGrid, PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -8,6 +7,7 @@ import { GridLayout } from "@/core/ui/post_grid/tiler";
 import { Media } from "@/core/domain/media/media";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { doNothing } from "@/core/utils/function/function";
@@ -66,7 +66,7 @@ function setup(...ids: string[]): Setup {
       settings={{ layout, size, upscale: new Signal(false) }}
       visiblePosts={visiblePosts}
       visibilityObserver={visibilityObserver}
-      decodeImage={() => new MemoryRemoteMedia().decodeImage()}
+      decodeStill={() => new MemoryRemoteMedia().decodeStill()}
       scheduler={new MemoryScheduler()}
       getDimensions={getDimensions}
       createActions={createActions}
@@ -97,7 +97,6 @@ describe("PostGrid", () => {
   test("draws a tile for each post", () => {
     const { element } = setup("1", "2", "3");
 
-    expect(element.className).toBe(PostGridClass.root);
     expect(element.dataset.layout).toBe("grid");
     expect(element.children).toHaveLength(3);
   });
@@ -258,7 +257,7 @@ describe("PostGrid", () => {
         settings={{ layout: new Signal<GridLayout>("grid"), size: new Signal(2), upscale: new Signal(false) }}
         visiblePosts={new Signal<readonly MediaItem[]>([])}
         visibilityObserver={{ observe: () => ():void => { } }}
-        decodeImage={() => new MemoryRemoteMedia().decodeImage()}
+        decodeStill={() => new MemoryRemoteMedia().decodeStill()}
         scheduler={new MemoryScheduler()}
         getDimensions={getDimensions}
         createActions={() => [

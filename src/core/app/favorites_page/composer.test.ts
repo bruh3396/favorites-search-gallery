@@ -18,6 +18,7 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { MemoryViewport } from "@/adapters/memory/ports/viewport/viewport";
 import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { Post } from "@/core/domain/post/post";
@@ -45,6 +46,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver: { observe: () => (): void => { } },
+    sizeObserver: new MemorySizeObserver(),
     remotePages: new MemoryRemotePages(),
     scheduler,
     randomSource: new MemoryRandomSource(),

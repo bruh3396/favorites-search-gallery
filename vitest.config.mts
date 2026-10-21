@@ -8,7 +8,7 @@ const DOM_TESTS = [
   "src/core/app/**/*.test.{ts,tsx}",
   "src/core/ui/**/*.test.{ts,tsx}",
   "src/core/features/**/*.test.tsx",
-  "src/core/features/*/ui/**/*.test.ts",
+  "src/core/features/*/{commands,input,ui}/**/*.test.ts",
   "src/core/features/lightbox/lightbox.test.ts",
   "src/adapters/browser/image/image.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
@@ -17,9 +17,11 @@ const DOM_TESTS = [
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
   "src/adapters/memory/ports/morpher/morpher.test.ts",
+  "src/adapters/memory/ports/remote_media/remote_media.test.ts",
   "src/adapters/rule34/client/{client,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
   "src/adapters/rule34/document/document.test.ts",
-  "src/adapters/rule34_cdn/client/video_duration.test.ts"
+  "src/adapters/rule34_cdn/client/{client,video_duration_prober}.test.ts",
+  "src/adapters/rule34_cdn/ports/remote_media/remote_media.test.ts"
 ];
 
 export default defineConfig({

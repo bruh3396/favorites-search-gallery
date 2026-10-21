@@ -1,4 +1,6 @@
-import { METRICS } from "@/core/domain/post/post";
+import { ALL_RATINGS_MASK, METRICS, isRatingMask } from "@/core/domain/post/post";
+import { isBoolean, oneOf, sameKindAs } from "@/core/utils/guards/guards";
+import { FieldGuards } from "@/core/utils/codec/codec";
 import { SearchExpression } from "@/core/search/expressions/search_expression";
 
 export const SORT_KEYS = ["favorited", "random", ...METRICS] as const;
@@ -24,3 +26,29 @@ export interface SearchRequest {
   readonly isShuffled: boolean;
   readonly shuffleSeed: number;
 }
+
+function isSeed(stored: unknown): stored is number {
+  return Number.isInteger(stored) && (stored as number) >= 0;
+}
+
+export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
+  query: "",
+  isInverted: false,
+  sortKey: "favorited",
+  isSortAscending: false,
+  allowedRatings: ALL_RATINGS_MASK,
+  isBlacklistEnabled: false,
+  isShuffled: false,
+  shuffleSeed: 0
+};
+
+export const SEARCH_SETTINGS_GUARDS: FieldGuards<SearchSettings> = {
+  query: sameKindAs(""),
+  isInverted: isBoolean,
+  sortKey: oneOf(SORT_KEYS),
+  isSortAscending: isBoolean,
+  allowedRatings: isRatingMask,
+  isBlacklistEnabled: isBoolean,
+  isShuffled: isBoolean,
+  shuffleSeed: isSeed
+};

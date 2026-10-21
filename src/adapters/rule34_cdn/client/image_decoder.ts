@@ -6,7 +6,6 @@ export interface Rule34CdnImageDecoderDependencies {
   decodeBitmap: (source: ImageBitmapSource, options?: ImageBitmapOptions) => Promise<ImageBitmap>;
 }
 
-/** Some files the bare host won't serve to a fetch still load from WIMG through an image element. */
 export class Rule34CdnImageDecoder {
   private readonly elementOnlyUrls = new Set<string>();
 
@@ -16,16 +15,25 @@ export class Rule34CdnImageDecoder {
     return this.dependencies.decodeBitmap(await this.load(url, signal), options);
   }
 
-  private async load(url: string, signal?: AbortSignal): Promise<ImageBitmapSource> {
-    if (!this.elementOnlyUrls.has(url)) {
-      try {
-        return await this.fetchBlob(url, signal);
-      } catch (error) {
-        if (signal?.aborted === true) {
-          throw error;
-        }
-      }
+  private load(url: string, signal?: AbortSignal): Promise<ImageBitmapSource> {
+    if (this.elementOnlyUrls.has(url)) {
+      return this.loadElement(url, signal);
     }
+    return this.loadBlob(url, signal);
+  }
+
+  private async loadBlob(url: string, signal?: AbortSignal): Promise<ImageBitmapSource> {
+    try {
+      return await this.fetchBlob(url, signal);
+    } catch (error) {
+      if (signal?.aborted === true) {
+        throw error;
+      }
+      return this.loadElement(url, signal);
+    }
+  }
+
+  private async loadElement(url: string, signal?: AbortSignal): Promise<HTMLImageElement> {
     const image = await this.dependencies.loadImage(wimgUrl(url), signal);
 
     this.elementOnlyUrls.add(url);

@@ -36,14 +36,6 @@ describe("FavoritesColumnarArena", () => {
 
       expect(arena.getTags(slot)).toEqual(new Set(["apple", "banana"]));
     });
-
-    test("returns the cached set while it is cached", () => {
-      const { arena, slot } = setup("apple");
-      const cached = new Set(["apple"]);
-
-      arena.cacheTags(slot, cached);
-      expect(arena.getTags(slot)).toBe(cached);
-    });
   });
 
   describe("write", () => {
@@ -60,36 +52,20 @@ describe("FavoritesColumnarArena", () => {
       expect(arena.getPost(slot)).toEqual(post);
     });
 
-    test("drops the cached tags so they cannot go stale", () => {
+    test("replaces the tags of a rewritten slot", () => {
       const { arena, slot } = setup("apple");
 
-      arena.cacheTags(slot, new Set(["apple"]));
       arena.write(slot, createPost({ id: "1", tags: "banana" }));
       expect(arena.getTags(slot)).toEqual(new Set(["banana"]));
     });
   });
 
-  describe("clearTagCache", () => {
-    test("drops every cached set and keeps the tags readable", () => {
-      const { arena, slot } = setup("apple");
-      const cached = new Set(["apple"]);
-
-      arena.cacheTags(slot, cached);
-      arena.clearTagCache();
-      expect(arena.getTags(slot)).not.toBe(cached);
-      expect(arena.getTags(slot)).toEqual(cached);
-    });
-  });
-
   describe("compact", () => {
-    test("drops every cached set and keeps the data readable", () => {
+    test("keeps the data readable", () => {
       const { arena, slot } = setup("apple banana");
-      const cached = new Set(["apple", "banana"]);
 
-      arena.cacheTags(slot, cached);
       arena.compact();
-      expect(arena.getTags(slot)).not.toBe(cached);
-      expect(arena.getTags(slot)).toEqual(cached);
+      expect(arena.getTags(slot)).toEqual(new Set(["apple", "banana"]));
       expect(arena.getNumericId(slot)).toBe(1);
     });
   });

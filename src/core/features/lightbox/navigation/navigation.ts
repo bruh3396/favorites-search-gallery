@@ -1,26 +1,37 @@
+import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer";
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { MediaItem } from "@/core/domain/post/post";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface LightboxNavigationConfiguration {
   readonly maxWarmItems: number;
   readonly maxNeighborDistance: number;
+  readonly settleDelay: number;
 }
 
 export class LightboxNavigation<T extends MediaItem> {
   private readonly currentState = new Signal<T | undefined>(undefined);
   private readonly closedEmitter = new Emitter<T>();
+  private readonly settledEmitter = new Emitter<T>();
+  private readonly settle: DebouncedTask<[T]>;
   private readonly isOpenState = computed(() => this.currentState.value !== undefined);
   private readonly neighborsState = new Signal<readonly T[]>([]);
   private readonly warmItemsState = new Signal<readonly T[]>([]);
   private readonly sequenceState = new Signal<MediaSequence<T> | undefined>(undefined);
   private readonly positionState = computed(() => findPosition(this.currentState.value, this.sequenceState.value));
 
-  constructor(private readonly configuration: LightboxNavigationConfiguration) { }
+  constructor(private readonly configuration: LightboxNavigationConfiguration, scheduler: Pick<Scheduler, "schedule">) {
+    this.settle = createDebouncedTask({ delay: configuration.settleDelay, leading: false }, scheduler, (item: T) => this.settledEmitter.emit(item));
+  }
 
   public get closed(): Occurrence<T> {
     return this.closedEmitter;
+  }
+
+  public get settled(): Occurrence<T> {
+    return this.settledEmitter;
   }
 
   public get isOpen(): Readable<boolean> {
@@ -54,7 +65,7 @@ export class LightboxNavigation<T extends MediaItem> {
 
   public open(item: T, sequence: MediaSequence<T>): void {
     this.sequenceState.value = sequence;
-    this.currentState.value = item;
+    this.show(item);
     this.warmItemsState.value = [];
     this.publishNeighbors(item, sequence).catch(console.error);
   }
@@ -64,6 +75,7 @@ export class LightboxNavigation<T extends MediaItem> {
 
     this.sequenceState.value = undefined;
     this.currentState.value = undefined;
+    this.settle.cancel();
     this.neighborsState.value = [];
 
     if (item !== undefined) {
@@ -89,9 +101,14 @@ export class LightboxNavigation<T extends MediaItem> {
     const neighbor = await getNeighbor(sequence, current);
 
     if (neighbor !== undefined && this.isShowing(current, sequence)) {
-      this.currentState.value = neighbor;
+      this.show(neighbor);
       await this.publishNeighbors(neighbor, sequence);
     }
+  }
+
+  private show(item: T): void {
+    this.currentState.value = item;
+    this.settle(item);
   }
 
   private async publishNeighbors(current: T, sequence: MediaSequence<T>): Promise<void> {

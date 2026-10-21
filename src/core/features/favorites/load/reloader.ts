@@ -11,7 +11,7 @@ const STREAM_BATCH_SIZE = 1_000;
 export interface FavoritesReloaderDependencies {
   localFavorites: LocalFavorites;
   remoteFavorites: RemoteFavorites;
-  collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll" | "clearTagCache">;
+  collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll">;
   index: Pick<FavoritesSearchIndex, "rebuild">;
   postLibrary: PostLibrary;
   waitForPaint: () => Promise<void>;
@@ -38,7 +38,6 @@ export class FavoritesReloader {
       report({ phase: "indexing" });
       await waitForPaint();
       index.rebuild(collection.getAll());
-      collection.clearTagCache();
       postLibrary.refresh([...pulled, ...restored]).catch(console.error);
     }
     report({ phase: "pruning" });

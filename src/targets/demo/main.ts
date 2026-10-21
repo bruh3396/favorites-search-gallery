@@ -6,6 +6,7 @@ import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
@@ -41,6 +42,7 @@ function createDemoDependencies(): FavoritesPageDependencies {
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
     viewport: new BrowserViewport(),
+    sizeObserver: new BrowserSizeObserver(),
     morpher: new BrowserMorpher(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document)

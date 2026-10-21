@@ -3,9 +3,8 @@ import { Media } from "@/core/domain/media/media";
 export interface RemoteMedia {
   resolvePreviewUrl: (media: Media) => Promise<string>;
   resolveOriginalUrl: (media: Media) => Promise<string>;
-  resolveImageUrl: (media: Media) => Promise<string>;
-  decodeImage: (media: Media, width: number, signal?: AbortSignal) => Promise<ImageBitmap>;
-  decodeOriginal: (media: Media, signal?: AbortSignal) => Promise<ImageBitmap>;
+  decodeStill: (media: Media, signal?: AbortSignal, width?: number) => Promise<ImageBitmap>;
+  loadOriginal: (media: Media, signal?: AbortSignal) => Promise<HTMLImageElement>;
   fetchOriginal: (media: Media) => Promise<Blob>;
-  fetchDurationSeconds: (media: Media) => Promise<number>;
+  probeDurationSeconds: (media: Media) => Promise<number>;
 }

@@ -8,6 +8,7 @@ import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
+import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
@@ -102,6 +103,7 @@ function createFavoritesDependencies(environment: Environment, dependencies: Pag
     randomSource,
     localKeyedValues,
     viewport,
+    sizeObserver: new BrowserSizeObserver(),
     morpher: new BrowserMorpher(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),

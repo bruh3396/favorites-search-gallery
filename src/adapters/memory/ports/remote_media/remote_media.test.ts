@@ -10,18 +10,20 @@ describe("MemoryRemoteMedia", () => {
 
     expect(await source.resolvePreviewUrl(IMAGE)).toBe(IMAGE.locator);
     expect(await source.resolveOriginalUrl(IMAGE)).toBe(IMAGE.locator);
-    expect(await source.resolveImageUrl(IMAGE)).toBe(IMAGE.locator);
   });
 
-  test("decodes every image as a one-pixel bitmap", async() => {
-    const source = new MemoryRemoteMedia();
+  test("decodes every still as a one-pixel bitmap", async() => {
+    const bitmap = await new MemoryRemoteMedia().decodeStill();
 
-    expect(await source.decodeOriginal()).toMatchObject({ width: 1, height: 1 });
-    expect(await source.decodeImage()).toMatchObject({ width: 1, height: 1 });
-    (await source.decodeImage()).close();
+    expect(bitmap).toMatchObject({ width: 1, height: 1 });
+    bitmap.close();
+  });
+
+  test("loads every original from its locator", async() => {
+    expect((await new MemoryRemoteMedia().loadOriginal(IMAGE)).src).toBe(IMAGE.locator);
   });
 
   test("has no durations", async() => {
-    expect(await new MemoryRemoteMedia().fetchDurationSeconds()).toBe(0);
+    expect(await new MemoryRemoteMedia().probeDurationSeconds()).toBe(0);
   });
 });

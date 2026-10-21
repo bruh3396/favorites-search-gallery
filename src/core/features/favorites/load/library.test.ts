@@ -18,28 +18,28 @@ const STORED_MEDIA: Partial<Post> = { media: { kind: "image", locator: "1/a.jpg"
 const DAY = 24 * 60 * 60 * 1_000;
 const NOW = 100 * DAY;
 
-function setup(remotePosts: Post[] = [], fetchDurationSeconds: RemoteMedia["fetchDurationSeconds"] = () => Promise.resolve(12)): {
+function setup(remotePosts: Post[] = [], probeDurationSeconds: RemoteMedia["probeDurationSeconds"] = () => Promise.resolve(12)): {
   library: PostLibrary;
   localPosts: MemoryLocalPosts;
   localTagCategories: MemoryLocalTagCategories;
   scheduler: MemoryScheduler;
-  fetchDurationSeconds: ReturnType<typeof vi.fn<RemoteMedia["fetchDurationSeconds"]>>;
+  probeDurationSeconds: ReturnType<typeof vi.fn<RemoteMedia["probeDurationSeconds"]>>;
   onRefresh: ReturnType<typeof vi.fn>;
 } {
   const localPosts = new MemoryLocalPosts();
   const localTagCategories = new MemoryLocalTagCategories();
   const scheduler = new MemoryScheduler(NOW);
-  const fetchDuration = vi.fn(fetchDurationSeconds);
+  const probeDuration = vi.fn(probeDurationSeconds);
   const onRefresh = vi.fn();
   const library = new PostLibrary({
     localPosts,
     localTagCategories,
     remotePosts: new MemoryRemotePosts(new MemoryClient(remotePosts)),
-    remoteMedia: { fetchDurationSeconds: fetchDuration },
+    remoteMedia: { probeDurationSeconds: probeDuration },
     scheduler,
     onRefresh
   });
-  return { library, localPosts, localTagCategories, scheduler, fetchDurationSeconds: fetchDuration, onRefresh };
+  return { library, localPosts, localTagCategories, scheduler, probeDurationSeconds: probeDuration, onRefresh };
 }
 
 async function readLocalIds(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
@@ -219,19 +219,19 @@ describe("PostLibrary", () => {
   });
 
   test("does not fetch the duration of a video that has one", async() => {
-    const { library, fetchDurationSeconds } = setup();
+    const { library, probeDurationSeconds } = setup();
 
     await library.refresh([createPost({ ...UNTIMED_VIDEO, durationSeconds: 5, fetchedAt: NOW })]);
 
-    expect(fetchDurationSeconds).not.toHaveBeenCalled();
+    expect(probeDurationSeconds).not.toHaveBeenCalled();
   });
 
   test("keeps a stale video's known duration when its fetched copy has none", async() => {
-    const { library, fetchDurationSeconds, onRefresh } = setup([createPost({ ...DIMENSIONS, media: UNTIMED_VIDEO.media, score: 9 })]);
+    const { library, probeDurationSeconds, onRefresh } = setup([createPost({ ...DIMENSIONS, media: UNTIMED_VIDEO.media, score: 9 })]);
 
     await library.refresh([createPost({ ...UNTIMED_VIDEO, durationSeconds: 5 })]);
 
-    expect(fetchDurationSeconds).not.toHaveBeenCalled();
+    expect(probeDurationSeconds).not.toHaveBeenCalled();
     expect(onRefresh.mock.calls[0][0]).toMatchObject({ score: 9, durationSeconds: 5 });
   });
 

@@ -2,6 +2,8 @@
   .fsg-FavoritesPane {
     flex: 1 1 0;
     min-inline-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .fsg-FavoritesPane-header {
@@ -18,9 +20,5 @@
 
   .fsg-FavoritesPane-pagination {
     flex-basis: 100%;
-  }
-
-  .fsg-FavoritesPane-content {
-    display: block;
   }
 }

@@ -4,8 +4,12 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
 import { Post } from "@/core/domain/post/post";
-import { TermUpdate } from "@/core/search/engines/search_engine";
 import { hasMedia } from "@/core/domain/media/media";
+
+export interface FavoriteOverwrite {
+  readonly favorite: Favorite;
+  readonly previousTags: ReadonlySet<string>;
+}
 
 export class FavoritesCollection {
   private readonly list = new IdentifiedList<ArenaFavorite>();
@@ -47,26 +51,21 @@ export class FavoritesCollection {
     return this.list.getAllIds();
   }
 
-  public overwrite(post: Post): TermUpdate<Favorite> | undefined {
+  public overwrite(post: Post): FavoriteOverwrite | undefined {
     const favorite = this.list.get(post.id);
 
     if (favorite === undefined) {
       return undefined;
     }
-    const oldTerms = favorite.tags;
+    const previousTags = favorite.tags;
     const wasMediaAvailable = hasMedia(favorite.media);
 
     this.arena.write(favorite.slot, post);
-    const newTerms = favorite.tags;
 
     if (!wasMediaAvailable && hasMedia(favorite.media)) {
       this.hydratedFavorites.emit(favorite);
     }
-    return oldTerms.symmetricDifference(newTerms).size > 0 ? { doc: favorite, oldTerms, newTerms } : undefined;
-  }
-
-  public clearTagCache(): void {
-    this.arena.clearTagCache();
+    return { favorite, previousTags };
   }
 
   public compact(): void {

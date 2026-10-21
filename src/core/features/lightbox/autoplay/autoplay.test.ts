@@ -12,13 +12,13 @@ interface Setup {
   autoplay: LightboxAutoplay;
   current: Signal<MediaItem | undefined>;
   scheduler: MemoryScheduler;
-  showNext: ReturnType<typeof vi.fn<() => void>>;
+  showNext: ReturnType<typeof vi.fn<() => Promise<void>>>;
 }
 
 function setup(item: MediaItem | undefined = IMAGE): Setup {
   const current = new Signal<MediaItem | undefined>(item);
   const scheduler = new MemoryScheduler();
-  const showNext = vi.fn<() => void>();
+  const showNext = vi.fn<() => Promise<void>>().mockResolvedValue();
   const autoplay = new LightboxAutoplay({ interval: 3_000 }, { current, showNext, scheduler });
 
   onTestFinished(() => autoplay.dispose());
@@ -68,6 +68,16 @@ describe("LightboxAutoplay", () => {
     expect([showNext.mock.calls.length, autoplay.countdown.value !== first, autoplay.countdown.value]).toEqual([0, true, { duration: 3_000 }]);
   });
 
+  test("stops once nothing is shown", () => {
+    const { autoplay, current, scheduler, showNext } = setup();
+
+    autoplay.toggle();
+    current.value = undefined;
+    current.value = IMAGE;
+    scheduler.advance(3_000);
+    expect([autoplay.isPlaying.value, autoplay.countdown.value, showNext.mock.calls.length]).toEqual([false, undefined, 0]);
+  });
+
   test("waits on a video instead of counting down", () => {
     const { autoplay, scheduler, showNext } = setup(VIDEO);
 
@@ -92,17 +102,6 @@ describe("LightboxAutoplay", () => {
       autoplay.toggle();
       autoplay.showNextAfterVideo();
       expect(showNext).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("stop", () => {
-    test("pauses and cancels the countdown", () => {
-      const { autoplay, scheduler, showNext } = setup();
-
-      autoplay.toggle();
-      autoplay.stop();
-      scheduler.advance(3_000);
-      expect([autoplay.isPlaying.value, showNext.mock.calls.length]).toEqual([false, 0]);
     });
   });
 

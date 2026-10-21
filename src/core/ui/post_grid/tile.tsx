@@ -24,7 +24,7 @@ export interface TileProps {
   upscalePaused?: Readable<boolean>;
   visibilityObserver: VisibilityObserver;
   onVisibilityChange: (visible: boolean) => void;
-  decodeImage: (media: Media, width: number, signal: AbortSignal) => Promise<ImageBitmap>;
+  decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
   scheduler: Pick<Scheduler, "schedule">;
   resolvePreviewUrl: (media: Media) => Promise<string>;
   href?: string;
@@ -68,7 +68,7 @@ export function Tile(props: TileProps): HTMLElement {
 
   if (hasMedia(post.media)) {
     loadPreview(root, preview, props);
-    const upscaler = new Upscaler({ canvas, media: post.media, decodeImage: props.decodeImage, scheduler: props.scheduler });
+    const upscaler = new Upscaler({ canvas, media: post.media, decodeStill: props.decodeStill, scheduler: props.scheduler });
 
     effect(() => {
       const upscalingEnabled = upscale.value;

@@ -2,12 +2,13 @@ import { describe, expect, test, vi } from "vitest";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryMorpher } from "@/adapters/memory/ports/morpher/morpher";
-import { closeIntoTile } from "@/core/features/lightbox/ui/screen/close";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { closeIntoTile } from "@/core/features/lightbox/commands/close";
 
 const POST: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
 
 function openNavigation(): LightboxNavigation<MediaItem> {
-  const navigation = new LightboxNavigation<MediaItem>({ maxWarmItems: 2, maxNeighborDistance: 0 });
+  const navigation = new LightboxNavigation<MediaItem>({ maxWarmItems: 2, maxNeighborDistance: 0, settleDelay: 75 }, new MemoryScheduler());
 
   navigation.open(POST, { getNext: () => Promise.resolve(undefined), getPrevious: () => Promise.resolve(undefined), positionOf: () => undefined });
   return navigation;

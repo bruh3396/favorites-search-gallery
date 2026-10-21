@@ -1,4 +1,6 @@
-import { FavoritesSearchSession, FavoritesSearchSessionSettingDependencies } from "@/core/features/favorites/search/session";
+import {
+  FavoritesSearchSession, FavoritesSearchSessionConfiguration, FavoritesSearchSessionSettingDependencies
+} from "@/core/features/favorites/search/session";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesActions } from "@/core/features/favorites/actions/actions";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
@@ -39,7 +41,9 @@ export interface FavoritesService {
   readonly actions: Pick<FavoritesActions, "add" | "remove">;
   readonly hydrated: Occurrence<Favorite>;
   readonly loadState: Readable<LoadState>;
-  createSearchSession: (settings: FavoritesSearchSessionSettingDependencies) => FavoritesSearchSession;
+  createSearchSession: (
+    configuration: FavoritesSearchSessionConfiguration, settings: FavoritesSearchSessionSettingDependencies
+  ) => FavoritesSearchSession;
   isFavorited: (id: string) => boolean;
   load: () => Promise<void>;
 }
@@ -54,7 +58,9 @@ export function createFavoritesService(configuration: FavoritesConfiguration, de
     actions,
     hydrated: collection.hydrated,
     loadState: loader.state,
-    createSearchSession: settings => new FavoritesSearchSession({ ...dependencies, ...settings, index: searchIndex, blacklist }),
+    createSearchSession: (sessionConfiguration, settings) => new FavoritesSearchSession(
+      sessionConfiguration, { ...dependencies, ...settings, index: searchIndex, blacklist }
+    ),
     isFavorited: id => actions.isFavorited(id),
     load: () => loader.load()
   };

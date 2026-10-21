@@ -1,5 +1,8 @@
-import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
+import { Readable, Signal, batch, computed, effect } from "@/core/utils/reactive/signal";
 import { MediaItem } from "@/core/domain/post/post";
+
+// The geometry formulas intentionally combine arithmetic operators.
+/* eslint-disable no-mixed-operators */
 
 export interface LightboxZoomConfiguration {
   readonly minimumScale: number;
@@ -36,7 +39,6 @@ export interface ZoomRegion {
 
 interface ZoomedItem {
   readonly item: MediaItem;
-  readonly frame: ZoomFrame;
   readonly view: ZoomView;
   readonly glides: boolean;
 }
@@ -47,6 +49,7 @@ interface Box extends ZoomPoint {
 }
 
 export const FIT_VIEW: ZoomView = { scale: 1, x: 0, y: 0 };
+export const EMPTY_FRAME: ZoomFrame = { width: 0, height: 0, mediaWidth: 0, mediaHeight: 0 };
 
 const MAXIMUM_SCALE_PAST_DETAIL = 2;
 const FITTED_SCALE_TOLERANCE = 0.001;
@@ -60,6 +63,7 @@ export class LightboxZoom {
   public readonly magnification: Readable<number | undefined>;
   public readonly visibleRegion: Readable<ZoomRegion | undefined>;
   private readonly zoomed = new Signal<ZoomedItem | undefined>(undefined);
+  private readonly frame = new Signal<ZoomFrame>(EMPTY_FRAME);
   private readonly stopEffect: () => void;
 
   constructor(private readonly configuration: LightboxZoomConfiguration, private readonly dependencies: LightboxZoomDependencies) {
@@ -75,11 +79,11 @@ export class LightboxZoom {
     });
     this.magnification = computed(() => {
       const zoomed = this.zoomed.value;
-      return zoomed === undefined ? undefined : zoomed.view.scale * fitRatio(zoomed.frame);
+      return zoomed === undefined ? undefined : zoomed.view.scale * fitRatio(this.frame.value);
     });
     this.visibleRegion = computed(() => {
       const zoomed = this.zoomed.value;
-      return zoomed === undefined ? undefined : findVisibleRegion(zoomed.frame, zoomed.view);
+      return zoomed === undefined ? undefined : findVisibleRegion(this.frame.value, zoomed.view);
     });
     this.stopEffect = effect(() => {
       if (this.zoomed.peek()?.item !== dependencies.current.value) {
@@ -88,21 +92,39 @@ export class LightboxZoom {
     });
   }
 
-  public toggle(frame: ZoomFrame, point: ZoomPoint = centerOf(frame)): void {
+  public setFrame(frame: ZoomFrame): void {
+    batch(() => {
+      const zoomed = this.zoomed.peek();
+
+      this.frame.value = frame;
+
+      if (zoomed === undefined) {
+        return;
+      }
+
+      if (hasArea(frame)) {
+        this.zoomed.value = { item: zoomed.item, view: clampView(frame, zoomed.view), glides: false };
+      } else {
+        this.zoomOut();
+      }
+    });
+  }
+
+  public toggle(point?: ZoomPoint): void {
     if (this.zoomed.peek() !== undefined) {
       this.zoomOut();
     } else {
-      this.zoomTo(frame, () => this.findDetailScale(frame), point, true);
+      this.zoomTo(frame => this.findDetailScale(frame), point, true);
     }
   }
 
-  public zoomBy(frame: ZoomFrame, factor: number, point: ZoomPoint = centerOf(frame)): void {
+  public zoomBy(factor: number, point?: ZoomPoint): void {
     const scale = this.view.peek().scale * factor;
 
     if (scale <= 1 + FITTED_SCALE_TOLERANCE) {
       this.zoomOut();
     } else {
-      this.zoomTo(frame, () => Math.min(scale, this.findDetailScale(frame) * MAXIMUM_SCALE_PAST_DETAIL), point, false);
+      this.zoomTo(frame => Math.min(scale, this.findDetailScale(frame) * MAXIMUM_SCALE_PAST_DETAIL), point, false);
     }
   }
 
@@ -110,13 +132,16 @@ export class LightboxZoom {
     this.zoomed.value = undefined;
   }
 
-  public panBy(frame: ZoomFrame, deltaX: number, deltaY: number): void {
+  public panBy(deltaX: number, deltaY: number): void {
     const zoomed = this.zoomed.peek();
 
     if (zoomed !== undefined) {
       const { view } = zoomed;
 
-      this.zoomed.value = { item: zoomed.item, frame, view: clampView(frame, { scale: view.scale, x: view.x + deltaX, y: view.y + deltaY }), glides: false };
+      const frame = this.frame.peek();
+      const nextView = { scale: view.scale, x: view.x + deltaX, y: view.y + deltaY };
+
+      this.zoomed.value = { item: zoomed.item, view: clampView(frame, nextView), glides: false };
     }
   }
 
@@ -124,11 +149,13 @@ export class LightboxZoom {
     this.stopEffect();
   }
 
-  private zoomTo(frame: ZoomFrame, chooseScale: () => number, point: ZoomPoint, glides: boolean): void {
+  // eslint-disable-next-line no-restricted-syntax
+  private zoomTo(chooseScale: (frame: ZoomFrame) => number, point: ZoomPoint | undefined, glides: boolean): void {
     const item = this.dependencies.current.peek();
+    const frame = this.frame.peek();
 
     if (item !== undefined && isZoomable(item) && hasArea(frame)) {
-      this.zoomed.value = { item, frame, view: zoomAt(frame, this.view.peek(), chooseScale(), point), glides };
+      this.zoomed.value = { item, view: zoomAt(frame, this.view.peek(), chooseScale(frame), point ?? centerOf(frame)), glides };
     }
   }
 
@@ -160,6 +187,8 @@ function fitBox(frame: ZoomFrame): Box {
   return { x: (frame.width - width) / 2, y: (frame.height - height) / 2, width, height };
 }
 
+// These numeric inputs form the geometry for one zoom operation.
+// eslint-disable-next-line @typescript-eslint/max-params
 function zoomAt(frame: ZoomFrame, view: ZoomView, scale: number, point: ZoomPoint): ZoomView {
   const localX = (point.x - view.x) / view.scale;
   const localY = (point.y - view.y) / view.scale;
@@ -175,6 +204,8 @@ function clampView(frame: ZoomFrame, view: ZoomView): ZoomView {
   };
 }
 
+// Keep the scalar geometry inputs explicit for this small mathematical helper.
+// eslint-disable-next-line @typescript-eslint/max-params
 function clampOffset(offset: number, scale: number, start: number, size: number, frameSize: number): number {
   const scaledSize = size * scale;
 
@@ -191,6 +222,8 @@ function findVisibleRegion(frame: ZoomFrame, view: ZoomView): ZoomRegion {
   return { left, top, width: right - left, height: bottom - top };
 }
 
+// Keep the scalar geometry inputs explicit for this small mathematical helper.
+// eslint-disable-next-line @typescript-eslint/max-params
 function findVisibleSpan(offset: number, scale: number, start: number, size: number, frameSize: number): [start: number, end: number] {
   const shownStart = offset + start * scale;
   const shownSize = size * scale;

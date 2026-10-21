@@ -1,4 +1,4 @@
-import { LightboxControls, LightboxControlsProps } from "@/core/features/lightbox/ui/controls/controls";
+import { LIGHTBOX_CONTROL_IDS, LightboxControls, LightboxControlsProps } from "@/core/features/lightbox/ui/controls/controls";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -48,22 +48,20 @@ function setup(overrides: Partial<LightboxControlsProps<string>> = {}): Setup {
       visibility={new LightboxOverlayVisibility({ idleDelay: 1_000, hideSoonDelay: 1_000 }, new MemoryScheduler())}
       current={new Signal<string | undefined>("1")}
       position={new Signal({ index: 36, total: 1_204 })}
-      autoplay={{ isPlaying, countdown: countdown as Readable<AutoplayCountdown | undefined>, toggle: toggleAutoplay }}
-      zoom={{ toggleDirection, toggle: toggleZoom }}
-      fullscreen={{ isFullscreen, toggle: toggleFullscreen }}
+      autoplay={{ isPlaying, countdown: countdown as Readable<AutoplayCountdown | undefined> }}
+      zoom={{ toggleDirection }}
+      fullscreen={{ isFullscreen }}
+      commands={{ toggleAutoplay, toggleZoom, toggleFullscreen, download, openPostPage, close, showNext, showPrevious }}
       favorites={{ isFavorited: () => false, addFavorite: doNothing, removeFavorite: doNothing }}
-      download={download}
-      openPostPage={openPostPage}
-      close={close}
-      showNext={showNext}
-      showPrevious={showPrevious}
+      shownControls={new Set(LIGHTBOX_CONTROL_IDS)}
       {...overrides}
     />
   ));
 
   onTestFinished(dispose);
   return {
-    root: result as HTMLElement, isPlaying, countdown, isFullscreen, toggleDirection, toggleAutoplay, toggleZoom, toggleFullscreen, close, showNext, showPrevious, download,
+    root: result as HTMLElement, isPlaying, countdown, isFullscreen, toggleDirection, toggleAutoplay, toggleZoom, toggleFullscreen,
+    close, showNext, showPrevious, download,
     openPostPage
   };
 }
@@ -83,10 +81,15 @@ describe("LightboxControls", () => {
     expect(root.querySelector(`.${LightboxPositionClass.root}`)!.textContent).toBe(`37 / ${(1_204).toLocaleString()}`);
   });
 
-  test("leaves out the buttons it has no callback for", () => {
-    const icons = readIcons(setup({ favorites: undefined, download: undefined, openPostPage: undefined }).root);
+  test("shows only the controls it is told to show", () => {
+    const { root } = setup({ shownControls: new Set(["download", "next"]) });
 
-    expect(["heart", "download", "postPage"].filter(icon => icons.includes(icon))).toEqual([]);
+    expect([readIcons(root), root.querySelectorAll(`.${LightboxArrowClass.root}`).length, root.querySelector(`.${LightboxPositionClass.root}`)])
+      .toEqual([["download"], 1, null]);
+  });
+
+  test("leaves out the favorite button when the page has no favorites", () => {
+    expect(readIcons(setup({ favorites: undefined }).root)).not.toContain("heart");
   });
 
   test("calls back from its buttons and arrows", () => {

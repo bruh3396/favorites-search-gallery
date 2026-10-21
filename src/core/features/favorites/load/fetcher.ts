@@ -16,7 +16,7 @@ interface MutableFetchProgress {
 export interface FavoritesFetcherDependencies {
   localFavorites: LocalFavorites;
   remoteFavorites: RemoteFavorites;
-  collection: Pick<FavoritesCollection, "append" | "getAllIds" | "clearTagCache">;
+  collection: Pick<FavoritesCollection, "append" | "getAllIds">;
   index: Pick<FavoritesSearchIndex, "add">;
   postLibrary: PostLibrary;
   report: (state: LoadState) => void;
@@ -71,7 +71,6 @@ export class FavoritesFetcher {
     const favorites = collection.append(adopted);
 
     index.add(favorites);
-    collection.clearTagCache();
     postLibrary.refresh(adopted).catch(console.error);
     return favorites;
   }

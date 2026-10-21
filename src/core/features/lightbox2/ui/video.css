@@ -1,0 +1,15 @@
+.fsg-LightboxVideo {
+  width: 100%;
+  height: 100%;
+}
+
+.fsg-LightboxVideo[hidden] {
+  display: none;
+}
+
+.fsg-LightboxVideo > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

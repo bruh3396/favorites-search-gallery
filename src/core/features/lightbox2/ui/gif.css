@@ -1,0 +1,15 @@
+.fsg-LightboxGif {
+  width: 100%;
+  height: 100%;
+}
+
+.fsg-LightboxGif[hidden] {
+  display: none;
+}
+
+.fsg-LightboxGif > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}

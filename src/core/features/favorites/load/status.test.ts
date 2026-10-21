@@ -23,6 +23,12 @@ describe("describeLoadState", () => {
     expect(describeLoadState({ phase: "restoring", loadedCount: 50, expectedCount: 200 })).toBe("Loading favorites: 50 / 200");
   });
 
+  test("groups the digits of large counts", () => {
+    expect(describeLoadState({ phase: "fetching", loadedCount: 12_400, expectedCount: 50_021 }))
+      .toBe(`Fetching favorites: ${(12_400).toLocaleString()} / ${(50_021).toLocaleString()}`);
+    expect(describeLoadState({ phase: "loaded", pulledCount: 1_200, removedCount: 0 })).toBe(`${(1_200).toLocaleString()} new`);
+  });
+
   test("reports what the sync changed once loaded", () => {
     expect(describeLoadState({ phase: "loaded", pulledCount: 3, removedCount: 1 })).toBe("3 new, 1 removed");
     expect(describeLoadState({ phase: "loaded", pulledCount: 3, removedCount: 0 })).toBe("3 new");

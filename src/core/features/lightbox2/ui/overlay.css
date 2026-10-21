@@ -1,0 +1,40 @@
+.fsg-LightboxOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-LightboxOverlay-top {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 16px 40px;
+  background: linear-gradient(rgb(0 0 0 / 0.7), transparent);
+}
+
+.fsg-LightboxOverlay-slot {
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.fsg-LightboxOverlay-startEdge,
+.fsg-LightboxOverlay-endEdge {
+  position: absolute;
+  inset-block: 64px 80px;
+  inline-size: 7.5%;
+  min-inline-size: 56px;
+}
+
+.fsg-LightboxOverlay-startEdge {
+  inset-inline-start: 0;
+}
+
+.fsg-LightboxOverlay-endEdge {
+  inset-inline-end: 0;
+}

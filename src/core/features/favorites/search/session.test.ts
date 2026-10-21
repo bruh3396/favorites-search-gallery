@@ -1,5 +1,5 @@
 import { Post, getRatingBit } from "@/core/domain/post/post";
-import { Signal, effect } from "@/core/utils/reactive/signal";
+import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -18,13 +18,14 @@ interface Options {
   blacklistedTags?: readonly string[];
   settings?: Partial<SearchSettings>;
   pagination?: PaginationSettings;
+  isStarted?: boolean;
 }
 
 interface Setup {
   session: FavoritesSearchSession;
   collection: FavoritesCollection;
   index: FavoritesSearchIndex;
-  searchSettings: Preference<SearchSettings>;
+  searchSettings: Readable<SearchSettings>;
   paginationSettings: Preference<PaginationSettings>;
 }
 
@@ -47,16 +48,22 @@ function createPreference<T>(initial: T): Preference<T> {
   };
 }
 
-function setup(posts: Post[] = [], { blacklistedTags = [], settings = {}, pagination = UNPAGINATED }: Options = {}): Setup {
+function setup(posts: Post[] = [], { blacklistedTags = [], settings = {}, pagination = UNPAGINATED, isStarted = true }: Options = {}): Setup {
   const collection = new FavoritesCollection();
   const index = new FavoritesSearchIndex();
   const blacklist = new FavoritesBlacklist({ blacklistedTags, force: false });
-  const searchSettings = createPreference(createSearchSettings(settings));
   const paginationSettings = createPreference(pagination);
 
   index.rebuild(collection.append(posts));
-  const session = new FavoritesSearchSession({ index, blacklist, searchSettings, paginationSettings, randomSource: new MemoryRandomSource([0.25, 0.5, 0.75]) });
-  return { session, collection, index, searchSettings, paginationSettings };
+  const session = new FavoritesSearchSession(
+    { searchSettings: createSearchSettings(settings) },
+    { index, blacklist, paginationSettings, randomSource: new MemoryRandomSource([0.25, 0.5, 0.75]) }
+  );
+
+  if (isStarted) {
+    session.start();
+  }
+  return { session, collection, index, searchSettings: session.settings, paginationSettings };
 }
 
 function getResultIds(session: FavoritesSearchSession): string[] {
@@ -114,6 +121,44 @@ describe("FavoritesSearchSession", () => {
     expect(getResultIds(session)).toEqual(["1", "2"]);
     session.updateSettings({ isBlacklistEnabled: true });
     expect(getResultIds(session)).toEqual(["2"]);
+  });
+
+  describe("start", () => {
+    test("shows no results before the session starts", () => {
+      const { session, collection, index } = setup(createTaggedPosts("apple"), { isStarted: false });
+
+      index.add(collection.append([createPost({ id: "2" })]));
+      index.rebuild(collection.getAll());
+      expect(getResultIds(session)).toEqual([]);
+    });
+
+    test("searches the whole index once started", () => {
+      const { session, collection, index } = setup(createTaggedPosts("apple"), { isStarted: false });
+
+      index.add(collection.append([createPost({ id: "2" })]));
+      session.start();
+      expect(getResultIds(session)).toEqual(["1", "2"]);
+    });
+
+    test("searches only the first time it is called", () => {
+      const { session } = setup(createTaggedPosts("apple"));
+      const { shown, stop } = watchResults(session);
+
+      session.start();
+      expect(shown).toEqual([["1"]]);
+      stop();
+    });
+
+    test("changes the settings without searching before the session starts", () => {
+      const { session, searchSettings } = setup(createTaggedPosts("apple", "banana"), { isStarted: false });
+
+      session.submit("apple");
+      expect(searchSettings.value.query).toBe("apple");
+      expect(getResultIds(session)).toEqual([]);
+
+      session.start();
+      expect(getResultIds(session)).toEqual(["1"]);
+    });
   });
 
   describe("createMediaSequence", () => {
@@ -512,11 +557,11 @@ describe("FavoritesSearchSession", () => {
   describe("when a favorite is refreshed", () => {
     test("keeps it shown even when it no longer matches", () => {
       const { session, collection, index } = setup(createTaggedPosts("apple"));
+      const [favorite] = collection.getAll();
 
       session.submit("apple");
-      const refreshed = collection.overwrite(createPost({ id: "1", tags: "banana" }));
-
-      index.update(refreshed === undefined ? [] : [refreshed]);
+      collection.overwrite(createPost({ id: "1", tags: "banana" }));
+      index.update([{ doc: favorite, oldTerms: new Set(["apple"]), newTerms: favorite.tags }]);
       expect(getResultIds(session)).toEqual(["1"]);
     });
   });

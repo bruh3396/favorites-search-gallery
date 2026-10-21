@@ -9,7 +9,7 @@ describe("mountAppRoot", () => {
     const root = mountAppRoot(container, { colorScheme: "dark", styles: [] });
 
     expect(container.shadowRoot?.firstElementChild).toBe(root);
-    expect(root.className).toBe(AppRootClass.root);
+    expect(root.classList.contains(AppRootClass.root)).toBe(true);
   });
 
   test("applies the color scheme to the root", () => {

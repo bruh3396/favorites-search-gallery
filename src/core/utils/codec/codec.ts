@@ -21,7 +21,7 @@ export function createFieldsCodec<T extends object>(fields: FieldGuards<T>): Cod
 export function createRecordCodec<T extends object>(defaultValue: T, fields: FieldGuards<T>): Codec<T> {
   const codec = createFieldsCodec(fields);
   return {
-    decode: (stored): T => ({ ...defaultValue, ...codec.decode(stored) }),
+    decode: (stored): T | undefined => (isRecord(stored) ? { ...defaultValue, ...codec.decode(stored) } : undefined),
     encode: (value): unknown => codec.encode(value)
   };
 }
@@ -37,5 +37,14 @@ export function createSetCodec<T>(acceptsMember: Guard<T>): Codec<ReadonlySet<T>
   return {
     decode: (stored): ReadonlySet<T> | undefined => (Array.isArray(stored) && stored.every(acceptsMember) ? new Set(stored) : undefined),
     encode: (value): unknown => [...value]
+  };
+}
+
+export function createListCodec<T>(item: Codec<T>): Codec<readonly T[]> {
+  return {
+    decode: (stored): readonly T[] | undefined => (Array.isArray(stored)
+      ? stored.map(entry => item.decode(entry)).filter((entry): entry is T => entry !== undefined)
+      : undefined),
+    encode: (value): unknown => value.map(entry => item.encode(entry))
   };
 }

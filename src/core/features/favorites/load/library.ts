@@ -32,7 +32,7 @@ export interface PostLibraryDependencies {
   localPosts: LocalPosts;
   localTagCategories: LocalTagCategories;
   remotePosts: RemotePosts;
-  remoteMedia: Pick<RemoteMedia, "fetchDurationSeconds">;
+  remoteMedia: Pick<RemoteMedia, "probeDurationSeconds">;
   scheduler: Scheduler;
   onRefresh: (refreshed: Post) => void;
 }
@@ -111,7 +111,7 @@ export class PostLibrary {
     if (post.media.kind !== "video" || post.durationSeconds !== 0) {
       return post;
     }
-    const durationSeconds = await this.dependencies.remoteMedia.fetchDurationSeconds(post.media).catch(console.error);
+    const durationSeconds = await this.dependencies.remoteMedia.probeDurationSeconds(post.media).catch(console.error);
     return durationSeconds === undefined ? post : { ...post, durationSeconds };
   }
 
