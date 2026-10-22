@@ -1,0 +1,115 @@
+.fsg-TabStrip {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  min-inline-size: 0;
+  block-size: 30px;
+  box-shadow: inset 0 -1px var(--fsg-color-outline);
+}
+
+.fsg-TabStrip-list {
+  display: flex;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+.fsg-TabStrip-tab {
+  display: flex;
+  align-items: center;
+  min-inline-size: 0;
+  max-inline-size: 240px;
+  border-inline-end: 1px solid var(--fsg-color-outline);
+}
+
+.fsg-TabStrip-tab[data-entering] {
+  animation: fsg-TabStrip-enter var(--fsg-motion-duration-short) ease-out;
+}
+
+@keyframes fsg-TabStrip-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.fsg-TabStrip-tab:has(> [aria-selected="true"]) {
+  background: var(--fsg-color-surface-container);
+}
+
+.fsg-TabStrip-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  block-size: 100%;
+  padding: 0 10px 0 12px;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+  cursor: pointer;
+}
+
+.fsg-TabStrip-select[aria-selected="true"] {
+  color: inherit;
+}
+
+.fsg-TabStrip-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fsg-TabStrip-close,
+.fsg-TabStrip-add {
+  display: grid;
+  place-items: center;
+  min-inline-size: var(--fsg-control-size-small);
+  color: var(--fsg-color-on-surface-muted);
+  cursor: pointer;
+}
+
+.fsg-TabStrip-tab:only-child .fsg-TabStrip-close {
+  display: none;
+}
+
+.fsg-TabStrip-close {
+  margin-inline-end: 4px;
+  block-size: var(--fsg-control-size-small);
+  border-radius: var(--fsg-radius-medium);
+}
+
+.fsg-TabStrip-add {
+  align-self: center;
+  block-size: var(--fsg-control-size-small);
+  margin-inline: 6px;
+  border-radius: var(--fsg-radius-medium);
+}
+
+.fsg-TabStrip-trailing {
+  display: flex;
+  align-items: center;
+  margin-inline-start: auto;
+  padding-inline: 12px;
+  white-space: nowrap;
+}
+
+.fsg-TabStrip-icon {
+  inline-size: 16px;
+  block-size: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.fsg-TabStrip-close:hover,
+.fsg-TabStrip-add:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+}
+
+.fsg-TabStrip-select:focus-visible,
+.fsg-TabStrip-close:focus-visible,
+.fsg-TabStrip-add:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: -2px;
+}

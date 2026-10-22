@@ -16,7 +16,6 @@ function flattenPostIds(batches: Post[][]): string[] {
   return batches.flat().map(post => post.id);
 }
 
-// The fetcher requests its next page only after a macrotask, so waiting on microtasks alone would never see it.
 function yieldToEventLoop(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 0));
 }

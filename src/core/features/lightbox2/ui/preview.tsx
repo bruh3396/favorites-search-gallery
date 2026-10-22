@@ -1,4 +1,4 @@
-import { Readable } from "@/core/utils/reactive/signal";
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
 export const LightboxPreviewClass = {
@@ -6,10 +6,16 @@ export const LightboxPreviewClass = {
 } as const;
 
 export interface LightboxPreviewProps {
-  src: Readable<string>;
-  hidden: Readable<boolean>;
+  src: Readable<string | undefined>;
 }
 
-export function LightboxPreview({ src, hidden }: LightboxPreviewProps): HTMLImageElement {
-  return <img className={LightboxPreviewClass.root} alt="" hidden={hidden} src={src} /> as HTMLImageElement;
+export function LightboxPreview({ src }: LightboxPreviewProps): HTMLImageElement {
+  return (
+    <img
+      className={LightboxPreviewClass.root}
+      alt=""
+      hidden={computed(() => src.value === undefined)}
+      src={computed(() => src.value ?? "")}
+    />
+  ) as HTMLImageElement;
 }

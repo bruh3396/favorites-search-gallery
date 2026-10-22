@@ -4,14 +4,14 @@ type Describers = { readonly [Phase in LoadPhase]: (state: Extract<LoadState, { 
 
 const DESCRIBERS: Describers = {
   starting: () => "Starting",
-  fetching: state => `Fetching favorites: ${describeProgress(state.loadedCount, state.expectedCount)}`,
-  restoring: state => `Loading favorites: ${describeProgress(state.loadedCount, state.expectedCount)}`,
-  saving: () => "Saving favorites",
-  pulling: () => "Checking for new favorites",
-  indexing: () => "Indexing favorites",
-  pruning: () => "Checking for removed favorites",
+  fetching: state => `Fetching ${describeProgress(state.loadedCount, state.expectedCount)}`,
+  restoring: state => `Loading ${describeProgress(state.loadedCount, state.expectedCount)}`,
+  saving: () => "Saving",
+  pulling: () => "Checking for new",
+  indexing: () => "Indexing",
+  pruning: () => "Checking for removed",
   loaded: state => describeChanges(state.pulledCount, state.removedCount),
-  interrupted: () => "Couldn't finish loading favorites"
+  interrupted: () => "Couldn't finish loading"
 };
 
 export function describeLoadState(state: LoadState): string {

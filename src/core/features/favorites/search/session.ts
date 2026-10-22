@@ -1,6 +1,6 @@
 import { PaginationResult, PaginationSettings, getPageSize, paginate } from "@/core/features/favorites/search/pagination";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
-import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/inputs";
+import { SearchRequest, SearchSettings, UNFILTERED_SEARCH_SETTINGS } from "@/core/features/favorites/search/inputs";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
@@ -29,6 +29,7 @@ const SEED_RANGE = 2 ** 32;
 
 export class FavoritesSearchSession {
   private readonly currentSettings: Signal<SearchSettings>;
+  private readonly currentTitle = computed(() => this.currentSettings.value.query || "New");
   private readonly request: Readable<SearchRequest>;
   private readonly currentResults = new Signal<readonly Favorite[]>([]);
   private readonly pageNumber = new Signal(1);
@@ -56,6 +57,10 @@ export class FavoritesSearchSession {
 
   public get settings(): Readable<SearchSettings> {
     return this.currentSettings;
+  }
+
+  public get title(): Readable<string> {
+    return this.currentTitle;
   }
 
   public get results(): Readable<readonly Favorite[]> {
@@ -87,6 +92,10 @@ export class FavoritesSearchSession {
 
   public shuffle(): void {
     this.run({ isShuffled: true, shuffleSeed: this.drawSeed() });
+  }
+
+  public clearFilters(): void {
+    this.run(UNFILTERED_SEARCH_SETTINGS);
   }
 
   public updateSettings(change: Partial<SearchSettings>): void {

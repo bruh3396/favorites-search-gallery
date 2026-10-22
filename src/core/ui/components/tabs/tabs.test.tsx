@@ -13,6 +13,7 @@ interface Setup {
   renderPanel: Mock<(tab: Tab<string>) => HTMLElement>;
   disposePanel: Mock<(value: string) => void>;
   onAdd: Mock<() => void>;
+  onClose: Mock<(id: string) => void>;
   dispose: () => void;
 }
 
@@ -24,14 +25,15 @@ function setup(values: readonly string[] = ["Home", "apple"]): Setup {
     return <p>{tab.value}</p>;
   });
   const onAdd = vi.fn<() => void>();
+  const onClose = vi.fn((id: string): void => manager.close(id));
 
   values.forEach((value, index) => manager.open(value, value, { closable: index > 0 }));
   const { result: element, dispose } = render(document, () => (
-    <Tabs manager={manager} label={tab => new Signal(tab.value)} renderPanel={renderPanel} onAdd={onAdd} />
+    <Tabs manager={manager} label={tab => new Signal(tab.value)} renderPanel={renderPanel} onAdd={onAdd} onClose={onClose} />
   ));
 
   document.body.append(element);
-  return { element, manager, renderPanel, disposePanel, onAdd, dispose };
+  return { element, manager, renderPanel, disposePanel, onAdd, onClose, dispose };
 }
 
 function readPanel(element: HTMLElement): string {
@@ -78,6 +80,13 @@ describe("Tabs", () => {
     manager.activate("apple");
     element.querySelector<HTMLButtonElement>("button[aria-label='Close apple']")!.click();
     expect([readPanel(element), manager.tabs.value.length]).toEqual(["Home", 1]);
+  });
+
+  test("reports the tab whose close button is clicked", () => {
+    const { element, onClose } = setup();
+
+    element.querySelector<HTMLButtonElement>("button[aria-label='Close apple']")!.click();
+    expect(onClose).toHaveBeenCalledExactlyOnceWith("apple");
   });
 
   test("adds a tab from the new tab button", () => {

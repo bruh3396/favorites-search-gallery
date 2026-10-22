@@ -1,7 +1,6 @@
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 
-// Settles each image as told the moment its source is set, since happy-dom loads no images.
 function stubImageLoads(outcome: "load" | "error" | "pending"): { urls: string[] } {
   const urls: string[] = [];
   const setSource = vi.spyOn(HTMLImageElement.prototype, "src", "set").mockImplementation(function settleImage(this: HTMLImageElement, url: string) {

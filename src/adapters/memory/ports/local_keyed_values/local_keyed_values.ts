@@ -1,7 +1,5 @@
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 
-// Copies on the way in and out, like a real store's serialization, so a caller
-// mutating a value it read or wrote never changes what is stored.
 export class MemoryLocalKeyedValues implements LocalKeyedValues {
   private readonly entries = new Map<string, unknown>();
 

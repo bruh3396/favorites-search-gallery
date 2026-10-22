@@ -18,7 +18,6 @@ function respondPartially(): Promise<Response> {
   return Promise.resolve(new Response("bytes", { status: 206 }));
 }
 
-// Each video the prober creates settles with the next outcome, reporting a duration of 12 seconds once loaded.
 function playOutcomes(outcomes: Outcome[]): void {
   const createElement = Document.prototype.createElement.bind(document);
 

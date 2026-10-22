@@ -6,23 +6,23 @@ export const LightboxImageClass = {
 } as const;
 
 export interface LightboxImageProps {
-  bitmap: Readable<ImageBitmap | undefined>;
+  element: Readable<HTMLCanvasElement | undefined>;
 }
 
-export function LightboxImage(props: LightboxImageProps): HTMLCanvasElement {
-  const canvas = (
-    <canvas className={LightboxImageClass.root} hidden={computed(() => props.bitmap.value === undefined)} />
-  ) as HTMLCanvasElement;
+export function LightboxImage(props: LightboxImageProps): HTMLElement {
+  const root = (
+    <div className={LightboxImageClass.root} hidden={computed(() => props.element.value === undefined)} />
+  ) as HTMLElement;
 
-  effect(() => drawBitmap(canvas, props.bitmap.value));
+  effect(() => root.replaceChildren(...(props.element.value === undefined ? [] : [props.element.value])));
+  return root;
+}
+
+export function createLightboxImage(ownerDocument: Document, bitmap: ImageBitmap): HTMLCanvasElement {
+  const canvas = ownerDocument.createElement("canvas");
+
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  canvas.getContext("2d")?.drawImage(bitmap, 0, 0);
   return canvas;
-}
-
-function drawBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap | undefined): void {
-  canvas.width = bitmap?.width ?? 0;
-  canvas.height = bitmap?.height ?? 0;
-
-  if (bitmap !== undefined) {
-    canvas.getContext("2d")?.drawImage(bitmap, 0, 0);
-  }
 }

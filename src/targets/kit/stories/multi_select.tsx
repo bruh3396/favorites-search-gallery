@@ -16,7 +16,6 @@ const ACTIONS = [
   { value: "open", label: "Open" }
 ] as const;
 
-// Each variant closes the controlled loop itself: whatever the group reports is written back to its value.
 function variant(label: string, { values, disabled = false, size }: MultiSelectState): Story["variants"][number] {
   return {
     label,

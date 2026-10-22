@@ -1,0 +1,31 @@
+@layer components {
+  .fsg-FavoritesShell {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    block-size: 100%;
+    border-block-start: 1px solid var(--fsg-color-outline);
+    background: var(--fsg-color-surface-sunken);
+  }
+
+  .fsg-FavoritesShell-loadLine {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: -1px;
+    inset-inline: 0;
+  }
+
+  .fsg-FavoritesShell-panes {
+    display: flex;
+    gap: 4px;
+    min-block-size: 0;
+    padding: 4px;
+  }
+
+  .fsg-FavoritesShell-panes > * {
+    overflow: hidden;
+    border: 1px solid var(--fsg-color-outline);
+    border-radius: var(--fsg-radius-medium);
+    background: var(--fsg-color-surface);
+  }
+}

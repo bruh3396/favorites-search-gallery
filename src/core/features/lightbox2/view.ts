@@ -1,21 +1,23 @@
-import { LightboxKeymap, createLightboxKeyListener } from "@/core/features/lightbox2/keymap";
+import { LightboxKeymap, createLightboxKeyListener } from "@/core/features/lightbox2/key_listener";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
-import { LightboxAutoplay } from "@/core/features/lightbox2/autoplay";
 import { currentDocument, h } from "@/core/ui/h/h";
 import { LightboxActions } from "@/core/features/lightbox2/actions";
-import { LightboxCommandHandlers } from "@/core/features/lightbox2/commands";
+import { LightboxAutoplay } from "@/core/features/lightbox2/autoplay";
+import { LightboxCloser } from "@/core/features/lightbox2/closer";
 import { LightboxDialog } from "@/core/features/lightbox2/ui/dialog";
 import { LightboxFullscreen } from "@/core/features/lightbox2/fullscreen";
 import { LightboxNavigation } from "@/core/features/lightbox2/navigation";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox2/overlay_visibility";
 import { LightboxStage } from "@/core/features/lightbox2/stage";
 import { LightboxZoom } from "@/core/features/lightbox2/zoom";
-import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/post/post";
+import { Morpher } from "@/core/boundary/ports/morpher/morpher";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { createLightboxCommandHandlers } from "@/core/features/lightbox2/command_handlers";
+import { createLightboxMouseListeners } from "@/core/features/lightbox2/mouse_listeners";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 const GIF_CAPACITY = 3;
@@ -39,13 +41,15 @@ export interface LightboxViewDependencies<T extends MediaItem> {
   retainedItems: Readable<readonly T[]>;
   volume: Preference<number>;
   muted: Preference<boolean>;
+  morpher?: Morpher;
+  locateItem: (item: T) => Element | undefined;
 }
 
 export function createLightboxView<T extends MediaItem>(
   configuration: LightboxViewConfiguration,
   dependencies: LightboxViewDependencies<T>
 ): HTMLElement {
-  const { scheduler, sizeObserver, remoteMedia, actions, navigation, retainedItems, volume, muted } = dependencies;
+  const { scheduler, sizeObserver, remoteMedia, actions, navigation, retainedItems, volume, muted, morpher, locateItem } = dependencies;
   const stage = new LightboxStage<T>(
     { gifCapacity: GIF_CAPACITY, videoCapacity: VIDEO_CAPACITY },
     { remoteMedia, currentItem: navigation.currentItem, retainedItems, volume, muted }
@@ -66,7 +70,8 @@ export function createLightboxView<T extends MediaItem>(
       navigation.goToNext().catch(console.error);
     }
   });
-  const handlers = bindLightboxCommands({ navigation, stage, fullscreen, zoom, autoplay, actions });
+  const closer = new LightboxCloser<T>({ navigation, shownMedia: stage.shownMedia, inFullscreen: fullscreen.inFullscreen, morpher, locateItem });
+  const handlers = createLightboxCommandHandlers({ navigation, stage, fullscreen, zoom, autoplay, closer, actions });
 
   onCleanup(() => overlayVisibility.dispose());
   effect(() => {
@@ -76,7 +81,6 @@ export function createLightboxView<T extends MediaItem>(
   });
   return h(LightboxDialog, {
     isOpen: navigation.isOpen,
-    currentItem: navigation.currentItem,
     position: navigation.position,
     stage,
     overlayVisibility,
@@ -85,45 +89,7 @@ export function createLightboxView<T extends MediaItem>(
     autoplay,
     sizeObserver,
     handlers,
-    onKeyDown: createLightboxKeyListener(configuration.keymap, handlers),
-    resolvePreviewUrl: (media: Media): Promise<string> => remoteMedia.resolvePreviewUrl(media)
+    keyListener: createLightboxKeyListener(configuration.keymap, handlers),
+    mouseListeners: createLightboxMouseListeners(handlers)
   });
-}
-
-interface CommandTargets<T extends MediaItem> {
-  readonly navigation: Pick<LightboxNavigation<T>, "currentItem" | "goToNext" | "goToPrevious" | "close">;
-  readonly stage: Pick<LightboxStage<T>, "togglePause" | "toggleMute">;
-  readonly fullscreen: Pick<LightboxFullscreen, "toggle">;
-  readonly zoom: Pick<LightboxZoom, "isZoomed" | "toggle" | "zoomOut">;
-  readonly autoplay: Pick<LightboxAutoplay, "toggle">;
-  readonly actions: LightboxActions;
-}
-
-function bindLightboxCommands<T extends MediaItem>(targets: CommandTargets<T>): LightboxCommandHandlers {
-  const { navigation, stage, fullscreen, zoom, autoplay, actions } = targets;
-  const withCurrentItem = (run: (item: T) => void) => (): void => {
-    const item = navigation.currentItem.peek();
-
-    if (item !== undefined) {
-      run(item);
-    }
-  };
-  return {
-    showNext: (): void => {
-      navigation.goToNext().catch(console.error);
-    },
-    showPrevious: (): void => {
-      navigation.goToPrevious().catch(console.error);
-    },
-    toggleAutoplay: (): void => autoplay.toggle(),
-    togglePause: (): void => stage.togglePause(),
-    toggleMute: (): void => stage.toggleMute(),
-    toggleFullscreen: (): void => fullscreen.toggle(),
-    toggleZoom: (): void => zoom.toggle(),
-    dismiss: (): void => (zoom.isZoomed.peek() ? zoom.zoomOut() : navigation.close()),
-    download: withCurrentItem(item => actions.download(item)),
-    openPostPage: withCurrentItem(item => actions.openPostPage(item)),
-    openOriginal: withCurrentItem(item => actions.openOriginal(item)),
-    close: (): void => navigation.close()
-  };
 }

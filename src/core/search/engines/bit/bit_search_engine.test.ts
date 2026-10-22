@@ -51,7 +51,6 @@ function searchMetricNames(engine: BitSearchEngine<MetricDoc>, query: string): s
   return engine.search(parseSearchExpression(query)).map(doc => doc.name).sort();
 }
 
-// Three favorites, two tagged apple, whose ids are their only metric.
 function createIdEngine(): BitSearchEngine<MetricDoc> {
   return createMetricEngine([
     createMetricDoc("a", { id: 100 }, ["apple"]),

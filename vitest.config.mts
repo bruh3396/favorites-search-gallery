@@ -10,6 +10,7 @@ const DOM_TESTS = [
   "src/core/features/**/*.test.tsx",
   "src/core/features/*/{commands,input,ui}/**/*.test.ts",
   "src/core/features/lightbox/lightbox.test.ts",
+  "src/core/features/lightbox2/mouse_listeners.test.ts",
   "src/adapters/browser/image/image.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/viewport/viewport.test.ts",
@@ -65,8 +66,8 @@ export default defineConfig({
         "src/**/*.test.{ts,tsx}",
         "src/**/*.d.ts",
         // TODO: cover once the post list grid gets posts and the favorites pane gets add/remove actions (then test the favorites gate).
-        "src/core/app/post_list_page/composer.ts",
-        "src/core/app/favorites_page/composer.ts"
+        "src/core/app/post_list/composer.ts",
+        "src/core/app/favorites/composer.ts"
       ]
     }
   }

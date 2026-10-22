@@ -1,0 +1,40 @@
+.fsg-EmptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 64px 16px;
+  text-align: center;
+}
+
+.fsg-EmptyState[hidden],
+.fsg-EmptyState-action[hidden] {
+  display: none;
+}
+
+.fsg-EmptyState-message {
+  margin: 0;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+}
+
+.fsg-EmptyState-action {
+  block-size: var(--fsg-control-size-medium);
+  padding: 0 16px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-full);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fsg-font-size-label);
+  cursor: pointer;
+}
+
+.fsg-EmptyState-action:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.fsg-EmptyState-action:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
+}

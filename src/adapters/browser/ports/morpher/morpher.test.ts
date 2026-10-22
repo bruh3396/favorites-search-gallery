@@ -47,12 +47,12 @@ function findStandIn(): HTMLCanvasElement | null {
 function readVisibleBox(element: HTMLElement): number[] {
   const [left, top, width, height] = ["left", "top", "width", "height"].map(property => parseFloat(element.style.getPropertyValue(property)));
   const [translateX, translateY, scale] = (/translate\((\S+)px, (\S+)px\) scale\((\S+)\)/).exec(element.style.transform)!.slice(1).map(Number);
-  const [insetY, insetX] = (/inset\((\S+)px (\S+)px/).exec(element.style.clipPath)!.slice(1).map(Number);
+  const [insetTop, insetRight, insetBottom, insetLeft] = (/inset\((\S+)px (\S+)px (\S+)px (\S+)px/).exec(element.style.clipPath)!.slice(1).map(Number);
   const box = [
-    left + translateX + (insetX * scale),
-    top + translateY + (insetY * scale),
-    (width - (2 * insetX)) * scale,
-    (height - (2 * insetY)) * scale
+    left + translateX + (insetLeft * scale),
+    top + translateY + (insetTop * scale),
+    (width - insetLeft - insetRight) * scale,
+    (height - insetTop - insetBottom) * scale
   ];
   return box.map(value => Math.round(value * 1_000) / 1_000);
 }
@@ -153,6 +153,26 @@ describe("BrowserMorpher", () => {
     moveTo(target, { left: 50, top: -500, width: 100, height: 120 });
     runFrame(MORPH_DURATION);
     expect(readVisibleBox(standIn)).toEqual([50, -500, 100, 120]);
+  });
+
+  test("narrows the stand-in from the viewport to the target's clipping ancestor", () => {
+    const runFrame = stubFrames();
+    const pane = document.createElement("div");
+    const target = createTarget();
+
+    pane.style.overflow = "hidden";
+    pane.append(target);
+    document.body.append(pane);
+    onTestFinished(() => pane.remove());
+    moveTo(pane, { left: 0, top: 100, width: 400, height: 400 });
+    new BrowserMorpher().morph(createSource(), () => target);
+    const standIn = findStandIn()!;
+
+    runFrame(0);
+    expect(readVisibleBox(standIn)).toEqual([10, 70, 300, 300]);
+    runFrame(MORPH_DURATION);
+    expect(readVisibleBox(standIn)).toEqual([50, 100, 100, 80]);
+    runFrame(MORPH_DURATION + 16);
   });
 
   test("drops the stand-in when the target leaves the page mid-flight", () => {

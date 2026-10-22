@@ -1,12 +1,16 @@
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { createLightboxVideo, playVideo } from "@/core/features/lightbox2/ui/video";
 import { LightboxMediaCache } from "@/core/features/lightbox2/media_cache";
 import { LightboxVideoPool } from "@/core/features/lightbox2/video_pool";
 import { MediaItem } from "@/core/domain/post/post";
+import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { Resource } from "@/core/utils/reactive/resource";
 import { ZoomSize } from "@/core/features/lightbox2/zoom";
+import { createLightboxImage } from "@/core/features/lightbox2/ui/image";
+import { currentDocument } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
-import { createLightboxVideo, playVideo } from "@/core/features/lightbox2/ui/video";
 
 export interface LightboxStageConfiguration {
   readonly gifCapacity: number;
@@ -14,7 +18,7 @@ export interface LightboxStageConfiguration {
 }
 
 export interface LightboxStageDependencies<T extends MediaItem> {
-  remoteMedia: Pick<RemoteMedia, "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
+  remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
   currentItem: Readable<T | undefined>;
   retainedItems: Readable<readonly T[]>;
   volume: Preference<number>;
@@ -22,9 +26,12 @@ export interface LightboxStageDependencies<T extends MediaItem> {
 }
 
 export class LightboxStage<T extends MediaItem> {
-  public readonly image: Readable<ImageBitmap | undefined>;
+  public readonly image: Readable<HTMLCanvasElement | undefined>;
   public readonly gif: Readable<HTMLImageElement | undefined>;
   public readonly video: Readable<HTMLVideoElement | undefined>;
+  public readonly previewUrl: Readable<string | undefined>;
+  public readonly shownPreviewUrl: Readable<string | undefined>;
+  public readonly shownMedia: Readable<MorphSource | undefined>;
   public readonly mediaSize: Readable<ZoomSize | undefined>;
   private readonly videoPool: LightboxVideoPool;
   private readonly volume: Preference<number>;
@@ -32,9 +39,19 @@ export class LightboxStage<T extends MediaItem> {
 
   constructor(configuration: LightboxStageConfiguration, dependencies: LightboxStageDependencies<T>) {
     const { remoteMedia, currentItem, retainedItems, volume, muted } = dependencies;
-    const bitmapCache = new LightboxMediaCache<ImageBitmap>({ kind: "image" }, {
-      load: (media, signal): Promise<ImageBitmap> => remoteMedia.decodeStill(media, signal),
-      release: (bitmap): void => bitmap.close()
+    const ownerDocument = currentDocument();
+    const imageCache = new LightboxMediaCache<HTMLCanvasElement>({ kind: "image" }, {
+      load: async(media, signal): Promise<HTMLCanvasElement> => {
+        const bitmap = await remoteMedia.decodeStill(media, signal);
+        const canvas = createLightboxImage(ownerDocument, bitmap);
+
+        bitmap.close();
+        return canvas;
+      },
+      release: (canvas): void => {
+        canvas.width = 0;
+        canvas.height = 0;
+      }
     });
     const gifCache = new LightboxMediaCache<HTMLImageElement>({ kind: "gif", capacity: configuration.gifCapacity }, {
       load: (media, signal): Promise<HTMLImageElement> => remoteMedia.loadOriginal(media, signal),
@@ -53,9 +70,18 @@ export class LightboxStage<T extends MediaItem> {
     this.volume = volume;
     this.muted = muted;
     this.videoPool = new LightboxVideoPool({ capacity: configuration.videoCapacity }, () => this.createVideo());
-    this.image = showCurrent(bitmapCache, currentItem);
+    this.image = showCurrent(imageCache, currentItem);
     this.gif = showCurrent(gifCache, currentItem);
     this.video = showCurrent(videoCache, currentItem);
+    this.previewUrl = new Resource({
+      source: currentItem,
+      load: (item: T): Promise<string> => resolveDecodedUrl(ownerDocument, remoteMedia.resolvePreviewUrl(item.media))
+    }).value;
+    this.shownPreviewUrl = computed(() => {
+      const isCovered = currentItem.value?.media.kind === "video" || this.image.value !== undefined || this.gif.value !== undefined;
+      return isCovered ? undefined : this.previewUrl.value;
+    });
+    this.shownMedia = computed(() => this.image.value ?? this.gif.value ?? this.video.value);
     this.mediaSize = computed(() => {
       const image = this.image.value;
       const gif = this.gif.value;
@@ -65,7 +91,7 @@ export class LightboxStage<T extends MediaItem> {
       }
       return gif === undefined ? undefined : { width: gif.naturalWidth, height: gif.naturalHeight };
     });
-    effect(() => bitmapCache.retain(retainedItems.value));
+    effect(() => imageCache.retain(retainedItems.value));
     effect(() => gifCache.retain(retainedItems.value));
     effect(() => videoCache.retain(retainedItems.value));
     effect(() => {
@@ -77,7 +103,7 @@ export class LightboxStage<T extends MediaItem> {
       }
     });
     onCleanup(() => {
-      bitmapCache.dispose();
+      imageCache.dispose();
       gifCache.dispose();
       videoCache.dispose();
     });
@@ -114,6 +140,15 @@ export class LightboxStage<T extends MediaItem> {
     });
     return video;
   }
+}
+
+async function resolveDecodedUrl(ownerDocument: Document, pendingUrl: Promise<string>): Promise<string> {
+  const url = await pendingUrl;
+  const image = ownerDocument.createElement("img");
+
+  image.src = url;
+  await image.decode();
+  return url;
 }
 
 function showCurrent<V>(cache: LightboxMediaCache<V>, currentItem: Readable<MediaItem | undefined>): Readable<V | undefined> {

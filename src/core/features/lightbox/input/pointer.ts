@@ -23,7 +23,6 @@ export interface LightboxPointerListeners {
   onDragstart: (event: DragEvent) => void;
 }
 
-// The tracker updates pointer coordinates and drag state as the pointer moves.
 // eslint-disable-next-line functional/type-declaration-immutability
 interface Press {
   readonly startX: number;

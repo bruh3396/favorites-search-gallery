@@ -1,13 +1,13 @@
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
+import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/composer";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
+import { BrowserPageVisibility } from "@/adapters/browser/ports/page_visibility/page_visibility";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
-import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
@@ -25,7 +25,7 @@ import { readPreferredColorScheme } from "@/adapters/browser/environment/environ
 const SAMPLE_POST_COUNT = 300;
 const FAVORITES_OWNER_ID = "demo";
 
-function createDemoDependencies(): FavoritesPageDependencies {
+function createDemoDependencies(): FavoritesAppDependencies {
   const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
   const indexedDb = new IndexedDbClient(() => null);
   return {
@@ -41,19 +41,19 @@ function createDemoDependencies(): FavoritesPageDependencies {
     remotePages: new MemoryRemotePages(),
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
-    viewport: new BrowserViewport(),
     sizeObserver: new BrowserSizeObserver(),
     morpher: new BrowserMorpher(),
     navigator: new BrowserNavigator(),
-    fileSaver: new BrowserFileSaver(document)
+    fileSaver: new BrowserFileSaver(document),
+    pageVisibility: new BrowserPageVisibility(document)
   };
 }
 
 const hostPage = new BrowserHostPage();
 
-mountFavoritesPage(hostPage.claimContent(), {
+composeFavoritesApp({
   userOwnsFavorites: true,
   blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
   colorScheme: readPreferredColorScheme()
-}, createDemoDependencies());
+}, createDemoDependencies()).mount(hostPage.claimContent());

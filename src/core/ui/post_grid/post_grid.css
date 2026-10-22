@@ -87,6 +87,9 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+}
+
+.fsg-Tile[data-slow] .fsg-Tile-preview {
   transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
@@ -102,7 +105,7 @@
   opacity: 0;
 }
 
-.fsg-Tile[data-loading] {
+.fsg-Tile[data-loading][data-slow] {
   background: var(--fsg-Tile-loading-color);
 }
 
@@ -121,7 +124,7 @@
   transition: display 0s linear var(--fsg-motion-duration-short) allow-discrete;
 }
 
-.fsg-Tile:not([data-loading])::after {
+.fsg-Tile:not([data-loading][data-slow])::after {
   display: none;
 }
 

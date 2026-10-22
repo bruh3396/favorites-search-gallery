@@ -36,6 +36,12 @@ describe("FavoritesColumnarArena", () => {
 
       expect(arena.getTags(slot)).toEqual(new Set(["apple", "banana"]));
     });
+
+    test("returns no tags for a post without tags", () => {
+      const { arena, slot } = setup("");
+
+      expect(arena.getTags(slot).size).toBe(0);
+    });
   });
 
   describe("write", () => {

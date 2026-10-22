@@ -23,7 +23,7 @@ export interface PostGridPreferences {
 export function createAppPreferences(storage: PreferenceStorage): AppPreferences {
   return createPreferences<AppPreferenceValues>({
     postGridLayout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
-    postGridSize: definePreference(6),
+    postGridSize: definePreference(3),
     postGridUpscale: definePreference(true),
     favoritesPagination: defineRecordPreference<PaginationSettings>(
       { size: 50, infiniteScroll: false },

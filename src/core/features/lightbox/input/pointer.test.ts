@@ -15,7 +15,6 @@ interface Setup {
   hideSoon: Mock<() => void>;
 }
 
-// The stage starts 100 px from the window's left edge.
 function locatePoint(event: MouseEvent): ZoomPoint {
   return { x: event.clientX - 100, y: event.clientY };
 }
@@ -51,7 +50,6 @@ function movePointer(init: PointerEventInit): PointerEvent {
   return new PointerEvent("pointermove", { pointerType: "mouse", ...init });
 }
 
-// happy-dom's WheelEvent extends UIEvent, so it drops ctrlKey and the pointer's place from its init.
 function ctrlWheel(deltaY: number, clientX = 0): WheelEvent {
   const event = new WheelEvent("wheel", { deltaY, cancelable: true });
 

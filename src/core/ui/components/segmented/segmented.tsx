@@ -11,7 +11,6 @@ export interface SegmentedProps<T> extends ControlProps<T> {
   choices: readonly ControlChoice<T>[];
 }
 
-// WAI-ARIA APG radio group: arrows move and select, wrapping at the ends; Home and End jump to the ends.
 const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => number>> = {
   ArrowLeft: (index, count) => (index - 1 + count) % count,
   ArrowUp: (index, count) => (index - 1 + count) % count,
@@ -24,7 +23,6 @@ const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => numbe
 export function Segmented<T>({ choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: SegmentedProps<T>): HTMLElement {
   const findCheckedIndex = (checked: T): number => choices.findIndex(choice => choice.value === checked);
   const checkedIndex = computed(() => findCheckedIndex(value.value));
-  // Roving tabindex: only the checked choice is a tab stop, or the first one while none is checked.
   const tabStop = computed(() => Math.max(checkedIndex.value, 0));
   const select = (index: number): void => {
     if (index !== findCheckedIndex(value.peek())) {

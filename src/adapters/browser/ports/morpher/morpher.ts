@@ -12,6 +12,11 @@ interface Size {
   readonly height: number;
 }
 
+interface Frame {
+  readonly box: Box;
+  readonly bounds?: Box;
+}
+
 export const MORPH_DURATION = 250;
 const STAND_IN_RADIUS = 8;
 
@@ -49,7 +54,7 @@ function drawStandIn(source: MorphSource, start: Box, intrinsic: Size): HTMLCanv
   canvas.height = Math.max(1, Math.round(start.height * density));
   canvas.getContext("2d")?.drawImage(source, 0, 0, canvas.width, canvas.height);
   pin(canvas, start);
-  cover(canvas, start, start);
+  cover(canvas, start, { box: start });
   return canvas;
 }
 
@@ -72,6 +77,8 @@ function fitInside(box: Box, { width, height }: Size): Box {
 
 function fly(standIn: HTMLCanvasElement, start: Box, target: Element): void {
   const reveal = hide(target);
+  const viewport = { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
+  const destination = findClippingAncestor(target)?.getBoundingClientRect();
   const land = (): void => {
     standIn.remove();
     reveal();
@@ -84,12 +91,23 @@ function fly(standIn: HTMLCanvasElement, start: Box, target: Element): void {
     }
     startTime ??= time;
     const progress = Math.min((time - startTime) / MORPH_DURATION, 1);
+    const amount = easeOut(progress);
+    const bounds = destination === undefined ? undefined : interpolate(viewport, destination, amount);
 
-    cover(standIn, start, interpolate(start, target.getBoundingClientRect(), easeOut(progress)));
+    cover(standIn, start, { box: interpolate(start, target.getBoundingClientRect(), amount), bounds });
     requestAnimationFrame(progress < 1 ? step : land);
   };
 
   requestAnimationFrame(step);
+}
+
+function findClippingAncestor(element: Element): Element | undefined {
+  for (let ancestor = element.parentElement; ancestor !== null && ancestor !== document.body; ancestor = ancestor.parentElement) {
+    if (getComputedStyle(ancestor).overflow !== "visible") {
+      return ancestor;
+    }
+  }
+  return undefined;
 }
 
 function hide(element: Element): () => void {
@@ -137,13 +155,23 @@ function pin(standIn: HTMLElement, start: Box): void {
   }
 }
 
-function cover(standIn: HTMLElement, start: Box, box: Box): void {
+function cover(standIn: HTMLElement, start: Box, { box, bounds }: Frame): void {
   const scale = Math.max(box.width / start.width, box.height / start.height);
   const insetX = (start.width - (box.width / scale)) / 2;
   const insetY = (start.height - (box.height / scale)) / 2;
   const translateX = box.left - start.left - (insetX * scale);
   const translateY = box.top - start.top - (insetY * scale);
+  const local = bounds === undefined ? { left: 0, top: 0, width: start.width, height: start.height } : {
+    left: (bounds.left - start.left - translateX) / scale,
+    top: (bounds.top - start.top - translateY) / scale,
+    width: bounds.width / scale,
+    height: bounds.height / scale
+  };
+  const top = Math.max(insetY, local.top);
+  const right = Math.max(insetX, start.width - local.left - local.width);
+  const bottom = Math.max(insetY, start.height - local.top - local.height);
+  const left = Math.max(insetX, local.left);
 
   standIn.style.setProperty("transform", `translate(${translateX}px, ${translateY}px) scale(${scale})`);
-  standIn.style.setProperty("clip-path", `inset(${insetY}px ${insetX}px round ${STAND_IN_RADIUS / scale}px)`);
+  standIn.style.setProperty("clip-path", `inset(${top}px ${right}px ${bottom}px ${left}px round ${STAND_IN_RADIUS / scale}px)`);
 }

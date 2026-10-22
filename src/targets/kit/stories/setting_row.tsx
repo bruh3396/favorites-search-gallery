@@ -84,7 +84,6 @@ function renderDropdownRow(ownerDocument: Document, log: Log): HTMLElement {
   )).result;
 }
 
-// The second row is disabled while the first is on: the switch's signal is the stepper's disabled state.
 function renderDependentRows(ownerDocument: Document, log: Log): HTMLElement {
   const infiniteScroll = new Signal(false);
   const resultsPerPage = new Signal(50);

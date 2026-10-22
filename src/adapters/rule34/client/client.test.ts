@@ -56,7 +56,6 @@ function setup(
 }
 
 describe("Rule34Client", () => {
-  // The browser opened a page holding one post and a paginator.
   beforeEach(() => {
     document.body.innerHTML = `${createThumb("1")}<div id="paginator">landing</div>`;
   });

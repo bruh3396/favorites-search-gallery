@@ -12,13 +12,13 @@ export const LightboxMinimapClass = {
 } as const;
 
 export interface LightboxMinimapProps {
-  previewUrl: Readable<string>;
+  previewUrl: Readable<string | undefined>;
   zoom: Pick<LightboxZoom, "visibleRegion" | "mediaRect" | "panBy" | "centerAt">;
 }
 
 export function LightboxMinimap({ previewUrl, zoom }: LightboxMinimapProps): HTMLElement {
   const region = zoom.visibleRegion;
-  const image = <img className={LightboxMinimapClass.image} alt="" src={previewUrl} /> as HTMLImageElement;
+  const image = <img className={LightboxMinimapClass.image} alt="" src={computed(() => previewUrl.value ?? "")} /> as HTMLImageElement;
   const marker = <div className={LightboxMinimapClass.region} /> as HTMLElement;
   const root = (
     <div className={LightboxMinimapClass.root} hidden={computed(() => region.value === undefined)}>
@@ -29,7 +29,7 @@ export function LightboxMinimap({ previewUrl, zoom }: LightboxMinimapProps): HTM
   const gestures = new Gestures({ dragThreshold: DRAG_THRESHOLD }, {
     element: root,
     handlers: {
-      canDrag: () => true,
+      canDrag: (): boolean => true,
       onDrag: ({ delta }): void => {
         const media = zoom.mediaRect.peek();
 
@@ -37,8 +37,8 @@ export function LightboxMinimap({ previewUrl, zoom }: LightboxMinimapProps): HTM
           zoom.panBy(-delta.x * media.width / image.clientWidth, -delta.y * media.height / image.clientHeight);
         }
       },
-      onTap: ({ point }) => zoom.centerAt({ x: point.x / image.clientWidth, y: point.y / image.clientHeight }),
-      onWheel: () => false
+      onTap: ({ point }): void => zoom.centerAt({ x: point.x / image.clientWidth, y: point.y / image.clientHeight }),
+      onWheel: (): boolean => false
     }
   });
 

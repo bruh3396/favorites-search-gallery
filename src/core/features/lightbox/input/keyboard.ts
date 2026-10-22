@@ -10,7 +10,6 @@ export interface LightboxKeyboardDependencies {
   lastPoint: Readable<ZoomPoint | undefined>;
 }
 
-// Keys are heard on the document, so they still work when focus slips out of the dialog.
 export class LightboxKeyboard {
   constructor(private readonly dependencies: LightboxKeyboardDependencies) { }
 

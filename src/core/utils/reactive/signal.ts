@@ -175,7 +175,6 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
 }
 
 class Effect implements Reader, Tracker {
-  /** Each source this effect read, with the version its last run saw (-1 until the run finishes). */
   private sources = new Map<Source, number>();
   private active = true;
   private executing = false;

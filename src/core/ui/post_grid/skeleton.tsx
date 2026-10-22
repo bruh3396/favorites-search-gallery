@@ -40,7 +40,7 @@ export function SkeletonGrid({ isShown, dimensions, layout, size, count }: Skele
 }
 
 function createSkeletonTile(dimensions: Dimensions): HTMLElement {
-  const tile = <div className={TileClass.root} dataset={{ loading: "" }} />;
+  const tile = <div className={TileClass.root} dataset={{ loading: "", slow: "" }} />;
 
   setAspectRatio(tile, dimensions);
   return tile;

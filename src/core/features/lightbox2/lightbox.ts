@@ -1,9 +1,10 @@
-import { DEFAULT_LIGHTBOX_KEYMAP } from "@/core/features/lightbox2/keymap";
 import { LightboxActions } from "@/core/features/lightbox2/actions";
+import { LightboxKeymap } from "@/core/features/lightbox2/key_listener";
 import { LightboxNavigation } from "@/core/features/lightbox2/navigation";
 import { LightboxRetentionList } from "@/core/features/lightbox2/retention_list";
 import { MediaItem } from "@/core/domain/post/post";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { Morpher } from "@/core/boundary/ports/morpher/morpher";
 import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Preference } from "@/core/utils/reactive/preference";
 import { Readable } from "@/core/utils/reactive/signal";
@@ -14,14 +15,36 @@ import { createLightboxView } from "@/core/features/lightbox2/view";
 
 const SETTLE_DELAY = 75;
 const RETENTION_CAPACITY = 8;
+const DEFAULT_LIGHTBOX_KEYMAP: LightboxKeymap = {
+  ArrowRight: "showNext",
+  d: "showNext",
+  D: "showNext",
+  ArrowLeft: "showPrevious",
+  a: "showPrevious",
+  A: "showPrevious",
+  " ": "toggleAutoplay",
+  k: "togglePause",
+  K: "togglePause",
+  m: "toggleMute",
+  M: "toggleMute",
+  f: "toggleFullscreen",
+  F: "toggleFullscreen",
+  z: "toggleZoom",
+  Z: "toggleZoom",
+  Escape: "dismiss",
+  Backspace: "close",
+  Delete: "close"
+};
 
-export interface LightboxDependencies {
+export interface LightboxDependencies<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   sizeObserver: SizeObserver;
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
   actions: LightboxActions;
   volume: Preference<number>;
   muted: Preference<boolean>;
+  morpher?: Morpher;
+  locateItem: (item: T) => Element | undefined;
 }
 
 export interface Lightbox<T extends MediaItem> {
@@ -34,7 +57,7 @@ export interface Lightbox<T extends MediaItem> {
   dispose(): void;
 }
 
-export function createLightbox<T extends MediaItem>(dependencies: LightboxDependencies): Lightbox<T> {
+export function createLightbox<T extends MediaItem>(dependencies: LightboxDependencies<T>): Lightbox<T> {
   const navigation = new LightboxNavigation<T>({ settleDelay: SETTLE_DELAY }, dependencies.scheduler);
   const retentionList = new LightboxRetentionList<T>({ capacity: RETENTION_CAPACITY });
   const stopRetainingSurroundings = keepSurroundingsRetained(navigation, retentionList, RETENTION_CAPACITY);
@@ -54,7 +77,9 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
         navigation,
         retainedItems: retentionList.items,
         volume: dependencies.volume,
-        muted: dependencies.muted
+        muted: dependencies.muted,
+        morpher: dependencies.morpher,
+        locateItem: dependencies.locateItem
       }
     ),
     dispose: (): void => {

@@ -5,7 +5,6 @@ export interface VideoEndDependencies {
   autoplay: Pick<LightboxAutoplay, "showNextAfterVideo">;
 }
 
-// Media events don't bubble, so only a capturing listener hears the video end.
 export function listenForVideoEnd(root: HTMLElement, { readShownMedia, autoplay }: VideoEndDependencies): void {
   root.addEventListener("ended", event => {
     if (event.target === readShownMedia()) {

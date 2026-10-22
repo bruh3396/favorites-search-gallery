@@ -19,7 +19,6 @@ const SORTS = [
 
 const COLUMNS = Array.from({ length: 12 }, (_, index) => ({ value: String(index + 1), label: `${index + 1} columns` }));
 
-// Each variant closes the controlled loop itself: whatever the dropdown reports is written back to its value.
 function variant(label: string, { choices, value: initial, disabled = false, size }: DropdownState): Story["variants"][number] {
   return {
     label,

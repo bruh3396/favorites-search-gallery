@@ -9,8 +9,6 @@ export interface StepGestureDependencies {
   commit: (value: number) => void;
 }
 
-// One gesture on a stepper (a press, a held key, a typed value) may step many times, but commits once when it ends,
-// and only if the value moved.
 export class StepGesture {
   private startValue: number | null = null;
   private stopRepeating = doNothing;
@@ -21,7 +19,6 @@ export class StepGesture {
     this.startValue ??= this.dependencies.getValue();
   }
 
-  // Steps again after a pause, then on an interval, until the gesture finishes or a step returns false.
   public repeat(step: () => boolean): void {
     this.scheduleStep(step, HOLD_DELAY);
   }

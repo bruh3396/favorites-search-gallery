@@ -35,6 +35,8 @@ export interface TileProps {
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
+export const SLOW_PREVIEW_DELAY = 100;
+
 export function Tile(props: TileProps): HTMLElement {
   const { post, dimensions, actions, upscale, href, onPlainClick, onCtrlClick, onPointerEnter } = props;
   const visible = new Signal(false);
@@ -52,12 +54,16 @@ export function Tile(props: TileProps): HTMLElement {
   );
 
   setAspectRatio(root, dimensions);
+  const cancelSlowMark = props.scheduler.schedule(() => {
+    root.dataset.slow = "";
+  }, SLOW_PREVIEW_DELAY);
   const unobserve = props.visibilityObserver.observe(root, isVisible => {
     visible.value = isVisible;
     props.onVisibilityChange(isVisible);
   });
 
   onCleanup(() => {
+    cancelSlowMark();
     unobserve();
     props.onVisibilityChange(false);
   });
@@ -67,7 +73,7 @@ export function Tile(props: TileProps): HTMLElement {
   }
 
   if (hasMedia(post.media)) {
-    loadPreview(root, preview, props);
+    loadPreview(root, preview, props, cancelSlowMark);
     const upscaler = new Upscaler({ canvas, media: post.media, decodeStill: props.decodeStill, scheduler: props.scheduler });
 
     effect(() => {
@@ -89,8 +95,9 @@ export function Tile(props: TileProps): HTMLElement {
   return root;
 }
 
-function loadPreview(root: HTMLElement, preview: HTMLImageElement, props: TileProps): Promise<void> {
+function loadPreview(root: HTMLElement, preview: HTMLImageElement, props: TileProps, cancelSlowMark: () => void): Promise<void> {
   return showPreview(root, preview, props.resolvePreviewUrl(props.post.media))
+    .then(cancelSlowMark)
     .catch(error => {
       console.error(error);
     });

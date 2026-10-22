@@ -14,11 +14,13 @@ import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/l
 import { ObservableRemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/observable_remote_favorite_actions";
 import { Occurrence } from "@/core/utils/reactive/emitter";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { Readable } from "@/core/utils/reactive/signal";
+import { Fact, Milestone } from "@/core/utils/reactive/milestone";
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { describeLoadState } from "@/core/features/favorites/load/status";
 
 export interface FavoritesConfiguration {
   readonly userOwnsFavorites: boolean;
@@ -41,6 +43,8 @@ export interface FavoritesService {
   readonly actions: Pick<FavoritesActions, "add" | "remove">;
   readonly hydrated: Occurrence<Favorite>;
   readonly loadState: Readable<LoadState>;
+  readonly loadStatus: Readable<string>;
+  readonly loaded: Fact;
   createSearchSession: (
     configuration: FavoritesSearchSessionConfiguration, settings: FavoritesSearchSessionSettingDependencies
   ) => FavoritesSearchSession;
@@ -54,14 +58,20 @@ export function createFavoritesService(configuration: FavoritesConfiguration, de
   const blacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
   const actions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, dependencies);
   const loader = new FavoritesLoader({ ...dependencies, collection, index: searchIndex });
+  const loaded = new Milestone();
   return {
     actions,
     hydrated: collection.hydrated,
     loadState: loader.state,
+    loadStatus: computed(() => describeLoadState(loader.state.value)),
+    loaded,
     createSearchSession: (sessionConfiguration, settings) => new FavoritesSearchSession(
       sessionConfiguration, { ...dependencies, ...settings, index: searchIndex, blacklist }
     ),
     isFavorited: id => actions.isFavorited(id),
-    load: () => loader.load()
+    load: async() => {
+      await loader.load();
+      loaded.reach();
+    }
   };
 }

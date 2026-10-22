@@ -16,7 +16,6 @@ interface StepperState {
 
 const SCHEDULER = new BrowserScheduler();
 
-// Each variant closes the controlled loop itself: whatever the stepper reports is told straight back to it.
 function variant(label: string, { value, min = 0, max = 100, step, disabled = false, size }: StepperState): Story["variants"][number] {
   return {
     label,

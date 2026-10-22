@@ -17,7 +17,6 @@ export interface SettingProps {
   scheduler: StepperScheduler;
 }
 
-// What every control a setting builds is given, whatever its kind.
 interface SettingControlProps<D extends SettingDescriptor = SettingDescriptor> {
   descriptor: D;
   size: ControlSize;
@@ -74,7 +73,6 @@ function ChoicesControl({ descriptor, size }: SettingControlProps<ChoicesSetting
   );
 }
 
-// A number that doesn't write on every step previews each step in a draft and writes the preference once, when the gesture ends.
 function NumberControl({
   descriptor: { preference, disabled, label, min, max, step, writeOnEveryStep = false },
   size,

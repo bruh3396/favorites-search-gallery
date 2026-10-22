@@ -1,14 +1,14 @@
-import { FavoritesPageDependencies, mountFavoritesPage } from "@/core/app/favorites_page/composer";
+import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/composer";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
+import { BrowserPageVisibility } from "@/adapters/browser/ports/page_visibility/page_visibility";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
-import { BrowserViewport } from "@/adapters/browser/ports/viewport/viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Environment } from "@/core/boundary/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
@@ -42,7 +42,7 @@ const ENVIRONMENT: Environment = {
   version: "playground"
 };
 
-function createFavoritesPageDependencies(): FavoritesPageDependencies {
+function createFavoritesAppDependencies(): FavoritesAppDependencies {
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
@@ -75,19 +75,19 @@ function createFavoritesPageDependencies(): FavoritesPageDependencies {
     remotePages: new Rule34RemotePages(rule34),
     scheduler,
     randomSource,
-    viewport: new BrowserViewport(),
     sizeObserver: new BrowserSizeObserver(),
     morpher: new BrowserMorpher(),
     navigator: new BrowserNavigator(),
-    fileSaver: new BrowserFileSaver(document)
+    fileSaver: new BrowserFileSaver(document),
+    pageVisibility: new BrowserPageVisibility(document)
   };
 }
 
 const hostPage = new BrowserHostPage();
 
-mountFavoritesPage(hostPage.claimContent(), {
+composeFavoritesApp({
   userOwnsFavorites: ENVIRONMENT.ownsFavorites,
   blacklistedTags: ENVIRONMENT.blacklistedTags,
   favoritesOwnerId: ENVIRONMENT.favoritesOwnerId,
   colorScheme: ENVIRONMENT.colorScheme
-}, createFavoritesPageDependencies());
+}, createFavoritesAppDependencies()).mount(hostPage.claimContent());

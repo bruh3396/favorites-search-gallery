@@ -9,6 +9,5 @@ export function fillRestOfWindow(element: HTMLElement, sizeObserver: SizeObserve
   };
 
   fit();
-  // The page resizes whenever something above the element does, such as the site header hiding or wrapping.
   return sizeObserver.observe(page, fit);
 }

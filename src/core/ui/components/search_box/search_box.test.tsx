@@ -60,6 +60,31 @@ describe("SearchBox", () => {
     expect(onSearch).toHaveBeenLastCalledWith("");
   });
 
+  test("reports the typed query when the search button is clicked", () => {
+    const { element, input, onSearch } = setup();
+
+    type(input, "cat");
+    element.querySelector<HTMLButtonElement>("button[type=submit]")!.click();
+    expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
+  });
+
+  test("empties the field without searching when cleared", () => {
+    const { element, input, onSearch } = setup();
+
+    type(input, "cat");
+    element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    expect(input.value).toBe("");
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  test("keeps focus in the field when cleared", () => {
+    const { element, input } = setup();
+
+    type(input, "cat");
+    element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    expect(document.activeElement).toBe(input);
+  });
+
   test("shows trailing content inside the field", () => {
     const trailing = document.createElement("span");
     const { input } = setup(trailing);

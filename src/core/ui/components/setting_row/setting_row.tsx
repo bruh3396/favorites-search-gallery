@@ -17,8 +17,6 @@ export interface SettingRowProps {
   size?: ControlSize;
 }
 
-// One setting: its label and caption beside one control (libadwaita ActionRow, Primer FormControl).
-// The text names and describes the control by element reference, so no ids are needed.
 export function SettingRow({ label, description, descriptionVisible, control, size = "medium" }: SettingRowProps): HTMLElement {
   const labelElement = <span className={SettingRowClass.label}>{label}</span>;
   const hidden = computed(() => descriptionVisible?.value === false);

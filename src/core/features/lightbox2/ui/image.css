@@ -1,10 +1,15 @@
 .fsg-LightboxImage {
-  display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
 }
 
 .fsg-LightboxImage[hidden] {
   display: none;
+}
+
+.fsg-LightboxImage > canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }

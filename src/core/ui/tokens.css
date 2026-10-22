@@ -8,6 +8,8 @@
   --fsg-color-accent: light-dark(#3b6fd8, #7aa2f7);
   --fsg-color-on-accent: light-dark(#ffffff, #10131a);
   --fsg-color-outline: light-dark(#c4c8d0, #3a3f4b);
+  --fsg-color-surface: light-dark(#ffffff, #20242c);
+  --fsg-color-surface-container: light-dark(#f5f6f8, #272c35);
   --fsg-color-surface-sunken: light-dark(#eceef2, #1b1e25);
   --fsg-color-on-surface-muted: light-dark(#6b7280, #9aa3b2);
 

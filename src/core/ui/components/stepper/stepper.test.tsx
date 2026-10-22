@@ -10,7 +10,6 @@ interface PendingTask {
   delay: number;
 }
 
-// Runs scheduled tasks only when the test says so.
 function createScheduler(): StepperScheduler & { runNext: () => number } {
   let pending: PendingTask | undefined;
   return {
@@ -41,7 +40,6 @@ type OnValueChange = Mock<(next: number) => void>;
 
 type SetupOptions = Partial<Omit<StepperProps, "value" | "disabled" | "onValueChange" | "scheduler">> & {
   initial?: number;
-  // Writes each reported value back, closing the controlled loop the way a caller does.
   writesBack?: boolean;
 };
 

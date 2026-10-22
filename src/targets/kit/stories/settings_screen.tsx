@@ -79,7 +79,6 @@ function createCatalog(log: Log): Catalog {
   return { descriptors, hints };
 }
 
-// Both hosts lay out the same catalog, so a change in one shows in the other.
 function createHostVariants(): StoryVariant[] {
   let catalog: Catalog | undefined;
   const host = (label: string, { layout, size, open }: { layout: SettingsLayout; size: ControlSize; open: string[] }): StoryVariant => ({

@@ -372,6 +372,45 @@ describe("FavoritesSearchSession", () => {
     });
   });
 
+  describe("clearFilters", () => {
+    test("shows every favorite again", () => {
+      const { session } = setup([
+        createPost({ id: "1", tags: "apple", rating: "safe" }),
+        createPost({ id: "2", tags: "banana", rating: "explicit" })
+      ], { blacklistedTags: ["apple"] });
+
+      session.updateSettings({ allowedRatings: getRatingBit("safe"), isBlacklistEnabled: true });
+      session.submit("banana");
+      session.invert();
+      session.clearFilters();
+      expect(getResultIds(session)).toEqual(["1", "2"]);
+    });
+
+    test("keeps the sort and the shuffle", () => {
+      const { session, searchSettings } = setup();
+
+      session.updateSettings({ sortKey: "score", isSortAscending: true });
+      session.shuffle();
+      session.submit("apple");
+      session.shuffle();
+      session.clearFilters();
+      expect(searchSettings.value).toEqual(createSearchSettings({ sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 2 ** 31 }));
+    });
+  });
+
+  describe("title", () => {
+    test("follows the query", () => {
+      const { session } = setup();
+
+      session.submit("apple");
+      expect(session.title.value).toBe("apple");
+    });
+
+    test("names a search without a query New", () => {
+      expect(setup().session.title.value).toBe("New");
+    });
+  });
+
   describe("paginationResult", () => {
     test("shows the first page of the results", () => {
       const { session } = setup(createTaggedPosts("a", "a", "a", "a", "a"), { pagination: PAGES_OF_TWO });

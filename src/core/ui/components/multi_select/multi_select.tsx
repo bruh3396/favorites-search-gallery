@@ -11,8 +11,6 @@ export interface MultiSelectProps<T> extends ControlProps<readonly T[]> {
   choices: readonly ControlChoice<T>[];
 }
 
-// WAI-ARIA APG toggle buttons in a group: each is its own tab stop. At least one stays pressed, so the last one
-// pressed can't be released; it stays focusable and says why through aria-disabled rather than native disabled.
 export function MultiSelect<T>({ choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: MultiSelectProps<T>): HTMLElement {
   const getPressedFlags = (values: readonly T[]): readonly boolean[] => choices.map(choice => values.includes(choice.value));
   const pressedFlags = computed(() => getPressedFlags(value.value));

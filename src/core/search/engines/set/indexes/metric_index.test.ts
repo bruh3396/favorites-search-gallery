@@ -21,7 +21,6 @@ function findMatchingScores(operator: ":" | ":<" | ":>", value: number): number[
   return [...index.docsMatching({ metric: "score", operator, value })].map(doc => doc.score).sort();
 }
 
-// A built index of copies of the docs, which a test may change.
 function createIndex(): MetricIndex<Doc> {
   const mutable = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metric as "score" | "width"]);
 

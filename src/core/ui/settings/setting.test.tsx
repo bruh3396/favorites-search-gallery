@@ -11,7 +11,6 @@ type Layout = (typeof LAYOUTS)[number];
 
 const SCHEDULER = { schedule: (): (() => void) => () => undefined };
 
-// Records every write, so a test can tell a preview from a write.
 function createPreference<T>(initial: T): SettingPreference<T> & { writes: T[] } {
   const signal = new Signal(initial);
   const writes: T[] = [];
@@ -53,7 +52,6 @@ function press(button: HTMLButtonElement): void {
   button.dispatchEvent(new PointerEvent("pointerdown", { button: 0 }));
 }
 
-// A number setting at 1 whose hold repeats only when the test runs the next task.
 function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
   input: HTMLInputElement;
   increment: HTMLButtonElement;

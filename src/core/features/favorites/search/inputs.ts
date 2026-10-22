@@ -42,6 +42,19 @@ export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
   shuffleSeed: 0
 };
 
+const FILTER_KEYS = ["query", "isInverted", "allowedRatings", "isBlacklistEnabled"] as const;
+
+export const UNFILTERED_SEARCH_SETTINGS: Pick<SearchSettings, (typeof FILTER_KEYS)[number]> = {
+  query: DEFAULT_SEARCH_SETTINGS.query,
+  isInverted: DEFAULT_SEARCH_SETTINGS.isInverted,
+  allowedRatings: DEFAULT_SEARCH_SETTINGS.allowedRatings,
+  isBlacklistEnabled: DEFAULT_SEARCH_SETTINGS.isBlacklistEnabled
+};
+
+export function isFiltered(settings: SearchSettings): boolean {
+  return FILTER_KEYS.some(key => settings[key] !== UNFILTERED_SEARCH_SETTINGS[key]);
+}
+
 export const SEARCH_SETTINGS_GUARDS: FieldGuards<SearchSettings> = {
   query: sameKindAs(""),
   isInverted: isBoolean,

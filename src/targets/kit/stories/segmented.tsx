@@ -22,7 +22,6 @@ const ORDERS = [
   { value: "ascending", label: "Ascending" }
 ] as const;
 
-// Each variant closes the controlled loop itself: whatever the group reports is written back to its value.
 function variant(label: string, { choices, value: initial, disabled = false, size }: SegmentedState): Story["variants"][number] {
   return {
     label,

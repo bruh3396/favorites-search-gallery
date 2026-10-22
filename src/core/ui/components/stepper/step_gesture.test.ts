@@ -13,7 +13,6 @@ interface Setup {
   runNext: () => number;
 }
 
-// Runs scheduled tasks only when the test says so; runNext answers the delay it ran, or -1 when nothing is pending.
 function setup(initial = 0): Setup {
   let value = initial;
   let pending: PendingTask | undefined;

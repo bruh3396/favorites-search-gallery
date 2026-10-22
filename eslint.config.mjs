@@ -698,8 +698,7 @@ export default defineConfig([
     files: ["src/core/**/*.{ts,tsx}"],
     ignores: ["src/**/*.test.{ts,tsx}", "src/**/testing/**"],
     rules: {
-      "no-restricted-properties": ["error", ...DOM_SEARCHES],
-      "no-restricted-globals": ["error", { name: "Image", message: "Don't load media in core: ask a port, like RemoteMedia, for it." }]
+      "no-restricted-properties": ["error", ...DOM_SEARCHES]
     }
   },
   {

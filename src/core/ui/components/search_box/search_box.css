@@ -19,10 +19,60 @@
   outline-offset: 1px;
 }
 
+.fsg-SearchBox-submit,
+.fsg-SearchBox-clear {
+  display: grid;
+  flex: none;
+  place-items: center;
+  align-self: center;
+  inline-size: var(--fsg-control-size-medium);
+  block-size: var(--fsg-control-size-medium);
+  padding: 0;
+  border: 0;
+  border-radius: var(--fsg-radius-full);
+  background: none;
+  color: var(--fsg-color-on-surface-muted);
+  cursor: pointer;
+}
+
+.fsg-SearchBox-submit {
+  margin-inline-start: 4px;
+}
+
+.fsg-SearchBox-clear {
+  margin-inline-end: 4px;
+}
+
+.fsg-SearchBox-input:placeholder-shown + .fsg-SearchBox-clear {
+  display: none;
+}
+
+.fsg-SearchBox-submit:hover,
+.fsg-SearchBox-clear:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+}
+
+.fsg-SearchBox-submit:focus-visible,
+.fsg-SearchBox-clear:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: -2px;
+}
+
+.fsg-SearchBox-icon {
+  inline-size: 18px;
+  block-size: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .fsg-SearchBox-input {
   flex: 1 1 auto;
   min-inline-size: 0;
-  padding: 0 16px;
+  padding: 0 6px;
   border: 0;
   background: none;
   color: inherit;
@@ -36,4 +86,8 @@
 
 .fsg-SearchBox-input:focus-visible {
   outline: none;
+}
+
+.fsg-SearchBox-input::-webkit-search-cancel-button {
+  appearance: none;
 }

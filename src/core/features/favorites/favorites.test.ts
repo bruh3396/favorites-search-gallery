@@ -99,6 +99,11 @@ describe("createFavoritesService", () => {
     expect(getResultIds(session)).toEqual(["1", "2", "3"]);
   });
 
+  test("reaches loaded once the load finishes", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple"));
+
+    expect(favorites.loaded.reached).toBe(true);
+  });
   test("shows the favorites matching the typed query", async() => {
     const { session } = await setup(createTaggedPosts("apple", "banana", "apple"));
 

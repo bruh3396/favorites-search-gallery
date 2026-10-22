@@ -1,8 +1,8 @@
+import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
 import { Tab, TabManager } from "@/core/ui/tabs/tab_manager";
-import { TabStrip } from "@/core/ui/components/tab_strip/tab_strip";
-import { h } from "@/core/ui/h/h";
+import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 
 export const TabsClass = {
   root: "fsg-Tabs",
@@ -13,10 +13,12 @@ export interface TabsProps<T> {
   manager: TabManager<T>;
   label: (tab: Tab<T>) => Readable<string>;
   renderPanel: (tab: Tab<T>) => HTMLElement;
+  trailing?: Child;
   onAdd: () => void;
+  onClose: (id: string) => void;
 }
 
-export function Tabs<T>({ manager, label, renderPanel, onAdd }: TabsProps<T>): HTMLElement {
+export function Tabs<T>({ manager, label, renderPanel, trailing, onAdd, onClose }: TabsProps<T>): HTMLElement {
   const createPanelScope = captureScope();
   const activeTab = computed(() => manager.tabs.value.find(tab => tab.id === manager.activeId.value) ?? null);
   const items = computed(() => manager.tabs.value.map(tab => ({ id: tab.id, label: label(tab), closable: tab.closable })));
@@ -36,8 +38,9 @@ export function Tabs<T>({ manager, label, renderPanel, onAdd }: TabsProps<T>): H
       <TabStrip
         tabs={items}
         activeId={manager.activeId}
+        trailing={trailing}
         onActivate={id => manager.activate(id)}
-        onClose={id => manager.close(id)}
+        onClose={onClose}
         onAdd={onAdd}
       />
       {panel}

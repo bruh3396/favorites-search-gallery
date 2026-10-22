@@ -2,7 +2,6 @@ import { Metric, Post } from "@/core/domain/post/post";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/post_table";
 import { Media } from "@/core/domain/media/media";
 import { TagPool } from "@/core/utils/collection/tag_pool";
-import { toTagSet } from "@/core/domain/tag/tag";
 
 export class FavoritesColumnarArena {
   private count = 0;
@@ -19,7 +18,7 @@ export class FavoritesColumnarArena {
 
   public write(slot: number, post: Post): void {
     this.postTable.write(slot, post);
-    this.tagPool.write(slot, post.tags);
+    this.tagPool.write(slot, post.tags.split(" "));
   }
 
   public compact(): void {
@@ -29,7 +28,7 @@ export class FavoritesColumnarArena {
   }
 
   public getPost(slot: number): Post {
-    return { ...this.postTable.getTaglessPost(slot), tags: this.tagPool.read(slot) };
+    return { ...this.postTable.getTaglessPost(slot), tags: this.tagPool.read(slot).join(" ") };
   }
 
   public getNumericId(slot: number): number {
@@ -49,7 +48,10 @@ export class FavoritesColumnarArena {
   }
 
   public getTags(slot: number): ReadonlySet<string> {
-    return toTagSet(this.tagPool.read(slot));
+    const tags = new Set(this.tagPool.read(slot));
+
+    tags.delete("");
+    return tags;
   }
 
   public isNew(slot: number): boolean {

@@ -16,14 +16,13 @@ export class TagPool {
   private tagsLength = 0;
   private vocabularyLength = 0;
 
-  public write(slot: number, tagString: string): void {
+  public write(slot: number, tagNames: readonly string[]): void {
     this.ensureCapacity(slot + 1);
 
     if (this.packedIds !== null) {
       this.unpackIds(this.packedIds);
     }
     const vocabulary = this.vocabulary ?? this.rebuildVocabulary();
-    const tagNames = tagString.split(" ");
 
     this.offsets[slot] = this.tagsLength;
     this.counts[slot] = tagNames.length;
@@ -44,7 +43,7 @@ export class TagPool {
     }
   }
 
-  public read(slot: number): string {
+  public read(slot: number): string[] {
     const offset = this.offsets[slot];
     const count = this.counts[slot];
     const tagNames: string[] = [];
@@ -52,7 +51,7 @@ export class TagPool {
     for (let i = 0; i < count; i += 1) {
       tagNames.push(this.reversedVocabulary[this.readId(offset + i)]);
     }
-    return tagNames.join(" ");
+    return tagNames;
   }
 
   public trim(count: number): void {

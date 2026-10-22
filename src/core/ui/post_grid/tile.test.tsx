@@ -1,5 +1,5 @@
 import { Media, NO_MEDIA } from "@/core/domain/media/media";
-import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
+import { SLOW_PREVIEW_DELAY, Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { MediaItem } from "@/core/domain/post/post";
@@ -20,7 +20,7 @@ function resolvePreviewUrl(media: Media): Promise<string> {
 
 type TileOptions = Omit<TileProps, "onPlainClick" | "upscale" |
   "visibilityObserver" | "onVisibilityChange" | "decodeStill" | "scheduler"> &
-  Partial<Pick<TileProps, "onPlainClick" | "onVisibilityChange" | "upscale" | "visibilityObserver">>;
+  Partial<Pick<TileProps, "onPlainClick" | "onVisibilityChange" | "upscale" | "visibilityObserver" | "scheduler">>;
 
 function drawTile(options: TileOptions): HTMLElement {
   return render(document, () => (
@@ -184,6 +184,47 @@ describe("Tile", () => {
     expect(tile.dataset.loading).toBe("");
     await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
     expect(getPreview(tile).src).toBe("https://preview/images/123");
+  });
+
+  test("shows a preview that loads quickly without marking it slow", async() => {
+    const scheduler = new MemoryScheduler();
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, scheduler });
+
+    await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
+    scheduler.advance(SLOW_PREVIEW_DELAY);
+    expect(tile.dataset.slow).toBeUndefined();
+  });
+
+  test("marks a preview still loading after the delay as slow", () => {
+    const scheduler = new MemoryScheduler();
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl: () => new Promise(doNothing), scheduler });
+
+    scheduler.advance(SLOW_PREVIEW_DELAY - 1);
+    expect(tile.dataset.slow).toBeUndefined();
+    scheduler.advance(1);
+    expect(tile.dataset.slow).toBe("");
+  });
+
+  test("stops waiting to mark the preview slow once disposed", () => {
+    const scheduler = new MemoryScheduler();
+    const { result: tile, dispose } = render(document, () => (
+      <Tile
+        post={IMAGE}
+        dimensions={PORTRAIT}
+        actions={[]}
+        upscale={new Signal(false)}
+        visibilityObserver={{ observe: () => doNothing }}
+        onVisibilityChange={doNothing}
+        decodeStill={() => new MemoryRemoteMedia().decodeStill()}
+        scheduler={scheduler}
+        resolvePreviewUrl={() => new Promise(doNothing)}
+        onPlainClick={doNothing}
+      />
+    ));
+
+    dispose();
+    scheduler.advance(SLOW_PREVIEW_DELAY);
+    expect(tile.dataset.slow).toBeUndefined();
   });
 
   test("takes its shape from the preview while the dimensions are unknown", async() => {
