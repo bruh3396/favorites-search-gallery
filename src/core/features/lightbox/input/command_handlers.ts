@@ -1,10 +1,10 @@
-import { LightboxActions } from "@/core/features/lightbox/actions";
-import { LightboxAutoplay } from "@/core/features/lightbox/autoplay";
-import { LightboxCloser } from "@/core/features/lightbox/closer";
+import { LightboxActions } from "@/core/features/lightbox/actions/actions";
+import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/autoplay";
+import { LightboxCloser } from "@/core/features/lightbox/closer/closer";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
-import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen";
+import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen/fullscreen";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
-import { LightboxStage } from "@/core/features/lightbox/stage/stage";
+import { LightboxStage } from "@/core/features/lightbox/stage/stage/stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { MediaItem } from "@/core/domain/post/post";
 

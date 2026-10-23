@@ -30,8 +30,8 @@ function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
 }
 
 describe("Rule34CdnRemoteMedia", () => {
-  test("gives a preview's URL", async() => {
-    expect(await setup().source.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
+  test("gives a preview's URL", () => {
+    expect(setup().source.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
   });
 
   test("gives an original's URL", async() => {

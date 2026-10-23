@@ -6,7 +6,6 @@ import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippe
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { RemoteFavoriteActions } from "@/core/boundary/ports/remote_favorite_actions/remote_favorite_actions";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
@@ -27,7 +26,6 @@ export interface Ports {
   readonly localTagCategories: LocalTagCategories;
   readonly navigator: Navigator;
   readonly randomSource: RandomSource;
-  readonly remoteFavoriteActions: RemoteFavoriteActions;
   readonly remoteFavorites: RemoteFavorites;
   readonly remoteMedia: RemoteMedia;
   readonly remotePages: RemotePages;

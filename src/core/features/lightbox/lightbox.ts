@@ -1,7 +1,7 @@
 import { DEFAULT_LIGHTBOX_KEYMAP } from "@/core/features/lightbox/input/keymap";
-import { LightboxActions } from "@/core/features/lightbox/actions";
+import { LightboxActions } from "@/core/features/lightbox/actions/actions";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
-import { LightboxRetentionList } from "@/core/features/lightbox/navigation/retention_list";
+import { LightboxRetentionList } from "@/core/features/lightbox/retention_list/retention_list";
 import { MediaItem } from "@/core/domain/post/post";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { Morpher } from "@/core/boundary/ports/morpher/morpher";
@@ -11,7 +11,7 @@ import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
-import { createLightboxView } from "@/core/features/lightbox/view";
+import { createLightboxView } from "@/core/features/lightbox/view/view";
 
 export { default as LIGHTBOX_STYLES } from "@/core/features/lightbox/styles.css?inline";
 

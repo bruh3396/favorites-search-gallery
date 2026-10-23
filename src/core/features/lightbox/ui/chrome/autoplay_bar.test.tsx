@@ -2,7 +2,7 @@ import { LightboxAutoplayBar, LightboxAutoplayBarClass } from "@/core/features/l
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import AUTOPLAY_BAR_CSS from "@/core/features/lightbox/ui/chrome/autoplay_bar.css?inline";
-import { AutoplayCountdown } from "@/core/features/lightbox/autoplay";
+import { AutoplayCountdown } from "@/core/features/lightbox/autoplay/autoplay";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { expectClassesStyled } from "@/testing/css";

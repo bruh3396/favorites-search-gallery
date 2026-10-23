@@ -61,11 +61,17 @@ function createClient({
   return rule34;
 }
 
-function setup(options: ClientOptions = {}): Setup {
+function setup(options: ClientOptions = {}, addAnswer = "3"): Setup {
   const rule34 = createClient(options);
   const scheduler = new MemoryScheduler();
   const rule34Document = { readFavoritesPageId: (): string => PAGE_ID };
-  const remoteFavorites = new Rule34RemoteFavorites({ rule34, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
+  const remoteFavorites = new Rule34RemoteFavorites({
+    rule34,
+    rule34Document,
+    fetch: (): Promise<Response> => Promise.resolve(new Response(addAnswer)),
+    scheduler,
+    randomSource: new MemoryRandomSource([1])
+  });
   return { remoteFavorites, rule34, scheduler };
 }
 
@@ -259,6 +265,36 @@ describe("Rule34RemoteFavorites", () => {
 
       await expect(findRemovedFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("add", () => {
+    test("reports the site's answer", async() => {
+      expect(await setup({}, "1").remoteFavorites.add("7")).toBe("alreadyAdded");
+    });
+
+    test("reports an add cancelled by a later remove", async() => {
+      const { remoteFavorites, scheduler } = setup();
+      const first = remoteFavorites.add("1");
+      const second = remoteFavorites.add("2");
+
+      await remoteFavorites.remove("2");
+      await advanceAndSettle(scheduler, 1_000);
+      expect(await first).toBe("added");
+      expect(await second).toBe("cancelled");
+    });
+  });
+
+  describe("remove", () => {
+    test("reports a sent remove as removed and one cancelled by a later add as cancelled", async() => {
+      const { remoteFavorites, scheduler } = setup();
+      const first = remoteFavorites.remove("1");
+      const second = remoteFavorites.remove("2");
+
+      await remoteFavorites.add("2");
+      await advanceAndSettle(scheduler, 1_000);
+      expect(await first).toBe("removed");
+      expect(await second).toBe("cancelled");
     });
   });
 });

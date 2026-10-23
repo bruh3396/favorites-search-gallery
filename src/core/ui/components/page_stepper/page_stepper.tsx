@@ -34,7 +34,7 @@ export function PageStepper({ pageNumber, pageCount, onPageChange }: PageStepper
       value={computed(() => String(pageNumber.value))}
       onFocus={() => field.select()}
       onChange={() => commit()}
-      onKeyDown={event => {
+      onKeydown={event => {
         if (event.key === "Enter") {
           event.preventDefault();
           commit();

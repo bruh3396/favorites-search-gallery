@@ -4,7 +4,7 @@ import {
   LightboxViewportGestureZoom,
   createLightboxViewportGestureHandlers,
   resolveLightboxViewportCursor
-} from "@/core/features/lightbox/zoom/viewport_gestures";
+} from "@/core/features/lightbox/viewport_gestures/viewport_gestures";
 import { computed, effect } from "@/core/utils/reactive/signal";
 import { Gestures } from "@/core/ui/gestures/gestures";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";

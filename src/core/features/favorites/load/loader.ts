@@ -20,7 +20,7 @@ export interface FavoritesLoaderDependencies {
   localFavorites: LocalFavorites;
   localPosts: LocalPosts;
   localTagCategories: LocalTagCategories;
-  remoteFavorites: RemoteFavorites;
+  remoteFavorites: Pick<RemoteFavorites, "fetchCount" | "fetchAll" | "findNew" | "findRemoved">;
   remotePosts: RemotePosts;
   remoteMedia: RemoteMedia;
   scheduler: Scheduler;

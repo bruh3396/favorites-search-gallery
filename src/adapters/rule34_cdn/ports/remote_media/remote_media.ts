@@ -6,8 +6,8 @@ export class Rule34CdnRemoteMedia implements RemoteMedia {
   constructor(private readonly rule34Cdn: Pick<Rule34CdnClient,
     "previewUrl" | "originalUrl" | "decodeStill" | "loadOriginal" | "fetchOriginal" | "probeDurationSeconds">) { }
 
-  public resolvePreviewUrl(media: Media): Promise<string> {
-    return Promise.resolve(this.rule34Cdn.previewUrl(media));
+  public resolvePreviewUrl(media: Media): string {
+    return this.rule34Cdn.previewUrl(media);
   }
 
   public resolveOriginalUrl(media: Media): Promise<string> {

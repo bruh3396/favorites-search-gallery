@@ -22,7 +22,6 @@ import { Media } from "@/core/domain/media/media";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
 import { Rule34Client } from "@/adapters/rule34/client/client";
-import { Rule34RemoteFavoriteActions } from "@/adapters/rule34/ports/remote_favorite_actions/remote_favorite_actions";
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
@@ -64,8 +63,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     localPosts: new IndexedDbLocalPosts(indexedDb),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
     localKeyedValues: new BrowserLocalKeyedValues(),
-    remoteFavorites: new Rule34RemoteFavorites({ rule34, rule34Document, scheduler, randomSource }),
-    remoteFavoriteActions: new Rule34RemoteFavoriteActions({ fetch: boundFetch, scheduler, randomSource }),
+    remoteFavorites: new Rule34RemoteFavorites({ rule34, rule34Document, fetch: boundFetch, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({
       primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
       fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })

@@ -1,56 +1,69 @@
-import { PageTerm, getPageSequence } from "@/core/ui/components/paginator/page_sequence";
-import { Readable, computed } from "@/core/utils/reactive/signal";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
+import { PageJump } from "@/core/ui/components/paginator/page_jump";
+import { PageSlot } from "@/core/ui/components/paginator/page_slot";
+import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
+import { getPageSequence } from "@/core/ui/components/paginator/page_sequence";
 import { h } from "@/core/ui/h/h";
 
 export const PaginatorClass = {
   root: "fsg-Paginator",
   list: "fsg-Paginator-list",
   step: "fsg-Paginator-step",
-  page: "fsg-Paginator-page",
-  gap: "fsg-Paginator-gap"
+  icon: "fsg-Paginator-icon"
 } as const;
 
 export interface PaginatorProps {
   pageNumber: Readable<number>;
   pageCount: Readable<number>;
+  scheduler: StepperScheduler;
   onPageChange: (pageNumber: number) => void;
 }
 
 interface StepButtonProps {
   label: string;
-  text: string;
+  icon: Icon;
   target: Readable<number>;
   pageCount: Readable<number>;
   onPageChange: (pageNumber: number) => void;
 }
 
-interface SlotProps {
-  term: Readable<PageTerm | undefined>;
-  current: Readable<number>;
-  onPageChange: (pageNumber: number) => void;
-}
+const SLOT_COUNT = 7;
 
-const NEARBY_PAGE_COUNT = 1;
-const SLOT_COUNT = NEARBY_PAGE_COUNT + 4;
-
-export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
-  const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, nearbyCount: NEARBY_PAGE_COUNT }));
+export function Paginator({ pageNumber, pageCount, scheduler, onPageChange }: PaginatorProps): HTMLElement {
+  const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, slotCount: SLOT_COUNT }));
+  const isJumpOpen = new Signal(false);
+  const openJump = (): void => {
+    isJumpOpen.value = true;
+  };
   return (
     <nav
       className={PaginatorClass.root}
       aria-label="Pagination"
       inert={computed(() => pageCount.value <= 1)}
     >
-      <StepButton label="Previous page" text="‹" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <StepButton label="Previous page" icon="chevronLeft" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
       <ul className={PaginatorClass.list}>
-        {Array.from({ length: SLOT_COUNT }, (_, index) => <Slot term={computed(() => terms.value[index])} current={pageNumber} onPageChange={onPageChange} />)}
+        {Array.from({ length: SLOT_COUNT }, (_, index) => (
+          <PageSlot term={computed(() => terms.value[index])} current={pageNumber} isJumpOpen={isJumpOpen} onPageChange={onPageChange} onJumpOpen={openJump} />
+        ))}
       </ul>
-      <StepButton label="Next page" text="›" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <StepButton label="Next page" icon="chevronRight" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <PageJump
+        isOpen={isJumpOpen}
+        pageNumber={pageNumber}
+        pageCount={pageCount}
+        scheduler={scheduler}
+        onPageChange={onPageChange}
+        onClose={() => {
+          isJumpOpen.value = false;
+        }}
+      />
     </nav>
   );
 }
 
-function StepButton({ label, text, target, pageCount, onPageChange }: StepButtonProps): HTMLElement {
+function StepButton({ label, icon, target, pageCount, onPageChange }: StepButtonProps): HTMLElement {
   return (
     <button
       className={PaginatorClass.step}
@@ -60,32 +73,7 @@ function StepButton({ label, text, target, pageCount, onPageChange }: StepButton
       disabled={computed(() => target.value < 1 || target.value > pageCount.value)}
       onClick={() => onPageChange(target.peek())}
     >
-      {text}
+      {createIcon(icon, PaginatorClass.icon)}
     </button>
-  );
-}
-
-function Slot({ term, current, onPageChange }: SlotProps): HTMLElement {
-  const page = computed(() => (typeof term.value === "number" ? term.value : null));
-  return (
-    <li>
-      <button
-        className={PaginatorClass.page}
-        type="button"
-        hidden={computed(() => page.value === null)}
-        dataset={{ pageNumber: computed(() => String(page.value ?? "")) }}
-        aria-current={computed(() => (page.value !== null && page.value === current.value ? "page" : null))}
-        onClick={() => {
-          const clicked = page.peek();
-
-          if (clicked !== null && clicked !== current.peek()) {
-            onPageChange(clicked);
-          }
-        }}
-      >
-        {computed(() => String(page.value ?? ""))}
-      </button>
-      <span className={PaginatorClass.gap} aria-hidden="true" hidden={computed(() => term.value !== "gap")}>…</span>
-    </li>
   );
 }

@@ -33,6 +33,7 @@ export function FavoritesApp({ favorites, workspace, lightbox, panel }: Favorite
           trailing={<StatusText text={favorites.loadStatus} />}
           onAdd={() => workspace.openBlankTab()}
           onClose={id => workspace.closeTab(id)}
+          onCloseAll={() => workspace.closeAllTabs()}
         />
       ]}
     />,

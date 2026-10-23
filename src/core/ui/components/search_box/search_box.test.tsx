@@ -1,6 +1,7 @@
 import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/search_box";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import SEARCH_BOX_CSS from "@/core/ui/components/search_box/search_box.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
@@ -8,15 +9,17 @@ import { expectClassesStyled } from "@/testing/css";
 interface Setup {
   element: HTMLElement;
   input: HTMLInputElement;
+  focusRequests: Emitter<void>;
   onSearch: (query: string) => void;
+  dispose: () => void;
 }
 
 function setup(trailing?: HTMLElement): Setup {
-  const options = { label: "Search favorites", query: new Signal(""), trailing, onSearch: vi.fn() };
-  const { result: element } = render(document, () => <SearchBox {...options} />);
+  const options = { label: "Search favorites", query: new Signal(""), trailing, focusRequests: new Emitter<void>(), onSearch: vi.fn() };
+  const { result: element, dispose } = render(document, () => <SearchBox {...options} />);
 
   document.body.append(element);
-  return { ...options, element, input: element.querySelector("input")! };
+  return { ...options, element, dispose, input: element.querySelector("input")! };
 }
 
 function type(input: HTMLInputElement, text: string): void {
@@ -83,6 +86,17 @@ describe("SearchBox", () => {
     type(input, "cat");
     element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
     expect(document.activeElement).toBe(input);
+  });
+
+  test("focuses the field on request until disposed", () => {
+    const { input, focusRequests, dispose } = setup();
+
+    focusRequests.emit();
+    expect(document.activeElement).toBe(input);
+    input.blur();
+    dispose();
+    focusRequests.emit();
+    expect(document.activeElement).not.toBe(input);
   });
 
   test("shows trailing content inside the field", () => {

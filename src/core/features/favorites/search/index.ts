@@ -2,7 +2,7 @@ import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { SearchRequest } from "@/core/features/favorites/search/inputs";
+import { SearchRequest } from "@/core/features/favorites/search/input";
 import { TermUpdate } from "@/core/domain/search/engines/search_engine";
 import { shuffleDeterministically } from "@/core/utils/collection/array";
 

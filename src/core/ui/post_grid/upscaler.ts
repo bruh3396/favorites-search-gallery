@@ -1,56 +1,55 @@
 import { Media } from "@/core/domain/media/media";
-import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { UpscalePacer } from "@/core/ui/post_grid/upscale_pacer";
 
 export const MAX_CANVAS_WIDTH = 500;
 export const MAX_CANVAS_HEIGHT = 16_000;
-export const UPSCALE_DELAY = 400;
-export const UPSCALE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 20 };
+export const DECODE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 20 };
 
 interface UpscalerDependencies {
   canvas: HTMLCanvasElement;
   media: Media;
   decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
-  scheduler: Pick<Scheduler, "schedule">;
+  upscalePacer: Pick<UpscalePacer, "decodeWhenQuiet" | "queuePaint">;
 }
 
 export class Upscaler {
   private requestVersion: number;
   private abortController: AbortController | undefined;
-  private completed: boolean;
-  private cancelPendingStart: (() => void) | undefined;
+  private cancelHeldDecode: (() => void) | undefined;
+  private isDrawn: boolean;
 
   constructor(private readonly dependencies: UpscalerDependencies) {
     this.requestVersion = 0;
     this.abortController = undefined;
-    this.completed = false;
-    this.cancelPendingStart = undefined;
+    this.cancelHeldDecode = undefined;
+    this.isDrawn = false;
   }
 
-  public disable(): void {
-    if (this.completed) {
+  public hide(): void {
+    if (this.isDrawn) {
       this.dependencies.canvas.hidden = true;
     }
-    this.dispose();
+    this.cancel();
   }
 
   public upscale(): void {
-    if (this.completed) {
+    if (this.isDrawn) {
       this.dependencies.canvas.hidden = false;
       return;
     }
 
-    if (this.abortController !== undefined || this.cancelPendingStart !== undefined) {
+    if (this.abortController !== undefined || this.cancelHeldDecode !== undefined) {
       return;
     }
-    this.cancelPendingStart = this.dependencies.scheduler.schedule(() => {
-      this.cancelPendingStart = undefined;
-      this.start();
-    }, UPSCALE_DELAY);
+    this.cancelHeldDecode = this.dependencies.upscalePacer.decodeWhenQuiet(() => {
+      this.cancelHeldDecode = undefined;
+      this.decode();
+    });
   }
 
-  public dispose(): void {
-    this.cancelPendingStart?.();
-    this.cancelPendingStart = undefined;
+  public cancel(): void {
+    this.cancelHeldDecode?.();
+    this.cancelHeldDecode = undefined;
 
     if (this.abortController === undefined) {
       return;
@@ -60,24 +59,31 @@ export class Upscaler {
     this.abortController = undefined;
   }
 
-  private start(): void {
+  private decode(): void {
     this.requestVersion += 1;
     const version = this.requestVersion;
     const controller = new AbortController();
+    const isCurrent = (): boolean => !controller.signal.aborted && version === this.requestVersion;
 
     this.abortController = controller;
     this.dependencies.decodeStill(this.dependencies.media, controller.signal, MAX_CANVAS_WIDTH)
       .then(bitmap => {
-        if (controller.signal.aborted || version !== this.requestVersion) {
+        if (!isCurrent()) {
           bitmap.close();
           return;
         }
-        drawBitmap(this.dependencies.canvas, bitmap);
-        this.completed = true;
-        this.abortController = undefined;
+        this.dependencies.upscalePacer.queuePaint(() => {
+          if (!isCurrent()) {
+            bitmap.close();
+            return;
+          }
+          drawBitmap(this.dependencies.canvas, bitmap);
+          this.isDrawn = true;
+          this.abortController = undefined;
+        });
       })
       .catch(error => {
-        if (!controller.signal.aborted && version === this.requestVersion) {
+        if (isCurrent()) {
           this.abortController = undefined;
           console.error(error);
         }

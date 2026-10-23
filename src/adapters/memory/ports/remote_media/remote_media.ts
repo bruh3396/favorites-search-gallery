@@ -2,8 +2,8 @@ import { Media } from "@/core/domain/media/media";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 
 export class MemoryRemoteMedia implements RemoteMedia {
-  public resolvePreviewUrl(media: Media): Promise<string> {
-    return Promise.resolve(media.locator);
+  public resolvePreviewUrl(media: Media): string {
+    return media.locator;
   }
 
   public resolveOriginalUrl(media: Media): Promise<string> {

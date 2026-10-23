@@ -8,6 +8,7 @@ export interface FavoritesTab {
   readonly session: FavoritesSession;
   readonly title: Readable<string>;
   readonly scrollTo: Emitter<Favorite>;
+  readonly focusSearch: Emitter<void>;
   readonly tileLocator: TileLocator<Favorite>;
   readonly visiblePosts: Signal<readonly Favorite[]>;
 }
@@ -17,6 +18,7 @@ export function createFavoritesTab(session: FavoritesSession): FavoritesTab {
     session,
     title: computed(() => session.query.value || "New"),
     scrollTo: new Emitter(),
+    focusSearch: new Emitter(),
     tileLocator: new TileLocator(),
     visiblePosts: new Signal<readonly Favorite[]>([])
   };

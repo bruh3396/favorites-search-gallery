@@ -24,15 +24,13 @@ interface FetcherSources {
   remotePosts?: Post[];
 }
 
-function createRemoteFavorites({ pages = [], count, pageFailure }: FetcherSources): RemoteFavorites {
+function createRemoteFavorites({ pages = [], count, pageFailure }: FetcherSources): Pick<RemoteFavorites, "fetchCount" | "fetchAll"> {
   return {
     fetchCount: (): Promise<number | null> => count ?? Promise.resolve(pages.flat().length),
     fetchAll: (onFavoritesFound): Promise<void> => {
       pages.forEach(onFavoritesFound);
       return pageFailure === undefined ? Promise.resolve() : Promise.reject(pageFailure);
-    },
-    findNew: (): Promise<Post[]> => Promise.resolve([]),
-    findRemoved: (): Promise<string[]> => Promise.resolve([])
+    }
   };
 }
 

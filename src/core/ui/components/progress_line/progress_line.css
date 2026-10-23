@@ -15,6 +15,7 @@
 
 .fsg-ProgressLine:not([aria-valuenow]) .fsg-ProgressLine-bar {
   inline-size: 22%;
+  transition: none;
   animation: fsg-ProgressLine-sweep 1.6s ease-in-out infinite;
 }
 

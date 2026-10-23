@@ -1,10 +1,9 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { Media, hasMedia } from "@/core/domain/media/media";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
-import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { UpscalePacer } from "@/core/ui/post_grid/upscale_pacer";
 import { Upscaler } from "@/core/ui/post_grid/upscaler";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { doNothing } from "@/core/utils/function/function";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
@@ -25,8 +24,8 @@ export interface TileProps {
   visibilityObserver: VisibilityObserver;
   onVisibilityChange: (visible: boolean) => void;
   decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
-  scheduler: Pick<Scheduler, "schedule">;
-  resolvePreviewUrl: (media: Media) => Promise<string>;
+  upscalePacer: UpscalePacer;
+  resolvePreviewUrl: (media: Media) => string;
   href?: string;
   onPlainClick: () => void;
   onCtrlClick?: () => void;
@@ -39,8 +38,6 @@ interface PreviewElements {
 }
 
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
-
-export const SLOW_PREVIEW_DELAY = 100;
 
 export function Tile(props: TileProps): HTMLElement {
   const { post, dimensions, actions, upscale, href, onPlainClick, onCtrlClick, onPointerEnter } = props;
@@ -59,16 +56,12 @@ export function Tile(props: TileProps): HTMLElement {
   );
 
   setAspectRatio(root, dimensions);
-  const cancelSlowMark = props.scheduler.schedule(() => {
-    root.dataset.slow = "";
-  }, SLOW_PREVIEW_DELAY);
   const unobserve = props.visibilityObserver.observe(root, isVisible => {
     visible.value = isVisible;
     props.onVisibilityChange(isVisible);
   });
 
   onCleanup(() => {
-    cancelSlowMark();
     unobserve();
     props.onVisibilityChange(false);
   });
@@ -78,34 +71,26 @@ export function Tile(props: TileProps): HTMLElement {
   }
 
   if (hasMedia(post.media)) {
-    loadPreview({ root, preview }, props, cancelSlowMark);
-    const upscaler = new Upscaler({ canvas, media: post.media, decodeStill: props.decodeStill, scheduler: props.scheduler });
+    showPreview({ root, preview }, props.resolvePreviewUrl(post.media));
+    const upscaler = new Upscaler({ canvas, media: post.media, decodeStill: props.decodeStill, upscalePacer: props.upscalePacer });
 
     effect(() => {
       const upscalingEnabled = upscale.value;
       const isVisible = visible.value;
 
       if (props.upscalePaused?.value === true) {
-        upscaler.dispose();
+        upscaler.cancel();
       } else if (!upscalingEnabled) {
-        upscaler.disable();
+        upscaler.hide();
       } else if (isVisible) {
         upscaler.upscale();
       } else {
-        upscaler.dispose();
+        upscaler.cancel();
       }
     });
-    onCleanup(() => upscaler.dispose());
+    onCleanup(() => upscaler.cancel());
   }
   return root;
-}
-
-function loadPreview({ root, preview }: PreviewElements, props: TileProps, cancelSlowMark: () => void): Promise<void> {
-  return showPreview(root, preview, props.resolvePreviewUrl(props.post.media))
-    .then(cancelSlowMark)
-    .catch(error => {
-      console.error(error);
-    });
 }
 
 function handleClick(event: MouseEvent, onPlainClick: () => void, onCtrlClick?: () => void): void {
@@ -143,14 +128,23 @@ function setHrefOnInteraction(link: HTMLAnchorElement, href: string): void {
   link.addEventListener("blur", removeHref);
 }
 
-async function showPreview(root: HTMLElement, preview: HTMLImageElement, url: Promise<string>): Promise<void> {
-  preview.src = await url;
-  await preview.decode().catch(doNothing);
+function showPreview({ root, preview }: PreviewElements, url: string): void {
+  const finishLoading = (): void => {
+    if (root.style.getPropertyValue(ASPECT_RATIO_PROPERTY) === "") {
+      setAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
+    }
+    delete root.dataset.loading;
+  };
 
-  if (root.style.getPropertyValue(ASPECT_RATIO_PROPERTY) === "") {
-    setAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
+  preview.src = url;
+
+  if (preview.complete) {
+    preview.decoding = "sync";
+    finishLoading();
+  } else {
+    preview.addEventListener("load", finishLoading, { once: true });
+    preview.addEventListener("error", finishLoading, { once: true });
   }
-  delete root.dataset.loading;
 }
 
 export function setAspectRatio(root: HTMLElement, { width, height }: Dimensions): void {

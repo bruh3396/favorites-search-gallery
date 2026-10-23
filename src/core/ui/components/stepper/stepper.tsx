@@ -1,5 +1,5 @@
 import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { StepGesture } from "@/core/ui/components/stepper/step_gesture";
 import { doNothing } from "@/core/utils/function/function";
 import { h } from "@/core/ui/h/h";
@@ -17,8 +17,9 @@ export interface StepperScheduler {
 export interface StepperProps extends ControlProps<number> {
   label: string;
   min: number;
-  max: number;
+  max: number | Readable<number>;
   step?: number;
+  isFocused?: Readable<boolean>;
   scheduler: StepperScheduler;
   onValueCommit?: (value: number) => void;
 }
@@ -44,12 +45,14 @@ export function Stepper({
   max,
   step = 1,
   size = "medium",
+  isFocused,
   scheduler,
   value,
   disabled = NEVER_DISABLED,
   onValueChange,
   onValueCommit = doNothing
 }: StepperProps): HTMLElement {
+  const upper = typeof max === "number" ? new Signal(max) : max;
   const gesture = new StepGesture({
     schedule: (task, delay): (() => void) => scheduler.schedule(task, delay),
     getValue: (): number => value.peek(),
@@ -60,14 +63,61 @@ export function Stepper({
       onValueChange(next);
     }
   };
-  const stepBy = (direction: 1 | -1): void => reportIfChanged(stepFrom(value.peek(), { direction, min, max, step }));
+  const stepBy = (direction: 1 | -1): void => reportIfChanged(stepFrom(value.peek(), { direction, min, max: upper.peek(), step }));
   const finishGesture = (): void => gesture.finish();
+  const input = (
+    <input
+      className={StepperClass.input}
+      type="number"
+      aria-label={label}
+      min={String(min)}
+      max={computed(() => String(upper.value))}
+      step={String(step)}
+      value={computed(() => String(value.value))}
+      disabled={disabled}
+      onKeydown={event => {
+        const direction = KEY_DIRECTIONS[event.key];
+
+        if (direction !== undefined) {
+          event.preventDefault();
+          gesture.begin();
+          stepBy(direction);
+        }
+      }}
+      onKeyup={event => {
+        if (KEY_DIRECTIONS[event.key] !== undefined) {
+          gesture.finish();
+        }
+      }}
+      onBlur={finishGesture}
+      onChange={event => {
+        const typed = event.currentTarget.valueAsNumber;
+
+        event.currentTarget.value = String(value.peek());
+
+        if (!Number.isNaN(typed)) {
+          gesture.begin();
+          reportIfChanged(Math.min(upper.peek(), Math.max(min, typed)));
+          gesture.finish();
+        }
+      }}
+    />
+  ) as HTMLInputElement;
 
   effect(() => {
     if (disabled.value) {
       gesture.finish();
     }
   });
+
+  if (isFocused !== undefined) {
+    effect(() => {
+      if (isFocused.value) {
+        input.focus();
+        input.select();
+      }
+    });
+  }
   return (
     <div className={StepperClass.root} dataset={{ size }}>
       <StepButton
@@ -77,46 +127,11 @@ export function Stepper({
         gesture={gesture}
         onStep={() => stepBy(-1)}
       />
-      <input
-        className={StepperClass.input}
-        type="number"
-        aria-label={label}
-        min={String(min)}
-        max={String(max)}
-        step={String(step)}
-        value={computed(() => String(value.value))}
-        disabled={disabled}
-        onKeydown={event => {
-          const direction = KEY_DIRECTIONS[event.key];
-
-          if (direction !== undefined) {
-            event.preventDefault();
-            gesture.begin();
-            stepBy(direction);
-          }
-        }}
-        onKeyup={event => {
-          if (KEY_DIRECTIONS[event.key] !== undefined) {
-            gesture.finish();
-          }
-        }}
-        onBlur={finishGesture}
-        onChange={event => {
-          const typed = event.currentTarget.valueAsNumber;
-
-          event.currentTarget.value = String(value.peek());
-
-          if (!Number.isNaN(typed)) {
-            gesture.begin();
-            reportIfChanged(Math.min(max, Math.max(min, typed)));
-            gesture.finish();
-          }
-        }}
-      />
+      {input}
       <StepButton
         label="Increase"
         text="+"
-        disabled={computed(() => disabled.value || value.value >= max)}
+        disabled={computed(() => disabled.value || value.value >= upper.value)}
         gesture={gesture}
         onStep={() => stepBy(1)}
       />

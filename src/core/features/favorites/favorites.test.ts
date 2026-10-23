@@ -8,7 +8,6 @@ import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/lo
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
@@ -60,7 +59,6 @@ function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
     remoteFavorites: new MemoryRemoteFavorites(client),
-    remoteFavoriteActions: new MemoryRemoteFavoriteActions(client),
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
     scheduler: new MemoryScheduler(),

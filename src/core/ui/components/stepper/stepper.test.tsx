@@ -115,6 +115,27 @@ describe("Stepper", () => {
     expect([input.value, decrement.disabled, increment.disabled]).toEqual(["10", false, true]);
   });
 
+  test("follows a changing max", () => {
+    const max = new Signal(10);
+    const { input, increment, onValueChange } = setup({ initial: 10, max });
+
+    max.value = 20;
+    expect([input.max, increment.disabled]).toEqual(["20", false]);
+    type(input, "42");
+    expect(onValueChange).toHaveBeenLastCalledWith(20);
+  });
+
+  test("focuses its input whenever told to", () => {
+    const isFocused = new Signal(false);
+    const { element, input } = setup({ isFocused });
+
+    document.body.append(element);
+    expect(document.activeElement).not.toBe(input);
+    isFocused.value = true;
+    expect(document.activeElement).toBe(input);
+    element.remove();
+  });
+
   test("reports one step on press without changing itself", () => {
     const { input, increment, onValueChange } = setup({ initial: 4 });
 

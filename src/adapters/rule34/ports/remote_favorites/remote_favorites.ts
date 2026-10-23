@@ -1,11 +1,13 @@
+import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page";
 import { Post } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34AllFavoritesFetcher } from "@/adapters/rule34/ports/remote_favorites/all_favorites_fetcher";
 import { Rule34Client } from "@/adapters/rule34/client/client";
 import { Rule34Document } from "@/adapters/rule34/document/document";
+import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/favorite_actions";
+import { Rule34Fetch } from "@/adapters/rule34/client/request";
 import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/new_favorites_finder";
 import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/removed_favorites_finder";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
@@ -14,6 +16,7 @@ import { isTransient } from "@/adapters/rule34/client/error";
 export interface Rule34RemoteFavoritesDependencies {
   rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
   rule34Document: Pick<Rule34Document, "readFavoritesPageId">;
+  fetch: Rule34Fetch;
   scheduler: Scheduler;
   randomSource: RandomSource;
 }
@@ -28,6 +31,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   private readonly pageId: string;
   private firstPageFavorites: Post[] | null;
   private readonly retry: Retry;
+  private readonly favoriteActions: Rule34FavoriteActions;
 
   constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
     this.pageId = dependencies.rule34Document.readFavoritesPageId();
@@ -37,6 +41,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
       randomSource: dependencies.randomSource,
       isRetryable: isTransient
     });
+    this.favoriteActions = new Rule34FavoriteActions(dependencies);
   }
 
   public fetchCount(): Promise<number | null> {
@@ -54,6 +59,14 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
 
   public findRemoved(localIds: readonly string[], remoteStart: number): Promise<string[]> {
     return this.dependencies.rule34.prioritizeFavorites(() => this.createRemovedFavoritesFinder().findRemoved(localIds, remoteStart));
+  }
+
+  public async add(id: string): Promise<AddFavoriteResult> {
+    return await this.favoriteActions.add(id) ?? "cancelled";
+  }
+
+  public async remove(id: string): Promise<RemoveFavoriteResult> {
+    return await this.favoriteActions.remove(id) ? "removed" : "cancelled";
   }
 
   private takeFirstPageFavorites(): Post[] | undefined {

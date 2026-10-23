@@ -7,16 +7,11 @@
   display: flex;
   align-items: stretch;
   box-sizing: border-box;
-  block-size: var(--fsg-control-size-large);
+  block-size: 30px;
   overflow: hidden;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-full);
   background: var(--fsg-color-surface-sunken);
-}
-
-.fsg-SearchBox-field:focus-within {
-  outline: 2px solid var(--fsg-color-accent);
-  outline-offset: 1px;
 }
 
 .fsg-SearchBox-submit,

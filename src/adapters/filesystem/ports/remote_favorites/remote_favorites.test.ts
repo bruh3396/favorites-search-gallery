@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { FilesystemRemoteFavorites } from "@/adapters/filesystem/ports/remote_favorites/remote_favorites";
 import { Post } from "@/core/domain/post/post";
 import { PostFile } from "@/adapters/filesystem/client/client";
@@ -8,7 +8,8 @@ function createRemoteFavorites(...files: [id: string, modifiedAt: number][]): Fi
   const postFiles: PostFile[] = files.map(([id, modifiedAt]) => ({ post: createPost({ id }), modifiedAt }));
   return new FilesystemRemoteFavorites({
     readPostFiles: () => Promise.resolve([...postFiles]),
-    countPostFiles: () => Promise.resolve(postFiles.length)
+    countPostFiles: () => Promise.resolve(postFiles.length),
+    deletePostFile: () => Promise.resolve()
   });
 }
 
@@ -36,5 +37,20 @@ describe("FilesystemRemoteFavorites", () => {
 
   test("finds the local ids that have no post file, in local order", async() => {
     expect(await createRemoteFavorites(["3", 3], ["1", 1]).findRemoved(["4", "3", "2", "1"])).toEqual(["4", "2"]);
+  });
+
+  test("deletes the post's file on remove", async() => {
+    const filesystem = {
+      readPostFiles: (): Promise<PostFile[]> => Promise.resolve([]),
+      countPostFiles: (): Promise<number> => Promise.resolve(0),
+      deletePostFile: vi.fn(() => Promise.resolve())
+    };
+
+    expect(await new FilesystemRemoteFavorites(filesystem).remove("1")).toBe("removed");
+    expect(filesystem.deletePostFile).toHaveBeenCalledWith("1");
+  });
+
+  test("succeeds on add", async() => {
+    expect(await createRemoteFavorites().add()).toBe("added");
   });
 });

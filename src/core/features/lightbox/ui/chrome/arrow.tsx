@@ -1,3 +1,4 @@
+import { LightboxShortcut } from "@/core/features/lightbox/input/shortcut";
 import { createLightboxIcon } from "@/core/features/lightbox/ui/chrome/icon";
 import { h } from "@/core/ui/h/h";
 
@@ -11,17 +12,26 @@ export type LightboxArrowDirection = "previous" | "next";
 
 export interface LightboxArrowProps {
   direction: LightboxArrowDirection;
+  shortcut?: LightboxShortcut;
   onClick: () => void;
 }
 
 const LABELS: Readonly<Record<LightboxArrowDirection, string>> = { previous: "Previous", next: "Next" };
 
-export function LightboxArrow({ direction, onClick }: LightboxArrowProps): HTMLElement {
+export function LightboxArrow({ direction, shortcut, onClick }: LightboxArrowProps): HTMLElement {
   const plate = (<span className={LightboxArrowClass.plate} />) as HTMLElement;
+  const label = LABELS[direction];
 
   plate.append(createLightboxIcon(plate.ownerDocument, direction, LightboxArrowClass.icon));
   return (
-    <button className={LightboxArrowClass.root} type="button" aria-label={LABELS[direction]} title={LABELS[direction]} onClick={() => onClick()}>
+    <button
+      className={LightboxArrowClass.root}
+      type="button"
+      aria-label={label}
+      aria-keyshortcuts={shortcut?.ariaName ?? null}
+      title={shortcut === undefined ? label : `${label} (${shortcut.text})`}
+      onClick={() => onClick()}
+    >
       {plate}
     </button>
   ) as HTMLElement;

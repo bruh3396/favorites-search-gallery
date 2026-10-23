@@ -1,5 +1,6 @@
 import { Media, NO_MEDIA } from "@/core/domain/media/media";
-import { SLOW_PREVIEW_DELAY, Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
+import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
+import { UPSCALE_PACER_CONFIGURATION, UpscalePacer } from "@/core/ui/post_grid/upscale_pacer";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { MediaItem } from "@/core/domain/post/post";
@@ -14,13 +15,20 @@ const PLACEHOLDER: MediaItem = { id: "456", media: NO_MEDIA };
 const PORTRAIT = { width: 1_200, height: 1_800 };
 const UNKNOWN = { width: 0, height: 0 };
 
-function resolvePreviewUrl(media: Media): Promise<string> {
-  return Promise.resolve(`https://preview/${media.locator}`);
+function resolvePreviewUrl(media: Media): string {
+  return `https://preview/${media.locator}`;
+}
+
+function setPreviewCached(complete: boolean): void {
+  vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(complete);
+  onTestFinished(() => {
+    vi.restoreAllMocks();
+  });
 }
 
 type TileOptions = Omit<TileProps, "onPlainClick" | "upscale" |
-  "visibilityObserver" | "onVisibilityChange" | "decodeStill" | "scheduler"> &
-  Partial<Pick<TileProps, "onPlainClick" | "onVisibilityChange" | "upscale" | "visibilityObserver" | "scheduler">>;
+  "visibilityObserver" | "onVisibilityChange" | "decodeStill" | "upscalePacer"> &
+  Partial<Pick<TileProps, "onPlainClick" | "onVisibilityChange" | "upscale" | "visibilityObserver" | "upscalePacer">>;
 
 function drawTile(options: TileOptions): HTMLElement {
   return render(document, () => (
@@ -29,7 +37,7 @@ function drawTile(options: TileOptions): HTMLElement {
       visibilityObserver={{ observe: () => () => { } }}
       onVisibilityChange={doNothing}
       decodeStill={() => new MemoryRemoteMedia().decodeStill()}
-      scheduler={new MemoryScheduler()}
+      upscalePacer={new UpscalePacer(UPSCALE_PACER_CONFIGURATION, new MemoryScheduler())}
       onPlainClick={doNothing}
       {...options}
     />
@@ -178,82 +186,45 @@ describe("Tile", () => {
     expect(onVisibilityChange).toHaveBeenCalledExactlyOnceWith(true);
   });
 
-  test("shows the preview and stops loading once it resolves", async() => {
+  test("shows a cached preview without loading", () => {
+    setPreviewCached(true);
     const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
-    expect(tile.dataset.loading).toBe("");
-    await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
+    expect(tile.dataset.loading).toBeUndefined();
     expect(getPreview(tile).src).toBe("https://preview/images/123");
   });
 
-  test("shows a preview that loads quickly without marking it slow", async() => {
-    const scheduler = new MemoryScheduler();
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, scheduler });
+  test("stays loading until the preview loads", () => {
+    setPreviewCached(false);
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
-    await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
-    scheduler.advance(SLOW_PREVIEW_DELAY);
-    expect(tile.dataset.slow).toBeUndefined();
+    expect(tile.dataset.loading).toBe("");
+    getPreview(tile).dispatchEvent(new Event("load"));
+    expect(tile.dataset.loading).toBeUndefined();
   });
 
-  test("marks a preview still loading after the delay as slow", () => {
-    const scheduler = new MemoryScheduler();
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl: () => new Promise(doNothing), scheduler });
+  test("stops loading when the preview fails", () => {
+    setPreviewCached(false);
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl });
 
-    scheduler.advance(SLOW_PREVIEW_DELAY - 1);
-    expect(tile.dataset.slow).toBeUndefined();
-    scheduler.advance(1);
-    expect(tile.dataset.slow).toBe("");
+    getPreview(tile).dispatchEvent(new Event("error"));
+    expect(tile.dataset.loading).toBeUndefined();
   });
 
-  test("stops waiting to mark the preview slow once disposed", () => {
-    const scheduler = new MemoryScheduler();
-    const { result: tile, dispose } = render(document, () => (
-      <Tile
-        post={IMAGE}
-        dimensions={PORTRAIT}
-        actions={[]}
-        upscale={new Signal(false)}
-        visibilityObserver={{ observe: () => doNothing }}
-        onVisibilityChange={doNothing}
-        decodeStill={() => new MemoryRemoteMedia().decodeStill()}
-        scheduler={scheduler}
-        resolvePreviewUrl={() => new Promise(doNothing)}
-        onPlainClick={doNothing}
-      />
-    ));
-
-    dispose();
-    scheduler.advance(SLOW_PREVIEW_DELAY);
-    expect(tile.dataset.slow).toBeUndefined();
-  });
-
-  test("takes its shape from the preview while the dimensions are unknown", async() => {
+  test("takes its shape from the preview while the dimensions are unknown", () => {
+    setPreviewCached(false);
     vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(300);
     vi.spyOn(HTMLImageElement.prototype, "naturalHeight", "get").mockReturnValue(200);
-    onTestFinished(() => {
-      vi.restoreAllMocks();
-    });
     const tile = drawTile({ post: IMAGE, dimensions: UNKNOWN, actions: [], resolvePreviewUrl });
 
-    await vi.waitFor(() => expect(tile.dataset.loading).toBeUndefined());
+    getPreview(tile).dispatchEvent(new Event("load"));
     expect(readAspectRatio(tile)).toBe("300 / 200");
-  });
-
-  test("logs a preview that fails to resolve and stays loading", async() => {
-    const error = new Error("offline");
-    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-
-    onTestFinished(() => log.mockRestore());
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl: () => Promise.reject(error) });
-
-    await vi.waitFor(() => expect(log).toHaveBeenCalledWith(error));
-    expect(tile.dataset.loading).toBe("");
   });
 
   test("upscales only while upscaling is on and the tile is visible", () => {
     const upscale = vi.spyOn(Upscaler.prototype, "upscale").mockImplementation(doNothing);
-    const dispose = vi.spyOn(Upscaler.prototype, "dispose").mockImplementation(doNothing);
-    const disable = vi.spyOn(Upscaler.prototype, "disable").mockImplementation(doNothing);
+    const cancel = vi.spyOn(Upscaler.prototype, "cancel").mockImplementation(doNothing);
+    const hide = vi.spyOn(Upscaler.prototype, "hide").mockImplementation(doNothing);
     const enabled = new Signal(true);
     let reportVisibility: (visible: boolean) => void = doNothing;
     const visibilityObserver = {
@@ -267,17 +238,17 @@ describe("Tile", () => {
       vi.restoreAllMocks();
     });
     drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, upscale: enabled, visibilityObserver });
-    expect(dispose).toHaveBeenCalledOnce();
+    expect(cancel).toHaveBeenCalledOnce();
     reportVisibility(true);
     expect(upscale).toHaveBeenCalledOnce();
     enabled.value = false;
-    expect(disable).toHaveBeenCalledOnce();
+    expect(hide).toHaveBeenCalledOnce();
   });
 
   test("cancels upscaling while paused without hiding a finished upscale, and resumes after", () => {
     const upscale = vi.spyOn(Upscaler.prototype, "upscale").mockImplementation(doNothing);
-    const dispose = vi.spyOn(Upscaler.prototype, "dispose").mockImplementation(doNothing);
-    const disable = vi.spyOn(Upscaler.prototype, "disable").mockImplementation(doNothing);
+    const cancel = vi.spyOn(Upscaler.prototype, "cancel").mockImplementation(doNothing);
+    const hide = vi.spyOn(Upscaler.prototype, "hide").mockImplementation(doNothing);
     const upscalePaused = new Signal(false);
     const visibilityObserver = {
       observe: (_element: Element, onVisibility: (visible: boolean) => void): (() => void) => {
@@ -291,19 +262,18 @@ describe("Tile", () => {
     });
     drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], resolvePreviewUrl, upscale: new Signal(true), upscalePaused, visibilityObserver });
     upscale.mockClear();
-    dispose.mockClear();
+    cancel.mockClear();
     upscalePaused.value = true;
-    expect([dispose.mock.calls.length, disable.mock.calls.length, upscale.mock.calls.length]).toEqual([1, 0, 0]);
+    expect([cancel.mock.calls.length, hide.mock.calls.length, upscale.mock.calls.length]).toEqual([1, 0, 0]);
     upscalePaused.value = false;
     expect(upscale).toHaveBeenCalledOnce();
   });
 
-  test("stays loading without a preview for a placeholder", async() => {
-    const resolve = vi.fn(resolvePreviewUrl);
-    const tile = drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl: resolve });
+  test("stays loading without a preview for a placeholder", () => {
+    const getPreviewUrl = vi.fn(resolvePreviewUrl);
+    const tile = drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [], resolvePreviewUrl: getPreviewUrl });
 
-    await Promise.resolve();
-    expect(resolve).not.toHaveBeenCalled();
+    expect(getPreviewUrl).not.toHaveBeenCalled();
     expect(tile.dataset.loading).toBe("");
     expect(getPreview(tile).hasAttribute("src")).toBe(false);
   });

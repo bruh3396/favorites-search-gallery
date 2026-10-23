@@ -70,6 +70,43 @@ describe("TabManager", () => {
     });
   });
 
+  describe("move", () => {
+    test("moves a tab to the given position", () => {
+      const manager = new TabManager<string>({ dispose: vi.fn() });
+
+      manager.open("first", "search one");
+      manager.open("second", "search two");
+      manager.open("third", "search three");
+      manager.move("first", 2);
+      manager.move("third", 0);
+
+      expect(manager.tabs.value.map(tab => tab.id)).toEqual(["third", "second", "first"]);
+    });
+
+    test("keeps the active tab", () => {
+      const manager = new TabManager<string>({ dispose: vi.fn() });
+
+      manager.open("first", "search one");
+      manager.open("second", "search two");
+      manager.move("first", 1);
+
+      expect(manager.activeId.value).toBe("first");
+    });
+
+    test("leaves the tabs alone for an unknown ID or an unchanged position", () => {
+      const manager = new TabManager<string>({ dispose: vi.fn() });
+
+      manager.open("first", "search one");
+      manager.open("second", "search two");
+      const tabs = manager.tabs.peek();
+
+      manager.move("missing", 0);
+      manager.move("second", 1);
+
+      expect(manager.tabs.value).toBe(tabs);
+    });
+  });
+
   describe("close", () => {
     test("activates the right neighbour when the active tab closes", () => {
       const manager = new TabManager<string>({ dispose: vi.fn() });

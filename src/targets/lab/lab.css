@@ -1,28 +1,61 @@
-.fsg-LabBar {
-  position: fixed;
-  inset-block-end: 12px;
-  inset-inline-start: 12px;
-  z-index: 2147483647;
+.fsg-LabScreen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 96px 16px;
+  text-align: center;
 }
 
-.fsg-LabBar-button {
+.fsg-LabScreen-message {
+  margin: 0;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+}
+
+.fsg-LabScreen-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fsg-LabScreen-label {
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+}
+
+.fsg-LabScreen .fsg-Stepper-input {
+  inline-size: 10ch;
+}
+
+.fsg-LabScreen-button {
   block-size: var(--fsg-control-size-medium);
-  padding: 0 12px;
+  padding: 0 16px;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-full);
-  background: var(--fsg-color-surface-container);
-  color: var(--fsg-color-on-surface-muted);
-  font: inherit;
-  font-size: var(--fsg-font-size-label-small);
-  cursor: pointer;
-  transition: color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
-}
-
-.fsg-LabBar-button:hover {
+  background: none;
   color: inherit;
+  font: inherit;
+  font-size: var(--fsg-font-size-label);
+  cursor: pointer;
 }
 
-.fsg-LabBar-button:focus-visible {
+.fsg-LabScreen-button:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
+.fsg-LabScreen-button[data-variant="primary"] {
+  border-color: var(--fsg-color-accent);
+  background: var(--fsg-color-accent);
+  color: var(--fsg-color-on-accent);
+}
+
+.fsg-LabScreen-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-LabScreen-button:focus-visible {
   outline: 2px solid var(--fsg-color-accent);
   outline-offset: 1px;
 }

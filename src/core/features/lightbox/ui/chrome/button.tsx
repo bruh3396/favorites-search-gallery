@@ -1,6 +1,7 @@
 import { LightboxIcon, createLightboxIcon } from "@/core/features/lightbox/ui/chrome/icon";
 import { Reactive, h } from "@/core/ui/h/h";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { LightboxShortcut } from "@/core/features/lightbox/input/shortcut";
 
 export const LightboxButtonClass = {
   root: "fsg-LightboxButton",
@@ -10,12 +11,13 @@ export const LightboxButtonClass = {
 export interface LightboxButtonProps {
   icon: Reactive<LightboxIcon>;
   label: string;
+  shortcut?: LightboxShortcut;
   pressed?: Readable<boolean>;
   disabled?: Reactive<boolean>;
   onClick: () => void;
 }
 
-export function LightboxButton({ icon, label, pressed, disabled = false, onClick }: LightboxButtonProps): HTMLElement {
+export function LightboxButton({ icon, label, shortcut, pressed, disabled = false, onClick }: LightboxButtonProps): HTMLElement {
   const button = (
     <button
       className={LightboxButtonClass.root}
@@ -23,7 +25,8 @@ export function LightboxButton({ icon, label, pressed, disabled = false, onClick
       disabled={disabled}
       aria-label={label}
       aria-pressed={pressed === undefined ? null : computed(() => String(pressed.value))}
-      title={label}
+      aria-keyshortcuts={shortcut?.ariaName ?? null}
+      title={shortcut === undefined ? label : `${label} (${shortcut.text})`}
       onClick={() => onClick()}
     />
   ) as HTMLElement;

@@ -2,10 +2,14 @@
 .fsg-Paginator {
   --fsg-Paginator-slot-size: 40px;
 
+  position: relative;
   display: flex;
   flex: none;
-  align-items: center;
-  gap: 2px;
+  align-items: stretch;
+  block-size: var(--fsg-control-size-large);
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-medium);
+  background: var(--fsg-color-surface);
 }
 
 .fsg-Paginator[inert] {
@@ -14,44 +18,42 @@
 
 .fsg-Paginator-list {
   display: flex;
-  align-items: center;
-  gap: 2px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.fsg-Paginator-list > li {
+.fsg-Paginator-list > *,
+.fsg-Paginator-step {
+  inline-size: var(--fsg-Paginator-slot-size);
+}
+
+.fsg-Paginator-list > :has(> :not([hidden])),
+.fsg-Paginator-list + .fsg-Paginator-step {
+  border-inline-start: 1px solid var(--fsg-color-outline);
+}
+
+.fsg-Paginator-step {
   display: grid;
-  inline-size: var(--fsg-Paginator-slot-size);
   place-items: center;
-}
-
-.fsg-Paginator-step,
-.fsg-Paginator-page {
-  inline-size: var(--fsg-Paginator-slot-size);
-  block-size: var(--fsg-control-size-medium);
   padding: 0;
-  font-variant-numeric: tabular-nums;
-  border-radius: var(--fsg-radius-medium);
   color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label);
-  line-height: 1;
   cursor: pointer;
-  transition:
-    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
-    color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+  transition: background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
-.fsg-Paginator-step:hover:not(:disabled),
-.fsg-Paginator-page:hover:not([aria-current="page"]) {
+.fsg-Paginator-step:first-child {
+  border-start-start-radius: calc(var(--fsg-radius-medium) - 1px);
+  border-end-start-radius: calc(var(--fsg-radius-medium) - 1px);
+}
+
+.fsg-Paginator-step:last-of-type {
+  border-start-end-radius: calc(var(--fsg-radius-medium) - 1px);
+  border-end-end-radius: calc(var(--fsg-radius-medium) - 1px);
+}
+
+.fsg-Paginator-step:hover:not(:disabled) {
   background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
-}
-
-.fsg-Paginator-page[aria-current="page"] {
-  background: var(--fsg-color-accent);
-  color: var(--fsg-color-on-accent);
-  cursor: default;
 }
 
 .fsg-Paginator-step:disabled {
@@ -59,14 +61,17 @@
   cursor: not-allowed;
 }
 
-.fsg-Paginator-step:focus-visible,
-.fsg-Paginator-page:focus-visible {
+.fsg-Paginator-step:focus-visible {
   outline: 2px solid var(--fsg-color-accent);
-  outline-offset: 1px;
+  outline-offset: -2px;
 }
 
-.fsg-Paginator-gap {
-  padding: 0 4px;
-  color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label);
+.fsg-Paginator-icon {
+  inline-size: 20px;
+  block-size: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }

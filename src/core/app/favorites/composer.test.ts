@@ -15,14 +15,13 @@ import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_cate
 import { MemoryMorpher } from "@/adapters/memory/ports/morpher/morpher";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { MemoryRemoteFavoriteActions } from "@/adapters/memory/ports/remote_favorite_actions/remote_favorite_actions";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
-import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
+import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
@@ -45,7 +44,6 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
     remoteFavorites: new MemoryRemoteFavorites(client),
-    remoteFavoriteActions: new MemoryRemoteFavoriteActions(client),
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver: { observe: () => (): void => { } },
@@ -146,7 +144,7 @@ describe("composeFavoritesApp", () => {
         scrolls.push({
           target: this,
           shown: grid.querySelector(`.${TileClass.root}`),
-          page: root.querySelector(`.${PaginatorClass.page}[aria-current="page"]`)?.textContent ?? null
+          page: root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent ?? null
         });
       }
     });
@@ -178,7 +176,7 @@ describe("composeFavoritesApp", () => {
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })], { scheduler });
-    const readPage = (): string | null | undefined => root.querySelector(`.${PaginatorClass.page}[aria-current="page"]`)?.textContent;
+    const readPage = (): string | null | undefined => root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent;
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
@@ -235,28 +233,14 @@ describe("composeFavoritesApp", () => {
     expect([morpher.morphs, root.querySelector("dialog")!.open]).toEqual([[], false]);
   });
 
-  test("highlights the closed favorite's tile instead of morphing when the indicator is a highlight", async() => {
-    const morpher = new MemoryMorpher();
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher, returnIndicator: "glow" });
-
-    await flushMicrotasks();
-    const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
-
-    tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
-    clickLightboxButton(root, "Close");
-    expect([tile.dataset.highlight, morpher.morphs]).toEqual(["glow", []]);
-  });
-
-  test("closes plainly without a morph or highlight when the indicator is none", async() => {
+  test("closes plainly without a morph when the indicator is none", async() => {
     const morpher = new MemoryMorpher();
     const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher, returnIndicator: "none" });
 
     await flushMicrotasks();
-    const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
-
-    tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
+    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
     clickLightboxButton(root, "Close");
-    expect([tile.dataset.highlight, morpher.morphs, root.querySelector("dialog")!.open]).toEqual([undefined, [], false]);
+    expect([morpher.morphs, root.querySelector("dialog")!.open]).toEqual([[], false]);
   });
 
   test("opens a favorite's original when its tile is Ctrl-clicked", async() => {

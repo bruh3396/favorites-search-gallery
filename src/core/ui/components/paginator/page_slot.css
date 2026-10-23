@@ -1,0 +1,36 @@
+.fsg-PageSlot {
+  display: grid;
+}
+
+.fsg-PageSlot-page,
+.fsg-PageSlot-gap {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-PageSlot-page:hover:not([aria-current="page"]),
+.fsg-PageSlot-gap:hover {
+  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+}
+
+.fsg-PageSlot-page[aria-current="page"] {
+  background: var(--fsg-color-accent);
+  color: var(--fsg-color-on-accent);
+  font-weight: 600;
+  cursor: default;
+}
+
+.fsg-PageSlot-page:focus-visible,
+.fsg-PageSlot-gap:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: -2px;
+}

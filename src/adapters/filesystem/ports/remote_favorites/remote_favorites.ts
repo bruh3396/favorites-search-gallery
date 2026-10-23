@@ -1,9 +1,9 @@
+import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { FilesystemClient } from "@/adapters/filesystem/client/client";
 import { Post } from "@/core/domain/post/post";
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class FilesystemRemoteFavorites implements RemoteFavorites {
-  constructor(private readonly filesystem: Pick<FilesystemClient, "readPostFiles" | "countPostFiles">) { }
+  constructor(private readonly filesystem: Pick<FilesystemClient, "readPostFiles" | "countPostFiles" | "deletePostFile">) { }
 
   public fetchCount(): Promise<number | null> {
     return this.filesystem.countPostFiles();
@@ -20,6 +20,15 @@ export class FilesystemRemoteFavorites implements RemoteFavorites {
   public async findRemoved(localIds: readonly string[]): Promise<string[]> {
     const remoteIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
     return localIds.filter(id => !remoteIds.has(id));
+  }
+
+  public add(): Promise<AddFavoriteResult> {
+    return Promise.resolve("added");
+  }
+
+  public async remove(id: string): Promise<RemoveFavoriteResult> {
+    await this.filesystem.deletePostFile(id);
+    return "removed";
   }
 
   private async readNewestFirst(): Promise<Post[]> {

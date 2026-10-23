@@ -1,6 +1,6 @@
+import { Child, h, render } from "@/core/ui/h/h";
 import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test, vi } from "vitest";
-import { h, render } from "@/core/ui/h/h";
 
 describe("h", () => {
   test("creates the element with its properties", () => {
@@ -57,6 +57,12 @@ describe("h", () => {
     const Greeting = ({ name }: { name: string }): HTMLElement => h("p", {}, `Hi ${name}`);
 
     expect(render(document, () => h(Greeting, { name: "Ann" })).result.outerHTML).toBe("<p>Hi Ann</p>");
+  });
+
+  test("passes a component its children as the children prop", () => {
+    const Wrap = ({ children }: { children?: Child }): HTMLElement => h("div", {}, children);
+
+    expect(render(document, () => h(Wrap, {}, "a", h("b", {}, "b"))).result.innerHTML).toBe("a<b>b</b>");
   });
 
   test("creates a bare element when given null props", () => {

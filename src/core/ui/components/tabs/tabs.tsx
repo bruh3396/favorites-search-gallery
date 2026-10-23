@@ -16,9 +16,10 @@ export interface TabsProps<T> {
   trailing?: Child;
   onAdd: () => void;
   onClose: (id: string) => void;
+  onCloseAll?: () => void;
 }
 
-export function Tabs<T>({ manager, label, renderPanel, trailing, onAdd, onClose }: TabsProps<T>): HTMLElement {
+export function Tabs<T>({ manager, label, renderPanel, trailing, onAdd, onClose, onCloseAll }: TabsProps<T>): HTMLElement {
   const createPanelScope = captureScope();
   const activeTab = computed(() => manager.tabs.value.find(tab => tab.id === manager.activeId.value) ?? null);
   const items = computed(() => manager.tabs.value.map(tab => ({ id: tab.id, label: label(tab), closable: tab.closable })));
@@ -41,7 +42,9 @@ export function Tabs<T>({ manager, label, renderPanel, trailing, onAdd, onClose 
         trailing={trailing}
         onActivate={id => manager.activate(id)}
         onClose={onClose}
+        onMove={(id, index) => manager.move(id, index)}
         onAdd={onAdd}
+        onCloseAll={onCloseAll}
       />
       {panel}
     </div>

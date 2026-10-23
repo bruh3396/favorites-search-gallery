@@ -1,6 +1,7 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
+import { UPSCALE_PACER_CONFIGURATION, UpscalePacer } from "@/core/ui/post_grid/upscale_pacer";
 import { KeyedList } from "@/core/ui/h/keyed_list";
 import { Media } from "@/core/domain/media/media";
 import { Occurrence } from "@/core/utils/reactive/emitter";
@@ -34,7 +35,7 @@ export interface PostGridProps<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   getDimensions: (post: T) => Dimensions;
   createActions: (post: T) => readonly Node[];
-  resolvePreviewUrl: (media: Media) => Promise<string>;
+  resolvePreviewUrl: (media: Media) => string;
   getPostUrl?: (post: T) => string;
   onPlainClick: (post: T) => void;
   onCtrlClick?: (post: T) => void;
@@ -49,9 +50,11 @@ class PostGridImplementation<T extends MediaItem> {
   private readonly root: HTMLElement;
   private readonly list: KeyedList<T>;
   private readonly visiblePostIds = new Set<string>();
+  private readonly upscalePacer: UpscalePacer;
 
   constructor(private readonly props: PostGridProps<T>) {
     this.root = <div className={PostGridClass.root} />;
+    this.upscalePacer = new UpscalePacer(UPSCALE_PACER_CONFIGURATION, props.scheduler);
     this.list = this.createPostList();
   }
 
@@ -101,7 +104,7 @@ class PostGridImplementation<T extends MediaItem> {
 
   private createPostList(): KeyedList<T> {
     const {
-      getDimensions, createActions, visibilityObserver, decodeStill, scheduler, resolvePreviewUrl, getPostUrl,
+      getDimensions, createActions, visibilityObserver, decodeStill, resolvePreviewUrl, getPostUrl,
       onPlainClick, onCtrlClick, onPointerEnter, settings, upscalePaused
     } = this.props;
     return new KeyedList<T>({
@@ -116,7 +119,7 @@ class PostGridImplementation<T extends MediaItem> {
           visibilityObserver={visibilityObserver}
           onVisibilityChange={isVisible => (isVisible ? this.markVisible(post) : this.markHidden(post))}
           decodeStill={decodeStill}
-          scheduler={scheduler}
+          upscalePacer={this.upscalePacer}
           resolvePreviewUrl={resolvePreviewUrl}
           href={getPostUrl?.(post)}
           onPlainClick={() => onPlainClick(post)}

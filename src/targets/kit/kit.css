@@ -2,7 +2,7 @@
    they follow the same color-scheme as the components. */
 .kit-Page {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: 200px minmax(0, 1fr) 280px;
   grid-template-rows: auto 1fr;
   gap: 24px;
   min-block-size: 100vh;
@@ -25,6 +25,30 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.kit-Nav {
+  display: grid;
+  position: sticky;
+  inset-block-start: 24px;
+  align-self: start;
+  gap: 2px;
+}
+
+.kit-Nav-link {
+  padding: 6px 10px;
+  border-radius: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.kit-Nav-link:hover {
+  background: color-mix(in srgb, CanvasText 8%, transparent);
+}
+
+.kit-Nav-link[aria-current="page"] {
+  background: Highlight;
+  color: HighlightText;
 }
 
 .kit-Story {
@@ -67,6 +91,19 @@
 
 .kit-Panel[data-size="small"] {
   inline-size: 280px;
+}
+
+.kit-Frame {
+  display: flex;
+  block-size: 360px;
+  border: 1px solid GrayText;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.kit-Placeholder {
+  margin: 0;
+  padding: 12px;
 }
 
 .kit-Log {

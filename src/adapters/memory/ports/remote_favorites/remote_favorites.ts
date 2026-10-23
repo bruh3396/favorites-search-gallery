@@ -1,9 +1,9 @@
+import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { Post } from "@/core/domain/post/post";
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class MemoryRemoteFavorites implements RemoteFavorites {
-  constructor(private readonly memory: Pick<MemoryClient, "readFavorites">) { }
+  constructor(private readonly memory: Pick<MemoryClient, "readFavorites" | "addFavorite" | "removeFavorite">) { }
 
   public fetchCount(): Promise<number | null> {
     return Promise.resolve(this.memory.readFavorites().length);
@@ -23,6 +23,15 @@ export class MemoryRemoteFavorites implements RemoteFavorites {
     return Promise.resolve(localIds.filter(id => !remoteIds.has(id)));
   }
 
+  public add(id: string): Promise<AddFavoriteResult> {
+    this.memory.addFavorite(id);
+    return Promise.resolve("added");
+  }
+
+  public remove(id: string): Promise<RemoveFavoriteResult> {
+    this.memory.removeFavorite(id);
+    return Promise.resolve("removed");
+  }
 }
 
 function takeAboveLocalOrder(remoteFavorites: Post[], localIds: readonly string[]): Post[] {

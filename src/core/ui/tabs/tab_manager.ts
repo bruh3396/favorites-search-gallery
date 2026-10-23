@@ -48,6 +48,18 @@ export class TabManager<T> {
     }
   }
 
+  public move(id: string, index: number): void {
+    const tabs = this.currentTabs.peek();
+    const tab = tabs.find(candidate => candidate.id === id);
+
+    if (tab === undefined || tabs.indexOf(tab) === index) {
+      return;
+    }
+    const remaining = tabs.filter(candidate => candidate !== tab);
+
+    this.currentTabs.value = [...remaining.slice(0, index), tab, ...remaining.slice(index)];
+  }
+
   public close(id: string): void {
     const tabs = this.currentTabs.peek();
     const index = tabs.findIndex(candidate => candidate.id === id);

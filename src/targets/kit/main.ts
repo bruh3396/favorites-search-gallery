@@ -2,20 +2,11 @@ import { AppFont, installAppFont } from "@/core/ui/fonts/app_font";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
-import { DISCLOSURE_STORY } from "@/targets/kit/stories/disclosure";
-import { DROPDOWN_STORY } from "@/targets/kit/stories/dropdown";
 import { GEIST_FONT } from "@/core/ui/fonts/geist";
 import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument";
 import { INTER_FONT } from "@/core/ui/fonts/inter";
 import KIT_CSS from "@/targets/kit/kit.css?inline";
-import { MULTI_SELECT_STORY } from "@/targets/kit/stories/multi_select";
 import { PLEX_FONT } from "@/core/ui/fonts/plex";
-import { SEGMENTED_STORY } from "@/targets/kit/stories/segmented";
-import { SETTINGS_SCREEN_STORY } from "@/targets/kit/stories/settings_screen";
-import { SETTING_ROW_STORY } from "@/targets/kit/stories/setting_row";
-import { SETTING_STORY } from "@/targets/kit/stories/setting";
-import { STEPPER_STORY } from "@/targets/kit/stories/stepper";
-import { SWITCH_STORY } from "@/targets/kit/stories/switch";
 import { SYSTEM_FONT } from "@/core/ui/fonts/system";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { Signal } from "@/core/utils/reactive/signal";
@@ -23,10 +14,20 @@ import { Switch } from "@/core/ui/components/switch/switch";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { VERDANA_FONT } from "@/core/ui/fonts/verdana";
 
-const STORIES: Story[] = [
-  SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, DISCLOSURE_STORY,
-  SETTING_ROW_STORY, SETTING_STORY, SETTINGS_SCREEN_STORY
-];
+interface StoryEntry {
+  readonly id: string;
+  readonly story: Story;
+}
+
+const STORY_MODULES = import.meta.glob<Record<string, Story>>("./stories/*.tsx", { eager: true });
+
+const STORIES: readonly StoryEntry[] = Object.entries(STORY_MODULES)
+  .flatMap(([path, exports]) => Object.values(exports).map(story => ({ id: readStoryId(path), story })))
+  .sort((a, b) => a.story.title.localeCompare(b.story.title));
+
+function readStoryId(path: string): string {
+  return path.slice(path.lastIndexOf("/") + 1, path.lastIndexOf(".")).replaceAll("_", "-");
+}
 
 function createStyleSheet(css: string): CSSStyleSheet {
   const sheet = new CSSStyleSheet();
@@ -57,6 +58,28 @@ function renderStory(story: Story, log: (message: string) => void): HTMLElement 
   variants.append(...story.variants.map(variant => renderVariant(variant, log)));
   section.append(createElement("h2", "kit-Story-title", story.title), variants);
   return section;
+}
+
+function renderNavigation(): HTMLElement {
+  const navigation = createElement("nav", "kit-Nav");
+
+  navigation.ariaLabel = "Stories";
+  navigation.append(...STORIES.map(({ id, story }) => {
+    const link = createElement("a", "kit-Nav-link", story.title);
+
+    link.href = `#${id}`;
+    return link;
+  }));
+  return navigation;
+}
+
+function showSelectedStory(navigation: HTMLElement, main: HTMLElement, log: (message: string) => void): void {
+  const selected = STORIES.find(({ id }) => `#${id}` === location.hash) ?? STORIES[0];
+
+  for (const link of navigation.querySelectorAll("a")) {
+    link.ariaCurrent = link.hash === `#${selected.id}` ? "page" : null;
+  }
+  main.replaceChildren(renderStory(selected.story, log));
 }
 
 const FONTS: readonly AppFont[] = [SYSTEM_FONT, VERDANA_FONT, INSTRUMENT_FONT, INTER_FONT, GEIST_FONT, PLEX_FONT];
@@ -104,6 +127,7 @@ function renderToolbar(app: HTMLElement): HTMLElement {
 function main(): void {
   const shadowRoot = new BrowserHostPage().claimContent().attachShadow({ mode: "open" });
   const app = createElement("div", "fsg-App kit-Page");
+  const navigation = renderNavigation();
   const stories = createElement("main", "");
   const logOutput = createElement("output", "kit-Log", "Events appear here.\n");
   const log = (message: string): void => {
@@ -112,8 +136,9 @@ function main(): void {
   };
 
   shadowRoot.adoptedStyleSheets = [createStyleSheet(UI_CSS), createStyleSheet(KIT_CSS)];
-  stories.append(...STORIES.map(story => renderStory(story, log)));
-  app.append(renderToolbar(app), stories, logOutput);
+  window.addEventListener("hashchange", () => showSelectedStory(navigation, stories, log));
+  showSelectedStory(navigation, stories, log);
+  app.append(renderToolbar(app), navigation, stories, logOutput);
   shadowRoot.append(app);
 }
 

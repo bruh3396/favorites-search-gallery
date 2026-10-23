@@ -1,6 +1,7 @@
 import { Paginator, PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import PAGINATOR_CSS from "@/core/ui/components/paginator/paginator.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
@@ -15,7 +16,7 @@ interface Setup {
 
 function setup({ pageNumber = 1, pageCount = 10 } = {}): Setup {
   const options = { pageNumber: new Signal(pageNumber), pageCount: new Signal(pageCount), onPageChange: vi.fn() };
-  const { result: element, dispose } = render(document, () => <Paginator {...options} />);
+  const { result: element, dispose } = render(document, () => <Paginator {...options} scheduler={new MemoryScheduler()} />);
 
   document.body.append(element);
   return { ...options, element, dispose };
@@ -41,8 +42,8 @@ describe("Paginator", () => {
     expect(element.getAttribute("aria-label")).toBe("Pagination");
   });
 
-  test("lists the current page between the first and last with gaps for the rest", () => {
-    expect(readItems(setup({ pageNumber: 10, pageCount: 20 }).element)).toEqual(["1", "…", "10", "…", "20"]);
+  test("lists the pages around the current one with gaps for the rest", () => {
+    expect(readItems(setup({ pageNumber: 10, pageCount: 20 }).element)).toEqual(["1", "…", "9", "10", "11", "…", "20"]);
   });
 
   test("marks only the current page", () => {
@@ -56,7 +57,7 @@ describe("Paginator", () => {
 
     pageCount.value = 5;
     pageNumber.value = 4;
-    expect(readItems(element)).toEqual(["1", "…", "4", "5"]);
+    expect(readItems(element)).toEqual(["1", "2", "3", "4", "5"]);
     expect(element.querySelector("[aria-current]")?.textContent).toBe("4");
   });
 
@@ -66,7 +67,7 @@ describe("Paginator", () => {
 
     pageNumber.value = 10;
     expect([...element.querySelectorAll("button")]).toEqual(buttons);
-    expect(readItems(element)).toEqual(["1", "…", "10", "…", "20"]);
+    expect(readItems(element)).toEqual(["1", "…", "9", "10", "11", "…", "20"]);
   });
 
   test("reports a clicked page", () => {
@@ -107,6 +108,20 @@ describe("Paginator", () => {
     expect(element.inert).toBe(true);
     pageCount.value = 2;
     expect(element.inert).toBe(false);
+  });
+
+  test("goes to a page entered after clicking a gap", () => {
+    const { element, onPageChange } = setup({ pageNumber: 10, pageCount: 20 });
+
+    findButton(element, "Go to page").click();
+    const jump = element.querySelector<HTMLFormElement>("[role=dialog]")!;
+
+    const field = jump.querySelector("input")!;
+
+    field.value = "15";
+    field.dispatchEvent(new Event("change"));
+    jump.requestSubmit();
+    expect([vi.mocked(onPageChange).mock.calls, jump.hidden]).toEqual([[[15]], true]);
   });
 
   test("stops following once disposed", () => {

@@ -1,74 +1,83 @@
 import { PageTerm, getPageSequence } from "@/core/ui/components/paginator/page_sequence";
 import { describe, expect, test } from "vitest";
 
-const NEARBY_COUNTS = [1, 3, 5, 7];
+const SLOT_COUNTS = [5, 6, 7, 9];
 
-function listSequences(nearbyCount: number): (readonly PageTerm[])[] {
-  const sequences: (readonly PageTerm[])[] = [];
+interface Sequence {
+  pageNumber: number;
+  pageCount: number;
+  terms: readonly PageTerm[];
+}
+
+function listSequences(slotCount: number): Sequence[] {
+  const sequences: Sequence[] = [];
 
   for (let pageCount = 1; pageCount <= 30; pageCount += 1) {
     for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
-      sequences.push(getPageSequence({ pageNumber, pageCount, nearbyCount }));
+      sequences.push({ pageNumber, pageCount, terms: getPageSequence({ pageNumber, pageCount, slotCount }) });
     }
   }
   return sequences;
 }
 
-function listPageNumbers(sequence: readonly PageTerm[]): number[] {
-  return sequence.filter((term): term is number => term !== "gap");
+function listPageNumbers(terms: readonly PageTerm[]): number[] {
+  return terms.filter((term): term is number => term !== "gap");
 }
 
 describe("getPageSequence", () => {
   test("lists a single page alone", () => {
-    expect(getPageSequence({ pageNumber: 1, pageCount: 1, nearbyCount: 5 })).toEqual([1]);
+    expect(getPageSequence({ pageNumber: 1, pageCount: 1, slotCount: 7 })).toEqual([1]);
   });
 
   test("lists nothing when there are no pages", () => {
-    expect(getPageSequence({ pageNumber: 1, pageCount: 0, nearbyCount: 5 })).toEqual([]);
+    expect(getPageSequence({ pageNumber: 1, pageCount: 0, slotCount: 7 })).toEqual([]);
   });
 
   test("lists every page without gaps when they all fit", () => {
-    expect(getPageSequence({ pageNumber: 2, pageCount: 3, nearbyCount: 3 })).toEqual([1, 2, 3]);
-    expect(getPageSequence({ pageNumber: 3, pageCount: 5, nearbyCount: 7 })).toEqual([1, 2, 3, 4, 5]);
+    expect(getPageSequence({ pageNumber: 2, pageCount: 3, slotCount: 7 })).toEqual([1, 2, 3]);
+    expect(getPageSequence({ pageNumber: 3, pageCount: 7, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 
-  test("gaps only the right side near the start", () => {
-    expect(getPageSequence({ pageNumber: 1, pageCount: 10, nearbyCount: 3 })).toEqual([1, 2, 3, "gap", 10]);
+  test("runs pages from the start before a single gap near the start", () => {
+    expect(getPageSequence({ pageNumber: 1, pageCount: 296, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, "gap", 296]);
+    expect(getPageSequence({ pageNumber: 4, pageCount: 296, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, "gap", 296]);
   });
 
-  test("gaps only the left side near the end", () => {
-    expect(getPageSequence({ pageNumber: 10, pageCount: 10, nearbyCount: 3 })).toEqual([1, "gap", 8, 9, 10]);
+  test("runs pages to the end after a single gap near the end", () => {
+    expect(getPageSequence({ pageNumber: 296, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 292, 293, 294, 295, 296]);
+    expect(getPageSequence({ pageNumber: 293, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 292, 293, 294, 295, 296]);
   });
 
   test("gaps both sides in the middle", () => {
-    expect(getPageSequence({ pageNumber: 10, pageCount: 20, nearbyCount: 5 })).toEqual([1, "gap", 8, 9, 10, 11, 12, "gap", 20]);
+    expect(getPageSequence({ pageNumber: 5, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 4, 5, 6, "gap", 296]);
+    expect(getPageSequence({ pageNumber: 150, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 149, 150, 151, "gap", 296]);
   });
 
-  test("shows a single hidden page instead of a gap", () => {
-    expect(getPageSequence({ pageNumber: 3, pageCount: 5, nearbyCount: 3 })).toEqual([1, 2, 3, 4, 5]);
-  });
-
-  test.each(NEARBY_COUNTS)("always lists the current page with %i nearby", nearbyCount => {
-    for (let pageCount = 1; pageCount <= 30; pageCount += 1) {
-      for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
-        expect(getPageSequence({ pageNumber, pageCount, nearbyCount })).toContain(pageNumber);
-      }
+  test.each(SLOT_COUNTS)("always lists the current page with %i slots", slotCount => {
+    for (const { pageNumber, terms } of listSequences(slotCount)) {
+      expect(terms).toContain(pageNumber);
     }
   });
 
-  test.each(NEARBY_COUNTS)("lists page numbers once each, in increasing order, with %i nearby", nearbyCount => {
-    for (const sequence of listSequences(nearbyCount)) {
-      const pages = listPageNumbers(sequence);
+  test.each(SLOT_COUNTS)("fills every slot once pages outnumber %i slots", slotCount => {
+    for (const { pageCount, terms } of listSequences(slotCount)) {
+      expect(terms).toHaveLength(Math.min(pageCount, slotCount));
+    }
+  });
+
+  test.each(SLOT_COUNTS)("lists page numbers once each, in increasing order, with %i slots", slotCount => {
+    for (const { terms } of listSequences(slotCount)) {
+      const pages = listPageNumbers(terms);
 
       expect(pages).toEqual([...new Set(pages)].sort((a, b) => a - b));
     }
   });
 
-  test.each(NEARBY_COUNTS)("puts a gap only where two or more pages are hidden with %i nearby", nearbyCount => {
-    for (const sequence of listSequences(nearbyCount)) {
-      sequence.forEach((term, index) => {
+  test.each(SLOT_COUNTS)("puts a gap only where two or more pages are hidden with %i slots", slotCount => {
+    for (const { terms } of listSequences(slotCount)) {
+      terms.forEach((term, index) => {
         if (term === "gap") {
-          expect((sequence[index + 1] as number) - (sequence[index - 1] as number)).toBeGreaterThan(2);
+          expect((terms[index + 1] as number) - (terms[index - 1] as number)).toBeGreaterThan(2);
         }
       });
     }

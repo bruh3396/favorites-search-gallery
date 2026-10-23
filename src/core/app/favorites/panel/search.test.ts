@@ -1,4 +1,4 @@
-import { DEFAULT_SEARCH_SETTINGS, SearchSettings, isFiltered } from "@/core/features/favorites/search/inputs";
+import { DEFAULT_SEARCH_SETTINGS, SearchSettings, isFiltered } from "@/core/features/favorites/search/input";
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/panel/search";
 import { Mock, describe, expect, test, vi } from "vitest";
@@ -13,7 +13,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Milestone } from "@/core/utils/reactive/milestone";
-import { PaginatorClass } from "@/core/ui/components/paginator/paginator";
+import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/panel/search.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
@@ -70,6 +70,7 @@ function setup(): Setup {
     favorites,
     session,
     scrollTo: new Emitter<Favorite>(),
+    focusSearch: new Emitter<void>(),
     tileLocator: new TileLocator<Favorite>(),
     skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
     skeletonItemCount: 50,
@@ -78,7 +79,7 @@ function setup(): Setup {
     visibilityObserver: { observe: () => (): void => { } },
     decodeStill: () => new MemoryRemoteMedia().decodeStill(),
     scheduler: new MemoryScheduler(),
-    resolvePreviewUrl: media => Promise.resolve(`https://preview/${media.locator}`),
+    resolvePreviewUrl: media => `https://preview/${media.locator}`,
     getPostUrl: post => `https://posts/${post.id}`,
     onSearch,
     onPlainClick,
@@ -147,6 +148,17 @@ describe("FavoritesSearchPanel", () => {
     loaded.reach();
     emptyState.querySelector("button")!.click();
     expect([emptyState.querySelector("p")!.textContent, clearFilters.mock.calls.length]).toEqual([message, 1]);
+  });
+
+  test("moves focus to the search box after clearing the filters", () => {
+    const { element, loaded, settings, emptyState } = setup();
+
+    document.body.append(element);
+    settings.value = { ...DEFAULT_SEARCH_SETTINGS, query: "cat" };
+    loaded.reach();
+    emptyState.querySelector("button")!.click();
+    expect(document.activeElement).toBe(element.querySelector("input[type=search]"));
+    element.remove();
   });
 
   test("offers nothing to clear when no filter hides a favorite", () => {
@@ -224,8 +236,29 @@ describe("FavoritesSearchPanel", () => {
     const { element, searchResults, goTo } = setup();
 
     searchResults.value = ["1", "2", "3"].map(createFavorite);
-    element.querySelector<HTMLButtonElement>(`.${PaginatorClass.page}[data-page-number="2"]`)!.click();
+    element.querySelector<HTMLButtonElement>(`.${PageSlotClass.page}[data-page-number="2"]`)!.click();
     expect(goTo).toHaveBeenCalledExactlyOnceWith(2);
+  });
+
+  test("scrolls the grid to the top when the paginator changes page", () => {
+    const { element, searchResults } = setup();
+    const body = element.querySelector<HTMLElement>(`.${FavoritesSearchPanelClass.body}`)!;
+
+    searchResults.value = ["1", "2", "3"].map(createFavorite);
+    body.scrollTop = 500;
+    element.querySelector<HTMLButtonElement>(`.${PageSlotClass.page}[data-page-number="2"]`)!.click();
+    expect(body.scrollTop).toBe(0);
+  });
+
+  test("scrolls the grid to the top when a search is submitted", () => {
+    const { element } = setup();
+    const body = element.querySelector<HTMLElement>(`.${FavoritesSearchPanelClass.body}`)!;
+    const input = element.querySelector("input[type=search]") as HTMLInputElement;
+
+    body.scrollTop = 500;
+    input.value = "cat";
+    input.form!.dispatchEvent(new Event("submit"));
+    expect(body.scrollTop).toBe(0);
   });
 
   test("stops following the favorites once disposed", () => {

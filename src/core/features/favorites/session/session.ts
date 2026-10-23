@@ -1,6 +1,6 @@
 import { FavoritesPagination, FavoritesPaginationSettings } from "@/core/features/favorites/session/pagination";
 import { Readable, computed } from "@/core/utils/reactive/signal";
-import { SearchSettings, isFiltered } from "@/core/features/favorites/search/inputs";
+import { SearchSettings, isFiltered } from "@/core/features/favorites/search/input";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearch } from "@/core/features/favorites/session/search";

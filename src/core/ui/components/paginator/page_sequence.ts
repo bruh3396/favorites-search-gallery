@@ -1,20 +1,28 @@
-import { getNumbersAround } from "@/core/utils/number/number";
-
 export type PageTerm = number | "gap";
 
 export interface PageSequenceOptions {
   readonly pageNumber: number;
   readonly pageCount: number;
-  readonly nearbyCount: number;
+  readonly slotCount: number;
 }
 
-export function getPageSequence({ pageNumber, pageCount, nearbyCount }: PageSequenceOptions): readonly PageTerm[] {
-  const nearbyPages = getNumbersAround(pageNumber, nearbyCount, { min: 1, max: pageCount });
-  const smallestNearby = nearbyPages[0] ?? 1;
-  const largestNearby = nearbyPages[nearbyPages.length - 1] ?? 1;
-  const leading: PageTerm[] = smallestNearby > 3 ? [1, "gap"] : listPages(1, smallestNearby - 1);
-  const trailing: PageTerm[] = largestNearby < pageCount - 2 ? ["gap", pageCount] : listPages(largestNearby + 1, pageCount);
-  return [...leading, ...nearbyPages, ...trailing];
+export function getPageSequence({ pageNumber, pageCount, slotCount }: PageSequenceOptions): readonly PageTerm[] {
+  if (pageCount <= slotCount) {
+    return listPages(1, pageCount);
+  }
+  const runLength = slotCount - 2;
+  const middleRunLength = slotCount - 4;
+  const middleStart = pageNumber - Math.floor((middleRunLength - 1) / 2);
+  const middleEnd = middleStart + middleRunLength - 1;
+
+  if (middleStart <= 3) {
+    return [...listPages(1, runLength), "gap", pageCount];
+  }
+
+  if (middleEnd >= pageCount - 2) {
+    return [1, "gap", ...listPages(pageCount - runLength + 1, pageCount)];
+  }
+  return [1, "gap", ...listPages(middleStart, middleEnd), "gap", pageCount];
 }
 
 function listPages(first: number, last: number): number[] {

@@ -1,4 +1,4 @@
-import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/inputs";
+import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/input";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";

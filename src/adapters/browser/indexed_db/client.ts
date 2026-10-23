@@ -4,7 +4,7 @@ const VERSION = 1;
 
 export interface IndexedDbClientConfiguration {
   readonly databaseName: string;
-  readonly legacyDatabaseNames: LegacyDatabaseNames;
+  readonly legacyDatabaseNames: LegacyDatabaseNames | null;
 }
 
 export const DEFAULT_INDEXED_DB_CONFIGURATION: IndexedDbClientConfiguration = {

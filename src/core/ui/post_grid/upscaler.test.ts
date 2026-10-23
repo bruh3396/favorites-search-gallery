@@ -1,10 +1,12 @@
-import { MAX_CANVAS_HEIGHT, MAX_CANVAS_WIDTH, UPSCALE_DELAY, Upscaler } from "@/core/ui/post_grid/upscaler";
+import { MAX_CANVAS_HEIGHT, MAX_CANVAS_WIDTH, Upscaler } from "@/core/ui/post_grid/upscaler";
+import { UPSCALE_PACER_CONFIGURATION, UpscalePacer } from "@/core/ui/post_grid/upscale_pacer";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
+const QUIET_PERIOD = UPSCALE_PACER_CONFIGURATION.quietPeriod;
 
 interface FakeBitmap {
   width: number;
@@ -40,10 +42,10 @@ function setup(decode: DecodeStill = () => Promise.resolve(createBitmap() as unk
     .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
   const decodeStill = vi.fn(decode);
   const scheduler = new MemoryScheduler();
-  const upscaler = new Upscaler({ canvas, media: MEDIA, decodeStill, scheduler });
+  const upscaler = new Upscaler({ canvas, media: MEDIA, decodeStill, upscalePacer: new UpscalePacer(UPSCALE_PACER_CONFIGURATION, scheduler) });
   const upscaleNow = (): void => {
     upscaler.upscale();
-    scheduler.advance(UPSCALE_DELAY);
+    scheduler.advance(QUIET_PERIOD);
   };
 
   onTestFinished(() => getContext.mockRestore());
@@ -86,7 +88,7 @@ describe("Upscaler", () => {
 
     upscaler.upscale();
     upscaler.upscale();
-    scheduler.advance(UPSCALE_DELAY - 1);
+    scheduler.advance(QUIET_PERIOD - 1);
     expect(decodeStill).not.toHaveBeenCalled();
     scheduler.advance(1);
     expect(decodeStill).toHaveBeenCalledOnce();
@@ -96,8 +98,8 @@ describe("Upscaler", () => {
     const { upscaler, scheduler, decodeStill } = setup();
 
     upscaler.upscale();
-    upscaler.dispose();
-    scheduler.advance(UPSCALE_DELAY);
+    upscaler.cancel();
+    scheduler.advance(QUIET_PERIOD);
     expect(decodeStill).not.toHaveBeenCalled();
   });
 
@@ -125,7 +127,7 @@ describe("Upscaler", () => {
 
     upscaleNow();
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
-    upscaler.disable();
+    upscaler.hide();
     expect(canvas.hidden).toBe(true);
 
     upscaler.upscale();
@@ -156,19 +158,19 @@ describe("Upscaler", () => {
 
     onTestFinished(() => log.mockRestore());
     upscaleNow();
-    upscaler.dispose();
+    upscaler.cancel();
     fail(new Error("aborted"));
     await flushMicrotasks();
     expect(log).not.toHaveBeenCalled();
   });
 
-  test("aborts an in-flight request when disabled", () => {
+  test("aborts an in-flight request when hidden", () => {
     const { upscaler, decodeStill, canvas, upscaleNow } = setup(() => deferred<ImageBitmap>().promise);
 
     upscaleNow();
     const signal = decodeStill.mock.calls[0][1];
 
-    upscaler.disable();
+    upscaler.hide();
 
     expect(signal.aborted).toBe(true);
     expect(canvas.hidden).toBe(true);
@@ -182,7 +184,7 @@ describe("Upscaler", () => {
     upscaleNow();
     const signal = decodeStill.mock.calls[0][1];
 
-    upscaler.dispose();
+    upscaler.cancel();
 
     expect(signal.aborted).toBe(true);
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);

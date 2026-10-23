@@ -24,6 +24,14 @@ describe("LightboxButton", () => {
     expect((button as HTMLButtonElement).disabled).toBe(false);
   });
 
+  test("names its shortcut in its title and to assistive technology", () => {
+    const { result: button } = render(document, () => (
+      <LightboxButton icon="play" label="Autoplay" shortcut={{ text: "Space", ariaName: "Space" }} onClick={vi.fn()} />
+    ));
+
+    expect([button.title, button.getAttribute("aria-keyshortcuts")]).toEqual(["Autoplay (Space)", "Space"]);
+  });
+
   test("swaps its icon when the icon changes", () => {
     const icon = new Signal<LightboxIcon>("play");
     const { result: button } = render(document, () => <LightboxButton icon={icon} label="Autoplay" onClick={vi.fn()} />);

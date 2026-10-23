@@ -1,7 +1,7 @@
 import { Codec, createListCodec, createRecordCodec } from "@/core/utils/codec/codec";
-import { DEFAULT_SEARCH_SETTINGS, SEARCH_SETTINGS_GUARDS, SearchSettings } from "@/core/features/favorites/search/inputs";
+import { DEFAULT_SEARCH_SETTINGS, SEARCH_SETTINGS_GUARDS, SearchSettings } from "@/core/features/favorites/search/input";
 import { FavoritesTab, createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
-import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { Readable, batch, computed, effect } from "@/core/utils/reactive/signal";
 import { Tab, TabManager } from "@/core/ui/tabs/tab_manager";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
@@ -69,13 +69,23 @@ export class FavoritesWorkspace {
   }
 
   public openBlankTab(): void {
-    this.tabManager.activate(this.openTab(DEFAULT_SEARCH_SETTINGS).id);
+    const tab = this.openTab(DEFAULT_SEARCH_SETTINGS);
+
+    this.tabManager.activate(tab.id);
+    tab.value.focusSearch.emit();
   }
 
   public closeTab(id: string): void {
     if (this.tabManager.tabs.peek().length > 1) {
       this.tabManager.close(id);
     }
+  }
+
+  public closeAllTabs(): void {
+    const previousTabs = this.tabManager.tabs.peek();
+
+    this.openBlankTab();
+    batch(() => previousTabs.forEach(tab => this.tabManager.close(tab.id)));
   }
 
   public locate(item: Favorite): HTMLElement | undefined {

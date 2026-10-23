@@ -28,7 +28,13 @@ function setup(): {
     close: vi.fn()
   } as Partial<LightboxCommandHandlers> as LightboxCommandHandlers;
   const { result: root } = render(document, () => (
-    <LightboxToolbar zoom={{ isZoomed, canZoom }} isAutoplaying={isAutoplaying} inFullscreen={inFullscreen} handlers={handlers} />
+    <LightboxToolbar
+      zoom={{ isZoomed, canZoom }}
+      isAutoplaying={isAutoplaying}
+      inFullscreen={inFullscreen}
+      handlers={handlers}
+      keymap={{ " ": "toggleAutoplay", Escape: "dismiss", Backspace: "close" }}
+    />
   ));
   return { root, handlers, isZoomed, canZoom, isAutoplaying, inFullscreen };
 }
@@ -67,6 +73,16 @@ describe("LightboxToolbar", () => {
 
     findButton(root, label).click();
     expect(handlers[command]).toHaveBeenCalledOnce();
+  });
+
+  test.each([
+    ["Autoplay", "Autoplay (Space)"],
+    ["Close", "Close (Esc)"],
+    ["Download", "Download"]
+  ])("titles %s with its key", (label, title) => {
+    const { root } = setup();
+
+    expect(findButton(root, label).title).toBe(title);
   });
 
   test("shows autoplay as a pressed pause button while autoplaying", () => {

@@ -8,7 +8,7 @@ describe("MemoryRemoteMedia", () => {
   test("gives the locator as every URL", async() => {
     const source = new MemoryRemoteMedia();
 
-    expect(await source.resolvePreviewUrl(IMAGE)).toBe(IMAGE.locator);
+    expect(source.resolvePreviewUrl(IMAGE)).toBe(IMAGE.locator);
     expect(await source.resolveOriginalUrl(IMAGE)).toBe(IMAGE.locator);
   });
 

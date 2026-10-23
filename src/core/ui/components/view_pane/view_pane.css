@@ -1,0 +1,77 @@
+.fsg-ViewPane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+.fsg-ViewPane-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-block-size: var(--fsg-control-size-large);
+  padding-inline: 14px 6px;
+  box-shadow: inset 0 -1px var(--fsg-color-outline);
+}
+
+.fsg-ViewPane-title {
+  flex: 1;
+  min-inline-size: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--fsg-color-on-surface-muted);
+  font-size: var(--fsg-font-size-label-small);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.fsg-ViewPane-toolbar {
+  display: flex;
+  flex: none;
+  gap: 2px;
+}
+
+.fsg-ViewPane-action {
+  display: grid;
+  place-items: center;
+  inline-size: var(--fsg-control-size-small);
+  block-size: var(--fsg-control-size-small);
+  border-radius: var(--fsg-radius-medium);
+  color: var(--fsg-color-on-surface-muted);
+  cursor: pointer;
+}
+
+.fsg-ViewPane-action:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit;
+}
+
+.fsg-ViewPane-action:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-ViewPane-action:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: -2px;
+}
+
+.fsg-ViewPane-icon {
+  inline-size: 16px;
+  block-size: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fsg-ViewPane-body {
+  flex: 1;
+  min-block-size: 0;
+  overflow: auto;
+}

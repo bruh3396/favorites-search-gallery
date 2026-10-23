@@ -1,5 +1,5 @@
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { AutoplayCountdown } from "@/core/features/lightbox/autoplay";
+import { AutoplayCountdown } from "@/core/features/lightbox/autoplay/autoplay";
 import { h } from "@/core/ui/h/h";
 
 export const LightboxAutoplayBarClass = {

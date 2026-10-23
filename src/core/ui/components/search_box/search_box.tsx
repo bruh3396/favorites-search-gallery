@@ -1,6 +1,8 @@
 import { Child, h } from "@/core/ui/h/h";
+import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Readable } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
+import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const SearchBoxClass = {
   root: "fsg-SearchBox",
@@ -15,11 +17,16 @@ export interface SearchBoxProps {
   label: string;
   query: Readable<string>;
   trailing?: Child;
+  focusRequests?: Occurrence<void>;
   onSearch: (query: string) => void;
 }
 
-export function SearchBox({ label, query, trailing, onSearch }: SearchBoxProps): HTMLElement {
+export function SearchBox({ label, query, trailing, focusRequests, onSearch }: SearchBoxProps): HTMLElement {
   const input = <input className={SearchBoxClass.input} type="search" placeholder={label} aria-label={label} value={query} /> as HTMLInputElement;
+
+  if (focusRequests !== undefined) {
+    onCleanup(focusRequests.on(() => input.focus()));
+  }
   return (
     <search className={SearchBoxClass.root}>
       <form

@@ -29,9 +29,7 @@
   "scripts": {
     "build": "node scripts/bin/build || (npm run compile-scripts && node scripts/bin/build)",
     "build:playground": "esbuild playground/playground.ts --bundle --format=iife --target=esnext --define:USE_LOCAL_SERVER=false --define:SCRIPT_VERSION=\\\"playground\\\" --loader:.svg=text --loader:.css=text --loader:.html=text --outfile=dist/playground/playground.js",
-    "build:demo": "npm run compile-scripts && node scripts/bin/build demo",
-    "build:electron": "npm run compile-scripts && node scripts/bin/build electron",
-    "electron": "npm run build:electron && electron dist/electron/launcher.js",
+    "electron": "npm run build && electron dist/electron/launcher.js",
     "build:kit": "vite build --config src/targets/kit/vite.config.mts",
     "kit": "vite --config src/targets/kit/vite.config.mts",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project src/targets/electron/tsconfig.json --noEmit",

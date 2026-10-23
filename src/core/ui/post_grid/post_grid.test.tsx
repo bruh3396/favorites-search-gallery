@@ -34,8 +34,8 @@ function createPost(id: string): MediaItem {
   return { id, media: { kind: "image", locator: `images/${id}` } };
 }
 
-function resolvePreviewUrl(media: Media): Promise<string> {
-  return Promise.resolve(`https://preview/${media.locator}`);
+function resolvePreviewUrl(media: Media): string {
+  return `https://preview/${media.locator}`;
 }
 
 function setup(...ids: string[]): Setup {

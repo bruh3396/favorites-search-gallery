@@ -6,7 +6,7 @@ const TAG_CATEGORIES = ["general", "artist", "unknown", "copyright", "character"
 const COMPRESSED_PREVIEW = /^([^_/]+)_([^/.]+)$/;
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
-interface LegacyPost {
+export interface LegacyPost {
   readonly id: string;
   readonly width: number;
   readonly height: number;
@@ -53,9 +53,12 @@ const NO_MIGRATION: LegacyMigration = {
 
 export async function prepareLegacyMigration(
   newDatabaseName: string,
-  legacyDatabaseNames: LegacyDatabaseNames,
+  legacyDatabaseNames: LegacyDatabaseNames | null,
   mintMedia: LegacyMintMedia
 ): Promise<LegacyMigration> {
+  if (legacyDatabaseNames === null) {
+    return NO_MIGRATION;
+  }
   const databaseNames = await listDatabaseNames();
 
   if (databaseNames === null) {
@@ -169,7 +172,7 @@ function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): 
   };
 }
 
-function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | null {
+export function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | null {
   const media = mintLegacyMedia(legacy, mintMedia);
 
   if (media === null) {

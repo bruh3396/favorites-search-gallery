@@ -36,14 +36,18 @@ export function currentDocument(): Document {
 
 export type Component<P> = (props: P) => HTMLElement;
 
-export function h<P>(component: Component<P>, props: P): HTMLElement;
+export function h<P>(component: Component<P>, props: P, ...children: Child[]): HTMLElement;
 export function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   props: Props<HTMLElementTagNameMap[K]> | null,
   ...children: Child[]
 ): HTMLElementTagNameMap[K];
 export function h(tag: string | Component<unknown>, props: object | null, ...children: Child[]): HTMLElement {
-  return typeof tag === "function" ? untracked(() => tag(props ?? {})) : createElement(tag, props, children);
+  if (typeof tag === "function") {
+    const componentProps = children.length === 0 ? props ?? {} : { ...props, children };
+    return untracked(() => tag(componentProps));
+  }
+  return createElement(tag, props, children);
 }
 
 function createElement(tag: string, props: object | null, children: readonly Child[]): HTMLElement {

@@ -11,6 +11,7 @@ export const TabStripClass = {
   label: "fsg-TabStrip-label",
   close: "fsg-TabStrip-close",
   add: "fsg-TabStrip-add",
+  closeAll: "fsg-TabStrip-closeAll",
   icon: "fsg-TabStrip-icon",
   trailing: "fsg-TabStrip-trailing"
 } as const;
@@ -27,24 +28,46 @@ export interface TabStripProps {
   trailing?: Child;
   onActivate: (id: string) => void;
   onClose: (id: string) => void;
+  onMove: (id: string, index: number) => void;
   onAdd: () => void;
+  onCloseAll?: () => void;
 }
+
+type DropSide = "before" | "after";
 
 interface TabProps {
   tab: TabStripItem;
   activeId: Readable<string | null>;
   onActivate: (id: string) => void;
   onClose: (id: string) => void;
+  onDrop: (draggedId: string, side: DropSide) => void;
 }
 
 const MIDDLE_BUTTON = 1;
+const TAB_DRAG_TYPE = "application/x-fsg-tab";
 
-export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onAdd }: TabStripProps): HTMLElement {
+export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onMove, onAdd, onCloseAll }: TabStripProps): HTMLElement {
   let isRendered = false;
+  const moveNextTo = (targetId: string, draggedId: string, side: DropSide): void => {
+    if (draggedId === targetId) {
+      return;
+    }
+    const ids = tabs.peek().map(tab => tab.id).filter(id => id !== draggedId);
+
+    onMove(draggedId, ids.indexOf(targetId) + (side === "after" ? 1 : 0));
+  };
   const items = new KeyedList<TabStripItem>({
     getKey: (tab): string => tab.id,
     create: (tab): HTMLElement => {
-      const element = <Tab tab={tab} activeId={activeId} onActivate={onActivate} onClose={onClose} />;
+      const element = (
+        <Tab
+          tab={tab}
+          activeId={activeId}
+          onActivate={onActivate}
+          onClose={onClose}
+          onDrop={(draggedId, side) => moveNextTo(tab.id, draggedId, side)}
+        />
+      );
 
       if (isRendered) {
         markEntering(element);
@@ -62,7 +85,16 @@ export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onAdd 
       <button className={TabStripClass.add} type="button" aria-label="New tab" onClick={onAdd}>
         {createIcon("add", TabStripClass.icon)}
       </button>
-      {trailing && <div className={TabStripClass.trailing}>{trailing}</div>}
+      {(trailing || onCloseAll) && (
+        <div className={TabStripClass.trailing}>
+          {trailing}
+          {onCloseAll && (
+            <button className={TabStripClass.closeAll} type="button" aria-label="Close all tabs" onClick={onCloseAll}>
+              {createIcon("ban", TabStripClass.icon)}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -72,9 +104,39 @@ function markEntering(element: HTMLElement): void {
   element.addEventListener("animationend", () => delete element.dataset.entering, { once: true });
 }
 
-function Tab({ tab, activeId, onActivate, onClose }: TabProps): HTMLElement {
-  return (
-    <div className={TabStripClass.tab} role="presentation">
+function readDropSide(event: DragEvent, element: HTMLElement): DropSide {
+  const { left, width } = element.getBoundingClientRect();
+  return event.clientX < left + width / 2 ? "before" : "after";
+}
+
+function Tab({ tab, activeId, onActivate, onClose, onDrop }: TabProps): HTMLElement {
+  const element = (
+    <div
+      className={TabStripClass.tab}
+      role="presentation"
+      draggable={true}
+      onDragstart={event => {
+        event.dataTransfer?.setData(TAB_DRAG_TYPE, tab.id);
+        event.dataTransfer?.setData("text/plain", tab.label.peek());
+      }}
+      onDragover={event => {
+        if (event.dataTransfer?.types.includes(TAB_DRAG_TYPE) === true) {
+          event.preventDefault();
+          element.dataset.drop = readDropSide(event, element);
+        }
+      }}
+      onDragleave={() => delete element.dataset.drop}
+      onDrop={event => {
+        const draggedId = event.dataTransfer?.getData(TAB_DRAG_TYPE) ?? "";
+
+        delete element.dataset.drop;
+
+        if (draggedId !== "") {
+          event.preventDefault();
+          onDrop(draggedId, readDropSide(event, element));
+        }
+      }}
+    >
       <button
         className={TabStripClass.select}
         type="button"
@@ -96,4 +158,5 @@ function Tab({ tab, activeId, onActivate, onClose }: TabProps): HTMLElement {
       )}
     </div>
   );
+  return element;
 }

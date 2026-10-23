@@ -9,7 +9,7 @@ import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { composePostListApp } from "@/core/app/post_list/composer";
 
 describe("composePostListApp", () => {
-  test("mounts the skeleton and the post grid in the app root inside the container", () => {
+  test("mounts the post grid without a skeleton in the app root inside the container", () => {
     const container = document.createElement("div");
 
     composePostListApp({ colorScheme: "light" }, {
@@ -21,8 +21,8 @@ describe("composePostListApp", () => {
     }).mount(container);
     const app = container.shadowRoot!.querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
-    expect(app.querySelector(`.${SkeletonGridClass.root}`)).not.toBeNull();
-    expect(app.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)).not.toBeNull();
+    expect(app.querySelector(`.${SkeletonGridClass.root}`)).toBeNull();
+    expect(app.querySelector(`.${PostGridClass.root}`)).not.toBeNull();
   });
 
   test("lays the grid out in the layout kept in the app's preferences", () => {

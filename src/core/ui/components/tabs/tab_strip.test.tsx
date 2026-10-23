@@ -11,6 +11,7 @@ interface Setup {
   activeId: Signal<string | null>;
   onActivate: Mock<(id: string) => void>;
   onClose: Mock<(id: string) => void>;
+  onMove: Mock<(id: string, index: number) => void>;
   onAdd: Mock<() => void>;
 }
 
@@ -24,6 +25,7 @@ function setup(tabs: readonly TabStripItem[] = [createTab("Home", { closable: fa
     activeId: new Signal(activeId),
     onActivate: vi.fn<(id: string) => void>(),
     onClose: vi.fn<(id: string) => void>(),
+    onMove: vi.fn<(id: string, index: number) => void>(),
     onAdd: vi.fn<() => void>()
   };
   const { result: element } = render(document, () => <TabStrip {...options} />);
@@ -38,6 +40,18 @@ function findTab(element: HTMLElement, label: string): HTMLButtonElement {
 
 function findCloseButton(element: HTMLElement, label: string): HTMLButtonElement | null {
   return element.querySelector<HTMLButtonElement>(`button[aria-label="Close ${label}"]`);
+}
+
+function dropOn(element: HTMLElement, label: string, draggedId: string, clientX: number, type = "drop"): DragEvent {
+  const target = findTab(element, label).parentElement!;
+  const dataTransfer = new DataTransfer();
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX }) as DragEvent;
+
+  Object.defineProperty(event, "dataTransfer", { value: dataTransfer });
+  dataTransfer.setData("application/x-fsg-tab", draggedId);
+  target.getBoundingClientRect = (): DOMRect => ({ left: 0, width: 100 }) as DOMRect;
+  target.dispatchEvent(event);
+  return event;
 }
 
 afterEach(() => {
@@ -116,6 +130,42 @@ describe("TabStrip", () => {
 
     findTab(element, "banana").parentElement!.dispatchEvent(new Event("animationend"));
     expect([before, isEntering()]).toEqual([[false, false, true], [false, false, false]]);
+  });
+
+  test("moves a dropped tab before or after the tab it lands on", () => {
+    const { element, onMove } = setup([createTab("a"), createTab("b"), createTab("c")]);
+
+    dropOn(element, "a", "c", 20);
+    dropOn(element, "b", "a", 80);
+    expect(onMove.mock.calls).toEqual([["c", 0], ["a", 1]]);
+  });
+
+  test("ignores a tab dropped on itself", () => {
+    const { element, onMove } = setup();
+
+    dropOn(element, "apple", "apple", 20);
+    expect(onMove).not.toHaveBeenCalled();
+  });
+
+  test("marks the side a dragged tab would land on, until it leaves", () => {
+    const { element } = setup();
+    const apple = findTab(element, "apple").parentElement!;
+
+    dropOn(element, "apple", "Home", 80, "dragover");
+    const marked = apple.dataset.drop;
+
+    apple.dispatchEvent(new Event("dragleave"));
+    expect([marked, apple.dataset.drop]).toEqual(["after", undefined]);
+  });
+
+  test("closes all tabs from the close all button", () => {
+    const onCloseAll = vi.fn<() => void>();
+    const { result: element } = render(document, () => (
+      <TabStrip tabs={new Signal([createTab("apple")])} activeId={new Signal("apple")} onActivate={vi.fn()} onClose={vi.fn()} onMove={vi.fn()} onAdd={vi.fn()} onCloseAll={onCloseAll} />
+    ));
+
+    element.querySelector<HTMLButtonElement>("button[aria-label='Close all tabs']")!.click();
+    expect(onCloseAll).toHaveBeenCalledOnce();
   });
 
   test("adds a tab from the new tab button", () => {

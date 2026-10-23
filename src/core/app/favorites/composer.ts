@@ -1,9 +1,9 @@
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/app";
 import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
-import { TileHighlight, highlightTile } from "@/core/ui/post_grid/tile_highlighter";
 import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { APP_FONT } from "@/core/app/font";
 import { ColorScheme } from "@/core/boundary/environment";
+import { DECODE_RATE_LIMIT } from "@/core/ui/post_grid/upscaler";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchPanelProps } from "@/core/app/favorites/panel/search";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
@@ -21,15 +21,15 @@ import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonDimensions } from "@/core/app/favorites/storage/skeleton_dimensions";
-import { UPSCALE_RATE_LIMIT } from "@/core/ui/post_grid/upscaler";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
+import { doNothing } from "@/core/utils/function/function";
 import { fillRestOfWindow } from "@/core/ui/app_root/fill_rest_of_window";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 
-export type ExitIndicator = "none" | "zoom" | TileHighlight;
+export type ExitIndicator = "none" | "zoom";
 
 const LIGHTBOX_EXIT_INDICATOR: ExitIndicator = "zoom";
 
@@ -69,27 +69,21 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     volume: preferences.lightboxVolume, muted: preferences.lightboxMuted, morpher: returnIndicator === "zoom" ? morpher : undefined,
     locateItem: item => workspace.locate(item)
   });
-  const upscaleLimiter = new RateLimiter(UPSCALE_RATE_LIMIT, ports.scheduler);
+  const decodeLimiter = new RateLimiter(DECODE_RATE_LIMIT, ports.scheduler);
 
   lightbox.settled.on(item => workspace.turnToPageContaining(item));
-  lightbox.closed.on(item => {
-    const tile = workspace.reveal(item);
-
-    if (returnIndicator !== "none" && returnIndicator !== "zoom") {
-      highlightTile(tile, returnIndicator);
-    }
-  });
+  lightbox.closed.on(item => workspace.reveal(item));
 
   function createPanelProps(tab: FavoritesTab): FavoritesSearchPanelProps {
     return {
       ...tab, favorites: favoritesService, gridPreferences, upscalePaused: lightbox.isOpen,
       skeletonDimensions: skeletonDimensions.value, skeletonItemCount: paginationSettings.peek().size,
       visibilityObserver, scheduler: ports.scheduler,
-      decodeStill: (media, signal, width) => upscaleLimiter.run(() => ports.remoteMedia.decodeStill(media, signal, width), signal),
+      decodeStill: (media, signal, width) => decodeLimiter.run(() => ports.remoteMedia.decodeStill(media, signal, width), signal),
       resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media), getPostUrl: post => remotePages.postUrl(post.id),
       onSearch: query => tab.session.submit(query),
       onPlainClick: post => lightbox.open(new ListSequence({ wraps: !paginationSettings.peek().infiniteScroll }, tab.session.results), post),
-      onCtrlClick: post => postActions.openOriginal(post), onPointerEnter: post => lightbox.prefetch(post)
+      onCtrlClick: post => postActions.openOriginal(post), onPointerEnter: doNothing
     };
   }
 

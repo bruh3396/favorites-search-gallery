@@ -28,4 +28,4 @@ async function buildTarget(name: string): Promise<void> {
   console.log(`✔ Build completed (${name}).`);
 }
 
-buildTarget(process.argv[2] ?? "rule34");
+Promise.all(Object.keys(readTargets()).map(buildTarget));

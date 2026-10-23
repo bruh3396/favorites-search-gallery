@@ -11,7 +11,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 4px;
+    padding: 2px 4px;
     border-block-end: 1px solid var(--fsg-color-outline);
     background: var(--fsg-color-surface-container);
   }
@@ -22,10 +22,28 @@
     min-inline-size: 0;
   }
 
+  .fsg-FavoritesSearchPanel-filter {
+    display: grid;
+    flex: none;
+    place-items: center;
+    align-self: center;
+    inline-size: var(--fsg-control-size-medium);
+    block-size: var(--fsg-control-size-medium);
+    margin-inline-end: 4px;
+    padding: 0;
+    border: 0;
+    border-radius: var(--fsg-radius-full);
+    background: none;
+    color: var(--fsg-color-on-surface-muted);
+    opacity: 0.5;
+    cursor: default;
+  }
+
   .fsg-FavoritesSearchPanel-count {
     display: flex;
     flex: none;
     align-items: center;
+    user-select: none;
     margin-block: 8px;
     padding: 0 16px 0 12px;
     border-inline-start: 1px solid var(--fsg-color-outline);

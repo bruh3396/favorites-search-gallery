@@ -251,6 +251,14 @@ describe("prepareLegacyMigration", () => {
     await vi.waitFor(async() => expect((await databaseNames()).sort()).toEqual(["FavoritesV2", "lab"]));
   });
 
+  test("leaves legacy databases alone when its configuration names none", async() => {
+    await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1")] }, keyed: false });
+    const indexedDb = new IndexedDbClient({ databaseName: "lab", legacyDatabaseNames: null }, mintMedia);
+
+    expect(await read(indexedDb, "favorites", "1")).toBeUndefined();
+    expect((await databaseNames()).sort()).toEqual(["FavoritesV2", "lab"]);
+  });
+
   test("rejects when a legacy database can't open", async() => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1")] }, keyed: true });
     const open = indexedDB.open.bind(indexedDB);

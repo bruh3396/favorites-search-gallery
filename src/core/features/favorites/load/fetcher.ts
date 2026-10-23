@@ -15,7 +15,7 @@ interface MutableFetchProgress {
 
 export interface FavoritesFetcherDependencies {
   localFavorites: LocalFavorites;
-  remoteFavorites: RemoteFavorites;
+  remoteFavorites: Pick<RemoteFavorites, "fetchCount" | "fetchAll">;
   collection: Pick<FavoritesCollection, "append" | "getAllIds">;
   index: Pick<FavoritesSearchIndex, "add">;
   postLibrary: PostLibrary;

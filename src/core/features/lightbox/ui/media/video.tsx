@@ -1,6 +1,6 @@
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
-import { playVideo } from "@/core/features/lightbox/stage/media_elements";
+import { playVideo } from "@/core/features/lightbox/stage/media_elements/media_elements";
 
 export const LightboxVideoClass = {
   root: "fsg-LightboxVideo"

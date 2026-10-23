@@ -1,1 +1,3 @@
-export { INSTRUMENT_FONT as APP_FONT } from "@/core/ui/fonts/instrument";
+import * as FONTS from "@/core/ui/fonts";
+
+export const APP_FONT = FONTS.INSTRUMENT_FONT;

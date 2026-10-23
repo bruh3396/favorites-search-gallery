@@ -1,15 +1,17 @@
-import { DEFAULT_SEARCH_SETTINGS, SearchSettings } from "@/core/features/favorites/search/inputs";
+import { DEFAULT_SEARCH_SETTINGS, SearchSettings } from "@/core/features/favorites/search/input";
 import { describe, expect, test, vi } from "vitest";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
+import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { Post } from "@/core/domain/post/post";
 import { createAppPreferences } from "@/core/app/preferences";
 import { createPost } from "@/testing/post";
+import { effect } from "@/core/utils/reactive/signal";
 
 interface Setup {
   workspace: FavoritesWorkspace;
@@ -162,6 +164,19 @@ describe("FavoritesWorkspace", () => {
       workspace.openBlankTab();
       expect(workspace.activeTab.value.session.settings.value).toEqual(DEFAULT_SEARCH_SETTINGS);
     });
+
+    test("asks the new tab to focus its search once it is active", () => {
+      const { workspace } = setup();
+      const requestedTabs: FavoritesTab[] = [];
+
+      effect(() => {
+        const tab = workspace.activeTab.value;
+
+        tab.focusSearch.on(() => requestedTabs.push(tab));
+      });
+      workspace.openBlankTab();
+      expect(requestedTabs).toEqual([workspace.activeTab.peek()]);
+    });
   });
 
   describe("closeTab", () => {
@@ -177,6 +192,23 @@ describe("FavoritesWorkspace", () => {
 
       workspace.closeTab(workspace.tabManager.tabs.value[0].id);
       expect(readQueries(workspace)).toEqual(["apple"]);
+    });
+  });
+
+  describe("closeAllTabs", () => {
+    test("leaves one active blank tab", () => {
+      const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
+
+      workspace.closeAllTabs();
+      expect([readSettings(workspace), readActiveIndex(workspace)]).toEqual([[DEFAULT_SEARCH_SETTINGS], 0]);
+    });
+
+    test("disposes the closed tabs' sessions", () => {
+      const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
+      const sessions = workspace.tabManager.tabs.value.map(tab => vi.spyOn(tab.value.session, "dispose"));
+
+      workspace.closeAllTabs();
+      expect(sessions.map(dispose => dispose.mock.calls.length)).toEqual([1, 1]);
     });
   });
 

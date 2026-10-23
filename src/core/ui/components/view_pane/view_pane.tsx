@@ -1,0 +1,51 @@
+import { Child, h } from "@/core/ui/h/h";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { Readable } from "@/core/utils/reactive/signal";
+
+export const ViewPaneClass = {
+  root: "fsg-ViewPane",
+  header: "fsg-ViewPane-header",
+  title: "fsg-ViewPane-title",
+  toolbar: "fsg-ViewPane-toolbar",
+  action: "fsg-ViewPane-action",
+  icon: "fsg-ViewPane-icon",
+  body: "fsg-ViewPane-body"
+} as const;
+
+export interface ViewPaneAction {
+  readonly label: string;
+  readonly icon: Icon;
+  readonly disabled?: Readable<boolean>;
+  onClick: () => void;
+}
+
+export interface ViewPaneProps {
+  title: string;
+  actions?: readonly ViewPaneAction[];
+  children?: Child;
+}
+
+export function ViewPane({ title, actions = [], children }: ViewPaneProps): HTMLElement {
+  return (
+    <section className={ViewPaneClass.root}>
+      <header className={ViewPaneClass.header}>
+        <h2 className={ViewPaneClass.title}>{title}</h2>
+        <div className={ViewPaneClass.toolbar} role="toolbar" aria-label={title}>
+          {actions.map(action => (
+            <button
+              className={ViewPaneClass.action}
+              type="button"
+              aria-label={action.label}
+              title={action.label}
+              disabled={action.disabled}
+              onClick={action.onClick}
+            >
+              {createIcon(action.icon, ViewPaneClass.icon)}
+            </button>
+          ))}
+        </div>
+      </header>
+      <div className={ViewPaneClass.body}>{children}</div>
+    </section>
+  );
+}

@@ -15,9 +15,13 @@
 @import "./components/status_text/status_text.css" layer(components);
 @import "./components/progress_line/progress_line.css" layer(components);
 @import "./components/paginator/paginator.css" layer(components);
+@import "./components/paginator/page_slot.css" layer(components);
+@import "./components/paginator/page_jump.css" layer(components);
 @import "./components/page_stepper/page_stepper.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
 @import "./components/tabs/tabs.css" layer(components);
 @import "./components/empty_state/empty_state.css" layer(components);
 @import "./components/slider/slider.css" layer(components);
+@import "./components/activity_bar/activity_bar.css" layer(components);
+@import "./components/view_pane/view_pane.css" layer(components);

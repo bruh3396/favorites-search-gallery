@@ -10,7 +10,7 @@ const STREAM_BATCH_SIZE = 1_000;
 
 export interface FavoritesReloaderDependencies {
   localFavorites: LocalFavorites;
-  remoteFavorites: RemoteFavorites;
+  remoteFavorites: Pick<RemoteFavorites, "findNew" | "findRemoved">;
   collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll">;
   index: Pick<FavoritesSearchIndex, "rebuild">;
   postLibrary: PostLibrary;

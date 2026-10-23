@@ -3,8 +3,8 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import DIALOG_CSS from "@/core/features/lightbox/ui/dialog.css?inline";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
-import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility";
-import { LightboxStage } from "@/core/features/lightbox/stage/stage";
+import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/overlay_visibility";
+import { LightboxStage } from "@/core/features/lightbox/stage/stage/stage";
 import { LightboxVideoClass } from "@/core/features/lightbox/ui/media/video";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
@@ -55,6 +55,7 @@ function setup(): {
         autoplay={{ isPlaying: new Signal(false), countdown: new Signal(undefined) }}
         sizeObserver={new MemorySizeObserver()}
         handlers={handlers}
+        keymap={{}}
         keyListener={keyListener}
         mouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn(), onContextmenu: vi.fn() }}
       />
