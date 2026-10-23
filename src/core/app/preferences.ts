@@ -1,13 +1,13 @@
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/tiler";
 import { Preference, PreferenceStorage, Preferences, createPreferences, definePreference, defineRecordPreference } from "@/core/utils/reactive/preference";
 import { isBoolean, isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
-import { PaginationSettings } from "@/core/features/favorites/search/pagination";
+import { FavoritesPaginationSettings } from "@/core/features/favorites/session/pagination";
 
 export interface AppPreferenceValues {
   readonly postGridLayout: GridLayout;
   readonly postGridSize: number;
   readonly postGridUpscale: boolean;
-  readonly favoritesPagination: PaginationSettings;
+  readonly favoritesPagination: FavoritesPaginationSettings;
   readonly lightboxVolume: number;
   readonly lightboxMuted: boolean;
 }
@@ -25,7 +25,7 @@ export function createAppPreferences(storage: PreferenceStorage): AppPreferences
     postGridLayout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
     postGridSize: definePreference(3),
     postGridUpscale: definePreference(true),
-    favoritesPagination: defineRecordPreference<PaginationSettings>(
+    favoritesPagination: defineRecordPreference<FavoritesPaginationSettings>(
       { size: 50, infiniteScroll: false },
       { size: isPageSize, infiniteScroll: isBoolean }
     ),

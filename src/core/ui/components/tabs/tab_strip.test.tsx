@@ -1,5 +1,5 @@
-import { TabStrip, TabStripClass, TabStripItem } from "@/core/ui/components/tabs/tab_strip";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
+import { TabStrip, TabStripClass, TabStripItem } from "@/core/ui/components/tabs/tab_strip";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import TAB_STRIP_CSS from "@/core/ui/components/tabs/tab_strip.css?inline";

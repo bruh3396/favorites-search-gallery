@@ -1,7 +1,7 @@
 import { ALL_RATINGS_MASK, METRICS, isRatingMask } from "@/core/domain/post/post";
 import { isBoolean, oneOf, sameKindAs } from "@/core/utils/guards/guards";
 import { FieldGuards } from "@/core/utils/codec/codec";
-import { SearchExpression } from "@/core/search/expressions/search_expression";
+import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 
 export const SORT_KEYS = ["favorited", "random", ...METRICS] as const;
 

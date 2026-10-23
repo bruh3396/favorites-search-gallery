@@ -9,13 +9,13 @@ const DOM_TESTS = [
   "src/core/ui/**/*.test.{ts,tsx}",
   "src/core/features/**/*.test.tsx",
   "src/core/features/*/{commands,input,ui}/**/*.test.ts",
-  "src/core/features/lightbox/lightbox.test.ts",
-  "src/core/features/lightbox2/mouse_listeners.test.ts",
+  "src/core/features/lightbox/**/*.test.ts",
   "src/adapters/browser/image/image.test.ts",
   "src/adapters/browser/ports/host_page/host_page.test.ts",
   "src/adapters/browser/ports/viewport/viewport.test.ts",
   "src/adapters/browser/ports/morpher/morpher.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
+  "src/adapters/browser/ports/page_visibility/page_visibility.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
   "src/adapters/memory/ports/morpher/morpher.test.ts",
   "src/adapters/memory/ports/remote_media/remote_media.test.ts",
@@ -39,7 +39,7 @@ export default defineConfig({
     exclude: EXCLUDED_TESTS,
     projects: [
       { extends: true, test: { name: "node", exclude: [...EXCLUDED_TESTS, ...DOM_TESTS] } },
-      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", css: { include: [/src\/core\/.+\.css/] } } }
+      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", setupFiles: ["src/testing/dom_setup.ts"], css: { include: [/src\/core\/.+\.css/] } } }
     ],
     isolate: false,
     pool: "threads",

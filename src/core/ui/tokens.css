@@ -21,6 +21,7 @@
   --fsg-control-size-small: 24px;
 
   --fsg-font-family: system-ui, sans-serif;
+  --fsg-font-family-numeric: var(--fsg-font-family);
   --fsg-font-size-label: 14px;
   --fsg-font-size-label-small: 12px;
 

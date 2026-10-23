@@ -1,21 +1,22 @@
-import { LightboxCommandName, LightboxCommands } from "@/core/features/lightbox/commands/commands";
-
-export type LightboxBindableCommandName = {
-  [Name in LightboxCommandName]: [] extends Parameters<LightboxCommands[Name]> ? Name : never
-}[LightboxCommandName];
-
-export type LightboxKeymap = Readonly<Record<string, LightboxBindableCommandName>>;
+import { LightboxKeymap } from "@/core/features/lightbox/input/key_listener";
 
 export const DEFAULT_LIGHTBOX_KEYMAP: LightboxKeymap = {
-  " ": "toggleAutoplay",
   ArrowRight: "showNext",
   d: "showNext",
   D: "showNext",
   ArrowLeft: "showPrevious",
   a: "showPrevious",
   A: "showPrevious",
-  Backspace: "close",
-  Delete: "close",
+  " ": "toggleAutoplay",
+  k: "togglePause",
+  K: "togglePause",
+  m: "toggleMute",
+  M: "toggleMute",
+  f: "toggleFullscreen",
+  F: "toggleFullscreen",
   z: "toggleZoom",
-  Z: "toggleZoom"
+  Z: "toggleZoom",
+  Escape: "dismiss",
+  Backspace: "close",
+  Delete: "close"
 };

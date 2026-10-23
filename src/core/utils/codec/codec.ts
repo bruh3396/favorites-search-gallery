@@ -42,9 +42,11 @@ export function createSetCodec<T>(acceptsMember: Guard<T>): Codec<ReadonlySet<T>
 
 export function createListCodec<T>(item: Codec<T>): Codec<readonly T[]> {
   return {
-    decode: (stored): readonly T[] | undefined => (Array.isArray(stored)
-      ? stored.map(entry => item.decode(entry)).filter((entry): entry is T => entry !== undefined)
-      : undefined),
+    decode: (stored): readonly T[] | undefined => (Array.isArray(stored) ? stored.map(entry => item.decode(entry)).filter(isDefined) : undefined),
     encode: (value): unknown => value.map(entry => item.encode(entry))
   };
+}
+
+function isDefined<T>(value: T | undefined): value is T {
+  return value !== undefined;
 }

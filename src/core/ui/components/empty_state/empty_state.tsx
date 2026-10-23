@@ -9,7 +9,7 @@ export const EmptyStateClass = {
 
 export interface EmptyStateAction {
   readonly label: string;
-  readonly onClick: () => void;
+  onClick: () => void;
 }
 
 export interface EmptyStateProps {

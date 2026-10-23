@@ -1,226 +1,256 @@
-import { FIT_VIEW, LightboxZoom, ZoomFrame } from "@/core/features/lightbox/zoom/zoom";
-import { describe, expect, onTestFinished, test } from "vitest";
-import { MediaItem } from "@/core/domain/post/post";
+import { FIT_VIEW, LightboxZoom, ZoomSize, ZoomView } from "@/core/features/lightbox/zoom/zoom";
+import { describe, expect, test } from "vitest";
+import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
+import { createPosts } from "@/testing/post";
 
-const IMAGE: MediaItem = { id: "1", media: { kind: "image", locator: "images/1" } };
-const GIF: MediaItem = { id: "2", media: { kind: "gif", locator: "images/2.gif" } };
-const VIDEO: MediaItem = { id: "3", media: { kind: "video", locator: "videos/3.mp4" } };
+const POSTS = createPosts("1", "2");
+const FRAME = { width: 800, height: 600 };
+const SQUARE_MEDIA = { width: 400, height: 400 };
 
-// A 1000x2000 image fits a 1000x500 frame at a quarter size, 250 wide and centered at x 375.
-const TALL_FRAME: ZoomFrame = { width: 1_000, height: 500, mediaWidth: 1_000, mediaHeight: 2_000 };
-const LARGE_FRAME: ZoomFrame = { width: 1_000, height: 500, mediaWidth: 4_000, mediaHeight: 2_000 };
-const SMALL_FRAME: ZoomFrame = { width: 1_000, height: 500, mediaWidth: 100, mediaHeight: 50 };
-
-interface Setup {
+function setup(mediaSize: ZoomSize | undefined): {
   zoom: LightboxZoom;
-  current: Signal<MediaItem | undefined>;
+  currentItem: Signal<Post | undefined>;
+  media: Signal<ZoomSize | undefined>;
+} {
+  const currentItem = new Signal<Post | undefined>(POSTS[0]);
+  const media = new Signal<ZoomSize | undefined>(mediaSize);
+  const zoom = new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: media });
+
+  zoom.setFrameSize(FRAME);
+  return { zoom, currentItem, media };
 }
 
-function setup(item: MediaItem | undefined = IMAGE, frame: ZoomFrame = TALL_FRAME): Setup {
-  const current = new Signal<MediaItem | undefined>(item);
-  const zoom = new LightboxZoom({ minimumScale: 2 }, { current });
-
-  zoom.setFrame(frame);
-  onTestFinished(() => zoom.dispose());
-  return { zoom, current };
+function readView(zoom: LightboxZoom): ZoomView {
+  const { scale, x, y } = zoom.view.value;
+  return { scale, x: x + 0, y: y + 0 };
 }
 
 describe("LightboxZoom", () => {
-  test("starts fitted", () => {
-    const { zoom } = setup();
+  test("starts fitted and ready to zoom", () => {
+    const { zoom } = setup(SQUARE_MEDIA);
 
-    expect([zoom.view.value, zoom.isZoomed.value]).toEqual([FIT_VIEW, false]);
+    expect(zoom.view.value).toEqual(FIT_VIEW);
+    expect(zoom.isZoomed.value).toBe(false);
+    expect(zoom.canZoom.value).toBe(true);
+    expect(zoom.glides.value).toBe(true);
+    expect(zoom.pixelScale.value).toBeUndefined();
+    expect(zoom.visibleRegion.value).toBeUndefined();
   });
 
-  test("zooms images and GIFs but not videos", () => {
-    expect([IMAGE, GIF, VIDEO].map(item => setup(item).zoom.canZoom.value)).toEqual([true, true, false]);
+  test("places the fitted media in the middle of the frame", () => {
+    const { zoom } = setup(SQUARE_MEDIA);
+
+    expect(zoom.mediaRect.value).toEqual({ x: 100, y: 0, width: 600, height: 600 });
   });
 
-  test("tells which way a toggle would zoom, and nothing for a video", () => {
-    const { zoom } = setup();
-    const directions = [zoom.toggleDirection.value];
+  test("can't zoom without a media size", () => {
+    const { zoom } = setup(undefined);
+
+    expect(zoom.canZoom.value).toBe(false);
+    expect(zoom.mediaRect.value).toBeUndefined();
+  });
+
+  test("can't zoom without a frame size", () => {
+    const { zoom } = setup(SQUARE_MEDIA);
+
+    zoom.setFrameSize({ width: 0, height: 0 });
+    expect(zoom.canZoom.value).toBe(false);
+  });
+
+  test("zooms out when the current item changes", () => {
+    const { zoom, currentItem } = setup(SQUARE_MEDIA);
 
     zoom.toggle();
-    directions.push(zoom.toggleDirection.value, setup(VIDEO).zoom.toggleDirection.value);
-    expect(directions).toEqual(["in", "out", undefined]);
+    currentItem.value = POSTS[1];
+    expect(zoom.isZoomed.value).toBe(false);
   });
 
-  describe("setFrame", () => {
-    test("keeps the view inside a frame that shrinks", () => {
-      const { zoom } = setup(IMAGE, LARGE_FRAME);
+  test("zooms out when the media size changes", () => {
+    const { zoom, media } = setup(SQUARE_MEDIA);
 
-      zoom.toggle({ x: 1_000, y: 500 });
-      zoom.setFrame({ ...LARGE_FRAME, width: 500, height: 250 });
-      expect([zoom.view.value.x, zoom.view.value.y, zoom.glides.value]).toEqual([-1_500, -750, false]);
-    });
+    zoom.toggle();
+    media.value = { width: 200, height: 100 };
+    expect(zoom.isZoomed.value).toBe(false);
+  });
 
-    test("measures magnification against the media shown now", () => {
-      const { zoom } = setup(IMAGE, LARGE_FRAME);
+  test("reports the visible part of the media as fractions", () => {
+    const { zoom } = setup(SQUARE_MEDIA);
+
+    zoom.toggle();
+    const region = zoom.visibleRegion.value!;
+
+    expect(region.x).toBeCloseTo(1 / 6);
+    expect(region.y).toBeCloseTo(0.25);
+    expect(region.width).toBeCloseTo(2 / 3);
+    expect(region.height).toBeCloseTo(0.5);
+  });
+
+  test("clamps the visible region to the media", () => {
+    const { zoom } = setup({ width: 100, height: 400 });
+
+    zoom.toggle();
+    expect(zoom.visibleRegion.value).toEqual(expect.objectContaining({ x: 0, width: 1 }));
+  });
+
+  describe("toggle", () => {
+    test("zooms to the minimum scale around the frame's centre", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
       zoom.toggle();
-      zoom.setFrame({ ...LARGE_FRAME, mediaWidth: 8_000, mediaHeight: 4_000 });
-      expect(zoom.magnification.value).toBe(0.5);
+      expect(readView(zoom)).toEqual({ scale: 2, x: -400, y: -300 });
+      expect(zoom.glides.value).toBe(true);
+      expect(zoom.pixelScale.value).toBe(3);
+      expect(zoom.mediaRect.value).toEqual({ x: -200, y: -300, width: 1_200, height: 1_200 });
     });
 
-    test("zooms out when the frame loses its size", () => {
-      const { zoom } = setup();
+    test("keeps the given point in place", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
+
+      zoom.toggle({ x: 500, y: 300 });
+      expect(readView(zoom)).toEqual({ scale: 2, x: -500, y: -300 });
+    });
+
+    test("zooms around the focus point when no point is given", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
+
+      zoom.setFocusPoint({ x: 500, y: 300 });
+      zoom.toggle();
+      expect(readView(zoom)).toEqual({ scale: 2, x: -500, y: -300 });
+    });
+
+    test("keeps the media's edges inside the frame", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
+
+      zoom.toggle({ x: 100, y: 0 });
+      expect(readView(zoom)).toEqual({ scale: 2, x: -200, y: 0 });
+    });
+
+    test("zooms to the media's own pixels when they need more than the minimum scale", () => {
+      const { zoom } = setup({ width: 3_200, height: 2_400 });
 
       zoom.toggle();
-      zoom.setFrame({ ...TALL_FRAME, width: 0, height: 0 });
+      expect(zoom.pixelScale.value).toBe(1);
+    });
+
+    test("zooms out when zoomed", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
+
+      zoom.toggle();
+      zoom.toggle();
+      expect(zoom.isZoomed.value).toBe(false);
+      expect(zoom.view.value).toEqual(FIT_VIEW);
+    });
+
+    test("does nothing when it can't zoom", () => {
+      const { zoom } = setup(undefined);
+
+      zoom.toggle();
       expect(zoom.isZoomed.value).toBe(false);
     });
   });
 
-  describe("toggle", () => {
-    test("zooms to actual pixels, keeping the pointed-at spot under the pointer", () => {
-      const { zoom } = setup();
-
-      zoom.toggle({ x: 500, y: 250 });
-      expect(zoom.view.value.scale).toBe(4);
-      expect(zoom.view.value.x).toBe(500 - (500 * 4));
-    });
-
-    test("zooms an image smaller than the frame to the minimum scale", () => {
-      const { zoom } = setup(IMAGE, SMALL_FRAME);
-
-      zoom.toggle();
-      expect(zoom.view.value.scale).toBe(2);
-    });
-
-    test("keeps the image's edges past the frame's edges", () => {
-      const { zoom } = setup();
-
-      zoom.toggle({ x: 0, y: 0 });
-      expect([zoom.view.value.x, zoom.view.value.y]).toEqual([-375 * 4, 0]);
-    });
-
-    test("zooms back out when zoomed", () => {
-      const { zoom } = setup();
-
-      zoom.toggle();
-      zoom.toggle();
-      expect([zoom.view.value, zoom.isZoomed.value]).toEqual([FIT_VIEW, false]);
-    });
-
-    test("ignores a video, media that hasn't loaded, and a frame with no size", () => {
-      const video = setup(VIDEO).zoom;
-      const unloaded = setup(IMAGE, { ...TALL_FRAME, mediaWidth: 0, mediaHeight: 0 }).zoom;
-      const unlaidOut = setup(IMAGE, { ...TALL_FRAME, width: 0, height: 0 }).zoom;
-
-      [video, unloaded, unlaidOut].forEach(zoom => zoom.toggle());
-      expect([video, unloaded, unlaidOut].map(zoom => zoom.isZoomed.value)).toEqual([false, false, false]);
-    });
-  });
-
   describe("zoomBy", () => {
-    test("scales the view by the factor, keeping the pointed-at spot under the pointer", () => {
-      const { zoom } = setup(IMAGE, LARGE_FRAME);
+    test("scales the view around the given point without gliding", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-      zoom.zoomBy(1.5, { x: 0, y: 0 });
-      zoom.zoomBy(2, { x: 0, y: 0 });
-      expect(zoom.view.value).toEqual({ scale: 3, x: 0, y: 0 });
+      zoom.zoomBy(2, { x: 500, y: 300 });
+      expect(readView(zoom)).toEqual({ scale: 2, x: -500, y: -300 });
+      expect(zoom.glides.value).toBe(false);
     });
 
-    test("stops at twice the scale a toggle zooms to", () => {
-      const { zoom } = setup(IMAGE, LARGE_FRAME);
+    test("caps the scale at the maximum", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-      zoom.zoomBy(100);
+      zoom.zoomBy(100, { x: 400, y: 300 });
       expect(zoom.view.value.scale).toBe(8);
     });
 
-    test("fits again once the scale gets back down to fitted", () => {
-      const { zoom } = setup(IMAGE, LARGE_FRAME);
+    test("caps the scale at the media's own pixels when they need more than the maximum", () => {
+      const { zoom } = setup({ width: 8_000, height: 6_000 });
 
-      zoom.zoomBy(1.5);
-      zoom.zoomBy(0.5);
-      expect([zoom.view.value, zoom.isZoomed.value]).toEqual([FIT_VIEW, false]);
+      zoom.zoomBy(100, { x: 400, y: 300 });
+      expect(zoom.pixelScale.value).toBe(1);
     });
 
-    test("ignores a video", () => {
-      const { zoom } = setup(VIDEO);
+    test("zooms out once the scale falls to the fit", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-      zoom.zoomBy(2);
+      zoom.zoomBy(2, { x: 400, y: 300 });
+      zoom.zoomBy(0.5, { x: 400, y: 300 });
+      expect(zoom.isZoomed.value).toBe(false);
+    });
+
+    test("does nothing when it can't zoom", () => {
+      const { zoom } = setup(undefined);
+
+      zoom.zoomBy(2, { x: 400, y: 300 });
       expect(zoom.isZoomed.value).toBe(false);
     });
   });
 
   describe("panBy", () => {
-    test("moves the view, stopping at the image's edges", () => {
-      const { zoom } = setup(IMAGE, LARGE_FRAME);
+    test("moves the view, clamped to the media's edges, without gliding", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
       zoom.toggle();
-      zoom.panBy(100, -50);
-      expect([zoom.view.value.x, zoom.view.value.y]).toEqual([-1_400, -800]);
-      zoom.panBy(10_000, 10_000);
-      expect([zoom.view.value.x, zoom.view.value.y]).toEqual([0, 0]);
+      zoom.panBy(50, 1_000);
+      expect(readView(zoom)).toEqual({ scale: 2, x: -350, y: 0 });
+      expect(zoom.glides.value).toBe(false);
     });
 
-    test("keeps an axis the image doesn't fill centered", () => {
-      const { zoom } = setup();
+    test("does nothing when not zoomed", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-      zoom.toggle({ x: 500, y: 250 });
-      zoom.panBy(100, 0);
-      expect(zoom.view.value.x).toBe(-375 * 4);
-    });
-
-    test("does nothing while fitted", () => {
-      const { zoom } = setup();
-
-      zoom.panBy(100, 100);
+      zoom.panBy(50, 50);
       expect(zoom.view.value).toEqual(FIT_VIEW);
     });
   });
 
-  test("glides through a toggle and a zoom out, but follows the wheel and drags at once", () => {
-    const { zoom } = setup(IMAGE, LARGE_FRAME);
-    const glides: boolean[] = [];
+  describe("centerAt", () => {
+    test("glides the given fraction of the media to the frame's centre, clamped to its edges", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-    zoom.toggle();
-    glides.push(zoom.glides.value);
-    zoom.panBy(10, 0);
-    glides.push(zoom.glides.value);
-    zoom.zoomBy(1.5);
-    glides.push(zoom.glides.value);
-    zoom.zoomOut();
-    glides.push(zoom.glides.value);
-    expect(glides).toEqual([true, false, false, true]);
+      zoom.toggle({ x: 500, y: 300 });
+      zoom.centerAt({ x: 0, y: 0 });
+      expect(readView(zoom)).toEqual({ scale: 2, x: -200, y: 0 });
+      expect(zoom.glides.value).toBe(true);
+    });
+
+    test("does nothing when not zoomed", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
+
+      zoom.centerAt({ x: 0, y: 0 });
+      expect(zoom.view.value).toEqual(FIT_VIEW);
+    });
   });
 
-  test("reports how many screen pixels show each media pixel, only while zoomed", () => {
-    const { zoom } = setup();
-    const magnifications: (number | undefined)[] = [zoom.magnification.value];
+  describe("setFrameSize", () => {
+    test("clamps the zoomed view to the new frame without gliding", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-    zoom.toggle();
-    magnifications.push(zoom.magnification.value);
-    zoom.zoomBy(2);
-    magnifications.push(zoom.magnification.value);
-    expect(magnifications).toEqual([undefined, 1, 2]);
+      zoom.toggle();
+      zoom.setFrameSize({ width: 200, height: 200 });
+      expect(readView(zoom)).toEqual({ scale: 2, x: -200, y: -200 });
+      expect(zoom.glides.value).toBe(false);
+    });
+
+    test("zooms out when the frame collapses", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
+
+      zoom.toggle();
+      zoom.setFrameSize({ width: 0, height: 0 });
+      expect(zoom.isZoomed.value).toBe(false);
+    });
   });
 
-  test("reports the part of the image in view, as fractions of it, only while zoomed", () => {
-    const { zoom } = setup(IMAGE, LARGE_FRAME);
-    const regions = [zoom.visibleRegion.value];
+  describe("zoomOut", () => {
+    test("returns to the fitted view", () => {
+      const { zoom } = setup(SQUARE_MEDIA);
 
-    zoom.toggle();
-    regions.push(zoom.visibleRegion.value);
-    zoom.zoomOut();
-    zoom.setFrame(TALL_FRAME);
-    zoom.toggle();
-    regions.push(zoom.visibleRegion.value);
-    expect(regions).toEqual([
-      undefined,
-      { left: 0.375, top: 0.375, width: 0.25, height: 0.25 },
-      { left: 0, top: 0.375, width: 1, height: 0.25 }
-    ]);
-  });
-
-  test("fits again after stepping to another item, even when stepping back", () => {
-    const { zoom, current } = setup();
-
-    zoom.toggle();
-    current.value = GIF;
-    current.value = IMAGE;
-    expect(zoom.isZoomed.value).toBe(false);
+      zoom.toggle();
+      zoom.zoomOut();
+      expect(zoom.view.value).toEqual(FIT_VIEW);
+    });
   });
 });

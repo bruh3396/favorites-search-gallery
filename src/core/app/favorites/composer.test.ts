@@ -3,7 +3,9 @@ import { ExitIndicator, composeFavoritesApp } from "@/core/app/favorites/compose
 import { describe, expect, onTestFinished, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { LightboxButtonClass } from "@/core/features/lightbox/ui/controls/button/button";
+import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/button";
+import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/position";
+import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
@@ -66,6 +68,21 @@ function readAspectRatios(grid: Element): string[] {
 
 function querySkeleton(root: ShadowRoot): Element {
   return root.querySelector(`.${SkeletonGridClass.root}`)!;
+}
+
+function clickLightboxButton(root: ShadowRoot, label: string): void {
+  root.querySelector<HTMLElement>(`.${LightboxButtonClass.root}[aria-label="${label}"]`)!.click();
+}
+
+function pressKey(root: ShadowRoot, key: string): void {
+  root.querySelector("dialog")!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true }));
+}
+
+function tapViewport(root: ShadowRoot, modifiers: { ctrlKey?: boolean } = {}): void {
+  const viewport = root.querySelector(`.${LightboxViewportClass.root}`)!;
+
+  viewport.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0, isPrimary: true, ...modifiers }));
+  viewport.dispatchEvent(new PointerEvent("pointerup", { bubbles: true, button: 0, isPrimary: true, ...modifiers }));
 }
 
 describe("composeFavoritesApp", () => {
@@ -145,11 +162,9 @@ describe("composeFavoritesApp", () => {
     const firstTile = grid.querySelector(`.${TileClass.root}`)!;
 
     firstTile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
-    const dialog = root.querySelector("dialog")!;
-
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    pressKey(root, "ArrowRight");
     await flushMicrotasks();
-    dialog.click();
+    clickLightboxButton(root, "Close");
 
     expect(scrolls).toHaveLength(1);
     expect(scrolls[0].page).toBe("2");
@@ -164,16 +179,13 @@ describe("composeFavoritesApp", () => {
     localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })], { scheduler });
     const readPage = (): string | null | undefined => root.querySelector(`.${PaginatorClass.page}[aria-current="page"]`)?.textContent;
-    const pressArrowRight = (): void => {
-      document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
-    };
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
-    pressArrowRight();
+    pressKey(root, "ArrowRight");
     await flushMicrotasks();
     scheduler.advance(74);
-    pressArrowRight();
+    pressKey(root, "ArrowRight");
     await flushMicrotasks();
     scheduler.advance(74);
     expect(readPage()).toBe("1");
@@ -181,17 +193,46 @@ describe("composeFavoritesApp", () => {
     expect([readPage(), root.querySelector("dialog")!.open]).toEqual(["3", true]);
   });
 
+  test.each([
+    { infiniteScroll: false, position: "1 / 2" },
+    { infiniteScroll: true, position: "2 / 2" }
+  ])("steps the lightbox past the last result to position $position when infinite scroll is $infiniteScroll", async({ infiniteScroll, position }) => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 50, infiniteScroll } } });
+    const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" })]);
+
+    await flushMicrotasks();
+    root.querySelectorAll<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)[1].click();
+    pressKey(root, "ArrowRight");
+    await flushMicrotasks();
+    expect(root.querySelector(`.${LightboxPositionClass.root}`)!.textContent).toBe(position);
+  });
+
   test("morphs the lightbox's media into its favorite's tile on close", async() => {
     const morpher = new MemoryMorpher();
+    const scheduler = new MemoryScheduler();
     const posts = [createPost({ id: "1", media: { kind: "image", locator: "data:image/png;base64,AA==" } })];
-    const root = mount(new MemoryLocalKeyedValues(), posts, { morpher });
+    const root = mount(new MemoryLocalKeyedValues(), posts, { morpher, scheduler });
 
     await flushMicrotasks();
     const tile = root.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
 
     tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
-    root.querySelector("dialog")!.click();
-    expect(morpher.morphs).toEqual([{ source: expect.any(HTMLImageElement), target: tile }]);
+    scheduler.advance(75);
+    await flushMicrotasks();
+    clickLightboxButton(root, "Close");
+    expect(morpher.morphs).toEqual([{ source: expect.any(HTMLCanvasElement), target: tile }]);
+  });
+
+  test("closes plainly without a morph while the lightbox's media is still loading", async() => {
+    const morpher = new MemoryMorpher();
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher });
+
+    await flushMicrotasks();
+    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
+    clickLightboxButton(root, "Close");
+    expect([morpher.morphs, root.querySelector("dialog")!.open]).toEqual([[], false]);
   });
 
   test("highlights the closed favorite's tile instead of morphing when the indicator is a highlight", async() => {
@@ -202,7 +243,7 @@ describe("composeFavoritesApp", () => {
     const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
 
     tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
-    root.querySelector("dialog")!.click();
+    clickLightboxButton(root, "Close");
     expect([tile.dataset.highlight, morpher.morphs]).toEqual(["glow", []]);
   });
 
@@ -214,7 +255,7 @@ describe("composeFavoritesApp", () => {
     const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
 
     tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
-    root.querySelector("dialog")!.click();
+    clickLightboxButton(root, "Close");
     expect([tile.dataset.highlight, morpher.morphs, root.querySelector("dialog")!.open]).toEqual([undefined, [], false]);
   });
 
@@ -231,7 +272,7 @@ describe("composeFavoritesApp", () => {
     expect(root.querySelector("dialog")!.open).toBe(false);
   });
 
-  test("opens the lightbox favorite's original on a Ctrl click and its post on a middle click", async() => {
+  test("opens the lightbox favorite's original on a Ctrl tap and its post on a middle click", async() => {
     const navigator = new MemoryNavigator();
     const posts = [createPost({ id: "1", media: { kind: "image", locator: "https://originals/1.png" } })];
     const root = mount(new MemoryLocalKeyedValues(), posts, { navigator });
@@ -240,7 +281,7 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
     const dialog = root.querySelector("dialog")!;
 
-    dialog.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }));
+    tapViewport(root, { ctrlKey: true });
     dialog.dispatchEvent(new MouseEvent("auxclick", { bubbles: true, cancelable: true, button: 1 }));
     await flushMicrotasks();
     expect([navigator.opened, dialog.open]).toEqual([["#post-1", "https://originals/1.png"], true]);
@@ -252,7 +293,7 @@ describe("composeFavoritesApp", () => {
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
-    root.querySelector<HTMLElement>(`.${LightboxButtonClass.root}[data-icon="download"]`)!.click();
+    clickLightboxButton(root, "Download");
     await flushMicrotasks();
     expect(fileSaver.saved.map(saved => saved.name)).toEqual(["1"]);
   });

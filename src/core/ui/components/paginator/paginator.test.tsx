@@ -41,8 +41,8 @@ describe("Paginator", () => {
     expect(element.getAttribute("aria-label")).toBe("Pagination");
   });
 
-  test("lists the pages around the current one with gaps for the rest", () => {
-    expect(readItems(setup({ pageNumber: 10, pageCount: 20 }).element)).toEqual(["1", "…", "8", "9", "10", "11", "12", "…", "20"]);
+  test("lists the current page between the first and last with gaps for the rest", () => {
+    expect(readItems(setup({ pageNumber: 10, pageCount: 20 }).element)).toEqual(["1", "…", "10", "…", "20"]);
   });
 
   test("marks only the current page", () => {
@@ -56,7 +56,7 @@ describe("Paginator", () => {
 
     pageCount.value = 5;
     pageNumber.value = 4;
-    expect(readItems(element)).toEqual(["1", "2", "3", "4", "5"]);
+    expect(readItems(element)).toEqual(["1", "…", "4", "5"]);
     expect(element.querySelector("[aria-current]")?.textContent).toBe("4");
   });
 
@@ -66,14 +66,14 @@ describe("Paginator", () => {
 
     pageNumber.value = 10;
     expect([...element.querySelectorAll("button")]).toEqual(buttons);
-    expect(readItems(element)).toEqual(["1", "…", "8", "9", "10", "11", "12", "…", "20"]);
+    expect(readItems(element)).toEqual(["1", "…", "10", "…", "20"]);
   });
 
   test("reports a clicked page", () => {
     const { element, onPageChange } = setup();
 
-    findButton(element, "3").click();
-    expect(onPageChange).toHaveBeenCalledExactlyOnceWith(3);
+    findButton(element, "10").click();
+    expect(onPageChange).toHaveBeenCalledExactlyOnceWith(10);
   });
 
   test("does not report the current page", () => {
@@ -101,12 +101,12 @@ describe("Paginator", () => {
     expect(findButton(last.element, "Next page").disabled).toBe(true);
   });
 
-  test("hides itself while there is only one page", () => {
+  test("disables itself while there is only one page", () => {
     const { element, pageCount } = setup({ pageCount: 1 });
 
-    expect(element.hidden).toBe(true);
+    expect(element.inert).toBe(true);
     pageCount.value = 2;
-    expect(element.hidden).toBe(false);
+    expect(element.inert).toBe(false);
   });
 
   test("stops following once disposed", () => {

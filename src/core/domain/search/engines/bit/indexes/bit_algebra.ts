@@ -1,0 +1,52 @@
+import { BitSet } from "@/core/domain/search/engines/bit/postings/bitset";
+import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
+import { Posting } from "@/core/domain/search/engines/bit/postings/posting";
+
+export class BitAlgebra<Doc> {
+  private occupied: BitSet = new BitSet(0);
+
+  constructor(private readonly table: DocTable<Doc>) { }
+
+  public reset(): void {
+    this.occupied = new BitSet(this.table.width);
+  }
+
+  public occupy(position: number): void {
+    this.occupied.set(position);
+  }
+
+  public universe(): BitSet {
+    return this.occupied.clone();
+  }
+
+  public empty(): BitSet {
+    return new BitSet(this.table.width);
+  }
+
+  public docsFrom(bitset: BitSet): readonly Doc[] {
+    return bitset.gather(this.table.allDocs());
+  }
+
+  public bitSetFrom(posting: Posting): BitSet {
+    const bitSet = this.empty();
+
+    posting.orInto(bitSet);
+    return bitSet;
+  }
+
+  public complementOf(bitset: BitSet): BitSet {
+    const universe = this.universe();
+
+    universe.andNotInPlace(bitset);
+    return universe;
+  }
+
+  public unionOf(postings: readonly Posting[]): BitSet {
+    const union = this.empty();
+
+    for (const posting of postings) {
+      posting.orInto(union);
+    }
+    return union;
+  }
+}

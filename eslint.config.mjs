@@ -327,7 +327,7 @@ export default defineConfig([
       "no-useless-rename": "error",
       "no-useless-return": "error",
       "no-var": "error",
-      "no-void": "error",
+      "no-void": ["error", { allowAsStatement: true }],
       "no-warning-comments": "error",
       "no-whitespace-before-property": "error",
       "no-with": "error",
@@ -702,7 +702,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/core/search/testing/fruit_corpus.ts", "playground/search_performance/queries.ts"],
+    files: ["src/core/domain/search/testing/fruit_corpus.ts", "playground/search_performance/queries.ts"],
     rules: {
       "@stylistic/max-len": "off"
     }

@@ -1,9 +1,9 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
-import { BitSearchEngine } from "@/core/search/engines/bit/bit_search_engine";
+import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { SearchRequest } from "@/core/features/favorites/search/inputs";
-import { TermUpdate } from "@/core/search/engines/search_engine";
+import { TermUpdate } from "@/core/domain/search/engines/search_engine";
 import { shuffleDeterministically } from "@/core/utils/collection/array";
 
 export class FavoritesSearchIndex {

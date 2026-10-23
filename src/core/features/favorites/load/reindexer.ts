@@ -4,7 +4,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/collec
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { Post } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { TermUpdate } from "@/core/search/engines/search_engine";
+import { TermUpdate } from "@/core/domain/search/engines/search_engine";
 
 const TERM_UPDATE_COALESCING = { flushSize: 50, flushTimeout: 1_500 };
 

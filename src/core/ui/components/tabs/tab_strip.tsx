@@ -42,8 +42,8 @@ const MIDDLE_BUTTON = 1;
 export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onAdd }: TabStripProps): HTMLElement {
   let isRendered = false;
   const items = new KeyedList<TabStripItem>({
-    getKey: tab => tab.id,
-    create: tab => {
+    getKey: (tab): string => tab.id,
+    create: (tab): HTMLElement => {
       const element = <Tab tab={tab} activeId={activeId} onActivate={onActivate} onClose={onClose} />;
 
       if (isRendered) {

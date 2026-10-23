@@ -14,10 +14,10 @@ function setup(fetchOriginal: () => Promise<Blob> = () => Promise.resolve(new Bl
   const opened: string[] = [];
   const saved: { file: Blob; name: string }[] = [];
   const actions = new PostActions({
-    remoteMedia: { resolveOriginalUrl: media => Promise.resolve(`original/${media.locator}`), fetchOriginal },
-    remotePages: { postUrl: id => `post/${id}` },
-    navigator: { open: url => opened.push(url) },
-    fileSaver: { save: (file, name) => saved.push({ file, name }) }
+    remoteMedia: { resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`original/${media.locator}`), fetchOriginal },
+    remotePages: { postUrl: (id): string => `post/${id}` },
+    navigator: { open: (url): number => opened.push(url) },
+    fileSaver: { save: (file, name): number => saved.push({ file, name }) }
   });
   return { actions, opened, saved };
 }
@@ -45,9 +45,12 @@ describe("PostActions", () => {
       const logError = vi.spyOn(console, "error").mockImplementation(doNothing);
       const opened: string[] = [];
       const actions = new PostActions({
-        remoteMedia: { resolveOriginalUrl: () => Promise.reject(new Error("gone")), fetchOriginal: () => Promise.reject(new Error("gone")) },
-        remotePages: { postUrl: id => id },
-        navigator: { open: url => opened.push(url) },
+        remoteMedia: {
+          resolveOriginalUrl: (): Promise<never> => Promise.reject(new Error("gone")),
+          fetchOriginal: (): Promise<never> => Promise.reject(new Error("gone"))
+        },
+        remotePages: { postUrl: (id): string => id },
+        navigator: { open: (url): number => opened.push(url) },
         fileSaver: { save: doNothing }
       });
 

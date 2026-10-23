@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
+import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
-import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/local_snippets";
 import { Snippet } from "@/core/domain/snippet/snippet";
 
@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 function createLocalSnippets(): IndexedDbLocalSnippets {
-  return new IndexedDbLocalSnippets(new IndexedDbClient(() => null));
+  return new IndexedDbLocalSnippets(new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null));
 }
 
 function createSnippet(name: string, query = "apple"): Snippet {

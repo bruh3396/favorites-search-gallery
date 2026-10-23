@@ -1,79 +1,60 @@
-import { LightboxActions, LightboxActionsDependencies } from "@/core/features/lightbox/actions/actions";
-import { LightboxAutoplay, LightboxAutoplayConfiguration } from "@/core/features/lightbox/autoplay/autoplay";
-import { LightboxNavigation, LightboxNavigationConfiguration } from "@/core/features/lightbox/navigation/navigation";
-import { LightboxScreen, LightboxScreenProps } from "@/core/features/lightbox/ui/screen/screen";
-import { LightboxZoom, LightboxZoomConfiguration } from "@/core/features/lightbox/zoom/zoom";
-import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
-import { Readable, effect } from "@/core/utils/reactive/signal";
-import { LightboxOverlayVisibilityConfiguration } from "@/core/features/lightbox/ui/overlay/visibility";
-import { LightboxStageDependencies } from "@/core/features/lightbox/ui/stage/stage";
+import { DEFAULT_LIGHTBOX_KEYMAP } from "@/core/features/lightbox/input/keymap";
+import { LightboxActions } from "@/core/features/lightbox/actions";
+import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
+import { LightboxRetentionList } from "@/core/features/lightbox/navigation/retention_list";
 import { MediaItem } from "@/core/domain/post/post";
+import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { Morpher } from "@/core/boundary/ports/morpher/morpher";
 import { Occurrence } from "@/core/utils/reactive/emitter";
+import { Preference } from "@/core/utils/reactive/preference";
+import { Readable } from "@/core/utils/reactive/signal";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
-import { Viewport } from "@/core/boundary/ports/viewport/viewport";
-import { h } from "@/core/ui/h/h";
+import { createLightboxView } from "@/core/features/lightbox/view";
 
-export interface LightboxConfiguration extends LightboxNavigationConfiguration {
-  readonly autoplay: LightboxAutoplayConfiguration;
-  readonly zoom: LightboxZoomConfiguration;
-  readonly overlay: LightboxOverlayVisibilityConfiguration;
-}
+export { default as LIGHTBOX_STYLES } from "@/core/features/lightbox/styles.css?inline";
 
-export interface LightboxDependencies extends LightboxActionsDependencies {
-  remoteMedia: LightboxActionsDependencies["remoteMedia"] & LightboxStageDependencies["remoteMedia"];
-  viewport: Pick<Viewport, "lockScroll" | "unlockScroll">;
+const SETTLE_DELAY = 75;
+const RETENTION_CAPACITY = 8;
+
+export interface LightboxDependencies<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   sizeObserver: SizeObserver;
+  remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
+  actions: LightboxActions;
+  volume: Preference<number>;
+  muted: Preference<boolean>;
+  morpher?: Morpher;
+  locateItem: (item: T) => Element | undefined;
 }
 
-export type LightboxScreenOptions<T extends MediaItem> = Readonly<Pick<LightboxScreenProps<T>, "morpher" | "locateItem" | "favorites">>;
-
-export interface LightboxService<T extends MediaItem> {
-  readonly current: Readable<T | undefined>;
-  readonly position: Readable<SequencePosition | undefined>;
+export interface Lightbox<T extends MediaItem> {
   readonly isOpen: Readable<boolean>;
   readonly settled: Occurrence<T>;
   readonly closed: Occurrence<T>;
-  readonly actions: LightboxActions;
-  open: (item: T, sequence: MediaSequence<T>) => void;
-  warm: (item: T) => void;
-  close: () => void;
-  createScreen: (options: LightboxScreenOptions<T>) => HTMLElement;
+  open(sequence: MediaSequence<T>, item: T): void;
+  prefetch(item: T): void;
+  createView(): HTMLElement;
+  dispose(): void;
 }
 
-export const DEFAULT_LIGHTBOX_CONFIGURATION: LightboxConfiguration = {
-  maxWarmItems: 8,
-  maxNeighborDistance: 20,
-  settleDelay: 75,
-  autoplay: { interval: 3_000 },
-  zoom: { minimumScale: 2 },
-  overlay: { idleDelay: 1_000, hideSoonDelay: 1_000 }
-};
-
-export function createLightboxService<T extends MediaItem>(configuration: LightboxConfiguration, dependencies: LightboxDependencies): LightboxService<T> {
-  const { remoteMedia, viewport, scheduler, sizeObserver } = dependencies;
-  const navigation = new LightboxNavigation<T>(configuration, scheduler);
-  const autoplay = new LightboxAutoplay(
-    configuration.autoplay,
-    { current: navigation.current, showNext: (): Promise<void> => navigation.showNext(), scheduler }
-  );
-  const zoom = new LightboxZoom(configuration.zoom, { current: navigation.current });
-  const actions = new LightboxActions(dependencies);
-
-  effect(() => (navigation.isOpen.value ? viewport.lockScroll() : viewport.unlockScroll()));
+export function createLightbox<T extends MediaItem>(dependencies: LightboxDependencies<T>): Lightbox<T> {
+  const navigation = new LightboxNavigation<T>({ settleDelay: SETTLE_DELAY }, dependencies.scheduler);
+  const retentionList = new LightboxRetentionList<T>({ capacity: RETENTION_CAPACITY }, navigation);
   return {
-    current: navigation.current,
-    position: navigation.position,
     isOpen: navigation.isOpen,
     settled: navigation.settled,
     closed: navigation.closed,
-    actions,
-    open: (item, sequence) => navigation.open(item, sequence),
-    warm: item => navigation.warm(item),
-    close: () => navigation.close(),
-    createScreen: options => h(LightboxScreen<T>, {
-      ...options, navigation, autoplay, zoom, actions, remoteMedia, overlay: configuration.overlay, scheduler, sizeObserver
-    })
+    open: (sequence, item): void => navigation.open(sequence, item),
+    prefetch: (item): void => retentionList.retain([item]),
+    createView: (): HTMLElement => createLightboxView(
+      { keymap: DEFAULT_LIGHTBOX_KEYMAP },
+      { ...dependencies, navigation, retainedItems: retentionList.items }
+    ),
+    dispose: (): void => {
+      retentionList.dispose();
+      navigation.dispose();
+    }
   };
 }

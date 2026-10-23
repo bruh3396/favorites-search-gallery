@@ -33,6 +33,11 @@ export interface TileProps {
   onPointerEnter?: () => void;
 }
 
+interface PreviewElements {
+  readonly root: HTMLElement;
+  readonly preview: HTMLImageElement;
+}
+
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export const SLOW_PREVIEW_DELAY = 100;
@@ -73,7 +78,7 @@ export function Tile(props: TileProps): HTMLElement {
   }
 
   if (hasMedia(post.media)) {
-    loadPreview(root, preview, props, cancelSlowMark);
+    loadPreview({ root, preview }, props, cancelSlowMark);
     const upscaler = new Upscaler({ canvas, media: post.media, decodeStill: props.decodeStill, scheduler: props.scheduler });
 
     effect(() => {
@@ -95,7 +100,7 @@ export function Tile(props: TileProps): HTMLElement {
   return root;
 }
 
-function loadPreview(root: HTMLElement, preview: HTMLImageElement, props: TileProps, cancelSlowMark: () => void): Promise<void> {
+function loadPreview({ root, preview }: PreviewElements, props: TileProps, cancelSlowMark: () => void): Promise<void> {
   return showPreview(root, preview, props.resolvePreviewUrl(props.post.media))
     .then(cancelSlowMark)
     .catch(error => {

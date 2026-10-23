@@ -30,7 +30,7 @@ interface SlotProps {
   onPageChange: (pageNumber: number) => void;
 }
 
-const NEARBY_PAGE_COUNT = 5;
+const NEARBY_PAGE_COUNT = 1;
 const SLOT_COUNT = NEARBY_PAGE_COUNT + 4;
 
 export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
@@ -39,7 +39,7 @@ export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProp
     <nav
       className={PaginatorClass.root}
       aria-label="Pagination"
-      hidden={computed(() => pageCount.value <= 1)}
+      inert={computed(() => pageCount.value <= 1)}
     >
       <StepButton label="Previous page" text="‹" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
       <ul className={PaginatorClass.list}>
@@ -68,7 +68,7 @@ function StepButton({ label, text, target, pageCount, onPageChange }: StepButton
 function Slot({ term, current, onPageChange }: SlotProps): HTMLElement {
   const page = computed(() => (typeof term.value === "number" ? term.value : null));
   return (
-    <li hidden={computed(() => term.value === undefined)}>
+    <li>
       <button
         className={PaginatorClass.page}
         type="button"

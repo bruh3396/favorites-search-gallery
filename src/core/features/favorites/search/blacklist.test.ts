@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { parseExclusions, tryParseSearchExpression } from "@/core/search/parsers/search_expression_parser";
+import { parseExclusions, tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
-import { SearchExpression } from "@/core/search/expressions/search_expression";
+import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 
 const MATCHES = tryParseSearchExpression("cat")!;
 const EXCLUSIONS = parseExclusions(["apple", "banana"])!;

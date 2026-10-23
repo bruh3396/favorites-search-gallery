@@ -1,127 +1,118 @@
-import { DEFAULT_LIGHTBOX_CONFIGURATION, LightboxService, createLightboxService } from "@/core/features/lightbox/lightbox";
-import { describe, expect, onTestFinished, test, vi } from "vitest";
-import { LightboxButtonClass } from "@/core/features/lightbox/ui/controls/button/button";
-import { MediaItem } from "@/core/domain/post/post";
+import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
+import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
-import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
-import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
-import { MemoryViewport } from "@/adapters/memory/ports/viewport/viewport";
+import { Post } from "@/core/domain/post/post";
+import { StoredPreference } from "@/core/utils/reactive/preference";
+import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 import { render } from "@/core/ui/h/h";
 
-const ITEMS: readonly MediaItem[] = ["1", "2", "3"].map(id => ({ id, media: { kind: "image", locator: `images/${id}` } }));
+const IMAGE = createPost({ id: "1", media: { kind: "image", locator: "image.jpg" } });
+const NEIGHBOR = createPost({ id: "2", media: { kind: "image", locator: "neighbor.jpg" } });
+const LONGER_THAN_ANY_DELAY = 60_000;
 
-interface Setup {
-  lightbox: LightboxService<MediaItem>;
+function setup(): {
+  lightbox: Lightbox<Post>;
   scheduler: MemoryScheduler;
-  viewport: MemoryViewport;
-}
-
-function setup(): Setup {
+  remoteMedia: MemoryRemoteMedia;
+  sequence: MediaSequence<Post>;
+  getNeighbors: Mock<MediaSequence<Post>["getNeighbors"]>;
+} {
   const scheduler = new MemoryScheduler();
-  const viewport = new MemoryViewport();
-  const lightbox = createLightboxService<MediaItem>(DEFAULT_LIGHTBOX_CONFIGURATION, {
-    remoteMedia: new MemoryRemoteMedia(),
-    remotePages: new MemoryRemotePages(),
-    navigator: new MemoryNavigator(),
-    fileSaver: new MemoryFileSaver(),
-    viewport,
-    scheduler,
-    sizeObserver: new MemorySizeObserver()
-  });
-  return { lightbox, scheduler, viewport };
-}
-
-function sequence(): MediaSequence<MediaItem> {
-  const step = (item: MediaItem, offset: number): Promise<MediaItem | undefined> => Promise.resolve(ITEMS[ITEMS.indexOf(item) + offset]);
-  return {
-    getNext: item => step(item, 1),
-    getPrevious: item => step(item, -1),
-    positionOf: item => ({ index: ITEMS.indexOf(item), total: ITEMS.length })
+  const remoteMedia = new MemoryRemoteMedia();
+  const storage = { get: (): undefined => undefined, set: (): void => undefined };
+  const getNeighbors = vi.fn<MediaSequence<Post>["getNeighbors"]>(() => Promise.resolve([NEIGHBOR]));
+  const sequence: MediaSequence<Post> = {
+    getNext: () => Promise.resolve(undefined),
+    getPrevious: () => Promise.resolve(undefined),
+    getNeighbors,
+    positionOf: () => undefined
   };
-}
-
-function pressArrowRight(): void {
-  document.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
-}
-
-function mountScreen(lightbox: LightboxService<MediaItem>): HTMLDialogElement {
-  const { result, dispose } = render(document, () => lightbox.createScreen({ locateItem: () => undefined }));
-
-  document.body.append(result);
-  onTestFinished(() => {
-    dispose();
-    result.remove();
+  const lightbox = createLightbox<Post>({
+    scheduler,
+    sizeObserver: new MemorySizeObserver(),
+    remoteMedia,
+    actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download: vi.fn() },
+    volume: new StoredPreference({ key: "volume", defaultValue: 1 }, { storage }),
+    muted: new StoredPreference({ key: "muted", defaultValue: false }, { storage }),
+    locateItem: () => undefined
   });
-  return result as HTMLDialogElement;
+  return { lightbox, scheduler, remoteMedia, sequence, getNeighbors };
 }
 
-describe("createLightboxService", () => {
-  test("locks the page's scroll while open", () => {
-    const { lightbox, viewport } = setup();
+function createView(lightbox: Lightbox<Post>): HTMLElement {
+  const { result: view } = render(document, () => lightbox.createView());
 
-    lightbox.open(ITEMS[0], sequence());
-    const lockedWhileOpen = viewport.scrollLocked;
+  document.body.append(view);
+  return view;
+}
 
-    lightbox.close();
-    expect([lockedWhileOpen, viewport.scrollLocked]).toEqual([true, false]);
+afterEach(() => {
+  vi.restoreAllMocks();
+  document.body.replaceChildren();
+});
+
+describe("createLightbox", () => {
+  test("opens on an item and reports it settled after a moment", () => {
+    const { lightbox, scheduler, sequence } = setup();
+    const settled = vi.fn();
+
+    lightbox.settled.on(settled);
+    lightbox.open(sequence, IMAGE);
+    expect(lightbox.isOpen.value).toBe(true);
+    scheduler.advance(LONGER_THAN_ANY_DELAY);
+    expect(settled).toHaveBeenCalledWith(IMAGE);
   });
 
-  test("reports the shown item as settled once navigation pauses", async() => {
-    const { lightbox, scheduler } = setup();
-    const settled: MediaItem[] = [];
+  test("loads a settled item and its neighbours", async() => {
+    const { lightbox, scheduler, remoteMedia, sequence } = setup();
+    const decodeStill = vi.spyOn(remoteMedia, "decodeStill");
 
-    mountScreen(lightbox);
-    lightbox.settled.on(item => settled.push(item));
-    lightbox.open(ITEMS[0], sequence());
-    scheduler.advance(74);
-    pressArrowRight();
+    createView(lightbox);
+    lightbox.open(sequence, IMAGE);
+    scheduler.advance(LONGER_THAN_ANY_DELAY);
     await flushMicrotasks();
-    scheduler.advance(74);
-    expect(settled).toEqual([]);
-    scheduler.advance(1);
-    expect(settled).toEqual([ITEMS[1]]);
+    expect(decodeStill).toHaveBeenNthCalledWith(1, IMAGE.media, expect.any(AbortSignal));
+    expect(decodeStill).toHaveBeenNthCalledWith(2, NEIGHBOR.media, expect.any(AbortSignal));
   });
 
-  test("steps to the next item when autoplay's interval passes", async() => {
-    const { lightbox, scheduler } = setup();
-    const dialog = mountScreen(lightbox);
+  test("loads a prefetched item before it is opened", () => {
+    const { lightbox, remoteMedia } = setup();
+    const decodeStill = vi.spyOn(remoteMedia, "decodeStill");
 
-    lightbox.open(ITEMS[0], sequence());
-    dialog.querySelector<HTMLElement>(`.${LightboxButtonClass.root}[data-icon="play"]`)!.click();
-    scheduler.advance(DEFAULT_LIGHTBOX_CONFIGURATION.autoplay.interval);
-    await flushMicrotasks();
-    expect(lightbox.current.value).toBe(ITEMS[1]);
+    createView(lightbox);
+    lightbox.prefetch(IMAGE);
+    expect(decodeStill).toHaveBeenCalledWith(IMAGE.media, expect.any(AbortSignal));
   });
 
-  test("preloads a warmed item's original while closed", async() => {
-    const remoteMedia = new MemoryRemoteMedia();
-    const decodeOriginal = vi.spyOn(remoteMedia, "decodeOriginal");
-    const scheduler = new MemoryScheduler();
-    const lightbox = createLightboxService<MediaItem>(DEFAULT_LIGHTBOX_CONFIGURATION, {
-      remoteMedia, remotePages: new MemoryRemotePages(), navigator: new MemoryNavigator(),
-      fileSaver: new MemoryFileSaver(), viewport: new MemoryViewport(), scheduler, sizeObserver: new MemorySizeObserver()
+  test("closes from its view and reports the item it closed on", () => {
+    const { lightbox, sequence } = setup();
+    const closed = vi.fn();
+    const view = createView(lightbox);
+
+    lightbox.closed.on(closed);
+    lightbox.open(sequence, IMAGE);
+    view.dispatchEvent(new MouseEvent("contextmenu", { cancelable: true }));
+    expect(lightbox.isOpen.value).toBe(false);
+    expect(closed).toHaveBeenCalledWith(IMAGE);
+  });
+
+  describe("dispose", () => {
+    test("closes, drops the pending settle, and stops loading neighbours", () => {
+      const { lightbox, scheduler, sequence, getNeighbors } = setup();
+      const settled = vi.fn();
+
+      lightbox.settled.on(settled);
+      lightbox.open(sequence, IMAGE);
+      lightbox.dispose();
+      expect(lightbox.isOpen.value).toBe(false);
+      lightbox.open(sequence, IMAGE);
+      scheduler.advance(LONGER_THAN_ANY_DELAY);
+      expect(settled).toHaveBeenCalledOnce();
+      expect(getNeighbors).not.toHaveBeenCalled();
     });
-
-    mountScreen(lightbox);
-    lightbox.warm(ITEMS[0]);
-    scheduler.advance(200);
-    await vi.waitFor(() => expect(decodeOriginal).toHaveBeenCalledOnce());
-  });
-
-  test("stops autoplay when it closes", () => {
-    const { lightbox } = setup();
-    const dialog = mountScreen(lightbox);
-    const findButton = (icon: string): Element | null => dialog.querySelector(`.${LightboxButtonClass.root}[data-icon="${icon}"]`);
-
-    lightbox.open(ITEMS[0], sequence());
-    (findButton("play") as HTMLElement).click();
-    lightbox.close();
-    lightbox.open(ITEMS[0], sequence());
-    expect(findButton("play")).not.toBeNull();
   });
 });

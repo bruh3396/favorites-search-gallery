@@ -15,6 +15,7 @@
 @import "./components/status_text/status_text.css" layer(components);
 @import "./components/progress_line/progress_line.css" layer(components);
 @import "./components/paginator/paginator.css" layer(components);
+@import "./components/page_stepper/page_stepper.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
 @import "./components/tabs/tabs.css" layer(components);

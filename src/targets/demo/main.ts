@@ -1,3 +1,4 @@
+import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/composer";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
@@ -9,7 +10,6 @@ import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/rand
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
-import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
@@ -27,7 +27,7 @@ const FAVORITES_OWNER_ID = "demo";
 
 function createDemoDependencies(): FavoritesAppDependencies {
   const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
-  const indexedDb = new IndexedDbClient(() => null);
+  const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null);
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDb),
     localPosts: new IndexedDbLocalPosts(indexedDb),

@@ -1,0 +1,28 @@
+.fsg-LabBar {
+  position: fixed;
+  inset-block-end: 12px;
+  inset-inline-start: 12px;
+  z-index: 2147483647;
+}
+
+.fsg-LabBar-button {
+  block-size: var(--fsg-control-size-medium);
+  padding: 0 12px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-radius-full);
+  background: var(--fsg-color-surface-container);
+  color: var(--fsg-color-on-surface-muted);
+  font: inherit;
+  font-size: var(--fsg-font-size-label-small);
+  cursor: pointer;
+  transition: color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-LabBar-button:hover {
+  color: inherit;
+}
+
+.fsg-LabBar-button:focus-visible {
+  outline: 2px solid var(--fsg-color-accent);
+  outline-offset: 1px;
+}

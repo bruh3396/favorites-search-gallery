@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { TagCategoryMap } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag/tag";
 
 describe("MemoryLocalTagCategories", () => {
   test("reads back what it wrote, skipping missing tags", async() => {
@@ -20,13 +20,13 @@ describe("MemoryLocalTagCategories", () => {
     expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
   });
 
-  test("is unaffected by mutating a map after writing or reading it", async() => {
+  test("ignores mutations to a map after writing or reading it", async() => {
     const tagCategories = new MemoryLocalTagCategories();
     const written = new Map([["alice", "character"]] as const);
 
     await tagCategories.setMany(written);
     written.clear();
-    (await tagCategories.getMany(["alice"]) as TagCategoryMap).clear();
+    (await tagCategories.getMany(["alice"]) as Map<string, TagCategory>).clear();
 
     expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
   });

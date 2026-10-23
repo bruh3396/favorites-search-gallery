@@ -14,6 +14,8 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
+const SLOW_READ_DELAY = 1_000;
+
 export interface FavoritesLoaderDependencies {
   localFavorites: LocalFavorites;
   localPosts: LocalPosts;
@@ -47,17 +49,26 @@ export class FavoritesLoader {
   }
 
   public async load(): Promise<void> {
-    const { localFavorites, collection } = this.dependencies;
-    const localIds = await localFavorites.getAll();
-
     try {
+      const localIds = await this.readLocalIds();
       const result = await (localIds.length > 0 ? this.reloader.reload(localIds) : this.fetcher.fetchAll());
 
       this.report({ phase: "loaded", ...result });
     } catch {
       this.report({ phase: "interrupted" });
     }
-    collection.compact();
+    this.dependencies.collection.compact();
+  }
+
+  private async readLocalIds(): Promise<readonly string[]> {
+    const { localFavorites, scheduler } = this.dependencies;
+    const cancelPreparing = scheduler.schedule(() => this.report({ phase: "preparing" }), SLOW_READ_DELAY);
+
+    try {
+      return await localFavorites.getAll();
+    } finally {
+      cancelPreparing();
+    }
   }
 
   private report(state: LoadState): void {

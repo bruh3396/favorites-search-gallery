@@ -1,7 +1,16 @@
-import { LegacyMigration, LegacyMintMedia, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
+import { LegacyDatabaseNames, LegacyMigration, LegacyMintMedia, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
 
-const DATABASE_NAME = "favorites-search-gallery";
 const VERSION = 1;
+
+export interface IndexedDbClientConfiguration {
+  readonly databaseName: string;
+  readonly legacyDatabaseNames: LegacyDatabaseNames;
+}
+
+export const DEFAULT_INDEXED_DB_CONFIGURATION: IndexedDbClientConfiguration = {
+  databaseName: "favorites-search-gallery",
+  legacyDatabaseNames: { favorites: "FavoritesV2", posts: "Posts", tagCategories: "TagCategories" }
+};
 
 const SCHEMA = {
   favorites: {},
@@ -15,7 +24,10 @@ export type IndexedDbStoreName = keyof typeof SCHEMA;
 export class IndexedDbClient {
   private connection: Promise<IDBDatabase> | undefined;
 
-  constructor(private readonly mintLegacyMedia: LegacyMintMedia) {}
+  constructor(
+    private readonly configuration: IndexedDbClientConfiguration,
+    private readonly mintLegacyMedia: LegacyMintMedia
+  ) {}
 
   public async runTransaction<T>(
     storeName: IndexedDbStoreName,
@@ -41,7 +53,8 @@ export class IndexedDbClient {
   }
 
   private async migrateAndOpen(): Promise<IDBDatabase> {
-    const migration = await prepareLegacyMigration(DATABASE_NAME, this.mintLegacyMedia);
+    const { databaseName, legacyDatabaseNames } = this.configuration;
+    const migration = await prepareLegacyMigration(databaseName, legacyDatabaseNames, this.mintLegacyMedia);
     const database = await this.openWithMigration(migration);
 
     migration.deleteLegacyDatabases();
@@ -50,7 +63,7 @@ export class IndexedDbClient {
 
   private openWithMigration(migration: LegacyMigration): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DATABASE_NAME, VERSION);
+      const request = indexedDB.open(this.configuration.databaseName, VERSION);
 
       request.onupgradeneeded = (): void => {
         createStores(request.result);

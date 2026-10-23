@@ -1,6 +1,7 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGrid } from "@/core/ui/post_grid/skeleton";
 import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
+import { APP_FONT } from "@/core/app/font";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
@@ -57,11 +58,9 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
       getPostUrl: post => remotePages.postUrl(post.id),
       onPlainClick: doNothing
     })
-  ];
-
-  return {
+  ];  return {
     mount: (container): void => {
-      mountAppRoot(container, { colorScheme: configuration.colorScheme, styles: [UI_CSS] }).append(...render(container.ownerDocument, renderApp).result);
+      mountAppRoot(container, { colorScheme: configuration.colorScheme, font: APP_FONT, styles: [UI_CSS] }).append(...render(container.ownerDocument, renderApp).result);
     }
   };
 }

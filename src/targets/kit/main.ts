@@ -1,20 +1,27 @@
+import { AppFont, installAppFont } from "@/core/ui/fonts/app_font";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { DISCLOSURE_STORY } from "@/targets/kit/stories/disclosure";
 import { DROPDOWN_STORY } from "@/targets/kit/stories/dropdown";
+import { GEIST_FONT } from "@/core/ui/fonts/geist";
+import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument";
+import { INTER_FONT } from "@/core/ui/fonts/inter";
 import KIT_CSS from "@/targets/kit/kit.css?inline";
 import { MULTI_SELECT_STORY } from "@/targets/kit/stories/multi_select";
+import { PLEX_FONT } from "@/core/ui/fonts/plex";
 import { SEGMENTED_STORY } from "@/targets/kit/stories/segmented";
 import { SETTINGS_SCREEN_STORY } from "@/targets/kit/stories/settings_screen";
 import { SETTING_ROW_STORY } from "@/targets/kit/stories/setting_row";
 import { SETTING_STORY } from "@/targets/kit/stories/setting";
 import { STEPPER_STORY } from "@/targets/kit/stories/stepper";
 import { SWITCH_STORY } from "@/targets/kit/stories/switch";
+import { SYSTEM_FONT } from "@/core/ui/fonts/system";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Switch } from "@/core/ui/components/switch/switch";
 import UI_CSS from "@/core/ui/styles.css?inline";
+import { VERDANA_FONT } from "@/core/ui/fonts/verdana";
 
 const STORIES: Story[] = [
   SWITCH_STORY, SEGMENTED_STORY, MULTI_SELECT_STORY, STEPPER_STORY, DROPDOWN_STORY, DISCLOSURE_STORY,
@@ -52,13 +59,7 @@ function renderStory(story: Story, log: (message: string) => void): HTMLElement 
   return section;
 }
 
-const FONTS = [
-  { value: "system-ui, sans-serif", label: "System" },
-  { value: "Verdana, sans-serif", label: "Verdana" },
-  { value: "Arial, sans-serif", label: "Arial" },
-  { value: "Georgia, serif", label: "Georgia" },
-  { value: "ui-monospace, monospace", label: "Mono" }
-] as const;
+const FONTS: readonly AppFont[] = [SYSTEM_FONT, VERDANA_FONT, INSTRUMENT_FONT, INTER_FONT, GEIST_FONT, PLEX_FONT];
 
 function renderSchemeToggle(app: HTMLElement): HTMLElement {
   const item = createElement("label", "kit-Toolbar-item", "Dark");
@@ -77,14 +78,14 @@ function renderSchemeToggle(app: HTMLElement): HTMLElement {
 
 function renderFontPicker(app: HTMLElement): HTMLElement {
   const item = createElement("div", "kit-Toolbar-item", "Font");
-  const family = new Signal<string>(FONTS[0].value);
+  const name = new Signal<string>(FONTS[0].name);
   const { result: font } = render(document, () => h(Segmented<string>, {
-    choices: FONTS,
+    choices: FONTS.map(choice => ({ value: choice.name, label: choice.name })),
     size: "small",
-    value: family,
+    value: name,
     onValueChange: next => {
-      app.style.setProperty("--fsg-font-family", next);
-      family.value = next;
+      installAppFont(app, FONTS.find(choice => choice.name === next) ?? SYSTEM_FONT);
+      name.value = next;
     }
   }));
 

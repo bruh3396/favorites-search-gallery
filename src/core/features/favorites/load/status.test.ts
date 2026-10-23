@@ -4,6 +4,7 @@ import { describeLoadState } from "@/core/features/favorites/load/status";
 describe("describeLoadState", () => {
   test("names each step of the load", () => {
     expect(describeLoadState({ phase: "starting" })).toBe("Starting");
+    expect(describeLoadState({ phase: "preparing" })).toBe("Preparing, can take a minute after an update");
     expect(describeLoadState({ phase: "saving" })).toBe("Saving");
     expect(describeLoadState({ phase: "pulling" })).toBe("Checking for new");
     expect(describeLoadState({ phase: "indexing" })).toBe("Indexing");

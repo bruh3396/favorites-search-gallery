@@ -1,5 +1,6 @@
 export type LoadState =
   | { readonly phase: "starting" }
+  | { readonly phase: "preparing" }
   | { readonly phase: "fetching"; readonly loadedCount: number; readonly expectedCount: number | null }
   | { readonly phase: "restoring"; readonly loadedCount: number; readonly expectedCount: number }
   | { readonly phase: "saving" }

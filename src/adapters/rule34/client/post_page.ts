@@ -1,5 +1,5 @@
 import { CategorizedPost, Rating } from "@/core/domain/post/post";
-import { TagCategoryMap, isTagCategory } from "@/core/domain/tag/tag";
+import { TagCategory, TagCategoryMap, isTagCategory } from "@/core/domain/tag/tag";
 import { BASE_INDEX_URL } from "@/adapters/rule34/client/urls";
 import { Media } from "@/core/domain/media/media";
 import { Rule34Error } from "@/adapters/rule34/client/error";
@@ -38,7 +38,7 @@ export function parsePostPage(html: string, mintMedia: Rule34MintMedia): Categor
 }
 
 function parseTagCategories(dom: Document): TagCategoryMap {
-  const categoryMap: TagCategoryMap = new Map();
+  const categoryMap = new Map<string, TagCategory>();
 
   for (const tag of [...dom.querySelectorAll(".tag")]) {
     const category = TAG_TYPE.exec(tag.className)?.[1] ?? "general";

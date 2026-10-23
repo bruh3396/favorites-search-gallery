@@ -32,6 +32,7 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
   index: FavoritesSearchIndex;
   localFavorites: MemoryLocalFavorites;
   remoteFavorites: MemoryRemoteFavorites;
+  scheduler: MemoryScheduler;
 }> {
   const collection = new FavoritesCollection();
   const index = createSearchIndex();
@@ -39,6 +40,7 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
   const localPosts = new MemoryLocalPosts();
   const client = new MemoryClient(remote);
   const remoteFavorites = new MemoryRemoteFavorites(client);
+  const scheduler = new MemoryScheduler();
   const flow = new FavoritesLoader({
     collection,
     index,
@@ -48,12 +50,12 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
     remoteFavorites,
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
-    scheduler: new MemoryScheduler()
+    scheduler
   });
 
   await localPosts.setMany(local.filter(post => hasMedia(post.media)));
   await localFavorites.prepend(local.map(post => post.id));
-  return { flow, collection, index, localFavorites, remoteFavorites };
+  return { flow, collection, index, localFavorites, remoteFavorites, scheduler };
 }
 
 function recordPhases(flow: FavoritesLoader): LoadPhase[] {
@@ -96,6 +98,32 @@ describe("FavoritesLoader", () => {
       expect(searchIds(index)).toEqual(["2", "1"]);
       expect(flow.state.value).toEqual({ phase: "loaded", pulledCount: 1, removedCount: 0 });
       expect(phases).toEqual(["starting", "restoring", "restoring", "pulling", "indexing", "pruning", "loaded"]);
+    });
+
+    test("reports preparing while reading the stored membership takes over a second", async() => {
+      const { flow, localFavorites, scheduler } = await setup({ remote: [] });
+      let finishRead: (ids: readonly string[]) => void = () => undefined;
+
+      vi.spyOn(localFavorites, "getAll").mockReturnValue(new Promise(resolve => {
+        finishRead = resolve;
+      }));
+      const loading = flow.load();
+
+      scheduler.advance(999);
+      expect(flow.state.value).toEqual({ phase: "starting" });
+      scheduler.advance(1);
+      expect(flow.state.value).toEqual({ phase: "preparing" });
+      finishRead([]);
+      await loading;
+      expect(flow.state.value.phase).toBe("loaded");
+    });
+
+    test("reports an interruption when the stored membership cannot be read", async() => {
+      const { flow, localFavorites } = await setup({ remote: createPosts("1") });
+
+      vi.spyOn(localFavorites, "getAll").mockRejectedValue(new Error("upgrade failed"));
+      await flow.load();
+      expect(flow.state.value).toEqual({ phase: "interrupted" });
     });
 
     test("reports an interruption and saves no membership when client refuses the fetch", async() => {

@@ -1,3 +1,4 @@
+import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/composer";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
@@ -14,7 +15,6 @@ import { Environment } from "@/core/boundary/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
-import { IndexedDbClient } from "@/adapters/browser/indexed_db/client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
@@ -58,7 +58,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: ENVIRONMENT.favoritesOwnerId, version: ENVIRONMENT.version, platform: ENVIRONMENT.device }
   }, { scheduler, fetch: boundFetch });
-  const indexedDb = new IndexedDbClient(mintMedia);
+  const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: ENVIRONMENT.favoritesOwnerId }, indexedDb),
     localPosts: new IndexedDbLocalPosts(indexedDb),

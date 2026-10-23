@@ -1,10 +1,6 @@
 import { Post, Rating } from "@/core/domain/post/post";
 import { Media } from "@/core/domain/media/media";
 
-const LEGACY_FAVORITES = "FavoritesV2";
-const LEGACY_POSTS = "Posts";
-const LEGACY_TAG_CATEGORIES = "TagCategories";
-const LEGACY_DATABASES = [LEGACY_FAVORITES, LEGACY_POSTS, LEGACY_TAG_CATEGORIES];
 const OWNER_PREFIX = "user";
 const TAG_CATEGORIES = ["general", "artist", "unknown", "copyright", "character", "metadata"];
 const COMPRESSED_PREVIEW = /^([^_/]+)_([^/.]+)$/;
@@ -39,6 +35,12 @@ interface LegacyData {
 
 export type LegacyMintMedia = (file: { url: string; tags: string }) => Media | null;
 
+export interface LegacyDatabaseNames {
+  readonly favorites: string;
+  readonly posts: string;
+  readonly tagCategories: string;
+}
+
 export interface LegacyMigration {
   writeToNewDatabase: (transaction: IDBTransaction) => void;
   deleteLegacyDatabases: () => void;
@@ -49,13 +51,17 @@ const NO_MIGRATION: LegacyMigration = {
   deleteLegacyDatabases: () => undefined
 };
 
-export async function prepareLegacyMigration(newDatabaseName: string, mintMedia: LegacyMintMedia): Promise<LegacyMigration> {
+export async function prepareLegacyMigration(
+  newDatabaseName: string,
+  legacyDatabaseNames: LegacyDatabaseNames,
+  mintMedia: LegacyMintMedia
+): Promise<LegacyMigration> {
   const databaseNames = await listDatabaseNames();
 
   if (databaseNames === null) {
     return NO_MIGRATION;
   }
-  const legacyDatabases = LEGACY_DATABASES.filter(name => databaseNames.has(name));
+  const legacyDatabases = Object.values(legacyDatabaseNames).filter(name => databaseNames.has(name));
 
   if (legacyDatabases.length === 0) {
     return NO_MIGRATION;
@@ -66,7 +72,7 @@ export async function prepareLegacyMigration(newDatabaseName: string, mintMedia:
     deleteLegacyDatabases();
     return NO_MIGRATION;
   }
-  const legacy = await readLegacy(legacyDatabases);
+  const legacy = await readLegacy(legacyDatabaseNames, legacyDatabases);
   return {
     writeToNewDatabase: (transaction): void => writeToTarget(transaction, legacy, mintMedia),
     deleteLegacyDatabases
@@ -81,14 +87,14 @@ async function listDatabaseNames(): Promise<Set<string | undefined> | null> {
   }
 }
 
-async function readLegacy(present: string[]): Promise<LegacyData> {
+async function readLegacy(names: LegacyDatabaseNames, present: string[]): Promise<LegacyData> {
   const read = (name: string): Promise<Map<string, unknown[]>> => (
     present.includes(name) ? readDatabase(name) : Promise.resolve(new Map())
   );
   const [favorites, posts, tagCategories] = await Promise.all([
-    read(LEGACY_FAVORITES),
-    read(LEGACY_POSTS),
-    read(LEGACY_TAG_CATEGORIES)
+    read(names.favorites),
+    read(names.posts),
+    read(names.tagCategories)
   ]);
   return {
     posts: (posts.get("posts") ?? []).filter(isLegacyPost),
@@ -130,7 +136,7 @@ function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedi
   const posts = transaction.objectStore("posts");
   const favorites = transaction.objectStore("favorites");
   const tagCategories = transaction.objectStore("tagCategories");
-  const allPosts = [...legacy.posts, ...[...legacy.favorites.values()].flat()];
+  const allPosts = removeDuplicateIds([...legacy.posts, ...[...legacy.favorites.values()].flat()]);
 
   for (const post of allPosts.map(legacyPost => convertPost(legacyPost, mintMedia))) {
     if (post !== null) {
@@ -149,6 +155,11 @@ function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedi
   for (const { id, category } of legacy.tagCategories) {
     addIfAbsent(tagCategories, category, id);
   }
+}
+
+function removeDuplicateIds(posts: LegacyPost[]): LegacyPost[] {
+  const seenIds = new Set<string>();
+  return posts.filter(post => !seenIds.has(post.id) && seenIds.add(post.id));
 }
 
 function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): void {

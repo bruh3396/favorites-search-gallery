@@ -1,7 +1,15 @@
+/* Every slot keeps one width whether it holds a page, a gap, or nothing, so paging never moves the arrows or resizes the search beside it. */
 .fsg-Paginator {
+  --fsg-Paginator-slot-size: 40px;
+
   display: flex;
+  flex: none;
   align-items: center;
   gap: 2px;
+}
+
+.fsg-Paginator[inert] {
+  visibility: hidden;
 }
 
 .fsg-Paginator-list {
@@ -13,11 +21,18 @@
   list-style: none;
 }
 
+.fsg-Paginator-list > li {
+  display: grid;
+  inline-size: var(--fsg-Paginator-slot-size);
+  place-items: center;
+}
+
 .fsg-Paginator-step,
 .fsg-Paginator-page {
-  min-inline-size: var(--fsg-control-size-medium);
+  inline-size: var(--fsg-Paginator-slot-size);
   block-size: var(--fsg-control-size-medium);
-  padding: 0 6px;
+  padding: 0;
+  font-variant-numeric: tabular-nums;
   border-radius: var(--fsg-radius-medium);
   color: var(--fsg-color-on-surface-muted);
   font-size: var(--fsg-font-size-label);

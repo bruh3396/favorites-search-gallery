@@ -37,8 +37,9 @@
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project src/targets/electron/tsconfig.json --noEmit",
     "test": "npx vitest --run --coverage",
     "test:frozen-cobalt": "npx vitest --run --config checks/vitest.config.mts checks/frozen_cobalt.test.ts",
+    "test:siblings": "node scripts/bin/test_siblings",
     "lint": "npx eslint src/",
-    "continuous-integration": "npm run build && npm run test && npm run typecheck && npm run lint",
+    "continuous-integration": "npm run build && npm run test && npm run test:siblings && npm run typecheck && npm run lint",
     "release-checks:ci": "npm run compile-scripts && npm run continuous-integration",
     "release-checks:local": "npm run release-checks:ci && npm run test:frozen-cobalt",
     "release": "npm run compile-scripts && node scripts/bin/release",
@@ -47,7 +48,7 @@
     "release:major": "npm run release -- major",
     "compile-scripts": "tsc --project scripts/tsconfig.json",
     "delete-compiled-scripts": "if exist scripts\\bin del /q scripts\\bin\\*.js",
-    "fix-bom": "python .scripts/correct_bom.py",
+    "fix-bom": "python .archive/.scripts/correct_bom.py",
     "visualize": "esbuild-visualizer --metadata dist/rule34/meta.json --template treemap --filename dist/rule34/stats.html --open"
   },
   "dependencies": {

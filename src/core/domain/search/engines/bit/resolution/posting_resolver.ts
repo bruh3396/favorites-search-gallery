@@ -1,0 +1,37 @@
+import { DensePosting, EMPTY_POSTING, Posting } from "@/core/domain/search/engines/bit/postings/posting";
+import { AbstractSearchTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
+import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_index";
+import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
+import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
+import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
+import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
+
+export class PostingResolver<Doc> {
+  constructor(
+    private readonly bitIndex: BitIndex<Doc>,
+    private readonly metricIndex: MetricBitIndex<Doc>,
+    private readonly wildcardResolver: WildcardPostingResolver<Doc>
+  ) { }
+
+  public resolve(term: AbstractSearchTerm): Posting {
+    if (term instanceof NumericSearchTerm) {
+      return this.postingForNumeric(term);
+    }
+
+    if (term instanceof WildcardSearchTerm) {
+      return this.wildcardResolver.resolve(term) ?? EMPTY_POSTING;
+    }
+
+    if (term instanceof MetricSearchTerm) {
+      return this.metricIndex.getPosting(term.comparison);
+    }
+    return this.bitIndex.findPosting(term.value) ?? EMPTY_POSTING;
+  }
+
+  private postingForNumeric(term: NumericSearchTerm): Posting {
+    const taggedPosting = this.bitIndex.findPosting(term.value) ?? EMPTY_POSTING;
+    const idPosting = this.metricIndex.getPosting(term.idComparison);
+    return new DensePosting(this.bitIndex.unionOf([taggedPosting, idPosting]));
+  }
+}

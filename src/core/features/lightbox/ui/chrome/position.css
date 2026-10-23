@@ -1,0 +1,12 @@
+.fsg-LightboxPosition {
+  display: flex;
+  align-items: center;
+  block-size: 40px;
+  padding-inline: 8px;
+  color: white;
+  font-family: var(--fsg-font-family-numeric);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.8;
+  text-shadow: 0 1px 3px black;
+}

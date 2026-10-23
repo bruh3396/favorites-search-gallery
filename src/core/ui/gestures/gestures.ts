@@ -41,16 +41,16 @@ export interface GesturesConfiguration {
 }
 
 export interface GesturesDependencies {
-  readonly element: HTMLElement;
-  readonly handlers: GestureHandlers;
+  element: HTMLElement;
+  handlers: GestureHandlers;
 }
 
-interface Press {
+interface MutablePress {
   readonly pointerId: number;
   readonly start: GesturePoint;
   last: GesturePoint;
   moved: boolean;
-  readonly drags: boolean;
+  readonly canDrag: boolean;
 }
 
 export class Gestures {
@@ -59,7 +59,7 @@ export class Gestures {
   private readonly dragThreshold: number;
   private readonly element: HTMLElement;
   private readonly handlers: GestureHandlers;
-  private press: Press | undefined;
+  private press: MutablePress | undefined;
 
   constructor(configuration: GesturesConfiguration, dependencies: GesturesDependencies) {
     this.dragThreshold = configuration.dragThreshold;
@@ -92,11 +92,11 @@ export class Gestures {
       return;
     }
     const point = this.locate(event);
-    const drags = this.handlers.canDrag();
+    const canDrag = this.handlers.canDrag();
 
-    this.press = { pointerId: event.pointerId, start: point, last: point, moved: false, drags };
+    this.press = { pointerId: event.pointerId, start: point, last: point, moved: false, canDrag };
 
-    if (drags) {
+    if (canDrag) {
       this.element.setPointerCapture(event.pointerId);
     }
   };
@@ -111,13 +111,13 @@ export class Gestures {
       return;
     }
 
-    if (press.drags) {
+    if (press.canDrag) {
       this.handlers.onDrag({ point, delta: { x: point.x - press.last.x, y: point.y - press.last.y } });
     }
     press.last = point;
     press.moved ||= Math.hypot(point.x - press.start.x, point.y - press.start.y) > this.dragThreshold;
 
-    if (press.drags && press.moved) {
+    if (press.canDrag && press.moved) {
       this.isDraggingState.value = true;
     }
   };

@@ -155,13 +155,16 @@ describe("BrowserMorpher", () => {
     expect(readVisibleBox(standIn)).toEqual([50, -500, 100, 120]);
   });
 
-  test("narrows the stand-in from the viewport to the target's clipping ancestor", () => {
+  test("narrows the stand-in from the viewport to the target's nearest clipping ancestor", () => {
     const runFrame = stubFrames();
     const pane = document.createElement("div");
+    const wrapper = document.createElement("div");
     const target = createTarget();
 
     pane.style.overflow = "hidden";
-    pane.append(target);
+    wrapper.style.overflow = "visible";
+    wrapper.append(target);
+    pane.append(wrapper);
     document.body.append(pane);
     onTestFinished(() => pane.remove());
     moveTo(pane, { left: 0, top: 100, width: 400, height: 400 });

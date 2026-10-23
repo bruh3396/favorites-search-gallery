@@ -4,6 +4,7 @@ type Describers = { readonly [Phase in LoadPhase]: (state: Extract<LoadState, { 
 
 const DESCRIBERS: Describers = {
   starting: () => "Starting",
+  preparing: () => "Preparing, can take a minute after an update",
   fetching: state => `Fetching ${describeProgress(state.loadedCount, state.expectedCount)}`,
   restoring: state => `Loading ${describeProgress(state.loadedCount, state.expectedCount)}`,
   saving: () => "Saving",
