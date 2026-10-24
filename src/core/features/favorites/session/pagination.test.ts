@@ -18,10 +18,8 @@ interface Setup {
   search: FavoritesSearch;
   collection: FavoritesCollection;
   index: FavoritesSearchIndex;
-  paginationSettings: Preference<FavoritesPaginationSettings>;
+  paginationSettings: FavoritesPaginationSettings;
 }
-
-const PAGES_OF_TWO: FavoritesPaginationSettings = { size: 2, infiniteScroll: false };
 
 function createPreference<T>(initial: T): Preference<T> {
   const current = new Signal(initial);
@@ -39,10 +37,10 @@ function createPreference<T>(initial: T): Preference<T> {
   };
 }
 
-function setup(posts: Post[], settings: FavoritesPaginationSettings = PAGES_OF_TWO): Setup {
+function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
   const collection = new FavoritesCollection();
   const index = new FavoritesSearchIndex();
-  const paginationSettings = createPreference(settings);
+  const paginationSettings = { pageSize: createPreference(2), infiniteScroll: createPreference(infiniteScroll) };
 
   index.rebuild(collection.append(posts));
   const search = new FavoritesSearch(
@@ -75,18 +73,21 @@ describe("FavoritesPagination", () => {
     expect(setup([]).pagination.pageCount.value).toBe(1);
   });
 
-  test("pages by the current pagination settings", () => {
+  test("pages by the current page size", () => {
     const { pagination, paginationSettings } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    paginationSettings.set({ size: 3, infiniteScroll: false });
+    paginationSettings.pageSize.set(3);
     expect(getItemIds(pagination)).toEqual(["1", "2", "3"]);
   });
 
-  test("goes back to the first page when the pagination settings change", () => {
+  test.each([
+    { name: "page size", act: (settings: FavoritesPaginationSettings): void => settings.pageSize.set(1) },
+    { name: "infinite scroll", act: (settings: FavoritesPaginationSettings): void => settings.infiniteScroll.set(true) }
+  ])("goes back to the first page when the $name changes", ({ act }) => {
     const { pagination, paginationSettings } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
     pagination.goTo(2);
-    paginationSettings.set({ size: 1, infiniteScroll: false });
+    act(paginationSettings);
     expect(pagination.pageNumber.value).toBe(1);
   });
 
@@ -184,7 +185,7 @@ describe("FavoritesPagination", () => {
 
     test("grows the infinite scroll prefix to include the favorite", () => {
       const posts = Array.from({ length: 30 }, (_, index) => createPost({ id: String(index + 1) }));
-      const { pagination, search } = setup(posts, { size: 2, infiniteScroll: true });
+      const { pagination, search } = setup(posts, { infiniteScroll: true });
 
       pagination.goToContaining(search.results.peek()[27]);
       expect(pagination.pageNumber.value).toBe(2);
@@ -207,7 +208,7 @@ describe("FavoritesPagination", () => {
       pagination.goTo(3);
       pagination.dispose();
       search.updateSettings({ sortKey: "score" });
-      paginationSettings.set({ size: 2, infiniteScroll: false });
+      paginationSettings.pageSize.set(1);
       expect(pagination.pageNumber.value).toBe(3);
     });
   });

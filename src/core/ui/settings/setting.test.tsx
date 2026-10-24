@@ -138,6 +138,42 @@ describe("Setting", () => {
     expect(select?.selectedIndex).toBe(1);
   });
 
+  test("switches a switch when its row is clicked", () => {
+    const preference = createPreference(false);
+    const element = renderSetting(createSwitchSetting(preference));
+
+    element.click();
+    expect(preference.value).toBe(true);
+  });
+
+  test("leaves a disabled switch alone when its row is clicked", () => {
+    const preference = createPreference(false);
+    const element = renderSetting(createSwitchSetting(preference, createPreference(true)));
+
+    element.click();
+    expect(preference.value).toBe(false);
+  });
+
+  test("opens a dropdown's picker when its row is clicked", () => {
+    const element = renderSetting(createLayoutSetting(createPreference<Layout>("row"), "dropdown"));
+    const select = element.querySelector("select")!;
+    let opened = 0;
+
+    select.showPicker = (): void => {
+      opened++;
+    };
+    element.click();
+    expect(opened).toBe(1);
+  });
+
+  test("leaves a segmented choice alone when its row is clicked", () => {
+    const preference = createPreference<Layout>("row");
+    const element = renderSetting(createLayoutSetting(preference, "segmented"));
+
+    element.click();
+    expect(preference.writes).toEqual([]);
+  });
+
   test("toggles one of several choices", () => {
     const preference = createPreference<readonly Layout[]>(["column"]);
     const descriptor: ChoicesSetting<Layout> = {

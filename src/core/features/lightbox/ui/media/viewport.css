@@ -1,7 +1,11 @@
 .fsg-LightboxViewport {
-  width: 100%;
+  width: calc(100% - var(--fsg-lightbox-start-inset, 0px));
   height: 100%;
+  margin-inline-start: var(--fsg-lightbox-start-inset, 0px);
   overflow: hidden;
+  transition:
+    width var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    margin-inline-start var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
 .fsg-LightboxViewport[data-zoomed] {

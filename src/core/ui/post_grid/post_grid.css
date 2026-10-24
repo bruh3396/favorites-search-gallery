@@ -90,7 +90,7 @@
   transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
-.fsg-Tile-upscale {
+.fsg-Tile-fullImage {
   position: absolute;
   inset: 0;
   inline-size: 100%;
@@ -207,5 +207,5 @@
 
 .fsg-PostGrid[data-layout="row"] .fsg-Tile {
   flex: 1 1 auto;
-  block-size: calc(100cqi / var(--fsg-PostGrid-size));
+  block-size: calc(100cqi / var(--fsg-PostGrid-tilesPerRow));
 }

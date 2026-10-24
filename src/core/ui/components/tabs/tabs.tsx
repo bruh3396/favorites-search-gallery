@@ -13,13 +13,14 @@ export interface TabsProps<T> {
   manager: TabManager<T>;
   label: (tab: Tab<T>) => Readable<string>;
   renderPanel: (tab: Tab<T>) => HTMLElement;
+  stripVisible: Readable<boolean>;
   trailing?: Child;
   onAdd: () => void;
   onClose: (id: string) => void;
-  onCloseAll?: () => void;
+  onCloseAll: () => void;
 }
 
-export function Tabs<T>({ manager, label, renderPanel, trailing, onAdd, onClose, onCloseAll }: TabsProps<T>): HTMLElement {
+export function Tabs<T>({ manager, label, renderPanel, stripVisible, trailing, onAdd, onClose, onCloseAll }: TabsProps<T>): HTMLElement {
   const createPanelScope = captureScope();
   const activeTab = computed(() => manager.tabs.value.find(tab => tab.id === manager.activeId.value) ?? null);
   const items = computed(() => manager.tabs.value.map(tab => ({ id: tab.id, label: label(tab), closable: tab.closable })));
@@ -34,18 +35,25 @@ export function Tabs<T>({ manager, label, renderPanel, trailing, onAdd, onClose,
     panel.replaceChildren(...shown === null ? [] : [shown.result]);
   });
   onCleanup(() => shown?.dispose());
+  const strip = (
+    <TabStrip
+      tabs={items}
+      activeId={manager.activeId}
+      trailing={trailing}
+      onActivate={id => manager.activate(id)}
+      onClose={onClose}
+      onMove={(id, index) => manager.move(id, index)}
+      onAdd={onAdd}
+      onCloseAll={onCloseAll}
+    />
+  );
+
+  effect(() => {
+    strip.hidden = !stripVisible.value;
+  });
   return (
     <div className={TabsClass.root}>
-      <TabStrip
-        tabs={items}
-        activeId={manager.activeId}
-        trailing={trailing}
-        onActivate={id => manager.activate(id)}
-        onClose={onClose}
-        onMove={(id, index) => manager.move(id, index)}
-        onAdd={onAdd}
-        onCloseAll={onCloseAll}
-      />
+      {strip}
       {panel}
     </div>
   );

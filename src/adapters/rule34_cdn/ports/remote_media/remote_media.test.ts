@@ -3,12 +3,14 @@ import { Media } from "@/core/domain/media/media";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
 
 const VIDEO: Media = { kind: "video", locator: "1234/a1b2c3" };
+const RESOLVED: Media = { kind: "video", locator: "1234/a1b2c3.mp4" };
 const ORIGINAL = "https://original/1234/a1b2c3.mp4";
 const BITMAP = { close: (): void => undefined } as ImageBitmap;
 const IMAGE = document.createElement("img");
 const FILE = new Blob(["video"], { type: "video/mp4" });
 
 interface Rule34Cdn {
+  resolveMedia: ReturnType<typeof vi.fn<(media: Media) => Promise<Media>>>;
   previewUrl: ReturnType<typeof vi.fn<(media: Media) => string>>;
   originalUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
   decodeStill: ReturnType<typeof vi.fn<(media: Media, signal?: AbortSignal, width?: number) => Promise<ImageBitmap>>>;
@@ -19,6 +21,7 @@ interface Rule34Cdn {
 
 function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
   const rule34Cdn: Rule34Cdn = {
+    resolveMedia: vi.fn(() => Promise.resolve(RESOLVED)),
     previewUrl: vi.fn((media: Media) => `https://preview/${media.locator}`),
     originalUrl: vi.fn(() => Promise.resolve(ORIGINAL)),
     decodeStill: vi.fn(() => Promise.resolve(BITMAP)),
@@ -30,6 +33,13 @@ function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
 }
 
 describe("Rule34CdnRemoteMedia", () => {
+  test("resolves media", async() => {
+    const { source, rule34Cdn } = setup();
+
+    expect(await source.resolveMedia(VIDEO)).toBe(RESOLVED);
+    expect(rule34Cdn.resolveMedia).toHaveBeenCalledWith(VIDEO);
+  });
+
   test("gives a preview's URL", () => {
     expect(setup().source.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
   });

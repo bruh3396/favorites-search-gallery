@@ -1,6 +1,6 @@
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
-import { ExitIndicator, composeFavoritesApp } from "@/core/app/favorites/composer";
-import { describe, expect, onTestFinished, test } from "vitest";
+import { describe, expect, onTestFinished, test, vi } from "vitest";
+import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/button";
@@ -8,11 +8,11 @@ import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/positi
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { MemoryMorpher } from "@/adapters/memory/ports/morpher/morpher";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
@@ -24,22 +24,23 @@ import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_o
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
+import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { TileClass } from "@/core/ui/post_grid/tile";
+import { composeFavoritesApp } from "@/core/app/favorites/composer";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = [], {
-  morpher = new MemoryMorpher(),
   navigator = new MemoryNavigator(),
   fileSaver = new MemoryFileSaver(),
-  returnIndicator = undefined as ExitIndicator | undefined,
   scheduler = new MemoryScheduler(),
-  pageVisibility = { hidden: new Emitter<void>() }
+  pageVisibility = { hidden: new Emitter<void>() },
+  hostPage = new MemoryHostPage()
 } = {}): ShadowRoot {
   const container = document.createElement("div");
   const client = new MemoryClient(posts);
 
-  composeFavoritesApp({ userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark", returnIndicator }, {
+  composeFavoritesApp({ userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
@@ -52,12 +53,16 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     scheduler,
     randomSource: new MemoryRandomSource(),
     localKeyedValues,
-    morpher,
     navigator,
     fileSaver,
-    pageVisibility
+    pageVisibility,
+    hostPage
   }).mount(container);
   return container.shadowRoot!;
+}
+
+function findStandIn(): HTMLCanvasElement | null {
+  return document.body.querySelector<HTMLCanvasElement>(":scope > canvas");
 }
 
 function readAspectRatios(grid: Element): string[] {
@@ -70,6 +75,12 @@ function querySkeleton(root: ShadowRoot): Element {
 
 function clickLightboxButton(root: ShadowRoot, label: string): void {
   root.querySelector<HTMLElement>(`.${LightboxButtonClass.root}[aria-label="${label}"]`)!.click();
+}
+
+function clickSettingsSwitch(root: ShadowRoot, label: string): void {
+  [...root.querySelectorAll<HTMLButtonElement>(`.${SwitchClass.root}`)]
+    .find(control => control.ariaLabelledByElements?.[0]?.textContent === label)!
+    .click();
 }
 
 function pressKey(root: ShadowRoot, key: string): void {
@@ -91,13 +102,42 @@ describe("composeFavoritesApp", () => {
     expect(app.querySelector("input[type=search]")).not.toBeNull();
   });
 
-  test("uses the grid size kept in the app's preferences", () => {
+  test("uses the tiles per row kept in the favorites preferences, not the post list's", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { postGridSize: 3 } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { tilesPerRow: 4 }, postList: { tilesPerRow: 7 } } });
     const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
-    expect(grid.style.getPropertyValue("--fsg-PostGrid-size")).toBe("3");
+    expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("4");
+  });
+
+  test("stores infinite scroll when it is switched on in the Settings tool", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const root = mount(localKeyedValues);
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    clickSettingsSwitch(root, "Infinite scroll");
+
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { infiniteScroll: true } } });
+  });
+
+  test("hides the site header when it is switched off in the Settings tool", () => {
+    const hostPage = new MemoryHostPage(true);
+    const root = mount(new MemoryLocalKeyedValues(), [], { hostPage });
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    expect(hostPage.headerVisible).toBe(true);
+    clickSettingsSwitch(root, "Site header");
+    expect(hostPage.headerVisible).toBe(false);
+  });
+
+  test("hides the site header on mount when it was switched off before", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const hostPage = new MemoryHostPage(true);
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { siteHeaderVisible: false } } });
+    mount(localKeyedValues, [], { hostPage });
+    expect(hostPage.headerVisible).toBe(false);
   });
 
   test("records the shapes of the active tab's results for the next load's skeleton when the page is hidden", async() => {
@@ -125,7 +165,10 @@ describe("composeFavoritesApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
     localKeyedValues.set("favorites-search-gallery", { favoritesSkeleton: { 2: [{ width: 4, height: 3 }] } });
-    expect(readAspectRatios(querySkeleton(mount(localKeyedValues)))).toHaveLength(DEFAULT_SKELETON_DIMENSIONS.length);
+    const ratios = readAspectRatios(querySkeleton(mount(localKeyedValues)));
+
+    expect(ratios).not.toHaveLength(0);
+    expect(new Set(ratios)).toEqual(new Set(DEFAULT_SKELETON_DIMENSIONS.map(({ width, height }) => `${width} / ${height}`)));
   });
 
   test("reveals the lightbox's last favorite before scrolling to its tile", async() => {
@@ -133,7 +176,7 @@ describe("composeFavoritesApp", () => {
     const previousScrollIntoView = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollIntoView");
     const scrolls: Array<{ target: HTMLElement; shown: Element | null; page: string | null }> = [];
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pageSize: 1 } } });
     const media = { kind: "image" as const, locator: "data:image/png;base64,AA==" };
     const root = mount(localKeyedValues, [createPost({ id: "1", media }), createPost({ id: "2", media })]);
     const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
@@ -174,7 +217,7 @@ describe("composeFavoritesApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const scheduler = new MemoryScheduler();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 1, infiniteScroll: false } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pageSize: 1 } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })], { scheduler });
     const readPage = (): string | null | undefined => root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent;
 
@@ -197,7 +240,7 @@ describe("composeFavoritesApp", () => {
   ])("steps the lightbox past the last result to position $position when infinite scroll is $infiniteScroll", async({ infiniteScroll, position }) => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favoritesPagination: { size: 50, infiniteScroll } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pageSize: 50, infiniteScroll } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" })]);
 
     await flushMicrotasks();
@@ -208,39 +251,33 @@ describe("composeFavoritesApp", () => {
   });
 
   test("morphs the lightbox's media into its favorite's tile on close", async() => {
-    const morpher = new MemoryMorpher();
     const scheduler = new MemoryScheduler();
     const posts = [createPost({ id: "1", media: { kind: "image", locator: "data:image/png;base64,AA==" } })];
-    const root = mount(new MemoryLocalKeyedValues(), posts, { morpher, scheduler });
+    const root = mount(new MemoryLocalKeyedValues(), posts, { scheduler });
 
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
+    vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 100, 100));
+    onTestFinished(() => {
+      findStandIn()?.remove();
+      vi.restoreAllMocks();
+    });
     await flushMicrotasks();
-    const tile = root.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
+    const tile = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)!;
 
     tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
     scheduler.advance(75);
     await flushMicrotasks();
     clickLightboxButton(root, "Close");
-    expect(morpher.morphs).toEqual([{ source: expect.any(HTMLCanvasElement), target: tile }]);
+    expect([findStandIn() !== null, tile.style.visibility]).toEqual([true, "hidden"]);
   });
 
   test("closes plainly without a morph while the lightbox's media is still loading", async() => {
-    const morpher = new MemoryMorpher();
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher });
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]);
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
     clickLightboxButton(root, "Close");
-    expect([morpher.morphs, root.querySelector("dialog")!.open]).toEqual([[], false]);
-  });
-
-  test("closes plainly without a morph when the indicator is none", async() => {
-    const morpher = new MemoryMorpher();
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { morpher, returnIndicator: "none" });
-
-    await flushMicrotasks();
-    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
-    clickLightboxButton(root, "Close");
-    expect([morpher.morphs, root.querySelector("dialog")!.open]).toEqual([[], false]);
+    expect([findStandIn(), root.querySelector("dialog")!.open]).toEqual([null, false]);
   });
 
   test("opens a favorite's original when its tile is Ctrl-clicked", async() => {

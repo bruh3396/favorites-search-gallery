@@ -6,8 +6,8 @@
   justify-content: space-between;
   gap: 12px;
   min-block-size: calc(var(--fsg-control-size-medium) + 12px);
-  padding: 6px 8px;
-  border-radius: var(--fsg-radius-medium);
+  padding: 6px 14px;
+  user-select: none;
   transition:
     opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
     background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
@@ -22,6 +22,10 @@
   .fsg-SettingRow:hover:has(:enabled) {
     background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 10%, transparent);
   }
+}
+
+.fsg-SettingRow[data-activatable]:has(:enabled) {
+  cursor: pointer;
 }
 
 /* Disabled means nothing in the control can be used. :has(:disabled) alone would also
@@ -39,10 +43,6 @@
 
 .fsg-SettingRow-label {
   font-size: var(--fsg-font-size-label);
-}
-
-.fsg-SettingRow[data-size="small"] .fsg-SettingRow-label {
-  font-size: var(--fsg-font-size-label-small);
 }
 
 .fsg-SettingRow-description {

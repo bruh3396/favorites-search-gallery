@@ -13,7 +13,6 @@ import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favo
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { Occurrence } from "@/core/utils/reactive/emitter";
-import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
@@ -37,7 +36,7 @@ export interface FavoritesDependencies {
   remoteMedia: RemoteMedia;
   scheduler: Scheduler;
   randomSource: RandomSource;
-  paginationSettings: Preference<FavoritesPaginationSettings>;
+  paginationSettings: FavoritesPaginationSettings;
 }
 
 export interface FavoritesService {

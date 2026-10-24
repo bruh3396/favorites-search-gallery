@@ -1,5 +1,6 @@
+import { MediaKind } from "@/core/domain/media/media";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
-import { Rule34CdnImageExtension } from "@/adapters/rule34_cdn/client/extension";
+import { Rule34CdnFileExtension } from "@/adapters/rule34_cdn/client/extension";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { fileUrl } from "@/adapters/rule34_cdn/client/addresses";
 
@@ -9,31 +10,44 @@ export interface Rule34CdnExtensionProberDependencies {
 }
 
 const PROBE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 50 };
-const PROBED_EXTENSIONS: readonly Rule34CdnImageExtension[] = ["jpeg", "png", "jpg"];
-const FALLBACK_EXTENSION: Rule34CdnImageExtension = "jpg";
+const PROBE_ORDERS: Record<MediaKind, readonly Rule34CdnFileExtension[]> = {
+  image: ["jpeg", "png", "jpg", "gif", "mp4"],
+  gif: ["gif", "mp4", "jpeg", "png", "jpg"],
+  video: ["mp4", "gif", "jpeg", "png", "jpg"]
+};
 
 export class Rule34CdnExtensionProber {
   private readonly limiter: RateLimiter;
-  private readonly found = new Map<string, Rule34CdnImageExtension>();
+  private readonly probes = new Map<string, Promise<Rule34CdnFileExtension | null>>();
 
   constructor(private readonly dependencies: Rule34CdnExtensionProberDependencies) {
     this.limiter = new RateLimiter(PROBE_RATE_LIMIT, dependencies.scheduler);
   }
 
-  public async probe(locator: string): Promise<Rule34CdnImageExtension> {
-    const cached = this.found.get(locator);
+  public probe(locator: string, guess: MediaKind): Promise<Rule34CdnFileExtension | null> {
+    const pending = this.probes.get(locator);
 
-    if (cached !== undefined) {
-      return cached;
+    if (pending !== undefined) {
+      return pending;
     }
+    const probe = this.findExtension(locator, PROBE_ORDERS[guess]);
 
-    for (const extension of PROBED_EXTENSIONS) {
+    this.probes.set(locator, probe);
+    void probe.then(extension => {
+      if (extension === null) {
+        this.probes.delete(locator);
+      }
+    });
+    return probe;
+  }
+
+  private async findExtension(locator: string, order: readonly Rule34CdnFileExtension[]): Promise<Rule34CdnFileExtension | null> {
+    for (const extension of order) {
       if (await this.exists(fileUrl(locator, extension))) {
-        this.found.set(locator, extension);
         return extension;
       }
     }
-    return FALLBACK_EXTENSION;
+    return null;
   }
 
   private exists(url: string): Promise<boolean> {

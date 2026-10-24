@@ -1,8 +1,7 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
-import { Media, hasMedia } from "@/core/domain/media/media";
-import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
-import { UpscalePacer } from "@/core/ui/post_grid/upscale_pacer";
-import { Upscaler } from "@/core/ui/post_grid/upscaler";
+import { hasMedia } from "@/core/domain/media/media";
+import { Signal } from "@/core/utils/reactive/signal";
+import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
@@ -11,7 +10,7 @@ export const TileClass = {
   root: "fsg-Tile",
   link: "fsg-Tile-link",
   preview: "fsg-Tile-preview",
-  upscale: "fsg-Tile-upscale",
+  fullImage: "fsg-Tile-fullImage",
   actions: "fsg-Tile-actions"
 } as const;
 
@@ -19,17 +18,11 @@ export interface TileProps {
   post: MediaItem;
   dimensions: Dimensions;
   actions: readonly Node[];
-  upscale: Readable<boolean>;
-  upscalePaused?: Readable<boolean>;
   visibilityObserver: VisibilityObserver;
-  onVisibilityChange: (visible: boolean) => void;
-  decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
-  upscalePacer: UpscalePacer;
-  resolvePreviewUrl: (media: Media) => string;
+  imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
   href?: string;
   onPlainClick: () => void;
   onCtrlClick?: () => void;
-  onPointerEnter?: () => void;
 }
 
 interface PreviewElements {
@@ -40,12 +33,12 @@ interface PreviewElements {
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
-  const { post, dimensions, actions, upscale, href, onPlainClick, onCtrlClick, onPointerEnter } = props;
+  const { post, dimensions, actions, href, onPlainClick, onCtrlClick } = props;
   const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
-  const canvas = <canvas className={TileClass.upscale} hidden /> as HTMLCanvasElement;
+  const canvas = <canvas className={TileClass.fullImage} hidden /> as HTMLCanvasElement;
   const link =
-    <a className={TileClass.link} target="_blank" onClick={event => handleClick(event, onPlainClick, onCtrlClick)} onPointerenter={() => onPointerEnter?.()}>
+    <a className={TileClass.link} target="_blank" onClick={event => handleClick(event, onPlainClick, onCtrlClick)}>
       {preview}{canvas}
     </a> as HTMLAnchorElement;
   const root = (
@@ -56,39 +49,17 @@ export function Tile(props: TileProps): HTMLElement {
   );
 
   setAspectRatio(root, dimensions);
-  const unobserve = props.visibilityObserver.observe(root, isVisible => {
+  onCleanup(props.visibilityObserver.observe(root, isVisible => {
     visible.value = isVisible;
-    props.onVisibilityChange(isVisible);
-  });
-
-  onCleanup(() => {
-    unobserve();
-    props.onVisibilityChange(false);
-  });
+  }));
 
   if (href !== undefined) {
     setHrefOnInteraction(link, href);
   }
 
   if (hasMedia(post.media)) {
-    showPreview({ root, preview }, props.resolvePreviewUrl(post.media));
-    const upscaler = new Upscaler({ canvas, media: post.media, decodeStill: props.decodeStill, upscalePacer: props.upscalePacer });
-
-    effect(() => {
-      const upscalingEnabled = upscale.value;
-      const isVisible = visible.value;
-
-      if (props.upscalePaused?.value === true) {
-        upscaler.cancel();
-      } else if (!upscalingEnabled) {
-        upscaler.hide();
-      } else if (isVisible) {
-        upscaler.upscale();
-      } else {
-        upscaler.cancel();
-      }
-    });
-    onCleanup(() => upscaler.cancel());
+    showPreview({ root, preview }, props.imageLoaderService.resolvePreviewUrl(post.media));
+    onCleanup(props.imageLoaderService.createLoader(canvas, post.media).trackVisibility(visible));
   }
   return root;
 }

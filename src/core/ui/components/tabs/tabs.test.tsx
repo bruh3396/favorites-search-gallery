@@ -14,6 +14,7 @@ interface Setup {
   disposePanel: Mock<(value: string) => void>;
   onAdd: Mock<() => void>;
   onClose: Mock<(id: string) => void>;
+  stripVisible: Signal<boolean>;
   dispose: () => void;
 }
 
@@ -26,14 +27,27 @@ function setup(values: readonly string[] = ["Home", "apple"]): Setup {
   });
   const onAdd = vi.fn<() => void>();
   const onClose = vi.fn((id: string): void => manager.close(id));
+  const stripVisible = new Signal(true);
 
   values.forEach((value, index) => manager.open(value, value, { closable: index > 0 }));
   const { result: element, dispose } = render(document, () => (
-    <Tabs manager={manager} label={tab => new Signal(tab.value)} renderPanel={renderPanel} onAdd={onAdd} onClose={onClose} />
+    <Tabs
+      manager={manager}
+      label={tab => new Signal(tab.value)}
+      renderPanel={renderPanel}
+      stripVisible={stripVisible}
+      onAdd={onAdd}
+      onClose={onClose}
+      onCloseAll={vi.fn()}
+    />
   ));
 
   document.body.append(element);
-  return { element, manager, renderPanel, disposePanel, onAdd, onClose, dispose };
+  return { element, manager, renderPanel, disposePanel, onAdd, onClose, stripVisible, dispose };
+}
+
+function isStripHidden(element: HTMLElement): boolean {
+  return element.querySelector("[role=tablist]")!.closest("[hidden]") !== null;
 }
 
 function readPanel(element: HTMLElement): string {
@@ -94,6 +108,16 @@ describe("Tabs", () => {
 
     element.querySelector<HTMLButtonElement>("button[aria-label='New tab']")!.click();
     expect(onAdd).toHaveBeenCalledOnce();
+  });
+
+  test("hides and shows the strip while keeping the shown panel", () => {
+    const { element, renderPanel, disposePanel, stripVisible } = setup();
+
+    stripVisible.value = false;
+    const wasHidden = isStripHidden(element);
+
+    stripVisible.value = true;
+    expect([wasHidden, isStripHidden(element), readPanel(element), renderPanel.mock.calls.length, disposePanel.mock.calls]).toEqual([true, false, "Home", 1, []]);
   });
 
   test("disposes the shown panel when it is disposed", () => {

@@ -1,8 +1,6 @@
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
-import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { PageJump } from "@/core/ui/components/paginator/page_jump";
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { PageSlot } from "@/core/ui/components/paginator/page_slot";
-import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { getPageSequence } from "@/core/ui/components/paginator/page_sequence";
 import { h } from "@/core/ui/h/h";
 
@@ -16,7 +14,6 @@ export const PaginatorClass = {
 export interface PaginatorProps {
   pageNumber: Readable<number>;
   pageCount: Readable<number>;
-  scheduler: StepperScheduler;
   onPageChange: (pageNumber: number) => void;
 }
 
@@ -30,12 +27,8 @@ interface StepButtonProps {
 
 const SLOT_COUNT = 7;
 
-export function Paginator({ pageNumber, pageCount, scheduler, onPageChange }: PaginatorProps): HTMLElement {
+export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
   const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, slotCount: SLOT_COUNT }));
-  const isJumpOpen = new Signal(false);
-  const openJump = (): void => {
-    isJumpOpen.value = true;
-  };
   return (
     <nav
       className={PaginatorClass.root}
@@ -45,20 +38,10 @@ export function Paginator({ pageNumber, pageCount, scheduler, onPageChange }: Pa
       <StepButton label="Previous page" icon="chevronLeft" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
       <ul className={PaginatorClass.list}>
         {Array.from({ length: SLOT_COUNT }, (_, index) => (
-          <PageSlot term={computed(() => terms.value[index])} current={pageNumber} isJumpOpen={isJumpOpen} onPageChange={onPageChange} onJumpOpen={openJump} />
+          <PageSlot term={computed(() => terms.value[index])} current={pageNumber} pageCount={pageCount} onPageChange={onPageChange} />
         ))}
       </ul>
       <StepButton label="Next page" icon="chevronRight" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
-      <PageJump
-        isOpen={isJumpOpen}
-        pageNumber={pageNumber}
-        pageCount={pageCount}
-        scheduler={scheduler}
-        onPageChange={onPageChange}
-        onClose={() => {
-          isJumpOpen.value = false;
-        }}
-      />
     </nav>
   );
 }

@@ -16,6 +16,8 @@ export const DEFAULT_LIGHTBOX_KEYMAP: LightboxKeymap = {
   F: "toggleFullscreen",
   z: "toggleZoom",
   Z: "toggleZoom",
+  i: "toggleDetails",
+  I: "toggleDetails",
   Escape: "dismiss",
   Backspace: "close",
   Delete: "close"

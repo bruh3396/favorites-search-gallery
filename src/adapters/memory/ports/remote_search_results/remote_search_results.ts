@@ -1,6 +1,5 @@
 import { MemoryClient } from "@/adapters/memory/client/client";
-import { Post } from "@/core/domain/post/post";
-import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
+import { RemoteSearchResults, SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 
 export interface MemoryRemoteSearchResultsConfiguration {
   readonly pageSize: number;
@@ -8,16 +7,24 @@ export interface MemoryRemoteSearchResultsConfiguration {
 }
 
 export class MemoryRemoteSearchResults implements RemoteSearchResults {
-  public readonly pageSize: number;
-  public readonly initialPageIndex: number;
+  private readonly pageSize: number;
+  private readonly initialPage: SearchResultsPage;
 
   constructor(configuration: MemoryRemoteSearchResultsConfiguration, private readonly memory: Pick<MemoryClient, "readPosts">) {
     this.pageSize = configuration.pageSize;
-    this.initialPageIndex = configuration.initialPageIndex;
+    this.initialPage = this.readPage(configuration.initialPageIndex);
   }
 
-  public fetchPage(pageIndex: number): Promise<Post[]> {
-    const start = pageIndex * this.pageSize;
-    return Promise.resolve(this.memory.readPosts().slice(start, start + this.pageSize));
+  public readInitialPage(): SearchResultsPage {
+    return this.initialPage;
+  }
+
+  public fetchPage(index: number): Promise<SearchResultsPage> {
+    return Promise.resolve(index === this.initialPage.index ? this.initialPage : this.readPage(index));
+  }
+
+  private readPage(index: number): SearchResultsPage {
+    const start = index * this.pageSize;
+    return { index, posts: this.memory.readPosts().slice(start, start + this.pageSize) };
   }
 }

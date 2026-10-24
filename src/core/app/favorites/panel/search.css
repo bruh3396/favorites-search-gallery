@@ -53,6 +53,48 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .fsg-FavoritesSearchPanel-tabStripToggle {
+    display: grid;
+    flex: none;
+    place-items: center;
+    position: relative;
+    inline-size: var(--fsg-control-size-medium);
+    block-size: var(--fsg-control-size-medium);
+    margin-inline-start: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--fsg-radius-medium);
+    background: none;
+    color: var(--fsg-color-on-surface-muted);
+    cursor: pointer;
+  }
+
+  .fsg-FavoritesSearchPanel-tabStripToggle:hover {
+    background: color-mix(in srgb, currentColor 12%, transparent);
+    color: inherit;
+  }
+
+  .fsg-FavoritesSearchPanel-tabStripToggle:focus-visible {
+    outline: 2px solid var(--fsg-color-accent);
+    outline-offset: -2px;
+  }
+
+  .fsg-FavoritesSearchPanel-tabCount {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    min-inline-size: 14px;
+    padding-inline: 3px;
+    box-sizing: border-box;
+    border-radius: var(--fsg-radius-full);
+    background: var(--fsg-color-accent);
+    color: var(--fsg-color-on-accent);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    line-height: 14px;
+    text-align: center;
+  }
+
   .fsg-FavoritesSearchPanel-body {
     flex: 1 1 0;
     min-block-size: 0;

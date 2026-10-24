@@ -30,10 +30,19 @@ describe("fillRestOfWindow", () => {
     expect(element.style.blockSize).toBe("calc(100dvh - 0px)");
   });
 
-  test("stops refitting once stopped", () => {
+  test("refits when told, for a move that leaves the page's size unchanged", () => {
+    const { element, sizeObserver, moveTo } = setup();
+    const { refit } = fillRestOfWindow(element, sizeObserver);
+
+    moveTo(0);
+    refit();
+    expect(element.style.blockSize).toBe("calc(100dvh - 0px)");
+  });
+
+  test("stops refitting once disposed", () => {
     const { element, sizeObserver, moveTo } = setup();
 
-    fillRestOfWindow(element, sizeObserver)();
+    fillRestOfWindow(element, sizeObserver).dispose();
     moveTo(0);
     sizeObserver.resize(document.documentElement, { width: 800, height: 600 });
     expect(element.style.blockSize).toBe("calc(100dvh - 40px)");

@@ -1,42 +1,72 @@
-import { AppPreferences, createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
+import { createFavoritesPreferences, createLightboxPreferences, createPostListPreferences } from "@/core/app/preferences";
 import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 
-function readDefaults(): AppPreferences {
-  return createAppPreferences(new MemoryLocalKeyedValues());
-}
-
-describe("createAppPreferences", () => {
+describe("createFavoritesPreferences", () => {
   test("restores a stored layout and falls back to the default for one it doesn't recognize", () => {
     const storage = new MemoryLocalKeyedValues();
+    const defaultLayout = createFavoritesPreferences(new MemoryLocalKeyedValues()).layout.value;
 
-    storage.set("postGridLayout", "row");
-    expect(createAppPreferences(storage).postGridLayout.value).toBe("row");
-    storage.set("postGridLayout", "masonry");
-    expect(createAppPreferences(storage).postGridLayout.value).toBe(readDefaults().postGridLayout.value);
+    storage.set("layout", "row");
+    expect(createFavoritesPreferences(storage).layout.value).toBe("row");
+    storage.set("layout", "masonry");
+    expect(createFavoritesPreferences(storage).layout.value).toBe(defaultLayout);
   });
 
-  test("restores the pagination settings it stores", () => {
+  test("restores the page size and infinite scroll it stores", () => {
     const storage = new MemoryLocalKeyedValues();
+    const preferences = createFavoritesPreferences(storage);
 
-    createAppPreferences(storage).favoritesPagination.set({ size: 100, infiniteScroll: true });
-    expect(createAppPreferences(storage).favoritesPagination.value).toEqual({ size: 100, infiniteScroll: true });
+    preferences.pageSize.set(100);
+    preferences.infiniteScroll.set(true);
+    const restored = createFavoritesPreferences(storage);
+
+    expect([restored.pageSize.value, restored.infiniteScroll.value]).toEqual([100, true]);
   });
 
   test("falls back to the default page size for one below 1", () => {
     const storage = new MemoryLocalKeyedValues();
 
-    storage.set("favoritesPagination", { size: 0, infiniteScroll: true });
-    expect(createAppPreferences(storage).favoritesPagination.value).toEqual({ size: readDefaults().favoritesPagination.value.size, infiniteScroll: true });
+    storage.set("pageSize", 0);
+    expect(createFavoritesPreferences(storage).pageSize.value).toBe(createFavoritesPreferences(new MemoryLocalKeyedValues()).pageSize.value);
+  });
+
+  test("shows the tab strip by default and restores it hidden once stored", () => {
+    const storage = new MemoryLocalKeyedValues();
+
+    expect(createFavoritesPreferences(storage).tabStripVisible.value).toBe(true);
+    createFavoritesPreferences(storage).tabStripVisible.set(false);
+    expect(createFavoritesPreferences(storage).tabStripVisible.value).toBe(false);
   });
 });
 
-describe("pickPostGridPreferences", () => {
-  test("returns the post grid preferences under their short names", () => {
-    const preferences = createAppPreferences(new MemoryLocalKeyedValues());
+describe("createPostListPreferences", () => {
+  test("restores the grid preferences it stores", () => {
+    const storage = new MemoryLocalKeyedValues();
+    const preferences = createPostListPreferences(storage);
 
-    expect(pickPostGridPreferences(preferences)).toEqual({
-      layout: preferences.postGridLayout, size: preferences.postGridSize, upscale: preferences.postGridUpscale
-    });
+    preferences.layout.set("row");
+    preferences.tilesPerRow.set(6);
+    preferences.upscale.set(false);
+    const restored = createPostListPreferences(storage);
+
+    expect([restored.layout.value, restored.tilesPerRow.value, restored.upscale.value]).toEqual(["row", 6, false]);
+  });
+});
+
+describe("createLightboxPreferences", () => {
+  test("falls back to the default volume for one outside 0 to 1", () => {
+    const storage = new MemoryLocalKeyedValues();
+
+    storage.set("volume", 2);
+    expect(createLightboxPreferences(storage).volume.value).toBe(1);
+  });
+
+  test("keeps the details panel closed until it is opened", () => {
+    const storage = new MemoryLocalKeyedValues();
+
+    expect(createLightboxPreferences(storage).detailsOpen.value).toBe(false);
+    createLightboxPreferences(storage).detailsOpen.set(true);
+    expect(createLightboxPreferences(storage).detailsOpen.value).toBe(true);
   });
 });

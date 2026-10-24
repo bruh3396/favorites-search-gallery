@@ -22,7 +22,7 @@ export interface SearchBoxProps {
 }
 
 export function SearchBox({ label, query, trailing, focusRequests, onSearch }: SearchBoxProps): HTMLElement {
-  const input = <input className={SearchBoxClass.input} type="search" placeholder={label} aria-label={label} value={query} /> as HTMLInputElement;
+  const input = <input className={SearchBoxClass.input} type="search" spellcheck={false} placeholder={label} aria-label={label} value={query} /> as HTMLInputElement;
 
   if (focusRequests !== undefined) {
     onCleanup(focusRequests.on(() => input.focus()));

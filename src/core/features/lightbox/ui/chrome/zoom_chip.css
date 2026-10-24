@@ -1,6 +1,6 @@
 .fsg-LightboxZoomChip {
   position: absolute;
-  inset-inline-start: 16px;
+  inset-inline-start: calc(var(--fsg-lightbox-start-inset, 0px) + 16px);
   inset-block-end: 16px;
   padding: 4px 8px;
   border-radius: 5px;

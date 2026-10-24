@@ -30,7 +30,7 @@ export interface TabStripProps {
   onClose: (id: string) => void;
   onMove: (id: string, index: number) => void;
   onAdd: () => void;
-  onCloseAll?: () => void;
+  onCloseAll: () => void;
 }
 
 type DropSide = "before" | "after";
@@ -85,16 +85,12 @@ export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onMove
       <button className={TabStripClass.add} type="button" aria-label="New tab" onClick={onAdd}>
         {createIcon("add", TabStripClass.icon)}
       </button>
-      {(trailing || onCloseAll) && (
-        <div className={TabStripClass.trailing}>
-          {trailing}
-          {onCloseAll && (
-            <button className={TabStripClass.closeAll} type="button" aria-label="Close all tabs" onClick={onCloseAll}>
-              {createIcon("ban", TabStripClass.icon)}
-            </button>
-          )}
-        </div>
-      )}
+      <div className={TabStripClass.trailing}>
+        {trailing}
+        <button className={TabStripClass.closeAll} type="button" aria-label="Close all tabs" onClick={onCloseAll}>
+          {createIcon("ban", TabStripClass.icon)}
+        </button>
+      </div>
     </div>
   );
 }

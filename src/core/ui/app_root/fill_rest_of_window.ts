@@ -1,13 +1,18 @@
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 
-export function fillRestOfWindow(element: HTMLElement, sizeObserver: SizeObserver): () => void {
+export interface WindowFill {
+  refit: () => void;
+  dispose: () => void;
+}
+
+export function fillRestOfWindow(element: HTMLElement, sizeObserver: SizeObserver): WindowFill {
   const page = element.ownerDocument.documentElement;
-  const fit = (): void => {
+  const refit = (): void => {
     const top = element.getBoundingClientRect().top + page.scrollTop;
 
     element.style.blockSize = `calc(100dvh - ${top}px)`;
   };
 
-  fit();
-  return sizeObserver.observe(page, fit);
+  refit();
+  return { refit, dispose: sizeObserver.observe(page, refit) };
 }

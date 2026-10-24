@@ -1,0 +1,30 @@
+.fsg-LightboxDetailsPanel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--fsg-lightbox-details-width);
+  border-inline-end: 1px solid rgb(255 255 255 / 0.08);
+  background: #16181d;
+  color: white;
+  translate: -100% 0;
+  transition: translate var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-LightboxDetailsPanel[data-open] {
+  translate: none;
+}
+
+.fsg-LightboxDetailsPanel-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 12px 0;
+}
+
+.fsg-LightboxDetailsPanel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 16px;
+  scrollbar-width: thin;
+}

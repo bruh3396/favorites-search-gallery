@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { createLightboxImage, createLightboxVideo, playVideo } from "@/core/features/lightbox/stage/media_elements/media_elements";
+import { createLightboxImage, createLightboxVideo, playVideo } from "@/core/features/lightbox/stage/media_elements";
 import { flushMicrotasks } from "@/testing/async";
 
 const BITMAP = { width: 4, height: 3 } as ImageBitmap;

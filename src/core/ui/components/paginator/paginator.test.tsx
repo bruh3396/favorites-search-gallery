@@ -1,7 +1,6 @@
 import { Paginator, PaginatorClass } from "@/core/ui/components/paginator/paginator";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import PAGINATOR_CSS from "@/core/ui/components/paginator/paginator.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
@@ -16,7 +15,7 @@ interface Setup {
 
 function setup({ pageNumber = 1, pageCount = 10 } = {}): Setup {
   const options = { pageNumber: new Signal(pageNumber), pageCount: new Signal(pageCount), onPageChange: vi.fn() };
-  const { result: element, dispose } = render(document, () => <Paginator {...options} scheduler={new MemoryScheduler()} />);
+  const { result: element, dispose } = render(document, () => <Paginator {...options} />);
 
   document.body.append(element);
   return { ...options, element, dispose };
@@ -113,15 +112,12 @@ describe("Paginator", () => {
   test("goes to a page entered after clicking a gap", () => {
     const { element, onPageChange } = setup({ pageNumber: 10, pageCount: 20 });
 
-    findButton(element, "Go to page").click();
-    const jump = element.querySelector<HTMLFormElement>("[role=dialog]")!;
-
-    const field = jump.querySelector("input")!;
+    element.querySelector<HTMLButtonElement>("button[aria-label='Go to page']:not([hidden])")!.click();
+    const field = element.querySelector<HTMLInputElement>("input:not([hidden])")!;
 
     field.value = "15";
-    field.dispatchEvent(new Event("change"));
-    jump.requestSubmit();
-    expect([vi.mocked(onPageChange).mock.calls, jump.hidden]).toEqual([[[15]], true]);
+    field.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    expect(onPageChange).toHaveBeenCalledExactlyOnceWith(15);
   });
 
   test("stops following once disposed", () => {

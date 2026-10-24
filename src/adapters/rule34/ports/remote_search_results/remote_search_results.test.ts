@@ -1,6 +1,7 @@
 import { Mock, describe, expect, test, vi } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Post } from "@/core/domain/post/post";
 import { Rule34Error } from "@/adapters/rule34/client/error";
 import { Rule34RemoteSearchResults } from "@/adapters/rule34/ports/remote_search_results/remote_search_results";
@@ -19,16 +20,16 @@ interface Setup {
 const LANDING_PAGE = [createPost({ id: "1" })];
 const OTHER_PAGE = [createPost({ id: "2" })];
 
-function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolve(OTHER_PAGE))): Setup {
+function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolve(OTHER_PAGE)), initialPage: Post[] = LANDING_PAGE): Setup {
   const scheduler = new MemoryScheduler();
-  const readPostListPage = vi.fn((): Post[] => LANDING_PAGE);
+  const readPostListPage = vi.fn((): Post[] => initialPage);
   const rule34 = { readPostListPage, fetchPostListPage };
   const rule34Document = { readSearchQuery: (): string => "apple banana", readPostListPageIndex: (): number => 2 };
   const searchResults = new Rule34RemoteSearchResults({ rule34, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
   return { searchResults, scheduler, readPostListPage, fetchPostListPage };
 }
 
-async function fetchFirstPage(fetchPostListPage: FetchPostListPage): Promise<Post[]> {
+async function fetchFirstPage(fetchPostListPage: FetchPostListPage): Promise<SearchResultsPage> {
   const { searchResults, scheduler } = setup(fetchPostListPage);
   const fetched = searchResults.fetchPage(0);
 
@@ -38,18 +39,27 @@ async function fetchFirstPage(fetchPostListPage: FetchPostListPage): Promise<Pos
 }
 
 describe("Rule34RemoteSearchResults", () => {
-  test("pages through the site's fixed page size, starting at the page the browser opened", () => {
+  test("reads the page the browser opened", () => {
     const { searchResults } = setup();
 
-    expect(searchResults.pageSize).toBe(42);
-    expect(searchResults.initialPageIndex).toBe(2);
+    expect(searchResults.readInitialPage()).toEqual({ index: 2, posts: LANDING_PAGE });
   });
 
-  test("reads the page the browser opened from the page itself, once", async() => {
+  test("captures the native page when constructed and reuses it", async() => {
     const { searchResults, readPostListPage, fetchPostListPage } = setup();
 
-    expect(await searchResults.fetchPage(2)).toBe(LANDING_PAGE);
-    expect(await searchResults.fetchPage(2)).toBe(LANDING_PAGE);
+    expect(readPostListPage).toHaveBeenCalledExactlyOnceWith(2);
+    expect(await searchResults.fetchPage(2)).toBe(searchResults.readInitialPage());
+    expect(await searchResults.fetchPage(2)).toBe(searchResults.readInitialPage());
+    expect(readPostListPage).toHaveBeenCalledOnce();
+    expect(fetchPostListPage).not.toHaveBeenCalled();
+  });
+
+  test("keeps an empty native page as the initial page", async() => {
+    const { searchResults, readPostListPage, fetchPostListPage } = setup(undefined, []);
+
+    expect(searchResults.readInitialPage()).toEqual({ index: 2, posts: [] });
+    expect(await searchResults.fetchPage(2)).toBe(searchResults.readInitialPage());
     expect(readPostListPage).toHaveBeenCalledOnce();
     expect(fetchPostListPage).not.toHaveBeenCalled();
   });
@@ -57,7 +67,7 @@ describe("Rule34RemoteSearchResults", () => {
   test("fetches any other page of the same search", async() => {
     const { searchResults, fetchPostListPage } = setup();
 
-    expect(await searchResults.fetchPage(5)).toBe(OTHER_PAGE);
+    expect(await searchResults.fetchPage(5)).toEqual({ index: 5, posts: OTHER_PAGE });
     expect(fetchPostListPage).toHaveBeenCalledWith("apple banana", 5);
   });
 
@@ -66,7 +76,7 @@ describe("Rule34RemoteSearchResults", () => {
       .mockRejectedValueOnce(new Rule34Error("http", { status: 429 }))
       .mockResolvedValue(OTHER_PAGE);
 
-    expect(await fetchFirstPage(fetchPostListPage)).toBe(OTHER_PAGE);
+    expect(await fetchFirstPage(fetchPostListPage)).toEqual({ index: 0, posts: OTHER_PAGE });
     expect(fetchPostListPage).toHaveBeenCalledTimes(2);
   });
 

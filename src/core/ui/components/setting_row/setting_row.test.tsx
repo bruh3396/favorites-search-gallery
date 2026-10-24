@@ -78,6 +78,22 @@ describe("SettingRow", () => {
     expect(findDescription(element)?.hidden).toBe(false);
   });
 
+  test("activates on a click outside its control", () => {
+    let activations = 0;
+    const { element } = setup({ onActivate: () => activations++ });
+
+    element.querySelector<HTMLElement>(`.${SettingRowClass.label}`)?.click();
+    expect(activations).toBe(1);
+  });
+
+  test("leaves a click on its control to the control", () => {
+    let activations = 0;
+    const { control } = setup({ onActivate: () => activations++ });
+
+    control.click();
+    expect(activations).toBe(0);
+  });
+
   test("styles every class it sets", () => {
     expectClassesStyled(SettingRowClass, SETTING_ROW_CSS);
   });

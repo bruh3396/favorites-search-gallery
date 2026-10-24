@@ -1,6 +1,7 @@
-import { LightboxStage, LightboxStageDependencies } from "@/core/features/lightbox/stage/stage/stage";
+import { LightboxStage, LightboxStageDependencies } from "@/core/features/lightbox/stage/stage";
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
+import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { Preference } from "@/core/utils/reactive/preference";
@@ -38,7 +39,15 @@ function createGif(media: Media): HTMLImageElement {
   return gif;
 }
 
-function setup(current: Post | undefined, retained: readonly Post[] = current === undefined ? [] : [current]): {
+function resolveAsGiven(media: Media): Promise<Media> {
+  return Promise.resolve(media);
+}
+
+function setup(
+  current: Post | undefined,
+  retained: readonly Post[] = current === undefined ? [] : [current],
+  resolveMedia: (media: Media) => Promise<Media> = resolveAsGiven
+): {
   stage: LightboxStage<Post>;
   dispose: () => void;
   currentItem: Signal<Post | undefined>;
@@ -50,6 +59,7 @@ function setup(current: Post | undefined, retained: readonly Post[] = current ==
 } {
   const closeBitmap = vi.fn<() => void>();
   let resolveStill = (): void => undefined;
+  const resolver = new LightboxMediaResolver(resolveMedia);
   const remoteMedia: RemoteMedia = {
     resolvePreviewUrl: media => `preview/${media.locator}`,
     resolveOriginalUrl: media => Promise.resolve(`https://example.com/${media.locator}`),
@@ -64,7 +74,7 @@ function setup(current: Post | undefined, retained: readonly Post[] = current ==
   const muted = createPreference(true);
   const { result: stage, dispose } = render(document, () => new LightboxStage(
     { gifCapacity: 2, videoCapacity: 2 },
-    { remoteMedia, currentItem, retainedItems, volume, muted }
+    { remoteMedia, resolver, currentItem, retainedItems, volume, muted }
   ));
   return { stage, dispose, currentItem, retainedItems, volume, muted, closeBitmap, resolveStill: () => resolveStill() };
 }
@@ -140,6 +150,33 @@ describe("LightboxStage", () => {
     await flushMicrotasks();
     expect(stage.previewUrl.value).toBe("preview/clip.mp4");
     expect(stage.shownPreviewUrl.value).toBeUndefined();
+  });
+
+  test("shows the kind its media resolves to", async() => {
+    const untagged = createPost({ id: "5", media: { kind: "image", locator: "animation" } });
+    const { stage } = setup(untagged, [untagged], () => Promise.resolve({ kind: "gif", locator: "animation.gif" }));
+
+    await flushMicrotasks();
+    expect(stage.gif.value?.getAttribute("src")).toBe("animation.gif");
+    expect(stage.image.value).toBeUndefined();
+  });
+
+  test("plays a video its media resolves to, without the preview", async() => {
+    const untagged = createPost({ id: "6", media: { kind: "image", locator: "clip" } });
+    const { stage } = setup(untagged, [untagged], () => Promise.resolve({ kind: "video", locator: "clip.mp4" }));
+
+    await flushMicrotasks();
+    expect(stage.video.value?.getAttribute("src")).toBe("https://example.com/clip.mp4");
+    expect(stage.shownPreviewUrl.value).toBeUndefined();
+    expect(stage.image.value).toBeUndefined();
+  });
+
+  test("loads nothing until its media resolves", async() => {
+    const { stage } = setup(VIDEO, [VIDEO], () => new Promise(() => undefined));
+
+    await flushMicrotasks();
+    expect([stage.image.value, stage.gif.value, stage.video.value]).toEqual([undefined, undefined, undefined]);
+    expect(stage.shownPreviewUrl.value).toBe("preview/clip.mp4");
   });
 
   test("shows only what it retains", async() => {

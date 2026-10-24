@@ -1,6 +1,3 @@
-/* System tokens, named for their role (Material 3). Each color resolves per color-scheme through light-dark(),
-   so choosing a scheme is setting color-scheme on the root, never swapping classes.
-   The root sets the font family too: inheritance crosses the shadow boundary, so otherwise the host page's font leaks in. */
 .fsg-App {
   color-scheme: light dark;
   font-family: var(--fsg-font-family);

@@ -1,4 +1,4 @@
-import { BrowserMorpher, MORPH_DURATION } from "@/adapters/browser/ports/morpher/morpher";
+import { MORPH_DURATION, morph } from "@/core/features/lightbox/closer/morph";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 
 interface Rect {
@@ -57,13 +57,13 @@ function readVisibleBox(element: HTMLElement): number[] {
   return box.map(value => Math.round(value * 1_000) / 1_000);
 }
 
-describe("BrowserMorpher", () => {
+describe("morph", () => {
   test("covers the source's drawn media with a stand-in before the page changes", () => {
     stubFrames();
     const target = createTarget();
     let standIn: HTMLCanvasElement | null = null;
 
-    new BrowserMorpher().morph(createSource(), () => {
+    morph(createSource(), () => {
       standIn = findStandIn();
       return target;
     });
@@ -78,7 +78,7 @@ describe("BrowserMorpher", () => {
 
     source.width = 150;
     source.height = 150;
-    new BrowserMorpher().morph(source, createTarget);
+    morph(source, createTarget);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -89,7 +89,7 @@ describe("BrowserMorpher", () => {
   test("flies the stand-in onto the target, then removes it", () => {
     const runFrame = stubFrames();
 
-    new BrowserMorpher().morph(createSource(), createTarget);
+    morph(createSource(), createTarget);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -105,7 +105,7 @@ describe("BrowserMorpher", () => {
     const target = createTarget();
 
     target.style.setProperty("visibility", "visible", "important");
-    new BrowserMorpher().morph(createSource(), () => target);
+    morph(createSource(), () => target);
     runFrame(0);
     expect(target.style.visibility).toBe("hidden");
     runFrame(MORPH_DURATION);
@@ -119,7 +119,7 @@ describe("BrowserMorpher", () => {
 
     document.body.append(target);
 
-    new BrowserMorpher().morph(createSource(), () => target);
+    morph(createSource(), () => target);
     runFrame(0);
 
     expect(target.getAttribute("visibility")).toBeNull();
@@ -134,7 +134,7 @@ describe("BrowserMorpher", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    new BrowserMorpher().morph(createSource(), () => target);
+    morph(createSource(), () => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -145,7 +145,7 @@ describe("BrowserMorpher", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    new BrowserMorpher().morph(createSource(), () => target);
+    morph(createSource(), () => target);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -168,7 +168,7 @@ describe("BrowserMorpher", () => {
     document.body.append(pane);
     onTestFinished(() => pane.remove());
     moveTo(pane, { left: 0, top: 100, width: 400, height: 400 });
-    new BrowserMorpher().morph(createSource(), () => target);
+    morph(createSource(), () => target);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -182,7 +182,7 @@ describe("BrowserMorpher", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    new BrowserMorpher().morph(createSource(), () => target);
+    morph(createSource(), () => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -192,7 +192,7 @@ describe("BrowserMorpher", () => {
   test("drops the stand-in as the page changes when there is no target", () => {
     stubFrames();
 
-    new BrowserMorpher().morph(createSource(), () => undefined);
+    morph(createSource(), () => undefined);
     expect(findStandIn()).toBeNull();
     expect(window.requestAnimationFrame).not.toHaveBeenCalled();
   });
@@ -201,7 +201,7 @@ describe("BrowserMorpher", () => {
     stubFrames();
     const update = vi.fn(() => undefined);
 
-    new BrowserMorpher().morph(document.createElement("img"), update);
+    morph(document.createElement("img"), update);
     expect(update).toHaveBeenCalledOnce();
     expect(findStandIn()).toBeNull();
   });
@@ -211,7 +211,7 @@ describe("BrowserMorpher", () => {
     const update = vi.fn(() => undefined);
     const video = Object.defineProperties(document.createElement("video"), { videoWidth: { value: 0 }, videoHeight: { value: 0 } });
 
-    new BrowserMorpher().morph(video, update);
+    morph(video, update);
     expect(update).toHaveBeenCalledOnce();
     expect(findStandIn()).toBeNull();
   });

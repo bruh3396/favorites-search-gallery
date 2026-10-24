@@ -1,9 +1,10 @@
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
-import { createLightboxImage, createLightboxVideo, playVideo } from "@/core/features/lightbox/stage/media_elements/media_elements";
-import { LightboxMediaCache } from "@/core/features/lightbox/stage/media_cache/media_cache";
-import { LightboxVideoPool } from "@/core/features/lightbox/stage/video_pool/video_pool";
+import { createLightboxImage, createLightboxVideo, playVideo } from "@/core/features/lightbox/stage/media_elements";
+import { LightboxMediaCache } from "@/core/features/lightbox/stage/media_cache";
+import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
+import { LightboxVideoPool } from "@/core/features/lightbox/stage/video_pool";
 import { MediaItem } from "@/core/domain/post/post";
-import { MorphSource } from "@/core/boundary/ports/morpher/morpher";
+import { MorphSource } from "@/core/features/lightbox/closer/morph";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Resource } from "@/core/utils/reactive/resource";
@@ -17,6 +18,7 @@ export interface LightboxStageConfiguration {
 
 export interface LightboxStageDependencies<T extends MediaItem> {
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
+  resolver: LightboxMediaResolver;
   currentItem: Readable<T | undefined>;
   retainedItems: Readable<readonly T[]>;
   volume: Preference<number>;
@@ -41,8 +43,9 @@ export class LightboxStage<T extends MediaItem> {
   private readonly muted: Preference<boolean>;
 
   constructor(configuration: LightboxStageConfiguration, dependencies: LightboxStageDependencies<T>) {
-    const { remoteMedia, currentItem, retainedItems, volume, muted } = dependencies;
+    const { remoteMedia, resolver, currentItem, retainedItems, volume, muted } = dependencies;
     const ownerDocument = currentDocument();
+    const resolvedItems = computed(() => resolver.readResolved(retainedItems.value));
     const imageCache = new LightboxMediaCache<HTMLCanvasElement>({ kind: "image" }, {
       load: async(media, signal): Promise<HTMLCanvasElement> => {
         const bitmap = await remoteMedia.decodeStill(media, signal);
@@ -81,7 +84,8 @@ export class LightboxStage<T extends MediaItem> {
       load: (item: T): Promise<string> => resolveDecodedUrl(ownerDocument, remoteMedia.resolvePreviewUrl(item.media))
     }).value;
     this.shownPreviewUrl = computed(() => {
-      const isCovered = currentItem.value?.media.kind === "video" || this.image.value !== undefined || this.gif.value !== undefined;
+      const isVideo = resolver.readMedia(currentItem.value?.id ?? "")?.kind === "video";
+      const isCovered = isVideo || this.image.value !== undefined || this.gif.value !== undefined;
       return isCovered ? undefined : this.previewUrl.value;
     });
     this.shownMedia = computed(() => this.image.value ?? this.gif.value ?? this.video.value);
@@ -94,9 +98,14 @@ export class LightboxStage<T extends MediaItem> {
       }
       return gif === undefined ? undefined : { width: gif.naturalWidth, height: gif.naturalHeight };
     });
-    effect(() => imageCache.retain(retainedItems.value));
-    effect(() => gifCache.retain(retainedItems.value));
-    effect(() => videoCache.retain(retainedItems.value));
+    effect(() => {
+      const current = currentItem.value;
+
+      resolver.resolve(current === undefined ? retainedItems.value : [current, ...retainedItems.value]);
+    });
+    effect(() => imageCache.retain(resolvedItems.value));
+    effect(() => gifCache.retain(resolvedItems.value));
+    effect(() => videoCache.retain(resolvedItems.value));
     effect(() => {
       const video = this.video.value;
 

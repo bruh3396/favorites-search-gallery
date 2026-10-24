@@ -1,4 +1,4 @@
-import { MorphSource, Morpher } from "@/core/boundary/ports/morpher/morpher";
+export type MorphSource = Readonly<HTMLImageElement | HTMLCanvasElement | HTMLVideoElement>;
 
 interface Box {
   readonly left: number;
@@ -20,35 +20,34 @@ interface Frame {
 export const MORPH_DURATION = 250;
 const STAND_IN_RADIUS = 8;
 
-export class BrowserMorpher implements Morpher {
-  public morph(source: MorphSource, update: () => Element | undefined): void {
-    const intrinsic = measureIntrinsicSize(source);
-    const start = fitInside(source.getBoundingClientRect(), intrinsic);
+export function morph(source: MorphSource, update: () => Element | undefined): void {
+  const view = source.ownerDocument.defaultView;
+  const intrinsic = measureIntrinsicSize(source);
+  const start = fitInside(source.getBoundingClientRect(), intrinsic);
 
-    if (isEmpty(intrinsic) || isEmpty(start)) {
-      update();
-      return;
-    }
-    const standIn = drawStandIn(source, start, intrinsic);
-
-    document.body.append(standIn);
-    const target = update();
-
-    if (target === undefined) {
-      standIn.remove();
-      return;
-    }
-    fly(standIn, start, target);
+  if (view === null || isEmpty(intrinsic) || isEmpty(start)) {
+    update();
+    return;
   }
+  const standIn = drawStandIn(view, source, { start, intrinsic });
+
+  source.ownerDocument.body.append(standIn);
+  const target = update();
+
+  if (target === undefined) {
+    standIn.remove();
+    return;
+  }
+  fly(view, standIn, { start, target });
 }
 
 function isEmpty({ width, height }: Size): boolean {
   return !(width > 0 && height > 0);
 }
 
-function drawStandIn(source: MorphSource, start: Box, intrinsic: Size): HTMLCanvasElement {
-  const canvas = document.createElement("canvas");
-  const density = Math.min(window.devicePixelRatio, intrinsic.width / start.width);
+function drawStandIn(view: Window, source: MorphSource, { start, intrinsic }: { start: Box; intrinsic: Size }): HTMLCanvasElement {
+  const canvas = source.ownerDocument.createElement("canvas");
+  const density = Math.min(view.devicePixelRatio, intrinsic.width / start.width);
 
   canvas.width = Math.max(1, Math.round(start.width * density));
   canvas.height = Math.max(1, Math.round(start.height * density));
@@ -75,10 +74,10 @@ function fitInside(box: Box, { width, height }: Size): Box {
   return { left: box.left + ((box.width - fitted.width) / 2), top: box.top + ((box.height - fitted.height) / 2), ...fitted };
 }
 
-function fly(standIn: HTMLCanvasElement, start: Box, target: Element): void {
+function fly(view: Window, standIn: HTMLCanvasElement, { start, target }: { start: Box; target: Element }): void {
   const reveal = hide(target);
-  const viewport = { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight };
-  const destination = findClippingAncestor(target)?.getBoundingClientRect();
+  const viewport = { left: 0, top: 0, width: view.innerWidth, height: view.innerHeight };
+  const destination = findClippingAncestor(view, target)?.getBoundingClientRect();
   const land = (): void => {
     standIn.remove();
     reveal();
@@ -95,15 +94,15 @@ function fly(standIn: HTMLCanvasElement, start: Box, target: Element): void {
     const bounds = destination === undefined ? undefined : interpolate(viewport, destination, amount);
 
     cover(standIn, start, { box: interpolate(start, target.getBoundingClientRect(), amount), bounds });
-    requestAnimationFrame(progress < 1 ? step : land);
+    view.requestAnimationFrame(progress < 1 ? step : land);
   };
 
-  requestAnimationFrame(step);
+  view.requestAnimationFrame(step);
 }
 
-function findClippingAncestor(element: Element): Element | undefined {
-  for (let ancestor = element.parentElement; ancestor !== null && ancestor !== document.body; ancestor = ancestor.parentElement) {
-    if (getComputedStyle(ancestor).overflow !== "visible") {
+function findClippingAncestor(view: Window, element: Element): Element | undefined {
+  for (let ancestor = element.parentElement; ancestor !== null && ancestor !== element.ownerDocument.body; ancestor = ancestor.parentElement) {
+    if (view.getComputedStyle(ancestor).overflow !== "visible") {
       return ancestor;
     }
   }

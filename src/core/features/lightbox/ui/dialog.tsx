@@ -3,6 +3,8 @@ import { LightboxArrow } from "@/core/features/lightbox/ui/chrome/arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/autoplay";
 import { LightboxAutoplayBar } from "@/core/features/lightbox/ui/chrome/autoplay_bar";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
+import { LightboxDetails } from "@/core/features/lightbox/details/details";
+import { LightboxDetailsPanel } from "@/core/features/lightbox/ui/details/details_panel";
 import { LightboxGif } from "@/core/features/lightbox/ui/media/gif";
 import { LightboxImage } from "@/core/features/lightbox/ui/media/image";
 import { LightboxKeymap } from "@/core/features/lightbox/input/key_listener";
@@ -12,7 +14,7 @@ import { LightboxOverlay } from "@/core/features/lightbox/ui/chrome/overlay";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/overlay_visibility";
 import { LightboxPosition } from "@/core/features/lightbox/ui/chrome/position";
 import { LightboxPreview } from "@/core/features/lightbox/ui/media/preview";
-import { LightboxStage } from "@/core/features/lightbox/stage/stage/stage";
+import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxToolbar } from "@/core/features/lightbox/ui/chrome/toolbar";
 import { LightboxVideo } from "@/core/features/lightbox/ui/media/video";
 import { LightboxViewport } from "@/core/features/lightbox/ui/media/viewport";
@@ -31,6 +33,8 @@ export const LightboxDialogClass = {
 export interface LightboxDialogProps<T extends MediaItem> {
   isOpen: Readable<boolean>;
   position: Readable<SequencePosition | undefined>;
+  currentItem: Readable<T | undefined>;
+  details?: LightboxDetails<T>;
   stage: LightboxStage<T>;
   overlayVisibility: LightboxOverlayVisibility;
   inFullscreen: Readable<boolean>;
@@ -44,7 +48,8 @@ export interface LightboxDialogProps<T extends MediaItem> {
 }
 
 export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T>): HTMLDialogElement {
-  const { stage, overlayVisibility, zoom, handlers } = props;
+  const { stage, overlayVisibility, zoom, handlers, details } = props;
+  const detailsShortcut = findLightboxShortcut(props.keymap, "toggleDetails");
   const dialog = (
     <dialog
       className={LightboxDialogClass.root}
@@ -71,7 +76,12 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
         onSlotEnter={() => overlayVisibility.hold()}
         onSlotLeave={() => overlayVisibility.release()}
         topEdge={<LightboxAutoplayBar countdown={props.autoplay.countdown} />}
-        topStart={<LightboxPosition position={props.position} />}
+        topStart={
+          <LightboxPosition
+            position={props.position}
+            toggle={details === undefined ? undefined : { isOn: details.isOpen, label: "Details", shortcut: detailsShortcut, onClick: handlers.toggleDetails }}
+          />
+        }
         topEnd={
           <LightboxToolbar zoom={zoom} isAutoplaying={props.autoplay.isPlaying} inFullscreen={props.inFullscreen} handlers={handlers} keymap={props.keymap} />
         }
@@ -80,6 +90,16 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
       />
       <LightboxZoomChip pixelScale={zoom.pixelScale} />
       <LightboxMinimap previewUrl={stage.previewUrl} zoom={zoom} />
+      {details === undefined ? null : (
+        <LightboxDetailsPanel
+          isOpen={details.isOpen}
+          content={details.createContent(props.currentItem)}
+          closeShortcut={detailsShortcut}
+          onClose={handlers.toggleDetails}
+          onPointerenter={() => overlayVisibility.hold()}
+          onPointerleave={() => overlayVisibility.release()}
+        />
+      )}
     </dialog>
   ) as HTMLDialogElement;
 
@@ -93,5 +113,6 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
     overlayVisibility.wake();
   });
   effect(() => dialog.toggleAttribute("data-idle", !overlayVisibility.visible.value));
+  effect(() => dialog.toggleAttribute("data-details-open", details?.isOpen.value ?? false));
   return dialog;
 }

@@ -1,6 +1,7 @@
 import { Media } from "@/core/domain/media/media";
 
 export interface RemoteMedia {
+  resolveMedia: (media: Media) => Promise<Media>;
   resolvePreviewUrl: (media: Media) => string;
   resolveOriginalUrl: (media: Media) => Promise<string>;
   decodeStill: (media: Media, signal?: AbortSignal, width?: number) => Promise<ImageBitmap>;

@@ -1,9 +1,9 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { Rule34CdnImageDecoder, Rule34CdnImageDecoderDependencies } from "@/adapters/rule34_cdn/client/image_decoder";
 import { fileUrl, previewUrl, wimgUrl } from "@/adapters/rule34_cdn/client/addresses";
+import { Rule34CdnFileExtension, kindOf } from "@/adapters/rule34_cdn/client/extension";
 import { mintMedia, readLocator } from "@/adapters/rule34_cdn/client/locator";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/extension_prober";
-import { Rule34CdnFileExtension } from "@/adapters/rule34_cdn/client/extension";
 import { Rule34CdnVideoDurationProber } from "@/adapters/rule34_cdn/client/video_duration_prober";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
@@ -12,6 +12,7 @@ export interface Rule34CdnClientDependencies extends Rule34CdnImageDecoderDepend
 }
 
 const KIND_EXTENSIONS: Record<MediaKind, Rule34CdnFileExtension | null> = { image: null, video: "mp4", gif: "gif" };
+const FALLBACK_EXTENSION: Rule34CdnFileExtension = "jpg";
 
 export class Rule34CdnClient {
   private readonly extensionProber: Rule34CdnExtensionProber;
@@ -26,6 +27,14 @@ export class Rule34CdnClient {
 
   public mintMedia(file: { url: string; tags: string }): Media | null {
     return mintMedia(file);
+  }
+
+  public async resolveMedia(media: Media): Promise<Media> {
+    if (readLocator(media.locator).extension !== null) {
+      return media;
+    }
+    const extension = await this.extensionProber.probe(media.locator, media.kind);
+    return extension === null ? media : { kind: kindOf(extension), locator: `${media.locator}.${extension}` };
   }
 
   public previewUrl(media: Media): string {
@@ -77,8 +86,8 @@ export class Rule34CdnClient {
     }
   }
 
-  private extension({ locator, kind }: Media): Promise<Rule34CdnFileExtension> {
+  private async extension({ locator, kind }: Media): Promise<Rule34CdnFileExtension> {
     const known = readLocator(locator).extension ?? KIND_EXTENSIONS[kind];
-    return Promise.resolve(known ?? this.extensionProber.probe(locator));
+    return known ?? await this.extensionProber.probe(locator, kind) ?? FALLBACK_EXTENSION;
   }
 }

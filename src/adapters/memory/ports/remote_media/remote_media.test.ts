@@ -5,6 +5,10 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 const IMAGE: Media = { kind: "image", locator: "data:text/plain,bytes" };
 
 describe("MemoryRemoteMedia", () => {
+  test("resolves media to itself", async() => {
+    expect(await new MemoryRemoteMedia().resolveMedia(IMAGE)).toBe(IMAGE);
+  });
+
   test("gives the locator as every URL", async() => {
     const source = new MemoryRemoteMedia();
 

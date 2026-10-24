@@ -8,6 +8,12 @@
   border: none;
   background: transparent;
   overflow: hidden;
+  --fsg-lightbox-details-width: clamp(240px, 22vw, 360px);
+  --fsg-lightbox-start-inset: 0px;
+}
+
+.fsg-LightboxDialog[data-details-open] {
+  --fsg-lightbox-start-inset: var(--fsg-lightbox-details-width);
 }
 
 .fsg-LightboxDialog:focus-visible {

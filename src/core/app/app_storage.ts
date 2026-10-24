@@ -7,10 +7,18 @@ const PREFERENCES_NAMESPACE = "preferences";
 
 export interface AppStorage {
   readonly app: LocalKeyedValues;
-  readonly preferences: PreferenceStorage;
+  readonly favoritesPreferences: PreferenceStorage;
+  readonly postListPreferences: PreferenceStorage;
+  readonly lightboxPreferences: PreferenceStorage;
 }
 
 export function createAppStorage(localKeyedValues: LocalKeyedValues): AppStorage {
   const app = new NamespacedLocalKeyedValues(APP_NAMESPACE, localKeyedValues);
-  return { app, preferences: new NamespacedLocalKeyedValues(PREFERENCES_NAMESPACE, app) };
+  const preferences = new NamespacedLocalKeyedValues(PREFERENCES_NAMESPACE, app);
+  return {
+    app,
+    favoritesPreferences: new NamespacedLocalKeyedValues("favorites", preferences),
+    postListPreferences: new NamespacedLocalKeyedValues("postList", preferences),
+    lightboxPreferences: new NamespacedLocalKeyedValues("lightbox", preferences)
+  };
 }

@@ -4,14 +4,15 @@ import { currentDocument, h } from "@/core/ui/h/h";
 import { LightboxActions } from "@/core/features/lightbox/actions/actions";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/autoplay";
 import { LightboxCloser } from "@/core/features/lightbox/closer/closer";
+import { LightboxDetails } from "@/core/features/lightbox/details/details";
 import { LightboxDialog } from "@/core/features/lightbox/ui/dialog";
 import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen/fullscreen";
+import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/overlay_visibility";
-import { LightboxStage } from "@/core/features/lightbox/stage/stage/stage";
+import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { MediaItem } from "@/core/domain/post/post";
-import { Morpher } from "@/core/boundary/ports/morpher/morpher";
 import { Preference } from "@/core/utils/reactive/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
@@ -35,23 +36,24 @@ export interface LightboxViewDependencies<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   sizeObserver: SizeObserver;
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
+  resolver: LightboxMediaResolver;
   actions: LightboxActions;
   navigation: Pick<LightboxNavigation<T>, "isOpen" | "currentItem" | "position" | "goToNext" | "goToPrevious" | "close">;
   retainedItems: Readable<readonly T[]>;
   volume: Preference<number>;
   muted: Preference<boolean>;
-  morpher?: Morpher;
   locateItem: (item: T) => Element | undefined;
+  details?: LightboxDetails<T>;
 }
 
 export function createLightboxView<T extends MediaItem>(
   configuration: LightboxViewConfiguration,
   dependencies: LightboxViewDependencies<T>
 ): HTMLElement {
-  const { scheduler, sizeObserver, remoteMedia, actions, navigation, retainedItems, volume, muted, morpher, locateItem } = dependencies;
+  const { scheduler, sizeObserver, remoteMedia, resolver, actions, navigation, retainedItems, volume, muted, locateItem, details } = dependencies;
   const stage = new LightboxStage<T>(
     { gifCapacity: GIF_CAPACITY, videoCapacity: VIDEO_CAPACITY },
-    { remoteMedia, currentItem: navigation.currentItem, retainedItems, volume, muted }
+    { remoteMedia, resolver, currentItem: navigation.currentItem, retainedItems, volume, muted }
   );
   const overlayVisibility = new LightboxOverlayVisibility({ idleDelay: OVERLAY_IDLE_DELAY, leaveDelay: OVERLAY_LEAVE_DELAY }, scheduler);
   const fullscreen = new LightboxFullscreen(currentDocument());
@@ -65,8 +67,8 @@ export function createLightboxView<T extends MediaItem>(
     canCountDown: computed(() => stage.mediaSize.value !== undefined && !zoom.isZoomed.value),
     video: stage.video
   });
-  const closer = new LightboxCloser<T>({ navigation, shownMedia: stage.shownMedia, inFullscreen: fullscreen.inFullscreen, morpher, locateItem });
-  const handlers = createLightboxCommandHandlers({ navigation, stage, fullscreen, zoom, autoplay, closer, actions });
+  const closer = new LightboxCloser<T>({ navigation, shownMedia: stage.shownMedia, inFullscreen: fullscreen.inFullscreen, locateItem });
+  const handlers = createLightboxCommandHandlers({ navigation, stage, fullscreen, zoom, autoplay, closer, actions, details });
 
   effect(() => {
     if (!navigation.isOpen.value) {
@@ -76,6 +78,8 @@ export function createLightboxView<T extends MediaItem>(
   return h(LightboxDialog, {
     isOpen: navigation.isOpen,
     position: navigation.position,
+    currentItem: navigation.currentItem,
+    details,
     stage,
     overlayVisibility,
     inFullscreen: fullscreen.inFullscreen,

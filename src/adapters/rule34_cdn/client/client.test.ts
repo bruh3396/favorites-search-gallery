@@ -65,6 +65,35 @@ describe("Rule34CdnClient", () => {
       .toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
   });
 
+  test("resolves media with an extension without asking the host", async() => {
+    const { client, fetch } = setup();
+    const known = media("image", "1234/a1b2c3.png");
+
+    expect(await client.resolveMedia(known)).toBe(known);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  test("resolves media without an extension to the kind of the file found", async() => {
+    const { client, scheduler } = setup(createFetchFindingOnly(GIF_ORIGINAL));
+
+    expect(await settled(scheduler, client.resolveMedia(media("image", "1234/a1b2c3"))))
+      .toEqual(media("gif", "1234/a1b2c3.gif"));
+  });
+
+  test("resolves untagged media to a video when only the mp4 exists", async() => {
+    const { client, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.mp4"));
+
+    expect(await settled(scheduler, client.resolveMedia(media("image", "1234/a1b2c3"))))
+      .toEqual(media("video", "1234/a1b2c3.mp4"));
+  });
+
+  test("resolves media to itself when no file is found", async() => {
+    const { client, scheduler } = setup(createFetchFindingOnly(""));
+    const unknown = media("image", "1234/a1b2c3");
+
+    expect(await settled(scheduler, client.resolveMedia(unknown))).toBe(unknown);
+  });
+
   test("addresses a preview on the thumbnail host", () => {
     expect(setup().client.previewUrl(media("image", "1234/a1b2c3")))
       .toBe("https://wimg.rule34.xxx/thumbnails//1234/thumbnail_a1b2c3.jpg");

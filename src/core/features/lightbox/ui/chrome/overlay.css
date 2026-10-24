@@ -1,9 +1,12 @@
 .fsg-LightboxOverlay {
   position: absolute;
   inset: 0;
+  inset-inline-start: var(--fsg-lightbox-start-inset, 0px);
   pointer-events: none;
   user-select: none;
-  transition: opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+  transition:
+    opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    inset-inline-start var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
 .fsg-LightboxOverlay-top {

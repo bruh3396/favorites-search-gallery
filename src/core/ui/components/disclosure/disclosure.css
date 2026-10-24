@@ -9,7 +9,7 @@
   justify-content: space-between;
   gap: 8px;
   inline-size: 100%;
-  padding: 8px;
+  padding: 8px 14px;
   font-size: var(--fsg-font-size-label);
   font-weight: 600;
   text-align: start;
@@ -17,8 +17,7 @@
 }
 
 .fsg-Disclosure[data-size="small"] .fsg-Disclosure-trigger {
-  padding: 6px 8px;
-  font-size: var(--fsg-font-size-label-small);
+  padding: 6px 14px;
 }
 
 .fsg-Disclosure-trigger:focus-visible {
@@ -35,19 +34,18 @@
   min-inline-size: 0;
 }
 
-/* A chevron drawn from two borders: pointing down when closed, up when open. */
 .fsg-Disclosure-icon {
   flex: none;
   inline-size: 7px;
   block-size: 7px;
-  margin-block-end: 3px;
+  margin-inline-end: 3px;
   border-inline-end: 1.5px solid var(--fsg-color-on-surface-muted);
   border-block-end: 1.5px solid var(--fsg-color-on-surface-muted);
-  transform: rotate(45deg);
+  transform: rotate(-45deg);
   transition: transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
 .fsg-Disclosure-trigger[aria-expanded="true"] .fsg-Disclosure-icon {
-  margin-block: 3px 0;
-  transform: rotate(-135deg);
+  margin-block-end: 3px;
+  transform: rotate(45deg);
 }

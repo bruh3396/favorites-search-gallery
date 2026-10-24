@@ -12,3 +12,4 @@
 @import "./ui/chrome/zoom_chip.css" layer(components);
 @import "./ui/chrome/minimap.css" layer(components);
 @import "./ui/chrome/autoplay_bar.css" layer(components);
+@import "./ui/details/details_panel.css" layer(components);

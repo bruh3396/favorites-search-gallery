@@ -6,12 +6,12 @@ function createTiles(count: number): HTMLElement[] {
 }
 
 describe("applyTiling", () => {
-  test("writes the layout, the size, and the column count the size rounds to", () => {
+  test("writes the layout, the tiles per row, and the column count they round to", () => {
     const root = document.createElement("div");
 
-    applyTiling(root, { layout: "row", size: 4.6 });
+    applyTiling(root, { layout: "row", tilesPerRow: 4.6 });
     expect(root.dataset.layout).toBe("row");
-    expect(root.style.getPropertyValue("--fsg-PostGrid-size")).toBe("4.6");
+    expect(root.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("4.6");
     expect(root.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("5");
   });
 });

@@ -1,23 +1,56 @@
-import { Readable, computed } from "@/core/utils/reactive/signal";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { PageTerm } from "@/core/ui/components/paginator/page_sequence";
 import { h } from "@/core/ui/h/h";
 
 export const PageSlotClass = {
   root: "fsg-PageSlot",
   page: "fsg-PageSlot-page",
-  gap: "fsg-PageSlot-gap"
+  gap: "fsg-PageSlot-gap",
+  field: "fsg-PageSlot-field"
 } as const;
 
 export interface PageSlotProps {
   term: Readable<PageTerm | undefined>;
   current: Readable<number>;
-  isJumpOpen: Readable<boolean>;
+  pageCount: Readable<number>;
   onPageChange: (pageNumber: number) => void;
-  onJumpOpen: () => void;
 }
 
-export function PageSlot({ term, current, isJumpOpen, onPageChange, onJumpOpen }: PageSlotProps): HTMLElement {
+export function PageSlot({ term, current, pageCount, onPageChange }: PageSlotProps): HTMLElement {
   const page = computed(() => (typeof term.value === "number" ? term.value : null));
+  const isEditing = new Signal(false);
+  const goToIfChanged = (pageNumber: number): void => {
+    if (pageNumber !== current.peek()) {
+      onPageChange(pageNumber);
+    }
+  };
+  const field = (
+    <input
+      className={PageSlotClass.field}
+      type="number"
+      aria-label="Go to page"
+      min="1"
+      max={computed(() => String(pageCount.value))}
+      hidden={computed(() => term.value !== "gap" || !isEditing.value)}
+      onKeydown={event => {
+        if (event.key === "Enter") {
+          const typed = event.currentTarget.valueAsNumber;
+
+          event.currentTarget.blur();
+
+          if (!Number.isNaN(typed)) {
+            goToIfChanged(Math.min(pageCount.peek(), Math.max(1, typed)));
+          }
+        } else if (event.key === "Escape") {
+          event.currentTarget.blur();
+        }
+      }}
+      onBlur={event => {
+        event.currentTarget.value = "";
+        isEditing.value = false;
+      }}
+    />
+  ) as HTMLInputElement;
   return (
     <li className={PageSlotClass.root}>
       <button
@@ -29,8 +62,8 @@ export function PageSlot({ term, current, isJumpOpen, onPageChange, onJumpOpen }
         onClick={() => {
           const clicked = page.peek();
 
-          if (clicked !== null && clicked !== current.peek()) {
-            onPageChange(clicked);
+          if (clicked !== null) {
+            goToIfChanged(clicked);
           }
         }}
       >
@@ -40,13 +73,15 @@ export function PageSlot({ term, current, isJumpOpen, onPageChange, onJumpOpen }
         className={PageSlotClass.gap}
         type="button"
         aria-label="Go to page"
-        aria-haspopup="dialog"
-        aria-expanded={computed(() => String(isJumpOpen.value))}
-        hidden={computed(() => term.value !== "gap")}
-        onClick={onJumpOpen}
+        hidden={computed(() => term.value !== "gap" || isEditing.value)}
+        onClick={() => {
+          isEditing.value = true;
+          field.focus();
+        }}
       >
         …
       </button>
+      {field}
     </li>
   );
 }

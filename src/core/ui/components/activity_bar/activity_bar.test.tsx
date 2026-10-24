@@ -81,6 +81,16 @@ describe("ActivityBar", () => {
     expect([onValueChange.mock.calls, findPanel(element).hidden]).toEqual([[[null]], true]);
   });
 
+  test("keeps a closed panel's content and reuses it when the same item reopens", () => {
+    const { element, renderPanel, disposePanel } = setup("settings");
+
+    findItem(element, "Settings").click();
+    const closedText = findPanel(element).textContent;
+
+    findItem(element, "Settings").click();
+    expect([closedText, renderPanel.mock.calls.length, disposePanel.mock.calls.length]).toEqual(["Settings", 1, 0]);
+  });
+
   test("presses only the active item", () => {
     const { element } = setup("downloads");
     const pressed = (label: string): string | null => findItem(element, label).getAttribute("aria-pressed");

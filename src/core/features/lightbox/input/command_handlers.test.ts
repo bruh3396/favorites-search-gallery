@@ -1,8 +1,10 @@
 import { LightboxCommandTargets, createLightboxCommandHandlers } from "@/core/features/lightbox/input/command_handlers";
 import { describe, expect, test, vi } from "vitest";
 import { LightboxCommand } from "@/core/features/lightbox/input/commands";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
+import { StoredPreference } from "@/core/utils/reactive/preference";
 import { createPost } from "@/testing/post";
 
 const POST = createPost();
@@ -95,6 +97,23 @@ describe("createLightboxCommandHandlers", () => {
     currentItem.value = later;
     handlers.download();
     expect(targets.actions.download).toHaveBeenCalledWith(later);
+  });
+
+  test("flips the details panel's open state", () => {
+    const { targets } = setup();
+    const isOpen = new StoredPreference({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() });
+    const handlers = createLightboxCommandHandlers({ ...targets, details: { isOpen } });
+
+    handlers.toggleDetails();
+    expect(isOpen.value).toBe(true);
+    handlers.toggleDetails();
+    expect(isOpen.value).toBe(false);
+  });
+
+  test("ignores the details toggle without a details panel", () => {
+    const { targets } = setup();
+
+    expect(() => createLightboxCommandHandlers(targets).toggleDetails()).not.toThrow();
   });
 
   test("logs a failed navigation instead of throwing", async() => {

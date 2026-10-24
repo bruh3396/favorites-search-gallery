@@ -1,23 +1,29 @@
-import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
-import { h, render } from "@/core/ui/h/h";
+import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/app";
+import { createLightboxPreferences, createPostListPreferences } from "@/core/app/preferences";
 import { APP_FONT } from "@/core/app/font";
 import { ColorScheme } from "@/core/boundary/environment";
-import { DECODE_RATE_LIMIT } from "@/core/ui/post_grid/upscaler";
-import { Emitter } from "@/core/utils/reactive/emitter";
+import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
+import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { ListSequence } from "@/core/domain/media/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { MediaItem } from "@/core/domain/post/post";
 import { MountableApp } from "@/core/app/mountable_app";
-import { PostGrid } from "@/core/ui/post_grid/post_grid";
-import { RateLimiter } from "@/core/utils/async/rate_limiter";
+import { Navigator } from "@/core/boundary/ports/navigator/navigator";
+import { Post } from "@/core/domain/post/post";
+import { PostActions } from "@/core/app/post_actions";
+import { PostGridProps } from "@/core/ui/post_grid/post_grid";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
+import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { Signal } from "@/core/utils/reactive/signal";
-import UI_CSS from "@/core/ui/styles.css?inline";
+import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
+import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
-import { doNothing } from "@/core/utils/function/function";
+import { createLightbox } from "@/core/features/lightbox/lightbox";
+import { createPostListService } from "@/core/features/post_list/post_list";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
+import { render } from "@/core/ui/h/h";
 
 export interface PostListAppConfiguration {
   readonly colorScheme: ColorScheme;
@@ -25,36 +31,54 @@ export interface PostListAppConfiguration {
 
 export interface PostListAppDependencies {
   visibilityObserver: VisibilityObserver;
+  sizeObserver: SizeObserver;
   scheduler: Scheduler;
   remoteMedia: RemoteMedia;
   remotePages: RemotePages;
+  remoteSearchResults: RemoteSearchResults;
   localKeyedValues: LocalKeyedValues;
+  navigator: Navigator;
+  fileSaver: FileSaver;
 }
 
 export function composePostListApp(configuration: PostListAppConfiguration, dependencies: PostListAppDependencies): MountableApp {
-  const { visibilityObserver, scheduler, remoteMedia, remotePages, localKeyedValues } = dependencies;
-  const { layout, size, upscale } = pickPostGridPreferences(createAppPreferences(createAppStorage(localKeyedValues).preferences));
-  const decodeLimiter = new RateLimiter(DECODE_RATE_LIMIT, scheduler);
-  const renderApp = (): HTMLElement => h(PostGrid<MediaItem>, {
-    posts: new Signal<readonly MediaItem[]>([]),
-    changed: new Emitter<MediaItem>(),
-    settings: { layout, size, upscale },
-    visiblePosts: new Signal<readonly MediaItem[]>([]),
-    visibilityObserver,
-    decodeStill: (media, signal, width) => decodeLimiter.run(() => remoteMedia.decodeStill(media, signal, width), signal),
-    scheduler,
-    getDimensions: () => ({ width: 1, height: 1 }),
-    createActions: () => [],
-    resolvePreviewUrl: media => remoteMedia.resolvePreviewUrl(media),
-    getPostUrl: post => remotePages.postUrl(post.id),
-    onPlainClick: doNothing
+  const {
+    visibilityObserver, sizeObserver, scheduler, remoteMedia, remotePages, remoteSearchResults, localKeyedValues, navigator, fileSaver
+  } = dependencies;
+  const postList = createPostListService({ remoteSearchResults });
+  const storage = createAppStorage(localKeyedValues);
+  const { layout, tilesPerRow, upscale } = createPostListPreferences(storage.postListPreferences);
+  const { volume, muted } = createLightboxPreferences(storage.lightboxPreferences);
+  const posts = computed(() => postList.page.value.posts);
+  const sequence = new ListSequence({ wraps: false }, posts);
+  const tileLocator = new TileLocator<Post>();
+  const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
+  const lightbox = createLightbox<Post>({
+    scheduler, sizeObserver, remoteMedia, actions: postActions,
+    volume, muted,
+    locateItem: post => tileLocator.locate(post)
   });
+
+  lightbox.mediaCorrected.on(({ id, media }) => postList.correctMedia(id, media));
+  const imageLoaderService = new ImageLoaderService({ remoteMedia, scheduler, enabled: upscale, paused: lightbox.isOpen });
+  const grid: Omit<PostGridProps<Post>, "posts"> = {
+    changed: postList.changed,
+    tileLocator,
+    settings: { layout, tilesPerRow },
+    visibilityObserver,
+    imageLoaderService,
+    getDimensions: post => ({ width: post.width, height: post.height }),
+    createActions: () => [],
+    getPostUrl: post => remotePages.postUrl(post.id),
+    onPlainClick: post => lightbox.open(sequence, post)
+  };
+  const renderApp = (): HTMLElement[] => PostListApp({ posts, grid, lightbox });
   return {
     mount: (container): void => {
       mountAppRoot(
         container,
-        { colorScheme: configuration.colorScheme, font: APP_FONT, styles: [UI_CSS] }
-      ).append(render(container.ownerDocument, renderApp).result);
+        { colorScheme: configuration.colorScheme, font: APP_FONT, styles: POST_LIST_APP_STYLES }
+      ).append(...render(container.ownerDocument, renderApp).result);
     }
   };
 }

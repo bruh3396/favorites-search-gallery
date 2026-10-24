@@ -1,41 +1,69 @@
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/tiler";
-import { Preference, PreferenceStorage, Preferences, createPreferences, definePreference, defineRecordPreference } from "@/core/utils/reactive/preference";
-import { isBoolean, isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
-import { FavoritesPaginationSettings } from "@/core/features/favorites/session/pagination";
+import { PreferenceSchema, PreferenceStorage, Preferences, createPreferences, definePreference } from "@/core/utils/reactive/preference";
+import { isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
 
-export interface AppPreferenceValues {
-  readonly postGridLayout: GridLayout;
-  readonly postGridSize: number;
-  readonly postGridUpscale: boolean;
-  readonly favoritesPagination: FavoritesPaginationSettings;
-  readonly lightboxVolume: number;
-  readonly lightboxMuted: boolean;
+export interface PostGridPreferenceValues {
+  readonly layout: GridLayout;
+  readonly tilesPerRow: number;
+  readonly upscale: boolean;
 }
 
-export type AppPreferences = Preferences<AppPreferenceValues>;
-
-export interface PostGridPreferences {
-  readonly layout: Preference<GridLayout>;
-  readonly size: Preference<number>;
-  readonly upscale: Preference<boolean>;
+export interface FavoritesPreferenceValues extends PostGridPreferenceValues {
+  readonly pageSize: number;
+  readonly infiniteScroll: boolean;
+  readonly tabStripVisible: boolean;
+  readonly enhanceSearchPages: boolean;
+  readonly siteHeaderVisible: boolean;
+  readonly expandedSettingSections: readonly string[];
+  readonly activeTool: string | null;
 }
 
-export function createAppPreferences(storage: PreferenceStorage): AppPreferences {
-  return createPreferences<AppPreferenceValues>({
-    postGridLayout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
-    postGridSize: definePreference(3),
-    postGridUpscale: definePreference(true),
-    favoritesPagination: defineRecordPreference<FavoritesPaginationSettings>(
-      { size: 50, infiniteScroll: false },
-      { size: isPageSize, infiniteScroll: isBoolean }
-    ),
-    lightboxVolume: definePreference(1, isInUnitInterval),
-    lightboxMuted: definePreference(false)
+export interface LightboxPreferenceValues {
+  readonly volume: number;
+  readonly muted: boolean;
+  readonly detailsOpen: boolean;
+}
+
+export type PostGridPreferences = Preferences<PostGridPreferenceValues>;
+export type FavoritesPreferences = Preferences<FavoritesPreferenceValues>;
+export type PostListPreferences = PostGridPreferences;
+export type LightboxPreferences = Preferences<LightboxPreferenceValues>;
+
+export function createFavoritesPreferences(storage: PreferenceStorage): FavoritesPreferences {
+  return createPreferences<FavoritesPreferenceValues>({
+    ...definePostGridPreferences(),
+    pageSize: definePreference(3, isPageSize),
+    infiniteScroll: definePreference(false),
+    tabStripVisible: definePreference(true),
+    enhanceSearchPages: definePreference(false),
+    siteHeaderVisible: definePreference(true),
+    expandedSettingSections: definePreference<readonly string[]>(["general", "results"]),
+    activeTool: definePreference<string | null>(null, isToolId)
   }, storage);
 }
 
-export function pickPostGridPreferences(preferences: AppPreferences): PostGridPreferences {
-  return { layout: preferences.postGridLayout, size: preferences.postGridSize, upscale: preferences.postGridUpscale };
+export function createPostListPreferences(storage: PreferenceStorage): PostListPreferences {
+  return createPreferences(definePostGridPreferences(), storage);
+}
+
+export function createLightboxPreferences(storage: PreferenceStorage): LightboxPreferences {
+  return createPreferences<LightboxPreferenceValues>({
+    volume: definePreference(1, isInUnitInterval),
+    muted: definePreference(false),
+    detailsOpen: definePreference(false)
+  }, storage);
+}
+
+function definePostGridPreferences(): PreferenceSchema<PostGridPreferenceValues> {
+  return {
+    layout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
+    tilesPerRow: definePreference(6),
+    upscale: definePreference(true)
+  };
+}
+
+function isToolId(stored: unknown): stored is string | null {
+  return stored === null || typeof stored === "string";
 }
 
 function isPageSize(stored: unknown): stored is number {

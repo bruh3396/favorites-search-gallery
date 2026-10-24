@@ -5,7 +5,6 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearch } from "@/core/features/favorites/session/search";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { Preference } from "@/core/utils/reactive/preference";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export interface FavoritesSessionConfiguration {
@@ -16,7 +15,7 @@ export interface FavoritesSessionDependencies {
   searchIndex: FavoritesSearchIndex;
   blacklist: FavoritesBlacklist;
   randomSource: RandomSource;
-  paginationSettings: Preference<FavoritesPaginationSettings>;
+  paginationSettings: FavoritesPaginationSettings;
 }
 
 export class FavoritesSession {

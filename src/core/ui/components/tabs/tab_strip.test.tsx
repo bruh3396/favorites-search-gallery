@@ -13,6 +13,7 @@ interface Setup {
   onClose: Mock<(id: string) => void>;
   onMove: Mock<(id: string, index: number) => void>;
   onAdd: Mock<() => void>;
+  onCloseAll: Mock<() => void>;
 }
 
 function createTab(id: string, { closable = true }: { closable?: boolean } = {}): TabStripItem {
@@ -26,7 +27,8 @@ function setup(tabs: readonly TabStripItem[] = [createTab("Home", { closable: fa
     onActivate: vi.fn<(id: string) => void>(),
     onClose: vi.fn<(id: string) => void>(),
     onMove: vi.fn<(id: string, index: number) => void>(),
-    onAdd: vi.fn<() => void>()
+    onAdd: vi.fn<() => void>(),
+    onCloseAll: vi.fn<() => void>()
   };
   const { result: element } = render(document, () => <TabStrip {...options} />);
 
@@ -159,10 +161,7 @@ describe("TabStrip", () => {
   });
 
   test("closes all tabs from the close all button", () => {
-    const onCloseAll = vi.fn<() => void>();
-    const { result: element } = render(document, () => (
-      <TabStrip tabs={new Signal([createTab("apple")])} activeId={new Signal("apple")} onActivate={vi.fn()} onClose={vi.fn()} onMove={vi.fn()} onAdd={vi.fn()} onCloseAll={onCloseAll} />
-    ));
+    const { element, onCloseAll } = setup();
 
     element.querySelector<HTMLButtonElement>("button[aria-label='Close all tabs']")!.click();
     expect(onCloseAll).toHaveBeenCalledOnce();

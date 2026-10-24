@@ -1,5 +1,5 @@
 import { PageSlot, PageSlotClass } from "@/core/ui/components/paginator/page_slot";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PAGE_SLOT_CSS from "@/core/ui/components/paginator/page_slot.css?inline";
 import { PageTerm } from "@/core/ui/components/paginator/page_sequence";
@@ -9,20 +9,34 @@ import { expectClassesStyled } from "@/testing/css";
 interface Setup {
   element: HTMLElement;
   term: Signal<PageTerm | undefined>;
-  isJumpOpen: Signal<boolean>;
   onPageChange: (pageNumber: number) => void;
-  onJumpOpen: () => void;
 }
 
 function setup(term: PageTerm | undefined, current = 2): Setup {
-  const options = { term: new Signal(term), isJumpOpen: new Signal(false), onPageChange: vi.fn(), onJumpOpen: vi.fn() };
-  const { result: element } = render(document, () => <PageSlot {...options} current={new Signal(current)} />);
+  const options = { term: new Signal(term), onPageChange: vi.fn() };
+  const { result: element } = render(document, () => <PageSlot {...options} current={new Signal(current)} pageCount={new Signal(20)} />);
+
+  document.body.append(element);
   return { ...options, element };
 }
 
 function readShown(element: HTMLElement): string[] {
   return [...element.querySelectorAll<HTMLButtonElement>("button:not([hidden])")].map(button => button.textContent);
 }
+
+function openField(element: HTMLElement): HTMLInputElement {
+  element.querySelector<HTMLButtonElement>("[aria-label='Go to page']")!.click();
+  return element.querySelector("input")!;
+}
+
+function enter(field: HTMLInputElement, value: string): void {
+  field.value = value;
+  field.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+}
+
+afterEach(() => {
+  document.body.replaceChildren();
+});
 
 describe("PageSlot", () => {
   test("shows a page, a gap, or nothing", () => {
@@ -50,13 +64,47 @@ describe("PageSlot", () => {
     expect(current.onPageChange).not.toHaveBeenCalled();
   });
 
-  test("opens the jump from a gap and reflects whether it is open", () => {
-    const { element, isJumpOpen, onJumpOpen } = setup("gap");
-    const gap = element.querySelector<HTMLButtonElement>("[aria-haspopup]")!;
+  test("replaces a clicked gap with a focused field", () => {
+    const { element } = setup("gap");
+    const field = openField(element);
 
-    gap.click();
-    isJumpOpen.value = true;
-    expect([vi.mocked(onJumpOpen).mock.calls.length, gap.getAttribute("aria-expanded")]).toEqual([1, "true"]);
+    expect([readShown(element), field.hidden, document.activeElement === field]).toEqual([[], false, true]);
+  });
+
+  test("reports a page entered in the field, clamped to the page range", () => {
+    const { element, onPageChange } = setup("gap");
+
+    enter(openField(element), "15");
+    enter(openField(element), "99");
+    enter(openField(element), "0");
+    expect(vi.mocked(onPageChange).mock.calls).toEqual([[15], [20], [1]]);
+  });
+
+  test("ignores an empty entry and the current page", () => {
+    const { element, onPageChange } = setup("gap");
+
+    enter(openField(element), "");
+    enter(openField(element), "2");
+    expect(onPageChange).not.toHaveBeenCalled();
+  });
+
+  test("turns back into a gap once the field loses focus", () => {
+    const { element } = setup("gap");
+    const field = openField(element);
+
+    field.value = "15";
+    field.blur();
+    expect([readShown(element), field.hidden, field.value]).toEqual([["…"], true, ""]);
+  });
+
+  test("turns back into a gap on Escape", () => {
+    const { element, onPageChange } = setup("gap");
+    const field = openField(element);
+
+    field.value = "15";
+    field.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    expect(readShown(element)).toEqual(["…"]);
+    expect(onPageChange).not.toHaveBeenCalled();
   });
 
   test("styles every class it sets", () => {

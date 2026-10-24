@@ -98,8 +98,10 @@ export class FavoritesWorkspace {
 
   public reveal(item: Favorite): HTMLElement | undefined {
     this.turnToPageContaining(item);
-    this.activeTab.peek().scrollTo.emit(item);
-    return this.locate(item);
+    const tile = this.locate(item);
+
+    tile?.scrollIntoView({ block: "center", behavior: "instant" });
+    return tile;
   }
 
   public dispose(): void {

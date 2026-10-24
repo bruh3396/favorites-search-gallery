@@ -3,7 +3,6 @@ import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
-import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserPageVisibility } from "@/adapters/browser/ports/page_visibility/page_visibility";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
@@ -82,7 +81,7 @@ export function createFavoritesDependencies(
   environment: Environment,
   dependencies: Rule34Dependencies
 ): FavoritesAppDependencies {
-  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, localKeyedValues } = dependencies;
+  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, hostPage, localKeyedValues } = dependencies;
   const frozenCobalt = new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: rule34Document.readUserId(), version: environment.version, platform: environment.device }
@@ -92,8 +91,8 @@ export function createFavoritesDependencies(
     scheduler,
     randomSource,
     localKeyedValues,
+    hostPage,
     sizeObserver: new BrowserSizeObserver(),
-    morpher: new BrowserMorpher(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     pageVisibility: new BrowserPageVisibility(document),

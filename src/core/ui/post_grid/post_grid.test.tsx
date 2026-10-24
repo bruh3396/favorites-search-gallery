@@ -3,83 +3,50 @@ import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
+import { createImageLoaderService } from "@/testing/image_loader_service";
 import { GridLayout } from "@/core/ui/post_grid/tiler";
-import { Media } from "@/core/domain/media/media";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { doNothing } from "@/core/utils/function/function";
-
-type VisibilityListener = (visible: boolean) => void;
 
 interface Setup {
   element: HTMLElement;
   dispose: () => void;
   posts: Signal<readonly MediaItem[]>;
   changed: Emitter<MediaItem>;
-  scrollTo: Emitter<MediaItem>;
   tileLocator: TileLocator<MediaItem>;
   layout: Signal<GridLayout>;
-  size: Signal<number>;
-  visiblePosts: Signal<readonly MediaItem[]>;
-  showTile: (index: number) => void;
-  hideTile: (index: number) => void;
+  tilesPerRow: Signal<number>;
   onPlainClick: Mock<(post: MediaItem) => void>;
-  onPointerEnter: Mock<(post: MediaItem) => void>;
 }
 
 function createPost(id: string): MediaItem {
   return { id, media: { kind: "image", locator: `images/${id}` } };
 }
 
-function resolvePreviewUrl(media: Media): string {
-  return `https://preview/${media.locator}`;
-}
-
 function setup(...ids: string[]): Setup {
   const posts = new Signal<readonly MediaItem[]>(ids.map(createPost));
   const changed = new Emitter<MediaItem>();
-  const scrollTo = new Emitter<MediaItem>();
   const tileLocator = new TileLocator<MediaItem>();
   const layout = new Signal<GridLayout>("grid");
-  const size = new Signal(2);
-  const visiblePosts = new Signal<readonly MediaItem[]>([]);
-  const observers = new Map<Element, VisibilityListener>();
+  const tilesPerRow = new Signal(2);
   const onPlainClick = vi.fn<(post: MediaItem) => void>();
-  const onPointerEnter = vi.fn<(post: MediaItem) => void>();
-  const visibilityObserver = {
-    observe: (element: Element, onVisibilityChange: VisibilityListener): (() => void) => {
-      observers.set(element, onVisibilityChange);
-      return (): void => {
-        observers.delete(element);
-      };
-    }
-  };
   const { result: element, dispose } = render(document, () => (
     <PostGrid
       posts={posts}
       changed={changed}
-      scrollTo={scrollTo}
       tileLocator={tileLocator}
-      settings={{ layout, size, upscale: new Signal(false) }}
-      visiblePosts={visiblePosts}
-      visibilityObserver={visibilityObserver}
-      decodeStill={() => new MemoryRemoteMedia().decodeStill()}
-      scheduler={new MemoryScheduler()}
+      settings={{ layout, tilesPerRow }}
+      visibilityObserver={{ observe: () => (): void => { } }}
+      imageLoaderService={createImageLoaderService()}
       getDimensions={getDimensions}
       createActions={createActions}
-      resolvePreviewUrl={resolvePreviewUrl}
       getPostUrl={post => `https://posts/${post.id}`}
       onPlainClick={onPlainClick}
-      onPointerEnter={onPointerEnter}
     />
   ));
-  const getListener = (index: number): VisibilityListener | undefined => observers.get(element.children[index]!);
-  const showTile = (index: number): void => getListener(index)?.(true);
-  const hideTile = (index: number): void => getListener(index)?.(false);
-  return { element, dispose, posts, changed, scrollTo, tileLocator, layout, size, visiblePosts, showTile, hideTile, onPlainClick, onPointerEnter };
+  return { element, dispose, posts, changed, tileLocator, layout, tilesPerRow, onPlainClick };
 }
 
 function getDimensions(post: MediaItem): Dimensions {
@@ -99,36 +66,6 @@ describe("PostGrid", () => {
 
     expect(element.dataset.layout).toBe("grid");
     expect(element.children).toHaveLength(3);
-  });
-
-  test("publishes visible posts in grid order", () => {
-    const { visiblePosts, showTile, hideTile } = setup("1", "2");
-
-    showTile(1);
-    expect(visiblePosts.value.map(post => post.id)).toEqual(["2"]);
-    showTile(0);
-    expect(visiblePosts.value.map(post => post.id)).toEqual(["1", "2"]);
-    hideTile(1);
-    expect(visiblePosts.value.map(post => post.id)).toEqual(["1"]);
-  });
-
-  test("publishes nothing new when a tile reports the visibility it already has", () => {
-    const { visiblePosts, showTile } = setup("1");
-
-    showTile(0);
-    const published = visiblePosts.value;
-
-    showTile(0);
-    expect(visiblePosts.value).toBe(published);
-  });
-
-  test("removes a post from the published list when its tile is removed", () => {
-    const { posts, visiblePosts, showTile } = setup("1", "2");
-
-    showTile(0);
-    posts.value = [createPost("2")];
-
-    expect(visiblePosts.value).toEqual([]);
   });
 
   test("shapes each tile after its post's dimensions", () => {
@@ -159,13 +96,6 @@ describe("PostGrid", () => {
     expect(onPlainClick).toHaveBeenCalledExactlyOnceWith(posts.value[1]);
   });
 
-  test("reports the post whose tile the pointer enters", () => {
-    const { element, posts, onPointerEnter } = setup("1", "2");
-
-    element.querySelectorAll<HTMLElement>(`.${TileClass.link}`)[1].dispatchEvent(new Event("pointerenter"));
-    expect(onPointerEnter).toHaveBeenCalledExactlyOnceWith(posts.value[1]);
-  });
-
   test("redraws when the posts change, keeping the tiles of posts still shown", () => {
     const { element, posts } = setup("1", "2");
     const second = element.children[1];
@@ -185,11 +115,11 @@ describe("PostGrid", () => {
   });
 
   test("resizes the tiles without moving them", () => {
-    const { element, size } = setup("1", "2");
+    const { element, tilesPerRow } = setup("1", "2");
     const tiles = [...element.children];
 
-    size.value = 3.5;
-    expect(element.style.getPropertyValue("--fsg-PostGrid-size")).toBe("3.5");
+    tilesPerRow.value = 3.5;
+    expect(element.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("3.5");
     expect([...element.children]).toEqual(tiles);
   });
 
@@ -200,23 +130,6 @@ describe("PostGrid", () => {
     changed.emit(createPost("1"));
     expect(element.children[0]).not.toBe(first);
     expect(element.children[1]).toBe(second);
-  });
-
-  test("scrolls to the shown tile matching a requested post", () => {
-    const { element, posts, scrollTo } = setup("1", "2");
-
-    posts.value = [createPost("2"), createPost("3")];
-    const scrollIntoView = vi.fn();
-
-    element.children[1].scrollIntoView = scrollIntoView;
-    scrollTo.emit(createPost("3"));
-    expect(scrollIntoView).toHaveBeenCalledOnce();
-  });
-
-  test("ignores scroll requests for posts it does not show", () => {
-    const { scrollTo } = setup("1");
-
-    expect(() => scrollTo.emit(createPost("2"))).not.toThrow();
   });
 
   test("lets its locator find the tile of each shown post", () => {
@@ -254,11 +167,9 @@ describe("PostGrid", () => {
       <PostGrid
         posts={posts}
         changed={new Emitter<MediaItem>()}
-        settings={{ layout: new Signal<GridLayout>("grid"), size: new Signal(2), upscale: new Signal(false) }}
-        visiblePosts={new Signal<readonly MediaItem[]>([])}
+        settings={{ layout: new Signal<GridLayout>("grid"), tilesPerRow: new Signal(2) }}
         visibilityObserver={{ observe: () => ():void => { } }}
-        decodeStill={() => new MemoryRemoteMedia().decodeStill()}
-        scheduler={new MemoryScheduler()}
+        imageLoaderService={createImageLoaderService()}
         getDimensions={getDimensions}
         createActions={() => [
           <button>
@@ -268,7 +179,6 @@ describe("PostGrid", () => {
             })}
           </button>
         ]}
-        resolvePreviewUrl={resolvePreviewUrl}
         onPlainClick={doNothing}
       />
     ));

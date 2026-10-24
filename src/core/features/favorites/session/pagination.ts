@@ -6,13 +6,13 @@ import { clamp } from "@/core/utils/number/number";
 import { haveSameItems } from "@/core/utils/collection/array";
 
 export interface FavoritesPaginationSettings {
-  readonly size: number;
-  readonly infiniteScroll: boolean;
+  readonly pageSize: Preference<number>;
+  readonly infiniteScroll: Preference<boolean>;
 }
 
 export interface FavoritesPaginationDependencies {
   search: FavoritesSearch;
-  paginationSettings: Preference<FavoritesPaginationSettings>;
+  paginationSettings: FavoritesPaginationSettings;
 }
 
 const INFINITE_SCROLL_PAGE_SIZE = 25;
@@ -33,7 +33,8 @@ export class FavoritesPagination {
     this.currentItems = computed(() => this.sliceItems(), { equals: haveSameItems });
     this.stopListening = [
       search.searched.on(() => this.goToFirst()),
-      paginationSettings.changed.on(() => this.goToFirst())
+      paginationSettings.pageSize.changed.on(() => this.goToFirst()),
+      paginationSettings.infiniteScroll.changed.on(() => this.goToFirst())
     ];
   }
 
@@ -74,12 +75,12 @@ export class FavoritesPagination {
   private sliceItems(): readonly Favorite[] {
     const pageSize = this.getPageSize();
     const pageNumber = this.currentPageNumber.value;
-    const start = this.dependencies.paginationSettings.value.infiniteScroll ? 0 : (pageNumber - 1) * pageSize;
+    const start = this.dependencies.paginationSettings.infiniteScroll.value ? 0 : (pageNumber - 1) * pageSize;
     return this.dependencies.search.results.value.slice(start, pageNumber * pageSize);
   }
 
   private getPageSize(): number {
-    const settings = this.dependencies.paginationSettings.value;
-    return settings.infiniteScroll ? INFINITE_SCROLL_PAGE_SIZE : Math.max(1, settings.size);
+    const { pageSize, infiniteScroll } = this.dependencies.paginationSettings;
+    return infiniteScroll.value ? INFINITE_SCROLL_PAGE_SIZE : Math.max(1, pageSize.value);
   }
 }

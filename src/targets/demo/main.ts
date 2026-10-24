@@ -3,7 +3,6 @@ import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favori
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
-import { BrowserMorpher } from "@/adapters/browser/ports/morpher/morpher";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserPageVisibility } from "@/adapters/browser/ports/page_visibility/page_visibility";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
@@ -14,6 +13,7 @@ import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorite
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
 import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
@@ -40,10 +40,10 @@ function createDemoDependencies(): FavoritesAppDependencies {
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
     sizeObserver: new BrowserSizeObserver(),
-    morpher: new BrowserMorpher(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
-    pageVisibility: new BrowserPageVisibility(document)
+    pageVisibility: new BrowserPageVisibility(document),
+    hostPage: new MemoryHostPage()
   };
 }
 

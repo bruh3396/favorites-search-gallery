@@ -1,16 +1,16 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/search_box";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesService } from "@/core/features/favorites/favorites";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
-import { Media } from "@/core/domain/media/media";
+import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { PostGridPreferences } from "@/core/app/preferences";
-import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { Preference } from "@/core/utils/reactive/preference";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -23,42 +23,40 @@ export const FavoritesSearchPanelClass = {
   search: "fsg-FavoritesSearchPanel-search",
   filter: "fsg-FavoritesSearchPanel-filter",
   count: "fsg-FavoritesSearchPanel-count",
+  tabStripToggle: "fsg-FavoritesSearchPanel-tabStripToggle",
+  tabCount: "fsg-FavoritesSearchPanel-tabCount",
   body: "fsg-FavoritesSearchPanel-body"
 } as const;
 
 export interface FavoritesSearchPanelProps {
   favorites: Pick<FavoritesService, "hydrated" | "loaded">;
-  session: Pick<FavoritesSession, "query" | "isFiltered" | "results" | "pageItems" | "pageNumber" | "pageCount" | "goTo" | "clearFilters">;
-  scrollTo: Occurrence<Favorite>;
+  session: Pick<FavoritesSession, "query" | "isFiltered" | "results" | "pageItems" | "pageNumber" | "pageCount" | "goTo" | "clearFilters" | "submit">;
   focusSearch: Emitter<void>;
   tileLocator: TileLocator<Favorite>;
   skeletonDimensions: readonly Dimensions[];
   skeletonItemCount: number;
   gridPreferences: PostGridPreferences;
-  upscalePaused?: Readable<boolean>;
-  visiblePosts: Signal<readonly Favorite[]>;
+  tabStripVisible: Preference<boolean>;
+  tabCount: Readable<number>;
   visibilityObserver: VisibilityObserver;
-  decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
-  scheduler: Pick<Scheduler, "schedule">;
-  resolvePreviewUrl: (media: Media) => string;
+  imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
   getPostUrl: (post: MediaItem) => string;
-  onSearch: (query: string) => void;
   onPlainClick: (post: Favorite) => void;
   onCtrlClick: (post: Favorite) => void;
-  onPointerEnter: (post: Favorite) => void;
 }
 
 export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElement {
-  const { favorites, session, scrollTo, focusSearch, tileLocator,
-    skeletonDimensions, gridPreferences: { layout, size }, visiblePosts, skeletonItemCount,
-    visibilityObserver, decodeStill, scheduler, resolvePreviewUrl, getPostUrl, onSearch, onPlainClick, onCtrlClick, onPointerEnter } = props;
+  const { favorites, session, focusSearch, tileLocator,
+    skeletonDimensions, gridPreferences: { layout, tilesPerRow }, tabStripVisible, tabCount, skeletonItemCount,
+    visibilityObserver, imageLoaderService, getPostUrl, onPlainClick, onCtrlClick } = props;
+  const hiddenTabCount = computed(() => (tabStripVisible.value ? 0 : tabCount.value));
   const body: HTMLElement = (
     <div className={FavoritesSearchPanelClass.body}>
       <SkeletonGrid
         isShown={computed(() => !favorites.loaded.reached && session.results.value.length === 0)}
         dimensions={skeletonDimensions}
         layout={layout}
-        size={size}
+        tilesPerRow={tilesPerRow}
         count={skeletonItemCount}
       />
       <EmptyState
@@ -86,21 +84,15 @@ export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElem
       <PostGrid
         posts={session.pageItems}
         changed={favorites.hydrated}
-        scrollTo={scrollTo}
         tileLocator={tileLocator}
         settings={props.gridPreferences}
-        upscalePaused={props.upscalePaused}
-        visiblePosts={visiblePosts}
         getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}
         createActions={() => []}
         visibilityObserver={visibilityObserver}
-        decodeStill={decodeStill}
-        scheduler={scheduler}
-        resolvePreviewUrl={resolvePreviewUrl}
+        imageLoaderService={imageLoaderService}
         getPostUrl={getPostUrl}
         onPlainClick={onPlainClick}
         onCtrlClick={onCtrlClick}
-        onPointerEnter={onPointerEnter}
       />
     </div>
   );
@@ -121,7 +113,7 @@ export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElem
             ]}
             focusRequests={focusSearch}
             onSearch={query => {
-              onSearch(query);
+              session.submit(query);
               body.scrollTop = 0;
             }}
           />
@@ -129,12 +121,23 @@ export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElem
         <Paginator
           pageNumber={session.pageNumber}
           pageCount={session.pageCount}
-          scheduler={scheduler}
           onPageChange={pageNumber => {
             session.goTo(pageNumber);
             body.scrollTop = 0;
           }}
         />
+        <button
+          className={FavoritesSearchPanelClass.tabStripToggle}
+          type="button"
+          aria-label={computed(() => (hiddenTabCount.value > 1 ? `Show tabs (${hiddenTabCount.value} open)` : "Show tabs"))}
+          aria-pressed={computed(() => String(tabStripVisible.value))}
+          onClick={() => tabStripVisible.set(!tabStripVisible.peek())}
+        >
+          {createIcon("appWindow", SearchBoxClass.icon)}
+          <span className={FavoritesSearchPanelClass.tabCount} hidden={computed(() => hiddenTabCount.value < 2)}>
+            {computed(() => String(hiddenTabCount.value))}
+          </span>
+        </button>
       </header>
       {body}
     </section>

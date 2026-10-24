@@ -10,8 +10,8 @@ import { TileClass } from "@/core/ui/post_grid/tile";
 import { expectClassesStyled } from "@/testing/css";
 
 function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }], layout = new Signal<GridLayout>("grid"),
-  size = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {
-  return render(document, () => <SkeletonGrid isShown={isShown} dimensions={dimensions} layout={layout} size={size} count={count} />);
+  tilesPerRow = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {
+  return render(document, () => <SkeletonGrid isShown={isShown} dimensions={dimensions} layout={layout} tilesPerRow={tilesPerRow} count={count} />);
 }
 
 function createSquares(count: number): { width: number; height: number }[] {
@@ -39,14 +39,14 @@ describe("SkeletonGrid", () => {
     expect(element.querySelectorAll(`.${TileClass.root}`)).toHaveLength(20);
   });
 
-  test("tiles again when the layout or size changes", () => {
+  test("tiles again when the layout or tiles per row change", () => {
     const layout = new Signal<GridLayout>("grid");
-    const size = new Signal(2);
-    const { result: element } = setup({ dimensions: createSquares(6), layout, size });
+    const tilesPerRow = new Signal(2);
+    const { result: element } = setup({ dimensions: createSquares(6), layout, tilesPerRow });
 
     layout.value = "column";
     expect(element.querySelectorAll(`.${TilerClass.column}`)).toHaveLength(2);
-    size.value = 3;
+    tilesPerRow.value = 3;
     expect(element.querySelectorAll(`.${TilerClass.column}`)).toHaveLength(3);
     expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("3");
   });
@@ -62,12 +62,12 @@ describe("SkeletonGrid", () => {
 
   test("stops following its signals once disposed", () => {
     const isShown = new Signal(true);
-    const size = new Signal(2);
-    const { result: element, dispose } = setup({ isShown, size });
+    const tilesPerRow = new Signal(2);
+    const { result: element, dispose } = setup({ isShown, tilesPerRow });
 
     dispose();
     isShown.value = false;
-    size.value = 5;
+    tilesPerRow.value = 5;
     expect(element.hidden).toBe(false);
     expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("2");
   });

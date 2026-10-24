@@ -18,11 +18,11 @@ export interface SkeletonGridProps {
   isShown: Readable<boolean>;
   dimensions: readonly Dimensions[];
   layout: Readable<GridLayout>;
-  size: Readable<number>;
+  tilesPerRow: Readable<number>;
   count: number;
 }
 
-export function SkeletonGrid({ isShown, dimensions, layout, size, count }: SkeletonGridProps): HTMLElement {
+export function SkeletonGrid({ isShown, dimensions, layout, tilesPerRow, count }: SkeletonGridProps): HTMLElement {
   const tiles = dimensions.slice(0, clamp(count, 0, MAX_TILE_COUNT)).map(createSkeletonTile);
   const root = (
     <div
@@ -33,8 +33,8 @@ export function SkeletonGrid({ isShown, dimensions, layout, size, count }: Skele
   );
 
   effect(() => {
-    applyTiling(root, { layout: layout.value, size: size.value });
-    arrangeTiles(root, tiles, { layout: layout.value, getColumnCount: () => Math.round(size.value) });
+    applyTiling(root, { layout: layout.value, tilesPerRow: tilesPerRow.value });
+    arrangeTiles(root, tiles, { layout: layout.value, getColumnCount: () => Math.round(tilesPerRow.value) });
   });
   return root;
 }

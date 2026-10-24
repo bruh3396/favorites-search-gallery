@@ -24,15 +24,28 @@ interface SettingControlProps<D extends SettingDescriptor = SettingDescriptor> {
 }
 
 export function Setting({ descriptor, descriptionVisible, size = "medium", scheduler }: SettingProps): HTMLElement {
+  const control = <SettingControl descriptor={descriptor} size={size} scheduler={scheduler} />;
   return (
     <SettingRow
       label={descriptor.label}
       description={descriptor.description}
       descriptionVisible={descriptionVisible}
-      control={<SettingControl descriptor={descriptor} size={size} scheduler={scheduler} />}
+      control={control}
       size={size}
+      onActivate={createActivation(control)}
     />
   );
+}
+
+function createActivation(control: HTMLElement): (() => void) | undefined {
+  if (control instanceof HTMLSelectElement) {
+    return () => {
+      if (!control.disabled) {
+        control.showPicker();
+      }
+    };
+  }
+  return control.role === "switch" ? (): void => control.click() : undefined;
 }
 
 function SettingControl({ descriptor, size, scheduler }: SettingControlProps): HTMLElement {

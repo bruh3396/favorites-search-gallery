@@ -8,7 +8,7 @@ export const TilerClass = {
 
 export interface Tiling {
   readonly layout: GridLayout;
-  readonly size: number;
+  readonly tilesPerRow: number;
 }
 
 export interface Arrangement {
@@ -26,10 +26,10 @@ const TILERS: Record<GridLayout, Tiler> = {
   native: appendInOrder
 };
 
-export function applyTiling(root: HTMLElement, { layout, size }: Tiling): void {
+export function applyTiling(root: HTMLElement, { layout, tilesPerRow }: Tiling): void {
   root.dataset.layout = layout;
-  root.style.setProperty("--fsg-PostGrid-columns", String(Math.round(size)));
-  root.style.setProperty("--fsg-PostGrid-size", String(size));
+  root.style.setProperty("--fsg-PostGrid-columns", String(Math.round(tilesPerRow)));
+  root.style.setProperty("--fsg-PostGrid-tilesPerRow", String(tilesPerRow));
 }
 
 export function arrangeTiles(root: HTMLElement, tiles: readonly HTMLElement[], { layout, getColumnCount }: Arrangement): void {

@@ -6,7 +6,7 @@
   display: flex;
   flex: none;
   align-items: stretch;
-  block-size: var(--fsg-control-size-large);
+  block-size: 30px;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-radius-medium);
   background: var(--fsg-color-surface);

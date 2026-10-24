@@ -2,9 +2,10 @@ import { LightboxActions } from "@/core/features/lightbox/actions/actions";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/autoplay";
 import { LightboxCloser } from "@/core/features/lightbox/closer/closer";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
+import { LightboxDetails } from "@/core/features/lightbox/details/details";
 import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen/fullscreen";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
-import { LightboxStage } from "@/core/features/lightbox/stage/stage/stage";
+import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { MediaItem } from "@/core/domain/post/post";
 
@@ -16,10 +17,11 @@ export interface LightboxCommandTargets<T extends MediaItem> {
   readonly autoplay: Pick<LightboxAutoplay, "toggle">;
   readonly closer: Pick<LightboxCloser<T>, "close">;
   readonly actions: LightboxActions;
+  readonly details?: Pick<LightboxDetails<T>, "isOpen">;
 }
 
 export function createLightboxCommandHandlers<T extends MediaItem>(targets: LightboxCommandTargets<T>): LightboxCommandHandlers {
-  const { navigation, stage, fullscreen, zoom, autoplay, closer, actions } = targets;
+  const { navigation, stage, fullscreen, zoom, autoplay, closer, actions, details } = targets;
   const withCurrentItem = (run: (item: T) => void) => (): void => {
     const item = navigation.currentItem.peek();
 
@@ -39,6 +41,7 @@ export function createLightboxCommandHandlers<T extends MediaItem>(targets: Ligh
     toggleMute: (): void => stage.toggleMute(),
     toggleFullscreen: (): void => fullscreen.toggle(),
     toggleZoom: (): void => zoom.toggle(),
+    toggleDetails: (): void => details?.isOpen.set(!details.isOpen.peek()),
     dismiss: (): void => (zoom.isZoomed.peek() ? zoom.zoomOut() : closer.close()),
     download: withCurrentItem(item => actions.download(item)),
     openPostPage: withCurrentItem(item => actions.openPostPage(item)),

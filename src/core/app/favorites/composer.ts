@@ -1,42 +1,37 @@
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/app";
 import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
-import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
+import { createFavoritesPreferences, createLightboxPreferences } from "@/core/app/preferences";
 import { APP_FONT } from "@/core/app/font";
 import { ColorScheme } from "@/core/boundary/environment";
-import { DECODE_RATE_LIMIT } from "@/core/ui/post_grid/upscaler";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchPanelProps } from "@/core/app/favorites/panel/search";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
+import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { ListSequence } from "@/core/domain/media/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
-import { Morpher } from "@/core/boundary/ports/morpher/morpher";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PageVisibility } from "@/core/boundary/ports/page_visibility/page_visibility";
 import { PostActions } from "@/core/app/post_actions";
-import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonDimensions } from "@/core/app/favorites/storage/skeleton_dimensions";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
+import { computed, effect } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
-import { doNothing } from "@/core/utils/function/function";
 import { fillRestOfWindow } from "@/core/ui/app_root/fill_rest_of_window";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
-import { render } from "@/core/ui/h/h";
-
-export type ExitIndicator = "none" | "zoom";
-
-const LIGHTBOX_EXIT_INDICATOR: ExitIndicator = "zoom";
+import { h, render } from "@/core/ui/h/h";
+import { FavoriteLightboxDetails } from "@/core/app/favorites/lightbox_details/lightbox_details";
 
 export interface FavoritesAppConfiguration extends FavoritesConfiguration {
   readonly favoritesOwnerId: string;
   readonly colorScheme: ColorScheme;
-  readonly returnIndicator?: ExitIndicator;
 }
 
 export interface FavoritesAppDependencies extends Omit<FavoritesDependencies, "paginationSettings"> {
@@ -44,19 +39,19 @@ export interface FavoritesAppDependencies extends Omit<FavoritesDependencies, "p
   sizeObserver: SizeObserver;
   remotePages: RemotePages;
   localKeyedValues: LocalKeyedValues;
-  morpher: Morpher;
   navigator: Navigator;
   fileSaver: FileSaver;
   pageVisibility: PageVisibility;
+  hostPage: HostPage;
 }
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
-  const { favoritesOwnerId, colorScheme, returnIndicator = LIGHTBOX_EXIT_INDICATOR, ...favoritesConfiguration } = configuration;
-  const { remotePages, localKeyedValues, morpher, navigator, fileSaver, visibilityObserver, sizeObserver, pageVisibility, ...ports } = dependencies;
+  const { favoritesOwnerId, colorScheme, ...favoritesConfiguration } = configuration;
+  const { remotePages, localKeyedValues, navigator, fileSaver, visibilityObserver, sizeObserver, pageVisibility, hostPage, ...ports } = dependencies;
   const storage = createAppStorage(localKeyedValues);
-  const preferences = createAppPreferences(storage.preferences);
-  const gridPreferences = pickPostGridPreferences(preferences);
-  const paginationSettings = preferences.favoritesPagination;
+  const preferences = createFavoritesPreferences(storage.favoritesPreferences);
+  const { volume, muted, detailsOpen } = createLightboxPreferences(storage.lightboxPreferences);
+  const paginationSettings = { pageSize: preferences.pageSize, infiniteScroll: preferences.infiniteScroll };
   const skeletonDimensions = new SkeletonDimensions({ ownerId: favoritesOwnerId }, { storage: storage.app });
   const favoritesService = createFavoritesService(favoritesConfiguration, { ...ports, paginationSettings });
   const workspace = new FavoritesWorkspace({ favoritesOwnerId }, {
@@ -66,24 +61,29 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const postActions = new PostActions({ remoteMedia: ports.remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Favorite>({
     scheduler: ports.scheduler, sizeObserver, remoteMedia: ports.remoteMedia, actions: postActions,
-    volume: preferences.lightboxVolume, muted: preferences.lightboxMuted, morpher: returnIndicator === "zoom" ? morpher : undefined,
-    locateItem: item => workspace.locate(item)
+    volume, muted,
+    locateItem: item => workspace.locate(item),
+    details: {
+      isOpen: detailsOpen,
+      createContent: favorite => h(FavoriteLightboxDetails, { favorite })
+    }
   });
-  const decodeLimiter = new RateLimiter(DECODE_RATE_LIMIT, ports.scheduler);
+  const imageLoaderService = new ImageLoaderService({
+    remoteMedia: ports.remoteMedia, scheduler: ports.scheduler, enabled: preferences.upscale, paused: lightbox.isOpen
+  });
+  const tabCount = computed(() => workspace.tabManager.tabs.value.length);
 
   lightbox.settled.on(item => workspace.turnToPageContaining(item));
   lightbox.closed.on(item => workspace.reveal(item));
 
   function createPanelProps(tab: FavoritesTab): FavoritesSearchPanelProps {
     return {
-      ...tab, favorites: favoritesService, gridPreferences, upscalePaused: lightbox.isOpen,
-      skeletonDimensions: skeletonDimensions.value, skeletonItemCount: paginationSettings.peek().size,
-      visibilityObserver, scheduler: ports.scheduler,
-      decodeStill: (media, signal, width) => decodeLimiter.run(() => ports.remoteMedia.decodeStill(media, signal, width), signal),
-      resolvePreviewUrl: media => ports.remoteMedia.resolvePreviewUrl(media), getPostUrl: post => remotePages.postUrl(post.id),
-      onSearch: query => tab.session.submit(query),
-      onPlainClick: post => lightbox.open(new ListSequence({ wraps: !paginationSettings.peek().infiniteScroll }, tab.session.results), post),
-      onCtrlClick: post => postActions.openOriginal(post), onPointerEnter: doNothing
+      ...tab, favorites: favoritesService, gridPreferences: preferences, tabStripVisible: preferences.tabStripVisible, tabCount,
+      skeletonDimensions: skeletonDimensions.value, skeletonItemCount: preferences.pageSize.peek(),
+      visibilityObserver, imageLoaderService,
+      getPostUrl: post => remotePages.postUrl(post.id),
+      onPlainClick: post => lightbox.open(new ListSequence({ wraps: !preferences.infiniteScroll.peek() }, tab.session.results), post),
+      onCtrlClick: post => postActions.openOriginal(post)
     };
   }
 
@@ -93,9 +93,14 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       const app = mountAppRoot(container, { colorScheme, font: APP_FONT, styles: FAVORITES_APP_STYLES });
 
       app.append(...render(container.ownerDocument, () => FavoritesApp({
-        favorites: favoritesService, workspace, lightbox, panel: createPanelProps
+        favorites: favoritesService, workspace, lightbox, preferences, scheduler: ports.scheduler, panel: createPanelProps
       })).result);
-      fillRestOfWindow(app, sizeObserver);
+      const windowFill = fillRestOfWindow(app, sizeObserver);
+
+      effect(() => {
+        hostPage.setHeaderVisible(preferences.siteHeaderVisible.value);
+        windowFill.refit();
+      });
       favoritesService.load().catch(console.error);
     }
   };

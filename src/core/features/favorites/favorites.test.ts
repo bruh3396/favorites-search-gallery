@@ -22,7 +22,7 @@ import { flushMicrotasks } from "@/testing/async";
 interface Setup {
   favorites: FavoritesService;
   session: FavoritesSession;
-  paginationSettings: Preference<FavoritesPaginationSettings>;
+  paginationSettings: FavoritesPaginationSettings;
   localFavorites: MemoryLocalFavorites;
   hydratedIds: string[];
 }
@@ -31,7 +31,7 @@ interface Created {
   favorites: FavoritesService;
   client: MemoryClient;
   localFavorites: MemoryLocalFavorites;
-  paginationSettings: Preference<FavoritesPaginationSettings>;
+  paginationSettings: FavoritesPaginationSettings;
 }
 
 function createPreference<T>(initial: T): Preference<T> {
@@ -53,7 +53,7 @@ function createPreference<T>(initial: T): Preference<T> {
 function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Created {
   const client = new MemoryClient(posts);
   const localFavorites = new MemoryLocalFavorites();
-  const paginationSettings = createPreference<FavoritesPaginationSettings>({ size: 2, infiniteScroll: false });
+  const paginationSettings = { pageSize: createPreference(2), infiniteScroll: createPreference(false) };
   const favorites = createFavoritesService({ userOwnsFavorites, blacklistedTags: [] }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
@@ -139,7 +139,7 @@ describe("createFavoritesService", () => {
     const { session, paginationSettings } = await setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
     session.goTo(2);
-    paginationSettings.set({ size: 1, infiniteScroll: false });
+    paginationSettings.pageSize.set(1);
     expect(session.pageNumber.value).toBe(1);
   });
 

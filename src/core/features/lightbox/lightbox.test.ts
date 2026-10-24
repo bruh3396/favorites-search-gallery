@@ -79,12 +79,13 @@ describe("createLightbox", () => {
     expect(decodeStill).toHaveBeenNthCalledWith(2, NEIGHBOR.media, expect.any(AbortSignal));
   });
 
-  test("loads a prefetched item before it is opened", () => {
+  test("loads a prefetched item before it is opened", async() => {
     const { lightbox, remoteMedia } = setup();
     const decodeStill = vi.spyOn(remoteMedia, "decodeStill");
 
     createView(lightbox);
     lightbox.prefetch(IMAGE);
+    await flushMicrotasks();
     expect(decodeStill).toHaveBeenCalledWith(IMAGE.media, expect.any(AbortSignal));
   });
 

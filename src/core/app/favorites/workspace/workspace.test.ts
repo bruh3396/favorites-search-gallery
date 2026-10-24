@@ -9,7 +9,7 @@ import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { Post } from "@/core/domain/post/post";
-import { createAppPreferences } from "@/core/app/preferences";
+import { createFavoritesPreferences } from "@/core/app/preferences";
 import { createPost } from "@/testing/post";
 import { effect } from "@/core/utils/reactive/signal";
 
@@ -19,10 +19,10 @@ interface Setup {
 }
 
 function createWorkspace(storage: MemoryLocalKeyedValues, favoritesOwnerId = "1", posts: Post[] = []): FavoritesWorkspace {
-  const paginationSettings = createAppPreferences(new MemoryLocalKeyedValues()).favoritesPagination;
+  const paginationSettings = createFavoritesPreferences(new MemoryLocalKeyedValues());
   const searchIndex = new FavoritesSearchIndex();
 
-  paginationSettings.set({ size: 2, infiniteScroll: false });
+  paginationSettings.pageSize.set(2);
   searchIndex.rebuild(new FavoritesCollection().append(posts));
   return new FavoritesWorkspace({ favoritesOwnerId }, {
     storage,
@@ -232,15 +232,15 @@ describe("FavoritesWorkspace", () => {
   });
 
   describe("reveal", () => {
-    test("turns to the item's page and scrolls the active tab to it", () => {
+    test("turns to the item's page and scrolls its tile into view", () => {
       const workspace = createWorkspaceWithFavorites(3);
-      const { session, scrollTo } = workspace.activeTab.peek();
-      const item = session.results.peek()[2];
-      const scrolledTo = vi.fn();
+      const { session } = workspace.activeTab.peek();
+      const tile = attachTile(workspace);
+      const scrollIntoView = vi.fn();
 
-      scrollTo.on(scrolledTo);
-      workspace.reveal(item);
-      expect([session.pageItems.value.map(favorite => favorite.id), scrolledTo.mock.calls]).toEqual([["3"], [[item]]]);
+      tile.scrollIntoView = scrollIntoView;
+      workspace.reveal(session.results.peek()[2]);
+      expect([session.pageItems.value.map(favorite => favorite.id), scrollIntoView.mock.calls.length]).toEqual([["3"], 1]);
     });
 
     test("returns the item's tile", () => {

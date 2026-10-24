@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { LightboxVideoPool } from "@/core/features/lightbox/stage/video_pool/video_pool";
+import { LightboxVideoPool } from "@/core/features/lightbox/stage/video_pool";
 
 function createFakeVideo(): HTMLVideoElement {
   const video = {

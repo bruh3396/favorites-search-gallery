@@ -1,6 +1,6 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
 import { describe, expect, test, vi } from "vitest";
-import { LightboxMediaCache } from "@/core/features/lightbox/stage/media_cache/media_cache";
+import { LightboxMediaCache } from "@/core/features/lightbox/stage/media_cache";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 import { doNothing } from "@/core/utils/function/function";

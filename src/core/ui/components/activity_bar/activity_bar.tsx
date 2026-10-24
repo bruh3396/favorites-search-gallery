@@ -36,13 +36,18 @@ export function ActivityBar({ items, value, renderPanel, onValueChange }: Activi
     />
   );
   let shown: Scoped<HTMLElement> | null = null;
+  let shownItem: ActivityBarItem | null = null;
 
   effect(() => {
     const item = activeItem.value;
 
+    if (item === null || item === shownItem) {
+      return;
+    }
     shown?.dispose();
-    shown = item === null ? null : createPanelScope(() => untracked(() => renderPanel(item)));
-    panel.replaceChildren(...shown === null ? [] : [shown.result]);
+    shown = createPanelScope(() => untracked(() => renderPanel(item)));
+    shownItem = item;
+    panel.replaceChildren(shown.result);
   });
   onCleanup(() => shown?.dispose());
 

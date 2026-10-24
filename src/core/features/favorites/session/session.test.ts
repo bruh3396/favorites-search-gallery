@@ -6,7 +6,7 @@ import { FavoritesSession } from "@/core/features/favorites/session/session";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { Post } from "@/core/domain/post/post";
-import { createAppPreferences } from "@/core/app/preferences";
+import { createFavoritesPreferences } from "@/core/app/preferences";
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
 
@@ -19,9 +19,9 @@ interface Setup {
 function setup(posts: Post[]): Setup {
   const collection = new FavoritesCollection();
   const index = new FavoritesSearchIndex();
-  const paginationSettings = createAppPreferences(new MemoryLocalKeyedValues()).favoritesPagination;
+  const paginationSettings = createFavoritesPreferences(new MemoryLocalKeyedValues());
 
-  paginationSettings.set({ size: 2, infiniteScroll: false });
+  paginationSettings.pageSize.set(2);
   index.rebuild(collection.append(posts));
   const session = new FavoritesSession({ settings: createSearchSettings() }, {
     searchIndex: index,

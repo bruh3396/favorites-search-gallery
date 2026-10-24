@@ -3,8 +3,12 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import DIALOG_CSS from "@/core/features/lightbox/ui/dialog.css?inline";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
+import { LightboxDetails } from "@/core/features/lightbox/details/details";
+import { LightboxDetailsPanelClass } from "@/core/features/lightbox/ui/details/details_panel";
+import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/position";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/overlay_visibility";
-import { LightboxStage } from "@/core/features/lightbox/stage/stage/stage";
+import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxVideoClass } from "@/core/features/lightbox/ui/media/video";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
@@ -18,7 +22,7 @@ import { expectClassesStyled } from "@/testing/css";
 const IDLE_DELAY = 100;
 const LEAVE_DELAY = 500;
 
-function setup(): {
+function setup(details?: LightboxDetails<Post>): {
   dialog: HTMLDialogElement;
   isOpen: Signal<boolean>;
   scheduler: MemoryScheduler;
@@ -33,7 +37,8 @@ function setup(): {
     close: vi.fn(),
     togglePause: vi.fn(),
     showNext: vi.fn(),
-    showPrevious: vi.fn()
+    showPrevious: vi.fn(),
+    toggleDetails: vi.fn()
   } as Partial<LightboxCommandHandlers> as LightboxCommandHandlers;
   const keyListener = vi.fn();
   const { result: dialog } = render(document, () => {
@@ -48,6 +53,8 @@ function setup(): {
       <LightboxDialog
         isOpen={isOpen}
         position={new Signal(undefined)}
+        currentItem={currentItem}
+        details={details}
         stage={stage}
         overlayVisibility={new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler)}
         inFullscreen={new Signal(false)}
@@ -66,11 +73,18 @@ function setup(): {
   return { dialog, isOpen, scheduler, handlers, keyListener };
 }
 
-function setupOpen(): ReturnType<typeof setup> {
-  const result = setup();
+function setupOpen(details?: LightboxDetails<Post>): ReturnType<typeof setup> {
+  const result = setup(details);
 
   result.isOpen.value = true;
   return result;
+}
+
+function createDetails(): LightboxDetails<Post> & { isOpen: StoredPreference<boolean> } {
+  return {
+    isOpen: new StoredPreference({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() }),
+    createContent: () => <p>details content</p>
+  };
 }
 
 function findButton(dialog: HTMLElement, label: string): HTMLButtonElement {
@@ -159,6 +173,38 @@ describe("LightboxDialog", () => {
 
     dialog.querySelector<HTMLElement>(`.${LightboxVideoClass.root}`)!.click();
     expect(handlers.togglePause).toHaveBeenCalledOnce();
+  });
+
+  test("leaves out the details panel and keeps the count plain without details", () => {
+    const { dialog } = setupOpen();
+
+    expect(dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)).toBeNull();
+    expect(dialog.querySelector(`.${LightboxPositionClass.button}`)).toBeNull();
+  });
+
+  test("mounts the details content and toggles the panel from the count", () => {
+    const { dialog, handlers } = setupOpen(createDetails());
+
+    expect(dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)!.textContent).toContain("details content");
+    dialog.querySelector<HTMLButtonElement>(`.${LightboxPositionClass.button}`)!.click();
+    expect(handlers.toggleDetails).toHaveBeenCalledOnce();
+  });
+
+  test("marks itself while the details panel is open", () => {
+    const details = createDetails();
+    const { dialog } = setupOpen(details);
+
+    expect(dialog.hasAttribute("data-details-open")).toBe(false);
+    details.isOpen.set(true);
+    expect(dialog.hasAttribute("data-details-open")).toBe(true);
+  });
+
+  test("keeps the overlay awake while the pointer is over the details panel", () => {
+    const { dialog, scheduler } = setupOpen(createDetails());
+
+    dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)!.dispatchEvent(new PointerEvent("pointerenter"));
+    scheduler.advance(LEAVE_DELAY);
+    expect(dialog.hasAttribute("data-idle")).toBe(false);
   });
 
   test("takes focus back when focus moves into the video", () => {

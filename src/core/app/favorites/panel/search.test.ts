@@ -3,18 +3,18 @@ import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_g
 import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/panel/search";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
-import { createAppPreferences, pickPostGridPreferences } from "@/core/app/preferences";
+import { createFavoritesPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { EmptyStateClass } from "@/core/ui/components/empty_state/empty_state";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { createImageLoaderService } from "@/testing/image_loader_service";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
+import { Preference } from "@/core/utils/reactive/preference";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/panel/search.css?inline";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
@@ -29,14 +29,15 @@ interface Setup {
   searchResults: Signal<readonly Favorite[]>;
   pageNumber: Signal<number>;
   loaded: Milestone;
-  visiblePosts: Signal<readonly Favorite[]>;
-  onSearch: Mock<(query: string) => void>;
+  submit: Mock<(query: string) => void>;
   goTo: Mock<(pageNumber: number) => void>;
   clearFilters: Mock<() => void>;
   settings: Signal<SearchSettings>;
   skeleton: HTMLElement;
   emptyState: HTMLElement;
   onPlainClick: Mock<(post: MediaItem) => void>;
+  tabStripVisible: Preference<boolean>;
+  tabCount: Signal<number>;
 }
 
 function createFavorite(id: string): Favorite {
@@ -47,14 +48,13 @@ function setup(): Setup {
   const searchResults = new Signal<readonly Favorite[]>([]);
   const pageNumber = new Signal(1);
   const loaded = new Milestone();
-  const visiblePosts = new Signal<readonly Favorite[]>([]);
-  const onSearch = vi.fn<(query: string) => void>();
+  const submit = vi.fn<(query: string) => void>();
   const goTo = vi.fn<(pageNumber: number) => void>();
   const clearFilters = vi.fn<() => void>();
   const settings = new Signal(DEFAULT_SEARCH_SETTINGS);
   const onPlainClick = vi.fn<(post: MediaItem) => void>();
   const favorites = { hydrated: new Emitter<Favorite>(), loaded };
-  const preferences = createAppPreferences(new MemoryLocalKeyedValues());
+  const preferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
   const session = {
     query: computed(() => settings.value.query),
     isFiltered: computed(() => isFiltered(settings.value)),
@@ -63,33 +63,32 @@ function setup(): Setup {
     pageNumber,
     pageCount: computed(() => Math.max(1, Math.ceil(searchResults.value.length / PAGE_SIZE))),
     goTo,
-    clearFilters
+    clearFilters,
+    submit
   };
-  const gridPreferences = pickPostGridPreferences(preferences);
+  const tabStripVisible = preferences.tabStripVisible;
+  const tabCount = new Signal(1);
   const { result: element, dispose } = render(document, () => h(FavoritesSearchPanel, {
     favorites,
     session,
-    scrollTo: new Emitter<Favorite>(),
     focusSearch: new Emitter<void>(),
     tileLocator: new TileLocator<Favorite>(),
     skeletonDimensions: DEFAULT_SKELETON_DIMENSIONS,
     skeletonItemCount: 50,
-    gridPreferences,
-    visiblePosts,
+    gridPreferences: preferences,
+    tabStripVisible,
+    tabCount,
     visibilityObserver: { observe: () => (): void => { } },
-    decodeStill: () => new MemoryRemoteMedia().decodeStill(),
-    scheduler: new MemoryScheduler(),
-    resolvePreviewUrl: media => `https://preview/${media.locator}`,
+    imageLoaderService: createImageLoaderService(),
     getPostUrl: post => `https://posts/${post.id}`,
-    onSearch,
     onPlainClick,
-    onCtrlClick: doNothing,
-    onPointerEnter: doNothing
+    onCtrlClick: doNothing
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${SkeletonGridClass.root}`)!;
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
-    element, dispose, searchResults, pageNumber, loaded, visiblePosts, onSearch, goTo, clearFilters, settings, skeleton, emptyState, onPlainClick
+    element, dispose, searchResults, pageNumber, loaded, submit, goTo, clearFilters, settings, skeleton, emptyState, onPlainClick,
+    tabStripVisible, tabCount
   };
 }
 
@@ -106,6 +105,10 @@ function readShownFavoriteUrls(element: HTMLElement): string[] {
 
 function readCount(element: HTMLElement): string {
   return element.querySelector(`.${FavoritesSearchPanelClass.count}`)!.textContent!;
+}
+
+function findTabStripToggle(element: HTMLElement): HTMLButtonElement {
+  return element.querySelector<HTMLButtonElement>("button[aria-pressed]")!;
 }
 
 describe("FavoritesSearchPanel", () => {
@@ -168,13 +171,13 @@ describe("FavoritesSearchPanel", () => {
     expect([emptyState.querySelector("p")!.textContent, emptyState.querySelector("button")!.hidden]).toEqual(["No favorites yet", true]);
   });
 
-  test("reports what is submitted in the search box", () => {
-    const { element, onSearch } = setup();
+  test("submits what is entered in the search box", () => {
+    const { element, submit } = setup();
     const input = element.querySelector("input[type=search]") as HTMLInputElement;
 
     input.value = "cat";
     input.form!.dispatchEvent(new Event("submit"));
-    expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
+    expect(submit).toHaveBeenCalledExactlyOnceWith("cat");
   });
 
   test("counts the results while favorites load", () => {
@@ -259,6 +262,39 @@ describe("FavoritesSearchPanel", () => {
     input.value = "cat";
     input.form!.dispatchEvent(new Event("submit"));
     expect(body.scrollTop).toBe(0);
+  });
+
+  test("toggles the tab strip and reports it as pressed while shown", () => {
+    const { element, tabStripVisible } = setup();
+    const toggle = findTabStripToggle(element);
+    const readState = (): [boolean, string | null] => [tabStripVisible.value, toggle.getAttribute("aria-pressed")];
+    const before = readState();
+
+    toggle.click();
+    const hidden = readState();
+
+    toggle.click();
+    expect([before, hidden, readState()]).toEqual([[true, "true"], [false, "false"], [true, "true"]]);
+  });
+
+  test("counts the open tabs on the toggle only while the strip hides more than one", () => {
+    const { element, tabStripVisible, tabCount } = setup();
+    const toggle = findTabStripToggle(element);
+    const badge = toggle.querySelector("span")!;
+    const readBadge = (): [boolean, string, string | null] => [badge.hidden, badge.textContent!, toggle.getAttribute("aria-label")];
+
+    tabCount.value = 3;
+    const shown = readBadge();
+
+    tabStripVisible.set(false);
+    const hidden = readBadge();
+
+    tabCount.value = 1;
+    expect([shown, hidden, readBadge()]).toEqual([
+      [true, "0", "Show tabs"],
+      [false, "3", "Show tabs (3 open)"],
+      [true, "1", "Show tabs"]
+    ]);
   });
 
   test("stops following the favorites once disposed", () => {
