@@ -1,4 +1,4 @@
-import { Rule34Error, Rule34ErrorReason, isTransient } from "@/adapters/rule34/client/error";
+import { Rule34Error, Rule34ErrorReason, isRetryable } from "@/adapters/rule34/client/error";
 import { describe, expect, test } from "vitest";
 
 describe("Rule34Error", () => {
@@ -14,33 +14,34 @@ describe("Rule34Error", () => {
   });
 });
 
-describe("isTransient", () => {
+describe("isRetryable", () => {
   test.each<[Rule34ErrorReason, boolean]>([
     ["network", true],
     ["malformed", false]
-  ])("%s is transient: %s", (reason, expected) => {
-    expect(isTransient(new Rule34Error(reason))).toBe(expected);
+  ])("classifies %s as retryable: %s", (reason, expected) => {
+    expect(isRetryable(new Rule34Error(reason))).toBe(expected);
   });
 
   test.each([
+    [403, true],
     [429, true],
     [500, true],
     [503, true],
     [400, false],
     [404, false]
-  ])("http %i is transient: %s", (status, expected) => {
-    expect(isTransient(new Rule34Error("http", { status }))).toBe(expected);
+  ])("classifies http %i as retryable: %s", (status, expected) => {
+    expect(isRetryable(new Rule34Error("http", { status }))).toBe(expected);
   });
 
   test("treats http without a status as permanent", () => {
-    expect(isTransient(new Rule34Error("http"))).toBe(false);
+    expect(isRetryable(new Rule34Error("http"))).toBe(false);
   });
 
   test("treats any other error as permanent", () => {
-    expect(isTransient(new Error("network"))).toBe(false);
+    expect(isRetryable(new Error("network"))).toBe(false);
   });
 
   test("throws for an unknown reason", () => {
-    expect(() => isTransient(new Rule34Error("bogus" as Rule34ErrorReason))).toThrow("bogus");
+    expect(() => isRetryable(new Rule34Error("bogus" as Rule34ErrorReason))).toThrow("bogus");
   });
 });

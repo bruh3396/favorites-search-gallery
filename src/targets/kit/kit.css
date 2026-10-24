@@ -1,5 +1,3 @@
-/* The kit's own chrome. It uses system colors so it never depends on the tokens it is there to show;
-   they follow the same color-scheme as the components. */
 .kit-Page {
   display: grid;
   grid-template-columns: 200px minmax(0, 1fr) 280px;

@@ -1,5 +1,5 @@
 import { CategorizedPost, Post } from "@/core/domain/post/post";
-import { FrozenCobaltError, isTransient } from "@/adapters/frozen_cobalt/client/error";
+import { FrozenCobaltError, isRetryable } from "@/adapters/frozen_cobalt/client/error";
 import { FrozenCobaltMintMedia, decodePost } from "@/adapters/frozen_cobalt/client/decoder";
 import { PostUnavailableError, RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
@@ -25,7 +25,7 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
     this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
-      isRetryable: isTransient
+      isRetryable
     });
   }
 

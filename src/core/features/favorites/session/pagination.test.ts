@@ -193,10 +193,11 @@ describe("FavoritesPagination", () => {
     });
 
     test("leaves the current page alone when the favorite is absent", () => {
-      const { pagination } = setup(createTaggedPosts("a", "a", "a"));
+      const { pagination, collection } = setup(createTaggedPosts("a", "a", "a"));
+      const [unindexed] = collection.append([createPost({ id: "99" })]);
 
       pagination.goTo(2);
-      pagination.goToContaining({ id: "missing" });
+      pagination.goToContaining(unindexed);
       expect(pagination.pageNumber.value).toBe(2);
     });
   });

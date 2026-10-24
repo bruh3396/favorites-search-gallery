@@ -29,7 +29,7 @@ export interface PostGridProps<T extends MediaItem> {
   getDimensions: (post: T) => Dimensions;
   createActions: (post: T) => readonly Node[];
   getPostUrl?: (post: T) => string;
-  onPlainClick: (post: T) => void;
+  onPlainClick: (post: T) => boolean;
   onCtrlClick?: (post: T) => void;
 }
 

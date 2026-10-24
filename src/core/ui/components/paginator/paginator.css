@@ -1,4 +1,3 @@
-/* Every slot keeps one width whether it holds a page, a gap, or nothing, so paging never moves the arrows or resizes the search beside it. */
 .fsg-Paginator {
   --fsg-Paginator-slot-size: 40px;
 
@@ -8,7 +7,7 @@
   align-items: stretch;
   block-size: 30px;
   border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-medium);
+  border-radius: var(--fsg-shape-corner-small);
   background: var(--fsg-color-surface);
 }
 
@@ -37,23 +36,23 @@
   display: grid;
   place-items: center;
   padding: 0;
-  color: var(--fsg-color-on-surface-muted);
+  color: var(--fsg-color-on-surface-variant);
   cursor: pointer;
   transition: background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
 .fsg-Paginator-step:first-child {
-  border-start-start-radius: calc(var(--fsg-radius-medium) - 1px);
-  border-end-start-radius: calc(var(--fsg-radius-medium) - 1px);
+  border-start-start-radius: calc(var(--fsg-shape-corner-small) - 1px);
+  border-end-start-radius: calc(var(--fsg-shape-corner-small) - 1px);
 }
 
 .fsg-Paginator-step:last-of-type {
-  border-start-end-radius: calc(var(--fsg-radius-medium) - 1px);
-  border-end-end-radius: calc(var(--fsg-radius-medium) - 1px);
+  border-start-end-radius: calc(var(--fsg-shape-corner-small) - 1px);
+  border-end-end-radius: calc(var(--fsg-shape-corner-small) - 1px);
 }
 
 .fsg-Paginator-step:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
 }
 
 .fsg-Paginator-step:disabled {
@@ -62,7 +61,7 @@
 }
 
 .fsg-Paginator-step:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: -2px;
 }
 

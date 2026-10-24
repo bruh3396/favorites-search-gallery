@@ -3,7 +3,7 @@
   flex: none;
   align-items: center;
   gap: 2px;
-  font-size: var(--fsg-font-size-label);
+  font-size: var(--fsg-typescale-label-large-size);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -12,8 +12,8 @@
   min-inline-size: var(--fsg-control-size-medium);
   block-size: var(--fsg-control-size-medium);
   padding: 0 6px;
-  border-radius: var(--fsg-radius-medium);
-  color: var(--fsg-color-on-surface-muted);
+  border-radius: var(--fsg-shape-corner-small);
+  color: var(--fsg-color-on-surface-variant);
   line-height: 1;
   cursor: pointer;
   transition:
@@ -22,7 +22,7 @@
 }
 
 .fsg-PageStepper-step:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
 }
 
 .fsg-PageStepper-step:disabled {
@@ -31,7 +31,7 @@
 }
 
 .fsg-PageStepper-step:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 1px;
 }
 
@@ -40,8 +40,8 @@
   block-size: var(--fsg-control-size-small);
   padding: 0 6px;
   border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-medium);
-  background: var(--fsg-color-surface-sunken);
+  border-radius: var(--fsg-shape-corner-small);
+  background: var(--fsg-color-surface-container-highest);
   color: inherit;
   font: inherit;
   font-weight: 600;
@@ -49,12 +49,12 @@
 }
 
 .fsg-PageStepper-field:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: -1px;
   border-color: transparent;
 }
 
 .fsg-PageStepper-total {
   padding-inline: 4px 2px;
-  color: var(--fsg-color-on-surface-muted);
+  color: var(--fsg-color-on-surface-variant);
 }

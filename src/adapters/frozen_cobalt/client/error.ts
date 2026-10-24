@@ -31,7 +31,7 @@ export class FrozenCobaltError extends Error {
   }
 }
 
-export function isTransient(error: unknown): boolean {
+export function isRetryable(error: unknown): boolean {
   if (!(error instanceof FrozenCobaltError)) {
     return false;
   }

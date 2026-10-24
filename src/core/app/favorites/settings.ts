@@ -1,20 +1,64 @@
-import { FavoritesPreferences } from "@/core/app/preferences";
+import { AppPreferences, FavoritesPreferences, LightboxPreferences } from "@/core/app/preferences";
+import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
+import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
+import { GridLayout } from "@/core/ui/post_grid/tiler";
+import { Icon } from "@/core/ui/components/icon/icon";
+import { Preference } from "@/core/utils/reactive/preference";
 import { SettingDescriptor } from "@/core/ui/settings/descriptor";
 import { SettingsLayout } from "@/core/ui/settings/screen";
+import { computed } from "@/core/utils/reactive/signal";
 
 export const FAVORITES_SETTINGS_LAYOUT: SettingsLayout = [
-  { id: "general", title: "General", settings: ["enhanceSearchPages"] },
-  { id: "appearance", title: "Appearance", settings: ["siteHeaderVisible"] },
+  { id: "general", title: "General", settings: ["postListEnabled", "lightboxMode"] },
+  { id: "appearance", title: "Appearance", settings: ["colorScheme", "nativeHeaderVisible", "fullImagesEnabled"] },
+  { id: "layout", title: "Layout", settings: ["layout", "tileSize"] },
   { id: "results", title: "Results", settings: ["pageSize", "infiniteScroll"] }
 ];
 
-export function createFavoritesSettings(preferences: FavoritesPreferences): SettingDescriptor[] {
+const COLOR_SCHEME_LABELS: Readonly<Record<ColorScheme, string>> = { light: "Light", dark: "Dark" };
+const LIGHTBOX_MODE_LABELS: Readonly<Record<LightboxMode, string>> = { off: "Off", simple: "Simple", full: "Full" };
+const LAYOUTS: readonly GridLayout[] = ["column", "row", "square", "grid", "native"];
+const LAYOUT_LABELS: Readonly<Record<GridLayout, string>> = { row: "Row", square: "Square", grid: "Grid", column: "Column", native: "Native" };
+const LAYOUT_ICONS: Readonly<Record<GridLayout, Icon>> = {
+  row: "layoutRow", square: "layoutSquare", grid: "layoutGrid", column: "layoutColumn", native: "layoutNative"
+};
+
+export function createFavoritesSettings(
+  preferences: FavoritesPreferences,
+  appPreferences: AppPreferences,
+  lightboxPreferences: LightboxPreferences,
+  colorScheme: Preference<ColorScheme>
+): SettingDescriptor[] {
   return [
     {
-      id: "enhanceSearchPages", kind: "switch", label: "Enhance search pages", keywords: ["post list", "search"],
-      preference: preferences.enhanceSearchPages
+      id: "postListEnabled", kind: "switch", label: "Enhance search pages", keywords: ["post list", "search"],
+      preference: appPreferences.postListEnabled
     },
-    { id: "siteHeaderVisible", kind: "switch", label: "Site header", keywords: ["header", "navigation"], preference: preferences.siteHeaderVisible },
+    {
+      id: "lightboxMode", kind: "choice", label: "Gallery", keywords: ["lightbox", "viewer", "click", "simple", "zoom"], control: "segmented",
+      preference: lightboxPreferences.mode, members: LIGHTBOX_MODES, labels: LIGHTBOX_MODE_LABELS
+    },
+    {
+      id: "colorScheme", kind: "choice", label: "Color scheme", keywords: ["theme", "dark", "light"], control: "segmented",
+      preference: colorScheme, members: COLOR_SCHEMES, labels: COLOR_SCHEME_LABELS
+    },
+    {
+      id: "nativeHeaderVisible", kind: "switch", label: "Native header", keywords: ["site header", "navigation"],
+      preference: preferences.nativeHeaderVisible
+    },
+    {
+      id: "fullImagesEnabled", kind: "switch", label: "Upscale thumbnails", keywords: ["quality", "resolution", "full size"],
+      preference: preferences.fullImagesEnabled
+    },
+    {
+      id: "layout", kind: "choice", label: "Layout", keywords: ["grid", "arrangement"], control: "segmented",
+      preference: preferences.layout, members: LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
+    },
+    {
+      id: "tileSize", kind: "slider", label: "Tile size", keywords: ["tiles per row", "columns", "zoom", "grid"],
+      preference: preferences.tilesPerRow, min: 1, max: 20, step: 1, inverted: true,
+      disabled: computed(() => preferences.layout.value === "native")
+    },
     {
       id: "pageSize", kind: "number", label: "Results per page", keywords: ["pagination", "count"],
       preference: preferences.pageSize, min: 1, max: 5_000, step: 25,

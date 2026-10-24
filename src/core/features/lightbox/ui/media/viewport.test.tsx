@@ -21,14 +21,14 @@ function setup(): {
 } {
   const zoom = new LightboxZoom(
     { minimumScale: 2, maximumScale: 8 },
-    { currentItem: new Signal<Post | undefined>(createPost()), mediaSize: new Signal<ZoomSize | undefined>({ width: 400, height: 400 }) }
+    { currentItem: new Signal<Post | undefined>(createPost()), mediaSize: new Signal<ZoomSize | undefined>({ width: 400, height: 400 }), enabled: new Signal(true) }
   );
   const sizeObserver = new MemorySizeObserver();
   const content = document.createElement("canvas");
   const close = vi.fn();
   const handlers = { close, showNext: vi.fn(), showPrevious: vi.fn(), openOriginal: vi.fn() };
   const { result: root, dispose } = render(document, () => (
-    <LightboxViewport zoom={zoom} sizeObserver={sizeObserver} handlers={handlers} content={content} />
+    <LightboxViewport zoom={zoom} sizeObserver={sizeObserver} handlers={handlers} closesOnTap={new Signal(false)} content={content} />
   ));
 
   sizeObserver.resize(root, FRAME);

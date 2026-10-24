@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { createIcon } from "@/core/ui/components/icon/icon";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { Signal } from "@/core/utils/reactive/signal";
 import { render } from "@/core/ui/h/h";
 
 describe("createIcon", () => {
@@ -14,5 +15,17 @@ describe("createIcon", () => {
     const { result: icon } = render(document, () => createIcon("close", "icon"));
 
     expect(icon.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  test("redraws as the icon it is given changes", () => {
+    const name = new Signal<Icon>("expandAll");
+    const { result: icon } = render(document, () => createIcon(name, "icon"));
+    const readPath = (): string | null => icon.querySelector("path")!.getAttribute("d");
+    const expandPath = readPath();
+
+    name.value = "collapseAll";
+    expect(readPath()).not.toBe(expandPath);
+    name.value = "expandAll";
+    expect(readPath()).toBe(expandPath);
   });
 });

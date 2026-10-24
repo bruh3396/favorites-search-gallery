@@ -1,17 +1,27 @@
 .fsg-App {
   color-scheme: light dark;
+  color: var(--fsg-color-on-surface);
   font-family: var(--fsg-font-family);
 
-  --fsg-color-accent: light-dark(#3b6fd8, #7aa2f7);
-  --fsg-color-on-accent: light-dark(#ffffff, #10131a);
-  --fsg-color-outline: light-dark(#c4c8d0, #3a3f4b);
+  --fsg-color-primary: light-dark(#3b6fd8, #7aa2f7);
+  --fsg-color-on-primary: light-dark(#ffffff, #10131a);
+  --fsg-color-secondary-container: light-dark(#dbe4fb, #2b3a5c);
+  --fsg-color-on-secondary-container: light-dark(#13306b, #d6e2ff);
+  --fsg-color-surface-dim: light-dark(#eceef2, #1b1e25);
   --fsg-color-surface: light-dark(#ffffff, #20242c);
-  --fsg-color-surface-container: light-dark(#f5f6f8, #272c35);
-  --fsg-color-surface-sunken: light-dark(#eceef2, #1b1e25);
-  --fsg-color-on-surface-muted: light-dark(#6b7280, #9aa3b2);
+  --fsg-color-surface-container-low: light-dark(#f5f6f8, #242831);
+  --fsg-color-surface-container: light-dark(#f0f2f5, #282d36);
+  --fsg-color-surface-container-high: light-dark(#e8ebf0, #2f343e);
+  --fsg-color-surface-container-highest: light-dark(#e2e5eb, #383e49);
+  --fsg-color-on-surface: light-dark(#1b1f27, #e3e6ec);
+  --fsg-color-on-surface-variant: light-dark(#5a6170, #a3abb9);
+  --fsg-color-outline: light-dark(#8a909c, #79818f);
+  --fsg-color-outline-variant: light-dark(#d5d9e0, #353a45);
 
-  --fsg-radius-medium: 8px;
-  --fsg-radius-full: 999px;
+  --fsg-state-hover-state-layer-opacity: 8%;
+
+  --fsg-shape-corner-small: 8px;
+  --fsg-shape-corner-full: 999px;
 
   --fsg-control-size-large: 36px;
   --fsg-control-size-medium: 28px;
@@ -19,8 +29,8 @@
 
   --fsg-font-family: system-ui, sans-serif;
   --fsg-font-family-numeric: var(--fsg-font-family);
-  --fsg-font-size-label: 14px;
-  --fsg-font-size-label-small: 12px;
+  --fsg-typescale-label-large-size: 14px;
+  --fsg-typescale-label-medium-size: 12px;
 
   --fsg-motion-duration-short: 150ms;
   --fsg-motion-easing-standard: ease;

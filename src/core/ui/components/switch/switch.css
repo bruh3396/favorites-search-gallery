@@ -9,9 +9,9 @@
   inline-size: 50px;
   block-size: var(--fsg-control-size-medium);
   padding: 2px;
-  border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-full);
-  background: var(--fsg-color-surface-sunken);
+  border: 1px solid var(--fsg-color-outline-variant);
+  border-radius: var(--fsg-shape-corner-full);
+  background: var(--fsg-color-surface-container-highest);
   cursor: pointer;
   transition:
     background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
@@ -27,12 +27,12 @@
 }
 
 .fsg-Switch[aria-checked="true"] {
-  border-color: var(--fsg-color-accent);
-  background: var(--fsg-color-accent);
+  border-color: var(--fsg-color-primary);
+  background: var(--fsg-color-primary);
 }
 
 .fsg-Switch:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 2px;
 }
 
@@ -43,8 +43,8 @@
 .fsg-Switch-thumb {
   inline-size: var(--fsg-switch-thumb-size);
   block-size: var(--fsg-switch-thumb-size);
-  border-radius: var(--fsg-radius-full);
-  background: var(--fsg-color-on-surface-muted);
+  border-radius: var(--fsg-shape-corner-full);
+  background: var(--fsg-color-on-surface-variant);
   pointer-events: none;
   transition:
     transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
@@ -52,6 +52,6 @@
 }
 
 .fsg-Switch[aria-checked="true"] .fsg-Switch-thumb {
-  background: var(--fsg-color-on-accent);
+  background: var(--fsg-color-on-primary);
   transform: translateX(var(--fsg-switch-travel));
 }

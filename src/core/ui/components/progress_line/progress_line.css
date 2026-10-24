@@ -9,7 +9,7 @@
   inset-block: 0;
   inset-inline-start: 0;
   inline-size: calc(var(--fsg-ProgressLine-fraction) * 100%);
-  background: var(--fsg-color-accent);
+  background: var(--fsg-color-primary);
   transition: inline-size var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 

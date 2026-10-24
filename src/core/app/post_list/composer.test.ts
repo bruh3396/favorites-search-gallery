@@ -8,17 +8,19 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_p
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
+import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
+import { TileClass } from "@/core/ui/post_grid/tile";
 import { composePostListApp } from "@/core/app/post_list/composer";
+import { createPost } from "@/testing/post";
 
-const REMOTE_SEARCH_RESULTS: RemoteSearchResults = {
-  readInitialPage: () => ({ index: 0, posts: [] }),
-  fetchPage: async(index) => ({ index, posts: [] })
-};
-
-function mount(localKeyedValues = new MemoryLocalKeyedValues()): ShadowRoot {
+function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = []): ShadowRoot {
   const container = document.createElement("div");
+  const remoteSearchResults: RemoteSearchResults = {
+    readInitialPage: () => ({ index: 0, posts }),
+    fetchPage: async(index) => ({ index, posts: [] })
+  };
 
   composePostListApp({ colorScheme: "light" }, {
     scheduler: new MemoryScheduler(),
@@ -26,7 +28,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues()): ShadowRoot {
     sizeObserver: new MemorySizeObserver(),
     remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(),
-    remoteSearchResults: REMOTE_SEARCH_RESULTS,
+    remoteSearchResults,
     localKeyedValues,
     navigator: new MemoryNavigator(),
     fileSaver: new MemoryFileSaver()
@@ -47,5 +49,16 @@ describe("composePostListApp", () => {
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { layout: "row" }, favorites: { layout: "square" } } });
     expect(mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}`)!.dataset.layout).toBe("row");
+  });
+
+  test("leaves a tile's click to its post link while the lightbox is off", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { lightbox: { mode: "off" } } });
+    const root = mount(localKeyedValues, [createPost({ id: "1" })]);
+
+    root.querySelector(`.${TileClass.link}`)!.dispatchEvent(click);
+    expect([click.defaultPrevented, root.querySelector("dialog")!.open]).toEqual([false, false]);
   });
 });

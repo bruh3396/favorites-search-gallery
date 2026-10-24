@@ -1,4 +1,4 @@
-import { Child, h } from "@/core/ui/h/h";
+import { Child, Reactive, h } from "@/core/ui/h/h";
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable } from "@/core/utils/reactive/signal";
 
@@ -13,8 +13,8 @@ export const ViewPaneClass = {
 } as const;
 
 export interface ViewPaneAction {
-  readonly label: string;
-  readonly icon: Icon;
+  readonly label: Reactive<string>;
+  readonly icon: Reactive<Icon>;
   readonly disabled?: Readable<boolean>;
   onClick: () => void;
 }

@@ -1,0 +1,24 @@
+import { FrozenCobaltPost, isPost } from "@/adapters/frozen_cobalt/client/schema";
+import { isRecord } from "@/core/utils/guards/guards";
+
+export interface CachePage {
+  readonly posts: readonly FrozenCobaltPost[];
+  readonly next: number | null;
+}
+
+const CACHE_URL = "http://localhost:8787/cache";
+const HEADERS = { "Content-Type": "application/json", "X-User-Id": "0" };
+
+export async function fetchCachePage(after: number): Promise<CachePage> {
+  const response = await fetch(CACHE_URL, { method: "POST", headers: HEADERS, body: JSON.stringify({ after }) });
+
+  if (!response.ok) {
+    throw new Error(`Local Frozen Cobalt answered ${response.status}`);
+  }
+  const page: unknown = await response.json();
+
+  if (!isRecord(page) || !Array.isArray(page.posts) || !page.posts.every(isPost) || !(page.next === null || typeof page.next === "number")) {
+    throw new Error("Local Frozen Cobalt sent a malformed page");
+  }
+  return { posts: page.posts, next: page.next };
+}

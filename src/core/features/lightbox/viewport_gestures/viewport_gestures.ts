@@ -1,6 +1,7 @@
 import { GestureHandlers, GesturePoint } from "@/core/ui/gestures/gestures";
 import { LightboxZoom, ZoomRect } from "@/core/features/lightbox/zoom/zoom";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
+import { Readable } from "@/core/utils/reactive/signal";
 
 const WHEEL_ZOOM_RATE = 0.002;
 
@@ -18,7 +19,11 @@ export function resolveLightboxViewportCursor(
   return zoom.canZoom.value && hoverPoint !== undefined && containsPoint(zoom.mediaRect.value, hoverPoint) ? "zoom-in" : undefined;
 }
 
-export function createLightboxViewportGestureHandlers(zoom: LightboxViewportGestureZoom, handlers: LightboxViewportCommandHandlers): GestureHandlers {
+export function createLightboxViewportGestureHandlers(
+  zoom: LightboxViewportGestureZoom,
+  handlers: LightboxViewportCommandHandlers,
+  closesOnTap: Readable<boolean>
+): GestureHandlers {
   return {
     canDrag: () => zoom.isZoomed.peek(),
     onDrag: ({ delta }) => zoom.panBy(delta.x, delta.y),
@@ -33,6 +38,8 @@ export function createLightboxViewportGestureHandlers(zoom: LightboxViewportGest
         } else {
           handlers.close();
         }
+      } else if (closesOnTap.peek()) {
+        handlers.close();
       }
     },
     onWheel: ({ point, delta, modifiers }): boolean => {

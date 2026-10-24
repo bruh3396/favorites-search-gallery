@@ -47,10 +47,10 @@ describe("createPostListPreferences", () => {
 
     preferences.layout.set("row");
     preferences.tilesPerRow.set(6);
-    preferences.upscale.set(false);
+    preferences.fullImagesEnabled.set(false);
     const restored = createPostListPreferences(storage);
 
-    expect([restored.layout.value, restored.tilesPerRow.value, restored.upscale.value]).toEqual(["row", 6, false]);
+    expect([restored.layout.value, restored.tilesPerRow.value, restored.fullImagesEnabled.value]).toEqual(["row", 6, false]);
   });
 });
 

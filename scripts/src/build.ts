@@ -28,4 +28,4 @@ async function buildTarget(name: string): Promise<void> {
   console.log(`✔ Build completed (${name}).`);
 }
 
-Promise.all(Object.keys(readTargets()).map(buildTarget));
+buildTarget("rule34").then(() => Promise.all(Object.keys(readTargets()).filter(name => name !== "rule34").map(buildTarget)));

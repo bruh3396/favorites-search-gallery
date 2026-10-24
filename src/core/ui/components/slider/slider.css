@@ -1,9 +1,73 @@
 .fsg-Slider {
+  --fsg-Slider-thickness: 20px;
+  --fsg-Slider-knob: light-dark(var(--fsg-color-on-primary), var(--fsg-color-on-surface));
+
   display: flex;
   align-items: center;
 }
 
+.fsg-Slider[data-size="small"] {
+  --fsg-Slider-thickness: 16px;
+}
+
 .fsg-Slider-input {
+  --fsg-Slider-fill-end: calc(var(--fsg-Slider-thickness) / 2 + (100% - var(--fsg-Slider-thickness)) * var(--fsg-Slider-fraction));
+
   inline-size: 160px;
+  block-size: var(--fsg-Slider-thickness);
   margin: 0;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+}
+
+.fsg-Slider-input:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: 2px;
+  border-radius: var(--fsg-shape-corner-full);
+}
+
+.fsg-Slider-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.fsg-Slider-input::-webkit-slider-runnable-track {
+  block-size: var(--fsg-Slider-thickness);
+  border-radius: var(--fsg-shape-corner-full);
+  background: linear-gradient(
+    90deg,
+    var(--fsg-color-primary) var(--fsg-Slider-fill-end),
+    var(--fsg-color-surface-container-highest) 0
+  );
+}
+
+.fsg-Slider-input::-webkit-slider-thumb {
+  inline-size: var(--fsg-Slider-thickness);
+  block-size: var(--fsg-Slider-thickness);
+  border-radius: var(--fsg-shape-corner-full);
+  background: var(--fsg-Slider-knob);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  appearance: none;
+}
+
+.fsg-Slider-input::-moz-range-track {
+  block-size: var(--fsg-Slider-thickness);
+  border-radius: var(--fsg-shape-corner-full);
+  background: var(--fsg-color-surface-container-highest);
+}
+
+.fsg-Slider-input::-moz-range-progress {
+  block-size: var(--fsg-Slider-thickness);
+  border-radius: var(--fsg-shape-corner-full);
+  background: var(--fsg-color-primary);
+}
+
+.fsg-Slider-input::-moz-range-thumb {
+  inline-size: var(--fsg-Slider-thickness);
+  block-size: var(--fsg-Slider-thickness);
+  border: 0;
+  border-radius: var(--fsg-shape-corner-full);
+  background: var(--fsg-Slider-knob);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
 }

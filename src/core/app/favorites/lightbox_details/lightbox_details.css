@@ -1,0 +1,38 @@
+.fsg-FavoriteLightboxDetails-id {
+  margin: 0 0 16px;
+  font-family: var(--fsg-font-family-numeric);
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.fsg-FavoriteLightboxDetails-group {
+  margin-block-end: 16px;
+}
+
+.fsg-FavoriteLightboxDetails-heading {
+  margin: 0 0 8px;
+  color: rgb(255 255 255 / 0.55);
+  font-size: 11px;
+  font-variant-caps: all-small-caps;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.fsg-FavoriteLightboxDetails-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fsg-FavoriteLightboxDetails-tag {
+  max-inline-size: 100%;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.08);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}

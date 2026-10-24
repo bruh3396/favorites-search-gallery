@@ -3,11 +3,11 @@
   margin: 0;
   padding: 0 8px;
   border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-medium);
-  background-color: var(--fsg-color-surface-sunken);
+  border-radius: var(--fsg-shape-corner-small);
+  background-color: var(--fsg-color-surface-container-highest);
   color: inherit;
   font: inherit;
-  font-size: var(--fsg-font-size-label);
+  font-size: var(--fsg-typescale-label-large-size);
   line-height: 1;
   cursor: pointer;
   transition: border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
@@ -16,15 +16,15 @@
 .fsg-Dropdown[data-size="small"] {
   block-size: var(--fsg-control-size-small);
   padding: 0 6px;
-  font-size: var(--fsg-font-size-label-small);
+  font-size: var(--fsg-typescale-label-medium-size);
 }
 
 .fsg-Dropdown:hover:not(:disabled) {
-  border-color: var(--fsg-color-on-surface-muted);
+  border-color: var(--fsg-color-on-surface-variant);
 }
 
 .fsg-Dropdown:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 1px;
 }
 

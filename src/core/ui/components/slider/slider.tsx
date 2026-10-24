@@ -1,5 +1,5 @@
 import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { computed } from "@/core/utils/reactive/signal";
+import { computed, effect } from "@/core/utils/reactive/signal";
 import { doNothing } from "@/core/utils/function/function";
 import { h } from "@/core/ui/h/h";
 
@@ -27,7 +27,7 @@ export function Slider({
   onValueChange,
   onValueCommit = doNothing
 }: SliderProps): HTMLElement {
-  return (
+  const root = (
     <div className={SliderClass.root} dataset={{ size }}>
       <input
         className={SliderClass.input}
@@ -47,4 +47,7 @@ export function Slider({
       />
     </div>
   );
+
+  effect(() => root.style.setProperty("--fsg-Slider-fraction", String((value.value - min) / (max - min))));
+  return root;
 }

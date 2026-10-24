@@ -12,7 +12,7 @@
     align-items: center;
     gap: 8px;
     padding: 2px 4px;
-    border-block-end: 1px solid var(--fsg-color-outline);
+    border-block-end: 1px solid var(--fsg-color-outline-variant);
     background: var(--fsg-color-surface-container);
   }
 
@@ -32,9 +32,9 @@
     margin-inline-end: 4px;
     padding: 0;
     border: 0;
-    border-radius: var(--fsg-radius-full);
+    border-radius: var(--fsg-shape-corner-full);
     background: none;
-    color: var(--fsg-color-on-surface-muted);
+    color: var(--fsg-color-on-surface-variant);
     opacity: 0.5;
     cursor: default;
   }
@@ -46,10 +46,10 @@
     user-select: none;
     margin-block: 8px;
     padding: 0 16px 0 12px;
-    border-inline-start: 1px solid var(--fsg-color-outline);
-    color: var(--fsg-color-on-surface-muted);
+    border-inline-start: 1px solid var(--fsg-color-outline-variant);
+    color: var(--fsg-color-on-surface-variant);
     white-space: nowrap;
-    font-size: var(--fsg-font-size-label);
+    font-size: var(--fsg-typescale-label-large-size);
     font-variant-numeric: tabular-nums;
   }
 
@@ -63,19 +63,19 @@
     margin-inline-start: auto;
     padding: 0;
     border: 0;
-    border-radius: var(--fsg-radius-medium);
+    border-radius: var(--fsg-shape-corner-small);
     background: none;
-    color: var(--fsg-color-on-surface-muted);
+    color: var(--fsg-color-on-surface-variant);
     cursor: pointer;
   }
 
   .fsg-FavoritesSearchPanel-tabStripToggle:hover {
-    background: color-mix(in srgb, currentColor 12%, transparent);
+    background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
     color: inherit;
   }
 
   .fsg-FavoritesSearchPanel-tabStripToggle:focus-visible {
-    outline: 2px solid var(--fsg-color-accent);
+    outline: 2px solid var(--fsg-color-primary);
     outline-offset: -2px;
   }
 
@@ -86,9 +86,9 @@
     min-inline-size: 14px;
     padding-inline: 3px;
     box-sizing: border-box;
-    border-radius: var(--fsg-radius-full);
-    background: var(--fsg-color-accent);
-    color: var(--fsg-color-on-accent);
+    border-radius: var(--fsg-shape-corner-full);
+    background: var(--fsg-color-primary);
+    color: var(--fsg-color-on-primary);
     font-size: 10px;
     font-variant-numeric: tabular-nums;
     line-height: 14px;

@@ -6,10 +6,12 @@ import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands
 import { LightboxDetails } from "@/core/features/lightbox/details/details";
 import { LightboxDetailsPanelClass } from "@/core/features/lightbox/ui/details/details_panel";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/position";
+import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/overlay_visibility";
 import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxVideoClass } from "@/core/features/lightbox/ui/media/video";
+import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -25,11 +27,13 @@ const LEAVE_DELAY = 500;
 function setup(details?: LightboxDetails<Post>): {
   dialog: HTMLDialogElement;
   isOpen: Signal<boolean>;
+  simple: Signal<boolean>;
   scheduler: MemoryScheduler;
   handlers: LightboxCommandHandlers;
   keyListener: (event: KeyboardEvent) => void;
 } {
   const isOpen = new Signal(false);
+  const simple = new Signal(false);
   const scheduler = new MemoryScheduler();
   const currentItem = new Signal<Post | undefined>(undefined);
   const storage = { get: (): undefined => undefined, set: (): void => undefined };
@@ -42,8 +46,10 @@ function setup(details?: LightboxDetails<Post>): {
   } as Partial<LightboxCommandHandlers> as LightboxCommandHandlers;
   const keyListener = vi.fn();
   const { result: dialog } = render(document, () => {
+    const remoteMedia = new MemoryRemoteMedia();
     const stage = new LightboxStage<Post>({ gifCapacity: 1, videoCapacity: 1 }, {
-      remoteMedia: new MemoryRemoteMedia(),
+      remoteMedia,
+      resolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
       currentItem,
       retainedItems: new Signal<readonly Post[]>([]),
       volume: new StoredPreference({ key: "volume", defaultValue: 1 }, { storage }),
@@ -55,10 +61,11 @@ function setup(details?: LightboxDetails<Post>): {
         position={new Signal(undefined)}
         currentItem={currentItem}
         details={details}
+        simple={simple}
         stage={stage}
         overlayVisibility={new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler)}
         inFullscreen={new Signal(false)}
-        zoom={new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: stage.mediaSize })}
+        zoom={new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: stage.mediaSize, enabled: new Signal(true) })}
         autoplay={{ isPlaying: new Signal(false), countdown: new Signal(undefined) }}
         sizeObserver={new MemorySizeObserver()}
         handlers={handlers}
@@ -70,7 +77,7 @@ function setup(details?: LightboxDetails<Post>): {
   });
 
   document.body.append(dialog);
-  return { dialog, isOpen, scheduler, handlers, keyListener };
+  return { dialog, isOpen, simple, scheduler, handlers, keyListener };
 }
 
 function setupOpen(details?: LightboxDetails<Post>): ReturnType<typeof setup> {
@@ -197,6 +204,30 @@ describe("LightboxDialog", () => {
     expect(dialog.hasAttribute("data-details-open")).toBe(false);
     details.isOpen.set(true);
     expect(dialog.hasAttribute("data-details-open")).toBe(true);
+  });
+
+  test("marks itself simple and gives up the details panel's room in simple mode", () => {
+    const details = createDetails();
+    const { dialog, simple } = setupOpen(details);
+
+    details.isOpen.set(true);
+    simple.value = true;
+    expect([dialog.hasAttribute("data-simple"), dialog.hasAttribute("data-details-open")]).toEqual([true, false]);
+  });
+
+  test("closes on a tap without a video only in simple mode", () => {
+    const { dialog, simple, handlers } = setupOpen();
+    const viewport = dialog.querySelector(`.${LightboxViewportClass.root}`)!;
+    const tap = (): void => {
+      viewport.dispatchEvent(new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 }));
+      viewport.dispatchEvent(new PointerEvent("pointerup", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 }));
+    };
+
+    tap();
+    expect(handlers.close).not.toHaveBeenCalled();
+    simple.value = true;
+    tap();
+    expect(handlers.close).toHaveBeenCalledOnce();
   });
 
   test("keeps the overlay awake while the pointer is over the details panel", () => {

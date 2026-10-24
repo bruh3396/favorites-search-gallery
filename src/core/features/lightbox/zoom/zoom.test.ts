@@ -12,13 +12,15 @@ function setup(mediaSize: ZoomSize | undefined): {
   zoom: LightboxZoom;
   currentItem: Signal<Post | undefined>;
   media: Signal<ZoomSize | undefined>;
+  enabled: Signal<boolean>;
 } {
   const currentItem = new Signal<Post | undefined>(POSTS[0]);
   const media = new Signal<ZoomSize | undefined>(mediaSize);
-  const zoom = new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: media });
+  const enabled = new Signal(true);
+  const zoom = new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: media, enabled });
 
   zoom.setFrameSize(FRAME);
-  return { zoom, currentItem, media };
+  return { zoom, currentItem, media, enabled };
 }
 
 function readView(zoom: LightboxZoom): ZoomView {
@@ -36,6 +38,17 @@ describe("LightboxZoom", () => {
     expect(zoom.glides.value).toBe(true);
     expect(zoom.pixelScale.value).toBeUndefined();
     expect(zoom.visibleRegion.value).toBeUndefined();
+  });
+
+  test("zooms out when disabled and refuses to zoom until enabled again", () => {
+    const { zoom, enabled } = setup(SQUARE_MEDIA);
+
+    zoom.toggle();
+    enabled.value = false;
+    expect(zoom.isZoomed.value).toBe(false);
+    zoom.toggle();
+    zoom.zoomBy(4, { x: 0, y: 0 });
+    expect([zoom.isZoomed.value, zoom.canZoom.value]).toEqual([false, false]);
   });
 
   test("places the fitted media in the middle of the frame", () => {

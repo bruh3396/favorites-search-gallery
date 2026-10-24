@@ -41,7 +41,7 @@ export interface FavoritesSearchPanelProps {
   visibilityObserver: VisibilityObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
   getPostUrl: (post: MediaItem) => string;
-  onPlainClick: (post: Favorite) => void;
+  onPlainClick: (post: Favorite) => boolean;
   onCtrlClick: (post: Favorite) => void;
 }
 

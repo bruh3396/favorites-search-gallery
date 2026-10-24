@@ -78,7 +78,7 @@ function isTagResult(value: unknown): value is FrozenCobaltTagResult {
   return value.status === "ok" ? isOneOf(TAG_CATEGORY_CODES, value.category) : value.status === "rate_limited";
 }
 
-function isPost(value: unknown): value is FrozenCobaltPost {
+export function isPost(value: unknown): value is FrozenCobaltPost {
   return isRecord(value) &&
     typeof value.id === "string" &&
     typeof value.width === "number" &&

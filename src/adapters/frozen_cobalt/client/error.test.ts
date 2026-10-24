@@ -1,4 +1,4 @@
-import { FrozenCobaltError, FrozenCobaltErrorReason, isTransient } from "@/adapters/frozen_cobalt/client/error";
+import { FrozenCobaltError, FrozenCobaltErrorReason, isRetryable } from "@/adapters/frozen_cobalt/client/error";
 import { describe, expect, test } from "vitest";
 
 describe("FrozenCobaltError", () => {
@@ -13,7 +13,7 @@ describe("FrozenCobaltError", () => {
   });
 });
 
-describe("isTransient", () => {
+describe("isRetryable", () => {
   test.each<[FrozenCobaltErrorReason, boolean]>([
     ["timeout", true],
     ["network", true],
@@ -22,8 +22,8 @@ describe("isTransient", () => {
     ["server_error", true],
     ["malformed", false],
     ["unknown_file", false]
-  ])("%s is transient: %s", (reason, expected) => {
-    expect(isTransient(new FrozenCobaltError(reason))).toBe(expected);
+  ])("classifies %s as retryable: %s", (reason, expected) => {
+    expect(isRetryable(new FrozenCobaltError(reason))).toBe(expected);
   });
 
   test.each([
@@ -32,19 +32,19 @@ describe("isTransient", () => {
     [503, true],
     [400, false],
     [404, false]
-  ])("http %i is transient: %s", (status, expected) => {
-    expect(isTransient(new FrozenCobaltError("http", { status }))).toBe(expected);
+  ])("classifies http %i as retryable: %s", (status, expected) => {
+    expect(isRetryable(new FrozenCobaltError("http", { status }))).toBe(expected);
   });
 
   test("treats http without a status as permanent", () => {
-    expect(isTransient(new FrozenCobaltError("http"))).toBe(false);
+    expect(isRetryable(new FrozenCobaltError("http"))).toBe(false);
   });
 
   test("treats any other error as permanent", () => {
-    expect(isTransient(new Error("timeout"))).toBe(false);
+    expect(isRetryable(new Error("timeout"))).toBe(false);
   });
 
   test("throws for an unknown reason", () => {
-    expect(() => isTransient(new FrozenCobaltError("bogus" as FrozenCobaltErrorReason))).toThrow("bogus");
+    expect(() => isRetryable(new FrozenCobaltError("bogus" as FrozenCobaltErrorReason))).toThrow("bogus");
   });
 });

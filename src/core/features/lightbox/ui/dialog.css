@@ -33,17 +33,22 @@
   pointer-events: none;
 }
 
+.fsg-LightboxDialog[data-simple] .fsg-LightboxOverlay,
+.fsg-LightboxDialog[data-simple] .fsg-LightboxDetailsPanel {
+  display: none;
+}
+
 .fsg-LightboxDialog::backdrop {
   background: black;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .fsg-LightboxDialog[open] {
+  .fsg-LightboxDialog[open]:not([data-simple]) {
     transition: scale 65ms linear;
   }
 
   @starting-style {
-    .fsg-LightboxDialog[open] {
+    .fsg-LightboxDialog[open]:not([data-simple]) {
       scale: 0.96;
     }
   }

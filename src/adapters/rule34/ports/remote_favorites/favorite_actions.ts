@@ -4,7 +4,7 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Retry } from "@/core/utils/async/retry";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { isTransient } from "@/adapters/rule34/client/error";
+import { isRetryable } from "@/adapters/rule34/client/error";
 
 export type Rule34AddFavoriteAnswer = "error" | "alreadyAdded" | "loggedOut" | "added";
 
@@ -51,7 +51,7 @@ export class Rule34FavoriteActions {
     this.removeRetry = new Retry({ attempts: REMOVE_ATTEMPTS, baseDelay: REMOVE_RETRY_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
-      isRetryable: isTransient
+      isRetryable
     });
   }
 

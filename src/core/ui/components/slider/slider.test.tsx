@@ -47,6 +47,16 @@ describe("Slider", () => {
     expect(input.value).toBe("7.5");
   });
 
+  test("fills the track up to the value's share of the range", () => {
+    const { input, value } = setup();
+    const root = input.parentElement!;
+
+    value.value = 1;
+    expect(root.style.getPropertyValue("--fsg-Slider-fraction")).toBe("0");
+    value.value = 20;
+    expect(root.style.getPropertyValue("--fsg-Slider-fraction")).toBe("1");
+  });
+
   test("reports every value while dragging", () => {
     const { input, onValueChange } = setup();
 

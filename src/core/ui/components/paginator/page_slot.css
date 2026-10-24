@@ -7,8 +7,8 @@
   display: grid;
   place-items: center;
   padding: 0;
-  color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label);
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-large-size);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   cursor: pointer;
@@ -19,12 +19,12 @@
 
 .fsg-PageSlot-page:hover:not([aria-current="page"]),
 .fsg-PageSlot-gap:hover {
-  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
 }
 
 .fsg-PageSlot-page[aria-current="page"] {
-  background: var(--fsg-color-accent);
-  color: var(--fsg-color-on-accent);
+  background: var(--fsg-color-primary);
+  color: var(--fsg-color-on-primary);
   font-weight: 600;
   cursor: default;
 }
@@ -32,7 +32,7 @@
 .fsg-PageSlot-page:focus-visible,
 .fsg-PageSlot-gap:focus-visible,
 .fsg-PageSlot-field:focus {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: -2px;
 }
 
@@ -42,10 +42,10 @@
   margin: 0;
   padding: 0;
   border: 0;
-  background: var(--fsg-color-surface-sunken);
+  background: var(--fsg-color-surface-container-highest);
   color: inherit;
   font: inherit;
-  font-size: var(--fsg-font-size-label);
+  font-size: var(--fsg-typescale-label-large-size);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   text-align: center;

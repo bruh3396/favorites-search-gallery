@@ -1,64 +1,84 @@
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/tiler";
-import { PreferenceSchema, PreferenceStorage, Preferences, createPreferences, definePreference } from "@/core/utils/reactive/preference";
+import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
+import { Preference, PreferenceSchema, PreferenceStorage, Preferences, StoredPreference, createPreferences, definePreference } from "@/core/utils/reactive/preference";
 import { isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
+import { ColorScheme } from "@/core/boundary/environment";
+import { HostPage } from "@/core/boundary/ports/host_page/host_page";
+
+export interface AppPreferenceValues {
+  readonly postListEnabled: boolean;
+}
 
 export interface PostGridPreferenceValues {
   readonly layout: GridLayout;
   readonly tilesPerRow: number;
-  readonly upscale: boolean;
+  readonly fullImagesEnabled: boolean;
 }
 
 export interface FavoritesPreferenceValues extends PostGridPreferenceValues {
   readonly pageSize: number;
   readonly infiniteScroll: boolean;
   readonly tabStripVisible: boolean;
-  readonly enhanceSearchPages: boolean;
-  readonly siteHeaderVisible: boolean;
+  readonly nativeHeaderVisible: boolean;
   readonly expandedSettingSections: readonly string[];
   readonly activeTool: string | null;
 }
 
 export interface LightboxPreferenceValues {
+  readonly mode: LightboxMode;
   readonly volume: number;
   readonly muted: boolean;
   readonly detailsOpen: boolean;
 }
 
-export type PostGridPreferences = Preferences<PostGridPreferenceValues>;
+export type AppPreferences = Preferences<AppPreferenceValues>;
+export type PostGridPreferences =Preferences<PostGridPreferenceValues>;
 export type FavoritesPreferences = Preferences<FavoritesPreferenceValues>;
 export type PostListPreferences = PostGridPreferences;
 export type LightboxPreferences = Preferences<LightboxPreferenceValues>;
 
+export function createAppPreferences(storage: PreferenceStorage): AppPreferences {
+  return createPreferences<AppPreferenceValues>({
+    postListEnabled: definePreference(false)
+  }, storage);
+}
+
 export function createFavoritesPreferences(storage: PreferenceStorage): FavoritesPreferences {
   return createPreferences<FavoritesPreferenceValues>({
-    ...definePostGridPreferences(),
-    pageSize: definePreference(3, isPageSize),
+    ...createPostGridPreferences(),
+    pageSize: definePreference(50, isPageSize),
     infiniteScroll: definePreference(false),
     tabStripVisible: definePreference(true),
-    enhanceSearchPages: definePreference(false),
-    siteHeaderVisible: definePreference(true),
-    expandedSettingSections: definePreference<readonly string[]>(["general", "results"]),
+    nativeHeaderVisible: definePreference(true),
+    expandedSettingSections: definePreference<readonly string[]>(["general"]),
     activeTool: definePreference<string | null>(null, isToolId)
   }, storage);
 }
 
 export function createPostListPreferences(storage: PreferenceStorage): PostListPreferences {
-  return createPreferences(definePostGridPreferences(), storage);
+  return createPreferences(createPostGridPreferences(), storage);
 }
 
 export function createLightboxPreferences(storage: PreferenceStorage): LightboxPreferences {
   return createPreferences<LightboxPreferenceValues>({
+    mode: definePreference<LightboxMode>("full", oneOf(LIGHTBOX_MODES)),
     volume: definePreference(1, isInUnitInterval),
     muted: definePreference(false),
     detailsOpen: definePreference(false)
   }, storage);
 }
 
-function definePostGridPreferences(): PreferenceSchema<PostGridPreferenceValues> {
+export function createColorSchemePreference(colorScheme: ColorScheme, hostPage: HostPage): Preference<ColorScheme> {
+  return new StoredPreference({ key: "colorScheme", defaultValue: colorScheme }, {
+    storage: { get: () => colorScheme, set: (_key, value) => hostPage.setColorScheme(value as ColorScheme) }
+  });
+}
+
+function createPostGridPreferences(): PreferenceSchema<PostGridPreferenceValues> {
   return {
     layout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
     tilesPerRow: definePreference(6),
-    upscale: definePreference(true)
+    fullImagesEnabled: definePreference(true)
   };
 }
 

@@ -10,7 +10,7 @@
   gap: 8px;
   inline-size: 100%;
   padding: 8px 14px;
-  font-size: var(--fsg-font-size-label);
+  font-size: var(--fsg-typescale-label-large-size);
   font-weight: 600;
   text-align: start;
   cursor: pointer;
@@ -21,7 +21,7 @@
 }
 
 .fsg-Disclosure-trigger:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 2px;
 }
 
@@ -39,8 +39,8 @@
   inline-size: 7px;
   block-size: 7px;
   margin-inline-end: 3px;
-  border-inline-end: 1.5px solid var(--fsg-color-on-surface-muted);
-  border-block-end: 1.5px solid var(--fsg-color-on-surface-muted);
+  border-inline-end: 1.5px solid var(--fsg-color-on-surface-variant);
+  border-block-end: 1.5px solid var(--fsg-color-on-surface-variant);
   transform: rotate(-45deg);
   transition: transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }

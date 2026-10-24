@@ -1,3 +1,4 @@
+import { Icon } from "@/core/ui/components/icon/icon";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface SettingPreference<T> extends Readable<T> {
@@ -22,6 +23,7 @@ export interface ChoiceSetting<M extends string = string> extends SettingBase {
   readonly preference: SettingPreference<M>;
   readonly members: readonly M[];
   readonly labels: Readonly<Record<M, string>>;
+  readonly icons?: Readonly<Record<M, Icon>>;
   readonly control: "segmented" | "dropdown";
 }
 
@@ -41,4 +43,13 @@ export interface NumberSetting extends SettingBase {
   readonly writeOnEveryStep?: boolean;
 }
 
-export type SettingDescriptor = SwitchSetting | ChoiceSetting | ChoicesSetting | NumberSetting;
+export interface SliderSetting extends SettingBase {
+  readonly kind: "slider";
+  readonly preference: SettingPreference<number>;
+  readonly min: number;
+  readonly max: number;
+  readonly step: number;
+  readonly inverted?: boolean;
+}
+
+export type SettingDescriptor = SwitchSetting | ChoiceSetting | ChoicesSetting | NumberSetting | SliderSetting;

@@ -1,0 +1,103 @@
+.fsg-LabScreen {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 32px;
+  min-block-size: 100vh;
+}
+
+.fsg-LabScreen-nav {
+  display: flex;
+  flex-direction: column;
+  border-inline-end: 1px solid var(--fsg-color-outline);
+}
+
+.fsg-LabScreen-navLink {
+  padding: 10px 24px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fsg-typescale-label-large-size);
+  text-align: start;
+  cursor: pointer;
+}
+
+.fsg-LabScreen-navLink:hover {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-LabScreen-navLink[aria-current="page"] {
+  background: var(--fsg-color-primary);
+  color: var(--fsg-color-on-primary);
+}
+
+.fsg-LabScreen-main {
+  padding: 48px 24px 48px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fsg-LabScreen-message {
+  margin: 0;
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-large-size);
+}
+
+.fsg-LabScreen-section {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 12px;
+}
+
+.fsg-LabScreen [hidden] {
+  display: none;
+}
+
+.fsg-LabScreen-title {
+  margin: 0;
+  font-size: var(--fsg-typescale-title-large-size, 22px);
+}
+
+.fsg-LabScreen-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.fsg-LabScreen .fsg-SettingRow {
+  inline-size: min(100%, 360px);
+}
+
+.fsg-LabScreen .fsg-Stepper-input {
+  inline-size: 10ch;
+}
+
+.fsg-LabScreen-button {
+  block-size: var(--fsg-control-size-medium);
+  padding: 0 16px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-shape-corner-full);
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: var(--fsg-typescale-label-large-size);
+  cursor: pointer;
+}
+
+.fsg-LabScreen-button:hover:not(:disabled) {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-LabScreen-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-LabScreen-button:focus-visible,
+.fsg-LabScreen-navLink:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: 1px;
+}

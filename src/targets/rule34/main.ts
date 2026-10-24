@@ -14,6 +14,8 @@ import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemoteSearchResults } from "@/adapters/rule34/ports/remote_search_results/remote_search_results";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
+import { createAppPreferences } from "@/core/app/preferences";
+import { createAppStorage } from "@/core/app/app_storage";
 import { composePostListApp } from "@/core/app/post_list/composer";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
@@ -48,6 +50,11 @@ function startFavoritesApp(environment: Environment, dependencies: Rule34Depende
 function startPostListApp(environment: Environment, {
   hostPage, rule34, rule34Cdn, rule34Document, randomSource, localKeyedValues, scheduler
 }: Rule34Dependencies): void {
+  const { postListEnabled } = createAppPreferences(createAppStorage(localKeyedValues).appPreferences);
+
+  if (!postListEnabled.peek()) {
+    return;
+  }
   const remoteSearchResults = new Rule34RemoteSearchResults({ rule34, rule34Document, scheduler, randomSource });
 
   composePostListApp({ colorScheme: environment.colorScheme }, {

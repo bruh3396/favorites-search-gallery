@@ -1,4 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
+import { LightboxMode } from "@/core/features/lightbox/mode";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
@@ -25,10 +27,12 @@ function setup(): {
   const retainedItems = new Signal<readonly Post[]>([]);
   const goToNext = vi.fn(() => Promise.resolve());
   const storage = { get: (): undefined => undefined, set: (): void => undefined };
+  const remoteMedia = new MemoryRemoteMedia();
   const { result: view } = render(document, () => createLightboxView<Post>({ keymap: { ArrowRight: "showNext", " ": "toggleAutoplay" } }, {
     scheduler,
     sizeObserver: new MemorySizeObserver(),
-    remoteMedia: new MemoryRemoteMedia(),
+    remoteMedia,
+    resolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
     actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download: vi.fn() },
     navigation: {
       isOpen,
@@ -41,7 +45,8 @@ function setup(): {
     retainedItems,
     volume: new StoredPreference({ key: "volume", defaultValue: 1 }, { storage }),
     muted: new StoredPreference({ key: "muted", defaultValue: false }, { storage }),
-    locateItem: () => undefined
+    locateItem: () => undefined,
+    mode: new Signal<LightboxMode>("full")
   }));
 
   document.body.append(view);

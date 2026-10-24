@@ -45,6 +45,14 @@ describe("ViewPane", () => {
     expect([wasDisabled, button.disabled]).toEqual([true, false]);
   });
 
+  test("follows an action's label signal", () => {
+    const label = new Signal("Expand all");
+    const element = setup([{ label, icon: "expandAll", onClick: vi.fn() }]);
+
+    label.value = "Collapse all";
+    expect(findAction(element, "Collapse all").title).toBe("Collapse all");
+  });
+
   test("enables an action without a disabled signal", () => {
     expect(findAction(setup([{ label: "Reset all", icon: "reset", onClick: vi.fn() }]), "Reset all").disabled).toBe(false);
   });

@@ -1,5 +1,3 @@
-/* Rows are the control's height plus a fixed gap, so every row of a size is the same height
-   unless a caption makes it taller (libadwaita rows). */
 .fsg-SettingRow {
   display: flex;
   align-items: center;
@@ -17,10 +15,9 @@
   min-block-size: calc(var(--fsg-control-size-small) + 12px);
 }
 
-/* Only where hover exists, so a tap on touch doesn't leave the row lit. */
 @media (hover: hover) {
   .fsg-SettingRow:hover:has(:enabled) {
-    background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 10%, transparent);
+    background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
   }
 }
 
@@ -28,8 +25,6 @@
   cursor: pointer;
 }
 
-/* Disabled means nothing in the control can be used. :has(:disabled) alone would also
-   match a stepper whose + is disabled at its max. */
 .fsg-SettingRow:not(:has(:enabled)) {
   opacity: 0.5;
 }
@@ -42,10 +37,10 @@
 }
 
 .fsg-SettingRow-label {
-  font-size: var(--fsg-font-size-label);
+  font-size: var(--fsg-typescale-label-large-size);
 }
 
 .fsg-SettingRow-description {
-  color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label-small);
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-medium-size);
 }

@@ -29,7 +29,7 @@ function drawTile(options: TileOptions): HTMLElement {
     <Tile
       visibilityObserver={{ observe: () => () => { } }}
       imageLoaderService={createImageLoaderService()}
-      onPlainClick={doNothing}
+      onPlainClick={() => true}
       {...options}
     />
   )).result;
@@ -39,8 +39,11 @@ function getLink(tile: HTMLElement): HTMLAnchorElement {
   return tile.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!;
 }
 
-function clickLink(tile: HTMLElement, init: MouseEventInit = {}): void {
-  getLink(tile).dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, ...init }));
+function clickLink(tile: HTMLElement, init: MouseEventInit = {}): MouseEvent {
+  const click = new MouseEvent("click", { bubbles: true, cancelable: true, ...init });
+
+  getLink(tile).dispatchEvent(click);
+  return click;
 }
 
 function getPreview(tile: HTMLElement): HTMLImageElement {
@@ -104,12 +107,18 @@ describe("Tile", () => {
     expect(getLink(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] })).hasAttribute("tabindex")).toBe(false);
   });
 
-  test("reports a plain click", () => {
-    const onPlainClick = vi.fn();
+  test("reports a plain click and keeps the link from following once it is handled", () => {
+    const onPlainClick = vi.fn(() => true);
     const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], onPlainClick });
 
-    clickLink(tile);
+    expect(clickLink(tile).defaultPrevented).toBe(true);
     expect(onPlainClick).toHaveBeenCalledOnce();
+  });
+
+  test("leaves a plain click nobody handles to the link", () => {
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], onPlainClick: () => false });
+
+    expect(clickLink(tile).defaultPrevented).toBe(false);
   });
 
   test("reports a Ctrl or Meta click instead of following the link", () => {

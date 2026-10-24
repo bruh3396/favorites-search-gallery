@@ -47,20 +47,20 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   } = dependencies;
   const postList = createPostListService({ remoteSearchResults });
   const storage = createAppStorage(localKeyedValues);
-  const { layout, tilesPerRow, upscale } = createPostListPreferences(storage.postListPreferences);
-  const { volume, muted } = createLightboxPreferences(storage.lightboxPreferences);
+  const { layout, tilesPerRow, fullImagesEnabled } = createPostListPreferences(storage.postListPreferences);
+  const { mode, volume, muted } = createLightboxPreferences(storage.lightboxPreferences);
   const posts = computed(() => postList.page.value.posts);
   const sequence = new ListSequence({ wraps: false }, posts);
   const tileLocator = new TileLocator<Post>();
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Post>({
     scheduler, sizeObserver, remoteMedia, actions: postActions,
-    volume, muted,
+    mode, volume, muted,
     locateItem: post => tileLocator.locate(post)
   });
 
   lightbox.mediaCorrected.on(({ id, media }) => postList.correctMedia(id, media));
-  const imageLoaderService = new ImageLoaderService({ remoteMedia, scheduler, enabled: upscale, paused: lightbox.isOpen });
+  const imageLoaderService = new ImageLoaderService({ remoteMedia, scheduler, enabled: fullImagesEnabled, paused: lightbox.isOpen });
   const grid: Omit<PostGridProps<Post>, "posts"> = {
     changed: postList.changed,
     tileLocator,

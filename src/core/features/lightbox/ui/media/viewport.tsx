@@ -5,7 +5,7 @@ import {
   createLightboxViewportGestureHandlers,
   resolveLightboxViewportCursor
 } from "@/core/features/lightbox/viewport_gestures/viewport_gestures";
-import { computed, effect } from "@/core/utils/reactive/signal";
+import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { Gestures } from "@/core/ui/gestures/gestures";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
@@ -22,15 +22,16 @@ export interface LightboxViewportProps {
   zoom: LightboxViewportGestureZoom & Pick<LightboxZoom, "view" | "glides" | "setFrameSize" | "setFocusPoint">;
   sizeObserver: SizeObserver;
   handlers: LightboxViewportCommandHandlers;
+  closesOnTap: Readable<boolean>;
   content: Child;
 }
 
-export function LightboxViewport({ zoom, sizeObserver, handlers, content }: LightboxViewportProps): HTMLElement {
+export function LightboxViewport({ zoom, sizeObserver, handlers, closesOnTap, content }: LightboxViewportProps): HTMLElement {
   const contentLayer = <div className={LightboxViewportClass.content}>{content}</div> as HTMLElement;
   const root = <div className={LightboxViewportClass.root}>{contentLayer}</div> as HTMLElement;
   const gestures = new Gestures({ dragThreshold: DRAG_THRESHOLD }, {
     element: root,
-    handlers: createLightboxViewportGestureHandlers(zoom, handlers)
+    handlers: createLightboxViewportGestureHandlers(zoom, handlers, closesOnTap)
   });
   const cursor = computed(() => resolveLightboxViewportCursor(zoom, gestures.hoverPoint.value));
 

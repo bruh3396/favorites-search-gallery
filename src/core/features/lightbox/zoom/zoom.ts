@@ -9,6 +9,7 @@ export interface LightboxZoomConfiguration {
 export interface LightboxZoomDependencies {
   currentItem: Readable<MediaItem | undefined>;
   mediaSize: Readable<ZoomSize | undefined>;
+  enabled: Readable<boolean>;
 }
 
 export interface ZoomSize {
@@ -66,7 +67,7 @@ export class LightboxZoom {
   constructor(configuration: LightboxZoomConfiguration, dependencies: LightboxZoomDependencies) {
     this.minimumScale = configuration.minimumScale;
     this.maximumScale = configuration.maximumScale;
-    this.frame = computed(() => createFrame(this.frameSize.value, dependencies.mediaSize.value));
+    this.frame = computed(() => (dependencies.enabled.value ? createFrame(this.frameSize.value, dependencies.mediaSize.value) : undefined));
     this.view = computed(() => this.zoomed.value?.view ?? FIT_VIEW);
     this.glides = computed(() => this.zoomed.value?.glides ?? true);
     this.isZoomed = computed(() => this.zoomed.value !== undefined);
@@ -88,6 +89,7 @@ export class LightboxZoom {
     effect(() => {
       void dependencies.currentItem.value;
       void dependencies.mediaSize.value;
+      void dependencies.enabled.value;
       this.zoomed.value = undefined;
     });
   }

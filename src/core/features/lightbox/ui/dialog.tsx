@@ -1,4 +1,4 @@
-import { Readable, effect } from "@/core/utils/reactive/signal";
+import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { LightboxArrow } from "@/core/features/lightbox/ui/chrome/arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/autoplay";
 import { LightboxAutoplayBar } from "@/core/features/lightbox/ui/chrome/autoplay_bar";
@@ -35,6 +35,7 @@ export interface LightboxDialogProps<T extends MediaItem> {
   position: Readable<SequencePosition | undefined>;
   currentItem: Readable<T | undefined>;
   details?: LightboxDetails<T>;
+  simple: Readable<boolean>;
   stage: LightboxStage<T>;
   overlayVisibility: LightboxOverlayVisibility;
   inFullscreen: Readable<boolean>;
@@ -65,6 +66,7 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
         zoom={zoom}
         sizeObserver={props.sizeObserver}
         handlers={handlers}
+        closesOnTap={computed(() => props.simple.value && stage.video.value === undefined)}
         content={[
           <LightboxPreview src={stage.shownPreviewUrl} />,
           <LightboxImage element={stage.image} />,
@@ -113,6 +115,7 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
     overlayVisibility.wake();
   });
   effect(() => dialog.toggleAttribute("data-idle", !overlayVisibility.visible.value));
-  effect(() => dialog.toggleAttribute("data-details-open", details?.isOpen.value ?? false));
+  effect(() => dialog.toggleAttribute("data-simple", props.simple.value));
+  effect(() => dialog.toggleAttribute("data-details-open", !props.simple.value && (details?.isOpen.value ?? false)));
   return dialog;
 }

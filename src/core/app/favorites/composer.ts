@@ -1,7 +1,10 @@
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/app";
 import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
-import { createFavoritesPreferences, createLightboxPreferences } from "@/core/app/preferences";
+import {
+  createAppPreferences, createColorSchemePreference, createFavoritesPreferences, createLightboxPreferences
+} from "@/core/app/preferences";
 import { APP_FONT } from "@/core/app/font";
+import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchPanelProps } from "@/core/app/favorites/panel/search";
@@ -41,16 +44,20 @@ export interface FavoritesAppDependencies extends Omit<FavoritesDependencies, "p
   localKeyedValues: LocalKeyedValues;
   navigator: Navigator;
   fileSaver: FileSaver;
+  clipboard: Clipboard;
   pageVisibility: PageVisibility;
   hostPage: HostPage;
 }
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
   const { favoritesOwnerId, colorScheme, ...favoritesConfiguration } = configuration;
-  const { remotePages, localKeyedValues, navigator, fileSaver, visibilityObserver, sizeObserver, pageVisibility, hostPage, ...ports } = dependencies;
+  const { remotePages, localKeyedValues, navigator, fileSaver, clipboard, visibilityObserver, sizeObserver, pageVisibility, hostPage, ...ports } = dependencies;
   const storage = createAppStorage(localKeyedValues);
   const preferences = createFavoritesPreferences(storage.favoritesPreferences);
-  const { volume, muted, detailsOpen } = createLightboxPreferences(storage.lightboxPreferences);
+  const appPreferences = createAppPreferences(storage.appPreferences);
+  const colorSchemePreference = createColorSchemePreference(colorScheme, hostPage);
+  const lightboxPreferences = createLightboxPreferences(storage.lightboxPreferences);
+  const { mode, volume, muted, detailsOpen } = lightboxPreferences;
   const paginationSettings = { pageSize: preferences.pageSize, infiniteScroll: preferences.infiniteScroll };
   const skeletonDimensions = new SkeletonDimensions({ ownerId: favoritesOwnerId }, { storage: storage.app });
   const favoritesService = createFavoritesService(favoritesConfiguration, { ...ports, paginationSettings });
@@ -61,15 +68,17 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const postActions = new PostActions({ remoteMedia: ports.remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Favorite>({
     scheduler: ports.scheduler, sizeObserver, remoteMedia: ports.remoteMedia, actions: postActions,
-    volume, muted,
+    mode, volume, muted,
     locateItem: item => workspace.locate(item),
     details: {
       isOpen: detailsOpen,
-      createContent: favorite => h(FavoriteLightboxDetails, { favorite })
+      createContent: favorite => h(FavoriteLightboxDetails, {
+        favorite, localTagCategories: ports.localTagCategories, clipboard, scheduler: ports.scheduler
+      })
     }
   });
   const imageLoaderService = new ImageLoaderService({
-    remoteMedia: ports.remoteMedia, scheduler: ports.scheduler, enabled: preferences.upscale, paused: lightbox.isOpen
+    remoteMedia: ports.remoteMedia, scheduler: ports.scheduler, enabled: preferences.fullImagesEnabled, paused: lightbox.isOpen
   });
   const tabCount = computed(() => workspace.tabManager.tabs.value.length);
 
@@ -93,12 +102,16 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       const app = mountAppRoot(container, { colorScheme, font: APP_FONT, styles: FAVORITES_APP_STYLES });
 
       app.append(...render(container.ownerDocument, () => FavoritesApp({
-        favorites: favoritesService, workspace, lightbox, preferences, scheduler: ports.scheduler, panel: createPanelProps
+        favorites: favoritesService, workspace, lightbox, preferences, appPreferences, lightboxPreferences, colorScheme: colorSchemePreference,
+        scheduler: ports.scheduler, panel: createPanelProps
       })).result);
       const windowFill = fillRestOfWindow(app, sizeObserver);
 
       effect(() => {
-        hostPage.setHeaderVisible(preferences.siteHeaderVisible.value);
+        app.style.colorScheme = colorSchemePreference.value;
+      });
+      effect(() => {
+        hostPage.setHeaderVisible(preferences.nativeHeaderVisible.value);
         windowFill.refit();
       });
       favoritesService.load().catch(console.error);

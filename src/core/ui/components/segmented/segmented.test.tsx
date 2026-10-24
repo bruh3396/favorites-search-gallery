@@ -34,6 +34,14 @@ function setup(initial: Layout = "none"): Setup {
   return { element, dispose, value, disabled, onValueChange, radios: [...element.querySelectorAll<HTMLButtonElement>("[role=radio]")] };
 }
 
+function setupIcons(): HTMLButtonElement[] {
+  const choices = [{ value: "row", label: "Row", icon: "layoutRow" }, { value: "column", label: "Column" }] as const;
+  const { result } = render(document, () => (
+    <Segmented<Layout> choices={choices} value={new Signal<Layout>("row")} onValueChange={() => undefined} />
+  ));
+  return [...result.querySelectorAll<HTMLButtonElement>("[role=radio]")];
+}
+
 function press(target: HTMLElement, key: string): KeyboardEvent {
   const event = new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true });
 
@@ -140,6 +148,13 @@ describe("Segmented", () => {
     dispose();
     value.value = "row";
     expect(readCheckedStates(radios)).toEqual([true, false, false]);
+  });
+
+  test("draws an icon in place of a choice's label and names the option by it", () => {
+    const [row, column] = setupIcons();
+
+    expect([row.querySelector("svg") !== null, row.textContent, row.getAttribute("aria-label"), row.title]).toEqual([true, "", "Row", "Row"]);
+    expect([column.textContent, column.hasAttribute("aria-label")]).toEqual(["Column", false]);
   });
 
   test("styles every class it sets", () => {

@@ -54,8 +54,8 @@ export class FavoritesPagination {
     this.requestedPageNumber.value = clamp(pageNumber, 1, this.currentPageCount.peek());
   }
 
-  public goToContaining(item: { id: string }): void {
-    const index = this.dependencies.search.results.peek().findIndex(favorite => favorite.id === item.id);
+  public goToContaining(item: Favorite): void {
+    const index = this.dependencies.search.results.peek().indexOf(item);
 
     if (index >= 0) {
       this.goTo(Math.floor(index / this.getPageSize()) + 1);

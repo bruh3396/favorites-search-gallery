@@ -7,6 +7,7 @@ import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/button";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/position";
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
 import { MemoryClient } from "@/adapters/memory/client/client";
+import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/clipboard";
 import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
@@ -24,6 +25,8 @@ import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_o
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
+import { SegmentedClass } from "@/core/ui/components/segmented/segmented";
+import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
@@ -55,6 +58,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     localKeyedValues,
     navigator,
     fileSaver,
+    clipboard: new MemoryClipboard(),
     pageVisibility,
     hostPage
   }).mount(container);
@@ -111,6 +115,37 @@ describe("composeFavoritesApp", () => {
     expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("4");
   });
 
+  test("resizes the grid's tiles as the tile size slider in the Settings tool is dragged", () => {
+    const root = mount();
+    const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    const slider = root.querySelector<HTMLInputElement>(`.${SliderClass.input}[aria-label="Tile size"]`)!;
+
+    slider.value = "18";
+    slider.dispatchEvent(new Event("input"));
+    expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("3");
+  });
+
+  test("lays the grid out as picked in the Settings tool", () => {
+    const root = mount();
+    const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    root.querySelector<HTMLButtonElement>(`.${SegmentedClass.option}[aria-label="Square"]`)!.click();
+    expect(grid.dataset.layout).toBe("square");
+  });
+
+  test("stores full images off when upscaling is switched off in the Settings tool", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const root = mount(localKeyedValues);
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    clickSettingsSwitch(root, "Upscale thumbnails");
+
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { fullImagesEnabled: false } } });
+  });
+
   test("stores infinite scroll when it is switched on in the Settings tool", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const root = mount(localKeyedValues);
@@ -121,21 +156,49 @@ describe("composeFavoritesApp", () => {
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { infiniteScroll: true } } });
   });
 
-  test("hides the site header when it is switched off in the Settings tool", () => {
+  test("stores the post list on with the preferences both apps read when it is switched on in the Settings tool", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const root = mount(localKeyedValues);
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    clickSettingsSwitch(root, "Enhance search pages");
+
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { app: { postListEnabled: true } } });
+  });
+
+  test("hides the native header when it is switched off in the Settings tool", () => {
     const hostPage = new MemoryHostPage(true);
     const root = mount(new MemoryLocalKeyedValues(), [], { hostPage });
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
     expect(hostPage.headerVisible).toBe(true);
-    clickSettingsSwitch(root, "Site header");
+    clickSettingsSwitch(root, "Native header");
     expect(hostPage.headerVisible).toBe(false);
   });
 
-  test("hides the site header on mount when it was switched off before", () => {
+  test("switches the app and the site to the color scheme picked in the Settings tool", () => {
+    const hostPage = new MemoryHostPage();
+
+    hostPage.colorScheme = "dark";
+    const root = mount(new MemoryLocalKeyedValues(), [], { hostPage });
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    [...root.querySelectorAll<HTMLButtonElement>(`.${SegmentedClass.option}`)].find(option => option.textContent === "Light")!.click();
+    expect([root.querySelector<HTMLElement>(`.${AppRootClass.root}`)!.style.colorScheme, hostPage.colorScheme]).toEqual(["light", "light"]);
+  });
+
+  test("leaves the site's color scheme alone on mount", () => {
+    const hostPage = new MemoryHostPage();
+
+    mount(new MemoryLocalKeyedValues(), [], { hostPage });
+    expect(hostPage.colorScheme).toBe("light");
+  });
+
+  test("hides the native header on mount when it was switched off before", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const hostPage = new MemoryHostPage(true);
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { siteHeaderVisible: false } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { nativeHeaderVisible: false } } });
     mount(localKeyedValues, [], { hostPage });
     expect(hostPage.headerVisible).toBe(false);
   });
@@ -278,6 +341,30 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
     clickLightboxButton(root, "Close");
     expect([findStandIn(), root.querySelector("dialog")!.open]).toEqual([null, false]);
+  });
+
+  test("leaves a tile's click to its post link once the gallery is turned off in the Settings tool", async() => {
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]);
+    const click = new MouseEvent("click", { bubbles: true, cancelable: true });
+
+    await flushMicrotasks();
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    [...root.querySelectorAll<HTMLButtonElement>(`.${SegmentedClass.option}`)].find(option => option.textContent === "Off")!.click();
+    root.querySelector(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.dispatchEvent(click);
+    expect([click.defaultPrevented, root.querySelector("dialog")!.open]).toEqual([false, false]);
+  });
+
+  test("opens the lightbox bare in simple mode", async() => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { lightbox: { mode: "simple" } } });
+    const root = mount(localKeyedValues, [createPost({ id: "1" })]);
+
+    await flushMicrotasks();
+    root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
+    const dialog = root.querySelector("dialog")!;
+
+    expect([dialog.open, dialog.hasAttribute("data-simple")]).toEqual([true, true]);
   });
 
   test("opens a favorite's original when its tile is Ctrl-clicked", async() => {

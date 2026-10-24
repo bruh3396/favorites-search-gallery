@@ -181,17 +181,21 @@ describe("Rule34RemoteFavorites", () => {
       await run;
     });
 
-    test("stops at the first refused page instead of retrying it", async() => {
-      const fetchPage = vi.fn<FetchPage>((_pageId, pageIndex) => (
-        pageIndex === 0 ? Promise.reject(new Rule34Error("http", { status: 403 })) : Promise.resolve(createPage(pageIndex))
-      ));
+    test("keeps going past a page refused once", async() => {
+      let refused = false;
+      const fetchPage = vi.fn<FetchPage>((_pageId, pageIndex) => {
+        if (pageIndex === 1 && !refused) {
+          refused = true;
+          return Promise.reject(new Rule34Error("http", { status: 403 }));
+        }
+        return Promise.resolve(pageIndex > 2 ? [] : createPage(pageIndex));
+      });
 
-      await expect(fetchAllFavorites({ fetchPage })).rejects.toThrow(Rule34Error);
-      expect(fetchPage).toHaveBeenCalledOnce();
+      expect(getPostIds(await fetchAllFavorites({ fetchPage }))).toEqual(["page0-0", "page1-0", "page2-0"]);
     });
 
-    test("gives up on a page after five transient failures", async() => {
-      const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 429 })));
+    test.each([403, 429])("gives up on a page after five failures with http %i", async(status) => {
+      const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status })));
 
       await expect(fetchAllFavorites({ fetchPage })).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
@@ -218,18 +222,26 @@ describe("Rule34RemoteFavorites", () => {
       expect(fetchPage).not.toHaveBeenCalled();
     });
 
-    test("retries a page that fails transiently", async() => {
+    test("retries a page that fails", async() => {
       const fetchPage = vi.fn<FetchPage>()
         .mockRejectedValueOnce(new Rule34Error("network"))
+        .mockRejectedValueOnce(new Rule34Error("http", { status: 403 }))
         .mockRejectedValueOnce(new Rule34Error("http", { status: 503 }))
         .mockResolvedValue(createPage(0));
 
       expect(await findNewFavoriteIds({ fetchPage }, ["page0-0"])).toEqual([]);
-      expect(fetchPage).toHaveBeenCalledTimes(3);
+      expect(fetchPage).toHaveBeenCalledTimes(4);
     });
 
-    test("never retries a refused page", async() => {
+    test("gives up on a page refused five times", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
+
+      await expect(findNewFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
+      expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
+    });
+
+    test("never retries a missing page", async() => {
+      const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 404 })));
 
       await expect(findNewFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledOnce();
@@ -260,11 +272,11 @@ describe("Rule34RemoteFavorites", () => {
       expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 0);
     });
 
-    test("never retries a refused page", async() => {
+    test("gives up on a page refused five times", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
 
       await expect(findRemovedFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
-      expect(fetchPage).toHaveBeenCalledOnce();
+      expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
     });
   });
 

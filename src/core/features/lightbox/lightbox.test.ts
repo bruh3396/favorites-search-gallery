@@ -3,8 +3,10 @@ import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { LightboxMode } from "@/core/features/lightbox/mode";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { Post } from "@/core/domain/post/post";
+import { Signal } from "@/core/utils/reactive/signal";
 import { StoredPreference } from "@/core/utils/reactive/preference";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
@@ -14,7 +16,7 @@ const IMAGE = createPost({ id: "1", media: { kind: "image", locator: "image.jpg"
 const NEIGHBOR = createPost({ id: "2", media: { kind: "image", locator: "neighbor.jpg" } });
 const LONGER_THAN_ANY_DELAY = 60_000;
 
-function setup(): {
+function setup(mode: LightboxMode = "full"): {
   lightbox: Lightbox<Post>;
   scheduler: MemoryScheduler;
   remoteMedia: MemoryRemoteMedia;
@@ -38,7 +40,8 @@ function setup(): {
     actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download: vi.fn() },
     volume: new StoredPreference({ key: "volume", defaultValue: 1 }, { storage }),
     muted: new StoredPreference({ key: "muted", defaultValue: false }, { storage }),
-    locateItem: () => undefined
+    locateItem: () => undefined,
+    mode: new Signal(mode)
   });
   return { lightbox, scheduler, remoteMedia, sequence, getNeighbors };
 }
@@ -65,6 +68,13 @@ describe("createLightbox", () => {
     expect(lightbox.isOpen.value).toBe(true);
     scheduler.advance(LONGER_THAN_ANY_DELAY);
     expect(settled).toHaveBeenCalledWith(IMAGE);
+  });
+
+  test("reports whether it opened, and stays closed while off", () => {
+    const { lightbox: full, sequence } = setup();
+    const { lightbox: off } = setup("off");
+
+    expect([full.open(sequence, IMAGE), off.open(sequence, IMAGE), off.isOpen.value]).toEqual([true, false, false]);
   });
 
   test("loads a settled item and its neighbours", async() => {

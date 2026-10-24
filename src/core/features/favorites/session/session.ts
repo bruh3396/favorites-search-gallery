@@ -75,7 +75,7 @@ export class FavoritesSession {
     this.pagination.goTo(pageNumber);
   }
 
-  public goToPageContaining(item: { id: string }): void {
+  public goToPageContaining(item: Favorite): void {
     this.pagination.goToContaining(item);
   }
 

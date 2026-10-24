@@ -21,7 +21,7 @@ export interface TileProps {
   visibilityObserver: VisibilityObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
   href?: string;
-  onPlainClick: () => void;
+  onPlainClick: () => boolean;
   onCtrlClick?: () => void;
 }
 
@@ -64,7 +64,7 @@ export function Tile(props: TileProps): HTMLElement {
   return root;
 }
 
-function handleClick(event: MouseEvent, onPlainClick: () => void, onCtrlClick?: () => void): void {
+function handleClick(event: MouseEvent, onPlainClick: () => boolean, onCtrlClick?: () => void): void {
   if (event.button !== 0 || event.shiftKey || event.altKey) {
     return;
   }
@@ -74,9 +74,8 @@ function handleClick(event: MouseEvent, onPlainClick: () => void, onCtrlClick?: 
       event.preventDefault();
       onCtrlClick();
     }
-  } else {
+  } else if (onPlainClick()) {
     event.preventDefault();
-    onPlainClick();
   }
 }
 

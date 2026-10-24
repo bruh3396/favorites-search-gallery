@@ -5,15 +5,15 @@
   block-size: var(--fsg-control-size-medium);
   padding: 2px;
   border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-medium);
-  background: var(--fsg-color-surface-sunken);
+  border-radius: var(--fsg-shape-corner-small);
+  background: var(--fsg-color-surface-container-highest);
 }
 
 .fsg-Segmented-option {
   padding: 0 12px;
-  border-radius: calc(var(--fsg-radius-medium) - 2px);
-  color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label);
+  border-radius: calc(var(--fsg-shape-corner-small) - 2px);
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-large-size);
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
@@ -22,26 +22,37 @@
     color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
+.fsg-Segmented-icon {
+  display: block;
+  inline-size: 16px;
+  block-size: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .fsg-Segmented[data-size="small"] {
   block-size: var(--fsg-control-size-small);
 }
 
 .fsg-Segmented[data-size="small"] .fsg-Segmented-option {
   padding: 0 8px;
-  font-size: var(--fsg-font-size-label-small);
+  font-size: var(--fsg-typescale-label-medium-size);
 }
 
 .fsg-Segmented-option:hover:not(:disabled, [aria-checked="true"]) {
-  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
 }
 
 .fsg-Segmented-option[aria-checked="true"] {
-  background: var(--fsg-color-accent);
-  color: var(--fsg-color-on-accent);
+  background: var(--fsg-color-primary);
+  color: var(--fsg-color-on-primary);
 }
 
 .fsg-Segmented-option:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 1px;
 }
 

@@ -35,7 +35,7 @@ interface Setup {
   settings: Signal<SearchSettings>;
   skeleton: HTMLElement;
   emptyState: HTMLElement;
-  onPlainClick: Mock<(post: MediaItem) => void>;
+  onPlainClick: Mock<(post: MediaItem) => boolean>;
   tabStripVisible: Preference<boolean>;
   tabCount: Signal<number>;
 }
@@ -52,7 +52,7 @@ function setup(): Setup {
   const goTo = vi.fn<(pageNumber: number) => void>();
   const clearFilters = vi.fn<() => void>();
   const settings = new Signal(DEFAULT_SEARCH_SETTINGS);
-  const onPlainClick = vi.fn<(post: MediaItem) => void>();
+  const onPlainClick = vi.fn<(post: MediaItem) => boolean>(() => true);
   const favorites = { hydrated: new Emitter<Favorite>(), loaded };
   const preferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
   const session = {

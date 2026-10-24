@@ -1,4 +1,6 @@
-import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SwitchSetting } from "@/core/ui/settings/descriptor";
+import {
+  ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SliderSetting, SwitchSetting
+} from "@/core/ui/settings/descriptor";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Setting, SettingProps } from "@/core/ui/settings/setting";
 import { describe, expect, test } from "vitest";
@@ -33,6 +35,15 @@ function createSwitchSetting(preference: SettingPreference<boolean>, disabled?: 
 
 function createLayoutSetting(preference: SettingPreference<Layout>, control: ChoiceSetting["control"]): ChoiceSetting<Layout> {
   return { id: "layout", kind: "choice", label: "Layout", preference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
+}
+
+function createSizeSetting(preference: SettingPreference<number>, inverted?: boolean): SliderSetting {
+  return { id: "size", kind: "slider", label: "Size", preference, min: 1, max: 20, step: 1, inverted };
+}
+
+function slide(input: HTMLInputElement, to: number): void {
+  input.value = String(to);
+  input.dispatchEvent(new Event("input"));
 }
 
 function setup(props: SettingProps): { element: HTMLElement; dispose: () => void } {
@@ -76,7 +87,7 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
 
 describe("Setting", () => {
   test("refuses a descriptor of an unknown kind", () => {
-    const descriptor = { ...createSwitchSetting(createPreference(false)), kind: "slider" } as unknown as SettingDescriptor;
+    const descriptor = { ...createSwitchSetting(createPreference(false)), kind: "color" } as unknown as SettingDescriptor;
 
     expect(() => renderSetting(descriptor)).toThrow("Unexpected value");
   });
@@ -220,6 +231,27 @@ describe("Setting", () => {
     scheduler.runNext();
     increment.dispatchEvent(new PointerEvent("pointerup"));
     expect(preference.writes).toEqual([2, 3]);
+  });
+
+  test("writes every value a slider passes while dragging", () => {
+    const preference = createPreference(5);
+    const input = renderSetting(createSizeSetting(preference)).querySelector("input")!;
+
+    expect([input.getAttribute("aria-label"), input.value]).toEqual(["Size", "5"]);
+    slide(input, 6);
+    slide(input, 7);
+    expect(preference.writes).toEqual([6, 7]);
+  });
+
+  test("runs an inverted slider from its max to its min", () => {
+    const preference = createPreference(6);
+    const input = renderSetting(createSizeSetting(preference, true)).querySelector("input")!;
+
+    expect(input.value).toBe("15");
+    slide(input, 20);
+    expect(preference.value).toBe(1);
+    preference.set(20);
+    expect(input.value).toBe("1");
   });
 
   test("disables the control while its disabled state is true", () => {

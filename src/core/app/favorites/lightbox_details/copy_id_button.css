@@ -1,0 +1,24 @@
+.fsg-CopyIdButton {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 2px 6px;
+  margin-inline-start: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: copy;
+}
+
+.fsg-CopyIdButton:hover {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.fsg-CopyIdButton-copied {
+  color: rgb(255 255 255 / 0.55);
+  font-family: var(--fsg-font-family);
+  font-size: 12px;
+  font-weight: 400;
+}

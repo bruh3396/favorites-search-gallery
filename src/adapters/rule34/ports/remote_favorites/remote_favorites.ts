@@ -11,7 +11,7 @@ import { Rule34Fetch } from "@/adapters/rule34/client/request";
 import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/new_favorites_finder";
 import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/removed_favorites_finder";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { isTransient } from "@/adapters/rule34/client/error";
+import { isRetryable } from "@/adapters/rule34/client/error";
 
 export interface Rule34RemoteFavoritesDependencies {
   rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
@@ -39,7 +39,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
     this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
-      isRetryable: isTransient
+      isRetryable
     });
     this.favoriteActions = new Rule34FavoriteActions(dependencies);
   }
@@ -80,7 +80,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
     return new Rule34AllFavoritesFetcher({
       onPostsFound: onFavoritesFound,
       fetch: (pageIndex): Promise<Post[]> => this.fetch(pageIndex),
-      shouldRetry: (error, failureCount): boolean => failureCount < MAX_FETCH_ATTEMPTS && isTransient(error),
+      shouldRetry: (error, failureCount): boolean => failureCount < MAX_FETCH_ATTEMPTS && isRetryable(error),
       delayForRetry: (retryCount): number => computeRetryDelay(retryCount, FETCH_DELAY),
       scheduler: this.dependencies.scheduler
     });

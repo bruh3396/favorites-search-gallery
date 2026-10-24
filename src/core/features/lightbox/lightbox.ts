@@ -2,6 +2,7 @@ import { DEFAULT_LIGHTBOX_KEYMAP } from "@/core/features/lightbox/input/keymap";
 import { LightboxActions } from "@/core/features/lightbox/actions/actions";
 import { LightboxDetails } from "@/core/features/lightbox/details/details";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
+import { LightboxMode } from "@/core/features/lightbox/mode";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
 import { LightboxRetentionList } from "@/core/features/lightbox/retention_list/retention_list";
 import { MediaItem } from "@/core/domain/post/post";
@@ -28,6 +29,7 @@ export interface LightboxDependencies<T extends MediaItem> {
   muted: Preference<boolean>;
   locateItem: (item: T) => Element | undefined;
   details?: LightboxDetails<T>;
+  mode: Readable<LightboxMode>;
 }
 
 export interface Lightbox<T extends MediaItem> {
@@ -35,7 +37,7 @@ export interface Lightbox<T extends MediaItem> {
   readonly settled: Occurrence<T>;
   readonly closed: Occurrence<T>;
   readonly mediaCorrected: Occurrence<MediaItem>;
-  open(sequence: MediaSequence<T>, item: T): void;
+  open(sequence: MediaSequence<T>, item: T): boolean;
   prefetch(item: T): void;
   createView(): HTMLElement;
   dispose(): void;
@@ -50,7 +52,13 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
     settled: navigation.settled,
     closed: navigation.closed,
     mediaCorrected: resolver.corrected,
-    open: (sequence, item): void => navigation.open(sequence, item),
+    open: (sequence, item): boolean => {
+      if (dependencies.mode.peek() === "off") {
+        return false;
+      }
+      navigation.open(sequence, item);
+      return true;
+    },
     prefetch: (item): void => retentionList.retain([item]),
     createView: (): HTMLElement => createLightboxView(
       { keymap: DEFAULT_LIGHTBOX_KEYMAP },

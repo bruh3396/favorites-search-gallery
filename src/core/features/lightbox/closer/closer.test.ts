@@ -37,6 +37,7 @@ function setup(overrides: Partial<LightboxCloserDependencies<Post>> = {}): {
     navigation: { currentItem: new Signal<Post | undefined>(POST), close },
     shownMedia: new Signal<MorphSource | undefined>(createShownMedia()),
     inFullscreen: new Signal(false),
+    morphs: new Signal(true),
     locateItem,
     ...overrides
   });
@@ -65,7 +66,8 @@ describe("LightboxCloser", () => {
 
     test.each<[string, Partial<LightboxCloserDependencies<Post>>]>([
       ["no shown media", { shownMedia: new Signal<MorphSource | undefined>(undefined) }],
-      ["fullscreen", { inFullscreen: new Signal(true) }]
+      ["fullscreen", { inFullscreen: new Signal(true) }],
+      ["morphing off", { morphs: new Signal(false) }]
     ])("closes without morphing with %s", (_, overrides) => {
       const { closer, close, locateItem } = setup(overrides);
 

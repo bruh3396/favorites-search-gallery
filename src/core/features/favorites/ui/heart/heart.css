@@ -3,7 +3,7 @@
   place-items: center;
   inline-size: var(--fsg-control-size-medium);
   block-size: var(--fsg-control-size-medium);
-  border-radius: var(--fsg-radius-full);
+  border-radius: var(--fsg-shape-corner-full);
   background: color-mix(in srgb, black 55%, transparent);
   color: white;
   font-size: 16px;
@@ -17,6 +17,6 @@
 }
 
 .fsg-FavoriteHeart:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 1px;
 }

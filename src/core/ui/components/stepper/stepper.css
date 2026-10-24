@@ -3,13 +3,13 @@
   flex: none;
   block-size: var(--fsg-control-size-medium);
   overflow: hidden;
-  border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-radius-medium);
-  background: var(--fsg-color-surface-sunken);
+  border: 1px solid var(--fsg-color-outline-variant);
+  border-radius: var(--fsg-shape-corner-small);
+  background: var(--fsg-color-surface-container-highest);
 }
 
 .fsg-Stepper:focus-within {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: 1px;
 }
 
@@ -18,11 +18,11 @@
   margin: 0;
   padding: 0 8px;
   border: 0;
-  border-inline: 1px solid var(--fsg-color-outline);
+  border-inline: 1px solid var(--fsg-color-outline-variant);
   background: none;
   color: inherit;
   font: inherit;
-  font-size: var(--fsg-font-size-label);
+  font-size: var(--fsg-typescale-label-large-size);
   font-variant-numeric: tabular-nums;
   line-height: 1;
   text-align: center;
@@ -41,8 +41,8 @@
 
 .fsg-Stepper-button {
   inline-size: 28px;
-  color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label);
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-large-size);
   cursor: pointer;
   user-select: none;
   touch-action: manipulation;
@@ -52,12 +52,12 @@
 }
 
 .fsg-Stepper-button:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--fsg-color-on-surface-muted) 14%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
 }
 
 .fsg-Stepper-button:active:not(:disabled) {
-  background: var(--fsg-color-accent);
-  color: var(--fsg-color-on-accent);
+  background: var(--fsg-color-primary);
+  color: var(--fsg-color-on-primary);
 }
 
 .fsg-Stepper-button:disabled {
@@ -75,10 +75,10 @@
 
 .fsg-Stepper[data-size="small"] .fsg-Stepper-input {
   padding: 0 6px;
-  font-size: var(--fsg-font-size-label-small);
+  font-size: var(--fsg-typescale-label-medium-size);
 }
 
 .fsg-Stepper[data-size="small"] .fsg-Stepper-button {
   inline-size: 22px;
-  font-size: var(--fsg-font-size-label-small);
+  font-size: var(--fsg-typescale-label-medium-size);
 }

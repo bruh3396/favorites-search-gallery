@@ -8,7 +8,6 @@ import { GridLayout } from "@/core/ui/post_grid/tiler";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
-import { doNothing } from "@/core/utils/function/function";
 
 interface Setup {
   element: HTMLElement;
@@ -18,7 +17,7 @@ interface Setup {
   tileLocator: TileLocator<MediaItem>;
   layout: Signal<GridLayout>;
   tilesPerRow: Signal<number>;
-  onPlainClick: Mock<(post: MediaItem) => void>;
+  onPlainClick: Mock<(post: MediaItem) => boolean>;
 }
 
 function createPost(id: string): MediaItem {
@@ -31,7 +30,7 @@ function setup(...ids: string[]): Setup {
   const tileLocator = new TileLocator<MediaItem>();
   const layout = new Signal<GridLayout>("grid");
   const tilesPerRow = new Signal(2);
-  const onPlainClick = vi.fn<(post: MediaItem) => void>();
+  const onPlainClick = vi.fn<(post: MediaItem) => boolean>(() => true);
   const { result: element, dispose } = render(document, () => (
     <PostGrid
       posts={posts}
@@ -179,7 +178,7 @@ describe("PostGrid", () => {
             })}
           </button>
         ]}
-        onPlainClick={doNothing}
+        onPlainClick={() => true}
       />
     ));
     posts.value = [];

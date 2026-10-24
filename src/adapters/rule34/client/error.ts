@@ -26,7 +26,9 @@ export class Rule34Error extends Error {
   }
 }
 
-export function isTransient(error: unknown): boolean {
+// 403 is the bot challenge, which sometimes refuses one request and lets the next through;
+// a wall refuses every attempt, so the attempt cap still ends the fetch.
+export function isRetryable(error: unknown): boolean {
   if (!(error instanceof Rule34Error)) {
     return false;
   }
@@ -35,7 +37,7 @@ export function isTransient(error: unknown): boolean {
     case "network":
       return true;
     case "http":
-      return error.status === 429 || (error.status ?? 0) >= 500;
+      return error.status === 403 || error.status === 429 || (error.status ?? 0) >= 500;
     case "malformed":
       return false;
     default:

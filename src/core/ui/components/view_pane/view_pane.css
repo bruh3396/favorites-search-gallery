@@ -12,7 +12,7 @@
   gap: 8px;
   min-block-size: var(--fsg-control-size-large);
   padding-inline: 8px 6px;
-  box-shadow: inset 0 -1px var(--fsg-color-outline);
+  box-shadow: inset 0 -1px var(--fsg-color-outline-variant);
 }
 
 .fsg-ViewPane-title {
@@ -20,8 +20,8 @@
   min-inline-size: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--fsg-color-on-surface-muted);
-  font-size: var(--fsg-font-size-label-small);
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-medium-size);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-overflow: ellipsis;
@@ -40,13 +40,13 @@
   place-items: center;
   inline-size: var(--fsg-control-size-small);
   block-size: var(--fsg-control-size-small);
-  border-radius: var(--fsg-radius-medium);
-  color: var(--fsg-color-on-surface-muted);
+  border-radius: var(--fsg-shape-corner-small);
+  color: var(--fsg-color-on-surface-variant);
   cursor: pointer;
 }
 
 .fsg-ViewPane-action:hover:not(:disabled) {
-  background: color-mix(in srgb, currentColor 12%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
   color: inherit;
 }
 
@@ -56,7 +56,7 @@
 }
 
 .fsg-ViewPane-action:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: -2px;
 }
 

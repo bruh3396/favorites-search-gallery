@@ -12,7 +12,7 @@
   gap: 4px;
   inline-size: 48px;
   padding-block: 8px;
-  background: color-mix(in srgb, var(--fsg-color-surface-sunken), var(--fsg-color-surface));
+  background: var(--fsg-color-surface-container-low);
 }
 
 .fsg-ActivityBar-item {
@@ -20,23 +20,23 @@
   place-items: center;
   inline-size: var(--fsg-control-size-large);
   block-size: var(--fsg-control-size-large);
-  border-radius: var(--fsg-radius-medium);
-  color: var(--fsg-color-on-surface-muted);
+  border-radius: var(--fsg-shape-corner-small);
+  color: var(--fsg-color-on-surface-variant);
   cursor: pointer;
 }
 
 .fsg-ActivityBar-item:hover {
-  background: color-mix(in srgb, currentColor 12%, transparent);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
   color: inherit;
 }
 
 .fsg-ActivityBar-item[aria-pressed="true"] {
-  background: color-mix(in srgb, var(--fsg-color-accent) 18%, transparent);
-  color: var(--fsg-color-accent);
+  background: var(--fsg-color-secondary-container);
+  color: var(--fsg-color-on-secondary-container);
 }
 
 .fsg-ActivityBar-item:focus-visible {
-  outline: 2px solid var(--fsg-color-accent);
+  outline: 2px solid var(--fsg-color-primary);
   outline-offset: -2px;
 }
 
@@ -56,5 +56,5 @@
   inline-size: 300px;
   min-block-size: 0;
   overflow: hidden;
-  box-shadow: inset 1px 0 var(--fsg-color-outline);
+  box-shadow: inset 1px 0 var(--fsg-color-outline-variant);
 }
