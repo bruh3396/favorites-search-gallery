@@ -15,6 +15,7 @@ type ListenerProps<E> = {
 
 interface AttributeProps {
   [name: `aria-${string}`]: Reactive<string | null> | undefined;
+  [name: `data-${string}`]: Reactive<string | null> | undefined;
   role?: Reactive<string>;
   dataset?: Readonly<Record<string, Reactive<string>>>;
 }

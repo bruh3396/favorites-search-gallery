@@ -20,9 +20,9 @@ describe("CopyIdButton", () => {
   test("shows the id and follows it", () => {
     const { id, readId } = setup("12");
 
-    expect(readId()).toBe("#12");
+    expect(readId()).toBe("12");
     id.value = "34";
-    expect(readId()).toBe("#34");
+    expect(readId()).toBe("34");
   });
 
   test("copies the id and confirms it briefly", async() => {

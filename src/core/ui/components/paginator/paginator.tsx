@@ -1,5 +1,5 @@
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
-import { Readable, computed } from "@/core/utils/reactive/signal";
+import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { PageSlot } from "@/core/ui/components/paginator/page_slot";
 import { getPageSequence } from "@/core/ui/components/paginator/page_sequence";
 import { h } from "@/core/ui/h/h";
@@ -29,7 +29,7 @@ const SLOT_COUNT = 7;
 
 export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
   const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, slotCount: SLOT_COUNT }));
-  return (
+  const root = (
     <nav
       className={PaginatorClass.root}
       aria-label="Pagination"
@@ -44,6 +44,9 @@ export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProp
       <StepButton label="Next page" icon="chevronRight" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
     </nav>
   );
+
+  effect(() => root.style.setProperty("--fsg-Paginator-digits", String(String(pageCount.value).length)));
+  return root;
 }
 
 function StepButton({ label, icon, target, pageCount, onPageChange }: StepButtonProps): HTMLElement {

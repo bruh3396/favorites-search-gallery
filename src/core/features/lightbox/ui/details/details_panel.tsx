@@ -6,11 +6,15 @@ import { LightboxShortcut } from "@/core/features/lightbox/input/shortcut";
 export const LightboxDetailsPanelClass = {
   root: "fsg-LightboxDetailsPanel",
   header: "fsg-LightboxDetailsPanel-header",
+  title: "fsg-LightboxDetailsPanel-title",
+  controls: "fsg-LightboxDetailsPanel-controls",
   content: "fsg-LightboxDetailsPanel-content"
 } as const;
 
 export interface LightboxDetailsPanelProps {
   isOpen: Readable<boolean>;
+  title?: Child;
+  controls?: Child;
   content: Child;
   closeShortcut?: LightboxShortcut;
   onClose: () => void;
@@ -27,8 +31,10 @@ export function LightboxDetailsPanel(props: LightboxDetailsPanelProps): HTMLElem
       onPointerleave={props.onPointerleave}
     >
       <div className={LightboxDetailsPanelClass.header}>
+        <div className={LightboxDetailsPanelClass.title}>{props.title}</div>
         <LightboxButton icon="close" label="Hide details" shortcut={props.closeShortcut} onClick={props.onClose} />
       </div>
+      <div className={LightboxDetailsPanelClass.controls}>{props.controls}</div>
       <div className={LightboxDetailsPanelClass.content}>{props.content}</div>
     </aside>
   ) as HTMLElement;

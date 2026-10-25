@@ -44,7 +44,7 @@ export function CopyIdButton({ id, clipboard, scheduler }: CopyIdButtonProps): H
   onCleanup(() => cancelCopied());
   return (
     <button type="button" className={CopyIdButtonClass.root} title="Copy id" onClick={copyId}>
-      {computed(() => (id.value === undefined ? "" : `#${id.value}`))}
+      {computed(() => id.value ?? "")}
       <span className={CopyIdButtonClass.copied} hidden={computed(() => !copied.value)}>Copied</span>
     </button>
   ) as HTMLElement;

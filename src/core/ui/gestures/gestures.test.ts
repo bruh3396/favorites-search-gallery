@@ -13,6 +13,7 @@ function setup(canDrag = false): {
   const element = document.createElement("div");
   const handlers = {
     canDrag: vi.fn(() => canDrag),
+    onPress: vi.fn<GestureHandlers["onPress"]>(() => false),
     onTap: vi.fn<GestureHandlers["onTap"]>(),
     onDrag: vi.fn<GestureHandlers["onDrag"]>(),
     onWheel: vi.fn<GestureHandlers["onWheel"]>(() => true)
@@ -36,6 +37,25 @@ describe("Gestures", () => {
     element.dispatchEvent(point("pointermove", { x: 32, y: 41 }));
     element.dispatchEvent(point("pointerup", { x: 32, y: 41 }, { shiftKey: true }));
     expect(handlers.onTap).toHaveBeenCalledWith({ point: { x: 22, y: 21 }, modifiers: { shift: true, ctrl: false, alt: false, meta: false } });
+  });
+
+  test("reports a press at the point within the element", () => {
+    const { element, handlers } = setup();
+
+    element.dispatchEvent(point("pointerdown", { x: 30, y: 40 }, { ctrlKey: true }));
+    expect(handlers.onPress).toHaveBeenCalledWith({ point: { x: 20, y: 20 }, modifiers: { shift: false, ctrl: true, alt: false, meta: false } });
+  });
+
+  test("reports neither a tap nor a drag after a handled press", () => {
+    const { element, handlers } = setup(true);
+
+    handlers.onPress.mockReturnValue(true);
+    element.dispatchEvent(point("pointerdown", { x: 30, y: 40 }));
+    element.dispatchEvent(point("pointermove", { x: 40, y: 40 }));
+    element.dispatchEvent(point("pointerup", { x: 40, y: 40 }));
+    expect(element.setPointerCapture).not.toHaveBeenCalled();
+    expect(handlers.onDrag).not.toHaveBeenCalled();
+    expect(handlers.onTap).not.toHaveBeenCalled();
   });
 
   test("ignores presses from other buttons and secondary pointers", () => {

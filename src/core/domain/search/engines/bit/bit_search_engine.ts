@@ -31,6 +31,10 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     return matches.filter(doc => candidateSet.has(doc));
   }
 
+  public countDocsWithTerm(term: string): number {
+    return this.bitIndex.findPosting(term)?.cardinality ?? 0;
+  }
+
   public rebuild(docs: readonly Doc[]): void {
     this.bitIndex.build(docs);
     this.metricIndex.build(this.bitIndex.width, this.bitIndex.allDocs());

@@ -1,6 +1,7 @@
-import { DEFAULT_SEARCH_SETTINGS, SearchSettings, isFiltered } from "@/core/features/favorites/search/input";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings, isFiltered } from "@/core/features/favorites/search/input";
 import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/panel/search";
+import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createFavoritesPreferences } from "@/core/app/preferences";
@@ -10,6 +11,7 @@ import { EmptyStateClass } from "@/core/ui/components/empty_state/empty_state";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MediaItem } from "@/core/domain/post/post";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { createImageLoaderService } from "@/testing/image_loader_service";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
@@ -28,16 +30,18 @@ interface Setup {
   dispose: () => void;
   searchResults: Signal<readonly Favorite[]>;
   pageNumber: Signal<number>;
-  loaded: Milestone;
+  loadState: Signal<FavoritesLoadState>;
+  searchable: Milestone;
   submit: Mock<(query: string) => void>;
   goTo: Mock<(pageNumber: number) => void>;
   clearFilters: Mock<() => void>;
-  settings: Signal<SearchSettings>;
+  settings: Signal<FavoritesSearchSettings>;
   skeleton: HTMLElement;
   emptyState: HTMLElement;
   onPlainClick: Mock<(post: MediaItem) => boolean>;
   tabStripVisible: Preference<boolean>;
   tabCount: Signal<number>;
+  onEnterZen: Mock<() => void>;
 }
 
 function createFavorite(id: string): Favorite {
@@ -47,13 +51,14 @@ function createFavorite(id: string): Favorite {
 function setup(): Setup {
   const searchResults = new Signal<readonly Favorite[]>([]);
   const pageNumber = new Signal(1);
-  const loaded = new Milestone();
+  const loadState = new Signal<FavoritesLoadState>({ phase: "starting" });
+  const searchable = new Milestone();
   const submit = vi.fn<(query: string) => void>();
   const goTo = vi.fn<(pageNumber: number) => void>();
   const clearFilters = vi.fn<() => void>();
-  const settings = new Signal(DEFAULT_SEARCH_SETTINGS);
+  const settings = new Signal(DEFAULT_FAVORITES_SEARCH_SETTINGS);
   const onPlainClick = vi.fn<(post: MediaItem) => boolean>(() => true);
-  const favorites = { hydrated: new Emitter<Favorite>(), loaded };
+  const favorites = { hydrated: new Emitter<Favorite>(), loadState, searchable };
   const preferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
   const session = {
     query: computed(() => settings.value.query),
@@ -68,6 +73,7 @@ function setup(): Setup {
   };
   const tabStripVisible = preferences.tabStripVisible;
   const tabCount = new Signal(1);
+  const onEnterZen = vi.fn<() => void>();
   const { result: element, dispose } = render(document, () => h(FavoritesSearchPanel, {
     favorites,
     session,
@@ -79,18 +85,22 @@ function setup(): Setup {
     tabStripVisible,
     tabCount,
     visibilityObserver: { observe: () => (): void => { } },
+    sizeObserver: new MemorySizeObserver(),
     imageLoaderService: createImageLoaderService(),
     getPostUrl: post => `https://posts/${post.id}`,
     onPlainClick,
-    onCtrlClick: doNothing
+    onCtrlClick: doNothing,
+    onEnterZen
   }));
   const skeleton = element.querySelector<HTMLElement>(`.${SkeletonGridClass.root}`)!;
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
-    element, dispose, searchResults, pageNumber, loaded, submit, goTo, clearFilters, settings, skeleton, emptyState, onPlainClick,
-    tabStripVisible, tabCount
+    element, dispose, searchResults, pageNumber, loadState, searchable, submit, goTo, clearFilters, settings, skeleton, emptyState, onPlainClick,
+    tabStripVisible, tabCount, onEnterZen
   };
 }
+
+const LOADED: FavoritesLoadState = { phase: "loaded", pulledCount: 0, removedCount: 0 };
 
 function queryFavoriteLink(element: HTMLElement): HTMLAnchorElement {
   return element.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!;
@@ -125,49 +135,53 @@ describe("FavoritesSearchPanel", () => {
   });
 
   test("hides the skeleton once loading finishes without favorites", () => {
-    const { loaded, skeleton } = setup();
+    const { loadState, skeleton } = setup();
 
-    loaded.reach();
+    loadState.value = LOADED;
     expect(skeleton.hidden).toBe(true);
   });
 
-  test("says nothing matched only once loading finishes without results", () => {
-    const { loaded, searchResults, emptyState } = setup();
+  test("says nothing matched, rather than showing the skeleton, while favorites still load", () => {
+    const { searchable, settings, skeleton, emptyState } = setup();
 
-    expect(emptyState.hidden).toBe(true);
-    loaded.reach();
-    expect(emptyState.hidden).toBe(false);
+    searchable.reach();
+    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
+    expect([skeleton.hidden, emptyState.hidden, emptyState.querySelector("p")!.textContent]).toEqual([true, false, "No favorites match \"cat\" yet"]);
+  });
+
+  test("hides the empty state once results arrive", () => {
+    const { loadState, searchResults, emptyState } = setup();
+
+    loadState.value = LOADED;
     searchResults.value = [createFavorite("1")];
     expect(emptyState.hidden).toBe(true);
   });
 
-  test.each([
-    { change: { query: "cat" }, message: "No favorites match \"cat\"" },
-    { change: { isBlacklistEnabled: true }, message: "No favorites match these filters" }
-  ])("says $message and clears the filters on request", ({ change, message }) => {
-    const { loaded, settings, emptyState, clearFilters } = setup();
+  test("clears the filters on request", () => {
+    const { searchable, settings, emptyState, clearFilters } = setup();
 
-    settings.value = { ...DEFAULT_SEARCH_SETTINGS, ...change };
-    loaded.reach();
+    searchable.reach();
+    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
     emptyState.querySelector("button")!.click();
-    expect([emptyState.querySelector("p")!.textContent, clearFilters.mock.calls.length]).toEqual([message, 1]);
+    expect(clearFilters).toHaveBeenCalledOnce();
   });
 
   test("moves focus to the search box after clearing the filters", () => {
-    const { element, loaded, settings, emptyState } = setup();
+    const { element, searchable, settings, emptyState } = setup();
 
     document.body.append(element);
-    settings.value = { ...DEFAULT_SEARCH_SETTINGS, query: "cat" };
-    loaded.reach();
+    searchable.reach();
+    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
     emptyState.querySelector("button")!.click();
     expect(document.activeElement).toBe(element.querySelector("input[type=search]"));
     element.remove();
   });
 
-  test("offers nothing to clear when no filter hides a favorite", () => {
-    const { loaded, emptyState } = setup();
+  test("offers nothing to clear when there are no favorites", () => {
+    const { loadState, settings, emptyState } = setup();
 
-    loaded.reach();
+    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
+    loadState.value = LOADED;
     expect([emptyState.querySelector("p")!.textContent, emptyState.querySelector("button")!.hidden]).toEqual(["No favorites yet", true]);
   });
 
@@ -295,6 +309,13 @@ describe("FavoritesSearchPanel", () => {
       [false, "3", "Show tabs (3 open)"],
       [true, "1", "Show tabs"]
     ]);
+  });
+
+  test("enters zen from the zen button", () => {
+    const { element, onEnterZen } = setup();
+
+    element.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
+    expect(onEnterZen).toHaveBeenCalledOnce();
   });
 
   test("stops following the favorites once disposed", () => {

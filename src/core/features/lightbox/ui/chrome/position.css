@@ -10,36 +10,3 @@
   opacity: 0.8;
   text-shadow: 0 1px 3px black;
 }
-
-.fsg-LightboxPosition-button {
-  gap: 6px;
-  border: none;
-  border-radius: 8px;
-  background: transparent;
-  cursor: pointer;
-  transition:
-    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
-    opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
-}
-
-.fsg-LightboxPosition-button:is(:hover, :focus-visible),
-.fsg-LightboxPosition-button[aria-pressed="true"] {
-  background: rgb(255 255 255 / 0.09);
-  opacity: 1;
-}
-
-.fsg-LightboxPosition-button:focus-visible {
-  outline: 2px solid var(--fsg-color-primary);
-  outline-offset: -2px;
-}
-
-.fsg-LightboxPosition-icon {
-  inline-size: 16px;
-  block-size: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.7));
-}

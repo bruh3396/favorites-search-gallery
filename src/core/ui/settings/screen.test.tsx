@@ -34,19 +34,17 @@ function createSwitchSetting(id: string, preference = createPreference(false)): 
 interface Setup {
   element: HTMLElement;
   dispose: () => void;
-  expanded: SettingPreference<readonly string[]>;
   query: Signal<string>;
-  triggers: HTMLButtonElement[];
+  sections: HTMLElement[];
 }
 
 function setup(props: Partial<SettingsScreenProps> = {}): Setup {
-  const expanded = props.expanded ?? createPreference<readonly string[]>([]);
   const query = new Signal("");
   const descriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
   const { result: element, dispose } = render(document, () => (
-    <SettingsScreen layout={LAYOUT} descriptors={descriptors} expanded={expanded} query={query} scheduler={SCHEDULER} {...props} />
+    <SettingsScreen layout={LAYOUT} descriptors={descriptors} query={query} scheduler={SCHEDULER} {...props} />
   ));
-  return { element, dispose, expanded, query, triggers: [...element.querySelectorAll<HTMLButtonElement>("[aria-expanded]")] };
+  return { element, dispose, query, sections: [...element.querySelectorAll<HTMLElement>("section")] };
 }
 
 function readLabels(element: HTMLElement): string[] {
@@ -59,19 +57,11 @@ function readVisibleLabels(element: HTMLElement): string[] {
     .map(row => row.querySelector(".fsg-SettingRow-label")?.textContent ?? "");
 }
 
-function readSectionHiddenStates(triggers: HTMLButtonElement[]): (boolean | undefined)[] {
-  return triggers.map(trigger => trigger.closest<HTMLElement>(".fsg-Disclosure")?.hidden);
-}
-
-function readExpandedStates(triggers: HTMLButtonElement[]): (string | null)[] {
-  return triggers.map(trigger => trigger.getAttribute("aria-expanded"));
-}
-
 describe("SettingsScreen", () => {
   test("draws each section in layout order, its rows in the order it lists them", () => {
-    const { triggers, element } = setup();
+    const { sections, element } = setup();
 
-    expect(triggers.map(trigger => trigger.textContent)).toEqual(["General", "Gallery"]);
+    expect(sections.map(section => section.ariaLabelledByElements?.[0].textContent)).toEqual(["General", "Gallery"]);
     expect(readLabels(element)).toEqual(["hints", "autoplay", "loop"]);
   });
 
@@ -85,28 +75,11 @@ describe("SettingsScreen", () => {
     expect(() => setup({ layout: [{ id: "general", title: "General", settings: ["missing"] }] })).toThrow("\"missing\"");
   });
 
-  test("opens the sections the preference lists, and follows it", () => {
-    const { triggers, expanded } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-
-    expect(readExpandedStates(triggers)).toEqual(["false", "true"]);
-    expanded.set(["general"]);
-    expect(readExpandedStates(triggers)).toEqual(["true", "false"]);
-  });
-
-  test("writes a section's id into or out of the preference when it is toggled, keeping the others", () => {
-    const { triggers, expanded } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-
-    triggers[0].click();
-    expect(expanded.value).toEqual(["gallery", "general"]);
-    triggers[1].click();
-    expect(expanded.value).toEqual(["general"]);
-  });
-
   test("draws sections and rows at the host's size", () => {
     const { element } = setup({ size: "small" });
     const sizes = [...element.querySelectorAll<HTMLElement>("[data-size]")].map(sized => sized.dataset.size);
 
-    expect(new Set(sizes)).toEqual(new Set(["small"]));
+    expect(new Set([element.dataset.size, ...sizes])).toEqual(new Set(["small"]));
   });
 
   test("hides and shows every caption as told", () => {
@@ -122,11 +95,11 @@ describe("SettingsScreen", () => {
   });
 
   test("shows only the rows a query matches, and only the sections holding one", () => {
-    const { element, triggers, query } = setup();
+    const { element, sections, query } = setup();
 
     query.value = "hints";
     expect(readVisibleLabels(element)).toEqual(["hints"]);
-    expect(readSectionHiddenStates(triggers)).toEqual([false, true]);
+    expect(sections.map(section => section.hidden)).toEqual([false, true]);
   });
 
   test("shows every row when given no query", () => {
@@ -136,44 +109,22 @@ describe("SettingsScreen", () => {
   });
 
   test("shows every row again when the query is cleared", () => {
-    const { element, triggers, query } = setup();
+    const { element, sections, query } = setup();
 
     query.value = "loop";
     query.value = "  ";
     expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
-    expect(readSectionHiddenStates(triggers)).toEqual([false, false]);
-  });
-
-  test("opens every section while searching, then restores the saved open sections", () => {
-    const { triggers, query } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-
-    query.value = "o";
-    expect(readExpandedStates(triggers)).toEqual(["true", "true"]);
-    query.value = "";
-    expect(readExpandedStates(triggers)).toEqual(["false", "true"]);
-  });
-
-  test("toggles a section while searching without saving it, and reopens it on the next query", () => {
-    const { triggers, expanded, query } = setup({ expanded: createPreference<readonly string[]>(["gallery"]) });
-
-    query.value = "o";
-    triggers[0].click();
-    expect(triggers[0].getAttribute("aria-expanded")).toBe("false");
-    expect(expanded.value).toEqual(["gallery"]);
-    query.value = "oo";
-    expect(triggers[0].getAttribute("aria-expanded")).toBe("true");
+    expect(sections.map(section => section.hidden)).toEqual([false, false]);
   });
 
   test("stops following its preferences and query once disposed", () => {
     const hints = createPreference(false);
     const descriptors = [createSwitchSetting("hints", hints), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
-    const { element, triggers, expanded, query, dispose } = setup({ descriptors });
+    const { element, query, dispose } = setup({ descriptors });
 
     dispose();
-    expanded.set(["general"]);
     hints.set(true);
     query.value = "loop";
-    expect(triggers[0].getAttribute("aria-expanded")).toBe("false");
     expect(element.querySelector("[role=switch]")?.getAttribute("aria-checked")).toBe("false");
     expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
   });

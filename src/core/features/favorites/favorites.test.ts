@@ -107,11 +107,23 @@ describe("createFavoritesService", () => {
     expect(getResultIds(session)).toEqual(["1", "2", "3"]);
   });
 
-  test("reaches loaded once the load finishes", async() => {
+  test("becomes searchable once favorites are loaded", async() => {
     const { favorites } = await setup(createTaggedPosts("apple"));
 
-    expect(favorites.loaded.reached).toBe(true);
+    expect(favorites.searchable.reached).toBe(true);
   });
+
+  test("never becomes searchable without favorites", async() => {
+    const { favorites } = await setup([]);
+
+    expect([favorites.loadState.value.phase, favorites.searchable.reached]).toEqual(["loaded", false]);
+  });
+  test("counts the loaded favorites carrying a tag", async() => {
+    const { favorites } = await setup(createTaggedPosts("apple", "banana", "apple"));
+
+    expect(favorites.countFavoritesWithTag("apple")).toBe(2);
+  });
+
   test("shows the favorites matching the typed query", async() => {
     const { session } = await setup(createTaggedPosts("apple", "banana", "apple"));
 

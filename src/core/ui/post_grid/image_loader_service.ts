@@ -1,13 +1,13 @@
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
-import { FullImageLoader } from "@/core/ui/post_grid/full_image_loader";
+import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { Media } from "@/core/domain/media/media";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
+export const DECODE_DEBOUNCE = { delay: 400 };
 export const DECODE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 20 };
-export const DECODE_DEBOUNCE = { delay: 500 };
 export const PAINT_RATE_LIMIT = { concurrency: 1, ratePerSecond: 40 };
 
 export interface ImageLoaderServiceDependencies {
@@ -38,9 +38,9 @@ export class ImageLoaderService {
     return this.remoteMedia.resolvePreviewUrl(media);
   }
 
-  public createLoader(canvas: HTMLCanvasElement, media: Media): FullImageLoader {
-    return new FullImageLoader({
-      canvas, media, decodeDebouncer: this.decodeDebouncer, paintLimiter: this.paintLimiter, enabled: this.enabled, paused: this.paused,
+  public createLoader(canvas: HTMLCanvasElement, media: Media, targetWidth: Readable<number>): ImageLoader {
+    return new ImageLoader({
+      canvas, media, targetWidth, decodeDebouncer: this.decodeDebouncer, paintLimiter: this.paintLimiter, enabled: this.enabled, paused: this.paused,
       decodeStill: (target, signal, width) => this.decodeLimiter.run(() => this.remoteMedia.decodeStill(target, signal, width), signal)
     });
   }

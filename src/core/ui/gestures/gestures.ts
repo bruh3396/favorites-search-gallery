@@ -13,6 +13,11 @@ export interface GesturePoint {
   readonly y: number;
 }
 
+export interface PressGesture {
+  readonly point: GesturePoint;
+  readonly modifiers: ModifierState;
+}
+
 export interface TapGesture {
   readonly point: GesturePoint;
   readonly modifiers: ModifierState;
@@ -31,6 +36,7 @@ export interface WheelGesture {
 
 export interface GestureHandlers {
   canDrag(): boolean;
+  onPress(gesture: PressGesture): boolean;
   onTap(gesture: TapGesture): void;
   onDrag(gesture: DragGesture): void;
   onWheel(gesture: WheelGesture): boolean;
@@ -92,6 +98,10 @@ export class Gestures {
       return;
     }
     const point = this.locate(event);
+
+    if (this.handlers.onPress({ point, modifiers: readModifiers(event) })) {
+      return;
+    }
     const canDrag = this.handlers.canDrag();
 
     this.press = { pointerId: event.pointerId, start: point, last: point, moved: false, canDrag };

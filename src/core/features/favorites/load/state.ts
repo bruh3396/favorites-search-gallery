@@ -1,4 +1,4 @@
-export type LoadState =
+export type FavoritesLoadState =
   | { readonly phase: "starting" }
   | { readonly phase: "preparing" }
   | { readonly phase: "fetching"; readonly loadedCount: number; readonly expectedCount: number | null }
@@ -10,9 +10,9 @@ export type LoadState =
   | { readonly phase: "loaded"; readonly pulledCount: number; readonly removedCount: number }
   | { readonly phase: "interrupted" };
 
-export type LoadPhase = LoadState["phase"];
+export type FavoritesLoadPhase = FavoritesLoadState["phase"];
 
-export interface LoadResult {
+export interface FavoritesLoadResult {
   readonly pulledCount: number;
   readonly removedCount: number;
 }

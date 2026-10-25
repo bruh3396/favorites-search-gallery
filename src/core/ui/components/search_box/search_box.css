@@ -11,7 +11,7 @@
   overflow: hidden;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-shape-corner-full);
-  background: var(--fsg-color-surface-container-highest);
+  background: var(--fsg-color-surface-dim);
 }
 
 .fsg-SearchBox-submit,
@@ -20,8 +20,8 @@
   flex: none;
   place-items: center;
   align-self: center;
-  inline-size: var(--fsg-control-size-medium);
-  block-size: var(--fsg-control-size-medium);
+  inline-size: var(--fsg-control-size-small);
+  block-size: var(--fsg-control-size-small);
   padding: 0;
   border: 0;
   border-radius: var(--fsg-shape-corner-full);
@@ -31,11 +31,11 @@
 }
 
 .fsg-SearchBox-submit {
-  margin-inline-start: 4px;
+  margin-inline-start: 6px;
 }
 
 .fsg-SearchBox-clear {
-  margin-inline-end: 4px;
+  margin-inline-end: 6px;
 }
 
 .fsg-SearchBox-input:placeholder-shown + .fsg-SearchBox-clear {

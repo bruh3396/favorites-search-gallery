@@ -24,7 +24,9 @@
 
 .fsg-Paginator-list > *,
 .fsg-Paginator-step {
-  inline-size: var(--fsg-Paginator-slot-size);
+  inline-size: max(var(--fsg-Paginator-slot-size), calc(var(--fsg-Paginator-digits, 1) * 1ch + 16px));
+  font-size: var(--fsg-typescale-label-large-size);
+  font-variant-numeric: tabular-nums;
 }
 
 .fsg-Paginator-list > :has(> :not([hidden])),

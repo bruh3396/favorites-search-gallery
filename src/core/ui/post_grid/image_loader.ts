@@ -3,12 +3,12 @@ import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
 import { Media } from "@/core/domain/media/media";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 
-export const MAX_CANVAS_WIDTH = 500;
 export const MAX_CANVAS_HEIGHT = 16_000;
 
-interface FullImageLoaderDependencies {
+interface ImageLoaderDependencies {
   canvas: HTMLCanvasElement;
   media: Media;
+  targetWidth: Readable<number>;
   decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
   decodeDebouncer: Pick<BatchDebouncer, "add">;
   paintLimiter: Pick<RateLimiter, "run">;
@@ -16,17 +16,19 @@ interface FullImageLoaderDependencies {
   paused: Readable<boolean>;
 }
 
-export class FullImageLoader {
+export class ImageLoader {
   private requestVersion: number;
   private abortController: AbortController | undefined;
   private cancelHeldDecode: (() => void) | undefined;
-  private isDrawn: boolean;
+  private requestedWidth: number;
+  private drawnWidth: number;
 
-  constructor(private readonly dependencies: FullImageLoaderDependencies) {
+  constructor(private readonly dependencies: ImageLoaderDependencies) {
     this.requestVersion = 0;
     this.abortController = undefined;
     this.cancelHeldDecode = undefined;
-    this.isDrawn = false;
+    this.requestedWidth = 0;
+    this.drawnWidth = 0;
   }
 
   public trackVisibility(visible: Readable<boolean>): () => void {
@@ -38,20 +40,28 @@ export class FullImageLoader {
   }
 
   public hide(): void {
-    if (this.isDrawn) {
+    if (this.drawnWidth > 0) {
       this.dependencies.canvas.hidden = true;
     }
     this.cancel();
   }
 
   public show(): void {
-    if (this.isDrawn) {
+    const width = this.dependencies.targetWidth.value;
+
+    if (this.drawnWidth > 0) {
       this.dependencies.canvas.hidden = false;
+    }
+
+    if (width <= this.drawnWidth || this.cancelHeldDecode !== undefined) {
       return;
     }
 
-    if (this.abortController !== undefined || this.cancelHeldDecode !== undefined) {
-      return;
+    if (this.abortController !== undefined) {
+      if (width <= this.requestedWidth) {
+        return;
+      }
+      this.cancel();
     }
     this.cancelHeldDecode = this.dependencies.decodeDebouncer.add(() => {
       this.cancelHeldDecode = undefined;
@@ -84,20 +94,26 @@ export class FullImageLoader {
   }
 
   private decode(): void {
+    const width = this.dependencies.targetWidth.value;
+
+    if (width <= this.drawnWidth) {
+      return;
+    }
     this.requestVersion += 1;
     const version = this.requestVersion;
     const controller = new AbortController();
     const isCurrent = (): boolean => !controller.signal.aborted && version === this.requestVersion;
 
     this.abortController = controller;
-    this.dependencies.decodeStill(this.dependencies.media, controller.signal, MAX_CANVAS_WIDTH)
+    this.requestedWidth = width;
+    this.dependencies.decodeStill(this.dependencies.media, controller.signal, width)
       .then(bitmap => this.dependencies.paintLimiter.run(() => {
         if (!isCurrent()) {
           bitmap.close();
           return Promise.resolve();
         }
-        drawBitmap(this.dependencies.canvas, bitmap);
-        this.isDrawn = true;
+        drawBitmap(this.dependencies.canvas, bitmap, width);
+        this.drawnWidth = width;
         this.abortController = undefined;
         return Promise.resolve();
       }, controller.signal).catch(() => bitmap.close()))
@@ -110,9 +126,9 @@ export class FullImageLoader {
   }
 }
 
-function drawBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap): void {
+function drawBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap, width: number): void {
   try {
-    const scale = Math.min(1, MAX_CANVAS_WIDTH / bitmap.width, MAX_CANVAS_HEIGHT / bitmap.height);
+    const scale = Math.min(1, width / bitmap.width, MAX_CANVAS_HEIGHT / bitmap.height);
 
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);

@@ -40,6 +40,10 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     return this.setEvaluator.evaluate(expression, candidates);
   }
 
+  public countDocsWithTerm(term: string): number {
+    return this.termIndex.docsForTerm(term)?.size ?? 0;
+  }
+
   public rebuild(docs: readonly Doc[]): void {
     this.termIndex.addDocs(docs);
     this.wildcardResolver.index(this.termIndex.indexedTerms());

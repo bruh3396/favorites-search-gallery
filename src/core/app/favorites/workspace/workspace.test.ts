@@ -1,4 +1,4 @@
-import { DEFAULT_SEARCH_SETTINGS, SearchSettings } from "@/core/features/favorites/search/input";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings } from "@/core/features/favorites/search/input";
 import { describe, expect, test, vi } from "vitest";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
@@ -50,7 +50,7 @@ function setup(stored?: unknown): Setup {
 }
 
 function createStoredWorkspace(queries: readonly string[], activeIndex = 0): unknown {
-  return { panes: [{ tabs: queries.map(query => ({ ...DEFAULT_SEARCH_SETTINGS, query })), activeIndex }] };
+  return { panes: [{ tabs: queries.map(query => ({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query })), activeIndex }] };
 }
 
 function createWorkspaceWithFavorites(count: number): FavoritesWorkspace {
@@ -65,7 +65,7 @@ function attachTile(workspace: FavoritesWorkspace): HTMLElement {
   return tile;
 }
 
-function readSettings(workspace: FavoritesWorkspace): SearchSettings[] {
+function readSettings(workspace: FavoritesWorkspace): FavoritesSearchSettings[] {
   return workspace.tabManager.tabs.value.map(tab => tab.value.session.settings.value);
 }
 
@@ -81,7 +81,7 @@ describe("FavoritesWorkspace", () => {
   test("opens one blank tab when nothing was saved", () => {
     const { workspace } = setup();
 
-    expect(readSettings(workspace)).toEqual([DEFAULT_SEARCH_SETTINGS]);
+    expect(readSettings(workspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
   });
 
   test("restores the saved tabs with the saved one active, starting only that one", () => {
@@ -117,7 +117,7 @@ describe("FavoritesWorkspace", () => {
   test("fills a stored tab's invalid field with its default", () => {
     const { workspace } = setup({ panes: [{ tabs: [{ query: "apple", sortKey: "unknown" }] }] });
 
-    expect(readSettings(workspace)).toEqual([{ ...DEFAULT_SEARCH_SETTINGS, query: "apple" }]);
+    expect(readSettings(workspace)).toEqual([{ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "apple" }]);
   });
 
   test("skips a stored pane left without tabs", () => {
@@ -129,13 +129,13 @@ describe("FavoritesWorkspace", () => {
   test("opens one blank tab when no stored pane survives", () => {
     const { workspace } = setup({ panes: [{ tabs: ["apple"] }] });
 
-    expect(readSettings(workspace)).toEqual([DEFAULT_SEARCH_SETTINGS]);
+    expect(readSettings(workspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
   });
 
   test("opens one blank tab when the stored workspace isn't a record", () => {
     const { workspace } = setup("workspace");
 
-    expect(readSettings(workspace)).toEqual([DEFAULT_SEARCH_SETTINGS]);
+    expect(readSettings(workspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
   });
 
   test("starts a tab's session once it is activated", () => {
@@ -162,7 +162,7 @@ describe("FavoritesWorkspace", () => {
       const { workspace } = setup(createStoredWorkspace(["apple"]));
 
       workspace.openBlankTab();
-      expect(workspace.activeTab.value.session.settings.value).toEqual(DEFAULT_SEARCH_SETTINGS);
+      expect(workspace.activeTab.value.session.settings.value).toEqual(DEFAULT_FAVORITES_SEARCH_SETTINGS);
     });
 
     test("asks the new tab to focus its search once it is active", () => {
@@ -200,7 +200,7 @@ describe("FavoritesWorkspace", () => {
       const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
 
       workspace.closeAllTabs();
-      expect([readSettings(workspace), readActiveIndex(workspace)]).toEqual([[DEFAULT_SEARCH_SETTINGS], 0]);
+      expect([readSettings(workspace), readActiveIndex(workspace)]).toEqual([[DEFAULT_FAVORITES_SEARCH_SETTINGS], 0]);
     });
 
     test("disposes the closed tabs' sessions", () => {

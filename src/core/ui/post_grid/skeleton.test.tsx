@@ -19,12 +19,12 @@ function createSquares(count: number): { width: number; height: number }[] {
 }
 
 describe("SkeletonGrid", () => {
-  test("draws a post grid of loading tiles shaped like the given dimensions", () => {
+  test("draws a post grid of tiles shaped like the given dimensions", () => {
     const { result: element } = setup();
     const tiles = [...element.querySelectorAll<HTMLElement>(`.${TileClass.root}`)];
 
     expect(element.classList.contains(PostGridClass.root)).toBe(true);
-    expect(tiles.map(tile => [tile.style.getPropertyValue("--fsg-Tile-aspect-ratio"), tile.dataset.loading])).toEqual([["4 / 3", ""], ["1 / 2", ""]]);
+    expect(tiles.map(tile => tile.style.getPropertyValue("--fsg-Tile-aspect-ratio"))).toEqual(["4 / 3", "1 / 2"]);
   });
 
   test("draws at most 50 tiles", () => {

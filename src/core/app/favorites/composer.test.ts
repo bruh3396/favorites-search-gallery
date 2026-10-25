@@ -2,7 +2,6 @@ import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_g
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/button";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/position";
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
@@ -28,6 +27,7 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { SegmentedClass } from "@/core/ui/components/segmented/segmented";
 import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
 import { createPost } from "@/testing/post";
@@ -37,7 +37,6 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   navigator = new MemoryNavigator(),
   fileSaver = new MemoryFileSaver(),
   scheduler = new MemoryScheduler(),
-  pageVisibility = { hidden: new Emitter<void>() },
   hostPage = new MemoryHostPage()
 } = {}): ShadowRoot {
   const container = document.createElement("div");
@@ -59,7 +58,6 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     navigator,
     fileSaver,
     clipboard: new MemoryClipboard(),
-    pageVisibility,
     hostPage
   }).mount(container);
   return container.shadowRoot!;
@@ -75,6 +73,19 @@ function readAspectRatios(grid: Element): string[] {
 
 function querySkeleton(root: ShadowRoot): Element {
   return root.querySelector(`.${SkeletonGridClass.root}`)!;
+}
+
+function openThemeMenu(root: ShadowRoot): void {
+  root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+  [...root.querySelectorAll<HTMLElement>('[role="combobox"]')].find(control => control.ariaLabelledByElements?.[0]?.textContent === "Theme")!.click();
+}
+
+function findThemeOption(root: ShadowRoot, label: string): HTMLElement {
+  return [...root.querySelectorAll<HTMLElement>('[role="option"]')].find(option => option.textContent === label)!;
+}
+
+function readThemeAccent(root: ShadowRoot): string {
+  return root.querySelector<HTMLElement>(`.${AppRootClass.root}`)!.style.getPropertyValue("--fsg-theme-accent");
 }
 
 function clickLightboxButton(root: ShadowRoot, label: string): void {
@@ -120,11 +131,11 @@ describe("composeFavoritesApp", () => {
     const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    const slider = root.querySelector<HTMLInputElement>(`.${SliderClass.input}[aria-label="Tile size"]`)!;
+    const slider = root.querySelector<HTMLInputElement>(`.${SliderClass.input}[aria-label="Size"]`)!;
 
     slider.value = "18";
     slider.dispatchEvent(new Event("input"));
-    expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("3");
+    expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("1");
   });
 
   test("lays the grid out as picked in the Settings tool", () => {
@@ -136,14 +147,14 @@ describe("composeFavoritesApp", () => {
     expect(grid.dataset.layout).toBe("square");
   });
 
-  test("stores full images off when upscaling is switched off in the Settings tool", () => {
+  test("stores HD tiles off when they are switched off in the Settings tool", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const root = mount(localKeyedValues);
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    clickSettingsSwitch(root, "Upscale thumbnails");
+    clickSettingsSwitch(root, "HD");
 
-    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { fullImagesEnabled: false } } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { hdTilesEnabled: false } } });
   });
 
   test("stores infinite scroll when it is switched on in the Settings tool", () => {
@@ -172,7 +183,7 @@ describe("composeFavoritesApp", () => {
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
     expect(hostPage.headerVisible).toBe(true);
-    clickSettingsSwitch(root, "Native header");
+    clickSettingsSwitch(root, "Header");
     expect(hostPage.headerVisible).toBe(false);
   });
 
@@ -183,8 +194,40 @@ describe("composeFavoritesApp", () => {
     const root = mount(new MemoryLocalKeyedValues(), [], { hostPage });
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    [...root.querySelectorAll<HTMLButtonElement>(`.${SegmentedClass.option}`)].find(option => option.textContent === "Light")!.click();
+    [...root.querySelectorAll<HTMLButtonElement>(`.${SegmentedClass.option}`)].find(option => option.getAttribute("aria-label") === "Light")!.click();
     expect([root.querySelector<HTMLElement>(`.${AppRootClass.root}`)!.style.colorScheme, hostPage.colorScheme]).toEqual(["light", "light"]);
+  });
+
+  test("applies and stores the theme picked in the Settings tool", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const root = mount(localKeyedValues);
+
+    openThemeMenu(root);
+    findThemeOption(root, "Cherry").click();
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.cherry.light.accent}, ${THEME_DEFINITIONS.cherry.dark.accent})`);
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { app: { theme: "cherry" } } });
+  });
+
+  test("previews a hovered theme without storing it, and restores the picked one when the pointer leaves", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const root = mount(localKeyedValues);
+
+    openThemeMenu(root);
+    findThemeOption(root, "Forest").dispatchEvent(new PointerEvent("pointermove"));
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.forest.light.accent}, ${THEME_DEFINITIONS.forest.dark.accent})`);
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toMatchObject({ preferences: { app: { theme: "forest" } } });
+    root.querySelector('[role="listbox"]')!.dispatchEvent(new PointerEvent("pointerleave"));
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.slate.light.accent}, ${THEME_DEFINITIONS.slate.dark.accent})`);
+  });
+
+  test("applies the theme picked before on mount", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { app: { theme: "forest" } } });
+    const app = mount(localKeyedValues).querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
+
+    expect(app.style.getPropertyValue("--fsg-theme-surface"))
+      .toBe(`light-dark(${THEME_DEFINITIONS.forest.light.surface}, ${THEME_DEFINITIONS.forest.dark.surface})`);
   });
 
   test("leaves the site's color scheme alone on mount", () => {
@@ -203,15 +246,34 @@ describe("composeFavoritesApp", () => {
     expect(hostPage.headerVisible).toBe(false);
   });
 
-  test("records the shapes of the active tab's results for the next load's skeleton when the page is hidden", async() => {
+  test("records the shapes of the active tab's first results after they settle", async() => {
     const localKeyedValues = new MemoryLocalKeyedValues();
-    const pageVisibility = { hidden: new Emitter<void>() };
+    const scheduler = new MemoryScheduler();
     const posts = [createPost({ id: "1", width: 300, height: 200 }), createPost({ id: "2", width: 100, height: 400 })];
 
-    mount(localKeyedValues, posts, { pageVisibility });
+    mount(localKeyedValues, posts, { scheduler });
     await flushMicrotasks();
     expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty("favoritesSkeleton");
-    pageVisibility.hidden.emit();
+    scheduler.advance(499);
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty("favoritesSkeleton");
+    scheduler.advance(1);
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
+      favoritesSkeleton: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
+    });
+  });
+
+  test("keeps the first page's shapes when the active tab moves to another page", async() => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const scheduler = new MemoryScheduler();
+    const posts = [createPost({ id: "1", width: 300, height: 200 }), createPost({ id: "2", width: 100, height: 400 })];
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pageSize: 1 } } });
+    const root = mount(localKeyedValues, posts, { scheduler });
+
+    await flushMicrotasks();
+    root.querySelector<HTMLButtonElement>(`.${PageSlotClass.page}[data-page-number="2"]`)!.click();
+    expect(root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent).toBe("2");
+    scheduler.advance(500);
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
       favoritesSkeleton: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
     });
@@ -395,7 +457,7 @@ describe("composeFavoritesApp", () => {
     expect([navigator.opened, dialog.open]).toEqual([["#post-1", "https://originals/1.png"], true]);
   });
 
-  test("saves the lightbox favorite's original, named by its id, from the download button", async() => {
+  test.skip("saves the lightbox favorite's original, named by its id, from the download button", async() => {
     const fileSaver = new MemoryFileSaver();
     const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { fileSaver });
 

@@ -153,6 +153,23 @@ describe("Stepper", () => {
     expect(onValueChange).toHaveBeenLastCalledWith(10);
   });
 
+  test("steps to multiples of the step, not offsets from the min", () => {
+    const { decrement, increment, onValueChange } = setup({ initial: 25, min: 1, step: 25, max: 100, writesBack: true });
+
+    press(decrement);
+    press(increment);
+    press(increment);
+    expect(onValueChange.mock.calls.flat()).toEqual([1, 25, 50]);
+  });
+
+  test("reaches an off-grid max and steps back onto the grid", () => {
+    const { decrement, increment, onValueChange } = setup({ initial: 100, step: 25, max: 110, writesBack: true });
+
+    press(increment);
+    press(decrement);
+    expect(onValueChange.mock.calls.flat()).toEqual([110, 100]);
+  });
+
   test("walks every decimal step up to the max and back down to the min", () => {
     const { decrement, increment, onValueChange } = setup({ step: 0.1, max: 1, writesBack: true });
     const tenths = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1];

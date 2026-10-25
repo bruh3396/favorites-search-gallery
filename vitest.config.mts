@@ -15,7 +15,6 @@ const DOM_TESTS = [
   "src/adapters/browser/ports/viewport/viewport.test.ts",
   "src/adapters/browser/ports/morpher/morpher.test.ts",
   "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
-  "src/adapters/browser/ports/page_visibility/page_visibility.test.ts",
   "src/adapters/memory/ports/host_page/host_page.test.ts",
   "src/adapters/memory/ports/morpher/morpher.test.ts",
   "src/adapters/memory/ports/remote_media/remote_media.test.ts",

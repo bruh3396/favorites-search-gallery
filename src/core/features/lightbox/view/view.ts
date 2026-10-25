@@ -29,6 +29,8 @@ const OVERLAY_LEAVE_DELAY = 1_000;
 const ZOOM_MINIMUM_SCALE = 2;
 const ZOOM_MAXIMUM_SCALE = 8;
 const AUTOPLAY_INTERVAL = 3_000;
+const FULL_MORPH_DURATION = 250;
+const SIMPLE_MORPH_DURATION = 120;
 
 export interface LightboxViewConfiguration {
   readonly keymap: LightboxKeymap;
@@ -72,7 +74,13 @@ export function createLightboxView<T extends MediaItem>(
     canCountDown: computed(() => stage.mediaSize.value !== undefined && !zoom.isZoomed.value),
     video: stage.video
   });
-  const closer = new LightboxCloser<T>({ navigation, shownMedia: stage.shownMedia, inFullscreen: fullscreen.inFullscreen, morphs: full, locateItem });
+  const closer = new LightboxCloser<T>({
+    navigation,
+    shownMedia: stage.shownMedia,
+    inFullscreen: fullscreen.inFullscreen,
+    morphDuration: computed(() => simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION),
+    locateItem
+  });
   const handlers = limitToSimpleCommands(createLightboxCommandHandlers({ navigation, stage, fullscreen, zoom, autoplay, closer, actions, details }), simple);
 
   effect(() => {

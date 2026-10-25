@@ -1,22 +1,25 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
-import { hasMedia } from "@/core/domain/media/media";
-import { Signal } from "@/core/utils/reactive/signal";
+import { GridSizing, computeDecodeWidth } from "@/core/ui/post_grid/decode_width";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { PlainPress } from "@/core/ui/post_grid/plain_press";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
+import { hasMedia } from "@/core/domain/media/media";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const TileClass = {
   root: "fsg-Tile",
   link: "fsg-Tile-link",
   preview: "fsg-Tile-preview",
-  fullImage: "fsg-Tile-fullImage",
+  image: "fsg-Tile-image",
   actions: "fsg-Tile-actions"
 } as const;
 
 export interface TileProps {
   post: MediaItem;
   dimensions: Dimensions;
+  sizing: Readable<GridSizing>;
   actions: readonly Node[];
   visibilityObserver: VisibilityObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
@@ -33,16 +36,22 @@ interface PreviewElements {
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
-  const { post, dimensions, actions, href, onPlainClick, onCtrlClick } = props;
+  const { post, dimensions, sizing, actions, href, onPlainClick, onCtrlClick } = props;
   const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
-  const canvas = <canvas className={TileClass.fullImage} hidden /> as HTMLCanvasElement;
+  const canvas = <canvas className={TileClass.image} hidden /> as HTMLCanvasElement;
+  const plainPress = new PlainPress(onPlainClick);
   const link =
-    <a className={TileClass.link} target="_blank" onClick={event => handleClick(event, onPlainClick, onCtrlClick)}>
+    <a
+      className={TileClass.link}
+      target="_blank"
+      onPointerdown={event => plainPress.press(event)}
+      onClick={event => handleClick(event, () => plainPress.release(), onCtrlClick)}
+    >
       {preview}{canvas}
     </a> as HTMLAnchorElement;
   const root = (
-    <div className={TileClass.root} dataset={{ mediaKind: post.media.kind, loading: "" }}>
+    <div className={TileClass.root} dataset={{ mediaKind: post.media.kind }}>
       {link}
       <div className={TileClass.actions}>{actions}</div>
     </div>
@@ -59,7 +68,9 @@ export function Tile(props: TileProps): HTMLElement {
 
   if (hasMedia(post.media)) {
     showPreview({ root, preview }, props.imageLoaderService.resolvePreviewUrl(post.media));
-    onCleanup(props.imageLoaderService.createLoader(canvas, post.media).trackVisibility(visible));
+    const targetWidth = computed(() => computeDecodeWidth(sizing.value, dimensions));
+
+    onCleanup(props.imageLoaderService.createLoader(canvas, post.media, targetWidth).trackVisibility(visible));
   }
   return root;
 }
@@ -99,21 +110,26 @@ function setHrefOnInteraction(link: HTMLAnchorElement, href: string): void {
 }
 
 function showPreview({ root, preview }: PreviewElements, url: string): void {
-  const finishLoading = (): void => {
+  const takeShapeFromPreview = (): void => {
     if (root.style.getPropertyValue(ASPECT_RATIO_PROPERTY) === "") {
       setAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
     }
-    delete root.dataset.loading;
   };
 
   preview.src = url;
+  preview.addEventListener("animationend", () => {
+    preview.dataset.entered = "";
+  }, { once: true });
 
   if (preview.complete) {
     preview.decoding = "sync";
-    finishLoading();
+    takeShapeFromPreview();
   } else {
-    preview.addEventListener("load", finishLoading, { once: true });
-    preview.addEventListener("error", finishLoading, { once: true });
+    preview.hidden = true;
+    preview.addEventListener("load", () => {
+      takeShapeFromPreview();
+      preview.hidden = false;
+    }, { once: true });
   }
 }
 

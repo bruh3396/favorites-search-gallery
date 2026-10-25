@@ -1,13 +1,13 @@
-import { SearchRequest, SearchSettings } from "@/core/features/favorites/search/input";
+import { FavoritesSearchRequest, FavoritesSearchSettings } from "@/core/features/favorites/search/input";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
-interface SearchRequestOverrides extends Partial<SearchRequest> {
+interface SearchRequestOverrides extends Partial<FavoritesSearchRequest> {
   query?: string;
 }
 
-export function createSearchSettings(overrides: Partial<SearchSettings> = {}): SearchSettings {
+export function createSearchSettings(overrides: Partial<FavoritesSearchSettings> = {}): FavoritesSearchSettings {
   return {
     query: "",
     isInverted: false,
@@ -21,7 +21,7 @@ export function createSearchSettings(overrides: Partial<SearchSettings> = {}): S
   };
 }
 
-export function createSearchRequest({ query = "", ...overrides }: SearchRequestOverrides = {}): SearchRequest {
+export function createSearchRequest({ query = "", ...overrides }: SearchRequestOverrides = {}): FavoritesSearchRequest {
   return {
     expression: parseSearchExpression(query),
     isShuffled: false,

@@ -1,6 +1,6 @@
-import { LoadPhase, LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadPhase, FavoritesLoadState } from "@/core/features/favorites/load/state";
 
-type Describers = { readonly [Phase in LoadPhase]: (state: Extract<LoadState, { phase: Phase }>) => string };
+type Describers = { readonly [Phase in FavoritesLoadPhase]: (state: Extract<FavoritesLoadState, { phase: Phase }>) => string };
 
 const DESCRIBERS: Describers = {
   starting: () => "Starting",
@@ -10,13 +10,13 @@ const DESCRIBERS: Describers = {
   saving: () => "Saving",
   pulling: () => "Checking for new",
   indexing: () => "Indexing",
-  pruning: () => "Checking for removed",
+  pruning: () => "Syncing",
   loaded: state => describeChanges(state.pulledCount, state.removedCount),
   interrupted: () => "Couldn't finish loading"
 };
 
-export function describeLoadState(state: LoadState): string {
-  const describe = DESCRIBERS[state.phase] as (state: LoadState) => string;
+export function describeFavoritesLoadState(state: FavoritesLoadState): string {
+  const describe = DESCRIBERS[state.phase] as (state: FavoritesLoadState) => string;
   return describe(state);
 }
 

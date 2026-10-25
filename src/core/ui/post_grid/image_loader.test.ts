@@ -1,5 +1,5 @@
 import { DECODE_DEBOUNCE, PAINT_RATE_LIMIT } from "@/core/ui/post_grid/image_loader_service";
-import { FullImageLoader, MAX_CANVAS_HEIGHT, MAX_CANVAS_WIDTH } from "@/core/ui/post_grid/full_image_loader";
+import { ImageLoader, MAX_CANVAS_HEIGHT } from "@/core/ui/post_grid/image_loader";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
 import { Media } from "@/core/domain/media/media";
@@ -11,6 +11,7 @@ import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
 const QUIET_PERIOD = DECODE_DEBOUNCE.delay;
+const WIDTH = 500;
 
 interface FakeBitmap {
   width: number;
@@ -21,11 +22,12 @@ interface FakeBitmap {
 type DecodeStill = (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
 
 interface Setup {
-  fullImageLoader: FullImageLoader;
+  imageLoader: ImageLoader;
   scheduler: MemoryScheduler;
   canvas: HTMLCanvasElement;
   decodeStill: ReturnType<typeof vi.fn<DecodeStill>>;
   drawImage: ReturnType<typeof vi.fn>;
+  targetWidth: Signal<number>;
   enabled: Signal<boolean>;
   paused: Signal<boolean>;
   showNow: () => void;
@@ -48,22 +50,23 @@ function setup(decode: DecodeStill = () => Promise.resolve(createBitmap() as unk
     .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
   const decodeStill = vi.fn(decode);
   const scheduler = new MemoryScheduler();
+  const targetWidth = new Signal(WIDTH);
   const enabled = new Signal(true);
   const paused = new Signal(false);
-  const fullImageLoader = new FullImageLoader({
-    canvas, media: MEDIA, decodeStill, enabled, paused,
+  const imageLoader = new ImageLoader({
+    canvas, media: MEDIA, targetWidth, decodeStill, enabled, paused,
     decodeDebouncer: new BatchDebouncer(DECODE_DEBOUNCE, scheduler), paintLimiter: new RateLimiter(PAINT_RATE_LIMIT, scheduler)
   });
   const showNow = (): void => {
-    fullImageLoader.show();
+    imageLoader.show();
     scheduler.advance(QUIET_PERIOD);
   };
 
   onTestFinished(() => getContext.mockRestore());
-  return { fullImageLoader, scheduler, canvas, decodeStill, drawImage, enabled, paused, showNow };
+  return { imageLoader, scheduler, canvas, decodeStill, drawImage, targetWidth, enabled, paused, showNow };
 }
 
-function createBitmap(width = MAX_CANVAS_WIDTH / 2, height = MAX_CANVAS_WIDTH / 4): FakeBitmap {
+function createBitmap(width = WIDTH / 2, height = WIDTH / 4): FakeBitmap {
   return { width, height, close: vi.fn() };
 }
 
@@ -76,14 +79,14 @@ async function drawnSize(bitmap: FakeBitmap): Promise<number[]> {
   return [canvas.width, canvas.height];
 }
 
-describe("FullImageLoader", () => {
-  test("decodes the image at the maximum width and draws it when shown", async() => {
+describe("ImageLoader", () => {
+  test("decodes the image at the target width and draws it when shown", async() => {
     const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
     const { canvas, decodeStill, drawImage, showNow } = setup(() => pendingDecode.promise);
 
     showNow();
-    expect(decodeStill).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal), MAX_CANVAS_WIDTH);
+    expect(decodeStill).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal), WIDTH);
     expect(canvas.hidden).toBe(true);
 
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);
@@ -95,10 +98,10 @@ describe("FullImageLoader", () => {
   });
 
   test("waits for the tile to stay in view before decoding", () => {
-    const { fullImageLoader, scheduler, decodeStill } = setup();
+    const { imageLoader, scheduler, decodeStill } = setup();
 
-    fullImageLoader.show();
-    fullImageLoader.show();
+    imageLoader.show();
+    imageLoader.show();
     scheduler.advance(QUIET_PERIOD - 1);
     expect(decodeStill).not.toHaveBeenCalled();
     scheduler.advance(1);
@@ -106,20 +109,20 @@ describe("FullImageLoader", () => {
   });
 
   test("never decodes a tile left before the delay passes", () => {
-    const { fullImageLoader, scheduler, decodeStill } = setup();
+    const { imageLoader, scheduler, decodeStill } = setup();
 
-    fullImageLoader.show();
-    fullImageLoader.cancel();
+    imageLoader.show();
+    imageLoader.cancel();
     scheduler.advance(QUIET_PERIOD);
     expect(decodeStill).not.toHaveBeenCalled();
   });
 
-  test("scales a wide image down to the maximum width", async() => {
-    expect(await drawnSize(createBitmap(MAX_CANVAS_WIDTH * 6, MAX_CANVAS_WIDTH * 4))).toEqual([MAX_CANVAS_WIDTH, Math.round(MAX_CANVAS_WIDTH * 4 / 6)]);
+  test("scales a wide image down to the target width", async() => {
+    expect(await drawnSize(createBitmap(WIDTH * 6, WIDTH * 4))).toEqual([WIDTH, Math.round(WIDTH * 4 / 6)]);
   });
 
   test("scales a tall image down to the maximum height", async() => {
-    const width = Math.min(MAX_CANVAS_WIDTH, MAX_CANVAS_HEIGHT / 40);
+    const width = Math.min(WIDTH, MAX_CANVAS_HEIGHT / 40);
 
     expect(await drawnSize(createBitmap(width * 2, MAX_CANVAS_HEIGHT * 2))).toEqual([width, MAX_CANVAS_HEIGHT]);
   });
@@ -133,15 +136,67 @@ describe("FullImageLoader", () => {
     expect(decodeStill).toHaveBeenCalledOnce();
   });
 
-  test("hides and shows a completed image without decoding it again", async() => {
-    const { fullImageLoader, canvas, decodeStill, drawImage, showNow } = setup();
+  test("decodes nothing while the target width is zero", () => {
+    const { decodeStill, targetWidth, showNow } = setup();
+
+    targetWidth.value = 0;
+    showNow();
+    expect(decodeStill).not.toHaveBeenCalled();
+  });
+
+  test("decodes again at a target width wider than the drawn one, keeping the drawn image shown", async() => {
+    const { canvas, decodeStill, drawImage, targetWidth, showNow } = setup();
 
     showNow();
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
-    fullImageLoader.hide();
+    targetWidth.value = WIDTH * 2;
+    showNow();
+
+    expect(canvas.hidden).toBe(false);
+    expect(decodeStill).toHaveBeenLastCalledWith(MEDIA, expect.any(AbortSignal), WIDTH * 2);
+    await vi.waitFor(() => expect(drawImage).toHaveBeenCalledTimes(2));
+  });
+
+  test("keeps the drawn image when the target width shrinks", async() => {
+    const { decodeStill, drawImage, targetWidth, showNow } = setup();
+
+    showNow();
+    await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
+    targetWidth.value = WIDTH / 2;
+    showNow();
+    expect(decodeStill).toHaveBeenCalledOnce();
+  });
+
+  test("replaces an in-flight request with one at a wider target width", () => {
+    const { decodeStill, targetWidth, showNow } = setup(() => deferred<ImageBitmap>().promise);
+
+    showNow();
+    const narrowSignal = decodeStill.mock.calls[0][1];
+
+    targetWidth.value = WIDTH * 2;
+    showNow();
+    expect(narrowSignal.aborted).toBe(true);
+    expect(decodeStill).toHaveBeenLastCalledWith(MEDIA, expect.any(AbortSignal), WIDTH * 2);
+  });
+
+  test("decodes at the target width when the held decode starts, not when it was held", () => {
+    const { imageLoader, scheduler, decodeStill, targetWidth } = setup();
+
+    imageLoader.show();
+    targetWidth.value = WIDTH * 2;
+    scheduler.advance(QUIET_PERIOD);
+    expect(decodeStill).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal), WIDTH * 2);
+  });
+
+  test("hides and shows a completed image without decoding it again", async() => {
+    const { imageLoader, canvas, decodeStill, drawImage, showNow } = setup();
+
+    showNow();
+    await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
+    imageLoader.hide();
     expect(canvas.hidden).toBe(true);
 
-    fullImageLoader.show();
+    imageLoader.show();
 
     expect(canvas.hidden).toBe(false);
     expect(decodeStill).toHaveBeenCalledOnce();
@@ -163,25 +218,25 @@ describe("FullImageLoader", () => {
   test("ignores the failure of a request it already aborted", async() => {
     let fail: (error: Error) => void = () => undefined;
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
-    const { fullImageLoader, showNow } = setup(() => new Promise((_, reject) => {
+    const { imageLoader, showNow } = setup(() => new Promise((_, reject) => {
       fail = reject;
     }));
 
     onTestFinished(() => log.mockRestore());
     showNow();
-    fullImageLoader.cancel();
+    imageLoader.cancel();
     fail(new Error("aborted"));
     await flushMicrotasks();
     expect(log).not.toHaveBeenCalled();
   });
 
   test("aborts an in-flight request when hidden", () => {
-    const { fullImageLoader, decodeStill, canvas, showNow } = setup(() => deferred<ImageBitmap>().promise);
+    const { imageLoader, decodeStill, canvas, showNow } = setup(() => deferred<ImageBitmap>().promise);
 
     showNow();
     const signal = decodeStill.mock.calls[0][1];
 
-    fullImageLoader.hide();
+    imageLoader.hide();
 
     expect(signal.aborted).toBe(true);
     expect(canvas.hidden).toBe(true);
@@ -190,12 +245,12 @@ describe("FullImageLoader", () => {
   test("aborts a request and closes its bitmap if the result arrives later", async() => {
     const pendingDecode = deferred<ImageBitmap>();
     const bitmap = createBitmap();
-    const { fullImageLoader, canvas, decodeStill, drawImage, showNow } = setup(() => pendingDecode.promise);
+    const { imageLoader, canvas, decodeStill, drawImage, showNow } = setup(() => pendingDecode.promise);
 
     showNow();
     const signal = decodeStill.mock.calls[0][1];
 
-    fullImageLoader.cancel();
+    imageLoader.cancel();
 
     expect(signal.aborted).toBe(true);
     pendingDecode.resolve(bitmap as unknown as ImageBitmap);
@@ -210,8 +265,8 @@ describe("FullImageLoader", () => {
     const decodeDebouncer = new BatchDebouncer(DECODE_DEBOUNCE, scheduler);
     const paintLimiter = new RateLimiter(PAINT_RATE_LIMIT, scheduler);
     const bitmaps = [createBitmap(), createBitmap()];
-    const [first, second] = bitmaps.map(bitmap => new FullImageLoader({
-      canvas: document.createElement("canvas"), media: MEDIA, paintLimiter, decodeDebouncer, enabled: new Signal(true), paused: new Signal(false),
+    const [first, second] = bitmaps.map(bitmap => new ImageLoader({
+      canvas: document.createElement("canvas"), media: MEDIA, targetWidth: new Signal(WIDTH), paintLimiter, decodeDebouncer, enabled: new Signal(true), paused: new Signal(false),
       decodeStill: () => Promise.resolve(bitmap as unknown as ImageBitmap)
     }));
 
@@ -226,20 +281,20 @@ describe("FullImageLoader", () => {
   });
 
   describe("trackVisibility", () => {
-    function spyOnActions(fullImageLoader: FullImageLoader): Record<"show" | "hide" | "cancel", ReturnType<typeof vi.fn>> {
+    function spyOnActions(imageLoader: ImageLoader): Record<"show" | "hide" | "cancel", ReturnType<typeof vi.fn>> {
       return {
-        show: vi.spyOn(fullImageLoader, "show").mockImplementation(doNothing),
-        hide: vi.spyOn(fullImageLoader, "hide").mockImplementation(doNothing),
-        cancel: vi.spyOn(fullImageLoader, "cancel").mockImplementation(doNothing)
+        show: vi.spyOn(imageLoader, "show").mockImplementation(doNothing),
+        hide: vi.spyOn(imageLoader, "hide").mockImplementation(doNothing),
+        cancel: vi.spyOn(imageLoader, "cancel").mockImplementation(doNothing)
       };
     }
 
     test("shows while enabled and visible, and hides once disabled", () => {
-      const { fullImageLoader, enabled } = setup();
-      const { show, hide, cancel } = spyOnActions(fullImageLoader);
+      const { imageLoader, enabled } = setup();
+      const { show, hide, cancel } = spyOnActions(imageLoader);
       const visible = new Signal(false);
 
-      fullImageLoader.trackVisibility(visible);
+      imageLoader.trackVisibility(visible);
       expect(cancel).toHaveBeenCalledOnce();
       visible.value = true;
       expect(show).toHaveBeenCalledOnce();
@@ -248,10 +303,10 @@ describe("FullImageLoader", () => {
     });
 
     test("cancels loading while paused without hiding a shown image, and resumes after", () => {
-      const { fullImageLoader, paused } = setup();
-      const { show, hide, cancel } = spyOnActions(fullImageLoader);
+      const { imageLoader, paused } = setup();
+      const { show, hide, cancel } = spyOnActions(imageLoader);
 
-      fullImageLoader.trackVisibility(new Signal(true));
+      imageLoader.trackVisibility(new Signal(true));
       show.mockClear();
       paused.value = true;
       expect([cancel.mock.calls.length, hide.mock.calls.length, show.mock.calls.length]).toEqual([1, 0, 0]);
@@ -259,11 +314,22 @@ describe("FullImageLoader", () => {
       expect(show).toHaveBeenCalledOnce();
     });
 
+    test("decodes again when the target width grows while visible", async() => {
+      const { imageLoader, scheduler, decodeStill, drawImage, targetWidth } = setup();
+
+      imageLoader.trackVisibility(new Signal(true));
+      scheduler.advance(QUIET_PERIOD);
+      await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
+      targetWidth.value = WIDTH * 2;
+      scheduler.advance(QUIET_PERIOD);
+      expect(decodeStill).toHaveBeenLastCalledWith(MEDIA, expect.any(AbortSignal), WIDTH * 2);
+    });
+
     test("cancels and stops following once stopped", () => {
-      const { fullImageLoader } = setup();
-      const { show, cancel } = spyOnActions(fullImageLoader);
+      const { imageLoader } = setup();
+      const { show, cancel } = spyOnActions(imageLoader);
       const visible = new Signal(false);
-      const stop = fullImageLoader.trackVisibility(visible);
+      const stop = imageLoader.trackVisibility(visible);
 
       cancel.mockClear();
       stop();

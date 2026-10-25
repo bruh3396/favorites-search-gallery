@@ -7,36 +7,32 @@ import { Signal } from "@/core/utils/reactive/signal";
 import TOOLBAR_CSS from "@/core/features/lightbox/ui/chrome/toolbar.css?inline";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(): {
+function setup(detailsOpen: Signal<boolean> | null = new Signal(false)): {
   root: HTMLElement;
   handlers: LightboxCommandHandlers;
-  isZoomed: Signal<boolean>;
-  canZoom: Signal<boolean>;
   isAutoplaying: Signal<boolean>;
   inFullscreen: Signal<boolean>;
 } {
-  const isZoomed = new Signal(false);
-  const canZoom = new Signal(true);
   const isAutoplaying = new Signal(false);
   const inFullscreen = new Signal(false);
   const handlers = {
+    toggleDetails: vi.fn(),
     toggleAutoplay: vi.fn(),
     download: vi.fn(),
-    toggleZoom: vi.fn(),
     toggleFullscreen: vi.fn(),
     openPostPage: vi.fn(),
     close: vi.fn()
   } as Partial<LightboxCommandHandlers> as LightboxCommandHandlers;
   const { result: root } = render(document, () => (
     <LightboxToolbar
-      zoom={{ isZoomed, canZoom }}
       isAutoplaying={isAutoplaying}
       inFullscreen={inFullscreen}
+      detailsOpen={detailsOpen ?? undefined}
       handlers={handlers}
-      keymap={{ " ": "toggleAutoplay", Escape: "dismiss", Backspace: "close" }}
+      keymap={{ " ": "toggleAutoplay", i: "toggleDetails", Escape: "dismiss", Backspace: "close" }}
     />
   ));
-  return { root, handlers, isZoomed, canZoom, isAutoplaying, inFullscreen };
+  return { root, handlers, isAutoplaying, inFullscreen };
 }
 
 function findButton(root: HTMLElement, label: string): HTMLButtonElement {
@@ -61,10 +57,18 @@ describe("LightboxToolbar", () => {
     expectClassesStyled(LightboxToolbarClass, TOOLBAR_CSS);
   });
 
+  test.each<[string, Signal<boolean> | null, string[]]>([
+    ["with details", new Signal(false), ["Autoplay", "Details", "Open post page", "Fullscreen", "Close"]],
+    ["without details", null, ["Autoplay", "Open post page", "Fullscreen", "Close"]]
+  ])("orders buttons %s", (_case, detailsOpen, expected) => {
+    const { root } = setup(detailsOpen);
+
+    expect(Array.from(root.querySelectorAll("button"), button => button.getAttribute("aria-label"))).toEqual(expected);
+  });
+
   test.each<[string, LightboxCommand]>([
+    ["Details", "toggleDetails"],
     ["Autoplay", "toggleAutoplay"],
-    ["Download", "download"],
-    ["Zoom", "toggleZoom"],
     ["Fullscreen", "toggleFullscreen"],
     ["Open post page", "openPostPage"],
     ["Close", "close"]
@@ -77,12 +81,26 @@ describe("LightboxToolbar", () => {
 
   test.each([
     ["Autoplay", "Autoplay (Space)"],
+    ["Details", "Details (I)"],
     ["Close", "Close (Esc)"],
-    ["Download", "Download"]
+    ["Open post page", "Open post page"]
   ])("titles %s with its key", (label, title) => {
     const { root } = setup();
 
     expect(findButton(root, label).title).toBe(title);
+  });
+
+  test("shows details as pressed while the details panel is open", () => {
+    const detailsOpen = new Signal(false);
+    const button = findButton(setup(detailsOpen).root, "Details");
+
+    expect(button.getAttribute("aria-pressed")).toBe("false");
+    detailsOpen.value = true;
+    expect(button.getAttribute("aria-pressed")).toBe("true");
+  });
+
+  test("leaves out the details button without a details panel", () => {
+    expect(findButton(setup(null).root, "Details")).toBeNull();
   });
 
   test("shows autoplay as a pressed pause button while autoplaying", () => {
@@ -92,22 +110,6 @@ describe("LightboxToolbar", () => {
     expectState(button, { pressed: false, icon: "play" });
     isAutoplaying.value = true;
     expectState(button, { pressed: true, icon: "pause" });
-  });
-
-  test("shows zoom as a pressed zoom-out button while zoomed", () => {
-    const { root, isZoomed } = setup();
-    const button = findButton(root, "Zoom");
-
-    expectState(button, { pressed: false, icon: "zoomIn" });
-    isZoomed.value = true;
-    expectState(button, { pressed: true, icon: "zoomOut" });
-  });
-
-  test("disables zoom while it can't zoom", () => {
-    const { root, canZoom } = setup();
-
-    canZoom.value = false;
-    expect(findButton(root, "Zoom").disabled).toBe(true);
   });
 
   test("shows fullscreen as a pressed exit button while in fullscreen", () => {

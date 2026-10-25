@@ -3,14 +3,14 @@ import { isBoolean, oneOf, sameKindAs } from "@/core/utils/guards/guards";
 import { FieldGuards } from "@/core/utils/codec/codec";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 
-export const SORT_KEYS = ["favorited", "random", ...METRICS] as const;
+export const FAVORITES_SORT_KEYS = ["favorited", "random", ...METRICS] as const;
 
-export type SortKey = (typeof SORT_KEYS)[number];
+export type FavoritesSortKey = (typeof FAVORITES_SORT_KEYS)[number];
 
-export interface SearchSettings {
+export interface FavoritesSearchSettings {
   readonly query: string;
   readonly isInverted: boolean;
-  readonly sortKey: SortKey;
+  readonly sortKey: FavoritesSortKey;
   readonly isSortAscending: boolean;
   readonly allowedRatings: number;
   readonly isBlacklistEnabled: boolean;
@@ -18,9 +18,9 @@ export interface SearchSettings {
   readonly shuffleSeed: number;
 }
 
-export interface SearchRequest {
+export interface FavoritesSearchRequest {
   readonly expression: SearchExpression | undefined;
-  readonly sortKey: SortKey;
+  readonly sortKey: FavoritesSortKey;
   readonly isSortAscending: boolean;
   readonly allowedRatings: number;
   readonly isShuffled: boolean;
@@ -31,7 +31,7 @@ function isSeed(stored: unknown): stored is number {
   return Number.isInteger(stored) && (stored as number) >= 0;
 }
 
-export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
+export const DEFAULT_FAVORITES_SEARCH_SETTINGS: FavoritesSearchSettings = {
   query: "",
   isInverted: false,
   sortKey: "favorited",
@@ -44,21 +44,21 @@ export const DEFAULT_SEARCH_SETTINGS: SearchSettings = {
 
 const FILTER_KEYS = ["query", "isInverted", "allowedRatings", "isBlacklistEnabled"] as const;
 
-export const UNFILTERED_SEARCH_SETTINGS: Pick<SearchSettings, (typeof FILTER_KEYS)[number]> = {
-  query: DEFAULT_SEARCH_SETTINGS.query,
-  isInverted: DEFAULT_SEARCH_SETTINGS.isInverted,
-  allowedRatings: DEFAULT_SEARCH_SETTINGS.allowedRatings,
-  isBlacklistEnabled: DEFAULT_SEARCH_SETTINGS.isBlacklistEnabled
+export const UNFILTERED_FAVORITES_SEARCH_SETTINGS: Pick<FavoritesSearchSettings, (typeof FILTER_KEYS)[number]> = {
+  query: DEFAULT_FAVORITES_SEARCH_SETTINGS.query,
+  isInverted: DEFAULT_FAVORITES_SEARCH_SETTINGS.isInverted,
+  allowedRatings: DEFAULT_FAVORITES_SEARCH_SETTINGS.allowedRatings,
+  isBlacklistEnabled: DEFAULT_FAVORITES_SEARCH_SETTINGS.isBlacklistEnabled
 };
 
-export function isFiltered(settings: SearchSettings): boolean {
-  return FILTER_KEYS.some(key => settings[key] !== UNFILTERED_SEARCH_SETTINGS[key]);
+export function isFiltered(settings: FavoritesSearchSettings): boolean {
+  return FILTER_KEYS.some(key => settings[key] !== UNFILTERED_FAVORITES_SEARCH_SETTINGS[key]);
 }
 
-export const SEARCH_SETTINGS_GUARDS: FieldGuards<SearchSettings> = {
+export const FAVORITES_SEARCH_SETTINGS_GUARDS: FieldGuards<FavoritesSearchSettings> = {
   query: sameKindAs(""),
   isInverted: isBoolean,
-  sortKey: oneOf(SORT_KEYS),
+  sortKey: oneOf(FAVORITES_SORT_KEYS),
   isSortAscending: isBoolean,
   allowedRatings: isRatingMask,
   isBlacklistEnabled: isBoolean,

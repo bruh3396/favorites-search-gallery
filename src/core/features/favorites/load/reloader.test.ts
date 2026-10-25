@@ -5,7 +5,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesReloader } from "@/core/features/favorites/load/reloader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -33,7 +33,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [], paint = Pro
   localPosts: MemoryLocalPosts;
   remoteFavorites: MemoryRemoteFavorites;
   localIds: string[];
-  states: LoadState[];
+  states: FavoritesLoadState[];
   refreshedIds: string[];
 }> {
   const collection = new FavoritesCollection();
@@ -42,7 +42,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [], paint = Pro
   const localPosts = new MemoryLocalPosts();
   const client = new MemoryClient(remote);
   const remoteFavorites = new MemoryRemoteFavorites(client);
-  const states: LoadState[] = [];
+  const states: FavoritesLoadState[] = [];
   const refreshedIds: string[] = [];
   const postLibrary = new PostLibrary({
     localPosts,

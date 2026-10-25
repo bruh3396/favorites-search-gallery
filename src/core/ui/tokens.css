@@ -2,21 +2,46 @@
   color-scheme: light dark;
   color: var(--fsg-color-on-surface);
   font-family: var(--fsg-font-family);
+  user-select: none;
 
-  --fsg-color-primary: light-dark(#3b6fd8, #7aa2f7);
-  --fsg-color-on-primary: light-dark(#ffffff, #10131a);
-  --fsg-color-secondary-container: light-dark(#dbe4fb, #2b3a5c);
-  --fsg-color-on-secondary-container: light-dark(#13306b, #d6e2ff);
-  --fsg-color-surface-dim: light-dark(#eceef2, #1b1e25);
-  --fsg-color-surface: light-dark(#ffffff, #20242c);
-  --fsg-color-surface-container-low: light-dark(#f5f6f8, #242831);
-  --fsg-color-surface-container: light-dark(#f0f2f5, #282d36);
-  --fsg-color-surface-container-high: light-dark(#e8ebf0, #2f343e);
-  --fsg-color-surface-container-highest: light-dark(#e2e5eb, #383e49);
-  --fsg-color-on-surface: light-dark(#1b1f27, #e3e6ec);
-  --fsg-color-on-surface-variant: light-dark(#5a6170, #a3abb9);
-  --fsg-color-outline: light-dark(#8a909c, #79818f);
-  --fsg-color-outline-variant: light-dark(#d5d9e0, #353a45);
+  --fsg-color-primary: var(--fsg-theme-accent);
+  --fsg-color-on-primary: var(--fsg-theme-on-accent);
+  --fsg-color-secondary-container: light-dark(
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-accent) 16%),
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-accent) 20%)
+  );
+  --fsg-color-on-secondary-container: light-dark(
+    color-mix(in oklab, var(--fsg-theme-text), var(--fsg-theme-accent) 35%),
+    color-mix(in oklab, var(--fsg-theme-text), var(--fsg-theme-accent) 20%)
+  );
+  --fsg-color-surface-dim: var(--fsg-theme-sunken);
+  --fsg-color-surface: var(--fsg-theme-surface);
+  --fsg-color-surface-container-low: light-dark(
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 4.5%),
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 3%)
+  );
+  --fsg-color-surface-container: light-dark(
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 6.5%),
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 6%)
+  );
+  --fsg-color-surface-container-high: light-dark(
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 10%),
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 10%)
+  );
+  --fsg-color-surface-container-highest: light-dark(
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 13%),
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 15%)
+  );
+  --fsg-color-on-surface: var(--fsg-theme-text);
+  --fsg-color-on-surface-variant: var(--fsg-theme-muted);
+  --fsg-color-outline: light-dark(
+    color-mix(in oklab, var(--fsg-theme-muted), var(--fsg-theme-surface) 30%),
+    color-mix(in oklab, var(--fsg-theme-muted), var(--fsg-theme-surface) 32%)
+  );
+  --fsg-color-outline-variant: light-dark(
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 22%),
+    color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-text) 16%)
+  );
 
   --fsg-state-hover-state-layer-opacity: 8%;
 

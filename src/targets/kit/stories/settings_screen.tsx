@@ -81,23 +81,21 @@ function createCatalog(log: Log): Catalog {
 
 function createHostVariants(): StoryVariant[] {
   let catalog: Catalog | undefined;
-  const host = (label: string, { layout, size, open }: { layout: SettingsLayout; size: ControlSize; open: string[] }): StoryVariant => ({
+  const host = (label: string, { layout, size }: { layout: SettingsLayout; size: ControlSize }): StoryVariant => ({
     label,
     render: (ownerDocument, log): HTMLElement => {
-      const expanded = createPreference<readonly string[]>({ id: `${label} expanded`, initial: open, log });
-
       catalog ??= createCatalog(log);
       const { descriptors, hints } = catalog;
       return render(ownerDocument, () => (
         <div className="kit-Panel" dataset={{ size }}>
-          <SettingsScreen layout={layout} descriptors={descriptors} expanded={expanded} size={size} scheduler={SCHEDULER} descriptionsVisible={hints} />
+          <SettingsScreen layout={layout} descriptors={descriptors} size={size} scheduler={SCHEDULER} descriptionsVisible={hints} />
         </div>
       )).result;
     }
   });
   return [
-    host("Favorites drawer", { layout: FAVORITES_LAYOUT, size: "medium", open: ["general", "layout"] }),
-    host("Post-list menu", { layout: POST_LIST_LAYOUT, size: "small", open: ["paging"] })
+    host("Favorites drawer", { layout: FAVORITES_LAYOUT, size: "medium" }),
+    host("Post-list menu", { layout: POST_LIST_LAYOUT, size: "small" })
   ];
 }
 

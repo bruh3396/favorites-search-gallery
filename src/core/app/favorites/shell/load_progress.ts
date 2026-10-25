@@ -1,7 +1,7 @@
-import { LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { Progress } from "@/core/ui/components/progress_line/progress_line";
 
-export function measureLoadProgress(state: LoadState): Progress {
+export function measureLoadProgress(state: FavoritesLoadState): Progress {
   switch (state.phase) {
     case "fetching":
     case "restoring":

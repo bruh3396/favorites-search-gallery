@@ -9,7 +9,7 @@
   inline-size: 50px;
   block-size: var(--fsg-control-size-medium);
   padding: 2px;
-  border: 1px solid var(--fsg-color-outline-variant);
+  border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-shape-corner-full);
   background: var(--fsg-color-surface-container-highest);
   cursor: pointer;

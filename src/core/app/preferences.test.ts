@@ -47,10 +47,10 @@ describe("createPostListPreferences", () => {
 
     preferences.layout.set("row");
     preferences.tilesPerRow.set(6);
-    preferences.fullImagesEnabled.set(false);
+    preferences.hdTilesEnabled.set(false);
     const restored = createPostListPreferences(storage);
 
-    expect([restored.layout.value, restored.tilesPerRow.value, restored.fullImagesEnabled.value]).toEqual(["row", 6, false]);
+    expect([restored.layout.value, restored.tilesPerRow.value, restored.hdTilesEnabled.value]).toEqual(["row", 6, false]);
   });
 });
 
@@ -68,5 +68,18 @@ describe("createLightboxPreferences", () => {
     expect(createLightboxPreferences(storage).detailsOpen.value).toBe(false);
     createLightboxPreferences(storage).detailsOpen.set(true);
     expect(createLightboxPreferences(storage).detailsOpen.value).toBe(true);
+  });
+
+  test("shows details tags by category, left aligned, at medium size by default", () => {
+    const { detailsOrganization, detailsAlignment, detailsSize } = createLightboxPreferences(new MemoryLocalKeyedValues());
+
+    expect([detailsOrganization.value, detailsAlignment.value, detailsSize.value]).toEqual(["category", "start", "medium"]);
+  });
+
+  test("falls back to the default details size for an unknown one", () => {
+    const storage = new MemoryLocalKeyedValues();
+
+    storage.set("detailsSize", "huge");
+    expect(createLightboxPreferences(storage).detailsSize.value).toBe("medium");
   });
 });

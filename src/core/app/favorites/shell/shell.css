@@ -41,4 +41,32 @@
   .fsg-FavoritesShell-panes .fsg-ViewPane-header {
     min-block-size: 24px;
   }
+
+  .fsg-FavoritesShell-zenHint {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 16px;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    padding: 6px 12px;
+    border-radius: var(--fsg-shape-corner-full);
+    background: var(--fsg-color-on-surface);
+    color: var(--fsg-color-surface);
+    font-size: var(--fsg-typescale-label-large-size);
+    white-space: nowrap;
+    pointer-events: none;
+    animation: fsg-FavoritesShell-zenHint-fade 2.4s forwards;
+  }
+
+  @keyframes fsg-FavoritesShell-zenHint-fade {
+    0%,
+    75% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+      visibility: hidden;
+    }
+  }
 }

@@ -39,14 +39,7 @@ export function Setting({ descriptor, descriptionVisible, size = "medium", sched
 }
 
 function createActivation(control: HTMLElement): (() => void) | undefined {
-  if (control instanceof HTMLSelectElement) {
-    return () => {
-      if (!control.disabled) {
-        control.showPicker();
-      }
-    };
-  }
-  return control.role === "switch" ? (): void => control.click() : undefined;
+  return control.role === "switch" || control.role === "combobox" ? (): void => control.click() : undefined;
 }
 
 function SettingControl({ descriptor, size, scheduler }: SettingControlProps): HTMLElement {
@@ -71,9 +64,9 @@ function SwitchControl({ descriptor: { preference, disabled }, size }: SettingCo
 }
 
 function ChoiceControl({ descriptor, size }: SettingControlProps<ChoiceSetting>): HTMLElement {
-  const { preference, disabled, control } = descriptor;
+  const { preference, disabled, control, onPreview } = descriptor;
   const props = { choices: createChoices(descriptor), value: preference, disabled, size, onValueChange: (next: string): void => preference.set(next) };
-  return control === "segmented" ? <Segmented<string> {...props} /> : <Dropdown<string> {...props} />;
+  return control === "segmented" ? <Segmented<string> {...props} /> : <Dropdown<string> {...props} onPreview={onPreview} />;
 }
 
 function ChoicesControl({ descriptor, size }: SettingControlProps<ChoicesSetting>): HTMLElement {

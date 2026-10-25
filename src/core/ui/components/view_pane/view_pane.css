@@ -20,12 +20,9 @@
   min-inline-size: 0;
   margin: 0;
   overflow: hidden;
-  color: var(--fsg-color-on-surface-variant);
-  font-size: var(--fsg-typescale-label-medium-size);
+  font-size: var(--fsg-typescale-label-large-size);
   font-weight: 600;
-  letter-spacing: 0.08em;
   text-overflow: ellipsis;
-  text-transform: uppercase;
   white-space: nowrap;
 }
 

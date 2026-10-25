@@ -1,5 +1,5 @@
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/app";
-import { createLightboxPreferences, createPostListPreferences } from "@/core/app/preferences";
+import { createAppPreferences, createLightboxPreferences, createPostListPreferences } from "@/core/app/preferences";
 import { APP_FONT } from "@/core/app/font";
 import { ColorScheme } from "@/core/boundary/environment";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
@@ -22,6 +22,7 @@ import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 
@@ -47,8 +48,9 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   } = dependencies;
   const postList = createPostListService({ remoteSearchResults });
   const storage = createAppStorage(localKeyedValues);
-  const { layout, tilesPerRow, fullImagesEnabled } = createPostListPreferences(storage.postListPreferences);
+  const { layout, tilesPerRow, hdTilesEnabled } = createPostListPreferences(storage.postListPreferences);
   const { mode, volume, muted } = createLightboxPreferences(storage.lightboxPreferences);
+  const { theme } = createAppPreferences(storage.appPreferences);
   const posts = computed(() => postList.page.value.posts);
   const sequence = new ListSequence({ wraps: false }, posts);
   const tileLocator = new TileLocator<Post>();
@@ -60,12 +62,13 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   });
 
   lightbox.mediaCorrected.on(({ id, media }) => postList.correctMedia(id, media));
-  const imageLoaderService = new ImageLoaderService({ remoteMedia, scheduler, enabled: fullImagesEnabled, paused: lightbox.isOpen });
+  const imageLoaderService = new ImageLoaderService({ remoteMedia, scheduler, enabled: hdTilesEnabled, paused: lightbox.isOpen });
   const grid: Omit<PostGridProps<Post>, "posts"> = {
     changed: postList.changed,
     tileLocator,
     settings: { layout, tilesPerRow },
     visibilityObserver,
+    sizeObserver,
     imageLoaderService,
     getDimensions: post => ({ width: post.width, height: post.height }),
     createActions: () => [],
@@ -77,7 +80,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
     mount: (container): void => {
       mountAppRoot(
         container,
-        { colorScheme: configuration.colorScheme, font: APP_FONT, styles: POST_LIST_APP_STYLES }
+        { colorScheme: configuration.colorScheme, theme: THEME_DEFINITIONS[theme.peek()], font: APP_FONT, styles: POST_LIST_APP_STYLES }
       ).append(...render(container.ownerDocument, renderApp).result);
     }
   };

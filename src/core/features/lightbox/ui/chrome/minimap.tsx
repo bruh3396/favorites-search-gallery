@@ -30,6 +30,7 @@ export function LightboxMinimap({ previewUrl, zoom }: LightboxMinimapProps): HTM
     element: root,
     handlers: {
       canDrag: (): boolean => true,
+      onPress: (): boolean => false,
       onDrag: ({ delta }): void => {
         const media = zoom.mediaRect.peek();
 

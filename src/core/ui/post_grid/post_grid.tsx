@@ -1,11 +1,13 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
 import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
-import { Readable, effect } from "@/core/utils/reactive/signal";
+import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
+import { GridSizing } from "@/core/ui/post_grid/decode_width";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { KeyedList } from "@/core/ui/h/keyed_list";
 import { Occurrence } from "@/core/utils/reactive/emitter";
 import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
+import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
@@ -25,6 +27,7 @@ export interface PostGridProps<T extends MediaItem> {
   tileLocator?: TileLocator<T>;
   settings: PostGridSettings;
   visibilityObserver: VisibilityObserver;
+  sizeObserver: SizeObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
   getDimensions: (post: T) => Dimensions;
   createActions: (post: T) => readonly Node[];
@@ -39,17 +42,26 @@ export function PostGrid<T extends MediaItem>(props: PostGridProps<T>): HTMLElem
 
 class PostGridImplementation<T extends MediaItem> {
   private readonly root: HTMLElement;
+  private readonly gridWidth: Signal<number>;
+  private readonly sizing: Readable<GridSizing>;
   private readonly list: KeyedList<T>;
 
   constructor(private readonly props: PostGridProps<T>) {
+    const { layout, tilesPerRow } = props.settings;
+
     this.root = <div className={PostGridClass.root} />;
+    this.gridWidth = new Signal(0);
+    this.sizing = computed(() => ({ layout: layout.value, tilesPerRow: tilesPerRow.value, gridWidth: this.gridWidth.value }));
     this.list = this.createPostList();
   }
 
   public create(): HTMLElement {
-    const { posts, changed, tileLocator, settings } = this.props;
+    const { posts, changed, tileLocator, settings, sizeObserver } = this.props;
 
     effect(() => applyTiling(this.root, { layout: settings.layout.value, tilesPerRow: settings.tilesPerRow.value }));
+    onCleanup(sizeObserver.observe(this.root, size => {
+      this.gridWidth.value = size.devicePixelWidth;
+    }));
     effect(() => this.reconcilePosts(posts.value));
     onCleanup(changed.on(post => this.list.recreate(post)));
 
@@ -79,6 +91,7 @@ class PostGridImplementation<T extends MediaItem> {
         <Tile
           post={post}
           dimensions={getDimensions(post)}
+          sizing={this.sizing}
           actions={createActions(post)}
           visibilityObserver={visibilityObserver}
           imageLoaderService={imageLoaderService}

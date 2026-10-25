@@ -25,6 +25,7 @@ export interface ChoiceSetting<M extends string = string> extends SettingBase {
   readonly labels: Readonly<Record<M, string>>;
   readonly icons?: Readonly<Record<M, Icon>>;
   readonly control: "segmented" | "dropdown";
+  onPreview?(member: M | null): void;
 }
 
 export interface ChoicesSetting<M extends string = string> extends SettingBase {

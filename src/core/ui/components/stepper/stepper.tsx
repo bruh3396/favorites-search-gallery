@@ -1,4 +1,5 @@
 import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { StepGesture } from "@/core/ui/components/stepper/step_gesture";
 import { doNothing } from "@/core/utils/function/function";
@@ -7,7 +8,8 @@ import { h } from "@/core/ui/h/h";
 export const StepperClass = {
   root: "fsg-Stepper",
   input: "fsg-Stepper-input",
-  button: "fsg-Stepper-button"
+  button: "fsg-Stepper-button",
+  icon: "fsg-Stepper-icon"
 } as const;
 
 export interface StepperScheduler {
@@ -26,7 +28,7 @@ export interface StepperProps extends ControlProps<number> {
 
 interface StepButtonProps {
   label: string;
-  text: string;
+  icon: Icon;
   disabled: Readable<boolean>;
   gesture: StepGesture;
   onStep: () => void;
@@ -122,7 +124,7 @@ export function Stepper({
     <div className={StepperClass.root} dataset={{ size }}>
       <StepButton
         label="Decrease"
-        text="−"
+        icon="subtract"
         disabled={computed(() => disabled.value || value.value <= min)}
         gesture={gesture}
         onStep={() => stepBy(-1)}
@@ -130,7 +132,7 @@ export function Stepper({
       {input}
       <StepButton
         label="Increase"
-        text="+"
+        icon="add"
         disabled={computed(() => disabled.value || value.value >= upper.value)}
         gesture={gesture}
         onStep={() => stepBy(1)}
@@ -139,7 +141,7 @@ export function Stepper({
   );
 }
 
-function StepButton({ label, text, disabled, gesture, onStep }: StepButtonProps): HTMLElement {
+function StepButton({ label, icon, disabled, gesture, onStep }: StepButtonProps): HTMLElement {
   const finishGesture = (): void => gesture.finish();
   const stepIfEnabled = (): boolean => {
     if (disabled.peek()) {
@@ -176,7 +178,7 @@ function StepButton({ label, text, disabled, gesture, onStep }: StepButtonProps)
       onPointerleave={finishGesture}
       onPointercancel={finishGesture}
     >
-      {text}
+      {createIcon(icon, StepperClass.icon)}
     </button>
   );
 }
@@ -185,9 +187,9 @@ function stepFrom(
   value: number,
   { direction, min, max, step }: { direction: 1 | -1; min: number; max: number; step: number }
 ): number {
-  const offset = roundToPrecision((value - min) / step, OFFSET_PRECISION);
+  const offset = roundToPrecision(value / step, OFFSET_PRECISION);
   const index = direction === 1 ? Math.floor(offset) + 1 : Math.ceil(offset) - 1;
-  const next = roundToPrecision(min + (index * step), countDecimals(step));
+  const next = roundToPrecision(index * step, countDecimals(step));
   return Math.min(max, Math.max(min, next));
 }
 

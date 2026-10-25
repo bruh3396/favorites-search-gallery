@@ -51,6 +51,7 @@ export interface LightboxDialogProps<T extends MediaItem> {
 export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T>): HTMLDialogElement {
   const { stage, overlayVisibility, zoom, handlers, details } = props;
   const detailsShortcut = findLightboxShortcut(props.keymap, "toggleDetails");
+  const detailsContent = details?.createContent(props.currentItem);
   const dialog = (
     <dialog
       className={LightboxDialogClass.root}
@@ -66,7 +67,7 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
         zoom={zoom}
         sizeObserver={props.sizeObserver}
         handlers={handlers}
-        closesOnTap={computed(() => props.simple.value && stage.video.value === undefined)}
+        closesOnPress={computed(() => props.simple.value && stage.video.value === undefined)}
         content={[
           <LightboxPreview src={stage.shownPreviewUrl} />,
           <LightboxImage element={stage.image} />,
@@ -79,13 +80,16 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
         onSlotLeave={() => overlayVisibility.release()}
         topEdge={<LightboxAutoplayBar countdown={props.autoplay.countdown} />}
         topStart={
-          <LightboxPosition
-            position={props.position}
-            toggle={details === undefined ? undefined : { isOn: details.isOpen, label: "Details", shortcut: detailsShortcut, onClick: handlers.toggleDetails }}
-          />
+          <LightboxPosition position={props.position} />
         }
         topEnd={
-          <LightboxToolbar zoom={zoom} isAutoplaying={props.autoplay.isPlaying} inFullscreen={props.inFullscreen} handlers={handlers} keymap={props.keymap} />
+          <LightboxToolbar
+            isAutoplaying={props.autoplay.isPlaying}
+            inFullscreen={props.inFullscreen}
+            detailsOpen={details?.isOpen}
+            handlers={handlers}
+            keymap={props.keymap}
+          />
         }
         startEdge={<LightboxArrow direction="previous" shortcut={findLightboxShortcut(props.keymap, "showPrevious")} onClick={handlers.showPrevious} />}
         endEdge={<LightboxArrow direction="next" shortcut={findLightboxShortcut(props.keymap, "showNext")} onClick={handlers.showNext} />}
@@ -95,7 +99,9 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
       {details === undefined ? null : (
         <LightboxDetailsPanel
           isOpen={details.isOpen}
-          content={details.createContent(props.currentItem)}
+          title={detailsContent?.title}
+          controls={detailsContent?.controls}
+          content={detailsContent?.body}
           closeShortcut={detailsShortcut}
           onClose={handlers.toggleDetails}
           onPointerenter={() => overlayVisibility.hold()}

@@ -17,10 +17,9 @@ interface Frame {
   readonly bounds?: Box;
 }
 
-export const MORPH_DURATION = 250;
 const STAND_IN_RADIUS = 8;
 
-export function morph(source: MorphSource, update: () => Element | undefined): void {
+export function morph(source: MorphSource, duration: number, update: () => Element | undefined): void {
   const view = source.ownerDocument.defaultView;
   const intrinsic = measureIntrinsicSize(source);
   const start = fitInside(source.getBoundingClientRect(), intrinsic);
@@ -38,7 +37,7 @@ export function morph(source: MorphSource, update: () => Element | undefined): v
     standIn.remove();
     return;
   }
-  fly(view, standIn, { start, target });
+  fly(view, standIn, { start, target, duration });
 }
 
 function isEmpty({ width, height }: Size): boolean {
@@ -74,7 +73,7 @@ function fitInside(box: Box, { width, height }: Size): Box {
   return { left: box.left + ((box.width - fitted.width) / 2), top: box.top + ((box.height - fitted.height) / 2), ...fitted };
 }
 
-function fly(view: Window, standIn: HTMLCanvasElement, { start, target }: { start: Box; target: Element }): void {
+function fly(view: Window, standIn: HTMLCanvasElement, { start, target, duration }: { start: Box; target: Element; duration: number }): void {
   const reveal = hide(target);
   const viewport = { left: 0, top: 0, width: view.innerWidth, height: view.innerHeight };
   const destination = findClippingAncestor(view, target)?.getBoundingClientRect();
@@ -89,7 +88,7 @@ function fly(view: Window, standIn: HTMLCanvasElement, { start, target }: { star
       return;
     }
     startTime ??= time;
-    const progress = Math.min((time - startTime) / MORPH_DURATION, 1);
+    const progress = Math.min((time - startTime) / duration, 1);
     const amount = easeOut(progress);
     const bounds = destination === undefined ? undefined : interpolate(viewport, destination, amount);
 

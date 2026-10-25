@@ -1,5 +1,5 @@
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { SearchSettings } from "@/core/features/favorites/search/input";
+import { FavoritesSearchSettings } from "@/core/features/favorites/search/input";
 import { parseExclusions } from "@/core/domain/search/parsers/search_expression_parser";
 
 export interface FavoritesBlacklistConfiguration {
@@ -16,7 +16,7 @@ export class FavoritesBlacklist {
     this.force = force;
   }
 
-  public apply(expression: SearchExpression, { isBlacklistEnabled }: Pick<SearchSettings, "isBlacklistEnabled">): SearchExpression {
+  public apply(expression: SearchExpression, { isBlacklistEnabled }: Pick<FavoritesSearchSettings, "isBlacklistEnabled">): SearchExpression {
     return (this.force || isBlacklistEnabled) && this.expression !== undefined ? SearchExpression.and([this.expression, expression]) : expression;
   }
 }

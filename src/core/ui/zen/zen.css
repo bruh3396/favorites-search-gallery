@@ -1,0 +1,3 @@
+[data-zen] :has([data-zen-stage]) > :not(:has([data-zen-stage]), [data-zen-stage]) {
+  display: none;
+}

@@ -1,18 +1,21 @@
+import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/themes";
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/tiler";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
 import { Preference, PreferenceSchema, PreferenceStorage, Preferences, StoredPreference, createPreferences, definePreference } from "@/core/utils/reactive/preference";
+import { TAG_ALIGNMENTS, TAG_ORGANIZATIONS, TAG_SIZES, TagAlignment, TagOrganization, TagSize } from "@/core/app/favorites/lightbox_details/view_options";
 import { isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
 import { ColorScheme } from "@/core/boundary/environment";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 
 export interface AppPreferenceValues {
   readonly postListEnabled: boolean;
+  readonly theme: Theme;
 }
 
 export interface PostGridPreferenceValues {
   readonly layout: GridLayout;
   readonly tilesPerRow: number;
-  readonly fullImagesEnabled: boolean;
+  readonly hdTilesEnabled: boolean;
 }
 
 export interface FavoritesPreferenceValues extends PostGridPreferenceValues {
@@ -20,7 +23,6 @@ export interface FavoritesPreferenceValues extends PostGridPreferenceValues {
   readonly infiniteScroll: boolean;
   readonly tabStripVisible: boolean;
   readonly nativeHeaderVisible: boolean;
-  readonly expandedSettingSections: readonly string[];
   readonly activeTool: string | null;
 }
 
@@ -29,6 +31,9 @@ export interface LightboxPreferenceValues {
   readonly volume: number;
   readonly muted: boolean;
   readonly detailsOpen: boolean;
+  readonly detailsOrganization: TagOrganization;
+  readonly detailsAlignment: TagAlignment;
+  readonly detailsSize: TagSize;
 }
 
 export type AppPreferences = Preferences<AppPreferenceValues>;
@@ -39,7 +44,8 @@ export type LightboxPreferences = Preferences<LightboxPreferenceValues>;
 
 export function createAppPreferences(storage: PreferenceStorage): AppPreferences {
   return createPreferences<AppPreferenceValues>({
-    postListEnabled: definePreference(false)
+    postListEnabled: definePreference(false),
+    theme: definePreference<Theme>(DEFAULT_THEME, oneOf(THEMES))
   }, storage);
 }
 
@@ -50,7 +56,6 @@ export function createFavoritesPreferences(storage: PreferenceStorage): Favorite
     infiniteScroll: definePreference(false),
     tabStripVisible: definePreference(true),
     nativeHeaderVisible: definePreference(true),
-    expandedSettingSections: definePreference<readonly string[]>(["general"]),
     activeTool: definePreference<string | null>(null, isToolId)
   }, storage);
 }
@@ -64,7 +69,10 @@ export function createLightboxPreferences(storage: PreferenceStorage): LightboxP
     mode: definePreference<LightboxMode>("full", oneOf(LIGHTBOX_MODES)),
     volume: definePreference(1, isInUnitInterval),
     muted: definePreference(false),
-    detailsOpen: definePreference(false)
+    detailsOpen: definePreference(false),
+    detailsOrganization: definePreference<TagOrganization>("category", oneOf(TAG_ORGANIZATIONS)),
+    detailsAlignment: definePreference<TagAlignment>("start", oneOf(TAG_ALIGNMENTS)),
+    detailsSize: definePreference<TagSize>("medium", oneOf(TAG_SIZES))
   }, storage);
 }
 
@@ -78,7 +86,7 @@ function createPostGridPreferences(): PreferenceSchema<PostGridPreferenceValues>
   return {
     layout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
     tilesPerRow: definePreference(6),
-    fullImagesEnabled: definePreference(true)
+    hdTilesEnabled: definePreference(true)
   };
 }
 

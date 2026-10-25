@@ -21,7 +21,37 @@ function searchWithEngine(engine: SearchEngine<Doc>, query: string, docs: Doc[])
   return expression === undefined ? [] : engine.search(expression, docs).map(getName);
 }
 
-const implementations: { name: string; implementation: Searcher; supportsAST: boolean }[] = [
+function createDoc(name: string, ...tags: string[]): Doc {
+  return { name, tags: new Set(tags) };
+}
+
+const engines: { name: string; createEngine: (docs: Doc[]) => SearchEngine<Doc> }[] = [
+  { name: "SetSearchEngine", createEngine: docs => new SetSearchEngine<Doc>(getTerms, getMetric, docs) },
+  { name: "BitSearchEngine", createEngine: docs => new BitSearchEngine<Doc>(getTerms, getMetric, docs) }
+];
+
+for (const { name, createEngine } of engines) {
+  describe(name, () => {
+    describe("countDocsWithTerm", () => {
+      test("counts the docs carrying a term", () => {
+        const engine = createEngine([createDoc("a", "apple"), createDoc("b", "apple", "banana")]);
+
+        expect(["apple", "banana", "ghost"].map(term => engine.countDocsWithTerm(term))).toEqual([2, 1, 0]);
+      });
+
+      test("follows added and corrected docs", () => {
+        const target = createDoc("a", "apple");
+        const engine = createEngine([target]);
+
+        engine.add([createDoc("b", "apple")]);
+        engine.update([{ doc: target, oldTerms: new Set(["apple"]), newTerms: new Set(["banana"]) }]);
+        expect([engine.countDocsWithTerm("apple"), engine.countDocsWithTerm("banana")]).toEqual([1, 1]);
+      });
+    });
+  });
+}
+
+const implementations:{ name: string; implementation: Searcher; supportsAST: boolean }[] = [
   {
     name: "SetSearchEngine",
     implementation: (query, docs) => searchWithEngine(new SetSearchEngine<Doc>(getTerms, getMetric, docs), query, docs),

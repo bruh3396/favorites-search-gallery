@@ -7,7 +7,7 @@ export interface LightboxCloserDependencies<T extends MediaItem> {
   navigation: Pick<LightboxNavigation<T>, "currentItem" | "close">;
   shownMedia: Readable<MorphSource | undefined>;
   inFullscreen: Readable<boolean>;
-  morphs: Readable<boolean>;
+  morphDuration: Readable<number>;
   locateItem: (item: T) => Element | undefined;
 }
 
@@ -15,15 +15,15 @@ export class LightboxCloser<T extends MediaItem> {
   constructor(private readonly dependencies: LightboxCloserDependencies<T>) { }
 
   public close(): void {
-    const { navigation, shownMedia, inFullscreen, morphs, locateItem } = this.dependencies;
+    const { navigation, shownMedia, inFullscreen, morphDuration, locateItem } = this.dependencies;
     const item = navigation.currentItem.peek();
     const source = shownMedia.peek();
 
-    if (item === undefined || source === undefined || inFullscreen.peek() || !morphs.peek()) {
+    if (item === undefined || source === undefined || inFullscreen.peek()) {
       navigation.close();
       return;
     }
-    morph(source, () => {
+    morph(source, morphDuration.peek(), () => {
       navigation.close();
       return locateItem(item);
     });

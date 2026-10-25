@@ -12,7 +12,9 @@ import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { PostGridPreferences } from "@/core/app/preferences";
 import { Preference } from "@/core/utils/reactive/preference";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton";
+import { describeFavoritesPanelBody } from "@/core/app/favorites/panel/body";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
+import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
@@ -25,11 +27,12 @@ export const FavoritesSearchPanelClass = {
   count: "fsg-FavoritesSearchPanel-count",
   tabStripToggle: "fsg-FavoritesSearchPanel-tabStripToggle",
   tabCount: "fsg-FavoritesSearchPanel-tabCount",
+  zenButton: "fsg-FavoritesSearchPanel-zenButton",
   body: "fsg-FavoritesSearchPanel-body"
 } as const;
 
 export interface FavoritesSearchPanelProps {
-  favorites: Pick<FavoritesService, "hydrated" | "loaded">;
+  favorites: Pick<FavoritesService, "hydrated" | "loadState" | "searchable">;
   session: Pick<FavoritesSession, "query" | "isFiltered" | "results" | "pageItems" | "pageNumber" | "pageCount" | "goTo" | "clearFilters" | "submit">;
   focusSearch: Emitter<void>;
   tileLocator: TileLocator<Favorite>;
@@ -39,41 +42,39 @@ export interface FavoritesSearchPanelProps {
   tabStripVisible: Preference<boolean>;
   tabCount: Readable<number>;
   visibilityObserver: VisibilityObserver;
+  sizeObserver: SizeObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
   getPostUrl: (post: MediaItem) => string;
   onPlainClick: (post: Favorite) => boolean;
   onCtrlClick: (post: Favorite) => void;
+  onEnterZen: () => void;
 }
 
 export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElement {
   const { favorites, session, focusSearch, tileLocator,
     skeletonDimensions, gridPreferences: { layout, tilesPerRow }, tabStripVisible, tabCount, skeletonItemCount,
-    visibilityObserver, imageLoaderService, getPostUrl, onPlainClick, onCtrlClick } = props;
+    visibilityObserver, sizeObserver, imageLoaderService, getPostUrl, onPlainClick, onCtrlClick, onEnterZen } = props;
   const hiddenTabCount = computed(() => (tabStripVisible.value ? 0 : tabCount.value));
+  const panelBody = computed(() => describeFavoritesPanelBody({
+    resultCount: session.results.value.length,
+    isSearchable: favorites.searchable.reached,
+    loadPhase: favorites.loadState.value.phase,
+    query: session.query.value,
+    isFiltered: session.isFiltered.value
+  }));
   const body: HTMLElement = (
-    <div className={FavoritesSearchPanelClass.body}>
+    <div className={FavoritesSearchPanelClass.body} data-zen-stage="">
       <SkeletonGrid
-        isShown={computed(() => !favorites.loaded.reached && session.results.value.length === 0)}
+        isShown={computed(() => panelBody.value.kind === "skeleton")}
         dimensions={skeletonDimensions}
         layout={layout}
         tilesPerRow={tilesPerRow}
         count={skeletonItemCount}
       />
       <EmptyState
-        isShown={computed(() => favorites.loaded.reached && session.results.value.length === 0)}
-        message={computed(() => {
-          const query = session.query.value;
-
-          if (query !== "") {
-            return `No favorites match "${query}"`;
-          }
-
-          if (session.isFiltered.value) {
-            return "No favorites match these filters";
-          }
-          return "No favorites yet";
-        })}
-        action={computed(() => (session.isFiltered.value ? {
+        isShown={computed(() => panelBody.value.kind === "empty")}
+        message={computed(() => (panelBody.value.kind === "empty" ? panelBody.value.message : ""))}
+        action={computed(() => (panelBody.value.kind === "empty" && panelBody.value.offersClear ? {
           label: "Clear",
           onClick: (): void => {
             session.clearFilters();
@@ -89,6 +90,7 @@ export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElem
         getDimensions={post => ({ width: post.getMetric("width"), height: post.getMetric("height") })}
         createActions={() => []}
         visibilityObserver={visibilityObserver}
+        sizeObserver={sizeObserver}
         imageLoaderService={imageLoaderService}
         getPostUrl={getPostUrl}
         onPlainClick={onPlainClick}
@@ -137,6 +139,9 @@ export function FavoritesSearchPanel(props: FavoritesSearchPanelProps): HTMLElem
           <span className={FavoritesSearchPanelClass.tabCount} hidden={computed(() => hiddenTabCount.value < 2)}>
             {computed(() => String(hiddenTabCount.value))}
           </span>
+        </button>
+        <button className={FavoritesSearchPanelClass.zenButton} type="button" aria-label="Zen" onClick={onEnterZen}>
+          {createIcon("scan", SearchBoxClass.icon)}
         </button>
       </header>
       {body}

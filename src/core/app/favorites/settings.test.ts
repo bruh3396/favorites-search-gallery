@@ -12,7 +12,7 @@ function setup(): { preferences: FavoritesPreferences; findSetting: (id: string)
   const colorScheme = createColorSchemePreference("light", new MemoryHostPage());
   const appPreferences = createAppPreferences({ get: () => undefined, set: () => undefined });
   const lightboxPreferences = createLightboxPreferences({ get: () => undefined, set: () => undefined });
-  const settings = createFavoritesSettings(preferences, appPreferences, lightboxPreferences, colorScheme);
+  const settings = createFavoritesSettings(preferences, appPreferences, lightboxPreferences, colorScheme, () => undefined);
   return { preferences, findSetting: id => settings.find(setting => setting.id === id)! };
 }
 

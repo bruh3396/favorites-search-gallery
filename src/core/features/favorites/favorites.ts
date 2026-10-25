@@ -8,7 +8,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/collec
 import { FavoritesLoader } from "@/core/features/favorites/load/loader";
 import { FavoritesPaginationSettings } from "@/core/features/favorites/session/pagination";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
@@ -18,7 +18,7 @@ import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_f
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { describeLoadState } from "@/core/features/favorites/load/status";
+import { describeFavoritesLoadState } from "@/core/features/favorites/load/status";
 
 export { default as FAVORITES_STYLES } from "@/core/features/favorites/styles.css?inline";
 
@@ -42,11 +42,12 @@ export interface FavoritesDependencies {
 export interface FavoritesService {
   readonly actions: Pick<FavoritesActions, "add" | "remove">;
   readonly hydrated: Occurrence<Favorite>;
-  readonly loadState: Readable<LoadState>;
+  readonly loadState: Readable<FavoritesLoadState>;
   readonly loadStatus: Readable<string>;
-  readonly loaded: Fact;
+  readonly searchable: Fact;
   createSession: (configuration: FavoritesSessionConfiguration) => FavoritesSession;
   isFavorited: (id: string) => boolean;
+  countFavoritesWithTag: (tag: string) => number;
   load: () => Promise<void>;
 }
 
@@ -64,8 +65,8 @@ export function createFavoritesService(configuration: FavoritesConfiguration, de
     actions,
     hydrated: collection.hydrated,
     loadState: loader.state,
-    loadStatus: computed(() => describeLoadState(loader.state.value)),
-    loaded,
+    loadStatus: computed(() => describeFavoritesLoadState(loader.state.value)),
+    searchable: searchIndex.populated,
     createSession: sessionConfiguration => new FavoritesSession(sessionConfiguration, {
       searchIndex,
       blacklist,
@@ -73,6 +74,7 @@ export function createFavoritesService(configuration: FavoritesConfiguration, de
       paginationSettings: dependencies.paginationSettings
     }),
     isFavorited: id => actions.isFavorited(id),
+    countFavoritesWithTag: tag => searchIndex.countFavoritesWithTag(tag),
     load: async(): Promise<void> => {
       await loader.load();
       loaded.reach();

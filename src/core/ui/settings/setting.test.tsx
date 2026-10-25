@@ -143,10 +143,27 @@ describe("Setting", () => {
 
   test("offers a choice as a dropdown", () => {
     const preference = createPreference<Layout>("row");
-    const select = renderSetting(createLayoutSetting(preference, "dropdown")).querySelector("select");
+    const element = renderSetting(createLayoutSetting(preference, "dropdown"));
+    const dropdown = element.querySelector<HTMLElement>('[role="combobox"]')!;
 
-    expect([...select?.options ?? []].map(option => option.textContent)).toEqual(["Column", "Row", "Square"]);
-    expect(select?.selectedIndex).toBe(1);
+    expect(dropdown.textContent).toBe("Row");
+    dropdown.click();
+    expect([...element.querySelectorAll('[role="option"]')].map(option => option.textContent)).toEqual(["Column", "Row", "Square"]);
+    dropdown.click();
+  });
+
+  test("passes a dropdown's previews through", () => {
+    const previewed: (string | null)[] = [];
+    const descriptor: ChoiceSetting<Layout> = {
+      ...createLayoutSetting(createPreference<Layout>("row"), "dropdown"),
+      onPreview: member => previewed.push(member)
+    };
+    const dropdown = renderSetting(descriptor).querySelector<HTMLElement>('[role="combobox"]')!;
+
+    dropdown.click();
+    dropdown.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
+    dropdown.click();
+    expect(previewed).toEqual(["row", "square", null]);
   });
 
   test("switches a switch when its row is clicked", () => {
@@ -165,16 +182,24 @@ describe("Setting", () => {
     expect(preference.value).toBe(false);
   });
 
-  test("opens a dropdown's picker when its row is clicked", () => {
+  test("opens a dropdown's menu when its row is clicked", () => {
     const element = renderSetting(createLayoutSetting(createPreference<Layout>("row"), "dropdown"));
-    const select = element.querySelector("select")!;
-    let opened = 0;
+    const dropdown = element.querySelector<HTMLElement>('[role="combobox"]')!;
 
-    select.showPicker = (): void => {
-      opened++;
-    };
     element.click();
-    expect(opened).toBe(1);
+    expect(dropdown.getAttribute("aria-expanded")).toBe("true");
+    dropdown.click();
+  });
+
+  test("closes a dropdown's menu when an option is chosen", () => {
+    const preference = createPreference<Layout>("row");
+    const element = renderSetting(createLayoutSetting(preference, "dropdown"));
+    const dropdown = element.querySelector<HTMLElement>('[role="combobox"]')!;
+
+    dropdown.click();
+    element.querySelectorAll<HTMLElement>('[role="option"]')[2].click();
+    expect(preference.value).toBe("square");
+    expect(dropdown.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("leaves a segmented choice alone when its row is clicked", () => {

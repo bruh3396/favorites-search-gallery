@@ -6,7 +6,7 @@
   padding: 2px;
   border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-shape-corner-small);
-  background: var(--fsg-color-surface-container-highest);
+  background: var(--fsg-color-surface-dim);
 }
 
 .fsg-Segmented-option {

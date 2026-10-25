@@ -1,11 +1,15 @@
-import { FavoriteLightboxDetails, FavoriteLightboxDetailsClass } from "@/core/app/favorites/lightbox_details/lightbox_details";
+import { FavoriteLightboxDetailsClass, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox_details/lightbox_details";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/lightbox_details.css?inline";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/clipboard";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { TagCategory } from "@/core/domain/tag/tag";
+import { createLightboxPreferences } from "@/core/app/preferences";
+import { expectClassesStyled } from "@/testing/css";
 import { flushMicrotasks } from "@/testing/async";
 
 type ShownFavorite = Pick<Favorite, "id" | "tags">;
@@ -21,31 +25,52 @@ function setup(initial: ShownFavorite | undefined, categories: ReadonlyMap<strin
     return category === undefined ? [] : [[name, category] as const];
   }))));
   const clipboard = new MemoryClipboard();
-  const { result } = render(document, () => (
-    <FavoriteLightboxDetails favorite={favorite} localTagCategories={{ getMany }} clipboard={clipboard} scheduler={new MemoryScheduler()} />
-  ) as HTMLElement);
-  const copyButton = result.querySelector<HTMLButtonElement>("button")!;
+  const preferences = createLightboxPreferences(new MemoryLocalKeyedValues());
+  const view = { organization: preferences.detailsOrganization, alignment: preferences.detailsAlignment, size: preferences.detailsSize };
+  const { result } = render(document, () => {
+    const { title, controls, body } = createFavoriteLightboxDetails({
+      favorite, view, localTagCategories: { getMany }, clipboard, scheduler: new MemoryScheduler()
+    });
+    return <div>{title}{controls}{body}</div> as HTMLElement;
+  });
+  const copyButton = result.querySelector<HTMLButtonElement>(`.${FavoriteLightboxDetailsClass.id} button`)!;
+  const viewButton = result.querySelector<HTMLButtonElement>("[aria-label=\"View settings\"]")!;
+  const viewSettings = result.querySelector<HTMLElement>(`.${FavoriteLightboxDetailsClass.view}`)!;
   const readId = (): string => copyButton.firstChild?.textContent ?? "";
   const readGroups = (): string[][] => [...result.querySelectorAll(`.${FavoriteLightboxDetailsClass.group}`)]
-    .map(group => [...group.querySelectorAll("h3, li")].map(element => element.textContent ?? ""));
-  return { favorite, getMany, clipboard, copyButton, readId, readGroups };
+    .map(group => [...group.querySelectorAll<HTMLElement>("h3, li:not([hidden])")].map(element => element.textContent ?? ""));
+  const clickShowMore = (): void => result.querySelector<HTMLButtonElement>(`.${FavoriteLightboxDetailsClass.showMore}`)!.click();
+  const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
+    .find(button => button.getAttribute("aria-label") === label)!.click();
+  return { favorite, getMany, clipboard, view, copyButton, viewButton, viewSettings, readId, readGroups, clickShowMore, chooseView };
 }
 
-describe("FavoriteLightboxDetails", () => {
+describe("createFavoriteLightboxDetails", () => {
+  test("styles every class it sets", () => {
+    expectClassesStyled(FavoriteLightboxDetailsClass, LIGHTBOX_DETAILS_CSS);
+  });
+
   test("shows the shown favorite's id and follows it", () => {
     const { favorite, readId } = setup(createFavorite("12"));
 
-    expect(readId()).toBe("#12");
+    expect(readId()).toBe("12");
     favorite.value = createFavorite("34");
-    expect(readId()).toBe("#34");
+    expect(readId()).toBe("34");
+  });
+
+  test("copies the shown favorite's id", async() => {
+    const { clipboard, copyButton } = setup(createFavorite("12"));
+
+    copyButton.click();
+    await flushMicrotasks();
+    expect(clipboard.text).toBe("12");
   });
 
   test("shows nothing without a favorite", async() => {
     const { readId, readGroups } = setup(undefined);
 
     await flushMicrotasks();
-    expect(readId()).toBe("");
-    expect(readGroups()).toEqual([]);
+    expect([readId(), readGroups()]).toEqual(["", []]);
   });
 
   test("groups the favorite's tags under their saved categories", async() => {
@@ -53,6 +78,26 @@ describe("FavoriteLightboxDetails", () => {
 
     await flushMicrotasks();
     expect(readGroups()).toEqual([["Artist", "alice"], ["Character", "tracer"], ["General", "solo"]]);
+  });
+
+  test("shows six tags of a longer group until asked for the rest", async() => {
+    const { readGroups, clickShowMore } = setup(createFavorite("1", ["a", "b", "c", "d", "e", "f", "g", "h"]));
+
+    await flushMicrotasks();
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 2 more"]]);
+    clickShowMore();
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "g", "h"]]);
+  });
+
+  test("collapses an expanded group again for the next favorite", async() => {
+    const tags = ["a", "b", "c", "d", "e", "f", "g"];
+    const { favorite, readGroups, clickShowMore } = setup(createFavorite("1", tags));
+
+    await flushMicrotasks();
+    clickShowMore();
+    favorite.value = createFavorite("2", tags);
+    await flushMicrotasks();
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 1 more"]]);
   });
 
   test("shows a newer favorite's tags when an older lookup resolves late", async() => {
@@ -82,11 +127,30 @@ describe("FavoriteLightboxDetails", () => {
     expect(readGroups()).toEqual([["General", "solo"]]);
   });
 
-  test("copies the shown favorite's id", async() => {
-    const { clipboard, copyButton } = setup(createFavorite("12"));
+  test("opens and closes the view settings from the settings button", () => {
+    const { viewButton, viewSettings } = setup(createFavorite("1"));
 
-    copyButton.click();
+    expect(viewSettings.hidden).toBe(true);
+    viewButton.click();
+    expect([viewSettings.hidden, viewButton.getAttribute("aria-pressed")]).toEqual([false, "true"]);
+    viewButton.click();
+    expect(viewSettings.hidden).toBe(true);
+  });
+
+  test("shows every tag in one alphabetical list without headings when chosen", async() => {
+    const { view, readGroups, chooseView } = setup(createFavorite("1", ["solo", "alice", "b", "c", "d", "e", "f"]), new Map([["alice", "artist"]]));
+
     await flushMicrotasks();
-    expect(clipboard.text).toBe("12");
+    chooseView("One list");
+    expect(view.organization.value).toBe("list");
+    expect(readGroups()).toEqual([["alice", "b", "c", "d", "e", "f", "solo"]]);
+  });
+
+  test("remembers the chosen alignment and size", () => {
+    const { view, chooseView } = setup(createFavorite("1"));
+
+    chooseView("Centered");
+    chooseView("Large");
+    expect([view.alignment.value, view.size.value]).toEqual(["center", "large"]);
   });
 });

@@ -1,5 +1,7 @@
-import { MORPH_DURATION, morph } from "@/core/features/lightbox/closer/morph";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
+import { morph } from "@/core/features/lightbox/closer/morph";
+
+const MORPH_DURATION = 250;
 
 interface Rect {
   left: number;
@@ -63,7 +65,7 @@ describe("morph", () => {
     const target = createTarget();
     let standIn: HTMLCanvasElement | null = null;
 
-    morph(createSource(), () => {
+    morph(createSource(), MORPH_DURATION,() => {
       standIn = findStandIn();
       return target;
     });
@@ -78,7 +80,7 @@ describe("morph", () => {
 
     source.width = 150;
     source.height = 150;
-    morph(source, createTarget);
+    morph(source, MORPH_DURATION, createTarget);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -89,7 +91,7 @@ describe("morph", () => {
   test("flies the stand-in onto the target, then removes it", () => {
     const runFrame = stubFrames();
 
-    morph(createSource(), createTarget);
+    morph(createSource(), MORPH_DURATION,createTarget);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -100,12 +102,25 @@ describe("morph", () => {
     expect(findStandIn()).toBeNull();
   });
 
+  test("lands on the target after the given duration", () => {
+    const runFrame = stubFrames();
+
+    morph(createSource(), 100, createTarget);
+    const standIn = findStandIn()!;
+
+    runFrame(0);
+    runFrame(100);
+    expect(readVisibleBox(standIn)).toEqual([50, 60, 100, 120]);
+    runFrame(116);
+    expect(findStandIn()).toBeNull();
+  });
+
   test("hides the target during the flight and restores its visibility on landing", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
     target.style.setProperty("visibility", "visible", "important");
-    morph(createSource(), () => target);
+    morph(createSource(), MORPH_DURATION,() => target);
     runFrame(0);
     expect(target.style.visibility).toBe("hidden");
     runFrame(MORPH_DURATION);
@@ -119,7 +134,7 @@ describe("morph", () => {
 
     document.body.append(target);
 
-    morph(createSource(), () => target);
+    morph(createSource(), MORPH_DURATION,() => target);
     runFrame(0);
 
     expect(target.getAttribute("visibility")).toBeNull();
@@ -134,7 +149,7 @@ describe("morph", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    morph(createSource(), () => target);
+    morph(createSource(), MORPH_DURATION,() => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -145,7 +160,7 @@ describe("morph", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    morph(createSource(), () => target);
+    morph(createSource(), MORPH_DURATION,() => target);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -168,7 +183,7 @@ describe("morph", () => {
     document.body.append(pane);
     onTestFinished(() => pane.remove());
     moveTo(pane, { left: 0, top: 100, width: 400, height: 400 });
-    morph(createSource(), () => target);
+    morph(createSource(), MORPH_DURATION,() => target);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -182,7 +197,7 @@ describe("morph", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    morph(createSource(), () => target);
+    morph(createSource(), MORPH_DURATION,() => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -192,7 +207,7 @@ describe("morph", () => {
   test("drops the stand-in as the page changes when there is no target", () => {
     stubFrames();
 
-    morph(createSource(), () => undefined);
+    morph(createSource(), MORPH_DURATION,() => undefined);
     expect(findStandIn()).toBeNull();
     expect(window.requestAnimationFrame).not.toHaveBeenCalled();
   });
@@ -201,7 +216,7 @@ describe("morph", () => {
     stubFrames();
     const update = vi.fn(() => undefined);
 
-    morph(document.createElement("img"), update);
+    morph(document.createElement("img"), MORPH_DURATION, update);
     expect(update).toHaveBeenCalledOnce();
     expect(findStandIn()).toBeNull();
   });
@@ -211,7 +226,7 @@ describe("morph", () => {
     const update = vi.fn(() => undefined);
     const video = Object.defineProperties(document.createElement("video"), { videoWidth: { value: 0 }, videoHeight: { value: 0 } });
 
-    morph(video, update);
+    morph(video, MORPH_DURATION, update);
     expect(update).toHaveBeenCalledOnce();
     expect(findStandIn()).toBeNull();
   });

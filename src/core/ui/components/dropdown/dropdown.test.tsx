@@ -1,5 +1,5 @@
 import { Dropdown, DropdownClass } from "@/core/ui/components/dropdown/dropdown";
-import { Mock, describe, expect, test, vi } from "vitest";
+import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import DROPDOWN_CSS from "@/core/ui/components/dropdown/dropdown.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
@@ -14,55 +14,132 @@ const CHOICES = [
 ] as const;
 
 interface Setup {
-  element: HTMLSelectElement;
+  trigger: HTMLButtonElement;
   dispose: () => void;
   value: Signal<Sort>;
   disabled: Signal<boolean>;
   onValueChange: Mock<(next: Sort) => void>;
+  onPreview: Mock<(previewed: Sort | null) => void>;
 }
 
-function setup(initial: Sort = "none"): Setup {
+function setup(initial: Sort = "score"): Setup {
   const value = new Signal<Sort>(initial);
   const disabled = new Signal(false);
   const onValueChange = vi.fn<(next: Sort) => void>();
-  const { result, dispose } = render(document, () => <Dropdown<Sort> choices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} />);
-  return { element: result as HTMLSelectElement, dispose, value, disabled, onValueChange };
+  const onPreview = vi.fn<(previewed: Sort | null) => void>();
+  const { result, dispose } = render(document, () => (
+    <Dropdown<Sort> choices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} onPreview={onPreview} />
+  ));
+  const container = document.createElement("div");
+
+  container.append(result);
+  document.body.append(container);
+  onTestFinished(() => {
+    dispose();
+    container.remove();
+  });
+  return { trigger: result as HTMLButtonElement, dispose, value, disabled, onValueChange, onPreview };
 }
 
-function choose(element: HTMLSelectElement, index: number): void {
-  element.selectedIndex = index;
-  element.dispatchEvent(new Event("change"));
+function queryMenu(): HTMLElement | null {
+  return document.querySelector(`.${DropdownClass.menu}`);
+}
+
+function queryOptions(): HTMLElement[] {
+  return [...document.querySelectorAll<HTMLElement>(`.${DropdownClass.option}`)];
+}
+
+function press(trigger: HTMLElement, key: string): void {
+  trigger.dispatchEvent(new KeyboardEvent("keydown", { key, cancelable: true }));
 }
 
 describe("Dropdown", () => {
-  test("is a native select with one option per choice, choosing nothing while its value is not an option", () => {
-    const { element } = setup();
+  test("shows the chosen label on a closed combobox", () => {
+    const { trigger } = setup("date");
 
-    expect(element.tagName).toBe("SELECT");
-    expect([...element.options].map(option => option.textContent)).toEqual(["Score", "Date", "Random"]);
-    expect(element.selectedIndex).toBe(-1);
+    expect([trigger.role, trigger.textContent, trigger.getAttribute("aria-expanded")]).toEqual(["combobox", "Date", "false"]);
+    expect(queryMenu()).toBeNull();
   });
 
   test("is medium unless told otherwise", () => {
     const { result } = render(document, () => <Dropdown<string> choices={CHOICES} value={new Signal("score")} onValueChange={vi.fn()} size="small" />);
 
-    expect(setup().element.dataset.size).toBe("medium");
+    expect(setup().trigger.dataset.size).toBe("medium");
     expect(result.dataset.size).toBe("small");
   });
 
   test("follows its value", () => {
-    const { element, value } = setup();
+    const { trigger, value } = setup();
 
     value.value = "random";
-    expect(element.selectedIndex).toBe(2);
+    expect(trigger.textContent).toBe("Random");
   });
 
-  test("reports the chosen option and goes back to its current value", () => {
-    const { element, onValueChange } = setup("score");
+  test("opens a menu of every choice, marking the chosen one", () => {
+    const { trigger } = setup("date");
 
-    choose(element, 1);
-    expect(onValueChange).toHaveBeenLastCalledWith("date");
-    expect(element.selectedIndex).toBe(0);
+    trigger.click();
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+    expect(queryOptions().map(option => [option.textContent, option.getAttribute("aria-selected")]))
+      .toEqual([["Score", "false"], ["Date", "true"], ["Random", "false"]]);
+  });
+
+  test("reports the clicked option and closes", () => {
+    const { trigger, onValueChange } = setup();
+
+    trigger.click();
+    queryOptions()[2].click();
+    expect(onValueChange).toHaveBeenLastCalledWith("random");
+    expect(queryMenu()).toBeNull();
+  });
+
+  test("closes without reporting when the chosen option is clicked again", () => {
+    const { trigger, onValueChange } = setup();
+
+    trigger.click();
+    queryOptions()[0].click();
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  test("previews the hovered option and clears the preview when the pointer leaves", () => {
+    const { trigger, onPreview } = setup();
+
+    trigger.click();
+    queryOptions()[1].dispatchEvent(new PointerEvent("pointermove"));
+    queryMenu()!.dispatchEvent(new PointerEvent("pointerleave"));
+    expect(onPreview.mock.calls).toEqual([["score"], ["date"], [null]]);
+  });
+
+  test("previews with the arrow keys and chooses with Enter", () => {
+    const { trigger, onPreview, onValueChange } = setup();
+
+    press(trigger, "ArrowDown");
+    press(trigger, "ArrowDown");
+    press(trigger, "ArrowDown");
+    expect(onPreview.mock.calls).toEqual([["score"], ["date"], ["random"]]);
+    expect(trigger.getAttribute("aria-activedescendant")).toBe(queryOptions()[2].id);
+    press(trigger, "Enter");
+    expect(onValueChange).toHaveBeenLastCalledWith("random");
+    expect(onPreview).toHaveBeenLastCalledWith(null);
+  });
+
+  test("closes on Escape without choosing", () => {
+    const { trigger, onValueChange, onPreview } = setup();
+
+    trigger.click();
+    press(trigger, "End");
+    press(trigger, "Escape");
+    expect(queryMenu()).toBeNull();
+    expect(onValueChange).not.toHaveBeenCalled();
+    expect(onPreview).toHaveBeenLastCalledWith(null);
+  });
+
+  test("closes when pressed outside", () => {
+    const { trigger } = setup();
+
+    trigger.click();
+    document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, composed: true }));
+    expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("works with values that are not strings", () => {
@@ -70,23 +147,25 @@ describe("Dropdown", () => {
     const choices = [{ value: 10, label: "Ten" }, { value: 20, label: "Twenty" }];
     const { result } = render(document, () => <Dropdown choices={choices} value={new Signal(10)} onValueChange={onValueChange} />);
 
-    choose(result as HTMLSelectElement, 1);
+    press(result, "ArrowDown");
+    press(result, "ArrowDown");
+    press(result, "Enter");
     expect(onValueChange).toHaveBeenLastCalledWith(20);
   });
 
   test("disables natively", () => {
-    const { element, disabled } = setup();
+    const { trigger, disabled } = setup();
 
     disabled.value = true;
-    expect(element.disabled).toBe(true);
+    expect(trigger.disabled).toBe(true);
   });
 
   test("stops following its value once disposed", () => {
-    const { element, value, dispose } = setup("score");
+    const { trigger, value, dispose } = setup();
 
     dispose();
     value.value = "random";
-    expect(element.selectedIndex).toBe(0);
+    expect(trigger.textContent).toBe("Score");
   });
 
   test("styles every class it sets", () => {

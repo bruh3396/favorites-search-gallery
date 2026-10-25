@@ -9,7 +9,9 @@
   justify-content: space-between;
   gap: 8px;
   inline-size: 100%;
-  padding: 8px 14px;
+  padding: 8px 14px 8px 8px;
+  background: var(--fsg-color-surface-container-low);
+  color: var(--fsg-color-on-surface-variant);
   font-size: var(--fsg-typescale-label-large-size);
   font-weight: 600;
   text-align: start;
@@ -17,7 +19,7 @@
 }
 
 .fsg-Disclosure[data-size="small"] .fsg-Disclosure-trigger {
-  padding: 6px 14px;
+  padding: 6px 14px 6px 8px;
 }
 
 .fsg-Disclosure-trigger:focus-visible {
@@ -45,7 +47,18 @@
   transition: transform var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
+.fsg-Disclosure-trigger[aria-expanded="true"] {
+  color: var(--fsg-color-primary);
+}
+
 .fsg-Disclosure-trigger[aria-expanded="true"] .fsg-Disclosure-icon {
   margin-block-end: 3px;
+  border-color: var(--fsg-color-primary);
   transform: rotate(45deg);
+}
+
+@media (hover: hover) {
+  .fsg-Disclosure-trigger[aria-expanded="false"]:hover:enabled .fsg-Disclosure-icon {
+    border-color: var(--fsg-color-on-surface);
+  }
 }

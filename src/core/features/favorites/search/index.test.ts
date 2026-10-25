@@ -63,6 +63,14 @@ describe("FavoritesSearchIndex", () => {
     });
   });
 
+  describe("countFavoritesWithTag", () => {
+    test("counts the favorites carrying a tag", () => {
+      const { index } = setup(createTaggedPosts("apple", "apple banana", "cherry"));
+
+      expect(["apple", "banana", "ghost"].map(tag => index.countFavoritesWithTag(tag))).toEqual([2, 1, 0]);
+    });
+  });
+
   describe("rebuild", () => {
     test("searches only the given favorites", () => {
       const { favorites, index } = setup(createTaggedPosts("apple", "apple"));
@@ -88,6 +96,32 @@ describe("FavoritesSearchIndex", () => {
       index.indexed.on(added => announced.push(added));
       index.rebuild(favorites);
       expect(announced).toEqual([]);
+    });
+  });
+
+  describe("populated", () => {
+    test("stays unreached while no favorite has been indexed", () => {
+      const index = new FavoritesSearchIndex();
+
+      index.add([]);
+      index.rebuild([]);
+      expect(index.populated.reached).toBe(false);
+    });
+
+    test("reaches once favorites are first added", () => {
+      const index = new FavoritesSearchIndex();
+      const collection = new FavoritesCollection();
+
+      index.add(collection.append([createPost({ id: "1" })]));
+      index.add(collection.append([createPost({ id: "2" })]));
+      expect(index.populated.reached).toBe(true);
+    });
+
+    test("reaches once rebuilt from favorites", () => {
+      const index = new FavoritesSearchIndex();
+
+      index.rebuild(new FavoritesCollection().append(createTaggedPosts("apple")));
+      expect(index.populated.reached).toBe(true);
     });
   });
 

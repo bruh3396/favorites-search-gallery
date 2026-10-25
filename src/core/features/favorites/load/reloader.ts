@@ -1,4 +1,4 @@
-import { LoadResult, LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadResult, FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
@@ -15,7 +15,7 @@ export interface FavoritesReloaderDependencies {
   index: Pick<FavoritesSearchIndex, "rebuild">;
   postLibrary: PostLibrary;
   waitForPaint: () => Promise<void>;
-  report: (state: LoadState) => void;
+  report: (state: FavoritesLoadState) => void;
 }
 
 export class FavoritesReloader {
@@ -25,7 +25,7 @@ export class FavoritesReloader {
     this.dependencies = dependencies;
   }
 
-  public async reload(localIds: readonly string[]): Promise<LoadResult> {
+  public async reload(localIds: readonly string[]): Promise<FavoritesLoadResult> {
     const { collection, index, postLibrary, report, waitForPaint } = this.dependencies;
     const restored = await this.restore(localIds);
     let pulled: Post[] = [];

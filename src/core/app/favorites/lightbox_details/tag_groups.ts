@@ -1,6 +1,6 @@
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
 
-const GROUP_ORDER = ["artist", "character", "copyright", "general", "metadata"] as const;
+const GROUP_ORDER = ["artist", "character", "copyright", "metadata", "general"] as const;
 
 export type TagGroupCategory = typeof GROUP_ORDER[number];
 

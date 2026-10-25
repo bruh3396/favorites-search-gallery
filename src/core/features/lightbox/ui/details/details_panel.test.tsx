@@ -5,14 +5,15 @@ import DETAILS_PANEL_CSS from "@/core/features/lightbox/ui/details/details_panel
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(): { panel: HTMLElement; isOpen: Signal<boolean>; props: LightboxDetailsPanelProps } {
+function setup(overrides: Partial<LightboxDetailsPanelProps> = {}): { panel: HTMLElement; isOpen: Signal<boolean>; props: LightboxDetailsPanelProps } {
   const isOpen = new Signal(false);
   const props: LightboxDetailsPanelProps = {
     isOpen,
     content: "content",
     onClose: vi.fn(),
     onPointerenter: vi.fn(),
-    onPointerleave: vi.fn()
+    onPointerleave: vi.fn(),
+    ...overrides
   };
   const { result: panel } = render(document, () => <LightboxDetailsPanel {...props} /> as HTMLElement);
   return { panel, isOpen, props };
@@ -25,6 +26,20 @@ describe("LightboxDetailsPanel", () => {
 
   test("shows its content", () => {
     expect(setup().panel.textContent).toContain("content");
+  });
+
+  test("shows its title beside the close button", () => {
+    const { panel } = setup({ title: "#12" });
+    const closeButton = panel.querySelector("[aria-label=\"Hide details\"]")!;
+
+    expect(closeButton.parentElement!.textContent).toContain("#12");
+  });
+
+  test("keeps its controls outside the scrolling content", () => {
+    const { panel } = setup({ controls: "controls" });
+
+    expect(panel.querySelector(`.${LightboxDetailsPanelClass.content}`)!.textContent).not.toContain("controls");
+    expect(panel.textContent).toContain("controls");
   });
 
   test("is inert while closed and interactive while open", () => {

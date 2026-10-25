@@ -40,13 +40,11 @@
 }
 
 .fsg-Tile {
-  --fsg-Tile-loading-color: var(--fsg-color-surface-container-highest);
-
   position: relative;
   overflow: hidden;
   aspect-ratio: var(--fsg-Tile-aspect-ratio, 1);
   border-radius: var(--fsg-shape-corner-small);
-  background: var(--fsg-color-surface-container-highest);
+  background: color-mix(in srgb, currentColor 5%, transparent);
 }
 
 .fsg-PostGrid[data-layout="native"] .fsg-Tile {
@@ -81,9 +79,20 @@
   inline-size: 100%;
   block-size: 100%;
   object-fit: cover;
+  animation: fsg-Tile-enter var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
-.fsg-Tile-fullImage {
+.fsg-Tile-preview[data-entered] {
+  animation: none;
+}
+
+@keyframes fsg-Tile-enter {
+  from {
+    opacity: 0;
+  }
+}
+
+.fsg-Tile-image {
   position: absolute;
   inset: 0;
   inline-size: 100%;
@@ -91,18 +100,11 @@
   object-fit: cover;
 }
 
-.fsg-Tile[data-loading] .fsg-Tile-preview {
-  opacity: 0;
-}
-
-.fsg-Tile[data-loading] {
-  background: var(--fsg-Tile-loading-color);
-}
-
-/* Only the skeleton pulses: its tiles hold no preview, and there are at most 50 of them. */
 .fsg-SkeletonGrid .fsg-Tile {
   --fsg-Tile-pulse-duration: calc(0.6s + 0.1s * (var(--fsg-Tile-pulse-duration-step, 0) + var(--fsg-Tile-pulse-column-step, 0)));
   --fsg-Tile-pulse-delay: calc(0.05s * (var(--fsg-Tile-pulse-delay-step, 0) + var(--fsg-Tile-pulse-column-step, 0)));
+
+  background: var(--fsg-color-surface-container-highest);
 }
 
 .fsg-SkeletonGrid .fsg-Tile::after {

@@ -4,6 +4,7 @@ import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size
 interface ObservedResize {
   readonly target: Element;
   readonly contentRect: { readonly width: number; readonly height: number };
+  readonly devicePixelContentBoxSize?: readonly { readonly inlineSize: number }[];
 }
 
 class FakeResizeObserver {
@@ -29,6 +30,7 @@ describe("BrowserSizeObserver", () => {
   beforeEach(() => {
     FakeResizeObserver.instances = [];
     vi.stubGlobal("ResizeObserver", FakeResizeObserver);
+    vi.stubGlobal("devicePixelRatio", 1);
   });
 
   afterEach(() => {
@@ -48,7 +50,30 @@ describe("BrowserSizeObserver", () => {
     ]);
 
     expect(resizeObserver.observe).toHaveBeenCalledWith(element);
-    expect(onResize.mock.calls).toEqual([[{ width: 1_000, height: 500 }]]);
+    expect(onResize.mock.calls).toEqual([[{ width: 1_000, height: 500, devicePixelWidth: 1_000 }]]);
+  });
+
+  test("reports the device pixel width the browser measured", () => {
+    const element = createTarget();
+    const onResize = vi.fn();
+    const sizeObserver = new BrowserSizeObserver();
+
+    sizeObserver.observe(element, onResize);
+    FakeResizeObserver.instances[0].emit([{ target: element, contentRect: { width: 1_000, height: 500 }, devicePixelContentBoxSize: [{ inlineSize: 1_501 }] }]);
+
+    expect(onResize).toHaveBeenCalledWith({ width: 1_000, height: 500, devicePixelWidth: 1_501 });
+  });
+
+  test("multiplies by the device pixel ratio when the browser measures no device pixels", () => {
+    const element = createTarget();
+    const onResize = vi.fn();
+    const sizeObserver = new BrowserSizeObserver();
+
+    vi.stubGlobal("devicePixelRatio", 2);
+    sizeObserver.observe(element, onResize);
+    FakeResizeObserver.instances[0].emit([{ target: element, contentRect: { width: 1_000, height: 500 } }]);
+
+    expect(onResize).toHaveBeenCalledWith({ width: 1_000, height: 500, devicePixelWidth: 2_000 });
   });
 
   test("stops observing an element when its subscription is removed", () => {
@@ -76,6 +101,6 @@ describe("BrowserSizeObserver", () => {
     resizeObserver.emit([{ target: element, contentRect: { width: 2, height: 3 } }]);
 
     expect(resizeObserver.unobserve).not.toHaveBeenCalled();
-    expect(onNewResize).toHaveBeenCalledWith({ width: 2, height: 3 });
+    expect(onNewResize).toHaveBeenCalledWith({ width: 2, height: 3, devicePixelWidth: 2 });
   });
 });

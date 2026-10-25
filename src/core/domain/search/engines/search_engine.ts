@@ -5,6 +5,7 @@ export type TermDelta = { readonly added: readonly string[]; readonly removed: r
 
 export interface SearchEngine<Doc> {
   search(expression: SearchExpression, candidates?: readonly Doc[]): readonly Doc[];
+  countDocsWithTerm(term: string): number;
   rebuild(docs: readonly Doc[]): void;
   add(docs: readonly Doc[]): void;
   update(updates: readonly TermUpdate<Doc>[]): void;

@@ -1,6 +1,6 @@
 import { FavoritesPagination, FavoritesPaginationSettings } from "@/core/features/favorites/session/pagination";
+import { FavoritesSearchSettings, isFiltered } from "@/core/features/favorites/search/input";
 import { Readable, computed } from "@/core/utils/reactive/signal";
-import { SearchSettings, isFiltered } from "@/core/features/favorites/search/input";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearch } from "@/core/features/favorites/session/search";
@@ -8,7 +8,7 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export interface FavoritesSessionConfiguration {
-  readonly settings: SearchSettings;
+  readonly settings: FavoritesSearchSettings;
 }
 
 export interface FavoritesSessionDependencies {
@@ -31,7 +31,7 @@ export class FavoritesSession {
     this.currentlyFiltered = computed(() => isFiltered(this.search.settings.value));
   }
 
-  public get settings(): Readable<SearchSettings> {
+  public get settings(): Readable<FavoritesSearchSettings> {
     return this.search.settings;
   }
 

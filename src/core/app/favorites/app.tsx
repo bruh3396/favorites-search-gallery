@@ -16,9 +16,9 @@ import SEARCH_PANEL_CSS from "@/core/app/favorites/panel/search.css?inline";
 import SHELL_CSS from "@/core/app/favorites/shell/shell.css?inline";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SettingsScreen } from "@/core/ui/settings/screen";
-import { Signal } from "@/core/utils/reactive/signal";
-import { createSectionsToggleAction } from "@/core/ui/settings/sections_toggle";
+import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
+import { Theme } from "@/core/ui/theme/themes";
 import { Tabs } from "@/core/ui/components/tabs/tabs";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
@@ -36,16 +36,19 @@ export interface FavoritesAppProps {
   appPreferences: AppPreferences;
   lightboxPreferences: LightboxPreferences;
   colorScheme: Preference<ColorScheme>;
+  onThemePreview: (theme: Theme | null) => void;
+  zenEnabled: Readable<boolean>;
   scheduler: Scheduler;
   panel: (tab: FavoritesTab) => FavoritesSearchPanelProps;
 }
 
 export function FavoritesApp({
-  favorites, workspace, lightbox, preferences, appPreferences, lightboxPreferences, colorScheme, scheduler, panel
+  favorites, workspace, lightbox, preferences, appPreferences, lightboxPreferences, colorScheme, onThemePreview, zenEnabled, scheduler, panel
 }: FavoritesAppProps): HTMLElement[] {
   return [
     <FavoritesShell
       favorites={favorites}
+      zenEnabled={zenEnabled}
       panes={[
         <ActivityBar
           items={TOOLS}
@@ -53,15 +56,11 @@ export function FavoritesApp({
           renderPanel={tool => (
             <ViewPane
               title={tool.label}
-              actions={[
-                createSectionsToggleAction(FAVORITES_SETTINGS_LAYOUT, preferences.expandedSettingSections),
-                { label: "Reset all settings", icon: "reset", disabled: new Signal(true), onClick: () => undefined }
-              ]}
+              actions={[{ label: "Reset all settings", icon: "reset", disabled: new Signal(true), onClick: () => undefined }]}
             >
               <SettingsScreen
                 layout={FAVORITES_SETTINGS_LAYOUT}
-                descriptors={createFavoritesSettings(preferences, appPreferences, lightboxPreferences, colorScheme)}
-                expanded={preferences.expandedSettingSections}
+                descriptors={createFavoritesSettings(preferences, appPreferences, lightboxPreferences, colorScheme, onThemePreview)}
                 size="small"
                 scheduler={scheduler}
               />

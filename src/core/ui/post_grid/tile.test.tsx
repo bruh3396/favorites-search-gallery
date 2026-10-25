@@ -1,6 +1,7 @@
 import { NO_MEDIA } from "@/core/domain/media/media";
 import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
-import { FullImageLoader } from "@/core/ui/post_grid/full_image_loader";
+import { GridSizing, computeDecodeWidth } from "@/core/ui/post_grid/decode_width";
+import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -21,12 +22,13 @@ function setPreviewCached(complete: boolean): void {
   });
 }
 
-type TileOptions = Omit<TileProps, "onPlainClick" | "visibilityObserver" | "imageLoaderService"> &
-  Partial<Pick<TileProps, "onPlainClick" | "visibilityObserver" | "imageLoaderService">>;
+type TileOptions = Omit<TileProps, "onPlainClick" | "visibilityObserver" | "imageLoaderService" | "sizing"> &
+  Partial<Pick<TileProps, "onPlainClick" | "visibilityObserver" | "imageLoaderService" | "sizing">>;
 
 function drawTile(options: TileOptions): HTMLElement {
   return render(document, () => (
     <Tile
+      sizing={new Signal<GridSizing>({ layout: "column", tilesPerRow: 4, gridWidth: 1_000 })}
       visibilityObserver={{ observe: () => () => { } }}
       imageLoaderService={createImageLoaderService()}
       onPlainClick={() => true}
@@ -115,6 +117,17 @@ describe("Tile", () => {
     expect(onPlainClick).toHaveBeenCalledOnce();
   });
 
+  test("reports a plain mouse press once, keeping the click that follows from the link", () => {
+    const onPlainClick = vi.fn(() => true);
+    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], onPlainClick });
+    const press = new PointerEvent("pointerdown", { pointerType: "mouse", button: 0, cancelable: true });
+
+    getLink(tile).dispatchEvent(press);
+    expect(onPlainClick).toHaveBeenCalledOnce();
+    expect(clickLink(tile).defaultPrevented).toBe(true);
+    expect([press.defaultPrevented, onPlainClick.mock.calls.length]).toEqual([true, 1]);
+  });
+
   test("leaves a plain click nobody handles to the link", () => {
     const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], onPlainClick: () => false });
 
@@ -170,29 +183,47 @@ describe("Tile", () => {
     expect(readAspectRatio(drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [] }))).toBe("");
   });
 
-  test("shows a cached preview without loading", () => {
+  test("points its preview at the post's preview address", () => {
+    expect(getPreview(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] })).getAttribute("src")).toBe("images/123");
+  });
+
+  test("shows a cached preview at once", () => {
     setPreviewCached(true);
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] });
 
-    expect(tile.dataset.loading).toBeUndefined();
-    expect(getPreview(tile).getAttribute("src")).toBe("images/123");
+    expect(getPreview(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] })).hidden).toBe(false);
   });
 
-  test("stays loading until the preview loads", () => {
+  test("hides a preview until it loads", () => {
     setPreviewCached(false);
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] });
+    const preview = getPreview(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] }));
 
-    expect(tile.dataset.loading).toBe("");
-    getPreview(tile).dispatchEvent(new Event("load"));
-    expect(tile.dataset.loading).toBeUndefined();
+    expect(preview.hidden).toBe(true);
+    preview.dispatchEvent(new Event("load"));
+    expect(preview.hidden).toBe(false);
   });
 
-  test("stops loading when the preview fails", () => {
+  test("keeps a preview that fails to load hidden", () => {
     setPreviewCached(false);
-    const tile = drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] });
+    const preview = getPreview(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] }));
 
-    getPreview(tile).dispatchEvent(new Event("error"));
-    expect(tile.dataset.loading).toBeUndefined();
+    preview.dispatchEvent(new Event("error"));
+    expect(preview.hidden).toBe(true);
+  });
+
+  test("marks its preview entered once the fade ends, so moving the tile doesn't fade it again", () => {
+    const preview = getPreview(drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [] }));
+
+    expect(preview.dataset.entered).toBeUndefined();
+    preview.dispatchEvent(new Event("animationend"));
+    expect(preview.dataset.entered).toBe("");
+  });
+
+  test("takes its shape from a cached preview at once while the dimensions are unknown", () => {
+    setPreviewCached(true);
+    vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(300);
+    vi.spyOn(HTMLImageElement.prototype, "naturalHeight", "get").mockReturnValue(200);
+
+    expect(readAspectRatio(drawTile({ post: IMAGE, dimensions: UNKNOWN, actions: [] }))).toBe("300 / 200");
   });
 
   test("takes its shape from the preview while the dimensions are unknown", () => {
@@ -205,8 +236,8 @@ describe("Tile", () => {
     expect(readAspectRatio(tile)).toBe("300 / 200");
   });
 
-  test("shows the full image once the tile is visible", () => {
-    const show = vi.spyOn(FullImageLoader.prototype, "show").mockImplementation(doNothing);
+  test("shows the HD image once the tile is visible", () => {
+    const show = vi.spyOn(ImageLoader.prototype, "show").mockImplementation(doNothing);
     let reportVisibility: (visible: boolean) => void = doNothing;
     const visibilityObserver = {
       observe: (_element: Element, onVisibility: (visible: boolean) => void): (() => void) => {
@@ -224,7 +255,22 @@ describe("Tile", () => {
     expect(show).toHaveBeenCalledOnce();
   });
 
-  test("stays loading without a preview for a placeholder", () => {
+  test("sizes the HD image from the grid's sizing and the post's dimensions", () => {
+    const createLoader = vi.spyOn(ImageLoaderService.prototype, "createLoader");
+    const sizing = new Signal<GridSizing>({ layout: "row", tilesPerRow: 4, gridWidth: 1_000 });
+
+    onTestFinished(() => {
+      vi.restoreAllMocks();
+    });
+    drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], sizing });
+    const targetWidth = createLoader.mock.calls[0][2];
+
+    expect(targetWidth.value).toBe(computeDecodeWidth(sizing.value, PORTRAIT));
+    sizing.value = { layout: "row", tilesPerRow: 1, gridWidth: 1_000 };
+    expect(targetWidth.value).toBe(computeDecodeWidth(sizing.value, PORTRAIT));
+  });
+
+  test("leaves a placeholder's preview without an address", () => {
     const getPreviewUrl = vi.spyOn(ImageLoaderService.prototype, "resolvePreviewUrl");
 
     onTestFinished(() => {
@@ -233,7 +279,6 @@ describe("Tile", () => {
     const tile = drawTile({ post: PLACEHOLDER, dimensions: UNKNOWN, actions: [] });
 
     expect(getPreviewUrl).not.toHaveBeenCalled();
-    expect(tile.dataset.loading).toBe("");
     expect(getPreview(tile).hasAttribute("src")).toBe(false);
   });
 });

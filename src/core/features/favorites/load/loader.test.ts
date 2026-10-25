@@ -5,7 +5,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesLoader } from "@/core/features/favorites/load/loader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { LoadPhase } from "@/core/features/favorites/load/state";
+import { FavoritesLoadPhase } from "@/core/features/favorites/load/state";
 import { MemoryClient } from "@/adapters/memory/client/client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
@@ -58,8 +58,8 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
   return { flow, collection, index, localFavorites, remoteFavorites, scheduler };
 }
 
-function recordPhases(flow: FavoritesLoader): LoadPhase[] {
-  const phases: LoadPhase[] = [];
+function recordPhases(flow: FavoritesLoader): FavoritesLoadPhase[] {
+  const phases: FavoritesLoadPhase[] = [];
 
   effect(() => {
     phases.push(flow.state.value.phase);

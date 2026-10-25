@@ -22,24 +22,29 @@ export function resolveLightboxViewportCursor(
 export function createLightboxViewportGestureHandlers(
   zoom: LightboxViewportGestureZoom,
   handlers: LightboxViewportCommandHandlers,
-  closesOnTap: Readable<boolean>
+  closesOnPress: Readable<boolean>
 ): GestureHandlers {
   return {
     canDrag: () => zoom.isZoomed.peek(),
     onDrag: ({ delta }) => zoom.panBy(delta.x, delta.y),
+    onPress: ({ point, modifiers }): boolean => {
+      if (modifiers.ctrl || modifiers.meta || zoom.isZoomed.peek()) {
+        return false;
+      }
+      const closes = zoom.canZoom.peek() ? !containsPoint(zoom.mediaRect.peek(), point) : closesOnPress.peek();
+
+      if (closes) {
+        handlers.close();
+      }
+      return closes;
+    },
     onTap: ({ point, modifiers }): void => {
       if (modifiers.ctrl || modifiers.meta) {
         handlers.openOriginal();
       } else if (zoom.isZoomed.peek()) {
         zoom.zoomOut();
-      } else if (zoom.canZoom.peek()) {
-        if (containsPoint(zoom.mediaRect.peek(), point)) {
-          zoom.toggle(point);
-        } else {
-          handlers.close();
-        }
-      } else if (closesOnTap.peek()) {
-        handlers.close();
+      } else if (zoom.canZoom.peek() && containsPoint(zoom.mediaRect.peek(), point)) {
+        zoom.toggle(point);
       }
     },
     onWheel: ({ point, delta, modifiers }): boolean => {

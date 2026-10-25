@@ -88,6 +88,49 @@ describe("createLightboxViewportGestureHandlers", () => {
     });
   });
 
+  describe("onPress", () => {
+    test("closes on a press off the media", () => {
+      const { zoom, handlers } = setup();
+
+      expect(createLightboxViewportGestureHandlers(zoom, handlers, new Signal(false)).onPress({ point: OFF_MEDIA, modifiers: NO_MODIFIERS })).toBe(true);
+      expect(handlers.close).toHaveBeenCalledOnce();
+    });
+
+    test("leaves a press on the media to the tap", () => {
+      const { zoom, handlers } = setup();
+
+      expect(createLightboxViewportGestureHandlers(zoom, handlers, new Signal(true)).onPress({ point: ON_MEDIA, modifiers: NO_MODIFIERS })).toBe(false);
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+
+    test("leaves a press to the tap or drag while zoomed or with ctrl or meta held", () => {
+      const { zoom, handlers } = setup();
+      const gestures = createLightboxViewportGestureHandlers(zoom, handlers, new Signal(true));
+
+      expect(gestures.onPress({ point: OFF_MEDIA, modifiers: { ...NO_MODIFIERS, ctrl: true } })).toBe(false);
+      expect(gestures.onPress({ point: OFF_MEDIA, modifiers: { ...NO_MODIFIERS, meta: true } })).toBe(false);
+      zoom.isZoomed.value = true;
+      expect(gestures.onPress({ point: OFF_MEDIA, modifiers: NO_MODIFIERS })).toBe(false);
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+
+    test("closes on a press anywhere when it can't zoom but closes on press", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.canZoom.value = false;
+      expect(createLightboxViewportGestureHandlers(zoom, handlers, new Signal(true)).onPress({ point: ON_MEDIA, modifiers: NO_MODIFIERS })).toBe(true);
+      expect(handlers.close).toHaveBeenCalledOnce();
+    });
+
+    test("does nothing when it can neither zoom nor close on press", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.canZoom.value = false;
+      expect(createLightboxViewportGestureHandlers(zoom, handlers, new Signal(false)).onPress({ point: OFF_MEDIA, modifiers: NO_MODIFIERS })).toBe(false);
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+  });
+
   describe("onTap", () => {
     test.each(["ctrl", "meta"] as const)("opens the original on %s+tap", modifier => {
       const { zoom, handlers } = setup();
@@ -113,28 +156,13 @@ describe("createLightboxViewportGestureHandlers", () => {
       expect(zoom.toggle).toHaveBeenCalledWith(ON_MEDIA);
     });
 
-    test("closes on a tap off the media", () => {
-      const { zoom, handlers } = setup();
-
-      createLightboxViewportGestureHandlers(zoom, handlers, new Signal(false)).onTap({ point: OFF_MEDIA, modifiers: NO_MODIFIERS });
-      expect(handlers.close).toHaveBeenCalledOnce();
-    });
-
     test("does nothing when it can't zoom", () => {
       const { zoom, handlers } = setup();
 
       zoom.canZoom.value = false;
-      createLightboxViewportGestureHandlers(zoom, handlers, new Signal(false)).onTap({ point: OFF_MEDIA, modifiers: NO_MODIFIERS });
+      createLightboxViewportGestureHandlers(zoom, handlers, new Signal(true)).onTap({ point: ON_MEDIA, modifiers: NO_MODIFIERS });
       expect(zoom.toggle).not.toHaveBeenCalled();
       expect(handlers.close).not.toHaveBeenCalled();
-    });
-
-    test("closes on a tap anywhere when it can't zoom but closes on tap", () => {
-      const { zoom, handlers } = setup();
-
-      zoom.canZoom.value = false;
-      createLightboxViewportGestureHandlers(zoom, handlers, new Signal(true)).onTap({ point: ON_MEDIA, modifiers: NO_MODIFIERS });
-      expect(handlers.close).toHaveBeenCalledOnce();
     });
   });
 

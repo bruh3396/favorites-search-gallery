@@ -28,7 +28,7 @@ function setup(): {
   const close = vi.fn();
   const handlers = { close, showNext: vi.fn(), showPrevious: vi.fn(), openOriginal: vi.fn() };
   const { result: root, dispose } = render(document, () => (
-    <LightboxViewport zoom={zoom} sizeObserver={sizeObserver} handlers={handlers} closesOnTap={new Signal(false)} content={content} />
+    <LightboxViewport zoom={zoom} sizeObserver={sizeObserver} handlers={handlers} closesOnPress={new Signal(false)} content={content} />
   ));
 
   sizeObserver.resize(root, FRAME);
@@ -64,10 +64,10 @@ describe("LightboxViewport", () => {
     expect(contentLayer.hasAttribute("data-glides")).toBe(true);
   });
 
-  test("closes on a tap off the media", () => {
+  test("closes on a press off the media", () => {
     const { root, close } = setup();
 
-    tap(root, 50, 300);
+    root.dispatchEvent(point("pointerdown", 50, 300));
     expect(close).toHaveBeenCalledOnce();
   });
 

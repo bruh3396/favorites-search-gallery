@@ -5,7 +5,6 @@ import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
-import { BrowserPageVisibility } from "@/adapters/browser/ports/page_visibility/page_visibility";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
@@ -97,7 +96,6 @@ export function createFavoritesDependencies(
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
-    pageVisibility: new BrowserPageVisibility(document),
     localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDb),
     localPosts: new IndexedDbLocalPosts(indexedDb),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDb),

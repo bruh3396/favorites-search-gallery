@@ -51,7 +51,7 @@ describe("LightboxButton", () => {
 
   test("disables itself while disabled", () => {
     const disabled = new Signal(true);
-    const { result: button } = render(document, () => <LightboxButton icon="zoomIn" label="Zoom" disabled={disabled} onClick={vi.fn()} />);
+    const { result: button } = render(document, () => <LightboxButton icon="download" label="Download" disabled={disabled} onClick={vi.fn()} />);
 
     expect((button as HTMLButtonElement).disabled).toBe(true);
     disabled.value = false;

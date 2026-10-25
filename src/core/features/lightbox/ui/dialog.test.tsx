@@ -71,7 +71,7 @@ function setup(details?: LightboxDetails<Post>): {
         handlers={handlers}
         keymap={{}}
         keyListener={keyListener}
-        mouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn(), onContextmenu: vi.fn() }}
+        mouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn() }}
       />
     ) as HTMLDialogElement;
   });
@@ -90,7 +90,7 @@ function setupOpen(details?: LightboxDetails<Post>): ReturnType<typeof setup> {
 function createDetails(): LightboxDetails<Post> & { isOpen: StoredPreference<boolean> } {
   return {
     isOpen: new StoredPreference({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() }),
-    createContent: () => <p>details content</p>
+    createContent: () => ({ body: <p>details content</p> })
   };
 }
 
@@ -182,18 +182,18 @@ describe("LightboxDialog", () => {
     expect(handlers.togglePause).toHaveBeenCalledOnce();
   });
 
-  test("leaves out the details panel and keeps the count plain without details", () => {
+  test("leaves out the details panel and its button without details", () => {
     const { dialog } = setupOpen();
 
     expect(dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)).toBeNull();
-    expect(dialog.querySelector(`.${LightboxPositionClass.button}`)).toBeNull();
+    expect(dialog.querySelector("[aria-label=\"Details\"]")).toBeNull();
   });
 
-  test("mounts the details content and toggles the panel from the count", () => {
+  test("mounts the details content and toggles the panel from the details button", () => {
     const { dialog, handlers } = setupOpen(createDetails());
 
     expect(dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)!.textContent).toContain("details content");
-    dialog.querySelector<HTMLButtonElement>(`.${LightboxPositionClass.button}`)!.click();
+    dialog.querySelector<HTMLButtonElement>("[aria-label=\"Details\"]")!.click();
     expect(handlers.toggleDetails).toHaveBeenCalledOnce();
   });
 
@@ -215,18 +215,17 @@ describe("LightboxDialog", () => {
     expect([dialog.hasAttribute("data-simple"), dialog.hasAttribute("data-details-open")]).toEqual([true, false]);
   });
 
-  test("closes on a tap without a video only in simple mode", () => {
+  test("closes on a press without a video only in simple mode", () => {
     const { dialog, simple, handlers } = setupOpen();
     const viewport = dialog.querySelector(`.${LightboxViewportClass.root}`)!;
-    const tap = (): void => {
+    const press = (): void => {
       viewport.dispatchEvent(new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 }));
-      viewport.dispatchEvent(new PointerEvent("pointerup", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 }));
     };
 
-    tap();
+    press();
     expect(handlers.close).not.toHaveBeenCalled();
     simple.value = true;
-    tap();
+    press();
     expect(handlers.close).toHaveBeenCalledOnce();
   });
 

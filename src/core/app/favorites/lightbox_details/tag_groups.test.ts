@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { groupTagsByCategory } from "@/core/app/favorites/lightbox_details/tag_groups";
 
 describe("groupTagsByCategory", () => {
-  test("orders groups artist, character, copyright, general, metadata", () => {
+  test("orders groups artist, character, copyright, metadata, general", () => {
     const categories = new Map([
       ["highres", "metadata"],
       ["solo", "general"],
@@ -12,7 +12,7 @@ describe("groupTagsByCategory", () => {
     ] as const);
 
     expect(groupTagsByCategory(categories.keys(), categories).map(group => group.category))
-      .toEqual(["artist", "character", "copyright", "general", "metadata"]);
+      .toEqual(["artist", "character", "copyright", "metadata", "general"]);
   });
 
   test("sorts tags alphabetically within a group", () => {

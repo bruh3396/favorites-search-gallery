@@ -1,5 +1,5 @@
 import { Codec, createListCodec, createRecordCodec } from "@/core/utils/codec/codec";
-import { DEFAULT_SEARCH_SETTINGS, SEARCH_SETTINGS_GUARDS, SearchSettings } from "@/core/features/favorites/search/input";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, FavoritesSearchSettings } from "@/core/features/favorites/search/input";
 import { FavoritesTab, createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { Readable, batch, computed, effect } from "@/core/utils/reactive/signal";
 import { Tab, TabManager } from "@/core/ui/tabs/tab_manager";
@@ -15,11 +15,11 @@ export interface FavoritesWorkspaceConfiguration {
 
 export interface FavoritesWorkspaceDependencies {
   storage: LocalKeyedValues;
-  createSession: (settings: SearchSettings) => FavoritesSession;
+  createSession: (settings: FavoritesSearchSettings) => FavoritesSession;
 }
 
 interface TabGroup {
-  readonly tabs: readonly SearchSettings[];
+  readonly tabs: readonly FavoritesSearchSettings[];
   readonly activeIndex: number;
 }
 
@@ -28,8 +28,8 @@ interface Workspace {
 }
 
 const WORKSPACE_NAMESPACE = "favoritesWorkspace";
-const DEFAULT_WORKSPACE: Workspace = { panes: [{ tabs: [DEFAULT_SEARCH_SETTINGS], activeIndex: 0 }] };
-const TABS_CODEC = createListCodec(createRecordCodec(DEFAULT_SEARCH_SETTINGS, SEARCH_SETTINGS_GUARDS));
+const DEFAULT_WORKSPACE: Workspace = { panes: [{ tabs: [DEFAULT_FAVORITES_SEARCH_SETTINGS], activeIndex: 0 }] };
+const TABS_CODEC = createListCodec(createRecordCodec(DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS));
 const TAB_GROUPS_CODEC = createListCodec<TabGroup>({
   decode: (stored): TabGroup | undefined => {
     if (!isRecord(stored)) {
@@ -69,7 +69,7 @@ export class FavoritesWorkspace {
   }
 
   public openBlankTab(): void {
-    const tab = this.openTab(DEFAULT_SEARCH_SETTINGS);
+    const tab = this.openTab(DEFAULT_FAVORITES_SEARCH_SETTINGS);
 
     this.tabManager.activate(tab.id);
     tab.value.focusSearch.emit();
@@ -119,7 +119,7 @@ export class FavoritesWorkspace {
     return tabs.find(tab => tab.id === this.tabManager.activeId.value) ?? tabs[0];
   }
 
-  private openTab(settings: SearchSettings): Tab<FavoritesTab> {
+  private openTab(settings: FavoritesSearchSettings): Tab<FavoritesTab> {
     this.tabCount += 1;
     return this.tabManager.open(`tab-${this.tabCount}`, createFavoritesTab(this.dependencies.createSession(settings)));
   }

@@ -22,16 +22,16 @@ export interface LightboxViewportProps {
   zoom: LightboxViewportGestureZoom & Pick<LightboxZoom, "view" | "glides" | "setFrameSize" | "setFocusPoint">;
   sizeObserver: SizeObserver;
   handlers: LightboxViewportCommandHandlers;
-  closesOnTap: Readable<boolean>;
+  closesOnPress: Readable<boolean>;
   content: Child;
 }
 
-export function LightboxViewport({ zoom, sizeObserver, handlers, closesOnTap, content }: LightboxViewportProps): HTMLElement {
+export function LightboxViewport({ zoom, sizeObserver, handlers, closesOnPress, content }: LightboxViewportProps): HTMLElement {
   const contentLayer = <div className={LightboxViewportClass.content}>{content}</div> as HTMLElement;
   const root = <div className={LightboxViewportClass.root}>{contentLayer}</div> as HTMLElement;
   const gestures = new Gestures({ dragThreshold: DRAG_THRESHOLD }, {
     element: root,
-    handlers: createLightboxViewportGestureHandlers(zoom, handlers, closesOnTap)
+    handlers: createLightboxViewportGestureHandlers(zoom, handlers, closesOnPress)
   });
   const cursor = computed(() => resolveLightboxViewportCursor(zoom, gestures.hoverPoint.value));
 

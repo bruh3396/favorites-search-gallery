@@ -1,5 +1,5 @@
-import { describe, expect, test, vi } from "vitest";
 import { PostListService, createPostListService } from "@/core/features/post_list/post_list";
+import { describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryRemoteSearchResults } from "@/adapters/memory/ports/remote_search_results/remote_search_results";
 import { Post } from "@/core/domain/post/post";

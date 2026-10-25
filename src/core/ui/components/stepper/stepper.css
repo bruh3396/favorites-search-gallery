@@ -1,24 +1,19 @@
 .fsg-Stepper {
   display: inline-flex;
   flex: none;
+  gap: 2px;
   block-size: var(--fsg-control-size-medium);
-  overflow: hidden;
-  border: 1px solid var(--fsg-color-outline-variant);
+  padding: 2px;
+  border: 1px solid var(--fsg-color-outline);
   border-radius: var(--fsg-shape-corner-small);
-  background: var(--fsg-color-surface-container-highest);
-}
-
-.fsg-Stepper:focus-within {
-  outline: 2px solid var(--fsg-color-primary);
-  outline-offset: 1px;
+  background: var(--fsg-color-surface-dim);
 }
 
 .fsg-Stepper-input {
   inline-size: 6ch;
   margin: 0;
-  padding: 0 8px;
+  padding: 0 4px;
   border: 0;
-  border-inline: 1px solid var(--fsg-color-outline-variant);
   background: none;
   color: inherit;
   font: inherit;
@@ -40,15 +35,27 @@
 }
 
 .fsg-Stepper-button {
-  inline-size: 28px;
+  display: grid;
+  place-items: center;
+  inline-size: 24px;
+  border-radius: calc(var(--fsg-shape-corner-small) - 2px);
   color: var(--fsg-color-on-surface-variant);
-  font-size: var(--fsg-typescale-label-large-size);
   cursor: pointer;
   user-select: none;
   touch-action: manipulation;
   transition:
     background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
     color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Stepper-icon {
+  display: block;
+  inline-size: 14px;
+  block-size: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 
 .fsg-Stepper-button:hover:not(:disabled) {
@@ -74,11 +81,14 @@
 }
 
 .fsg-Stepper[data-size="small"] .fsg-Stepper-input {
-  padding: 0 6px;
   font-size: var(--fsg-typescale-label-medium-size);
 }
 
 .fsg-Stepper[data-size="small"] .fsg-Stepper-button {
-  inline-size: 22px;
-  font-size: var(--fsg-typescale-label-medium-size);
+  inline-size: 20px;
+}
+
+.fsg-Stepper[data-size="small"] .fsg-Stepper-icon {
+  inline-size: 12px;
+  block-size: 12px;
 }

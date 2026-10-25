@@ -11,7 +11,7 @@ export class MemorySizeObserver implements SizeObserver {
     return () => subscriptions.delete(onResize);
   }
 
-  public resize(element: Element, size: ObservedSize): void {
-    this.subscriptions.get(element)?.forEach(onResize => onResize(size));
+  public resize(element: Element, { width, height, devicePixelWidth = width }: Omit<ObservedSize, "devicePixelWidth"> & Partial<ObservedSize>): void {
+    this.subscriptions.get(element)?.forEach(onResize => onResize({ width, height, devicePixelWidth }));
   }
 }

@@ -40,6 +40,10 @@
   font-size: var(--fsg-typescale-label-large-size);
 }
 
+.fsg-SettingRow[data-size="small"] .fsg-SettingRow-label {
+  font-size: 13px;
+}
+
 .fsg-SettingRow-description {
   color: var(--fsg-color-on-surface-variant);
   font-size: var(--fsg-typescale-label-medium-size);

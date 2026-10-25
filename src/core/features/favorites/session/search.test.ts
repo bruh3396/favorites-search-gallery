@@ -5,14 +5,14 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/collec
 import { FavoritesSearch } from "@/core/features/favorites/session/search";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { SearchSettings } from "@/core/features/favorites/search/input";
+import { FavoritesSearchSettings } from "@/core/features/favorites/search/input";
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
 import { effect } from "@/core/utils/reactive/signal";
 
 interface Options {
   blacklistedTags?: readonly string[];
-  settings?: Partial<SearchSettings>;
+  settings?: Partial<FavoritesSearchSettings>;
   isStarted?: boolean;
 }
 

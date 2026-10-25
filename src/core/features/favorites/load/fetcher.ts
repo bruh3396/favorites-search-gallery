@@ -1,4 +1,4 @@
-import { LoadResult, LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadResult, FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
@@ -19,7 +19,7 @@ export interface FavoritesFetcherDependencies {
   collection: Pick<FavoritesCollection, "append" | "getAllIds">;
   index: Pick<FavoritesSearchIndex, "add">;
   postLibrary: PostLibrary;
-  report: (state: LoadState) => void;
+  report: (state: FavoritesLoadState) => void;
 }
 
 export class FavoritesFetcher {
@@ -29,7 +29,7 @@ export class FavoritesFetcher {
     this.dependencies = dependencies;
   }
 
-  public async fetchAll(): Promise<LoadResult> {
+  public async fetchAll(): Promise<FavoritesLoadResult> {
     const { remoteFavorites, localFavorites, collection, report } = this.dependencies;
     const progress: MutableFetchProgress = { loadedCount: 0, expectedCount: null, isFetching: true };
     const reportProgress = (): void => {

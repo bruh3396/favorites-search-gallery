@@ -1,6 +1,6 @@
 import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
+import { FavoritesSearchRequest, FavoritesSearchSettings, UNFILTERED_FAVORITES_SEARCH_SETTINGS } from "@/core/features/favorites/search/input";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
-import { SearchRequest, SearchSettings, UNFILTERED_SEARCH_SETTINGS } from "@/core/features/favorites/search/input";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
@@ -8,7 +8,7 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { buildSearchRequest } from "@/core/features/favorites/search/request";
 
 export interface FavoritesSearchConfiguration {
-  readonly settings: SearchSettings;
+  readonly settings: FavoritesSearchSettings;
 }
 
 export interface FavoritesSearchDependencies {
@@ -20,9 +20,9 @@ export interface FavoritesSearchDependencies {
 const SEED_RANGE = 2 ** 32;
 
 export class FavoritesSearch {
-  private readonly currentSettings: Signal<SearchSettings>;
+  private readonly currentSettings: Signal<FavoritesSearchSettings>;
   private readonly currentResults: Signal<readonly Favorite[]>;
-  private readonly request: Readable<SearchRequest>;
+  private readonly request: Readable<FavoritesSearchRequest>;
   private readonly searchedEmitter: Emitter<void>;
   private readonly stopListening: Array<() => void>;
   private hasStarted: boolean;
@@ -39,7 +39,7 @@ export class FavoritesSearch {
     ];
   }
 
-  public get settings(): Readable<SearchSettings> {
+  public get settings(): Readable<FavoritesSearchSettings> {
     return this.currentSettings;
   }
 
@@ -71,10 +71,10 @@ export class FavoritesSearch {
   }
 
   public clearFilters(): void {
-    this.applySettings(UNFILTERED_SEARCH_SETTINGS);
+    this.applySettings(UNFILTERED_FAVORITES_SEARCH_SETTINGS);
   }
 
-  public updateSettings(change: Partial<SearchSettings>): void {
+  public updateSettings(change: Partial<FavoritesSearchSettings>): void {
     const sortWasChanged = change.sortKey !== undefined || change.isSortAscending !== undefined;
     const isShuffled = this.currentSettings.peek().isShuffled && !sortWasChanged;
 
@@ -87,7 +87,7 @@ export class FavoritesSearch {
     }
   }
 
-  private applySettings(change: Partial<SearchSettings>): void {
+  private applySettings(change: Partial<FavoritesSearchSettings>): void {
     batch(() => {
       this.currentSettings.value = { ...this.currentSettings.peek(), ...change };
       this.searchAll();

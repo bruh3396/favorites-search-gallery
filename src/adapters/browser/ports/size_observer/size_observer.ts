@@ -5,9 +5,14 @@ export class BrowserSizeObserver implements SizeObserver {
 
   private readonly observer = new ResizeObserver(entries => {
     for (const entry of entries) {
-      const { width, height } = entry.contentRect;
+      const subscription = this.subscriptions.get(entry.target);
 
-      this.subscriptions.get(entry.target)?.onResize({ width, height });
+      if (subscription !== undefined) {
+        const { width, height } = entry.contentRect;
+        const devicePixelWidth = entry.devicePixelContentBoxSize?.[0]?.inlineSize ?? width * devicePixelRatio;
+
+        subscription.onResize({ width, height, devicePixelWidth });
+      }
     }
   });
 

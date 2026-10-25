@@ -1,16 +1,17 @@
 import { FavoritesShell, FavoritesShellClass } from "@/core/app/favorites/shell/shell";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { LoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import SHELL_CSS from "@/core/app/favorites/shell/shell.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(): { element: HTMLElement; loadState: Signal<LoadState>; pane: HTMLElement } {
-  const loadState = new Signal<LoadState>({ phase: "fetching", loadedCount: 150, expectedCount: 600 });
+function setup(): { element: HTMLElement; loadState: Signal<FavoritesLoadState>; pane: HTMLElement; zenEnabled: Signal<boolean> } {
+  const loadState = new Signal<FavoritesLoadState>({ phase: "fetching", loadedCount: 150, expectedCount: 600 });
   const pane = document.createElement("section");
-  const { result: element } = render(document, () => <FavoritesShell favorites={{ loadState }} panes={[pane]} />);
-  return { element, loadState, pane };
+  const zenEnabled = new Signal(false);
+  const { result: element } = render(document, () => <FavoritesShell favorites={{ loadState }} panes={[pane]} zenEnabled={zenEnabled} />);
+  return { element, loadState, pane, zenEnabled };
 }
 
 describe("FavoritesShell", () => {
@@ -27,6 +28,23 @@ describe("FavoritesShell", () => {
     expect([progressBar.hidden, progressBar.getAttribute("aria-valuenow")]).toEqual([false, "25"]);
     loadState.value = { phase: "loaded", pulledCount: 0, removedCount: 0 };
     expect(progressBar.hidden).toBe(true);
+  });
+
+  test("becomes a zen root while zen is enabled", () => {
+    const { element, zenEnabled } = setup();
+
+    expect(element.hasAttribute("data-zen")).toBe(false);
+    zenEnabled.value = true;
+    expect(element.hasAttribute("data-zen")).toBe(true);
+  });
+
+  test("shows how to exit zen only while zen is enabled", () => {
+    const { element, zenEnabled } = setup();
+    const hint = element.querySelector<HTMLElement>("[role=status]")!;
+
+    expect(hint.hidden).toBe(true);
+    zenEnabled.value = true;
+    expect([hint.hidden, hint.textContent]).toEqual([false, "Press Z or Esc to exit zen"]);
   });
 
   test("styles every class it sets", () => {

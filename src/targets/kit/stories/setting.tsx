@@ -55,7 +55,7 @@ function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
     { id: "columns", kind: "number", label: "Columns", preference: createPreference({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
     {
       id: "tileSize", kind: "slider", label: "Tile size", preference: createPreference({ id: "tilesPerRow", initial: 6, log }),
-      min: 1, max: 20, step: 1, inverted: true
+      min: 1, max: 10, step: 1, inverted: true
     }
   ]);
 }

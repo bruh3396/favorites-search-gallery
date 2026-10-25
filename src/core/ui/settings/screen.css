@@ -1,8 +1,40 @@
 .fsg-SettingsScreen {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+  padding: 4px 8px 12px;
 }
 
-.fsg-SettingsScreen > :not([hidden]) ~ :not([hidden]) {
+.fsg-SettingsScreen-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.fsg-SettingsScreen-heading {
+  margin: 0;
+  padding: 0 6px 6px;
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-medium-size);
+  font-weight: 500;
+}
+
+.fsg-SettingsScreen-group {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--fsg-shape-corner-small);
+  background: var(--fsg-color-surface-container-high);
+}
+
+.fsg-SettingsScreen-group > :not([hidden]) ~ * {
   border-block-start: 1px solid var(--fsg-color-outline-variant);
+}
+
+.fsg-SettingsScreen[data-size="small"] {
+  gap: 12px;
+}
+
+.fsg-SettingsScreen[data-size="small"] .fsg-SettingsScreen-heading {
+  padding-block-end: 4px;
+  font-size: 11px;
 }

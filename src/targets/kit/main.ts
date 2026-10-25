@@ -1,4 +1,5 @@
 import { AppFont, installAppFont } from "@/core/ui/fonts/app_font";
+import { DEFAULT_THEME, THEME_DEFINITIONS, applyTheme } from "@/core/ui/theme/themes";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
@@ -135,6 +136,7 @@ function main(): void {
     logOutput.scrollTop = logOutput.scrollHeight;
   };
 
+  applyTheme(app, THEME_DEFINITIONS[DEFAULT_THEME]);
   shadowRoot.adoptedStyleSheets = [createStyleSheet(UI_CSS), createStyleSheet(KIT_CSS)];
   window.addEventListener("hashchange", () => showSelectedStory(navigation, stories, log));
   showSelectedStory(navigation, stories, log);

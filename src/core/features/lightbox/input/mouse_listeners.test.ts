@@ -13,6 +13,10 @@ function createWheelEvent(init: MouseEventInit): WheelEvent {
   return new MouseEvent("wheel", { cancelable: true, ...init }) as WheelEvent;
 }
 
+function createContextmenuEvent(): MouseEvent {
+  return new MouseEvent("contextmenu", { cancelable: true });
+}
+
 describe("createLightboxMouseListeners", () => {
   test("blocks page zoom on ctrl+wheel", () => {
     const { listeners } = setup();
@@ -38,12 +42,20 @@ describe("createLightboxMouseListeners", () => {
     expect(event.defaultPrevented).toBe(true);
   });
 
-  test("lets other buttons' mousedown through", () => {
-    const { listeners } = setup();
+  test("lets a left mousedown through", () => {
+    const { handlers, listeners } = setup();
     const event = new MouseEvent("mousedown", { button: 0, cancelable: true });
 
     listeners.onMousedown(event);
     expect(event.defaultPrevented).toBe(false);
+    expect(handlers.close).not.toHaveBeenCalled();
+  });
+
+  test("closes on right mousedown", () => {
+    const { handlers, listeners } = setup();
+
+    listeners.onMousedown(new MouseEvent("mousedown", { button: 2, cancelable: true }));
+    expect(handlers.close).toHaveBeenCalledOnce();
   });
 
   test("opens the post page on middle click", () => {
@@ -62,21 +74,24 @@ describe("createLightboxMouseListeners", () => {
     expect(handlers.openPostPage).not.toHaveBeenCalled();
   });
 
-  test("closes on right click", () => {
-    const { handlers, listeners } = setup();
-    const event = new MouseEvent("contextmenu", { cancelable: true });
+  test("blocks only the contextmenu that follows a right mousedown", () => {
+    const { listeners } = setup();
+    const following = createContextmenuEvent();
+    const later = createContextmenuEvent();
 
-    listeners.onContextmenu(event);
-    expect(handlers.close).toHaveBeenCalledOnce();
-    expect(event.defaultPrevented).toBe(true);
+    listeners.onMousedown(new MouseEvent("mousedown", { button: 2, view: window }));
+    window.dispatchEvent(following);
+    window.dispatchEvent(later);
+    expect([following.defaultPrevented, later.defaultPrevented]).toEqual([true, false]);
   });
 
-  test("keeps the native menu on shift+right click", () => {
-    const { handlers, listeners } = setup();
-    const event = new MouseEvent("contextmenu", { shiftKey: true, cancelable: true });
+  test("stops blocking the contextmenu after another mousedown", () => {
+    const { listeners } = setup();
+    const event = createContextmenuEvent();
 
-    listeners.onContextmenu(event);
-    expect(handlers.close).not.toHaveBeenCalled();
+    listeners.onMousedown(new MouseEvent("mousedown", { button: 2, view: window }));
+    window.dispatchEvent(new MouseEvent("mousedown"));
+    window.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);
   });
 });

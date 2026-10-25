@@ -12,7 +12,7 @@
   gap: 4px;
   inline-size: 48px;
   padding-block: 8px;
-  background: var(--fsg-color-surface-container-low);
+  background: color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%);
 }
 
 .fsg-ActivityBar-item {
@@ -31,8 +31,8 @@
 }
 
 .fsg-ActivityBar-item[aria-pressed="true"] {
-  background: var(--fsg-color-secondary-container);
-  color: var(--fsg-color-on-secondary-container);
+  background: var(--fsg-color-surface-container-highest);
+  color: var(--fsg-color-on-surface);
 }
 
 .fsg-ActivityBar-item:focus-visible {
@@ -56,5 +56,5 @@
   inline-size: 300px;
   min-block-size: 0;
   overflow: hidden;
-  box-shadow: inset 1px 0 var(--fsg-color-outline-variant);
+  border-inline-start: 1px solid var(--fsg-color-outline-variant);
 }

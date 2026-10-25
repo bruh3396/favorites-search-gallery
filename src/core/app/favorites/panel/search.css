@@ -53,14 +53,14 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .fsg-FavoritesSearchPanel-tabStripToggle {
+  .fsg-FavoritesSearchPanel-tabStripToggle,
+  .fsg-FavoritesSearchPanel-zenButton {
     display: grid;
     flex: none;
     place-items: center;
     position: relative;
     inline-size: var(--fsg-control-size-medium);
     block-size: var(--fsg-control-size-medium);
-    margin-inline-start: auto;
     padding: 0;
     border: 0;
     border-radius: var(--fsg-shape-corner-small);
@@ -69,12 +69,22 @@
     cursor: pointer;
   }
 
-  .fsg-FavoritesSearchPanel-tabStripToggle:hover {
+  .fsg-FavoritesSearchPanel-tabStripToggle {
+    margin-inline-start: auto;
+  }
+
+  .fsg-FavoritesSearchPanel-zenButton {
+    margin-inline-start: -6px;
+  }
+
+  .fsg-FavoritesSearchPanel-tabStripToggle:hover,
+  .fsg-FavoritesSearchPanel-zenButton:hover {
     background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
     color: inherit;
   }
 
-  .fsg-FavoritesSearchPanel-tabStripToggle:focus-visible {
+  .fsg-FavoritesSearchPanel-tabStripToggle:focus-visible,
+  .fsg-FavoritesSearchPanel-zenButton:focus-visible {
     outline: 2px solid var(--fsg-color-primary);
     outline-offset: -2px;
   }
