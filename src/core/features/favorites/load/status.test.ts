@@ -8,7 +8,7 @@ describe("describeFavoritesLoadState", () => {
     expect(describeFavoritesLoadState({ phase: "saving" })).toBe("Saving");
     expect(describeFavoritesLoadState({ phase: "pulling" })).toBe("Checking for new");
     expect(describeFavoritesLoadState({ phase: "indexing" })).toBe("Indexing");
-    expect(describeFavoritesLoadState({ phase: "pruning" })).toBe("Checking for removed");
+    expect(describeFavoritesLoadState({ phase: "pruning" })).toBe("Syncing");
     expect(describeFavoritesLoadState({ phase: "interrupted" })).toBe("Couldn't finish loading");
   });
 

@@ -2,8 +2,8 @@ import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPending
 import { Rule34Dependencies, Rule34DependenciesConfiguration, createFavoritesDependencies, createRule34Dependencies } from "@/targets/rule34/dependencies";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
 import { Environment } from "@/core/boundary/environment";
-import { Signal } from "@/core/utils/reactive/signal";
 import { Rule34Document } from "@/adapters/rule34/document/document";
+import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
 import { createAppStorage } from "@/core/app/app_storage";

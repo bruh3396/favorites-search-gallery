@@ -1,0 +1,34 @@
+.fsg-IconButton {
+  display: grid;
+  flex: none;
+  place-items: center;
+  position: relative;
+  inline-size: var(--fsg-control-size-medium);
+  block-size: var(--fsg-control-size-medium);
+  padding: 0;
+  border: 0;
+  border-radius: var(--fsg-shape-corner-small);
+  background: none;
+  color: var(--fsg-color-on-surface-variant);
+  cursor: pointer;
+}
+
+.fsg-IconButton:hover {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+  color: inherit;
+}
+
+.fsg-IconButton:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: -2px;
+}
+
+.fsg-IconButton-icon {
+  inline-size: 18px;
+  block-size: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

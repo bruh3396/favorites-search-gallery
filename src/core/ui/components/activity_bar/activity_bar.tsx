@@ -8,7 +8,7 @@ export const ActivityBarClass = {
   rail: "fsg-ActivityBar-rail",
   item: "fsg-ActivityBar-item",
   icon: "fsg-ActivityBar-icon",
-  panel: "fsg-ActivityBar-panel"
+  view: "fsg-ActivityBar-view"
 } as const;
 
 export interface ActivityBarItem {
@@ -20,16 +20,16 @@ export interface ActivityBarItem {
 export interface ActivityBarProps {
   items: readonly ActivityBarItem[];
   value: Readable<string | null>;
-  renderPanel: (item: ActivityBarItem) => HTMLElement;
+  renderView: (item: ActivityBarItem) => HTMLElement;
   onValueChange: (id: string | null) => void;
 }
 
-export function ActivityBar({ items, value, renderPanel, onValueChange }: ActivityBarProps): HTMLElement {
-  const createPanelScope = captureScope();
+export function ActivityBar({ items, value, renderView, onValueChange }: ActivityBarProps): HTMLElement {
+  const createViewScope = captureScope();
   const activeItem = computed(() => items.find(item => item.id === value.value) ?? null);
-  const panel = (
+  const view = (
     <div
-      className={ActivityBarClass.panel}
+      className={ActivityBarClass.view}
       role="region"
       aria-label={computed(() => activeItem.value?.label ?? "")}
       hidden={computed(() => activeItem.value === null)}
@@ -45,9 +45,9 @@ export function ActivityBar({ items, value, renderPanel, onValueChange }: Activi
       return;
     }
     shown?.dispose();
-    shown = createPanelScope(() => untracked(() => renderPanel(item)));
+    shown = createViewScope(() => untracked(() => renderView(item)));
     shownItem = item;
-    panel.replaceChildren(shown.result);
+    view.replaceChildren(shown.result);
   });
   onCleanup(() => shown?.dispose());
 
@@ -65,13 +65,13 @@ export function ActivityBar({ items, value, renderPanel, onValueChange }: Activi
       </button>
     );
 
-    button.ariaControlsElements = [panel];
+    button.ariaControlsElements = [view];
     return button;
   });
   return (
     <div className={ActivityBarClass.root}>
       <nav className={ActivityBarClass.rail} aria-label="Activities">{buttons}</nav>
-      {panel}
+      {view}
     </div>
   );
 }

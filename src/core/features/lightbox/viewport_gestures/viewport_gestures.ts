@@ -31,12 +31,12 @@ export function createLightboxViewportGestureHandlers(
       if (modifiers.ctrl || modifiers.meta || zoom.isZoomed.peek()) {
         return false;
       }
-      const closes = zoom.canZoom.peek() ? !containsPoint(zoom.mediaRect.peek(), point) : closesOnPress.peek();
+      const isClosing = zoom.canZoom.peek() ? !containsPoint(zoom.mediaRect.peek(), point) : closesOnPress.peek();
 
-      if (closes) {
+      if (isClosing) {
         handlers.close();
       }
-      return closes;
+      return isClosing;
     },
     onTap: ({ point, modifiers }): void => {
       if (modifiers.ctrl || modifiers.meta) {

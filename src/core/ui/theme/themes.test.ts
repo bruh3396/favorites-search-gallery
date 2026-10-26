@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
 import { ThemeColors, applyTheme } from "@/core/ui/theme/themes";
+import { describe, expect, test } from "vitest";
 
 function createColors(base: string): ThemeColors {
   return { surface: `${base}1`, sunken: `${base}2`, text: `${base}3`, muted: `${base}4`, accent: `${base}5`, onAccent: `${base}6` };

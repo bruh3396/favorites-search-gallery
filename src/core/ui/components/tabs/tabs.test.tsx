@@ -117,7 +117,9 @@ describe("Tabs", () => {
     const wasHidden = isStripHidden(element);
 
     stripVisible.value = true;
-    expect([wasHidden, isStripHidden(element), readPanel(element), renderPanel.mock.calls.length, disposePanel.mock.calls]).toEqual([true, false, "Home", 1, []]);
+    expect([
+      wasHidden, isStripHidden(element), readPanel(element), renderPanel.mock.calls.length, disposePanel.mock.calls
+    ]).toEqual([true, false, "Home", 1, []]);
   });
 
   test("disposes the shown panel when it is disposed", () => {

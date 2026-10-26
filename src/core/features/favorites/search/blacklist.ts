@@ -1,5 +1,5 @@
-import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { FavoritesSearchSettings } from "@/core/features/favorites/search/input";
+import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { parseExclusions } from "@/core/domain/search/parsers/search_expression_parser";
 
 export interface FavoritesBlacklistConfiguration {

@@ -6,7 +6,16 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { flushMicrotasks } from "@/testing/async";
 
-function setup(initial: string | undefined) {
+interface Setup {
+  id: Signal<string | undefined>;
+  clipboard: MemoryClipboard;
+  scheduler: MemoryScheduler;
+  button: HTMLButtonElement;
+  readId: () => string;
+  isCopiedShown: () => boolean;
+}
+
+function setup(initial: string | undefined): Setup {
   const id = new Signal<string | undefined>(initial);
   const clipboard = new MemoryClipboard();
   const scheduler = new MemoryScheduler();

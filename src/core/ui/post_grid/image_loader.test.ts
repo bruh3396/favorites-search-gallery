@@ -266,8 +266,9 @@ describe("ImageLoader", () => {
     const paintLimiter = new RateLimiter(PAINT_RATE_LIMIT, scheduler);
     const bitmaps = [createBitmap(), createBitmap()];
     const [first, second] = bitmaps.map(bitmap => new ImageLoader({
-      canvas: document.createElement("canvas"), media: MEDIA, targetWidth: new Signal(WIDTH), paintLimiter, decodeDebouncer, enabled: new Signal(true), paused: new Signal(false),
-      decodeStill: () => Promise.resolve(bitmap as unknown as ImageBitmap)
+      canvas: document.createElement("canvas"), media: MEDIA, targetWidth: new Signal(WIDTH), paintLimiter, decodeDebouncer,
+      enabled: new Signal(true), paused: new Signal(false),
+      decodeStill: (): Promise<ImageBitmap> => Promise.resolve(bitmap as unknown as ImageBitmap)
     }));
 
     first.show();

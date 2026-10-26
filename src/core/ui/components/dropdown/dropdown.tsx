@@ -1,5 +1,5 @@
 import { ControlChoice, ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { Signal, computed } from "@/core/utils/reactive/signal";
+import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
@@ -21,10 +21,7 @@ export interface DropdownProps<T> extends ControlProps<T> {
 const MENU_GAP = 4;
 const NO_OPTION = -1;
 
-let menuCount = 0;
-
 export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValueChange, onPreview, size = "medium" }: DropdownProps<T>): HTMLElement {
-  const menuId = `fsg-Dropdown-menu-${menuCount++}`;
   const selectedIndex = computed(() => choices.findIndex(choice => choice.value === value.value));
   const open = new Signal(false);
   const active = new Signal(NO_OPTION);
@@ -35,7 +32,6 @@ export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValue
   const options = choices.map(({ label }, index) => (
     <li
       className={DropdownClass.option}
-      id={`${menuId}-${index}`}
       role="option"
       aria-selected={computed(() => String(selectedIndex.value === index))}
       dataset={{ active: computed(() => String(active.value === index)) }}
@@ -53,7 +49,6 @@ export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValue
   const menu = (
     <ul
       className={DropdownClass.menu}
-      id={menuId}
       role="listbox"
       dataset={{ size }}
       onPointerleave={() => activate(NO_OPTION)}
@@ -68,9 +63,7 @@ export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValue
       type="button"
       role="combobox"
       aria-haspopup="listbox"
-      aria-controls={menuId}
       aria-expanded={computed(() => String(open.value))}
-      aria-activedescendant={computed(() => (open.value && active.value !== NO_OPTION ? options[active.value].id : null))}
       dataset={{ size }}
       disabled={disabled}
       onClick={() => (open.peek() ? close() : show())}
@@ -144,6 +137,10 @@ export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValue
     }
   }
 
+  trigger.ariaControlsElements = [menu];
+  effect(() => {
+    trigger.ariaActiveDescendantElement = open.value && active.value !== NO_OPTION ? options[active.value] : null;
+  });
   onCleanup(close);
   return trigger;
 }
@@ -151,13 +148,13 @@ export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValue
 function placeMenu(trigger: HTMLElement, menu: HTMLElement): void {
   const anchor = trigger.getBoundingClientRect();
   const viewportHeight = trigger.ownerDocument.documentElement.clientHeight;
-  const spaceBelow = viewportHeight - anchor.bottom - MENU_GAP * 2;
-  const spaceAbove = anchor.top - MENU_GAP * 2;
-  const opensUp = menu.scrollHeight > spaceBelow && spaceAbove > spaceBelow;
+  const spaceBelow = viewportHeight - anchor.bottom - (MENU_GAP * 2);
+  const spaceAbove = anchor.top - (MENU_GAP * 2);
+  const isOpeningUp = menu.scrollHeight > spaceBelow && spaceAbove > spaceBelow;
 
   menu.style.minInlineSize = `${anchor.width}px`;
   menu.style.left = `${anchor.left}px`;
-  menu.style.maxBlockSize = `${Math.max(opensUp ? spaceAbove : spaceBelow, 0)}px`;
-  menu.style.top = opensUp ? "" : `${anchor.bottom + MENU_GAP}px`;
-  menu.style.bottom = opensUp ? `${viewportHeight - anchor.top + MENU_GAP}px` : "";
+  menu.style.maxBlockSize = `${Math.max(isOpeningUp ? spaceAbove : spaceBelow, 0)}px`;
+  menu.style.top = isOpeningUp ? "" : `${anchor.bottom + MENU_GAP}px`;
+  menu.style.bottom = isOpeningUp ? `${viewportHeight - anchor.top + MENU_GAP}px` : "";
 }

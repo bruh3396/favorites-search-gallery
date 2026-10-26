@@ -26,7 +26,8 @@ describe("mountAppRoot", () => {
   test("applies the theme to the root", () => {
     const root = mountAppRoot(document.createElement("div"), { colorScheme: "light", theme: THEME_DEFINITIONS.cherry, font: SYSTEM_FONT, styles: [] });
 
-    expect(root.style.getPropertyValue("--fsg-theme-accent")).toBe(`light-dark(${THEME_DEFINITIONS.cherry.light.accent}, ${THEME_DEFINITIONS.cherry.dark.accent})`);
+    expect(root.style.getPropertyValue("--fsg-theme-accent"))
+      .toBe(`light-dark(${THEME_DEFINITIONS.cherry.light.accent}, ${THEME_DEFINITIONS.cherry.dark.accent})`);
   });
 
   test("applies the font to the root", () => {

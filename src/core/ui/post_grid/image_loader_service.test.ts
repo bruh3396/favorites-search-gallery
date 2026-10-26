@@ -22,7 +22,8 @@ describe("ImageLoaderService", () => {
       const remoteMedia = new MemoryRemoteMedia();
       const decodeStill = vi.spyOn(remoteMedia, "decodeStill").mockReturnValue(new Promise<ImageBitmap>(() => undefined));
       const service = createImageLoaderService({ remoteMedia, scheduler });
-      const loaders = Array.from({ length: DECODE_RATE_LIMIT.concurrency + 1 }, () => service.createLoader(document.createElement("canvas"), MEDIA, new Signal(500)));
+      const loaders = Array.from({ length: DECODE_RATE_LIMIT.concurrency + 1 }, () =>
+        service.createLoader(document.createElement("canvas"), MEDIA, new Signal(500)));
 
       loaders.forEach(loader => loader.show());
       await advanceAndSettle(scheduler, DECODE_DEBOUNCE.delay + 1_000);

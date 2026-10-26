@@ -1,10 +1,10 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesFetcher } from "@/core/features/favorites/load/fetcher";
+import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { FavoritesReindexer } from "@/core/features/favorites/load/reindexer";
 import { FavoritesReloader } from "@/core/features/favorites/load/reloader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";

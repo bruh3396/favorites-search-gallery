@@ -1,5 +1,5 @@
-import { MemoryClient } from "@/adapters/memory/client/client";
 import { RemoteSearchResults, SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
+import { MemoryClient } from "@/adapters/memory/client/client";
 
 export interface MemoryRemoteSearchResultsConfiguration {
   readonly pageSize: number;

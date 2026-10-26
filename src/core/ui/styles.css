@@ -23,5 +23,6 @@
 @import "./components/slider/slider.css" layer(components);
 @import "./components/activity_bar/activity_bar.css" layer(components);
 @import "./components/view_pane/view_pane.css" layer(components);
+@import "./components/icon_button/icon_button.css" layer(components);
 
 @import "./zen/zen.css" layer(utilities);

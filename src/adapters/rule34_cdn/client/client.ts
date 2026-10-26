@@ -1,7 +1,7 @@
 import { Media, MediaKind } from "@/core/domain/media/media";
+import { Rule34CdnFileExtension, kindOf } from "@/adapters/rule34_cdn/client/extension";
 import { Rule34CdnImageDecoder, Rule34CdnImageDecoderDependencies } from "@/adapters/rule34_cdn/client/image_decoder";
 import { fileUrl, previewUrl, wimgUrl } from "@/adapters/rule34_cdn/client/addresses";
-import { Rule34CdnFileExtension, kindOf } from "@/adapters/rule34_cdn/client/extension";
 import { mintMedia, readLocator } from "@/adapters/rule34_cdn/client/locator";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/extension_prober";
 import { Rule34CdnVideoDurationProber } from "@/adapters/rule34_cdn/client/video_duration_prober";

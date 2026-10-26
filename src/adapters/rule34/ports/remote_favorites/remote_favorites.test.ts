@@ -182,10 +182,10 @@ describe("Rule34RemoteFavorites", () => {
     });
 
     test("keeps going past a page refused once", async() => {
-      let refused = false;
+      let wasRefused = false;
       const fetchPage = vi.fn<FetchPage>((_pageId, pageIndex) => {
-        if (pageIndex === 1 && !refused) {
-          refused = true;
+        if (pageIndex === 1 && !wasRefused) {
+          wasRefused = true;
           return Promise.reject(new Rule34Error("http", { status: 403 }));
         }
         return Promise.resolve(pageIndex > 2 ? [] : createPage(pageIndex));
@@ -194,7 +194,7 @@ describe("Rule34RemoteFavorites", () => {
       expect(getPostIds(await fetchAllFavorites({ fetchPage }))).toEqual(["page0-0", "page1-0", "page2-0"]);
     });
 
-    test.each([403, 429])("gives up on a page after five failures with http %i", async(status) => {
+    test.each([403, 429])("gives up on a page after five failures with http %i", async status => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status })));
 
       await expect(fetchAllFavorites({ fetchPage })).rejects.toThrow(Rule34Error);

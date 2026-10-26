@@ -7,9 +7,9 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
-import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
+import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { composePostListApp } from "@/core/app/post_list/composer";
@@ -19,7 +19,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   const container = document.createElement("div");
   const remoteSearchResults: RemoteSearchResults = {
     readInitialPage: () => ({ index: 0, posts }),
-    fetchPage: async(index) => ({ index, posts: [] })
+    fetchPage: async index => ({ index, posts: [] })
   };
 
   composePostListApp({ colorScheme: "light" }, {

@@ -1,10 +1,10 @@
 import { Mock, describe, expect, test, vi } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Post } from "@/core/domain/post/post";
 import { Rule34Error } from "@/adapters/rule34/client/error";
 import { Rule34RemoteSearchResults } from "@/adapters/rule34/ports/remote_search_results/remote_search_results";
+import { SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { advanceAndSettle } from "@/testing/async";
 import { createPost } from "@/testing/post";
 

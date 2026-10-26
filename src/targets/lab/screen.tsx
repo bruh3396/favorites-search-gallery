@@ -134,7 +134,8 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
       <div className={LabScreenClass.root}>
         <nav className={LabScreenClass.nav} aria-label="Lab">
           {AREAS.map(({ id, title }) => (
-            <button className={LabScreenClass.navLink} type="button" aria-current={computed(() => area.value === id ? "page" : null)} onClick={() => select(id)}>
+            <button className={LabScreenClass.navLink} type="button"
+              aria-current={computed(() => (area.value === id ? "page" : null))} onClick={() => select(id)}>
               {title}
             </button>
           ))}

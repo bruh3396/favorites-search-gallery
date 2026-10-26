@@ -1,4 +1,4 @@
-import { FavoritesPanelBodyInput, describeFavoritesPanelBody } from "@/core/app/favorites/panel/body";
+import { FavoritesPanelBodyInput, describeFavoritesPanelBody } from "@/core/app/favorites/search_panel/body";
 import { describe, expect, test } from "vitest";
 
 function describeWith(overrides: Partial<FavoritesPanelBodyInput>): ReturnType<typeof describeFavoritesPanelBody> {

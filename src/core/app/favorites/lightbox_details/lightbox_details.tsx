@@ -136,7 +136,7 @@ function FavoriteLightboxBody({ favorite, view, localTagCategories }: PartProps)
     const organization = view.organization.value;
 
     shown?.dispose();
-    shown = createGroupsScope(() => (organization === "category" ? shownGroups.map(group => <TagGroupSection group={group} />) : shownGroups.length === 0 ? [] : [<TagList tags={shownGroups.flatMap(group => group.tags).sort()} />]));
+    shown = createGroupsScope(() => renderGroups(shownGroups, organization));
     groupList.replaceChildren(...shown.result);
   });
   onCleanup(() => shown?.dispose());
@@ -148,6 +148,13 @@ function FavoriteLightboxBody({ favorite, view, localTagCategories }: PartProps)
       {groupList}
     </div>
   ) as HTMLElement;
+}
+
+function renderGroups(groups: readonly TagGroup[], organization: TagOrganization): HTMLElement[] {
+  if (organization === "category") {
+    return groups.map(group => <TagGroupSection group={group} />);
+  }
+  return groups.length === 0 ? [] : [<TagList tags={groups.flatMap(group => group.tags).sort()} />];
 }
 
 function TagGroupSection({ group }: { group: TagGroup }): HTMLElement {

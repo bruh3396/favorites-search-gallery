@@ -1,5 +1,5 @@
 import {
-  ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SliderSetting, SwitchSetting
+    ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SliderSetting, SwitchSetting
 } from "@/core/ui/settings/descriptor";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Setting, SettingProps } from "@/core/ui/settings/setting";
@@ -144,11 +144,11 @@ describe("Setting", () => {
   test("offers a choice as a dropdown", () => {
     const preference = createPreference<Layout>("row");
     const element = renderSetting(createLayoutSetting(preference, "dropdown"));
-    const dropdown = element.querySelector<HTMLElement>('[role="combobox"]')!;
+    const dropdown = element.querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
     expect(dropdown.textContent).toBe("Row");
     dropdown.click();
-    expect([...element.querySelectorAll('[role="option"]')].map(option => option.textContent)).toEqual(["Column", "Row", "Square"]);
+    expect([...element.querySelectorAll("[role=\"option\"]")].map(option => option.textContent)).toEqual(["Column", "Row", "Square"]);
     dropdown.click();
   });
 
@@ -158,7 +158,7 @@ describe("Setting", () => {
       ...createLayoutSetting(createPreference<Layout>("row"), "dropdown"),
       onPreview: member => previewed.push(member)
     };
-    const dropdown = renderSetting(descriptor).querySelector<HTMLElement>('[role="combobox"]')!;
+    const dropdown = renderSetting(descriptor).querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
     dropdown.click();
     dropdown.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
@@ -184,7 +184,7 @@ describe("Setting", () => {
 
   test("opens a dropdown's menu when its row is clicked", () => {
     const element = renderSetting(createLayoutSetting(createPreference<Layout>("row"), "dropdown"));
-    const dropdown = element.querySelector<HTMLElement>('[role="combobox"]')!;
+    const dropdown = element.querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
     element.click();
     expect(dropdown.getAttribute("aria-expanded")).toBe("true");
@@ -194,10 +194,10 @@ describe("Setting", () => {
   test("closes a dropdown's menu when an option is chosen", () => {
     const preference = createPreference<Layout>("row");
     const element = renderSetting(createLayoutSetting(preference, "dropdown"));
-    const dropdown = element.querySelector<HTMLElement>('[role="combobox"]')!;
+    const dropdown = element.querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
     dropdown.click();
-    element.querySelectorAll<HTMLElement>('[role="option"]')[2].click();
+    element.querySelectorAll<HTMLElement>("[role=\"option\"]")[2].click();
     expect(preference.value).toBe("square");
     expect(dropdown.getAttribute("aria-expanded")).toBe("false");
   });

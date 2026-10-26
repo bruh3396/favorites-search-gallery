@@ -2,6 +2,7 @@ import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_g
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
+import { FavoritesShellClass } from "@/core/app/favorites/shell/shell";
 import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/button";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/position";
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
@@ -29,15 +30,19 @@ import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
 import { TileClass } from "@/core/ui/post_grid/tile";
+import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
+
+const IDLE_VISIBILITY_OBSERVER: VisibilityObserver = { observe: () => (): void => { } };
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = [], {
   navigator = new MemoryNavigator(),
   fileSaver = new MemoryFileSaver(),
   scheduler = new MemoryScheduler(),
-  hostPage = new MemoryHostPage()
+  hostPage = new MemoryHostPage(),
+  visibilityObserver = IDLE_VISIBILITY_OBSERVER
 } = {}): ShadowRoot {
   const container = document.createElement("div");
   const client = new MemoryClient(posts);
@@ -49,7 +54,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteFavorites: new MemoryRemoteFavorites(client),
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
-    visibilityObserver: { observe: () => (): void => { } },
+    visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
     remotePages: new MemoryRemotePages(),
     scheduler,
@@ -77,11 +82,11 @@ function querySkeleton(root: ShadowRoot): Element {
 
 function openThemeMenu(root: ShadowRoot): void {
   root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-  [...root.querySelectorAll<HTMLElement>('[role="combobox"]')].find(control => control.ariaLabelledByElements?.[0]?.textContent === "Theme")!.click();
+  [...root.querySelectorAll<HTMLElement>("[role=\"combobox\"]")].find(control => control.ariaLabelledByElements?.[0]?.textContent === "Theme")!.click();
 }
 
 function findThemeOption(root: ShadowRoot, label: string): HTMLElement {
-  return [...root.querySelectorAll<HTMLElement>('[role="option"]')].find(option => option.textContent === label)!;
+  return [...root.querySelectorAll<HTMLElement>("[role=\"option\"]")].find(option => option.textContent === label)!;
 }
 
 function readThemeAccent(root: ShadowRoot): string {
@@ -216,7 +221,7 @@ describe("composeFavoritesApp", () => {
     findThemeOption(root, "Forest").dispatchEvent(new PointerEvent("pointermove"));
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.forest.light.accent}, ${THEME_DEFINITIONS.forest.dark.accent})`);
     expect(localKeyedValues.get("favorites-search-gallery")).not.toMatchObject({ preferences: { app: { theme: "forest" } } });
-    root.querySelector('[role="listbox"]')!.dispatchEvent(new PointerEvent("pointerleave"));
+    root.querySelector("[role=\"listbox\"]")!.dispatchEvent(new PointerEvent("pointerleave"));
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.slate.light.accent}, ${THEME_DEFINITIONS.slate.dark.accent})`);
   });
 
@@ -277,6 +282,34 @@ describe("composeFavoritesApp", () => {
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
       favoritesSkeleton: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
     });
+  });
+
+  test("stops watching a tab's tiles once another tab is shown", async() => {
+    const watched = new Set<Element>();
+    const visibilityObserver: VisibilityObserver = {
+      observe: element => {
+        watched.add(element);
+        return (): void => {
+          watched.delete(element);
+        };
+      }
+    };
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { visibilityObserver });
+
+    await flushMicrotasks();
+    const firstTabTiles = [...root.querySelectorAll(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)];
+    const countWatched = (): number => firstTabTiles.filter(tile => watched.has(tile)).length;
+    const before = countWatched();
+
+    root.querySelector<HTMLButtonElement>("button[aria-label='New tab']")!.click();
+    expect([before, countWatched()]).toEqual([1, 0]);
+  });
+
+  test("enters zen from the search panel's zen button", () => {
+    const root = mount();
+
+    root.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
+    expect(root.querySelector(`.${FavoritesShellClass.root}`)!.hasAttribute("data-zen")).toBe(true);
   });
 
   test("draws the skeleton recorded for the favorites' owner", () => {

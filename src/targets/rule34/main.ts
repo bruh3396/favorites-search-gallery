@@ -5,18 +5,18 @@ import {
   createFavoritesDependencies,
   createRule34Dependencies
 } from "@/targets/rule34/dependencies";
-import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
-import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
-import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
+import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
+import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
+import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
 import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemoteSearchResults } from "@/adapters/rule34/ports/remote_search_results/remote_search_results";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
+import { composePostListApp } from "@/core/app/post_list/composer";
 import { createAppPreferences } from "@/core/app/preferences";
 import { createAppStorage } from "@/core/app/app_storage";
-import { composePostListApp } from "@/core/app/post_list/composer";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 

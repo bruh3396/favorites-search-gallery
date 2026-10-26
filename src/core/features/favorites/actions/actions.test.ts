@@ -107,11 +107,11 @@ describe("FavoritesActions", () => {
   });
 
   test("checks whether it accepts changes on every call", async() => {
-    let acceptsChanges = false;
-    const { actions } = await setup({ acceptsChanges: () => acceptsChanges });
+    let isAccepting = false;
+    const { actions } = await setup({ acceptsChanges: () => isAccepting });
 
     expect(await actions.remove("1")).toBe("blocked");
-    acceptsChanges = true;
+    isAccepting = true;
     expect(await actions.remove("1")).toBe("removed");
   });
 

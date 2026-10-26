@@ -1,9 +1,9 @@
+import { CachePage, fetchCachePage } from "@/targets/lab/local_frozen_cobalt";
 import { IndexedDbClient, IndexedDbClientConfiguration } from "@/adapters/browser/indexed_db/client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { Post } from "@/core/domain/post/post";
 import { decodePost } from "@/adapters/frozen_cobalt/client/decoder";
-import { CachePage, fetchCachePage } from "@/targets/lab/local_frozen_cobalt";
 import { mintMedia } from "@/adapters/rule34_cdn/client/locator";
 
 export const LAB_NAMESPACE = "fsg-lab";
@@ -144,6 +144,7 @@ async function *readLines(file: File): AsyncGenerator<string> {
   let rest = "";
 
   for (;;) {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { done, value } = await reader.read();
 
     if (done) {

@@ -36,7 +36,9 @@ export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, hand
           onClick={handlers.toggleDetails}
         />
       )}
-      {/* Hidden for now: <LightboxButton icon="download" label="Download" shortcut={findLightboxShortcut(keymap, "download")} onClick={handlers.download} /> */}
+      {/* Hidden for now:
+        <LightboxButton icon="download" label="Download" shortcut={findLightboxShortcut(keymap, "download")} onClick={handlers.download} />
+      */}
       <LightboxButton icon="postPage" label="Open post page" shortcut={findLightboxShortcut(keymap, "openPostPage")} onClick={handlers.openPostPage} />
       <LightboxButton
         icon={computed(() => (inFullscreen.value ? "exitFullscreen" : "fullscreen"))}

@@ -53,56 +53,12 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .fsg-FavoritesSearchPanel-tabStripToggle,
-  .fsg-FavoritesSearchPanel-zenButton {
-    display: grid;
+  .fsg-FavoritesSearchPanel-trailing {
+    display: flex;
     flex: none;
-    place-items: center;
-    position: relative;
-    inline-size: var(--fsg-control-size-medium);
-    block-size: var(--fsg-control-size-medium);
-    padding: 0;
-    border: 0;
-    border-radius: var(--fsg-shape-corner-small);
-    background: none;
-    color: var(--fsg-color-on-surface-variant);
-    cursor: pointer;
-  }
-
-  .fsg-FavoritesSearchPanel-tabStripToggle {
+    align-items: center;
+    gap: 2px;
     margin-inline-start: auto;
-  }
-
-  .fsg-FavoritesSearchPanel-zenButton {
-    margin-inline-start: -6px;
-  }
-
-  .fsg-FavoritesSearchPanel-tabStripToggle:hover,
-  .fsg-FavoritesSearchPanel-zenButton:hover {
-    background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
-    color: inherit;
-  }
-
-  .fsg-FavoritesSearchPanel-tabStripToggle:focus-visible,
-  .fsg-FavoritesSearchPanel-zenButton:focus-visible {
-    outline: 2px solid var(--fsg-color-primary);
-    outline-offset: -2px;
-  }
-
-  .fsg-FavoritesSearchPanel-tabCount {
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-end: 0;
-    min-inline-size: 14px;
-    padding-inline: 3px;
-    box-sizing: border-box;
-    border-radius: var(--fsg-shape-corner-full);
-    background: var(--fsg-color-primary);
-    color: var(--fsg-color-on-primary);
-    font-size: 10px;
-    font-variant-numeric: tabular-nums;
-    line-height: 14px;
-    text-align: center;
   }
 
   .fsg-FavoritesSearchPanel-body {

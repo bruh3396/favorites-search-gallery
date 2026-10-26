@@ -9,9 +9,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup({ isShown = new Signal(true), dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }], layout = new Signal<GridLayout>("grid"),
+function setup({ dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }], layout = new Signal<GridLayout>("grid"),
   tilesPerRow = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {
-  return render(document, () => <SkeletonGrid isShown={isShown} dimensions={dimensions} layout={layout} tilesPerRow={tilesPerRow} count={count} />);
+  return render(document, () => <SkeletonGrid dimensions={dimensions} layout={layout} tilesPerRow={tilesPerRow} count={count} />);
 }
 
 function createSquares(count: number): { width: number; height: number }[] {
@@ -51,24 +51,18 @@ describe("SkeletonGrid", () => {
     expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("3");
   });
 
-  test("shows and hides with its signal, hidden from assistive technology", () => {
-    const isShown = new Signal(true);
-    const { result: element } = setup({ isShown });
+  test("hides itself from assistive technology", () => {
+    const { result: element } = setup();
 
     expect(element.getAttribute("aria-hidden")).toBe("true");
-    isShown.value = false;
-    expect(element.hidden).toBe(true);
   });
 
   test("stops following its signals once disposed", () => {
-    const isShown = new Signal(true);
     const tilesPerRow = new Signal(2);
-    const { result: element, dispose } = setup({ isShown, tilesPerRow });
+    const { result: element, dispose } = setup({ tilesPerRow });
 
     dispose();
-    isShown.value = false;
     tilesPerRow.value = 5;
-    expect(element.hidden).toBe(false);
     expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("2");
   });
 

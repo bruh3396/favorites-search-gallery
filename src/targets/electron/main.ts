@@ -17,8 +17,8 @@ import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_p
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
-import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { Media } from "@/core/domain/media/media";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
 import { Rule34Client } from "@/adapters/rule34/client/client";

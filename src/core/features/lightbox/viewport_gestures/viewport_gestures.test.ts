@@ -1,8 +1,8 @@
 import { GesturePoint, ModifierState } from "@/core/ui/gestures/gestures";
 import {
-  LightboxViewportCommandHandlers,
-  createLightboxViewportGestureHandlers,
-  resolveLightboxViewportCursor
+    LightboxViewportCommandHandlers,
+    createLightboxViewportGestureHandlers,
+    resolveLightboxViewportCursor
 } from "@/core/features/lightbox/viewport_gestures/viewport_gestures";
 import { LightboxZoom, ZoomRect } from "@/core/features/lightbox/zoom/zoom";
 import { Mock, describe, expect, test, vi } from "vitest";
@@ -184,7 +184,9 @@ describe("createLightboxViewportGestureHandlers", () => {
       const { zoom, handlers } = setup();
 
       zoom.isZoomed.value = true;
-      expect(createLightboxViewportGestureHandlers(zoom, handlers, new Signal(false)).onWheel({ point: ON_MEDIA, delta: { x: 10, y: 20 }, modifiers: NO_MODIFIERS }))
+      expect(createLightboxViewportGestureHandlers(zoom, handlers, new Signal(false)).onWheel({
+        point: ON_MEDIA, delta: { x: 10, y: 20 }, modifiers: NO_MODIFIERS
+      }))
         .toBe(true);
       expect(zoom.panBy).toHaveBeenCalledWith(-10, -20);
     });

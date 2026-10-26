@@ -1,9 +1,9 @@
 import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
+import { LightboxMode } from "@/core/features/lightbox/mode";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { LightboxMode } from "@/core/features/lightbox/mode";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
@@ -106,7 +106,7 @@ describe("createLightbox", () => {
 
     lightbox.closed.on(closed);
     lightbox.open(sequence, IMAGE);
-    view.dispatchEvent(new MouseEvent("contextmenu", { cancelable: true }));
+    view.dispatchEvent(new MouseEvent("mousedown", { button: 2, bubbles: true, view: window }));
     expect(lightbox.isOpen.value).toBe(false);
     expect(closed).toHaveBeenCalledWith(IMAGE);
   });

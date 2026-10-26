@@ -102,7 +102,7 @@ function markEntering(element: HTMLElement): void {
 
 function readDropSide(event: DragEvent, element: HTMLElement): DropSide {
   const { left, width } = element.getBoundingClientRect();
-  return event.clientX < left + width / 2 ? "before" : "after";
+  return event.clientX < left + (width / 2) ? "before" : "after";
 }
 
 function Tab({ tab, activeId, onActivate, onClose, onDrop }: TabProps): HTMLElement {

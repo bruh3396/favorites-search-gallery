@@ -1,11 +1,11 @@
-import { NO_MEDIA } from "@/core/domain/media/media";
-import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
 import { GridSizing, computeDecodeWidth } from "@/core/ui/post_grid/decode_width";
-import { ImageLoader } from "@/core/ui/post_grid/image_loader";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { ImageLoader } from "@/core/ui/post_grid/image_loader";
+import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { MediaItem } from "@/core/domain/post/post";
+import { NO_MEDIA } from "@/core/domain/media/media";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createImageLoaderService } from "@/testing/image_loader_service";
 import { doNothing } from "@/core/utils/function/function";
@@ -249,7 +249,9 @@ describe("Tile", () => {
     onTestFinished(() => {
       vi.restoreAllMocks();
     });
-    drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], imageLoaderService: createImageLoaderService({ enabled: new Signal(true) }), visibilityObserver });
+    drawTile({
+      post: IMAGE, dimensions: PORTRAIT, actions: [], imageLoaderService: createImageLoaderService({ enabled: new Signal(true) }), visibilityObserver
+    });
     expect(show).not.toHaveBeenCalled();
     reportVisibility(true);
     expect(show).toHaveBeenCalledOnce();

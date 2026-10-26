@@ -50,7 +50,7 @@
   stroke-linejoin: round;
 }
 
-.fsg-ActivityBar-panel {
+.fsg-ActivityBar-view {
   display: flex;
   flex-direction: column;
   inline-size: 300px;

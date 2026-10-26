@@ -1,50 +1,46 @@
 import { ActivityBar, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
-import { FAVORITES_SETTINGS_LAYOUT, createFavoritesSettings } from "@/core/app/favorites/settings";
 import { FAVORITES_STYLES, FavoritesService } from "@/core/features/favorites/favorites";
-import { FavoritesSearchPanel, FavoritesSearchPanelProps } from "@/core/app/favorites/panel/search";
-import { LIGHTBOX_STYLES, Lightbox } from "@/core/features/lightbox/lightbox";
-import { ColorScheme } from "@/core/boundary/environment";
-import { Favorite } from "@/core/features/favorites/favorite";
-import { AppPreferences, FavoritesPreferences, LightboxPreferences } from "@/core/app/preferences";
+import { Readable, Signal } from "@/core/utils/reactive/signal";
+import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox_details/copy_id_button.css?inline";
+import { FavoritesPreferences } from "@/core/app/preferences";
 import { FavoritesShell } from "@/core/app/favorites/shell/shell";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
-import { Preference } from "@/core/utils/reactive/preference";
 import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/lightbox_details.css?inline";
-import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox_details/copy_id_button.css?inline";
-import SEARCH_PANEL_CSS from "@/core/app/favorites/panel/search.css?inline";
+import { LIGHTBOX_STYLES } from "@/core/features/lightbox/lightbox";
+import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/search_panel.css?inline";
 import SHELL_CSS from "@/core/app/favorites/shell/shell.css?inline";
-import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { SettingsScreen } from "@/core/ui/settings/screen";
-import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
-import { Theme } from "@/core/ui/theme/themes";
+import TAB_STRIP_TOGGLE_CSS from "@/core/app/favorites/search_panel/tab_strip_toggle.css?inline";
 import { Tabs } from "@/core/ui/components/tabs/tabs";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 import { h } from "@/core/ui/h/h";
 
-export const FAVORITES_APP_STYLES = [UI_CSS, FAVORITES_STYLES, SHELL_CSS, SEARCH_PANEL_CSS, LIGHTBOX_STYLES, LIGHTBOX_DETAILS_CSS, COPY_ID_BUTTON_CSS];
+export const FAVORITES_APP_STYLES = [
+  UI_CSS,
+  FAVORITES_STYLES,
+  SHELL_CSS,
+  SEARCH_PANEL_CSS,
+  TAB_STRIP_TOGGLE_CSS,
+  LIGHTBOX_STYLES,
+  LIGHTBOX_DETAILS_CSS,
+  COPY_ID_BUTTON_CSS
+];
 
-const TOOLS: readonly ActivityBarItem[] = [{ id: "settings", label: "Settings", icon: "settings" }];
+const TOOLS: readonly ActivityBarItem[] = [{ id: "settings", label: "Settings", icon: "settings"}];
 
 export interface FavoritesAppProps {
-  favorites: FavoritesService;
+  favorites: Pick<FavoritesService, "loadState" | "loadStatus">;
   workspace: FavoritesWorkspace;
-  lightbox: Lightbox<Favorite>;
-  preferences: FavoritesPreferences;
-  appPreferences: AppPreferences;
-  lightboxPreferences: LightboxPreferences;
-  colorScheme: Preference<ColorScheme>;
-  onThemePreview: (theme: Theme | null) => void;
+  lightboxView: HTMLElement;
+  preferences: Pick<FavoritesPreferences, "activeTool" | "tabStripVisible">;
   zenEnabled: Readable<boolean>;
-  scheduler: Scheduler;
-  panel: (tab: FavoritesTab) => FavoritesSearchPanelProps;
+  renderTool: (tool: ActivityBarItem) => HTMLElement;
+  renderPanel: (tab: FavoritesTab) => HTMLElement;
 }
 
-export function FavoritesApp({
-  favorites, workspace, lightbox, preferences, appPreferences, lightboxPreferences, colorScheme, onThemePreview, zenEnabled, scheduler, panel
-}: FavoritesAppProps): HTMLElement[] {
+export function FavoritesApp({ favorites, workspace, lightboxView, preferences, zenEnabled, renderTool, renderPanel }: FavoritesAppProps): HTMLElement[] {
   return [
     <FavoritesShell
       favorites={favorites}
@@ -53,17 +49,12 @@ export function FavoritesApp({
         <ActivityBar
           items={TOOLS}
           value={preferences.activeTool}
-          renderPanel={tool => (
+          renderView={tool => (
             <ViewPane
               title={tool.label}
               actions={[{ label: "Reset all settings", icon: "reset", disabled: new Signal(true), onClick: () => undefined }]}
             >
-              <SettingsScreen
-                layout={FAVORITES_SETTINGS_LAYOUT}
-                descriptors={createFavoritesSettings(preferences, appPreferences, lightboxPreferences, colorScheme, onThemePreview)}
-                size="small"
-                scheduler={scheduler}
-              />
+              {renderTool(tool)}
             </ViewPane>
           )}
           onValueChange={id => preferences.activeTool.set(id)}
@@ -71,7 +62,7 @@ export function FavoritesApp({
         <Tabs<FavoritesTab>
           manager={workspace.tabManager}
           label={({ value }) => value.title}
-          renderPanel={({ value }) => <FavoritesSearchPanel {...panel(value)} />}
+          renderPanel={({ value }) => renderPanel(value)}
           stripVisible={preferences.tabStripVisible}
           trailing={<StatusText text={favorites.loadStatus} />}
           onAdd={() => workspace.openBlankTab()}
@@ -80,6 +71,6 @@ export function FavoritesApp({
         />
       ]}
     />,
-    lightbox.createView()
+    lightboxView
   ];
 }

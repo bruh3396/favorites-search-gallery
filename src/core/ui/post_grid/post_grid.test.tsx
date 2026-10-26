@@ -3,13 +3,13 @@ import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { createImageLoaderService } from "@/testing/image_loader_service";
 import { GridLayout } from "@/core/ui/post_grid/tiler";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
+import { createImageLoaderService } from "@/testing/image_loader_service";
 
 interface Setup {
   element: HTMLElement;

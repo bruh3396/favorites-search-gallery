@@ -29,7 +29,7 @@ describe("computeDecodeWidth", () => {
   });
 
   test("decodes a tile just wider than the minimum", () => {
-    expect(computeDecodeWidth({ layout: "column", tilesPerRow: 4, gridWidth: 4 * MIN_DECODE_WIDTH + 4 }, LARGE)).toBe(DECODE_WIDTH_STEP);
+    expect(computeDecodeWidth({ layout: "column", tilesPerRow: 4, gridWidth: (4 * MIN_DECODE_WIDTH) + 4 }, LARGE)).toBe(DECODE_WIDTH_STEP);
   });
 
   test("caps at the original's width", () => {

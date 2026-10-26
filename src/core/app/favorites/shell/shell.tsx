@@ -1,6 +1,6 @@
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { FavoritesService } from "@/core/features/favorites/favorites";
 import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
-import { Readable, computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 import { measureLoadProgress } from "@/core/app/favorites/shell/load_progress";
 

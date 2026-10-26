@@ -1,8 +1,10 @@
-import { FavoriteLightboxDetailsClass, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox_details/lightbox_details";
-import { describe, expect, test, vi } from "vitest";
+import {
+  FavoriteLightboxDetailsClass, FavoriteLightboxDetailsView, createFavoriteLightboxDetails
+} from "@/core/app/favorites/lightbox_details/lightbox_details";
+import { Mock, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/lightbox_details.css?inline";
 import { Favorite } from "@/core/features/favorites/favorite";
+import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/lightbox_details.css?inline";
 import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/clipboard";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -18,7 +20,21 @@ function createFavorite(id: string, tags: readonly string[] = []): ShownFavorite
   return { id, tags: new Set(tags) };
 }
 
-function setup(initial: ShownFavorite | undefined, categories: ReadonlyMap<string, TagCategory> = new Map()) {
+interface Setup {
+  favorite: Signal<ShownFavorite | undefined>;
+  getMany: Mock<(names: readonly string[]) => Promise<Map<string, TagCategory>>>;
+  clipboard: MemoryClipboard;
+  view: FavoriteLightboxDetailsView;
+  copyButton: HTMLButtonElement;
+  viewButton: HTMLButtonElement;
+  viewSettings: HTMLElement;
+  readId: () => string;
+  readGroups: () => string[][];
+  clickShowMore: () => void;
+  chooseView: (label: string) => void;
+}
+
+function setup(initial: ShownFavorite | undefined, categories: ReadonlyMap<string, TagCategory> = new Map()): Setup {
   const favorite = new Signal<ShownFavorite | undefined>(initial);
   const getMany = vi.fn((names: readonly string[]) => Promise.resolve(new Map(names.flatMap(name => {
     const category = categories.get(name);
@@ -102,7 +118,7 @@ describe("createFavoriteLightboxDetails", () => {
 
   test("shows a newer favorite's tags when an older lookup resolves late", async() => {
     const { favorite, getMany, readGroups } = setup(undefined);
-    let resolveLate = (_categories: Map<string, TagCategory>): void => undefined;
+    let resolveLate: (categories: Map<string, TagCategory>) => void = () => undefined;
 
     getMany.mockReturnValueOnce(new Promise(resolve => {
       resolveLate = resolve;

@@ -78,7 +78,7 @@ export function createLightboxView<T extends MediaItem>(
     navigation,
     shownMedia: stage.shownMedia,
     inFullscreen: fullscreen.inFullscreen,
-    morphDuration: computed(() => simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION),
+    morphDuration: computed(() => (simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION)),
     locateItem
   });
   const handlers = limitToSimpleCommands(createLightboxCommandHandlers({ navigation, stage, fullscreen, zoom, autoplay, closer, actions, details }), simple);

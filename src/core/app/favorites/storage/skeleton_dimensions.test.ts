@@ -30,6 +30,7 @@ describe("SkeletonDimensions", () => {
     const storage = new MemoryLocalKeyedValues();
     const scheduler = new MemoryScheduler();
     const results = new Signal<readonly Favorite[]>([]);
+
     setup(storage, "1", { results, scheduler });
 
     results.value = [createFavorite(4, 3)];

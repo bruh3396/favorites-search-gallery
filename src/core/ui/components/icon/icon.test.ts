@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vitest";
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { describe, expect, test } from "vitest";
 import { Signal } from "@/core/utils/reactive/signal";
 import { render } from "@/core/ui/h/h";
 

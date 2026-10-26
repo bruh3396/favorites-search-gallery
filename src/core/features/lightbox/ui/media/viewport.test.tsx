@@ -21,7 +21,11 @@ function setup(): {
 } {
   const zoom = new LightboxZoom(
     { minimumScale: 2, maximumScale: 8 },
-    { currentItem: new Signal<Post | undefined>(createPost()), mediaSize: new Signal<ZoomSize | undefined>({ width: 400, height: 400 }), enabled: new Signal(true) }
+    {
+      currentItem: new Signal<Post | undefined>(createPost()),
+      mediaSize: new Signal<ZoomSize | undefined>({ width: 400, height: 400 }),
+      enabled: new Signal(true)
+    }
   );
   const sizeObserver = new MemorySizeObserver();
   const content = document.createElement("canvas");

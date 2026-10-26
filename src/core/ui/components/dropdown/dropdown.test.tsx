@@ -117,7 +117,7 @@ describe("Dropdown", () => {
     press(trigger, "ArrowDown");
     press(trigger, "ArrowDown");
     expect(onPreview.mock.calls).toEqual([["score"], ["date"], ["random"]]);
-    expect(trigger.getAttribute("aria-activedescendant")).toBe(queryOptions()[2].id);
+    expect(trigger.ariaActiveDescendantElement).toBe(queryOptions()[2]);
     press(trigger, "Enter");
     expect(onValueChange).toHaveBeenLastCalledWith("random");
     expect(onPreview).toHaveBeenLastCalledWith(null);

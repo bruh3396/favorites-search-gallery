@@ -11,7 +11,7 @@ const ITEMS: readonly ActivityBarItem[] = [
   { id: "help", label: "Help", icon: "help" }
 ];
 
-function renderPane(item: ActivityBarItem, log: (message: string) => void): HTMLElement {
+function renderView(item: ActivityBarItem, log: (message: string) => void): HTMLElement {
   if (item.id !== "settings") {
     return <ViewPane title={item.label}><p className="kit-Placeholder">{item.label} content</p></ViewPane>;
   }
@@ -46,7 +46,7 @@ function variant(label: string, initial: string | null): StoryVariant {
           <ActivityBar
             items={ITEMS}
             value={value}
-            renderPanel={item => renderPane(item, log)}
+            renderView={item => renderView(item, log)}
             onValueChange={next => {
               log(`ActivityBar "${label}" → ${String(next)}`);
               value.value = next;

@@ -1,15 +1,26 @@
 import { AppPreferences, FavoritesPreferences, LightboxPreferences } from "@/core/app/preferences";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
+import { SettingsLayout, SettingsScreen } from "@/core/ui/settings/screen";
 import { THEMES, Theme } from "@/core/ui/theme/themes";
 import { GridLayout } from "@/core/ui/post_grid/tiler";
 import { Icon } from "@/core/ui/components/icon/icon";
 import { Preference } from "@/core/utils/reactive/preference";
 import { SettingDescriptor } from "@/core/ui/settings/descriptor";
-import { SettingsLayout } from "@/core/ui/settings/screen";
+import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";
+import { h } from "@/core/ui/h/h";
 
-export const FAVORITES_SETTINGS_LAYOUT: SettingsLayout = [
+export interface FavoritesSettingsProps {
+  preferences: FavoritesPreferences;
+  appPreferences: AppPreferences;
+  lightboxPreferences: LightboxPreferences;
+  colorScheme: Preference<ColorScheme>;
+  onThemePreview: (theme: Theme | null) => void;
+  scheduler: StepperScheduler;
+}
+
+const LAYOUT: SettingsLayout = [
   { id: "general", title: "General", settings: ["lightboxMode", "postListEnabled"] },
   { id: "appearance", title: "Appearance", settings: ["theme", "colorScheme", "nativeHeaderVisible"] },
   { id: "grid", title: "Grid", settings: ["layout", "tileSize", "hdTilesEnabled"] },
@@ -21,20 +32,21 @@ const COLOR_SCHEME_ICONS: Readonly<Record<ColorScheme, Icon>> = { light: "sun", 
 const THEME_LABELS: Readonly<Record<Theme, string>> = {
   rule34: "Rule34", cherry: "Cherry", cirrus: "Cirrus", dusk: "Dusk", ember: "Ember", forest: "Forest",
   frost: "Frost", ink: "Ink", parchment: "Parchment", slate: "Slate", venom: "Venom", zeal: "Zeal"
-};const LIGHTBOX_MODE_LABELS: Readonly<Record<LightboxMode, string>> = { off: "Off", simple: "Simple", full: "Full" };
+};
+const LIGHTBOX_MODE_LABELS: Readonly<Record<LightboxMode, string>> = { off: "Off", simple: "Simple", full: "Full" };
 const LAYOUTS: readonly GridLayout[] = ["column", "row", "square", "native"];
 const LAYOUT_LABELS: Readonly<Record<GridLayout, string>> = { row: "Row", square: "Square", grid: "Grid", column: "Column", native: "Native" };
 const LAYOUT_ICONS: Readonly<Record<GridLayout, Icon>> = {
   row: "layoutRow", square: "layoutSquare", grid: "layoutGrid", column: "layoutColumn", native: "layoutNative"
 };
 
-export function createFavoritesSettings(
-  preferences: FavoritesPreferences,
-  appPreferences: AppPreferences,
-  lightboxPreferences: LightboxPreferences,
-  colorScheme: Preference<ColorScheme>,
-  onThemePreview: (theme: Theme | null) => void
-): SettingDescriptor[] {
+export function FavoritesSettings({ scheduler, ...props }: FavoritesSettingsProps): HTMLElement {
+  return <SettingsScreen layout={LAYOUT} descriptors={createDescriptors(props)} size="small" scheduler={scheduler} />;
+}
+
+function createDescriptors({
+  preferences, appPreferences, lightboxPreferences, colorScheme, onThemePreview
+}: Omit<FavoritesSettingsProps, "scheduler">): SettingDescriptor[] {
   return [
     {
       id: "postListEnabled", kind: "switch", label: "Enhance search pages", keywords: ["post list", "search"],

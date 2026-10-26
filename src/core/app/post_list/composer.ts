@@ -16,13 +16,13 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 

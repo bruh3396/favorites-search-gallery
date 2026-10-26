@@ -9,7 +9,8 @@ function createSearchResults(): MemoryRemoteSearchResults {
 }
 
 async function pageAt(index: number): Promise<{ index: number; ids: string[] }> {
-  const page = await createSearchResults().fetchPage(index);  return { index: page.index, ids: page.posts.map(post => post.id) };
+  const page = await createSearchResults().fetchPage(index);
+  return { index: page.index, ids: page.posts.map(post => post.id) };
 }
 
 describe("MemoryRemoteSearchResults", () => {

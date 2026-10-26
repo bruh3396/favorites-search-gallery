@@ -13,35 +13,35 @@ const ITEMS: readonly ActivityBarItem[] = [
 
 interface Setup {
   element: HTMLElement;
-  renderPanel: Mock<(item: ActivityBarItem) => HTMLElement>;
-  disposePanel: Mock<(id: string) => void>;
+  renderView: Mock<(item: ActivityBarItem) => HTMLElement>;
+  disposeView: Mock<(id: string) => void>;
   onValueChange: Mock<(id: string | null) => void>;
   dispose: () => void;
 }
 
 function setup(initial: string | null = null): Setup {
   const value = new Signal<string | null>(initial);
-  const disposePanel = vi.fn<(id: string) => void>();
-  const renderPanel = vi.fn((item: ActivityBarItem): HTMLElement => {
-    onCleanup(() => disposePanel(item.id));
+  const disposeView = vi.fn<(id: string) => void>();
+  const renderView = vi.fn((item: ActivityBarItem): HTMLElement => {
+    onCleanup(() => disposeView(item.id));
     return <p>{item.label}</p>;
   });
   const onValueChange = vi.fn((id: string | null): void => {
     value.value = id;
   });
   const { result: element, dispose } = render(document, () => (
-    <ActivityBar items={ITEMS} value={value} renderPanel={renderPanel} onValueChange={onValueChange} />
+    <ActivityBar items={ITEMS} value={value} renderView={renderView} onValueChange={onValueChange} />
   ));
 
   document.body.append(element);
-  return { element, renderPanel, disposePanel, onValueChange, dispose };
+  return { element, renderView, disposeView, onValueChange, dispose };
 }
 
 function findItem(element: HTMLElement, label: string): HTMLButtonElement {
   return element.querySelector<HTMLButtonElement>(`button[aria-label='${label}']`)!;
 }
 
-function findPanel(element: HTMLElement): HTMLElement {
+function findView(element: HTMLElement): HTMLElement {
   return element.querySelector<HTMLElement>("[role=region]")!;
 }
 
@@ -54,17 +54,17 @@ describe("ActivityBar", () => {
     expectClassesStyled(ActivityBarClass, ACTIVITY_BAR_CSS);
   });
 
-  test("hides the panel while no item is active", () => {
-    const { element, renderPanel } = setup();
+  test("hides the view while no item is active", () => {
+    const { element, renderView } = setup();
 
-    expect([findPanel(element).hidden, renderPanel.mock.calls.length]).toEqual([true, 0]);
+    expect([findView(element).hidden, renderView.mock.calls.length]).toEqual([true, 0]);
   });
 
-  test("shows the active item's panel, named after it", () => {
+  test("shows the active item's view, named after it", () => {
     const { element } = setup("downloads");
-    const panel = findPanel(element);
+    const view = findView(element);
 
-    expect([panel.hidden, panel.textContent, panel.getAttribute("aria-label")]).toEqual([false, "Downloads", "Downloads"]);
+    expect([view.hidden, view.textContent, view.getAttribute("aria-label")]).toEqual([false, "Downloads", "Downloads"]);
   });
 
   test("reports the item whose icon is clicked", () => {
@@ -78,17 +78,17 @@ describe("ActivityBar", () => {
     const { element, onValueChange } = setup("settings");
 
     findItem(element, "Settings").click();
-    expect([onValueChange.mock.calls, findPanel(element).hidden]).toEqual([[[null]], true]);
+    expect([onValueChange.mock.calls, findView(element).hidden]).toEqual([[[null]], true]);
   });
 
-  test("keeps a closed panel's content and reuses it when the same item reopens", () => {
-    const { element, renderPanel, disposePanel } = setup("settings");
+  test("keeps a closed view's content and reuses it when the same item reopens", () => {
+    const { element, renderView, disposeView } = setup("settings");
 
     findItem(element, "Settings").click();
-    const closedText = findPanel(element).textContent;
+    const closedText = findView(element).textContent;
 
     findItem(element, "Settings").click();
-    expect([closedText, renderPanel.mock.calls.length, disposePanel.mock.calls.length]).toEqual(["Settings", 1, 0]);
+    expect([closedText, renderView.mock.calls.length, disposeView.mock.calls.length]).toEqual(["Settings", 1, 0]);
   });
 
   test("presses only the active item", () => {
@@ -98,17 +98,17 @@ describe("ActivityBar", () => {
     expect([pressed("Settings"), pressed("Downloads")]).toEqual(["false", "true"]);
   });
 
-  test("disposes the panel a switch replaces", () => {
-    const { element, disposePanel } = setup("settings");
+  test("disposes the view a switch replaces", () => {
+    const { element, disposeView } = setup("settings");
 
     findItem(element, "Downloads").click();
-    expect([findPanel(element).textContent, disposePanel.mock.calls]).toEqual(["Downloads", [["settings"]]]);
+    expect([findView(element).textContent, disposeView.mock.calls]).toEqual(["Downloads", [["settings"]]]);
   });
 
-  test("disposes the shown panel when it is disposed", () => {
-    const { dispose, disposePanel } = setup("settings");
+  test("disposes the shown view when it is disposed", () => {
+    const { dispose, disposeView } = setup("settings");
 
     dispose();
-    expect(disposePanel).toHaveBeenCalledExactlyOnceWith("settings");
+    expect(disposeView).toHaveBeenCalledExactlyOnceWith("settings");
   });
 });

@@ -65,7 +65,7 @@ describe("morph", () => {
     const target = createTarget();
     let standIn: HTMLCanvasElement | null = null;
 
-    morph(createSource(), MORPH_DURATION,() => {
+    morph(createSource(), MORPH_DURATION, () => {
       standIn = findStandIn();
       return target;
     });
@@ -91,7 +91,7 @@ describe("morph", () => {
   test("flies the stand-in onto the target, then removes it", () => {
     const runFrame = stubFrames();
 
-    morph(createSource(), MORPH_DURATION,createTarget);
+    morph(createSource(), MORPH_DURATION, createTarget);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -120,7 +120,7 @@ describe("morph", () => {
     const target = createTarget();
 
     target.style.setProperty("visibility", "visible", "important");
-    morph(createSource(), MORPH_DURATION,() => target);
+    morph(createSource(), MORPH_DURATION, () => target);
     runFrame(0);
     expect(target.style.visibility).toBe("hidden");
     runFrame(MORPH_DURATION);
@@ -134,7 +134,7 @@ describe("morph", () => {
 
     document.body.append(target);
 
-    morph(createSource(), MORPH_DURATION,() => target);
+    morph(createSource(), MORPH_DURATION, () => target);
     runFrame(0);
 
     expect(target.getAttribute("visibility")).toBeNull();
@@ -149,7 +149,7 @@ describe("morph", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    morph(createSource(), MORPH_DURATION,() => target);
+    morph(createSource(), MORPH_DURATION, () => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -160,7 +160,7 @@ describe("morph", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    morph(createSource(), MORPH_DURATION,() => target);
+    morph(createSource(), MORPH_DURATION, () => target);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -183,7 +183,7 @@ describe("morph", () => {
     document.body.append(pane);
     onTestFinished(() => pane.remove());
     moveTo(pane, { left: 0, top: 100, width: 400, height: 400 });
-    morph(createSource(), MORPH_DURATION,() => target);
+    morph(createSource(), MORPH_DURATION, () => target);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -197,7 +197,7 @@ describe("morph", () => {
     const runFrame = stubFrames();
     const target = createTarget();
 
-    morph(createSource(), MORPH_DURATION,() => target);
+    morph(createSource(), MORPH_DURATION, () => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -207,7 +207,7 @@ describe("morph", () => {
   test("drops the stand-in as the page changes when there is no target", () => {
     stubFrames();
 
-    morph(createSource(), MORPH_DURATION,() => undefined);
+    morph(createSource(), MORPH_DURATION, () => undefined);
     expect(findStandIn()).toBeNull();
     expect(window.requestAnimationFrame).not.toHaveBeenCalled();
   });
