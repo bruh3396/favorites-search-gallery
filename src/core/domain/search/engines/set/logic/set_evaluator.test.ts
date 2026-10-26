@@ -8,11 +8,12 @@ import { SearchExpression } from "@/core/domain/search/expressions/search_expres
 import { SetEvaluator } from "@/core/domain/search/engines/set/logic/set_evaluator";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 const positionIndex = new PositionIndex<Fruit>();
 
 positionIndex.build(fruitDocs);
-const wildcardResolver = new WildcardDocResolver<Fruit>(index);
+const wildcardResolver = new WildcardDocResolver<Fruit>({ termIndex: index, stringInterner: new StringInterner() });
 
 wildcardResolver.index(index.indexedTerms());
 const metricIndex = new MetricIndex<Fruit>([], () => 0);

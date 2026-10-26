@@ -1,24 +1,26 @@
-import { WildcardMatchType, WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
+import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
+import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { PrefixIndex } from "@/core/domain/search/indexes/prefix_index";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { TrigramIndex } from "@/core/domain/search/indexes/trigram_index";
-import { compareStrings } from "@/core/utils/string/string";
+import { compareStrings } from "@/core/utils/string/string_utilities";
 
 export class WildcardIndex {
   private terms: SortedArray<string>;
   private prefixIndex: PrefixIndex;
   private trigramIndex: TrigramIndex;
 
-  constructor(terms: string[] = []) {
+  constructor(private readonly stringInterner: StringInterner, terms: string[] = []) {
     this.terms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);
     this.prefixIndex = new PrefixIndex(this.terms);
-    this.trigramIndex = new TrigramIndex(this.terms);
+    this.trigramIndex = new TrigramIndex(this.terms, this.stringInterner);
   }
 
   public index(terms: string[]): void {
     this.terms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);
     this.prefixIndex = new PrefixIndex(this.terms);
-    this.trigramIndex = new TrigramIndex(this.terms);
+    this.trigramIndex = new TrigramIndex(this.terms, this.stringInterner);
   }
 
   public matchingTerms(term: WildcardSearchTerm): string[] {

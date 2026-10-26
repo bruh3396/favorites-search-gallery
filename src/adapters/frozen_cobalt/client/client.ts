@@ -1,5 +1,5 @@
 import { FrozenCobaltEndpoints, FrozenCobaltPostResult, FrozenCobaltTagResult, parseBatch, parsePostResult, parseTagResult } from "@/adapters/frozen_cobalt/client/schema";
-import { CoalescingResolver } from "@/core/utils/async/coalescing";
+import { CoalescingResolver } from "@/core/utils/async/coalescing_resolver";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

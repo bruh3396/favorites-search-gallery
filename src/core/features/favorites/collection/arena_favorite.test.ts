@@ -1,12 +1,14 @@
-import { RATINGS, getRatingBit } from "@/core/domain/post/post";
+import { RATINGS } from "@/core/domain/post/rating";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { createPost } from "@/testing/post";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 describe("ArenaFavorite", () => {
   test("allocates its own slot and writes the post into it", () => {
-    const arena = new FavoritesColumnarArena();
+    const arena = new FavoritesColumnarArena(new StringInterner());
 
     arena.allocate();
     const favorite = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", score: 99 }), arena);
@@ -18,7 +20,7 @@ describe("ArenaFavorite", () => {
   });
 
   test("reads media and the new flag from the arena", () => {
-    const arena = new FavoritesColumnarArena();
+    const arena = new FavoritesColumnarArena(new StringInterner());
     const favorite = new ArenaFavorite(createPost({ id: "1", media: { kind: "video", locator: "12/abc.mp4" } }), arena);
 
     arena.markNew(favorite.slot);
@@ -27,13 +29,13 @@ describe("ArenaFavorite", () => {
   });
 
   test.each(RATINGS)("reads the bit of a %s rating from the arena", rating => {
-    const favorite = new ArenaFavorite(createPost({ id: "1", rating }), new FavoritesColumnarArena());
+    const favorite = new ArenaFavorite(createPost({ id: "1", rating }), new FavoritesColumnarArena(new StringInterner()));
 
-    expect(favorite.ratingBit).toBe(getRatingBit(rating));
+    expect(favorite.ratingBit).toBe(toRatingMask(rating));
   });
 
   test("keeps distinct favorites on independent slots", () => {
-    const arena = new FavoritesColumnarArena();
+    const arena = new FavoritesColumnarArena(new StringInterner());
     const first = new ArenaFavorite(createPost({ id: "10", tags: "one" }), arena);
     const second = new ArenaFavorite(createPost({ id: "20", tags: "two" }), arena);
 

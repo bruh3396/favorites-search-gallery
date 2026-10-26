@@ -2,10 +2,11 @@ import { describe, expect, test } from "vitest";
 import { parseExclusions, parseSearchExpression, tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { BitEvaluator } from "@/core/domain/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
-import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_index";
+import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { Searchable } from "@/core/domain/search/searchable";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Item extends Searchable { id: string }
 
@@ -14,13 +15,13 @@ function createItem(id: string, ...tags: string[]): Item {
 }
 
 function createEvaluator(items: Item[]): BitEvaluator<Item> {
-  const bitIndex = new BitIndex<Item>(doc => doc.tags);
+  const bitIndex = new BitIndex<Item>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(items);
   const metricIndex = new MetricBitIndex<Item>(doc => doc.id.length);
 
   metricIndex.build(bitIndex.width, bitIndex.allDocs());
-  const wildcardResolver = new WildcardPostingResolver(bitIndex);
+  const wildcardResolver = new WildcardPostingResolver({ bitIndex: bitIndex, stringInterner: new StringInterner() });
 
   wildcardResolver.index(bitIndex.indexedTerms());
   const resolver = new PostingResolver(bitIndex, metricIndex, wildcardResolver);

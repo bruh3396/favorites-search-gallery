@@ -1,9 +1,5 @@
 import { Signal, effect } from "@/core/utils/reactive/signal";
-
-export interface Fact<V = void> {
-  readonly reached: boolean;
-  wait: () => Promise<V>;
-}
+import { Fact } from "@/core/utils/reactive/fact";
 
 export class Milestone<V = void> implements Fact<V> {
   private readonly deferred = Promise.withResolvers<V>();

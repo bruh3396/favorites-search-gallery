@@ -1,4 +1,5 @@
-import { Post, RATINGS } from "@/core/domain/post/post";
+import { Post } from "@/core/domain/post/post";
+import { RATINGS } from "@/core/domain/post/rating";
 
 const TAGS = ["apple", "banana", "cherry", "durian", "elderberry", "fig", "grape", "kiwi", "lemon", "mango", "orange", "peach"];
 const SIZES = [[640, 480], [480, 640], [800, 450], [600, 600]];

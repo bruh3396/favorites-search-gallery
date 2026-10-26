@@ -1,4 +1,5 @@
-import { Post, Rating } from "@/core/domain/post/post";
+import { Post } from "@/core/domain/post/post";
+import { Rating } from "@/core/domain/post/rating";
 import { Media } from "@/core/domain/media/media";
 
 const OWNER_PREFIX = "user";

@@ -12,6 +12,7 @@ import { Post } from "@/core/domain/post/post";
 import { createFavoritesPreferences } from "@/core/app/preferences";
 import { createPost } from "@/testing/post";
 import { effect } from "@/core/utils/reactive/signal";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
   workspace: FavoritesWorkspace;
@@ -20,10 +21,10 @@ interface Setup {
 
 function createWorkspace(storage: MemoryLocalKeyedValues, favoritesOwnerId = "1", posts: Post[] = []): FavoritesWorkspace {
   const paginationSettings = createFavoritesPreferences(new MemoryLocalKeyedValues());
-  const searchIndex = new FavoritesSearchIndex();
+  const searchIndex = new FavoritesSearchIndex(new StringInterner());
 
   paginationSettings.pageSize.set(2);
-  searchIndex.rebuild(new FavoritesCollection().append(posts));
+  searchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
   return new FavoritesWorkspace({ favoritesOwnerId }, {
     storage,
     createSession: (settings): FavoritesSession => {

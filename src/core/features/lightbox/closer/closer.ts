@@ -1,6 +1,6 @@
 import { MorphSource, morph } from "@/core/features/lightbox/closer/morph";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface LightboxCloserDependencies<T extends MediaItem> {

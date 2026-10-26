@@ -1,6 +1,6 @@
 import { Codec, createFieldsCodec, createGuardedCodec, createListCodec, createRecordCodec, createSetCodec } from "@/core/utils/codec/codec";
 import { describe, expect, test } from "vitest";
-import { isBoolean, oneOf } from "@/core/utils/guards/guards";
+import { isBoolean, oneOf } from "@/core/utils/guard/guard";
 
 const COLORS = ["red", "blue"] as const;
 

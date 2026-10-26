@@ -1,6 +1,4 @@
-export const MEDIA_KINDS = ["image", "video", "gif"] as const;
-
-export type MediaKind = typeof MEDIA_KINDS[number];
+import { MediaKind } from "@/core/domain/media/media_kind";
 
 export interface Media {
   readonly kind: MediaKind;

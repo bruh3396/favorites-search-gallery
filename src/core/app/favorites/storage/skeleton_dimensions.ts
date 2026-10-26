@@ -1,19 +1,20 @@
-import { Preference, StoredPreference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
+import { StoredPreference } from "@/core/utils/preference/stored_preference";
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { hasFields, isNumber } from "@/core/utils/guards/guards";
-import { Dimensions } from "@/core/domain/post/post";
+import { hasFields, isNumber } from "@/core/utils/guard/guard";
+import { Size } from "@/core/utils/geometry/size";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { createDebouncedTask } from "@/core/utils/async/debouncer";
+import { createDebouncedTask } from "@/core/utils/async/debounced_task";
 import { createGuardedCodec } from "@/core/utils/codec/codec";
 
 const SKELETON_NAMESPACE = "favoritesSkeleton";
 const MEASURED_COUNT = 50;
 const SKELETON_RECORD_DELAY = 500;
 
-export const DEFAULT_SKELETON_DIMENSIONS: readonly Dimensions[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
+export const DEFAULT_SKELETON_DIMENSIONS: readonly Size[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
 
 export interface SkeletonDimensionsConfiguration {
   readonly ownerId: string;
@@ -26,7 +27,7 @@ export interface SkeletonDimensionsDependencies {
 }
 
 export class SkeletonDimensions {
-  private readonly stored: Preference<readonly Dimensions[]>;
+  private readonly stored: Preference<readonly Size[]>;
 
   constructor({ ownerId }: SkeletonDimensionsConfiguration, { storage, scheduler, results }: SkeletonDimensionsDependencies) {
     this.stored = new StoredPreference(
@@ -49,7 +50,7 @@ export class SkeletonDimensions {
     });
   }
 
-  public get value(): readonly Dimensions[] {
+  public get value(): readonly Size[] {
     return this.stored.peek();
   }
 
@@ -62,16 +63,16 @@ export class SkeletonDimensions {
   }
 }
 
-function sameDimensions(first: readonly Dimensions[], second: readonly Dimensions[]): boolean {
+function sameDimensions(first: readonly Size[], second: readonly Size[]): boolean {
   return first.length === second.length && first.every((dimensions, index) => dimensions.width === second[index].width && dimensions.height === second[index].height);
 }
 
-function measure(favorites: readonly Favorite[]): Dimensions[] {
+function measure(favorites: readonly Favorite[]): Size[] {
   return favorites
     .slice(0, MEASURED_COUNT)
     .map(favorite => ({ width: favorite.getMetric("width"), height: favorite.getMetric("height") }));
 }
 
-function isDimensionsList(stored: unknown): stored is readonly Dimensions[] {
-  return Array.isArray(stored) && stored.every(hasFields<Dimensions>({ width: isNumber, height: isNumber }));
+function isDimensionsList(stored: unknown): stored is readonly Size[] {
+  return Array.isArray(stored) && stored.every(hasFields<Size>({ width: isNumber, height: isNumber }));
 }

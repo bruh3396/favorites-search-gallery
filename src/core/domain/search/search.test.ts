@@ -2,12 +2,13 @@ import { FruitName, fruitDocs } from "@/core/domain/search/testing/fruit_corpus"
 import { QueryAssertion, searchCases } from "@/core/domain/search/testing/search_cases";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
-import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
 import { SearchEngine } from "@/core/domain/search/engines/search_engine";
 import { Searchable } from "@/core/domain/search/searchable";
 import { SetSearchEngine } from "@/core/domain/search/engines/set/set_search_engine";
-import { parseSearchQuery } from "@/core/domain/search/parsers/search_term_group_parser";
+import { parseSearchQuery } from "@/core/domain/search/parsers/search_query_parser";
 import { tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 type Doc = Searchable & { name: string; getMetric?: (metric: Metric) => number };
 type Searcher = (query: string, docs: Doc[]) => string[];
@@ -26,8 +27,8 @@ function createDoc(name: string, ...tags: string[]): Doc {
 }
 
 const engines: { name: string; createEngine: (docs: Doc[]) => SearchEngine<Doc> }[] = [
-  { name: "SetSearchEngine", createEngine: docs => new SetSearchEngine<Doc>(getTerms, getMetric, docs) },
-  { name: "BitSearchEngine", createEngine: docs => new BitSearchEngine<Doc>(getTerms, getMetric, docs) }
+  { name: "SetSearchEngine", createEngine: docs => new SetSearchEngine<Doc>({ getTerms: getTerms, getMetric: getMetric, stringInterner: new StringInterner() }, docs) },
+  { name: "BitSearchEngine", createEngine: docs => new BitSearchEngine<Doc>({ getTerms: getTerms, getMetric: getMetric, stringInterner: new StringInterner() }, docs) }
 ];
 
 for (const { name, createEngine } of engines) {
@@ -54,12 +55,12 @@ for (const { name, createEngine } of engines) {
 const implementations:{ name: string; implementation: Searcher; supportsAST: boolean }[] = [
   {
     name: "SetSearchEngine",
-    implementation: (query, docs) => searchWithEngine(new SetSearchEngine<Doc>(getTerms, getMetric, docs), query, docs),
+    implementation: (query, docs) => searchWithEngine(new SetSearchEngine<Doc>({ getTerms: getTerms, getMetric: getMetric, stringInterner: new StringInterner() }, docs), query, docs),
     supportsAST: true
   },
   {
     name: "BitSearchEngine",
-    implementation: (query, docs) => searchWithEngine(new BitSearchEngine<Doc>(getTerms, getMetric, docs), query, docs),
+    implementation: (query, docs) => searchWithEngine(new BitSearchEngine<Doc>({ getTerms: getTerms, getMetric: getMetric, stringInterner: new StringInterner() }, docs), query, docs),
     supportsAST: true
   },
   {

@@ -1,4 +1,4 @@
-import { METRICS, Metric } from "@/core/domain/post/post";
+import { METRICS, Metric } from "@/core/domain/post/metric";
 import { describe, expect, test } from "vitest";
 import { parseMetricSearchTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
@@ -8,6 +8,7 @@ import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
 import { Searchable } from "@/core/domain/search/searchable";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>> };
 
@@ -34,7 +35,7 @@ function createResolver(): DocResolver<Doc> {
 
   docs.forEach(item => termIndex.addDoc(item));
   positionIndex.build(docs);
-  const wildcardResolver = new WildcardDocResolver<Doc>(termIndex);
+  const wildcardResolver = new WildcardDocResolver<Doc>({ termIndex: termIndex, stringInterner: new StringInterner() });
 
   wildcardResolver.index(termIndex.indexedTerms());
   return new DocResolver<Doc>({ termIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver });

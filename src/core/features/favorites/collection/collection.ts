@@ -1,9 +1,11 @@
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
 import { Post } from "@/core/domain/post/post";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { hasMedia } from "@/core/domain/media/media";
 
 export interface FavoriteOverwrite {
@@ -13,8 +15,12 @@ export interface FavoriteOverwrite {
 
 export class FavoritesCollection {
   private readonly list = new IdentifiedList<ArenaFavorite>();
-  private readonly arena = new FavoritesColumnarArena();
+  private readonly arena: FavoritesColumnarArena;
   private readonly hydratedFavorites = new Emitter<Favorite>();
+
+  constructor(stringInterner: StringInterner) {
+    this.arena = new FavoritesColumnarArena(stringInterner);
+  }
 
   public get hydrated(): Occurrence<Favorite> {
     return this.hydratedFavorites;

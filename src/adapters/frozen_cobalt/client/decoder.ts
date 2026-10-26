@@ -1,9 +1,10 @@
-import { CategorizedPost, Rating } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Rating } from "@/core/domain/post/rating";
 import { FrozenCobaltPost, FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/client/schema";
-import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag_category/tag_category";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 import { Media } from "@/core/domain/media/media";
-import { decodeHtmlEntities } from "@/core/utils/string/string";
+import { decodeHtmlEntities } from "@/core/utils/string/string_utilities";
 
 const TAG_CATEGORY_BY_CODE: Record<NonNullable<FrozenCobaltTagCategoryCode>, TagCategory> = {
   0: "general",

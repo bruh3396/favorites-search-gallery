@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { MediaKind } from "@/core/domain/media/media";
+import { MediaKind } from "@/core/domain/media/media_kind";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/extension_prober";
 import { advanceAndSettle } from "@/testing/async";

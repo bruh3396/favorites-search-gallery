@@ -7,7 +7,7 @@ import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen/fullscre
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
 import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 
 export interface LightboxCommandTargets<T extends MediaItem> {
   readonly navigation: Pick<LightboxNavigation<T>, "currentItem" | "goToNext" | "goToPrevious">;

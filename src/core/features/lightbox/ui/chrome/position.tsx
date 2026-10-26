@@ -1,5 +1,5 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
-import { SequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
 import { h } from "@/core/ui/h/h";
 
 export const LightboxPositionClass = {
@@ -7,14 +7,14 @@ export const LightboxPositionClass = {
 } as const;
 
 export interface LightboxPositionProps {
-  position: Readable<SequencePosition | undefined>;
+  position: Readable<MediaSequencePosition | undefined>;
 }
 
 export function LightboxPosition({ position }: LightboxPositionProps): HTMLElement {
   return <span className={LightboxPositionClass.root}>{computed(() => formatPosition(position.value))}</span> as HTMLElement;
 }
 
-function formatPosition(position: SequencePosition | undefined): string {
+function formatPosition(position: MediaSequencePosition | undefined): string {
   if (position === undefined) {
     return "";
   }

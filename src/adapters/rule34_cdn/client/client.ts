@@ -1,4 +1,5 @@
-import { Media, MediaKind } from "@/core/domain/media/media";
+import { Media } from "@/core/domain/media/media";
+import { MediaKind } from "@/core/domain/media/media_kind";
 import { Rule34CdnFileExtension, kindOf } from "@/adapters/rule34_cdn/client/extension";
 import { Rule34CdnImageDecoder, Rule34CdnImageDecoderDependencies } from "@/adapters/rule34_cdn/client/image_decoder";
 import { fileUrl, previewUrl, wimgUrl } from "@/adapters/rule34_cdn/client/addresses";

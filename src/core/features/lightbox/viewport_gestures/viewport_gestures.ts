@@ -1,6 +1,7 @@
 import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
 import { Point } from "@/core/utils/geometry/point";
-import { LightboxZoom, ZoomRect } from "@/core/features/lightbox/zoom/zoom";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
+import { Rect } from "@/core/utils/geometry/rect";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
 import { Readable } from "@/core/utils/reactive/signal";
 
@@ -68,6 +69,6 @@ export function createLightboxViewportGestureHandlers(
   };
 }
 
-function containsPoint(rect: ZoomRect | undefined, point: Point): boolean {
+function containsPoint(rect: Rect | undefined, point: Point): boolean {
   return rect !== undefined && point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }

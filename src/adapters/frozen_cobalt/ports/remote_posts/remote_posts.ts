@@ -1,4 +1,5 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Post } from "@/core/domain/post/post";
 import { FrozenCobaltError, isRetryable } from "@/adapters/frozen_cobalt/client/error";
 import { FrozenCobaltMintMedia, decodePost } from "@/adapters/frozen_cobalt/client/decoder";
 import { PostUnavailableError, RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
@@ -6,7 +7,7 @@ import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Retry } from "@/core/utils/async/retry";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { assertNever } from "@/core/utils/guards/guards";
+import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
 export interface FrozenCobaltRemotePostsDependencies {
   frozenCobalt: Pick<FrozenCobaltClient, "fetchPost">;
@@ -51,7 +52,7 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
       case "error":
         throw new FrozenCobaltError("server_error", { subject: id });
       default:
-        return assertNever(result);
+        throw new UnreachableError(result);
     }
   }
 }

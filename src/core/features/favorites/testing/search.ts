@@ -1,7 +1,8 @@
 import { FavoritesSearchRequest, FavoritesSearchSettings } from "@/core/features/favorites/search/input";
-import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
+import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface SearchRequestOverrides extends Partial<FavoritesSearchRequest> {
   query?: string;
@@ -34,7 +35,7 @@ export function createSearchRequest({ query = "", ...overrides }: SearchRequestO
 }
 
 export function createSearchIndex(): FavoritesSearchIndex {
-  return new FavoritesSearchIndex();
+  return new FavoritesSearchIndex(new StringInterner());
 }
 
 export function searchIds(index: FavoritesSearchIndex, query = ""): string[] {

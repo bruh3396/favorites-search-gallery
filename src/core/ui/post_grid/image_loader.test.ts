@@ -5,7 +5,7 @@ import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Signal } from "@/core/utils/reactive/signal";
-import { doNothing } from "@/core/utils/function/function";
+import { doNothing } from "@/core/utils/function/function_utilities";
 import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };

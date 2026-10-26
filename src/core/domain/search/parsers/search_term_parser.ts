@@ -1,14 +1,16 @@
-import { AbstractSearchTerm, ParsedTerm } from "@/core/domain/search/terms/abstract_search_term";
-import { WildcardMatchType, WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
+import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
+import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
+import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { metricComparisonRegex, parseMetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { ExactSearchTerm } from "@/core/domain/search/terms/exact_search_term";
 import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
-import { escapeParentheses } from "@/core/utils/string/string";
+import { escapeParentheses } from "@/core/utils/string/string_utilities";
 
 const unmatchableRegex = /^\b$/;
 
-export function parseSearchTerm(term: string): AbstractSearchTerm {
+export function parseSearchTerm(term: string): SearchTerm {
   if (isNumericTerm(term)) {
     return parseNumericSearchTerm(term);
   }

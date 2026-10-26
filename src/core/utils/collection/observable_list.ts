@@ -1,6 +1,6 @@
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { doNothing } from "@/core/utils/function/function";
-import { shuffleInPlace as shuffleArray } from "@/core/utils/collection/array";
+import { doNothing } from "@/core/utils/function/function_utilities";
+import { shuffleInPlace as shuffleArray } from "@/core/utils/random/random_utilities";
 
 export class ObservableList<T> {
   private readonly onChanged: (items: T[]) => void;

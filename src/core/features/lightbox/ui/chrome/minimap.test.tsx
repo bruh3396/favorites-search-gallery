@@ -1,5 +1,5 @@
 import { LightboxMinimap, LightboxMinimapClass } from "@/core/features/lightbox/ui/chrome/minimap";
-import { ZoomRect, ZoomRegion } from "@/core/features/lightbox/zoom/zoom";
+import { Rect } from "@/core/utils/geometry/rect";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import MINIMAP_CSS from "@/core/features/lightbox/ui/chrome/minimap.css?inline";
@@ -12,14 +12,14 @@ function setup(): {
   root: HTMLElement;
   marker: HTMLElement;
   previewUrl: Signal<string | undefined>;
-  visibleRegion: Signal<ZoomRegion | undefined>;
-  mediaRect: Signal<ZoomRect | undefined>;
+  visibleRegion: Signal<Rect | undefined>;
+  mediaRect: Signal<Rect | undefined>;
   panBy: ReturnType<typeof vi.fn>;
   centerAt: ReturnType<typeof vi.fn>;
 } {
   const previewUrl = new Signal<string | undefined>("https://example.com/thumb.jpg");
-  const visibleRegion = new Signal<ZoomRegion | undefined>({ x: 0.25, y: 0.5, width: 0.5, height: 0.25 });
-  const mediaRect = new Signal<ZoomRect | undefined>({ x: 0, y: 0, width: 1_000, height: 500 });
+  const visibleRegion = new Signal<Rect | undefined>({ x: 0.25, y: 0.5, width: 0.5, height: 0.25 });
+  const mediaRect = new Signal<Rect | undefined>({ x: 0, y: 0, width: 1_000, height: 500 });
   const panBy = vi.fn();
   const centerAt = vi.fn();
   const { result: root } = render(document, () => <LightboxMinimap previewUrl={previewUrl} zoom={{ visibleRegion, mediaRect, panBy, centerAt }} />);

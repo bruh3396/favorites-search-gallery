@@ -8,7 +8,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
-import { isRecord } from "@/core/utils/guards/guards";
+import { isRecord } from "@/core/utils/guard/guard";
 
 export interface FavoritesWorkspaceConfiguration {
   readonly favoritesOwnerId: string;

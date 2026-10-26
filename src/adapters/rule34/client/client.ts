@@ -1,4 +1,5 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Post } from "@/core/domain/post/post";
 import { Rule34Fetch, request } from "@/adapters/rule34/client/request";
 import { Rule34PostListPage, parsePostListPage, postListPageUrl, postListUrlFromQuery } from "@/adapters/rule34/client/post_list_page";
 import { favoritesPageOffset, favoritesPageUrl, parseFavoritesPage } from "@/adapters/rule34/client/favorites_page";

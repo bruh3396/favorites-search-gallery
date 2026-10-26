@@ -1,13 +1,19 @@
-import { Metric, Post } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
+import { Post } from "@/core/domain/post/post";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/post_table";
 import { Media } from "@/core/domain/media/media";
-import { TagPool } from "@/core/utils/collection/tag_pool";
+import { StringInterner } from "@/core/utils/string/string_interner";
+import { TagPool } from "@/core/features/favorites/collection/tag_pool";
 
 export class FavoritesColumnarArena {
   private count = 0;
   private readonly postTable = new FavoritesPostTable();
-  private readonly tagPool = new TagPool();
+  private readonly tagPool: TagPool;
   private readonly newSlots = new Set<number>();
+
+  constructor(stringInterner: StringInterner) {
+    this.tagPool = new TagPool(stringInterner);
+  }
 
   public allocate(): number {
     const slot = this.count;

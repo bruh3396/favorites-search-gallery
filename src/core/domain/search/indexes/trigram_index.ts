@@ -1,13 +1,13 @@
-import { compareStrings, computeTrigrams } from "@/core/utils/string/string";
-import { findFirstIndexWhere, intersectSorted } from "@/core/utils/collection/array";
+import { compareStrings, computeTrigrams } from "@/core/utils/string/string_utilities";
+import { findFirstIndexWhere, intersectSorted } from "@/core/utils/collection/array_utilities";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
-import { internString } from "@/core/utils/string/interner";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 export class TrigramIndex {
   private readonly terms: SortedArray<string>;
   private readonly termsByTrigram: Map<string, string[]> = new Map<string, string[]>();
 
-  constructor(terms: SortedArray<string>) {
+  constructor(terms: SortedArray<string>, private readonly stringInterner: StringInterner) {
     this.terms = terms;
 
     for (const term of terms.toArray()) {
@@ -25,10 +25,10 @@ export class TrigramIndex {
   }
 
   public add(term: string): void {
-    const shared = internString(term);
+    const shared = this.stringInterner.intern(term);
 
     for (const trigram of computeTrigrams(shared)) {
-      const key = internString(trigram);
+      const key = this.stringInterner.intern(trigram);
       const bucket = this.termsByTrigram.get(key);
 
       if (bucket === undefined) {

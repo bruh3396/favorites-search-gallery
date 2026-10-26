@@ -9,10 +9,10 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { LightboxButton } from "@/core/features/lightbox/ui/chrome/button";
 import { LightboxDetailsContent } from "@/core/features/lightbox/details/details";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
-import { TagCategoryMap } from "@/core/domain/tag/tag";
+import { TagCategoryMap } from "@/core/domain/tag_category/tag_category";
 import { h } from "@/core/ui/h/h";
 
 export const FavoriteLightboxDetailsClass = {

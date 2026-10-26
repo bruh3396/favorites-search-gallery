@@ -1,10 +1,12 @@
-import { Post, getRatingBit } from "@/core/domain/post/post";
+import { Post } from "@/core/domain/post/post";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { createSearchRequest } from "@/core/features/favorites/testing/search";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
   collection: FavoritesCollection;
@@ -13,9 +15,9 @@ interface Setup {
 }
 
 function setup(posts: Post[] = []): Setup {
-  const collection = new FavoritesCollection();
+  const collection = new FavoritesCollection(new StringInterner());
   const favorites = collection.append(posts);
-  const index = new FavoritesSearchIndex();
+  const index = new FavoritesSearchIndex(new StringInterner());
 
   index.rebuild(favorites);
   return { collection, favorites, index };
@@ -101,7 +103,7 @@ describe("FavoritesSearchIndex", () => {
 
   describe("populated", () => {
     test("stays unreached while no favorite has been indexed", () => {
-      const index = new FavoritesSearchIndex();
+      const index = new FavoritesSearchIndex(new StringInterner());
 
       index.add([]);
       index.rebuild([]);
@@ -109,8 +111,8 @@ describe("FavoritesSearchIndex", () => {
     });
 
     test("reaches once favorites are first added", () => {
-      const index = new FavoritesSearchIndex();
-      const collection = new FavoritesCollection();
+      const index = new FavoritesSearchIndex(new StringInterner());
+      const collection = new FavoritesCollection(new StringInterner());
 
       index.add(collection.append([createPost({ id: "1" })]));
       index.add(collection.append([createPost({ id: "2" })]));
@@ -118,9 +120,9 @@ describe("FavoritesSearchIndex", () => {
     });
 
     test("reaches once rebuilt from favorites", () => {
-      const index = new FavoritesSearchIndex();
+      const index = new FavoritesSearchIndex(new StringInterner());
 
-      index.rebuild(new FavoritesCollection().append(createTaggedPosts("apple")));
+      index.rebuild(new FavoritesCollection(new StringInterner()).append(createTaggedPosts("apple")));
       expect(index.populated.reached).toBe(true);
     });
   });
@@ -135,7 +137,7 @@ describe("FavoritesSearchIndex", () => {
     test("keeps only favorites whose rating is allowed", () => {
       const { index } = setup([createPost({ id: "1", rating: "safe" }), createPost({ id: "2", rating: "explicit" })]);
 
-      expect(getIds(index.search(createSearchRequest({ allowedRatings: getRatingBit("safe") })))).toEqual(["1"]);
+      expect(getIds(index.search(createSearchRequest({ allowedRatings: toRatingMask("safe") })))).toEqual(["1"]);
     });
 
     test("returns nothing without an expression", () => {
@@ -220,7 +222,7 @@ describe("FavoritesSearchIndex", () => {
     test("keeps only candidates whose rating is allowed", () => {
       const { favorites, index } = setup([createPost({ id: "1", rating: "safe" }), createPost({ id: "2", rating: "explicit" })]);
 
-      expect(getIds(index.match(createSearchRequest({ allowedRatings: getRatingBit("safe") }), favorites))).toEqual(["1"]);
+      expect(getIds(index.match(createSearchRequest({ allowedRatings: toRatingMask("safe") }), favorites))).toEqual(["1"]);
     });
 
     test("keeps the indexed order regardless of the sort order", () => {

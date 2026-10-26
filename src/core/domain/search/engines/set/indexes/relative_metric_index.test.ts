@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
 

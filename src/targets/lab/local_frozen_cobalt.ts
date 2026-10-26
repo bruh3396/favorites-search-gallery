@@ -1,5 +1,5 @@
 import { FrozenCobaltPost, isPost } from "@/adapters/frozen_cobalt/client/schema";
-import { isRecord } from "@/core/utils/guards/guards";
+import { isRecord } from "@/core/utils/guard/guard";
 
 export interface CachePage {
   readonly posts: readonly FrozenCobaltPost[];

@@ -1,5 +1,6 @@
-import { METRICS, Metric } from "@/core/domain/post/post";
-import { SearchEngine, TermUpdate } from "@/core/domain/search/engines/search_engine";
+import { METRICS } from "@/core/domain/post/metric";
+import { SearchEngine, SearchEngineDependencies } from "@/core/domain/search/engines/search_engine";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -17,12 +18,12 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardDocResolver<Doc>;
   private readonly setEvaluator: SetEvaluator<Doc>;
 
-  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: readonly Doc[] = []) {
+  constructor({ getTerms, getMetric, stringInterner }: SearchEngineDependencies<Doc>, docs: readonly Doc[] = []) {
     this.termIndex = new InvertedIndex<Doc>(getTerms);
     this.metricIndex = new MetricIndex<Doc>([...METRICS], getMetric);
     this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], getMetric);
     this.positionIndex = new PositionIndex<Doc>();
-    this.wildcardResolver = new WildcardDocResolver<Doc>(this.termIndex);
+    this.wildcardResolver = new WildcardDocResolver<Doc>({ termIndex: this.termIndex, stringInterner });
     this.setEvaluator = new SetEvaluator<Doc>(
       this.termIndex,
       new DocResolver<Doc>({

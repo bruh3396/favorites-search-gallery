@@ -1,6 +1,6 @@
 import { IndexedDbClient, IndexedDbStoreName } from "@/adapters/browser/indexed_db/client";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 const STORE_NAME: IndexedDbStoreName = "tagCategories";
 

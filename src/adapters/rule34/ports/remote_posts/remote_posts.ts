@@ -1,4 +1,5 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Post } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Retry } from "@/core/utils/async/retry";

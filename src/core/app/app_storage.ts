@@ -1,6 +1,6 @@
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
-import { PreferenceStorage } from "@/core/utils/reactive/preference";
+import { PreferenceStorage } from "@/core/utils/preference/preference_storage";
 
 const APP_NAMESPACE = "favorites-search-gallery";
 const PREFERENCES_NAMESPACE = "preferences";

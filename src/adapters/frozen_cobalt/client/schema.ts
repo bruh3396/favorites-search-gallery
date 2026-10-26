@@ -1,4 +1,4 @@
-import { isOneOf, isRecord } from "@/core/utils/guards/guards";
+import { isOneOf, isRecord } from "@/core/utils/guard/guard";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
 
 const TAG_CATEGORY_CODES = [0, 1, 2, 3, 4, 5, null] as const;

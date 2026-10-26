@@ -1,5 +1,5 @@
 import { Child, h } from "@/core/ui/h/h";
-import { Occurrence } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Readable } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { onCleanup } from "@/core/utils/reactive/scope";

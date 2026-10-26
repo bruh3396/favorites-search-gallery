@@ -6,7 +6,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { StoredPreference } from "@/core/utils/reactive/preference";
+import { StoredPreference } from "@/core/utils/preference/stored_preference";
 import { createLightboxView } from "@/core/features/lightbox/view/view";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";

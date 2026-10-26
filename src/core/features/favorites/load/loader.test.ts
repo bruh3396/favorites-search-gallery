@@ -18,6 +18,7 @@ import { Post } from "@/core/domain/post/post";
 import { effect } from "@/core/utils/reactive/signal";
 import { flushMicrotasks } from "@/testing/async";
 import { hasMedia } from "@/core/domain/media/media";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
 
@@ -34,7 +35,7 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
   remoteFavorites: MemoryRemoteFavorites;
   scheduler: MemoryScheduler;
 }> {
-  const collection = new FavoritesCollection();
+  const collection = new FavoritesCollection(new StringInterner());
   const index = createSearchIndex();
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();

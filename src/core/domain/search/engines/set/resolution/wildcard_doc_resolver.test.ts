@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Doc {
   id: string;
@@ -32,7 +33,7 @@ function setup(docs: Doc[] = corpus): Harness {
 
   termIndex.addDocs(docs);
   const unionSpy = vi.spyOn(termIndex, "docsForTerm");
-  const resolver = new WildcardDocResolver(termIndex);
+  const resolver = new WildcardDocResolver({ termIndex: termIndex, stringInterner: new StringInterner() });
 
   resolver.index(termIndex.indexedTerms());
   unionSpy.mockClear();

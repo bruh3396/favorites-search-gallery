@@ -1,26 +1,11 @@
-import { AbstractSearchTerm, ParsedTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
+import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
 import { Searchable } from "@/core/domain/search/searchable";
+import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
+import { WildcardPattern } from "@/core/domain/search/terms/wildcard_pattern";
+import { WildcardResolutionInputs } from "@/core/domain/search/terms/wildcard_resolution_inputs";
 
-export enum WildcardMatchType {
-  Prefix = 10,
-  Suffix = 15,
-  Substring = 20,
-  MultiStar = 25
-}
-
-export interface WildcardResolutionInputs {
-  readonly matchType: WildcardMatchType;
-  readonly fragment: string;
-  readonly fragments: string[];
-  readonly regex: RegExp;
-}
-
-export interface WildcardPattern {
-  readonly matchType: WildcardMatchType;
-  readonly regex: RegExp;
-}
-
-export class WildcardSearchTerm extends AbstractSearchTerm {
+export class WildcardSearchTerm extends SearchTerm {
   public readonly matchType: WildcardMatchType;
   protected override readonly baseCost: number;
   private readonly regex: RegExp;

@@ -1,8 +1,8 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
-import { Occurrence } from "@/core/utils/reactive/emitter";
-import { haveSameItems } from "@/core/utils/collection/array";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { haveSameItems } from "@/core/utils/collection/array_utilities";
 
 export interface LightboxRetentionListConfiguration {
   readonly capacity: number;

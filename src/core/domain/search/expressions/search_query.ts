@@ -1,10 +1,10 @@
-import { AbstractSearchTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { Searchable } from "@/core/domain/search/searchable";
 
 export class SearchQuery<Doc> {
   constructor(
-    public readonly andTerms: AbstractSearchTerm[] = [],
-    public readonly orGroups: AbstractSearchTerm[][] = []
+    public readonly andTerms: SearchTerm[] = [],
+    public readonly orGroups: SearchTerm[][] = []
   ) { }
 
   public filter(items: (Doc & Searchable)[]): Doc[] {

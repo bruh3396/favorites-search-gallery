@@ -1,7 +1,10 @@
-import { MEDIA_KINDS, Media } from "@/core/domain/media/media";
-import { Metric, Post, RATINGS, Rating } from "@/core/domain/post/post";
-import { assertNever } from "@/core/utils/guards/guards";
-import { grow } from "@/core/utils/collection/array";
+import { MEDIA_KINDS } from "@/core/domain/media/media_kind";
+import { Media } from "@/core/domain/media/media";
+import { Metric } from "@/core/domain/post/metric";
+import { Post } from "@/core/domain/post/post";
+import { RATINGS, Rating } from "@/core/domain/post/rating";
+import { UnreachableError } from "@/core/utils/error/unreachable_error";
+import { grow } from "@/core/utils/collection/array_utilities";
 
 const INITIAL_CAPACITY = 1_024;
 
@@ -44,7 +47,7 @@ export class FavoritesPostTable {
       case "duration":
         return this.durationSeconds[slot];
       default:
-        return assertNever(metric);
+        throw new UnreachableError(metric);
     }
   }
 

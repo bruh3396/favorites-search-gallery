@@ -1,4 +1,4 @@
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 
 export interface LightboxActions {
   openPostPage(item: MediaItem): void;

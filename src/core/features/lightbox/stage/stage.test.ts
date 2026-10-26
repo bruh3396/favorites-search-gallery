@@ -4,7 +4,7 @@ import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";

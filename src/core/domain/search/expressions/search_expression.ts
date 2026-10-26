@@ -1,13 +1,13 @@
-import { AbstractSearchTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 
 type SearchExpressionNode =
-  | { readonly kind: "term"; readonly term: AbstractSearchTerm }
+  | { readonly kind: "term"; readonly term: SearchTerm }
   | { readonly kind: "and"; readonly children: SearchExpression[] }
   | { readonly kind: "or"; readonly children: SearchExpression[] }
   | { readonly kind: "not"; readonly child: SearchExpression };
 
 export class SearchExpression {
-  public static term(term: AbstractSearchTerm): SearchExpression {
+  public static term(term: SearchTerm): SearchExpression {
     return new SearchExpression({ kind: "term", term });
   }
 

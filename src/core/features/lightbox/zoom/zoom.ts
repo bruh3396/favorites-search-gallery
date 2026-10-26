@@ -1,5 +1,8 @@
 import { Readable, Signal, batch, computed, effect } from "@/core/utils/reactive/signal";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
+import { Point } from "@/core/utils/geometry/point";
+import { Rect } from "@/core/utils/geometry/rect";
+import { Size } from "@/core/utils/geometry/size";
 
 export interface LightboxZoomConfiguration {
   readonly minimumScale: number;
@@ -8,27 +11,13 @@ export interface LightboxZoomConfiguration {
 
 export interface LightboxZoomDependencies {
   currentItem: Readable<MediaItem | undefined>;
-  mediaSize: Readable<ZoomSize | undefined>;
+  mediaSize: Readable<Size | undefined>;
   enabled: Readable<boolean>;
 }
 
-export interface ZoomSize {
-  readonly width: number;
-  readonly height: number;
-}
-
-export interface ZoomPoint {
-  readonly x: number;
-  readonly y: number;
-}
-
-export interface ZoomView extends ZoomPoint {
+export interface ZoomView extends Point {
   readonly scale: number;
 }
-
-export interface ZoomRect extends ZoomPoint, ZoomSize {}
-
-export interface ZoomRegion extends ZoomPoint, ZoomSize {}
 
 interface Zoomed {
   readonly view: ZoomView;
@@ -37,7 +26,7 @@ interface Zoomed {
 
 interface ZoomTarget {
   readonly scale: number;
-  readonly point: ZoomPoint;
+  readonly point: Point;
 }
 
 interface Frame {
@@ -55,14 +44,14 @@ export class LightboxZoom {
   public readonly isZoomed: Readable<boolean>;
   public readonly canZoom: Readable<boolean>;
   public readonly pixelScale: Readable<number | undefined>;
-  public readonly visibleRegion: Readable<ZoomRegion | undefined>;
-  public readonly mediaRect: Readable<ZoomRect | undefined>;
+  public readonly visibleRegion: Readable<Rect | undefined>;
+  public readonly mediaRect: Readable<Rect | undefined>;
   private readonly zoomed = new Signal<Zoomed | undefined>(undefined);
-  private readonly frameSize = new Signal<ZoomSize>({ width: 0, height: 0 });
+  private readonly frameSize = new Signal<Size>({ width: 0, height: 0 });
   private readonly frame: Readable<Frame | undefined>;
   private readonly minimumScale: number;
   private readonly maximumScale: number;
-  private focusPoint: ZoomPoint | undefined;
+  private focusPoint: Point | undefined;
 
   constructor(configuration: LightboxZoomConfiguration, dependencies: LightboxZoomDependencies) {
     this.minimumScale = configuration.minimumScale;
@@ -94,7 +83,7 @@ export class LightboxZoom {
     });
   }
 
-  public setFrameSize(size: ZoomSize): void {
+  public setFrameSize(size: Size): void {
     batch(() => {
       this.frameSize.value = size;
       const zoomed = this.zoomed.peek();
@@ -107,11 +96,11 @@ export class LightboxZoom {
     });
   }
 
-  public setFocusPoint(point: ZoomPoint | undefined): void {
+  public setFocusPoint(point: Point | undefined): void {
     this.focusPoint = point;
   }
 
-  public toggle(point?: ZoomPoint): void {
+  public toggle(point?: Point): void {
     const frame = this.frame.peek();
 
     if (this.zoomed.peek() !== undefined) {
@@ -123,7 +112,7 @@ export class LightboxZoom {
     }
   }
 
-  public zoomBy(factor: number, point: ZoomPoint): void {
+  public zoomBy(factor: number, point: Point): void {
     const frame = this.frame.peek();
 
     if (frame === undefined) {
@@ -146,7 +135,7 @@ export class LightboxZoom {
     }
   }
 
-  public centerAt(fraction: ZoomPoint): void {
+  public centerAt(fraction: Point): void {
     const zoomed = this.zoomed.peek();
     const frame = this.frame.peek();
 
@@ -165,14 +154,14 @@ export class LightboxZoom {
   }
 }
 
-function createFrame(size: ZoomSize, mediaSize: ZoomSize | undefined): Frame | undefined {
+function createFrame(size: Size, mediaSize: Size | undefined): Frame | undefined {
   if (mediaSize === undefined || Math.min(size.width, size.height, mediaSize.width, mediaSize.height) <= 0) {
     return undefined;
   }
   return { width: size.width, height: size.height, mediaWidth: mediaSize.width, mediaHeight: mediaSize.height };
 }
 
-function computeCenter(frame: Frame): ZoomPoint {
+function computeCenter(frame: Frame): Point {
   return { x: frame.width / 2, y: frame.height / 2 };
 }
 
@@ -186,14 +175,14 @@ function zoomAt(frame: Frame, view: ZoomView, { scale, point }: ZoomTarget): Zoo
   return clampView(frame, { scale, x: point.x - (localX * scale), y: point.y - (localY * scale) });
 }
 
-function computeFittedRect(frame: Frame): ZoomRect {
+function computeFittedRect(frame: Frame): Rect {
   const ratio = computeFitRatio(frame);
   const width = frame.mediaWidth * ratio;
   const height = frame.mediaHeight * ratio;
   return { x: (frame.width - width) / 2, y: (frame.height - height) / 2, width, height };
 }
 
-function computeMediaRect(frame: Frame, view: ZoomView): ZoomRect {
+function computeMediaRect(frame: Frame, view: ZoomView): Rect {
   const media = computeFittedRect(frame);
   return {
     x: (media.x * view.scale) + view.x,
@@ -203,7 +192,7 @@ function computeMediaRect(frame: Frame, view: ZoomView): ZoomRect {
   };
 }
 
-function computeVisibleRegion(frame: Frame, view: ZoomView): ZoomRegion {
+function computeVisibleRegion(frame: Frame, view: ZoomView): Rect {
   const media = computeFittedRect(frame);
   const left = clampFraction(((-view.x / view.scale) - media.x) / media.width);
   const top = clampFraction(((-view.y / view.scale) - media.y) / media.height);

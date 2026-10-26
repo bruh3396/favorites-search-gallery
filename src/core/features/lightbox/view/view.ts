@@ -13,8 +13,8 @@ import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigati
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/overlay_visibility";
 import { LightboxStage } from "@/core/features/lightbox/stage/stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
-import { MediaItem } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/reactive/preference";
+import { MediaItem } from "@/core/domain/media/media_item";
+import { Preference } from "@/core/utils/preference/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";

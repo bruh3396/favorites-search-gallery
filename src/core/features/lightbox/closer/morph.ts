@@ -1,15 +1,10 @@
+import { Size } from "@/core/utils/geometry/size";
+
 export type MorphSource = Readonly<HTMLImageElement | HTMLCanvasElement | HTMLVideoElement>;
 
-interface Box {
+interface Box extends Size {
   readonly left: number;
   readonly top: number;
-  readonly width: number;
-  readonly height: number;
-}
-
-interface Size {
-  readonly width: number;
-  readonly height: number;
 }
 
 interface Frame {

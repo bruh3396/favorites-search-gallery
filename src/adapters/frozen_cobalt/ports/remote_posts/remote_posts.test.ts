@@ -1,4 +1,5 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Post } from "@/core/domain/post/post";
 import { FrozenCobaltPost, FrozenCobaltPostResult } from "@/adapters/frozen_cobalt/client/schema";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";

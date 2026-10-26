@@ -1,4 +1,5 @@
-import { AbstractSearchTerm, ParsedTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
+import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
 import { MetricComparator, MetricSearchable } from "@/core/domain/search/searchable";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 
@@ -10,7 +11,7 @@ export const comparators: Record<MetricComparator, Comparator> = {
   ":>": (a, b) => a > b
 };
 
-export class MetricSearchTerm extends AbstractSearchTerm {
+export class MetricSearchTerm extends SearchTerm {
   public readonly comparison: MetricComparison;
   protected override readonly baseCost: number = 0;
   private compare: Comparator;

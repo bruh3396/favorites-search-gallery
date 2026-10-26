@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { CategorizedPost } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Media } from "@/core/domain/media/media";
 import { Rule34Error } from "@/adapters/rule34/client/error";
 import { parsePostPage } from "@/adapters/rule34/client/post_page";

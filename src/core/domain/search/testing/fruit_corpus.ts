@@ -1,7 +1,7 @@
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
-import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
 import { MetricSearchable } from "@/core/domain/search/searchable";
-import { createSearchable } from "@/core/domain/search/testing/searchable";
+import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
 
 export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
 export type Fruit = MetricSearchable & { name: FruitName };
@@ -15,7 +15,7 @@ export const fruits = new Set([
   "pear", "persimmon", "pineapple", "plum", "pomegranate",
   "raspberry", "starfruit", "strawberry", "tangerine", "watermelon"
 ].sort());
-export const searchableFruitDoc = createSearchable([...fruits]);
+export const searchableFruitDoc = buildSearchable([...fruits]);
 
 function fruit(name: FruitName, tags: string[], metrics: Partial<Record<Metric, number>>): Fruit {
   return {

@@ -1,4 +1,4 @@
-import { removeExtraWhitespace, removeNonNumericCharacters } from "@/core/utils/string/string";
+import { removeExtraWhitespace, removeNonNumericCharacters } from "@/core/utils/string/string_utilities";
 import { NO_MEDIA } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";

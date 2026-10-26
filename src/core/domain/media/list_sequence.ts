@@ -1,6 +1,6 @@
-import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
-import { getItemsAround, getWrappedItemsAround } from "@/core/utils/collection/array";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaSequence, MediaSequencePosition } from "@/core/domain/media/media_sequence";
+import { getItemsAround, getWrappedItemsAround } from "@/core/utils/collection/array_utilities";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface ListSequenceConfiguration {
@@ -25,7 +25,7 @@ export class ListSequence<T extends MediaItem> implements MediaSequence<T> {
     return Promise.resolve(getAround.slice(1));
   }
 
-  public positionOf(item: T): SequencePosition | undefined {
+  public positionOf(item: T): MediaSequencePosition | undefined {
     const items = this.list.value;
     const index = items.indexOf(item);
     return index === -1 ? undefined : { index, total: items.length };

@@ -1,7 +1,13 @@
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
+import { Metric } from "@/core/domain/post/metric";
+import { StringInterner } from "@/core/utils/string/string_interner";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 
-export type TermUpdate<Doc> = { readonly doc: Doc; readonly oldTerms: ReadonlySet<string>; readonly newTerms: ReadonlySet<string> };
-export type TermDelta = { readonly added: readonly string[]; readonly removed: readonly string[] };
+export interface SearchEngineDependencies<Doc> {
+  getTerms: (doc: Doc) => Iterable<string>;
+  getMetric: (doc: Doc, metric: Metric) => number;
+  stringInterner: StringInterner;
+}
 
 export interface SearchEngine<Doc> {
   search(expression: SearchExpression, candidates?: readonly Doc[]): readonly Doc[];

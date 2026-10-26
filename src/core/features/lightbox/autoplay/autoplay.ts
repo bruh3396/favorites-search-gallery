@@ -1,6 +1,6 @@
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { onCleanup } from "@/core/utils/reactive/scope";
 

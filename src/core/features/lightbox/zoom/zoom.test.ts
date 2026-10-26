@@ -1,4 +1,5 @@
-import { FIT_VIEW, LightboxZoom, ZoomSize, ZoomView } from "@/core/features/lightbox/zoom/zoom";
+import { FIT_VIEW, LightboxZoom, ZoomView } from "@/core/features/lightbox/zoom/zoom";
+import { Size } from "@/core/utils/geometry/size";
 import { describe, expect, test } from "vitest";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
@@ -8,14 +9,14 @@ const POSTS = createPosts("1", "2");
 const FRAME = { width: 800, height: 600 };
 const SQUARE_MEDIA = { width: 400, height: 400 };
 
-function setup(mediaSize: ZoomSize | undefined): {
+function setup(mediaSize: Size | undefined): {
   zoom: LightboxZoom;
   currentItem: Signal<Post | undefined>;
-  media: Signal<ZoomSize | undefined>;
+  media: Signal<Size | undefined>;
   enabled: Signal<boolean>;
 } {
   const currentItem = new Signal<Post | undefined>(POSTS[0]);
-  const media = new Signal<ZoomSize | undefined>(mediaSize);
+  const media = new Signal<Size | undefined>(mediaSize);
   const enabled = new Signal(true);
   const zoom = new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: media, enabled });
 

@@ -1,6 +1,6 @@
-import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
-import { findFirstIndexWhere } from "@/core/utils/collection/array";
+import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";
 
 type AbsoluteComparison = Pick<MetricComparison, "metric" | "operator" | "value">;
 

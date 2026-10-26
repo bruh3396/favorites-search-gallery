@@ -20,8 +20,8 @@ import { LightboxVideo } from "@/core/features/lightbox/ui/media/video";
 import { LightboxViewport } from "@/core/features/lightbox/ui/media/viewport";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
 import { LightboxZoomChip } from "@/core/features/lightbox/ui/chrome/zoom_chip";
-import { MediaItem } from "@/core/domain/post/post";
-import { SequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaItem } from "@/core/domain/media/media_item";
+import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { findLightboxShortcut } from "@/core/features/lightbox/input/shortcut";
 import { h } from "@/core/ui/h/h";
@@ -32,7 +32,7 @@ export const LightboxDialogClass = {
 
 export interface LightboxDialogProps<T extends MediaItem> {
   isOpen: Readable<boolean>;
-  position: Readable<SequencePosition | undefined>;
+  position: Readable<MediaSequencePosition | undefined>;
   currentItem: Readable<T | undefined>;
   details?: LightboxDetails<T>;
   simple: Readable<boolean>;

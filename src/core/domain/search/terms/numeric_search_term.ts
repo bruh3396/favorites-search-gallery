@@ -1,8 +1,9 @@
-import { AbstractSearchTerm, ParsedTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
+import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { MetricSearchable } from "@/core/domain/search/searchable";
 
-export class NumericSearchTerm extends AbstractSearchTerm {
+export class NumericSearchTerm extends SearchTerm {
   public readonly idComparison: MetricComparison;
   protected override readonly baseCost: number = 0;
 

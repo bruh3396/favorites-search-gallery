@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { searchableEmptyDoc } from "@/core/domain/search/testing/searchable";
+import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
 import { searchableFruitDoc } from "@/core/domain/search/testing/fruit_corpus";
 
 const positiveCases = [
@@ -57,10 +57,10 @@ describe("ExactSearchTerm", () => {
   });
 
   test.each(invalidCases)("rejects the invalid term '%s'", (term, expected) => {
-    expect(parseExactSearchTerm(term).matches(searchableEmptyDoc)).toBe(expected);
+    expect(parseExactSearchTerm(term).matches(buildSearchable([]))).toBe(expected);
   });
 
   test("matches a doc with no tags when negated", () => {
-    expect(parseExactSearchTerm("-banana").matches(searchableEmptyDoc)).toBe(true);
+    expect(parseExactSearchTerm("-banana").matches(buildSearchable([]))).toBe(true);
   });
 });

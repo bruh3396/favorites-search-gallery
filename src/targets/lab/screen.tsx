@@ -4,7 +4,7 @@ import { exportCorpus, importCorpus, pickCorpusFile, pullCorpus, requestReset, s
 import { exportRealDatabases, importRealDatabases, requestPurge } from "@/targets/lab/real_data";
 import { h, render } from "@/core/ui/h/h";
 import { ColorScheme } from "@/core/boundary/environment";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { SettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { Switch } from "@/core/ui/components/switch/switch";
 import { mountLabRoot } from "@/targets/lab/root";

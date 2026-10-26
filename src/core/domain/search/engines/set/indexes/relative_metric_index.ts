@@ -1,4 +1,4 @@
-import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 
 const EMPTY: ReadonlySet<never> = new Set<never>();

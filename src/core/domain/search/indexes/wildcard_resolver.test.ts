@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { WildcardResolver } from "@/core/domain/search/indexes/wildcard_resolver";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 const TERMS = ["banana", "bandana", "cabana", "canvas", "brand"];
 
@@ -9,7 +10,7 @@ class ListResolver extends WildcardResolver<string[]> {
 }
 
 function createResolver(terms: string[] = TERMS): ListResolver {
-  const r = new ListResolver();
+  const r = new ListResolver(new StringInterner());
 
   r.index(terms);
   return r;

@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
-import { randomInt } from "@/core/utils/number/number";
+import { randomInt } from "@/core/utils/random/random_utilities";
 
 interface Item {
   id: number;

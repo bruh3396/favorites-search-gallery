@@ -1,4 +1,5 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Post } from "@/core/domain/post/post";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/remote_posts";

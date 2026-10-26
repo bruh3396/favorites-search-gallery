@@ -13,7 +13,7 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_m
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";

@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
 import { SearchQuery } from "@/core/domain/search/expressions/search_query";
 import { Searchable } from "@/core/domain/search/searchable";
-import { createSearchable } from "@/core/domain/search/testing/searchable";
+import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
-const apple = createSearchable(["red", "fruit", "sweet"]);
-const cherry = createSearchable(["red", "fruit"]);
-const lemon = createSearchable(["yellow", "fruit", "sour"]);
+const apple = buildSearchable(["red", "fruit", "sweet"]);
+const cherry = buildSearchable(["red", "fruit"]);
+const lemon = buildSearchable(["yellow", "fruit", "sour"]);
 const corpus = [apple, cherry, lemon];
 
 function createQuery(andTerms: string[], orGroups: string[][] = []): SearchQuery<Searchable> {

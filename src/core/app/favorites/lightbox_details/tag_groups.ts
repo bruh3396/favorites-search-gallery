@@ -1,4 +1,4 @@
-import { TagCategory, TagCategoryMap } from "@/core/domain/tag/tag";
+import { TagCategory, TagCategoryMap } from "@/core/domain/tag_category/tag_category";
 
 const GROUP_ORDER = ["artist", "character", "copyright", "metadata", "general"] as const;
 

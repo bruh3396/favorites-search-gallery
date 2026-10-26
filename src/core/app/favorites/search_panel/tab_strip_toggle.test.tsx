@@ -2,7 +2,7 @@ import { TabStripToggle, TabStripToggleClass } from "@/core/app/favorites/search
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { Signal } from "@/core/utils/reactive/signal";
 import TAB_STRIP_TOGGLE_CSS from "@/core/app/favorites/search_panel/tab_strip_toggle.css?inline";
 import { createFavoritesPreferences } from "@/core/app/preferences";

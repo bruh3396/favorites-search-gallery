@@ -1,4 +1,4 @@
-import { METRICS, Metric, isMetric } from "@/core/domain/post/post";
+import { METRICS, Metric, isMetric } from "@/core/domain/post/metric";
 import { MetricComparator } from "@/core/domain/search/searchable";
 
 export interface MetricComparison {

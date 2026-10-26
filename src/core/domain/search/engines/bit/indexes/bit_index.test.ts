@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Doc {
   id: string;
@@ -11,7 +12,7 @@ function createDoc(id: string, ...tags: string[]): Doc {
 }
 
 function createIndex(docs: readonly Doc[]): BitIndex<Doc> {
-  const bitIndex = new BitIndex<Doc>(d => d.tags);
+  const bitIndex = new BitIndex<Doc>({ getTerms: d => d.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(docs);
   return bitIndex;
@@ -86,7 +87,7 @@ describe("BitIndex", () => {
   });
 
   test("rebuilds cleanly, discarding the previous corpus", () => {
-    const bitIndex = new BitIndex<Doc>(d => d.tags);
+    const bitIndex = new BitIndex<Doc>({ getTerms: d => d.tags, stringInterner: new StringInterner() });
 
     bitIndex.build([apple]);
     bitIndex.build([lemon]);

@@ -1,4 +1,4 @@
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 export interface LocalTagCategories {
   getMany: (tagNames: readonly string[]) => Promise<ReadonlyMap<string, TagCategory>>;

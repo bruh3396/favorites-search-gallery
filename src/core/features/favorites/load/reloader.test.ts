@@ -16,6 +16,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/library";
 import { flushMicrotasks } from "@/testing/async";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface ReloaderSources {
   local: Post[];
@@ -36,7 +37,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [], paint = Pro
   states: FavoritesLoadState[];
   refreshedIds: string[];
 }> {
-  const collection = new FavoritesCollection();
+  const collection = new FavoritesCollection(new StringInterner());
   const index = createSearchIndex();
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();

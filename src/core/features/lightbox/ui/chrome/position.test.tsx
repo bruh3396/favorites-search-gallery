@@ -2,11 +2,11 @@ import { LightboxPosition, LightboxPositionClass } from "@/core/features/lightbo
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import POSITION_CSS from "@/core/features/lightbox/ui/chrome/position.css?inline";
-import { SequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function renderPosition(position: SequencePosition | undefined): HTMLElement {
+function renderPosition(position: MediaSequencePosition | undefined): HTMLElement {
   return render(document, () => <LightboxPosition position={new Signal(position)} />).result as HTMLElement;
 }
 

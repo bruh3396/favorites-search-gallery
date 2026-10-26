@@ -1,10 +1,19 @@
-import { DensePosting, Posting } from "@/core/domain/search/engines/bit/postings/posting";
+import { DensePosting, Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardResolver } from "@/core/domain/search/indexes/wildcard_resolver";
 
+export interface WildcardPostingResolverDependencies<Doc> {
+  bitIndex: BitIndex<Doc>;
+  stringInterner: StringInterner;
+}
+
 export class WildcardPostingResolver<Doc> extends WildcardResolver<Posting | undefined> {
-  constructor(private readonly bitIndex: BitIndex<Doc>) {
-    super();
+  private readonly bitIndex: BitIndex<Doc>;
+
+  constructor({ bitIndex, stringInterner }: WildcardPostingResolverDependencies<Doc>) {
+    super(stringInterner);
+    this.bitIndex = bitIndex;
   }
 
   protected combine(matches: string[]): Posting | undefined {

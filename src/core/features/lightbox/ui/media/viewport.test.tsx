@@ -1,5 +1,6 @@
 import { LightboxViewport, LightboxViewportClass } from "@/core/features/lightbox/ui/media/viewport";
-import { LightboxZoom, ZoomSize } from "@/core/features/lightbox/zoom/zoom";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
+import { Size } from "@/core/utils/geometry/size";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
@@ -23,7 +24,7 @@ function setup(): {
     { minimumScale: 2, maximumScale: 8 },
     {
       currentItem: new Signal<Post | undefined>(createPost()),
-      mediaSize: new Signal<ZoomSize | undefined>({ width: 400, height: 400 }),
+      mediaSize: new Signal<Size | undefined>({ width: 400, height: 400 }),
       enabled: new Signal(true)
     }
   );

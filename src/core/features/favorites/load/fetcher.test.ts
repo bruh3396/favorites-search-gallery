@@ -16,6 +16,7 @@ import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { flushMicrotasks } from "@/testing/async";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface FetcherSources {
   pages?: Post[][];
@@ -43,7 +44,7 @@ function setup(sources: FetcherSources = {}): {
   states: FavoritesLoadState[];
   refreshed: Post[];
 } {
-  const collection = new FavoritesCollection();
+  const collection = new FavoritesCollection(new StringInterner());
   const index = createSearchIndex();
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();

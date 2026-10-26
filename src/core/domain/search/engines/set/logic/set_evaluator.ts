@@ -1,7 +1,7 @@
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { isInAllSets } from "@/core/utils/collection/set";
+import { isInAllSets } from "@/core/utils/collection/set_utilities";
 
 const SELECTIVE_QUERY_FRACTION = 0.25;
 const EMPTY_EXCLUSIONS: ReadonlySet<never> = new Set<never>();

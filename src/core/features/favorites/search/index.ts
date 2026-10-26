@@ -1,17 +1,28 @@
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { Fact, Milestone } from "@/core/utils/reactive/milestone";
-import { ALL_RATINGS_MASK } from "@/core/domain/post/post";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { Fact } from "@/core/utils/reactive/fact";
+import { Milestone } from "@/core/utils/reactive/milestone";
+import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchRequest } from "@/core/features/favorites/search/input";
-import { TermUpdate } from "@/core/domain/search/engines/search_engine";
-import { shuffleDeterministically } from "@/core/utils/collection/array";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
+import { StringInterner } from "@/core/utils/string/string_interner";
+import { shuffleDeterministically } from "@/core/utils/collection/array_utilities";
 
 export class FavoritesSearchIndex {
-  private readonly engine = new BitSearchEngine<Favorite>(favorite => favorite.tags, (favorite, metric) => favorite.getMetric(metric));
+  private readonly engine: BitSearchEngine<Favorite>;
   private readonly indexes = new Emitter<readonly Favorite[]>();
   private readonly rebuilds = new Emitter<void>();
   private readonly populatedMilestone = new Milestone();
+
+  constructor(stringInterner: StringInterner) {
+    this.engine = new BitSearchEngine<Favorite>({
+      getTerms: favorite => favorite.tags,
+      getMetric: (favorite, metric) => favorite.getMetric(metric),
+      stringInterner
+    });
+  }
 
   public get indexed(): Occurrence<readonly Favorite[]> {
     return this.indexes;

@@ -1,13 +1,14 @@
-import { CategorizedPost, Post } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { Post } from "@/core/domain/post/post";
 import { NO_MEDIA, hasMedia } from "@/core/domain/media/media";
-import { CoalescingExecutor } from "@/core/utils/async/coalescing";
+import { CoalescingExecutor } from "@/core/utils/async/coalescing_executor";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { TagCategory } from "@/core/domain/tag/tag";
-import { partition } from "@/core/utils/collection/array";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
+import { partition } from "@/core/utils/collection/array_utilities";
 
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const POST_TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;

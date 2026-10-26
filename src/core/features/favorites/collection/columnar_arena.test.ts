@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
 import { createPost } from "@/testing/post";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 function setup(tags: string): { arena: FavoritesColumnarArena; slot: number } {
-  const arena = new FavoritesColumnarArena();
+  const arena = new FavoritesColumnarArena(new StringInterner());
   const slot = arena.allocate();
 
   arena.write(slot, createPost({ id: "1", tags }));
@@ -13,7 +14,7 @@ function setup(tags: string): { arena: FavoritesColumnarArena; slot: number } {
 describe("FavoritesColumnarArena", () => {
   describe("allocate", () => {
     test("hands out consecutive indexes", () => {
-      const arena = new FavoritesColumnarArena();
+      const arena = new FavoritesColumnarArena(new StringInterner());
 
       expect([arena.allocate(), arena.allocate(), arena.allocate()]).toEqual([0, 1, 2]);
     });
@@ -21,7 +22,7 @@ describe("FavoritesColumnarArena", () => {
 
   describe("getPost", () => {
     test("reads back the written post", () => {
-      const arena = new FavoritesColumnarArena();
+      const arena = new FavoritesColumnarArena(new StringInterner());
       const slot = arena.allocate();
       const post = createPost({ id: "1", tags: "apple banana", score: 5 });
 
@@ -46,7 +47,7 @@ describe("FavoritesColumnarArena", () => {
 
   describe("write", () => {
     test("grows storage when writing beyond the initial capacity", () => {
-      const arena = new FavoritesColumnarArena();
+      const arena = new FavoritesColumnarArena(new StringInterner());
       let slot = -1;
 
       for (let i = 0; i < 1_025; i += 1) {

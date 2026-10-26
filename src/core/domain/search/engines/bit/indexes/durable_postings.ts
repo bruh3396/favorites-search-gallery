@@ -1,6 +1,6 @@
-import { DensePosting, Posting, SparsePosting } from "@/core/domain/search/engines/bit/postings/posting";
-import { BitSet } from "@/core/domain/search/engines/bit/postings/bitset";
-import { PackedPostings } from "@/core/domain/search/engines/bit/postings/packed_postings";
+import { DensePosting, Posting, SparsePosting } from "@/core/domain/search/engines/bit/posting/posting";
+import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
+import { PackedPostings } from "@/core/domain/search/engines/bit/indexes/packed_postings";
 
 export class DurablePostings {
   private densePostings = new Map<string, DensePosting>();

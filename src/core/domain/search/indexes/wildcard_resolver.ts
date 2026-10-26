@@ -1,13 +1,18 @@
 import { BoundedCache } from "@/core/utils/collection/bounded_cache";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardIndex } from "@/core/domain/search/indexes/wildcard_index";
 import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 
 export abstract class WildcardResolver<V> {
-  private wildcardIndex = new WildcardIndex([]);
+  private wildcardIndex: WildcardIndex;
   private readonly cache = new BoundedCache<string, V>(100);
 
+  constructor(private readonly stringInterner: StringInterner) {
+    this.wildcardIndex = new WildcardIndex(stringInterner);
+  }
+
   public index(terms: string[]): void {
-    this.wildcardIndex = new WildcardIndex(terms);
+    this.wildcardIndex = new WildcardIndex(this.stringInterner, terms);
     this.cache.clear();
   }
 

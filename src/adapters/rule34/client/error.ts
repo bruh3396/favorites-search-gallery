@@ -1,4 +1,4 @@
-import { assertNever } from "@/core/utils/guards/guards";
+import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
 export type Rule34ErrorReason =
   | "network"
@@ -39,6 +39,6 @@ export function isRetryable(error: unknown): boolean {
     case "malformed":
       return false;
     default:
-      return assertNever(error.reason);
+      throw new UnreachableError(error.reason);
   }
 }

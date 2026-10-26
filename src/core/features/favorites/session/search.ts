@@ -1,4 +1,5 @@
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { FavoritesSearchRequest, FavoritesSearchSettings, UNFILTERED_FAVORITES_SEARCH_SETTINGS } from "@/core/features/favorites/search/input";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";

@@ -1,7 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
 import { TrigramIndex } from "@/core/domain/search/indexes/trigram_index";
-import { compareStrings } from "@/core/utils/string/string";
+import { compareStrings } from "@/core/utils/string/string_utilities";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 const terms = ["banana", "bandana", "cabana", "canvas", "abandon", "and", "an", "sandbox", "brand", "nan_ana"];
 const sortedTerms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);
@@ -11,7 +12,7 @@ function expectSameTerms(actual: string[], expected: string[]): void {
 }
 
 function createIndex(): TrigramIndex {
-  return new TrigramIndex(sortedTerms);
+  return new TrigramIndex(sortedTerms, new StringInterner());
 }
 
 describe("TrigramIndex", () => {
@@ -45,7 +46,7 @@ describe("TrigramIndex", () => {
     });
 
     test("returns nothing for a fragment whose trigrams exist but never co-occur", () => {
-      expectSameTerms(new TrigramIndex(sortedTerms).termsMatching("banvas"), []);
+      expectSameTerms(new TrigramIndex(sortedTerms, new StringInterner()).termsMatching("banvas"), []);
     });
   });
 
@@ -67,7 +68,7 @@ describe("TrigramIndex", () => {
 
   describe("add", () => {
     test("makes a new term findable", () => {
-      const index = new TrigramIndex(sortedTerms);
+      const index = new TrigramIndex(sortedTerms, new StringInterner());
 
       expectSameTerms(index.termsMatching("mango"), []);
       index.add("mango");
@@ -77,21 +78,21 @@ describe("TrigramIndex", () => {
 
   describe("remove", () => {
     test("drops a term from its trigram buckets", () => {
-      const index = new TrigramIndex(sortedTerms);
+      const index = new TrigramIndex(sortedTerms, new StringInterner());
 
       index.remove("banana");
       expect(index.termsMatching("ana")).not.toContain("banana");
     });
 
     test("leaves a trigram unmatched once its last term is removed", () => {
-      const index = new TrigramIndex(new SortedArray<string>((a, b) => compareStrings(a, b), ["kiwi"]));
+      const index = new TrigramIndex(new SortedArray<string>((a, b) => compareStrings(a, b), ["kiwi"]), new StringInterner());
 
       index.remove("kiwi");
       expectSameTerms(index.termsMatching("kiwi"), []);
     });
 
     test("changes nothing for an unindexed term", () => {
-      const index = new TrigramIndex(sortedTerms);
+      const index = new TrigramIndex(sortedTerms, new StringInterner());
 
       index.remove("zzzz");
       index.remove("bananas");

@@ -1,5 +1,5 @@
 import { SortedArray } from "@/core/utils/collection/sorted_array";
-import { findFirstIndexWhere } from "@/core/utils/collection/array";
+import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";
 
 export class PrefixIndex {
   constructor(private readonly terms: SortedArray<string>) {}

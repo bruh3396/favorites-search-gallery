@@ -17,7 +17,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { StoredPreference } from "@/core/utils/reactive/preference";
+import { StoredPreference } from "@/core/utils/preference/stored_preference";
 import { expectClassesStyled } from "@/testing/css";
 
 const IDLE_DELAY = 100;

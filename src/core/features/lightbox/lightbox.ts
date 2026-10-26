@@ -5,10 +5,10 @@ import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_reso
 import { LightboxMode } from "@/core/features/lightbox/mode";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/navigation";
 import { LightboxRetentionList } from "@/core/features/lightbox/retention_list/retention_list";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
-import { Occurrence } from "@/core/utils/reactive/emitter";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { Preference } from "@/core/utils/preference/preference";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

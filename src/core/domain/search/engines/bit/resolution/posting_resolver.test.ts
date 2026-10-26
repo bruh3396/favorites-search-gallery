@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
-import { Metric } from "@/core/domain/post/post";
-import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_index";
+import { Metric } from "@/core/domain/post/metric";
+import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Doc {
   readonly id: number;
@@ -21,9 +22,9 @@ function getMetric(doc: Doc, metric: Metric): number {
 }
 
 function setup(): (term: string) => number[] {
-  const bitIndex = new BitIndex<Doc>(doc => doc.tags);
+  const bitIndex = new BitIndex<Doc>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
   const metricIndex = new MetricBitIndex<Doc>(getMetric);
-  const wildcardResolver = new WildcardPostingResolver(bitIndex);
+  const wildcardResolver = new WildcardPostingResolver({ bitIndex: bitIndex, stringInterner: new StringInterner() });
   const resolver = new PostingResolver(bitIndex, metricIndex, wildcardResolver);
 
   bitIndex.build([apple, cherry, lemon]);

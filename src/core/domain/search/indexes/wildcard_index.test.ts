@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { WildcardIndex } from "@/core/domain/search/indexes/wildcard_index";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 const terms = ["banana", "band", "bandana", "brand", "grand", "island", "orange", "sand"].slice().sort();
 
@@ -9,7 +10,7 @@ function matches(index: WildcardIndex, pattern: string): string[] {
 }
 
 function createIndex(): WildcardIndex {
-  return new WildcardIndex(terms);
+  return new WildcardIndex(new StringInterner(), terms);
 }
 
 describe("WildcardIndex", () => {
@@ -35,13 +36,13 @@ describe("WildcardIndex", () => {
     });
 
     test("returns nothing from an empty index", () => {
-      expect(matches(new WildcardIndex(), "ban*")).toEqual([]);
+      expect(matches(new WildcardIndex(new StringInterner()), "ban*")).toEqual([]);
     });
   });
 
   describe("add", () => {
     test("makes a new term matchable", () => {
-      const index = new WildcardIndex(terms);
+      const index = new WildcardIndex(new StringInterner(), terms);
 
       index.add("bandit");
       expect(matches(index, "ban*")).toEqual(["banana", "band", "bandana", "bandit"]);
@@ -50,7 +51,7 @@ describe("WildcardIndex", () => {
 
   describe("remove", () => {
     test("drops a term from matches", () => {
-      const index = new WildcardIndex(terms);
+      const index = new WildcardIndex(new StringInterner(), terms);
 
       index.remove("band");
       expect(matches(index, "ban*")).toEqual(["banana", "bandana"]);
@@ -59,7 +60,7 @@ describe("WildcardIndex", () => {
 
   describe("index", () => {
     test("replaces the corpus", () => {
-      const index = new WildcardIndex(terms);
+      const index = new WildcardIndex(new StringInterner(), terms);
 
       index.index(["kiwi", "kumquat"]);
       expect(matches(index, "ban*")).toEqual([]);

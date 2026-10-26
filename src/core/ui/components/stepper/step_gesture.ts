@@ -1,4 +1,4 @@
-import { doNothing } from "@/core/utils/function/function";
+import { doNothing } from "@/core/utils/function/function_utilities";
 
 const HOLD_DELAY = 400;
 const REPEAT_INTERVAL = 60;

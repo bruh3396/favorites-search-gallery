@@ -1,11 +1,9 @@
-import { Guard, isRecord } from "@/core/utils/guards/guards";
+import { FieldGuards, Guard, isRecord } from "@/core/utils/guard/guard";
 
 export interface Codec<T> {
   decode: (stored: unknown) => T | undefined;
   encode: (value: T) => unknown;
 }
-
-export type FieldGuards<T extends object> = { [K in keyof T]: Guard<T[K]> };
 
 export function createFieldsCodec<T extends object>(fields: FieldGuards<T>): Codec<Partial<T>> {
   const entries = Object.entries(fields as Record<string, Guard<unknown>>);

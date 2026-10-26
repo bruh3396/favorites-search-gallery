@@ -1,4 +1,5 @@
-import { WildcardMatchType, WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
+import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
+import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { describe, expect, test } from "vitest";
 import { isMetricTerm, isNumericTerm, isWildcardTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { ExactSearchTerm } from "@/core/domain/search/terms/exact_search_term";

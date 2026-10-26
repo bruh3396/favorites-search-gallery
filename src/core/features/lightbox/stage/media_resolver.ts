@@ -1,6 +1,7 @@
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Media } from "@/core/domain/media/media";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Signal } from "@/core/utils/reactive/signal";
 
 export class LightboxMediaResolver {

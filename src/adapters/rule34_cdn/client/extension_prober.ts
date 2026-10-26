@@ -1,4 +1,4 @@
-import { MediaKind } from "@/core/domain/media/media";
+import { MediaKind } from "@/core/domain/media/media_kind";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Rule34CdnFileExtension } from "@/adapters/rule34_cdn/client/extension";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

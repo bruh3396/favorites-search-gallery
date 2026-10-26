@@ -6,7 +6,7 @@ import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
 import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";

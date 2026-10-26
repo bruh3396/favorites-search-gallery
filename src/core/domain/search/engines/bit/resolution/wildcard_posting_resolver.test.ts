@@ -1,8 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
-import { Posting } from "@/core/domain/search/engines/bit/postings/posting";
+import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Doc {
   id: string;
@@ -29,11 +30,11 @@ interface Harness {
 }
 
 function setup(docs: Doc[] = corpus): Harness {
-  const bitIndex = new BitIndex<Doc>(d => d.tags);
+  const bitIndex = new BitIndex<Doc>({ getTerms: d => d.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(docs);
   const unionSpy = vi.spyOn(bitIndex, "unionOf");
-  const resolver = new WildcardPostingResolver(bitIndex);
+  const resolver = new WildcardPostingResolver({ bitIndex: bitIndex, stringInterner: new StringInterner() });
 
   resolver.index(bitIndex.indexedTerms());
   return {

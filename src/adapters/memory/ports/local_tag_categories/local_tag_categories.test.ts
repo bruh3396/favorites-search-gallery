@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 describe("MemoryLocalTagCategories", () => {
   test("reads back what it wrote, skipping missing tags", async() => {

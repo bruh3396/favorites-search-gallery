@@ -1,4 +1,5 @@
-import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Size } from "@/core/utils/geometry/size";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
 import { pickDecodeWidth } from "@/core/ui/post_grid/decode_width_picker";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
@@ -19,7 +20,7 @@ export const TileClass = {
 
 export interface TileProps {
   post: MediaItem;
-  dimensions: Dimensions;
+  dimensions: Size;
   sizing: Readable<GridSizing>;
   actions: readonly Node[];
   visibilityObserver: VisibilityObserver;
@@ -134,7 +135,7 @@ function showPreview({ root, preview }: PreviewElements, url: string): void {
   }
 }
 
-export function setAspectRatio(root: HTMLElement, { width, height }: Dimensions): void {
+export function setAspectRatio(root: HTMLElement, { width, height }: Size): void {
   if (width > 0 && height > 0) {
     root.style.setProperty(ASPECT_RATIO_PROPERTY, `${width} / ${height}`);
   }

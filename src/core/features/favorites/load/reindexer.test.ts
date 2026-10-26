@@ -7,6 +7,7 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 const TERM_UPDATE_DELAY = 1_500;
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
@@ -19,7 +20,7 @@ interface Setup {
 }
 
 function setup(posts: Post[] = []): Setup {
-  const collection = new FavoritesCollection();
+  const collection = new FavoritesCollection(new StringInterner());
   const index = createSearchIndex();
   const scheduler = new MemoryScheduler();
 

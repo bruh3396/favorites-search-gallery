@@ -1,4 +1,4 @@
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { MetricSearchable } from "@/core/domain/search/searchable";
 
 export interface Favorite extends MediaItem, MetricSearchable {

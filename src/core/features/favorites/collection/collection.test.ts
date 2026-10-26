@@ -2,6 +2,7 @@ import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 function getIds(favorites: { id: string }[]): string[] {
   return favorites.map(favorite => favorite.id);
@@ -10,7 +11,7 @@ function getIds(favorites: { id: string }[]): string[] {
 describe("FavoritesCollection", () => {
   describe("append", () => {
     test("adds favorites to the end", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
 
       collection.append(createPosts("1", "2"));
       collection.append(createPosts("3"));
@@ -20,7 +21,7 @@ describe("FavoritesCollection", () => {
 
   describe("prependAsNew", () => {
     test("adds favorites to the front marked as new", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
 
       collection.append(createPosts("1", "2"));
       collection.prependAsNew(createPosts("3"));
@@ -28,7 +29,7 @@ describe("FavoritesCollection", () => {
     });
 
     test("moves a favorite it already holds to the front as new", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
 
       const [, existing] = collection.append(createPosts("1", "2"));
       const [prepended] = collection.prependAsNew(createPosts("2"));
@@ -40,7 +41,7 @@ describe("FavoritesCollection", () => {
 
   describe("size", () => {
     test("counts the favorites", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
 
       collection.append(createPosts("1", "2"));
       collection.prependAsNew(createPosts("3"));
@@ -50,7 +51,7 @@ describe("FavoritesCollection", () => {
 
   describe("slice", () => {
     test("returns the favorites in the given range", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
 
       collection.append(createPosts("1", "2", "3", "4"));
       expect(getIds(collection.slice(1, 3))).toEqual(["2", "3"]);
@@ -59,14 +60,14 @@ describe("FavoritesCollection", () => {
 
   describe("overwrite", () => {
     test("returns undefined for a post that is not in the collection", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
 
       collection.append(createPosts("1"));
       expect(collection.overwrite(createPost({ id: "2" }))).toBeUndefined();
     });
 
     test("overwrites the favorite's post", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
       const [favorite] = collection.append([createPost({ id: "1", score: 1 })]);
 
       collection.overwrite(createPost({ id: "1", score: 500 }));
@@ -74,7 +75,7 @@ describe("FavoritesCollection", () => {
     });
 
     test("returns the favorite with the tags it had before", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
       const [favorite] = collection.append([createPost({ id: "1", tags: "apple" })]);
 
       expect(collection.overwrite(createPost({ id: "1", tags: "banana" }))).toEqual({ favorite, previousTags: new Set(["apple"]) });
@@ -82,7 +83,7 @@ describe("FavoritesCollection", () => {
     });
 
     test("announces a favorite each time it gains media", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
       const [first, second] = collection.append(createPosts("1", "2"));
       const announced: Favorite[] = [];
 
@@ -93,7 +94,7 @@ describe("FavoritesCollection", () => {
     });
 
     test("announces nothing when the media was already known", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
       const announced: Favorite[] = [];
 
       collection.append([createPost({ id: "1", media: { kind: "image", locator: "1/a" } })]);
@@ -105,7 +106,7 @@ describe("FavoritesCollection", () => {
 
   describe("compact", () => {
     test("keeps every favorite readable", () => {
-      const collection = new FavoritesCollection();
+      const collection = new FavoritesCollection(new StringInterner());
       const [favorite] = collection.append([createPost({ id: "1", tags: "apple" })]);
 
       collection.compact();

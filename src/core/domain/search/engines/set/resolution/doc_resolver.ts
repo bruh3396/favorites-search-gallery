@@ -1,4 +1,4 @@
-import { AbstractSearchTerm } from "@/core/domain/search/terms/abstract_search_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -8,7 +8,7 @@ import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
-import { union } from "@/core/utils/collection/set";
+import { union } from "@/core/utils/collection/set_utilities";
 
 export interface DocResolverDependencies<Doc> {
   termIndex: InvertedIndex<Doc>;
@@ -33,7 +33,7 @@ export class DocResolver<Doc> {
     this.wildcardResolver = wildcardResolver;
   }
 
-  public resolve(term: AbstractSearchTerm): ReadonlySet<Doc> {
+  public resolve(term: SearchTerm): ReadonlySet<Doc> {
     if (term instanceof NumericSearchTerm) {
       return this.docsForNumeric(term);
     }

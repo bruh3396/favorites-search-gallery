@@ -1,9 +1,9 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearch } from "@/core/features/favorites/session/search";
-import { Preference } from "@/core/utils/reactive/preference";
-import { clamp } from "@/core/utils/number/number";
-import { haveSameItems } from "@/core/utils/collection/array";
+import { Preference } from "@/core/utils/preference/preference";
+import { clamp } from "@/core/utils/number/number_utilities";
+import { haveSameItems } from "@/core/utils/collection/array_utilities";
 
 export interface FavoritesPaginationSettings {
   readonly pageSize: Preference<number>;

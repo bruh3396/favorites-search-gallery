@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { PrefixIndex } from "@/core/domain/search/indexes/prefix_index";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
-import { compareStrings } from "@/core/utils/string/string";
+import { compareStrings } from "@/core/utils/string/string_utilities";
 
 const terms = ["ana", "banana", "band", "bandana", "brand", "cabana", "canvas", "sandbox"].slice().sort();
 

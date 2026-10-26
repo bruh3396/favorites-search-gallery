@@ -1,9 +1,10 @@
-import { Media, MediaKind } from "@/core/domain/media/media";
+import { Media } from "@/core/domain/media/media";
+import { MediaKind } from "@/core/domain/media/media_kind";
 import { describe, expect, test, vi } from "vitest";
 import { LightboxMediaCache } from "@/core/features/lightbox/stage/media_cache";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
-import { doNothing } from "@/core/utils/function/function";
+import { doNothing } from "@/core/utils/function/function_utilities";
 import { flushMicrotasks } from "@/testing/async";
 
 interface Load {

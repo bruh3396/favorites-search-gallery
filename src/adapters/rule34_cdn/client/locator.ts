@@ -1,4 +1,5 @@
-import { Media, MediaKind } from "@/core/domain/media/media";
+import { Media } from "@/core/domain/media/media";
+import { MediaKind } from "@/core/domain/media/media_kind";
 import { Rule34CdnFileExtension, isFileExtension, kindOf } from "@/adapters/rule34_cdn/client/extension";
 
 export interface Rule34CdnLocator {

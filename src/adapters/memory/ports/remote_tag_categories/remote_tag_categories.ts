@@ -1,5 +1,5 @@
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 export class MemoryRemoteTagCategories implements RemoteTagCategories {
   public fetch(tagNames: readonly string[]): Promise<ReadonlyMap<string, TagCategory>> {

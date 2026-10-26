@@ -1,9 +1,6 @@
-type Listener<V> = (value: V) => void;
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 
-export interface Occurrence<V> {
-  on: (listener: Listener<V>) => () => void;
-  once: (listener: Listener<V>) => () => void;
-}
+type Listener<V> = (value: V) => void;
 
 export class Emitter<V> implements Occurrence<V> {
   private readonly listeners = new Set<Listener<V>>();

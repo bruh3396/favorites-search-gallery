@@ -26,6 +26,7 @@ import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
 import { render } from "@/core/ui/h/h";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
   element: HTMLElement;
@@ -37,7 +38,7 @@ interface Setup {
 }
 
 function setup(posts: Post[] = []): Setup {
-  const index = new FavoritesSearchIndex();
+  const index = new FavoritesSearchIndex(new StringInterner());
   const preferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
@@ -52,7 +53,7 @@ function setup(posts: Post[] = []): Setup {
   const enterZen = vi.fn<() => void>();
 
   preferences.pageSize.set(2);
-  index.rebuild(new FavoritesCollection().append(posts));
+  index.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
   const session = new FavoritesSession({ settings: createSearchSettings() }, {
     searchIndex: index,
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),

@@ -9,6 +9,7 @@ import { Post } from "@/core/domain/post/post";
 import { createFavoritesPreferences } from "@/core/app/preferences";
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
   session: FavoritesSession;
@@ -17,8 +18,8 @@ interface Setup {
 }
 
 function setup(posts: Post[]): Setup {
-  const collection = new FavoritesCollection();
-  const index = new FavoritesSearchIndex();
+  const collection = new FavoritesCollection(new StringInterner());
+  const index = new FavoritesSearchIndex(new StringInterner());
   const paginationSettings = createFavoritesPreferences(new MemoryLocalKeyedValues());
 
   paginationSettings.pageSize.set(2);

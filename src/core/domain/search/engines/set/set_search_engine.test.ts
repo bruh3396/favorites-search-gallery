@@ -1,8 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { Metric } from "@/core/domain/post/post";
+import { Metric } from "@/core/domain/post/metric";
 import { Searchable } from "@/core/domain/search/searchable";
 import { SetSearchEngine } from "@/core/domain/search/engines/set/set_search_engine";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 type Doc = Searchable & { name: string; tags: Set<string>; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
 
@@ -23,7 +24,7 @@ const cherry = createDoc("cherry", ["red", "tart", "fruit"], { score: 30 });
 const docs = [apple, banana, cherry];
 
 function createEngine(seed: Doc[] = docs): SetSearchEngine<Doc> {
-  return new SetSearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric), seed);
+  return new SetSearchEngine<Doc>({ getTerms: item => item.tags, getMetric: (item, metric) => item.getMetric(metric), stringInterner: new StringInterner() }, seed);
 }
 
 function search(query: string, engineToSearch: SetSearchEngine<Doc> = createEngine(), candidates: Doc[] = docs): string[] {
@@ -143,7 +144,7 @@ describe("SetSearchEngine", () => {
     });
 
     test("rebuilds the corpus from a fresh set of docs", () => {
-      const searchEngine = new SetSearchEngine<Doc>(item => item.tags, (item, metric) => item.getMetric(metric));
+      const searchEngine = new SetSearchEngine<Doc>({ getTerms: item => item.tags, getMetric: (item, metric) => item.getMetric(metric), stringInterner: new StringInterner() });
       const kiwi = createDoc("kiwi", ["green", "fuzzy"]);
 
       expect(search("green", searchEngine, [kiwi])).toEqual([]);

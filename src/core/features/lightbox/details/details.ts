@@ -1,6 +1,6 @@
 import { Child } from "@/core/ui/h/h";
-import { MediaItem } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/reactive/preference";
+import { MediaItem } from "@/core/domain/media/media_item";
+import { Preference } from "@/core/utils/preference/preference";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface LightboxDetailsContent {

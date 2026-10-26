@@ -1,11 +1,8 @@
 import { Point } from "@/core/utils/geometry/point";
 import { ModifierState } from "@/core/ui/gestures/modifier_state";
-import {
-    LightboxViewportCommandHandlers,
-    createLightboxViewportGestureHandlers,
-    resolveLightboxViewportCursor
-} from "@/core/features/lightbox/viewport_gestures/viewport_gestures";
-import { LightboxZoom, ZoomRect } from "@/core/features/lightbox/zoom/zoom";
+import { LightboxViewportCommandHandlers, createLightboxViewportGestureHandlers, resolveLightboxViewportCursor } from "@/core/features/lightbox/viewport_gestures/viewport_gestures";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/zoom";
+import { Rect } from "@/core/utils/geometry/rect";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal } from "@/core/utils/reactive/signal";
 
@@ -17,7 +14,7 @@ function setup(): {
   zoom: {
     isZoomed: Signal<boolean>;
     canZoom: Signal<boolean>;
-    mediaRect: Signal<ZoomRect | undefined>;
+    mediaRect: Signal<Rect | undefined>;
     toggle: Mock<LightboxZoom["toggle"]>;
     zoomBy: Mock<LightboxZoom["zoomBy"]>;
     zoomOut: Mock<LightboxZoom["zoomOut"]>;
@@ -29,7 +26,7 @@ function setup(): {
     zoom: {
       isZoomed: new Signal(false),
       canZoom: new Signal(true),
-      mediaRect: new Signal<ZoomRect | undefined>({ x: 100, y: 0, width: 600, height: 600 }),
+      mediaRect: new Signal<Rect | undefined>({ x: 100, y: 0, width: 600, height: 600 }),
       toggle: vi.fn<LightboxZoom["toggle"]>(),
       zoomBy: vi.fn<LightboxZoom["zoomBy"]>(),
       zoomOut: vi.fn<LightboxZoom["zoomOut"]>(),

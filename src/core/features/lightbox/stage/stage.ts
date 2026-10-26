@@ -3,11 +3,12 @@ import { createLightboxImage, createLightboxVideo, playVideo } from "@/core/feat
 import { LightboxMediaCache } from "@/core/features/lightbox/stage/media_cache";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/media_resolver";
 import { LightboxVideoPool } from "@/core/features/lightbox/stage/video_pool";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { MorphSource } from "@/core/features/lightbox/closer/morph";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Resource } from "@/core/utils/reactive/resource";
+import { Size } from "@/core/utils/geometry/size";
 import { currentDocument } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
@@ -25,11 +26,6 @@ export interface LightboxStageDependencies<T extends MediaItem> {
   muted: Preference<boolean>;
 }
 
-export interface MediaSize {
-  readonly width: number;
-  readonly height: number;
-}
-
 export class LightboxStage<T extends MediaItem> {
   public readonly image: Readable<HTMLCanvasElement | undefined>;
   public readonly gif: Readable<HTMLImageElement | undefined>;
@@ -37,7 +33,7 @@ export class LightboxStage<T extends MediaItem> {
   public readonly previewUrl: Readable<string | undefined>;
   public readonly shownPreviewUrl: Readable<string | undefined>;
   public readonly shownMedia: Readable<MorphSource | undefined>;
-  public readonly mediaSize: Readable<MediaSize | undefined>;
+  public readonly mediaSize: Readable<Size | undefined>;
   private readonly videoPool: LightboxVideoPool;
   private readonly volume: Preference<number>;
   private readonly muted: Preference<boolean>;

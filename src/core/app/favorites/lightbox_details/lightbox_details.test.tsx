@@ -1,6 +1,4 @@
-import {
-  FavoriteLightboxDetailsClass, FavoriteLightboxDetailsView, createFavoriteLightboxDetails
-} from "@/core/app/favorites/lightbox_details/lightbox_details";
+import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsView, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox_details/lightbox_details";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -9,7 +7,7 @@ import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/clipboard";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { createLightboxPreferences } from "@/core/app/preferences";
 import { expectClassesStyled } from "@/testing/css";
 import { flushMicrotasks } from "@/testing/async";

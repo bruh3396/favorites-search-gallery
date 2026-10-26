@@ -9,9 +9,10 @@ import { FavoritesSearch } from "@/core/features/favorites/session/search";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { Post } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
   pagination: FavoritesPagination;
@@ -38,8 +39,8 @@ function createPreference<T>(initial: T): Preference<T> {
 }
 
 function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
-  const collection = new FavoritesCollection();
-  const index = new FavoritesSearchIndex();
+  const collection = new FavoritesCollection(new StringInterner());
+  const index = new FavoritesSearchIndex(new StringInterner());
   const paginationSettings = { pageSize: createPreference(2), infiniteScroll: createPreference(infiniteScroll) };
 
   index.rebuild(collection.append(posts));

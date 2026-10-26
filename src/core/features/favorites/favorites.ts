@@ -1,4 +1,5 @@
-import { Fact, Milestone } from "@/core/utils/reactive/milestone";
+import { Fact } from "@/core/utils/reactive/fact";
+import { Milestone } from "@/core/utils/reactive/milestone";
 import { FavoritesSession, FavoritesSessionConfiguration } from "@/core/features/favorites/session/session";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -12,12 +13,13 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { Occurrence } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { describeFavoritesLoadState } from "@/core/features/favorites/load/status";
 
 export { default as FAVORITES_STYLES } from "@/core/features/favorites/styles.css?inline";
@@ -53,8 +55,9 @@ export interface FavoritesService {
 
 export function createFavoritesService(configuration: FavoritesConfiguration, dependencies: FavoritesDependencies): FavoritesService {
   const loaded = new Milestone();
-  const collection = new FavoritesCollection();
-  const searchIndex = new FavoritesSearchIndex();
+  const stringInterner = new StringInterner();
+  const collection = new FavoritesCollection(stringInterner);
+  const searchIndex = new FavoritesSearchIndex(stringInterner);
   const blacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
   const actions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, {
     ...dependencies,

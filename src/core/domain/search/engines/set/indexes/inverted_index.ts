@@ -1,4 +1,5 @@
-import { TermDelta, TermUpdate } from "@/core/domain/search/engines/search_engine";
+import { TermDelta } from "@/core/domain/search/engines/term_delta";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
 
 export class InvertedIndex<Doc> {

@@ -1,4 +1,5 @@
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { RemoteSearchResults, SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Media } from "@/core/domain/media/media";

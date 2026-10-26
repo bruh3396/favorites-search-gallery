@@ -1,7 +1,7 @@
-import { DensePosting, SparsePosting } from "@/core/domain/search/engines/bit/postings/posting";
+import { DensePosting, SparsePosting } from "@/core/domain/search/engines/bit/posting/posting";
 import { describe, expect, test } from "vitest";
 import { BitAlgebra } from "@/core/domain/search/engines/bit/indexes/bit_algebra";
-import { BitSet } from "@/core/domain/search/engines/bit/postings/bitset";
+import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
 import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
 
 const DOCS = ["apple", "banana", "cherry"];

@@ -1,4 +1,4 @@
-import { DensePosting, SparsePosting } from "@/core/domain/search/engines/bit/postings/posting";
+import { DensePosting, SparsePosting } from "@/core/domain/search/engines/bit/posting/posting";
 import { describe, expect, test } from "vitest";
 import { DurablePostings } from "@/core/domain/search/engines/bit/indexes/durable_postings";
 

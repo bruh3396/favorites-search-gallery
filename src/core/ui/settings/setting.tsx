@@ -9,7 +9,7 @@ import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { SettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { Slider } from "@/core/ui/components/slider/slider";
 import { Switch } from "@/core/ui/components/switch/switch";
-import { assertNever } from "@/core/utils/guards/guards";
+import { UnreachableError } from "@/core/utils/error/unreachable_error";
 import { h } from "@/core/ui/h/h";
 
 export interface SettingProps {
@@ -56,7 +56,7 @@ function SettingControl({ descriptor, size, scheduler }: SettingControlProps): H
     case "slider":
       return <SliderControl descriptor={descriptor} size={size} scheduler={scheduler} />;
     default:
-      return assertNever(descriptor);
+      throw new UnreachableError(descriptor);
   }
 }
 

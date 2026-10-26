@@ -1,4 +1,5 @@
-import { Dimensions, MediaItem } from "@/core/domain/post/post";
+import { Size } from "@/core/utils/geometry/size";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
@@ -53,7 +54,7 @@ function setup(...ids: string[]): Setup {
   return { element, dispose, posts, changed, tileLocator, layout, columnCount, sizeObserver, onPlainClick };
 }
 
-function getDimensions(post: MediaItem): Dimensions {
+function getDimensions(post: MediaItem): Size {
   return { width: Number(post.id) * 100, height: 100 };
 }
 

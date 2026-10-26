@@ -1,9 +1,13 @@
 import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/theme";
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
-import { Preference, PreferenceSchema, PreferenceStorage, Preferences, StoredPreference, createPreferences, definePreference } from "@/core/utils/reactive/preference";
+import { Preference } from "@/core/utils/preference/preference";
+import { PreferenceSetSchema, PreferenceSet, createPreferenceSet } from "@/core/utils/preference/preference_set";
+import { PreferenceStorage } from "@/core/utils/preference/preference_storage";
+import { StoredPreference } from "@/core/utils/preference/stored_preference";
+import { definePreference } from "@/core/utils/preference/preference_definition";
 import { TAG_ALIGNMENTS, TAG_ORGANIZATIONS, TAG_SIZES, TagAlignment, TagOrganization, TagSize } from "@/core/app/favorites/lightbox_details/view_options";
-import { isInUnitInterval, oneOf } from "@/core/utils/guards/guards";
+import { isInUnitInterval, oneOf } from "@/core/utils/guard/guard";
 import { ColorScheme } from "@/core/boundary/environment";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 
@@ -36,21 +40,21 @@ export interface LightboxPreferenceValues {
   readonly detailsSize: TagSize;
 }
 
-export type AppPreferences = Preferences<AppPreferenceValues>;
-export type PostGridPreferences =Preferences<PostGridPreferenceValues>;
-export type FavoritesPreferences = Preferences<FavoritesPreferenceValues>;
+export type AppPreferences = PreferenceSet<AppPreferenceValues>;
+export type PostGridPreferences =PreferenceSet<PostGridPreferenceValues>;
+export type FavoritesPreferences = PreferenceSet<FavoritesPreferenceValues>;
 export type PostListPreferences = PostGridPreferences;
-export type LightboxPreferences = Preferences<LightboxPreferenceValues>;
+export type LightboxPreferences = PreferenceSet<LightboxPreferenceValues>;
 
 export function createAppPreferences(storage: PreferenceStorage): AppPreferences {
-  return createPreferences<AppPreferenceValues>({
+  return createPreferenceSet<AppPreferenceValues>({
     postListEnabled: definePreference(false),
     theme: definePreference<Theme>(DEFAULT_THEME, oneOf(THEMES))
   }, storage);
 }
 
 export function createFavoritesPreferences(storage: PreferenceStorage): FavoritesPreferences {
-  return createPreferences<FavoritesPreferenceValues>({
+  return createPreferenceSet<FavoritesPreferenceValues>({
     ...createPostGridPreferences(),
     pageSize: definePreference(50, isPageSize),
     infiniteScroll: definePreference(false),
@@ -61,11 +65,11 @@ export function createFavoritesPreferences(storage: PreferenceStorage): Favorite
 }
 
 export function createPostListPreferences(storage: PreferenceStorage): PostListPreferences {
-  return createPreferences(createPostGridPreferences(), storage);
+  return createPreferenceSet(createPostGridPreferences(), storage);
 }
 
 export function createLightboxPreferences(storage: PreferenceStorage): LightboxPreferences {
-  return createPreferences<LightboxPreferenceValues>({
+  return createPreferenceSet<LightboxPreferenceValues>({
     mode: definePreference<LightboxMode>("full", oneOf(LIGHTBOX_MODES)),
     volume: definePreference(1, isInUnitInterval),
     muted: definePreference(false),
@@ -82,7 +86,7 @@ export function createColorSchemePreference(colorScheme: ColorScheme, hostPage: 
   });
 }
 
-function createPostGridPreferences(): PreferenceSchema<PostGridPreferenceValues> {
+function createPostGridPreferences(): PreferenceSetSchema<PostGridPreferenceValues> {
   return {
     layout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
     columnCount: definePreference(6),

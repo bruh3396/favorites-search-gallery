@@ -1,6 +1,6 @@
 import { parseExactSearchTerm, parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { removeExtraWhitespace } from "@/core/utils/string/string";
+import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";
 
 const OPEN = "(";
 const NEGATED_OPEN = "-(";

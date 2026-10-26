@@ -1,5 +1,5 @@
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";

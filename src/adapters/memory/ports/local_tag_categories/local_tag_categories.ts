@@ -1,5 +1,5 @@
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { TagCategory } from "@/core/domain/tag/tag";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 export class MemoryLocalTagCategories implements LocalTagCategories {
   private readonly tagCategories = new Map<string, TagCategory>();

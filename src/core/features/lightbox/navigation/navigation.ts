@@ -1,8 +1,9 @@
-import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debouncer";
-import { Emitter, Occurrence } from "@/core/utils/reactive/emitter";
-import { MediaSequence, SequencePosition } from "@/core/domain/media/media_sequence";
+import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debounced_task";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { MediaSequence, MediaSequencePosition } from "@/core/domain/media/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface LightboxNavigationConfiguration {
@@ -43,7 +44,7 @@ export class LightboxNavigation<T extends MediaItem> {
     return this.sequenceState;
   }
 
-  public get position(): Readable<SequencePosition | undefined> {
+  public get position(): Readable<MediaSequencePosition | undefined> {
     return this.positionState;
   }
 

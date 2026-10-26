@@ -1,4 +1,5 @@
-import { Post, getRatingBit } from "@/core/domain/post/post";
+import { Post } from "@/core/domain/post/post";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
@@ -9,6 +10,7 @@ import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random
 import { createPost } from "@/testing/post";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
 import { effect } from "@/core/utils/reactive/signal";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Options {
   blacklistedTags?: readonly string[];
@@ -23,8 +25,8 @@ interface Setup {
 }
 
 function setup(posts: Post[] = [], { blacklistedTags = [], settings = {}, isStarted = true }: Options = {}): Setup {
-  const collection = new FavoritesCollection();
-  const index = new FavoritesSearchIndex();
+  const collection = new FavoritesCollection(new StringInterner());
+  const index = new FavoritesSearchIndex(new StringInterner());
   const blacklist = new FavoritesBlacklist({ blacklistedTags, force: false });
 
   index.rebuild(collection.append(posts));
@@ -188,7 +190,7 @@ describe("FavoritesSearch", () => {
         createPost({ id: "3", score: 3, rating: "safe" })
       ]);
 
-      search.updateSettings({ sortKey: "score", isSortAscending: false, allowedRatings: getRatingBit("safe") });
+      search.updateSettings({ sortKey: "score", isSortAscending: false, allowedRatings: toRatingMask("safe") });
       expect(getResultIds(search)).toEqual(["3", "1"]);
     });
 
@@ -215,7 +217,7 @@ describe("FavoritesSearch", () => {
     test.each([
       { change: { sortKey: "favorited" }, isShuffled: false },
       { change: { isSortAscending: true }, isShuffled: false },
-      { change: { allowedRatings: getRatingBit("safe") }, isShuffled: true },
+      { change: { allowedRatings: toRatingMask("safe") }, isShuffled: true },
       { change: { isBlacklistEnabled: true }, isShuffled: true }
     ] as const)("leaves shuffled $isShuffled after changing $change", ({ change, isShuffled }) => {
       const { search } = setup();
@@ -302,7 +304,7 @@ describe("FavoritesSearch", () => {
         createPost({ id: "2", tags: "banana", rating: "explicit" })
       ], { blacklistedTags: ["apple"] });
 
-      search.updateSettings({ allowedRatings: getRatingBit("safe"), isBlacklistEnabled: true });
+      search.updateSettings({ allowedRatings: toRatingMask("safe"), isBlacklistEnabled: true });
       search.submit("banana");
       search.invert();
       search.clearFilters();

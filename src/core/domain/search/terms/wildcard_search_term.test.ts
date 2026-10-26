@@ -1,20 +1,20 @@
-import { createSearchable, searchableEmptyDoc } from "@/core/domain/search/testing/searchable";
+import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
 import { describe, expect, test } from "vitest";
 import { fruits, searchableFruitDoc } from "@/core/domain/search/testing/fruit_corpus";
-import { listPrefixes, listSubstrings } from "@/core/domain/search/testing/string";
+import { listPrefixes, listSubstrings } from "@/core/utils/string/string_utilities";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
 describe("WildcardSearchTerm", () => {
   test("rejects a doc with no tags", () => {
-    expect(parseWildcardSearchTerm("*").matches(searchableEmptyDoc)).toBe(false);
+    expect(parseWildcardSearchTerm("*").matches(buildSearchable([]))).toBe(false);
   });
 
   test("matches a doc with no tags when negated", () => {
-    expect(parseWildcardSearchTerm("-*").matches(searchableEmptyDoc)).toBe(true);
+    expect(parseWildcardSearchTerm("-*").matches(buildSearchable([]))).toBe(true);
   });
 
   test("matches a doc with one tag", () => {
-    expect(parseWildcardSearchTerm("*").matches(createSearchable(["apple"]))).toBe(true);
+    expect(parseWildcardSearchTerm("*").matches(buildSearchable(["apple"]))).toBe(true);
   });
 
   test("matches every doc with tags through *", () => {

@@ -1,4 +1,4 @@
-import { doNothing } from "@/core/utils/function/function";
+import { doNothing } from "@/core/utils/function/function_utilities";
 
 export type Cleanup = () => void;
 

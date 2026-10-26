@@ -1,11 +1,11 @@
-import { Dimensions } from "@/core/domain/post/post";
+import { Size } from "@/core/utils/geometry/size";
 import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
 
 const DECODE_WIDTH_STEP = 250;
 const MAX_DECODE_WIDTH = 2_000;
 const MIN_DECODE_WIDTH = 100;
 
-export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, { width, height }: Dimensions): number {
+export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, { width, height }: Size): number {
   if (layout === "native" || gridWidth <= 0 || columnCount <= 0) {
     return 0;
   }

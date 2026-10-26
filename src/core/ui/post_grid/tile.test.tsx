@@ -5,11 +5,11 @@ import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
-import { MediaItem } from "@/core/domain/post/post";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { NO_MEDIA } from "@/core/domain/media/media";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createImageLoaderService } from "@/testing/image_loader_service";
-import { doNothing } from "@/core/utils/function/function";
+import { doNothing } from "@/core/utils/function/function_utilities";
 
 const IMAGE: MediaItem = { id: "123", media: { kind: "image", locator: "images/123" } };
 const PLACEHOLDER: MediaItem = { id: "456", media: NO_MEDIA };

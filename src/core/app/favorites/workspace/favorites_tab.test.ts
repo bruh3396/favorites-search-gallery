@@ -7,10 +7,11 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { createFavoritesPreferences } from "@/core/app/preferences";
 import { createSearchSettings } from "@/core/features/favorites/testing/search";
+import { StringInterner } from "@/core/utils/string/string_interner";
 
 function setup(): FavoritesTab {
   return createFavoritesTab(new FavoritesSession({ settings: createSearchSettings() }, {
-    searchIndex: new FavoritesSearchIndex(),
+    searchIndex: new FavoritesSearchIndex(new StringInterner()),
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
     paginationSettings: createFavoritesPreferences(new MemoryLocalKeyedValues())

@@ -1,11 +1,17 @@
-import { TermDelta, TermUpdate } from "@/core/domain/search/engines/search_engine";
+import { TermDelta } from "@/core/domain/search/engines/term_delta";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { BitAlgebra } from "@/core/domain/search/engines/bit/indexes/bit_algebra";
-import { BitSet } from "@/core/domain/search/engines/bit/postings/bitset";
+import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
 import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
 import { DraftPostings } from "@/core/domain/search/engines/bit/indexes/draft_postings";
 import { DurablePostings } from "@/core/domain/search/engines/bit/indexes/durable_postings";
-import { Posting } from "@/core/domain/search/engines/bit/postings/posting";
-import { internString } from "@/core/utils/string/interner";
+import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
+import { StringInterner } from "@/core/utils/string/string_interner";
+
+export interface BitIndexDependencies<Doc> {
+  getTerms: (doc: Doc) => Iterable<string>;
+  stringInterner: StringInterner;
+}
 
 export class BitIndex<Doc> {
   private readonly docs = new DocTable<Doc>();
@@ -13,7 +19,7 @@ export class BitIndex<Doc> {
   private readonly draft = new DraftPostings();
   private readonly postings = new DurablePostings();
 
-  constructor(private readonly getTerms: (doc: Doc) => Iterable<string>) { }
+  constructor(private readonly dependencies: BitIndexDependencies<Doc>) { }
 
   public get size(): number {
     return this.docs.size;
@@ -96,8 +102,8 @@ export class BitIndex<Doc> {
     this.algebra.occupy(position);
     const newTerms: string[] = [];
 
-    for (const term of this.getTerms(doc)) {
-      if (this.draft.add(internString(term), position)) {
+    for (const term of this.dependencies.getTerms(doc)) {
+      if (this.draft.add(this.dependencies.stringInterner.intern(term), position)) {
         newTerms.push(term);
       }
     }

@@ -1,5 +1,5 @@
 import { Mock, describe, expect, test, vi } from "vitest";
-import { CategorizedPost } from "@/core/domain/post/post";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Rule34Error } from "@/adapters/rule34/client/error";

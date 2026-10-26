@@ -1,6 +1,6 @@
-import { BitSet } from "@/core/domain/search/engines/bit/postings/bitset";
+import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
 import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
-import { Posting } from "@/core/domain/search/engines/bit/postings/posting";
+import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 
 export class BitAlgebra<Doc> {
   private occupied: BitSet = new BitSet(0);

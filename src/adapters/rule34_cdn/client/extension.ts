@@ -1,4 +1,4 @@
-import { MediaKind } from "@/core/domain/media/media";
+import { MediaKind } from "@/core/domain/media/media_kind";
 
 export type Rule34CdnImageExtension = "jpg" | "png" | "jpeg";
 export type Rule34CdnFileExtension = Rule34CdnImageExtension | "gif" | "mp4";

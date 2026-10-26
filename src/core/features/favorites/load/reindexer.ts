@@ -1,10 +1,10 @@
-import { CoalescingExecutor } from "@/core/utils/async/coalescing";
+import { CoalescingExecutor } from "@/core/utils/async/coalescing_executor";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { Post } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { TermUpdate } from "@/core/domain/search/engines/search_engine";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 
 const TERM_UPDATE_COALESCING = { flushSize: 50, flushTimeout: 1_500 };
 

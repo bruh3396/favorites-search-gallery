@@ -1,4 +1,4 @@
-import { findFirstIndexWhere } from "@/core/utils/collection/array";
+import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";
 
 type Comparator<T> = (a: T, b: T) => number;
 const defaultCompare = <T>(a: T, b: T): number => (a < b ? -1 : a > b ? 1 : 0);

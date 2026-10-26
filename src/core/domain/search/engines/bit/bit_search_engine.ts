@@ -1,8 +1,8 @@
-import { SearchEngine, TermUpdate } from "@/core/domain/search/engines/search_engine";
+import { SearchEngine, SearchEngineDependencies } from "@/core/domain/search/engines/search_engine";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { BitEvaluator } from "@/core/domain/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
-import { Metric } from "@/core/domain/post/post";
-import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_index";
+import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
@@ -13,10 +13,10 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
   private readonly wildcardResolver: WildcardPostingResolver<Doc>;
   private readonly bitEvaluator: BitEvaluator<Doc>;
 
-  constructor(getTerms: (doc: Doc) => Iterable<string>, getMetric: (doc: Doc, metric: Metric) => number, docs: readonly Doc[] = []) {
-    this.bitIndex = new BitIndex<Doc>(getTerms);
+  constructor({ getTerms, getMetric, stringInterner }: SearchEngineDependencies<Doc>, docs: readonly Doc[] = []) {
+    this.bitIndex = new BitIndex<Doc>({ getTerms, stringInterner });
     this.metricIndex = new MetricBitIndex<Doc>(getMetric);
-    this.wildcardResolver = new WildcardPostingResolver(this.bitIndex);
+    this.wildcardResolver = new WildcardPostingResolver({ bitIndex: this.bitIndex, stringInterner });
     this.bitEvaluator = new BitEvaluator(this.bitIndex, new PostingResolver(this.bitIndex, this.metricIndex, this.wildcardResolver));
     this.rebuild(docs);
   }

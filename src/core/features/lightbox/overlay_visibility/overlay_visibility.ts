@@ -1,6 +1,6 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { doNothing } from "@/core/utils/function/function";
+import { doNothing } from "@/core/utils/function/function_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export interface LightboxOverlayVisibilityConfiguration {

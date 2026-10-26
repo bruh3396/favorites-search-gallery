@@ -1,4 +1,5 @@
-import { RATINGS, getRatingBit } from "@/core/domain/post/post";
+import { RATINGS } from "@/core/domain/post/rating";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/post_table";
 import { createPost } from "@/testing/post";
@@ -71,7 +72,7 @@ describe("FavoritesPostTable", () => {
       const table = new FavoritesPostTable();
 
       table.write(0, createPost({ id: "1", rating }));
-      expect(table.getRatingBit(0)).toBe(getRatingBit(rating));
+      expect(table.getRatingBit(0)).toBe(toRatingMask(rating));
     });
   });
 
