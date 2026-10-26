@@ -1,0 +1,121 @@
+import { FavoritesSearchSettings, UNFILTERED_FAVORITES_SEARCH_SETTINGS } from "@/core/features/favorites/search/favorites_search_settings";
+import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Favorite } from "@/core/features/favorites/favorite";
+import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
+import { FavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
+
+export interface FavoritesSearchConfiguration {
+  readonly settings: FavoritesSearchSettings;
+}
+
+export interface FavoritesSearchDependencies {
+  searchIndex: FavoritesSearchIndex;
+  blacklist: FavoritesBlacklist;
+  randomSource: RandomSource;
+}
+
+const SEED_RANGE = 2 ** 32;
+
+export class FavoritesSearch {
+  private readonly currentSettings: Signal<FavoritesSearchSettings>;
+  private readonly currentResults: Signal<readonly Favorite[]>;
+  private readonly request: Readable<FavoritesSearchRequest>;
+  private readonly searchedEmitter: Emitter<void>;
+  private readonly stopListening: Array<() => void>;
+  private hasStarted: boolean;
+
+  constructor(configuration: FavoritesSearchConfiguration, private readonly dependencies: FavoritesSearchDependencies) {
+    this.hasStarted = false;
+    this.currentSettings = new Signal(configuration.settings);
+    this.currentResults = new Signal<readonly Favorite[]>([]);
+    this.searchedEmitter = new Emitter<void>();
+    this.request = computed(() => compileFavoritesSearchRequest(this.currentSettings.value, dependencies.blacklist));
+    this.stopListening = [
+      dependencies.searchIndex.indexed.on(favorites => this.appendMatches(favorites)),
+      dependencies.searchIndex.rebuilt.on(() => this.searchAll())
+    ];
+  }
+
+  public get settings(): Readable<FavoritesSearchSettings> {
+    return this.currentSettings;
+  }
+
+  public get results(): Readable<readonly Favorite[]> {
+    return this.currentResults;
+  }
+
+  public get searched(): Occurrence<void> {
+    return this.searchedEmitter;
+  }
+
+  public start(): void {
+    if (!this.hasStarted) {
+      this.hasStarted = true;
+      this.searchAll();
+    }
+  }
+
+  public submit(query: string): void {
+    this.applySettings({ query, isShuffled: false });
+  }
+
+  public invert(): void {
+    this.applySettings({ isInverted: !this.currentSettings.peek().isInverted });
+  }
+
+  public shuffle(): void {
+    this.applySettings({ isShuffled: true, shuffleSeed: this.drawSeed() });
+  }
+
+  public clearFilters(): void {
+    this.applySettings(UNFILTERED_FAVORITES_SEARCH_SETTINGS);
+  }
+
+  public updateSettings(change: Partial<FavoritesSearchSettings>): void {
+    const sortWasChanged = change.sortKey !== undefined || change.isSortAscending !== undefined;
+    const isShuffled = this.currentSettings.peek().isShuffled && !sortWasChanged;
+
+    this.applySettings({ ...change, isShuffled });
+  }
+
+  public dispose(): void {
+    for (const stop of this.stopListening) {
+      stop();
+    }
+  }
+
+  private applySettings(change: Partial<FavoritesSearchSettings>): void {
+    batch(() => {
+      this.currentSettings.value = { ...this.currentSettings.peek(), ...change };
+      this.searchAll();
+      this.searchedEmitter.emit();
+    });
+  }
+
+  private searchAll(): void {
+    if (this.hasStarted) {
+      this.currentResults.value = this.dependencies.searchIndex.search(this.request.peek());
+    }
+  }
+
+  private appendMatches(favorites: readonly Favorite[]): void {
+    if (!this.hasStarted) {
+      return;
+    }
+    const matched = this.dependencies.searchIndex.match(this.request.peek(), favorites);
+
+    if (matched.length > 0) {
+      // eslint-disable-next-line unicorn/prefer-spread
+      this.currentResults.value = this.currentResults.peek().concat(matched);
+    }
+  }
+
+  private drawSeed(): number {
+    return Math.floor(this.dependencies.randomSource.next() * SEED_RANGE);
+  }
+}

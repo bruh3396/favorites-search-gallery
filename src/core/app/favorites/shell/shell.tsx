@@ -1,5 +1,5 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
-import { FavoritesService } from "@/core/features/favorites/favorites";
+import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import { h } from "@/core/ui/h/h";
 import { measureLoadProgress } from "@/core/app/favorites/shell/load_progress";
@@ -25,7 +25,7 @@ export function FavoritesShell({ favorites, panes, zenEnabled }: FavoritesShellP
       </div>
       <main className={FavoritesShellClass.panes}>{panes}</main>
       <div className={FavoritesShellClass.zenHint} role="status" hidden={computed(() => !zenEnabled.value)} data-zen-stage="">
-        Press Z or Esc to exit zen
+        Press Z or Esc to exit Zen
       </div>
     </div>
   );

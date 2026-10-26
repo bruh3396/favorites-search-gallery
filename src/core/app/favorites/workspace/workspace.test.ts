@@ -1,9 +1,9 @@
-import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings } from "@/core/features/favorites/search/input";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { describe, expect, test, vi } from "vitest";
-import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
-import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
-import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { FavoritesSession } from "@/core/features/favorites/session/session";
+import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
+import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
+import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
@@ -20,10 +20,10 @@ interface Setup {
 }
 
 function createWorkspace(storage: MemoryLocalKeyedValues, favoritesOwnerId = "1", posts: Post[] = []): FavoritesWorkspace {
-  const paginationSettings = createFavoritesPreferences(new MemoryLocalKeyedValues());
+  const paginationPreferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
   const searchIndex = new FavoritesSearchIndex(new StringInterner());
 
-  paginationSettings.pageSize.set(2);
+  paginationPreferences.pageSize.set(2);
   searchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
   return new FavoritesWorkspace({ favoritesOwnerId }, {
     storage,
@@ -31,7 +31,7 @@ function createWorkspace(storage: MemoryLocalKeyedValues, favoritesOwnerId = "1"
       const session = new FavoritesSession({ settings }, {
         searchIndex,
         blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
-        paginationSettings,
+        paginationPreferences,
         randomSource: new MemoryRandomSource()
       });
 

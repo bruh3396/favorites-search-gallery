@@ -1,7 +1,7 @@
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesPreferences } from "@/core/app/preferences";
 import { FavoritesSearchPanel } from "@/core/app/favorites/search_panel/search_panel";
-import { FavoritesService } from "@/core/features/favorites/favorites";
+import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";

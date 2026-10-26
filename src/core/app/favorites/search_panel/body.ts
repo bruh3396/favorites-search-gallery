@@ -1,4 +1,4 @@
-import { FavoritesLoadPhase } from "@/core/features/favorites/load/state";
+import { FavoritesLoadPhase } from "@/core/features/favorites/load/favorites_load_state";
 
 export type FavoritesPanelBody =
   | { readonly kind: "skeleton" }

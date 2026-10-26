@@ -1,5 +1,6 @@
 import { ActivityBar, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
-import { FAVORITES_STYLES, FavoritesService } from "@/core/features/favorites/favorites";
+import FAVORITES_CSS from "@/core/features/favorites/styles.css?inline";
+import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox_details/copy_id_button.css?inline";
 import { FavoritesPreferences } from "@/core/app/preferences";
@@ -7,7 +8,7 @@ import { FavoritesShell } from "@/core/app/favorites/shell/shell";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/lightbox_details.css?inline";
-import { LIGHTBOX_STYLES } from "@/core/features/lightbox/lightbox";
+import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/search_panel.css?inline";
 import SHELL_CSS from "@/core/app/favorites/shell/shell.css?inline";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
@@ -19,11 +20,11 @@ import { h } from "@/core/ui/h/h";
 
 export const FAVORITES_APP_STYLES = [
   UI_CSS,
-  FAVORITES_STYLES,
+  FAVORITES_CSS,
   SHELL_CSS,
   SEARCH_PANEL_CSS,
   TAB_STRIP_TOGGLE_CSS,
-  LIGHTBOX_STYLES,
+  LIGHTBOX_CSS,
   LIGHTBOX_DETAILS_CSS,
   COPY_ID_BUTTON_CSS
 ];

@@ -1,0 +1,88 @@
+import { describe, expect, test } from "vitest";
+import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
+import { createPost } from "@/testing/post";
+import { StringInterner } from "@/core/utils/string/string_interner";
+
+function setup(tags: string): { arena: FavoritesColumnarArena; slot: number } {
+  const arena = new FavoritesColumnarArena(new StringInterner());
+  const slot = arena.allocate();
+
+  arena.write(slot, createPost({ id: "1", tags }));
+  return { arena, slot };
+}
+
+describe("FavoritesColumnarArena", () => {
+  describe("allocate", () => {
+    test("hands out consecutive indexes", () => {
+      const arena = new FavoritesColumnarArena(new StringInterner());
+
+      expect([arena.allocate(), arena.allocate(), arena.allocate()]).toEqual([0, 1, 2]);
+    });
+  });
+
+  describe("getPost", () => {
+    test("reads back the written post", () => {
+      const arena = new FavoritesColumnarArena(new StringInterner());
+      const slot = arena.allocate();
+      const post = createPost({ id: "1", tags: "apple banana", score: 5 });
+
+      arena.write(slot, post);
+      expect(arena.getPost(slot)).toEqual(post);
+    });
+  });
+
+  describe("getTags", () => {
+    test("parses the written tags", () => {
+      const { arena, slot } = setup("apple banana");
+
+      expect(arena.getTags(slot)).toEqual(new Set(["apple", "banana"]));
+    });
+
+    test("returns no tags for a post without tags", () => {
+      const { arena, slot } = setup("");
+
+      expect(arena.getTags(slot).size).toBe(0);
+    });
+  });
+
+  describe("write", () => {
+    test("grows storage when writing beyond the initial capacity", () => {
+      const arena = new FavoritesColumnarArena(new StringInterner());
+      let slot = -1;
+
+      for (let i = 0; i < 1_025; i += 1) {
+        slot = arena.allocate();
+      }
+      const post = createPost({ id: "1025", tags: "apple banana" });
+
+      arena.write(slot, post);
+      expect(arena.getPost(slot)).toEqual(post);
+    });
+
+    test("replaces the tags of a rewritten slot", () => {
+      const { arena, slot } = setup("apple");
+
+      arena.write(slot, createPost({ id: "1", tags: "banana" }));
+      expect(arena.getTags(slot)).toEqual(new Set(["banana"]));
+    });
+  });
+
+  describe("compact", () => {
+    test("keeps the data readable", () => {
+      const { arena, slot } = setup("apple banana");
+
+      arena.compact();
+      expect(arena.getTags(slot)).toEqual(new Set(["apple", "banana"]));
+      expect(arena.getNumericId(slot)).toBe(1);
+    });
+  });
+
+  describe("markNew", () => {
+    test("marks the favorite as new", () => {
+      const { arena, slot } = setup("apple");
+
+      arena.markNew(slot);
+      expect(arena.isNew(slot)).toBe(true);
+    });
+  });
+});

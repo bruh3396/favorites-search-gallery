@@ -1,4 +1,4 @@
-import { FavoritesLoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { Progress } from "@/core/ui/components/progress_line/progress";
 
 export function measureLoadProgress(state: FavoritesLoadState): Progress {

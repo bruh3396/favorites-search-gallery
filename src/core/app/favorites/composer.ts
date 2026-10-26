@@ -1,5 +1,5 @@
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/app";
-import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
+import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { SearchPanelDependencies, composeSearchPanel } from "@/core/app/favorites/search_panel/composer";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
@@ -11,7 +11,7 @@ import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment";
 import { DEFAULT_FAVORITES_KEYMAP } from "@/core/app/favorites/keymap";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoritesSession } from "@/core/features/favorites/session/session";
+import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesSettings } from "@/core/app/favorites/favorites_settings";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
@@ -32,12 +32,12 @@ import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
 import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
-export interface FavoritesAppConfiguration extends FavoritesConfiguration {
+export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration {
   readonly favoritesOwnerId: string;
   readonly colorScheme: ColorScheme;
 }
 
-export interface FavoritesAppDependencies extends Omit<FavoritesDependencies, "paginationSettings"> {
+export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "paginationPreferences"> {
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
   remotePages: RemotePages;
@@ -60,8 +60,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const detailsView = {
     organization: lightboxPreferences.detailsOrganization, alignment: lightboxPreferences.detailsAlignment, size: lightboxPreferences.detailsSize
   };
-  const paginationSettings = { pageSize: preferences.pageSize, infiniteScroll: preferences.infiniteScroll };
-  const favoritesService = createFavoritesService(favoritesConfiguration, { ...ports, paginationSettings });
+  const paginationPreferences = { pageSize: preferences.pageSize, infiniteScroll: preferences.infiniteScroll };
+  const favoritesService = createFavoritesService(favoritesConfiguration, { ...ports, paginationPreferences });
   const workspace = new FavoritesWorkspace({ favoritesOwnerId }, {
     storage: storage.app,
     createSession: (settings): FavoritesSession => favoritesService.createSession({ settings })

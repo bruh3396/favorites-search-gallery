@@ -1,6 +1,6 @@
 import { AppPreferences, FavoritesPreferences, LightboxPreferences } from "@/core/app/preferences";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
-import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
+import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { THEMES, Theme } from "@/core/ui/theme/theme";

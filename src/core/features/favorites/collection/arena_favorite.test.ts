@@ -2,7 +2,7 @@ import { RATINGS } from "@/core/domain/post/rating";
 import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
-import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
+import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
 import { createPost } from "@/testing/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
 

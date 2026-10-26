@@ -1,11 +1,11 @@
 import { Codec, createListCodec, createRecordCodec } from "@/core/utils/codec/codec";
-import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, FavoritesSearchSettings } from "@/core/features/favorites/search/input";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { FavoritesTab, createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { Readable, batch, computed, effect } from "@/core/utils/reactive/signal";
 import { Tab } from "@/core/ui/tabs/tab";
 import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoritesSession } from "@/core/features/favorites/session/session";
+import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { isRecord } from "@/core/utils/guard/guard";

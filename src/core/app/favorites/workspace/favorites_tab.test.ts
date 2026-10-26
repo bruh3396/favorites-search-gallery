@@ -1,20 +1,20 @@
 import { FavoritesTab, createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { describe, expect, test } from "vitest";
-import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
-import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { FavoritesSession } from "@/core/features/favorites/session/session";
+import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
+import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { createFavoritesPreferences } from "@/core/app/preferences";
-import { createSearchSettings } from "@/core/features/favorites/testing/search";
+import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 function setup(): FavoritesTab {
-  return createFavoritesTab(new FavoritesSession({ settings: createSearchSettings() }, {
+  return createFavoritesTab(new FavoritesSession({ settings: buildFavoritesSearchSettings() }, {
     searchIndex: new FavoritesSearchIndex(new StringInterner()),
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
-    paginationSettings: createFavoritesPreferences(new MemoryLocalKeyedValues())
+    paginationPreferences: createFavoritesPreferences(new MemoryLocalKeyedValues())
   }));
 }
 

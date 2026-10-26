@@ -22,7 +22,7 @@ import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/vi
 import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
-import { createPostListService } from "@/core/features/post_list/post_list";
+import { createPostListService } from "@/core/features/post_list/post_list_service";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 

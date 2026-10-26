@@ -1,6 +1,6 @@
 import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
-import { LightboxMode } from "@/core/features/lightbox/mode";
+import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";

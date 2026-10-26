@@ -1,7 +1,7 @@
 import { Metric } from "@/core/domain/post/metric";
 import { Post } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoritesColumnarArena } from "@/core/features/favorites/collection/columnar_arena";
+import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
 import { Media } from "@/core/domain/media/media";
 
 export class ArenaFavorite implements Favorite {

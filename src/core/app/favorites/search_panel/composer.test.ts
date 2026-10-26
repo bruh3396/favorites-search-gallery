@@ -1,11 +1,11 @@
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoritesBlacklist } from "@/core/features/favorites/search/blacklist";
-import { FavoritesCollection } from "@/core/features/favorites/collection/collection";
-import { FavoritesLoadState } from "@/core/features/favorites/load/state";
-import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
-import { FavoritesSession } from "@/core/features/favorites/session/session";
+import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
+import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
+import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { createImageLoaderService } from "@/testing/image_loader_service";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
@@ -24,7 +24,7 @@ import { composeSearchPanel } from "@/core/app/favorites/search_panel/composer";
 import { createFavoritesPreferences } from "@/core/app/preferences";
 import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { createPost } from "@/testing/post";
-import { createSearchSettings } from "@/core/features/favorites/testing/search";
+import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { render } from "@/core/ui/h/h";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
@@ -54,11 +54,11 @@ function setup(posts: Post[] = []): Setup {
 
   preferences.pageSize.set(2);
   index.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
-  const session = new FavoritesSession({ settings: createSearchSettings() }, {
+  const session = new FavoritesSession({ settings: buildFavoritesSearchSettings() }, {
     searchIndex: index,
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
-    paginationSettings: preferences
+    paginationPreferences: preferences
   });
 
   session.start();

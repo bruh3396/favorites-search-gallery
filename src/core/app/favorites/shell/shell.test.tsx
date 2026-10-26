@@ -1,7 +1,7 @@
 import { FavoritesShell, FavoritesShellClass } from "@/core/app/favorites/shell/shell";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { FavoritesLoadState } from "@/core/features/favorites/load/state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import SHELL_CSS from "@/core/app/favorites/shell/shell.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";

@@ -1,6 +1,6 @@
 import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/theme";
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/grid_layout";
-import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
+import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { Preference } from "@/core/utils/preference/preference";
 import { PreferenceSetSchema, PreferenceSet, createPreferenceSet } from "@/core/utils/preference/preference_set";
 import { PreferenceStorage } from "@/core/utils/preference/preference_storage";

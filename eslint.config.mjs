@@ -6,7 +6,6 @@ import stylistic from "@stylistic/eslint-plugin";
 import tseslint from "typescript-eslint";
 import unicorn from "eslint-plugin-unicorn";
 
-// A boolean among several parameters is a flag argument; a lone boolean is the value being set.
 const SIGNATURE_WITH_SEVERAL_PARAMETERS = ":matches(:function, TSDeclareFunction, TSEmptyBodyFunctionExpression, TSMethodSignature, TSFunctionType, TSCallSignatureDeclaration, TSConstructSignatureDeclaration)[params.length>1]";
 const BOOLEAN_TYPED = "[typeAnnotation.typeAnnotation.type='TSBooleanKeyword']";
 const BOOLEAN_DEFAULT = "[right.type='Literal'][right.raw=/^(true|false)$/]";
@@ -19,7 +18,6 @@ const BOOLEAN_FLAG_PARAMETERS = [
   `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`,
   `${SIGNATURE_WITH_SEVERAL_PARAMETERS} > TSParameterProperty > AssignmentPattern${BOOLEAN_DEFAULT} > Identifier.left:not(${BOOLEAN_TYPED})`
 ].map(selector => ({ selector, message: BOOLEAN_FLAG_MESSAGE }));
-// readonly marks data; behavior (function members, Dependencies, Props) is never marked.
 const BEHAVIOR_MESSAGE = "Function members, Dependencies, and Props aren't marked readonly.";
 const READONLY_BEHAVIOR = [
   "TSPropertySignature[readonly=true] > TSTypeAnnotation > TSFunctionType",
@@ -27,7 +25,6 @@ const READONLY_BEHAVIOR = [
   "TSTypeAliasDeclaration[id.name=/(Dependencies|Props)$/] > TSTypeLiteral > TSPropertySignature[readonly=true]",
   "TSTypeAliasDeclaration[id.name=/(Dependencies|Props)$/] > TSMappedType[readonly=true]"
 ].map(selector => ({ selector, message: BEHAVIOR_MESSAGE }));
-// Core holds references to the elements it builds; searching the tree couples it to markup it may not own.
 const DOM_SEARCH_MESSAGE = "Don't search the DOM in core: keep a reference to the element, or ask the component that owns it.";
 const DOM_SEARCHES = [
   "querySelector",
@@ -41,9 +38,43 @@ const DOM_SEARCHES = [
   "elementFromPoint",
   "elementsFromPoint"
 ].map(property => ({ property, message: DOM_SEARCH_MESSAGE }));
+const TIME_MESSAGE = "Time and randomness go through the Scheduler and RandomSource ports, so tests control them.";
+const TIME_GLOBALS = [
+  "setTimeout",
+  "clearTimeout",
+  "setInterval",
+  "clearInterval",
+  "requestAnimationFrame",
+  "cancelAnimationFrame",
+  "devicePixelRatio"
+].map(name => ({ name, message: TIME_MESSAGE }));
+const TIME_PROPERTIES = [
+  ...["setTimeout", "clearTimeout", "setInterval", "clearInterval", "requestAnimationFrame", "cancelAnimationFrame", "devicePixelRatio"]
+    .map(property => ({ property, message: TIME_MESSAGE })),
+  { object: "Date", property: "now", message: TIME_MESSAGE },
+  { object: "performance", property: "now", message: TIME_MESSAGE },
+  { object: "Math", property: "random", message: TIME_MESSAGE }
+];
 const CALLED_ONCE = {
   selector: "CallExpression[callee.property.name='toHaveBeenCalledTimes'][arguments.length=1][arguments.0.value=1]",
   message: "Use toHaveBeenCalledOnce() instead of toHaveBeenCalledTimes(1)."
+};
+const TEST_TIME_MESSAGE = "Control time with MemoryScheduler.advance(), not fake timers or real delays.";
+const FAKE_TIMERS = {
+  selector: "MemberExpression[object.name='vi'][property.name=/Timer|SystemTime/]",
+  message: TEST_TIME_MESSAGE
+};
+const TEST_TIME_GLOBALS = ["setTimeout", "setInterval"].map(name => ({ name, message: TEST_TIME_MESSAGE }));
+const local = {
+  rules: {
+    "no-vitest-environment": {
+      create: context => ({
+        Program: () => context.sourceCode.getAllComments()
+          .filter(comment => comment.value.includes("@vitest-environment"))
+          .forEach(comment => context.report({ loc: comment.loc, message: "Don't override the test environment per file." }))
+      })
+    }
+  }
 };
 
 export default defineConfig([
@@ -690,7 +721,17 @@ export default defineConfig([
   },
   {
     files: ["**/*.test.{ts,tsx}"],
+    plugins: { local },
     rules: {
+      "local/no-vitest-environment": "error",
+      "no-restricted-globals": ["error", ...TEST_TIME_GLOBALS],
+      "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, CALLED_ONCE, FAKE_TIMERS]
+    }
+  },
+  {
+    files: ["src/adapters/browser/ports/scheduler/scheduler.test.ts"],
+    rules: {
+      "no-restricted-globals": "error",
       "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, CALLED_ONCE]
     }
   },
@@ -698,7 +739,8 @@ export default defineConfig([
     files: ["src/core/**/*.{ts,tsx}"],
     ignores: ["src/**/*.test.{ts,tsx}", "src/**/testing/**"],
     rules: {
-      "no-restricted-properties": ["error", ...DOM_SEARCHES]
+      "no-restricted-globals": ["error", ...TIME_GLOBALS],
+      "no-restricted-properties": ["error", ...DOM_SEARCHES, ...TIME_PROPERTIES]
     }
   },
   {
