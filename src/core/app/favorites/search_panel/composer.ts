@@ -13,14 +13,14 @@ import { Readable } from "@/core/utils/reactive/signal";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonDimensions } from "@/core/app/favorites/storage/skeleton_dimensions";
-import { SkeletonGrid } from "@/core/ui/post_grid/skeleton";
+import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
 import { TabStripToggle } from "@/core/app/favorites/search_panel/tab_strip_toggle";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 
 export interface SearchPanelDependencies {
   favorites: Pick<FavoritesService, "loadState" | "searchable" | "hydrated">;
-  preferences: Pick<FavoritesPreferences, "layout" | "tilesPerRow" | "pageSize" | "infiniteScroll" | "tabStripVisible">;
+  preferences: Pick<FavoritesPreferences, "layout" | "columnCount" | "pageSize" | "infiniteScroll" | "tabStripVisible">;
   tabCount: Readable<number>;
   skeletonDimensions: Pick<SkeletonDimensions, "value">;
   visibilityObserver: VisibilityObserver;
@@ -47,7 +47,7 @@ export function composeSearchPanel(tab: FavoritesTab, dependencies: SearchPanelD
     skeleton: h(SkeletonGrid, {
       dimensions: skeletonDimensions.value,
       layout: preferences.layout,
-      tilesPerRow: preferences.tilesPerRow,
+      columnCount: preferences.columnCount,
       count: preferences.pageSize.peek()
     }),
     grid: h(PostGrid<Favorite>, {

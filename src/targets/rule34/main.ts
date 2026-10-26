@@ -3,9 +3,13 @@ import {
   DEFAULT_RULE34_DEPENDENCIES_CONFIGURATION,
   Rule34Dependencies,
   createFavoritesDependencies,
+  createFrozenCobaltClient,
   createRule34Dependencies
 } from "@/targets/rule34/dependencies";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
+import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
+import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
+import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
@@ -39,12 +43,21 @@ function readEnvironment(rule34Document: Rule34Document): Environment {
 }
 
 function startFavoritesApp(environment: Environment, dependencies: Rule34Dependencies): void {
+  const { mintMedia, rule34, scheduler, randomSource } = dependencies;
+  const frozenCobalt = createFrozenCobaltClient(environment, dependencies);
+  const remotePosts = new FallbackRemotePosts({
+    primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
+    fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
+  });
+
+  frozenCobalt.ping();
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
-  }, createFavoritesDependencies(DEFAULT_RULE34_DEPENDENCIES_CONFIGURATION, environment, dependencies)).mount(dependencies.hostPage.claimContent());
+  }, createFavoritesDependencies(DEFAULT_RULE34_DEPENDENCIES_CONFIGURATION, environment, dependencies, remotePosts))
+    .mount(dependencies.hostPage.claimContent());
 }
 
 function startPostListApp(environment: Environment, {
@@ -73,8 +86,9 @@ function startPostListApp(environment: Environment, {
 function main(): void {
   const rule34Document = new Rule34Document();
   const environment = readEnvironment(rule34Document);
+  const dependencies = createRule34Dependencies(DEFAULT_RULE34_DEPENDENCIES_CONFIGURATION, environment, rule34Document);
 
-  APPS[environment.mode](environment, createRule34Dependencies(DEFAULT_RULE34_DEPENDENCIES_CONFIGURATION, environment, rule34Document));
+  APPS[environment.mode](environment, dependencies);
 }
 
 main();

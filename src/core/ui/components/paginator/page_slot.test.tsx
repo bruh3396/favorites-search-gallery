@@ -2,7 +2,7 @@ import { PageSlot, PageSlotClass } from "@/core/ui/components/paginator/page_slo
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PAGE_SLOT_CSS from "@/core/ui/components/paginator/page_slot.css?inline";
-import { PageTerm } from "@/core/ui/components/paginator/page_sequence";
+import { PageTerm } from "@/core/ui/components/paginator/page_term";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 

@@ -1,6 +1,5 @@
-import {
-    ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SettingPreference, SliderSetting, SwitchSetting
-} from "@/core/ui/settings/descriptor";
+import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SliderSetting, SwitchSetting } from "@/core/ui/settings/setting_descriptor";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Setting, SettingProps } from "@/core/ui/settings/setting";
 import { describe, expect, test } from "vitest";

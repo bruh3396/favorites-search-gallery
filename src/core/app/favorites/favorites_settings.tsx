@@ -1,12 +1,13 @@
 import { AppPreferences, FavoritesPreferences, LightboxPreferences } from "@/core/app/preferences";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
-import { SettingsLayout, SettingsScreen } from "@/core/ui/settings/screen";
-import { THEMES, Theme } from "@/core/ui/theme/themes";
-import { GridLayout } from "@/core/ui/post_grid/tiler";
+import { SettingsLayout } from "@/core/ui/settings/settings_layout";
+import { SettingsScreen } from "@/core/ui/settings/settings_screen";
+import { THEMES, Theme } from "@/core/ui/theme/theme";
+import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
 import { Preference } from "@/core/utils/reactive/preference";
-import { SettingDescriptor } from "@/core/ui/settings/descriptor";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
@@ -78,7 +79,7 @@ function createDescriptors({
     },
     {
       id: "tileSize", kind: "slider", label: "Size", keywords: ["tile size", "tiles per row", "columns", "zoom", "grid"],
-      preference: preferences.tilesPerRow, min: 1, max: 16, step: 1, inverted: true,
+      preference: preferences.columnCount, min: 1, max: 16, step: 1, inverted: true,
       disabled: computed(() => preferences.layout.value === "native")
     },
     {

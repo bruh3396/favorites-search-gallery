@@ -13,11 +13,11 @@
 .fsg-PostGrid[data-layout="square"],
 .fsg-PostGrid[data-layout="column"] {
   display: grid;
-  grid-template-columns: repeat(var(--fsg-PostGrid-columns), minmax(0, 1fr));
+  grid-template-columns: repeat(var(--fsg-GridTiler-columnCount), minmax(0, 1fr));
   align-items: start;
 }
 
-.fsg-PostGrid-column {
+.fsg-GridTiler-column {
   display: flex;
   flex-direction: column;
   gap: var(--fsg-PostGrid-gap);
@@ -137,15 +137,15 @@
   --fsg-Tile-pulse-delay-step: 3;
 }
 
-.fsg-SkeletonGrid .fsg-PostGrid-column:nth-child(4n + 2) {
+.fsg-SkeletonGrid .fsg-GridTiler-column:nth-child(4n + 2) {
   --fsg-Tile-pulse-column-step: 1;
 }
 
-.fsg-SkeletonGrid .fsg-PostGrid-column:nth-child(4n + 3) {
+.fsg-SkeletonGrid .fsg-GridTiler-column:nth-child(4n + 3) {
   --fsg-Tile-pulse-column-step: 2;
 }
 
-.fsg-SkeletonGrid .fsg-PostGrid-column:nth-child(4n) {
+.fsg-SkeletonGrid .fsg-GridTiler-column:nth-child(4n) {
   --fsg-Tile-pulse-column-step: 3;
 }
 
@@ -198,5 +198,5 @@
 
 .fsg-PostGrid[data-layout="row"] .fsg-Tile {
   flex: 1 1 auto;
-  block-size: calc(100cqi / var(--fsg-PostGrid-tilesPerRow));
+  block-size: calc(100cqi / var(--fsg-GridTiler-columnCount));
 }

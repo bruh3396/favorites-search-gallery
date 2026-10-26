@@ -3,7 +3,7 @@ import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
-import { GridLayout } from "@/core/ui/post_grid/tiler";
+import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
@@ -18,7 +18,7 @@ interface Setup {
   changed: Emitter<MediaItem>;
   tileLocator: TileLocator<MediaItem>;
   layout: Signal<GridLayout>;
-  tilesPerRow: Signal<number>;
+  columnCount: Signal<number>;
   sizeObserver: MemorySizeObserver;
   onPlainClick: Mock<(post: MediaItem) => boolean>;
 }
@@ -32,7 +32,7 @@ function setup(...ids: string[]): Setup {
   const changed = new Emitter<MediaItem>();
   const tileLocator = new TileLocator<MediaItem>();
   const layout = new Signal<GridLayout>("grid");
-  const tilesPerRow = new Signal(2);
+  const columnCount = new Signal(2);
   const sizeObserver = new MemorySizeObserver();
   const onPlainClick = vi.fn<(post: MediaItem) => boolean>(() => true);
   const { result: element, dispose } = render(document, () => (
@@ -40,7 +40,7 @@ function setup(...ids: string[]): Setup {
       posts={posts}
       changed={changed}
       tileLocator={tileLocator}
-      settings={{ layout, tilesPerRow }}
+      settings={{ layout, columnCount }}
       visibilityObserver={{ observe: () => (): void => { } }}
       sizeObserver={sizeObserver}
       imageLoaderService={createImageLoaderService()}
@@ -50,7 +50,7 @@ function setup(...ids: string[]): Setup {
       onPlainClick={onPlainClick}
     />
   ));
-  return { element, dispose, posts, changed, tileLocator, layout, tilesPerRow, sizeObserver, onPlainClick };
+  return { element, dispose, posts, changed, tileLocator, layout, columnCount, sizeObserver, onPlainClick };
 }
 
 function getDimensions(post: MediaItem): Dimensions {
@@ -119,11 +119,11 @@ describe("PostGrid", () => {
   });
 
   test("resizes the tiles without moving them", () => {
-    const { element, tilesPerRow } = setup("1", "2");
+    const { element, columnCount } = setup("1", "2");
     const tiles = [...element.children];
 
-    tilesPerRow.value = 3.5;
-    expect(element.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("3.5");
+    columnCount.value = 3;
+    expect(element.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("3");
     expect([...element.children]).toEqual(tiles);
   });
 
@@ -133,13 +133,13 @@ describe("PostGrid", () => {
     onTestFinished(() => {
       vi.restoreAllMocks();
     });
-    const { element, sizeObserver, tilesPerRow } = setup("40");
+    const { element, sizeObserver, columnCount } = setup("40");
     const targetWidth = createLoader.mock.calls[0][2];
 
     expect(targetWidth.value).toBe(0);
     sizeObserver.resize(element, { width: 500, height: 800, devicePixelWidth: 1_000 });
     expect(targetWidth.value).toBe(500);
-    tilesPerRow.value = 1;
+    columnCount.value = 1;
     expect(targetWidth.value).toBe(1_000);
   });
 
@@ -187,7 +187,7 @@ describe("PostGrid", () => {
       <PostGrid
         posts={posts}
         changed={new Emitter<MediaItem>()}
-        settings={{ layout: new Signal<GridLayout>("grid"), tilesPerRow: new Signal(2) }}
+        settings={{ layout: new Signal<GridLayout>("grid"), columnCount: new Signal(2) }}
         visibilityObserver={{ observe: () => ():void => { } }}
         sizeObserver={new MemorySizeObserver()}
         imageLoaderService={createImageLoaderService()}

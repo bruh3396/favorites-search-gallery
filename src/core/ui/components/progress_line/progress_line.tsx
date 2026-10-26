@@ -1,12 +1,11 @@
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { Progress } from "@/core/ui/components/progress_line/progress";
 import { h } from "@/core/ui/h/h";
 
 export const ProgressLineClass = {
   root: "fsg-ProgressLine",
   bar: "fsg-ProgressLine-bar"
 } as const;
-
-export type Progress = number | "indeterminate" | "idle";
 
 export interface ProgressLineProps {
   label: string;

@@ -9,7 +9,7 @@
 @import "./components/dropdown/dropdown.css" layer(components);
 @import "./components/setting_row/setting_row.css" layer(components);
 @import "./components/disclosure/disclosure.css" layer(components);
-@import "./settings/screen.css" layer(components);
+@import "./settings/settings_screen.css" layer(components);
 @import "./post_grid/post_grid.css" layer(components);
 @import "./components/status_text/status_text.css" layer(components);
 @import "./components/progress_line/progress_line.css" layer(components);

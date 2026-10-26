@@ -1,4 +1,5 @@
-import { PageTerm, getPageSequence } from "@/core/ui/components/paginator/page_sequence";
+import { PageTerm } from "@/core/ui/components/paginator/page_term";
+import { listPageTerms } from "@/core/ui/components/paginator/page_term_lister";
 import { describe, expect, test } from "vitest";
 
 const SLOT_COUNTS = [5, 6, 7, 9];
@@ -14,7 +15,7 @@ function listSequences(slotCount: number): Sequence[] {
 
   for (let pageCount = 1; pageCount <= 30; pageCount += 1) {
     for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
-      sequences.push({ pageNumber, pageCount, terms: getPageSequence({ pageNumber, pageCount, slotCount }) });
+      sequences.push({ pageNumber, pageCount, terms: listPageTerms({ pageNumber, pageCount, slotCount }) });
     }
   }
   return sequences;
@@ -24,33 +25,33 @@ function listPageNumbers(terms: readonly PageTerm[]): number[] {
   return terms.filter((term): term is number => term !== "gap");
 }
 
-describe("getPageSequence", () => {
+describe("listPageTerms", () => {
   test("lists a single page alone", () => {
-    expect(getPageSequence({ pageNumber: 1, pageCount: 1, slotCount: 7 })).toEqual([1]);
+    expect(listPageTerms({ pageNumber: 1, pageCount: 1, slotCount: 7 })).toEqual([1]);
   });
 
   test("lists nothing when there are no pages", () => {
-    expect(getPageSequence({ pageNumber: 1, pageCount: 0, slotCount: 7 })).toEqual([]);
+    expect(listPageTerms({ pageNumber: 1, pageCount: 0, slotCount: 7 })).toEqual([]);
   });
 
   test("lists every page without gaps when they all fit", () => {
-    expect(getPageSequence({ pageNumber: 2, pageCount: 3, slotCount: 7 })).toEqual([1, 2, 3]);
-    expect(getPageSequence({ pageNumber: 3, pageCount: 7, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, 6, 7]);
+    expect(listPageTerms({ pageNumber: 2, pageCount: 3, slotCount: 7 })).toEqual([1, 2, 3]);
+    expect(listPageTerms({ pageNumber: 3, pageCount: 7, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, 6, 7]);
   });
 
   test("runs pages from the start before a single gap near the start", () => {
-    expect(getPageSequence({ pageNumber: 1, pageCount: 296, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, "gap", 296]);
-    expect(getPageSequence({ pageNumber: 4, pageCount: 296, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, "gap", 296]);
+    expect(listPageTerms({ pageNumber: 1, pageCount: 296, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, "gap", 296]);
+    expect(listPageTerms({ pageNumber: 4, pageCount: 296, slotCount: 7 })).toEqual([1, 2, 3, 4, 5, "gap", 296]);
   });
 
   test("runs pages to the end after a single gap near the end", () => {
-    expect(getPageSequence({ pageNumber: 296, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 292, 293, 294, 295, 296]);
-    expect(getPageSequence({ pageNumber: 293, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 292, 293, 294, 295, 296]);
+    expect(listPageTerms({ pageNumber: 296, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 292, 293, 294, 295, 296]);
+    expect(listPageTerms({ pageNumber: 293, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 292, 293, 294, 295, 296]);
   });
 
   test("gaps both sides in the middle", () => {
-    expect(getPageSequence({ pageNumber: 5, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 4, 5, 6, "gap", 296]);
-    expect(getPageSequence({ pageNumber: 150, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 149, 150, 151, "gap", 296]);
+    expect(listPageTerms({ pageNumber: 5, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 4, 5, 6, "gap", 296]);
+    expect(listPageTerms({ pageNumber: 150, pageCount: 296, slotCount: 7 })).toEqual([1, "gap", 149, 150, 151, "gap", 296]);
   });
 
   test.each(SLOT_COUNTS)("always lists the current page with %i slots", slotCount => {

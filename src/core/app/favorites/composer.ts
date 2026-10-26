@@ -2,7 +2,8 @@ import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/app";
 import { FavoritesConfiguration, FavoritesDependencies, createFavoritesService } from "@/core/features/favorites/favorites";
 import { SearchPanelDependencies, composeSearchPanel } from "@/core/app/favorites/search_panel/composer";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { THEME_DEFINITIONS, Theme, applyTheme } from "@/core/ui/theme/themes";
+import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
+import { applyTheme } from "@/core/ui/theme/theme_applier";
 import { createAppPreferences, createColorSchemePreference, createFavoritesPreferences, createLightboxPreferences } from "@/core/app/preferences";
 import { h, render } from "@/core/ui/h/h";
 import { APP_FONT } from "@/core/app/font";
@@ -15,7 +16,7 @@ import { FavoritesSettings } from "@/core/app/favorites/favorites_settings";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
@@ -27,8 +28,8 @@ import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/vi
 import { createAppStorage } from "@/core/app/app_storage";
 import { createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox_details/lightbox_details";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
-import { fillRestOfWindow } from "@/core/ui/app_root/fill_rest_of_window";
-import { listenForHotkeys } from "@/core/ui/hotkeys/hotkeys";
+import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
+import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export interface FavoritesAppConfiguration extends FavoritesConfiguration {
@@ -81,7 +82,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       })
     }
   });
-  const imageLoaderService = new ImageLoaderService({
+  const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {
     remoteMedia: ports.remoteMedia, scheduler: ports.scheduler, enabled: preferences.hdTilesEnabled, paused: lightbox.isOpen
   });
   const tabCount = computed(() => workspace.tabManager.tabs.value.length);

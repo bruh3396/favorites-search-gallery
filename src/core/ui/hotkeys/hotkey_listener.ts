@@ -1,6 +1,5 @@
-export type Keymap<C extends string> = Readonly<Record<string, C>>;
-
-export type CommandHandlers<C extends string> = Readonly<Record<C, () => void>>;
+import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { Keymap } from "@/core/ui/hotkeys/keymap";
 
 export function listenForHotkeys<C extends string>(target: Document, keymap: Keymap<C>, handlers: CommandHandlers<C>): () => void {
   const listener = (event: KeyboardEvent): void => {

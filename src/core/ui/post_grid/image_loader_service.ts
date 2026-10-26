@@ -1,14 +1,24 @@
-import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
+import { BatchDebouncer, BatchDebouncerConfiguration } from "@/core/utils/async/batch_debouncer";
+import { RateLimiter, RateLimiterConfiguration } from "@/core/utils/async/rate_limiter";
 import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { Media } from "@/core/domain/media/media";
-import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
-export const DECODE_DEBOUNCE = { delay: 400 };
-export const DECODE_RATE_LIMIT = { concurrency: 3, ratePerSecond: 20 };
-export const PAINT_RATE_LIMIT = { concurrency: 1, ratePerSecond: 40 };
+export interface ImageLoaderServiceConfiguration {
+  readonly decodeDebounce: BatchDebouncerConfiguration;
+  readonly decodeRateLimit: RateLimiterConfiguration;
+  readonly paintRateLimit: RateLimiterConfiguration;
+  readonly maxCanvasHeight: number;
+}
+
+export const DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION: ImageLoaderServiceConfiguration = {
+  decodeDebounce: { delay: 400 },
+  decodeRateLimit: { concurrency: 3, ratePerSecond: 20 },
+  paintRateLimit: { concurrency: 1, ratePerSecond: 40 },
+  maxCanvasHeight: 16_000
+};
 
 export interface ImageLoaderServiceDependencies {
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "decodeStill">;
@@ -18,30 +28,29 @@ export interface ImageLoaderServiceDependencies {
 }
 
 export class ImageLoaderService {
-  private readonly remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "decodeStill">;
-  private readonly enabled: Readable<boolean>;
-  private readonly paused: Readable<boolean>;
   private readonly decodeLimiter: RateLimiter;
   private readonly decodeDebouncer: BatchDebouncer;
   private readonly paintLimiter: RateLimiter;
 
-  constructor(dependencies: ImageLoaderServiceDependencies) {
-    this.remoteMedia = dependencies.remoteMedia;
-    this.enabled = dependencies.enabled;
-    this.paused = dependencies.paused;
-    this.decodeLimiter = new RateLimiter(DECODE_RATE_LIMIT, dependencies.scheduler);
-    this.decodeDebouncer = new BatchDebouncer(DECODE_DEBOUNCE, dependencies.scheduler);
-    this.paintLimiter = new RateLimiter(PAINT_RATE_LIMIT, dependencies.scheduler);
+  constructor(private readonly configuration: ImageLoaderServiceConfiguration, private readonly dependencies: ImageLoaderServiceDependencies) {
+    const { decodeRateLimit, decodeDebounce, paintRateLimit } = configuration;
+    const { scheduler } = dependencies;
+
+    this.decodeLimiter = new RateLimiter(decodeRateLimit, scheduler);
+    this.decodeDebouncer = new BatchDebouncer(decodeDebounce, scheduler);
+    this.paintLimiter = new RateLimiter(paintRateLimit, scheduler);
   }
 
   public resolvePreviewUrl(media: Media): string {
-    return this.remoteMedia.resolvePreviewUrl(media);
+    return this.dependencies.remoteMedia.resolvePreviewUrl(media);
   }
 
   public createLoader(canvas: HTMLCanvasElement, media: Media, targetWidth: Readable<number>): ImageLoader {
-    return new ImageLoader({
-      canvas, media, targetWidth, decodeDebouncer: this.decodeDebouncer, paintLimiter: this.paintLimiter, enabled: this.enabled, paused: this.paused,
-      decodeStill: (target, signal, width) => this.decodeLimiter.run(() => this.remoteMedia.decodeStill(target, signal, width), signal)
+    const { maxCanvasHeight } = this.configuration;
+    const { remoteMedia, enabled, paused } = this.dependencies;
+    return new ImageLoader({ maxCanvasHeight }, {
+      canvas, media, targetWidth, decodeDebouncer: this.decodeDebouncer, paintLimiter: this.paintLimiter, enabled, paused,
+      decodeStill: (target, signal, width) => this.decodeLimiter.run(() => remoteMedia.decodeStill(target, signal, width), signal)
     });
   }
 }

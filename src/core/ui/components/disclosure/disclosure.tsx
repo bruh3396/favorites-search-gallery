@@ -1,5 +1,5 @@
-import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { computed } from "@/core/utils/reactive/signal";
+import { ControlProps } from "@/core/ui/components/control/control_props";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
 export const DisclosureClass = {
@@ -14,7 +14,7 @@ export interface DisclosureProps extends ControlProps<boolean> {
   content: HTMLElement;
 }
 
-export function Disclosure({ title, content, value, disabled = NEVER_DISABLED, size = "medium", onValueChange }: DisclosureProps): HTMLElement {
+export function Disclosure({ title, content, value, disabled = new Signal(false), size = "medium", onValueChange }: DisclosureProps): HTMLElement {
   const region = <div hidden={computed(() => !value.value)}>{content}</div>;
   const trigger = (
     <button

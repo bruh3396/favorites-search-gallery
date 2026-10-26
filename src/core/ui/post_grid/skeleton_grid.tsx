@@ -1,4 +1,5 @@
-import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
+import { GridLayout } from "@/core/ui/post_grid/grid_layout";
+import { tileGrid } from "@/core/ui/post_grid/grid_tiler";
 import { Readable, effect } from "@/core/utils/reactive/signal";
 import { TileClass, setAspectRatio } from "@/core/ui/post_grid/tile";
 import { Dimensions } from "@/core/domain/post/post";
@@ -12,23 +13,18 @@ export const SkeletonGridClass = {
 
 const MAX_TILE_COUNT = 50;
 
-export const DEFAULT_SKELETON_DIMENSIONS: readonly Dimensions[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
-
 export interface SkeletonGridProps {
   dimensions: readonly Dimensions[];
   layout: Readable<GridLayout>;
-  tilesPerRow: Readable<number>;
+  columnCount: Readable<number>;
   count: number;
 }
 
-export function SkeletonGrid({ dimensions, layout, tilesPerRow, count }: SkeletonGridProps): HTMLElement {
+export function SkeletonGrid({ dimensions, layout, columnCount, count }: SkeletonGridProps): HTMLElement {
   const tiles = dimensions.slice(0, clamp(count, 0, MAX_TILE_COUNT)).map(createSkeletonTile);
   const root = <div className={`${PostGridClass.root} ${SkeletonGridClass.root}`} aria-hidden="true" />;
 
-  effect(() => {
-    applyTiling(root, { layout: layout.value, tilesPerRow: tilesPerRow.value });
-    arrangeTiles(root, tiles, { layout: layout.value, getColumnCount: () => Math.round(tilesPerRow.value) });
-  });
+  effect(() => tileGrid(root, tiles, { layout: layout.value, columnCount: columnCount.value }));
   return root;
 }
 

@@ -1,5 +1,7 @@
-import { AppFont, installAppFont } from "@/core/ui/fonts/app_font";
-import { ThemeDefinition, applyTheme } from "@/core/ui/theme/themes";
+import { AppFont } from "@/core/ui/fonts/app_font";
+import { installAppFont } from "@/core/ui/fonts/app_font_installer";
+import { ThemeDefinition } from "@/core/ui/theme/theme";
+import { applyTheme } from "@/core/ui/theme/theme_applier";
 import { ColorScheme } from "@/core/boundary/environment";
 
 export const AppRootClass = {

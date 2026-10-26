@@ -1,4 +1,5 @@
-import { DEFAULT_SKELETON_DIMENSIONS, SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
+import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/app/favorites/storage/skeleton_dimensions";
+import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
@@ -28,7 +29,7 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { SegmentedClass } from "@/core/ui/components/segmented/segmented";
 import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesApp } from "@/core/app/favorites/composer";
@@ -122,13 +123,13 @@ describe("composeFavoritesApp", () => {
     expect(app.querySelector("input[type=search]")).not.toBeNull();
   });
 
-  test("uses the tiles per row kept in the favorites preferences, not the post list's", () => {
+  test("uses the column count kept in the favorites preferences, not the post list's", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { tilesPerRow: 4 }, postList: { tilesPerRow: 7 } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { columnCount: 4 }, postList: { columnCount: 7 } } });
     const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
-    expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("4");
+    expect(grid.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("4");
   });
 
   test("resizes the grid's tiles as the tile size slider in the Settings tool is dragged", () => {
@@ -140,7 +141,7 @@ describe("composeFavoritesApp", () => {
 
     slider.value = "18";
     slider.dispatchEvent(new Event("input"));
-    expect(grid.style.getPropertyValue("--fsg-PostGrid-tilesPerRow")).toBe("1");
+    expect(grid.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("1");
   });
 
   test("lays the grid out as picked in the Settings tool", () => {

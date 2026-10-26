@@ -1,4 +1,5 @@
-import { GridSizing, computeDecodeWidth } from "@/core/ui/post_grid/decode_width";
+import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
+import { pickDecodeWidth } from "@/core/ui/post_grid/decode_width_picker";
 import { Tile, TileClass, TileProps } from "@/core/ui/post_grid/tile";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -28,7 +29,7 @@ type TileOptions = Omit<TileProps, "onPlainClick" | "visibilityObserver" | "imag
 function drawTile(options: TileOptions): HTMLElement {
   return render(document, () => (
     <Tile
-      sizing={new Signal<GridSizing>({ layout: "column", tilesPerRow: 4, gridWidth: 1_000 })}
+      sizing={new Signal<GridSizing>({ layout: "column", columnCount: 4, gridWidth: 1_000 })}
       visibilityObserver={{ observe: () => () => { } }}
       imageLoaderService={createImageLoaderService()}
       onPlainClick={() => true}
@@ -259,7 +260,7 @@ describe("Tile", () => {
 
   test("sizes the HD image from the grid's sizing and the post's dimensions", () => {
     const createLoader = vi.spyOn(ImageLoaderService.prototype, "createLoader");
-    const sizing = new Signal<GridSizing>({ layout: "row", tilesPerRow: 4, gridWidth: 1_000 });
+    const sizing = new Signal<GridSizing>({ layout: "row", columnCount: 4, gridWidth: 1_000 });
 
     onTestFinished(() => {
       vi.restoreAllMocks();
@@ -267,9 +268,9 @@ describe("Tile", () => {
     drawTile({ post: IMAGE, dimensions: PORTRAIT, actions: [], sizing });
     const targetWidth = createLoader.mock.calls[0][2];
 
-    expect(targetWidth.value).toBe(computeDecodeWidth(sizing.value, PORTRAIT));
-    sizing.value = { layout: "row", tilesPerRow: 1, gridWidth: 1_000 };
-    expect(targetWidth.value).toBe(computeDecodeWidth(sizing.value, PORTRAIT));
+    expect(targetWidth.value).toBe(pickDecodeWidth(sizing.value, PORTRAIT));
+    sizing.value = { layout: "row", columnCount: 1, gridWidth: 1_000 };
+    expect(targetWidth.value).toBe(pickDecodeWidth(sizing.value, PORTRAIT));
   });
 
   test("leaves a placeholder's preview without an address", () => {

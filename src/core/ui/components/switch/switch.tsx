@@ -1,5 +1,5 @@
-import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { computed } from "@/core/utils/reactive/signal";
+import { ControlProps } from "@/core/ui/components/control/control_props";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
 export const SwitchClass = {
@@ -9,7 +9,7 @@ export const SwitchClass = {
 
 export type SwitchProps = ControlProps<boolean>;
 
-export function Switch({ value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: SwitchProps): HTMLElement {
+export function Switch({ value, disabled = new Signal(false), onValueChange, size = "medium" }: SwitchProps): HTMLElement {
   return (
     <button
       className={SwitchClass.root}

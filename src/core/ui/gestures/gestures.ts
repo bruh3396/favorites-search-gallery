@@ -1,46 +1,8 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
+import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
+import { ModifierState } from "@/core/ui/gestures/modifier_state";
+import { Point } from "@/core/utils/geometry/point";
 import { onCleanup } from "@/core/utils/reactive/scope";
-
-export interface ModifierState {
-  readonly shift: boolean;
-  readonly ctrl: boolean;
-  readonly alt: boolean;
-  readonly meta: boolean;
-}
-
-export interface GesturePoint {
-  readonly x: number;
-  readonly y: number;
-}
-
-export interface PressGesture {
-  readonly point: GesturePoint;
-  readonly modifiers: ModifierState;
-}
-
-export interface TapGesture {
-  readonly point: GesturePoint;
-  readonly modifiers: ModifierState;
-}
-
-export interface DragGesture {
-  readonly point: GesturePoint;
-  readonly delta: GesturePoint;
-}
-
-export interface WheelGesture {
-  readonly point: GesturePoint;
-  readonly delta: GesturePoint;
-  readonly modifiers: ModifierState;
-}
-
-export interface GestureHandlers {
-  canDrag(): boolean;
-  onPress(gesture: PressGesture): boolean;
-  onTap(gesture: TapGesture): void;
-  onDrag(gesture: DragGesture): void;
-  onWheel(gesture: WheelGesture): boolean;
-}
 
 export interface GesturesConfiguration {
   readonly dragThreshold: number;
@@ -53,15 +15,15 @@ export interface GesturesDependencies {
 
 interface MutablePress {
   readonly pointerId: number;
-  readonly start: GesturePoint;
-  last: GesturePoint;
+  readonly start: Point;
+  last: Point;
   moved: boolean;
   readonly canDrag: boolean;
 }
 
 export class Gestures {
   private readonly isDraggingState = new Signal(false);
-  private readonly hoverPointState = new Signal<GesturePoint | undefined>(undefined);
+  private readonly hoverPointState = new Signal<Point | undefined>(undefined);
   private readonly dragThreshold: number;
   private readonly element: HTMLElement;
   private readonly handlers: GestureHandlers;
@@ -84,7 +46,7 @@ export class Gestures {
     return this.isDraggingState;
   }
 
-  public get hoverPoint(): Readable<GesturePoint | undefined> {
+  public get hoverPoint(): Readable<Point | undefined> {
     return this.hoverPointState;
   }
 
@@ -166,7 +128,7 @@ export class Gestures {
     }
   };
 
-  private locate(event: MouseEvent): GesturePoint {
+  private locate(event: MouseEvent): Point {
     const rect = this.element.getBoundingClientRect();
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   }

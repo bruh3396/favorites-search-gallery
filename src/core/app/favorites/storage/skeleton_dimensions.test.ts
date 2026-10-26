@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/ui/post_grid/skeleton";
+import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/app/favorites/storage/skeleton_dimensions";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
@@ -61,11 +61,11 @@ describe("SkeletonDimensions", () => {
   });
 
   describe("record", () => {
-    test("measures the favorites, skipping those whose dimensions aren't known", () => {
+    test("measures every favorite, including those whose dimensions aren't known", () => {
       const skeletonDimensions = setup();
 
       skeletonDimensions.record([createFavorite(4, 3), createFavorite(0, 0), createFavorite(1, 2)]);
-      expect(skeletonDimensions.value).toEqual([{ width: 4, height: 3 }, { width: 1, height: 2 }]);
+      expect(skeletonDimensions.value).toEqual([{ width: 4, height: 3 }, { width: 0, height: 0 }, { width: 1, height: 2 }]);
     });
 
     test("measures only the first 50 favorites", () => {
@@ -73,14 +73,6 @@ describe("SkeletonDimensions", () => {
 
       skeletonDimensions.record(Array.from({ length: 60 }, () => createFavorite(1, 1)));
       expect(skeletonDimensions.value).toHaveLength(50);
-    });
-
-    test("keeps the recorded skeleton when no favorite has known dimensions", () => {
-      const storage = new MemoryLocalKeyedValues();
-
-      setup(storage).record([createFavorite(4, 3)]);
-      setup(storage).record([createFavorite(0, 0)]);
-      expect(setup(storage).value).toEqual([{ width: 4, height: 3 }]);
     });
 
     test("doesn't write unchanged dimensions again", () => {

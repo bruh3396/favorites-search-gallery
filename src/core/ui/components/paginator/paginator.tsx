@@ -1,7 +1,7 @@
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { PageSlot } from "@/core/ui/components/paginator/page_slot";
-import { getPageSequence } from "@/core/ui/components/paginator/page_sequence";
+import { listPageTerms } from "@/core/ui/components/paginator/page_term_lister";
 import { h } from "@/core/ui/h/h";
 
 export const PaginatorClass = {
@@ -28,7 +28,7 @@ interface StepButtonProps {
 const SLOT_COUNT = 7;
 
 export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProps): HTMLElement {
-  const terms = computed(() => getPageSequence({ pageNumber: pageNumber.value, pageCount: pageCount.value, slotCount: SLOT_COUNT }));
+  const terms = computed(() => listPageTerms({ pageNumber: pageNumber.value, pageCount: pageCount.value, slotCount: SLOT_COUNT }));
   const root = (
     <nav
       className={PaginatorClass.root}

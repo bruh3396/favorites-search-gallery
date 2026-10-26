@@ -1,14 +1,5 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
-
-export interface Tab<T> {
-  readonly id: string;
-  readonly value: T;
-  readonly closable: boolean;
-}
-
-export interface TabOptions {
-  readonly closable?: boolean;
-}
+import { Tab, TabOptions } from "@/core/ui/tabs/tab";
 
 export interface TabManagerDependencies<T> {
   dispose: (value: T) => void;

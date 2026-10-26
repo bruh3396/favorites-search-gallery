@@ -1,3 +1,3 @@
-import * as FONTS from "@/core/ui/fonts";
+import { SYSTEM_FONT } from "@/core/ui/fonts/system_font";
 
-export const APP_FONT = FONTS.SYSTEM_FONT;
+export const APP_FONT = SYSTEM_FONT;

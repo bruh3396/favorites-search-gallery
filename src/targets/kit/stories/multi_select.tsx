@@ -1,5 +1,5 @@
 import { h, render } from "@/core/ui/h/h";
-import { ControlSize } from "@/core/ui/components/control";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { MultiSelect } from "@/core/ui/components/multi_select/multi_select";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";

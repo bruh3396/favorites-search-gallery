@@ -10,10 +10,8 @@ import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Environment } from "@/core/boundary/environment";
-import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { FavoritesAppDependencies } from "@/core/app/favorites/composer";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
-import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
@@ -21,6 +19,7 @@ import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local
 import { Media } from "@/core/domain/media/media";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
 import { Rule34Client } from "@/adapters/rule34/client/client";
@@ -28,7 +27,6 @@ import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/host_page";
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
-import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 declare const USE_LOCAL_SERVER: boolean;
@@ -76,16 +74,23 @@ export function createRule34Dependencies(
   };
 }
 
-export function createFavoritesDependencies(
-  configuration: Rule34DependenciesConfiguration,
+export function createFrozenCobaltClient(
   environment: Environment,
-  dependencies: Rule34Dependencies
-): FavoritesAppDependencies {
-  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, hostPage, localKeyedValues } = dependencies;
-  const frozenCobalt = new FrozenCobaltClient({
+  { fetch, scheduler, rule34Document }: Pick<Rule34Dependencies, "fetch" | "scheduler" | "rule34Document">
+): FrozenCobaltClient {
+  return new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: rule34Document.readUserId(), version: environment.version, platform: environment.device }
   }, { scheduler, fetch });
+}
+
+export function createFavoritesDependencies(
+  configuration: Rule34DependenciesConfiguration,
+  environment: Environment,
+  dependencies: Rule34Dependencies,
+  remotePosts: RemotePosts
+): FavoritesAppDependencies {
+  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, hostPage, localKeyedValues } = dependencies;
   const indexedDb = new IndexedDbClient(configuration.indexedDb, mintMedia);
   return {
     scheduler,
@@ -100,10 +105,7 @@ export function createFavoritesDependencies(
     localPosts: new IndexedDbLocalPosts(indexedDb),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
     remoteFavorites: new Rule34RemoteFavorites({ rule34, rule34Document, fetch, scheduler, randomSource }),
-    remotePosts: new FallbackRemotePosts({
-      primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
-      fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
-    }),
+    remotePosts,
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
     remotePages: new Rule34RemotePages(rule34),
     visibilityObserver: new BrowserVisibilityObserver()

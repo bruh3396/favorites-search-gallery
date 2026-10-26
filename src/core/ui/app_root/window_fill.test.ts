@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
-import { fillRestOfWindow } from "@/core/ui/app_root/fill_rest_of_window";
+import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
 
 function setup(): { element: HTMLElement; sizeObserver: MemorySizeObserver; moveTo: (top: number) => void } {
   const element = document.createElement("div");

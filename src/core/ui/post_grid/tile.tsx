@@ -1,5 +1,6 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
-import { GridSizing, computeDecodeWidth } from "@/core/ui/post_grid/decode_width";
+import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
+import { pickDecodeWidth } from "@/core/ui/post_grid/decode_width_picker";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { PlainPress } from "@/core/ui/post_grid/plain_press";
@@ -68,7 +69,7 @@ export function Tile(props: TileProps): HTMLElement {
 
   if (hasMedia(post.media)) {
     showPreview({ root, preview }, props.imageLoaderService.resolvePreviewUrl(post.media));
-    const targetWidth = computed(() => computeDecodeWidth(sizing.value, dimensions));
+    const targetWidth = computed(() => pickDecodeWidth(sizing.value, dimensions));
 
     onCleanup(props.imageLoaderService.createLoader(canvas, post.media, targetWidth).trackVisibility(visible));
   }

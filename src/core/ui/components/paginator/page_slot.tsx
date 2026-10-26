@@ -1,5 +1,5 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { PageTerm } from "@/core/ui/components/paginator/page_sequence";
+import { PageTerm } from "@/core/ui/components/paginator/page_term";
 import { h } from "@/core/ui/h/h";
 
 export const PageSlotClass = {

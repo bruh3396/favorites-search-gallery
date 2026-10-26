@@ -9,12 +9,12 @@ describe("createAppStorage", () => {
 
     app.set("favoritesSkeleton", []);
     appPreferences.set("postListEnabled", true);
-    favoritesPreferences.set("tilesPerRow", 4);
-    postListPreferences.set("tilesPerRow", 6);
+    favoritesPreferences.set("columnCount", 4);
+    postListPreferences.set("columnCount", 6);
     lightboxPreferences.set("muted", true);
     expect(localKeyedValues.get("favorites-search-gallery")).toEqual({
       favoritesSkeleton: [],
-      preferences: { app: { postListEnabled: true }, favorites: { tilesPerRow: 4 }, postList: { tilesPerRow: 6 }, lightbox: { muted: true } }
+      preferences: { app: { postListEnabled: true }, favorites: { columnCount: 4 }, postList: { columnCount: 6 }, lightbox: { muted: true } }
     });
   });
 });

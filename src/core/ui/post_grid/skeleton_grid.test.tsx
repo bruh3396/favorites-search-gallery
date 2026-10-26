@@ -1,5 +1,6 @@
-import { GridLayout, TilerClass } from "@/core/ui/post_grid/tiler";
-import { SkeletonGrid, SkeletonGridClass, SkeletonGridProps } from "@/core/ui/post_grid/skeleton";
+import { GridLayout } from "@/core/ui/post_grid/grid_layout";
+import { GridTilerClass } from "@/core/ui/post_grid/grid_tiler";
+import { SkeletonGrid, SkeletonGridClass, SkeletonGridProps } from "@/core/ui/post_grid/skeleton_grid";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import POST_GRID_CSS from "@/core/ui/post_grid/post_grid.css?inline";
@@ -10,8 +11,8 @@ import { TileClass } from "@/core/ui/post_grid/tile";
 import { expectClassesStyled } from "@/testing/css";
 
 function setup({ dimensions = [{ width: 4, height: 3 }, { width: 1, height: 2 }], layout = new Signal<GridLayout>("grid"),
-  tilesPerRow = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {
-  return render(document, () => <SkeletonGrid dimensions={dimensions} layout={layout} tilesPerRow={tilesPerRow} count={count} />);
+  columnCount = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {
+  return render(document, () => <SkeletonGrid dimensions={dimensions} layout={layout} columnCount={columnCount} count={count} />);
 }
 
 function createSquares(count: number): { width: number; height: number }[] {
@@ -39,16 +40,16 @@ describe("SkeletonGrid", () => {
     expect(element.querySelectorAll(`.${TileClass.root}`)).toHaveLength(20);
   });
 
-  test("tiles again when the layout or tiles per row change", () => {
+  test("tiles again when the layout or column count changes", () => {
     const layout = new Signal<GridLayout>("grid");
-    const tilesPerRow = new Signal(2);
-    const { result: element } = setup({ dimensions: createSquares(6), layout, tilesPerRow });
+    const columnCount = new Signal(2);
+    const { result: element } = setup({ dimensions: createSquares(6), layout, columnCount });
 
     layout.value = "column";
-    expect(element.querySelectorAll(`.${TilerClass.column}`)).toHaveLength(2);
-    tilesPerRow.value = 3;
-    expect(element.querySelectorAll(`.${TilerClass.column}`)).toHaveLength(3);
-    expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("3");
+    expect(element.querySelectorAll(`.${GridTilerClass.column}`)).toHaveLength(2);
+    columnCount.value = 3;
+    expect(element.querySelectorAll(`.${GridTilerClass.column}`)).toHaveLength(3);
+    expect(element.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("3");
   });
 
   test("hides itself from assistive technology", () => {
@@ -58,12 +59,12 @@ describe("SkeletonGrid", () => {
   });
 
   test("stops following its signals once disposed", () => {
-    const tilesPerRow = new Signal(2);
-    const { result: element, dispose } = setup({ tilesPerRow });
+    const columnCount = new Signal(2);
+    const { result: element, dispose } = setup({ columnCount });
 
     dispose();
-    tilesPerRow.value = 5;
-    expect(element.style.getPropertyValue("--fsg-PostGrid-columns")).toBe("2");
+    columnCount.value = 5;
+    expect(element.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("2");
   });
 
   test("styles every class it sets", () => {

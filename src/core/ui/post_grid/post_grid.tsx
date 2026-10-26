@@ -1,7 +1,8 @@
 import { Dimensions, MediaItem } from "@/core/domain/post/post";
-import { GridLayout, applyTiling, arrangeTiles } from "@/core/ui/post_grid/tiler";
+import { GridLayout } from "@/core/ui/post_grid/grid_layout";
+import { tileGrid } from "@/core/ui/post_grid/grid_tiler";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { GridSizing } from "@/core/ui/post_grid/decode_width";
+import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { KeyedList } from "@/core/ui/h/keyed_list";
 import { Occurrence } from "@/core/utils/reactive/emitter";
@@ -18,7 +19,7 @@ export const PostGridClass = {
 
 export interface PostGridSettings {
   readonly layout: Readable<GridLayout>;
-  readonly tilesPerRow: Readable<number>;
+  readonly columnCount: Readable<number>;
 }
 
 export interface PostGridProps<T extends MediaItem> {
@@ -47,18 +48,17 @@ class PostGridImplementation<T extends MediaItem> {
   private readonly list: KeyedList<T>;
 
   constructor(private readonly props: PostGridProps<T>) {
-    const { layout, tilesPerRow } = props.settings;
+    const { layout, columnCount } = props.settings;
 
     this.root = <div className={PostGridClass.root} />;
     this.gridWidth = new Signal(0);
-    this.sizing = computed(() => ({ layout: layout.value, tilesPerRow: tilesPerRow.value, gridWidth: this.gridWidth.value }));
+    this.sizing = computed(() => ({ layout: layout.value, columnCount: columnCount.value, gridWidth: this.gridWidth.value }));
     this.list = this.createPostList();
   }
 
   public create(): HTMLElement {
-    const { posts, changed, tileLocator, settings, sizeObserver } = this.props;
+    const { posts, changed, tileLocator, sizeObserver } = this.props;
 
-    effect(() => applyTiling(this.root, { layout: settings.layout.value, tilesPerRow: settings.tilesPerRow.value }));
     onCleanup(sizeObserver.observe(this.root, size => {
       this.gridWidth.value = size.devicePixelWidth;
     }));
@@ -72,12 +72,9 @@ class PostGridImplementation<T extends MediaItem> {
   }
 
   private reconcilePosts(posts: readonly T[]): void {
-    const tiles = this.list.reconcile(posts);
+    const { layout, columnCount } = this.props.settings;
 
-    arrangeTiles(this.root, tiles, {
-      layout: this.props.settings.layout.value,
-      getColumnCount: (): number => Math.round(this.props.settings.tilesPerRow.value)
-    });
+    tileGrid(this.root, this.list.reconcile(posts), { layout: layout.value, columnCount: columnCount.value });
   }
 
   private createPostList(): KeyedList<T> {

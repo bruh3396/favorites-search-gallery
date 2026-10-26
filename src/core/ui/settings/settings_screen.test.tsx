@@ -1,8 +1,10 @@
-import { SettingPreference, SwitchSetting } from "@/core/ui/settings/descriptor";
-import { SettingsLayout, SettingsScreen, SettingsScreenClass, SettingsScreenProps } from "@/core/ui/settings/screen";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
+import { SwitchSetting } from "@/core/ui/settings/setting_descriptor";
+import { SettingsLayout } from "@/core/ui/settings/settings_layout";
+import { SettingsScreen, SettingsScreenClass, SettingsScreenProps } from "@/core/ui/settings/settings_screen";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import SCREEN_CSS from "@/core/ui/settings/screen.css?inline";
+import SCREEN_CSS from "@/core/ui/settings/settings_screen.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 

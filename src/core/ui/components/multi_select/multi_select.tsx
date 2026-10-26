@@ -1,5 +1,6 @@
-import { ControlChoice, ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { computed } from "@/core/utils/reactive/signal";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
+import { ControlProps } from "@/core/ui/components/control/control_props";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
 export const MultiSelectClass = {
@@ -11,7 +12,7 @@ export interface MultiSelectProps<T> extends ControlProps<readonly T[]> {
   choices: readonly ControlChoice<T>[];
 }
 
-export function MultiSelect<T>({ choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: MultiSelectProps<T>): HTMLElement {
+export function MultiSelect<T>({ choices, value, disabled = new Signal(false), onValueChange, size = "medium" }: MultiSelectProps<T>): HTMLElement {
   const getPressedFlags = (values: readonly T[]): readonly boolean[] => choices.map(choice => values.includes(choice.value));
   const pressedFlags = computed(() => getPressedFlags(value.value));
   const toggle = (index: number): void => {

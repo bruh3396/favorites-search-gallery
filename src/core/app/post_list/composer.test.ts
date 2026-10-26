@@ -10,7 +10,7 @@ import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_o
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
-import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
+import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { composePostListApp } from "@/core/app/post_list/composer";
 import { createPost } from "@/testing/post";

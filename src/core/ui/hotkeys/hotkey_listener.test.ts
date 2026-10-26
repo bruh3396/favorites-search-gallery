@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { listenForHotkeys } from "@/core/ui/hotkeys/hotkeys";
+import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
 
 type Command = "first" | "second";
 

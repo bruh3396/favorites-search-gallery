@@ -1,4 +1,5 @@
-import { ControlChoice, ControlSize } from "@/core/ui/components/control";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { h, render } from "@/core/ui/h/h";
 import { Dropdown } from "@/core/ui/components/dropdown/dropdown";
 import { Signal } from "@/core/utils/reactive/signal";

@@ -1,4 +1,5 @@
-import { GesturePoint, ModifierState } from "@/core/ui/gestures/gestures";
+import { Point } from "@/core/utils/geometry/point";
+import { ModifierState } from "@/core/ui/gestures/modifier_state";
 import {
     LightboxViewportCommandHandlers,
     createLightboxViewportGestureHandlers,
@@ -9,8 +10,8 @@ import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal } from "@/core/utils/reactive/signal";
 
 const NO_MODIFIERS: ModifierState = { shift: false, ctrl: false, alt: false, meta: false };
-const ON_MEDIA: GesturePoint = { x: 400, y: 300 };
-const OFF_MEDIA: GesturePoint = { x: 50, y: 300 };
+const ON_MEDIA: Point = { x: 400, y: 300 };
+const OFF_MEDIA: Point = { x: 50, y: 300 };
 
 function setup(): {
   zoom: {

@@ -20,15 +20,6 @@ export type Theme = (typeof THEMES)[number];
 
 export const DEFAULT_THEME: Theme = "slate";
 
-const THEME_PROPERTIES: Readonly<Record<keyof ThemeColors, string>> = {
-  surface: "--fsg-theme-surface",
-  sunken: "--fsg-theme-sunken",
-  text: "--fsg-theme-text",
-  muted: "--fsg-theme-muted",
-  accent: "--fsg-theme-accent",
-  onAccent: "--fsg-theme-on-accent"
-};
-
 //                  surface    sunken     text       muted      accent     onAccent
 type Row = readonly [string, string, string, string, string, string];
 
@@ -48,12 +39,6 @@ const THEME_ROWS: Readonly<Record<Theme, { light: Row; dark: Row }>> = {
 };
 
 export const THEME_DEFINITIONS: Readonly<Record<Theme, ThemeDefinition>> = Object.fromEntries(THEMES.map(theme => [theme, { light: toColors(THEME_ROWS[theme].light), dark: toColors(THEME_ROWS[theme].dark) }])) as Record<Theme, ThemeDefinition>;
-
-export function applyTheme(root: HTMLElement, { light, dark }: ThemeDefinition): void {
-  for (const [color, property] of Object.entries(THEME_PROPERTIES) as [keyof ThemeColors, string][]) {
-    root.style.setProperty(property, `light-dark(${light[color]}, ${dark[color]})`);
-  }
-}
 
 function toColors([surface, sunken, text, muted, accent, onAccent]: Row): ThemeColors {
   return { surface, sunken, text, muted, accent, onAccent };

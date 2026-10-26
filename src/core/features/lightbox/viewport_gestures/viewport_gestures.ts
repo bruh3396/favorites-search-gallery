@@ -1,4 +1,5 @@
-import { GestureHandlers, GesturePoint } from "@/core/ui/gestures/gestures";
+import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
+import { Point } from "@/core/utils/geometry/point";
 import { LightboxZoom, ZoomRect } from "@/core/features/lightbox/zoom/zoom";
 import { LightboxCommandHandlers } from "@/core/features/lightbox/input/commands";
 import { Readable } from "@/core/utils/reactive/signal";
@@ -11,7 +12,7 @@ export type LightboxViewportCursor = "zoom-in" | "grab" | undefined;
 
 export function resolveLightboxViewportCursor(
   zoom: Pick<LightboxZoom, "isZoomed" | "canZoom" | "mediaRect">,
-  hoverPoint: GesturePoint | undefined
+  hoverPoint: Point | undefined
 ): LightboxViewportCursor {
   if (zoom.isZoomed.value) {
     return "grab";
@@ -67,6 +68,6 @@ export function createLightboxViewportGestureHandlers(
   };
 }
 
-function containsPoint(rect: ZoomRect | undefined, point: GesturePoint): boolean {
+function containsPoint(rect: ZoomRect | undefined, point: Point): boolean {
   return rect !== undefined && point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }

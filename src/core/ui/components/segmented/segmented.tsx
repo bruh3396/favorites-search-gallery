@@ -1,5 +1,6 @@
-import { ControlChoice, ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
-import { computed } from "@/core/utils/reactive/signal";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
+import { ControlProps } from "@/core/ui/components/control/control_props";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
 
@@ -22,7 +23,7 @@ const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => numbe
   End: (_, count) => count - 1
 };
 
-export function Segmented<T>({ choices, value, disabled = NEVER_DISABLED, onValueChange, size = "medium" }: SegmentedProps<T>): HTMLElement {
+export function Segmented<T>({ choices, value, disabled = new Signal(false), onValueChange, size = "medium" }: SegmentedProps<T>): HTMLElement {
   const findCheckedIndex = (checked: T): number => choices.findIndex(choice => choice.value === checked);
   const checkedIndex = computed(() => findCheckedIndex(value.value));
   const tabStop = computed(() => Math.max(checkedIndex.value, 0));

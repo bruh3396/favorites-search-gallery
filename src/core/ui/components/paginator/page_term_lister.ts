@@ -1,12 +1,6 @@
-export type PageTerm = number | "gap";
+import { PageTerm } from "@/core/ui/components/paginator/page_term";
 
-export interface PageSequenceOptions {
-  readonly pageNumber: number;
-  readonly pageCount: number;
-  readonly slotCount: number;
-}
-
-export function getPageSequence({ pageNumber, pageCount, slotCount }: PageSequenceOptions): readonly PageTerm[] {
+export function listPageTerms({ pageNumber, pageCount, slotCount }: { pageNumber: number; pageCount: number; slotCount: number }): readonly PageTerm[] {
   if (pageCount <= slotCount) {
     return listPages(1, pageCount);
   }

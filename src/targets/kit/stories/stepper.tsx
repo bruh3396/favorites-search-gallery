@@ -1,6 +1,6 @@
 import { h, render } from "@/core/ui/h/h";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
-import { ControlSize } from "@/core/ui/components/control";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Stepper } from "@/core/ui/components/stepper/stepper";
 import { Story } from "@/targets/kit/story";

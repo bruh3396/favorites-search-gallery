@@ -1,5 +1,5 @@
 import { h, render } from "@/core/ui/h/h";
-import { ControlSize } from "@/core/ui/components/control";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 import { Switch } from "@/core/ui/components/switch/switch";

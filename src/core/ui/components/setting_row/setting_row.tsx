@@ -1,5 +1,5 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
-import { ControlSize } from "@/core/ui/components/control";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { h } from "@/core/ui/h/h";
 
 export const SettingRowClass = {

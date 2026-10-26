@@ -1,4 +1,6 @@
-import { GestureHandlers, GesturePoint, Gestures } from "@/core/ui/gestures/gestures";
+import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
+import { Point } from "@/core/utils/geometry/point";
+import { Gestures } from "@/core/ui/gestures/gestures";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { createScope } from "@/core/utils/reactive/scope";
 
@@ -25,7 +27,7 @@ function setup(canDrag = false): {
   return { gestures, element, handlers, dispose };
 }
 
-function point(type: string, { x, y }: GesturePoint, init: PointerEventInit = {}): PointerEvent {
+function point(type: string, { x, y }: Point, init: PointerEventInit = {}): PointerEvent {
   return new PointerEvent(type, { pointerId: 1, isPrimary: true, button: 0, clientX: x, clientY: y, ...init });
 }
 

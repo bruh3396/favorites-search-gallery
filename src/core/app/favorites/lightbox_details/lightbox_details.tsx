@@ -3,7 +3,7 @@ import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
 import { TagAlignment, TagOrganization, TagSize } from "@/core/app/favorites/lightbox_details/view_options";
 import { TagGroup, TagGroupCategory, groupTagsByCategory } from "@/core/app/favorites/lightbox_details/tag_groups";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
-import { ControlChoice } from "@/core/ui/components/control";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { CopyIdButton } from "@/core/app/favorites/lightbox_details/copy_id_button";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LightboxButton } from "@/core/features/lightbox/ui/chrome/button";

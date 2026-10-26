@@ -1,8 +1,10 @@
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
-import { indexSettings, matchSettings, splitQuery } from "@/core/ui/settings/search";
-import { ControlSize } from "@/core/ui/components/control";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Setting } from "@/core/ui/settings/setting";
-import { SettingDescriptor } from "@/core/ui/settings/descriptor";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
+import { SettingSection } from "@/core/ui/settings/setting_section";
+import { SettingsIndex } from "@/core/ui/settings/settings_index";
+import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { h } from "@/core/ui/h/h";
 
@@ -12,14 +14,6 @@ export const SettingsScreenClass = {
   heading: "fsg-SettingsScreen-heading",
   group: "fsg-SettingsScreen-group"
 } as const;
-
-export interface SettingSection {
-  readonly id: string;
-  readonly title: string;
-  readonly settings: readonly string[];
-}
-
-export type SettingsLayout = readonly SettingSection[];
 
 export interface SettingsScreenProps {
   layout: SettingsLayout;
@@ -44,9 +38,8 @@ export function SettingsScreen({ layout, descriptors, descriptionsVisible, query
   const sectionsWithSettings = layout
     .map(section => ({ section, title: section.title, descriptors: section.settings.map(id => getDescriptor(descriptorsById, id)) }))
     .filter(entry => entry.descriptors.length > 0);
-  const index = indexSettings(sectionsWithSettings);
-  const terms = computed(() => splitQuery(query?.value ?? ""));
-  const matches = computed(() => matchSettings(index, terms.value));
+  const index = new SettingsIndex(sectionsWithSettings);
+  const matches = computed(() => index.match(query?.value ?? ""));
   return (
     <div className={SettingsScreenClass.root} dataset={{ size }}>
       {sectionsWithSettings.map(entry => (

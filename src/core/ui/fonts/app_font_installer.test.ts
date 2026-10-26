@@ -1,4 +1,5 @@
-import { AppFont, installAppFont } from "@/core/ui/fonts/app_font";
+import { AppFont } from "@/core/ui/fonts/app_font";
+import { installAppFont } from "@/core/ui/fonts/app_font_installer";
 import { afterEach, describe, expect, test, vi } from "vitest";
 
 const FONT: AppFont = {

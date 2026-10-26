@@ -6,7 +6,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/collec
 import { FavoritesLoadState } from "@/core/features/favorites/load/state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/index";
 import { FavoritesSession } from "@/core/features/favorites/session/session";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { createImageLoaderService } from "@/testing/image_loader_service";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
@@ -17,7 +17,7 @@ import { Milestone } from "@/core/utils/reactive/milestone";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal } from "@/core/utils/reactive/signal";
-import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton";
+import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeSearchPanel } from "@/core/app/favorites/search_panel/composer";
@@ -69,7 +69,7 @@ function setup(posts: Post[] = []): Setup {
     skeletonDimensions: { value: [] },
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
-    imageLoaderService: new ImageLoaderService({ remoteMedia: new MemoryRemoteMedia(), scheduler, enabled: new Signal(false), paused: new Signal(false) }),
+    imageLoaderService: createImageLoaderService({ scheduler }),
     remotePages: new MemoryRemotePages(),
     lightbox: { open },
     postActions: { openOriginal: vi.fn() },

@@ -1,4 +1,5 @@
-import { ThemeColors, applyTheme } from "@/core/ui/theme/themes";
+import { ThemeColors } from "@/core/ui/theme/theme";
+import { applyTheme } from "@/core/ui/theme/theme_applier";
 import { describe, expect, test } from "vitest";
 
 function createColors(base: string): ThemeColors {

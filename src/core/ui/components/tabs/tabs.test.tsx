@@ -1,5 +1,6 @@
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
-import { Tab, TabManager } from "@/core/ui/tabs/tab_manager";
+import { Tab } from "@/core/ui/tabs/tab";
+import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { Tabs, TabsClass } from "@/core/ui/components/tabs/tabs";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";

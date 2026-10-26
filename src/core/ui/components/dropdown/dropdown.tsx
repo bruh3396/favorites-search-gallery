@@ -1,4 +1,5 @@
-import { ControlChoice, ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
+import { ControlProps } from "@/core/ui/components/control/control_props";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
@@ -21,7 +22,7 @@ export interface DropdownProps<T> extends ControlProps<T> {
 const MENU_GAP = 4;
 const NO_OPTION = -1;
 
-export function Dropdown<T>({ choices, value, disabled = NEVER_DISABLED, onValueChange, onPreview, size = "medium" }: DropdownProps<T>): HTMLElement {
+export function Dropdown<T>({ choices, value, disabled = new Signal(false), onValueChange, onPreview, size = "medium" }: DropdownProps<T>): HTMLElement {
   const selectedIndex = computed(() => choices.findIndex(choice => choice.value === value.value));
   const open = new Signal(false);
   const active = new Signal(NO_OPTION);

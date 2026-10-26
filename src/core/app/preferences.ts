@@ -1,5 +1,5 @@
-import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/themes";
-import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/tiler";
+import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/theme";
+import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/mode";
 import { Preference, PreferenceSchema, PreferenceStorage, Preferences, StoredPreference, createPreferences, definePreference } from "@/core/utils/reactive/preference";
 import { TAG_ALIGNMENTS, TAG_ORGANIZATIONS, TAG_SIZES, TagAlignment, TagOrganization, TagSize } from "@/core/app/favorites/lightbox_details/view_options";
@@ -14,7 +14,7 @@ export interface AppPreferenceValues {
 
 export interface PostGridPreferenceValues {
   readonly layout: GridLayout;
-  readonly tilesPerRow: number;
+  readonly columnCount: number;
   readonly hdTilesEnabled: boolean;
 }
 
@@ -85,7 +85,7 @@ export function createColorSchemePreference(colorScheme: ColorScheme, hostPage: 
 function createPostGridPreferences(): PreferenceSchema<PostGridPreferenceValues> {
   return {
     layout: definePreference<GridLayout>("column", oneOf(GRID_LAYOUTS)),
-    tilesPerRow: definePreference(6),
+    columnCount: definePreference(6),
     hdTilesEnabled: definePreference(true)
   };
 }

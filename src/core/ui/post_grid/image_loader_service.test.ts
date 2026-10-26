@@ -1,4 +1,3 @@
-import { DECODE_DEBOUNCE, DECODE_RATE_LIMIT } from "@/core/ui/post_grid/image_loader_service";
 import { describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
@@ -21,13 +20,13 @@ describe("ImageLoaderService", () => {
       const scheduler = new MemoryScheduler();
       const remoteMedia = new MemoryRemoteMedia();
       const decodeStill = vi.spyOn(remoteMedia, "decodeStill").mockReturnValue(new Promise<ImageBitmap>(() => undefined));
-      const service = createImageLoaderService({ remoteMedia, scheduler });
-      const loaders = Array.from({ length: DECODE_RATE_LIMIT.concurrency + 1 }, () =>
+      const service = createImageLoaderService({ remoteMedia, scheduler }, { decodeDebounce: { delay: 100 }, decodeRateLimit: { concurrency: 2, ratePerSecond: 1_000 } });
+      const loaders = Array.from({ length: 3 }, () =>
         service.createLoader(document.createElement("canvas"), MEDIA, new Signal(500)));
 
       loaders.forEach(loader => loader.show());
-      await advanceAndSettle(scheduler, DECODE_DEBOUNCE.delay + 1_000);
-      expect(decodeStill).toHaveBeenCalledTimes(DECODE_RATE_LIMIT.concurrency);
+      await advanceAndSettle(scheduler, 1_000);
+      expect(decodeStill).toHaveBeenCalledTimes(2);
     });
   });
 });

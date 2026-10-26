@@ -1,4 +1,4 @@
-import { Keymap } from "@/core/ui/hotkeys/hotkeys";
+import { Keymap } from "@/core/ui/hotkeys/keymap";
 
 export type FavoritesCommand = "toggleZen" | "exitZen";
 

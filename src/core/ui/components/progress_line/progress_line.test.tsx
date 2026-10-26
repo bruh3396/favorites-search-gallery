@@ -1,4 +1,5 @@
-import { Progress, ProgressLine, ProgressLineClass } from "@/core/ui/components/progress_line/progress_line";
+import { Progress } from "@/core/ui/components/progress_line/progress";
+import { ProgressLine, ProgressLineClass } from "@/core/ui/components/progress_line/progress_line";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PROGRESS_LINE_CSS from "@/core/ui/components/progress_line/progress_line.css?inline";

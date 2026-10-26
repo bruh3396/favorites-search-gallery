@@ -1,9 +1,9 @@
 import { AppRootClass, mountAppRoot } from "@/core/ui/app_root/app_root";
 import { describe, expect, test } from "vitest";
-import { SYSTEM_FONT } from "@/core/ui/fonts/system";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
+import { SYSTEM_FONT } from "@/core/ui/fonts/system_font";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import TOKENS_CSS from "@/core/ui/tokens.css?inline";
-import { VERDANA_FONT } from "@/core/ui/fonts/verdana";
+import { VERDANA_FONT } from "@/core/ui/fonts/verdana_font";
 import { expectClassesStyled } from "@/testing/css";
 
 const THEME = THEME_DEFINITIONS.slate;

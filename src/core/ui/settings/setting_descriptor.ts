@@ -1,9 +1,6 @@
 import { Icon } from "@/core/ui/components/icon/icon";
 import { Readable } from "@/core/utils/reactive/signal";
-
-export interface SettingPreference<T> extends Readable<T> {
-  set(value: T): void;
-}
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
 
 interface SettingBase {
   readonly id: string;

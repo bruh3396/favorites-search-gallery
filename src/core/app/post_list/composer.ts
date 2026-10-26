@@ -3,7 +3,7 @@ import { createAppPreferences, createLightboxPreferences, createPostListPreferen
 import { APP_FONT } from "@/core/app/font";
 import { ColorScheme } from "@/core/boundary/environment";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { ListSequence } from "@/core/domain/media/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
@@ -16,7 +16,7 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/themes";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { computed } from "@/core/utils/reactive/signal";
@@ -48,7 +48,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   } = dependencies;
   const postList = createPostListService({ remoteSearchResults });
   const storage = createAppStorage(localKeyedValues);
-  const { layout, tilesPerRow, hdTilesEnabled } = createPostListPreferences(storage.postListPreferences);
+  const { layout, columnCount, hdTilesEnabled } = createPostListPreferences(storage.postListPreferences);
   const { mode, volume, muted } = createLightboxPreferences(storage.lightboxPreferences);
   const { theme } = createAppPreferences(storage.appPreferences);
   const posts = computed(() => postList.page.value.posts);
@@ -62,11 +62,11 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   });
 
   lightbox.mediaCorrected.on(({ id, media }) => postList.correctMedia(id, media));
-  const imageLoaderService = new ImageLoaderService({ remoteMedia, scheduler, enabled: hdTilesEnabled, paused: lightbox.isOpen });
+  const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, { remoteMedia, scheduler, enabled: hdTilesEnabled, paused: lightbox.isOpen });
   const grid: Omit<PostGridProps<Post>, "posts"> = {
     changed: postList.changed,
     tileLocator,
-    settings: { layout, tilesPerRow },
+    settings: { layout, columnCount },
     visibilityObserver,
     sizeObserver,
     imageLoaderService,

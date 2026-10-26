@@ -26,9 +26,8 @@ function startApp(environment: Environment, dependencies: Rule34Dependencies): v
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
   }, {
-    ...createFavoritesDependencies(LAB_CONFIGURATION, environment, dependencies),
-    remoteFavorites: UNCHANGED_REMOTE_FAVORITES,
-    remotePosts: UNAVAILABLE_REMOTE_POSTS
+    ...createFavoritesDependencies(LAB_CONFIGURATION, environment, dependencies, UNAVAILABLE_REMOTE_POSTS),
+    remoteFavorites: UNCHANGED_REMOTE_FAVORITES
   }).mount(dependencies.hostPage.claimContent());
 }
 

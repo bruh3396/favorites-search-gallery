@@ -1,5 +1,4 @@
-import { DECODE_DEBOUNCE, PAINT_RATE_LIMIT } from "@/core/ui/post_grid/image_loader_service";
-import { ImageLoader, MAX_CANVAS_HEIGHT } from "@/core/ui/post_grid/image_loader";
+import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
 import { Media } from "@/core/domain/media/media";
@@ -10,6 +9,9 @@ import { doNothing } from "@/core/utils/function/function";
 import { flushMicrotasks } from "@/testing/async";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
+const DECODE_DEBOUNCE = { delay: 100 };
+const PAINT_RATE_LIMIT = { concurrency: 1, ratePerSecond: 1_000 };
+const MAX_CANVAS_HEIGHT = 1_000;
 const QUIET_PERIOD = DECODE_DEBOUNCE.delay;
 const WIDTH = 500;
 
@@ -53,7 +55,7 @@ function setup(decode: DecodeStill = () => Promise.resolve(createBitmap() as unk
   const targetWidth = new Signal(WIDTH);
   const enabled = new Signal(true);
   const paused = new Signal(false);
-  const imageLoader = new ImageLoader({
+  const imageLoader = new ImageLoader({ maxCanvasHeight: MAX_CANVAS_HEIGHT }, {
     canvas, media: MEDIA, targetWidth, decodeStill, enabled, paused,
     decodeDebouncer: new BatchDebouncer(DECODE_DEBOUNCE, scheduler), paintLimiter: new RateLimiter(PAINT_RATE_LIMIT, scheduler)
   });
@@ -265,7 +267,7 @@ describe("ImageLoader", () => {
     const decodeDebouncer = new BatchDebouncer(DECODE_DEBOUNCE, scheduler);
     const paintLimiter = new RateLimiter(PAINT_RATE_LIMIT, scheduler);
     const bitmaps = [createBitmap(), createBitmap()];
-    const [first, second] = bitmaps.map(bitmap => new ImageLoader({
+    const [first, second] = bitmaps.map(bitmap => new ImageLoader({ maxCanvasHeight: MAX_CANVAS_HEIGHT }, {
       canvas: document.createElement("canvas"), media: MEDIA, targetWidth: new Signal(WIDTH), paintLimiter, decodeDebouncer,
       enabled: new Signal(true), paused: new Signal(false),
       decodeStill: (): Promise<ImageBitmap> => Promise.resolve(bitmap as unknown as ImageBitmap)

@@ -1,5 +1,6 @@
-import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SliderSetting, SwitchSetting } from "@/core/ui/settings/descriptor";
-import { ControlChoice, ControlSize } from "@/core/ui/components/control";
+import { ChoiceSetting, ChoicesSetting, NumberSetting, SettingDescriptor, SliderSetting, SwitchSetting } from "@/core/ui/settings/setting_descriptor";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { Stepper, StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { Dropdown } from "@/core/ui/components/dropdown/dropdown";

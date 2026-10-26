@@ -1,4 +1,4 @@
-import { ControlProps, NEVER_DISABLED } from "@/core/ui/components/control";
+import { ControlProps } from "@/core/ui/components/control/control_props";
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { StepGesture } from "@/core/ui/components/stepper/step_gesture";
@@ -50,7 +50,7 @@ export function Stepper({
   isFocused,
   scheduler,
   value,
-  disabled = NEVER_DISABLED,
+  disabled = new Signal(false),
   onValueChange,
   onValueCommit = doNothing
 }: StepperProps): HTMLElement {

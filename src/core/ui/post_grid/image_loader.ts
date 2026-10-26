@@ -3,9 +3,11 @@ import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
 import { Media } from "@/core/domain/media/media";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 
-export const MAX_CANVAS_HEIGHT = 16_000;
+export interface ImageLoaderConfiguration {
+  readonly maxCanvasHeight: number;
+}
 
-interface ImageLoaderDependencies {
+export interface ImageLoaderDependencies {
   canvas: HTMLCanvasElement;
   media: Media;
   targetWidth: Readable<number>;
@@ -23,7 +25,7 @@ export class ImageLoader {
   private requestedWidth: number;
   private drawnWidth: number;
 
-  constructor(private readonly dependencies: ImageLoaderDependencies) {
+  constructor(private readonly configuration: ImageLoaderConfiguration, private readonly dependencies: ImageLoaderDependencies) {
     this.requestVersion = 0;
     this.abortController = undefined;
     this.cancelHeldDecode = undefined;
@@ -112,7 +114,7 @@ export class ImageLoader {
           bitmap.close();
           return Promise.resolve();
         }
-        drawBitmap(this.dependencies.canvas, bitmap, width);
+        drawBitmap(this.dependencies.canvas, bitmap, { width, maxHeight: this.configuration.maxCanvasHeight });
         this.drawnWidth = width;
         this.abortController = undefined;
         return Promise.resolve();
@@ -126,9 +128,9 @@ export class ImageLoader {
   }
 }
 
-function drawBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap, width: number): void {
+function drawBitmap(canvas: HTMLCanvasElement, bitmap: ImageBitmap, { width, maxHeight }: { width: number; maxHeight: number }): void {
   try {
-    const scale = Math.min(1, width / bitmap.width, MAX_CANVAS_HEIGHT / bitmap.height);
+    const scale = Math.min(1, width / bitmap.width, maxHeight / bitmap.height);
 
     canvas.width = Math.round(bitmap.width * scale);
     canvas.height = Math.round(bitmap.height * scale);

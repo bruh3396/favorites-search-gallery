@@ -46,11 +46,11 @@ describe("createPostListPreferences", () => {
     const preferences = createPostListPreferences(storage);
 
     preferences.layout.set("row");
-    preferences.tilesPerRow.set(6);
+    preferences.columnCount.set(6);
     preferences.hdTilesEnabled.set(false);
     const restored = createPostListPreferences(storage);
 
-    expect([restored.layout.value, restored.tilesPerRow.value, restored.hdTilesEnabled.value]).toEqual(["row", 6, false]);
+    expect([restored.layout.value, restored.columnCount.value, restored.hdTilesEnabled.value]).toEqual(["row", 6, false]);
   });
 });
 
