@@ -26,17 +26,17 @@ const FAVORITES_OWNER_ID = "demo";
 
 function createDemoDependencies(): FavoritesAppDependencies {
   const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
-  const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null);
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null);
   return {
-    localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDb),
-    localPosts: new IndexedDbLocalPosts(indexedDb),
-    localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDbClient),
+    localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     localKeyedValues: new BrowserLocalKeyedValues(),
     remoteFavorites: new MemoryRemoteFavorites(memory),
     remotePosts: new MemoryRemotePosts(memory),
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver: new BrowserVisibilityObserver(),
-    remotePages: new MemoryRemotePages(),
+    remotePages: new MemoryRemotePages(memory),
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
     sizeObserver: new BrowserSizeObserver(),

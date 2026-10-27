@@ -54,7 +54,7 @@ function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
   return { pagination, search, collection, index, favoritesPaginationPreferences };
 }
 
-function getItemIds(pagination: FavoritesPagination): string[] {
+function getItemPostIds(pagination: FavoritesPagination): string[] {
   return pagination.items.value.map(favorite => favorite.id);
 }
 
@@ -66,7 +66,7 @@ describe("FavoritesPagination", () => {
   test("shows the first page of the results", () => {
     const { pagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    expect(getItemIds(pagination)).toEqual(["1", "2"]);
+    expect(getItemPostIds(pagination)).toEqual(["1", "2"]);
     expect([pagination.pageNumber.value, pagination.pageCount.value]).toEqual([1, 3]);
   });
 
@@ -78,7 +78,7 @@ describe("FavoritesPagination", () => {
     const { pagination, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
     favoritesPaginationPreferences.pageSize.set(3);
-    expect(getItemIds(pagination)).toEqual(["1", "2", "3"]);
+    expect(getItemPostIds(pagination)).toEqual(["1", "2", "3"]);
   });
 
   test.each([
@@ -125,7 +125,7 @@ describe("FavoritesPagination", () => {
 
     pagination.goTo(2);
     index.add(collection.append([createPost({ id: "4", tags: "a" }), createPost({ id: "5", tags: "a" })]));
-    expect(getItemIds(pagination)).toEqual(["3", "4"]);
+    expect(getItemPostIds(pagination)).toEqual(["3", "4"]);
   });
 
   describe("items", () => {
@@ -133,7 +133,7 @@ describe("FavoritesPagination", () => {
       const { pagination, collection, index } = setup(createTaggedPosts("a"));
       const seen: string[][] = [];
       const stop = effect(() => {
-        seen.push(getItemIds(pagination));
+        seen.push(getItemPostIds(pagination));
       });
 
       index.add(collection.append([createPost({ id: "2", tags: "a" })]));
@@ -160,7 +160,7 @@ describe("FavoritesPagination", () => {
       const { pagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
       pagination.goTo(3);
-      expect(getItemIds(pagination)).toEqual(["5"]);
+      expect(getItemPostIds(pagination)).toEqual(["5"]);
     });
 
     test.each([
@@ -181,7 +181,7 @@ describe("FavoritesPagination", () => {
 
       pagination.goToContaining(search.results.peek()[4]);
       expect(pagination.pageNumber.value).toBe(3);
-      expect(getItemIds(pagination)).toEqual(["5"]);
+      expect(getItemPostIds(pagination)).toEqual(["5"]);
     });
 
     test("grows the infinite scroll prefix to include the favorite", () => {
@@ -190,7 +190,7 @@ describe("FavoritesPagination", () => {
 
       pagination.goToContaining(search.results.peek()[27]);
       expect(pagination.pageNumber.value).toBe(2);
-      expect(getItemIds(pagination)).toHaveLength(30);
+      expect(getItemPostIds(pagination)).toHaveLength(30);
     });
 
     test("leaves the current page alone when the favorite is absent", () => {

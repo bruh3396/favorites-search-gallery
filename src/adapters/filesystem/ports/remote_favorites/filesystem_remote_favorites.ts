@@ -13,21 +13,21 @@ export class FilesystemRemoteFavorites implements RemoteFavorites {
     onFavoritesFound(await this.readNewestFirst());
   }
 
-  public async findNew(localIds: readonly string[]): Promise<Post[]> {
-    return takeAboveLocalOrder(await this.readNewestFirst(), localIds);
+  public async findNew(localPostIds: readonly string[]): Promise<Post[]> {
+    return takeAboveLocalOrder(await this.readNewestFirst(), localPostIds);
   }
 
-  public async findMissing(localIds: readonly string[]): Promise<string[]> {
-    const remoteIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
-    return localIds.filter(id => !remoteIds.has(id));
+  public async findMissing(localPostIds: readonly string[]): Promise<string[]> {
+    const remotePostIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
+    return localPostIds.filter(id => !remotePostIds.has(id));
   }
 
   public add(): Promise<boolean> {
     return Promise.resolve(true);
   }
 
-  public async remove(id: string): Promise<boolean> {
-    await this.filesystem.deletePostFile(id);
+  public async remove(postId: string): Promise<boolean> {
+    await this.filesystem.deletePostFile(postId);
     return true;
   }
 
@@ -37,13 +37,13 @@ export class FilesystemRemoteFavorites implements RemoteFavorites {
   }
 }
 
-function takeAboveLocalOrder(remoteFavorites: Post[], localIds: readonly string[]): Post[] {
-  const localIndexById = new Map(localIds.map((id, index) => [id, index]));
+function takeAboveLocalOrder(remoteFavorites: Post[], localPostIds: readonly string[]): Post[] {
+  const localIndexByPostId = new Map(localPostIds.map((id, index) => [id, index]));
   let remoteStart = remoteFavorites.length;
   let nextLocalIndex = Infinity;
 
   for (let remoteIndex = remoteFavorites.length - 1; remoteIndex >= 0; remoteIndex -= 1) {
-    const localIndex = localIndexById.get(remoteFavorites[remoteIndex].id);
+    const localIndex = localIndexByPostId.get(remoteFavorites[remoteIndex].id);
 
     if (localIndex === undefined || localIndex >= nextLocalIndex) {
       break;

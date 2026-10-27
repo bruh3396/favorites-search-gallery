@@ -10,23 +10,23 @@ export const CopyIdButtonClass = {
 } as const;
 
 export interface CopyIdButtonProps {
-  id: Readable<string | undefined>;
+  postId: Readable<string | undefined>;
   clipboard: Pick<Clipboard, "write">;
   scheduler: Pick<Scheduler, "schedule">;
   copiedDuration: number;
 }
 
-export function CopyIdButton({ id, clipboard, scheduler, copiedDuration }: CopyIdButtonProps): HTMLElement {
+export function CopyIdButton({ postId, clipboard, scheduler, copiedDuration }: CopyIdButtonProps): HTMLElement {
   const copied = new Signal(false);
   let cancelCopied = (): void => undefined;
 
-  function copyId(): void {
-    const shownId = id.peek();
+  function copyPostId(): void {
+    const shownPostId = postId.peek();
 
-    if (shownId === undefined) {
+    if (shownPostId === undefined) {
       return;
     }
-    clipboard.write(shownId).then(() => {
+    clipboard.write(shownPostId).then(() => {
       cancelCopied();
       copied.value = true;
       cancelCopied = scheduler.schedule(() => {
@@ -36,14 +36,14 @@ export function CopyIdButton({ id, clipboard, scheduler, copiedDuration }: CopyI
   }
 
   effect(() => {
-    void id.value;
+    void postId.value;
     cancelCopied();
     copied.value = false;
   });
   onCleanup(() => cancelCopied());
   return (
-    <button type="button" className={CopyIdButtonClass.root} title="Copy id" onClick={copyId}>
-      {computed(() => id.value ?? "")}
+    <button type="button" className={CopyIdButtonClass.root} title="Copy id" onClick={copyPostId}>
+      {computed(() => postId.value ?? "")}
       <span className={CopyIdButtonClass.copied} hidden={computed(() => !copied.value)}>Copied</span>
     </button>
   ) as HTMLElement;

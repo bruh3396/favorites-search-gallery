@@ -15,7 +15,7 @@ function setup(fetchOriginal: () => Promise<Blob> = () => Promise.resolve(new Bl
   const saved: { file: Blob; name: string }[] = [];
   const actions = new PostActions({
     remoteMedia: { resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`original/${media.locator}`), fetchOriginal },
-    remotePages: { postUrl: (id): string => `post/${id}` },
+    remotePages: { postUrl: (postId): string => `post/${postId}` },
     navigator: { open: (url): number => opened.push(url) },
     fileSaver: { save: (file, name): number => saved.push({ file, name }) }
   });
@@ -49,7 +49,7 @@ describe("PostActions", () => {
           resolveOriginalUrl: (): Promise<never> => Promise.reject(new Error("gone")),
           fetchOriginal: (): Promise<never> => Promise.reject(new Error("gone"))
         },
-        remotePages: { postUrl: (id): string => id },
+        remotePages: { postUrl: (postId): string => postId },
         navigator: { open: (url): number => opened.push(url) },
         fileSaver: { save: doNothing }
       });

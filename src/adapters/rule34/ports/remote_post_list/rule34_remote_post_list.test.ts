@@ -23,9 +23,9 @@ const OTHER_PAGE = [createPost({ id: "2" })];
 function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolve(OTHER_PAGE)), initialPage: Post[] = LANDING_PAGE): Setup {
   const scheduler = new MemoryScheduler();
   const readPostListPage = vi.fn((): Post[] => initialPage);
-  const rule34 = { readPostListPage, fetchPostListPage };
+  const rule34Client = { readPostListPage, fetchPostListPage };
   const rule34Document = { readSearchQuery: (): string => "apple banana", readPostListPageIndex: (): number => 2 };
-  const postList = new Rule34RemotePostList({ rule34, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
+  const postList = new Rule34RemotePostList({ rule34Client, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
   return { postList, scheduler, readPostListPage, fetchPostListPage };
 }
 

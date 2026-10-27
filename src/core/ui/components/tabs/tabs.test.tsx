@@ -14,7 +14,7 @@ interface Setup {
   renderPanel: Mock<(tab: Tab<string>) => HTMLElement>;
   disposePanel: Mock<(value: string) => void>;
   onAdd: Mock<() => void>;
-  onClose: Mock<(id: string) => void>;
+  onClose: Mock<(tabId: string) => void>;
   stripVisible: Signal<boolean>;
   dispose: () => void;
 }
@@ -27,7 +27,7 @@ function setup(values: readonly string[] = ["Home", "apple"]): Setup {
     return <p>{tab.value}</p>;
   });
   const onAdd = vi.fn<() => void>();
-  const onClose = vi.fn((id: string): void => manager.close(id));
+  const onClose = vi.fn((tabId: string): void => manager.close(tabId));
   const stripVisible = new Signal(true);
 
   values.forEach((value, index) => manager.open(value, value, { closable: index > 0 }));

@@ -10,8 +10,8 @@ const DESCRIBERS: Describers = {
   saving: () => "Saving",
   pulling: () => "Checking for new",
   indexing: () => "Indexing",
-  pruning: () => "Syncing",
-  loaded: state => describeChanges(state.pulledCount, state.removedCount),
+  checkingMissing: () => "Syncing",
+  loaded: state => describeChanges(state.newCount, state.unfavoritedCount),
   interrupted: () => "Couldn't finish loading"
 };
 
@@ -25,10 +25,10 @@ function describeProgress(loadedCount: number, expectedCount: number | null): st
   return expectedCount === null ? loaded : `${loaded} / ${expectedCount.toLocaleString()}`;
 }
 
-function describeChanges(pulledCount: number, removedCount: number): string {
+function describeChanges(newCount: number, unfavoritedCount: number): string {
   const changes = [
-    pulledCount > 0 ? `${pulledCount.toLocaleString()} new` : null,
-    removedCount > 0 ? `${removedCount.toLocaleString()} removed` : null
+    newCount > 0 ? `${newCount.toLocaleString()} new` : null,
+    unfavoritedCount > 0 ? `${unfavoritedCount.toLocaleString()} removed` : null
   ].filter(change => change !== null);
   return changes.join(", ");
 }

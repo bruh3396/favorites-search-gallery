@@ -7,7 +7,7 @@ describe("PostUnavailableError", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe("PostUnavailableError");
-    expect(error.id).toBe("123");
+    expect(error.postId).toBe("123");
     expect(error.message).toBe("Post 123 is unavailable from this source");
   });
 });

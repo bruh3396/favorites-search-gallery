@@ -31,7 +31,7 @@ export class PostActions {
   }
 }
 
-function nameDownload(id: string, file: Blob): string {
+function nameDownload(postId: string, file: Blob): string {
   const subtype = file.type.split("/")[1];
-  return subtype === undefined || subtype === "" ? id : `${id}.${subtype}`;
+  return subtype === undefined || subtype === "" ? postId : `${postId}.${subtype}`;
 }

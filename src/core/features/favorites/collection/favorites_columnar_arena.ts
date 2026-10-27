@@ -1,4 +1,4 @@
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { Post } from "@/core/domain/post/post";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/favorites_post_table";
 import { Media } from "@/core/domain/media/media";

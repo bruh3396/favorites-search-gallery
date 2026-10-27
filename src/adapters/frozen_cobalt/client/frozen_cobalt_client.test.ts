@@ -7,7 +7,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 type Fetch = Mock<(url: string, init: RequestInit) => Promise<Response>>;
 
 interface Setup {
-  frozenCobalt: FrozenCobaltClient;
+  frozenCobaltClient: FrozenCobaltClient;
   scheduler: MemoryScheduler;
   fetch: Fetch;
 }
@@ -27,15 +27,15 @@ function answerEach(keys: string[], result: (key: string) => unknown): Record<st
 
 function setup(fetch: Fetch = createFetch(), identity?: FrozenCobaltIdentity): Setup {
   const scheduler = new MemoryScheduler();
-  return { frozenCobalt: new FrozenCobaltClient({ origin: ORIGIN, identity }, { scheduler, fetch }), scheduler, fetch };
+  return { frozenCobaltClient: new FrozenCobaltClient({ origin: ORIGIN, identity }, { scheduler, fetch }), scheduler, fetch };
 }
 
 function readRequests(fetch: Fetch): { url: string; body: unknown }[] {
   return fetch.mock.calls.map(([url, init]) => ({ url, body: JSON.parse(String(init.body)) as unknown }));
 }
 
-async function fetchPostResult({ frozenCobalt, scheduler }: Setup, id: string): Promise<unknown> {
-  const fetched = frozenCobalt.fetchPost(id);
+async function fetchPostResult({ frozenCobaltClient, scheduler }: Setup, postId: string): Promise<unknown> {
+  const fetched = frozenCobaltClient.fetchPost(postId);
 
   fetched.catch(() => { });
   await advanceAndSettle(scheduler, 20_000);
@@ -45,8 +45,8 @@ async function fetchPostResult({ frozenCobalt, scheduler }: Setup, id: string): 
 describe("FrozenCobaltClient", () => {
   test("batches posts asked for together into one request to its origin", async() => {
     const fetch = createFetch(({ ids }) => answerEach(ids, id => ({ status: "deleted", id })));
-    const { frozenCobalt, scheduler } = setup(fetch);
-    const fetched = Promise.all([frozenCobalt.fetchPost("1"), frozenCobalt.fetchPost("2")]);
+    const { frozenCobaltClient, scheduler } = setup(fetch);
+    const fetched = Promise.all([frozenCobaltClient.fetchPost("1"), frozenCobaltClient.fetchPost("2")]);
 
     await advanceAndSettle(scheduler, 10_000);
     expect(await fetched).toEqual([{ status: "deleted", id: "1" }, { status: "deleted", id: "2" }]);
@@ -55,8 +55,8 @@ describe("FrozenCobaltClient", () => {
 
   test("batches tag categories asked for together into one request", async() => {
     const fetch = createFetch(({ tagNames }) => answerEach(tagNames, () => ({ status: "ok", category: 0 })));
-    const { frozenCobalt, scheduler } = setup(fetch);
-    const fetched = Promise.all([frozenCobalt.fetchTagCategory("apple"), frozenCobalt.fetchTagCategory("alice")]);
+    const { frozenCobaltClient, scheduler } = setup(fetch);
+    const fetched = Promise.all([frozenCobaltClient.fetchTagCategory("apple"), frozenCobaltClient.fetchTagCategory("alice")]);
 
     await advanceAndSettle(scheduler, 10_000);
     expect(await fetched).toHaveLength(2);
@@ -112,7 +112,7 @@ describe("FrozenCobaltClient", () => {
   });
 
   test("identifies every request by the identity it was built with", async() => {
-    const { frozenCobalt, fetch } = setup(createFetch(), { userId: "9", version: "1.0", platform: "mobile" });
+    const { frozenCobaltClient, fetch } = setup(createFetch(), { userId: "9", version: "1.0", platform: "mobile" });
     const headers = {
       "Content-Type": "application/json",
       "X-User-Id": "9",
@@ -120,24 +120,24 @@ describe("FrozenCobaltClient", () => {
       "X-Platform": "mobile"
     };
 
-    frozenCobalt.ping();
+    frozenCobaltClient.ping();
     await flushMicrotasks();
     expect(fetch.mock.calls.map(([url, init]) => [url, init.headers])).toEqual([[`${ORIGIN}/ping`, headers]]);
   });
 
   test("is anonymous unless given an identity", async() => {
-    const { frozenCobalt, fetch } = setup();
+    const { frozenCobaltClient, fetch } = setup();
     const headers = { "Content-Type": "application/json", "X-User-Id": "", "X-Version": "", "X-Platform": "" };
 
-    frozenCobalt.ping();
+    frozenCobaltClient.ping();
     await flushMicrotasks();
     expect(fetch.mock.calls.map(([, init]) => init.headers)).toEqual([headers]);
   });
 
   test("swallows a failed ping", async() => {
-    const { frozenCobalt } = setup(vi.fn(() => Promise.reject(new Error("offline"))));
+    const { frozenCobaltClient } = setup(vi.fn(() => Promise.reject(new Error("offline"))));
 
-    frozenCobalt.ping();
+    frozenCobaltClient.ping();
     await flushMicrotasks();
   });
 });

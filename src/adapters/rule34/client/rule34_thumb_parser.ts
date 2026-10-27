@@ -4,15 +4,15 @@ import { Post } from "@/core/domain/post/post";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 
 export function parseRule34Thumb(thumb: HTMLElement, mintMedia: MediaMinter): Post | null {
-  const id = parseId(thumb);
+  const postId = parsePostId(thumb);
 
-  if (id === "") {
+  if (postId === "") {
     return null;
   }
   const image = thumb.querySelector("img");
   const tags = normalizeTags(image?.title ?? "");
   return {
-    id,
+    id: postId,
     tags,
     width: 0,
     height: 0,
@@ -25,7 +25,7 @@ export function parseRule34Thumb(thumb: HTMLElement, mintMedia: MediaMinter): Po
   };
 }
 
-function parseId(thumb: HTMLElement): string {
+function parsePostId(thumb: HTMLElement): string {
   return removeNonNumericCharacters(thumb.id || (thumb.querySelector("a")?.id ?? ""));
 }
 

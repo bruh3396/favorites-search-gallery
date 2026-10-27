@@ -24,11 +24,11 @@ export interface TabStripItem {
 
 export interface TabStripProps {
   tabs: Readable<readonly TabStripItem[]>;
-  activeId: Readable<string | null>;
+  activeTabId: Readable<string | null>;
   trailing?: Child;
-  onActivate: (id: string) => void;
-  onClose: (id: string) => void;
-  onMove: (id: string, index: number) => void;
+  onActivate: (tabId: string) => void;
+  onClose: (tabId: string) => void;
+  onMove: (tabId: string, index: number) => void;
   onAdd: () => void;
   onCloseAll: () => void;
 }
@@ -37,24 +37,24 @@ type DropSide = "before" | "after";
 
 interface TabProps {
   tab: TabStripItem;
-  activeId: Readable<string | null>;
-  onActivate: (id: string) => void;
-  onClose: (id: string) => void;
-  onDrop: (draggedId: string, side: DropSide) => void;
+  activeTabId: Readable<string | null>;
+  onActivate: (tabId: string) => void;
+  onClose: (tabId: string) => void;
+  onDrop: (draggedTabId: string, side: DropSide) => void;
 }
 
 const MIDDLE_BUTTON = 1;
 const TAB_DRAG_TYPE = "application/x-fsg-tab";
 
-export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onMove, onAdd, onCloseAll }: TabStripProps): HTMLElement {
+export function TabStrip({ tabs, activeTabId, trailing, onActivate, onClose, onMove, onAdd, onCloseAll }: TabStripProps): HTMLElement {
   let isRendered = false;
-  const moveNextTo = (targetId: string, draggedId: string, side: DropSide): void => {
-    if (draggedId === targetId) {
+  const moveNextTo = (targetTabId: string, draggedTabId: string, side: DropSide): void => {
+    if (draggedTabId === targetTabId) {
       return;
     }
-    const ids = tabs.peek().map(tab => tab.id).filter(id => id !== draggedId);
+    const tabIds = tabs.peek().map(tab => tab.id).filter(tabId => tabId !== draggedTabId);
 
-    onMove(draggedId, ids.indexOf(targetId) + (side === "after" ? 1 : 0));
+    onMove(draggedTabId, tabIds.indexOf(targetTabId) + (side === "after" ? 1 : 0));
   };
   const items = new KeyedList<TabStripItem>({
     getKey: (tab): string => tab.id,
@@ -62,10 +62,10 @@ export function TabStrip({ tabs, activeId, trailing, onActivate, onClose, onMove
       const element = (
         <Tab
           tab={tab}
-          activeId={activeId}
+          activeTabId={activeTabId}
           onActivate={onActivate}
           onClose={onClose}
-          onDrop={(draggedId, side) => moveNextTo(tab.id, draggedId, side)}
+          onDrop={(draggedTabId, side) => moveNextTo(tab.id, draggedTabId, side)}
         />
       );
 
@@ -105,7 +105,7 @@ function readDropSide(event: DragEvent, element: HTMLElement): DropSide {
   return event.clientX < left + (width / 2) ? "before" : "after";
 }
 
-function Tab({ tab, activeId, onActivate, onClose, onDrop }: TabProps): HTMLElement {
+function Tab({ tab, activeTabId, onActivate, onClose, onDrop }: TabProps): HTMLElement {
   const element = (
     <div
       className={TabStripClass.tab}
@@ -123,13 +123,13 @@ function Tab({ tab, activeId, onActivate, onClose, onDrop }: TabProps): HTMLElem
       }}
       onDragleave={() => delete element.dataset.drop}
       onDrop={event => {
-        const draggedId = event.dataTransfer?.getData(TAB_DRAG_TYPE) ?? "";
+        const draggedTabId = event.dataTransfer?.getData(TAB_DRAG_TYPE) ?? "";
 
         delete element.dataset.drop;
 
-        if (draggedId !== "") {
+        if (draggedTabId !== "") {
           event.preventDefault();
-          onDrop(draggedId, readDropSide(event, element));
+          onDrop(draggedTabId, readDropSide(event, element));
         }
       }}
     >
@@ -137,7 +137,7 @@ function Tab({ tab, activeId, onActivate, onClose, onDrop }: TabProps): HTMLElem
         className={TabStripClass.select}
         type="button"
         role="tab"
-        aria-selected={computed(() => String(activeId.value === tab.id))}
+        aria-selected={computed(() => String(activeTabId.value === tab.id))}
         onClick={() => onActivate(tab.id)}
         onAuxclick={event => {
           if (event.button === MIDDLE_BUTTON && tab.closable) {

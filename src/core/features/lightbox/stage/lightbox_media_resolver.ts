@@ -30,8 +30,8 @@ export class LightboxMediaResolver {
     });
   }
 
-  public readMedia(id: string): Media | undefined {
-    return this.resolved.value.get(id);
+  public readMedia(postId: string): Media | undefined {
+    return this.resolved.value.get(postId);
   }
 
   private resolveOne({ id, media }: MediaItem): void {

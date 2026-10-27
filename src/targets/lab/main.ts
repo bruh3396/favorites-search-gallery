@@ -41,10 +41,10 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
   const { scheduler } = base;
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
-  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
-  const mintMedia: MediaMinter = file => rule34Cdn.mintMedia(file);
-  const rule34 = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
-  const indexedDb = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintMedia);
+  const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
+  const mintMedia: MediaMinter = file => rule34CdnClient.mintMedia(file);
+  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
+  const indexedDbClient = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintMedia);
   return {
     ...base,
     randomSource,
@@ -52,13 +52,13 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
-    localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDb),
-    localPosts: new IndexedDbLocalPosts(indexedDb),
-    localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDbClient),
+    localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     remoteFavorites: UNCHANGED_REMOTE_FAVORITES,
     remotePosts: UNAVAILABLE_REMOTE_POSTS,
-    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
-    remotePages: new Rule34RemotePages(rule34),
+    remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
+    remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     visibilityObserver: new BrowserVisibilityObserver()
   };
 }

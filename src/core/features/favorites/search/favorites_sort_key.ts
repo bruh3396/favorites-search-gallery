@@ -1,4 +1,4 @@
-import { METRICS } from "@/core/domain/post/metric";
+import { METRICS } from "@/core/domain/search/metric";
 
 export const FAVORITES_SORT_KEYS = ["favorited", "random", ...METRICS] as const;
 

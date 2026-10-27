@@ -6,16 +6,16 @@ import { mintRule34CdnMedia } from "@/adapters/rule34_cdn/client/rule34_cdn_medi
 
 type Row = Record<string, unknown>;
 
-function createLegacyPost(id: string, overrides: Row = {}): Row {
+function createLegacyPost(postId: string, overrides: Row = {}): Row {
   return {
-    id,
+    id: postId,
     width: 100,
     height: 200,
     score: 5,
     rating: "explicit",
     change: 1_700_000_000,
-    fileURL: `https://api-cdn.rule34.xxx/images/1234/${id}abc.png`,
-    previewURL: `https://api-cdn.rule34.xxx/thumbnails/1234/thumbnail_${id}abc.jpg`,
+    fileURL: `https://api-cdn.rule34.xxx/images/1234/${postId}abc.png`,
+    previewURL: `https://api-cdn.rule34.xxx/thumbnails/1234/thumbnail_${postId}abc.jpg`,
     tags: "tag_a tag_b",
     ...overrides
   };
@@ -55,8 +55,8 @@ function createLegacyDatabase({ name, stores, keyed }: { name: string; stores: R
   });
 }
 
-async function read(indexedDb: IndexedDbClient, storeName: "favorites" | "posts" | "tagCategories", key: string): Promise<unknown> {
-  return (await indexedDb.runTransaction(storeName, "readonly", store => store.get(key))).result;
+async function read(indexedDbClient: IndexedDbClient, storeName: "favorites" | "posts" | "tagCategories", key: string): Promise<unknown> {
+  return (await indexedDbClient.runTransaction(storeName, "readonly", store => store.get(key))).result;
 }
 
 async function databaseNames(): Promise<(string | undefined)[]> {
@@ -77,10 +77,10 @@ describe("prepareLegacyMigration", () => {
       user1: [createLegacyPost("10"), createLegacyPost("20"), createLegacyPost("30")],
       user2: [createLegacyPost("40")]
     }, keyed: false });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "favorites", "1")).toEqual(["30", "20", "10"]);
-    expect(await read(indexedDb, "favorites", "2")).toEqual(["40"]);
+    expect(await read(indexedDbClient, "favorites", "1")).toEqual(["30", "20", "10"]);
+    expect(await read(indexedDbClient, "favorites", "2")).toEqual(["40"]);
   });
 
   test("skips favorites stores without an owner or rows", async() => {
@@ -89,19 +89,19 @@ describe("prepareLegacyMigration", () => {
       other1: [createLegacyPost("20")],
       user3: []
     }, keyed: false });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await Promise.all(["", "1", "her1", "3"].map(key => read(indexedDb, "favorites", key)))).toEqual([undefined, undefined, undefined, undefined]);
-    expect(await read(indexedDb, "posts", "10")).toMatchObject({ id: "10" });
+    expect(await Promise.all(["", "1", "her1", "3"].map(key => read(indexedDbClient, "favorites", key)))).toEqual([undefined, undefined, undefined, undefined]);
+    expect(await read(indexedDbClient, "posts", "10")).toMatchObject({ id: "10" });
   });
 
   test("converts legacy posts to the new shape", async() => {
     await createLegacyDatabase({ name: "Posts", stores: {
       posts: [createLegacyPost("1", { duration: 12, deleted: false, fetchedAt: 5, extension: "png" })]
     }, keyed: true });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toEqual({
+    expect(await read(indexedDbClient, "posts", "1")).toEqual({
       id: "1",
       width: 100,
       height: 200,
@@ -118,18 +118,18 @@ describe("prepareLegacyMigration", () => {
 
   test("converts a legacy deleted post to the deleted status", async() => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1", { deleted: true })] }, keyed: true });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toMatchObject({ status: "deleted" });
+    expect(await read(indexedDbClient, "posts", "1")).toMatchObject({ status: "deleted" });
   });
 
   test("prefers a post from the Posts database over the same post in a favorites row", async() => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1", { score: 99 })] }, keyed: true });
     await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1", { score: 1 }), createLegacyPost("2")] }, keyed: false });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toMatchObject({ score: 99 });
-    expect(await read(indexedDb, "posts", "2")).toMatchObject({ id: "2" });
+    expect(await read(indexedDbClient, "posts", "1")).toMatchObject({ score: 99 });
+    expect(await read(indexedDbClient, "posts", "2")).toMatchObject({ id: "2" });
   });
 
   test("writes a post stored in both legacy databases once, since Firefox slows down on every rejected add", async() => {
@@ -153,10 +153,10 @@ describe("prepareLegacyMigration", () => {
         createLegacyPost("2", { fileURL: "https://x/thumbnails/9/thumbnail_bb.jpg", tags: "animated" })
       ]
     }, keyed: true });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toMatchObject({ media: { kind: "video", locator: "9/aa.mp4" } });
-    expect(await read(indexedDb, "posts", "2")).toMatchObject({ media: { kind: "gif", locator: "9/bb" } });
+    expect(await read(indexedDbClient, "posts", "1")).toMatchObject({ media: { kind: "video", locator: "9/aa.mp4" } });
+    expect(await read(indexedDbClient, "posts", "2")).toMatchObject({ media: { kind: "gif", locator: "9/bb" } });
   });
 
   test("reads the media of a favorites row from its compressed preview", async() => {
@@ -166,27 +166,27 @@ describe("prepareLegacyMigration", () => {
         createLegacyPost("2", { fileURL: "", previewURL: "2075_9e223af24537", extension: "", tags: "video" })
       ]
     }, keyed: false });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toMatchObject({ media: { kind: "image", locator: "4461/929221e6e18e.jpeg" } });
-    expect(await read(indexedDb, "posts", "2")).toMatchObject({ media: { kind: "video", locator: "2075/9e223af24537" } });
+    expect(await read(indexedDbClient, "posts", "1")).toMatchObject({ media: { kind: "image", locator: "4461/929221e6e18e.jpeg" } });
+    expect(await read(indexedDbClient, "posts", "2")).toMatchObject({ media: { kind: "video", locator: "2075/9e223af24537" } });
   });
 
   test("skips posts whose media can't be read", async() => {
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1", { fileURL: "nonsense" })] }, keyed: true });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toBeUndefined();
+    expect(await read(indexedDbClient, "posts", "1")).toBeUndefined();
   });
 
   test("moves valid tag categories", async() => {
     await createLegacyDatabase({ name: "TagCategories", stores: {
       tagCategories: [{ id: "alice", category: "artist" }, { id: "bogus", category: "nope" }]
     }, keyed: false });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "tagCategories", "alice")).toBe("artist");
-    expect(await read(indexedDb, "tagCategories", "bogus")).toBeUndefined();
+    expect(await read(indexedDbClient, "tagCategories", "alice")).toBe("artist");
+    expect(await read(indexedDbClient, "tagCategories", "bogus")).toBeUndefined();
   });
 
   test("deletes the legacy databases after migrating", async() => {
@@ -200,15 +200,15 @@ describe("prepareLegacyMigration", () => {
   });
 
   test("deletes legacy databases written after the migration without reading them", async() => {
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    await indexedDb.runTransaction("favorites", "readwrite", store => store.put(["new"], "1"));
+    await indexedDbClient.runTransaction("favorites", "readwrite", store => store.put(["new"], "1"));
     await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("old")] }, keyed: false });
     await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("old")] }, keyed: true });
-    const reopened = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const reopenedIndexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(reopened, "favorites", "1")).toEqual(["new"]);
-    expect(await read(reopened, "posts", "old")).toBeUndefined();
+    expect(await read(reopenedIndexedDbClient, "favorites", "1")).toEqual(["new"]);
+    expect(await read(reopenedIndexedDbClient, "posts", "old")).toBeUndefined();
     await vi.waitFor(async() => expect(await databaseNames()).toEqual(["favorites-search-gallery"]));
   });
 
@@ -235,9 +235,9 @@ describe("prepareLegacyMigration", () => {
     await createLegacyDatabase({ name: "Posts", stores: {
       posts: [createLegacyPost("1", { rating: "unknown", fileURL: "https://x/thumbnails/9/thumbnail_aa.jpg" })]
     }, keyed: true });
-    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "posts", "1")).toMatchObject({ rating: "explicit", media: { kind: "image", locator: "9/aa" } });
+    expect(await read(indexedDbClient, "posts", "1")).toMatchObject({ rating: "explicit", media: { kind: "image", locator: "9/aa" } });
   });
 
   test("skips tag categories without a category", async() => {
@@ -249,20 +249,20 @@ describe("prepareLegacyMigration", () => {
   test("reads, writes, and deletes only the databases its configuration names", async() => {
     await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1")] }, keyed: false });
     await createLegacyDatabase({ name: "lab-FavoritesV2", stores: { user1: [createLegacyPost("2")] }, keyed: false });
-    const indexedDb = new IndexedDbClient({
+    const indexedDbClient = new IndexedDbClient({
       databaseName: "lab",
       legacyDatabaseNames: { favorites: "lab-FavoritesV2", posts: "lab-Posts", tagCategories: "lab-TagCategories" }
     }, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "favorites", "1")).toEqual(["2"]);
+    expect(await read(indexedDbClient, "favorites", "1")).toEqual(["2"]);
     await vi.waitFor(async() => expect((await databaseNames()).sort()).toEqual(["FavoritesV2", "lab"]));
   });
 
   test("leaves legacy databases alone when its configuration names none", async() => {
     await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1")] }, keyed: false });
-    const indexedDb = new IndexedDbClient({ databaseName: "lab", legacyDatabaseNames: null }, mintRule34CdnMedia);
+    const indexedDbClient = new IndexedDbClient({ databaseName: "lab", legacyDatabaseNames: null }, mintRule34CdnMedia);
 
-    expect(await read(indexedDb, "favorites", "1")).toBeUndefined();
+    expect(await read(indexedDbClient, "favorites", "1")).toBeUndefined();
     expect((await databaseNames()).sort()).toEqual(["FavoritesV2", "lab"]);
   });
 

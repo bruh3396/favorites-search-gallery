@@ -6,14 +6,18 @@ import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favo
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 
-const STREAM_BATCH_SIZE = 1_000;
+const RESTORE_BATCH_SIZE = 1_000;
+
+type MissingReason = "unfavorited" | "purged" | "unknown";
 
 export interface FavoritesReloaderDependencies {
   localFavorites: LocalFavorites;
   remoteFavorites: Pick<RemoteFavorites, "findNew" | "findMissing">;
+  remotePages: Pick<RemotePages, "postExists">;
   collection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll">;
-  searchIndex: Pick<FavoritesSearchIndex, "rebuild">;
+  index: Pick<FavoritesSearchIndex, "rebuild">;
   postLibrary: PostLibrary;
   waitForPaint: () => Promise<void>;
   report: (state: FavoritesLoadState) => void;
@@ -26,116 +30,82 @@ export class FavoritesReloader {
     this.dependencies = dependencies;
   }
 
-  public async reload(localIds: readonly string[]): Promise<FavoritesLoadResult> {
-    const { collection, searchIndex, postLibrary, report, waitForPaint } = this.dependencies;
-    const restored = await this.restorePosts(localIds);
-    const purgedIds = new Set(restored.filter(post => post.status === "purged").map(post => post.id));
-    let pulled: Post[] = [];
-
-    report({ phase: "pulling" });
-
-    try {
-      pulled = await this.pullNewPosts(localIds.filter(id => !purgedIds.has(id)));
-    } finally {
-      report({ phase: "indexing" });
-      await waitForPaint();
-      searchIndex.rebuild(collection.getAll());
-      postLibrary.refresh([...pulled, ...restored]).catch(console.error);
-    }
-    report({ phase: "pruning" });
-    const removedCount = await this.pruneRemoved(pulled.length, restored, purgedIds);
-    return { pulledCount: pulled.length, removedCount };
-  }
-
-  public async reload2(localPostIds: readonly string[]): Promise<FavoritesLoadResult> {
+  public async reload(localPostIds: readonly string[]): Promise<FavoritesLoadResult> {
     const { localFavorites, postLibrary, report } = this.dependencies;
     const restoredPosts = await this.restorePosts(localPostIds);
-    const existingPostIds = excludePurgedPosts(localPostIds, restoredPosts);
-    let pulledPosts: Post[] = [];
+    const existingPostIds = restoredPosts.filter(post => post.status !== "purged").map(post => post.id);
+    let newPosts: Post[] = [];
 
     report({ phase: "pulling" });
 
     try {
-      pulledPosts = await this.pullNewPosts(existingPostIds);
+      newPosts = await this.pullNewPosts(existingPostIds);
     } finally {
       await this.rebuildSearchIndex();
-      postLibrary.refresh([...pulledPosts, ...restoredPosts]).catch(console.error);
+      postLibrary.refresh([...newPosts, ...restoredPosts]).catch(console.error);
     }
     report({ phase: "checkingMissing" });
-    const missing = await this.findMissingPosts(existingPostIds, pulledPosts, restoredPosts);
-    const { unfavoritedPosts, purgedPosts } = await this.partitionMissingPosts(missing);
+    const missingPosts = await this.findMissingPosts(existingPostIds, newPosts, restoredPosts);
+    const { unfavoritedPosts, purgedPosts } = await this.partitionMissingPosts(missingPosts);
 
-    await postLibrary.markPurged(purged);
-    await localFavorites.remove(unfavorited.map(post => post.id));
-    return { pulledCount: pulledPosts.length, unfavoritedCount: unfavorited.length };
+    await postLibrary.markPurged(purgedPosts);
+    await localFavorites.remove(unfavoritedPosts.map(post => post.id));
+    return { newCount: newPosts.length, unfavoritedCount: unfavoritedPosts.length };
   }
 
-  private async restorePosts(localIds: readonly string[]): Promise<Post[]> {
+  private async restorePosts(localPostIds: readonly string[]): Promise<Post[]> {
     const { collection, postLibrary, report } = this.dependencies;
-    const restored: Post[] = [];
-    const reportProgress = (): void => report({ phase: "restoring", loadedCount: restored.length, expectedCount: localIds.length });
+    const restoredPosts: Post[] = [];
+    const reportProgress = (): void => report({ phase: "restoring", loadedCount: restoredPosts.length, expectedCount: localPostIds.length });
 
     reportProgress();
-    await postLibrary.stream(localIds, STREAM_BATCH_SIZE, posts => {
+    await postLibrary.stream(localPostIds, RESTORE_BATCH_SIZE, posts => {
       collection.append(posts);
-      restored.push(...posts);
+      restoredPosts.push(...posts);
       reportProgress();
     });
-    return restored;
+    return restoredPosts;
   }
 
-  private async pullNewPosts(localIds: readonly string[]): Promise<Post[]> {
+  private async pullNewPosts(existingPostIds: readonly string[]): Promise<Post[]> {
     const { collection, postLibrary, remoteFavorites, localFavorites } = this.dependencies;
-    const pulled = await remoteFavorites.findNew(localIds);
+    const remoteNewPosts = await remoteFavorites.findNew(existingPostIds);
 
-    if (pulled.length === 0) {
+    if (remoteNewPosts.length === 0) {
       return [];
     }
-    const adopted = await postLibrary.adopt(pulled);
+    const newPosts = await postLibrary.adopt(remoteNewPosts);
 
-    collection.prependAsNew(adopted);
-    await localFavorites.prepend(adopted.map(post => post.id));
-    return adopted;
+    collection.prependAsNew(newPosts);
+    await localFavorites.prepend(newPosts.map(post => post.id));
+    return newPosts;
   }
 
   private async rebuildSearchIndex(): Promise<void> {
-    const { collection, searchIndex, report, waitForPaint } = this.dependencies;
+    const { collection, index, report, waitForPaint } = this.dependencies;
 
     report({ phase: "indexing" });
     await waitForPaint();
-    searchIndex.rebuild(collection.getAll());
+    index.rebuild(collection.getAll());
   }
 
-  private async findMissingPosts(existingPostIds: readonly string[], pulledPosts: readonly Post[], restoredPosts: readonly Post[]): Promise<Post[]> {
-    const pulledPostIds = new Set(pulledPosts.map(post => post.id));
-    const unpulledPostIds = existingPostIds.filter(id => !pulledPostIds.has(id));
-    const missingPostIds = new Set(await this.dependencies.remoteFavorites.findMissing(unpulledPostIds, pulledPosts.length));
+  private async findMissingPosts(existingPostIds: readonly string[], newPosts: readonly Post[], restoredPosts: readonly Post[]): Promise<Post[]> {
+    const newPostIds = new Set(newPosts.map(post => post.id));
+    const oldPostIds = existingPostIds.filter(postId => !newPostIds.has(postId));
+    const missingPostIds = new Set(await this.dependencies.remoteFavorites.findMissing(oldPostIds, newPosts.length));
     return restoredPosts.filter(post => missingPostIds.has(post.id));
   }
 
-  private async pruneRemoved(pulledCount: number, restored: readonly Post[], purgedIds: ReadonlySet<string>): Promise<number> {
-    const { remoteFavorites, localFavorites, postLibrary } = this.dependencies;
-    const idsBelowPulled = (await localFavorites.getAll()).slice(pulledCount).filter(id => !purgedIds.has(id));
-    const removedIds = new Set(await remoteFavorites.findMissing(idsBelowPulled, pulledCount));
-    const removedPosts = restored.filter(post => removedIds.has(post.id));
-    const fates = await Promise.all(removedPosts.map(post => this.findRemovedFate(post)));
-    const unfavorited = removedPosts.filter((_post, index) => fates[index] === "unfavorited");
-    const purged = removedPosts.filter((_post, index) => fates[index] === "purged");
-
-    await postLibrary.markPurged(purged);
-    await localFavorites.remove(unfavorited.map(post => post.id));
-    return unfavorited.length;
+  private async partitionMissingPosts(missingPosts: readonly Post[]): Promise<{ unfavoritedPosts: Post[]; purgedPosts: Post[]; unknownPosts: Post[] }> {
+    const missingReasons = await Promise.all(missingPosts.map(post => this.findMissingReason(post)));
+    const postsWithReason = (reason: MissingReason): Post[] => missingPosts.filter((_post, index) => missingReasons[index] === reason);
+    return { unfavoritedPosts: postsWithReason("unfavorited"), purgedPosts: postsWithReason("purged"), unknownPosts: postsWithReason("unknown") };
   }
 
-  private findRemovedFate(post: Post): Promise<RemovedFate> {
-    return this.dependencies.remotePosts.fetch(post).then(
-      (): RemovedFate => "unfavorited",
-      (error: unknown): RemovedFate => (error instanceof PostPurgedError ? "purged" : "unknown")
+  private findMissingReason(post: Post): Promise<MissingReason> {
+    return this.dependencies.remotePages.postExists(post.id).then(
+      (exists): MissingReason => (exists ? "unfavorited" : "purged"),
+      (): MissingReason => "unknown"
     );
   }
-}
-
-function excludePurgedPosts(localPostIds: readonly string[], restoredPosts: readonly Post[]): string[] {
-  const purgedPostIds = new Set(restoredPosts.filter(post => post.status === "purged").map(post => post.id));
-  return localPostIds.filter(id => !purgedPostIds.has(id));
 }

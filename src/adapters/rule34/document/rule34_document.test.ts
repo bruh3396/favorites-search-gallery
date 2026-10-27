@@ -47,25 +47,25 @@ function addScript(src: string): HTMLScriptElement {
   return script;
 }
 
-function createThumb(id: string): string {
-  const image = `<img src="https://example.com/${id}.jpg" title="apple banana">`;
-  return `<span class="thumb" id="s${id}"><a id="p${id}">${image}</a></span>`;
+function createThumb(postId: string): string {
+  const image = `<img src="https://example.com/${postId}.jpg" title="apple banana">`;
+  return `<span class="thumb" id="s${postId}"><a id="p${postId}">${image}</a></span>`;
 }
 
-function addContent(...ids: string[]): HTMLElement {
+function addContent(...postIds: string[]): HTMLElement {
   const content = document.createElement("div");
 
   content.id = "content";
-  content.innerHTML = ids.map(createThumb).join("");
+  content.innerHTML = postIds.map(createThumb).join("");
   document.body.append(content);
   return content;
 }
 
-function addPostList(...ids: string[]): HTMLElement {
+function addPostList(...postIds: string[]): HTMLElement {
   const postList = document.createElement("div");
 
   postList.id = "post-list";
-  postList.innerHTML = `<div class="sidebar"></div><div class="content">${ids.map(createThumb).join("")}</div><div id="paginator"></div>`;
+  postList.innerHTML = `<div class="sidebar"></div><div class="content">${postIds.map(createThumb).join("")}</div><div id="paginator"></div>`;
   document.body.append(postList);
   return postList;
 }
@@ -99,13 +99,13 @@ describe("Rule34Document", () => {
     });
   });
 
-  describe("readFavoritesPageId", () => {
+  describe("readFavoritesOwnerId", () => {
     test("reads the viewed favorites page id, empty when absent", () => {
       visit("page=favorites&id=123");
-      expect(new Rule34Document().readFavoritesPageId()).toBe("123");
+      expect(new Rule34Document().readFavoritesOwnerId()).toBe("123");
 
       visit("page=favorites");
-      expect(new Rule34Document().readFavoritesPageId()).toBe("");
+      expect(new Rule34Document().readFavoritesOwnerId()).toBe("");
     });
   });
 

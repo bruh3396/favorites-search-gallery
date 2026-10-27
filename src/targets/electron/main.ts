@@ -45,32 +45,32 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
-  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
-  const mintMedia: MediaMinter = file => rule34Cdn.mintMedia(file);
+  const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
+  const mintMedia: MediaMinter = file => rule34CdnClient.mintMedia(file);
   const rule34Document = {
     isFirstFavoritesPage: (): boolean => false,
     keepPaginator: (): void => { },
-    readFavoritesPageId: (): string => ENVIRONMENT.favoritesOwnerId
+    readFavoritesOwnerId: (): string => ENVIRONMENT.favoritesOwnerId
   };
-  const rule34 = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
-  const frozenCobalt = new FrozenCobaltClient({
+  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
+  const frozenCobaltClient = new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: ENVIRONMENT.favoritesOwnerId, version: ENVIRONMENT.version, platform: ENVIRONMENT.device }
   }, { scheduler, fetch: boundFetch });
-  const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
   return {
-    localFavorites: new IndexedDbLocalFavorites({ ownerId: ENVIRONMENT.favoritesOwnerId }, indexedDb),
-    localPosts: new IndexedDbLocalPosts(indexedDb),
-    localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: ENVIRONMENT.favoritesOwnerId }, indexedDbClient),
+    localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     localKeyedValues: new BrowserLocalKeyedValues(),
-    remoteFavorites: new Rule34RemoteFavorites({ rule34, rule34Document, fetch: boundFetch, scheduler, randomSource }),
+    remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch: boundFetch, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({
-      primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
-      fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
+      primary: new FrozenCobaltRemotePosts({ frozenCobaltClient, mintMedia, scheduler, randomSource }),
+      fallback: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
     }),
-    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
+    remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
     visibilityObserver: new BrowserVisibilityObserver(),
-    remotePages: new Rule34RemotePages(rule34),
+    remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     scheduler,
     randomSource,
     sizeObserver: new BrowserSizeObserver(),

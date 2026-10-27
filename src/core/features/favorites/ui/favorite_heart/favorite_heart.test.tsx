@@ -8,19 +8,19 @@ import { expectClassesStyled } from "@/testing/css";
 interface Setup {
   heart: HTMLElement;
   favorited: Record<string, Signal<boolean>>;
-  addFavorite: (id: string) => void;
-  removeFavorite: (id: string) => void;
+  addFavorite: (postId: string) => void;
+  removeFavorite: (postId: string) => void;
   dispose: () => void;
 }
 
-function setup(removedIds: string[] = []): Setup {
+function setup(removedPostIds: string[] = []): Setup {
   const favorited: Record<string, Signal<boolean>> = {
-    1: new Signal(!removedIds.includes("1")),
-    2: new Signal(!removedIds.includes("2"))
+    1: new Signal(!removedPostIds.includes("1")),
+    2: new Signal(!removedPostIds.includes("2"))
   };
   const options = { addFavorite: vi.fn(), removeFavorite: vi.fn() };
   const { result: heart, dispose } = render(document, () => (
-    <FavoriteHeart id="1" isFavorited={id => favorited[id].value} {...options} />
+    <FavoriteHeart postId="1" isFavorited={postId => favorited[postId].value} {...options} />
   ));
   return { ...options, favorited, heart, dispose };
 }

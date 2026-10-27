@@ -1,5 +1,5 @@
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { MetricSearchable } from "@/core/domain/search/searchable";
 import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
 

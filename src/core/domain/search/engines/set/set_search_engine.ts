@@ -1,4 +1,4 @@
-import { METRICS } from "@/core/domain/post/metric";
+import { METRICS } from "@/core/domain/search/metric";
 import { SearchEngine, SearchEngineDependencies } from "@/core/domain/search/engines/search_engine";
 import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";

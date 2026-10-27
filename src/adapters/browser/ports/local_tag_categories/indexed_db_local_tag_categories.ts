@@ -6,10 +6,10 @@ import { TagCategory } from "@/core/domain/tag_category/tag_category";
 const STORE_NAME: IndexedDbStoreName = "tagCategories";
 
 export class IndexedDbLocalTagCategories implements LocalTagCategories {
-  constructor(private readonly indexedDb: IndexedDbClient) { }
+  constructor(private readonly indexedDbClient: IndexedDbClient) { }
 
   public async getMany(tagNames: readonly string[]): Promise<ReadonlyMap<string, TagCategory>> {
-    const lookups = await this.indexedDb.runTransaction(
+    const lookups = await this.indexedDbClient.runTransaction(
       STORE_NAME,
       "readonly",
       store => tagNames.map(tagName => [tagName, store.get(tagName) as IDBRequest<TagCategory | undefined>] as const)
@@ -20,7 +20,7 @@ export class IndexedDbLocalTagCategories implements LocalTagCategories {
   }
 
   public async setMany(tagCategories: ReadonlyMap<string, TagCategory>): Promise<void> {
-    await this.indexedDb.runTransaction(
+    await this.indexedDbClient.runTransaction(
       STORE_NAME,
       "readwrite",
       store => tagCategories.forEach((category, tagName) => store.put(category, tagName))

@@ -1,6 +1,6 @@
 export class PostUnavailableError extends Error {
-  constructor(public readonly id: string) {
-    super(`Post ${id} is unavailable from this source`);
+  constructor(public readonly postId: string) {
+    super(`Post ${postId} is unavailable from this source`);
     this.name = "PostUnavailableError";
   }
 }

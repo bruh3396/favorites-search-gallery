@@ -14,8 +14,8 @@ interface Load {
   readonly reject: (error: unknown) => void;
 }
 
-function createItem(id: string, kind: MediaKind = "image"): Post {
-  return createPost({ id, media: { kind, locator: id } });
+function createItem(postId: string, kind: MediaKind = "image"): Post {
+  return createPost({ id: postId, media: { kind, locator: postId } });
 }
 
 function setup(capacity?: number): { cache: LightboxMediaCache<string>; loads: Load[]; released: string[] } {

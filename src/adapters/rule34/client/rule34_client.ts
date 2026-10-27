@@ -50,21 +50,21 @@ export class Rule34Client {
     return this.keepPaginator(pageIndex, parseRule34PostListPage(document, this.dependencies.mintMedia));
   }
 
-  public postPageUrl(id: string): string {
-    return buildRule34PostPageUrl(id);
+  public postPageUrl(postId: string): string {
+    return buildRule34PostPageUrl(postId);
   }
 
   public postListUrl(searchQuery: string): string {
     return buildRule34PostListUrl(searchQuery);
   }
 
-  public async fetchFavoritesPage(pageId: string, pageIndex: number): Promise<Post[]> {
-    const html = await this.fetchHtml(buildRule34FavoritesPageUrl(pageId, rule34FavoritesPageOffset(pageIndex)));
+  public async fetchFavoritesPage(userId: string, pageIndex: number): Promise<Post[]> {
+    const html = await this.fetchHtml(buildRule34FavoritesPageUrl(userId, rule34FavoritesPageOffset(pageIndex)));
     return parseRule34FavoritesPage(new DOMParser().parseFromString(html, "text/html"), this.dependencies.mintMedia);
   }
 
-  public async fetchFavoriteCount(pageId: string): Promise<number> {
-    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34ProfilePageUrl(pageId)));
+  public async fetchFavoriteCount(userId: string): Promise<number> {
+    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34ProfilePageUrl(userId)));
     return parseRule34ProfileFavoriteCount(html);
   }
 
@@ -74,9 +74,9 @@ export class Rule34Client {
     return this.keepPaginator(pageIndex, parseRule34PostListPage(page, this.dependencies.mintMedia));
   }
 
-  public async fetchPostPage(id: string): Promise<CategorizedPost> {
+  public async fetchPostPage(postId: string): Promise<CategorizedPost> {
     await Promise.all(this.favoritesFetches);
-    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34PostPageUrl(id)));
+    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34PostPageUrl(postId)));
     return parseRule34PostPage(html, this.dependencies.mintMedia);
   }
 

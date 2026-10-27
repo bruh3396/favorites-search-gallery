@@ -13,7 +13,7 @@ function createRemoteFavorites(...files: [id: string, modifiedAt: number][]): Fi
   });
 }
 
-async function fetchAllIds(source: FilesystemRemoteFavorites): Promise<string[]> {
+async function fetchAllPostIds(source: FilesystemRemoteFavorites): Promise<string[]> {
   const delivered: Post[] = [];
 
   await source.fetchAll(posts => delivered.push(...posts));
@@ -22,7 +22,7 @@ async function fetchAllIds(source: FilesystemRemoteFavorites): Promise<string[]>
 
 describe("FilesystemRemoteFavorites", () => {
   test("delivers every post, newest first", async() => {
-    expect(await fetchAllIds(createRemoteFavorites(["old", 1], ["new", 3], ["middle", 2]))).toEqual(["new", "middle", "old"]);
+    expect(await fetchAllPostIds(createRemoteFavorites(["old", 1], ["new", 3], ["middle", 2]))).toEqual(["new", "middle", "old"]);
   });
 
   test("counts the post files", async() => {

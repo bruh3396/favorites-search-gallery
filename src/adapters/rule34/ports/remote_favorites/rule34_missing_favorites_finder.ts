@@ -12,14 +12,14 @@ export interface Rule34MissingFavoritesFinderDependencies {
 }
 
 interface LocalList {
-  readonly ids: readonly string[];
-  readonly indexById: ReadonlyMap<string, number>;
+  readonly postIds: readonly string[];
+  readonly indexByPostId: ReadonlyMap<string, number>;
   readonly remoteStart: number;
 }
 
 interface RemotePage {
   readonly index: number;
-  readonly ids: string[];
+  readonly postIds: string[];
 }
 
 interface Checkpoint {
@@ -34,15 +34,15 @@ export class Rule34MissingFavoritesFinder {
     private readonly dependencies: Rule34MissingFavoritesFinderDependencies
   ) { }
 
-  public async findMissing(localIds: readonly string[], remoteStart: number): Promise<string[]> {
-    if (localIds.length === 0) {
+  public async findMissing(localPostIds: readonly string[], remoteStart: number): Promise<string[]> {
+    if (localPostIds.length === 0) {
       return [];
     }
-    const localList = { ids: localIds, indexById: new Map(localIds.map((id, index) => [id, index])), remoteStart };
+    const localList = { postIds: localPostIds, indexByPostId: new Map(localPostIds.map((id, index) => [id, index])), remoteStart };
     const localListStart = this.createLocalListStart(localList);
-    const remoteEnd = this.createCheckpoint(localList, await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localIds.length - 1)));
+    const remoteEnd = this.createCheckpoint(localList, await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localPostIds.length - 1)));
     const removedBeforeRemoteEnd = await this.findMissingBetween(localList, localListStart, remoteEnd);
-    const removedAfterRemoteEnd = localIds.slice(remoteEnd.localIndex + 1);
+    const removedAfterRemoteEnd = localPostIds.slice(remoteEnd.localIndex + 1);
     return [...removedBeforeRemoteEnd, ...removedAfterRemoteEnd];
   }
 
@@ -52,24 +52,24 @@ export class Rule34MissingFavoritesFinder {
     }
 
     if (bottom.page.index === top.page.index + 1) {
-      return localList.ids.slice(top.localIndex + 1, bottom.localIndex + 1).filter(id => !bottom.page.ids.includes(id));
+      return localList.postIds.slice(top.localIndex + 1, bottom.localIndex + 1).filter(id => !bottom.page.postIds.includes(id));
     }
     const middle = this.createCheckpoint(localList, await this.fetchPageAfterDelay(Math.floor((top.page.index + bottom.page.index) / 2)));
     return [...await this.findMissingBetween(localList, top, middle), ...await this.findMissingBetween(localList, middle, bottom)];
   }
 
   private createLocalListStart(localList: LocalList): Checkpoint {
-    return { page: { index: this.calculatePageIndex(localList.remoteStart) - 1, ids: [] }, localIndex: -1, removedAbove: 0 };
+    return { page: { index: this.calculatePageIndex(localList.remoteStart) - 1, postIds: [] }, localIndex: -1, removedAbove: 0 };
   }
 
   private createCheckpoint(localList: LocalList, page: RemotePage): Checkpoint {
-    const lastId = page.ids.at(-1);
-    const localIndex = lastId === undefined ? undefined : localList.indexById.get(lastId);
+    const lastPostId = page.postIds.at(-1);
+    const localIndex = lastPostId === undefined ? undefined : localList.indexByPostId.get(lastPostId);
 
     if (localIndex === undefined) {
       return { page, localIndex: -1, removedAbove: 0 };
     }
-    const remoteIndex = this.calculateRemoteIndex(page, page.ids.length - 1);
+    const remoteIndex = this.calculateRemoteIndex(page, page.postIds.length - 1);
     return { page, localIndex, removedAbove: localList.remoteStart + localIndex - remoteIndex };
   }
 
@@ -86,7 +86,7 @@ export class Rule34MissingFavoritesFinder {
   }
 
   private async stepBackPastEmptyPages(page: RemotePage): Promise<RemotePage> {
-    if (page.ids.length === 0 && page.index > 0) {
+    if (page.postIds.length === 0 && page.index > 0) {
       return this.stepBackPastEmptyPages(await this.fetchPageAfterDelay(page.index - 1));
     }
     return page;
@@ -99,6 +99,6 @@ export class Rule34MissingFavoritesFinder {
 
   private async fetchPage(index: number): Promise<RemotePage> {
     const posts = await this.dependencies.fetch(index);
-    return { index, ids: posts.map(post => post.id) };
+    return { index, postIds: posts.map(post => post.id) };
   }
 }

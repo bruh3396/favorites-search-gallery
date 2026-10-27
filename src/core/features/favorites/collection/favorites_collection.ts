@@ -53,7 +53,7 @@ export class FavoritesCollection {
     return this.list.slice(start, end);
   }
 
-  public getAllIds(): Set<string> {
+  public getAllPostIds(): Set<string> {
     return this.list.getAllIds();
   }
 

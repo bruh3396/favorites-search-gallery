@@ -1,5 +1,5 @@
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TermUpdate } from "@/core/domain/search/engines/term_update";
 

@@ -74,7 +74,7 @@ describe("FavoritesApp", () => {
     const progressBar = element.querySelector<HTMLElement>("[role=progressbar]")!;
 
     expect([progressBar.hidden, progressBar.getAttribute("aria-valuenow")]).toEqual([false, "25"]);
-    loadState.value = { phase: "loaded", pulledCount: 0, removedCount: 0 };
+    loadState.value = { phase: "loaded", newCount: 0, unfavoritedCount: 0 };
     expect(progressBar.hidden).toBe(true);
   });
 

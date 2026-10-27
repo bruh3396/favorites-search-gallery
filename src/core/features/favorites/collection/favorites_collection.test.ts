@@ -4,7 +4,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
-function getIds(favorites: { id: string }[]): string[] {
+function getPostIds(favorites: { id: string }[]): string[] {
   return favorites.map(favorite => favorite.id);
 }
 
@@ -15,7 +15,7 @@ describe("FavoritesCollection", () => {
 
       collection.append(createPosts("1", "2"));
       collection.append(createPosts("3"));
-      expect(getIds(collection.getAll())).toEqual(["1", "2", "3"]);
+      expect(getPostIds(collection.getAll())).toEqual(["1", "2", "3"]);
     });
   });
 
@@ -54,7 +54,7 @@ describe("FavoritesCollection", () => {
       const collection = new FavoritesCollection(new StringInterner());
 
       collection.append(createPosts("1", "2", "3", "4"));
-      expect(getIds(collection.slice(1, 3))).toEqual(["2", "3"]);
+      expect(getPostIds(collection.slice(1, 3))).toEqual(["2", "3"]);
     });
   });
 

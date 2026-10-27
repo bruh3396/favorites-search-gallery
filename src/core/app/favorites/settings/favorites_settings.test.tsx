@@ -8,7 +8,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 
-function setup(): { favoritesPreferences: AppPreferences["favorites"]; queryInput: (label: string) => HTMLInputElement } {
+function setup(): { favoritesPreferences: AppPreferences["favorites"]; queryInput: (type: string, label: string) => HTMLInputElement } {
   const storage = new MemoryLocalKeyedValues();
   const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, storage, ["favorites"]);
   const { result: element } = render(document, () => (
@@ -19,7 +19,7 @@ function setup(): { favoritesPreferences: AppPreferences["favorites"]; queryInpu
       scheduler={new MemoryScheduler()}
     />
   ));
-  return { favoritesPreferences, queryInput: label => element.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)! };
+  return { favoritesPreferences, queryInput: (type, label) => element.querySelector<HTMLInputElement>(`input[type="${type}"][aria-label="${label}"]`)! };
 }
 
 describe("FavoritesSettings", () => {
@@ -28,12 +28,12 @@ describe("FavoritesSettings", () => {
 
     favoritesPreferences.pagination.infiniteScroll.set(true);
 
-    expect(queryInput("Page size").disabled).toBe(true);
+    expect(queryInput("number", "Size").disabled).toBe(true);
   });
 
   test("disables tile size while the layout is native", () => {
     const { favoritesPreferences, queryInput } = setup();
-    const tileSize = queryInput("Size");
+    const tileSize = queryInput("range", "Size");
 
     favoritesPreferences.grid.layout.set("native");
     expect(tileSize.disabled).toBe(true);

@@ -8,25 +8,25 @@ import { expectClassesStyled } from "@/testing/css";
 interface Setup {
   element: HTMLElement;
   tabs: Signal<readonly TabStripItem[]>;
-  activeId: Signal<string | null>;
-  onActivate: Mock<(id: string) => void>;
-  onClose: Mock<(id: string) => void>;
-  onMove: Mock<(id: string, index: number) => void>;
+  activeTabId: Signal<string | null>;
+  onActivate: Mock<(tabId: string) => void>;
+  onClose: Mock<(tabId: string) => void>;
+  onMove: Mock<(tabId: string, index: number) => void>;
   onAdd: Mock<() => void>;
   onCloseAll: Mock<() => void>;
 }
 
-function createTab(id: string, { closable = true }: { closable?: boolean } = {}): TabStripItem {
-  return { id, label: new Signal(id), closable };
+function createTab(tabId: string, { closable = true }: { closable?: boolean } = {}): TabStripItem {
+  return { id: tabId, label: new Signal(tabId), closable };
 }
 
-function setup(tabs: readonly TabStripItem[] = [createTab("Home", { closable: false }), createTab("apple")], activeId: string | null = "Home"): Setup {
+function setup(tabs: readonly TabStripItem[] = [createTab("Home", { closable: false }), createTab("apple")], activeTabId: string | null = "Home"): Setup {
   const options = {
     tabs: new Signal(tabs),
-    activeId: new Signal(activeId),
-    onActivate: vi.fn<(id: string) => void>(),
-    onClose: vi.fn<(id: string) => void>(),
-    onMove: vi.fn<(id: string, index: number) => void>(),
+    activeTabId: new Signal(activeTabId),
+    onActivate: vi.fn<(tabId: string) => void>(),
+    onClose: vi.fn<(tabId: string) => void>(),
+    onMove: vi.fn<(tabId: string, index: number) => void>(),
     onAdd: vi.fn<() => void>(),
     onCloseAll: vi.fn<() => void>()
   };
@@ -44,13 +44,13 @@ function findCloseButton(element: HTMLElement, label: string): HTMLButtonElement
   return element.querySelector<HTMLButtonElement>(`button[aria-label="Close ${label}"]`);
 }
 
-function dropOn(element: HTMLElement, label: string, draggedId: string, clientX: number, type = "drop"): DragEvent {
+function dropOn(element: HTMLElement, label: string, draggedTabId: string, clientX: number, type = "drop"): DragEvent {
   const target = findTab(element, label).parentElement!;
   const dataTransfer = new DataTransfer();
   const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX }) as DragEvent;
 
   Object.defineProperty(event, "dataTransfer", { value: dataTransfer });
-  dataTransfer.setData("application/x-fsg-tab", draggedId);
+  dataTransfer.setData("application/x-fsg-tab", draggedTabId);
   target.getBoundingClientRect = (): DOMRect => ({ left: 0, width: 100 }) as DOMRect;
   target.dispatchEvent(event);
   return event;
@@ -80,9 +80,9 @@ describe("TabStrip", () => {
   });
 
   test("marks only the active tab as selected", () => {
-    const { element, activeId } = setup();
+    const { element, activeTabId } = setup();
 
-    activeId.value = "apple";
+    activeTabId.value = "apple";
     expect([findTab(element, "Home"), findTab(element, "apple")].map(tab => tab.getAttribute("aria-selected"))).toEqual(["false", "true"]);
   });
 

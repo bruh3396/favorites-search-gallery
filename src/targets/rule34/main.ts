@@ -45,9 +45,9 @@ interface Rule34Dependencies {
   scheduler: Scheduler;
   randomSource: RandomSource;
   mintMedia: MediaMinter;
-  rule34: Rule34Client;
+  rule34Client: Rule34Client;
   rule34Document: Rule34Document;
-  rule34Cdn: Rule34CdnClient;
+  rule34CdnClient: Rule34CdnClient;
   hostPage: Rule34HostPage;
   localKeyedValues: LocalKeyedValues;
 }
@@ -72,12 +72,12 @@ function createRule34Dependencies(environment: Environment, rule34Document: Rule
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
-  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
-  const mintMedia: MediaMinter = file => rule34Cdn.mintMedia(file);
-  const rule34 = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
+  const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
+  const mintMedia: MediaMinter = file => rule34CdnClient.mintMedia(file);
+  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
   const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
   return {
-    fetch: boundFetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn,
+    fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,
     hostPage, localKeyedValues: new BrowserLocalKeyedValues()
   };
 }
@@ -93,15 +93,15 @@ function createFrozenCobaltClient(
 }
 
 function startFavoritesApp(environment: Environment, dependencies: Rule34Dependencies): void {
-  const { fetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn, hostPage, localKeyedValues } = dependencies;
-  const frozenCobalt = createFrozenCobaltClient(environment, dependencies);
-  const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
+  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = dependencies;
+  const frozenCobaltClient = createFrozenCobaltClient(environment, dependencies);
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
   const remotePosts = new FallbackRemotePosts({
-    primary: new FrozenCobaltRemotePosts({ frozenCobalt, mintMedia, scheduler, randomSource }),
-    fallback: new Rule34RemotePosts({ rule34, scheduler, randomSource })
+    primary: new FrozenCobaltRemotePosts({ frozenCobaltClient, mintMedia, scheduler, randomSource }),
+    fallback: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
   });
 
-  frozenCobalt.ping();
+  frozenCobaltClient.ping();
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
     blacklistedTags: environment.blacklistedTags,
@@ -116,33 +116,33 @@ function startFavoritesApp(environment: Environment, dependencies: Rule34Depende
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
-    localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDb),
-    localPosts: new IndexedDbLocalPosts(indexedDb),
-    localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
-    remoteFavorites: new Rule34RemoteFavorites({ rule34, rule34Document, fetch, scheduler, randomSource }),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDbClient),
+    localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
+    remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch, scheduler, randomSource }),
     remotePosts,
-    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
-    remotePages: new Rule34RemotePages(rule34),
+    remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
+    remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     visibilityObserver: new BrowserVisibilityObserver()
   }).mount(hostPage.claimContent());
 }
 
 function startPostListApp(environment: Environment, {
-  hostPage, rule34, rule34Cdn, rule34Document, randomSource, localKeyedValues, scheduler
+  hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, localKeyedValues, scheduler
 }: Rule34Dependencies): void {
   const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]);
 
   if (!sharedPreferences.postListEnabled.peek()) {
     return;
   }
-  const remotePostList = new Rule34RemotePostList({ rule34, rule34Document, scheduler, randomSource });
+  const remotePostList = new Rule34RemotePostList({ rule34Client, rule34Document, scheduler, randomSource });
 
   composePostListApp({ colorScheme: environment.colorScheme }, {
     scheduler,
     visibilityObserver: new BrowserVisibilityObserver(),
     sizeObserver: new BrowserSizeObserver(),
-    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
-    remotePages: new Rule34RemotePages(rule34),
+    remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
+    remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     remotePostList,
     localKeyedValues,
     navigator: new BrowserNavigator(),

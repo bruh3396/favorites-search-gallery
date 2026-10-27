@@ -14,7 +14,7 @@ export interface PostListService {
   readonly page: Readable<PostListPage>;
   readonly changed: Occurrence<Post>;
   showPage(index: number): Promise<void>;
-  correctMedia(id: string, media: Media): void;
+  correctMedia(postId: string, media: Media): void;
 }
 
 export function createPostListService(dependencies: PostListServiceDependencies): PostListService {
@@ -26,9 +26,9 @@ export function createPostListService(dependencies: PostListServiceDependencies)
     showPage: async(index): Promise<void> => {
       page.value = await dependencies.remotePostList.fetchPage(index);
     },
-    correctMedia: (id, media): void => {
+    correctMedia: (postId, media): void => {
       const current = page.peek();
-      const post = current.posts.find(candidate => candidate.id === id);
+      const post = current.posts.find(candidate => candidate.id === postId);
 
       if (post === undefined) {
         return;

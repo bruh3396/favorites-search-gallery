@@ -10,6 +10,7 @@ import { createImageLoaderService } from "@/testing/image_loader_service";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
@@ -72,7 +73,7 @@ function setup(posts: Post[] = []): Setup {
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
     imageLoaderService: createImageLoaderService({ scheduler }),
-    remotePages: new MemoryRemotePages(),
+    remotePages: new MemoryRemotePages(new MemoryClient([])),
     lightbox: { open },
     postActions: { openOriginal: vi.fn() },
     enterZen

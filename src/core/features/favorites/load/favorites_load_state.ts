@@ -6,8 +6,8 @@ export type FavoritesLoadState =
   | { readonly phase: "saving" }
   | { readonly phase: "pulling" }
   | { readonly phase: "indexing" }
-  | { readonly phase: "pruning" }
-  | { readonly phase: "loaded"; readonly pulledCount: number; readonly removedCount: number }
+  | { readonly phase: "checkingMissing" }
+  | { readonly phase: "loaded"; readonly newCount: number; readonly unfavoritedCount: number }
   | { readonly phase: "interrupted" };
 
 export type FavoritesLoadPhase = FavoritesLoadState["phase"];

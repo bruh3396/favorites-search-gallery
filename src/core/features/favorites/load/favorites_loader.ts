@@ -11,6 +11,7 @@ import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/l
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
@@ -23,6 +24,7 @@ export interface FavoritesLoaderDependencies {
   remoteFavorites: Pick<RemoteFavorites, "fetchCount" | "fetchAll" | "findNew" | "findMissing">;
   remotePosts: RemotePosts;
   remoteMedia: RemoteMedia;
+  remotePages: Pick<RemotePages, "postExists">;
   scheduler: Scheduler;
   collection: FavoritesCollection;
   index: FavoritesSearchIndex;
@@ -50,8 +52,8 @@ export class FavoritesLoader {
 
   public async load(): Promise<void> {
     try {
-      const localIds = await this.readLocalIds();
-      const result = await (localIds.length > 0 ? this.reloader.reload(localIds) : this.fetcher.fetchAll());
+      const localPostIds = await this.readLocalPostIds();
+      const result = await (localPostIds.length > 0 ? this.reloader.reload(localPostIds) : this.fetcher.fetchAll());
 
       this.report({ phase: "loaded", ...result });
     } catch {
@@ -60,7 +62,7 @@ export class FavoritesLoader {
     this.dependencies.collection.compact();
   }
 
-  private async readLocalIds(): Promise<readonly string[]> {
+  private async readLocalPostIds(): Promise<readonly string[]> {
     const { localFavorites, scheduler } = this.dependencies;
     const cancelPreparing = scheduler.schedule(() => this.report({ phase: "preparing" }), SLOW_READ_DELAY);
 

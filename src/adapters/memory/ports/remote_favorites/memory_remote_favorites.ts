@@ -14,33 +14,33 @@ export class MemoryRemoteFavorites implements RemoteFavorites {
     return Promise.resolve();
   }
 
-  public findNew(localIds: readonly string[]): Promise<Post[]> {
-    return Promise.resolve(takeAboveLocalOrder(this.memory.readFavorites(), localIds));
+  public findNew(localPostIds: readonly string[]): Promise<Post[]> {
+    return Promise.resolve(takeAboveLocalOrder(this.memory.readFavorites(), localPostIds));
   }
 
-  public findMissing(localIds: readonly string[]): Promise<string[]> {
-    const remoteIds = new Set(this.memory.readFavorites().map(post => post.id));
-    return Promise.resolve(localIds.filter(id => !remoteIds.has(id)));
+  public findMissing(localPostIds: readonly string[]): Promise<string[]> {
+    const remotePostIds = new Set(this.memory.readFavorites().map(post => post.id));
+    return Promise.resolve(localPostIds.filter(id => !remotePostIds.has(id)));
   }
 
-  public add(id: string): Promise<boolean> {
-    this.memory.addFavorite(id);
+  public add(postId: string): Promise<boolean> {
+    this.memory.addFavorite(postId);
     return Promise.resolve(true);
   }
 
-  public remove(id: string): Promise<boolean> {
-    this.memory.removeFavorite(id);
+  public remove(postId: string): Promise<boolean> {
+    this.memory.removeFavorite(postId);
     return Promise.resolve(true);
   }
 }
 
-function takeAboveLocalOrder(remoteFavorites: Post[], localIds: readonly string[]): Post[] {
-  const localIndexById = new Map(localIds.map((id, index) => [id, index]));
+function takeAboveLocalOrder(remoteFavorites: Post[], localPostIds: readonly string[]): Post[] {
+  const localIndexByPostId = new Map(localPostIds.map((id, index) => [id, index]));
   let remoteStart = remoteFavorites.length;
   let nextLocalIndex = Infinity;
 
   for (let remoteIndex = remoteFavorites.length - 1; remoteIndex >= 0; remoteIndex -= 1) {
-    const localIndex = localIndexById.get(remoteFavorites[remoteIndex].id);
+    const localIndex = localIndexByPostId.get(remoteFavorites[remoteIndex].id);
 
     if (localIndex === undefined || localIndex >= nextLocalIndex) {
       break;

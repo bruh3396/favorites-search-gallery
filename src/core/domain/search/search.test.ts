@@ -2,7 +2,7 @@ import { FruitName, fruitDocs } from "@/core/domain/search/testing/fruit_corpus"
 import { QueryAssertion, searchCases } from "@/core/domain/search/testing/search_cases";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { SearchEngine } from "@/core/domain/search/engines/search_engine";
 import { Searchable } from "@/core/domain/search/searchable";
 import { SetSearchEngine } from "@/core/domain/search/engines/set/set_search_engine";

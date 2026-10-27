@@ -1,6 +1,6 @@
 import { MEDIA_KINDS } from "@/core/domain/media/media_kind";
 import { Media } from "@/core/domain/media/media";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { POST_STATUSES, PostStatus } from "@/core/domain/post/post_status";
 import { Post } from "@/core/domain/post/post";
 import { RATINGS, Rating } from "@/core/domain/post/rating";
@@ -10,7 +10,7 @@ import { grow } from "@/core/utils/collection/array_utilities";
 const INITIAL_CAPACITY = 1_024;
 
 export class FavoritesPostTable {
-  private ids = new Uint32Array(INITIAL_CAPACITY);
+  private postIds = new Uint32Array(INITIAL_CAPACITY);
   private widths = new Uint16Array(INITIAL_CAPACITY);
   private heights = new Uint16Array(INITIAL_CAPACITY);
   private scores = new Uint32Array(INITIAL_CAPACITY);
@@ -23,7 +23,7 @@ export class FavoritesPostTable {
 
   public write(slot: number, post: Post): void {
     this.ensureCapacity(slot + 1);
-    this.ids[slot] = parseInt(post.id, 10);
+    this.postIds[slot] = parseInt(post.id, 10);
     this.widths[slot] = post.width;
     this.heights[slot] = post.height;
     this.scores[slot] = post.score;
@@ -38,7 +38,7 @@ export class FavoritesPostTable {
   public getMetric(slot: number, metric: Metric): number {
     switch (metric) {
       case "id":
-        return this.ids[slot];
+        return this.postIds[slot];
       case "width":
         return this.widths[slot];
       case "height":
@@ -57,7 +57,7 @@ export class FavoritesPostTable {
   public getTaglessPost(slot: number): Omit<Post, "tags"> {
     const durationSeconds = this.durationSeconds[slot];
     return {
-      id: String(this.ids[slot]),
+      id: String(this.postIds[slot]),
       width: this.widths[slot],
       height: this.heights[slot],
       score: this.scores[slot],
@@ -70,7 +70,7 @@ export class FavoritesPostTable {
   }
 
   public getNumericId(slot: number): number {
-    return this.ids[slot];
+    return this.postIds[slot];
   }
 
   public getRating(slot: number): Rating {
@@ -90,10 +90,10 @@ export class FavoritesPostTable {
   }
 
   public trim(count: number): void {
-    if (count === this.ids.length) {
+    if (count === this.postIds.length) {
       return;
     }
-    this.ids = this.ids.slice(0, count);
+    this.postIds = this.postIds.slice(0, count);
     this.widths = this.widths.slice(0, count);
     this.heights = this.heights.slice(0, count);
     this.scores = this.scores.slice(0, count);
@@ -106,12 +106,12 @@ export class FavoritesPostTable {
   }
 
   private ensureCapacity(required: number): void {
-    if (required <= this.ids.length) {
+    if (required <= this.postIds.length) {
       return;
     }
-    const capacity = Math.max(this.ids.length * 2, required);
+    const capacity = Math.max(this.postIds.length * 2, required);
 
-    this.ids = grow(this.ids, capacity);
+    this.postIds = grow(this.postIds, capacity);
     this.widths = grow(this.widths, capacity);
     this.heights = grow(this.heights, capacity);
     this.scores = grow(this.scores, capacity);

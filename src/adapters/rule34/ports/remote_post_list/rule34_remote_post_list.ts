@@ -8,7 +8,7 @@ import { PostListPage } from "@/core/domain/post_list/post_list_page";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
 export interface Rule34RemotePostListDependencies {
-  rule34: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
+  rule34Client: Pick<Rule34Client, "readPostListPage" | "fetchPostListPage">;
   rule34Document: Pick<Rule34Document, "readSearchQuery" | "readPostListPageIndex">;
   scheduler: Scheduler;
   randomSource: RandomSource;
@@ -26,7 +26,7 @@ export class Rule34RemotePostList implements RemotePostList {
     this.searchQuery = dependencies.rule34Document.readSearchQuery();
     const initialIndex = dependencies.rule34Document.readPostListPageIndex();
 
-    this.initialPage = { index: initialIndex, posts: dependencies.rule34.readPostListPage(initialIndex) };
+    this.initialPage = { index: initialIndex, posts: dependencies.rule34Client.readPostListPage(initialIndex) };
     this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
@@ -42,7 +42,7 @@ export class Rule34RemotePostList implements RemotePostList {
     if (index === this.initialPage.index) {
       return Promise.resolve(this.initialPage);
     }
-    return this.retry.retry(() => this.dependencies.rule34.fetchPostListPage(this.searchQuery, index))
+    return this.retry.retry(() => this.dependencies.rule34Client.fetchPostListPage(this.searchQuery, index))
       .then(posts => ({ index, posts }));
   }
 }

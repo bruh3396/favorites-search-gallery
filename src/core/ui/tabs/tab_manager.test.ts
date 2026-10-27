@@ -6,7 +6,7 @@ describe("TabManager", () => {
     const manager = new TabManager<string>({ dispose: vi.fn() });
 
     expect(manager.tabs.value).toEqual([]);
-    expect(manager.activeId.value).toBeNull();
+    expect(manager.activeTabId.value).toBeNull();
   });
 
   describe("open", () => {
@@ -45,7 +45,7 @@ describe("TabManager", () => {
       manager.open("first", "search one");
       manager.open("second", "search two");
 
-      expect(manager.activeId.value).toBe("first");
+      expect(manager.activeTabId.value).toBe("first");
     });
   });
 
@@ -57,7 +57,7 @@ describe("TabManager", () => {
       manager.open("second", "search two");
       manager.activate("second");
 
-      expect(manager.activeId.value).toBe("second");
+      expect(manager.activeTabId.value).toBe("second");
     });
 
     test("ignores an unknown ID", () => {
@@ -66,7 +66,7 @@ describe("TabManager", () => {
       manager.open("first", "search one");
       manager.activate("missing");
 
-      expect(manager.activeId.value).toBe("first");
+      expect(manager.activeTabId.value).toBe("first");
     });
   });
 
@@ -90,7 +90,7 @@ describe("TabManager", () => {
       manager.open("second", "search two");
       manager.move("first", 1);
 
-      expect(manager.activeId.value).toBe("first");
+      expect(manager.activeTabId.value).toBe("first");
     });
 
     test("leaves the tabs alone for an unknown ID or an unchanged position", () => {
@@ -117,7 +117,7 @@ describe("TabManager", () => {
       manager.activate("second");
       manager.close("second");
 
-      expect(manager.activeId.value).toBe("third");
+      expect(manager.activeTabId.value).toBe("third");
     });
 
     test("activates the left neighbour when the active tab closes last in line", () => {
@@ -128,7 +128,7 @@ describe("TabManager", () => {
       manager.activate("second");
       manager.close("second");
 
-      expect(manager.activeId.value).toBe("first");
+      expect(manager.activeTabId.value).toBe("first");
     });
 
     test("keeps the active tab when another tab closes", () => {
@@ -138,7 +138,7 @@ describe("TabManager", () => {
       manager.open("second", "search two");
       manager.close("second");
 
-      expect(manager.activeId.value).toBe("first");
+      expect(manager.activeTabId.value).toBe("first");
     });
 
     test("clears the active tab when the last tab closes", () => {
@@ -147,7 +147,7 @@ describe("TabManager", () => {
       manager.open("first", "search one");
       manager.close("first");
 
-      expect(manager.activeId.value).toBeNull();
+      expect(manager.activeTabId.value).toBeNull();
     });
 
     test("removes the selected tab and disposes its value once", () => {

@@ -1,6 +1,6 @@
 export class PostPurgedError extends Error {
-  constructor(public readonly id: string) {
-    super(`Post ${id} was purged from the site`);
+  constructor(public readonly postId: string) {
+    super(`Post ${postId} was purged from the site`);
     this.name = "PostPurgedError";
   }
 }

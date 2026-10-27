@@ -1,5 +1,5 @@
 import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoriteIds } from "@/core/features/favorites/testing/favorite_id_searcher";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -42,11 +42,11 @@ describe("FavoritesReindexer", () => {
 
     reindexer.reindex(createPost({ id: "1", tags: "banana" }));
     scheduler.advance(TERM_UPDATE_DELAY - 1);
-    expect(searchFavoriteIds(index, "banana")).toEqual([]);
+    expect(searchFavoritePostIds(index, "banana")).toEqual([]);
 
     scheduler.advance(1);
-    expect(searchFavoriteIds(index, "banana")).toEqual(["1"]);
-    expect(searchFavoriteIds(index, "apple")).toEqual([]);
+    expect(searchFavoritePostIds(index, "banana")).toEqual(["1"]);
+    expect(searchFavoritePostIds(index, "apple")).toEqual([]);
   });
 
   test("ignores a post missing from the collection", () => {

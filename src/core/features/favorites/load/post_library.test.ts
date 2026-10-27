@@ -42,8 +42,8 @@ function setup(remotePosts: Post[] = [], probeDurationSeconds: RemoteMedia["prob
   return { library, localPosts, localTagCategories, scheduler, probeDurationSeconds: probeDuration, onRefresh };
 }
 
-async function readLocalIds(localPosts: MemoryLocalPosts, ids: string[]): Promise<string[]> {
-  return (await localPosts.getMany(ids)).map(post => post.id);
+async function readLocalPostIds(localPosts: MemoryLocalPosts, postIds: string[]): Promise<string[]> {
+  return (await localPosts.getMany(postIds)).map(post => post.id);
 }
 
 describe("PostLibrary", () => {
@@ -82,7 +82,7 @@ describe("PostLibrary", () => {
     scheduler.advance(WRITE_DELAY);
 
     expect(onRefresh.mock.calls[0][0]).toMatchObject({ id: "2", tags: "apple" });
-    expect(await readLocalIds(localPosts, ["2"])).toEqual(["2"]);
+    expect(await readLocalPostIds(localPosts, ["2"])).toEqual(["2"]);
   });
 
   test("fetches placeholders before stale posts", async() => {
@@ -176,19 +176,19 @@ describe("PostLibrary", () => {
 
     await library.refresh([createPost()]);
     scheduler.advance(WRITE_DELAY - 1);
-    expect(await readLocalIds(localPosts, ["0"])).toEqual([]);
+    expect(await readLocalPostIds(localPosts, ["0"])).toEqual([]);
 
     scheduler.advance(1);
-    expect(await readLocalIds(localPosts, ["0"])).toEqual(["0"]);
+    expect(await readLocalPostIds(localPosts, ["0"])).toEqual(["0"]);
   });
 
   test("writes refreshed posts without waiting once a batch fills", async() => {
-    const ids = Array.from({ length: WRITE_BATCH_SIZE }, (_, i) => String(i));
-    const { library, localPosts } = setup(ids.map(id => createPost({ ...DIMENSIONS, id })));
+    const postIds = Array.from({ length: WRITE_BATCH_SIZE }, (_, i) => String(i));
+    const { library, localPosts } = setup(postIds.map(id => createPost({ ...DIMENSIONS, id })));
 
-    await library.refresh(ids.map(id => createPost({ id })));
+    await library.refresh(postIds.map(id => createPost({ id })));
 
-    expect(await readLocalIds(localPosts, ids)).toEqual(ids);
+    expect(await readLocalPostIds(localPosts, postIds)).toEqual(postIds);
   });
 
   test("reports but never writes a refreshed post without dimensions", async() => {
@@ -198,7 +198,7 @@ describe("PostLibrary", () => {
     scheduler.advance(WRITE_DELAY);
 
     expect(onRefresh).toHaveBeenCalledOnce();
-    expect(await readLocalIds(localPosts, ["0"])).toEqual([]);
+    expect(await readLocalPostIds(localPosts, ["0"])).toEqual([]);
   });
 
   test("fills a video's duration on its fetched copy", async() => {

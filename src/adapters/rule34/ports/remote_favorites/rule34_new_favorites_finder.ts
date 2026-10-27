@@ -23,31 +23,31 @@ export class Rule34NewFavoritesFinder {
     private readonly dependencies: Rule34NewFavoritesFinderDependencies
   ) { }
 
-  public async findNew(localIds: readonly string[], firstPage?: Post[]): Promise<Post[]> {
-    const localFavoriteIndexById = new Map(localIds.map((id, index) => [id, index]));
+  public async findNew(localPostIds: readonly string[], firstPage?: Post[]): Promise<Post[]> {
+    const localFavoriteIndexByPostId = new Map(localPostIds.map((id, index) => [id, index]));
     const remoteFavorites: Post[] = [];
     let pageIndex = 0;
     let page = firstPage ?? await this.dependencies.fetch(pageIndex);
 
     remoteFavorites.push(...page);
-    let localRun = this.findLocalRun(remoteFavorites, localFavoriteIndexById);
+    let localRun = this.findLocalRun(remoteFavorites, localFavoriteIndexByPostId);
 
     while (localRun.length < this.configuration.minimumLocalRunLength && page.length >= this.configuration.pageSize) {
       pageIndex += 1;
       await this.dependencies.scheduler.sleep(this.configuration.fetchDelay);
       page = await this.dependencies.fetch(pageIndex);
       remoteFavorites.push(...page);
-      localRun = this.findLocalRun(remoteFavorites, localFavoriteIndexById);
+      localRun = this.findLocalRun(remoteFavorites, localFavoriteIndexByPostId);
     }
     return remoteFavorites.slice(0, localRun.remoteStart);
   }
 
-  private findLocalRun(remoteFavorites: readonly Post[], localFavoriteIndexById: ReadonlyMap<string, number>): LocalRun {
+  private findLocalRun(remoteFavorites: readonly Post[], localFavoriteIndexByPostId: ReadonlyMap<string, number>): LocalRun {
     let remoteStart = 0;
     let lastLocalIndex = -1;
 
     for (const [remoteIndex, post] of remoteFavorites.entries()) {
-      const localIndex = localFavoriteIndexById.get(post.id);
+      const localIndex = localFavoriteIndexByPostId.get(post.id);
 
       if (localIndex === undefined) {
         remoteStart = remoteIndex + 1;

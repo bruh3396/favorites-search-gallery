@@ -1,4 +1,4 @@
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 
 export type MetricComparator = ":" | ":<" | ":>";
 

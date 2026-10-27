@@ -1,6 +1,6 @@
 import { createPost, createPosts } from "@/testing/post";
 import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoriteIds } from "@/core/features/favorites/testing/favorite_id_searcher";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -74,7 +74,7 @@ function setup(sources: FetcherSources = {}): {
   return { fetcher, collection, index, localFavorites, localPosts, states, refreshed };
 }
 
-function getIds(favorites: readonly Favorite[]): string[] {
+function getPostIds(favorites: readonly Favorite[]): string[] {
   return favorites.map(favorite => favorite.id);
 }
 
@@ -84,14 +84,14 @@ describe("FavoritesFetcher", () => {
       const { fetcher, collection } = setup({ pages: [createPosts("1", "2"), createPosts("3")] });
 
       await fetcher.fetchAll();
-      expect(getIds(collection.getAll())).toEqual(["1", "2", "3"]);
+      expect(getPostIds(collection.getAll())).toEqual(["1", "2", "3"]);
     });
 
     test("indexes each page as it arrives", async() => {
       const { fetcher, index } = setup({ pages: [createPosts("1", "2"), createPosts("3")] });
       const indexed: string[][] = [];
 
-      index.indexed.on(favorites => indexed.push(getIds(favorites)));
+      index.indexed.on(favorites => indexed.push(getPostIds(favorites)));
       await fetcher.fetchAll();
       expect(indexed).toEqual([["1", "2"], ["3"]]);
     });
@@ -100,7 +100,7 @@ describe("FavoritesFetcher", () => {
       const { fetcher, index } = setup({ pages: [[createPost({ id: "1", tags: "apple" }), createPost({ id: "2", tags: "banana" })]] });
 
       await fetcher.fetchAll();
-      expect(searchFavoriteIds(index, "banana")).toEqual(["2"]);
+      expect(searchFavoritePostIds(index, "banana")).toEqual(["2"]);
     });
 
     test("stores the posts it has never stored", async() => {
@@ -186,7 +186,7 @@ describe("FavoritesFetcher", () => {
     test("reports nothing added or removed", async() => {
       const { fetcher } = setup({ pages: [createPosts("1")] });
 
-      expect(await fetcher.fetchAll()).toEqual({ pulledCount: 0, removedCount: 0 });
+      expect(await fetcher.fetchAll()).toEqual({ newCount: 0, unfavoritedCount: 0 });
     });
   });
 });

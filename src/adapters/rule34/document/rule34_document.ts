@@ -36,7 +36,7 @@ export class Rule34Document {
     return null;
   }
 
-  public readFavoritesPageId(): string {
+  public readFavoritesOwnerId(): string {
     return readQueryParam("id") ?? "";
   }
 

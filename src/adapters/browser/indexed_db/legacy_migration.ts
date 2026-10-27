@@ -156,8 +156,8 @@ function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedi
 }
 
 function removeDuplicateIds(posts: LegacyPost[]): LegacyPost[] {
-  const seenIds = new Set<string>();
-  return posts.filter(post => !seenIds.has(post.id) && seenIds.add(post.id));
+  const seenPostIds = new Set<string>();
+  return posts.filter(post => !seenPostIds.has(post.id) && seenPostIds.add(post.id));
 }
 
 function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): void {

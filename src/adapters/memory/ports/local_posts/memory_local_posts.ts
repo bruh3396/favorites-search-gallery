@@ -4,8 +4,8 @@ import { Post } from "@/core/domain/post/post";
 export class MemoryLocalPosts implements LocalPosts {
   private readonly posts = new Map<string, Post>();
 
-  public getMany(ids: readonly string[]): Promise<readonly Readonly<Post>[]> {
-    return Promise.resolve(ids.flatMap(id => {
+  public getMany(postIds: readonly string[]): Promise<readonly Readonly<Post>[]> {
+    return Promise.resolve(postIds.flatMap(id => {
       const post = this.posts.get(id);
       return post === undefined ? [] : [structuredClone(post)];
     }));

@@ -41,7 +41,7 @@ function setup(posts: Post[] = [], { blacklistedTags = [], settings = {}, isStar
   return { search, collection, index };
 }
 
-function getResultIds(search: FavoritesSearch): string[] {
+function getResultPostIds(search: FavoritesSearch): string[] {
   return search.results.value.map(favorite => favorite.id);
 }
 
@@ -56,42 +56,42 @@ function createScoredPosts(...scores: number[]): Post[] {
 function watchResults(search: FavoritesSearch): { shown: string[][]; stop: () => void } {
   const shown: string[][] = [];
   const stop = effect(() => {
-    shown.push(getResultIds(search));
+    shown.push(getResultPostIds(search));
   });
   return { shown, stop };
 }
 
 describe("FavoritesSearch", () => {
   test("starts with every indexed favorite", () => {
-    expect(getResultIds(setup(createTaggedPosts("apple", "banana")).search)).toEqual(["1", "2"]);
+    expect(getResultPostIds(setup(createTaggedPosts("apple", "banana")).search)).toEqual(["1", "2"]);
   });
 
   test("starts from the stored sort", () => {
     const { search } = setup(createScoredPosts(1, 3, 2), { settings: { sortKey: "score" } });
 
-    expect(getResultIds(search)).toEqual(["3", "2", "1"]);
+    expect(getResultPostIds(search)).toEqual(["3", "2", "1"]);
   });
 
   test("starts from the stored query and inversion", () => {
     const { search } = setup(createTaggedPosts("apple", "banana", "cherry"), { settings: { query: "apple", isInverted: true } });
 
-    expect(getResultIds(search)).toEqual(["2", "3"]);
+    expect(getResultPostIds(search)).toEqual(["2", "3"]);
   });
 
   test("starts from the stored shuffle", () => {
     const posts = createScoredPosts(...Array.from({ length: 20 }, (_, index) => index + 1));
-    const shuffled = getResultIds(setup(posts, { settings: { isShuffled: true, shuffleSeed: 7 } }).search);
+    const shuffled = getResultPostIds(setup(posts, { settings: { isShuffled: true, shuffleSeed: 7 } }).search);
 
-    expect(shuffled).toEqual(getResultIds(setup(posts, { settings: { isShuffled: true, shuffleSeed: 7 } }).search));
-    expect(shuffled).not.toEqual(getResultIds(setup(posts).search));
+    expect(shuffled).toEqual(getResultPostIds(setup(posts, { settings: { isShuffled: true, shuffleSeed: 7 } }).search));
+    expect(shuffled).not.toEqual(getResultPostIds(setup(posts).search));
   });
 
   test("hides blacklisted favorites by its blacklist setting", () => {
     const { search } = setup(createTaggedPosts("apple", "cherry"), { blacklistedTags: ["apple"] });
 
-    expect(getResultIds(search)).toEqual(["1", "2"]);
+    expect(getResultPostIds(search)).toEqual(["1", "2"]);
     search.updateSettings({ isBlacklistEnabled: true });
-    expect(getResultIds(search)).toEqual(["2"]);
+    expect(getResultPostIds(search)).toEqual(["2"]);
   });
 
   describe("start", () => {
@@ -100,7 +100,7 @@ describe("FavoritesSearch", () => {
 
       index.add(collection.append([createPost({ id: "2" })]));
       index.rebuild(collection.getAll());
-      expect(getResultIds(search)).toEqual([]);
+      expect(getResultPostIds(search)).toEqual([]);
     });
 
     test("searches the whole index once started", () => {
@@ -108,7 +108,7 @@ describe("FavoritesSearch", () => {
 
       index.add(collection.append([createPost({ id: "2" })]));
       search.start();
-      expect(getResultIds(search)).toEqual(["1", "2"]);
+      expect(getResultPostIds(search)).toEqual(["1", "2"]);
     });
 
     test("searches only the first time it is called", () => {
@@ -125,10 +125,10 @@ describe("FavoritesSearch", () => {
 
       search.submit("apple");
       expect(search.settings.value.query).toBe("apple");
-      expect(getResultIds(search)).toEqual([]);
+      expect(getResultPostIds(search)).toEqual([]);
 
       search.start();
-      expect(getResultIds(search)).toEqual(["1"]);
+      expect(getResultPostIds(search)).toEqual(["1"]);
     });
   });
 
@@ -137,14 +137,14 @@ describe("FavoritesSearch", () => {
       const { search } = setup(createTaggedPosts("apple", "banana", "apple"));
 
       search.submit("apple");
-      expect(getResultIds(search)).toEqual(["1", "3"]);
+      expect(getResultPostIds(search)).toEqual(["1", "3"]);
     });
 
     test("shows nothing for an invalid query", () => {
       const { search } = setup(createTaggedPosts("apple"));
 
       search.submit("( apple");
-      expect(getResultIds(search)).toEqual([]);
+      expect(getResultPostIds(search)).toEqual([]);
     });
 
     test("writes the query and leaves the rest of the settings alone", () => {
@@ -191,7 +191,7 @@ describe("FavoritesSearch", () => {
       ]);
 
       search.updateSettings({ sortKey: "score", isSortAscending: false, allowedRatings: toRatingMask("safe") });
-      expect(getResultIds(search)).toEqual(["3", "1"]);
+      expect(getResultPostIds(search)).toEqual(["3", "1"]);
     });
 
     test("keeps the query", () => {
@@ -199,14 +199,14 @@ describe("FavoritesSearch", () => {
 
       search.submit("apple");
       search.updateSettings({ sortKey: "score" });
-      expect(getResultIds(search)).toEqual(["1"]);
+      expect(getResultPostIds(search)).toEqual(["1"]);
     });
 
     test("writes the settings and updates the results in one batch", () => {
       const { search } = setup(createScoredPosts(1, 2));
       const runs: Array<[string, string[]]> = [];
       const stop = effect(() => {
-        runs.push([search.settings.value.sortKey, getResultIds(search)]);
+        runs.push([search.settings.value.sortKey, getResultPostIds(search)]);
       });
 
       search.updateSettings({ sortKey: "score" });
@@ -246,11 +246,11 @@ describe("FavoritesSearch", () => {
 
     test("reorders the results", () => {
       const { search } = setup(createScoredPosts(...Array.from({ length: 20 }, (_, index) => index + 1)));
-      const before = getResultIds(search);
+      const before = getResultPostIds(search);
 
       search.shuffle();
-      expect(getResultIds(search)).not.toEqual(before);
-      expect(getResultIds(search).toSorted()).toEqual(before.toSorted());
+      expect(getResultPostIds(search)).not.toEqual(before);
+      expect(getResultPostIds(search).toSorted()).toEqual(before.toSorted());
     });
 
     test("keeps the query", () => {
@@ -268,7 +268,7 @@ describe("FavoritesSearch", () => {
 
       search.submit("apple");
       search.invert();
-      expect(getResultIds(search)).toEqual(["2"]);
+      expect(getResultPostIds(search)).toEqual(["2"]);
     });
 
     test("restores the results when inverted twice", () => {
@@ -277,7 +277,7 @@ describe("FavoritesSearch", () => {
       search.submit("apple");
       search.invert();
       search.invert();
-      expect(getResultIds(search)).toEqual(["1"]);
+      expect(getResultPostIds(search)).toEqual(["1"]);
     });
 
     test("keeps the inversion for a new query", () => {
@@ -285,7 +285,7 @@ describe("FavoritesSearch", () => {
 
       search.invert();
       search.submit("apple");
-      expect(getResultIds(search)).toEqual(["2"]);
+      expect(getResultPostIds(search)).toEqual(["2"]);
     });
 
     test("keeps the blacklist outside the inversion", () => {
@@ -293,7 +293,7 @@ describe("FavoritesSearch", () => {
 
       search.submit("banana");
       search.invert();
-      expect(getResultIds(search)).toEqual(["3"]);
+      expect(getResultPostIds(search)).toEqual(["3"]);
     });
   });
 
@@ -308,7 +308,7 @@ describe("FavoritesSearch", () => {
       search.submit("banana");
       search.invert();
       search.clearFilters();
-      expect(getResultIds(search)).toEqual(["1", "2"]);
+      expect(getResultPostIds(search)).toEqual(["1", "2"]);
     });
 
     test("keeps the sort and the shuffle", () => {
@@ -368,7 +368,7 @@ describe("FavoritesSearch", () => {
       const { search, collection, index } = setup(createScoredPosts(1, 3, 2), { settings: { sortKey: "score" } });
 
       index.add(collection.append(createScoredPosts(5, 4)));
-      expect(getResultIds(search)).toEqual(["3", "2", "1", "5", "4"]);
+      expect(getResultPostIds(search)).toEqual(["3", "2", "1", "5", "4"]);
     });
 
     test("appends only the arrivals matching the current search", () => {
@@ -376,7 +376,7 @@ describe("FavoritesSearch", () => {
 
       search.submit("banana");
       index.add(collection.append([createPost({ id: "2", tags: "apple" }), createPost({ id: "3", tags: "banana" })]));
-      expect(getResultIds(search)).toEqual(["3"]);
+      expect(getResultPostIds(search)).toEqual(["3"]);
     });
 
     test("leaves the results alone when no arrival matches", () => {
@@ -395,7 +395,7 @@ describe("FavoritesSearch", () => {
 
       search.dispose();
       index.add(collection.append(createTaggedPosts("apple")));
-      expect(getResultIds(search)).toEqual([]);
+      expect(getResultPostIds(search)).toEqual([]);
     });
   });
 
@@ -417,7 +417,7 @@ describe("FavoritesSearch", () => {
       search.submit("apple");
       collection.overwrite(createPost({ id: "1", tags: "banana" }));
       index.update([{ doc: favorite, oldTerms: new Set(["apple"]), newTerms: favorite.tags }]);
-      expect(getResultIds(search)).toEqual(["1"]);
+      expect(getResultPostIds(search)).toEqual(["1"]);
     });
   });
 });

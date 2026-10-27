@@ -24,12 +24,12 @@ interface Setup {
   onPlainClick: Mock<(post: MediaItem) => boolean>;
 }
 
-function createPost(id: string): MediaItem {
-  return { id, media: { kind: "image", locator: `images/${id}` } };
+function createPost(postId: string): MediaItem {
+  return { id: postId, media: { kind: "image", locator: `images/${postId}` } };
 }
 
-function setup(...ids: string[]): Setup {
-  const posts = new Signal<readonly MediaItem[]>(ids.map(createPost));
+function setup(...postIds: string[]): Setup {
+  const posts = new Signal<readonly MediaItem[]>(postIds.map(createPost));
   const changed = new Emitter<MediaItem>();
   const tileLocator = new TileLocator<MediaItem>();
   const layout = new Signal<GridLayout>("grid");

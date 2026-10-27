@@ -1,4 +1,5 @@
 export interface RemotePages {
-  postUrl: (id: string) => string;
+  postUrl: (postId: string) => string;
   searchUrl: (query: string) => string;
+  postExists: (postId: string) => Promise<boolean>;
 }

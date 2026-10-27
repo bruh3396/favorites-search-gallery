@@ -11,11 +11,11 @@ export interface IndexedDbLocalFavoritesConfiguration {
 export class IndexedDbLocalFavorites implements LocalFavorites {
   constructor(
     private readonly configuration: IndexedDbLocalFavoritesConfiguration,
-    private readonly indexedDb: IndexedDbClient
+    private readonly indexedDbClient: IndexedDbClient
   ) { }
 
   public async getAll(): Promise<readonly string[]> {
-    return (await this.indexedDb.runTransaction(
+    return (await this.indexedDbClient.runTransaction(
       STORE_NAME,
       "readonly",
       store => store.get(this.configuration.ownerId) as IDBRequest<string[] | undefined>
@@ -23,7 +23,7 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
   }
 
   public async setAll(postIds: readonly string[]): Promise<void> {
-    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => store.put(postIds, this.configuration.ownerId));
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => store.put(postIds, this.configuration.ownerId));
   }
 
   public prepend(postIds: readonly string[]): Promise<void> {
@@ -38,8 +38,8 @@ export class IndexedDbLocalFavorites implements LocalFavorites {
     return this.update(ids => ids.filter(id => !removed.has(id)));
   }
 
-  private async update(change: (ids: string[]) => string[]): Promise<void> {
-    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => {
+  private async update(change: (postIds: string[]) => string[]): Promise<void> {
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => {
       const request = store.get(this.configuration.ownerId) as IDBRequest<string[] | undefined>;
 
       request.onsuccess = (): void => {

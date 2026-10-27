@@ -1,6 +1,6 @@
 import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
 import { DensePosting } from "@/core/domain/search/engines/bit/posting/posting";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { MetricComparator } from "@/core/domain/search/searchable";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";

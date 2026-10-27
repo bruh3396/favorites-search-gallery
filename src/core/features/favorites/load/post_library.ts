@@ -13,8 +13,8 @@ import { partition } from "@/core/utils/collection/array_utilities";
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const POST_TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
 
-function createPlaceholder(id: string): Post {
-  return { id, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: NO_MEDIA, status: "active" };
+function createPlaceholder(postId: string): Post {
+  return { id: postId, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: NO_MEDIA, status: "active" };
 }
 
 function isPlaceholder(post: Post): boolean {
@@ -53,9 +53,9 @@ export class PostLibrary {
     });
   }
 
-  public async stream(ids: readonly string[], batchSize: number, onBatch: (posts: Post[]) => void): Promise<void> {
-    for (let i = 0; i < ids.length; i += batchSize) {
-      onBatch(await this.getManyOrPlaceholders(ids.slice(i, i + batchSize)));
+  public async stream(postIds: readonly string[], batchSize: number, onBatch: (posts: Post[]) => void): Promise<void> {
+    for (let i = 0; i < postIds.length; i += batchSize) {
+      onBatch(await this.getManyOrPlaceholders(postIds.slice(i, i + batchSize)));
     }
   }
 
@@ -78,13 +78,13 @@ export class PostLibrary {
     await Promise.all([...placeholders, ...others].map(post => this.refreshOne(post)));
   }
 
-  private async getManyOrPlaceholders(ids: readonly string[]): Promise<Post[]> {
-    const local = await this.getLocalPostsById(ids);
-    return ids.map(id => local.get(id) ?? createPlaceholder(id));
+  private async getManyOrPlaceholders(postIds: readonly string[]): Promise<Post[]> {
+    const local = await this.getLocalPostsById(postIds);
+    return postIds.map(id => local.get(id) ?? createPlaceholder(id));
   }
 
-  private async getLocalPostsById(ids: readonly string[]): Promise<Map<string, Post>> {
-    return new Map((await this.dependencies.localPosts.getMany(ids)).map(post => [post.id, post]));
+  private async getLocalPostsById(postIds: readonly string[]): Promise<Map<string, Post>> {
+    return new Map((await this.dependencies.localPosts.getMany(postIds)).map(post => [post.id, post]));
   }
 
   private async refreshOne(post: Post): Promise<void> {

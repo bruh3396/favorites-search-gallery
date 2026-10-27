@@ -1,6 +1,6 @@
 import { createPost, createPosts } from "@/testing/post";
 import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoriteIds } from "@/core/features/favorites/testing/favorite_id_searcher";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -13,6 +13,7 @@ import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/memory_loc
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/memory_local_tag_categories";
 import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/memory_remote_favorites";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
@@ -52,6 +53,7 @@ async function setup({ local = [], remote }: LoadSources): Promise<{
     remoteFavorites,
     remotePosts: new MemoryRemotePosts(client),
     remoteMedia: new MemoryRemoteMedia(),
+    remotePages: new MemoryRemotePages(client),
     scheduler
   });
 
@@ -69,7 +71,7 @@ function recordPhases(flow: FavoritesLoader): FavoritesLoadPhase[] {
   return phases;
 }
 
-function getIds(favorites: readonly Favorite[]): string[] {
+function getPostIds(favorites: readonly Favorite[]): string[] {
   return favorites.map(favorite => favorite.id);
 }
 
@@ -86,7 +88,7 @@ describe("FavoritesLoader", () => {
       const phases = recordPhases(flow);
 
       await flow.load();
-      expect(searchFavoriteIds(index)).toEqual(["1", "2"]);
+      expect(searchFavoritePostIds(index)).toEqual(["1", "2"]);
       expect(await localFavorites.getAll()).toEqual(["1", "2"]);
       expect(phases).toEqual(["starting", "fetching", "fetching", "fetching", "saving", "loaded"]);
     });
@@ -97,14 +99,14 @@ describe("FavoritesLoader", () => {
       const phases = recordPhases(flow);
 
       await flow.load();
-      expect(searchFavoriteIds(index)).toEqual(["2", "1"]);
-      expect(flow.state.value).toEqual({ phase: "loaded", pulledCount: 1, removedCount: 0 });
-      expect(phases).toEqual(["starting", "restoring", "restoring", "pulling", "indexing", "pruning", "loaded"]);
+      expect(searchFavoritePostIds(index)).toEqual(["2", "1"]);
+      expect(flow.state.value).toEqual({ phase: "loaded", newCount: 1, unfavoritedCount: 0 });
+      expect(phases).toEqual(["starting", "restoring", "restoring", "pulling", "indexing", "checkingMissing", "loaded"]);
     });
 
     test("reports preparing while reading the stored membership takes over a second", async() => {
       const { flow, localFavorites, scheduler } = await setup({ remote: [] });
-      let finishRead: (ids: readonly string[]) => void = () => undefined;
+      let finishRead: (postIds: readonly string[]) => void = () => undefined;
 
       vi.spyOn(localFavorites, "getAll").mockReturnValue(new Promise(resolve => {
         finishRead = resolve;
@@ -144,7 +146,7 @@ describe("FavoritesLoader", () => {
       vi.spyOn(remoteFavorites, "findNew").mockRejectedValue(new Error("refused"));
       await flow.load();
       expect(flow.state.value).toEqual({ phase: "interrupted" });
-      expect(searchFavoriteIds(index)).toEqual(["1"]);
+      expect(searchFavoritePostIds(index)).toEqual(["1"]);
     });
 
     test("hydrates and announces a restored placeholder once its post is refreshed", async() => {
@@ -155,7 +157,7 @@ describe("FavoritesLoader", () => {
       await flow.load();
       await flushMicrotasks();
       expect(collection.getAll().find(favorite => favorite.id === "1")?.media).toEqual(MEDIA);
-      expect(getIds(hydrated)).toEqual(["1"]);
+      expect(getPostIds(hydrated)).toEqual(["1"]);
     });
   });
 });

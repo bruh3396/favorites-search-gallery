@@ -17,8 +17,8 @@ export class FilesystemClient {
     return (await this.readPostFileNames()).length;
   }
 
-  public async deletePostFile(id: string): Promise<void> {
-    await rm(join(this.directory, `${id}${POST_FILE_EXTENSION}`), { force: true });
+  public async deletePostFile(postId: string): Promise<void> {
+    await rm(join(this.directory, `${postId}${POST_FILE_EXTENSION}`), { force: true });
   }
 
   private async readPostFileNames(): Promise<string[]> {

@@ -14,8 +14,8 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
 export interface Rule34RemoteFavoritesDependencies {
-  rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
-  rule34Document: Pick<Rule34Document, "readFavoritesPageId">;
+  rule34Client: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
+  rule34Document: Pick<Rule34Document, "readFavoritesOwnerId">;
   fetch: Rule34Fetch;
   scheduler: Scheduler;
   randomSource: RandomSource;
@@ -28,14 +28,14 @@ const RETRY_BASE_DELAY = 1_500;
 const RETRY_BACKOFF_BASE = 7;
 
 export class Rule34RemoteFavorites implements RemoteFavorites {
-  private readonly pageId: string;
+  private readonly favoritesOwnerId: string;
   private firstPageFavorites: Post[] | null;
   private readonly retry: Retry;
   private readonly favoriteActions: Rule34FavoriteActions;
 
   constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
-    this.pageId = dependencies.rule34Document.readFavoritesPageId();
-    this.firstPageFavorites = dependencies.rule34.readFirstFavoritesPage();
+    this.favoritesOwnerId = dependencies.rule34Document.readFavoritesOwnerId();
+    this.firstPageFavorites = dependencies.rule34Client.readFirstFavoritesPage();
     this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
@@ -45,29 +45,29 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   }
 
   public fetchCount(): Promise<number | null> {
-    return this.retry.retry(() => this.dependencies.rule34.fetchFavoriteCount(this.pageId))
+    return this.retry.retry(() => this.dependencies.rule34Client.fetchFavoriteCount(this.favoritesOwnerId))
       .catch(() => null);
   }
 
   public fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    return this.dependencies.rule34.prioritizeFavorites(() => this.createAllFavoritesFetcher(onFavoritesFound).fetchAll(this.takeFirstPageFavorites()));
+    return this.dependencies.rule34Client.prioritizeFavorites(() => this.createAllFavoritesFetcher(onFavoritesFound).fetchAll(this.takeFirstPageFavorites()));
   }
 
-  public findNew(localIds: readonly string[]): Promise<Post[]> {
-    return this.dependencies.rule34.prioritizeFavorites(() => this.createNewFavoritesFinder().findNew(localIds, this.takeFirstPageFavorites()));
+  public findNew(localPostIds: readonly string[]): Promise<Post[]> {
+    return this.dependencies.rule34Client.prioritizeFavorites(() => this.createNewFavoritesFinder().findNew(localPostIds, this.takeFirstPageFavorites()));
   }
 
-  public findMissing(localIds: readonly string[], remoteStart: number): Promise<string[]> {
-    return this.dependencies.rule34.prioritizeFavorites(() => this.createMissingFavoritesFinder().findMissing(localIds, remoteStart));
+  public findMissing(localPostIds: readonly string[], remoteStart: number): Promise<string[]> {
+    return this.dependencies.rule34Client.prioritizeFavorites(() => this.createMissingFavoritesFinder().findMissing(localPostIds, remoteStart));
   }
 
-  public async add(id: string): Promise<boolean> {
-    const answer = await this.favoriteActions.add(id);
+  public async add(postId: string): Promise<boolean> {
+    const answer = await this.favoriteActions.add(postId);
     return answer === "added" || answer === "alreadyAdded";
   }
 
-  public remove(id: string): Promise<boolean> {
-    return this.favoriteActions.remove(id);
+  public remove(postId: string): Promise<boolean> {
+    return this.favoriteActions.remove(postId);
   }
 
   private takeFirstPageFavorites(): Post[] | undefined {
@@ -102,7 +102,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   }
 
   private fetch(pageIndex: number): Promise<Post[]> {
-    return this.dependencies.rule34.fetchFavoritesPage(this.pageId, pageIndex);
+    return this.dependencies.rule34Client.fetchFavoritesPage(this.favoritesOwnerId, pageIndex);
   }
 }
 

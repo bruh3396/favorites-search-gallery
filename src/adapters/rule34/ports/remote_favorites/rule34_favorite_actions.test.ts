@@ -20,16 +20,16 @@ function setup(respond: Fetch = (): Promise<Response> => Promise.resolve(new Res
   return { actions, fetch, scheduler };
 }
 
-function addFavoriteUrl(id: string): string {
-  return `https://rule34.xxx/public/addfav.php?id=${id}`;
+function addFavoriteUrl(postId: string): string {
+  return `https://rule34.xxx/public/addfav.php?id=${postId}`;
 }
 
-function postVoteUrl(id: string): string {
-  return `https://rule34.xxx/index.php?page=post&s=vote&type=up&id=${id}`;
+function postVoteUrl(postId: string): string {
+  return `https://rule34.xxx/index.php?page=post&s=vote&type=up&id=${postId}`;
 }
 
-function removeFavoriteUrl(id: string): string {
-  return `https://rule34.xxx/index.php?page=favorites&s=delete&id=${id}`;
+function removeFavoriteUrl(postId: string): string {
+  return `https://rule34.xxx/index.php?page=favorites&s=delete&id=${postId}`;
 }
 
 function readRequestedUrls(fetch: FetchMock): string[] {

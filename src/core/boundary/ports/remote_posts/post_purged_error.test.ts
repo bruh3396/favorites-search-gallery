@@ -7,7 +7,7 @@ describe("PostPurgedError", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe("PostPurgedError");
-    expect(error.id).toBe("123");
+    expect(error.postId).toBe("123");
     expect(error.message).toBe("Post 123 was purged from the site");
   });
 });

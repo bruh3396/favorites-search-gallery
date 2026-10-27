@@ -16,6 +16,6 @@ export function createPost(overrides: Partial<Post> = {}): Post {
   };
 }
 
-export function createPosts(...ids: string[]): Post[] {
-  return ids.map(id => createPost({ id }));
+export function createPosts(...postIds: string[]): Post[] {
+  return postIds.map(id => createPost({ id }));
 }

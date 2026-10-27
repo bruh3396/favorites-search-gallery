@@ -70,9 +70,9 @@ export class FavoritesWorkspace {
     tab.value.focusSearch.emit();
   }
 
-  public closeTab(id: string): void {
+  public closeTab(tabId: string): void {
     if (this.tabManager.tabs.peek().length > 1) {
-      this.tabManager.close(id);
+      this.tabManager.close(tabId);
     }
   }
 
@@ -111,7 +111,7 @@ export class FavoritesWorkspace {
 
   private findActiveTab(): Tab<FavoritesTab> {
     const tabs = this.tabManager.tabs.value;
-    return tabs.find(tab => tab.id === this.tabManager.activeId.value) ?? tabs[0];
+    return tabs.find(tab => tab.id === this.tabManager.activeTabId.value) ?? tabs[0];
   }
 
   private openTab(settings: FavoritesSearchSettings): Tab<FavoritesTab> {

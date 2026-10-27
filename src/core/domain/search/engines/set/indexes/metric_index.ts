@@ -1,4 +1,4 @@
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";
 

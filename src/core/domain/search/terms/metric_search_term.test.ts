@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { Searchable } from "@/core/domain/search/searchable";
 import { parseMetricSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 

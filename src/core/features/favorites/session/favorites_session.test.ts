@@ -42,7 +42,7 @@ function createTaggedPosts(...tags: string[]): Post[] {
   return tags.map((tag, index) => createPost({ id: String(index + 1), tags: tag }));
 }
 
-function getPageItemIds(session: FavoritesSession): string[] {
+function getPagePostIds(session: FavoritesSession): string[] {
   return session.pageItems.value.map(favorite => favorite.id);
 }
 
@@ -50,7 +50,7 @@ describe("FavoritesSession", () => {
   test("pages the results of its search", () => {
     const { session } = setup(createTaggedPosts("a", "b", "a"));
 
-    expect([getPageItemIds(session), session.pageCount.value]).toEqual([["1", "2"], 2]);
+    expect([getPagePostIds(session), session.pageCount.value]).toEqual([["1", "2"], 2]);
   });
 
   test("follows the submitted query", () => {
@@ -77,7 +77,7 @@ describe("FavoritesSession", () => {
 
       session.goTo(2);
       session.submit("a");
-      expect([session.pageNumber.value, getPageItemIds(session)]).toEqual([1, ["1", "3"]]);
+      expect([session.pageNumber.value, getPagePostIds(session)]).toEqual([1, ["1", "3"]]);
     });
   });
 
@@ -86,7 +86,7 @@ describe("FavoritesSession", () => {
       const { session } = setup(createTaggedPosts("a", "a", "a"));
 
       session.goToPageContaining(session.results.peek()[2]);
-      expect(getPageItemIds(session)).toEqual(["3"]);
+      expect(getPagePostIds(session)).toEqual(["3"]);
     });
   });
 

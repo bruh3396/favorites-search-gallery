@@ -15,8 +15,8 @@ import { flushMicrotasks } from "@/testing/async";
 
 type ShownFavorite = Pick<Favorite, "id" | "tags">;
 
-function createFavorite(id: string, tags: readonly string[] = []): ShownFavorite {
-  return { id, tags: new Set(tags) };
+function createFavorite(postId: string, tags: readonly string[] = []): ShownFavorite {
+  return { id: postId, tags: new Set(tags) };
 }
 
 interface Setup {
@@ -27,7 +27,7 @@ interface Setup {
   copyButton: HTMLButtonElement;
   viewButton: HTMLButtonElement;
   viewSettings: HTMLElement;
-  readId: () => string;
+  readPostId: () => string;
   chooseView: (label: string) => void;
 }
 
@@ -44,10 +44,10 @@ function setup(initial: ShownFavorite | undefined): Setup {
   const copyButton = element.querySelector<HTMLButtonElement>(`.${FavoriteLightboxDetailsClass.id} button`)!;
   const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"View settings\"]")!;
   const viewSettings = element.querySelector<HTMLElement>(`.${FavoriteLightboxDetailsClass.view}`)!;
-  const readId = (): string => copyButton.firstChild?.textContent ?? "";
+  const readPostId = (): string => copyButton.firstChild?.textContent ?? "";
   const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
     .find(button => button.getAttribute("aria-label") === label)!.click();
-  return { element, favorite, clipboard, favoriteLightboxTagsPreferences, copyButton, viewButton, viewSettings, readId, chooseView };
+  return { element, favorite, clipboard, favoriteLightboxTagsPreferences, copyButton, viewButton, viewSettings, readPostId, chooseView };
 }
 
 describe("createFavoriteLightboxDetails", () => {
@@ -56,11 +56,11 @@ describe("createFavoriteLightboxDetails", () => {
   });
 
   test("shows the shown favorite's id and follows it", () => {
-    const { favorite, readId } = setup(createFavorite("12"));
+    const { favorite, readPostId } = setup(createFavorite("12"));
 
-    expect(readId()).toBe("12");
+    expect(readPostId()).toBe("12");
     favorite.value = createFavorite("34");
-    expect(readId()).toBe("34");
+    expect(readPostId()).toBe("34");
   });
 
   test("copies the shown favorite's id", async() => {
@@ -72,9 +72,9 @@ describe("createFavoriteLightboxDetails", () => {
   });
 
   test("shows no id without a favorite", () => {
-    const { readId } = setup(undefined);
+    const { readPostId } = setup(undefined);
 
-    expect(readId()).toBe("");
+    expect(readPostId()).toBe("");
   });
 
   test("shows the favorite's tags in its body", async() => {

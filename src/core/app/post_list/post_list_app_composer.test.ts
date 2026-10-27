@@ -5,6 +5,7 @@ import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_pa
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
@@ -28,7 +29,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     visibilityObserver: { observe: (): (() => void) => () => { } },
     sizeObserver: new MemorySizeObserver(),
     remoteMedia: new MemoryRemoteMedia(),
-    remotePages: new MemoryRemotePages(),
+    remotePages: new MemoryRemotePages(new MemoryClient(posts)),
     remotePostList,
     localKeyedValues,
     navigator: new MemoryNavigator(),

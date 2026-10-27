@@ -5,11 +5,11 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
-import { Rule34Error, isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
+import { isRetryableRule34Error, isRule34PageMissing } from "@/adapters/rule34/client/rule34_error";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34RemotePostsDependencies {
-  rule34: Pick<Rule34Client, "fetchPostPage">;
+  rule34Client: Pick<Rule34Client, "fetchPostPage">;
   scheduler: Scheduler;
   randomSource: RandomSource;
 }
@@ -29,12 +29,8 @@ export class Rule34RemotePosts implements RemotePosts {
   }
 
   public fetch(post: Pick<Post, "id">): Promise<CategorizedPost> {
-    return this.retry.retry(() => this.dependencies.rule34.fetchPostPage(post.id)).catch((error: unknown) => {
-      throw isPostPageMissing(error) ? new PostPurgedError(post.id) : error;
+    return this.retry.retry(() => this.dependencies.rule34Client.fetchPostPage(post.id)).catch((error: unknown) => {
+      throw isRule34PageMissing(error) ? new PostPurgedError(post.id) : error;
     });
   }
-}
-
-function isPostPageMissing(error: unknown): boolean {
-  return error instanceof Rule34Error && error.reason === "http" && error.status === 404;
 }

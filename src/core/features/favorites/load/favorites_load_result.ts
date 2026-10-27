@@ -1,4 +1,4 @@
 export interface FavoritesLoadResult {
-  readonly pulledCount: number;
-  readonly removedCount: number;
+  readonly newCount: number;
+  readonly unfavoritedCount: number;
 }

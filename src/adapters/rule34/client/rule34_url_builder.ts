@@ -4,8 +4,8 @@ const POSTS_PER_POST_LIST_PAGE = 42;
 
 export const RULE34_FAVORITES_PER_PAGE = 50;
 
-export function buildRule34FavoritesPageUrl(pageId: string, offset: number): string {
-  return `${INDEX_URL}favorites&s=view&id=${pageId}&pid=${offset}`;
+export function buildRule34FavoritesPageUrl(userId: string, offset: number): string {
+  return `${INDEX_URL}favorites&s=view&id=${userId}&pid=${offset}`;
 }
 
 export function rule34FavoritesPageOffset(pageIndex: number): number {
@@ -28,22 +28,22 @@ export function rule34PostListPageIndex(offset: number): number {
   return Math.round(offset / POSTS_PER_POST_LIST_PAGE);
 }
 
-export function buildRule34PostPageUrl(id: string): string {
-  return `${INDEX_URL}post&s=view&id=${id}`;
+export function buildRule34PostPageUrl(postId: string): string {
+  return `${INDEX_URL}post&s=view&id=${postId}`;
 }
 
-export function buildRule34ProfilePageUrl(id: string): string {
-  return `${INDEX_URL}account&s=profile&id=${id}`;
+export function buildRule34ProfilePageUrl(userId: string): string {
+  return `${INDEX_URL}account&s=profile&id=${userId}`;
 }
 
-export function buildRule34AddFavoriteUrl(id: string): string {
-  return `${RULE34_ORIGIN}/public/addfav.php?id=${id}`;
+export function buildRule34AddFavoriteUrl(postId: string): string {
+  return `${RULE34_ORIGIN}/public/addfav.php?id=${postId}`;
 }
 
-export function buildRule34PostVoteUrl(id: string): string {
-  return `${INDEX_URL}post&s=vote&type=up&id=${id}`;
+export function buildRule34PostVoteUrl(postId: string): string {
+  return `${INDEX_URL}post&s=vote&type=up&id=${postId}`;
 }
 
-export function buildRule34RemoveFavoriteUrl(id: string): string {
-  return `${INDEX_URL}favorites&s=delete&id=${id}`;
+export function buildRule34RemoveFavoriteUrl(postId: string): string {
+  return `${INDEX_URL}favorites&s=delete&id=${postId}`;
 }

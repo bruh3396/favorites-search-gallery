@@ -1,4 +1,4 @@
-import { METRICS, isMetric } from "@/core/domain/post/metric";
+import { METRICS, isMetric } from "@/core/domain/search/metric";
 import { describe, expect, test } from "vitest";
 
 describe("isMetric", () => {

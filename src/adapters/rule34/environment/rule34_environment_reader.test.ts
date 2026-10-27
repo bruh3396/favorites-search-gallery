@@ -5,17 +5,17 @@ import { readRule34Environment } from "@/adapters/rule34/environment/rule34_envi
 
 interface Visit {
   pageName: Rule34PageName | null;
-  favoritesPageId?: string;
+  favoritesOwnerId?: string;
   userId?: string;
   theme?: ColorScheme;
   tagBlacklist?: readonly string[];
 }
 
 function createRule34Document(visit: Visit): Parameters<typeof readRule34Environment>[0] {
-  const { pageName, favoritesPageId = "", userId = "", theme = "light", tagBlacklist = [] } = visit;
+  const { pageName, favoritesOwnerId = "", userId = "", theme = "light", tagBlacklist = [] } = visit;
   return {
     readPageName: () => pageName,
-    readFavoritesPageId: () => favoritesPageId,
+    readFavoritesOwnerId: () => favoritesOwnerId,
     readUserId: () => userId,
     readTheme: () => theme,
     readTagBlacklist: () => [...tagBlacklist]
@@ -24,12 +24,12 @@ function createRule34Document(visit: Visit): Parameters<typeof readRule34Environ
 
 describe("readRule34Environment", () => {
   test("runs in favorites mode on a favorites page, keyed by the viewed page", () => {
-    expect(readRule34Environment(createRule34Document({ pageName: "favorites", favoritesPageId: "123", userId: "9" })))
+    expect(readRule34Environment(createRule34Document({ pageName: "favorites", favoritesOwnerId: "123", userId: "9" })))
       .toMatchObject({ mode: "favorites", favoritesOwnerId: "123", ownsFavorites: false });
   });
 
   test("owns the favorites on the viewer's own favorites page", () => {
-    const rule34Document = createRule34Document({ pageName: "favorites", favoritesPageId: "9", userId: "9" });
+    const rule34Document = createRule34Document({ pageName: "favorites", favoritesOwnerId: "9", userId: "9" });
 
     expect(readRule34Environment(rule34Document)?.ownsFavorites).toBe(true);
   });

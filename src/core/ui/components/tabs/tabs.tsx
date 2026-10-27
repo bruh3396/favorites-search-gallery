@@ -17,13 +17,13 @@ export interface TabsProps<T> {
   stripVisible: Readable<boolean>;
   trailing?: Child;
   onAdd: () => void;
-  onClose: (id: string) => void;
+  onClose: (tabId: string) => void;
   onCloseAll: () => void;
 }
 
 export function Tabs<T>({ manager, label, renderPanel, stripVisible, trailing, onAdd, onClose, onCloseAll }: TabsProps<T>): HTMLElement {
   const createPanelScope = captureScope();
-  const activeTab = computed(() => manager.tabs.value.find(tab => tab.id === manager.activeId.value) ?? null);
+  const activeTab = computed(() => manager.tabs.value.find(tab => tab.id === manager.activeTabId.value) ?? null);
   const items = computed(() => manager.tabs.value.map(tab => ({ id: tab.id, label: label(tab), closable: tab.closable })));
   const panel = <div className={TabsClass.panel} role="tabpanel" />;
   let shown: Scoped<HTMLElement> | null = null;
@@ -39,11 +39,11 @@ export function Tabs<T>({ manager, label, renderPanel, stripVisible, trailing, o
   const strip = (
     <TabStrip
       tabs={items}
-      activeId={manager.activeId}
+      activeTabId={manager.activeTabId}
       trailing={trailing}
-      onActivate={id => manager.activate(id)}
+      onActivate={tabId => manager.activate(tabId)}
       onClose={onClose}
-      onMove={(id, index) => manager.move(id, index)}
+      onMove={(tabId, index) => manager.move(tabId, index)}
       onAdd={onAdd}
       onCloseAll={onCloseAll}
     />

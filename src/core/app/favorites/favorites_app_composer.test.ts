@@ -56,7 +56,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
-    remotePages: new MemoryRemotePages(),
+    remotePages: new MemoryRemotePages(client),
     scheduler,
     randomSource: new MemoryRandomSource(),
     localKeyedValues,

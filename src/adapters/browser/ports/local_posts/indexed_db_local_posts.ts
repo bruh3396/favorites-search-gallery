@@ -6,23 +6,23 @@ import { Post } from "@/core/domain/post/post";
 const STORE_NAME: IndexedDbStoreName = "posts";
 
 export class IndexedDbLocalPosts implements LocalPosts {
-  constructor(private readonly indexedDb: IndexedDbClient) { }
+  constructor(private readonly indexedDbClient: IndexedDbClient) { }
 
-  public async getMany(ids: readonly string[]): Promise<readonly Readonly<Post>[]> {
-    const requests = await this.indexedDb.runTransaction(
+  public async getMany(postIds: readonly string[]): Promise<readonly Readonly<Post>[]> {
+    const requests = await this.indexedDbClient.runTransaction(
       STORE_NAME,
       "readonly",
-      store => ids.map(id => store.get(id) as IDBRequest<Post | undefined>)
+      store => postIds.map(id => store.get(id) as IDBRequest<Post | undefined>)
     );
     return requests.map(request => request.result).filter(post => post !== undefined);
   }
 
   public async setMany(posts: readonly Readonly<Post>[]): Promise<void> {
-    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => posts.forEach(post => store.put(post)));
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => posts.forEach(post => store.put(post)));
   }
 
   public async setManyIfAbsent(posts: readonly Readonly<Post>[]): Promise<void> {
-    await this.indexedDb.runTransaction(STORE_NAME, "readwrite", store => posts.forEach(post => {
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => posts.forEach(post => {
       store.add(post).onerror = (event): void => {
         event.preventDefault();
         event.stopPropagation();

@@ -8,7 +8,7 @@ import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_r
 import { advanceAndSettle } from "@/testing/async";
 import { createPost } from "@/testing/post";
 
-type FetchPostPage = Mock<(id: string) => Promise<CategorizedPost>>;
+type FetchPostPage = Mock<(postId: string) => Promise<CategorizedPost>>;
 
 const PAGE = {
   post: createPost({ id: "42", status: "deleted" }),
@@ -17,8 +17,8 @@ const PAGE = {
 
 function setup(fetchPostPage: FetchPostPage): { remotePosts: Rule34RemotePosts; scheduler: MemoryScheduler } {
   const scheduler = new MemoryScheduler();
-  const rule34 = { fetchPostPage };
-  return { remotePosts: new Rule34RemotePosts({ rule34, scheduler, randomSource: new MemoryRandomSource([1]) }), scheduler };
+  const rule34Client = { fetchPostPage };
+  return { remotePosts: new Rule34RemotePosts({ rule34Client, scheduler, randomSource: new MemoryRandomSource([1]) }), scheduler };
 }
 
 async function fetchRemotePost(fetchPostPage: FetchPostPage): Promise<CategorizedPost> {
@@ -39,7 +39,7 @@ describe("Rule34RemotePosts", () => {
   });
 
   test("retries a transient failure", async() => {
-    const fetchPostPage: FetchPostPage = vi.fn<(id: string) => Promise<CategorizedPost>>()
+    const fetchPostPage: FetchPostPage = vi.fn<(postId: string) => Promise<CategorizedPost>>()
       .mockRejectedValueOnce(new Rule34Error("http", { status: 503 }))
       .mockResolvedValue(PAGE);
 

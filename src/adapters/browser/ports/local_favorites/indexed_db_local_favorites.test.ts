@@ -66,9 +66,9 @@ describe("IndexedDbLocalFavorites", () => {
   });
 
   test("leaves other owners alone when removing", async() => {
-    const indexedDb = createIndexedDb();
-    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDb);
-    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDb);
+    const indexedDbClient = createIndexedDb();
+    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDbClient);
+    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDbClient);
 
     await first.prepend(["1"]);
     await second.prepend(["1"]);
@@ -78,9 +78,9 @@ describe("IndexedDbLocalFavorites", () => {
   });
 
   test("keeps owners in one namespace apart", async() => {
-    const indexedDb = createIndexedDb();
-    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDb);
-    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDb);
+    const indexedDbClient = createIndexedDb();
+    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDbClient);
+    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDbClient);
 
     await first.prepend(["1"]);
 

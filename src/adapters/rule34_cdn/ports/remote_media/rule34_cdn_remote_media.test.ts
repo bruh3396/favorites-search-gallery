@@ -19,8 +19,8 @@ interface Rule34Cdn {
   probeDurationSeconds: ReturnType<typeof vi.fn<(media: Media) => Promise<number>>>;
 }
 
-function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
-  const rule34Cdn: Rule34Cdn = {
+function setup(): { remoteMedia: Rule34CdnRemoteMedia; rule34CdnClient: Rule34Cdn } {
+  const rule34CdnClient: Rule34Cdn = {
     resolveMedia: vi.fn(() => Promise.resolve(RESOLVED)),
     previewUrl: vi.fn((media: Media) => `https://preview/${media.locator}`),
     originalUrl: vi.fn(() => Promise.resolve(ORIGINAL)),
@@ -29,55 +29,55 @@ function setup(): { source: Rule34CdnRemoteMedia; rule34Cdn: Rule34Cdn } {
     fetchOriginal: vi.fn(() => Promise.resolve(FILE)),
     probeDurationSeconds: vi.fn(() => Promise.resolve(12))
   };
-  return { source: new Rule34CdnRemoteMedia(rule34Cdn), rule34Cdn };
+  return { remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient), rule34CdnClient };
 }
 
 describe("Rule34CdnRemoteMedia", () => {
   test("resolves media", async() => {
-    const { source, rule34Cdn } = setup();
+    const { remoteMedia, rule34CdnClient } = setup();
 
-    expect(await source.resolveMedia(VIDEO)).toBe(RESOLVED);
-    expect(rule34Cdn.resolveMedia).toHaveBeenCalledWith(VIDEO);
+    expect(await remoteMedia.resolveMedia(VIDEO)).toBe(RESOLVED);
+    expect(rule34CdnClient.resolveMedia).toHaveBeenCalledWith(VIDEO);
   });
 
   test("gives a preview's URL", () => {
-    expect(setup().source.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
+    expect(setup().remoteMedia.resolvePreviewUrl(VIDEO)).toBe("https://preview/1234/a1b2c3");
   });
 
   test("gives an original's URL", async() => {
-    const { source, rule34Cdn } = setup();
+    const { remoteMedia, rule34CdnClient } = setup();
 
-    expect(await source.resolveOriginalUrl(VIDEO)).toBe(ORIGINAL);
-    expect(rule34Cdn.originalUrl).toHaveBeenCalledWith(VIDEO);
+    expect(await remoteMedia.resolveOriginalUrl(VIDEO)).toBe(ORIGINAL);
+    expect(rule34CdnClient.originalUrl).toHaveBeenCalledWith(VIDEO);
   });
 
   test("decodes the still", async() => {
-    const { source, rule34Cdn } = setup();
+    const { remoteMedia, rule34CdnClient } = setup();
     const signal = new AbortController().signal;
 
-    expect(await source.decodeStill(VIDEO, signal, 500)).toBe(BITMAP);
-    expect(rule34Cdn.decodeStill).toHaveBeenCalledWith(VIDEO, signal, 500);
+    expect(await remoteMedia.decodeStill(VIDEO, signal, 500)).toBe(BITMAP);
+    expect(rule34CdnClient.decodeStill).toHaveBeenCalledWith(VIDEO, signal, 500);
   });
 
   test("loads the original", async() => {
-    const { source, rule34Cdn } = setup();
+    const { remoteMedia, rule34CdnClient } = setup();
     const signal = new AbortController().signal;
 
-    expect(await source.loadOriginal(VIDEO, signal)).toBe(IMAGE);
-    expect(rule34Cdn.loadOriginal).toHaveBeenCalledWith(VIDEO, signal);
+    expect(await remoteMedia.loadOriginal(VIDEO, signal)).toBe(IMAGE);
+    expect(rule34CdnClient.loadOriginal).toHaveBeenCalledWith(VIDEO, signal);
   });
 
   test("fetches the original's file", async() => {
-    const { source, rule34Cdn } = setup();
+    const { remoteMedia, rule34CdnClient } = setup();
 
-    expect(await source.fetchOriginal(VIDEO)).toBe(FILE);
-    expect(rule34Cdn.fetchOriginal).toHaveBeenCalledWith(VIDEO);
+    expect(await remoteMedia.fetchOriginal(VIDEO)).toBe(FILE);
+    expect(rule34CdnClient.fetchOriginal).toHaveBeenCalledWith(VIDEO);
   });
 
   test("probes the original's duration", async() => {
-    const { source, rule34Cdn } = setup();
+    const { remoteMedia, rule34CdnClient } = setup();
 
-    expect(await source.probeDurationSeconds(VIDEO)).toBe(12);
-    expect(rule34Cdn.probeDurationSeconds).toHaveBeenCalledWith(VIDEO);
+    expect(await remoteMedia.probeDurationSeconds(VIDEO)).toBe(12);
+    expect(rule34CdnClient.probeDurationSeconds).toHaveBeenCalledWith(VIDEO);
   });
 });

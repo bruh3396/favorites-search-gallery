@@ -31,8 +31,8 @@ interface Setup {
   trailing: HTMLElement;
 }
 
-function createFavorite(id: string): Favorite {
-  return { id, numericId: Number(id), media: { kind: "image", locator: `images/${id}` }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 100 };
+function createFavorite(postId: string): Favorite {
+  return { id: postId, numericId: Number(postId), media: { kind: "image", locator: `images/${postId}` }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 100 };
 }
 
 function setup(): Setup {
@@ -72,7 +72,7 @@ function setup(): Setup {
   };
 }
 
-const LOADED: FavoritesLoadState = { phase: "loaded", pulledCount: 0, removedCount: 0 };
+const LOADED: FavoritesLoadState = { phase: "loaded", newCount: 0, unfavoritedCount: 0 };
 
 function isHidden(element: HTMLElement): boolean {
   return element.closest("[hidden]") !== null;

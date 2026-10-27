@@ -6,21 +6,21 @@ export const FavoriteHeartClass = {
 } as const;
 
 export interface FavoriteHeartProps {
-  id: string;
-  isFavorited: (id: string) => boolean;
-  addFavorite: (id: string) => void;
-  removeFavorite: (id: string) => void;
+  postId: string;
+  isFavorited: (postId: string) => boolean;
+  addFavorite: (postId: string) => void;
+  removeFavorite: (postId: string) => void;
 }
 
-export function FavoriteHeart({ id, isFavorited: readIsFavorited, addFavorite, removeFavorite }: FavoriteHeartProps): HTMLElement {
-  const isFavorited = computed(() => readIsFavorited(id));
+export function FavoriteHeart({ postId, isFavorited: readIsFavorited, addFavorite, removeFavorite }: FavoriteHeartProps): HTMLElement {
+  const isFavorited = computed(() => readIsFavorited(postId));
   return (
     <button
       className={FavoriteHeartClass.root}
       type="button"
       aria-label="Favorite"
       aria-pressed={computed(() => String(isFavorited.value))}
-      onClick={() => (isFavorited.peek() ? removeFavorite : addFavorite)(id)}
+      onClick={() => (isFavorited.peek() ? removeFavorite : addFavorite)(postId)}
     >
       ♥
     </button>

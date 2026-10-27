@@ -7,10 +7,10 @@ import { tmpdir } from "node:os";
 
 let directory: string;
 
-async function writePostFile(id: string, modifiedAtSeconds: number): Promise<void> {
-  const path = join(directory, `${id}.json`);
+async function writePostFile(postId: string, modifiedAtSeconds: number): Promise<void> {
+  const path = join(directory, `${postId}.json`);
 
-  await writeFile(path, JSON.stringify(createPost({ id })));
+  await writeFile(path, JSON.stringify(createPost({ id: postId })));
   await utimes(path, modifiedAtSeconds, modifiedAtSeconds);
 }
 

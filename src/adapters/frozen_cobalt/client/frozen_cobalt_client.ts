@@ -45,7 +45,7 @@ export class FrozenCobaltClient {
       "X-Platform": configuration.identity?.platform ?? ""
     };
     this.postResolver = new CoalescingResolver(REQUEST_COALESCING, {
-      resolve: (ids): Promise<Resolved> => postLimiter.run(() => this.requestBatch("post", { ids }, ids)),
+      resolve: (postIds): Promise<Resolved> => postLimiter.run(() => this.requestBatch("post", { ids: postIds }, postIds)),
       scheduler: dependencies.scheduler
     });
     this.tagResolver = new CoalescingResolver(REQUEST_COALESCING, {
@@ -58,8 +58,8 @@ export class FrozenCobaltClient {
     this.request("ping", {}).catch(() => { });
   }
 
-  public async fetchPost(id: string): Promise<FrozenCobaltPostResult> {
-    return parseFrozenCobaltPostResult(await this.postResolver.schedule(id), id);
+  public async fetchPost(postId: string): Promise<FrozenCobaltPostResult> {
+    return parseFrozenCobaltPostResult(await this.postResolver.schedule(postId), postId);
   }
 
   public async fetchTagCategory(tagName: string): Promise<FrozenCobaltTagResult> {

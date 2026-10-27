@@ -1,4 +1,4 @@
-import { METRICS, Metric } from "@/core/domain/post/metric";
+import { METRICS, Metric } from "@/core/domain/search/metric";
 import { describe, expect, test } from "vitest";
 import { parseMetricSearchTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";

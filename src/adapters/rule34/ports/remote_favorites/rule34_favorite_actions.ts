@@ -43,34 +43,34 @@ export class Rule34FavoriteActions {
     });
   }
 
-  public add(id: string): Promise<Rule34AddFavoriteAnswer | null> {
-    this.intents.set(id, "add");
+  public add(postId: string): Promise<Rule34AddFavoriteAnswer | null> {
+    this.intents.set(postId, "add");
     return this.addLimiter.run(async() => {
-      if (!this.claimIntent(id, "add")) {
+      if (!this.claimIntent(postId, "add")) {
         return null;
       }
-      sendRule34Request(this.dependencies.fetch, buildRule34PostVoteUrl(id)).catch(() => { });
-      const answer = await (await sendOkRule34Request(this.dependencies.fetch, buildRule34AddFavoriteUrl(id))).text();
+      sendRule34Request(this.dependencies.fetch, buildRule34PostVoteUrl(postId)).catch(() => { });
+      const answer = await (await sendOkRule34Request(this.dependencies.fetch, buildRule34AddFavoriteUrl(postId))).text();
       return ADD_ANSWERS[parseInt(answer, 10)] ?? "error";
     });
   }
 
-  public remove(id: string): Promise<boolean> {
-    this.intents.set(id, "remove");
+  public remove(postId: string): Promise<boolean> {
+    this.intents.set(postId, "remove");
     return this.removeLimiter.run(async() => {
-      if (!this.claimIntent(id, "remove")) {
+      if (!this.claimIntent(postId, "remove")) {
         return false;
       }
-      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, buildRule34RemoveFavoriteUrl(id), { redirect: "manual" }));
+      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, buildRule34RemoveFavoriteUrl(postId), { redirect: "manual" }));
       return true;
     });
   }
 
-  private claimIntent(id: string, intent: Intent): boolean {
-    if (this.intents.get(id) !== intent) {
+  private claimIntent(postId: string, intent: Intent): boolean {
+    if (this.intents.get(postId) !== intent) {
       return false;
     }
-    this.intents.delete(id);
+    this.intents.delete(postId);
     return true;
   }
 }

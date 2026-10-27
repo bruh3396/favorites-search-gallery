@@ -23,7 +23,7 @@ function setup(posts: Post[] = []): Setup {
   return { collection, favorites, index };
 }
 
-function getIds(favorites: readonly Favorite[]): string[] {
+function getPostIds(favorites: readonly Favorite[]): string[] {
   return favorites.map(favorite => favorite.id);
 }
 
@@ -41,7 +41,7 @@ describe("FavoritesSearchIndex", () => {
       const { collection, index } = setup(createTaggedPosts("apple"));
 
       index.add(collection.append([createPost({ id: "2", tags: "apple" })]));
-      expect(getIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["1", "2"]);
+      expect(getPostIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["1", "2"]);
     });
 
     test("announces the added favorites once they are searchable", () => {
@@ -49,7 +49,7 @@ describe("FavoritesSearchIndex", () => {
       const added = collection.append(createTaggedPosts("apple"));
       const announced: string[][] = [];
 
-      index.indexed.on(favorites => announced.push(getIds(index.match(buildFavoritesSearchRequest({ query: "apple" }), favorites))));
+      index.indexed.on(favorites => announced.push(getPostIds(index.match(buildFavoritesSearchRequest({ query: "apple" }), favorites))));
       index.add(added);
       expect(announced).toEqual([["1"]]);
     });
@@ -61,7 +61,7 @@ describe("FavoritesSearchIndex", () => {
 
       collection.overwrite(createPost({ id: "1", tags: "banana" }));
       index.update([{ doc: favorite, oldTerms: new Set(["apple"]), newTerms: favorite.tags }]);
-      expect(getIds(index.search(buildFavoritesSearchRequest({ query: "banana" })))).toEqual(["1"]);
+      expect(getPostIds(index.search(buildFavoritesSearchRequest({ query: "banana" })))).toEqual(["1"]);
     });
   });
 
@@ -78,7 +78,7 @@ describe("FavoritesSearchIndex", () => {
       const { favorites, index } = setup(createTaggedPosts("apple", "apple"));
 
       index.rebuild(favorites.slice(1));
-      expect(getIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["2"]);
+      expect(getPostIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["2"]);
     });
 
     test("announces the rebuild once the favorites are searchable", () => {
@@ -86,7 +86,7 @@ describe("FavoritesSearchIndex", () => {
       const favorites = collection.append(createTaggedPosts("apple"));
       const announced: string[][] = [];
 
-      index.rebuilt.on(() => announced.push(getIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))));
+      index.rebuilt.on(() => announced.push(getPostIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))));
       index.rebuild(favorites);
       expect(announced).toEqual([["1"]]);
     });
@@ -131,13 +131,13 @@ describe("FavoritesSearchIndex", () => {
     test("returns every indexed favorite matching the query", () => {
       const { index } = setup(createTaggedPosts("apple", "banana", "apple"));
 
-      expect(getIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["1", "3"]);
+      expect(getPostIds(index.search(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["1", "3"]);
     });
 
     test("keeps only favorites whose rating is allowed", () => {
       const { index } = setup([createPost({ id: "1", rating: "safe" }), createPost({ id: "2", rating: "explicit" })]);
 
-      expect(getIds(index.search(buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe") })))).toEqual(["1"]);
+      expect(getPostIds(index.search(buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe") })))).toEqual(["1"]);
     });
 
     test("returns nothing without an expression", () => {
@@ -154,7 +154,7 @@ describe("FavoritesSearchIndex", () => {
     ] as const)("orders by $sortKey, ascending $isSortAscending, as $expected", ({ sortKey, isSortAscending, expected }) => {
       const { index } = setup(["1", "3", "2"].map(id => createPost({ id, score: Number(id) })));
 
-      expect(getIds(index.search(buildFavoritesSearchRequest({ sortKey, isSortAscending })))).toEqual(expected);
+      expect(getPostIds(index.search(buildFavoritesSearchRequest({ sortKey, isSortAscending })))).toEqual(expected);
     });
 
     test("orders by the shuffle seed for a random sort", () => {
@@ -175,7 +175,7 @@ describe("FavoritesSearchIndex", () => {
       const forward = setup(createNumberedPosts(5)).index.search(request);
       const backward = setup(createNumberedPosts(5).toReversed()).index.search(request);
 
-      expect(getIds(backward)).toEqual(getIds(forward));
+      expect(getPostIds(backward)).toEqual(getPostIds(forward));
     });
 
     test("returns a different order for a different seed", () => {
@@ -187,10 +187,10 @@ describe("FavoritesSearchIndex", () => {
 
     test("keeps the shuffled order of the favorites that still match a narrower search", () => {
       const { index } = setup(createTaggedPosts(...Array.from({ length: 20 }, (_, position) => (position % 2 === 0 ? "apple" : "apple banana"))));
-      const everythingIds = getIds(index.search(buildFavoritesSearchRequest({ isShuffled: true })));
-      const narrowedIds = getIds(index.search(buildFavoritesSearchRequest({ isShuffled: true, query: "banana" })));
+      const everythingPostIds = getPostIds(index.search(buildFavoritesSearchRequest({ isShuffled: true })));
+      const narrowedPostIds = getPostIds(index.search(buildFavoritesSearchRequest({ isShuffled: true, query: "banana" })));
 
-      expect(narrowedIds).toEqual(everythingIds.filter(id => narrowedIds.includes(id)));
+      expect(narrowedPostIds).toEqual(everythingPostIds.filter(id => narrowedPostIds.includes(id)));
     });
   });
 
@@ -198,43 +198,43 @@ describe("FavoritesSearchIndex", () => {
     test("returns the candidates matching the query", () => {
       const { favorites, index } = setup(createTaggedPosts("apple", "banana", "apple"));
 
-      expect(getIds(index.match(buildFavoritesSearchRequest({ query: "apple" }), favorites))).toEqual(["1", "3"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest({ query: "apple" }), favorites))).toEqual(["1", "3"]);
     });
 
     test("returns every candidate for an empty query", () => {
       const { favorites, index } = setup(createTaggedPosts("apple", "banana"));
 
-      expect(getIds(index.match(buildFavoritesSearchRequest(), favorites))).toEqual(["1", "2"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest(), favorites))).toEqual(["1", "2"]);
     });
 
     test("matches every indexed favorite without candidates", () => {
       const { index } = setup(createTaggedPosts("apple", "banana", "apple"));
 
-      expect(getIds(index.match(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["1", "3"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest({ query: "apple" })))).toEqual(["1", "3"]);
     });
 
     test("matches a metric comparison term", () => {
       const { favorites, index } = setup([1, 2, 3].map(score => createPost({ id: String(score), score })));
 
-      expect(getIds(index.match(buildFavoritesSearchRequest({ query: "score:>1" }), favorites))).toEqual(["2", "3"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest({ query: "score:>1" }), favorites))).toEqual(["2", "3"]);
     });
 
     test("keeps only candidates whose rating is allowed", () => {
       const { favorites, index } = setup([createPost({ id: "1", rating: "safe" }), createPost({ id: "2", rating: "explicit" })]);
 
-      expect(getIds(index.match(buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe") }), favorites))).toEqual(["1"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe") }), favorites))).toEqual(["1"]);
     });
 
     test("keeps the indexed order regardless of the sort order", () => {
       const { favorites, index } = setup(["1", "3", "2"].map(id => createPost({ id, score: Number(id) })));
 
-      expect(getIds(index.match(buildFavoritesSearchRequest({ sortKey: "score", isSortAscending: true }), favorites))).toEqual(["1", "3", "2"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest({ sortKey: "score", isSortAscending: true }), favorites))).toEqual(["1", "3", "2"]);
     });
 
     test("negates within the candidates only", () => {
       const { favorites, index } = setup(createTaggedPosts("banana", "apple", "banana", "apple"));
 
-      expect(getIds(index.match(buildFavoritesSearchRequest({ query: "-apple" }), favorites.slice(2)))).toEqual(["3"]);
+      expect(getPostIds(index.match(buildFavoritesSearchRequest({ query: "-apple" }), favorites.slice(2)))).toEqual(["3"]);
     });
 
     test("returns nothing without an expression", () => {

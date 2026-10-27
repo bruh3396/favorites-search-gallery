@@ -12,7 +12,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
 export interface FrozenCobaltRemotePostsDependencies {
-  frozenCobalt: Pick<FrozenCobaltClient, "fetchPost">;
+  frozenCobaltClient: Pick<FrozenCobaltClient, "fetchPost">;
   mintMedia: MediaMinter;
   scheduler: Scheduler;
   randomSource: RandomSource;
@@ -39,20 +39,20 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
     return this.retry.retry(() => this.fetchOnce(post.id));
   }
 
-  private async fetchOnce(id: string): Promise<CategorizedPost> {
-    const result = await this.dependencies.frozenCobalt.fetchPost(id);
+  private async fetchOnce(postId: string): Promise<CategorizedPost> {
+    const result = await this.dependencies.frozenCobaltClient.fetchPost(postId);
 
     switch (result.status) {
       case "ok":
         return decodeFrozenCobaltPost(result.post, this.dependencies.mintMedia);
       case "deleted":
-        throw new PostUnavailableError(id);
+        throw new PostUnavailableError(postId);
       case "deferred":
-        throw new FrozenCobaltError("deferred", { subject: id });
+        throw new FrozenCobaltError("deferred", { subject: postId });
       case "rate_limited":
-        throw new FrozenCobaltError("rate_limited", { subject: id });
+        throw new FrozenCobaltError("rate_limited", { subject: postId });
       case "error":
-        throw new FrozenCobaltError("server_error", { subject: id });
+        throw new FrozenCobaltError("server_error", { subject: postId });
       default:
         throw new UnreachableError(result);
     }

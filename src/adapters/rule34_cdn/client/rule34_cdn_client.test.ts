@@ -22,7 +22,7 @@ function rejectEveryImage(): Promise<HTMLImageElement> {
 }
 
 interface Setup {
-  client: Rule34CdnClient;
+  rule34CdnClient: Rule34CdnClient;
   fetch: FetchMock;
   scheduler: MemoryScheduler;
   decodeBitmap: ReturnType<typeof vi.fn<DecodeBitmap>>;
@@ -34,8 +34,8 @@ function setup(respond: Fetch = respondWithBytes, load: LoadImage = rejectEveryI
   const scheduler = new MemoryScheduler();
   const decodeBitmap = vi.fn<DecodeBitmap>(() => Promise.resolve(BITMAP));
   const loadImage = vi.fn<LoadImage>(load);
-  const client = new Rule34CdnClient({ fetch, scheduler, loadImage, decodeBitmap });
-  return { client, fetch, scheduler, decodeBitmap, loadImage };
+  const rule34CdnClient = new Rule34CdnClient({ fetch, scheduler, loadImage, decodeBitmap });
+  return { rule34CdnClient, fetch, scheduler, decodeBitmap, loadImage };
 }
 
 function createDecodableImage(): HTMLImageElement {
@@ -61,78 +61,78 @@ function media(kind: Media["kind"], locator: string): Media {
 
 describe("Rule34CdnClient", () => {
   test("mints media from a file url", () => {
-    expect(setup().client.mintMedia({ url: "https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", tags: "" }))
+    expect(setup().rule34CdnClient.mintMedia({ url: "https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", tags: "" }))
       .toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
   });
 
   test("resolves media with an extension without asking the host", async() => {
-    const { client, fetch } = setup();
+    const { rule34CdnClient, fetch } = setup();
     const known = media("image", "1234/a1b2c3.png");
 
-    expect(await client.resolveMedia(known)).toBe(known);
+    expect(await rule34CdnClient.resolveMedia(known)).toBe(known);
     expect(fetch).not.toHaveBeenCalled();
   });
 
   test("resolves media without an extension to the kind of the file found", async() => {
-    const { client, scheduler } = setup(createFetchFindingOnly(GIF_ORIGINAL));
+    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(GIF_ORIGINAL));
 
-    expect(await settled(scheduler, client.resolveMedia(media("image", "1234/a1b2c3"))))
+    expect(await settled(scheduler, rule34CdnClient.resolveMedia(media("image", "1234/a1b2c3"))))
       .toEqual(media("gif", "1234/a1b2c3.gif"));
   });
 
   test("resolves untagged media to a video when only the mp4 exists", async() => {
-    const { client, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.mp4"));
+    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.mp4"));
 
-    expect(await settled(scheduler, client.resolveMedia(media("image", "1234/a1b2c3"))))
+    expect(await settled(scheduler, rule34CdnClient.resolveMedia(media("image", "1234/a1b2c3"))))
       .toEqual(media("video", "1234/a1b2c3.mp4"));
   });
 
   test("resolves media to itself when no file is found", async() => {
-    const { client, scheduler } = setup(createFetchFindingOnly(""));
+    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(""));
     const unknown = media("image", "1234/a1b2c3");
 
-    expect(await settled(scheduler, client.resolveMedia(unknown))).toBe(unknown);
+    expect(await settled(scheduler, rule34CdnClient.resolveMedia(unknown))).toBe(unknown);
   });
 
   test("addresses a preview on the thumbnail host", () => {
-    expect(setup().client.previewUrl(media("image", "1234/a1b2c3")))
+    expect(setup().rule34CdnClient.previewUrl(media("image", "1234/a1b2c3")))
       .toBe("https://wimg.rule34.xxx/thumbnails//1234/thumbnail_a1b2c3.jpg");
   });
 
   test("addresses an original by the extension its locator carries", async() => {
-    const { client, fetch } = setup();
+    const { rule34CdnClient, fetch } = setup();
 
-    expect(await client.originalUrl(media("gif", "1234/a1b2c3.png"))).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
+    expect(await rule34CdnClient.originalUrl(media("gif", "1234/a1b2c3.png"))).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
     expect(fetch).not.toHaveBeenCalled();
   });
 
   test("addresses videos and gifs by their kind", async() => {
-    const { client } = setup();
+    const { rule34CdnClient } = setup();
 
-    expect(await client.originalUrl(media("video", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.mp4");
-    expect(await client.originalUrl(media("gif", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
+    expect(await rule34CdnClient.originalUrl(media("video", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.mp4");
+    expect(await rule34CdnClient.originalUrl(media("gif", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
   });
 
   test("addresses a video's still as the jpg beside it", async() => {
-    const { client, fetch } = setup();
+    const { rule34CdnClient, fetch } = setup();
 
-    expect(await client.stillUrl(media("video", "1234/a1b2c3.mp4"))).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
+    expect(await rule34CdnClient.stillUrl(media("video", "1234/a1b2c3.mp4"))).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
     expect(fetch).not.toHaveBeenCalled();
   });
 
   test("addresses an image's or gif's still as its original", async() => {
-    const { client } = setup();
+    const { rule34CdnClient } = setup();
 
-    expect(await client.stillUrl(media("image", "1234/a1b2c3.png"))).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
-    expect(await client.stillUrl(media("gif", "1234/a1b2c3"))).toBe(GIF_ORIGINAL);
+    expect(await rule34CdnClient.stillUrl(media("image", "1234/a1b2c3.png"))).toBe("https://rule34.xxx/images//1234/a1b2c3.png");
+    expect(await rule34CdnClient.stillUrl(media("gif", "1234/a1b2c3"))).toBe(GIF_ORIGINAL);
   });
 
   test("probes an image's extension once", async() => {
-    const { client, fetch, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.png"));
+    const { rule34CdnClient, fetch, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.png"));
     const original = "https://rule34.xxx/images//1234/a1b2c3.png";
 
-    expect(await settled(scheduler, client.originalUrl(media("image", "1234/a1b2c3")))).toBe(original);
-    expect(await settled(scheduler, client.originalUrl(media("image", "1234/a1b2c3")))).toBe(original);
+    expect(await settled(scheduler, rule34CdnClient.originalUrl(media("image", "1234/a1b2c3")))).toBe(original);
+    expect(await settled(scheduler, rule34CdnClient.originalUrl(media("image", "1234/a1b2c3")))).toBe(original);
     expect(fetch.mock.calls.map(([url]) => url)).toEqual([
       "https://rule34.xxx/images//1234/a1b2c3.jpeg",
       "https://rule34.xxx/images//1234/a1b2c3.png"
@@ -140,89 +140,89 @@ describe("Rule34CdnClient", () => {
   });
 
   test("falls back to jpg when no probe finds the image", async() => {
-    const { client, scheduler } = setup(createFetchFindingOnly(""));
+    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(""));
 
-    expect(await settled(scheduler, client.originalUrl(media("image", "1234/a1b2c3"))))
+    expect(await settled(scheduler, rule34CdnClient.originalUrl(media("image", "1234/a1b2c3"))))
       .toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
   });
 
   test("treats a probe the network fails as a miss", async() => {
-    const { client, scheduler } = setup(() => Promise.reject(new TypeError("offline")));
+    const { rule34CdnClient, scheduler } = setup(() => Promise.reject(new TypeError("offline")));
 
-    expect(await settled(scheduler, client.originalUrl(media("image", "1234/a1b2c3"))))
+    expect(await settled(scheduler, rule34CdnClient.originalUrl(media("image", "1234/a1b2c3"))))
       .toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
   });
 
   test("rejects a video duration the host won't serve", async() => {
-    const { client, scheduler } = setup(createFetchFindingOnly(""));
-    const duration = client.probeDurationSeconds(media("video", "1234/a1b2c3"));
+    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(""));
+    const duration = rule34CdnClient.probeDurationSeconds(media("video", "1234/a1b2c3"));
 
     duration.catch(() => { });
     await expect(settled(scheduler, duration)).rejects.toThrow("Unable to probe video duration: https://rule34.xxx/images//1234/a1b2c3.mp4");
   });
 
   test("decodes a still at full size without a width", async() => {
-    const { client, fetch, decodeBitmap } = setup();
+    const { rule34CdnClient, fetch, decodeBitmap } = setup();
     const signal = new AbortController().signal;
 
-    expect(await client.decodeStill(media("image", "1234/a1b2c3.png"), signal)).toBe(BITMAP);
+    expect(await rule34CdnClient.decodeStill(media("image", "1234/a1b2c3.png"), signal)).toBe(BITMAP);
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.png", { signal });
     expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(expect.any(Blob), undefined);
   });
 
   test("fetches an original's file", async() => {
-    const { client, fetch } = setup();
+    const { rule34CdnClient, fetch } = setup();
 
-    expect(await (await client.fetchOriginal(media("video", "1234/a1b2c3"))).text()).toBe("bytes");
+    expect(await (await rule34CdnClient.fetchOriginal(media("video", "1234/a1b2c3"))).text()).toBe("bytes");
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.mp4");
   });
 
   test("rejects an original the host won't serve", async() => {
-    const { client } = setup(createFetchFindingOnly(""));
+    const { rule34CdnClient } = setup(createFetchFindingOnly(""));
 
-    await expect(client.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
+    await expect(rule34CdnClient.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
   });
 
   test("decodes a video's still from the jpg beside it", async() => {
-    const { client, fetch } = setup();
+    const { rule34CdnClient, fetch } = setup();
 
-    expect(await client.decodeStill(media("video", "1234/a1b2c3"), undefined, 500)).toBe(BITMAP);
+    expect(await rule34CdnClient.decodeStill(media("video", "1234/a1b2c3"), undefined, 500)).toBe(BITMAP);
     expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.jpg", { signal: undefined });
   });
 
   test("decodes a still already scaled to the width asked for", async() => {
-    const { client, decodeBitmap } = setup();
+    const { rule34CdnClient, decodeBitmap } = setup();
 
-    await client.decodeStill(media("image", "1234/a1b2c3.png"), undefined, 500);
+    await rule34CdnClient.decodeStill(media("image", "1234/a1b2c3.png"), undefined, 500);
     expect(decodeBitmap).toHaveBeenCalledExactlyOnceWith(expect.any(Blob), { resizeWidth: 500, resizeQuality: "high" });
   });
 
   test("loads an original from its host, decoded", async() => {
     const image = createDecodableImage();
-    const { client, loadImage } = setup(respondWithBytes, createLoadFindingOnly(GIF_ORIGINAL, image));
+    const { rule34CdnClient, loadImage } = setup(respondWithBytes, createLoadFindingOnly(GIF_ORIGINAL, image));
     const signal = new AbortController().signal;
 
-    expect(await client.loadOriginal(media("gif", "1234/a1b2c3"), signal)).toBe(image);
+    expect(await rule34CdnClient.loadOriginal(media("gif", "1234/a1b2c3"), signal)).toBe(image);
     expect(loadImage).toHaveBeenCalledExactlyOnceWith(GIF_ORIGINAL, signal);
     expect(image.decode).toHaveBeenCalledOnce();
   });
 
   test("loads an original from WIMG when its host fails", async() => {
     const image = createDecodableImage();
-    const { client, loadImage } = setup(respondWithBytes, createLoadFindingOnly(GIF_ON_WIMG, image));
+    const { rule34CdnClient, loadImage } = setup(respondWithBytes, createLoadFindingOnly(GIF_ON_WIMG, image));
 
-    expect(await client.loadOriginal(media("gif", "1234/a1b2c3"))).toBe(image);
+    expect(await rule34CdnClient.loadOriginal(media("gif", "1234/a1b2c3"))).toBe(image);
     expect(loadImage.mock.calls.map(([url]) => url)).toEqual([GIF_ORIGINAL, GIF_ON_WIMG]);
   });
 
   test("rejects an aborted original without trying WIMG", async() => {
     const controller = new AbortController();
-    const { client, loadImage } = setup(respondWithBytes, () => {
+    const { rule34CdnClient, loadImage } = setup(respondWithBytes, () => {
       controller.abort();
       return rejectEveryImage();
     });
 
-    await expect(client.loadOriginal(media("gif", "1234/a1b2c3"), controller.signal)).rejects.toThrow("Could not load image");
+    await expect(rule34CdnClient.loadOriginal(media("gif", "1234/a1b2c3"), controller.signal)).rejects.toThrow("Could not load image");
     expect(loadImage).toHaveBeenCalledOnce();
   });
 });

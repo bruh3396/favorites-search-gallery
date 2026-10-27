@@ -26,6 +26,10 @@ export class Rule34Error extends Error {
   }
 }
 
+export function isRule34PageMissing(error: unknown): boolean {
+  return error instanceof Rule34Error && error.reason === "http" && error.status === 404;
+}
+
 export function isRetryableRule34Error(error: unknown): boolean {
   if (!(error instanceof Rule34Error)) {
     return false;

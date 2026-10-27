@@ -17,7 +17,7 @@ interface MutableFetchProgress {
 export interface FavoritesFetcherDependencies {
   localFavorites: LocalFavorites;
   remoteFavorites: Pick<RemoteFavorites, "fetchCount" | "fetchAll">;
-  collection: Pick<FavoritesCollection, "append" | "getAllIds">;
+  collection: Pick<FavoritesCollection, "append" | "getAllPostIds">;
   index: Pick<FavoritesSearchIndex, "add">;
   postLibrary: PostLibrary;
   report: (state: FavoritesLoadState) => void;
@@ -62,8 +62,8 @@ export class FavoritesFetcher {
       progress.isFetching = false;
     }
     report({ phase: "saving" });
-    await localFavorites.setAll([...collection.getAllIds()]);
-    return { pulledCount: 0, removedCount: 0 };
+    await localFavorites.setAll([...collection.getAllPostIds()]);
+    return { newCount: 0, unfavoritedCount: 0 };
   }
 
   private async ingest(posts: readonly Readonly<Post>[]): Promise<readonly Favorite[]> {

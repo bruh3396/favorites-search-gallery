@@ -17,44 +17,44 @@ export class FavoritesActions {
 
   constructor(private readonly configuration: FavoritesActionsConfiguration, private readonly dependencies: FavoritesActionsDependencies) { }
 
-  public async add(id: string): Promise<boolean> {
+  public async add(postId: string): Promise<boolean> {
     if (!this.dependencies.acceptsChanges()) {
       return false;
     }
-    const isAdded = await this.dependencies.remoteFavorites.add(id);
+    const isAdded = await this.dependencies.remoteFavorites.add(postId);
 
     if (isAdded) {
-      this.getSignal(id).value = true;
+      this.getSignal(postId).value = true;
     }
     return isAdded;
   }
 
-  public async remove(id: string): Promise<boolean> {
+  public async remove(postId: string): Promise<boolean> {
     if (!this.dependencies.acceptsChanges()) {
       return false;
     }
-    const isRemoved = await this.dependencies.remoteFavorites.remove(id);
+    const isRemoved = await this.dependencies.remoteFavorites.remove(postId);
 
     if (isRemoved) {
-      this.getSignal(id).value = false;
-      await this.dependencies.localFavorites.remove([id]);
+      this.getSignal(postId).value = false;
+      await this.dependencies.localFavorites.remove([postId]);
     }
     return isRemoved;
   }
 
-  public isFavorited(id: string): boolean {
-    return this.getSignal(id).value;
+  public isFavorited(postId: string): boolean {
+    return this.getSignal(postId).value;
   }
 
-  private getSignal(id: string): Signal<boolean> {
-    const existing = this.favorited.get(id);
+  private getSignal(postId: string): Signal<boolean> {
+    const existing = this.favorited.get(postId);
 
     if (existing !== undefined) {
       return existing;
     }
     const cell = new Signal(this.configuration.favoritedByDefault);
 
-    this.favorited.set(id, cell);
+    this.favorited.set(postId, cell);
     return cell;
   }
 }

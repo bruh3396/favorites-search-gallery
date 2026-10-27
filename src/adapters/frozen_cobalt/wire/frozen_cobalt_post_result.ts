@@ -8,9 +8,9 @@ export type FrozenCobaltPostResult =
   | { readonly status: "ok"; readonly post: FrozenCobaltPost }
   | { readonly status: typeof POST_FAILURE_STATUSES[number]; readonly id: string };
 
-export function parseFrozenCobaltPostResult(value: unknown, id: string): FrozenCobaltPostResult {
+export function parseFrozenCobaltPostResult(value: unknown, postId: string): FrozenCobaltPostResult {
   if (!isPostResult(value)) {
-    throw new FrozenCobaltError("malformed", { subject: id });
+    throw new FrozenCobaltError("malformed", { subject: postId });
   }
   return value;
 }

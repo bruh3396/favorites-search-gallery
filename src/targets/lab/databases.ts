@@ -16,10 +16,10 @@ const CORPUS_OWNER_ID = "corpus";
 const RESET_FLAG = `${LAB_NAMESPACE}-reset`;
 const WRITE_BATCH_SIZE = 10_000;
 
-const indexedDb = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
-const localPosts = new IndexedDbLocalPosts(indexedDb);
-const labFavorites = new IndexedDbLocalFavorites({ ownerId: LAB_OWNER_ID }, indexedDb);
-const corpusOrder = new IndexedDbLocalFavorites({ ownerId: CORPUS_OWNER_ID }, indexedDb);
+const indexedDbClient = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+const localPosts = new IndexedDbLocalPosts(indexedDbClient);
+const labFavorites = new IndexedDbLocalFavorites({ ownerId: LAB_OWNER_ID }, indexedDbClient);
+const corpusOrder = new IndexedDbLocalFavorites({ ownerId: CORPUS_OWNER_ID }, indexedDbClient);
 
 export async function readCorpusSize(): Promise<number> {
   return (await corpusOrder.getAll()).length;
@@ -65,7 +65,7 @@ export async function pickCorpusFile(): Promise<File | null> {
 }
 
 export async function importCorpus(file: File, onProgress: (count: number) => void): Promise<void> {
-  const ids: string[] = [];
+  const postIds: string[] = [];
   let batch: Post[] = [];
 
   for await (const line of readLines(file)) {
@@ -74,17 +74,17 @@ export async function importCorpus(file: File, onProgress: (count: number) => vo
     }
 
     if (batch.length === WRITE_BATCH_SIZE) {
-      ids.push(...await writePosts(batch));
+      postIds.push(...await writePosts(batch));
       batch = [];
-      onProgress(ids.length);
+      onProgress(postIds.length);
     }
   }
-  ids.push(...await writePosts(batch));
-  await writeCorpusOrder(ids);
+  postIds.push(...await writePosts(batch));
+  await writeCorpusOrder(postIds);
 }
 
 export async function pullCorpus(onProgress: (count: number) => void): Promise<void> {
-  const ids: string[] = [];
+  const postIds: string[] = [];
   let nextPage: Promise<CachePage> | null = fetchCachePage(0);
 
   while (nextPage !== null) {
@@ -99,22 +99,22 @@ export async function pullCorpus(onProgress: (count: number) => void): Promise<v
       }
     });
 
-    ids.push(...await writePosts(posts));
-    onProgress(ids.length);
+    postIds.push(...await writePosts(posts));
+    onProgress(postIds.length);
   }
-  await writeCorpusOrder(ids.sort((a, b) => Number(b) - Number(a)));
+  await writeCorpusOrder(postIds.sort((a, b) => Number(b) - Number(a)));
 }
 
 export async function exportCorpus(): Promise<number> {
-  const ids = await corpusOrder.getAll();
+  const postIds = await corpusOrder.getAll();
   const parts: string[] = [];
 
-  for (let start = 0; start < ids.length; start += WRITE_BATCH_SIZE) {
-    const chunk = ids.slice(start, start + WRITE_BATCH_SIZE);
+  for (let start = 0; start < postIds.length; start += WRITE_BATCH_SIZE) {
+    const chunk = postIds.slice(start, start + WRITE_BATCH_SIZE);
     const postsById = new Map((await localPosts.getMany(chunk)).map(post => [post.id, post]));
 
-    for (const id of chunk) {
-      const post = postsById.get(id);
+    for (const postId of chunk) {
+      const post = postsById.get(postId);
 
       if (post !== undefined) {
         parts.push(`${JSON.stringify(post)}\n`);
@@ -134,9 +134,9 @@ async function writePosts(posts: readonly Post[]): Promise<string[]> {
   return posts.map(post => post.id);
 }
 
-async function writeCorpusOrder(ids: readonly string[]): Promise<void> {
-  await corpusOrder.setAll(ids);
-  await labFavorites.setAll(ids);
+async function writeCorpusOrder(postIds: readonly string[]): Promise<void> {
+  await corpusOrder.setAll(postIds);
+  await labFavorites.setAll(postIds);
 }
 
 async function *readLines(file: File): AsyncGenerator<string> {

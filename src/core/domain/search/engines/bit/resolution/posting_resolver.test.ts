@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
-import { Metric } from "@/core/domain/post/metric";
+import { Metric } from "@/core/domain/search/metric";
 import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";

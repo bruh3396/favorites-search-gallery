@@ -5,7 +5,7 @@ import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { decodeFrozenCobaltTagCategory } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 
 export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {
-  constructor(private readonly frozenCobalt: Pick<FrozenCobaltClient, "fetchTagCategory">) { }
+  constructor(private readonly frozenCobaltClient: Pick<FrozenCobaltClient, "fetchTagCategory">) { }
 
   public async fetch(tagNames: readonly string[]): Promise<ReadonlyMap<string, TagCategory>> {
     const settled = await Promise.allSettled(tagNames.map(tagName => this.fetchCategory(tagName)));
@@ -13,7 +13,7 @@ export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {
   }
 
   private async fetchCategory(tagName: string): Promise<[string, TagCategory]> {
-    const result = await this.frozenCobalt.fetchTagCategory(tagName);
+    const result = await this.frozenCobaltClient.fetchTagCategory(tagName);
 
     if (result.status === "rate_limited") {
       throw new FrozenCobaltError("rate_limited", { subject: tagName });

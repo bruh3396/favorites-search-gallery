@@ -80,7 +80,7 @@ export function FavoritesApp({
           stripVisible={favoritesPreferences.tabStripVisible}
           trailing={<StatusText text={favoritesService.loadStatus} />}
           onAdd={() => workspace.openBlankTab()}
-          onClose={id => workspace.closeTab(id)}
+          onClose={tabId => workspace.closeTab(tabId)}
           onCloseAll={() => workspace.closeAllTabs()}
         />
       </main>

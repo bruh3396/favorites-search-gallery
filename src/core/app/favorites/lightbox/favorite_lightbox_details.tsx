@@ -68,7 +68,7 @@ function FavoriteLightboxTitle({ favorite, clipboard, scheduler, copiedDuration,
   return (
     <div className={FavoriteLightboxDetailsClass.title}>
       <h2 className={FavoriteLightboxDetailsClass.id}>
-        <CopyIdButton id={computed(() => favorite.value?.id)} clipboard={clipboard} scheduler={scheduler} copiedDuration={copiedDuration} />
+        <CopyIdButton postId={computed(() => favorite.value?.id)} clipboard={clipboard} scheduler={scheduler} copiedDuration={copiedDuration} />
       </h2>
       <LightboxButton icon="tune" label="View settings" pressed={viewOpen} onClick={() => {
         viewOpen.value = !viewOpen.value;

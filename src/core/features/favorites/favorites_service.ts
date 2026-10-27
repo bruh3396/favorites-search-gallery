@@ -17,6 +17,7 @@ import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { StringInterner } from "@/core/utils/string/string_interner";
@@ -34,6 +35,7 @@ export interface FavoritesServiceDependencies {
   remoteFavorites: RemoteFavorites;
   remotePosts: RemotePosts;
   remoteMedia: RemoteMedia;
+  remotePages: Pick<RemotePages, "postExists">;
   scheduler: Scheduler;
   randomSource: RandomSource;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
@@ -46,7 +48,7 @@ export interface FavoritesService {
   readonly loadStatus: Readable<string>;
   readonly searchable: Fact;
   createSession: (configuration: FavoritesSessionConfiguration) => FavoritesSession;
-  isFavorited: (id: string) => boolean;
+  isFavorited: (postId: string) => boolean;
   countFavoritesWithTag: (tag: string) => number;
   load: () => Promise<void>;
 }
@@ -74,7 +76,7 @@ export function createFavoritesService(configuration: FavoritesServiceConfigurat
       randomSource: dependencies.randomSource,
       favoritesPaginationPreferences: dependencies.favoritesPaginationPreferences
     }),
-    isFavorited: id => actions.isFavorited(id),
+    isFavorited: postId => actions.isFavorited(postId),
     countFavoritesWithTag: tag => searchIndex.countFavoritesWithTag(tag),
     load: async(): Promise<void> => {
       await loader.load();
