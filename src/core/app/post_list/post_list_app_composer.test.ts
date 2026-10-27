@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/memory_file_saver";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
@@ -31,7 +32,8 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remotePostList,
     localKeyedValues,
     navigator: new MemoryNavigator(),
-    fileSaver: new MemoryFileSaver()
+    fileSaver: new MemoryFileSaver(),
+    hostPage: new MemoryHostPage()
   }).mount(container);
   return container.shadowRoot!;
 }
@@ -47,7 +49,7 @@ describe("composePostListApp", () => {
   test("lays the grid out in the layout kept in the post list preferences, not the favorites'", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { grid: { layout: "row" } }, favorites: { grid: { layout: "square" } } } });
+    localKeyedValues.set("favorites-search-gallery:preferences", { postList: { grid: { layout: "row" } }, favorites: { grid: { layout: "square" } } });
     expect(mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}`)!.dataset.layout).toBe("row");
   });
 
@@ -55,7 +57,7 @@ describe("composePostListApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const click = new MouseEvent("click", { bubbles: true, cancelable: true });
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { lightbox: { mode: "off" } } } });
+    localKeyedValues.set("favorites-search-gallery:preferences", { postList: { lightbox: { mode: "off" } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" })]);
 
     root.querySelector(`.${TileClass.link}`)!.dispatchEvent(click);

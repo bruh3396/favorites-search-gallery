@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Media } from "@/core/domain/media/media";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
-import { parsePostPage } from "@/adapters/rule34/client/post_page";
+import { parseRule34PostPage } from "@/adapters/rule34/client/rule34_post_page_parser";
 
 const IMAGE_SOURCE = "https://us.rule34.xxx//images/1234/a1b2c3.png?42";
 const VIDEO_SOURCE = "https://us.rule34.xxx//images/1234/a1b2c3.mp4?42";
@@ -32,10 +32,10 @@ function createPostPage(size: string, file: string = IMAGE, tags: string = ALICE
 }
 
 function parsePostPageHtml(html: string): CategorizedPost {
-  return parsePostPage(html, mintMedia);
+  return parseRule34PostPage(html, mintMedia);
 }
 
-describe("parsePostPage", () => {
+describe("parseRule34PostPage", () => {
   test("reads a deleted post and its tag categories", () => {
     const { post, tagCategories } = parsePostPageHtml(createPostPage("1920x1080"));
 
@@ -45,7 +45,7 @@ describe("parsePostPage", () => {
       height: 1_080,
       score: 7,
       rating: "explicit",
-      deleted: true,
+      status: "deleted",
       tags: "alice"
     });
     expect(tagCategories).toEqual(new Map([["alice", "character"]]));

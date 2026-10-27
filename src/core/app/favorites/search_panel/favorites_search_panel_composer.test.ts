@@ -40,7 +40,7 @@ interface Setup {
 
 function setup(posts: Post[] = []): Setup {
   const index = new FavoritesSearchIndex(new StringInterner());
-  const preferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
+  const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
     observe: element => {
@@ -53,20 +53,20 @@ function setup(posts: Post[] = []): Setup {
   const open = vi.fn<(sequence: unknown, favorite: Favorite) => boolean>(() => true);
   const enterZen = vi.fn<() => void>();
 
-  preferences.pageSize.set(2);
+  favoritesPreferences.pagination.pageSize.set(2);
   index.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
   const session = new FavoritesSession({ settings: buildFavoritesSearchSettings() }, {
     searchIndex: index,
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
-    paginationPreferences: preferences
+    favoritesPaginationPreferences: favoritesPreferences.pagination
   });
 
   session.start();
   const scheduler = new MemoryScheduler();
   const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(session), {
-    favorites: { loadState: new Signal<FavoritesLoadState>({ phase: "starting" }), searchable: new Milestone(), hydrated: new Emitter<Favorite>() },
-    preferences,
+    favoritesService: { loadState: new Signal<FavoritesLoadState>({ phase: "starting" }), searchable: new Milestone(), hydrated: new Emitter<Favorite>() },
+    favoritesPreferences,
     tabCount: new Signal(1),
     favoriteSizeRecorder: { sizes: [] },
     visibilityObserver,

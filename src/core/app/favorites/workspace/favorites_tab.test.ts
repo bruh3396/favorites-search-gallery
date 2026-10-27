@@ -15,7 +15,7 @@ function setup(): FavoritesTab {
     searchIndex: new FavoritesSearchIndex(new StringInterner()),
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
-    paginationPreferences: createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites
+    favoritesPaginationPreferences: createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination
   }));
 }
 

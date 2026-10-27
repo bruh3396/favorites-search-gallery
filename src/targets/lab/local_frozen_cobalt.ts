@@ -1,4 +1,4 @@
-import { FrozenCobaltPost, isPost } from "@/adapters/frozen_cobalt/client/schema";
+import { FrozenCobaltPost, isFrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
 import { isRecord } from "@/core/utils/guard/guard";
 
 export interface CachePage {
@@ -17,7 +17,7 @@ export async function fetchCachePage(after: number): Promise<CachePage> {
   }
   const page: unknown = await response.json();
 
-  if (!isRecord(page) || !Array.isArray(page.posts) || !page.posts.every(isPost) || !(page.next === null || typeof page.next === "number")) {
+  if (!isRecord(page) || !Array.isArray(page.posts) || !page.posts.every(isFrozenCobaltPost) || !(page.next === null || typeof page.next === "number")) {
     throw new Error("Local Frozen Cobalt sent a malformed page");
   }
   return { posts: page.posts, next: page.next };

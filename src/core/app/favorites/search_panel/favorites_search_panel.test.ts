@@ -47,7 +47,7 @@ function setup(): Setup {
   const skeleton = document.createElement("div");
   const grid = document.createElement("div");
   const trailing = document.createElement("button");
-  const favorites = { loadState, searchable };
+  const favoritesService = { loadState, searchable };
   const session = {
     query: computed(() => settings.value.query),
     isFiltered: computed(() => filtersFavorites(settings.value)),
@@ -59,7 +59,7 @@ function setup(): Setup {
     submit
   };
   const { result: element, dispose } = render(document, () => h(FavoritesSearchPanel, {
-    favorites,
+    favoritesService,
     session,
     focusSearch: new Emitter<void>(),
     trailing,

@@ -1,6 +1,8 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
-import { FrozenCobaltPost, FrozenCobaltPostResult } from "@/adapters/frozen_cobalt/client/schema";
+import { PostStatus } from "@/core/domain/post/post_status";
+import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
+import { FrozenCobaltPostResult } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post_result";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";
@@ -36,7 +38,7 @@ function setup(...results: FrozenCobaltPostResult[]): Setup {
 
 async function fetchRemotePost(
   { remotePosts, scheduler }: Setup,
-  post: Pick<Post, "id" | "deleted">
+  post: Pick<Post, "id" | "status">
 ): Promise<CategorizedPost> {
   const fetched = remotePosts.fetch(post);
 
@@ -50,28 +52,28 @@ describe("FrozenCobaltRemotePosts", () => {
     const bundle = setup({ status: "ok", post: createFrozenCobaltPost("1") });
     const media = { kind: "image", locator: "https://example.com/1.png" };
 
-    expect((await fetchRemotePost(bundle, { id: "1" })).post).toMatchObject({ id: "1", width: 10, media });
+    expect((await fetchRemotePost(bundle, { id: "1", status: "active" })).post).toMatchObject({ id: "1", width: 10, media });
   });
 
   test("rejects at once a post whose file can't be minted", async() => {
     const post = { ...createFrozenCobaltPost("1"), fileURL: "https://example.com/1.webm" };
     const bundle = setup({ status: "ok", post });
 
-    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toMatchObject({ reason: "unknown_file" });
+    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toMatchObject({ reason: "unknown_file" });
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledOnce();
   });
 
   test("rejects at once as unavailable a post Frozen Cobalt reports deleted", async() => {
     const bundle = setup({ status: "deleted", id: "1" });
 
-    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toEqual(new PostUnavailableError("1"));
+    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toEqual(new PostUnavailableError("1"));
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledOnce();
   });
 
-  test("rejects as unavailable without asking a post already marked deleted", async() => {
+  test.each<PostStatus>(["deleted", "purged"])("rejects as unavailable without asking a post already marked %s", async status => {
     const bundle = setup({ status: "ok", post: createFrozenCobaltPost("1") });
 
-    await expect(fetchRemotePost(bundle, { id: "1", deleted: true })).rejects.toEqual(new PostUnavailableError("1"));
+    await expect(fetchRemotePost(bundle, { id: "1", status })).rejects.toEqual(new PostUnavailableError("1"));
     expect(bundle.frozenCobalt.fetchPost).not.toHaveBeenCalled();
   });
 
@@ -80,7 +82,7 @@ describe("FrozenCobaltRemotePosts", () => {
 
     bundle.frozenCobalt.fetchPost.mockRejectedValueOnce(new FrozenCobaltError("malformed", { subject: "1" }));
 
-    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toMatchObject({ reason: "malformed" });
+    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toMatchObject({ reason: "malformed" });
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledOnce();
   });
 
@@ -91,20 +93,20 @@ describe("FrozenCobaltRemotePosts", () => {
   ])("asks again after a $status result", async result => {
     const bundle = setup(result, { status: "ok", post: createFrozenCobaltPost("1") });
 
-    expect((await fetchRemotePost(bundle, { id: "1" })).post.id).toBe("1");
+    expect((await fetchRemotePost(bundle, { id: "1", status: "active" })).post.id).toBe("1");
     expect(bundle.frozenCobalt.fetchPost).toHaveBeenCalledTimes(2);
   });
 
   test("rejects a result of an unknown status", async() => {
     const bundle = setup({ status: "bogus" } as unknown as FrozenCobaltPostResult);
 
-    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toThrow("Unexpected value");
+    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toThrow("Unexpected value");
   });
 
   test("retries a server error, then rejects when Frozen Cobalt keeps failing", async() => {
     const bundle = setup();
 
-    await expect(fetchRemotePost(bundle, { id: "1" })).rejects.toMatchObject({ reason: "server_error" });
+    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toMatchObject({ reason: "server_error" });
     expect(bundle.frozenCobalt.fetchPost.mock.calls.length).toBeGreaterThan(1);
   });
 });

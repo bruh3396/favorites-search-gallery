@@ -1,5 +1,5 @@
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page";
+import { RULE34_FAVORITES_PER_PAGE } from "@/adapters/rule34/client/rule34_url_builder";
 import { Post } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Retry } from "@/core/utils/async/retry";
@@ -9,7 +9,7 @@ import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/rule34_favorite_actions";
 import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
 import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_new_favorites_finder";
-import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_removed_favorites_finder";
+import { Rule34MissingFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_missing_favorites_finder";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
@@ -57,8 +57,8 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
     return this.dependencies.rule34.prioritizeFavorites(() => this.createNewFavoritesFinder().findNew(localIds, this.takeFirstPageFavorites()));
   }
 
-  public findRemoved(localIds: readonly string[], remoteStart: number): Promise<string[]> {
-    return this.dependencies.rule34.prioritizeFavorites(() => this.createRemovedFavoritesFinder().findRemoved(localIds, remoteStart));
+  public findMissing(localIds: readonly string[], remoteStart: number): Promise<string[]> {
+    return this.dependencies.rule34.prioritizeFavorites(() => this.createMissingFavoritesFinder().findMissing(localIds, remoteStart));
   }
 
   public async add(id: string): Promise<boolean> {
@@ -88,14 +88,14 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   }
 
   private createNewFavoritesFinder(): Rule34NewFavoritesFinder {
-    return new Rule34NewFavoritesFinder({ pageSize: FAVORITES_PER_PAGE, minimumLocalRunLength: MINIMUM_LOCAL_RUN_LENGTH, fetchDelay: FETCH_DELAY }, {
+    return new Rule34NewFavoritesFinder({ pageSize: RULE34_FAVORITES_PER_PAGE, minimumLocalRunLength: MINIMUM_LOCAL_RUN_LENGTH, fetchDelay: FETCH_DELAY }, {
       fetch: (pageIndex): Promise<Post[]> => this.retry.retry(() => this.fetch(pageIndex)),
       scheduler: this.dependencies.scheduler
     });
   }
 
-  private createRemovedFavoritesFinder(): Rule34RemovedFavoritesFinder {
-    return new Rule34RemovedFavoritesFinder({ pageSize: FAVORITES_PER_PAGE, fetchDelay: FETCH_DELAY }, {
+  private createMissingFavoritesFinder(): Rule34MissingFavoritesFinder {
+    return new Rule34MissingFavoritesFinder({ pageSize: RULE34_FAVORITES_PER_PAGE, fetchDelay: FETCH_DELAY }, {
       fetch: (pageIndex): Promise<Post[]> => this.retry.retry(() => this.fetch(pageIndex)),
       scheduler: this.dependencies.scheduler
     });

@@ -1,9 +1,12 @@
-import { FrozenCobaltEndpoints, FrozenCobaltPostResult, FrozenCobaltTagResult, parseBatch, parsePostResult, parseTagResult } from "@/adapters/frozen_cobalt/client/schema";
+import { FrozenCobaltPostResult, parseFrozenCobaltPostResult } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post_result";
+import { FrozenCobaltTagResult, parseFrozenCobaltTagResult } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_result";
 import { CoalescingResolver } from "@/core/utils/async/coalescing_resolver";
+import { FrozenCobaltEndpoints } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_endpoints";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 import { FrozenCobaltIdentity } from "@/adapters/frozen_cobalt/client/frozen_cobalt_identity";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { isRecord } from "@/core/utils/guard/guard";
 
 export interface FrozenCobaltClientConfiguration {
   readonly origin: string;
@@ -56,11 +59,11 @@ export class FrozenCobaltClient {
   }
 
   public async fetchPost(id: string): Promise<FrozenCobaltPostResult> {
-    return parsePostResult(await this.postResolver.schedule(id), id);
+    return parseFrozenCobaltPostResult(await this.postResolver.schedule(id), id);
   }
 
   public async fetchTagCategory(tagName: string): Promise<FrozenCobaltTagResult> {
-    return parseTagResult(await this.tagResolver.schedule(tagName), tagName);
+    return parseFrozenCobaltTagResult(await this.tagResolver.schedule(tagName), tagName);
   }
 
   private async requestBatch<E extends FrozenCobaltEndpoint>(
@@ -97,4 +100,19 @@ export class FrozenCobaltClient {
       cancelTimeout();
     }
   }
+}
+
+function parseBatch(text: string): Record<string, unknown> {
+  let parsed: unknown;
+
+  try {
+    parsed = JSON.parse(text);
+  } catch (cause) {
+    throw new FrozenCobaltError("malformed", { cause });
+  }
+
+  if (!isRecord(parsed)) {
+    throw new FrozenCobaltError("malformed");
+  }
+  return parsed;
 }

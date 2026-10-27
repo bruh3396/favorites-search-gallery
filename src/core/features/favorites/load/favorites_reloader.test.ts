@@ -58,7 +58,7 @@ async function setup({ local, remote, unstoredIds = [], stored = [], paint = Pro
   });
   const reloader = new FavoritesReloader({
     collection,
-    index,
+    searchIndex: index,
     localFavorites,
     remoteFavorites,
     postLibrary,
@@ -215,7 +215,7 @@ describe("FavoritesReloader", () => {
     test("keeps the pulled membership when pruning fails", async() => {
       const { reloader, localFavorites, remoteFavorites, localIds } = await setup({ local: createPosts("1"), remote: createPosts("2", "1") });
 
-      vi.spyOn(remoteFavorites, "findRemoved").mockRejectedValue(new Error("refused"));
+      vi.spyOn(remoteFavorites, "findMissing").mockRejectedValue(new Error("refused"));
       await expect(reloader.reload(localIds)).rejects.toThrow("refused");
       expect(await localFavorites.getAll()).toEqual(["2", "1"]);
     });

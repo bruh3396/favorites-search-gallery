@@ -11,7 +11,7 @@ export interface FallbackRemotePostsDependencies {
 export class FallbackRemotePosts implements RemotePosts {
   constructor(private readonly dependencies: FallbackRemotePostsDependencies) { }
 
-  public fetch(post: Readonly<Pick<Post, "id" | "deleted">>): Promise<CategorizedPost> {
+  public fetch(post: Readonly<Pick<Post, "id" | "status">>): Promise<CategorizedPost> {
     return this.dependencies.primary.fetch(post).catch((error: unknown) => {
       if (!(error instanceof PostUnavailableError)) {
         throw error;

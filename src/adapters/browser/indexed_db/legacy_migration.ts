@@ -1,5 +1,6 @@
 import { LegacyDatabaseNames } from "@/adapters/browser/indexed_db/legacy_database_names";
 import { Media } from "@/core/domain/media/media";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 import { Post } from "@/core/domain/post/post";
 import { Rating } from "@/core/domain/post/rating";
 
@@ -35,8 +36,6 @@ interface LegacyData {
   readonly tagCategories: LegacyTagCategory[];
 }
 
-export type LegacyMintMedia = (file: { url: string; tags: string }) => Media | null;
-
 export interface LegacyMigration {
   writeToNewDatabase: (transaction: IDBTransaction) => void;
   deleteLegacyDatabases: () => void;
@@ -50,7 +49,7 @@ const NO_MIGRATION: LegacyMigration = {
 export async function prepareLegacyMigration(
   newDatabaseName: string,
   legacyDatabaseNames: LegacyDatabaseNames | null,
-  mintMedia: LegacyMintMedia
+  mintMedia: MediaMinter
 ): Promise<LegacyMigration> {
   if (legacyDatabaseNames === null) {
     return NO_MIGRATION;
@@ -131,7 +130,7 @@ function readDatabase(name: string): Promise<Map<string, unknown[]>> {
   });
 }
 
-function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedia: LegacyMintMedia): void {
+function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedia: MediaMinter): void {
   const posts = transaction.objectStore("posts");
   const favorites = transaction.objectStore("favorites");
   const tagCategories = transaction.objectStore("tagCategories");
@@ -168,7 +167,7 @@ function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): 
   };
 }
 
-function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | null {
+function convertPost(legacy: LegacyPost, mintMedia: MediaMinter): Post | null {
   const media = mintLegacyMedia(legacy, mintMedia);
 
   if (media === null) {
@@ -184,12 +183,12 @@ function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | nul
     media,
     tags: legacy.tags,
     ...(legacy.duration === undefined ? {} : { durationSeconds: legacy.duration }),
-    ...(legacy.deleted === undefined ? {} : { deleted: legacy.deleted }),
+    status: legacy.deleted === true ? "deleted" : "active",
     ...(legacy.fetchedAt === undefined ? {} : { fetchedAt: legacy.fetchedAt })
   };
 }
 
-function mintLegacyMedia({ fileURL, previewURL = "", extension = "", tags }: LegacyPost, mintMedia: LegacyMintMedia): Media | null {
+function mintLegacyMedia({ fileURL, previewURL = "", extension = "", tags }: LegacyPost, mintMedia: MediaMinter): Media | null {
   const media = mintMedia({ url: fileURL, tags }) ?? mintMedia({ url: expandCompressedPreview(previewURL), tags });
 
   if (media === null || media.locator.includes(".")) {

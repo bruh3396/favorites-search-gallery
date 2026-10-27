@@ -17,7 +17,7 @@ import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_p
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
-import { Media } from "@/core/domain/media/media";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media";
@@ -46,7 +46,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
   const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
-  const mintMedia = (file: { url: string; tags: string }): Media | null => rule34Cdn.mintMedia(file);
+  const mintMedia: MediaMinter = file => rule34Cdn.mintMedia(file);
   const rule34Document = {
     isFirstFavoritesPage: (): boolean => false,
     keepPaginator: (): void => { },

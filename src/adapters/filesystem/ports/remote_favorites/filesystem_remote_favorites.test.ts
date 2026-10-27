@@ -36,7 +36,7 @@ describe("FilesystemRemoteFavorites", () => {
   });
 
   test("finds the local ids that have no post file, in local order", async() => {
-    expect(await createRemoteFavorites(["3", 3], ["1", 1]).findRemoved(["4", "3", "2", "1"])).toEqual(["4", "2"]);
+    expect(await createRemoteFavorites(["3", 3], ["1", 1]).findMissing(["4", "3", "2", "1"])).toEqual(["4", "2"]);
   });
 
   test("deletes the post's file on remove", async() => {

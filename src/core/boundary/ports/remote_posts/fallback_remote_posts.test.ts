@@ -5,7 +5,7 @@ import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/post_unavailable_error";
 import { createPost } from "@/testing/post";
 
-type Fetch = Mock<(post: Pick<Post, "id" | "deleted">) => Promise<CategorizedPost>>;
+type Fetch = Mock<(post: Pick<Post, "id" | "status">) => Promise<CategorizedPost>>;
 
 function createFetch(width: number): Fetch {
   return vi.fn(({ id }: Pick<Post, "id">) => Promise.resolve({ post: createPost({ id, width }), tagCategories: new Map() }));
@@ -21,7 +21,7 @@ describe("FallbackRemotePosts", () => {
   test("delivers the primary's post", async() => {
     const { remotePosts, fallback } = setup();
 
-    expect((await remotePosts.fetch({ id: "1" })).post.width).toBe(1);
+    expect((await remotePosts.fetch({ id: "1", status: "active" })).post.width).toBe(1);
     expect(fallback).not.toHaveBeenCalled();
   });
 
@@ -30,8 +30,8 @@ describe("FallbackRemotePosts", () => {
 
     primary.mockRejectedValueOnce(new PostUnavailableError("1"));
 
-    expect((await remotePosts.fetch({ id: "1", deleted: true })).post.width).toBe(2);
-    expect(fallback).toHaveBeenCalledWith({ id: "1", deleted: true });
+    expect((await remotePosts.fetch({ id: "1", status: "deleted" })).post.width).toBe(2);
+    expect(fallback).toHaveBeenCalledWith({ id: "1", status: "deleted" });
   });
 
   test("passes on any other failure without asking the fallback", async() => {
@@ -39,7 +39,7 @@ describe("FallbackRemotePosts", () => {
 
     primary.mockRejectedValueOnce(new Error("down"));
 
-    await expect(remotePosts.fetch({ id: "1" })).rejects.toThrow("down");
+    await expect(remotePosts.fetch({ id: "1", status: "active" })).rejects.toThrow("down");
     expect(fallback).not.toHaveBeenCalled();
   });
 
@@ -49,6 +49,6 @@ describe("FallbackRemotePosts", () => {
     primary.mockRejectedValueOnce(new PostUnavailableError("1"));
     fallback.mockRejectedValueOnce(new Error("post page has no file"));
 
-    await expect(remotePosts.fetch({ id: "1" })).rejects.toThrow("post page has no file");
+    await expect(remotePosts.fetch({ id: "1", status: "active" })).rejects.toThrow("post page has no file");
   });
 });

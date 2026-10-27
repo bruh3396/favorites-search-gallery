@@ -1,4 +1,4 @@
-import { postListPageIndex, postListPageOffset } from "@/adapters/rule34/client/post_list_page";
+import { rule34PostListPageIndex, rule34PostListPageOffset } from "@/adapters/rule34/client/rule34_url_builder";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 
@@ -50,7 +50,7 @@ export class Rule34Document {
   }
 
   public readPostListPageIndex(): number {
-    return postListPageIndex(readPageOffset());
+    return rule34PostListPageIndex(readPageOffset());
   }
 
   public readUserId(): string {
@@ -102,7 +102,7 @@ export class Rule34Document {
     if (paginator !== undefined) {
       replacePaginator(paginator);
     }
-    setPageOffset(postListPageOffset(pageIndex));
+    setPageOffset(rule34PostListPageOffset(pageIndex));
   }
 
   public clearNativePage(): void {

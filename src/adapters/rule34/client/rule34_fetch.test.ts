@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { request, send } from "@/adapters/rule34/client/rule34_fetch";
+import { sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_fetch";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 
 const URL = "https://rule34.xxx/index.php";
@@ -12,26 +12,26 @@ function failNetwork(): Promise<Response> {
   return Promise.reject(new TypeError("offline"));
 }
 
-describe("send", () => {
+describe("sendRule34Request", () => {
   test("hands back any response the host gives", async() => {
-    expect((await send(respondWith(404), URL)).status).toBe(404);
+    expect((await sendRule34Request(respondWith(404), URL)).status).toBe(404);
   });
 
   test("names a network failure", async() => {
-    await expect(send(failNetwork, URL)).rejects.toMatchObject({ reason: "network", subject: URL });
+    await expect(sendRule34Request(failNetwork, URL)).rejects.toMatchObject({ reason: "network", subject: URL });
   });
 });
 
-describe("request", () => {
+describe("sendOkRule34Request", () => {
   test("hands back an ok response", async() => {
-    expect(await (await request(respondWith(200), URL)).text()).toBe("body");
+    expect(await (await sendOkRule34Request(respondWith(200), URL)).text()).toBe("body");
   });
 
   test("names a refused response by its status", async() => {
-    await expect(request(respondWith(503), URL)).rejects.toMatchObject({ reason: "http", status: 503 });
+    await expect(sendOkRule34Request(respondWith(503), URL)).rejects.toMatchObject({ reason: "http", status: 503 });
   });
 
   test("names a network failure", async() => {
-    await expect(request(failNetwork, URL)).rejects.toBeInstanceOf(Rule34Error);
+    await expect(sendOkRule34Request(failNetwork, URL)).rejects.toBeInstanceOf(Rule34Error);
   });
 });

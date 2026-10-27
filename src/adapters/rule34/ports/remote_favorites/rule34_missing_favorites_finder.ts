@@ -1,12 +1,12 @@
 import { Post } from "@/core/domain/post/post";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
-export interface Rule34RemovedFavoritesFinderConfiguration {
+export interface Rule34MissingFavoritesFinderConfiguration {
   readonly pageSize: number;
   readonly fetchDelay: number;
 }
 
-export interface Rule34RemovedFavoritesFinderDependencies {
+export interface Rule34MissingFavoritesFinderDependencies {
   fetch: (pageIndex: number) => Promise<Post[]>;
   scheduler: Pick<Scheduler, "sleep">;
 }
@@ -28,25 +28,25 @@ interface Checkpoint {
   readonly removedAbove: number;
 }
 
-export class Rule34RemovedFavoritesFinder {
+export class Rule34MissingFavoritesFinder {
   constructor(
-    private readonly configuration: Rule34RemovedFavoritesFinderConfiguration,
-    private readonly dependencies: Rule34RemovedFavoritesFinderDependencies
+    private readonly configuration: Rule34MissingFavoritesFinderConfiguration,
+    private readonly dependencies: Rule34MissingFavoritesFinderDependencies
   ) { }
 
-  public async findRemoved(localIds: readonly string[], remoteStart: number): Promise<string[]> {
+  public async findMissing(localIds: readonly string[], remoteStart: number): Promise<string[]> {
     if (localIds.length === 0) {
       return [];
     }
     const localList = { ids: localIds, indexById: new Map(localIds.map((id, index) => [id, index])), remoteStart };
     const localListStart = this.createLocalListStart(localList);
     const remoteEnd = this.createCheckpoint(localList, await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localIds.length - 1)));
-    const removedBeforeRemoteEnd = await this.findRemovedBetween(localList, localListStart, remoteEnd);
+    const removedBeforeRemoteEnd = await this.findMissingBetween(localList, localListStart, remoteEnd);
     const removedAfterRemoteEnd = localIds.slice(remoteEnd.localIndex + 1);
     return [...removedBeforeRemoteEnd, ...removedAfterRemoteEnd];
   }
 
-  private async findRemovedBetween(localList: LocalList, top: Checkpoint, bottom: Checkpoint): Promise<string[]> {
+  private async findMissingBetween(localList: LocalList, top: Checkpoint, bottom: Checkpoint): Promise<string[]> {
     if (top.removedAbove === bottom.removedAbove) {
       return [];
     }
@@ -55,7 +55,7 @@ export class Rule34RemovedFavoritesFinder {
       return localList.ids.slice(top.localIndex + 1, bottom.localIndex + 1).filter(id => !bottom.page.ids.includes(id));
     }
     const middle = this.createCheckpoint(localList, await this.fetchPageAfterDelay(Math.floor((top.page.index + bottom.page.index) / 2)));
-    return [...await this.findRemovedBetween(localList, top, middle), ...await this.findRemovedBetween(localList, middle, bottom)];
+    return [...await this.findMissingBetween(localList, top, middle), ...await this.findMissingBetween(localList, middle, bottom)];
   }
 
   private createLocalListStart(localList: LocalList): Checkpoint {

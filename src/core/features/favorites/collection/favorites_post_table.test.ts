@@ -1,3 +1,4 @@
+import { POST_STATUSES } from "@/core/domain/post/post_status";
 import { RATINGS } from "@/core/domain/post/rating";
 import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
@@ -43,7 +44,8 @@ describe("FavoritesPostTable", () => {
         rating: "safe",
         changedAt: 123,
         durationSeconds: 30,
-        media: { kind: "video", locator: "7/a" }
+        media: { kind: "video", locator: "7/a" },
+        status: "deleted"
       });
 
       table.write(0, post);
@@ -64,6 +66,15 @@ describe("FavoritesPostTable", () => {
 
       table.write(0, createPost({ id: "1", rating }));
       expect(table.getRating(0)).toBe(rating);
+    });
+  });
+
+  describe("getStatus", () => {
+    test.each(POST_STATUSES)("round-trips %s", status => {
+      const table = new FavoritesPostTable();
+
+      table.write(0, createPost({ id: "1", status }));
+      expect(table.getStatus(0)).toBe(status);
     });
   });
 

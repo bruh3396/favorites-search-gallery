@@ -8,7 +8,8 @@ import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_b
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { StringInterner } from "@/core/utils/string/string_interner";
@@ -24,14 +25,14 @@ interface Setup {
 }
 
 function createWorkspace(): FavoritesWorkspace {
-  const paginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
+  const favoritesPaginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination;
   const searchIndex = new FavoritesSearchIndex(new StringInterner());
-  return new FavoritesWorkspace({ favoritesOwnerId: "1" }, {
-    storage: new MemoryLocalKeyedValues(),
+  return new FavoritesWorkspace({
+    storedSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage: new MemoryLocalKeyedValues() }),
     createSession: (settings): FavoritesSession => new FavoritesSession({ settings }, {
       searchIndex,
       blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
-      paginationPreferences,
+      favoritesPaginationPreferences,
       randomSource: new MemoryRandomSource()
     })
   });
@@ -42,12 +43,12 @@ function setup(): Setup {
   const loadStatus: Readable<string> = new Signal("");
   const lightboxView = document.createElement("dialog");
   const zenEnabled = new Signal(false);
-  const preferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
+  const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const { result: elements } = render(document, () => FavoritesApp({
-    favorites: { loadState, loadStatus },
+    favoritesService: { loadState, loadStatus },
     workspace: createWorkspace(),
     lightboxView,
-    preferences,
+    favoritesPreferences,
     zenEnabled,
     renderTool: () => document.createElement("form"),
     renderPanel: () => document.createElement("section")

@@ -111,9 +111,16 @@ describe("prepareLegacyMigration", () => {
       media: { kind: "image", locator: "1234/1abc.png" },
       tags: "tag_a tag_b",
       durationSeconds: 12,
-      deleted: false,
+      status: "active",
       fetchedAt: 5
     });
+  });
+
+  test("converts a legacy deleted post to the deleted status", async() => {
+    await createLegacyDatabase({ name: "Posts", stores: { posts: [createLegacyPost("1", { deleted: true })] }, keyed: true });
+    const indexedDb = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+
+    expect(await read(indexedDb, "posts", "1")).toMatchObject({ status: "deleted" });
   });
 
   test("prefers a post from the Posts database over the same post in a favorites row", async() => {

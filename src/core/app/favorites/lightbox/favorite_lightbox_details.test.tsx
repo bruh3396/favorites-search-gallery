@@ -1,4 +1,4 @@
-import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsView, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
+import { FavoriteLightboxDetailsClass, FavoriteLightboxTagsPreferences, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
@@ -23,7 +23,7 @@ interface Setup {
   element: HTMLElement;
   favorite: Signal<ShownFavorite | undefined>;
   clipboard: MemoryClipboard;
-  view: FavoriteLightboxDetailsView;
+  favoriteLightboxTagsPreferences: FavoriteLightboxTagsPreferences;
   copyButton: HTMLButtonElement;
   viewButton: HTMLButtonElement;
   viewSettings: HTMLElement;
@@ -34,10 +34,10 @@ interface Setup {
 function setup(initial: ShownFavorite | undefined): Setup {
   const favorite = new Signal<ShownFavorite | undefined>(initial);
   const clipboard = new MemoryClipboard();
-  const view = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox.details;
+  const favoriteLightboxTagsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox.details;
   const { result: element } = render(document, () => {
     const { title, controls, body } = createFavoriteLightboxDetails({
-      favorite, view, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
+      favorite, tagsPreferences: favoriteLightboxTagsPreferences, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
     });
     return <div>{title}{controls}{body}</div> as HTMLElement;
   });
@@ -47,7 +47,7 @@ function setup(initial: ShownFavorite | undefined): Setup {
   const readId = (): string => copyButton.firstChild?.textContent ?? "";
   const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
     .find(button => button.getAttribute("aria-label") === label)!.click();
-  return { element, favorite, clipboard, view, copyButton, viewButton, viewSettings, readId, chooseView };
+  return { element, favorite, clipboard, favoriteLightboxTagsPreferences, copyButton, viewButton, viewSettings, readId, chooseView };
 }
 
 describe("createFavoriteLightboxDetails", () => {
@@ -95,13 +95,13 @@ describe("createFavoriteLightboxDetails", () => {
   });
 
   test("remembers the chosen view and shows the tags in it", () => {
-    const { element, view, chooseView } = setup(createFavorite("1"));
+    const { element, favoriteLightboxTagsPreferences, chooseView } = setup(createFavorite("1"));
     const tags = element.querySelector<HTMLElement>(`.${FavoriteLightboxTagsClass.root}`)!;
 
     chooseView("One list");
     chooseView("Centered");
     chooseView("Large");
-    expect([view.organization.value, view.alignment.value, view.size.value]).toEqual(["list", "center", "large"]);
+    expect([favoriteLightboxTagsPreferences.organization.value, favoriteLightboxTagsPreferences.alignment.value, favoriteLightboxTagsPreferences.size.value]).toEqual(["list", "center", "large"]);
     expect([tags.dataset.alignment, tags.dataset.size]).toEqual(["center", "large"]);
   });
 });

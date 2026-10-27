@@ -1,6 +1,7 @@
 import { MEDIA_KINDS } from "@/core/domain/media/media_kind";
 import { Media } from "@/core/domain/media/media";
 import { Metric } from "@/core/domain/post/metric";
+import { POST_STATUSES, PostStatus } from "@/core/domain/post/post_status";
 import { Post } from "@/core/domain/post/post";
 import { RATINGS, Rating } from "@/core/domain/post/rating";
 import { UnreachableError } from "@/core/utils/error/unreachable_error";
@@ -17,6 +18,7 @@ export class FavoritesPostTable {
   private durationSeconds = new Uint16Array(INITIAL_CAPACITY);
   private changedAts = new Float64Array(INITIAL_CAPACITY);
   private ratings = new Uint8Array(INITIAL_CAPACITY);
+  private statuses = new Uint8Array(INITIAL_CAPACITY);
   private mediaLocators: string[] = [];
 
   public write(slot: number, post: Post): void {
@@ -28,6 +30,7 @@ export class FavoritesPostTable {
     this.changedAts[slot] = post.changedAt;
     this.durationSeconds[slot] = post.durationSeconds ?? 0;
     this.ratings[slot] = RATINGS.indexOf(post.rating);
+    this.statuses[slot] = POST_STATUSES.indexOf(post.status);
     this.mediaKinds[slot] = MEDIA_KINDS.indexOf(post.media.kind);
     this.mediaLocators[slot] = post.media.locator;
   }
@@ -61,6 +64,7 @@ export class FavoritesPostTable {
       rating: this.getRating(slot),
       changedAt: this.changedAts[slot],
       media: this.getMedia(slot),
+      status: this.getStatus(slot),
       ...(durationSeconds === 0 ? {} : { durationSeconds })
     };
   }
@@ -71,6 +75,10 @@ export class FavoritesPostTable {
 
   public getRating(slot: number): Rating {
     return RATINGS[this.ratings[slot]];
+  }
+
+  public getStatus(slot: number): PostStatus {
+    return POST_STATUSES[this.statuses[slot]];
   }
 
   public getRatingBit(slot: number): number {
@@ -93,6 +101,7 @@ export class FavoritesPostTable {
     this.durationSeconds = this.durationSeconds.slice(0, count);
     this.changedAts = this.changedAts.slice(0, count);
     this.ratings = this.ratings.slice(0, count);
+    this.statuses = this.statuses.slice(0, count);
     this.mediaLocators.length = count;
   }
 
@@ -110,5 +119,6 @@ export class FavoritesPostTable {
     this.durationSeconds = grow(this.durationSeconds, capacity);
     this.changedAts = grow(this.changedAts, capacity);
     this.ratings = grow(this.ratings, capacity);
+    this.statuses = grow(this.statuses, capacity);
   }
 }

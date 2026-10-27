@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
-import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_removed_favorites_finder";
+import { Rule34MissingFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_missing_favorites_finder";
 import { advanceAndSettle } from "@/testing/async";
 import { createPost } from "@/testing/post";
 import { seededFloat } from "@/core/utils/random/random_utilities";
@@ -38,26 +38,26 @@ function createFakeRemote(remoteIds: string[]): FakeRemote {
   };
 }
 
-function createFinder(remote: FakeRemote): Rule34RemovedFavoritesFinder {
-  return new Rule34RemovedFavoritesFinder(
+function createFinder(remote: FakeRemote): Rule34MissingFavoritesFinder {
+  return new Rule34MissingFavoritesFinder(
     { pageSize: PAGE_SIZE, fetchDelay: 0 },
     { fetch: remote.fetch, scheduler: { sleep: (): Promise<void> => Promise.resolve() } }
   );
 }
 
-describe("Rule34RemovedFavoritesFinder", () => {
+describe("Rule34MissingFavoritesFinder", () => {
   test("finds nothing removed with one request for the remote page where the local list ends", async() => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote(localIds);
 
-    expect(await createFinder(remote).findRemoved(localIds, 0)).toEqual([]);
+    expect(await createFinder(remote).findMissing(localIds, 0)).toEqual([]);
     expect(remote.requested).toEqual([4]);
   });
 
   test("makes no requests when nothing is local", async() => {
     const remote = createFakeRemote([]);
 
-    expect(await createFinder(remote).findRemoved([], 0)).toEqual([]);
+    expect(await createFinder(remote).findMissing([], 0)).toEqual([]);
     expect(remote.requested).toEqual([]);
   });
 
@@ -65,14 +65,14 @@ describe("Rule34RemovedFavoritesFinder", () => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote(removeIds(localIds, ["local1"]));
 
-    expect(await createFinder(remote).findRemoved(localIds, 0)).toEqual(["local1"]);
+    expect(await createFinder(remote).findMissing(localIds, 0)).toEqual(["local1"]);
   });
 
   test("finds a removal on the last remote page", async() => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote(removeIds(localIds, ["local21"]));
 
-    expect(await createFinder(remote).findRemoved(localIds, 0)).toEqual(["local21"]);
+    expect(await createFinder(remote).findMissing(localIds, 0)).toEqual(["local21"]);
   });
 
   test("finds removals that emptied the last remote page", async() => {
@@ -80,14 +80,14 @@ describe("Rule34RemovedFavoritesFinder", () => {
     const removedIds = ["local18", "local19", "local20", "local21", "local22"];
     const remote = createFakeRemote(removeIds(localIds, removedIds));
 
-    expect(await createFinder(remote).findRemoved(localIds, 0)).toEqual(removedIds);
+    expect(await createFinder(remote).findMissing(localIds, 0)).toEqual(removedIds);
   });
 
   test("finds a removal in the middle with a binary search", async() => {
     const localIds = createLocalIds(100);
     const remote = createFakeRemote(removeIds(localIds, ["local52"]));
 
-    expect(await createFinder(remote).findRemoved(localIds, 0)).toEqual(["local52"]);
+    expect(await createFinder(remote).findMissing(localIds, 0)).toEqual(["local52"]);
     expect(remote.requested.length).toBeLessThanOrEqual(7);
   });
 
@@ -95,14 +95,14 @@ describe("Rule34RemovedFavoritesFinder", () => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote([]);
 
-    expect(await createFinder(remote).findRemoved(localIds, 0)).toEqual(localIds);
+    expect(await createFinder(remote).findMissing(localIds, 0)).toEqual(localIds);
   });
 
   test("finds nothing removed below new favorites with one request for the remote page where the local list ends", async() => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote([...createNewIds(7), ...localIds]);
 
-    expect(await createFinder(remote).findRemoved(localIds, 7)).toEqual([]);
+    expect(await createFinder(remote).findMissing(localIds, 7)).toEqual([]);
     expect(remote.requested).toEqual([5]);
   });
 
@@ -110,14 +110,14 @@ describe("Rule34RemovedFavoritesFinder", () => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote([...createNewIds(7), ...removeIds(localIds, ["local0"])]);
 
-    expect(await createFinder(remote).findRemoved(localIds, 7)).toEqual(["local0"]);
+    expect(await createFinder(remote).findMissing(localIds, 7)).toEqual(["local0"]);
   });
 
   test("finds a removal in the middle when the new favorites span several remote pages", async() => {
     const localIds = createLocalIds(100);
     const remote = createFakeRemote([...createNewIds(12), ...removeIds(localIds, ["local52"])]);
 
-    expect(await createFinder(remote).findRemoved(localIds, 12)).toEqual(["local52"]);
+    expect(await createFinder(remote).findMissing(localIds, 12)).toEqual(["local52"]);
     expect(remote.requested.length).toBeLessThanOrEqual(7);
   });
 
@@ -125,7 +125,7 @@ describe("Rule34RemovedFavoritesFinder", () => {
     const localIds = createLocalIds(23);
     const remote = createFakeRemote(createNewIds(7));
 
-    expect(await createFinder(remote).findRemoved(localIds, 7)).toEqual(localIds);
+    expect(await createFinder(remote).findMissing(localIds, 7)).toEqual(localIds);
   });
 
   test.each(Array.from({ length: 200 }, (_, seed) => seed))("finds exactly the removed favorites in random lists (seed %i)", async seed => {
@@ -134,22 +134,22 @@ describe("Rule34RemovedFavoritesFinder", () => {
     const removedIds = localIds.filter((_, i) => seededFloat((seed * 1_000) + i) < seededFloat(seed + 0.25));
     const remote = createFakeRemote([...newIds, ...removeIds(localIds, removedIds)]);
 
-    expect(await createFinder(remote).findRemoved(localIds, newIds.length)).toEqual(removedIds);
+    expect(await createFinder(remote).findMissing(localIds, newIds.length)).toEqual(removedIds);
   });
 
   test("passes on a failed request", async() => {
     const refused = new Error("refused");
     const remote: FakeRemote = { requested: [], fetch: () => Promise.reject(refused) };
 
-    await expect(createFinder(remote).findRemoved(createLocalIds(23), 0)).rejects.toBe(refused);
+    await expect(createFinder(remote).findMissing(createLocalIds(23), 0)).rejects.toBe(refused);
   });
 
   test("waits the fetch delay before every request after the first", async() => {
     const localIds = createLocalIds(100);
     const remote = createFakeRemote(removeIds(localIds, ["local52"]));
     const scheduler = new MemoryScheduler();
-    const finder = new Rule34RemovedFavoritesFinder({ pageSize: PAGE_SIZE, fetchDelay: FETCH_DELAY }, { fetch: remote.fetch, scheduler });
-    const found = finder.findRemoved(localIds, 0);
+    const finder = new Rule34MissingFavoritesFinder({ pageSize: PAGE_SIZE, fetchDelay: FETCH_DELAY }, { fetch: remote.fetch, scheduler });
+    const found = finder.findMissing(localIds, 0);
 
     await advanceAndSettle(scheduler, 0);
     expect(remote.requested).toEqual([19]);

@@ -36,7 +36,7 @@ const SIZE_CHOICES: readonly ControlChoice<TagSize>[] = [
   { value: "large", label: "Large", icon: "textLarge" }
 ];
 
-export interface FavoriteLightboxDetailsView {
+export interface FavoriteLightboxTagsPreferences {
   readonly organization: StoredValue<TagOrganization>;
   readonly alignment: StoredValue<TagAlignment>;
   readonly size: StoredValue<TagSize>;
@@ -44,7 +44,7 @@ export interface FavoriteLightboxDetailsView {
 
 export interface FavoriteLightboxDetailsProps {
   favorite: Readable<Pick<Favorite, "id" | "tags"> | undefined>;
-  view: FavoriteLightboxDetailsView;
+  tagsPreferences: FavoriteLightboxTagsPreferences;
   localTagCategories: Pick<LocalTagCategories, "getMany">;
   clipboard: Pick<Clipboard, "write">;
   scheduler: Pick<Scheduler, "schedule">;
@@ -53,12 +53,12 @@ export interface FavoriteLightboxDetailsProps {
 }
 
 export function createFavoriteLightboxDetails(props: FavoriteLightboxDetailsProps): LightboxDetailsContent {
-  const { favorite, view, localTagCategories, collapsedTagCount } = props;
+  const { favorite, tagsPreferences, localTagCategories, collapsedTagCount } = props;
   const viewOpen = new Signal(false);
   return {
     title: <FavoriteLightboxTitle {...props} viewOpen={viewOpen} />,
     controls: <FavoriteLightboxViewSettings {...props} viewOpen={viewOpen} />,
-    body: <FavoriteLightboxTags favorite={favorite} {...view} localTagCategories={localTagCategories} collapsedTagCount={collapsedTagCount} />
+    body: <FavoriteLightboxTags favorite={favorite} {...tagsPreferences} localTagCategories={localTagCategories} collapsedTagCount={collapsedTagCount} />
   };
 }
 
@@ -85,12 +85,12 @@ function ViewOption<T>({ label, choices, preference }: { label: string; choices:
   ) as HTMLElement;
 }
 
-function FavoriteLightboxViewSettings({ view, viewOpen }: PartProps): HTMLElement {
+function FavoriteLightboxViewSettings({ tagsPreferences, viewOpen }: PartProps): HTMLElement {
   return (
     <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View settings" hidden={computed(() => !viewOpen.value)}>
-      <ViewOption label="Organization" choices={ORGANIZATION_CHOICES} preference={view.organization} />
-      <ViewOption label="Alignment" choices={ALIGNMENT_CHOICES} preference={view.alignment} />
-      <ViewOption label="Size" choices={SIZE_CHOICES} preference={view.size} />
+      <ViewOption label="Organization" choices={ORGANIZATION_CHOICES} preference={tagsPreferences.organization} />
+      <ViewOption label="Alignment" choices={ALIGNMENT_CHOICES} preference={tagsPreferences.alignment} />
+      <ViewOption label="Size" choices={SIZE_CHOICES} preference={tagsPreferences.size} />
     </div>
   ) as HTMLElement;
 }

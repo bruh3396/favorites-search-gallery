@@ -1,15 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { parseFavoriteCount } from "@/adapters/rule34/client/profile_page";
+import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_page_parser";
 
-describe("parseFavoriteCount", () => {
+describe("parseRule34ProfileFavoriteCount", () => {
   test("reads the count from the favorites link", () => {
-    expect(parseFavoriteCount(`
+    expect(parseRule34ProfileFavoriteCount(`
       <a href="https://rule34.xxx/index.php?page=account&s=profile&id=7">Profile</a>
       <a href="https://rule34.xxx/index.php?page=favorites&s=view&id=7">1234</a>
     `)).toBe(1_234);
   });
 
   test("reads zero from a profile without a favorites link", () => {
-    expect(parseFavoriteCount("<p>No such user</p>")).toBe(0);
+    expect(parseRule34ProfileFavoriteCount("<p>No such user</p>")).toBe(0);
   });
 });

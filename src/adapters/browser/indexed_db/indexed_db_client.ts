@@ -1,5 +1,6 @@
 import { INDEXED_DB_STORES, IndexedDbStoreName } from "@/adapters/browser/indexed_db/indexed_db_store_name";
-import { LegacyMigration, LegacyMintMedia, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
+import { MediaMinter } from "@/core/domain/media/media_minter";
+import { LegacyMigration, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
 import { LegacyDatabaseNames } from "@/adapters/browser/indexed_db/legacy_database_names";
 
 const VERSION = 1;
@@ -19,7 +20,7 @@ export class IndexedDbClient {
 
   constructor(
     private readonly configuration: IndexedDbClientConfiguration,
-    private readonly mintLegacyMedia: LegacyMintMedia
+    private readonly mintLegacyMedia: MediaMinter
   ) {}
 
   public async runTransaction<T>(

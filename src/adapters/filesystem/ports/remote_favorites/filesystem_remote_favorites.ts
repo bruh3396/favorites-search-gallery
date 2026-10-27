@@ -17,7 +17,7 @@ export class FilesystemRemoteFavorites implements RemoteFavorites {
     return takeAboveLocalOrder(await this.readNewestFirst(), localIds);
   }
 
-  public async findRemoved(localIds: readonly string[]): Promise<string[]> {
+  public async findMissing(localIds: readonly string[]): Promise<string[]> {
     const remoteIds = new Set((await this.filesystem.readPostFiles()).map(file => file.post.id));
     return localIds.filter(id => !remoteIds.has(id));
   }

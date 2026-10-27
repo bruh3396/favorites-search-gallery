@@ -1,7 +1,8 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
 import { FrozenCobaltError, isRetryableFrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
-import { FrozenCobaltMintMedia, decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
+import { MediaMinter } from "@/core/domain/media/media_minter";
+import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/post_unavailable_error";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
@@ -12,7 +13,7 @@ import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
 export interface FrozenCobaltRemotePostsDependencies {
   frozenCobalt: Pick<FrozenCobaltClient, "fetchPost">;
-  mintMedia: FrozenCobaltMintMedia;
+  mintMedia: MediaMinter;
   scheduler: Scheduler;
   randomSource: RandomSource;
 }
@@ -31,8 +32,8 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
     });
   }
 
-  public fetch(post: Pick<Post, "id" | "deleted">): Promise<CategorizedPost> {
-    if (post.deleted === true) {
+  public fetch(post: Pick<Post, "id" | "status">): Promise<CategorizedPost> {
+    if (post.status !== "active") {
       return Promise.reject(new PostUnavailableError(post.id));
     }
     return this.retry.retry(() => this.fetchOnce(post.id));

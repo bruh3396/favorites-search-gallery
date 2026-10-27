@@ -1,15 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { parseFavoritesPage } from "@/adapters/rule34/client/favorites_page";
+import { parseRule34FavoritesPage } from "@/adapters/rule34/client/rule34_favorites_page_parser";
 
 function createPage(body: string): Document {
   return new DOMParser().parseFromString(`<html><body>${body}</body></html>`, "text/html");
 }
 
 function parseFavoriteIds(body: string): string[] {
-  return parseFavoritesPage(createPage(body), () => null).map(post => post.id);
+  return parseRule34FavoritesPage(createPage(body), () => null).map(post => post.id);
 }
 
-describe("parseFavoritesPage", () => {
+describe("parseRule34FavoritesPage", () => {
   test("reads each thumb as a post, in order", () => {
     expect(parseFavoriteIds(`
       <span class="thumb" id="s1"><a id="p1"><img src="https://example.com/thumbnail_1.jpg" title="apple"></a></span>

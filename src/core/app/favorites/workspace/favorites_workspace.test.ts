@@ -5,7 +5,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
-import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
@@ -13,6 +13,7 @@ import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 import { createPost } from "@/testing/post";
 import { effect } from "@/core/utils/reactive/signal";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
@@ -20,19 +21,19 @@ interface Setup {
   storage: MemoryLocalKeyedValues;
 }
 
-function createWorkspace(storage: MemoryLocalKeyedValues, favoritesOwnerId = "1", posts: Post[] = []): FavoritesWorkspace {
-  const paginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
+function createWorkspace(storage: MemoryLocalKeyedValues, posts: Post[] = []): FavoritesWorkspace {
+  const favoritesPaginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination;
   const searchIndex = new FavoritesSearchIndex(new StringInterner());
 
-  paginationPreferences.pageSize.set(2);
+  favoritesPaginationPreferences.pageSize.set(2);
   searchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
-  return new FavoritesWorkspace({ favoritesOwnerId }, {
-    storage,
+  return new FavoritesWorkspace({
+    storedSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage, codec: FAVORITES_WORKSPACE_SNAPSHOT_CODEC }),
     createSession: (settings): FavoritesSession => {
       const session = new FavoritesSession({ settings }, {
         searchIndex,
         blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
-        paginationPreferences,
+        favoritesPaginationPreferences,
         randomSource: new MemoryRandomSource()
       });
 
@@ -46,7 +47,7 @@ function setup(stored?: unknown): Setup {
   const storage = new MemoryLocalKeyedValues();
 
   if (stored !== undefined) {
-    storage.set("favoritesWorkspace", { 1: stored });
+    storage.set("workspace", stored);
   }
   return { workspace: createWorkspace(storage), storage };
 }
@@ -57,7 +58,7 @@ function createStoredWorkspace(queries: readonly string[], activeIndex = 0): unk
 
 function createWorkspaceWithFavorites(count: number): FavoritesWorkspace {
   const posts = Array.from({ length: count }, (_, index) => createPost({ id: String(index + 1) }));
-  return createWorkspace(new MemoryLocalKeyedValues(), "1", posts);
+  return createWorkspace(new MemoryLocalKeyedValues(), posts);
 }
 
 function attachTile(workspace: FavoritesWorkspace): HTMLElement {
@@ -93,14 +94,6 @@ describe("FavoritesWorkspace", () => {
     expect(readQueries(workspace)).toEqual(["apple", "banana"]);
     expect(workspace.activeTab.value).toBe(banana);
     expect([apple.session.start, banana.session.start].map(start => vi.mocked(start).mock.calls.length)).toEqual([0, 1]);
-  });
-
-  test("restores only the given owner's tabs", () => {
-    const storage = new MemoryLocalKeyedValues();
-
-    createWorkspace(storage, "1").activeTab.value.session.submit("apple");
-    createWorkspace(storage, "2").activeTab.value.session.submit("banana");
-    expect(readQueries(createWorkspace(storage, "1"))).toEqual(["apple"]);
   });
 
   test("activates the first tab when the stored active tab is missing or out of range", () => {

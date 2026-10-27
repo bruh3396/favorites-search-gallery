@@ -1,12 +1,10 @@
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/favorites_app";
 import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
-import { FavoritesSearchPanelDependencies, composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
-import { applyTheme } from "@/core/ui/theme/theme_applier";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { createColorSchemePreference } from "@/core/app/color_scheme_preference";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createLightbox } from "@/core/features/lightbox/lightbox";
+import { createSharedPreferences } from "@/core/app/shared_preferences";
+import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { h, render } from "@/core/ui/h/h";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
@@ -27,16 +25,18 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
+import { bindAppearance } from "@/core/app/appearance_binder";
+import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
-import { createLightbox } from "@/core/features/lightbox/lightbox";
+import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
 import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
-type FavoritesCommand = "toggleZen" | "exitZen";
+type Command = "toggleZen" | "exitZen";
 
-const FAVORITES_KEYMAP: Keymap<FavoritesCommand> = {
+const KEYMAP: Keymap<Command> = {
   z: "toggleZen",
   Z: "toggleZen",
   Escape: "exitZen"
@@ -47,7 +47,7 @@ export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration
   readonly colorScheme: ColorScheme;
 }
 
-export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "paginationPreferences"> {
+export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "favoritesPaginationPreferences"> {
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
   remotePages: RemotePages;
@@ -59,71 +59,75 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
 }
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
-  const { favoritesOwnerId, colorScheme, ...favoritesConfiguration } = configuration;
-  const { remotePages, localKeyedValues, navigator, fileSaver, clipboard, visibilityObserver, sizeObserver, hostPage, ...ports } = dependencies;
-  const storage = createAppStorage(localKeyedValues);
-  const { app: appPreferences, favorites: preferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, storage.preferences, ["app", "favorites"]);
-  const colorSchemePreference = createColorSchemePreference(colorScheme, hostPage);
-  const { mode, volume, muted, details } = preferences.lightbox;
-  const paginationPreferences = { pageSize: preferences.pageSize, infiniteScroll: preferences.infiniteScroll };
-  const favoritesService = createFavoritesService(favoritesConfiguration, { ...ports, paginationPreferences });
-  const workspace = new FavoritesWorkspace({ favoritesOwnerId }, {
-    storage: storage.app,
+  const { favoritesOwnerId, colorScheme, ...favoritesServiceConfiguration } = configuration;
+  const { localKeyedValues, hostPage, ...ports } = dependencies;
+  const { remoteMedia, remotePages, navigator, fileSaver, scheduler, sizeObserver, visibilityObserver, localTagCategories, clipboard } = ports;
+  const appStorage = createAppStorage(localKeyedValues);
+  const sharedPreferences = createSharedPreferences(appStorage.preferences, colorScheme, hostPage);
+  const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites"]);
+  const { favorites: favoritesState } = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites"]);
+  const ownerState = favoritesState.get(favoritesOwnerId);
+  const favoritesService = createFavoritesService(favoritesServiceConfiguration, {
+    ...ports, favoritesPaginationPreferences: favoritesPreferences.pagination
+  });
+  const workspace = new FavoritesWorkspace({
+    storedSnapshot: ownerState.workspace,
     createSession: (settings): FavoritesSession => favoritesService.createSession({ settings })
   });
-  const favoriteSizeRecorder = new FavoriteSizeRecorder({ ownerId: favoritesOwnerId, measuredCount: 50, recordDelay: 500, fallbackCount: 24 }, {
-    storage: storage.app, scheduler: ports.scheduler,
+  const favoriteSizeRecorder = new FavoriteSizeRecorder({ measuredCount: 50, recordDelay: 500 }, {
+    storedSizes: ownerState.sizes, scheduler,
     results: computed(() => workspace.activeTab.value.session.results.value)
   });
-  const postActions = new PostActions({ remoteMedia: ports.remoteMedia, remotePages, navigator, fileSaver });
+  const lightboxPreferences = favoritesPreferences.lightbox;
+  const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Favorite>({
-    scheduler: ports.scheduler, sizeObserver, remoteMedia: ports.remoteMedia, actions: postActions,
-    mode, volume, muted,
+    scheduler, sizeObserver, remoteMedia, actions: postActions,
+    mode: lightboxPreferences.mode, volume: lightboxPreferences.volume, muted: lightboxPreferences.muted,
     locateItem: item => workspace.locate(item),
     details: {
-      isOpen: details.open,
+      isOpen: lightboxPreferences.details.isOpen,
       createContent: favorite => createFavoriteLightboxDetails({
-        favorite, view: details, localTagCategories: ports.localTagCategories, clipboard, scheduler: ports.scheduler,
+        favorite, tagsPreferences: lightboxPreferences.details, localTagCategories, clipboard, scheduler,
         copiedDuration: 1_500, collapsedTagCount: 6
       })
     }
   });
   const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {
-    remoteMedia: ports.remoteMedia, scheduler: ports.scheduler, enabled: preferences.grid.hdTilesEnabled, paused: lightbox.isOpen
+    remoteMedia, scheduler, enabled: favoritesPreferences.grid.hdTilesEnabled, paused: lightbox.isOpen
   });
-  const tabCount = computed(() => workspace.tabManager.tabs.value.length);
-  const zenEnabled = new Signal(false);
-  const previewedTheme = new Signal<Theme | null>(null);
 
   lightbox.settled.on(item => workspace.turnToPageContaining(item));
   lightbox.closed.on(item => workspace.reveal(item));
 
-  const searchPanelDependencies: FavoritesSearchPanelDependencies = {
-    favorites: favoritesService, preferences, tabCount, favoriteSizeRecorder,
-    visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox, postActions,
-    enterZen: (): void => {
-      zenEnabled.value = true;
-    }
-  };
+  const tabCount = computed(() => workspace.tabManager.tabs.value.length);
+  const zenEnabled = new Signal(false);
+  const previewedTheme = new Signal<Theme | null>(null);
   return {
     mount: (container): void => {
-      const app = mountAppRoot(container, {
-        colorScheme, theme: THEME_DEFINITIONS[appPreferences.theme.peek()], font: DEFAULT_APP_FONT, styles: FAVORITES_APP_STYLES
+      const appRoot = mountAppRoot(container, {
+        colorScheme: sharedPreferences.colorScheme.peek(), theme: THEME_DEFINITIONS[sharedPreferences.theme.peek()], font: DEFAULT_APP_FONT, styles: FAVORITES_APP_STYLES
       });
 
-      app.append(...render(container.ownerDocument, () => FavoritesApp({
-        favorites: favoritesService, workspace, lightboxView: lightbox.createView(), preferences, zenEnabled,
+      appRoot.append(...render(container.ownerDocument, () => FavoritesApp({
+        favoritesService, workspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled,
         renderTool: () => h(FavoritesSettings, {
-          preferences, appPreferences, colorScheme: colorSchemePreference, scheduler: ports.scheduler,
+          favoritesPreferences, sharedPreferences, scheduler,
           onThemePreview: (theme): void => {
             previewedTheme.value = theme;
           }
         }),
-        renderPanel: tab => composeFavoritesSearchPanel(tab, searchPanelDependencies)
+        renderPanel: tab => composeFavoritesSearchPanel(tab, {
+          favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder,
+          visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox, postActions,
+          enterZen: (): void => {
+            zenEnabled.value = true;
+          }
+        })
       })).result);
-      const windowFill = fillRestOfWindow(app, sizeObserver);
+      const windowFill = fillRestOfWindow(appRoot, sizeObserver);
 
-      listenForHotkeys(container.ownerDocument, FAVORITES_KEYMAP, {
+      bindAppearance(appRoot, sharedPreferences, previewedTheme);
+      listenForHotkeys(container.ownerDocument, KEYMAP, {
         toggleZen: () => {
           zenEnabled.value = !zenEnabled.peek();
         },
@@ -132,11 +136,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         }
       });
       effect(() => {
-        app.style.colorScheme = colorSchemePreference.value;
-      });
-      effect(() => applyTheme(app, THEME_DEFINITIONS[previewedTheme.value ?? appPreferences.theme.value]));
-      effect(() => {
-        hostPage.setHeaderVisible(preferences.nativeHeaderVisible.value);
+        hostPage.setHeaderVisible(favoritesPreferences.nativeHeaderVisible.value);
         windowFill.refit();
       });
       favoritesService.load().catch(console.error);

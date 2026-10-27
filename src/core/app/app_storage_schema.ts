@@ -28,7 +28,7 @@ const PLACEHOLDER_FAVORITE_SIZES: readonly Size[] = Array.from({ length: 24 }, (
 
 export const APP_STORAGE_SCHEMA = {
   preferences: {
-    app: {
+    shared: {
       postListEnabled: defineStoredValue(false),
       theme: defineStoredValue<Theme>(DEFAULT_THEME, oneOf(THEMES))
     },
@@ -37,23 +37,23 @@ export const APP_STORAGE_SCHEMA = {
       lightbox: {
         ...LIGHTBOX,
         details: {
-          open: defineStoredValue(false),
+          isOpen: defineStoredValue(false),
           organization: defineStoredValue<TagOrganization>("category", oneOf(TAG_ORGANIZATIONS)),
           alignment: defineStoredValue<TagAlignment>("start", oneOf(TAG_ALIGNMENTS)),
           size: defineStoredValue<TagSize>("medium", oneOf(TAG_SIZES))
         }
       },
-      pageSize: defineStoredValue(50, isPageSize),
-      infiniteScroll: defineStoredValue(false),
+      pagination: {
+        pageSize: defineStoredValue(50, isPageSize),
+        infiniteScroll: defineStoredValue(false)
+      },
       tabStripVisible: defineStoredValue(true),
       nativeHeaderVisible: defineStoredValue(true),
       activeTool: defineStoredValue<string | null>(null, isToolId)
     },
     postList: {
       grid: POST_GRID,
-      lightbox: LIGHTBOX,
-      infiniteScroll: defineStoredValue(false),
-      favoriteIndicator: defineStoredValue(false)
+      lightbox: LIGHTBOX
     }
   },
   state: {

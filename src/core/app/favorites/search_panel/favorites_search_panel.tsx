@@ -20,7 +20,7 @@ export const FavoritesSearchPanelClass = {
 } as const;
 
 export interface FavoritesSearchPanelProps {
-  favorites: Pick<FavoritesService, "loadState" | "searchable">;
+  favoritesService: Pick<FavoritesService, "loadState" | "searchable">;
   session: Pick<FavoritesSession, "query" | "isFiltered" | "results" | "pageNumber" | "pageCount" | "goTo" | "clearFilters" | "submit">;
   focusSearch: Emitter<void>;
   trailing: Child;
@@ -28,11 +28,11 @@ export interface FavoritesSearchPanelProps {
   grid: Node;
 }
 
-export function FavoritesSearchPanel({ favorites, session, focusSearch, trailing, skeleton, grid }: FavoritesSearchPanelProps): HTMLElement {
+export function FavoritesSearchPanel({ favoritesService, session, focusSearch, trailing, skeleton, grid }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: session.results.value.length,
-    isSearchable: favorites.searchable.reached,
-    loadPhase: favorites.loadState.value.phase,
+    isSearchable: favoritesService.searchable.reached,
+    loadPhase: favoritesService.loadState.value.phase,
     query: session.query.value,
     isFiltered: session.isFiltered.value
   }));

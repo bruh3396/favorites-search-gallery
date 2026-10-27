@@ -1,6 +1,6 @@
 import { Rule34RemoteFavorites, Rule34RemoteFavoritesDependencies } from "@/adapters/rule34/ports/remote_favorites/rule34_remote_favorites";
 import { describe, expect, test, vi } from "vitest";
-import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page";
+import { RULE34_FAVORITES_PER_PAGE } from "@/adapters/rule34/client/rule34_url_builder";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
@@ -95,9 +95,9 @@ async function findNewFavoriteIds(options: ClientOptions, localIds: string[]): P
   return getPostIds(await found);
 }
 
-async function findRemovedFavoriteIds(options: ClientOptions, localIds: string[], remoteStart = 0): Promise<string[]> {
+async function findMissingFavoriteIds(options: ClientOptions, localIds: string[], remoteStart = 0): Promise<string[]> {
   const { remoteFavorites, scheduler } = setup(options);
-  const found = remoteFavorites.findRemoved(localIds, remoteStart);
+  const found = remoteFavorites.findMissing(localIds, remoteStart);
 
   found.catch(() => { });
   await advanceAndSettle(scheduler, SETTLE_TIME);
@@ -118,7 +118,7 @@ describe("Rule34RemoteFavorites", () => {
     const runs = [
       remoteFavorites.fetchAll(() => { }),
       remoteFavorites.findNew(["page0-0"]),
-      remoteFavorites.findRemoved(["page0-0"], 0)
+      remoteFavorites.findMissing(["page0-0"], 0)
     ];
 
     await advanceAndSettle(scheduler, SETTLE_TIME);
@@ -269,13 +269,13 @@ describe("Rule34RemoteFavorites", () => {
     });
   });
 
-  describe("findRemoved", () => {
+  describe("findMissing", () => {
     test("finds the local favorites the remote list no longer has", async() => {
-      const remote = createPage(0, FAVORITES_PER_PAGE);
+      const remote = createPage(0, RULE34_FAVORITES_PER_PAGE);
       const localIds = getPostIds(remote);
       const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(remote.filter(post => post.id !== localIds[3])));
 
-      expect(await findRemovedFavoriteIds({ fetchPage }, localIds)).toEqual([localIds[3]]);
+      expect(await findMissingFavoriteIds({ fetchPage }, localIds)).toEqual([localIds[3]]);
     });
 
     test("finds removals below new favorites", async() => {
@@ -283,20 +283,20 @@ describe("Rule34RemoteFavorites", () => {
       const localIds = getPostIds(remote).slice(2);
       const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(remote.filter(post => post.id !== localIds[3])));
 
-      expect(await findRemovedFavoriteIds({ fetchPage }, localIds, 2)).toEqual([localIds[3]]);
+      expect(await findMissingFavoriteIds({ fetchPage }, localIds, 2)).toEqual([localIds[3]]);
     });
 
     test("fetches the first page fresh instead of trusting the one on screen", async() => {
       const fetchPage = createPageFetch(0);
 
-      expect(await findRemovedFavoriteIds({ fetchPage, firstPage: createPage(9) }, ["page0-0"])).toEqual([]);
+      expect(await findMissingFavoriteIds({ fetchPage, firstPage: createPage(9) }, ["page0-0"])).toEqual([]);
       expect(fetchPage).toHaveBeenCalledWith(PAGE_ID, 0);
     });
 
     test("gives up on a page refused five times", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
 
-      await expect(findRemovedFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
+      await expect(findMissingFavoriteIds({ fetchPage }, ["page0-0"])).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
     });
   });

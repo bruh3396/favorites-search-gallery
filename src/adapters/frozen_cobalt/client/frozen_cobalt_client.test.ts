@@ -84,6 +84,12 @@ describe("FrozenCobaltClient", () => {
     });
   });
 
+  test("rejects a response that is JSON but not an object as malformed", async() => {
+    const bundle = setup(vi.fn(() => Promise.resolve(new Response("[]"))));
+
+    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "malformed" });
+  });
+
   test("rejects with the status when the server answers with an error", async() => {
     const bundle = setup(vi.fn(() => Promise.resolve(new Response("", { status: 503 }))));
 

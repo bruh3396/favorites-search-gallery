@@ -4,6 +4,10 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { Size } from "@/core/utils/geometry/size";
+
+const PLACEHOLDER_SIZES: readonly Size[] = [{ width: 1, height: 1 }, { width: 1, height: 1 }];
 
 function createFavorite(width: number, height: number): Favorite {
   return {
@@ -18,10 +22,11 @@ function createFavorite(width: number, height: number): Favorite {
 }
 
 function setup(
-  storage = new MemoryLocalKeyedValues(), ownerId = "1",
+  storage = new MemoryLocalKeyedValues(),
   { results = new Signal<readonly Favorite[]>([]), scheduler = new MemoryScheduler() } = {}
 ): FavoriteSizeRecorder {
-  return new FavoriteSizeRecorder({ ownerId, measuredCount: 3, recordDelay: 100, fallbackCount: 2 }, { storage, results, scheduler });
+  const storedSizes = new KeyedStoredValue({ key: "sizes", defaultValue: PLACEHOLDER_SIZES }, { storage });
+  return new FavoriteSizeRecorder({ measuredCount: 3, recordDelay: 100 }, { storedSizes, results, scheduler });
 }
 
 describe("FavoriteSizeRecorder", () => {
@@ -30,33 +35,20 @@ describe("FavoriteSizeRecorder", () => {
     const scheduler = new MemoryScheduler();
     const results = new Signal<readonly Favorite[]>([]);
 
-    setup(storage, "1", { results, scheduler });
+    setup(storage, { results, scheduler });
 
     results.value = [createFavorite(4, 3)];
     scheduler.advance(50);
     results.value = [];
     scheduler.advance(100);
 
-    expect(storage.get("favoriteSizes")).toBeUndefined();
+    expect(storage.get("sizes")).toBeUndefined();
 
     results.value = [createFavorite(1, 2)];
     scheduler.advance(99);
-    expect(storage.get("favoriteSizes")).toBeUndefined();
+    expect(storage.get("sizes")).toBeUndefined();
     scheduler.advance(1);
-    expect(storage.get("favoriteSizes")).toEqual({ 1: [{ width: 1, height: 2 }] });
-  });
-
-  describe("value", () => {
-    test("returns the fallback squares when the owner has none recorded", () => {
-      expect(setup().sizes).toEqual([{ width: 1, height: 1 }, { width: 1, height: 1 }]);
-    });
-
-    test("returns the fallback squares when the record isn't a list of dimensions", () => {
-      const storage = new MemoryLocalKeyedValues();
-
-      storage.set("favoriteSizes", { 1: [{ width: "4", height: 3 }] });
-      expect(setup(storage).sizes).toEqual([{ width: 1, height: 1 }, { width: 1, height: 1 }]);
-    });
+    expect(storage.get("sizes")).toEqual([{ width: 1, height: 2 }]);
   });
 
   describe("record", () => {
@@ -82,14 +74,6 @@ describe("FavoriteSizeRecorder", () => {
       favoriteSizeRecorder.record([createFavorite(4, 3)]);
       favoriteSizeRecorder.record([createFavorite(4, 3)]);
       expect(write).toHaveBeenCalledOnce();
-    });
-
-    test("keeps each owner's dimensions apart", () => {
-      const storage = new MemoryLocalKeyedValues();
-
-      setup(storage, "1").record([createFavorite(4, 3)]);
-      setup(storage, "2").record([createFavorite(1, 2)]);
-      expect(storage.get("favoriteSizes")).toEqual({ 1: [{ width: 4, height: 3 }], 2: [{ width: 1, height: 2 }] });
     });
   });
 });

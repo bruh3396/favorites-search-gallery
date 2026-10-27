@@ -1,11 +1,31 @@
+import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPendingReset, readCorpusSize, readFavoriteCount } from "@/targets/lab/databases";
-import { Rule34Dependencies, Rule34DependenciesConfiguration, createFavoritesDependencies, createRule34Dependencies } from "@/targets/rule34/dependencies";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
+import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
+import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
+import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
+import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
+import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/browser_local_keyed_values";
+import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
+import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/browser_random_source";
+import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
+import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
+import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
 import { Environment } from "@/core/boundary/environment";
+import { IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
+import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
+import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
+import { MediaMinter } from "@/core/domain/media/media_minter";
+import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
+import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
+import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media";
+import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
+import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/rule34_host_page";
+import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_remote_pages";
 import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
-import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
@@ -15,21 +35,41 @@ import { readRule34Environment } from "@/adapters/rule34/environment/rule34_envi
 
 declare const SCRIPT_VERSION: string;
 
-const LAB_CONFIGURATION: Rule34DependenciesConfiguration = {
-  indexedDb: LAB_INDEXED_DB_CONFIGURATION,
-  localKeyedValuesNamespace: LAB_NAMESPACE
-};
+type LabBase = Pick<FavoritesAppDependencies, "scheduler" | "hostPage" | "localKeyedValues">;
 
-function startApp(environment: Environment, dependencies: Rule34Dependencies): void {
+function createFavoritesAppDependencies(environment: Environment, rule34Document: Rule34Document, base: LabBase): FavoritesAppDependencies {
+  const { scheduler } = base;
+  const randomSource = new BrowserRandomSource();
+  const boundFetch = fetch.bind(globalThis);
+  const rule34Cdn = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
+  const mintMedia: MediaMinter = file => rule34Cdn.mintMedia(file);
+  const rule34 = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
+  const indexedDb = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintMedia);
+  return {
+    ...base,
+    randomSource,
+    sizeObserver: new BrowserSizeObserver(),
+    navigator: new BrowserNavigator(),
+    fileSaver: new BrowserFileSaver(document),
+    clipboard: new BrowserClipboard(navigator.clipboard),
+    localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDb),
+    localPosts: new IndexedDbLocalPosts(indexedDb),
+    localTagCategories: new IndexedDbLocalTagCategories(indexedDb),
+    remoteFavorites: UNCHANGED_REMOTE_FAVORITES,
+    remotePosts: UNAVAILABLE_REMOTE_POSTS,
+    remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
+    remotePages: new Rule34RemotePages(rule34),
+    visibilityObserver: new BrowserVisibilityObserver()
+  };
+}
+
+function startApp(environment: Environment, dependencies: FavoritesAppDependencies, container: HTMLElement): void {
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
-  }, {
-    ...createFavoritesDependencies(LAB_CONFIGURATION, environment, dependencies, UNAVAILABLE_REMOTE_POSTS),
-    remoteFavorites: UNCHANGED_REMOTE_FAVORITES
-  }).mount(dependencies.hostPage.claimContent());
+  }, dependencies).mount(container);
 }
 
 async function main(): Promise<void> {
@@ -43,24 +83,26 @@ async function main(): Promise<void> {
   await applyPendingPurge();
   await applyPendingReset();
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
-  const dependencies = createRule34Dependencies(LAB_CONFIGURATION, environment, rule34Document);
-  const labContainer = dependencies.hostPage.claimContent();
-  const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(dependencies.localKeyedValues).preferences, ["favorites"]).favorites;
+  const scheduler = new BrowserScheduler();
+  const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
+  const localKeyedValues = new NamespacedLocalKeyedValues(LAB_NAMESPACE, new BrowserLocalKeyedValues());
+  const labContainer = hostPage.claimContent();
+  const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["favorites"]).favorites;
 
-  dependencies.hostPage.setHeaderVisible(nativeHeaderVisible.value);
-  nativeHeaderVisible.changed.on(visible => dependencies.hostPage.setHeaderVisible(visible));
+  hostPage.setHeaderVisible(nativeHeaderVisible.value);
+  nativeHeaderVisible.changed.on(visible => hostPage.setHeaderVisible(visible));
 
   const postCount = new Signal<number | null>(null);
   const favoriteCount = new Signal<number | null>(null);
 
   mountLabScreen(labContainer, { colorScheme: environment.colorScheme }, {
-    scheduler: dependencies.scheduler,
+    scheduler,
     postCount,
     favoriteCount,
     nativeHeaderVisible,
     onStart: () => {
       labContainer.remove();
-      startApp(environment, dependencies);
+      startApp(environment, createFavoritesAppDependencies(environment, rule34Document, { scheduler, hostPage, localKeyedValues }), hostPage.claimContent());
     }
   });
   postCount.value = await readCorpusSize();

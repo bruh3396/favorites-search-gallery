@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { FrozenCobaltRemoteTagCategories } from "@/adapters/frozen_cobalt/ports/remote_tag_categories/frozen_cobalt_remote_tag_categories";
-import { FrozenCobaltTagResult } from "@/adapters/frozen_cobalt/client/schema";
+import { FrozenCobaltTagResult } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_result";
 
 function createRemoteTagCategories(results: Record<string, FrozenCobaltTagResult>): FrozenCobaltRemoteTagCategories {
   return new FrozenCobaltRemoteTagCategories({

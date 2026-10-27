@@ -11,6 +11,7 @@ export function createPost(overrides: Partial<Post> = {}): Post {
     rating: "explicit",
     changedAt: 0,
     media: NO_MEDIA,
+    status: "active",
     ...overrides
   };
 }

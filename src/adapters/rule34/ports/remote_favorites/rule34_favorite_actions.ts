@@ -1,5 +1,5 @@
-import { BASE_INDEX_URL, RULE34_ORIGIN } from "@/adapters/rule34/client/urls";
-import { Rule34Fetch, request, send } from "@/adapters/rule34/client/rule34_fetch";
+import { buildRule34AddFavoriteUrl, buildRule34PostVoteUrl, buildRule34RemoveFavoriteUrl } from "@/adapters/rule34/client/rule34_url_builder";
+import { Rule34Fetch, sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_fetch";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Retry } from "@/core/utils/async/retry";
@@ -27,18 +27,6 @@ const ADD_ANSWERS: Record<number, Rule34AddFavoriteAnswer> = {
   3: "added"
 };
 
-function addFavoriteUrl(id: string): string {
-  return `${RULE34_ORIGIN}/public/addfav.php?id=${id}`;
-}
-
-function postVoteUrl(id: string): string {
-  return `${BASE_INDEX_URL}post&s=vote&type=up&id=${id}`;
-}
-
-function removeFavoriteUrl(id: string): string {
-  return `${BASE_INDEX_URL}favorites&s=delete&id=${id}`;
-}
-
 export class Rule34FavoriteActions {
   private readonly addLimiter: RateLimiter;
   private readonly removeLimiter: RateLimiter;
@@ -61,8 +49,8 @@ export class Rule34FavoriteActions {
       if (!this.claimIntent(id, "add")) {
         return null;
       }
-      send(this.dependencies.fetch, postVoteUrl(id)).catch(() => { });
-      const answer = await (await request(this.dependencies.fetch, addFavoriteUrl(id))).text();
+      sendRule34Request(this.dependencies.fetch, buildRule34PostVoteUrl(id)).catch(() => { });
+      const answer = await (await sendOkRule34Request(this.dependencies.fetch, buildRule34AddFavoriteUrl(id))).text();
       return ADD_ANSWERS[parseInt(answer, 10)] ?? "error";
     });
   }
@@ -73,7 +61,7 @@ export class Rule34FavoriteActions {
       if (!this.claimIntent(id, "remove")) {
         return false;
       }
-      await this.removeRetry.retry(() => send(this.dependencies.fetch, removeFavoriteUrl(id), { redirect: "manual" }));
+      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, buildRule34RemoveFavoriteUrl(id), { redirect: "manual" }));
       return true;
     });
   }

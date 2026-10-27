@@ -1,4 +1,5 @@
 import { Media } from "@/core/domain/media/media";
+import { PostStatus } from "@/core/domain/post/post_status";
 import { Rating } from "@/core/domain/post/rating";
 
 export type Post = {
@@ -11,6 +12,6 @@ export type Post = {
   readonly media: Media;
   readonly tags: string;
   readonly durationSeconds?: number;
-  readonly deleted?: boolean;
+  readonly status: PostStatus;
   readonly fetchedAt?: number;
 };

@@ -27,7 +27,7 @@ describe("parseRule34Thumb", () => {
       rating: "explicit",
       changedAt: 0,
       durationSeconds: 0,
-      deleted: false,
+      status: "active",
       media: { kind: "image", locator: `${PREVIEW} apple banana` }
     });
   });

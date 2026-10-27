@@ -1,6 +1,7 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
+import { PostPurgedError } from "@/core/boundary/ports/remote_posts/post_purged_error";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 
 export class MemoryRemotePosts implements RemotePosts {
@@ -8,6 +9,6 @@ export class MemoryRemotePosts implements RemotePosts {
 
   public fetch({ id }: Pick<Post, "id">): Promise<CategorizedPost> {
     const post = this.memory.readPost(id);
-    return post === undefined ? Promise.reject(new Error(`MemoryRemotePosts: no post ${id}`)) : Promise.resolve({ post, tagCategories: new Map() });
+    return post === undefined ? Promise.reject(new PostPurgedError(id)) : Promise.resolve({ post, tagCategories: new Map() });
   }
 }

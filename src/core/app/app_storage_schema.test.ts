@@ -20,11 +20,11 @@ describe("APP_STORAGE_SCHEMA", () => {
 
   test("restores the favorites page size and infinite scroll it stores", () => {
     const storage = new MemoryLocalKeyedValues();
-    const preferences = createFavorites(storage);
+    const { pagination } = createFavorites(storage);
 
-    preferences.pageSize.set(100);
-    preferences.infiniteScroll.set(true);
-    const restored = createFavorites(storage);
+    pagination.pageSize.set(100);
+    pagination.infiniteScroll.set(true);
+    const restored = createFavorites(storage).pagination;
 
     expect([restored.pageSize.value, restored.infiniteScroll.value]).toEqual([100, true]);
   });
@@ -32,8 +32,8 @@ describe("APP_STORAGE_SCHEMA", () => {
   test("falls back to the default page size for one below 1", () => {
     const storage = new MemoryLocalKeyedValues();
 
-    storage.set("favorites", { pageSize: 0 });
-    expect(createFavorites(storage).pageSize.value).toBe(createFavorites().pageSize.value);
+    storage.set("favorites", { pagination: { pageSize: 0 } });
+    expect(createFavorites(storage).pagination.pageSize.value).toBe(createFavorites().pagination.pageSize.value);
   });
 
   test("shows the tab strip by default and restores it hidden once stored", () => {
@@ -63,9 +63,9 @@ describe("APP_STORAGE_SCHEMA", () => {
   test("keeps the details panel closed until it is opened", () => {
     const storage = new MemoryLocalKeyedValues();
 
-    expect(createFavorites(storage).lightbox.details.open.value).toBe(false);
-    createFavorites(storage).lightbox.details.open.set(true);
-    expect(createFavorites(storage).lightbox.details.open.value).toBe(true);
+    expect(createFavorites(storage).lightbox.details.isOpen.value).toBe(false);
+    createFavorites(storage).lightbox.details.isOpen.set(true);
+    expect(createFavorites(storage).lightbox.details.isOpen.value).toBe(true);
   });
 
   test("shows details tags by category, left aligned, at medium size by default", () => {

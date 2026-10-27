@@ -750,7 +750,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/core/domain/post/post.ts", "src/adapters/frozen_cobalt/client/schema.ts"],
+    files: ["src/core/domain/post/post.ts", "src/adapters/frozen_cobalt/wire/frozen_cobalt_post.ts"],
     rules: {
       "@typescript-eslint/naming-convention": [
         "error",

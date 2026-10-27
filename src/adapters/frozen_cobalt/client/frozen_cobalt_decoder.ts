@@ -1,9 +1,10 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Rating } from "@/core/domain/post/rating";
-import { FrozenCobaltPost, FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/client/schema";
+import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
+import { FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_category_code";
 import { TagCategory, TagCategoryMap } from "@/core/domain/tag_category/tag_category";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
-import { Media } from "@/core/domain/media/media";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 import { decodeHtmlEntities } from "@/core/utils/string/string_utilities";
 
 const TAG_CATEGORY_BY_CODE: Record<NonNullable<FrozenCobaltTagCategoryCode>, TagCategory> = {
@@ -16,9 +17,7 @@ const TAG_CATEGORY_BY_CODE: Record<NonNullable<FrozenCobaltTagCategoryCode>, Tag
 };
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
-export type FrozenCobaltMintMedia = (file: { url: string; tags: string }) => Media | null;
-
-export function decodeFrozenCobaltPost(post: FrozenCobaltPost, mintMedia: FrozenCobaltMintMedia): CategorizedPost {
+export function decodeFrozenCobaltPost(post: FrozenCobaltPost, mintMedia: MediaMinter): CategorizedPost {
   const tagCategories = decodeTagCategories(post);
   const tags = [...tagCategories.keys()].join(" ");
   const media = mintMedia({ url: post.fileURL, tags });
@@ -36,7 +35,7 @@ export function decodeFrozenCobaltPost(post: FrozenCobaltPost, mintMedia: Frozen
       changedAt: post.change * 1_000,
       media,
       tags,
-      deleted: false
+      status: "active"
     },
     tagCategories
   };

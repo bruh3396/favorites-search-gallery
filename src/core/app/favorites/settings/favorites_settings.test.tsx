@@ -5,39 +5,39 @@ import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_setti
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
-import { createColorSchemePreference } from "@/core/app/color_scheme_preference";
+import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 
-function setup(): { preferences: AppPreferences["favorites"]; queryInput: (label: string) => HTMLInputElement } {
-  const { app: appPreferences, favorites: preferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["app", "favorites"]);
+function setup(): { favoritesPreferences: AppPreferences["favorites"]; queryInput: (label: string) => HTMLInputElement } {
+  const storage = new MemoryLocalKeyedValues();
+  const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, storage, ["favorites"]);
   const { result: element } = render(document, () => (
     <FavoritesSettings
-      preferences={preferences}
-      appPreferences={appPreferences}
-      colorScheme={createColorSchemePreference("light", new MemoryHostPage())}
+      favoritesPreferences={favoritesPreferences}
+      sharedPreferences={createSharedPreferences(storage, "light", new MemoryHostPage())}
       onThemePreview={() => undefined}
       scheduler={new MemoryScheduler()}
     />
   ));
-  return { preferences, queryInput: label => element.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)! };
+  return { favoritesPreferences, queryInput: label => element.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`)! };
 }
 
 describe("FavoritesSettings", () => {
   test("disables page size while infinite scroll is on", () => {
-    const { preferences, queryInput } = setup();
+    const { favoritesPreferences, queryInput } = setup();
 
-    preferences.infiniteScroll.set(true);
+    favoritesPreferences.pagination.infiniteScroll.set(true);
 
     expect(queryInput("Page size").disabled).toBe(true);
   });
 
   test("disables tile size while the layout is native", () => {
-    const { preferences, queryInput } = setup();
+    const { favoritesPreferences, queryInput } = setup();
     const tileSize = queryInput("Size");
 
-    preferences.grid.layout.set("native");
+    favoritesPreferences.grid.layout.set("native");
     expect(tileSize.disabled).toBe(true);
-    preferences.grid.layout.set("row");
+    favoritesPreferences.grid.layout.set("row");
     expect(tileSize.disabled).toBe(false);
   });
 });

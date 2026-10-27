@@ -14,7 +14,7 @@ const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
 const POST_TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
 
 function createPlaceholder(id: string): Post {
-  return { id, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: NO_MEDIA };
+  return { id, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: NO_MEDIA, status: "active" };
 }
 
 function isPlaceholder(post: Post): boolean {
@@ -26,6 +26,9 @@ function hasDimensions(post: Post): boolean {
 }
 
 function isStale(post: Post, now: number): boolean {
+  if (post.status === "purged") {
+    return false;
+  }
   return post.fetchedAt === undefined || now - post.fetchedAt > POST_TIME_TO_LIVE;
 }
 
@@ -60,6 +63,13 @@ export class PostLibrary {
     await this.dependencies.localPosts.setManyIfAbsent(posts);
     const local = await this.getLocalPostsById(posts.map(post => post.id));
     return posts.map(post => local.get(post.id) ?? post);
+  }
+
+  public async markPurged(posts: readonly Post[]): Promise<void> {
+    const purged = posts.map(post => ({ ...post, status: "purged" as const }));
+
+    await this.dependencies.localPosts.setMany(purged);
+    purged.forEach(post => this.dependencies.onRefresh(post));
   }
 
   public async refresh(posts: Post[]): Promise<void> {

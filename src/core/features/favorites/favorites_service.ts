@@ -36,7 +36,7 @@ export interface FavoritesServiceDependencies {
   remoteMedia: RemoteMedia;
   scheduler: Scheduler;
   randomSource: RandomSource;
-  paginationPreferences: FavoritesPaginationPreferences;
+  favoritesPaginationPreferences: FavoritesPaginationPreferences;
 }
 
 export interface FavoritesService {
@@ -72,7 +72,7 @@ export function createFavoritesService(configuration: FavoritesServiceConfigurat
       searchIndex,
       blacklist,
       randomSource: dependencies.randomSource,
-      paginationPreferences: dependencies.paginationPreferences
+      favoritesPaginationPreferences: dependencies.favoritesPaginationPreferences
     }),
     isFavorited: id => actions.isFavorited(id),
     countFavoritesWithTag: tag => searchIndex.countFavoritesWithTag(tag),

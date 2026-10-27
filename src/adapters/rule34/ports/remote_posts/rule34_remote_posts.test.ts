@@ -2,6 +2,7 @@ import { Mock, describe, expect, test, vi } from "vitest";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { PostPurgedError } from "@/core/boundary/ports/remote_posts/post_purged_error";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
 import { advanceAndSettle } from "@/testing/async";
@@ -10,7 +11,7 @@ import { createPost } from "@/testing/post";
 type FetchPostPage = Mock<(id: string) => Promise<CategorizedPost>>;
 
 const PAGE = {
-  post: createPost({ id: "42", deleted: true }),
+  post: createPost({ id: "42", status: "deleted" }),
   tagCategories: new Map([["alice", "character" as const]])
 };
 
@@ -51,6 +52,13 @@ describe("Rule34RemotePosts", () => {
 
     await expect(fetchRemotePost(fetchPostPage)).rejects.toThrow(Rule34Error);
     expect(fetchPostPage).toHaveBeenCalledTimes(3);
+  });
+
+  test("reports a missing post page as purged, without retrying", async() => {
+    const fetchPostPage: FetchPostPage = vi.fn(() => Promise.reject(new Rule34Error("http", { status: 404 })));
+
+    await expect(fetchRemotePost(fetchPostPage)).rejects.toEqual(new PostPurgedError("42"));
+    expect(fetchPostPage).toHaveBeenCalledOnce();
   });
 
   test("never retries a page it can't read", async() => {

@@ -1,9 +1,9 @@
 import { removeExtraWhitespace, removeNonNumericCharacters } from "@/core/utils/string/string_utilities";
 import { NO_MEDIA } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { Rule34MintMedia } from "@/adapters/rule34/client/rule34_mint_media";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 
-export function parseRule34Thumb(thumb: HTMLElement, mintMedia: Rule34MintMedia): Post | null {
+export function parseRule34Thumb(thumb: HTMLElement, mintMedia: MediaMinter): Post | null {
   const id = parseId(thumb);
 
   if (id === "") {
@@ -20,7 +20,7 @@ export function parseRule34Thumb(thumb: HTMLElement, mintMedia: Rule34MintMedia)
     rating: "explicit",
     changedAt: 0,
     durationSeconds: 0,
-    deleted: false,
+    status: "active",
     media: mintMedia({ url: parsePreviewUrl(image), tags }) ?? NO_MEDIA
   };
 }

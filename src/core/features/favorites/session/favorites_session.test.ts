@@ -21,7 +21,7 @@ function setup(posts: Post[]): Setup {
   const collection = new FavoritesCollection(new StringInterner());
   const index = new FavoritesSearchIndex(new StringInterner());
   const storage = new MemoryLocalKeyedValues();
-  const paginationPreferences = {
+  const favoritesPaginationPreferences = {
     pageSize: new KeyedStoredValue({ key: "pageSize", defaultValue: 2 }, { storage }),
     infiniteScroll: new KeyedStoredValue({ key: "infiniteScroll", defaultValue: false }, { storage })
   };
@@ -31,7 +31,7 @@ function setup(posts: Post[]): Setup {
     searchIndex: index,
     blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
-    paginationPreferences
+    favoritesPaginationPreferences
   });
 
   session.start();

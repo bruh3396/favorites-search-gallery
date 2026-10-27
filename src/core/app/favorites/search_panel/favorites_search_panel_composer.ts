@@ -19,8 +19,8 @@ import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/vi
 import { h } from "@/core/ui/h/h";
 
 export interface FavoritesSearchPanelDependencies {
-  favorites: Pick<FavoritesService, "loadState" | "searchable" | "hydrated">;
-  preferences: Pick<AppPreferences["favorites"], "grid" | "pageSize" | "infiniteScroll" | "tabStripVisible">;
+  favoritesService: Pick<FavoritesService, "loadState" | "searchable" | "hydrated">;
+  favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination" | "tabStripVisible">;
   tabCount: Readable<number>;
   favoriteSizeRecorder: Pick<FavoriteSizeRecorder, "sizes">;
   visibilityObserver: VisibilityObserver;
@@ -34,32 +34,33 @@ export interface FavoritesSearchPanelDependencies {
 
 export function composeFavoritesSearchPanel(tab: FavoritesTab, dependencies: FavoritesSearchPanelDependencies): HTMLElement {
   const {
-    favorites, preferences, tabCount, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox, postActions, enterZen
+    favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox,
+    postActions, enterZen
   } = dependencies;
   return h(FavoritesSearchPanel, {
-    favorites,
+    favoritesService,
     session: tab.session,
     focusSearch: tab.focusSearch,
     trailing: [
-      h(TabStripToggle, { visible: preferences.tabStripVisible, tabCount }),
+      h(TabStripToggle, { visible: favoritesPreferences.tabStripVisible, tabCount }),
       h(IconButton, { icon: "scan", label: "Zen", onClick: enterZen })
     ],
     skeleton: h(SkeletonGrid, {
       sizes: favoriteSizeRecorder.sizes,
-      layout: preferences.grid.layout,
-      columnCount: preferences.grid.columnCount,
-      count: preferences.pageSize.peek()
+      layout: favoritesPreferences.grid.layout,
+      columnCount: favoritesPreferences.grid.columnCount,
+      count: favoritesPreferences.pagination.pageSize.peek()
     }),
     grid: h(PostGrid<Favorite>, {
       posts: tab.session.pageItems,
-      changed: favorites.hydrated,
+      changed: favoritesService.hydrated,
       tileLocator: tab.tileLocator,
-      settings: preferences.grid,
+      settings: favoritesPreferences.grid,
       getSize: post => ({ width: post.getMetric("width"), height: post.getMetric("height") }),
       createActions: () => [],
       visibilityObserver, sizeObserver, imageLoaderService,
       getPostUrl: post => remotePages.postUrl(post.id),
-      onPlainClick: post => lightbox.open(new ListSequence({ wraps: !preferences.infiniteScroll.peek() }, tab.session.results), post),
+      onPlainClick: post => lightbox.open(new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, tab.session.results), post),
       onCtrlClick: post => postActions.openOriginal(post)
     })
   });

@@ -2,7 +2,7 @@ import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 
 export type Rule34Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 
-export async function send(fetch: Rule34Fetch, url: string, init?: RequestInit): Promise<Response> {
+export async function sendRule34Request(fetch: Rule34Fetch, url: string, init?: RequestInit): Promise<Response> {
   try {
     return await fetch(url, init);
   } catch (cause) {
@@ -10,8 +10,8 @@ export async function send(fetch: Rule34Fetch, url: string, init?: RequestInit):
   }
 }
 
-export async function request(fetch: Rule34Fetch, url: string, init?: RequestInit): Promise<Response> {
-  const response = await send(fetch, url, init);
+export async function sendOkRule34Request(fetch: Rule34Fetch, url: string, init?: RequestInit): Promise<Response> {
+  const response = await sendRule34Request(fetch, url, init);
 
   if (!response.ok) {
     throw new Rule34Error("http", { subject: url, status: response.status });

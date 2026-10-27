@@ -18,7 +18,7 @@ export class MemoryRemoteFavorites implements RemoteFavorites {
     return Promise.resolve(takeAboveLocalOrder(this.memory.readFavorites(), localIds));
   }
 
-  public findRemoved(localIds: readonly string[]): Promise<string[]> {
+  public findMissing(localIds: readonly string[]): Promise<string[]> {
     const remoteIds = new Set(this.memory.readFavorites().map(post => post.id));
     return Promise.resolve(localIds.filter(id => !remoteIds.has(id)));
   }

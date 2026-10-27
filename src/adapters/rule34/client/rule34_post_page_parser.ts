@@ -1,10 +1,9 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Rating } from "@/core/domain/post/rating";
 import { TagCategory, TagCategoryMap, isTagCategory } from "@/core/domain/tag_category/tag_category";
-import { BASE_INDEX_URL } from "@/adapters/rule34/client/urls";
 import { Media } from "@/core/domain/media/media";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
-import { Rule34MintMedia } from "@/adapters/rule34/client/rule34_mint_media";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";
 
 const STATISTIC_ENTRY = /(\S+):\s+(\S+)/g;
@@ -12,11 +11,7 @@ const DIMENSIONS = /^([1-9]\d*)(?:x|\/)([1-9]\d*)$/;
 const TAG_TYPE = /\btag-type-(\S+)/;
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
-export function postPageUrl(id: string): string {
-  return `${BASE_INDEX_URL}post&s=view&id=${id}`;
-}
-
-export function parsePostPage(html: string, mintMedia: Rule34MintMedia): CategorizedPost {
+export function parseRule34PostPage(html: string, mintMedia: MediaMinter): CategorizedPost {
   const dom = new DOMParser().parseFromString(html, "text/html");
   const statistics = parseStatistics(dom);
   const tags = parseTags(dom);
@@ -30,7 +25,7 @@ export function parsePostPage(html: string, mintMedia: Rule34MintMedia): Categor
       score: Number(statistics.score),
       rating,
       changedAt: 0,
-      deleted: true,
+      status: "deleted",
       tags,
       media: parseMedia(dom, { tags, mintMedia })
     },
@@ -74,7 +69,7 @@ function parseDimensions(size: string | undefined): { width: number; height: num
   return { width: Number(match[1]), height: Number(match[2]) };
 }
 
-function parseMedia(dom: Document, { tags, mintMedia }: { tags: string; mintMedia: Rule34MintMedia }): Media {
+function parseMedia(dom: Document, { tags, mintMedia }: { tags: string; mintMedia: MediaMinter }): Media {
   const file = dom.querySelector("#image")?.getAttribute("src") ??
     dom.querySelector("video source")?.getAttribute("src") ??
     dom.querySelector(".link-list a[href*='/images/']")?.getAttribute("href") ??

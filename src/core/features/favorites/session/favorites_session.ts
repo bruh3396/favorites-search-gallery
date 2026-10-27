@@ -15,7 +15,7 @@ export interface FavoritesSessionDependencies {
   searchIndex: FavoritesSearchIndex;
   blacklist: FavoritesBlacklist;
   randomSource: RandomSource;
-  paginationPreferences: FavoritesPaginationPreferences;
+  favoritesPaginationPreferences: FavoritesPaginationPreferences;
 }
 
 export class FavoritesSession {
@@ -26,7 +26,7 @@ export class FavoritesSession {
 
   constructor(configuration: FavoritesSessionConfiguration, dependencies: FavoritesSessionDependencies) {
     this.search = new FavoritesSearch(configuration, dependencies);
-    this.pagination = new FavoritesPagination({ search: this.search, paginationPreferences: dependencies.paginationPreferences });
+    this.pagination = new FavoritesPagination({ search: this.search, preferences: dependencies.favoritesPaginationPreferences });
     this.currentQuery = computed(() => this.search.settings.value.query);
     this.currentlyFiltered = computed(() => filtersFavorites(this.search.settings.value));
   }

@@ -1,4 +1,5 @@
-import { FrozenCobaltPost, FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/client/schema";
+import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
+import { FrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_category_code";
 import { decodeFrozenCobaltPost, decodeFrozenCobaltTagCategory } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 import { describe, expect, test, vi } from "vitest";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
@@ -32,7 +33,7 @@ describe("decodeFrozenCobaltPost", () => {
       changedAt: 1_234_567_890_000,
       media,
       tags: "tag1 tag2",
-      deleted: false
+      status: "active"
     });
   });
 

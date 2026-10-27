@@ -53,7 +53,7 @@ describe("MemoryRemoteFavorites", () => {
   });
 
   test("finds the local ids it no longer lists, in local order", async() => {
-    expect(await createRemoteFavorites("3", "1").findRemoved(["4", "3", "2", "1"])).toEqual(["4", "2"]);
+    expect(await createRemoteFavorites("3", "1").findMissing(["4", "3", "2", "1"])).toEqual(["4", "2"]);
   });
 
   test("removes a favorite from the list", async() => {

@@ -6,7 +6,7 @@ export const UNCHANGED_REMOTE_FAVORITES: RemoteFavorites = {
   fetchCount: () => Promise.resolve(null),
   fetchAll: () => Promise.resolve(),
   findNew: () => Promise.resolve([]),
-  findRemoved: () => Promise.resolve([]),
+  findMissing: () => Promise.resolve([]),
   add: () => Promise.resolve(false),
   remove: () => Promise.resolve(false)
 };

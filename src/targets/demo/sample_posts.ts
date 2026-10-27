@@ -28,7 +28,8 @@ export function createSamplePosts(count: number): Post[] {
       score: (id * 7) % 100,
       rating: RATINGS[id % RATINGS.length],
       changedAt: id,
-      media: { kind: "image", locator: imageFor(id, width, height) }
+      media: { kind: "image", locator: imageFor(id, width, height) },
+      status: "active"
     };
   });
 }

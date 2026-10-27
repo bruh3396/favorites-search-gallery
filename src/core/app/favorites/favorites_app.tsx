@@ -42,25 +42,27 @@ export const FavoritesAppClass = {
 const TOOLS: readonly ActivityBarItem[] = [{ id: "settings", label: "Settings", icon: "settings"}];
 
 export interface FavoritesAppProps {
-  favorites: Pick<FavoritesService, "loadState" | "loadStatus">;
+  favoritesService: Pick<FavoritesService, "loadState" | "loadStatus">;
   workspace: FavoritesWorkspace;
   lightboxView: HTMLElement;
-  preferences: Pick<AppPreferences["favorites"], "activeTool" | "tabStripVisible">;
+  favoritesPreferences: Pick<AppPreferences["favorites"], "activeTool" | "tabStripVisible">;
   zenEnabled: Readable<boolean>;
   renderTool: (tool: ActivityBarItem) => HTMLElement;
   renderPanel: (tab: FavoritesTab) => HTMLElement;
 }
 
-export function FavoritesApp({ favorites, workspace, lightboxView, preferences, zenEnabled, renderTool, renderPanel }: FavoritesAppProps): HTMLElement[] {
+export function FavoritesApp({
+  favoritesService, workspace, lightboxView, favoritesPreferences, zenEnabled, renderTool, renderPanel
+}: FavoritesAppProps): HTMLElement[] {
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
       <div className={FavoritesAppClass.loadLine}>
-        <ProgressLine label="Loading favorites" progress={computed(() => measureFavoritesLoadProgress(favorites.loadState.value))} />
+        <ProgressLine label="Loading favorites" progress={computed(() => measureFavoritesLoadProgress(favoritesService.loadState.value))} />
       </div>
       <main className={FavoritesAppClass.panes}>
         <ActivityBar
           items={TOOLS}
-          value={preferences.activeTool}
+          value={favoritesPreferences.activeTool}
           renderView={tool => (
             <ViewPane
               title={tool.label}
@@ -69,14 +71,14 @@ export function FavoritesApp({ favorites, workspace, lightboxView, preferences, 
               {renderTool(tool)}
             </ViewPane>
           )}
-          onValueChange={id => preferences.activeTool.set(id)}
+          onValueChange={id => favoritesPreferences.activeTool.set(id)}
         />
         <Tabs<FavoritesTab>
           manager={workspace.tabManager}
           label={({ value }) => value.title}
           renderPanel={({ value }) => renderPanel(value)}
-          stripVisible={preferences.tabStripVisible}
-          trailing={<StatusText text={favorites.loadStatus} />}
+          stripVisible={favoritesPreferences.tabStripVisible}
+          trailing={<StatusText text={favoritesService.loadStatus} />}
           onAdd={() => workspace.openBlankTab()}
           onClose={id => workspace.closeTab(id)}
           onCloseAll={() => workspace.closeAllTabs()}

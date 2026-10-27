@@ -1,21 +1,20 @@
 import { AppPreferences } from "@/core/app/app_storage_schema";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
+import { SharedPreferences } from "@/core/app/shared_preferences";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
 import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
 export interface FavoritesSettingsProps {
-  preferences: Pick<AppPreferences["favorites"], "grid" | "lightbox" | "nativeHeaderVisible" | "pageSize" | "infiniteScroll">;
-  appPreferences: AppPreferences["app"];
-  colorScheme: StoredValue<ColorScheme>;
+  favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "lightbox" | "nativeHeaderVisible" | "pagination">;
+  sharedPreferences: SharedPreferences;
   onThemePreview: (theme: Theme | null) => void;
   scheduler: StepperScheduler;
 }
@@ -45,47 +44,47 @@ export function FavoritesSettings({ scheduler, ...props }: FavoritesSettingsProp
 }
 
 function createDescriptors({
-  preferences, appPreferences, colorScheme, onThemePreview
+  favoritesPreferences, sharedPreferences, onThemePreview
 }: Omit<FavoritesSettingsProps, "scheduler">): SettingDescriptor[] {
   return [
     {
       id: "postListEnabled", kind: "switch", label: "Enhance search pages", keywords: ["post list", "search"],
-      preference: appPreferences.postListEnabled
+      preference: sharedPreferences.postListEnabled
     },
     {
       id: "lightboxMode", kind: "choice", label: "Gallery", keywords: ["lightbox", "viewer", "click", "simple", "zoom"], control: "segmented",
-      preference: preferences.lightbox.mode, members: LIGHTBOX_MODES, labels: LIGHTBOX_MODE_LABELS
+      preference: favoritesPreferences.lightbox.mode, members: LIGHTBOX_MODES, labels: LIGHTBOX_MODE_LABELS
     },
     {
       id: "theme", kind: "choice", label: "Theme", keywords: ["colors", "palette", "accent"], control: "dropdown",
-      preference: appPreferences.theme, members: THEMES, labels: THEME_LABELS, onPreview: onThemePreview
+      preference: sharedPreferences.theme, members: THEMES, labels: THEME_LABELS, onPreview: onThemePreview
     },
     {
       id: "colorScheme", kind: "choice", label: "Color", keywords: ["color scheme", "theme", "dark", "light"], control: "segmented",
-      preference: colorScheme, members: COLOR_SCHEMES, labels: COLOR_SCHEME_LABELS, icons: COLOR_SCHEME_ICONS
+      preference: sharedPreferences.colorScheme, members: COLOR_SCHEMES, labels: COLOR_SCHEME_LABELS, icons: COLOR_SCHEME_ICONS
     },
     {
       id: "nativeHeaderVisible", kind: "switch", label: "Header", keywords: ["site header", "native header", "navigation"],
-      preference: preferences.nativeHeaderVisible
+      preference: favoritesPreferences.nativeHeaderVisible
     },
     {
       id: "hdTilesEnabled", kind: "switch", label: "HD", keywords: ["hd tiles", "thumbnails", "quality", "resolution", "full size"],
-      preference: preferences.grid.hdTilesEnabled
+      preference: favoritesPreferences.grid.hdTilesEnabled
     },
     {
       id: "layout", kind: "choice", label: "Layout", keywords: ["grid", "arrangement"], control: "segmented",
-      preference: preferences.grid.layout, members: LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
+      preference: favoritesPreferences.grid.layout, members: LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
     },
     {
       id: "tileSize", kind: "slider", label: "Size", keywords: ["tile size", "tiles per row", "columns", "zoom", "grid"],
-      preference: preferences.grid.columnCount, min: 1, max: 16, step: 1, inverted: true,
-      disabled: computed(() => preferences.grid.layout.value === "native")
+      preference: favoritesPreferences.grid.columnCount, min: 1, max: 16, step: 1, inverted: true,
+      disabled: computed(() => favoritesPreferences.grid.layout.value === "native")
     },
     {
-      id: "pageSize", kind: "number", label: "Page size", keywords: ["results per page", "count", "pagination"],
-      preference: preferences.pageSize, min: 1, max: 5_000, step: 25,
-      disabled: preferences.infiniteScroll
+      id: "pageSize", kind: "number", label: "Size", keywords: ["results per page", "count", "pagination"],
+      preference: favoritesPreferences.pagination.pageSize, min: 1, max: 5_000, step: 25,
+      disabled: favoritesPreferences.pagination.infiniteScroll
     },
-    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", keywords: ["pagination", "scroll"], preference: preferences.infiniteScroll }
+    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", keywords: ["pagination", "scroll"], preference: favoritesPreferences.pagination.infiniteScroll }
   ];
 }

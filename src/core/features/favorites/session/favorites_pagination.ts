@@ -12,7 +12,7 @@ export interface FavoritesPaginationPreferences {
 
 export interface FavoritesPaginationDependencies {
   search: FavoritesSearch;
-  paginationPreferences: FavoritesPaginationPreferences;
+  preferences: FavoritesPaginationPreferences;
 }
 
 const INFINITE_SCROLL_PAGE_SIZE = 25;
@@ -25,7 +25,7 @@ export class FavoritesPagination {
   private readonly stopListening: Array<() => void>;
 
   constructor(private readonly dependencies: FavoritesPaginationDependencies) {
-    const { search, paginationPreferences } = dependencies;
+    const { search, preferences } = dependencies;
 
     this.requestedPageNumber = new Signal(1);
     this.currentPageCount = computed(() => Math.max(1, Math.ceil(search.results.value.length / this.getPageSize())));
@@ -33,8 +33,8 @@ export class FavoritesPagination {
     this.currentItems = computed(() => this.sliceItems(), { equals: haveSameItems });
     this.stopListening = [
       search.searched.on(() => this.goToFirst()),
-      paginationPreferences.pageSize.changed.on(() => this.goToFirst()),
-      paginationPreferences.infiniteScroll.changed.on(() => this.goToFirst())
+      preferences.pageSize.changed.on(() => this.goToFirst()),
+      preferences.infiniteScroll.changed.on(() => this.goToFirst())
     ];
   }
 
@@ -75,12 +75,12 @@ export class FavoritesPagination {
   private sliceItems(): readonly Favorite[] {
     const pageSize = this.getPageSize();
     const pageNumber = this.currentPageNumber.value;
-    const start = this.dependencies.paginationPreferences.infiniteScroll.value ? 0 : (pageNumber - 1) * pageSize;
+    const start = this.dependencies.preferences.infiniteScroll.value ? 0 : (pageNumber - 1) * pageSize;
     return this.dependencies.search.results.value.slice(start, pageNumber * pageSize);
   }
 
   private getPageSize(): number {
-    const { pageSize, infiniteScroll } = this.dependencies.paginationPreferences;
+    const { pageSize, infiniteScroll } = this.dependencies.preferences;
     return infiniteScroll.value ? INFINITE_SCROLL_PAGE_SIZE : Math.max(1, pageSize.value);
   }
 }

@@ -2,15 +2,16 @@ import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { StoredValueStorage } from "@/core/utils/stored_value/stored_value_storage";
 
-const APP_NAMESPACE = "favorites-search-gallery";
-const PREFERENCES_NAMESPACE = "preferences";
+const APP_STORAGE_KEY = "favorites-search-gallery";
 
 export interface AppStorage {
-  readonly app: LocalKeyedValues;
   readonly preferences: StoredValueStorage;
+  readonly state: StoredValueStorage;
 }
 
 export function createAppStorage(localKeyedValues: LocalKeyedValues): AppStorage {
-  const app = new NamespacedLocalKeyedValues(APP_NAMESPACE, localKeyedValues);
-  return { app, preferences: new NamespacedLocalKeyedValues(PREFERENCES_NAMESPACE, app) };
+  return {
+    preferences: new NamespacedLocalKeyedValues(`${APP_STORAGE_KEY}:preferences`, localKeyedValues),
+    state: new NamespacedLocalKeyedValues(`${APP_STORAGE_KEY}:state`, localKeyedValues)
+  };
 }
