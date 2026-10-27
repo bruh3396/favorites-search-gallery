@@ -4,16 +4,16 @@ import { FavoritesSearchPanelDependencies, composeFavoritesSearchPanel } from "@
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { applyTheme } from "@/core/ui/theme/theme_applier";
-import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createColorSchemePreference } from "@/core/app/color_scheme_preference";
-import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
+import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 import { h, render } from "@/core/ui/h/h";
-import { APP_FONT } from "@/core/app/app_font";
+import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { FavoritesSettings } from "@/core/app/favorites/favorites_settings";
+import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_settings";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
@@ -22,13 +22,13 @@ import { Keymap } from "@/core/ui/hotkeys/keymap";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
-import { PostActions } from "@/core/app/post_actions";
+import { PostActions } from "@/core/features/post_actions/post_actions";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
-import { FavoriteSizeRecorder } from "@/core/app/favorites/favorite_size_recorder";
+import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox_details/favorite_lightbox_details";
+import { createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
 import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
@@ -62,7 +62,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const { favoritesOwnerId, colorScheme, ...favoritesConfiguration } = configuration;
   const { remotePages, localKeyedValues, navigator, fileSaver, clipboard, visibilityObserver, sizeObserver, hostPage, ...ports } = dependencies;
   const storage = createAppStorage(localKeyedValues);
-  const { app: appPreferences, favorites: preferences } = createPreferenceTree(APP_PREFERENCE_SCHEMA, storage.preferences, ["app", "favorites"]);
+  const { app: appPreferences, favorites: preferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, storage.preferences, ["app", "favorites"]);
   const colorSchemePreference = createColorSchemePreference(colorScheme, hostPage);
   const { mode, volume, muted, details } = preferences.lightbox;
   const paginationPreferences = { pageSize: preferences.pageSize, infiniteScroll: preferences.infiniteScroll };
@@ -108,7 +108,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   return {
     mount: (container): void => {
       const app = mountAppRoot(container, {
-        colorScheme, theme: THEME_DEFINITIONS[appPreferences.theme.peek()], font: APP_FONT, styles: FAVORITES_APP_STYLES
+        colorScheme, theme: THEME_DEFINITIONS[appPreferences.theme.peek()], font: DEFAULT_APP_FONT, styles: FAVORITES_APP_STYLES
       });
 
       app.append(...render(container.ownerDocument, () => FavoritesApp({

@@ -2,7 +2,7 @@ import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
 import { Media } from "@/core/domain/media/media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Signal } from "@/core/utils/reactive/signal";
 import { doNothing } from "@/core/utils/function/function_utilities";

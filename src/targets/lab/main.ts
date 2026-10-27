@@ -2,16 +2,16 @@ import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPending
 import { Rule34Dependencies, Rule34DependenciesConfiguration, createFavoritesDependencies, createRule34Dependencies } from "@/targets/rule34/dependencies";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
 import { Environment } from "@/core/boundary/environment";
-import { Rule34Document } from "@/adapters/rule34/document/document";
+import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
-import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
-import { mountLabScreen } from "@/targets/lab/screen";
-import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
-import { readRule34Environment } from "@/adapters/rule34/environment/environment";
+import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { mountLabScreen } from "@/targets/lab/lab_screen";
+import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
+import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";
 
 declare const SCRIPT_VERSION: string;
 
@@ -45,7 +45,7 @@ async function main(): Promise<void> {
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
   const dependencies = createRule34Dependencies(LAB_CONFIGURATION, environment, rule34Document);
   const labContainer = dependencies.hostPage.claimContent();
-  const { nativeHeaderVisible } = createPreferenceTree(APP_PREFERENCE_SCHEMA, createAppStorage(dependencies.localKeyedValues).preferences, ["favorites"]).favorites;
+  const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(dependencies.localKeyedValues).preferences, ["favorites"]).favorites;
 
   dependencies.hostPage.setHeaderVisible(nativeHeaderVisible.value);
   nativeHeaderVisible.changed.on(visible => dependencies.hostPage.setHeaderVisible(visible));

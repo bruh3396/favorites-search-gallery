@@ -1,5 +1,5 @@
 import { isOneOf, isRecord } from "@/core/utils/guard/guard";
-import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/error";
+import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 
 const TAG_CATEGORY_CODES = [0, 1, 2, 3, 4, 5, null] as const;
 const POST_FAILURE_STATUSES = ["rate_limited", "error", "deleted", "deferred"] as const;

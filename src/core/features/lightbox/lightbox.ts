@@ -9,7 +9,7 @@ import { LightboxRetentionList } from "@/core/features/lightbox/retention_list/l
 import { MediaItem } from "@/core/domain/media/media_item";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
@@ -23,8 +23,8 @@ export interface LightboxDependencies<T extends MediaItem> {
   sizeObserver: SizeObserver;
   remoteMedia: Pick<RemoteMedia, "resolveMedia" | "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
   actions: LightboxActions;
-  volume: Preference<number>;
-  muted: Preference<boolean>;
+  volume: StoredValue<number>;
+  muted: StoredValue<boolean>;
   locateItem: (item: T) => Element | undefined;
   details?: LightboxDetails<T>;
   mode: Readable<LightboxMode>;

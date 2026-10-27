@@ -1,7 +1,7 @@
 import { PostListService, createPostListService } from "@/core/features/post_list/post_list_service";
 import { describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
-import { MemoryRemoteSearchResults } from "@/adapters/memory/ports/remote_search_results/remote_search_results";
+import { MemoryRemotePostList } from "@/adapters/memory/ports/remote_post_list/memory_remote_post_list";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 
@@ -11,7 +11,7 @@ const GIF: Media = { kind: "gif", locator: "1234/a1b2c3.gif" };
 
 function setup(posts: Post[] = [UNTAGGED, OTHER]): PostListService {
   return createPostListService({
-    remoteSearchResults: new MemoryRemoteSearchResults({ pageSize: 2, initialPageIndex: 0 }, { readPosts: () => posts })
+    remotePostList: new MemoryRemotePostList({ pageSize: 2, initialPageIndex: 0 }, { readPosts: () => posts })
   });
 }
 

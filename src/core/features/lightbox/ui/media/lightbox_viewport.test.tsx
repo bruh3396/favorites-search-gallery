@@ -3,7 +3,7 @@ import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { Size } from "@/core/utils/geometry/size";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import VIEWPORT_CSS from "@/core/features/lightbox/ui/media/lightbox_viewport.css?inline";

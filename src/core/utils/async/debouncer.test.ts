@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { Debouncer } from "@/core/utils/async/debouncer";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 function setup(): { debouncer: Debouncer; scheduler: MemoryScheduler } {
   const scheduler = new MemoryScheduler();

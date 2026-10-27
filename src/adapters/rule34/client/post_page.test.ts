@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Media } from "@/core/domain/media/media";
-import { Rule34Error } from "@/adapters/rule34/client/error";
+import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { parsePostPage } from "@/adapters/rule34/client/post_page";
 
 const IMAGE_SOURCE = "https://us.rule34.xxx//images/1234/a1b2c3.png?42";

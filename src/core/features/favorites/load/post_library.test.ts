@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
-import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryClient } from "@/adapters/memory/client/memory_client";
+import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/memory_local_posts";
+import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/memory_local_tag_categories";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";

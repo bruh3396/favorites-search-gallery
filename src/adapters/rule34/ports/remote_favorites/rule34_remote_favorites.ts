@@ -1,0 +1,111 @@
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+import { FAVORITES_PER_PAGE } from "@/adapters/rule34/client/favorites_page";
+import { Post } from "@/core/domain/post/post";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { Retry } from "@/core/utils/async/retry";
+import { Rule34AllFavoritesFetcher } from "@/adapters/rule34/ports/remote_favorites/rule34_all_favorites_fetcher";
+import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
+import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
+import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/rule34_favorite_actions";
+import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
+import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_new_favorites_finder";
+import { Rule34RemovedFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_removed_favorites_finder";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
+
+export interface Rule34RemoteFavoritesDependencies {
+  rule34: Pick<Rule34Client, "readFirstFavoritesPage" | "fetchFavoritesPage" | "fetchFavoriteCount" | "prioritizeFavorites">;
+  rule34Document: Pick<Rule34Document, "readFavoritesPageId">;
+  fetch: Rule34Fetch;
+  scheduler: Scheduler;
+  randomSource: RandomSource;
+}
+
+const FETCH_DELAY = 1_000;
+const MINIMUM_LOCAL_RUN_LENGTH = 25;
+const MAX_FETCH_ATTEMPTS = 5;
+const RETRY_BASE_DELAY = 1_500;
+const RETRY_BACKOFF_BASE = 7;
+
+export class Rule34RemoteFavorites implements RemoteFavorites {
+  private readonly pageId: string;
+  private firstPageFavorites: Post[] | null;
+  private readonly retry: Retry;
+  private readonly favoriteActions: Rule34FavoriteActions;
+
+  constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
+    this.pageId = dependencies.rule34Document.readFavoritesPageId();
+    this.firstPageFavorites = dependencies.rule34.readFirstFavoritesPage();
+    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
+      scheduler: dependencies.scheduler,
+      randomSource: dependencies.randomSource,
+      isRetryable: isRetryableRule34Error
+    });
+    this.favoriteActions = new Rule34FavoriteActions(dependencies);
+  }
+
+  public fetchCount(): Promise<number | null> {
+    return this.retry.retry(() => this.dependencies.rule34.fetchFavoriteCount(this.pageId))
+      .catch(() => null);
+  }
+
+  public fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
+    return this.dependencies.rule34.prioritizeFavorites(() => this.createAllFavoritesFetcher(onFavoritesFound).fetchAll(this.takeFirstPageFavorites()));
+  }
+
+  public findNew(localIds: readonly string[]): Promise<Post[]> {
+    return this.dependencies.rule34.prioritizeFavorites(() => this.createNewFavoritesFinder().findNew(localIds, this.takeFirstPageFavorites()));
+  }
+
+  public findRemoved(localIds: readonly string[], remoteStart: number): Promise<string[]> {
+    return this.dependencies.rule34.prioritizeFavorites(() => this.createRemovedFavoritesFinder().findRemoved(localIds, remoteStart));
+  }
+
+  public async add(id: string): Promise<boolean> {
+    const answer = await this.favoriteActions.add(id);
+    return answer === "added" || answer === "alreadyAdded";
+  }
+
+  public remove(id: string): Promise<boolean> {
+    return this.favoriteActions.remove(id);
+  }
+
+  private takeFirstPageFavorites(): Post[] | undefined {
+    const firstPage = this.firstPageFavorites ?? undefined;
+
+    this.firstPageFavorites = null;
+    return firstPage;
+  }
+
+  private createAllFavoritesFetcher(onFavoritesFound: (posts: Post[]) => void): Rule34AllFavoritesFetcher {
+    return new Rule34AllFavoritesFetcher({
+      onPostsFound: onFavoritesFound,
+      fetch: (pageIndex): Promise<Post[]> => this.fetch(pageIndex),
+      shouldRetry: (error, failureCount): boolean => failureCount < MAX_FETCH_ATTEMPTS && isRetryableRule34Error(error),
+      delayForRetry: (retryCount): number => computeRetryDelay(retryCount, FETCH_DELAY),
+      scheduler: this.dependencies.scheduler
+    });
+  }
+
+  private createNewFavoritesFinder(): Rule34NewFavoritesFinder {
+    return new Rule34NewFavoritesFinder({ pageSize: FAVORITES_PER_PAGE, minimumLocalRunLength: MINIMUM_LOCAL_RUN_LENGTH, fetchDelay: FETCH_DELAY }, {
+      fetch: (pageIndex): Promise<Post[]> => this.retry.retry(() => this.fetch(pageIndex)),
+      scheduler: this.dependencies.scheduler
+    });
+  }
+
+  private createRemovedFavoritesFinder(): Rule34RemovedFavoritesFinder {
+    return new Rule34RemovedFavoritesFinder({ pageSize: FAVORITES_PER_PAGE, fetchDelay: FETCH_DELAY }, {
+      fetch: (pageIndex): Promise<Post[]> => this.retry.retry(() => this.fetch(pageIndex)),
+      scheduler: this.dependencies.scheduler
+    });
+  }
+
+  private fetch(pageIndex: number): Promise<Post[]> {
+    return this.dependencies.rule34.fetchFavoritesPage(this.pageId, pageIndex);
+  }
+}
+
+function computeRetryDelay(retryCount: number, fetchDelay: number): number {
+  return (RETRY_BACKOFF_BASE ** retryCount) + fetchDelay;
+}

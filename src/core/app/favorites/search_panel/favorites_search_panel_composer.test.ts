@@ -7,12 +7,12 @@ import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_loa
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { createImageLoaderService } from "@/testing/image_loader_service";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
@@ -21,8 +21,8 @@ import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
-import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
-import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
@@ -40,7 +40,7 @@ interface Setup {
 
 function setup(posts: Post[] = []): Setup {
   const index = new FavoritesSearchIndex(new StringInterner());
-  const preferences = createPreferenceTree(APP_PREFERENCE_SCHEMA, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
+  const preferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
     observe: element => {

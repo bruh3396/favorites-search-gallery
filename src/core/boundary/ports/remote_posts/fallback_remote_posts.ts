@@ -1,6 +1,7 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
-import { PostUnavailableError, RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
+import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/post_unavailable_error";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 
 export interface FallbackRemotePostsDependencies {
   primary: RemotePosts;

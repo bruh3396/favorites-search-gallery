@@ -3,29 +3,30 @@ import {
   DEFAULT_RULE34_DEPENDENCIES_CONFIGURATION,
   Rule34Dependencies,
   createFavoritesDependencies,
-  createFrozenCobaltClient,
   createRule34Dependencies
 } from "@/targets/rule34/dependencies";
-import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
+import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
-import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/remote_posts";
-import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/remote_posts";
-import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
-import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
-import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
-import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
-import { Rule34Document } from "@/adapters/rule34/document/document";
-import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
-import { Rule34RemoteSearchResults } from "@/adapters/rule34/ports/remote_search_results/remote_search_results";
+import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
+import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";
+import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
+import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
+import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
+import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
+import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media";
+import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
+import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_remote_pages";
+import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
-import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
-import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
-import { readRule34Environment } from "@/adapters/rule34/environment/environment";
+import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
+import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";
 
 declare const SCRIPT_VERSION: string;
+declare const USE_LOCAL_SERVER: boolean;
 
 type StartApp = (environment: Environment, dependencies: Rule34Dependencies) => void;
 
@@ -41,6 +42,16 @@ function readEnvironment(rule34Document: Rule34Document): Environment {
     throw new Error(`Unsupported page: ${location.href}`);
   }
   return { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment };
+}
+
+function createFrozenCobaltClient(
+  environment: Environment,
+  { fetch, scheduler, rule34Document }: Pick<Rule34Dependencies, "fetch" | "scheduler" | "rule34Document">
+): FrozenCobaltClient {
+  return new FrozenCobaltClient({
+    origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
+    identity: { userId: rule34Document.readUserId(), version: environment.version, platform: environment.device }
+  }, { scheduler, fetch });
 }
 
 function startFavoritesApp(environment: Environment, dependencies: Rule34Dependencies): void {
@@ -64,12 +75,12 @@ function startFavoritesApp(environment: Environment, dependencies: Rule34Depende
 function startPostListApp(environment: Environment, {
   hostPage, rule34, rule34Cdn, rule34Document, randomSource, localKeyedValues, scheduler
 }: Rule34Dependencies): void {
-  const { app: appPreferences } = createPreferenceTree(APP_PREFERENCE_SCHEMA, createAppStorage(localKeyedValues).preferences, ["app"]);
+  const { app: appPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["app"]);
 
   if (!appPreferences.postListEnabled.peek()) {
     return;
   }
-  const remoteSearchResults = new Rule34RemoteSearchResults({ rule34, rule34Document, scheduler, randomSource });
+  const remotePostList = new Rule34RemotePostList({ rule34, rule34Document, scheduler, randomSource });
 
   composePostListApp({ colorScheme: environment.colorScheme }, {
     scheduler,
@@ -77,7 +88,7 @@ function startPostListApp(environment: Environment, {
     sizeObserver: new BrowserSizeObserver(),
     remoteMedia: new Rule34CdnRemoteMedia(rule34Cdn),
     remotePages: new Rule34RemotePages(rule34),
-    remoteSearchResults,
+    remotePostList,
     localKeyedValues,
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document)

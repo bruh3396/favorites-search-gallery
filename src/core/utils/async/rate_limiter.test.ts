@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { advanceAndSettle } from "@/testing/async";
 

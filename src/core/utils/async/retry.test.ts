@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Retry } from "@/core/utils/async/retry";
 import { advanceAndSettle } from "@/testing/async";
 

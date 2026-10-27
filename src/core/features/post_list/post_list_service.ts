@@ -1,29 +1,30 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
-import { RemoteSearchResults, SearchResultsPage } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Media } from "@/core/domain/media/media";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Post } from "@/core/domain/post/post";
+import { PostListPage } from "@/core/domain/post_list/post_list_page";
+import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 
 export interface PostListServiceDependencies {
-  remoteSearchResults: RemoteSearchResults;
+  remotePostList: RemotePostList;
 }
 
 export interface PostListService {
-  readonly page: Readable<SearchResultsPage>;
+  readonly page: Readable<PostListPage>;
   readonly changed: Occurrence<Post>;
   showPage(index: number): Promise<void>;
   correctMedia(id: string, media: Media): void;
 }
 
 export function createPostListService(dependencies: PostListServiceDependencies): PostListService {
-  const page = new Signal(dependencies.remoteSearchResults.readInitialPage());
+  const page = new Signal(dependencies.remotePostList.readInitialPage());
   const changed = new Emitter<Post>();
   return {
     page,
     changed,
     showPage: async(index): Promise<void> => {
-      page.value = await dependencies.remoteSearchResults.fetchPage(index);
+      page.value = await dependencies.remotePostList.fetchPage(index);
     },
     correctMedia: (id, media): void => {
       const current = page.peek();

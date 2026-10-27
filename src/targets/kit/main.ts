@@ -4,7 +4,7 @@ import { DEFAULT_THEME, THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { applyTheme } from "@/core/ui/theme/theme_applier";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
-import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
+import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
 import { GEIST_FONT } from "@/core/ui/fonts/geist_font";
 import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument_font";
 import { INTER_FONT } from "@/core/ui/fonts/inter_font";

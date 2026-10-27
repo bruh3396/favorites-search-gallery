@@ -1,4 +1,4 @@
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 export async function flushMicrotasks(): Promise<void> {
   for (let i = 0; i < 20; i += 1) {

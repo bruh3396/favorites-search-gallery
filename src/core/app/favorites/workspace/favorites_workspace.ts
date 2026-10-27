@@ -24,12 +24,12 @@ interface TabGroup {
   readonly activeIndex: number;
 }
 
-interface Workspace {
+export interface FavoritesWorkspaceSnapshot {
   readonly panes: readonly TabGroup[];
 }
 
 const WORKSPACE_NAMESPACE = "favoritesWorkspace";
-const DEFAULT_WORKSPACE: Workspace = { panes: [{ tabs: [DEFAULT_FAVORITES_SEARCH_SETTINGS], activeIndex: 0 }] };
+export const DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT: FavoritesWorkspaceSnapshot = { panes: [{ tabs: [DEFAULT_FAVORITES_SEARCH_SETTINGS], activeIndex: 0 }] };
 const TABS_CODEC = createListCodec(createRecordCodec(DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS));
 const TAB_GROUPS_CODEC = createListCodec<TabGroup>({
   decode: (stored): TabGroup | undefined => {
@@ -41,8 +41,8 @@ const TAB_GROUPS_CODEC = createListCodec<TabGroup>({
   },
   encode: (tabGroup): unknown => ({ tabs: TABS_CODEC.encode(tabGroup.tabs), activeIndex: tabGroup.activeIndex })
 });
-const WORKSPACE_CODEC: Codec<Workspace> = {
-  decode: (stored): Workspace | undefined => {
+export const FAVORITES_WORKSPACE_SNAPSHOT_CODEC: Codec<FavoritesWorkspaceSnapshot> = {
+  decode: (stored): FavoritesWorkspaceSnapshot | undefined => {
     const panes = isRecord(stored) ? TAB_GROUPS_CODEC.decode(stored.panes) : undefined;
     return panes !== undefined && panes.length > 0 ? { panes } : undefined;
   },
@@ -60,13 +60,13 @@ export class FavoritesWorkspace {
     this.tabManager = new TabManager<FavoritesTab>({ dispose: (tab): void => tab.session.dispose() });
     this.tabCount = 0;
     const workspaces = new NamespacedLocalKeyedValues(WORKSPACE_NAMESPACE, dependencies.storage);
-    const { tabs, activeIndex } = (WORKSPACE_CODEC.decode(workspaces.get(favoritesOwnerId)) ?? DEFAULT_WORKSPACE).panes[0];
+    const { tabs, activeIndex } = (FAVORITES_WORKSPACE_SNAPSHOT_CODEC.decode(workspaces.get(favoritesOwnerId)) ?? DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT).panes[0];
     const restoredTabs = tabs.map(settings => this.openTab(settings));
 
     this.tabManager.activate(restoredTabs[activeIndex].id);
     this.activeTab = computed(() => this.findActiveTab().value);
     this.stopStartingActiveTab = effect(() => this.activeTab.value.session.start());
-    this.stopPersisting = effect(() => workspaces.set(favoritesOwnerId, WORKSPACE_CODEC.encode(this.createSnapshot())));
+    this.stopPersisting = effect(() => workspaces.set(favoritesOwnerId, FAVORITES_WORKSPACE_SNAPSHOT_CODEC.encode(this.createSnapshot())));
   }
 
   public openBlankTab(): void {
@@ -110,7 +110,7 @@ export class FavoritesWorkspace {
     this.stopPersisting();
   }
 
-  private createSnapshot(): Workspace {
+  private createSnapshot(): FavoritesWorkspaceSnapshot {
     const tabs = this.tabManager.tabs.value;
     return { panes: [{ tabs: tabs.map(tab => tab.value.session.settings.value), activeIndex: tabs.indexOf(this.findActiveTab()) }] };
   }

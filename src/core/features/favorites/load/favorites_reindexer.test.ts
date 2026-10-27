@@ -5,7 +5,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesReindexer } from "@/core/features/favorites/load/favorites_reindexer";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 import { StringInterner } from "@/core/utils/string/string_interner";

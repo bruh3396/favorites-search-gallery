@@ -1,10 +1,10 @@
 import { CachePage, fetchCachePage } from "@/targets/lab/local_frozen_cobalt";
-import { IndexedDbClient, IndexedDbClientConfiguration } from "@/adapters/browser/indexed_db/client";
-import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
-import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
+import { IndexedDbClient, IndexedDbClientConfiguration } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
+import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
 import { Post } from "@/core/domain/post/post";
-import { decodePost } from "@/adapters/frozen_cobalt/client/decoder";
-import { mintMedia } from "@/adapters/rule34_cdn/client/locator";
+import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
+import { mintRule34CdnMedia } from "@/adapters/rule34_cdn/client/rule34_cdn_media_minter";
 
 export const LAB_NAMESPACE = "fsg-lab";
 export const LAB_OWNER_ID = "lab";
@@ -16,7 +16,7 @@ const CORPUS_OWNER_ID = "corpus";
 const RESET_FLAG = `${LAB_NAMESPACE}-reset`;
 const WRITE_BATCH_SIZE = 10_000;
 
-const indexedDb = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintMedia);
+const indexedDb = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
 const localPosts = new IndexedDbLocalPosts(indexedDb);
 const labFavorites = new IndexedDbLocalFavorites({ ownerId: LAB_OWNER_ID }, indexedDb);
 const corpusOrder = new IndexedDbLocalFavorites({ ownerId: CORPUS_OWNER_ID }, indexedDb);
@@ -93,7 +93,7 @@ export async function pullCorpus(onProgress: (count: number) => void): Promise<v
     nextPage = page.next === null ? null : fetchCachePage(page.next);
     const posts = page.posts.flatMap(post => {
       try {
-        return [decodePost(post, mintMedia).post];
+        return [decodeFrozenCobaltPost(post, mintRule34CdnMedia).post];
       } catch {
         return [];
       }

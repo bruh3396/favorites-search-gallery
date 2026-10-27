@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/lightbox_overlay_visibility";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { createScope } from "@/core/utils/reactive/scope";
 
 const IDLE_DELAY = 750;

@@ -4,7 +4,7 @@ import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
@@ -17,7 +17,7 @@ const OTHER_VIDEO = createPost({ id: "4", media: { kind: "video", locator: "othe
 
 type RemoteMedia = LightboxStageDependencies<Post>["remoteMedia"];
 
-function createPreference<T>(initial: T): Preference<T> {
+function createStoredValue<T>(initial: T): StoredValue<T> {
   const current = new Signal(initial);
   return {
     get value(): T {
@@ -52,8 +52,8 @@ function setup(
   dispose: () => void;
   currentItem: Signal<Post | undefined>;
   retainedItems: Signal<readonly Post[]>;
-  volume: Preference<number>;
-  muted: Preference<boolean>;
+  volume: StoredValue<number>;
+  muted: StoredValue<boolean>;
   closeBitmap: Mock<() => void>;
   resolveStill: () => void;
 } {
@@ -70,8 +70,8 @@ function setup(
   };
   const currentItem = new Signal<Post | undefined>(current);
   const retainedItems = new Signal<readonly Post[]>(retained);
-  const volume = createPreference(0.5);
-  const muted = createPreference(true);
+  const volume = createStoredValue(0.5);
+  const muted = createStoredValue(true);
   const { result: stage, dispose } = render(document, () => new LightboxStage(
     { gifCapacity: 2, videoCapacity: 2 },
     { remoteMedia, resolver, currentItem, retainedItems, volume, muted }

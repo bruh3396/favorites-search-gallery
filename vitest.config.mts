@@ -10,18 +10,18 @@ const DOM_TESTS = [
   "src/core/features/**/*.test.tsx",
   "src/core/features/*/{commands,input,ui}/**/*.test.ts",
   "src/core/features/lightbox/**/*.test.ts",
-  "src/adapters/browser/image/image.test.ts",
-  "src/adapters/browser/ports/host_page/host_page.test.ts",
-  "src/adapters/browser/ports/viewport/viewport.test.ts",
+  "src/adapters/browser/image/image_utilities.test.ts",
+  "src/adapters/browser/ports/host_page/browser_host_page.test.ts",
+  "src/adapters/browser/ports/viewport/browser_viewport.test.ts",
   "src/adapters/browser/ports/morpher/morpher.test.ts",
-  "src/adapters/browser/ports/local_keyed_values/local_keyed_values.test.ts",
-  "src/adapters/memory/ports/host_page/host_page.test.ts",
+  "src/adapters/browser/ports/local_keyed_values/browser_local_keyed_values.test.ts",
+  "src/adapters/memory/ports/host_page/memory_host_page.test.ts",
   "src/adapters/memory/ports/morpher/morpher.test.ts",
-  "src/adapters/memory/ports/remote_media/remote_media.test.ts",
-  "src/adapters/rule34/client/{client,favorites_page,post_list_page,post_page,profile_page,thumb}.test.ts",
-  "src/adapters/rule34/document/document.test.ts",
-  "src/adapters/rule34_cdn/client/{client,video_duration_prober}.test.ts",
-  "src/adapters/rule34_cdn/ports/remote_media/remote_media.test.ts"
+  "src/adapters/memory/ports/remote_media/memory_remote_media.test.ts",
+  "src/adapters/rule34/client/{rule34_client,favorites_page,post_list_page,post_page,profile_page,rule34_thumb_parser}.test.ts",
+  "src/adapters/rule34/document/rule34_document.test.ts",
+  "src/adapters/rule34_cdn/client/{rule34_cdn_client,rule34_cdn_video_duration_prober}.test.ts",
+  "src/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media.test.ts"
 ];
 
 export default defineConfig({

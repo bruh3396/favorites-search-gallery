@@ -3,12 +3,12 @@ import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_b
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
-import { StoredPreference } from "@/core/utils/preference/stored_preference";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
@@ -22,8 +22,8 @@ function setup(posts: Post[]): Setup {
   const index = new FavoritesSearchIndex(new StringInterner());
   const storage = new MemoryLocalKeyedValues();
   const paginationPreferences = {
-    pageSize: new StoredPreference({ key: "pageSize", defaultValue: 2 }, { storage }),
-    infiniteScroll: new StoredPreference({ key: "infiniteScroll", defaultValue: false }, { storage })
+    pageSize: new KeyedStoredValue({ key: "pageSize", defaultValue: 2 }, { storage }),
+    infiniteScroll: new KeyedStoredValue({ key: "infiniteScroll", defaultValue: false }, { storage })
   };
 
   index.rebuild(collection.append(posts));

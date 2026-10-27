@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { ObservableList } from "@/core/utils/collection/observable_list";
 
 const createItem = (id: string): { id: string } => ({ id });

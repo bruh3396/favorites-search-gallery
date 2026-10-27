@@ -1,13 +1,14 @@
+import { LegacyDatabaseNames } from "@/adapters/browser/indexed_db/legacy_database_names";
+import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { Rating } from "@/core/domain/post/rating";
-import { Media } from "@/core/domain/media/media";
 
 const OWNER_PREFIX = "user";
 const TAG_CATEGORIES = ["general", "artist", "unknown", "copyright", "character", "metadata"];
 const COMPRESSED_PREVIEW = /^([^_/]+)_([^/.]+)$/;
 const RATING_BY_INITIAL: Partial<Record<string, Rating>> = { e: "explicit", q: "questionable", s: "safe" };
 
-export interface LegacyPost {
+interface LegacyPost {
   readonly id: string;
   readonly width: number;
   readonly height: number;
@@ -35,12 +36,6 @@ interface LegacyData {
 }
 
 export type LegacyMintMedia = (file: { url: string; tags: string }) => Media | null;
-
-export interface LegacyDatabaseNames {
-  readonly favorites: string;
-  readonly posts: string;
-  readonly tagCategories: string;
-}
 
 export interface LegacyMigration {
   writeToNewDatabase: (transaction: IDBTransaction) => void;
@@ -173,7 +168,7 @@ function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): 
   };
 }
 
-export function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | null {
+function convertPost(legacy: LegacyPost, mintMedia: LegacyMintMedia): Post | null {
   const media = mintLegacyMedia(legacy, mintMedia);
 
   if (media === null) {

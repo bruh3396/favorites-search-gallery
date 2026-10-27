@@ -6,7 +6,7 @@ import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";

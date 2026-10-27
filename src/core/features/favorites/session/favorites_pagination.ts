@@ -1,13 +1,13 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearch } from "@/core/features/favorites/session/favorites_search";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { clamp } from "@/core/utils/number/number_utilities";
 import { haveSameItems } from "@/core/utils/collection/array_utilities";
 
 export interface FavoritesPaginationPreferences {
-  readonly pageSize: Preference<number>;
-  readonly infiniteScroll: Preference<boolean>;
+  readonly pageSize: StoredValue<number>;
+  readonly infiniteScroll: StoredValue<boolean>;
 }
 
 export interface FavoritesPaginationDependencies {

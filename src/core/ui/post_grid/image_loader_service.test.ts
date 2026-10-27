@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { advanceAndSettle } from "@/testing/async";
 import { createImageLoaderService } from "@/testing/image_loader_service";

@@ -27,17 +27,6 @@ export class NamespacedLocalKeyedValues implements LocalKeyedValues {
     this.save(rest);
   }
 
-  public moveIn(keys: readonly string[]): void {
-    const entries = { ...this.entries, ...this.readStored() };
-    const movable = keys.filter(key => !(key in entries) && this.inner.get(key) !== undefined);
-
-    if (movable.length === 0) {
-      return;
-    }
-    this.save({ ...entries, ...Object.fromEntries(movable.map(key => [key, this.inner.get(key)])) });
-    movable.forEach(key => this.inner.remove(key));
-  }
-
   public clear(): void {
     this.inner.remove(this.namespace);
     this.entries = {};

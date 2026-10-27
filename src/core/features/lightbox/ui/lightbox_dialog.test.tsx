@@ -12,13 +12,13 @@ import { LightboxStage } from "@/core/features/lightbox/stage/lightbox_stage";
 import { LightboxVideoClass } from "@/core/features/lightbox/ui/media/lightbox_video";
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/lightbox_viewport";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { StoredPreference } from "@/core/utils/preference/stored_preference";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { expectClassesStyled } from "@/testing/css";
 
 const IDLE_DELAY = 100;
@@ -54,8 +54,8 @@ function setup(details?: LightboxDetails<Post>): {
       resolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
       currentItem,
       retainedItems: new Signal<readonly Post[]>([]),
-      volume: new StoredPreference({ key: "volume", defaultValue: 1 }, { storage }),
-      muted: new StoredPreference({ key: "muted", defaultValue: false }, { storage })
+      volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storage }),
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storage })
     });
     return (
       <LightboxDialog
@@ -90,9 +90,9 @@ function setupOpen(details?: LightboxDetails<Post>): ReturnType<typeof setup> {
   return result;
 }
 
-function createDetails(): LightboxDetails<Post> & { isOpen: StoredPreference<boolean> } {
+function createDetails(): LightboxDetails<Post> & { isOpen: KeyedStoredValue<boolean> } {
   return {
-    isOpen: new StoredPreference({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() }),
+    isOpen: new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() }),
     createContent: () => ({ body: <p>details content</p> })
   };
 }

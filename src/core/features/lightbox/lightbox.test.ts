@@ -2,12 +2,12 @@ import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { StoredPreference } from "@/core/utils/preference/stored_preference";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 import { render } from "@/core/ui/h/h";
@@ -38,8 +38,8 @@ function setup(mode: LightboxMode = "full"): {
     sizeObserver: new MemorySizeObserver(),
     remoteMedia,
     actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download: vi.fn() },
-    volume: new StoredPreference({ key: "volume", defaultValue: 1 }, { storage }),
-    muted: new StoredPreference({ key: "muted", defaultValue: false }, { storage }),
+    volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storage }),
+    muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storage }),
     locateItem: () => undefined,
     mode: new Signal(mode)
   });

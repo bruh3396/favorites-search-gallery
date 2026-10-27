@@ -1,15 +1,15 @@
 import { describe, expect, test } from "vitest";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/memory_file_saver";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
-import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
+import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
@@ -17,7 +17,7 @@ import { createPost } from "@/testing/post";
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = []): ShadowRoot {
   const container = document.createElement("div");
-  const remoteSearchResults: RemoteSearchResults = {
+  const remotePostList: RemotePostList = {
     readInitialPage: () => ({ index: 0, posts }),
     fetchPage: async index => ({ index, posts: [] })
   };
@@ -28,7 +28,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     sizeObserver: new MemorySizeObserver(),
     remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(),
-    remoteSearchResults,
+    remotePostList,
     localKeyedValues,
     navigator: new MemoryNavigator(),
     fileSaver: new MemoryFileSaver()

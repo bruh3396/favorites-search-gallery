@@ -1,4 +1,4 @@
-import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { Signal } from "@/core/utils/reactive/signal";
 
@@ -17,29 +17,29 @@ export class FavoritesActions {
 
   constructor(private readonly configuration: FavoritesActionsConfiguration, private readonly dependencies: FavoritesActionsDependencies) { }
 
-  public async add(id: string): Promise<AddFavoriteResult> {
+  public async add(id: string): Promise<boolean> {
     if (!this.dependencies.acceptsChanges()) {
-      return "blocked";
+      return false;
     }
-    const result = await this.dependencies.remoteFavorites.add(id);
+    const isAdded = await this.dependencies.remoteFavorites.add(id);
 
-    if (result === "added" || result === "alreadyAdded") {
+    if (isAdded) {
       this.getSignal(id).value = true;
     }
-    return result;
+    return isAdded;
   }
 
-  public async remove(id: string): Promise<RemoveFavoriteResult> {
+  public async remove(id: string): Promise<boolean> {
     if (!this.dependencies.acceptsChanges()) {
-      return "blocked";
+      return false;
     }
-    const result = await this.dependencies.remoteFavorites.remove(id);
+    const isRemoved = await this.dependencies.remoteFavorites.remove(id);
 
-    if (result === "removed") {
+    if (isRemoved) {
       this.getSignal(id).value = false;
       await this.dependencies.localFavorites.remove([id]);
     }
-    return result;
+    return isRemoved;
   }
 
   public isFavorited(id: string): boolean {

@@ -3,17 +3,17 @@ import { describe, expect, test } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
-import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
-import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryClient } from "@/adapters/memory/client/memory_client";
+import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
+import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/memory_local_posts";
+import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/memory_local_tag_categories";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/memory_remote_favorites";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
@@ -34,7 +34,7 @@ interface Created {
   paginationPreferences: FavoritesPaginationPreferences;
 }
 
-function createPreference<T>(initial: T): Preference<T> {
+function createStoredValue<T>(initial: T): StoredValue<T> {
   const signal = new Signal(initial);
   const changes = new Emitter<T>();
   return {
@@ -53,7 +53,7 @@ function createPreference<T>(initial: T): Preference<T> {
 function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Created {
   const client = new MemoryClient(posts);
   const localFavorites = new MemoryLocalFavorites();
-  const paginationPreferences = { pageSize: createPreference(2), infiniteScroll: createPreference(false) };
+  const paginationPreferences = { pageSize: createStoredValue(2), infiniteScroll: createStoredValue(false) };
   const favorites = createFavoritesService({ userOwnsFavorites, blacklistedTags: [] }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
@@ -172,16 +172,16 @@ describe("createFavoritesService", () => {
   test("blocks removing a favorite from the user's own favorites until loading finishes", async() => {
     const { favorites, client } = create(createTaggedPosts("apple"));
 
-    expect(await favorites.actions.remove("1")).toBe("blocked");
+    expect(await favorites.actions.remove("1")).toBe(false);
     expect(readFavoriteIds(client)).toEqual(["1"]);
     await favorites.load();
-    expect(await favorites.actions.remove("1")).toBe("removed");
+    expect(await favorites.actions.remove("1")).toBe(true);
   });
 
   test("removes a favorite from another user's favorites before loading finishes", async() => {
     const { favorites } = create(createTaggedPosts("apple"), { userOwnsFavorites: false });
 
-    expect(await favorites.actions.remove("1")).toBe("removed");
+    expect(await favorites.actions.remove("1")).toBe(true);
   });
 
   test("records a favorite removed through its intent", async() => {

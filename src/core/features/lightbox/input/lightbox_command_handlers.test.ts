@@ -1,10 +1,10 @@
 import { LightboxCommandHandlersDependencies, createLightboxCommandHandlers } from "@/core/features/lightbox/input/lightbox_command_handlers";
 import { describe, expect, test, vi } from "vitest";
 import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { StoredPreference } from "@/core/utils/preference/stored_preference";
+import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { createPost } from "@/testing/post";
 
 const POST = createPost();
@@ -101,7 +101,7 @@ describe("createLightboxCommandHandlers", () => {
 
   test("flips the details panel's open state", () => {
     const { targets } = setup();
-    const isOpen = new StoredPreference({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() });
+    const isOpen = new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() });
     const handlers = createLightboxCommandHandlers({ ...targets, details: { isOpen } });
 
     handlers.toggleDetails();

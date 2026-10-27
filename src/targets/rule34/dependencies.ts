@@ -1,35 +1,32 @@
-import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient, IndexedDbClientConfiguration } from "@/adapters/browser/indexed_db/client";
-import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
-import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/clipboard";
-import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";
-import { BrowserHostPage } from "@/adapters/browser/ports/host_page/host_page";
-import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/local_keyed_values";
-import { BrowserNavigator } from "@/adapters/browser/ports/navigator/navigator";
-import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/random_source";
-import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
-import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
-import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
+import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient, IndexedDbClientConfiguration } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
+import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
+import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
+import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
+import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/browser_local_keyed_values";
+import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
+import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/browser_random_source";
+import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
+import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
+import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
 import { Environment } from "@/core/boundary/environment";
 import { FavoritesAppDependencies } from "@/core/app/favorites/favorites_app_composer";
-import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
-import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
-import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";
-import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/local_tag_categories";
+import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
+import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
+import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Media } from "@/core/domain/media/media";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
-import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/client";
-import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/remote_media";
-import { Rule34Client } from "@/adapters/rule34/client/client";
-import { Rule34Document } from "@/adapters/rule34/document/document";
-import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/host_page";
-import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/remote_favorites";
-import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
+import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
+import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media";
+import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
+import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
+import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/rule34_host_page";
+import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/rule34_remote_favorites";
+import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_remote_pages";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-
-declare const USE_LOCAL_SERVER: boolean;
 
 export interface Rule34DependenciesConfiguration {
   readonly indexedDb: IndexedDbClientConfiguration;
@@ -72,16 +69,6 @@ export function createRule34Dependencies(
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34, rule34Document, rule34Cdn,
     hostPage, localKeyedValues
   };
-}
-
-export function createFrozenCobaltClient(
-  environment: Environment,
-  { fetch, scheduler, rule34Document }: Pick<Rule34Dependencies, "fetch" | "scheduler" | "rule34Document">
-): FrozenCobaltClient {
-  return new FrozenCobaltClient({
-    origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
-    identity: { userId: rule34Document.readUserId(), version: environment.version, platform: environment.device }
-  }, { scheduler, fetch });
 }
 
 export function createFavoritesDependencies(

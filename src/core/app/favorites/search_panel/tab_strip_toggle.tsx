@@ -1,6 +1,6 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { h } from "@/core/ui/h/h";
 
 export const TabStripToggleClass = {
@@ -8,7 +8,7 @@ export const TabStripToggleClass = {
 } as const;
 
 export interface TabStripToggleProps {
-  visible: Preference<boolean>;
+  visible: StoredValue<boolean>;
   tabCount: Readable<number>;
 }
 

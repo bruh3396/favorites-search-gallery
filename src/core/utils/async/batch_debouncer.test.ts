@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 const DELAY = 500;
 

@@ -12,7 +12,7 @@ type Layout = (typeof LAYOUTS)[number];
 
 const SCHEDULER = { schedule: (): (() => void) => () => undefined };
 
-function createPreference<T>(initial: T): SettingPreference<T> & { writes: T[] } {
+function createStoredValue<T>(initial: T): SettingPreference<T> & { writes: T[] } {
   const signal = new Signal(initial);
   const writes: T[] = [];
   return {
@@ -68,7 +68,7 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
   preference: SettingPreference<number> & { writes: number[] };
   scheduler: { runNext: () => void };
 } {
-  const preference = createPreference(1);
+  const preference = createStoredValue(1);
   let pending = (): void => undefined;
   const scheduler = {
     schedule: (task: () => void): (() => void) => {
@@ -86,26 +86,26 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
 
 describe("Setting", () => {
   test("refuses a descriptor of an unknown kind", () => {
-    const descriptor = { ...createSwitchSetting(createPreference(false)), kind: "color" } as unknown as SettingDescriptor;
+    const descriptor = { ...createSwitchSetting(createStoredValue(false)), kind: "color" } as unknown as SettingDescriptor;
 
     expect(() => renderSetting(descriptor)).toThrow("Unexpected value");
   });
 
   test("labels the row and captions it from the descriptor", () => {
-    const element = renderSetting({ ...createSwitchSetting(createPreference(false)), description: "Plays videos when opened." });
+    const element = renderSetting({ ...createSwitchSetting(createStoredValue(false)), description: "Plays videos when opened." });
 
     expect(element.textContent).toBe("AutoplayPlays videos when opened.");
   });
 
   test("draws the row and its control at one size", () => {
-    const descriptor = createSwitchSetting(createPreference(false));
+    const descriptor = createSwitchSetting(createStoredValue(false));
     const { element } = setup({ descriptor, size: "small", scheduler: SCHEDULER });
 
     expect([element.dataset.size, queryButtons(element)[0].dataset.size]).toEqual(["small", "small"]);
   });
 
   test("hides and shows its caption as told", () => {
-    const descriptor = { ...createSwitchSetting(createPreference(false)), description: "Plays videos when opened." };
+    const descriptor = { ...createSwitchSetting(createStoredValue(false)), description: "Plays videos when opened." };
     const descriptionVisible = new Signal(false);
     const { element } = setup({ descriptor, descriptionVisible, scheduler: SCHEDULER });
 
@@ -113,7 +113,7 @@ describe("Setting", () => {
   });
 
   test("shows a switch's preference and follows it", () => {
-    const preference = createPreference(false);
+    const preference = createStoredValue(false);
     const [control] = queryButtons(renderSetting(createSwitchSetting(preference)));
 
     expect(control.getAttribute("aria-checked")).toBe("false");
@@ -122,7 +122,7 @@ describe("Setting", () => {
   });
 
   test("writes the next value to the preference", () => {
-    const preference = createPreference(false);
+    const preference = createStoredValue(false);
     const [control] = queryButtons(renderSetting(createSwitchSetting(preference)));
 
     control.click();
@@ -131,7 +131,7 @@ describe("Setting", () => {
   });
 
   test("offers a choice's members in order, by their labels, as a segmented control", () => {
-    const preference = createPreference<Layout>("row");
+    const preference = createStoredValue<Layout>("row");
     const buttons = queryButtons(renderSetting(createLayoutSetting(preference, "segmented")));
 
     expect(buttons.map(button => button.textContent)).toEqual(["Column", "Row", "Square"]);
@@ -141,7 +141,7 @@ describe("Setting", () => {
   });
 
   test("offers a choice as a dropdown", () => {
-    const preference = createPreference<Layout>("row");
+    const preference = createStoredValue<Layout>("row");
     const element = renderSetting(createLayoutSetting(preference, "dropdown"));
     const dropdown = element.querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
@@ -154,7 +154,7 @@ describe("Setting", () => {
   test("passes a dropdown's previews through", () => {
     const previewed: (string | null)[] = [];
     const descriptor: ChoiceSetting<Layout> = {
-      ...createLayoutSetting(createPreference<Layout>("row"), "dropdown"),
+      ...createLayoutSetting(createStoredValue<Layout>("row"), "dropdown"),
       onPreview: member => previewed.push(member)
     };
     const dropdown = renderSetting(descriptor).querySelector<HTMLElement>("[role=\"combobox\"]")!;
@@ -166,7 +166,7 @@ describe("Setting", () => {
   });
 
   test("switches a switch when its row is clicked", () => {
-    const preference = createPreference(false);
+    const preference = createStoredValue(false);
     const element = renderSetting(createSwitchSetting(preference));
 
     element.click();
@@ -174,15 +174,15 @@ describe("Setting", () => {
   });
 
   test("leaves a disabled switch alone when its row is clicked", () => {
-    const preference = createPreference(false);
-    const element = renderSetting(createSwitchSetting(preference, createPreference(true)));
+    const preference = createStoredValue(false);
+    const element = renderSetting(createSwitchSetting(preference, createStoredValue(true)));
 
     element.click();
     expect(preference.value).toBe(false);
   });
 
   test("opens a dropdown's menu when its row is clicked", () => {
-    const element = renderSetting(createLayoutSetting(createPreference<Layout>("row"), "dropdown"));
+    const element = renderSetting(createLayoutSetting(createStoredValue<Layout>("row"), "dropdown"));
     const dropdown = element.querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
     element.click();
@@ -191,7 +191,7 @@ describe("Setting", () => {
   });
 
   test("closes a dropdown's menu when an option is chosen", () => {
-    const preference = createPreference<Layout>("row");
+    const preference = createStoredValue<Layout>("row");
     const element = renderSetting(createLayoutSetting(preference, "dropdown"));
     const dropdown = element.querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
@@ -202,7 +202,7 @@ describe("Setting", () => {
   });
 
   test("leaves a segmented choice alone when its row is clicked", () => {
-    const preference = createPreference<Layout>("row");
+    const preference = createStoredValue<Layout>("row");
     const element = renderSetting(createLayoutSetting(preference, "segmented"));
 
     element.click();
@@ -210,7 +210,7 @@ describe("Setting", () => {
   });
 
   test("toggles one of several choices", () => {
-    const preference = createPreference<readonly Layout[]>(["column"]);
+    const preference = createStoredValue<readonly Layout[]>(["column"]);
     const descriptor: ChoicesSetting<Layout> = {
       id: "layouts", kind: "choices", label: "Layouts", preference, members: LAYOUTS, labels: LAYOUT_LABELS
     };
@@ -221,7 +221,7 @@ describe("Setting", () => {
   });
 
   test("steps a number within its bounds", () => {
-    const preference = createPreference(10);
+    const preference = createStoredValue(10);
     const descriptor: NumberSetting = { id: "columns", kind: "number", label: "Columns", preference, min: 2, max: 10, step: 1 };
     const element = renderSetting(descriptor);
     const input = element.querySelector("input");
@@ -258,7 +258,7 @@ describe("Setting", () => {
   });
 
   test("writes every value a slider passes while dragging", () => {
-    const preference = createPreference(5);
+    const preference = createStoredValue(5);
     const input = renderSetting(createSizeSetting(preference)).querySelector("input")!;
 
     expect([input.getAttribute("aria-label"), input.value]).toEqual(["Size", "5"]);
@@ -268,7 +268,7 @@ describe("Setting", () => {
   });
 
   test("runs an inverted slider from its max to its min", () => {
-    const preference = createPreference(6);
+    const preference = createStoredValue(6);
     const input = renderSetting(createSizeSetting(preference, true)).querySelector("input")!;
 
     expect(input.value).toBe("15");
@@ -279,8 +279,8 @@ describe("Setting", () => {
   });
 
   test("disables the control while its disabled state is true", () => {
-    const infiniteScroll = createPreference(true);
-    const [control] = queryButtons(renderSetting(createSwitchSetting(createPreference(false), infiniteScroll)));
+    const infiniteScroll = createStoredValue(true);
+    const [control] = queryButtons(renderSetting(createSwitchSetting(createStoredValue(false), infiniteScroll)));
 
     expect(control.disabled).toBe(true);
     infiniteScroll.set(false);
@@ -288,7 +288,7 @@ describe("Setting", () => {
   });
 
   test("stops following its preference once disposed", () => {
-    const preference = createPreference(false);
+    const preference = createStoredValue(false);
     const { element, dispose } = setup({ descriptor: createSwitchSetting(preference), scheduler: SCHEDULER });
     const [control] = queryButtons(element);
 

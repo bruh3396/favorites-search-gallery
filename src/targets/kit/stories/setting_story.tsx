@@ -1,0 +1,82 @@
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
+import { h, render } from "@/core/ui/h/h";
+import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
+import { Setting } from "@/core/ui/settings/setting";
+import { Signal } from "@/core/utils/reactive/signal";
+import { Story } from "@/targets/kit/story";
+
+const SCHEDULER = new BrowserScheduler();
+
+const LAYOUTS = ["column", "row", "square"] as const;
+const LAYOUT_LABELS = { column: "Column", row: "Row", square: "Square" };
+
+const RATINGS = ["safe", "questionable", "explicit"] as const;
+const RATING_LABELS = { safe: "Safe", questionable: "Questionable", explicit: "Explicit" };
+
+type Log = (message: string) => void;
+
+function createStoredValue<T>({ id, initial, log }: { id: string; initial: T; log: Log }): SettingPreference<T> {
+  const signal = new Signal(initial);
+  return {
+    get value(): T {
+      return signal.value;
+    },
+    peek: (): T => signal.peek(),
+    set(value: T): void {
+      log(`${id} → ${String(value)}`);
+      signal.value = value;
+    }
+  };
+}
+
+function renderAll(ownerDocument: Document, descriptors: readonly SettingDescriptor[]): HTMLElement {
+  return render(ownerDocument, () => (
+    <div>
+      {descriptors.map(descriptor => <Setting descriptor={descriptor} size="small" scheduler={SCHEDULER} />)}
+    </div>
+  )).result;
+}
+
+function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
+  return renderAll(ownerDocument, [
+    { id: "autoplay", kind: "switch", label: "Autoplay", preference: createStoredValue({ id: "autoplay", initial: true, log }) },
+    {
+      id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
+      preference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
+    },
+    {
+      id: "sort", kind: "choice", label: "Sort layout", control: "dropdown",
+      preference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
+    },
+    {
+      id: "ratings", kind: "choices", label: "Ratings",
+      preference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
+    },
+    { id: "columns", kind: "number", label: "Columns", preference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
+    {
+      id: "tileSize", kind: "slider", label: "Tile size", preference: createStoredValue({ id: "columnCount", initial: 6, log }),
+      min: 1, max: 10, step: 1, inverted: true
+    }
+  ]);
+}
+
+function renderDependent(ownerDocument: Document, log: Log): HTMLElement {
+  const infiniteScroll = createStoredValue({ id: "infiniteScroll", initial: false, log });
+  return renderAll(ownerDocument, [
+    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", preference: infiniteScroll },
+    {
+      id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
+      preference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
+      disabled: infiniteScroll
+    }
+  ]);
+}
+
+export const SETTING_STORY: Story = {
+  title: "Setting (from a descriptor)",
+  variants: [
+    { label: "Every kind", render: renderEveryKind },
+    { label: "Disabled by another setting", render: renderDependent }
+  ]
+};

@@ -1,6 +1,6 @@
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
-import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
-import { APP_FONT } from "@/core/app/app_font";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { ColorScheme } from "@/core/boundary/environment";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
@@ -9,11 +9,11 @@ import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { Post } from "@/core/domain/post/post";
-import { PostActions } from "@/core/app/post_actions";
+import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGridProps } from "@/core/ui/post_grid/post_grid";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
-import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
+import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
@@ -23,7 +23,7 @@ import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list_service";
-import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
+import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 
@@ -37,7 +37,7 @@ export interface PostListAppDependencies {
   scheduler: Scheduler;
   remoteMedia: RemoteMedia;
   remotePages: RemotePages;
-  remoteSearchResults: RemoteSearchResults;
+  remotePostList: RemotePostList;
   localKeyedValues: LocalKeyedValues;
   navigator: Navigator;
   fileSaver: FileSaver;
@@ -45,11 +45,11 @@ export interface PostListAppDependencies {
 
 export function composePostListApp(configuration: PostListAppConfiguration, dependencies: PostListAppDependencies): MountableApp {
   const {
-    visibilityObserver, sizeObserver, scheduler, remoteMedia, remotePages, remoteSearchResults, localKeyedValues, navigator, fileSaver
+    visibilityObserver, sizeObserver, scheduler, remoteMedia, remotePages, remotePostList, localKeyedValues, navigator, fileSaver
   } = dependencies;
-  const postList = createPostListService({ remoteSearchResults });
+  const postList = createPostListService({ remotePostList });
   const storage = createAppStorage(localKeyedValues);
-  const { app: appPreferences, postList: preferences } = createPreferenceTree(APP_PREFERENCE_SCHEMA, storage.preferences, ["app", "postList"]);
+  const { app: appPreferences, postList: preferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, storage.preferences, ["app", "postList"]);
   const { layout, columnCount, hdTilesEnabled } = preferences.grid;
   const { mode, volume, muted } = preferences.lightbox;
   const posts = computed(() => postList.page.value.posts);
@@ -81,7 +81,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
     mount: (container): void => {
       mountAppRoot(
         container,
-        { colorScheme: configuration.colorScheme, theme: THEME_DEFINITIONS[appPreferences.theme.peek()], font: APP_FONT, styles: POST_LIST_APP_STYLES }
+        { colorScheme: configuration.colorScheme, theme: THEME_DEFINITIONS[appPreferences.theme.peek()], font: DEFAULT_APP_FONT, styles: POST_LIST_APP_STYLES }
       ).append(...render(container.ownerDocument, renderApp).result);
     }
   };

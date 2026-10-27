@@ -16,7 +16,7 @@ import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visi
 import { LightboxStage } from "@/core/features/lightbox/stage/lightbox_stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
@@ -47,8 +47,8 @@ export interface LightboxDialogDependencies<T extends MediaItem> {
   actions: LightboxActions;
   navigation: Pick<LightboxNavigation<T>, "isOpen" | "currentItem" | "position" | "goToNext" | "goToPrevious" | "close">;
   retainedItems: Readable<readonly T[]>;
-  volume: Preference<number>;
-  muted: Preference<boolean>;
+  volume: StoredValue<number>;
+  muted: StoredValue<boolean>;
   locateItem: (item: T) => Element | undefined;
   details?: LightboxDetails<T>;
   mode: Readable<LightboxMode>;

@@ -2,26 +2,26 @@ import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { FavoritesShellClass } from "@/core/app/favorites/shell/favorites_shell";
+import { FavoritesAppClass } from "@/core/app/favorites/favorites_app";
 import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/lightbox_button";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/lightbox_position";
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/lightbox_viewport";
-import { MemoryClient } from "@/adapters/memory/client/client";
-import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/clipboard";
-import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/file_saver";
-import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
-import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
-import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
-import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/local_posts";
-import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/local_tag_categories";
-import { MemoryNavigator } from "@/adapters/memory/ports/navigator/navigator";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
-import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/remote_favorites";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/remote_pages";
-import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/remote_posts";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
-import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/size_observer";
+import { MemoryClient } from "@/adapters/memory/client/memory_client";
+import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/memory_clipboard";
+import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/memory_file_saver";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
+import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/memory_local_posts";
+import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/memory_local_tag_categories";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
+import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/memory_remote_favorites";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
+import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
@@ -309,14 +309,14 @@ describe("composeFavoritesApp", () => {
     const root = mount();
 
     root.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
-    expect(root.querySelector(`.${FavoritesShellClass.root}`)!.hasAttribute("data-zen")).toBe(true);
+    expect(root.querySelector(`.${FavoritesAppClass.root}`)!.hasAttribute("data-zen")).toBe(true);
   });
 
   test("toggles zen on Z in either case", () => {
-    const shell = mount().querySelector(`.${FavoritesShellClass.root}`)!;
+    const app = mount().querySelector(`.${FavoritesAppClass.root}`)!;
     const zenStates = ["z", "Z"].map(key => {
       document.dispatchEvent(new KeyboardEvent("keydown", { key }));
-      return shell.hasAttribute("data-zen");
+      return app.hasAttribute("data-zen");
     });
 
     expect(zenStates).toEqual([true, false]);
@@ -327,7 +327,7 @@ describe("composeFavoritesApp", () => {
 
     root.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    expect(root.querySelector(`.${FavoritesShellClass.root}`)!.hasAttribute("data-zen")).toBe(false);
+    expect(root.querySelector(`.${FavoritesAppClass.root}`)!.hasAttribute("data-zen")).toBe(false);
   });
 
   test("draws the skeleton recorded for the favorites' owner", () => {

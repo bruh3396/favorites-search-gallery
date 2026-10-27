@@ -1,9 +1,9 @@
 import { BASE_INDEX_URL } from "@/adapters/rule34/client/urls";
 import { Post } from "@/core/domain/post/post";
-import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
-import { parseThumb } from "@/adapters/rule34/client/thumb";
+import { Rule34MintMedia } from "@/adapters/rule34/client/rule34_mint_media";
+import { parseRule34Thumb } from "@/adapters/rule34/client/rule34_thumb_parser";
 
-export const POSTS_PER_POST_LIST_PAGE = 42;
+const POSTS_PER_POST_LIST_PAGE = 42;
 
 export interface Rule34PostListPage {
   readonly posts: Post[];
@@ -28,7 +28,7 @@ export function postListPageIndex(offset: number): number {
 
 export function parsePostListPage(page: ParentNode, mintMedia: Rule34MintMedia): Rule34PostListPage {
   return {
-    posts: [...page.querySelectorAll<HTMLElement>(".thumb")].map(thumb => parseThumb(thumb, mintMedia)).filter(post => post !== null),
+    posts: [...page.querySelectorAll<HTMLElement>(".thumb")].map(thumb => parseRule34Thumb(thumb, mintMedia)).filter(post => post !== null),
     paginator: page.querySelector<HTMLElement>("#paginator")
   };
 }

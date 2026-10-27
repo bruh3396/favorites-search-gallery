@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPosts } from "@/testing/post";

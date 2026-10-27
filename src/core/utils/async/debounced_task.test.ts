@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { createDebouncedTask } from "@/core/utils/async/debounced_task";
 
 describe("createDebouncedTask", () => {

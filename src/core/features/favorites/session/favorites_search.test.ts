@@ -6,7 +6,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesSearch } from "@/core/features/favorites/session/favorites_search";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { effect } from "@/core/utils/reactive/signal";

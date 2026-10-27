@@ -16,7 +16,7 @@ const LAYOUT: SettingsLayout = [
   { id: "gallery", title: "Gallery", settings: ["loop"] }
 ];
 
-function createPreference<T>(initial: T): SettingPreference<T> {
+function createStoredValue<T>(initial: T): SettingPreference<T> {
   const signal = new Signal(initial);
   return {
     get value(): T {
@@ -29,7 +29,7 @@ function createPreference<T>(initial: T): SettingPreference<T> {
   };
 }
 
-function createSwitchSetting(id: string, preference = createPreference(false)): SwitchSetting {
+function createSwitchSetting(id: string, preference = createStoredValue(false)): SwitchSetting {
   return { id, kind: "switch", label: id, preference };
 }
 
@@ -120,7 +120,7 @@ describe("SettingsScreen", () => {
   });
 
   test("stops following its preferences and query once disposed", () => {
-    const hints = createPreference(false);
+    const hints = createStoredValue(false);
     const descriptors = [createSwitchSetting("hints", hints), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
     const { element, query, dispose } = setup({ descriptors });
 

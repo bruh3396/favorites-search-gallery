@@ -4,7 +4,7 @@ import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_m
 import { LightboxVideoPool } from "@/core/features/lightbox/stage/lightbox_video_pool";
 import { MediaItem } from "@/core/domain/media/media_item";
 import { LightboxMediaElement } from "@/core/features/lightbox/stage/lightbox_media_element";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Resource } from "@/core/utils/reactive/resource";
 import { Size } from "@/core/utils/geometry/size";
@@ -22,8 +22,8 @@ export interface LightboxStageDependencies<T extends MediaItem> {
   resolver: LightboxMediaResolver;
   currentItem: Readable<T | undefined>;
   retainedItems: Readable<readonly T[]>;
-  volume: Preference<number>;
-  muted: Preference<boolean>;
+  volume: StoredValue<number>;
+  muted: StoredValue<boolean>;
 }
 
 export class LightboxStage<T extends MediaItem> {
@@ -35,8 +35,8 @@ export class LightboxStage<T extends MediaItem> {
   public readonly shownMedia: Readable<LightboxMediaElement | undefined>;
   public readonly mediaSize: Readable<Size | undefined>;
   private readonly videoPool: LightboxVideoPool;
-  private readonly volume: Preference<number>;
-  private readonly muted: Preference<boolean>;
+  private readonly volume: StoredValue<number>;
+  private readonly muted: StoredValue<boolean>;
 
   constructor(configuration: LightboxStageConfiguration, dependencies: LightboxStageDependencies<T>) {
     const { remoteMedia, resolver, currentItem, retainedItems, volume, muted } = dependencies;

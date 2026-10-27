@@ -1,7 +1,7 @@
 import { BASE_INDEX_URL } from "@/adapters/rule34/client/urls";
 import { Post } from "@/core/domain/post/post";
-import { Rule34MintMedia } from "@/adapters/rule34/client/mint_media";
-import { parseThumb } from "@/adapters/rule34/client/thumb";
+import { Rule34MintMedia } from "@/adapters/rule34/client/rule34_mint_media";
+import { parseRule34Thumb } from "@/adapters/rule34/client/rule34_thumb_parser";
 
 export const FAVORITES_PER_PAGE = 50;
 
@@ -14,7 +14,7 @@ export function favoritesPageOffset(pageIndex: number): number {
 }
 
 export function parseFavoritesPage(page: ParentNode, mintMedia: Rule34MintMedia): Post[] {
-  return extractFavoriteElements(page).map(thumb => parseThumb(thumb, mintMedia)).filter(post => post !== null);
+  return extractFavoriteElements(page).map(thumb => parseRule34Thumb(thumb, mintMedia)).filter(post => post !== null);
 }
 
 function extractFavoriteElements(page: ParentNode): HTMLElement[] {

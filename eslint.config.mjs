@@ -729,7 +729,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/adapters/browser/ports/scheduler/scheduler.test.ts"],
+    files: ["src/adapters/browser/ports/scheduler/browser_scheduler.test.ts"],
     rules: {
       "no-restricted-globals": "error",
       "no-restricted-syntax": ["error", ...BOOLEAN_FLAG_PARAMETERS, CALLED_ONCE]

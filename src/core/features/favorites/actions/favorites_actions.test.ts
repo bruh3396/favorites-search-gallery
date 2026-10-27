@@ -1,7 +1,7 @@
-import { AddFavoriteResult, RemoteFavorites, RemoveFavoriteResult } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { describe, expect, test, vi } from "vitest";
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
-import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/local_favorites";
+import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { effect } from "@/core/utils/reactive/signal";
 
 type RemoteFavoriteChanges = Pick<RemoteFavorites, "add" | "remove">;
@@ -12,10 +12,10 @@ interface Setup {
   remoteFavorites: RemoteFavoriteChanges;
 }
 
-function createAnsweringRemote(addResult: AddFavoriteResult, removeResult: RemoveFavoriteResult): RemoteFavoriteChanges {
+function createAnsweringRemote(isAdded: boolean, isRemoved: boolean): RemoteFavoriteChanges {
   return {
-    add: vi.fn((): Promise<AddFavoriteResult> => Promise.resolve(addResult)),
-    remove: vi.fn((): Promise<RemoveFavoriteResult> => Promise.resolve(removeResult))
+    add: vi.fn((): Promise<boolean> => Promise.resolve(isAdded)),
+    remove: vi.fn((): Promise<boolean> => Promise.resolve(isRemoved))
   };
 }
 
@@ -27,7 +27,7 @@ interface SetupOptions {
 
 async function setup({
   favoritedByDefault = true,
-  remoteFavorites = createAnsweringRemote("added", "removed"),
+  remoteFavorites = createAnsweringRemote(true, true),
   acceptsChanges = (): boolean => true
 }: SetupOptions = {}): Promise<Setup> {
   const localFavorites = new MemoryLocalFavorites();
@@ -61,9 +61,9 @@ describe("FavoritesActions", () => {
   });
 
   test("keeps a favorite whose removal fails", async() => {
-    const { actions, localFavorites } = await setup({ remoteFavorites: createAnsweringRemote("added", "error") });
+    const { actions, localFavorites } = await setup({ remoteFavorites: createAnsweringRemote(true, false) });
 
-    expect(await actions.remove("1")).toBe("error");
+    expect(await actions.remove("1")).toBe(false);
     expect(actions.isFavorited("1")).toBe(true);
     expect(await localFavorites.getAll()).toEqual(["1", "2"]);
   });
@@ -75,32 +75,25 @@ describe("FavoritesActions", () => {
     expect(await localFavorites.getAll()).toEqual(["2"]);
   });
 
-  test("marks a favorite that was already added as favorited", async() => {
-    const { actions } = await setup({ favoritedByDefault: false, remoteFavorites: createAnsweringRemote("alreadyAdded", "removed") });
+  test("marks an added favorite as favorited", async() => {
+    const { actions } = await setup({ favoritedByDefault: false });
 
-    expect(await actions.add("1")).toBe("alreadyAdded");
+    expect(await actions.add("1")).toBe(true);
     expect(actions.isFavorited("1")).toBe(true);
   });
 
-  test.each<AddFavoriteResult>(["loggedOut", "cancelled", "error"])("leaves a favorite unmarked when adding answers %s", async result => {
-    const { actions } = await setup({ favoritedByDefault: false, remoteFavorites: createAnsweringRemote(result, "removed") });
+  test("leaves a favorite unmarked when adding fails", async() => {
+    const { actions } = await setup({ favoritedByDefault: false, remoteFavorites: createAnsweringRemote(false, true) });
 
-    expect(await actions.add("1")).toBe(result);
+    expect(await actions.add("1")).toBe(false);
     expect(actions.isFavorited("1")).toBe(false);
-  });
-
-  test.each<RemoveFavoriteResult>(["cancelled", "error"])("keeps a favorite when removing answers %s", async result => {
-    const { actions } = await setup({ remoteFavorites: createAnsweringRemote("added", result) });
-
-    expect(await actions.remove("1")).toBe(result);
-    expect(actions.isFavorited("1")).toBe(true);
   });
 
   test("blocks adding and removing without a request while it accepts no changes", async() => {
     const { actions, localFavorites, remoteFavorites } = await setup({ acceptsChanges: () => false });
 
-    expect(await actions.add("3")).toBe("blocked");
-    expect(await actions.remove("1")).toBe("blocked");
+    expect(await actions.add("3")).toBe(false);
+    expect(await actions.remove("1")).toBe(false);
     expect(remoteFavorites.add).not.toHaveBeenCalled();
     expect(remoteFavorites.remove).not.toHaveBeenCalled();
     expect(await localFavorites.getAll()).toEqual(["1", "2"]);
@@ -110,9 +103,9 @@ describe("FavoritesActions", () => {
     let isAccepting = false;
     const { actions } = await setup({ acceptsChanges: () => isAccepting });
 
-    expect(await actions.remove("1")).toBe("blocked");
+    expect(await actions.remove("1")).toBe(false);
     isAccepting = true;
-    expect(await actions.remove("1")).toBe("removed");
+    expect(await actions.remove("1")).toBe(true);
   });
 
   test("reruns an effect that reads it when it changes", async() => {

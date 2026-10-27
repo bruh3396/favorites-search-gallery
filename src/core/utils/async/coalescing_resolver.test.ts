@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { CoalescingResolver } from "@/core/utils/async/coalescing_resolver";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 const RESOLVER_COALESCING = { flushSize: 10, flushTimeout: 100 };
 

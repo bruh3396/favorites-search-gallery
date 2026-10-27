@@ -1,6 +1,6 @@
 import { ImageLoaderService, ImageLoaderServiceConfiguration, ImageLoaderServiceDependencies } from "@/core/ui/post_grid/image_loader_service";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/remote_media";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 
 export function createImageLoaderService(

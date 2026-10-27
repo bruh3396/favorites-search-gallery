@@ -7,9 +7,9 @@ import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_b
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearch } from "@/core/features/favorites/session/favorites_search";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
-import { Preference } from "@/core/utils/preference/preference";
+import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { StringInterner } from "@/core/utils/string/string_interner";
@@ -22,7 +22,7 @@ interface Setup {
   paginationPreferences: FavoritesPaginationPreferences;
 }
 
-function createPreference<T>(initial: T): Preference<T> {
+function createStoredValue<T>(initial: T): StoredValue<T> {
   const current = new Signal(initial);
   const changed = new Emitter<T>();
   return {
@@ -41,7 +41,7 @@ function createPreference<T>(initial: T): Preference<T> {
 function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
   const collection = new FavoritesCollection(new StringInterner());
   const index = new FavoritesSearchIndex(new StringInterner());
-  const paginationPreferences = { pageSize: createPreference(2), infiniteScroll: createPreference(infiniteScroll) };
+  const paginationPreferences = { pageSize: createStoredValue(2), infiniteScroll: createStoredValue(infiniteScroll) };
 
   index.rebuild(collection.append(posts));
   const search = new FavoritesSearch(
