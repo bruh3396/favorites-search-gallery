@@ -1,11 +1,11 @@
-import { FavoritesPanelBodyInput, describeFavoritesPanelBody } from "@/core/app/favorites/search_panel/body";
+import { FavoritesSearchPanelBodyInput, describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 import { describe, expect, test } from "vitest";
 
-function describeWith(overrides: Partial<FavoritesPanelBodyInput>): ReturnType<typeof describeFavoritesPanelBody> {
-  return describeFavoritesPanelBody({ resultCount: 0, isSearchable: false, loadPhase: "fetching", query: "", isFiltered: false, ...overrides });
+function describeWith(overrides: Partial<FavoritesSearchPanelBodyInput>): ReturnType<typeof describeFavoritesSearchPanelBody> {
+  return describeFavoritesSearchPanelBody({ resultCount: 0, isSearchable: false, loadPhase: "fetching", query: "", isFiltered: false, ...overrides });
 }
 
-describe("describeFavoritesPanelBody", () => {
+describe("describeFavoritesSearchPanelBody", () => {
   test("shows the skeleton while no favorites are searchable and loading continues", () => {
     expect(describeWith({ query: "cat", isFiltered: true })).toEqual({ kind: "skeleton" });
   });

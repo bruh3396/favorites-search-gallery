@@ -5,11 +5,12 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
-import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
+import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/random_source";
 import { Post } from "@/core/domain/post/post";
-import { createFavoritesPreferences } from "@/core/app/preferences";
+import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
+import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
 import { createPost } from "@/testing/post";
 import { effect } from "@/core/utils/reactive/signal";
 import { StringInterner } from "@/core/utils/string/string_interner";
@@ -20,7 +21,7 @@ interface Setup {
 }
 
 function createWorkspace(storage: MemoryLocalKeyedValues, favoritesOwnerId = "1", posts: Post[] = []): FavoritesWorkspace {
-  const paginationPreferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
+  const paginationPreferences = createPreferenceTree(APP_PREFERENCE_SCHEMA, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const searchIndex = new FavoritesSearchIndex(new StringInterner());
 
   paginationPreferences.pageSize.set(2);

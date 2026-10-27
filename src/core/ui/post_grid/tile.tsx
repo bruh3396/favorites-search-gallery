@@ -20,7 +20,7 @@ export const TileClass = {
 
 export interface TileProps {
   post: MediaItem;
-  dimensions: Size;
+  size: Size;
   sizing: Readable<GridSizing>;
   actions: readonly Node[];
   visibilityObserver: VisibilityObserver;
@@ -38,7 +38,7 @@ interface PreviewElements {
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
-  const { post, dimensions, sizing, actions, href, onPlainClick, onCtrlClick } = props;
+  const { post, size, sizing, actions, href, onPlainClick, onCtrlClick } = props;
   const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
   const canvas = <canvas className={TileClass.image} hidden /> as HTMLCanvasElement;
@@ -59,7 +59,7 @@ export function Tile(props: TileProps): HTMLElement {
     </div>
   );
 
-  setAspectRatio(root, dimensions);
+  setAspectRatio(root, size);
   onCleanup(props.visibilityObserver.observe(root, isVisible => {
     visible.value = isVisible;
   }));
@@ -70,7 +70,7 @@ export function Tile(props: TileProps): HTMLElement {
 
   if (hasMedia(post.media)) {
     showPreview({ root, preview }, props.imageLoaderService.resolvePreviewUrl(post.media));
-    const targetWidth = computed(() => pickDecodeWidth(sizing.value, dimensions));
+    const targetWidth = computed(() => pickDecodeWidth(sizing.value, size));
 
     onCleanup(props.imageLoaderService.createLoader(canvas, post.media, targetWidth).trackVisibility(visible));
   }

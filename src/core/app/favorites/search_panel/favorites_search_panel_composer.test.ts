@@ -20,8 +20,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { composeSearchPanel } from "@/core/app/favorites/search_panel/composer";
-import { createFavoritesPreferences } from "@/core/app/preferences";
+import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
+import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
+import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
 import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
@@ -39,7 +40,7 @@ interface Setup {
 
 function setup(posts: Post[] = []): Setup {
   const index = new FavoritesSearchIndex(new StringInterner());
-  const preferences = createFavoritesPreferences(new MemoryLocalKeyedValues());
+  const preferences = createPreferenceTree(APP_PREFERENCE_SCHEMA, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
     observe: element => {
@@ -63,11 +64,11 @@ function setup(posts: Post[] = []): Setup {
 
   session.start();
   const scheduler = new MemoryScheduler();
-  const { result: element, dispose } = render(document, () => composeSearchPanel(createFavoritesTab(session), {
+  const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(session), {
     favorites: { loadState: new Signal<FavoritesLoadState>({ phase: "starting" }), searchable: new Milestone(), hydrated: new Emitter<Favorite>() },
     preferences,
     tabCount: new Signal(1),
-    skeletonDimensions: { value: [] },
+    favoriteSizeRecorder: { sizes: [] },
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
     imageLoaderService: createImageLoaderService({ scheduler }),
@@ -90,7 +91,7 @@ function readShownPostUrls(element: HTMLElement): string[] {
   });
 }
 
-describe("composeSearchPanel", () => {
+describe("composeFavoritesSearchPanel", () => {
   test("links each favorite's tile to its post's page", () => {
     const { element } = setup([createPost({ id: "1" })]);
 

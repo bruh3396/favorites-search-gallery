@@ -10,7 +10,7 @@ import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/size_observer";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/visibility_observer";
 import { Environment } from "@/core/boundary/environment";
-import { FavoritesAppDependencies } from "@/core/app/favorites/composer";
+import { FavoritesAppDependencies } from "@/core/app/favorites/favorites_app_composer";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/local_posts";

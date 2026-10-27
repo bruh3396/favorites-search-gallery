@@ -12,7 +12,7 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { RemoteSearchResults } from "@/core/boundary/ports/remote_search_results/remote_search_results";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { TileClass } from "@/core/ui/post_grid/tile";
-import { composePostListApp } from "@/core/app/post_list/composer";
+import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
 import { createPost } from "@/testing/post";
 
 function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = []): ShadowRoot {
@@ -47,7 +47,7 @@ describe("composePostListApp", () => {
   test("lays the grid out in the layout kept in the post list preferences, not the favorites'", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { layout: "row" }, favorites: { layout: "square" } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { grid: { layout: "row" } }, favorites: { grid: { layout: "square" } } } });
     expect(mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}`)!.dataset.layout).toBe("row");
   });
 
@@ -55,7 +55,7 @@ describe("composePostListApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const click = new MouseEvent("click", { bubbles: true, cancelable: true });
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { lightbox: { mode: "off" } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { lightbox: { mode: "off" } } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" })]);
 
     root.querySelector(`.${TileClass.link}`)!.dispatchEvent(click);

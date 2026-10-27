@@ -1,10 +1,9 @@
 import { describe, expect, test, vi } from "vitest";
-import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/app/favorites/storage/skeleton_dimensions";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
-import { SkeletonDimensions } from "@/core/app/favorites/storage/skeleton_dimensions";
+import { FavoriteSizeRecorder } from "@/core/app/favorites/favorite_size_recorder";
 
 function createFavorite(width: number, height: number): Favorite {
   return {
@@ -21,11 +20,11 @@ function createFavorite(width: number, height: number): Favorite {
 function setup(
   storage = new MemoryLocalKeyedValues(), ownerId = "1",
   { results = new Signal<readonly Favorite[]>([]), scheduler = new MemoryScheduler() } = {}
-): SkeletonDimensions {
-  return new SkeletonDimensions({ ownerId }, { storage, results, scheduler });
+): FavoriteSizeRecorder {
+  return new FavoriteSizeRecorder({ ownerId, measuredCount: 3, recordDelay: 100, fallbackCount: 2 }, { storage, results, scheduler });
 }
 
-describe("SkeletonDimensions", () => {
+describe("FavoriteSizeRecorder", () => {
   test("records results after they settle and cancels an empty result", () => {
     const storage = new MemoryLocalKeyedValues();
     const scheduler = new MemoryScheduler();
@@ -34,54 +33,54 @@ describe("SkeletonDimensions", () => {
     setup(storage, "1", { results, scheduler });
 
     results.value = [createFavorite(4, 3)];
-    scheduler.advance(250);
+    scheduler.advance(50);
     results.value = [];
-    scheduler.advance(500);
+    scheduler.advance(100);
 
-    expect(storage.get("favoritesSkeleton")).toBeUndefined();
+    expect(storage.get("favoriteSizes")).toBeUndefined();
 
     results.value = [createFavorite(1, 2)];
-    scheduler.advance(499);
-    expect(storage.get("favoritesSkeleton")).toBeUndefined();
+    scheduler.advance(99);
+    expect(storage.get("favoriteSizes")).toBeUndefined();
     scheduler.advance(1);
-    expect(storage.get("favoritesSkeleton")).toEqual({ 1: [{ width: 1, height: 2 }] });
+    expect(storage.get("favoriteSizes")).toEqual({ 1: [{ width: 1, height: 2 }] });
   });
 
   describe("value", () => {
-    test("returns the default skeleton when the owner has none recorded", () => {
-      expect(setup().value).toEqual(DEFAULT_SKELETON_DIMENSIONS);
+    test("returns the fallback squares when the owner has none recorded", () => {
+      expect(setup().sizes).toEqual([{ width: 1, height: 1 }, { width: 1, height: 1 }]);
     });
 
-    test("returns the default skeleton when the record isn't a list of dimensions", () => {
+    test("returns the fallback squares when the record isn't a list of dimensions", () => {
       const storage = new MemoryLocalKeyedValues();
 
-      storage.set("favoritesSkeleton", { 1: [{ width: "4", height: 3 }] });
-      expect(setup(storage).value).toEqual(DEFAULT_SKELETON_DIMENSIONS);
+      storage.set("favoriteSizes", { 1: [{ width: "4", height: 3 }] });
+      expect(setup(storage).sizes).toEqual([{ width: 1, height: 1 }, { width: 1, height: 1 }]);
     });
   });
 
   describe("record", () => {
     test("measures every favorite, including those whose dimensions aren't known", () => {
-      const skeletonDimensions = setup();
+      const favoriteSizeRecorder = setup();
 
-      skeletonDimensions.record([createFavorite(4, 3), createFavorite(0, 0), createFavorite(1, 2)]);
-      expect(skeletonDimensions.value).toEqual([{ width: 4, height: 3 }, { width: 0, height: 0 }, { width: 1, height: 2 }]);
+      favoriteSizeRecorder.record([createFavorite(4, 3), createFavorite(0, 0), createFavorite(1, 2)]);
+      expect(favoriteSizeRecorder.sizes).toEqual([{ width: 4, height: 3 }, { width: 0, height: 0 }, { width: 1, height: 2 }]);
     });
 
-    test("measures only the first 50 favorites", () => {
-      const skeletonDimensions = setup();
+    test("measures only the configured number of favorites", () => {
+      const favoriteSizeRecorder = setup();
 
-      skeletonDimensions.record(Array.from({ length: 60 }, () => createFavorite(1, 1)));
-      expect(skeletonDimensions.value).toHaveLength(50);
+      favoriteSizeRecorder.record(Array.from({ length: 5 }, () => createFavorite(1, 1)));
+      expect(favoriteSizeRecorder.sizes).toHaveLength(3);
     });
 
     test("doesn't write unchanged dimensions again", () => {
       const storage = new MemoryLocalKeyedValues();
-      const skeletonDimensions = setup(storage);
+      const favoriteSizeRecorder = setup(storage);
       const write = vi.spyOn(storage, "set");
 
-      skeletonDimensions.record([createFavorite(4, 3)]);
-      skeletonDimensions.record([createFavorite(4, 3)]);
+      favoriteSizeRecorder.record([createFavorite(4, 3)]);
+      favoriteSizeRecorder.record([createFavorite(4, 3)]);
       expect(write).toHaveBeenCalledOnce();
     });
 
@@ -90,7 +89,7 @@ describe("SkeletonDimensions", () => {
 
       setup(storage, "1").record([createFavorite(4, 3)]);
       setup(storage, "2").record([createFavorite(1, 2)]);
-      expect(storage.get("favoritesSkeleton")).toEqual({ 1: [{ width: 4, height: 3 }], 2: [{ width: 1, height: 2 }] });
+      expect(storage.get("favoriteSizes")).toEqual({ 1: [{ width: 4, height: 3 }], 2: [{ width: 1, height: 2 }] });
     });
   });
 });

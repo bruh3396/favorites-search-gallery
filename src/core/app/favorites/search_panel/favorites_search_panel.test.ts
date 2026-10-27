@@ -1,5 +1,5 @@
 import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings, filtersFavorites } from "@/core/features/favorites/search/favorites_search_settings";
-import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/search_panel/search_panel";
+import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
@@ -9,7 +9,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
-import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/search_panel.css?inline";
+import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
 import { expectClassesStyled } from "@/testing/css";
 
 const PAGE_SIZE = 2;

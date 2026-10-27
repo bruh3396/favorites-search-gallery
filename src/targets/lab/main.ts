@@ -5,9 +5,10 @@ import { Environment } from "@/core/boundary/environment";
 import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
-import { composeFavoritesApp } from "@/core/app/favorites/composer";
+import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
+import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createFavoritesPreferences } from "@/core/app/preferences";
+import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
 import { mountLabScreen } from "@/targets/lab/screen";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
@@ -44,7 +45,7 @@ async function main(): Promise<void> {
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
   const dependencies = createRule34Dependencies(LAB_CONFIGURATION, environment, rule34Document);
   const labContainer = dependencies.hostPage.claimContent();
-  const { nativeHeaderVisible } = createFavoritesPreferences(createAppStorage(dependencies.localKeyedValues).favoritesPreferences);
+  const { nativeHeaderVisible } = createPreferenceTree(APP_PREFERENCE_SCHEMA, createAppStorage(dependencies.localKeyedValues).preferences, ["favorites"]).favorites;
 
   dependencies.hostPage.setHeaderVisible(nativeHeaderVisible.value);
   nativeHeaderVisible.changed.on(visible => dependencies.hostPage.setHeaderVisible(visible));

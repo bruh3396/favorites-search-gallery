@@ -7,7 +7,7 @@ import { FavoritesSession } from "@/core/features/favorites/session/favorites_se
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { computed } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
-import { describeFavoritesPanelBody } from "@/core/app/favorites/search_panel/body";
+import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 
 export const FavoritesSearchPanelClass = {
   root: "fsg-FavoritesSearchPanel",
@@ -29,7 +29,7 @@ export interface FavoritesSearchPanelProps {
 }
 
 export function FavoritesSearchPanel({ favorites, session, focusSearch, trailing, skeleton, grid }: FavoritesSearchPanelProps): HTMLElement {
-  const panelBody = computed(() => describeFavoritesPanelBody({
+  const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: session.results.value.length,
     isSearchable: favorites.searchable.reached,
     loadPhase: favorites.loadState.value.phase,

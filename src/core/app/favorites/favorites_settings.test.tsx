@@ -1,20 +1,19 @@
-import {
-  FavoritesPreferences, createAppPreferences, createColorSchemePreference, createFavoritesPreferences, createLightboxPreferences
-} from "@/core/app/preferences";
+import { APP_PREFERENCE_SCHEMA, AppPreferences } from "@/core/app/app_preference_schema";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { FavoritesSettings } from "@/core/app/favorites/favorites_settings";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/host_page";
+import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/scheduler";
+import { createColorSchemePreference } from "@/core/app/color_scheme_preference";
+import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
 
-function setup(): { preferences: FavoritesPreferences; queryInput: (label: string) => HTMLInputElement } {
-  const stored = new Map<string, unknown>();
-  const preferences = createFavoritesPreferences({ get: key => stored.get(key), set: (key, value) => stored.set(key, value) });
+function setup(): { preferences: AppPreferences["favorites"]; queryInput: (label: string) => HTMLInputElement } {
+  const { app: appPreferences, favorites: preferences } = createPreferenceTree(APP_PREFERENCE_SCHEMA, new MemoryLocalKeyedValues(), ["app", "favorites"]);
   const { result: element } = render(document, () => (
     <FavoritesSettings
       preferences={preferences}
-      appPreferences={createAppPreferences({ get: () => undefined, set: () => undefined })}
-      lightboxPreferences={createLightboxPreferences({ get: () => undefined, set: () => undefined })}
+      appPreferences={appPreferences}
       colorScheme={createColorSchemePreference("light", new MemoryHostPage())}
       onThemePreview={() => undefined}
       scheduler={new MemoryScheduler()}
@@ -36,9 +35,9 @@ describe("FavoritesSettings", () => {
     const { preferences, queryInput } = setup();
     const tileSize = queryInput("Size");
 
-    preferences.layout.set("native");
+    preferences.grid.layout.set("native");
     expect(tileSize.disabled).toBe(true);
-    preferences.layout.set("row");
+    preferences.grid.layout.set("row");
     expect(tileSize.disabled).toBe(false);
   });
 });

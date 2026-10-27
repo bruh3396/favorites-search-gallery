@@ -3,18 +3,15 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { createAppStorage } from "@/core/app/app_storage";
 
 describe("createAppStorage", () => {
-  test("keeps app values under the app's one key, with each owner's preferences in its own section", () => {
+  test("keeps app values under the app's one key, with preferences in their own section", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
-    const { app, appPreferences, favoritesPreferences, postListPreferences, lightboxPreferences } = createAppStorage(localKeyedValues);
+    const { app, preferences } = createAppStorage(localKeyedValues);
 
-    app.set("favoritesSkeleton", []);
-    appPreferences.set("postListEnabled", true);
-    favoritesPreferences.set("columnCount", 4);
-    postListPreferences.set("columnCount", 6);
-    lightboxPreferences.set("muted", true);
+    app.set("favoriteSizes", []);
+    preferences.set("app", { postListEnabled: true });
     expect(localKeyedValues.get("favorites-search-gallery")).toEqual({
-      favoritesSkeleton: [],
-      preferences: { app: { postListEnabled: true }, favorites: { columnCount: 4 }, postList: { columnCount: 6 }, lightbox: { muted: true } }
+      favoriteSizes: [],
+      preferences: { app: { postListEnabled: true } }
     });
   });
 });

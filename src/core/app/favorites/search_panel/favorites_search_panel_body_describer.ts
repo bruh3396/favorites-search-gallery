@@ -1,11 +1,11 @@
 import { FavoritesLoadPhase } from "@/core/features/favorites/load/favorites_load_state";
 
-export type FavoritesPanelBody =
+export type FavoritesSearchPanelBody =
   | { readonly kind: "skeleton" }
   | { readonly kind: "results" }
   | { readonly kind: "empty"; readonly message: string; readonly offersClear: boolean };
 
-export interface FavoritesPanelBodyInput {
+export interface FavoritesSearchPanelBodyInput {
   readonly resultCount: number;
   readonly isSearchable: boolean;
   readonly loadPhase: FavoritesLoadPhase;
@@ -13,7 +13,7 @@ export interface FavoritesPanelBodyInput {
   readonly isFiltered: boolean;
 }
 
-export function describeFavoritesPanelBody({ resultCount, isSearchable, loadPhase, query, isFiltered }: FavoritesPanelBodyInput): FavoritesPanelBody {
+export function describeFavoritesSearchPanelBody({ resultCount, isSearchable, loadPhase, query, isFiltered }: FavoritesSearchPanelBodyInput): FavoritesSearchPanelBody {
   if (resultCount > 0) {
     return { kind: "results" };
   }

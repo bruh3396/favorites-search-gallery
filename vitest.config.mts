@@ -65,8 +65,8 @@ export default defineConfig({
         "src/**/*.test.{ts,tsx}",
         "src/**/*.d.ts",
         // TODO: cover once the post list grid gets posts and the favorites pane gets add/remove actions (then test the favorites gate).
-        "src/core/app/post_list/composer.ts",
-        "src/core/app/favorites/composer.ts"
+        "src/core/app/post_list/post_list_app_composer.ts",
+        "src/core/app/favorites/favorites_app_composer.ts"
       ]
     }
   }

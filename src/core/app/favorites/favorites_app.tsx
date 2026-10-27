@@ -3,14 +3,15 @@ import FAVORITES_CSS from "@/core/features/favorites/styles.css?inline";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox_details/copy_id_button.css?inline";
-import { FavoritesPreferences } from "@/core/app/preferences";
-import { FavoritesShell } from "@/core/app/favorites/shell/shell";
+import { AppPreferences } from "@/core/app/app_preference_schema";
+import { FavoritesShell } from "@/core/app/favorites/shell/favorites_shell";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
-import { FavoritesWorkspace } from "@/core/app/favorites/workspace/workspace";
-import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/lightbox_details.css?inline";
+import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox_details/favorite_lightbox_details.css?inline";
+import LIGHTBOX_TAGS_CSS from "@/core/app/favorites/lightbox_details/favorite_lightbox_tags.css?inline";
 import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
-import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/search_panel.css?inline";
-import SHELL_CSS from "@/core/app/favorites/shell/shell.css?inline";
+import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
+import SHELL_CSS from "@/core/app/favorites/shell/favorites_shell.css?inline";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
 import TAB_STRIP_TOGGLE_CSS from "@/core/app/favorites/search_panel/tab_strip_toggle.css?inline";
 import { Tabs } from "@/core/ui/components/tabs/tabs";
@@ -26,6 +27,7 @@ export const FAVORITES_APP_STYLES = [
   TAB_STRIP_TOGGLE_CSS,
   LIGHTBOX_CSS,
   LIGHTBOX_DETAILS_CSS,
+  LIGHTBOX_TAGS_CSS,
   COPY_ID_BUTTON_CSS
 ];
 
@@ -35,7 +37,7 @@ export interface FavoritesAppProps {
   favorites: Pick<FavoritesService, "loadState" | "loadStatus">;
   workspace: FavoritesWorkspace;
   lightboxView: HTMLElement;
-  preferences: Pick<FavoritesPreferences, "activeTool" | "tabStripVisible">;
+  preferences: Pick<AppPreferences["favorites"], "activeTool" | "tabStripVisible">;
   zenEnabled: Readable<boolean>;
   renderTool: (tool: ActivityBarItem) => HTMLElement;
   renderPanel: (tab: FavoritesTab) => HTMLElement;

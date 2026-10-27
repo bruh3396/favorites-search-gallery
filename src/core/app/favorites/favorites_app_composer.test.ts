@@ -1,9 +1,8 @@
-import { DEFAULT_SKELETON_DIMENSIONS } from "@/core/app/favorites/storage/skeleton_dimensions";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
-import { FavoritesShellClass } from "@/core/app/favorites/shell/shell";
+import { FavoritesShellClass } from "@/core/app/favorites/shell/favorites_shell";
 import { LightboxButtonClass } from "@/core/features/lightbox/ui/chrome/lightbox_button";
 import { LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/lightbox_position";
 import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/lightbox_viewport";
@@ -32,7 +31,7 @@ import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { composeFavoritesApp } from "@/core/app/favorites/composer";
+import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/async";
 
@@ -126,7 +125,7 @@ describe("composeFavoritesApp", () => {
   test("uses the column count kept in the favorites preferences, not the post list's", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { columnCount: 4 }, postList: { columnCount: 7 } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { grid: { columnCount: 4 } }, postList: { grid: { columnCount: 7 } } } });
     const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
     expect(grid.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("4");
@@ -160,7 +159,7 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
     clickSettingsSwitch(root, "HD");
 
-    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { hdTilesEnabled: false } } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { grid: { hdTilesEnabled: false } } } });
   });
 
   test("stores infinite scroll when it is switched on in the Settings tool", () => {
@@ -223,7 +222,7 @@ describe("composeFavoritesApp", () => {
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.forest.light.accent}, ${THEME_DEFINITIONS.forest.dark.accent})`);
     expect(localKeyedValues.get("favorites-search-gallery")).not.toMatchObject({ preferences: { app: { theme: "forest" } } });
     root.querySelector("[role=\"listbox\"]")!.dispatchEvent(new PointerEvent("pointerleave"));
-    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.slate.light.accent}, ${THEME_DEFINITIONS.slate.dark.accent})`);
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.rule34.light.accent}, ${THEME_DEFINITIONS.rule34.dark.accent})`);
   });
 
   test("applies the theme picked before on mount", () => {
@@ -259,12 +258,12 @@ describe("composeFavoritesApp", () => {
 
     mount(localKeyedValues, posts, { scheduler });
     await flushMicrotasks();
-    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty("favoritesSkeleton");
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty("favoriteSizes");
     scheduler.advance(499);
-    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty("favoritesSkeleton");
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty("favoriteSizes");
     scheduler.advance(1);
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
-      favoritesSkeleton: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
+      favoriteSizes: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
     });
   });
 
@@ -281,7 +280,7 @@ describe("composeFavoritesApp", () => {
     expect(root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent).toBe("2");
     scheduler.advance(500);
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
-      favoritesSkeleton: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
+      favoriteSizes: { 1: [{ width: 300, height: 200 }, { width: 100, height: 400 }] }
     });
   });
 
@@ -313,21 +312,39 @@ describe("composeFavoritesApp", () => {
     expect(root.querySelector(`.${FavoritesShellClass.root}`)!.hasAttribute("data-zen")).toBe(true);
   });
 
+  test("toggles zen on Z in either case", () => {
+    const shell = mount().querySelector(`.${FavoritesShellClass.root}`)!;
+    const zenStates = ["z", "Z"].map(key => {
+      document.dispatchEvent(new KeyboardEvent("keydown", { key }));
+      return shell.hasAttribute("data-zen");
+    });
+
+    expect(zenStates).toEqual([true, false]);
+  });
+
+  test("exits zen on Escape", () => {
+    const root = mount();
+
+    root.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    expect(root.querySelector(`.${FavoritesShellClass.root}`)!.hasAttribute("data-zen")).toBe(false);
+  });
+
   test("draws the skeleton recorded for the favorites' owner", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { favoritesSkeleton: { 1: [{ width: 4, height: 3 }] } });
+    localKeyedValues.set("favorites-search-gallery", { favoriteSizes: { 1: [{ width: 4, height: 3 }] } });
     expect(readAspectRatios(querySkeleton(mount(localKeyedValues)))).toEqual(["4 / 3"]);
   });
 
   test("draws the default skeleton when only another owner's skeleton is recorded", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { favoritesSkeleton: { 2: [{ width: 4, height: 3 }] } });
+    localKeyedValues.set("favorites-search-gallery", { favoriteSizes: { 2: [{ width: 4, height: 3 }] } });
     const ratios = readAspectRatios(querySkeleton(mount(localKeyedValues)));
 
     expect(ratios).not.toHaveLength(0);
-    expect(new Set(ratios)).toEqual(new Set(DEFAULT_SKELETON_DIMENSIONS.map(({ width, height }) => `${width} / ${height}`)));
+    expect(new Set(ratios)).toEqual(new Set(["1 / 1"]));
   });
 
   test("reveals the lightbox's last favorite before scrolling to its tile", async() => {
@@ -453,7 +470,7 @@ describe("composeFavoritesApp", () => {
   test("opens the lightbox bare in simple mode", async() => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { lightbox: { mode: "simple" } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { lightbox: { mode: "simple" } } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" })]);
 
     await flushMicrotasks();

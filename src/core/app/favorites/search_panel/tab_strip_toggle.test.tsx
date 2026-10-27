@@ -4,8 +4,8 @@ import { h, render } from "@/core/ui/h/h";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/local_keyed_values";
 import { Preference } from "@/core/utils/preference/preference";
 import { Signal } from "@/core/utils/reactive/signal";
+import { StoredPreference } from "@/core/utils/preference/stored_preference";
 import TAB_STRIP_TOGGLE_CSS from "@/core/app/favorites/search_panel/tab_strip_toggle.css?inline";
-import { createFavoritesPreferences } from "@/core/app/preferences";
 import { expectClassesStyled } from "@/testing/css";
 
 interface Setup {
@@ -15,7 +15,7 @@ interface Setup {
 }
 
 function setup(): Setup {
-  const visible = createFavoritesPreferences(new MemoryLocalKeyedValues()).tabStripVisible;
+  const visible = new StoredPreference({ key: "tabStripVisible", defaultValue: true }, { storage: new MemoryLocalKeyedValues() });
   const tabCount = new Signal(1);
   const element = render(document, () => <TabStripToggle visible={visible} tabCount={tabCount} />).result as HTMLButtonElement;
   return { element, visible, tabCount };

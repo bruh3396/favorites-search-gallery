@@ -1,5 +1,5 @@
 import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/client";
-import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/composer";
+import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/clipboard";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/file_saver";

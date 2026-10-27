@@ -1,8 +1,9 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
+import { Progress } from "@/core/ui/components/progress_line/progress";
 import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import { h } from "@/core/ui/h/h";
-import { measureLoadProgress } from "@/core/app/favorites/shell/load_progress";
 
 export const FavoritesShellClass = {
   root: "fsg-FavoritesShell",
@@ -29,4 +30,17 @@ export function FavoritesShell({ favorites, panes, zenEnabled }: FavoritesShellP
       </div>
     </div>
   );
+}
+
+function measureLoadProgress(state: FavoritesLoadState): Progress {
+  switch (state.phase) {
+    case "fetching":
+    case "restoring":
+      return state.expectedCount === null || state.expectedCount === 0 ? "indeterminate" : state.loadedCount / state.expectedCount;
+    case "loaded":
+    case "interrupted":
+      return "idle";
+    default:
+      return "indeterminate";
+  }
 }

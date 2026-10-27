@@ -17,10 +17,11 @@ import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/r
 import { Rule34Document } from "@/adapters/rule34/document/document";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/remote_pages";
 import { Rule34RemoteSearchResults } from "@/adapters/rule34/ports/remote_search_results/remote_search_results";
-import { composeFavoritesApp } from "@/core/app/favorites/composer";
-import { composePostListApp } from "@/core/app/post_list/composer";
-import { createAppPreferences } from "@/core/app/preferences";
+import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
+import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
+import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
 import { createAppStorage } from "@/core/app/app_storage";
+import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/environment";
 import { readRule34Environment } from "@/adapters/rule34/environment/environment";
 
@@ -63,9 +64,9 @@ function startFavoritesApp(environment: Environment, dependencies: Rule34Depende
 function startPostListApp(environment: Environment, {
   hostPage, rule34, rule34Cdn, rule34Document, randomSource, localKeyedValues, scheduler
 }: Rule34Dependencies): void {
-  const { postListEnabled } = createAppPreferences(createAppStorage(localKeyedValues).appPreferences);
+  const { app: appPreferences } = createPreferenceTree(APP_PREFERENCE_SCHEMA, createAppStorage(localKeyedValues).preferences, ["app"]);
 
-  if (!postListEnabled.peek()) {
+  if (!appPreferences.postListEnabled.peek()) {
     return;
   }
   const remoteSearchResults = new Rule34RemoteSearchResults({ rule34, rule34Document, scheduler, randomSource });

@@ -11,8 +11,8 @@ describe("pickDecodeWidth", () => {
     ["square", 2_000, LARGE, 500],
     ["square", 2_000, WIDE, 1_000],
     ["row", 2_000, WIDE, 1_000]
-  ] as const)("returns the width a %s tile shows in a %i px grid", (layout, gridWidth, dimensions, expected) => {
-    expect(pickDecodeWidth({ layout, columnCount: 4, gridWidth }, dimensions)).toBe(expected);
+  ] as const)("returns the width a %s tile shows in a %i px grid", (layout, gridWidth, size, expected) => {
+    expect(pickDecodeWidth({ layout, columnCount: 4, gridWidth }, size)).toBe(expected);
   });
 
   test("rounds up to the next 250 px step", () => {
@@ -35,7 +35,7 @@ describe("pickDecodeWidth", () => {
     expect(pickDecodeWidth({ layout: "column", columnCount: 1, gridWidth: 3_840 }, { width: 8_000, height: 8_000 })).toBe(2_000);
   });
 
-  test("treats unknown dimensions as a square with no cap but the maximum", () => {
+  test("treats an unknown size as a square with no cap but the maximum", () => {
     expect(pickDecodeWidth({ layout: "row", columnCount: 2, gridWidth: 1_000 }, { width: 0, height: 0 })).toBe(500);
   });
 

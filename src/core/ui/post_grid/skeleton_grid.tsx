@@ -14,23 +14,23 @@ export const SkeletonGridClass = {
 const MAX_TILE_COUNT = 50;
 
 export interface SkeletonGridProps {
-  dimensions: readonly Size[];
+  sizes: readonly Size[];
   layout: Readable<GridLayout>;
   columnCount: Readable<number>;
   count: number;
 }
 
-export function SkeletonGrid({ dimensions, layout, columnCount, count }: SkeletonGridProps): HTMLElement {
-  const tiles = dimensions.slice(0, clamp(count, 0, MAX_TILE_COUNT)).map(createSkeletonTile);
+export function SkeletonGrid({ sizes, layout, columnCount, count }: SkeletonGridProps): HTMLElement {
+  const tiles = sizes.slice(0, clamp(count, 0, MAX_TILE_COUNT)).map(createSkeletonTile);
   const root = <div className={`${PostGridClass.root} ${SkeletonGridClass.root}`} aria-hidden="true" />;
 
   effect(() => tileGrid(root, tiles, { layout: layout.value, columnCount: columnCount.value }));
   return root;
 }
 
-function createSkeletonTile(dimensions: Size): HTMLElement {
+function createSkeletonTile(size: Size): HTMLElement {
   const tile = <div className={TileClass.root} />;
 
-  setAspectRatio(tile, dimensions);
+  setAspectRatio(tile, size);
   return tile;
 }

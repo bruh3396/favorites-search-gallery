@@ -19,7 +19,7 @@ function setup(initial: string | undefined): Setup {
   const id = new Signal<string | undefined>(initial);
   const clipboard = new MemoryClipboard();
   const scheduler = new MemoryScheduler();
-  const { result: button } = render(document, () => <CopyIdButton id={id} clipboard={clipboard} scheduler={scheduler} /> as HTMLButtonElement);
+  const { result: button } = render(document, () => <CopyIdButton id={id} clipboard={clipboard} scheduler={scheduler} copiedDuration={1_500} /> as HTMLButtonElement);
   const readId = (): string => button.firstChild?.textContent ?? "";
   const isCopiedShown = (): boolean => !button.querySelector<HTMLElement>(`.${CopyIdButtonClass.copied}`)!.hidden;
   return { id, clipboard, scheduler, button, readId, isCopiedShown };

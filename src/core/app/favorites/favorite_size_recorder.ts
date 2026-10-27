@@ -10,32 +10,36 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { createDebouncedTask } from "@/core/utils/async/debounced_task";
 import { createGuardedCodec } from "@/core/utils/codec/codec";
 
-const SKELETON_NAMESPACE = "favoritesSkeleton";
-const MEASURED_COUNT = 50;
-const SKELETON_RECORD_DELAY = 500;
+const FAVORITE_SIZES_NAMESPACE = "favoriteSizes";
 
-export const DEFAULT_SKELETON_DIMENSIONS: readonly Size[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
-
-export interface SkeletonDimensionsConfiguration {
+export interface FavoriteSizeRecorderConfiguration {
   readonly ownerId: string;
+  readonly measuredCount: number;
+  readonly recordDelay: number;
+  readonly fallbackCount: number;
 }
 
-export interface SkeletonDimensionsDependencies {
+export interface FavoriteSizeRecorderDependencies {
   storage: LocalKeyedValues;
   scheduler: Pick<Scheduler, "schedule">;
   results: Readable<readonly Favorite[]>;
 }
 
-export class SkeletonDimensions {
+export class FavoriteSizeRecorder {
   private readonly stored: Preference<readonly Size[]>;
+  private readonly measuredCount: number;
 
-  constructor({ ownerId }: SkeletonDimensionsConfiguration, { storage, scheduler, results }: SkeletonDimensionsDependencies) {
+  constructor(
+    { ownerId, measuredCount, recordDelay, fallbackCount }: FavoriteSizeRecorderConfiguration,
+    { storage, scheduler, results }: FavoriteSizeRecorderDependencies
+  ) {
+    this.measuredCount = measuredCount;
     this.stored = new StoredPreference(
-      { key: ownerId, defaultValue: DEFAULT_SKELETON_DIMENSIONS },
-      { storage: new NamespacedLocalKeyedValues(SKELETON_NAMESPACE, storage), codec: createGuardedCodec(isDimensionsList) }
+      { key: ownerId, defaultValue: Array.from({ length: fallbackCount }, () => ({ width: 1, height: 1 })) },
+      { storage: new NamespacedLocalKeyedValues(FAVORITE_SIZES_NAMESPACE, storage), codec: createGuardedCodec(isSizeList) }
     );
     const recordDebounced = createDebouncedTask(
-      { delay: SKELETON_RECORD_DELAY, leading: false }, scheduler,
+      { delay: recordDelay, leading: false }, scheduler,
       (favorites: readonly Favorite[]) => this.record(favorites)
     );
 
@@ -50,29 +54,27 @@ export class SkeletonDimensions {
     });
   }
 
-  public get value(): readonly Size[] {
+  public get sizes(): readonly Size[] {
     return this.stored.peek();
   }
 
   public record(favorites: readonly Favorite[]): void {
-    const dimensions = measure(favorites);
+    const sizes = measure(favorites.slice(0, this.measuredCount));
 
-    if (dimensions.length > 0 && !sameDimensions(dimensions, this.stored.peek())) {
-      this.stored.set(dimensions);
+    if (sizes.length > 0 && !sameSizes(sizes, this.stored.peek())) {
+      this.stored.set(sizes);
     }
   }
 }
 
-function sameDimensions(first: readonly Size[], second: readonly Size[]): boolean {
-  return first.length === second.length && first.every((dimensions, index) => dimensions.width === second[index].width && dimensions.height === second[index].height);
+function sameSizes(first: readonly Size[], second: readonly Size[]): boolean {
+  return first.length === second.length && first.every((size, index) => size.width === second[index].width && size.height === second[index].height);
 }
 
 function measure(favorites: readonly Favorite[]): Size[] {
-  return favorites
-    .slice(0, MEASURED_COUNT)
-    .map(favorite => ({ width: favorite.getMetric("width"), height: favorite.getMetric("height") }));
+  return favorites.map(favorite => ({ width: favorite.getMetric("width"), height: favorite.getMetric("height") }));
 }
 
-function isDimensionsList(stored: unknown): stored is readonly Size[] {
+function isSizeList(stored: unknown): stored is readonly Size[] {
   return Array.isArray(stored) && stored.every(hasFields<Size>({ width: isNumber, height: isNumber }));
 }

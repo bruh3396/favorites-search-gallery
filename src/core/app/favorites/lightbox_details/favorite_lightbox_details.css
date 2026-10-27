@@ -15,18 +15,6 @@
   line-height: 40px;
 }
 
-.fsg-FavoriteLightboxDetails-body {
-  --fsg-FavoriteLightboxDetails-tag-size: 13px;
-}
-
-.fsg-FavoriteLightboxDetails-body[data-size="small"] {
-  --fsg-FavoriteLightboxDetails-tag-size: 12px;
-}
-
-.fsg-FavoriteLightboxDetails-body[data-size="large"] {
-  --fsg-FavoriteLightboxDetails-tag-size: 15px;
-}
-
 .fsg-FavoriteLightboxDetails-title .fsg-LightboxButton[aria-pressed="true"] {
   background: rgb(255 255 255 / 0.16);
 }
@@ -74,58 +62,5 @@
 
 .fsg-FavoriteLightboxDetails-viewOption .fsg-Segmented-option[aria-checked="true"] {
   background: color-mix(in srgb, var(--fsg-color-primary) 24%, transparent);
-  color: white;
-}
-
-.fsg-FavoriteLightboxDetails-group {
-  margin-block-end: 16px;
-}
-
-.fsg-FavoriteLightboxDetails-heading {
-  margin: 0 0 6px;
-  color: rgb(255 255 255 / 0.55);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.fsg-FavoriteLightboxDetails-body[data-alignment="center"] .fsg-FavoriteLightboxDetails-group .fsg-FavoriteLightboxDetails-heading {
-  text-align: center;
-}
-
-.fsg-FavoriteLightboxDetails-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.fsg-FavoriteLightboxDetails-body[data-alignment="center"] .fsg-FavoriteLightboxDetails-tags {
-  justify-content: center;
-}
-
-.fsg-FavoriteLightboxDetails-tag {
-  max-inline-size: 100%;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgb(255 255 255 / 0.08);
-  font-size: var(--fsg-FavoriteLightboxDetails-tag-size);
-  overflow-wrap: anywhere;
-}
-
-.fsg-FavoriteLightboxDetails-showMore {
-  padding: 3px 10px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  color: rgb(255 255 255 / 0.55);
-  font: inherit;
-  font-size: var(--fsg-FavoriteLightboxDetails-tag-size);
-  cursor: pointer;
-}
-
-.fsg-FavoriteLightboxDetails-showMore:hover {
-  background: rgb(255 255 255 / 0.08);
   color: white;
 }

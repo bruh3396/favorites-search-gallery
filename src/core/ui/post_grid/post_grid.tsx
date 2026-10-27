@@ -31,7 +31,7 @@ export interface PostGridProps<T extends MediaItem> {
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
-  getDimensions: (post: T) => Size;
+  getSize: (post: T) => Size;
   createActions: (post: T) => readonly Node[];
   getPostUrl?: (post: T) => string;
   onPlainClick: (post: T) => boolean;
@@ -80,7 +80,7 @@ class PostGridImplementation<T extends MediaItem> {
 
   private createPostList(): KeyedList<T> {
     const {
-      getDimensions, createActions, visibilityObserver, imageLoaderService, getPostUrl,
+      getSize, createActions, visibilityObserver, imageLoaderService, getPostUrl,
       onPlainClick, onCtrlClick
     } = this.props;
     return new KeyedList<T>({
@@ -88,7 +88,7 @@ class PostGridImplementation<T extends MediaItem> {
       create: (post): HTMLElement => (
         <Tile
           post={post}
-          dimensions={getDimensions(post)}
+          size={getSize(post)}
           sizing={this.sizing}
           actions={createActions(post)}
           visibilityObserver={visibilityObserver}

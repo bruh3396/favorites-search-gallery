@@ -45,7 +45,7 @@ function setup(...ids: string[]): Setup {
       visibilityObserver={{ observe: () => (): void => { } }}
       sizeObserver={sizeObserver}
       imageLoaderService={createImageLoaderService()}
-      getDimensions={getDimensions}
+      getSize={getSize}
       createActions={createActions}
       getPostUrl={post => `https://posts/${post.id}`}
       onPlainClick={onPlainClick}
@@ -54,7 +54,7 @@ function setup(...ids: string[]): Setup {
   return { element, dispose, posts, changed, tileLocator, layout, columnCount, sizeObserver, onPlainClick };
 }
 
-function getDimensions(post: MediaItem): Size {
+function getSize(post: MediaItem): Size {
   return { width: Number(post.id) * 100, height: 100 };
 }
 
@@ -73,7 +73,7 @@ describe("PostGrid", () => {
     expect(element.children).toHaveLength(3);
   });
 
-  test("shapes each tile after its post's dimensions", () => {
+  test("shapes each tile after its post's size", () => {
     const { element } = setup("1", "2");
 
     expect([...element.children].map(tile => (tile as HTMLElement).style.getPropertyValue("--fsg-Tile-aspect-ratio"))).toEqual(["100 / 100", "200 / 100"]);
@@ -192,7 +192,7 @@ describe("PostGrid", () => {
         visibilityObserver={{ observe: () => ():void => { } }}
         sizeObserver={new MemorySizeObserver()}
         imageLoaderService={createImageLoaderService()}
-        getDimensions={getDimensions}
+        getSize={getSize}
         createActions={() => [
           <button>
             {computed(() => {

@@ -1,6 +1,6 @@
-import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/app";
-import { createAppPreferences, createLightboxPreferences, createPostListPreferences } from "@/core/app/preferences";
-import { APP_FONT } from "@/core/app/font";
+import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
+import { APP_PREFERENCE_SCHEMA } from "@/core/app/app_preference_schema";
+import { APP_FONT } from "@/core/app/app_font";
 import { ColorScheme } from "@/core/boundary/environment";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
@@ -23,6 +23,7 @@ import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list_service";
+import { createPreferenceTree } from "@/core/utils/preference/preference_tree";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 
@@ -48,9 +49,9 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   } = dependencies;
   const postList = createPostListService({ remoteSearchResults });
   const storage = createAppStorage(localKeyedValues);
-  const { layout, columnCount, hdTilesEnabled } = createPostListPreferences(storage.postListPreferences);
-  const { mode, volume, muted } = createLightboxPreferences(storage.lightboxPreferences);
-  const { theme } = createAppPreferences(storage.appPreferences);
+  const { app: appPreferences, postList: preferences } = createPreferenceTree(APP_PREFERENCE_SCHEMA, storage.preferences, ["app", "postList"]);
+  const { layout, columnCount, hdTilesEnabled } = preferences.grid;
+  const { mode, volume, muted } = preferences.lightbox;
   const posts = computed(() => postList.page.value.posts);
   const sequence = new ListSequence({ wraps: false }, posts);
   const tileLocator = new TileLocator<Post>();
@@ -70,7 +71,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
     visibilityObserver,
     sizeObserver,
     imageLoaderService,
-    getDimensions: post => ({ width: post.width, height: post.height }),
+    getSize: post => ({ width: post.width, height: post.height }),
     createActions: () => [],
     getPostUrl: post => remotePages.postUrl(post.id),
     onPlainClick: post => lightbox.open(sequence, post)
@@ -80,7 +81,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
     mount: (container): void => {
       mountAppRoot(
         container,
-        { colorScheme: configuration.colorScheme, theme: THEME_DEFINITIONS[theme.peek()], font: APP_FONT, styles: POST_LIST_APP_STYLES }
+        { colorScheme: configuration.colorScheme, theme: THEME_DEFINITIONS[appPreferences.theme.peek()], font: APP_FONT, styles: POST_LIST_APP_STYLES }
       ).append(...render(container.ownerDocument, renderApp).result);
     }
   };

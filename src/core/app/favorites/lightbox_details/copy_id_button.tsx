@@ -9,15 +9,14 @@ export const CopyIdButtonClass = {
   copied: "fsg-CopyIdButton-copied"
 } as const;
 
-const COPIED_DURATION = 1_500;
-
 export interface CopyIdButtonProps {
   id: Readable<string | undefined>;
   clipboard: Pick<Clipboard, "write">;
   scheduler: Pick<Scheduler, "schedule">;
+  copiedDuration: number;
 }
 
-export function CopyIdButton({ id, clipboard, scheduler }: CopyIdButtonProps): HTMLElement {
+export function CopyIdButton({ id, clipboard, scheduler, copiedDuration }: CopyIdButtonProps): HTMLElement {
   const copied = new Signal(false);
   let cancelCopied = (): void => undefined;
 
@@ -32,7 +31,7 @@ export function CopyIdButton({ id, clipboard, scheduler }: CopyIdButtonProps): H
       copied.value = true;
       cancelCopied = scheduler.schedule(() => {
         copied.value = false;
-      }, COPIED_DURATION);
+      }, copiedDuration);
     }, console.error);
   }
 
