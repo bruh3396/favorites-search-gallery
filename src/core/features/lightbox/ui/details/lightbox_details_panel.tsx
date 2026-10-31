@@ -13,10 +13,10 @@ export const LightboxDetailsPanelClass = {
 
 export interface LightboxDetailsPanelProps {
   isOpen: Readable<boolean>;
-  title?: Child;
-  controls?: Child;
-  content: Child;
-  closeShortcut?: LightboxShortcut;
+  titleChild?: Child;
+  controlsChild?: Child;
+  contentChild: Child;
+  closeLightboxShortcut?: LightboxShortcut;
   onClose: () => void;
   onPointerenter: () => void;
   onPointerleave: () => void;
@@ -31,11 +31,11 @@ export function LightboxDetailsPanel(props: LightboxDetailsPanelProps): HTMLElem
       onPointerleave={props.onPointerleave}
     >
       <div className={LightboxDetailsPanelClass.header}>
-        <div className={LightboxDetailsPanelClass.title}>{props.title}</div>
-        <LightboxButton icon="close" label="Hide details" shortcut={props.closeShortcut} onClick={props.onClose} />
+        <div className={LightboxDetailsPanelClass.title}>{props.titleChild}</div>
+        <LightboxButton icon="close" label="Hide details" lightboxShortcut={props.closeLightboxShortcut} onClick={props.onClose} />
       </div>
-      <div className={LightboxDetailsPanelClass.controls}>{props.controls}</div>
-      <div className={LightboxDetailsPanelClass.content}>{props.content}</div>
+      <div className={LightboxDetailsPanelClass.controls}>{props.controlsChild}</div>
+      <div className={LightboxDetailsPanelClass.content}>{props.contentChild}</div>
     </aside>
   ) as HTMLElement;
 

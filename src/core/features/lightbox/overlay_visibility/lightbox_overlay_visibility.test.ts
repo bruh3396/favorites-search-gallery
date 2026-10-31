@@ -6,104 +6,104 @@ import { createScope } from "@/core/utils/reactive/scope";
 const IDLE_DELAY = 750;
 const LEAVE_DELAY = 1_000;
 
-function setup(): { visibility: LightboxOverlayVisibility; scheduler: MemoryScheduler; dispose: () => void } {
+function setup(): { lightboxOverlayVisibility: LightboxOverlayVisibility; scheduler: MemoryScheduler; dispose: () => void } {
   const scheduler = new MemoryScheduler();
-  const { result: visibility, dispose } = createScope(() => new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler));
-  return { visibility, scheduler, dispose };
+  const { result: lightboxOverlayVisibility, dispose } = createScope(() => new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler));
+  return { lightboxOverlayVisibility, scheduler, dispose };
 }
 
 describe("LightboxOverlayVisibility", () => {
   test("starts visible", () => {
-    const { visibility } = setup();
+    const { lightboxOverlayVisibility } = setup();
 
-    expect(visibility.visible.value).toBe(true);
+    expect(lightboxOverlayVisibility.visible.value).toBe(true);
   });
 
   describe("wake", () => {
     test("hides after the idle delay", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.wake();
+      lightboxOverlayVisibility.wake();
       scheduler.advance(IDLE_DELAY - 1);
-      expect(visibility.visible.value).toBe(true);
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
       scheduler.advance(1);
-      expect(visibility.visible.value).toBe(false);
+      expect(lightboxOverlayVisibility.visible.value).toBe(false);
     });
 
     test("shows a hidden overlay", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.wake();
+      lightboxOverlayVisibility.wake();
       scheduler.advance(IDLE_DELAY);
-      visibility.wake();
-      expect(visibility.visible.value).toBe(true);
+      lightboxOverlayVisibility.wake();
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
     });
 
     test("restarts the idle delay", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.wake();
+      lightboxOverlayVisibility.wake();
       scheduler.advance(IDLE_DELAY - 1);
-      visibility.wake();
+      lightboxOverlayVisibility.wake();
       scheduler.advance(IDLE_DELAY - 1);
-      expect(visibility.visible.value).toBe(true);
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
     });
   });
 
   describe("leave", () => {
     test("hides after the leave delay", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.wake();
-      visibility.leave();
+      lightboxOverlayVisibility.wake();
+      lightboxOverlayVisibility.leave();
       scheduler.advance(LEAVE_DELAY - 1);
-      expect(visibility.visible.value).toBe(true);
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
       scheduler.advance(1);
-      expect(visibility.visible.value).toBe(false);
+      expect(lightboxOverlayVisibility.visible.value).toBe(false);
     });
   });
 
   describe("hold", () => {
     test("shows a hidden overlay", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.wake();
+      lightboxOverlayVisibility.wake();
       scheduler.advance(IDLE_DELAY);
-      visibility.hold();
-      expect(visibility.visible.value).toBe(true);
+      lightboxOverlayVisibility.hold();
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
     });
 
     test("keeps the overlay shown through wakes and leaves", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.wake();
-      visibility.hold();
-      visibility.wake();
-      visibility.leave();
+      lightboxOverlayVisibility.wake();
+      lightboxOverlayVisibility.hold();
+      lightboxOverlayVisibility.wake();
+      lightboxOverlayVisibility.leave();
       scheduler.advance(IDLE_DELAY);
-      expect(visibility.visible.value).toBe(true);
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
     });
   });
 
   describe("release", () => {
     test("hides after the idle delay", () => {
-      const { visibility, scheduler } = setup();
+      const { lightboxOverlayVisibility, scheduler } = setup();
 
-      visibility.hold();
-      visibility.release();
+      lightboxOverlayVisibility.hold();
+      lightboxOverlayVisibility.release();
       scheduler.advance(IDLE_DELAY - 1);
-      expect(visibility.visible.value).toBe(true);
+      expect(lightboxOverlayVisibility.visible.value).toBe(true);
       scheduler.advance(1);
-      expect(visibility.visible.value).toBe(false);
+      expect(lightboxOverlayVisibility.visible.value).toBe(false);
     });
   });
 
   test("cancels a pending hide when its scope is disposed", () => {
-    const { visibility, scheduler, dispose } = setup();
+    const { lightboxOverlayVisibility, scheduler, dispose } = setup();
 
-    visibility.wake();
+    lightboxOverlayVisibility.wake();
     dispose();
     scheduler.advance(IDLE_DELAY);
-    expect(visibility.visible.value).toBe(true);
+    expect(lightboxOverlayVisibility.visible.value).toBe(true);
   });
 });

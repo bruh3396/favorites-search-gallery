@@ -21,14 +21,14 @@ export function Slider({
   min,
   max,
   step = 1,
-  size = "medium",
+  size: controlSize = "medium",
   value,
   disabled = new Signal(false),
   onValueChange,
   onValueCommit = doNothing
 }: SliderProps): HTMLElement {
   const root = (
-    <div className={SliderClass.root} dataset={{ size }}>
+    <div className={SliderClass.root} dataset={{ size: controlSize }}>
       <input
         className={SliderClass.input}
         type="range"

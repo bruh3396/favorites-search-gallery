@@ -8,8 +8,8 @@ export interface LightboxShortcut {
 
 const TEXTS: Readonly<Record<string, string>> = { " ": "Space", ArrowLeft: "←", ArrowRight: "→", Escape: "Esc" };
 
-export function findLightboxShortcut(keymap: Keymap<LightboxCommand>, command: LightboxCommand): LightboxShortcut | undefined {
-  const key = Object.keys(keymap).find(candidate => keymap[candidate] === command);
+export function findLightboxShortcut(keymap: Keymap<LightboxCommand>, lightboxCommand: LightboxCommand): LightboxShortcut | undefined {
+  const key = Object.keys(keymap).find(candidate => keymap[candidate] === lightboxCommand);
 
   if (key === undefined) {
     return undefined;

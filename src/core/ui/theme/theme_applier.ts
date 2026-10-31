@@ -9,8 +9,8 @@ const THEME_PROPERTIES: Readonly<Record<keyof ThemeColors, string>> = {
   onAccent: "--fsg-theme-on-accent"
 };
 
-export function applyTheme(root: HTMLElement, { light, dark }: ThemeDefinition): void {
+export function applyTheme(root: HTMLElement, { lightColors: lightThemeColors, darkColors: darkThemeColors }: ThemeDefinition): void {
   for (const [color, property] of Object.entries(THEME_PROPERTIES) as [keyof ThemeColors, string][]) {
-    root.style.setProperty(property, `light-dark(${light[color]}, ${dark[color]})`);
+    root.style.setProperty(property, `light-dark(${lightThemeColors[color]}, ${darkThemeColors[color]})`);
   }
 }

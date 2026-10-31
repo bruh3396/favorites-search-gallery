@@ -51,13 +51,13 @@ describe("PageStepper", () => {
   });
 
   test("disables stepping past either end", () => {
-    const first = setup({ pageNumber: 1, pageCount: 3 });
-    const last = setup({ pageNumber: 3, pageCount: 3 });
+    const firstSetup = setup({ pageNumber: 1, pageCount: 3 });
+    const lastSetup = setup({ pageNumber: 3, pageCount: 3 });
 
     expect([
-      findButton(first.element, "Previous page").disabled,
-      findButton(first.element, "Next page").disabled,
-      findButton(last.element, "Next page").disabled
+      findButton(firstSetup.element, "Previous page").disabled,
+      findButton(firstSetup.element, "Next page").disabled,
+      findButton(lastSetup.element, "Next page").disabled
     ]).toEqual([true, false, true]);
   });
 

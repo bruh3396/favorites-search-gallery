@@ -7,28 +7,28 @@ describe("TileLocator", () => {
   });
 
   test("finds tiles through the attached grid", () => {
-    const locator = new TileLocator<string>();
+    const tileLocator = new TileLocator<string>();
     const tile = document.createElement("div");
 
-    locator.attach(post => (post === "1" ? tile : undefined));
-    expect([locator.locate("1"), locator.locate("2")]).toEqual([tile, undefined]);
+    tileLocator.attach(post => (post === "1" ? tile : undefined));
+    expect([tileLocator.locate("1"), tileLocator.locate("2")]).toEqual([tile, undefined]);
   });
 
   test("finds nothing once the grid detaches", () => {
-    const locator = new TileLocator<string>();
-    const detach = locator.attach(() => document.createElement("div"));
+    const tileLocator = new TileLocator<string>();
+    const detach = tileLocator.attach(() => document.createElement("div"));
 
     detach();
-    expect(locator.locate("1")).toBeUndefined();
+    expect(tileLocator.locate("1")).toBeUndefined();
   });
 
   test("keeps a later grid attached when an earlier one detaches", () => {
-    const locator = new TileLocator<string>();
+    const tileLocator = new TileLocator<string>();
     const tile = document.createElement("div");
-    const detachEarlier = locator.attach(() => undefined);
+    const detachEarlier = tileLocator.attach(() => undefined);
 
-    locator.attach(() => tile);
+    tileLocator.attach(() => tile);
     detachEarlier();
-    expect(locator.locate("1")).toBe(tile);
+    expect(tileLocator.locate("1")).toBe(tile);
   });
 });

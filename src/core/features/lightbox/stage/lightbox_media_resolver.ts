@@ -19,12 +19,12 @@ export class LightboxMediaResolver {
     return this.correctedItems;
   }
 
-  public resolve(items: readonly MediaItem[]): void {
-    items.forEach(item => this.resolveOne(item));
+  public resolve(mediaItems: readonly MediaItem[]): void {
+    mediaItems.forEach(mediaItem => this.resolveOne(mediaItem));
   }
 
-  public readResolved(items: readonly MediaItem[]): MediaItem[] {
-    return items.flatMap(({ id }) => {
+  public readResolved(mediaItems: readonly MediaItem[]): MediaItem[] {
+    return mediaItems.flatMap(({ id }) => {
       const media = this.resolved.value.get(id);
       return media === undefined ? [] : [{ id, media }];
     });
@@ -39,12 +39,12 @@ export class LightboxMediaResolver {
       return;
     }
     this.resolving.add(id);
-    this.resolveMedia(media).catch(() => media).then(resolved => {
+    this.resolveMedia(media).catch(() => media).then(resolvedMedia => {
       this.resolving.delete(id);
-      this.resolved.value = new Map(this.resolved.peek()).set(id, resolved);
+      this.resolved.value = new Map(this.resolved.peek()).set(id, resolvedMedia);
 
-      if (resolved.kind !== media.kind) {
-        this.correctedItems.emit({ id, media: resolved });
+      if (resolvedMedia.kind !== media.kind) {
+        this.correctedItems.emit({ id, media: resolvedMedia });
       }
     });
   }

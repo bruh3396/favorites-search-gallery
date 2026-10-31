@@ -22,7 +22,7 @@ function setup(): {
   const mediaRect = new Signal<Rect | undefined>({ x: 0, y: 0, width: 1_000, height: 500 });
   const panBy = vi.fn();
   const centerAt = vi.fn();
-  const { result: root } = render(document, () => <LightboxMinimap previewUrl={previewUrl} zoom={{ visibleRegion, mediaRect, panBy, centerAt }} />);
+  const { result: root } = render(document, () => <LightboxMinimap previewUrl={previewUrl} lightboxZoom={{ visibleRegion, mediaRect, panBy, centerAt }} />);
   const [image, marker] = root.children as unknown as [HTMLImageElement, HTMLElement];
 
   Object.defineProperties(image, { clientWidth: { value: MINIMAP_SIZE.width }, clientHeight: { value: MINIMAP_SIZE.height } });

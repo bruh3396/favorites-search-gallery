@@ -19,7 +19,7 @@ describe("LightboxArrow", () => {
 
   test("names its shortcut in its title and to assistive technology", () => {
     const { result: button } = render(document, () => (
-      <LightboxArrow direction="next" shortcut={{ text: "→", ariaName: "ArrowRight" }} onClick={vi.fn()} />
+      <LightboxArrow direction="next" lightboxShortcut={{ text: "→", ariaName: "ArrowRight" }} onClick={vi.fn()} />
     ));
 
     expect([button.title, button.getAttribute("aria-keyshortcuts")]).toEqual(["Next (→)", "ArrowRight"]);

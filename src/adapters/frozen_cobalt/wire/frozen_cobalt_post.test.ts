@@ -6,10 +6,12 @@ const frozenCobaltPost = {
   width: 10,
   height: 10,
   score: 0,
-  rating: "e",
-  change: 0,
-  fileURL: "",
-  tagCategories: { apple: 0, alice: null }
+  rating: "explicit",
+  changedAt: 0,
+  directory: 1234,
+  stem: "a1b2c3",
+  extension: "jpg",
+  tagCategoryByName: { apple: "general", alice: "character" }
 };
 
 describe("isFrozenCobaltPost", () => {
@@ -25,8 +27,12 @@ describe("isFrozenCobaltPost", () => {
     expect(isFrozenCobaltPost({ ...frozenCobaltPost, width: undefined })).toBe(false);
   });
 
-  test("rejects an unknown tag category code", () => {
-    expect(isFrozenCobaltPost({ ...frozenCobaltPost, tagCategories: { apple: 9 } })).toBe(false);
+  test("rejects an unknown rating", () => {
+    expect(isFrozenCobaltPost({ ...frozenCobaltPost, rating: "e" })).toBe(false);
+  });
+
+  test("rejects an unknown tag category", () => {
+    expect(isFrozenCobaltPost({ ...frozenCobaltPost, tagCategoryByName: { apple: "unknown" } })).toBe(false);
   });
 
   test("rejects a non-object", () => {

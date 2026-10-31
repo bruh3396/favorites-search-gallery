@@ -28,8 +28,8 @@ interface Setup {
   clickShowMore: () => void;
 }
 
-function setup(initial: ShownFavorite | undefined, categories: ReadonlyMap<string, TagCategory> = new Map()): Setup {
-  const favorite = new Signal<ShownFavorite | undefined>(initial);
+function setup(shownFavorite: ShownFavorite | undefined, categories: ReadonlyMap<string, TagCategory> = new Map()): Setup {
+  const favorite = new Signal<ShownFavorite | undefined>(shownFavorite);
   const organization = new Signal<TagOrganization>("category");
   const alignment = new Signal<TagAlignment>("start");
   const size = new Signal<TagSize>("medium");

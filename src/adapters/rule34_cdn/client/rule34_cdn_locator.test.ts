@@ -3,7 +3,7 @@ import { readRule34CdnLocator } from "@/adapters/rule34_cdn/client/rule34_cdn_lo
 
 describe("readRule34CdnLocator", () => {
   test("reads what minting kept", () => {
-    expect(readRule34CdnLocator("1234/a1b2c3.png")).toEqual({ directory: "1234", name: "a1b2c3", extension: "png" });
-    expect(readRule34CdnLocator("1234/a1b2c3")).toEqual({ directory: "1234", name: "a1b2c3", extension: null });
+    expect(readRule34CdnLocator("1234/a1b2c3.png")).toEqual({ directory: "1234", stem: "a1b2c3", extension: "png" });
+    expect(readRule34CdnLocator("1234/a1b2c3")).toEqual({ directory: "1234", stem: "a1b2c3", extension: null });
   });
 });

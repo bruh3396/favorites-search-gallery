@@ -20,9 +20,9 @@ function createTab(tabId: string, { closable = true }: { closable?: boolean } = 
   return { id: tabId, label: new Signal(tabId), closable };
 }
 
-function setup(tabs: readonly TabStripItem[] = [createTab("Home", { closable: false }), createTab("apple")], activeTabId: string | null = "Home"): Setup {
+function setup(tabStripItems: readonly TabStripItem[] = [createTab("Home", { closable: false }), createTab("apple")], activeTabId: string | null = "Home"): Setup {
   const options = {
-    tabs: new Signal(tabs),
+    tabs: new Signal(tabStripItems),
     activeTabId: new Signal(activeTabId),
     onActivate: vi.fn<(tabId: string) => void>(),
     onClose: vi.fn<(tabId: string) => void>(),
@@ -72,10 +72,10 @@ describe("TabStrip", () => {
   });
 
   test("updates a tab's label when it changes", () => {
-    const home = createTab("Home");
-    const { element } = setup([home]);
+    const tabStripItem = createTab("Home");
+    const { element } = setup([tabStripItem]);
 
-    (home.label as Signal<string>).value = "All";
+    (tabStripItem.label as Signal<string>).value = "All";
     expect(element.querySelector("[role=tab]")!.textContent).toBe("All");
   });
 
@@ -119,7 +119,7 @@ describe("TabStrip", () => {
     const home = findTab(element, "Home");
 
     tabs.value = [...tabs.value, createTab("banana")];
-    tabs.value = tabs.value.filter(tab => tab.id !== "apple");
+    tabs.value = tabs.value.filter(tabStripItem => tabStripItem.id !== "apple");
     expect([findTab(element, "Home"), element.querySelectorAll("[role=tab]").length]).toEqual([home, 2]);
   });
 

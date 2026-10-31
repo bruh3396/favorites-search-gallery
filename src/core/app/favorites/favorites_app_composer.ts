@@ -70,24 +70,24 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const favoritesService = createFavoritesService(favoritesServiceConfiguration, {
     ...ports, favoritesPaginationPreferences: favoritesPreferences.pagination
   });
-  const workspace = new FavoritesWorkspace({
-    storedSnapshot: ownerState.workspace,
-    createSession: (settings): FavoritesSession => favoritesService.createSession({ settings })
+  const favoritesWorkspace = new FavoritesWorkspace({
+    favoritesWorkspaceSnapshot: ownerState.workspace,
+    createSession: (favoritesSearchSettings): FavoritesSession => favoritesService.createSession({ favoritesSearchSettings })
   });
   const favoriteSizeRecorder = new FavoriteSizeRecorder({ measuredCount: 50, recordDelay: 500 }, {
-    storedSizes: ownerState.sizes, scheduler,
-    results: computed(() => workspace.activeTab.value.session.results.value)
+    sizes: ownerState.sizes, scheduler,
+    results: computed(() => favoritesWorkspace.activeTab.value.session.matchedFavorites.value)
   });
   const lightboxPreferences = favoritesPreferences.lightbox;
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Favorite>({
     scheduler, sizeObserver, remoteMedia, actions: postActions,
     mode: lightboxPreferences.mode, volume: lightboxPreferences.volume, muted: lightboxPreferences.muted,
-    locateItem: item => workspace.locate(item),
+    locateItem: favorite => favoritesWorkspace.locate(favorite),
     details: {
       isOpen: lightboxPreferences.details.isOpen,
       createContent: favorite => createFavoriteLightboxDetails({
-        favorite, tagsPreferences: lightboxPreferences.details, localTagCategories, clipboard, scheduler,
+        favorite, favoriteLightboxTagsPreferences: lightboxPreferences.details, localTagCategories, clipboard, scheduler,
         copiedDuration: 1_500, collapsedTagCount: 6
       })
     }
@@ -96,27 +96,27 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     remoteMedia, scheduler, enabled: favoritesPreferences.grid.hdTilesEnabled, paused: lightbox.isOpen
   });
 
-  lightbox.settled.on(item => workspace.turnToPageContaining(item));
-  lightbox.closed.on(item => workspace.reveal(item));
+  lightbox.settled.on(favorite => favoritesWorkspace.turnToPageContaining(favorite));
+  lightbox.closed.on(favorite => favoritesWorkspace.reveal(favorite));
 
-  const tabCount = computed(() => workspace.tabManager.tabs.value.length);
+  const tabCount = computed(() => favoritesWorkspace.tabManager.tabs.value.length);
   const zenEnabled = new Signal(false);
   const previewedTheme = new Signal<Theme | null>(null);
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {
-        colorScheme: sharedPreferences.colorScheme.peek(), theme: THEME_DEFINITIONS[sharedPreferences.theme.peek()], font: DEFAULT_APP_FONT, styles: FAVORITES_APP_STYLES
+        colorScheme: sharedPreferences.colorScheme.peek(), themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()], appFont: DEFAULT_APP_FONT, styles: FAVORITES_APP_STYLES
       });
 
       appRoot.append(...render(container.ownerDocument, () => FavoritesApp({
-        favoritesService, workspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled,
+        favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled,
         renderTool: () => h(FavoritesSettings, {
-          favoritesPreferences, sharedPreferences, scheduler,
+          favoritesPreferences, sharedPreferences, stepperScheduler: scheduler,
           onThemePreview: (theme): void => {
             previewedTheme.value = theme;
           }
         }),
-        renderPanel: tab => composeFavoritesSearchPanel(tab, {
+        renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, {
           favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder,
           visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox, postActions,
           enterZen: (): void => {

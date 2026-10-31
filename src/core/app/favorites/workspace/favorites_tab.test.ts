@@ -11,9 +11,9 @@ import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 function setup(): FavoritesTab {
-  return createFavoritesTab(new FavoritesSession({ settings: buildFavoritesSearchSettings() }, {
-    searchIndex: new FavoritesSearchIndex(new StringInterner()),
-    blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
+  return createFavoritesTab(new FavoritesSession({ favoritesSearchSettings: buildFavoritesSearchSettings() }, {
+    favoritesSearchIndex: new FavoritesSearchIndex(new StringInterner()),
+    favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
     favoritesPaginationPreferences: createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination
   }));
@@ -21,10 +21,10 @@ function setup(): FavoritesTab {
 
 describe("createFavoritesTab", () => {
   test("titles the tab after the query", () => {
-    const tab = setup();
+    const favoritesTab = setup();
 
-    tab.session.submit("apple");
-    expect(tab.title.value).toBe("apple");
+    favoritesTab.session.submit("apple");
+    expect(favoritesTab.title.value).toBe("apple");
   });
 
   test("titles a tab without a query New", () => {

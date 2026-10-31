@@ -24,7 +24,7 @@ export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, hand
       <LightboxButton
         icon={computed(() => (isAutoplaying.value ? "pause" : "play"))}
         label="Autoplay"
-        shortcut={findLightboxShortcut(keymap, "toggleAutoplay")}
+        lightboxShortcut={findLightboxShortcut(keymap, "toggleAutoplay")}
         pressed={isAutoplaying}
         onClick={handlers.toggleAutoplay}
       />
@@ -32,7 +32,7 @@ export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, hand
         <LightboxButton
           icon="info"
           label="Details"
-          shortcut={findLightboxShortcut(keymap, "toggleDetails")}
+          lightboxShortcut={findLightboxShortcut(keymap, "toggleDetails")}
           pressed={detailsOpen}
           onClick={handlers.toggleDetails}
         />
@@ -40,15 +40,15 @@ export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, hand
       {/* Hidden for now:
         <LightboxButton icon="download" label="Download" shortcut={findLightboxShortcut(keymap, "download")} onClick={handlers.download} />
       */}
-      <LightboxButton icon="postPage" label="Open post page" shortcut={findLightboxShortcut(keymap, "openPostPage")} onClick={handlers.openPostPage} />
+      <LightboxButton icon="postPage" label="Open post page" lightboxShortcut={findLightboxShortcut(keymap, "openPostPage")} onClick={handlers.openPostPage} />
       <LightboxButton
         icon={computed(() => (inFullscreen.value ? "exitFullscreen" : "fullscreen"))}
         label="Fullscreen"
-        shortcut={findLightboxShortcut(keymap, "toggleFullscreen")}
+        lightboxShortcut={findLightboxShortcut(keymap, "toggleFullscreen")}
         pressed={inFullscreen}
         onClick={handlers.toggleFullscreen}
       />
-      <LightboxButton icon="close" label="Close" shortcut={findLightboxShortcut(keymap, "dismiss")} onClick={handlers.close} />
+      <LightboxButton icon="close" label="Close" lightboxShortcut={findLightboxShortcut(keymap, "dismiss")} onClick={handlers.close} />
     </div>
   ) as HTMLElement;
 }

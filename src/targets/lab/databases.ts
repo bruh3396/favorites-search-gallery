@@ -4,7 +4,9 @@ import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorite
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
 import { Post } from "@/core/domain/post/post";
 import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
-import { mintRule34CdnMedia } from "@/adapters/rule34_cdn/client/rule34_cdn_media_minter";
+import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
+import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
+import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
 
 export const LAB_NAMESPACE = "fsg-lab";
 export const LAB_OWNER_ID = "lab";
@@ -16,7 +18,8 @@ const CORPUS_OWNER_ID = "corpus";
 const RESET_FLAG = `${LAB_NAMESPACE}-reset`;
 const WRITE_BATCH_SIZE = 10_000;
 
-const indexedDbClient = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintRule34CdnMedia);
+const rule34CdnClient = new Rule34CdnClient({ fetch: fetch.bind(globalThis), scheduler: new BrowserScheduler(), loadImage, decodeBitmap });
+const indexedDbClient = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, file => rule34CdnClient.mintMediaFromUrl(file));
 const localPosts = new IndexedDbLocalPosts(indexedDbClient);
 const labFavorites = new IndexedDbLocalFavorites({ ownerId: LAB_OWNER_ID }, indexedDbClient);
 const corpusOrder = new IndexedDbLocalFavorites({ ownerId: CORPUS_OWNER_ID }, indexedDbClient);
@@ -93,7 +96,7 @@ export async function pullCorpus(onProgress: (count: number) => void): Promise<v
     nextPage = page.next === null ? null : fetchCachePage(page.next);
     const posts = page.posts.flatMap(post => {
       try {
-        return [decodeFrozenCobaltPost(post, mintRule34CdnMedia).post];
+        return [decodeFrozenCobaltPost(post, file => rule34CdnClient.mintMediaFromParts(file)).post];
       } catch {
         return [];
       }

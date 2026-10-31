@@ -10,99 +10,99 @@ import { createPost } from "@/testing/post";
 const POST = createPost();
 
 function setup(): {
-  targets: LightboxCommandHandlersDependencies<Post>;
+  lightboxCommandHandlersDependencies: LightboxCommandHandlersDependencies<Post>;
   currentItem: Signal<Post | undefined>;
   isZoomed: Signal<boolean>;
 } {
   const currentItem = new Signal<Post | undefined>(POST);
   const isZoomed = new Signal(false);
-  const targets = {
-    navigation: { currentItem, goToNext: vi.fn(() => Promise.resolve()), goToPrevious: vi.fn(() => Promise.resolve()) },
-    stage: { togglePause: vi.fn(), toggleMute: vi.fn() },
-    fullscreen: { toggle: vi.fn() },
-    zoom: { isZoomed, toggle: vi.fn(), zoomOut: vi.fn() },
-    autoplay: { toggle: vi.fn() },
-    closer: { close: vi.fn() },
-    actions: { download: vi.fn(), openPostPage: vi.fn(), openOriginal: vi.fn() }
+  const lightboxCommandHandlersDependencies = {
+    lightboxNavigation: { currentItem, goToNext: vi.fn(() => Promise.resolve()), goToPrevious: vi.fn(() => Promise.resolve()) },
+    lightboxStage: { togglePause: vi.fn(), toggleMute: vi.fn() },
+    lightboxFullscreen: { toggle: vi.fn() },
+    lightboxZoom: { isZoomed, toggle: vi.fn(), zoomOut: vi.fn() },
+    lightboxAutoplay: { toggle: vi.fn() },
+    lightboxCloser: { close: vi.fn() },
+    lightboxActions: { download: vi.fn(), openPostPage: vi.fn(), openOriginal: vi.fn() }
   };
-  return { targets, currentItem, isZoomed };
+  return { lightboxCommandHandlersDependencies, currentItem, isZoomed };
 }
 
 describe("createLightboxCommandHandlers", () => {
-  const commandCases: Array<[LightboxCommand, (targets: LightboxCommandHandlersDependencies<Post>) => unknown]> = [
-    ["showNext", (targets): unknown => targets.navigation.goToNext],
-    ["showPrevious", (targets): unknown => targets.navigation.goToPrevious],
-    ["toggleAutoplay", (targets): unknown => targets.autoplay.toggle],
-    ["togglePause", (targets): unknown => targets.stage.togglePause],
-    ["toggleMute", (targets): unknown => targets.stage.toggleMute],
-    ["toggleFullscreen", (targets): unknown => targets.fullscreen.toggle],
-    ["toggleZoom", (targets): unknown => targets.zoom.toggle],
-    ["close", (targets): unknown => targets.closer.close]
+  const commandCases: Array<[LightboxCommand, (lightboxCommandHandlersDependencies: LightboxCommandHandlersDependencies<Post>) => unknown]> = [
+    ["showNext", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxNavigation.goToNext],
+    ["showPrevious", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxNavigation.goToPrevious],
+    ["toggleAutoplay", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxAutoplay.toggle],
+    ["togglePause", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxStage.togglePause],
+    ["toggleMute", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxStage.toggleMute],
+    ["toggleFullscreen", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxFullscreen.toggle],
+    ["toggleZoom", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxZoom.toggle],
+    ["close", (lightboxCommandHandlersDependencies): unknown => lightboxCommandHandlersDependencies.lightboxCloser.close]
   ];
 
-  test.each(commandCases)("runs %s on its target", (command, selectTarget) => {
-    const { targets } = setup();
+  test.each(commandCases)("runs %s on its target", (lightboxCommand, selectTarget) => {
+    const { lightboxCommandHandlersDependencies } = setup();
 
-    createLightboxCommandHandlers(targets)[command]();
-    expect(selectTarget(targets)).toHaveBeenCalledOnce();
+    createLightboxCommandHandlers(lightboxCommandHandlersDependencies)[lightboxCommand]();
+    expect(selectTarget(lightboxCommandHandlersDependencies)).toHaveBeenCalledOnce();
   });
 
   test("zooms out on dismiss when zoomed", () => {
-    const { targets, isZoomed } = setup();
+    const { lightboxCommandHandlersDependencies, isZoomed } = setup();
 
     isZoomed.value = true;
-    createLightboxCommandHandlers(targets).dismiss();
-    expect(targets.zoom.zoomOut).toHaveBeenCalledOnce();
-    expect(targets.closer.close).not.toHaveBeenCalled();
+    createLightboxCommandHandlers(lightboxCommandHandlersDependencies).dismiss();
+    expect(lightboxCommandHandlersDependencies.lightboxZoom.zoomOut).toHaveBeenCalledOnce();
+    expect(lightboxCommandHandlersDependencies.lightboxCloser.close).not.toHaveBeenCalled();
   });
 
   test("closes on dismiss when not zoomed", () => {
-    const { targets } = setup();
+    const { lightboxCommandHandlersDependencies } = setup();
 
-    createLightboxCommandHandlers(targets).dismiss();
-    expect(targets.closer.close).toHaveBeenCalledOnce();
-    expect(targets.zoom.zoomOut).not.toHaveBeenCalled();
+    createLightboxCommandHandlers(lightboxCommandHandlersDependencies).dismiss();
+    expect(lightboxCommandHandlersDependencies.lightboxCloser.close).toHaveBeenCalledOnce();
+    expect(lightboxCommandHandlersDependencies.lightboxZoom.zoomOut).not.toHaveBeenCalled();
   });
 
   test("passes the current item to item actions", () => {
-    const { targets } = setup();
-    const handlers = createLightboxCommandHandlers(targets);
+    const { lightboxCommandHandlersDependencies } = setup();
+    const handlers = createLightboxCommandHandlers(lightboxCommandHandlersDependencies);
 
     handlers.download();
     handlers.openPostPage();
     handlers.openOriginal();
-    expect(targets.actions.download).toHaveBeenCalledWith(POST);
-    expect(targets.actions.openPostPage).toHaveBeenCalledWith(POST);
-    expect(targets.actions.openOriginal).toHaveBeenCalledWith(POST);
+    expect(lightboxCommandHandlersDependencies.lightboxActions.download).toHaveBeenCalledWith(POST);
+    expect(lightboxCommandHandlersDependencies.lightboxActions.openPostPage).toHaveBeenCalledWith(POST);
+    expect(lightboxCommandHandlersDependencies.lightboxActions.openOriginal).toHaveBeenCalledWith(POST);
   });
 
   test("skips item actions when no item is current", () => {
-    const { targets, currentItem } = setup();
-    const handlers = createLightboxCommandHandlers(targets);
+    const { lightboxCommandHandlersDependencies, currentItem } = setup();
+    const handlers = createLightboxCommandHandlers(lightboxCommandHandlersDependencies);
 
     currentItem.value = undefined;
     handlers.download();
     handlers.openPostPage();
     handlers.openOriginal();
-    expect(targets.actions.download).not.toHaveBeenCalled();
-    expect(targets.actions.openPostPage).not.toHaveBeenCalled();
-    expect(targets.actions.openOriginal).not.toHaveBeenCalled();
+    expect(lightboxCommandHandlersDependencies.lightboxActions.download).not.toHaveBeenCalled();
+    expect(lightboxCommandHandlersDependencies.lightboxActions.openPostPage).not.toHaveBeenCalled();
+    expect(lightboxCommandHandlersDependencies.lightboxActions.openOriginal).not.toHaveBeenCalled();
   });
 
   test("reads the current item when the action runs", () => {
-    const { targets, currentItem } = setup();
-    const handlers = createLightboxCommandHandlers(targets);
-    const later = createPost({ id: "later" });
+    const { lightboxCommandHandlersDependencies, currentItem } = setup();
+    const handlers = createLightboxCommandHandlers(lightboxCommandHandlersDependencies);
+    const laterPost = createPost({ id: "later" });
 
-    currentItem.value = later;
+    currentItem.value = laterPost;
     handlers.download();
-    expect(targets.actions.download).toHaveBeenCalledWith(later);
+    expect(lightboxCommandHandlersDependencies.lightboxActions.download).toHaveBeenCalledWith(laterPost);
   });
 
   test("flips the details panel's open state", () => {
-    const { targets } = setup();
+    const { lightboxCommandHandlersDependencies } = setup();
     const isOpen = new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() });
-    const handlers = createLightboxCommandHandlers({ ...targets, details: { isOpen } });
+    const handlers = createLightboxCommandHandlers({ ...lightboxCommandHandlersDependencies, lightboxDetails: { isOpen } });
 
     handlers.toggleDetails();
     expect(isOpen.value).toBe(true);
@@ -111,19 +111,19 @@ describe("createLightboxCommandHandlers", () => {
   });
 
   test("ignores the details toggle without a details panel", () => {
-    const { targets } = setup();
+    const { lightboxCommandHandlersDependencies } = setup();
 
-    expect(() => createLightboxCommandHandlers(targets).toggleDetails()).not.toThrow();
+    expect(() => createLightboxCommandHandlers(lightboxCommandHandlersDependencies).toggleDetails()).not.toThrow();
   });
 
   test("logs a failed navigation instead of throwing", async() => {
-    const { targets } = setup();
+    const { lightboxCommandHandlersDependencies } = setup();
     const error = new Error("offline");
     const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     const goToNext = vi.fn(() => Promise.reject(error));
 
-    createLightboxCommandHandlers({ ...targets, navigation: { ...targets.navigation, goToNext } }).showNext();
+    createLightboxCommandHandlers({ ...lightboxCommandHandlersDependencies, lightboxNavigation: { ...lightboxCommandHandlersDependencies.lightboxNavigation, goToNext } }).showNext();
     await Promise.resolve();
     expect(log).toHaveBeenCalledWith(error);
     log.mockRestore();

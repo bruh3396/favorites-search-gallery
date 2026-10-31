@@ -5,17 +5,17 @@ import { SettingsIndex } from "@/core/ui/settings/settings_index";
 const PREFERENCE = { value: false, peek: (): boolean => false, set: (): void => undefined };
 
 const DESCRIPTORS: SettingDescriptor[] = [
-  { id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", preference: PREFERENCE },
-  { id: "autoplay", kind: "switch", label: "Autoplay", keywords: ["video"], preference: PREFERENCE },
+  { id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", settingPreference: PREFERENCE },
+  { id: "autoplay", kind: "switch", label: "Autoplay", keywords: ["video"], settingPreference: PREFERENCE },
   {
     id: "layout", kind: "choice", label: "Layout", control: "segmented", members: ["column", "row"], labels: { column: "Column", row: "Row" },
-    preference: { value: "column", peek: (): string => "column", set: (): void => undefined }
+    settingPreference: { value: "column", peek: (): string => "column", set: (): void => undefined }
   }
 ];
 
 const INDEX = new SettingsIndex([
-  { title: "General", descriptors: DESCRIPTORS.slice(0, 2) },
-  { title: "Thumbnails", descriptors: DESCRIPTORS.slice(2) }
+  { title: "General", settingDescriptors: DESCRIPTORS.slice(0, 2) },
+  { title: "Thumbnails", settingDescriptors: DESCRIPTORS.slice(2) }
 ]);
 
 function searchSettings(query: string): string[] {

@@ -6,16 +6,16 @@ import { Media } from "@/core/domain/media/media";
 
 export class ArenaFavorite implements Favorite {
   public readonly slot: number;
-  private readonly arena: FavoritesColumnarArena;
+  private readonly favoritesColumnarArena: FavoritesColumnarArena;
 
-  constructor(post: Post, arena: FavoritesColumnarArena) {
-    this.arena = arena;
-    this.slot = arena.allocate();
-    arena.write(this.slot, post);
+  constructor(post: Post, favoritesColumnarArena: FavoritesColumnarArena) {
+    this.favoritesColumnarArena = favoritesColumnarArena;
+    this.slot = favoritesColumnarArena.allocate();
+    favoritesColumnarArena.write(this.slot, post);
   }
 
   public get numericId(): number {
-    return this.arena.getNumericId(this.slot);
+    return this.favoritesColumnarArena.getNumericId(this.slot);
   }
 
   public get id(): string {
@@ -23,22 +23,22 @@ export class ArenaFavorite implements Favorite {
   }
 
   public get tags(): ReadonlySet<string> {
-    return this.arena.getTags(this.slot);
+    return this.favoritesColumnarArena.getTags(this.slot);
   }
 
   public get media(): Media {
-    return this.arena.getMedia(this.slot);
+    return this.favoritesColumnarArena.getMedia(this.slot);
   }
 
   public get isNew(): boolean {
-    return this.arena.isNew(this.slot);
+    return this.favoritesColumnarArena.isNew(this.slot);
   }
 
   public get ratingBit(): number {
-    return this.arena.getRatingBit(this.slot);
+    return this.favoritesColumnarArena.getRatingBit(this.slot);
   }
 
   public getMetric(metric: Metric): number {
-    return this.arena.getMetric(this.slot, metric);
+    return this.favoritesColumnarArena.getMetric(this.slot, metric);
   }
 }

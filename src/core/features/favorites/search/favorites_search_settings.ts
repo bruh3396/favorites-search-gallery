@@ -37,8 +37,8 @@ export const UNFILTERED_FAVORITES_SEARCH_SETTINGS: Pick<FavoritesSearchSettings,
   isBlacklistEnabled: DEFAULT_FAVORITES_SEARCH_SETTINGS.isBlacklistEnabled
 };
 
-export function filtersFavorites(settings: FavoritesSearchSettings): boolean {
-  return FILTER_KEYS.some(key => settings[key] !== UNFILTERED_FAVORITES_SEARCH_SETTINGS[key]);
+export function filtersFavorites(favoritesSearchSettings: FavoritesSearchSettings): boolean {
+  return FILTER_KEYS.some(key => favoritesSearchSettings[key] !== UNFILTERED_FAVORITES_SEARCH_SETTINGS[key]);
 }
 
 export const FAVORITES_SEARCH_SETTINGS_GUARDS: FieldGuards<FavoritesSearchSettings> = {

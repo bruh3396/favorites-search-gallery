@@ -18,16 +18,16 @@ interface Setup {
   dispose: () => void;
   value: Signal<Layout>;
   disabled: Signal<boolean>;
-  onValueChange: (next: Layout) => void;
+  onValueChange: (layout: Layout) => void;
   radios: HTMLButtonElement[];
 }
 
-function setup(initial: Layout = "none"): Setup {
-  const value = new Signal<Layout>(initial);
+function setup(layout: Layout = "none"): Setup {
+  const value = new Signal<Layout>(layout);
   const disabled = new Signal(false);
   const onValueChange = vi.fn();
   const { result: element, dispose } = render(document, () => (
-    <Segmented<Layout> choices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} />
+    <Segmented<Layout> controlChoices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} />
   ));
 
   document.body.append(element);
@@ -37,7 +37,7 @@ function setup(initial: Layout = "none"): Setup {
 function setupIcons(): HTMLButtonElement[] {
   const choices = [{ value: "row", label: "Row", icon: "layoutRow" }, { value: "column", label: "Column" }] as const;
   const { result } = render(document, () => (
-    <Segmented<Layout> choices={choices} value={new Signal<Layout>("row")} onValueChange={() => undefined} />
+    <Segmented<Layout> controlChoices={choices} value={new Signal<Layout>("row")} onValueChange={() => undefined} />
   ));
   return [...result.querySelectorAll<HTMLButtonElement>("[role=radio]")];
 }
@@ -78,7 +78,7 @@ describe("Segmented", () => {
   });
 
   test("is medium unless told otherwise", () => {
-    const { result } = render(document, () => <Segmented<string> choices={CHOICES} value={new Signal("row")} onValueChange={vi.fn()} size="small" />);
+    const { result } = render(document, () => <Segmented<string> controlChoices={CHOICES} value={new Signal("row")} onValueChange={vi.fn()} size="small" />);
 
     expect(setup().element.dataset.size).toBe("medium");
     expect(result.dataset.size).toBe("small");

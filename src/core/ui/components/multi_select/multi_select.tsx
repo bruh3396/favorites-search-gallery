@@ -8,12 +8,12 @@ export const MultiSelectClass = {
   option: "fsg-MultiSelect-option"
 } as const;
 
-export interface MultiSelectProps<T> extends ControlProps<readonly T[]> {
-  choices: readonly ControlChoice<T>[];
+export interface MultiSelectProps<Value> extends ControlProps<readonly Value[]> {
+  controlChoices: readonly ControlChoice<Value>[];
 }
 
-export function MultiSelect<T>({ choices, value, disabled = new Signal(false), onValueChange, size = "medium" }: MultiSelectProps<T>): HTMLElement {
-  const getPressedFlags = (values: readonly T[]): readonly boolean[] => choices.map(choice => values.includes(choice.value));
+export function MultiSelect<Value>({ controlChoices, value, disabled = new Signal(false), onValueChange, size: controlSize = "medium" }: MultiSelectProps<Value>): HTMLElement {
+  const getPressedFlags = (values: readonly Value[]): readonly boolean[] => controlChoices.map(controlChoice => values.includes(controlChoice.value));
   const pressedFlags = computed(() => getPressedFlags(value.value));
   const toggle = (index: number): void => {
     const pressed = getPressedFlags(value.peek());
@@ -21,11 +21,11 @@ export function MultiSelect<T>({ choices, value, disabled = new Signal(false), o
     if (isLastPressed(pressed, index)) {
       return;
     }
-    onValueChange(choices.filter((_, other) => (other === index ? !pressed[other] : pressed[other])).map(choice => choice.value));
+    onValueChange(controlChoices.filter((_, other) => (other === index ? !pressed[other] : pressed[other])).map(controlChoice => controlChoice.value));
   };
   return (
-    <div className={MultiSelectClass.root} role="group" dataset={{ size }}>
-      {choices.map(({ label }, index) => (
+    <div className={MultiSelectClass.root} role="group" dataset={{ size: controlSize }}>
+      {controlChoices.map(({ label }, index) => (
         <button
           className={MultiSelectClass.option}
           type="button"

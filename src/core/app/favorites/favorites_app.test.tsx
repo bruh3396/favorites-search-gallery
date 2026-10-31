@@ -26,12 +26,12 @@ interface Setup {
 
 function createWorkspace(): FavoritesWorkspace {
   const favoritesPaginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination;
-  const searchIndex = new FavoritesSearchIndex(new StringInterner());
+  const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   return new FavoritesWorkspace({
-    storedSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage: new MemoryLocalKeyedValues() }),
-    createSession: (settings): FavoritesSession => new FavoritesSession({ settings }, {
-      searchIndex,
-      blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
+    favoritesWorkspaceSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage: new MemoryLocalKeyedValues() }),
+    createSession: (favoritesSearchSettings): FavoritesSession => new FavoritesSession({ favoritesSearchSettings }, {
+      favoritesSearchIndex,
+      favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
       favoritesPaginationPreferences,
       randomSource: new MemoryRandomSource()
     })
@@ -46,7 +46,7 @@ function setup(): Setup {
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const { result: elements } = render(document, () => FavoritesApp({
     favoritesService: { loadState, loadStatus },
-    workspace: createWorkspace(),
+    favoritesWorkspace: createWorkspace(),
     lightboxView,
     favoritesPreferences,
     zenEnabled,

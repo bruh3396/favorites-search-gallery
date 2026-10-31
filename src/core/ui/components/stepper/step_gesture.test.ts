@@ -7,7 +7,7 @@ interface PendingTask {
 }
 
 interface Setup {
-  gesture: StepGesture;
+  stepGesture: StepGesture;
   commit: ReturnType<typeof vi.fn<(value: number) => void>>;
   setValue: (next: number) => void;
   runNext: () => number;
@@ -15,16 +15,16 @@ interface Setup {
 
 function setup(initial = 0): Setup {
   let value = initial;
-  let pending: PendingTask | undefined;
+  let pendingTask: PendingTask | undefined;
   const commit = vi.fn<(value: number) => void>();
-  const gesture = new StepGesture({
+  const stepGesture = new StepGesture({
     schedule: (task, delay): (() => void) => {
       const entry = { task, delay };
 
-      pending = entry;
+      pendingTask = entry;
       return (): void => {
-        if (pending === entry) {
-          pending = undefined;
+        if (pendingTask === entry) {
+          pendingTask = undefined;
         }
       };
     },
@@ -32,84 +32,84 @@ function setup(initial = 0): Setup {
     commit
   });
   return {
-    gesture,
+    stepGesture,
     commit,
     setValue: (next): void => {
       value = next;
     },
     runNext: (): number => {
-      const entry = pending;
+      const currentPendingTask = pendingTask;
 
-      if (entry === undefined) {
+      if (currentPendingTask === undefined) {
         return -1;
       }
-      pending = undefined;
-      entry.task();
-      return entry.delay;
+      pendingTask = undefined;
+      currentPendingTask.task();
+      return currentPendingTask.delay;
     }
   };
 }
 
 describe("StepGesture", () => {
   test("commits the value a gesture ends on", () => {
-    const { gesture, commit, setValue } = setup(3);
+    const { stepGesture, commit, setValue } = setup(3);
 
-    gesture.begin();
+    stepGesture.begin();
     setValue(5);
-    gesture.finish();
+    stepGesture.finish();
     expect(commit.mock.calls).toEqual([[5]]);
   });
 
   test("commits nothing when the gesture ends where it started", () => {
-    const { gesture, commit, setValue } = setup(3);
+    const { stepGesture, commit, setValue } = setup(3);
 
-    gesture.begin();
+    stepGesture.begin();
     setValue(4);
     setValue(3);
-    gesture.finish();
+    stepGesture.finish();
     expect(commit).not.toHaveBeenCalled();
   });
 
   test("keeps the first start when begun again mid-gesture", () => {
-    const { gesture, commit, setValue } = setup(3);
+    const { stepGesture, commit, setValue } = setup(3);
 
-    gesture.begin();
+    stepGesture.begin();
     setValue(4);
-    gesture.begin();
-    gesture.finish();
+    stepGesture.begin();
+    stepGesture.finish();
     expect(commit.mock.calls).toEqual([[4]]);
   });
 
   test("commits nothing when finished without beginning", () => {
-    const { gesture, commit, setValue } = setup(3);
+    const { stepGesture, commit, setValue } = setup(3);
 
     setValue(4);
-    gesture.finish();
+    stepGesture.finish();
     expect(commit).not.toHaveBeenCalled();
   });
 
   test("repeats after a pause, then on an interval", () => {
-    const { gesture, runNext } = setup();
+    const { stepGesture, runNext } = setup();
     const step = vi.fn((): boolean => true);
 
-    gesture.repeat(step);
+    stepGesture.repeat(step);
     expect([runNext(), runNext(), runNext()]).toEqual([400, 60, 60]);
     expect(step).toHaveBeenCalledTimes(3);
   });
 
   test("stops repeating when a step returns false", () => {
-    const { gesture, runNext } = setup();
+    const { stepGesture, runNext } = setup();
 
-    gesture.repeat(() => false);
+    stepGesture.repeat(() => false);
     runNext();
     expect(runNext()).toBe(-1);
   });
 
   test("stops repeating when finished", () => {
-    const { gesture, runNext } = setup();
+    const { stepGesture, runNext } = setup();
 
-    gesture.repeat(() => true);
-    gesture.finish();
+    stepGesture.repeat(() => true);
+    stepGesture.finish();
     expect(runNext()).toBe(-1);
   });
 });

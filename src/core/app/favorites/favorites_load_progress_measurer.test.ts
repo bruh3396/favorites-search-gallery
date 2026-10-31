@@ -4,10 +4,10 @@ import { measureFavoritesLoadProgress } from "@/core/app/favorites/favorites_loa
 
 describe("measureFavoritesLoadProgress", () => {
   test.each([
-    { state: { phase: "fetching", loadedCount: 150, expectedCount: 600 }, progress: 0.25 },
-    { state: { phase: "restoring", loadedCount: 300, expectedCount: 600 }, progress: 0.5 }
-  ] satisfies { state: FavoritesLoadState; progress: number }[])("measures the share counted so far while $state.phase", ({ state, progress }) => {
-    expect(measureFavoritesLoadProgress(state)).toBe(progress);
+    { favoritesLoadState: { phase: "fetching", loadedCount: 150, expectedCount: 600 }, progress: 0.25 },
+    { favoritesLoadState: { phase: "restoring", loadedCount: 300, expectedCount: 600 }, progress: 0.5 }
+  ] satisfies { favoritesLoadState: FavoritesLoadState; progress: number }[])("measures the share counted so far while $favoritesLoadState.phase", ({ favoritesLoadState, progress }) => {
+    expect(measureFavoritesLoadProgress(favoritesLoadState)).toBe(progress);
   });
 
   test.each([

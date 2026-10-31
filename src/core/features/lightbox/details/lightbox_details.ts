@@ -4,9 +4,9 @@ import { StoredValue } from "@/core/utils/stored_value/stored_value";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface LightboxDetailsContent {
-  readonly title?: Child;
-  readonly controls?: Child;
-  readonly body: Child;
+  readonly titleChild?: Child;
+  readonly controlsChild?: Child;
+  readonly bodyChild: Child;
 }
 
 export interface LightboxDetails<T extends MediaItem> {

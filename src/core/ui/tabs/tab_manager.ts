@@ -41,29 +41,29 @@ export class TabManager<T> {
 
   public move(tabId: string, index: number): void {
     const tabs = this.currentTabs.peek();
-    const tab = tabs.find(candidate => candidate.id === tabId);
+    const tab = tabs.find(candidateTab => candidateTab.id === tabId);
 
     if (tab === undefined || tabs.indexOf(tab) === index) {
       return;
     }
-    const remaining = tabs.filter(candidate => candidate !== tab);
+    const remainingTabs = tabs.filter(candidateTab => candidateTab !== tab);
 
-    this.currentTabs.value = [...remaining.slice(0, index), tab, ...remaining.slice(index)];
+    this.currentTabs.value = [...remainingTabs.slice(0, index), tab, ...remainingTabs.slice(index)];
   }
 
   public close(tabId: string): void {
     const tabs = this.currentTabs.peek();
-    const index = tabs.findIndex(candidate => candidate.id === tabId);
+    const index = tabs.findIndex(tab => tab.id === tabId);
 
     if (index === -1 || !tabs[index].closable) {
       return;
     }
-    const remaining = tabs.filter(candidate => candidate.id !== tabId);
+    const remainingTabs = tabs.filter(tab => tab.id !== tabId);
 
-    this.currentTabs.value = remaining;
+    this.currentTabs.value = remainingTabs;
 
     if (this.currentActiveTabId.peek() === tabId) {
-      this.currentActiveTabId.value = (remaining[index] ?? remaining[index - 1])?.id ?? null;
+      this.currentActiveTabId.value = (remainingTabs[index] ?? remainingTabs[index - 1])?.id ?? null;
     }
     this.dependencies.dispose(tabs[index].value);
   }

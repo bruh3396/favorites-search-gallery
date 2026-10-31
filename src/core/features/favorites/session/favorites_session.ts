@@ -8,47 +8,39 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export interface FavoritesSessionConfiguration {
-  readonly settings: FavoritesSearchSettings;
+  readonly favoritesSearchSettings: FavoritesSearchSettings;
 }
 
 export interface FavoritesSessionDependencies {
-  searchIndex: FavoritesSearchIndex;
-  blacklist: FavoritesBlacklist;
+  favoritesSearchIndex: FavoritesSearchIndex;
+  favoritesBlacklist: FavoritesBlacklist;
   randomSource: RandomSource;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
 }
 
 export class FavoritesSession {
+  public readonly query: Readable<string>;
+  public readonly isFiltered: Readable<boolean>;
   private readonly search: FavoritesSearch;
   private readonly pagination: FavoritesPagination;
-  private readonly currentQuery: Readable<string>;
-  private readonly currentlyFiltered: Readable<boolean>;
 
   constructor(configuration: FavoritesSessionConfiguration, dependencies: FavoritesSessionDependencies) {
     this.search = new FavoritesSearch(configuration, dependencies);
-    this.pagination = new FavoritesPagination({ search: this.search, preferences: dependencies.favoritesPaginationPreferences });
-    this.currentQuery = computed(() => this.search.settings.value.query);
-    this.currentlyFiltered = computed(() => filtersFavorites(this.search.settings.value));
+    this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: dependencies.favoritesPaginationPreferences });
+    this.query = computed(() => this.search.settings.value.query);
+    this.isFiltered = computed(() => filtersFavorites(this.search.settings.value));
   }
 
-  public get settings(): Readable<FavoritesSearchSettings> {
+  public get searchSettings(): Readable<FavoritesSearchSettings> {
     return this.search.settings;
   }
 
-  public get query(): Readable<string> {
-    return this.currentQuery;
+  public get matchedFavorites(): Readable<readonly Favorite[]> {
+    return this.search.matchedFavorites;
   }
 
-  public get isFiltered(): Readable<boolean> {
-    return this.currentlyFiltered;
-  }
-
-  public get results(): Readable<readonly Favorite[]> {
-    return this.search.results;
-  }
-
-  public get pageItems(): Readable<readonly Favorite[]> {
-    return this.pagination.items;
+  public get pageFavorites(): Readable<readonly Favorite[]> {
+    return this.pagination.pageFavorites;
   }
 
   public get pageNumber(): Readable<number> {
@@ -75,8 +67,8 @@ export class FavoritesSession {
     this.pagination.goTo(pageNumber);
   }
 
-  public goToPageContaining(item: Favorite): void {
-    this.pagination.goToContaining(item);
+  public goToPageContaining(favorite: Favorite): void {
+    this.pagination.goToContaining(favorite);
   }
 
   public dispose(): void {

@@ -1,5 +1,4 @@
 import { ActivityBar, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
-import FAVORITES_CSS from "@/core/features/favorites/styles.css?inline";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
@@ -22,7 +21,6 @@ import { measureFavoritesLoadProgress } from "@/core/app/favorites/favorites_loa
 
 export const FAVORITES_APP_STYLES = [
   UI_CSS,
-  FAVORITES_CSS,
   APP_CSS,
   SEARCH_PANEL_CSS,
   TAB_STRIP_TOGGLE_CSS,
@@ -43,16 +41,16 @@ const TOOLS: readonly ActivityBarItem[] = [{ id: "settings", label: "Settings", 
 
 export interface FavoritesAppProps {
   favoritesService: Pick<FavoritesService, "loadState" | "loadStatus">;
-  workspace: FavoritesWorkspace;
+  favoritesWorkspace: FavoritesWorkspace;
   lightboxView: HTMLElement;
   favoritesPreferences: Pick<AppPreferences["favorites"], "activeTool" | "tabStripVisible">;
   zenEnabled: Readable<boolean>;
-  renderTool: (tool: ActivityBarItem) => HTMLElement;
-  renderPanel: (tab: FavoritesTab) => HTMLElement;
+  renderTool: (activityBarItem: ActivityBarItem) => HTMLElement;
+  renderPanel: (favoritesTab: FavoritesTab) => HTMLElement;
 }
 
 export function FavoritesApp({
-  favoritesService, workspace, lightboxView, favoritesPreferences, zenEnabled, renderTool, renderPanel
+  favoritesService, favoritesWorkspace, lightboxView, favoritesPreferences, zenEnabled, renderTool, renderPanel
 }: FavoritesAppProps): HTMLElement[] {
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
@@ -63,25 +61,25 @@ export function FavoritesApp({
         <ActivityBar
           items={TOOLS}
           value={favoritesPreferences.activeTool}
-          renderView={tool => (
+          renderView={activityBarItem => (
             <ViewPane
-              title={tool.label}
+              title={activityBarItem.label}
               actions={[{ label: "Reset all settings", icon: "reset", disabled: new Signal(true), onClick: () => undefined }]}
             >
-              {renderTool(tool)}
+              {renderTool(activityBarItem)}
             </ViewPane>
           )}
           onValueChange={id => favoritesPreferences.activeTool.set(id)}
         />
         <Tabs<FavoritesTab>
-          manager={workspace.tabManager}
-          label={({ value }) => value.title}
-          renderPanel={({ value }) => renderPanel(value)}
+          tabManager={favoritesWorkspace.tabManager}
+          label={({ value: favoritesTab }) => favoritesTab.title}
+          renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)}
           stripVisible={favoritesPreferences.tabStripVisible}
-          trailing={<StatusText text={favoritesService.loadStatus} />}
-          onAdd={() => workspace.openBlankTab()}
-          onClose={tabId => workspace.closeTab(tabId)}
-          onCloseAll={() => workspace.closeAllTabs()}
+          trailingChild={<StatusText text={favoritesService.loadStatus} />}
+          onAdd={() => favoritesWorkspace.openBlankTab()}
+          onClose={tabId => favoritesWorkspace.closeTab(tabId)}
+          onCloseAll={() => favoritesWorkspace.closeAllTabs()}
         />
       </main>
       <div className={FavoritesAppClass.zenHint} role="status" hidden={computed(() => !zenEnabled.value)} data-zen-stage="">

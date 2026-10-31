@@ -19,7 +19,7 @@ export const TileClass = {
 } as const;
 
 export interface TileProps {
-  post: MediaItem;
+  mediaItem: MediaItem;
   size: Size;
   sizing: Readable<GridSizing>;
   actions: readonly Node[];
@@ -38,7 +38,7 @@ interface PreviewElements {
 const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
-  const { post, size, sizing, actions, href, onPlainClick, onCtrlClick } = props;
+  const { mediaItem, size, sizing, actions, href, onPlainClick, onCtrlClick } = props;
   const visible = new Signal(false);
   const preview = <img className={TileClass.preview} decoding="async" alt="" /> as HTMLImageElement;
   const canvas = <canvas className={TileClass.image} hidden /> as HTMLCanvasElement;
@@ -53,7 +53,7 @@ export function Tile(props: TileProps): HTMLElement {
       {preview}{canvas}
     </a> as HTMLAnchorElement;
   const root = (
-    <div className={TileClass.root} dataset={{ mediaKind: post.media.kind }}>
+    <div className={TileClass.root} dataset={{ mediaKind: mediaItem.media.kind }}>
       {link}
       <div className={TileClass.actions}>{actions}</div>
     </div>
@@ -68,11 +68,11 @@ export function Tile(props: TileProps): HTMLElement {
     setHrefOnInteraction(link, href);
   }
 
-  if (hasMedia(post.media)) {
-    showPreview({ root, preview }, props.imageLoaderService.resolvePreviewUrl(post.media));
+  if (hasMedia(mediaItem.media)) {
+    showPreview({ root, preview }, props.imageLoaderService.resolvePreviewUrl(mediaItem.media));
     const targetWidth = computed(() => pickDecodeWidth(sizing.value, size));
 
-    onCleanup(props.imageLoaderService.createLoader(canvas, post.media, targetWidth).trackVisibility(visible));
+    onCleanup(props.imageLoaderService.createLoader(canvas, mediaItem.media, targetWidth).trackVisibility(visible));
   }
   return root;
 }

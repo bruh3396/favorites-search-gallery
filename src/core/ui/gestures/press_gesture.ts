@@ -3,5 +3,5 @@ import { Point } from "@/core/utils/geometry/point";
 
 export interface PressGesture {
   readonly point: Point;
-  readonly modifiers: ModifierState;
+  readonly modifierState: ModifierState;
 }

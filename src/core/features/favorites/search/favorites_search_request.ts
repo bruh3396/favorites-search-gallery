@@ -2,7 +2,7 @@ import { FavoritesSortKey } from "@/core/features/favorites/search/favorites_sor
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 
 export interface FavoritesSearchRequest {
-  readonly expression: SearchExpression | undefined;
+  readonly searchExpression: SearchExpression | undefined;
   readonly sortKey: FavoritesSortKey;
   readonly isSortAscending: boolean;
   readonly allowedRatings: number;

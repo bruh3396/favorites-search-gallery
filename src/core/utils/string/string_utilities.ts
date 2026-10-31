@@ -63,10 +63,6 @@ export function copyString(value: string): string {
   return [...value].join("");
 }
 
-export function decodeHtmlEntities(text: string): string {
-  return text.replace(/&amp;/g, "&").replace(/&(?:apos|#0?39);/g, "'");
-}
-
 export function listPrefixes(word: string): string[] {
   const prefixes: string[] = [];
 

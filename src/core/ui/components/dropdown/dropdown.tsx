@@ -14,23 +14,23 @@ export const DropdownClass = {
   check: "fsg-Dropdown-check"
 } as const;
 
-export interface DropdownProps<T> extends ControlProps<T> {
-  choices: readonly ControlChoice<T>[];
-  onPreview?: (previewed: T | null) => void;
+export interface DropdownProps<Value> extends ControlProps<Value> {
+  controlChoices: readonly ControlChoice<Value>[];
+  onPreview?: (previewedValue: Value | null) => void;
 }
 
 const MENU_GAP = 4;
 const NO_OPTION = -1;
 
-export function Dropdown<T>({ choices, value, disabled = new Signal(false), onValueChange, onPreview, size = "medium" }: DropdownProps<T>): HTMLElement {
-  const selectedIndex = computed(() => choices.findIndex(choice => choice.value === value.value));
+export function Dropdown<Value>({ controlChoices, value, disabled = new Signal(false), onValueChange, onPreview, size: controlSize = "medium" }: DropdownProps<Value>): HTMLElement {
+  const selectedIndex = computed(() => controlChoices.findIndex(controlChoice => controlChoice.value === value.value));
   const open = new Signal(false);
   const active = new Signal(NO_OPTION);
   const activate = (index: number): void => {
     active.value = index;
-    onPreview?.(index === NO_OPTION ? null : choices[index].value);
+    onPreview?.(index === NO_OPTION ? null : controlChoices[index].value);
   };
-  const options = choices.map(({ label }, index) => (
+  const options = controlChoices.map(({ label }, index) => (
     <li
       className={DropdownClass.option}
       role="option"
@@ -51,7 +51,7 @@ export function Dropdown<T>({ choices, value, disabled = new Signal(false), onVa
     <ul
       className={DropdownClass.menu}
       role="listbox"
-      dataset={{ size }}
+      dataset={{ size: controlSize }}
       onPointerleave={() => activate(NO_OPTION)}
       onClick={event => event.stopPropagation()}
     >
@@ -65,12 +65,12 @@ export function Dropdown<T>({ choices, value, disabled = new Signal(false), onVa
       role="combobox"
       aria-haspopup="listbox"
       aria-expanded={computed(() => String(open.value))}
-      dataset={{ size }}
+      dataset={{ size: controlSize }}
       disabled={disabled}
       onClick={() => (open.peek() ? close() : show())}
       onKeydown={handleKey}
     >
-      <span className={DropdownClass.label}>{computed(() => choices[selectedIndex.value]?.label ?? "")}</span>
+      <span className={DropdownClass.label}>{computed(() => controlChoices[selectedIndex.value]?.label ?? "")}</span>
       {createIcon("chevronDown", DropdownClass.chevron)}
     </button>
   ) as HTMLButtonElement;
@@ -103,7 +103,7 @@ export function Dropdown<T>({ choices, value, disabled = new Signal(false), onVa
 
   function choose(index: number): void {
     if (index !== selectedIndex.peek()) {
-      onValueChange(choices[index].value);
+      onValueChange(controlChoices[index].value);
     }
     close();
     trigger.focus();
@@ -117,7 +117,7 @@ export function Dropdown<T>({ choices, value, disabled = new Signal(false), onVa
       }
       return;
     }
-    const last = choices.length - 1;
+    const last = controlChoices.length - 1;
     const from = active.peek() === NO_OPTION ? Math.max(selectedIndex.peek(), 0) : active.peek();
     const moves: Readonly<Record<string, number>> = { ArrowDown: Math.min(from + 1, last), ArrowUp: Math.max(from - 1, 0), Home: 0, End: last };
     const to = moves[event.key];

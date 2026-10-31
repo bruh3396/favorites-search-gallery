@@ -32,16 +32,16 @@ export interface FavoritesSearchPanelDependencies {
   enterZen: () => void;
 }
 
-export function composeFavoritesSearchPanel(tab: FavoritesTab, dependencies: FavoritesSearchPanelDependencies): HTMLElement {
+export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependencies: FavoritesSearchPanelDependencies): HTMLElement {
   const {
     favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox,
     postActions, enterZen
   } = dependencies;
   return h(FavoritesSearchPanel, {
     favoritesService,
-    session: tab.session,
-    focusSearch: tab.focusSearch,
-    trailing: [
+    favoritesSession: favoritesTab.session,
+    focusSearch: favoritesTab.focusSearch,
+    trailingChild: [
       h(TabStripToggle, { visible: favoritesPreferences.tabStripVisible, tabCount }),
       h(IconButton, { icon: "scan", label: "Zen", onClick: enterZen })
     ],
@@ -52,16 +52,16 @@ export function composeFavoritesSearchPanel(tab: FavoritesTab, dependencies: Fav
       count: favoritesPreferences.pagination.pageSize.peek()
     }),
     grid: h(PostGrid<Favorite>, {
-      posts: tab.session.pageItems,
+      posts: favoritesTab.session.pageFavorites,
       changed: favoritesService.hydrated,
-      tileLocator: tab.tileLocator,
+      tileLocator: favoritesTab.tileLocator,
       settings: favoritesPreferences.grid,
-      getSize: post => ({ width: post.getMetric("width"), height: post.getMetric("height") }),
+      getSize: favorite => ({ width: favorite.getMetric("width"), height: favorite.getMetric("height") }),
       createActions: () => [],
       visibilityObserver, sizeObserver, imageLoaderService,
-      getPostUrl: post => remotePages.postUrl(post.id),
-      onPlainClick: post => lightbox.open(new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, tab.session.results), post),
-      onCtrlClick: post => postActions.openOriginal(post)
+      getPostUrl: favorite => remotePages.postUrl(favorite.id),
+      onPlainClick: favorite => lightbox.open(new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, favoritesTab.session.matchedFavorites), favorite),
+      onCtrlClick: favorite => postActions.openOriginal(favorite)
     })
   });
 }

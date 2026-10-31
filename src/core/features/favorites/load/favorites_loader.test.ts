@@ -25,48 +25,48 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
 
 interface LoadSources {
-  local?: Post[];
-  remote: Post[];
+  localFavoritePosts?: Post[];
+  remoteFavoritePosts: Post[];
 }
 
-async function setup({ local = [], remote }: LoadSources): Promise<{
-  flow: FavoritesLoader;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+async function setup({ localFavoritePosts = [], remoteFavoritePosts }: LoadSources): Promise<{
+  favoritesLoader: FavoritesLoader;
+  favoritesCollection: FavoritesCollection;
+  favoritesSearchIndex: FavoritesSearchIndex;
   localFavorites: MemoryLocalFavorites;
   remoteFavorites: MemoryRemoteFavorites;
   scheduler: MemoryScheduler;
 }> {
-  const collection = new FavoritesCollection(new StringInterner());
-  const index = buildFavoritesSearchIndex();
+  const favoritesCollection = new FavoritesCollection(new StringInterner());
+  const favoritesSearchIndex = buildFavoritesSearchIndex();
   const localFavorites = new MemoryLocalFavorites();
   const localPosts = new MemoryLocalPosts();
-  const client = new MemoryClient(remote);
-  const remoteFavorites = new MemoryRemoteFavorites(client);
+  const memoryClient = new MemoryClient(remoteFavoritePosts);
+  const remoteFavorites = new MemoryRemoteFavorites(memoryClient);
   const scheduler = new MemoryScheduler();
-  const flow = new FavoritesLoader({
-    collection,
-    index,
+  const favoritesLoader = new FavoritesLoader({
+    favoritesCollection,
+    favoritesSearchIndex,
     localFavorites,
     localPosts,
     localTagCategories: new MemoryLocalTagCategories(),
     remoteFavorites,
-    remotePosts: new MemoryRemotePosts(client),
+    remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
-    remotePages: new MemoryRemotePages(client),
+    remotePages: new MemoryRemotePages(memoryClient),
     scheduler
   });
 
-  await localPosts.setMany(local.filter(post => hasMedia(post.media)));
-  await localFavorites.prepend(local.map(post => post.id));
-  return { flow, collection, index, localFavorites, remoteFavorites, scheduler };
+  await localPosts.setMany(localFavoritePosts.filter(post => hasMedia(post.media)));
+  await localFavorites.prepend(localFavoritePosts.map(post => post.id));
+  return { favoritesLoader, favoritesCollection, favoritesSearchIndex, localFavorites, remoteFavorites, scheduler };
 }
 
-function recordPhases(flow: FavoritesLoader): FavoritesLoadPhase[] {
+function recordPhases(favoritesLoader: FavoritesLoader): FavoritesLoadPhase[] {
   const phases: FavoritesLoadPhase[] = [];
 
   effect(() => {
-    phases.push(flow.state.value.phase);
+    phases.push(favoritesLoader.state.value.phase);
   });
   return phases;
 }
@@ -77,87 +77,87 @@ function getPostIds(favorites: readonly Favorite[]): string[] {
 
 describe("FavoritesLoader", () => {
   test("starts in the starting phase", async() => {
-    const { flow } = await setup({ remote: [] });
+    const { favoritesLoader } = await setup({ remoteFavoritePosts: [] });
 
-    expect(flow.state.value).toEqual({ phase: "starting" });
+    expect(favoritesLoader.state.value).toEqual({ phase: "starting" });
   });
 
   describe("load", () => {
     test("fetches every favorite and saves the membership when none is stored", async() => {
-      const { flow, index, localFavorites } = await setup({ remote: createPosts("1", "2") });
-      const phases = recordPhases(flow);
+      const { favoritesLoader, favoritesSearchIndex, localFavorites } = await setup({ remoteFavoritePosts: createPosts("1", "2") });
+      const phases = recordPhases(favoritesLoader);
 
-      await flow.load();
-      expect(searchFavoritePostIds(index)).toEqual(["1", "2"]);
+      await favoritesLoader.load();
+      expect(searchFavoritePostIds(favoritesSearchIndex)).toEqual(["1", "2"]);
       expect(await localFavorites.getAll()).toEqual(["1", "2"]);
       expect(phases).toEqual(["starting", "fetching", "fetching", "fetching", "saving", "loaded"]);
     });
 
     test("restores the stored favorites and syncs them when a membership is stored", async() => {
-      const local = [createPost({ id: "1", media: MEDIA })];
-      const { flow, index } = await setup({ local, remote: [createPost({ id: "2", media: MEDIA }), ...local] });
-      const phases = recordPhases(flow);
+      const localFavoritePosts = [createPost({ id: "1", media: MEDIA })];
+      const { favoritesLoader, favoritesSearchIndex } = await setup({ localFavoritePosts, remoteFavoritePosts: [createPost({ id: "2", media: MEDIA }), ...localFavoritePosts] });
+      const phases = recordPhases(favoritesLoader);
 
-      await flow.load();
-      expect(searchFavoritePostIds(index)).toEqual(["2", "1"]);
-      expect(flow.state.value).toEqual({ phase: "loaded", newCount: 1, unfavoritedCount: 0 });
+      await favoritesLoader.load();
+      expect(searchFavoritePostIds(favoritesSearchIndex)).toEqual(["2", "1"]);
+      expect(favoritesLoader.state.value).toEqual({ phase: "loaded", newCount: 1, unfavoritedCount: 0 });
       expect(phases).toEqual(["starting", "restoring", "restoring", "pulling", "indexing", "checkingMissing", "loaded"]);
     });
 
     test("reports preparing while reading the stored membership takes over a second", async() => {
-      const { flow, localFavorites, scheduler } = await setup({ remote: [] });
+      const { favoritesLoader, localFavorites, scheduler } = await setup({ remoteFavoritePosts: [] });
       let finishRead: (postIds: readonly string[]) => void = () => undefined;
 
       vi.spyOn(localFavorites, "getAll").mockReturnValue(new Promise(resolve => {
         finishRead = resolve;
       }));
-      const loading = flow.load();
+      const loading = favoritesLoader.load();
 
       scheduler.advance(999);
-      expect(flow.state.value).toEqual({ phase: "starting" });
+      expect(favoritesLoader.state.value).toEqual({ phase: "starting" });
       scheduler.advance(1);
-      expect(flow.state.value).toEqual({ phase: "preparing" });
+      expect(favoritesLoader.state.value).toEqual({ phase: "preparing" });
       finishRead([]);
       await loading;
-      expect(flow.state.value.phase).toBe("loaded");
+      expect(favoritesLoader.state.value.phase).toBe("loaded");
     });
 
     test("reports an interruption when the stored membership cannot be read", async() => {
-      const { flow, localFavorites } = await setup({ remote: createPosts("1") });
+      const { favoritesLoader, localFavorites } = await setup({ remoteFavoritePosts: createPosts("1") });
 
       vi.spyOn(localFavorites, "getAll").mockRejectedValue(new Error("upgrade failed"));
-      await flow.load();
-      expect(flow.state.value).toEqual({ phase: "interrupted" });
+      await favoritesLoader.load();
+      expect(favoritesLoader.state.value).toEqual({ phase: "interrupted" });
     });
 
     test("reports an interruption and saves no membership when client refuses the fetch", async() => {
-      const { flow, localFavorites, remoteFavorites } = await setup({ remote: createPosts("1") });
+      const { favoritesLoader, localFavorites, remoteFavorites } = await setup({ remoteFavoritePosts: createPosts("1") });
 
       vi.spyOn(remoteFavorites, "fetchAll").mockRejectedValue(new Error("refused"));
-      await flow.load();
-      expect(flow.state.value).toEqual({ phase: "interrupted" });
+      await favoritesLoader.load();
+      expect(favoritesLoader.state.value).toEqual({ phase: "interrupted" });
       expect(await localFavorites.getAll()).toEqual([]);
     });
 
     test("reports an interruption and still indexes the restored favorites when client refuses the sync", async() => {
-      const local = [createPost({ id: "1", media: MEDIA })];
-      const { flow, index, remoteFavorites } = await setup({ local, remote: local });
+      const localFavoritePosts = [createPost({ id: "1", media: MEDIA })];
+      const { favoritesLoader, favoritesSearchIndex, remoteFavorites } = await setup({ localFavoritePosts, remoteFavoritePosts: localFavoritePosts });
 
       vi.spyOn(remoteFavorites, "findNew").mockRejectedValue(new Error("refused"));
-      await flow.load();
-      expect(flow.state.value).toEqual({ phase: "interrupted" });
-      expect(searchFavoritePostIds(index)).toEqual(["1"]);
+      await favoritesLoader.load();
+      expect(favoritesLoader.state.value).toEqual({ phase: "interrupted" });
+      expect(searchFavoritePostIds(favoritesSearchIndex)).toEqual(["1"]);
     });
 
     test("hydrates and announces a restored placeholder once its post is refreshed", async() => {
-      const { flow, collection } = await setup({ local: [createPost({ id: "1" })], remote: [createPost({ id: "1", tags: "apple", media: MEDIA })] });
-      const hydrated: Favorite[] = [];
+      const { favoritesLoader, favoritesCollection } = await setup({ localFavoritePosts: [createPost({ id: "1" })], remoteFavoritePosts: [createPost({ id: "1", tags: "apple", media: MEDIA })] });
+      const hydratedFavorites: Favorite[] = [];
 
-      collection.hydrated.on(favorite => hydrated.push(favorite));
-      await flow.load();
+      favoritesCollection.hydrated.on(favorite => hydratedFavorites.push(favorite));
+      await favoritesLoader.load();
       await flushMicrotasks();
-      expect(collection.getAll().find(favorite => favorite.id === "1")?.media).toEqual(MEDIA);
-      expect(getPostIds(hydrated)).toEqual(["1"]);
+      expect(favoritesCollection.getAll().find(arenaFavorite => arenaFavorite.id === "1")?.media).toEqual(MEDIA);
+      expect(getPostIds(hydratedFavorites)).toEqual(["1"]);
     });
   });
 });

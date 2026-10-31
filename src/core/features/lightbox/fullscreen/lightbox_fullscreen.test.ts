@@ -13,62 +13,62 @@ class FakeDocument extends EventTarget {
   }
 }
 
-function setup(): { fullscreen: LightboxFullscreen; fake: FakeDocument; dispose: () => void } {
-  const fake = new FakeDocument();
-  const { result: fullscreen, dispose } = createScope(() => new LightboxFullscreen(fake as unknown as Document));
-  return { fullscreen, fake, dispose };
+function setup(): { lightboxFullscreen: LightboxFullscreen; fakeDocument: FakeDocument; dispose: () => void } {
+  const fakeDocument = new FakeDocument();
+  const { result: lightboxFullscreen, dispose } = createScope(() => new LightboxFullscreen(fakeDocument as unknown as Document));
+  return { lightboxFullscreen, fakeDocument, dispose };
 }
 
 describe("LightboxFullscreen", () => {
   test("starts in fullscreen when the document already is", () => {
-    const fake = new FakeDocument();
+    const fakeDocument = new FakeDocument();
 
-    fake.fullscreenElement = document.createElement("div");
-    expect(new LightboxFullscreen(fake as unknown as Document).inFullscreen.value).toBe(true);
+    fakeDocument.fullscreenElement = document.createElement("div");
+    expect(new LightboxFullscreen(fakeDocument as unknown as Document).inFullscreen.value).toBe(true);
   });
 
   test("follows the document's fullscreen changes", () => {
-    const { fullscreen, fake } = setup();
+    const { lightboxFullscreen, fakeDocument } = setup();
 
-    expect(fullscreen.inFullscreen.value).toBe(false);
-    fake.changeFullscreenElement(document.createElement("div"));
-    expect(fullscreen.inFullscreen.value).toBe(true);
-    fake.changeFullscreenElement(null);
-    expect(fullscreen.inFullscreen.value).toBe(false);
+    expect(lightboxFullscreen.inFullscreen.value).toBe(false);
+    fakeDocument.changeFullscreenElement(document.createElement("div"));
+    expect(lightboxFullscreen.inFullscreen.value).toBe(true);
+    fakeDocument.changeFullscreenElement(null);
+    expect(lightboxFullscreen.inFullscreen.value).toBe(false);
   });
 
   test("stops following once its scope is disposed", () => {
-    const { fullscreen, fake, dispose } = setup();
+    const { lightboxFullscreen, fakeDocument, dispose } = setup();
 
     dispose();
-    fake.changeFullscreenElement(document.createElement("div"));
-    expect(fullscreen.inFullscreen.value).toBe(false);
+    fakeDocument.changeFullscreenElement(document.createElement("div"));
+    expect(lightboxFullscreen.inFullscreen.value).toBe(false);
   });
 
   describe("toggle", () => {
     test("enters fullscreen when not in it", () => {
-      const { fullscreen, fake } = setup();
+      const { lightboxFullscreen, fakeDocument } = setup();
 
-      fullscreen.toggle();
-      expect(fake.documentElement.requestFullscreen).toHaveBeenCalledOnce();
+      lightboxFullscreen.toggle();
+      expect(fakeDocument.documentElement.requestFullscreen).toHaveBeenCalledOnce();
     });
 
     test("exits fullscreen when in it", () => {
-      const { fullscreen, fake } = setup();
+      const { lightboxFullscreen, fakeDocument } = setup();
 
-      fake.changeFullscreenElement(document.createElement("div"));
-      fullscreen.toggle();
-      expect(fake.exitFullscreen).toHaveBeenCalledOnce();
-      expect(fake.documentElement.requestFullscreen).not.toHaveBeenCalled();
+      fakeDocument.changeFullscreenElement(document.createElement("div"));
+      lightboxFullscreen.toggle();
+      expect(fakeDocument.exitFullscreen).toHaveBeenCalledOnce();
+      expect(fakeDocument.documentElement.requestFullscreen).not.toHaveBeenCalled();
     });
   });
 
   describe("exit", () => {
     test("does nothing when not in fullscreen", () => {
-      const { fullscreen, fake } = setup();
+      const { lightboxFullscreen, fakeDocument } = setup();
 
-      fullscreen.exit();
-      expect(fake.exitFullscreen).not.toHaveBeenCalled();
+      lightboxFullscreen.exit();
+      expect(fakeDocument.exitFullscreen).not.toHaveBeenCalled();
     });
   });
 });

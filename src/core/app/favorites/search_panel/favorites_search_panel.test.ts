@@ -28,7 +28,7 @@ interface Setup {
   skeleton: HTMLElement;
   emptyState: HTMLElement;
   grid: HTMLElement;
-  trailing: HTMLElement;
+  trailingChild: HTMLElement;
 }
 
 function createFavorite(postId: string): Favorite {
@@ -46,12 +46,12 @@ function setup(): Setup {
   const settings = new Signal(DEFAULT_FAVORITES_SEARCH_SETTINGS);
   const skeleton = document.createElement("div");
   const grid = document.createElement("div");
-  const trailing = document.createElement("button");
+  const trailingChild = document.createElement("button");
   const favoritesService = { loadState, searchable };
-  const session = {
+  const favoritesSession = {
     query: computed(() => settings.value.query),
     isFiltered: computed(() => filtersFavorites(settings.value)),
-    results: searchResults,
+    matchedFavorites: searchResults,
     pageNumber,
     pageCount: computed(() => Math.max(1, Math.ceil(searchResults.value.length / PAGE_SIZE))),
     goTo,
@@ -60,15 +60,15 @@ function setup(): Setup {
   };
   const { result: element, dispose } = render(document, () => h(FavoritesSearchPanel, {
     favoritesService,
-    session,
+    favoritesSession,
     focusSearch: new Emitter<void>(),
-    trailing,
+    trailingChild,
     skeleton,
     grid
   }));
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
-    element, dispose, searchResults, pageNumber, loadState, searchable, submit, goTo, clearFilters, settings, skeleton, emptyState, grid, trailing
+    element, dispose, searchResults, pageNumber, loadState, searchable, submit, goTo, clearFilters, settings, skeleton, emptyState, grid, trailingChild
   };
 }
 
@@ -218,9 +218,9 @@ describe("FavoritesSearchPanel", () => {
   });
 
   test("shows its trailing content in the header", () => {
-    const { element, trailing } = setup();
+    const { element, trailingChild } = setup();
 
-    expect(element.querySelector("header")!.contains(trailing)).toBe(true);
+    expect(element.querySelector("header")!.contains(trailingChild)).toBe(true);
   });
 
   test("stops following the favorites once disposed", () => {

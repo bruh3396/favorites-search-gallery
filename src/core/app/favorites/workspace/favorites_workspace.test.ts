@@ -17,43 +17,43 @@ import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
-  workspace: FavoritesWorkspace;
-  storage: MemoryLocalKeyedValues;
+  favoritesWorkspace: FavoritesWorkspace;
+  localKeyedValues: MemoryLocalKeyedValues;
 }
 
-function createWorkspace(storage: MemoryLocalKeyedValues, posts: Post[] = []): FavoritesWorkspace {
+function createWorkspace(localKeyedValues: MemoryLocalKeyedValues, posts: Post[] = []): FavoritesWorkspace {
   const favoritesPaginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination;
-  const searchIndex = new FavoritesSearchIndex(new StringInterner());
+  const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
 
   favoritesPaginationPreferences.pageSize.set(2);
-  searchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
+  favoritesSearchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
   return new FavoritesWorkspace({
-    storedSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage, codec: FAVORITES_WORKSPACE_SNAPSHOT_CODEC }),
-    createSession: (settings): FavoritesSession => {
-      const session = new FavoritesSession({ settings }, {
-        searchIndex,
-        blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
+    favoritesWorkspaceSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage: localKeyedValues, codec: FAVORITES_WORKSPACE_SNAPSHOT_CODEC }),
+    createSession: (favoritesSearchSettings): FavoritesSession => {
+      const favoritesSession = new FavoritesSession({ favoritesSearchSettings }, {
+        favoritesSearchIndex,
+        favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
         favoritesPaginationPreferences,
         randomSource: new MemoryRandomSource()
       });
 
-      vi.spyOn(session, "start");
-      return session;
+      vi.spyOn(favoritesSession, "start");
+      return favoritesSession;
     }
   });
 }
 
 function setup(stored?: unknown): Setup {
-  const storage = new MemoryLocalKeyedValues();
+  const localKeyedValues = new MemoryLocalKeyedValues();
 
   if (stored !== undefined) {
-    storage.set("workspace", stored);
+    localKeyedValues.set("workspace", stored);
   }
-  return { workspace: createWorkspace(storage), storage };
+  return { favoritesWorkspace: createWorkspace(localKeyedValues), localKeyedValues };
 }
 
 function createStoredWorkspace(queries: readonly string[], activeIndex = 0): unknown {
-  return { panes: [{ tabs: queries.map(query => ({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query })), activeIndex }] };
+  return { tabGroups: [{ favoritesSearchSettings: queries.map(query => ({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query })), activeIndex }] };
 }
 
 function createWorkspaceWithFavorites(count: number): FavoritesWorkspace {
@@ -61,207 +61,207 @@ function createWorkspaceWithFavorites(count: number): FavoritesWorkspace {
   return createWorkspace(new MemoryLocalKeyedValues(), posts);
 }
 
-function attachTile(workspace: FavoritesWorkspace): HTMLElement {
+function attachTile(favoritesWorkspace: FavoritesWorkspace): HTMLElement {
   const tile = document.createElement("div");
 
-  workspace.activeTab.peek().tileLocator.attach(() => tile);
+  favoritesWorkspace.activeTab.peek().tileLocator.attach(() => tile);
   return tile;
 }
 
-function readSettings(workspace: FavoritesWorkspace): FavoritesSearchSettings[] {
-  return workspace.tabManager.tabs.value.map(tab => tab.value.session.settings.value);
+function readSettings(favoritesWorkspace: FavoritesWorkspace): FavoritesSearchSettings[] {
+  return favoritesWorkspace.tabManager.tabs.value.map(tab => tab.value.session.searchSettings.value);
 }
 
-function readQueries(workspace: FavoritesWorkspace): string[] {
-  return readSettings(workspace).map(settings => settings.query);
+function readQueries(favoritesWorkspace: FavoritesWorkspace): string[] {
+  return readSettings(favoritesWorkspace).map(favoritesSearchSettings => favoritesSearchSettings.query);
 }
 
-function readActiveIndex(workspace: FavoritesWorkspace): number {
-  return workspace.tabManager.tabs.value.findIndex(tab => tab.value === workspace.activeTab.value);
+function readActiveIndex(favoritesWorkspace: FavoritesWorkspace): number {
+  return favoritesWorkspace.tabManager.tabs.value.findIndex(tab => tab.value === favoritesWorkspace.activeTab.value);
 }
 
 describe("FavoritesWorkspace", () => {
   test("opens one blank tab when nothing was saved", () => {
-    const { workspace } = setup();
+    const { favoritesWorkspace } = setup();
 
-    expect(readSettings(workspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
+    expect(readSettings(favoritesWorkspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
   });
 
   test("restores the saved tabs with the saved one active, starting only that one", () => {
-    const { workspace } = setup(createStoredWorkspace(["apple", "banana"], 1));
-    const [apple, banana] = workspace.tabManager.tabs.value.map(tab => tab.value);
+    const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"], 1));
+    const [appleFavoritesTab, bananaFavoritesTab] = favoritesWorkspace.tabManager.tabs.value.map(tab => tab.value);
 
-    expect(readQueries(workspace)).toEqual(["apple", "banana"]);
-    expect(workspace.activeTab.value).toBe(banana);
-    expect([apple.session.start, banana.session.start].map(start => vi.mocked(start).mock.calls.length)).toEqual([0, 1]);
+    expect(readQueries(favoritesWorkspace)).toEqual(["apple", "banana"]);
+    expect(favoritesWorkspace.activeTab.value).toBe(bananaFavoritesTab);
+    expect([appleFavoritesTab.session.start, bananaFavoritesTab.session.start].map(start => vi.mocked(start).mock.calls.length)).toEqual([0, 1]);
   });
 
   test("activates the first tab when the stored active tab is missing or out of range", () => {
-    const tabs = [{ query: "apple" }, { query: "banana" }];
+    const favoritesSearchSettings = [{ query: "apple" }, { query: "banana" }];
 
-    expect([undefined, 2, -1, 0.5, "1"].map(activeIndex => readActiveIndex(setup({ panes: [{ tabs, activeIndex }] }).workspace)))
+    expect([undefined, 2, -1, 0.5, "1"].map(activeIndex => readActiveIndex(setup({ tabGroups: [{ favoritesSearchSettings, activeIndex }] }).favoritesWorkspace)))
       .toEqual([0, 0, 0, 0, 0]);
   });
 
   test("drops a stored tab that isn't a record and keeps the rest", () => {
-    const { workspace } = setup({ panes: [{ tabs: ["apple", { query: "banana" }] }] });
+    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchSettings: ["apple", { query: "banana" }] }] });
 
-    expect(readQueries(workspace)).toEqual(["banana"]);
+    expect(readQueries(favoritesWorkspace)).toEqual(["banana"]);
   });
 
   test("fills a stored tab's invalid field with its default", () => {
-    const { workspace } = setup({ panes: [{ tabs: [{ query: "apple", sortKey: "unknown" }] }] });
+    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchSettings: [{ query: "apple", sortKey: "unknown" }] }] });
 
-    expect(readSettings(workspace)).toEqual([{ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "apple" }]);
+    expect(readSettings(favoritesWorkspace)).toEqual([{ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "apple" }]);
   });
 
-  test("skips a stored pane left without tabs", () => {
-    const { workspace } = setup({ panes: [{ tabs: [] }, { tabs: [{ query: "apple" }] }, "pane"] });
+  test("skips a stored tab group left without tabs", () => {
+    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchSettings: [] }, { favoritesSearchSettings: [{ query: "apple" }] }, "pane"] });
 
-    expect(readQueries(workspace)).toEqual(["apple"]);
+    expect(readQueries(favoritesWorkspace)).toEqual(["apple"]);
   });
 
-  test("opens one blank tab when no stored pane survives", () => {
-    const { workspace } = setup({ panes: [{ tabs: ["apple"] }] });
+  test("opens one blank tab when no stored tab group survives", () => {
+    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchSettings: ["apple"] }] });
 
-    expect(readSettings(workspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
+    expect(readSettings(favoritesWorkspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
   });
 
   test("opens one blank tab when the stored workspace isn't a record", () => {
-    const { workspace } = setup("workspace");
+    const { favoritesWorkspace } = setup("workspace");
 
-    expect(readSettings(workspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
+    expect(readSettings(favoritesWorkspace)).toEqual([DEFAULT_FAVORITES_SEARCH_SETTINGS]);
   });
 
   test("starts a tab's session once it is activated", () => {
-    const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
-    const banana = workspace.tabManager.tabs.value[1];
+    const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
+    const bananaTab = favoritesWorkspace.tabManager.tabs.value[1];
 
-    workspace.tabManager.activate(banana.id);
-    expect(banana.value.session.start).toHaveBeenCalledOnce();
+    favoritesWorkspace.tabManager.activate(bananaTab.id);
+    expect(bananaTab.value.session.start).toHaveBeenCalledOnce();
   });
 
   test("saves the tabs and which one is active as they change", () => {
-    const { workspace, storage } = setup(createStoredWorkspace(["apple"]));
+    const { favoritesWorkspace, localKeyedValues } = setup(createStoredWorkspace(["apple"]));
 
-    workspace.activeTab.value.session.submit("cherry");
-    workspace.openBlankTab();
-    const reopened = createWorkspace(storage);
+    favoritesWorkspace.activeTab.value.session.submit("cherry");
+    favoritesWorkspace.openBlankTab();
+    const reopenedFavoritesWorkspace = createWorkspace(localKeyedValues);
 
-    expect(readQueries(reopened)).toEqual(["cherry", ""]);
-    expect(readActiveIndex(reopened)).toBe(1);
+    expect(readQueries(reopenedFavoritesWorkspace)).toEqual(["cherry", ""]);
+    expect(readActiveIndex(reopenedFavoritesWorkspace)).toBe(1);
   });
 
   describe("openBlankTab", () => {
     test("opens an active tab with the default settings", () => {
-      const { workspace } = setup(createStoredWorkspace(["apple"]));
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple"]));
 
-      workspace.openBlankTab();
-      expect(workspace.activeTab.value.session.settings.value).toEqual(DEFAULT_FAVORITES_SEARCH_SETTINGS);
+      favoritesWorkspace.openBlankTab();
+      expect(favoritesWorkspace.activeTab.value.session.searchSettings.value).toEqual(DEFAULT_FAVORITES_SEARCH_SETTINGS);
     });
 
     test("asks the new tab to focus its search once it is active", () => {
-      const { workspace } = setup();
-      const requestedTabs: FavoritesTab[] = [];
+      const { favoritesWorkspace } = setup();
+      const requestedFavoritesTabs: FavoritesTab[] = [];
 
       effect(() => {
-        const tab = workspace.activeTab.value;
+        const favoritesTab = favoritesWorkspace.activeTab.value;
 
-        tab.focusSearch.on(() => requestedTabs.push(tab));
+        favoritesTab.focusSearch.on(() => requestedFavoritesTabs.push(favoritesTab));
       });
-      workspace.openBlankTab();
-      expect(requestedTabs).toEqual([workspace.activeTab.peek()]);
+      favoritesWorkspace.openBlankTab();
+      expect(requestedFavoritesTabs).toEqual([favoritesWorkspace.activeTab.peek()]);
     });
   });
 
   describe("closeTab", () => {
     test("closes the tab", () => {
-      const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
 
-      workspace.closeTab(workspace.tabManager.tabs.value[0].id);
-      expect(readQueries(workspace)).toEqual(["banana"]);
+      favoritesWorkspace.closeTab(favoritesWorkspace.tabManager.tabs.value[0].id);
+      expect(readQueries(favoritesWorkspace)).toEqual(["banana"]);
     });
 
     test("keeps the last tab open", () => {
-      const { workspace } = setup(createStoredWorkspace(["apple"]));
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple"]));
 
-      workspace.closeTab(workspace.tabManager.tabs.value[0].id);
-      expect(readQueries(workspace)).toEqual(["apple"]);
+      favoritesWorkspace.closeTab(favoritesWorkspace.tabManager.tabs.value[0].id);
+      expect(readQueries(favoritesWorkspace)).toEqual(["apple"]);
     });
   });
 
   describe("closeAllTabs", () => {
     test("leaves one active blank tab", () => {
-      const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
 
-      workspace.closeAllTabs();
-      expect([readSettings(workspace), readActiveIndex(workspace)]).toEqual([[DEFAULT_FAVORITES_SEARCH_SETTINGS], 0]);
+      favoritesWorkspace.closeAllTabs();
+      expect([readSettings(favoritesWorkspace), readActiveIndex(favoritesWorkspace)]).toEqual([[DEFAULT_FAVORITES_SEARCH_SETTINGS], 0]);
     });
 
     test("disposes the closed tabs' sessions", () => {
-      const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
-      const sessions = workspace.tabManager.tabs.value.map(tab => vi.spyOn(tab.value.session, "dispose"));
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
+      const sessions = favoritesWorkspace.tabManager.tabs.value.map(tab => vi.spyOn(tab.value.session, "dispose"));
 
-      workspace.closeAllTabs();
+      favoritesWorkspace.closeAllTabs();
       expect(sessions.map(dispose => dispose.mock.calls.length)).toEqual([1, 1]);
     });
   });
 
   describe("locate", () => {
     test("returns the active tab's tile for the item", () => {
-      const workspace = createWorkspaceWithFavorites(1);
-      const tile = attachTile(workspace);
+      const favoritesWorkspace = createWorkspaceWithFavorites(1);
+      const tile = attachTile(favoritesWorkspace);
 
-      expect(workspace.locate(workspace.activeTab.peek().session.results.peek()[0])).toBe(tile);
+      expect(favoritesWorkspace.locate(favoritesWorkspace.activeTab.peek().session.matchedFavorites.peek()[0])).toBe(tile);
     });
   });
 
   describe("turnToPageContaining", () => {
     test("turns the active tab to the item's page", () => {
-      const workspace = createWorkspaceWithFavorites(3);
-      const { session } = workspace.activeTab.peek();
+      const favoritesWorkspace = createWorkspaceWithFavorites(3);
+      const { session: favoritesSession } = favoritesWorkspace.activeTab.peek();
 
-      workspace.turnToPageContaining(session.results.peek()[2]);
-      expect(session.pageItems.value.map(favorite => favorite.id)).toEqual(["3"]);
+      favoritesWorkspace.turnToPageContaining(favoritesSession.matchedFavorites.peek()[2]);
+      expect(favoritesSession.pageFavorites.value.map(favorite => favorite.id)).toEqual(["3"]);
     });
   });
 
   describe("reveal", () => {
     test("turns to the item's page and scrolls its tile into view", () => {
-      const workspace = createWorkspaceWithFavorites(3);
-      const { session } = workspace.activeTab.peek();
-      const tile = attachTile(workspace);
+      const favoritesWorkspace = createWorkspaceWithFavorites(3);
+      const { session: favoritesSession } = favoritesWorkspace.activeTab.peek();
+      const tile = attachTile(favoritesWorkspace);
       const scrollIntoView = vi.fn();
 
       tile.scrollIntoView = scrollIntoView;
-      workspace.reveal(session.results.peek()[2]);
-      expect([session.pageItems.value.map(favorite => favorite.id), scrollIntoView.mock.calls.length]).toEqual([["3"], 1]);
+      favoritesWorkspace.reveal(favoritesSession.matchedFavorites.peek()[2]);
+      expect([favoritesSession.pageFavorites.value.map(favorite => favorite.id), scrollIntoView.mock.calls.length]).toEqual([["3"], 1]);
     });
 
     test("returns the item's tile", () => {
-      const workspace = createWorkspaceWithFavorites(1);
-      const tile = attachTile(workspace);
+      const favoritesWorkspace = createWorkspaceWithFavorites(1);
+      const tile = attachTile(favoritesWorkspace);
 
-      expect(workspace.reveal(workspace.activeTab.peek().session.results.peek()[0])).toBe(tile);
+      expect(favoritesWorkspace.reveal(favoritesWorkspace.activeTab.peek().session.matchedFavorites.peek()[0])).toBe(tile);
     });
   });
 
   describe("dispose", () => {
     test("stops saving the tabs", () => {
-      const { workspace, storage } = setup(createStoredWorkspace(["apple"]));
+      const { favoritesWorkspace, localKeyedValues } = setup(createStoredWorkspace(["apple"]));
 
-      workspace.dispose();
-      workspace.openBlankTab();
-      expect(readQueries(createWorkspace(storage))).toEqual(["apple"]);
+      favoritesWorkspace.dispose();
+      favoritesWorkspace.openBlankTab();
+      expect(readQueries(createWorkspace(localKeyedValues))).toEqual(["apple"]);
     });
 
     test("stops starting the tab that gets activated", () => {
-      const { workspace } = setup(createStoredWorkspace(["apple", "banana"]));
-      const banana = workspace.tabManager.tabs.value[1];
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
+      const bananaTab = favoritesWorkspace.tabManager.tabs.value[1];
 
-      workspace.dispose();
-      workspace.tabManager.activate(banana.id);
-      expect(banana.value.session.start).not.toHaveBeenCalled();
+      favoritesWorkspace.dispose();
+      favoritesWorkspace.tabManager.activate(bananaTab.id);
+      expect(bananaTab.value.session.start).not.toHaveBeenCalled();
     });
   });
 });

@@ -22,32 +22,32 @@ describe("createPostListService", () => {
 
   describe("showPage", () => {
     test("shows the page asked for", async() => {
-      const postList = setup([UNTAGGED, OTHER, createPost({ id: "3" })]);
+      const postListService = setup([UNTAGGED, OTHER, createPost({ id: "3" })]);
 
-      await postList.showPage(1);
-      expect(postList.page.value.posts.map(post => post.id)).toEqual(["3"]);
+      await postListService.showPage(1);
+      expect(postListService.page.value.posts.map(post => post.id)).toEqual(["3"]);
     });
   });
 
   describe("correctMedia", () => {
     test("replaces a shown post's media in place and reports the corrected post", () => {
-      const postList = setup();
+      const postListService = setup();
       const changed = vi.fn();
 
-      postList.changed.on(changed);
-      postList.correctMedia("1", GIF);
-      expect(postList.page.value.posts).toEqual([{ ...UNTAGGED, media: GIF }, OTHER]);
+      postListService.changed.on(changed);
+      postListService.correctMedia("1", GIF);
+      expect(postListService.page.value.posts).toEqual([{ ...UNTAGGED, media: GIF }, OTHER]);
       expect(changed).toHaveBeenCalledExactlyOnceWith({ ...UNTAGGED, media: GIF });
     });
 
     test("ignores a post no longer shown", () => {
-      const postList = setup();
+      const postListService = setup();
       const changed = vi.fn();
-      const page = postList.page.value;
+      const postListPage = postListService.page.value;
 
-      postList.changed.on(changed);
-      postList.correctMedia("9", GIF);
-      expect(postList.page.value).toBe(page);
+      postListService.changed.on(changed);
+      postListService.correctMedia("9", GIF);
+      expect(postListService.page.value).toBe(postListPage);
       expect(changed).not.toHaveBeenCalled();
     });
   });

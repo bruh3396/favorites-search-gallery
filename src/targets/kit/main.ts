@@ -106,7 +106,7 @@ function renderFontPicker(app: HTMLElement): HTMLElement {
   const item = createElement("div", "kit-Toolbar-item", "Font");
   const name = new Signal<string>(FONTS[0].name);
   const { result: font } = render(document, () => h(Segmented<string>, {
-    choices: FONTS.map(choice => ({ value: choice.name, label: choice.name })),
+    controlChoices: FONTS.map(choice => ({ value: choice.name, label: choice.name })),
     size: "small",
     value: name,
     onValueChange: next => {

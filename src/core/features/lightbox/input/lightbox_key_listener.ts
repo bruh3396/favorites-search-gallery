@@ -7,15 +7,15 @@ export function createLightboxKeyListener(keymap: Keymap<LightboxCommand>, handl
     if (event.ctrlKey || event.metaKey || event.altKey) {
       return;
     }
-    const command = keymap[event.key];
+    const lightboxCommand = keymap[event.key];
 
-    if (command !== undefined) {
+    if (lightboxCommand !== undefined) {
       event.preventDefault();
 
       if (event.currentTarget instanceof HTMLElement) {
         event.currentTarget.focus({ preventScroll: true });
       }
-      handlers[command]();
+      handlers[lightboxCommand]();
     }
   };
 }

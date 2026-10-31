@@ -10,8 +10,8 @@ const TERM_UPDATE_COALESCING = { flushSize: 50, flushTimeout: 1_500 };
 
 export interface FavoritesReindexerDependencies {
   scheduler: Scheduler;
-  collection: Pick<FavoritesCollection, "overwrite">;
-  index: Pick<FavoritesSearchIndex, "update">;
+  favoritesCollection: Pick<FavoritesCollection, "overwrite">;
+  favoritesSearchIndex: Pick<FavoritesSearchIndex, "update">;
 }
 
 export class FavoritesReindexer {
@@ -21,18 +21,18 @@ export class FavoritesReindexer {
   constructor(dependencies: FavoritesReindexerDependencies) {
     this.dependencies = dependencies;
     this.termUpdater = new CoalescingExecutor(TERM_UPDATE_COALESCING, {
-      execute: (updates): void => dependencies.index.update(updates),
+      execute: (termUpdates): void => dependencies.favoritesSearchIndex.update(termUpdates),
       scheduler: dependencies.scheduler
     });
   }
 
   public reindex(post: Post): void {
-    const overwrite = this.dependencies.collection.overwrite(post);
+    const favoriteOverwrite = this.dependencies.favoritesCollection.overwrite(post);
 
-    if (overwrite === undefined) {
+    if (favoriteOverwrite === undefined) {
       return;
     }
-    const { favorite, previousTags } = overwrite;
+    const { favorite, previousTags } = favoriteOverwrite;
     const tags = favorite.tags;
 
     if (previousTags.symmetricDifference(tags).size > 0) {

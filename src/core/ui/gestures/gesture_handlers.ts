@@ -5,8 +5,8 @@ import { WheelGesture } from "@/core/ui/gestures/wheel_gesture";
 
 export interface GestureHandlers {
   canDrag(): boolean;
-  onPress(gesture: PressGesture): boolean;
-  onTap(gesture: TapGesture): void;
-  onDrag(gesture: DragGesture): void;
-  onWheel(gesture: WheelGesture): boolean;
+  onPress(pressGesture: PressGesture): boolean;
+  onTap(tapGesture: TapGesture): void;
+  onDrag(dragGesture: DragGesture): void;
+  onWheel(wheelGesture: WheelGesture): boolean;
 }

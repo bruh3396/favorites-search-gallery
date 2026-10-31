@@ -11,7 +11,7 @@ export interface FavoritesPaginationPreferences {
 }
 
 export interface FavoritesPaginationDependencies {
-  search: FavoritesSearch;
+  favoritesSearch: FavoritesSearch;
   preferences: FavoritesPaginationPreferences;
 }
 
@@ -19,43 +19,31 @@ const INFINITE_SCROLL_PAGE_SIZE = 25;
 
 export class FavoritesPagination {
   private readonly requestedPageNumber: Signal<number>;
-  private readonly currentPageCount: Readable<number>;
-  private readonly currentPageNumber: Readable<number>;
-  private readonly currentItems: Readable<readonly Favorite[]>;
+  public readonly pageCount: Readable<number>;
+  public readonly pageNumber: Readable<number>;
+  public readonly pageFavorites: Readable<readonly Favorite[]>;
   private readonly stopListening: Array<() => void>;
 
   constructor(private readonly dependencies: FavoritesPaginationDependencies) {
-    const { search, preferences } = dependencies;
+    const { favoritesSearch, preferences: favoritesPaginationPreferences } = dependencies;
 
     this.requestedPageNumber = new Signal(1);
-    this.currentPageCount = computed(() => Math.max(1, Math.ceil(search.results.value.length / this.getPageSize())));
-    this.currentPageNumber = computed(() => clamp(this.requestedPageNumber.value, 1, this.currentPageCount.value));
-    this.currentItems = computed(() => this.sliceItems(), { equals: haveSameItems });
+    this.pageCount = computed(() => Math.max(1, Math.ceil(favoritesSearch.matchedFavorites.value.length / this.getPageSize())));
+    this.pageNumber = computed(() => clamp(this.requestedPageNumber.value, 1, this.pageCount.value));
+    this.pageFavorites = computed(() => this.sliceItems(), { equals: haveSameItems });
     this.stopListening = [
-      search.searched.on(() => this.goToFirst()),
-      preferences.pageSize.changed.on(() => this.goToFirst()),
-      preferences.infiniteScroll.changed.on(() => this.goToFirst())
+      favoritesSearch.searched.on(() => this.goToFirst()),
+      favoritesPaginationPreferences.pageSize.changed.on(() => this.goToFirst()),
+      favoritesPaginationPreferences.infiniteScroll.changed.on(() => this.goToFirst())
     ];
   }
 
-  public get items(): Readable<readonly Favorite[]> {
-    return this.currentItems;
-  }
-
-  public get pageNumber(): Readable<number> {
-    return this.currentPageNumber;
-  }
-
-  public get pageCount(): Readable<number> {
-    return this.currentPageCount;
-  }
-
   public goTo(pageNumber: number): void {
-    this.requestedPageNumber.value = clamp(pageNumber, 1, this.currentPageCount.peek());
+    this.requestedPageNumber.value = clamp(pageNumber, 1, this.pageCount.peek());
   }
 
-  public goToContaining(item: Favorite): void {
-    const index = this.dependencies.search.results.peek().indexOf(item);
+  public goToContaining(favorite: Favorite): void {
+    const index = this.dependencies.favoritesSearch.matchedFavorites.peek().indexOf(favorite);
 
     if (index >= 0) {
       this.goTo(Math.floor(index / this.getPageSize()) + 1);
@@ -74,13 +62,13 @@ export class FavoritesPagination {
 
   private sliceItems(): readonly Favorite[] {
     const pageSize = this.getPageSize();
-    const pageNumber = this.currentPageNumber.value;
+    const pageNumber = this.pageNumber.value;
     const start = this.dependencies.preferences.infiniteScroll.value ? 0 : (pageNumber - 1) * pageSize;
-    return this.dependencies.search.results.value.slice(start, pageNumber * pageSize);
+    return this.dependencies.favoritesSearch.matchedFavorites.value.slice(start, pageNumber * pageSize);
   }
 
   private getPageSize(): number {
-    const { pageSize, infiniteScroll } = this.dependencies.preferences;
-    return infiniteScroll.value ? INFINITE_SCROLL_PAGE_SIZE : Math.max(1, pageSize.value);
+    const { pageSize: favoritesPaginationPageSize, infiniteScroll: favoritesPaginationInfiniteScroll } = this.dependencies.preferences;
+    return favoritesPaginationInfiniteScroll.value ? INFINITE_SCROLL_PAGE_SIZE : Math.max(1, favoritesPaginationPageSize.value);
   }
 }

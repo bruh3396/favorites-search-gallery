@@ -21,20 +21,20 @@ export const FavoritesSearchPanelClass = {
 
 export interface FavoritesSearchPanelProps {
   favoritesService: Pick<FavoritesService, "loadState" | "searchable">;
-  session: Pick<FavoritesSession, "query" | "isFiltered" | "results" | "pageNumber" | "pageCount" | "goTo" | "clearFilters" | "submit">;
+  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "pageNumber" | "pageCount" | "goTo" | "clearFilters" | "submit">;
   focusSearch: Emitter<void>;
-  trailing: Child;
+  trailingChild: Child;
   skeleton: Node;
   grid: Node;
 }
 
-export function FavoritesSearchPanel({ favoritesService, session, focusSearch, trailing, skeleton, grid }: FavoritesSearchPanelProps): HTMLElement {
+export function FavoritesSearchPanel({ favoritesService, favoritesSession, focusSearch, trailingChild, skeleton, grid }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
-    resultCount: session.results.value.length,
+    resultCount: favoritesSession.matchedFavorites.value.length,
     isSearchable: favoritesService.searchable.reached,
     loadPhase: favoritesService.loadState.value.phase,
-    query: session.query.value,
-    isFiltered: session.isFiltered.value
+    query: favoritesSession.query.value,
+    isFiltered: favoritesSession.isFiltered.value
   }));
   const body: HTMLElement = (
     <div className={FavoritesSearchPanelClass.body} data-zen-stage="">
@@ -45,7 +45,7 @@ export function FavoritesSearchPanel({ favoritesService, session, focusSearch, t
         action={computed(() => (panelBody.value.kind === "empty" && panelBody.value.offersClear ? {
           label: "Clear",
           onClick: (): void => {
-            session.clearFilters();
+            favoritesSession.clearFilters();
             focusSearch.emit();
           }
         } : null))}
@@ -59,31 +59,31 @@ export function FavoritesSearchPanel({ favoritesService, session, focusSearch, t
         <div className={FavoritesSearchPanelClass.search}>
           <SearchBox
             label="Search favorites"
-            query={session.query}
-            trailing={[
+            query={favoritesSession.query}
+            trailingChild={[
               <button className={FavoritesSearchPanelClass.filter} type="button" aria-label="Filters" aria-disabled="true">
                 {createIcon("filter", SearchBoxClass.icon)}
               </button>,
               <span className={FavoritesSearchPanelClass.count}>
-                {computed(() => describeResultCount(session.results.value.length))}
+                {computed(() => describeResultCount(favoritesSession.matchedFavorites.value.length))}
               </span>
             ]}
             focusRequests={focusSearch}
             onSearch={query => {
-              session.submit(query);
+              favoritesSession.submit(query);
               body.scrollTop = 0;
             }}
           />
         </div>
         <Paginator
-          pageNumber={session.pageNumber}
-          pageCount={session.pageCount}
+          pageNumber={favoritesSession.pageNumber}
+          pageCount={favoritesSession.pageCount}
           onPageChange={pageNumber => {
-            session.goTo(pageNumber);
+            favoritesSession.goTo(pageNumber);
             body.scrollTop = 0;
           }}
         />
-        <div className={FavoritesSearchPanelClass.trailing}>{trailing}</div>
+        <div className={FavoritesSearchPanelClass.trailing}>{trailingChild}</div>
       </header>
       {body}
     </section>

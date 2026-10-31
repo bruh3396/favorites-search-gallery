@@ -13,11 +13,11 @@ interface Setup {
   onValueChange: (next: boolean) => void;
 }
 
-function setup(props: Partial<SwitchProps> = {}): Setup {
+function setup(partialSwitchProps: Partial<SwitchProps> = {}): Setup {
   const value = new Signal(false);
   const disabled = new Signal(false);
   const onValueChange = vi.fn<(next: boolean) => void>();
-  const { result, dispose } = render(document, () => <Switch value={value} disabled={disabled} onValueChange={onValueChange} {...props} />);
+  const { result, dispose } = render(document, () => <Switch value={value} disabled={disabled} onValueChange={onValueChange} {...partialSwitchProps} />);
   return { element: result as HTMLButtonElement, dispose, value, disabled, onValueChange };
 }
 

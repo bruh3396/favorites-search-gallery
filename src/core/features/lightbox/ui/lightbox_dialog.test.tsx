@@ -24,14 +24,14 @@ import { expectClassesStyled } from "@/testing/css";
 const IDLE_DELAY = 100;
 const LEAVE_DELAY = 500;
 
-function setup(details?: LightboxDetails<Post>): {
+function setup(lightboxDetails?: LightboxDetails<Post>): {
   dialog: HTMLDialogElement;
   isOpen: Signal<boolean>;
   simple: Signal<boolean>;
   closesOnPress: Signal<boolean>;
   scheduler: MemoryScheduler;
   handlers: CommandHandlers<LightboxCommand>;
-  keyListener: (event: KeyboardEvent) => void;
+  onKeydown: (event: KeyboardEvent) => void;
 } {
   const isOpen = new Signal(false);
   const simple = new Signal(false);
@@ -46,12 +46,12 @@ function setup(details?: LightboxDetails<Post>): {
     showPrevious: vi.fn(),
     toggleDetails: vi.fn()
   } as Partial<CommandHandlers<LightboxCommand>> as CommandHandlers<LightboxCommand>;
-  const keyListener = vi.fn();
+  const onKeydown = vi.fn();
   const { result: dialog } = render(document, () => {
     const remoteMedia = new MemoryRemoteMedia();
-    const stage = new LightboxStage<Post>({ gifCapacity: 1, videoCapacity: 1 }, {
+    const lightboxStage = new LightboxStage<Post>({ gifCapacity: 1, videoCapacity: 1 }, {
       remoteMedia,
-      resolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
+      lightboxMediaResolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
       currentItem,
       retainedItems: new Signal<readonly Post[]>([]),
       volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storage }),
@@ -62,29 +62,29 @@ function setup(details?: LightboxDetails<Post>): {
         isOpen={isOpen}
         position={new Signal(undefined)}
         currentItem={currentItem}
-        details={details}
+        lightboxDetails={lightboxDetails}
         simple={simple}
         closesOnPress={closesOnPress}
-        stage={stage}
-        overlayVisibility={new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler)}
+        lightboxStage={lightboxStage}
+        lightboxOverlayVisibility={new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler)}
         inFullscreen={new Signal(false)}
-        zoom={new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: stage.mediaSize, enabled: new Signal(true) })}
-        autoplay={{ isPlaying: new Signal(false), countdown: new Signal(undefined) }}
+        lightboxZoom={new LightboxZoom({ minimumScale: 2, maximumScale: 8 }, { currentItem, mediaSize: lightboxStage.mediaSize, enabled: new Signal(true) })}
+        lightboxAutoplay={{ isPlaying: new Signal(false), countdown: new Signal(undefined) }}
         sizeObserver={new MemorySizeObserver()}
         handlers={handlers}
         keymap={{}}
-        keyListener={keyListener}
-        mouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn() }}
+        onKeydown={onKeydown}
+        lightboxMouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn() }}
       />
     ) as HTMLDialogElement;
   });
 
   document.body.append(dialog);
-  return { dialog, isOpen, simple, closesOnPress, scheduler, handlers, keyListener };
+  return { dialog, isOpen, simple, closesOnPress, scheduler, handlers, onKeydown };
 }
 
-function setupOpen(details?: LightboxDetails<Post>): ReturnType<typeof setup> {
-  const result = setup(details);
+function setupOpen(lightboxDetails?: LightboxDetails<Post>): ReturnType<typeof setup> {
+  const result = setup(lightboxDetails);
 
   result.isOpen.value = true;
   return result;
@@ -93,7 +93,7 @@ function setupOpen(details?: LightboxDetails<Post>): ReturnType<typeof setup> {
 function createDetails(): LightboxDetails<Post> & { isOpen: KeyedStoredValue<boolean> } {
   return {
     isOpen: new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() }),
-    createContent: () => ({ body: <p>details content</p> })
+    createContent: () => ({ bodyChild: <p>details content</p> })
   };
 }
 
@@ -129,7 +129,7 @@ describe("LightboxDialog", () => {
   });
 
   test("passes keys to its key listener", () => {
-    const { dialog, keyListener } = setupOpen();
+    const { dialog, onKeydown: keyListener } = setupOpen();
     const event = new KeyboardEvent("keydown", { key: "ArrowRight" });
 
     dialog.dispatchEvent(event);
@@ -171,11 +171,11 @@ describe("LightboxDialog", () => {
   test.each<[string, keyof CommandHandlers<LightboxCommand>]>([
     ["Previous", "showPrevious"],
     ["Next", "showNext"]
-  ])("runs %s's command from its arrow", (label, command) => {
+  ])("runs %s's command from its arrow", (label, lightboxCommand) => {
     const { dialog, handlers } = setupOpen();
 
     findButton(dialog, label).click();
-    expect(handlers[command]).toHaveBeenCalledOnce();
+    expect(handlers[lightboxCommand]).toHaveBeenCalledOnce();
   });
 
   test("toggles pause on a click on the video", () => {

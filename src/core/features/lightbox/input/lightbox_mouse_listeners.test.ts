@@ -3,10 +3,10 @@ import { createLightboxMouseListeners } from "@/core/features/lightbox/input/lig
 
 function setup(): {
   handlers: { openPostPage: () => void; close: () => void };
-  listeners: ReturnType<typeof createLightboxMouseListeners>;
+  lightboxMouseListeners: ReturnType<typeof createLightboxMouseListeners>;
 } {
   const handlers = { openPostPage: vi.fn(), close: vi.fn() };
-  return { handlers, listeners: createLightboxMouseListeners(handlers) };
+  return { handlers, lightboxMouseListeners: createLightboxMouseListeners(handlers) };
 }
 
 function createWheelEvent(init: MouseEventInit): WheelEvent {
@@ -19,77 +19,77 @@ function createContextmenuEvent(): MouseEvent {
 
 describe("createLightboxMouseListeners", () => {
   test("blocks page zoom on ctrl+wheel", () => {
-    const { listeners } = setup();
+    const { lightboxMouseListeners } = setup();
     const event = createWheelEvent({ ctrlKey: true });
 
-    listeners.onWheel(event);
+    lightboxMouseListeners.onWheel(event);
     expect(event.defaultPrevented).toBe(true);
   });
 
   test("lets a plain wheel through", () => {
-    const { listeners } = setup();
+    const { lightboxMouseListeners } = setup();
     const event = createWheelEvent({});
 
-    listeners.onWheel(event);
+    lightboxMouseListeners.onWheel(event);
     expect(event.defaultPrevented).toBe(false);
   });
 
   test("blocks autoscroll on middle mousedown", () => {
-    const { listeners } = setup();
+    const { lightboxMouseListeners } = setup();
     const event = new MouseEvent("mousedown", { button: 1, cancelable: true });
 
-    listeners.onMousedown(event);
+    lightboxMouseListeners.onMousedown(event);
     expect(event.defaultPrevented).toBe(true);
   });
 
   test("lets a left mousedown through", () => {
-    const { handlers, listeners } = setup();
+    const { handlers, lightboxMouseListeners } = setup();
     const event = new MouseEvent("mousedown", { button: 0, cancelable: true });
 
-    listeners.onMousedown(event);
+    lightboxMouseListeners.onMousedown(event);
     expect(event.defaultPrevented).toBe(false);
     expect(handlers.close).not.toHaveBeenCalled();
   });
 
   test("closes on right mousedown", () => {
-    const { handlers, listeners } = setup();
+    const { handlers, lightboxMouseListeners } = setup();
 
-    listeners.onMousedown(new MouseEvent("mousedown", { button: 2, cancelable: true }));
+    lightboxMouseListeners.onMousedown(new MouseEvent("mousedown", { button: 2, cancelable: true }));
     expect(handlers.close).toHaveBeenCalledOnce();
   });
 
   test("opens the post page on middle click", () => {
-    const { handlers, listeners } = setup();
+    const { handlers, lightboxMouseListeners } = setup();
     const event = new MouseEvent("auxclick", { button: 1, cancelable: true });
 
-    listeners.onAuxclick(event);
+    lightboxMouseListeners.onAuxclick(event);
     expect(handlers.openPostPage).toHaveBeenCalledOnce();
     expect(event.defaultPrevented).toBe(true);
   });
 
   test("ignores other auxiliary buttons", () => {
-    const { handlers, listeners } = setup();
+    const { handlers, lightboxMouseListeners } = setup();
 
-    listeners.onAuxclick(new MouseEvent("auxclick", { button: 2, cancelable: true }));
+    lightboxMouseListeners.onAuxclick(new MouseEvent("auxclick", { button: 2, cancelable: true }));
     expect(handlers.openPostPage).not.toHaveBeenCalled();
   });
 
   test("blocks only the contextmenu that follows a right mousedown", () => {
-    const { listeners } = setup();
+    const { lightboxMouseListeners } = setup();
     const following = createContextmenuEvent();
     const later = createContextmenuEvent();
 
-    listeners.onMousedown(new MouseEvent("mousedown", { button: 2, view: window }));
+    lightboxMouseListeners.onMousedown(new MouseEvent("mousedown", { button: 2, view: window }));
     window.dispatchEvent(following);
     window.dispatchEvent(later);
     expect([following.defaultPrevented, later.defaultPrevented]).toEqual([true, false]);
   });
 
   test("stops blocking the contextmenu after another mousedown", () => {
-    const { listeners } = setup();
+    const { lightboxMouseListeners } = setup();
     const event = createContextmenuEvent();
 
-    listeners.onMousedown(new MouseEvent("mousedown", { button: 2, view: window }));
+    lightboxMouseListeners.onMousedown(new MouseEvent("mousedown", { button: 2, view: window }));
     window.dispatchEvent(new MouseEvent("mousedown"));
     window.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(false);

@@ -22,33 +22,33 @@ function createFavorite(width: number, height: number): Favorite {
 }
 
 function setup(
-  storage = new MemoryLocalKeyedValues(),
+  localKeyedValues = new MemoryLocalKeyedValues(),
   { results = new Signal<readonly Favorite[]>([]), scheduler = new MemoryScheduler() } = {}
 ): FavoriteSizeRecorder {
-  const storedSizes = new KeyedStoredValue({ key: "sizes", defaultValue: PLACEHOLDER_SIZES }, { storage });
-  return new FavoriteSizeRecorder({ measuredCount: 3, recordDelay: 100 }, { storedSizes, results, scheduler });
+  const sizes = new KeyedStoredValue({ key: "sizes", defaultValue: PLACEHOLDER_SIZES }, { storage: localKeyedValues });
+  return new FavoriteSizeRecorder({ measuredCount: 3, recordDelay: 100 }, { sizes, results, scheduler });
 }
 
 describe("FavoriteSizeRecorder", () => {
   test("records results after they settle and cancels an empty result", () => {
-    const storage = new MemoryLocalKeyedValues();
+    const localKeyedValues = new MemoryLocalKeyedValues();
     const scheduler = new MemoryScheduler();
     const results = new Signal<readonly Favorite[]>([]);
 
-    setup(storage, { results, scheduler });
+    setup(localKeyedValues, { results, scheduler });
 
     results.value = [createFavorite(4, 3)];
     scheduler.advance(50);
     results.value = [];
     scheduler.advance(100);
 
-    expect(storage.get("sizes")).toBeUndefined();
+    expect(localKeyedValues.get("sizes")).toBeUndefined();
 
     results.value = [createFavorite(1, 2)];
     scheduler.advance(99);
-    expect(storage.get("sizes")).toBeUndefined();
+    expect(localKeyedValues.get("sizes")).toBeUndefined();
     scheduler.advance(1);
-    expect(storage.get("sizes")).toEqual([{ width: 1, height: 2 }]);
+    expect(localKeyedValues.get("sizes")).toEqual([{ width: 1, height: 2 }]);
   });
 
   describe("record", () => {
@@ -67,9 +67,9 @@ describe("FavoriteSizeRecorder", () => {
     });
 
     test("doesn't write unchanged dimensions again", () => {
-      const storage = new MemoryLocalKeyedValues();
-      const favoriteSizeRecorder = setup(storage);
-      const write = vi.spyOn(storage, "set");
+      const localKeyedValues = new MemoryLocalKeyedValues();
+      const favoriteSizeRecorder = setup(localKeyedValues);
+      const write = vi.spyOn(localKeyedValues, "set");
 
       favoriteSizeRecorder.record([createFavorite(4, 3)]);
       favoriteSizeRecorder.record([createFavorite(4, 3)]);

@@ -3,6 +3,6 @@ import { Point } from "@/core/utils/geometry/point";
 
 export interface WheelGesture {
   readonly point: Point;
-  readonly delta: Point;
-  readonly modifiers: ModifierState;
+  readonly deltaPoint: Point;
+  readonly modifierState: ModifierState;
 }

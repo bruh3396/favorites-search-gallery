@@ -14,20 +14,20 @@ export interface PostActionsDependencies {
 export class PostActions {
   constructor(private readonly dependencies: PostActionsDependencies) { }
 
-  public openPostPage(item: MediaItem): void {
-    this.dependencies.navigator.open(this.dependencies.remotePages.postUrl(item.id));
+  public openPostPage(mediaItem: MediaItem): void {
+    this.dependencies.navigator.open(this.dependencies.remotePages.postUrl(mediaItem.id));
   }
 
-  public openOriginal(item: MediaItem): void {
-    this.dependencies.remoteMedia.resolveOriginalUrl(item.media)
+  public openOriginal(mediaItem: MediaItem): void {
+    this.dependencies.remoteMedia.resolveOriginalUrl(mediaItem.media)
       .then(url => this.dependencies.navigator.open(url))
       .catch(console.error);
   }
 
-  public download(item: MediaItem): void {
-    this.dependencies.remoteMedia.fetchOriginal(item.media)
-      .then(file => this.dependencies.fileSaver.save(file, nameDownload(item.id, file)))
-      .catch(() => this.openOriginal(item));
+  public download(mediaItem: MediaItem): void {
+    this.dependencies.remoteMedia.fetchOriginal(mediaItem.media)
+      .then(file => this.dependencies.fileSaver.save(file, nameDownload(mediaItem.id, file)))
+      .catch(() => this.openOriginal(mediaItem));
   }
 }
 

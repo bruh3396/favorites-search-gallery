@@ -10,51 +10,51 @@ import { containsPoint } from "@/core/utils/geometry/rect_utilities";
 const WHEEL_ZOOM_RATE = 0.002;
 
 export interface LightboxViewportGestureHandlersDependencies {
-  zoom: Pick<LightboxZoom, "isZoomed" | "canZoom" | "mediaRect" | "toggle" | "zoomBy" | "zoomOut" | "panBy">;
+  lightboxZoom: Pick<LightboxZoom, "isZoomed" | "canZoom" | "mediaRect" | "toggle" | "zoomBy" | "zoomOut" | "panBy">;
   handlers: Pick<CommandHandlers<LightboxCommand>, "close" | "showNext" | "showPrevious" | "openOriginal">;
   closesOnPress: Readable<boolean>;
 }
 
 export function createLightboxViewportGestureHandlers(dependencies: LightboxViewportGestureHandlersDependencies): GestureHandlers {
-  const { zoom, handlers, closesOnPress } = dependencies;
+  const { lightboxZoom, handlers, closesOnPress } = dependencies;
   return {
-    canDrag: () => zoom.isZoomed.peek(),
-    onDrag: ({ delta }) => zoom.panBy(delta.x, delta.y),
-    onPress: ({ point, modifiers }): boolean => {
-      if (modifiers.ctrl || modifiers.meta || zoom.isZoomed.peek()) {
+    canDrag: () => lightboxZoom.isZoomed.peek(),
+    onDrag: ({ deltaPoint }) => lightboxZoom.panBy(deltaPoint.x, deltaPoint.y),
+    onPress: ({ point, modifierState }): boolean => {
+      if (modifierState.ctrl || modifierState.meta || lightboxZoom.isZoomed.peek()) {
         return false;
       }
-      const isClosing = zoom.canZoom.peek() ? !isOnMedia(zoom.mediaRect.peek(), point) : closesOnPress.peek();
+      const isClosing = lightboxZoom.canZoom.peek() ? !isOnMedia(lightboxZoom.mediaRect.peek(), point) : closesOnPress.peek();
 
       if (isClosing) {
         handlers.close();
       }
       return isClosing;
     },
-    onTap: ({ point, modifiers }): void => {
-      if (modifiers.ctrl || modifiers.meta) {
+    onTap: ({ point, modifierState }): void => {
+      if (modifierState.ctrl || modifierState.meta) {
         handlers.openOriginal();
-      } else if (zoom.isZoomed.peek()) {
-        zoom.zoomOut();
-      } else if (zoom.canZoom.peek() && isOnMedia(zoom.mediaRect.peek(), point)) {
-        zoom.toggle(point);
+      } else if (lightboxZoom.isZoomed.peek()) {
+        lightboxZoom.zoomOut();
+      } else if (lightboxZoom.canZoom.peek() && isOnMedia(lightboxZoom.mediaRect.peek(), point)) {
+        lightboxZoom.toggle(point);
       }
     },
-    onWheel: ({ point, delta, modifiers }): boolean => {
-      if (modifiers.ctrl) {
-        zoom.zoomBy(Math.exp(-delta.y * WHEEL_ZOOM_RATE), point);
+    onWheel: ({ point, deltaPoint, modifierState }): boolean => {
+      if (modifierState.ctrl) {
+        lightboxZoom.zoomBy(Math.exp(-deltaPoint.y * WHEEL_ZOOM_RATE), point);
         return true;
       }
 
-      if (zoom.isZoomed.peek()) {
-        zoom.panBy(-delta.x, -delta.y);
+      if (lightboxZoom.isZoomed.peek()) {
+        lightboxZoom.panBy(-deltaPoint.x, -deltaPoint.y);
         return true;
       }
 
-      if (modifiers.shift || delta.y === 0) {
+      if (modifierState.shift || deltaPoint.y === 0) {
         return false;
       }
-      (delta.y > 0 ? handlers.showNext : handlers.showPrevious)();
+      (deltaPoint.y > 0 ? handlers.showNext : handlers.showPrevious)();
       return true;
     }
   };

@@ -55,13 +55,13 @@ describe("PageSlot", () => {
   });
 
   test("reports a clicked page other than the current one", () => {
-    const other = setup(5);
-    const current = setup(2);
+    const otherSetup = setup(5);
+    const currentSetup = setup(2);
 
-    other.element.querySelector<HTMLButtonElement>("[data-page-number]")!.click();
-    current.element.querySelector<HTMLButtonElement>("[data-page-number]")!.click();
-    expect(vi.mocked(other.onPageChange).mock.calls).toEqual([[5]]);
-    expect(current.onPageChange).not.toHaveBeenCalled();
+    otherSetup.element.querySelector<HTMLButtonElement>("[data-page-number]")!.click();
+    currentSetup.element.querySelector<HTMLButtonElement>("[data-page-number]")!.click();
+    expect(vi.mocked(otherSetup.onPageChange).mock.calls).toEqual([[5]]);
+    expect(currentSetup.onPageChange).not.toHaveBeenCalled();
   });
 
   test("replaces a clicked gap with a focused field", () => {

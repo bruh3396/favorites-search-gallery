@@ -14,35 +14,35 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Options {
   blacklistedTags?: readonly string[];
-  settings?: Partial<FavoritesSearchSettings>;
+  partialFavoritesSearchSettings?: Partial<FavoritesSearchSettings>;
   isStarted?: boolean;
 }
 
 interface Setup {
-  search: FavoritesSearch;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+  favoritesSearch: FavoritesSearch;
+  favoritesCollection: FavoritesCollection;
+  favoritesSearchIndex: FavoritesSearchIndex;
 }
 
-function setup(posts: Post[] = [], { blacklistedTags = [], settings = {}, isStarted = true }: Options = {}): Setup {
-  const collection = new FavoritesCollection(new StringInterner());
-  const index = new FavoritesSearchIndex(new StringInterner());
-  const blacklist = new FavoritesBlacklist({ blacklistedTags, force: false });
+function setup(posts: Post[] = [], { blacklistedTags = [], partialFavoritesSearchSettings = {}, isStarted = true }: Options = {}): Setup {
+  const favoritesCollection = new FavoritesCollection(new StringInterner());
+  const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
+  const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags, force: false });
 
-  index.rebuild(collection.append(posts));
-  const search = new FavoritesSearch(
-    { settings: buildFavoritesSearchSettings(settings) },
-    { searchIndex: index, blacklist, randomSource: new MemoryRandomSource([0.25, 0.5, 0.75]) }
+  favoritesSearchIndex.rebuild(favoritesCollection.append(posts));
+  const favoritesSearch = new FavoritesSearch(
+    { favoritesSearchSettings: buildFavoritesSearchSettings(partialFavoritesSearchSettings) },
+    { favoritesSearchIndex, favoritesBlacklist, randomSource: new MemoryRandomSource([0.25, 0.5, 0.75]) }
   );
 
   if (isStarted) {
-    search.start();
+    favoritesSearch.start();
   }
-  return { search, collection, index };
+  return { favoritesSearch, favoritesCollection, favoritesSearchIndex };
 }
 
-function getResultPostIds(search: FavoritesSearch): string[] {
-  return search.results.value.map(favorite => favorite.id);
+function getResultPostIds(favoritesSearch: FavoritesSearch): string[] {
+  return favoritesSearch.matchedFavorites.value.map(favorite => favorite.id);
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
@@ -53,163 +53,163 @@ function createScoredPosts(...scores: number[]): Post[] {
   return scores.map(score => createPost({ id: String(score), score }));
 }
 
-function watchResults(search: FavoritesSearch): { shown: string[][]; stop: () => void } {
+function watchResults(favoritesSearch: FavoritesSearch): { shown: string[][]; stop: () => void } {
   const shown: string[][] = [];
   const stop = effect(() => {
-    shown.push(getResultPostIds(search));
+    shown.push(getResultPostIds(favoritesSearch));
   });
   return { shown, stop };
 }
 
 describe("FavoritesSearch", () => {
   test("starts with every indexed favorite", () => {
-    expect(getResultPostIds(setup(createTaggedPosts("apple", "banana")).search)).toEqual(["1", "2"]);
+    expect(getResultPostIds(setup(createTaggedPosts("apple", "banana")).favoritesSearch)).toEqual(["1", "2"]);
   });
 
   test("starts from the stored sort", () => {
-    const { search } = setup(createScoredPosts(1, 3, 2), { settings: { sortKey: "score" } });
+    const { favoritesSearch } = setup(createScoredPosts(1, 3, 2), { partialFavoritesSearchSettings: { sortKey: "score" } });
 
-    expect(getResultPostIds(search)).toEqual(["3", "2", "1"]);
+    expect(getResultPostIds(favoritesSearch)).toEqual(["3", "2", "1"]);
   });
 
   test("starts from the stored query and inversion", () => {
-    const { search } = setup(createTaggedPosts("apple", "banana", "cherry"), { settings: { query: "apple", isInverted: true } });
+    const { favoritesSearch } = setup(createTaggedPosts("apple", "banana", "cherry"), { partialFavoritesSearchSettings: { query: "apple", isInverted: true } });
 
-    expect(getResultPostIds(search)).toEqual(["2", "3"]);
+    expect(getResultPostIds(favoritesSearch)).toEqual(["2", "3"]);
   });
 
   test("starts from the stored shuffle", () => {
     const posts = createScoredPosts(...Array.from({ length: 20 }, (_, index) => index + 1));
-    const shuffled = getResultPostIds(setup(posts, { settings: { isShuffled: true, shuffleSeed: 7 } }).search);
+    const shuffled = getResultPostIds(setup(posts, { partialFavoritesSearchSettings: { isShuffled: true, shuffleSeed: 7 } }).favoritesSearch);
 
-    expect(shuffled).toEqual(getResultPostIds(setup(posts, { settings: { isShuffled: true, shuffleSeed: 7 } }).search));
-    expect(shuffled).not.toEqual(getResultPostIds(setup(posts).search));
+    expect(shuffled).toEqual(getResultPostIds(setup(posts, { partialFavoritesSearchSettings: { isShuffled: true, shuffleSeed: 7 } }).favoritesSearch));
+    expect(shuffled).not.toEqual(getResultPostIds(setup(posts).favoritesSearch));
   });
 
   test("hides blacklisted favorites by its blacklist setting", () => {
-    const { search } = setup(createTaggedPosts("apple", "cherry"), { blacklistedTags: ["apple"] });
+    const { favoritesSearch } = setup(createTaggedPosts("apple", "cherry"), { blacklistedTags: ["apple"] });
 
-    expect(getResultPostIds(search)).toEqual(["1", "2"]);
-    search.updateSettings({ isBlacklistEnabled: true });
-    expect(getResultPostIds(search)).toEqual(["2"]);
+    expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
+    favoritesSearch.updateSettings({ isBlacklistEnabled: true });
+    expect(getResultPostIds(favoritesSearch)).toEqual(["2"]);
   });
 
   describe("start", () => {
     test("shows no results before the search starts", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"), { isStarted: false });
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"), { isStarted: false });
 
-      index.add(collection.append([createPost({ id: "2" })]));
-      index.rebuild(collection.getAll());
-      expect(getResultPostIds(search)).toEqual([]);
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "2" })]));
+      favoritesSearchIndex.rebuild(favoritesCollection.getAll());
+      expect(getResultPostIds(favoritesSearch)).toEqual([]);
     });
 
     test("searches the whole index once started", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"), { isStarted: false });
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"), { isStarted: false });
 
-      index.add(collection.append([createPost({ id: "2" })]));
-      search.start();
-      expect(getResultPostIds(search)).toEqual(["1", "2"]);
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "2" })]));
+      favoritesSearch.start();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
     });
 
     test("searches only the first time it is called", () => {
-      const { search } = setup(createTaggedPosts("apple"));
-      const { shown, stop } = watchResults(search);
+      const { favoritesSearch } = setup(createTaggedPosts("apple"));
+      const { shown, stop } = watchResults(favoritesSearch);
 
-      search.start();
+      favoritesSearch.start();
       expect(shown).toEqual([["1"]]);
       stop();
     });
 
     test("changes the settings without searching before the search starts", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana"), { isStarted: false });
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"), { isStarted: false });
 
-      search.submit("apple");
-      expect(search.settings.value.query).toBe("apple");
-      expect(getResultPostIds(search)).toEqual([]);
+      favoritesSearch.submit("apple");
+      expect(favoritesSearch.settings.value.query).toBe("apple");
+      expect(getResultPostIds(favoritesSearch)).toEqual([]);
 
-      search.start();
-      expect(getResultPostIds(search)).toEqual(["1"]);
+      favoritesSearch.start();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1"]);
     });
   });
 
   describe("submit", () => {
     test("shows the favorites matching the query", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana", "apple"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana", "apple"));
 
-      search.submit("apple");
-      expect(getResultPostIds(search)).toEqual(["1", "3"]);
+      favoritesSearch.submit("apple");
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1", "3"]);
     });
 
     test("shows nothing for an invalid query", () => {
-      const { search } = setup(createTaggedPosts("apple"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple"));
 
-      search.submit("( apple");
-      expect(getResultPostIds(search)).toEqual([]);
+      favoritesSearch.submit("( apple");
+      expect(getResultPostIds(favoritesSearch)).toEqual([]);
     });
 
     test("writes the query and leaves the rest of the settings alone", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.submit("apple");
-      expect(search.settings.value).toEqual(buildFavoritesSearchSettings({ query: "apple" }));
+      favoritesSearch.submit("apple");
+      expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ query: "apple" }));
     });
 
     test("reruns the results once for the same query searched again", () => {
-      const { search } = setup(createTaggedPosts("apple"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple"));
 
-      search.submit("apple");
-      const { shown, stop } = watchResults(search);
+      favoritesSearch.submit("apple");
+      const { shown, stop } = watchResults(favoritesSearch);
 
-      search.submit("apple");
+      favoritesSearch.submit("apple");
       expect(shown).toEqual([["1"], ["1"]]);
       stop();
     });
 
     test("ends a shuffle", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.shuffle();
-      search.submit("apple");
-      expect(search.settings.value.isShuffled).toBe(false);
+      favoritesSearch.shuffle();
+      favoritesSearch.submit("apple");
+      expect(favoritesSearch.settings.value.isShuffled).toBe(false);
     });
   });
 
   describe("updateSettings", () => {
     test("writes the given settings and leaves the rest alone", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.updateSettings({ sortKey: "score" });
-      search.updateSettings({ isBlacklistEnabled: true });
-      expect(search.settings.value).toEqual(buildFavoritesSearchSettings({ sortKey: "score", isBlacklistEnabled: true }));
+      favoritesSearch.updateSettings({ sortKey: "score" });
+      favoritesSearch.updateSettings({ isBlacklistEnabled: true });
+      expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ sortKey: "score", isBlacklistEnabled: true }));
     });
 
     test("orders and filters the results by the new settings", () => {
-      const { search } = setup([
+      const { favoritesSearch } = setup([
         createPost({ id: "1", score: 1, rating: "safe" }),
         createPost({ id: "2", score: 2, rating: "explicit" }),
         createPost({ id: "3", score: 3, rating: "safe" })
       ]);
 
-      search.updateSettings({ sortKey: "score", isSortAscending: false, allowedRatings: toRatingMask("safe") });
-      expect(getResultPostIds(search)).toEqual(["3", "1"]);
+      favoritesSearch.updateSettings({ sortKey: "score", isSortAscending: false, allowedRatings: toRatingMask("safe") });
+      expect(getResultPostIds(favoritesSearch)).toEqual(["3", "1"]);
     });
 
     test("keeps the query", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"));
 
-      search.submit("apple");
-      search.updateSettings({ sortKey: "score" });
-      expect(getResultPostIds(search)).toEqual(["1"]);
+      favoritesSearch.submit("apple");
+      favoritesSearch.updateSettings({ sortKey: "score" });
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1"]);
     });
 
     test("writes the settings and updates the results in one batch", () => {
-      const { search } = setup(createScoredPosts(1, 2));
+      const { favoritesSearch } = setup(createScoredPosts(1, 2));
       const runs: Array<[string, string[]]> = [];
       const stop = effect(() => {
-        runs.push([search.settings.value.sortKey, getResultPostIds(search)]);
+        runs.push([favoritesSearch.settings.value.sortKey, getResultPostIds(favoritesSearch)]);
       });
 
-      search.updateSettings({ sortKey: "score" });
+      favoritesSearch.updateSettings({ sortKey: "score" });
       expect(runs).toEqual([["favorited", ["1", "2"]], ["score", ["2", "1"]]]);
       stop();
     });
@@ -220,204 +220,204 @@ describe("FavoritesSearch", () => {
       { change: { allowedRatings: toRatingMask("safe") }, isShuffled: true },
       { change: { isBlacklistEnabled: true }, isShuffled: true }
     ] as const)("leaves shuffled $isShuffled after changing $change", ({ change, isShuffled }) => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.shuffle();
-      search.updateSettings(change);
-      expect(search.settings.value.isShuffled).toBe(isShuffled);
+      favoritesSearch.shuffle();
+      favoritesSearch.updateSettings(change);
+      expect(favoritesSearch.settings.value.isShuffled).toBe(isShuffled);
     });
   });
 
   describe("shuffle", () => {
     test("shuffles with a new seed drawn from the random source", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.shuffle();
-      expect(search.settings.value).toMatchObject({ isShuffled: true, shuffleSeed: 2 ** 30 });
+      favoritesSearch.shuffle();
+      expect(favoritesSearch.settings.value).toMatchObject({ isShuffled: true, shuffleSeed: 2 ** 30 });
     });
 
     test("draws a new seed each time", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.shuffle();
-      search.shuffle();
-      expect(search.settings.value.shuffleSeed).toBe(2 ** 31);
+      favoritesSearch.shuffle();
+      favoritesSearch.shuffle();
+      expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 31);
     });
 
     test("reorders the results", () => {
-      const { search } = setup(createScoredPosts(...Array.from({ length: 20 }, (_, index) => index + 1)));
-      const before = getResultPostIds(search);
+      const { favoritesSearch } = setup(createScoredPosts(...Array.from({ length: 20 }, (_, index) => index + 1)));
+      const before = getResultPostIds(favoritesSearch);
 
-      search.shuffle();
-      expect(getResultPostIds(search)).not.toEqual(before);
-      expect(getResultPostIds(search).toSorted()).toEqual(before.toSorted());
+      favoritesSearch.shuffle();
+      expect(getResultPostIds(favoritesSearch)).not.toEqual(before);
+      expect(getResultPostIds(favoritesSearch).toSorted()).toEqual(before.toSorted());
     });
 
     test("keeps the query", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.submit("apple");
-      search.shuffle();
-      expect(search.settings.value.query).toBe("apple");
+      favoritesSearch.submit("apple");
+      favoritesSearch.shuffle();
+      expect(favoritesSearch.settings.value.query).toBe("apple");
     });
   });
 
   describe("invert", () => {
     test("shows the favorites not matching the query", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"));
 
-      search.submit("apple");
-      search.invert();
-      expect(getResultPostIds(search)).toEqual(["2"]);
+      favoritesSearch.submit("apple");
+      favoritesSearch.invert();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["2"]);
     });
 
     test("restores the results when inverted twice", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"));
 
-      search.submit("apple");
-      search.invert();
-      search.invert();
-      expect(getResultPostIds(search)).toEqual(["1"]);
+      favoritesSearch.submit("apple");
+      favoritesSearch.invert();
+      favoritesSearch.invert();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1"]);
     });
 
     test("keeps the inversion for a new query", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"));
 
-      search.invert();
-      search.submit("apple");
-      expect(getResultPostIds(search)).toEqual(["2"]);
+      favoritesSearch.invert();
+      favoritesSearch.submit("apple");
+      expect(getResultPostIds(favoritesSearch)).toEqual(["2"]);
     });
 
     test("keeps the blacklist outside the inversion", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana", "cherry"), { blacklistedTags: ["apple"], settings: { isBlacklistEnabled: true } });
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana", "cherry"), { blacklistedTags: ["apple"], partialFavoritesSearchSettings: { isBlacklistEnabled: true } });
 
-      search.submit("banana");
-      search.invert();
-      expect(getResultPostIds(search)).toEqual(["3"]);
+      favoritesSearch.submit("banana");
+      favoritesSearch.invert();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["3"]);
     });
   });
 
   describe("clearFilters", () => {
     test("shows every favorite again", () => {
-      const { search } = setup([
+      const { favoritesSearch } = setup([
         createPost({ id: "1", tags: "apple", rating: "safe" }),
         createPost({ id: "2", tags: "banana", rating: "explicit" })
       ], { blacklistedTags: ["apple"] });
 
-      search.updateSettings({ allowedRatings: toRatingMask("safe"), isBlacklistEnabled: true });
-      search.submit("banana");
-      search.invert();
-      search.clearFilters();
-      expect(getResultPostIds(search)).toEqual(["1", "2"]);
+      favoritesSearch.updateSettings({ allowedRatings: toRatingMask("safe"), isBlacklistEnabled: true });
+      favoritesSearch.submit("banana");
+      favoritesSearch.invert();
+      favoritesSearch.clearFilters();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
     });
 
     test("keeps the sort and the shuffle", () => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
 
-      search.updateSettings({ sortKey: "score", isSortAscending: true });
-      search.shuffle();
-      search.submit("apple");
-      search.shuffle();
-      search.clearFilters();
-      expect(search.settings.value).toEqual(buildFavoritesSearchSettings({ sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 2 ** 31 }));
+      favoritesSearch.updateSettings({ sortKey: "score", isSortAscending: true });
+      favoritesSearch.shuffle();
+      favoritesSearch.submit("apple");
+      favoritesSearch.shuffle();
+      favoritesSearch.clearFilters();
+      expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 2 ** 31 }));
     });
   });
 
   describe("searched", () => {
     test.each([
-      { name: "submit", act: (search: FavoritesSearch): void => search.submit("a") },
-      { name: "updateSettings", act: (search: FavoritesSearch): void => search.updateSettings({ sortKey: "score" }) },
-      { name: "invert", act: (search: FavoritesSearch): void => search.invert() },
-      { name: "shuffle", act: (search: FavoritesSearch): void => search.shuffle() },
-      { name: "clearFilters", act: (search: FavoritesSearch): void => search.clearFilters() }
+      { name: "submit", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.submit("a") },
+      { name: "updateSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateSettings({ sortKey: "score" }) },
+      { name: "invert", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.invert() },
+      { name: "shuffle", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.shuffle() },
+      { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() }
     ])("fires once on $name", ({ act }) => {
-      const { search } = setup();
+      const { favoritesSearch } = setup();
       let count = 0;
 
-      search.searched.on(() => {
+      favoritesSearch.searched.on(() => {
         count += 1;
       });
-      act(search);
+      act(favoritesSearch);
       expect(count).toBe(1);
     });
 
     test("fires after the new results are in", () => {
-      const { search } = setup(createTaggedPosts("apple", "banana"));
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"));
       const seen: string[][] = [];
 
-      search.searched.on(() => seen.push(search.results.peek().map(favorite => favorite.id)));
-      search.submit("apple");
+      favoritesSearch.searched.on(() => seen.push(favoritesSearch.matchedFavorites.peek().map(favorite => favorite.id)));
+      favoritesSearch.submit("apple");
       expect(seen).toEqual([["1"]]);
     });
 
     test("stays silent when favorites are indexed or the index is rebuilt", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"));
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"));
       let count = 0;
 
-      search.searched.on(() => {
+      favoritesSearch.searched.on(() => {
         count += 1;
       });
-      index.add(collection.append([createPost({ id: "2" })]));
-      index.rebuild(collection.getAll());
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "2" })]));
+      favoritesSearchIndex.rebuild(favoritesCollection.getAll());
       expect(count).toBe(0);
     });
   });
 
   describe("when favorites are indexed", () => {
     test("keeps the searched results in place and appends the arrivals in arrival order", () => {
-      const { search, collection, index } = setup(createScoredPosts(1, 3, 2), { settings: { sortKey: "score" } });
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createScoredPosts(1, 3, 2), { partialFavoritesSearchSettings: { sortKey: "score" } });
 
-      index.add(collection.append(createScoredPosts(5, 4)));
-      expect(getResultPostIds(search)).toEqual(["3", "2", "1", "5", "4"]);
+      favoritesSearchIndex.add(favoritesCollection.append(createScoredPosts(5, 4)));
+      expect(getResultPostIds(favoritesSearch)).toEqual(["3", "2", "1", "5", "4"]);
     });
 
     test("appends only the arrivals matching the current search", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"));
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"));
 
-      search.submit("banana");
-      index.add(collection.append([createPost({ id: "2", tags: "apple" }), createPost({ id: "3", tags: "banana" })]));
-      expect(getResultPostIds(search)).toEqual(["3"]);
+      favoritesSearch.submit("banana");
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "2", tags: "apple" }), createPost({ id: "3", tags: "banana" })]));
+      expect(getResultPostIds(favoritesSearch)).toEqual(["3"]);
     });
 
     test("leaves the results alone when no arrival matches", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"));
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"));
 
-      search.submit("apple");
-      const { shown, stop } = watchResults(search);
+      favoritesSearch.submit("apple");
+      const { shown, stop } = watchResults(favoritesSearch);
 
-      index.add(collection.append([createPost({ id: "2", tags: "banana" })]));
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "2", tags: "banana" })]));
       expect(shown).toEqual([["1"]]);
       stop();
     });
 
     test("stops appending once disposed", () => {
-      const { search, collection, index } = setup();
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup();
 
-      search.dispose();
-      index.add(collection.append(createTaggedPosts("apple")));
-      expect(getResultPostIds(search)).toEqual([]);
+      favoritesSearch.dispose();
+      favoritesSearchIndex.add(favoritesCollection.append(createTaggedPosts("apple")));
+      expect(getResultPostIds(favoritesSearch)).toEqual([]);
     });
   });
 
   describe("when the index is rebuilt", () => {
     test("searches again, new favorites first", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"));
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"));
 
-      collection.prependAsNew([createPost({ id: "2" })]);
-      index.rebuild(collection.getAll());
-      expect(search.results.value.map(favorite => [favorite.id, favorite.isNew])).toEqual([["2", true], ["1", false]]);
+      favoritesCollection.prependAsNew([createPost({ id: "2" })]);
+      favoritesSearchIndex.rebuild(favoritesCollection.getAll());
+      expect(favoritesSearch.matchedFavorites.value.map(favorite => [favorite.id, favorite.isNew])).toEqual([["2", true], ["1", false]]);
     });
   });
 
   describe("when a favorite is refreshed", () => {
     test("keeps it shown even when it no longer matches", () => {
-      const { search, collection, index } = setup(createTaggedPosts("apple"));
-      const [favorite] = collection.getAll();
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("apple"));
+      const [arenaFavorite] = favoritesCollection.getAll();
 
-      search.submit("apple");
-      collection.overwrite(createPost({ id: "1", tags: "banana" }));
-      index.update([{ doc: favorite, oldTerms: new Set(["apple"]), newTerms: favorite.tags }]);
-      expect(getResultPostIds(search)).toEqual(["1"]);
+      favoritesSearch.submit("apple");
+      favoritesCollection.overwrite(createPost({ id: "1", tags: "banana" }));
+      favoritesSearchIndex.update([{ doc: arenaFavorite, oldTerms: new Set(["apple"]), newTerms: arenaFavorite.tags }]);
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1"]);
     });
   });
 });

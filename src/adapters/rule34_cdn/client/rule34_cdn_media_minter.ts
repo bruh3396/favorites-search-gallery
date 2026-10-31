@@ -1,24 +1,18 @@
-import { isRule34CdnFileExtension, rule34CdnFileExtensionKind } from "@/adapters/rule34_cdn/client/rule34_cdn_file_extension";
 import { Media } from "@/core/domain/media/media";
 import { MediaKind } from "@/core/domain/media/media_kind";
+import { Rule34CdnLocator } from "@/adapters/rule34_cdn/client/rule34_cdn_locator";
+import { rule34CdnFileExtensionKind } from "@/adapters/rule34_cdn/client/rule34_cdn_file_extension";
 
-const FILE_URL = /\/(thumbnails|samples|images)\/+([^/]+)\/+(?:thumbnail_|sample_)?([^/.?]+)(?:\.([a-z0-9]+))?/i;
 const VIDEO_TAGS = ["video", "mp4"];
 const GIF_TAGS = ["gif", "animated", "animated_gif"];
 
-export function mintRule34CdnMedia({ url, tags }: { url: string; tags: string }): Media | null {
-  const match = FILE_URL.exec(url);
+export function mintRule34CdnMedia({ locator, tags }: { locator: Rule34CdnLocator; tags: string }): Media {
+  const { directory, stem, extension } = locator;
 
-  if (match === null) {
-    return null;
+  if (extension !== null) {
+    return { kind: rule34CdnFileExtensionKind(extension), locator: `${directory}/${stem}.${extension}` };
   }
-  const [, folder, directory, name, rawExtension = ""] = match;
-  const extension = rawExtension.toLowerCase();
-
-  if (folder === "images" && isRule34CdnFileExtension(extension)) {
-    return { kind: rule34CdnFileExtensionKind(extension), locator: `${directory}/${name}.${extension}` };
-  }
-  return { kind: guessKind(tags), locator: `${directory}/${name}` };
+  return { kind: guessKind(tags), locator: `${directory}/${stem}` };
 }
 
 function guessKind(tags: string): MediaKind {

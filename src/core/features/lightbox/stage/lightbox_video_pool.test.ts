@@ -25,29 +25,29 @@ describe("LightboxVideoPool", () => {
 
   describe("acquire", () => {
     test("hands out a free video pointed at the url", () => {
-      const pool = new LightboxVideoPool({ capacity: 1 }, createFakeVideo);
+      const lightboxVideoPool = new LightboxVideoPool({ capacity: 1 }, createFakeVideo);
 
-      expect(pool.acquire("a.mp4").src).toBe("a.mp4");
+      expect(lightboxVideoPool.acquire("a.mp4").src).toBe("a.mp4");
     });
 
     test("throws once every video is out", () => {
-      const pool = new LightboxVideoPool({ capacity: 1 }, createFakeVideo);
+      const lightboxVideoPool = new LightboxVideoPool({ capacity: 1 }, createFakeVideo);
 
-      pool.acquire("a.mp4");
-      expect(() => pool.acquire("b.mp4")).toThrow("No free video element");
+      lightboxVideoPool.acquire("a.mp4");
+      expect(() => lightboxVideoPool.acquire("b.mp4")).toThrow("No free video element");
     });
   });
 
   describe("release", () => {
     test("stops the video, drops its source, and makes it free again", () => {
-      const pool = new LightboxVideoPool({ capacity: 1 }, createFakeVideo);
-      const video = pool.acquire("a.mp4");
+      const lightboxVideoPool = new LightboxVideoPool({ capacity: 1 }, createFakeVideo);
+      const video = lightboxVideoPool.acquire("a.mp4");
 
-      pool.release(video);
+      lightboxVideoPool.release(video);
       expect(video.pause).toHaveBeenCalled();
       expect(video.src).toBe("");
       expect(video.load).toHaveBeenCalled();
-      expect(pool.acquire("b.mp4")).toBe(video);
+      expect(lightboxVideoPool.acquire("b.mp4")).toBe(video);
     });
   });
 });

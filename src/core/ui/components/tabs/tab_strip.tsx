@@ -25,7 +25,7 @@ export interface TabStripItem {
 export interface TabStripProps {
   tabs: Readable<readonly TabStripItem[]>;
   activeTabId: Readable<string | null>;
-  trailing?: Child;
+  trailingChild?: Child;
   onActivate: (tabId: string) => void;
   onClose: (tabId: string) => void;
   onMove: (tabId: string, index: number) => void;
@@ -36,36 +36,36 @@ export interface TabStripProps {
 type DropSide = "before" | "after";
 
 interface TabProps {
-  tab: TabStripItem;
+  stripItem: TabStripItem;
   activeTabId: Readable<string | null>;
   onActivate: (tabId: string) => void;
   onClose: (tabId: string) => void;
-  onDrop: (draggedTabId: string, side: DropSide) => void;
+  onDrop: (draggedTabId: string, dropSide: DropSide) => void;
 }
 
 const MIDDLE_BUTTON = 1;
 const TAB_DRAG_TYPE = "application/x-fsg-tab";
 
-export function TabStrip({ tabs, activeTabId, trailing, onActivate, onClose, onMove, onAdd, onCloseAll }: TabStripProps): HTMLElement {
+export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose, onMove, onAdd, onCloseAll }: TabStripProps): HTMLElement {
   let isRendered = false;
-  const moveNextTo = (targetTabId: string, draggedTabId: string, side: DropSide): void => {
+  const moveNextTo = (targetTabId: string, draggedTabId: string, dropSide: DropSide): void => {
     if (draggedTabId === targetTabId) {
       return;
     }
-    const tabIds = tabs.peek().map(tab => tab.id).filter(tabId => tabId !== draggedTabId);
+    const tabIds = tabs.peek().map(tabStripItem => tabStripItem.id).filter(tabId => tabId !== draggedTabId);
 
-    onMove(draggedTabId, tabIds.indexOf(targetTabId) + (side === "after" ? 1 : 0));
+    onMove(draggedTabId, tabIds.indexOf(targetTabId) + (dropSide === "after" ? 1 : 0));
   };
   const items = new KeyedList<TabStripItem>({
-    getKey: (tab): string => tab.id,
-    create: (tab): HTMLElement => {
+    getKey: (tabStripItem): string => tabStripItem.id,
+    create: (tabStripItem): HTMLElement => {
       const element = (
         <Tab
-          tab={tab}
+          stripItem={tabStripItem}
           activeTabId={activeTabId}
           onActivate={onActivate}
           onClose={onClose}
-          onDrop={(draggedTabId, side) => moveNextTo(tab.id, draggedTabId, side)}
+          onDrop={(draggedTabId, dropSide) => moveNextTo(tabStripItem.id, draggedTabId, dropSide)}
         />
       );
 
@@ -86,7 +86,7 @@ export function TabStrip({ tabs, activeTabId, trailing, onActivate, onClose, onM
         {createIcon("add", TabStripClass.icon)}
       </button>
       <div className={TabStripClass.trailing}>
-        {trailing}
+        {trailingChild}
         <button className={TabStripClass.closeAll} type="button" aria-label="Close all tabs" onClick={onCloseAll}>
           {createIcon("ban", TabStripClass.icon)}
         </button>
@@ -105,15 +105,15 @@ function readDropSide(event: DragEvent, element: HTMLElement): DropSide {
   return event.clientX < left + (width / 2) ? "before" : "after";
 }
 
-function Tab({ tab, activeTabId, onActivate, onClose, onDrop }: TabProps): HTMLElement {
+function Tab({ stripItem: tabStripItem, activeTabId, onActivate, onClose, onDrop }: TabProps): HTMLElement {
   const element = (
     <div
       className={TabStripClass.tab}
       role="presentation"
       draggable={true}
       onDragstart={event => {
-        event.dataTransfer?.setData(TAB_DRAG_TYPE, tab.id);
-        event.dataTransfer?.setData("text/plain", tab.label.peek());
+        event.dataTransfer?.setData(TAB_DRAG_TYPE, tabStripItem.id);
+        event.dataTransfer?.setData("text/plain", tabStripItem.label.peek());
       }}
       onDragover={event => {
         if (event.dataTransfer?.types.includes(TAB_DRAG_TYPE) === true) {
@@ -137,18 +137,18 @@ function Tab({ tab, activeTabId, onActivate, onClose, onDrop }: TabProps): HTMLE
         className={TabStripClass.select}
         type="button"
         role="tab"
-        aria-selected={computed(() => String(activeTabId.value === tab.id))}
-        onClick={() => onActivate(tab.id)}
+        aria-selected={computed(() => String(activeTabId.value === tabStripItem.id))}
+        onClick={() => onActivate(tabStripItem.id)}
         onAuxclick={event => {
-          if (event.button === MIDDLE_BUTTON && tab.closable) {
-            onClose(tab.id);
+          if (event.button === MIDDLE_BUTTON && tabStripItem.closable) {
+            onClose(tabStripItem.id);
           }
         }}
       >
-        <span className={TabStripClass.label}>{tab.label}</span>
+        <span className={TabStripClass.label}>{tabStripItem.label}</span>
       </button>
-      {tab.closable && (
-        <button className={TabStripClass.close} type="button" aria-label={computed(() => `Close ${tab.label.value}`)} onClick={() => onClose(tab.id)}>
+      {tabStripItem.closable && (
+        <button className={TabStripClass.close} type="button" aria-label={computed(() => `Close ${tabStripItem.label.value}`)} onClick={() => onClose(tabStripItem.id)}>
           {createIcon("close", TabStripClass.icon)}
         </button>
       )}

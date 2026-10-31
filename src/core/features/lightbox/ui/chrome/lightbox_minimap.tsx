@@ -13,11 +13,11 @@ export const LightboxMinimapClass = {
 
 export interface LightboxMinimapProps {
   previewUrl: Readable<string | undefined>;
-  zoom: Pick<LightboxZoom, "visibleRegion" | "mediaRect" | "panBy" | "centerAt">;
+  lightboxZoom: Pick<LightboxZoom, "visibleRegion" | "mediaRect" | "panBy" | "centerAt">;
 }
 
-export function LightboxMinimap({ previewUrl, zoom }: LightboxMinimapProps): HTMLElement {
-  const region = zoom.visibleRegion;
+export function LightboxMinimap({ previewUrl, lightboxZoom }: LightboxMinimapProps): HTMLElement {
+  const region = lightboxZoom.visibleRegion;
   const image = <img className={LightboxMinimapClass.image} alt="" src={computed(() => previewUrl.value ?? "")} /> as HTMLImageElement;
   const marker = <div className={LightboxMinimapClass.region} /> as HTMLElement;
   const root = (
@@ -28,32 +28,32 @@ export function LightboxMinimap({ previewUrl, zoom }: LightboxMinimapProps): HTM
   ) as HTMLElement;
   const gestures = new Gestures({ dragThreshold: DRAG_THRESHOLD }, {
     element: root,
-    handlers: {
+    gestureHandlers: {
       canDrag: (): boolean => true,
       onPress: (): boolean => false,
-      onDrag: ({ delta }): void => {
-        const media = zoom.mediaRect.peek();
+      onDrag: ({ deltaPoint }): void => {
+        const currentMediaRect = lightboxZoom.mediaRect.peek();
 
-        if (media !== undefined) {
-          zoom.panBy(-delta.x * media.width / image.clientWidth, -delta.y * media.height / image.clientHeight);
+        if (currentMediaRect !== undefined) {
+          lightboxZoom.panBy(-deltaPoint.x * currentMediaRect.width / image.clientWidth, -deltaPoint.y * currentMediaRect.height / image.clientHeight);
         }
       },
-      onTap: ({ point }): void => zoom.centerAt({ x: point.x / image.clientWidth, y: point.y / image.clientHeight }),
+      onTap: ({ point }): void => lightboxZoom.centerAt({ x: point.x / image.clientWidth, y: point.y / image.clientHeight }),
       onWheel: (): boolean => false
     }
   });
 
   effect(() => {
-    const visible = region.value;
+    const currentRegion = region.value;
 
-    if (visible === undefined) {
+    if (currentRegion === undefined) {
       return;
     }
     Object.assign(marker.style, {
-      left: `${visible.x * 100}%`,
-      top: `${visible.y * 100}%`,
-      width: `${visible.width * 100}%`,
-      height: `${visible.height * 100}%`
+      left: `${currentRegion.x * 100}%`,
+      top: `${currentRegion.y * 100}%`,
+      width: `${currentRegion.width * 100}%`,
+      height: `${currentRegion.height * 100}%`
     });
   });
   effect(() => root.toggleAttribute("data-dragging", gestures.isDragging.value));

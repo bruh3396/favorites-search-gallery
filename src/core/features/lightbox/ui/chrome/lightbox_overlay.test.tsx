@@ -4,18 +4,18 @@ import { h, render } from "@/core/ui/h/h";
 import OVERLAY_CSS from "@/core/features/lightbox/ui/chrome/lightbox_overlay.css?inline";
 import { expectClassesStyled } from "@/testing/css";
 
-type SlottedEdge = "topStart" | "topEnd" | "startEdge" | "endEdge";
+type SlottedEdge = "topStartChild" | "topEndChild" | "startEdgeChild" | "endEdgeChild";
 
-function setup(): { root: HTMLElement; children: Record<SlottedEdge | "topEdge", HTMLElement>; props: LightboxOverlayProps } {
+function setup(): { root: HTMLElement; children: Record<SlottedEdge | "topEdgeChild", HTMLElement>; lightboxOverlayProps: LightboxOverlayProps } {
   const children = {
-    topEdge: document.createElement("div"),
-    topStart: document.createElement("div"),
-    topEnd: document.createElement("div"),
-    startEdge: document.createElement("div"),
-    endEdge: document.createElement("div")
+    topEdgeChild: document.createElement("div"),
+    topStartChild: document.createElement("div"),
+    topEndChild: document.createElement("div"),
+    startEdgeChild: document.createElement("div"),
+    endEdgeChild: document.createElement("div")
   };
   const props = { ...children, onSlotEnter: vi.fn(), onSlotLeave: vi.fn() };
-  return { root: render(document, () => <LightboxOverlay {...props} />).result, children, props };
+  return { root: render(document, () => <LightboxOverlay {...props} />).result, children, lightboxOverlayProps: props };
 }
 
 describe("LightboxOverlay", () => {
@@ -29,13 +29,13 @@ describe("LightboxOverlay", () => {
     expect(Object.values(children).every(child => root.contains(child))).toBe(true);
   });
 
-  test.each<SlottedEdge>(["topStart", "topEnd", "startEdge", "endEdge"])("reports the pointer entering and leaving the %s slot", edge => {
-    const { children, props } = setup();
-    const slot = children[edge].parentElement!;
+  test.each<SlottedEdge>(["topStartChild", "topEndChild", "startEdgeChild", "endEdgeChild"])("reports the pointer entering and leaving the %s slot", slottedEdge => {
+    const { children, lightboxOverlayProps } = setup();
+    const slot = children[slottedEdge].parentElement!;
 
     slot.dispatchEvent(new PointerEvent("pointerenter"));
-    expect(props.onSlotEnter).toHaveBeenCalledOnce();
+    expect(lightboxOverlayProps.onSlotEnter).toHaveBeenCalledOnce();
     slot.dispatchEvent(new PointerEvent("pointerleave"));
-    expect(props.onSlotLeave).toHaveBeenCalledOnce();
+    expect(lightboxOverlayProps.onSlotLeave).toHaveBeenCalledOnce();
   });
 });

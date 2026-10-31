@@ -26,20 +26,20 @@ export interface FavoritesLoaderDependencies {
   remoteMedia: RemoteMedia;
   remotePages: Pick<RemotePages, "postExists">;
   scheduler: Scheduler;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+  favoritesCollection: FavoritesCollection;
+  favoritesSearchIndex: FavoritesSearchIndex;
 }
 
 export class FavoritesLoader {
-  private readonly current = new Signal<FavoritesLoadState>({ phase: "starting" });
   private readonly dependencies: FavoritesLoaderDependencies;
   private readonly fetcher: FavoritesFetcher;
   private readonly reloader: FavoritesReloader;
+  readonly #state = new Signal<FavoritesLoadState>({ phase: "starting" });
 
   constructor(dependencies: FavoritesLoaderDependencies) {
-    const reindexer = new FavoritesReindexer(dependencies);
-    const postLibrary = new PostLibrary({ ...dependencies, onRefresh: (refreshed): void => reindexer.reindex(refreshed) });
-    const pathDependencies = { ...dependencies, postLibrary, report: (state: FavoritesLoadState): void => this.report(state) };
+    const favoritesReindexer = new FavoritesReindexer(dependencies);
+    const postLibrary = new PostLibrary({ ...dependencies, onRefresh: (refreshedPost): void => favoritesReindexer.reindex(refreshedPost) });
+    const pathDependencies = { ...dependencies, postLibrary, onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState): void => this.report(favoritesLoadState) };
 
     this.dependencies = dependencies;
     this.fetcher = new FavoritesFetcher(pathDependencies);
@@ -47,19 +47,19 @@ export class FavoritesLoader {
   }
 
   public get state(): Readable<FavoritesLoadState> {
-    return this.current;
+    return this.#state;
   }
 
   public async load(): Promise<void> {
     try {
       const localPostIds = await this.readLocalPostIds();
-      const result = await (localPostIds.length > 0 ? this.reloader.reload(localPostIds) : this.fetcher.fetchAll());
+      const favoritesLoadResult = await (localPostIds.length > 0 ? this.reloader.reload(localPostIds) : this.fetcher.fetchAll());
 
-      this.report({ phase: "loaded", ...result });
+      this.report({ phase: "loaded", ...favoritesLoadResult });
     } catch {
       this.report({ phase: "interrupted" });
     }
-    this.dependencies.collection.compact();
+    this.dependencies.favoritesCollection.compact();
   }
 
   private async readLocalPostIds(): Promise<readonly string[]> {
@@ -73,7 +73,7 @@ export class FavoritesLoader {
     }
   }
 
-  private report(state: FavoritesLoadState): void {
-    this.current.value = state;
+  private report(favoritesLoadState: FavoritesLoadState): void {
+    this.#state.value = favoritesLoadState;
   }
 }

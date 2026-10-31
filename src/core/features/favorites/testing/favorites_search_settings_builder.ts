@@ -1,7 +1,7 @@
 import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
 import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 
-export function buildFavoritesSearchSettings(overrides: Partial<FavoritesSearchSettings> = {}): FavoritesSearchSettings {
+export function buildFavoritesSearchSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings> = {}): FavoritesSearchSettings {
   return {
     query: "",
     isInverted: false,
@@ -11,6 +11,6 @@ export function buildFavoritesSearchSettings(overrides: Partial<FavoritesSearchS
     isBlacklistEnabled: false,
     isShuffled: false,
     shuffleSeed: 1,
-    ...overrides
+    ...partialFavoritesSearchSettings
   };
 }

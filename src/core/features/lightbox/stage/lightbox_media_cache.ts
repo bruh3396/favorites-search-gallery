@@ -26,11 +26,11 @@ export class LightboxMediaCache<V> {
     return this.cache;
   }
 
-  public retain(items: readonly MediaItem[]): void {
-    const retained = items.filter(item => item.media.kind === this.configuration.kind).slice(0, this.configuration.capacity);
+  public retain(mediaItems: readonly MediaItem[]): void {
+    const retainedMediaItems = mediaItems.filter(mediaItem => mediaItem.media.kind === this.configuration.kind).slice(0, this.configuration.capacity);
 
-    this.evictAllExcept(new Set(retained.map(item => item.id)));
-    retained.forEach(item => this.load(item));
+    this.evictAllExcept(new Set(retainedMediaItems.map(mediaItem => mediaItem.id)));
+    retainedMediaItems.forEach(mediaItem => this.load(mediaItem));
   }
 
   public dispose(): void {
@@ -54,25 +54,25 @@ export class LightboxMediaCache<V> {
     evicted.forEach(([, value]) => this.release(value));
   }
 
-  private load(item: MediaItem): void {
-    if (this.cache.peek().has(item.id) || this.pending.has(item.id)) {
+  private load(mediaItem: MediaItem): void {
+    if (this.cache.peek().has(mediaItem.id) || this.pending.has(mediaItem.id)) {
       return;
     }
     const controller = new AbortController();
 
-    this.pending.set(item.id, controller);
-    this.dependencies.load(item.media, controller.signal).then(
+    this.pending.set(mediaItem.id, controller);
+    this.dependencies.load(mediaItem.media, controller.signal).then(
       value => {
         if (controller.signal.aborted) {
           this.release(value);
           return;
         }
-        this.pending.delete(item.id);
-        this.cache.value = new Map(this.cache.peek()).set(item.id, value);
+        this.pending.delete(mediaItem.id);
+        this.cache.value = new Map(this.cache.peek()).set(mediaItem.id, value);
       },
       (error: unknown) => {
         if (!controller.signal.aborted) {
-          this.pending.delete(item.id);
+          this.pending.delete(mediaItem.id);
           console.error(error);
         }
       }

@@ -20,7 +20,7 @@ function setup(canDrag = false): {
     onDrag: vi.fn<GestureHandlers["onDrag"]>(),
     onWheel: vi.fn<GestureHandlers["onWheel"]>(() => true)
   };
-  const { result: gestures, dispose } = createScope(() => new Gestures({ dragThreshold: DRAG_THRESHOLD }, { element, handlers }));
+  const { result: gestures, dispose } = createScope(() => new Gestures({ dragThreshold: DRAG_THRESHOLD }, { element, gestureHandlers: handlers }));
 
   element.setPointerCapture = vi.fn();
   element.getBoundingClientRect = (): DOMRect => ({ left: 10, top: 20 }) as DOMRect;
@@ -38,14 +38,14 @@ describe("Gestures", () => {
     element.dispatchEvent(point("pointerdown", { x: 30, y: 40 }));
     element.dispatchEvent(point("pointermove", { x: 32, y: 41 }));
     element.dispatchEvent(point("pointerup", { x: 32, y: 41 }, { shiftKey: true }));
-    expect(handlers.onTap).toHaveBeenCalledWith({ point: { x: 22, y: 21 }, modifiers: { shift: true, ctrl: false, alt: false, meta: false } });
+    expect(handlers.onTap).toHaveBeenCalledWith({ point: { x: 22, y: 21 }, modifierState: { shift: true, ctrl: false, alt: false, meta: false } });
   });
 
   test("reports a press at the point within the element", () => {
     const { element, handlers } = setup();
 
     element.dispatchEvent(point("pointerdown", { x: 30, y: 40 }, { ctrlKey: true }));
-    expect(handlers.onPress).toHaveBeenCalledWith({ point: { x: 20, y: 20 }, modifiers: { shift: false, ctrl: true, alt: false, meta: false } });
+    expect(handlers.onPress).toHaveBeenCalledWith({ point: { x: 20, y: 20 }, modifierState: { shift: false, ctrl: true, alt: false, meta: false } });
   });
 
   test("reports neither a tap nor a drag after a handled press", () => {
@@ -98,7 +98,7 @@ describe("Gestures", () => {
     expect(gestures.isDragging.value).toBe(true);
     element.dispatchEvent(point("pointerup", { x: 40, y: 40 }));
     expect(gestures.isDragging.value).toBe(false);
-    expect(handlers.onDrag.mock.calls.map(([drag]) => drag.delta)).toEqual([{ x: 3, y: 0 }, { x: 7, y: 0 }]);
+    expect(handlers.onDrag.mock.calls.map(([dragGesture]) => dragGesture.deltaPoint)).toEqual([{ x: 3, y: 0 }, { x: 7, y: 0 }]);
     expect(handlers.onTap).not.toHaveBeenCalled();
   });
 
@@ -134,8 +134,8 @@ describe("Gestures", () => {
     element.dispatchEvent(unhandled);
     expect(handlers.onWheel).toHaveBeenNthCalledWith(1, {
       point: { x: 20, y: 20 },
-      delta: { x: 1, y: 2 },
-      modifiers: expect.objectContaining({ ctrl: true })
+      deltaPoint: { x: 1, y: 2 },
+      modifierState: expect.objectContaining({ ctrl: true })
     });
     expect([handled.defaultPrevented, unhandled.defaultPrevented]).toEqual([true, false]);
   });

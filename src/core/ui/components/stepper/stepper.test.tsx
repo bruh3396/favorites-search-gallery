@@ -11,27 +11,27 @@ interface PendingTask {
 }
 
 function createScheduler(): StepperScheduler & { runNext: () => number } {
-  let pending: PendingTask | undefined;
+  let pendingTask: PendingTask | undefined;
   return {
     schedule: (task, delay): (() => void) => {
       const entry = { task, delay };
 
-      pending = entry;
+      pendingTask = entry;
       return (): void => {
-        if (pending === entry) {
-          pending = undefined;
+        if (pendingTask === entry) {
+          pendingTask = undefined;
         }
       };
     },
     runNext: (): number => {
-      const entry = pending;
+      const currentPendingTask = pendingTask;
 
-      if (entry === undefined) {
+      if (currentPendingTask === undefined) {
         return -1;
       }
-      pending = undefined;
-      entry.task();
-      return entry.delay;
+      pendingTask = undefined;
+      currentPendingTask.task();
+      return currentPendingTask.delay;
     }
   };
 }

@@ -33,14 +33,14 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 interface Setup {
   element: HTMLElement;
   dispose: () => void;
-  session: FavoritesSession;
+  favoritesSession: FavoritesSession;
   watched: Set<Element>;
   open: Mock<(sequence: unknown, favorite: Favorite) => boolean>;
   enterZen: Mock<() => void>;
 }
 
 function setup(posts: Post[] = []): Setup {
-  const index = new FavoritesSearchIndex(new StringInterner());
+  const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
@@ -55,17 +55,17 @@ function setup(posts: Post[] = []): Setup {
   const enterZen = vi.fn<() => void>();
 
   favoritesPreferences.pagination.pageSize.set(2);
-  index.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
-  const session = new FavoritesSession({ settings: buildFavoritesSearchSettings() }, {
-    searchIndex: index,
-    blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
+  favoritesSearchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
+  const favoritesSession = new FavoritesSession({ favoritesSearchSettings: buildFavoritesSearchSettings() }, {
+    favoritesSearchIndex,
+    favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
     favoritesPaginationPreferences: favoritesPreferences.pagination
   });
 
-  session.start();
+  favoritesSession.start();
   const scheduler = new MemoryScheduler();
-  const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(session), {
+  const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(favoritesSession), {
     favoritesService: { loadState: new Signal<FavoritesLoadState>({ phase: "starting" }), searchable: new Milestone(), hydrated: new Emitter<Favorite>() },
     favoritesPreferences,
     tabCount: new Signal(1),
@@ -78,7 +78,7 @@ function setup(posts: Post[] = []): Setup {
     postActions: { openOriginal: vi.fn() },
     enterZen
   }));
-  return { element, dispose, session, watched, open, enterZen };
+  return { element, dispose, favoritesSession, watched, open, enterZen };
 }
 
 function queryTileLinks(element: HTMLElement): HTMLAnchorElement[] {
@@ -100,10 +100,10 @@ describe("composeFavoritesSearchPanel", () => {
   });
 
   test("shows only the tab's current page in the grid", () => {
-    const { element, session } = setup([createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })]);
+    const { element, favoritesSession } = setup([createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })]);
     const firstPage = readShownPostUrls(element);
 
-    session.goTo(2);
+    favoritesSession.goTo(2);
     expect([firstPage, readShownPostUrls(element)]).toEqual([["#post-1", "#post-2"], ["#post-3"]]);
   });
 

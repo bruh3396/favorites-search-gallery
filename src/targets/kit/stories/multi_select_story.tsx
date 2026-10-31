@@ -23,7 +23,7 @@ function variant(label: string, { values, disabled = false, size }: MultiSelectS
       const pressed = new Signal(values);
       const { result: element } = render(ownerDocument, () => (
         <MultiSelect<string>
-          choices={ACTIONS}
+          controlChoices={ACTIONS}
           value={pressed}
           disabled={new Signal(disabled)}
           size={size}

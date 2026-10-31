@@ -6,8 +6,8 @@ import PROGRESS_LINE_CSS from "@/core/ui/components/progress_line/progress_line.
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(initial: Progress): { element: HTMLElement; progress: Signal<Progress>; dispose: () => void } {
-  const progress = new Signal<Progress>(initial);
+function setup(initialProgress: Progress): { element: HTMLElement; progress: Signal<Progress>; dispose: () => void } {
+  const progress = new Signal<Progress>(initialProgress);
   const { result: element, dispose } = render(document, () => <ProgressLine label="Loading" progress={progress} />);
   return { element, progress, dispose };
 }

@@ -37,9 +37,9 @@ function setup(mode: LightboxMode = "full"): {
     scheduler,
     sizeObserver: new MemorySizeObserver(),
     remoteMedia,
-    resolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
-    actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download },
-    navigation: {
+    lightboxMediaResolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
+    lightboxActions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download },
+    lightboxNavigation: {
       isOpen,
       currentItem: new Signal<Post | undefined>(IMAGE),
       position: new Signal(undefined),

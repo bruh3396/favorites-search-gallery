@@ -10,13 +10,13 @@ export const POST_LIST_APP_STYLES = [UI_CSS, LIGHTBOX_CSS];
 
 export interface PostListAppProps {
   posts: Readable<readonly Post[]>;
-  grid: Omit<PostGridProps<Post>, "posts">;
+  postGridProps: Omit<PostGridProps<Post>, "posts">;
   lightbox: Lightbox<Post>;
 }
 
-export function PostListApp({ posts, grid, lightbox }: PostListAppProps): HTMLElement[] {
+export function PostListApp({ posts, postGridProps, lightbox }: PostListAppProps): HTMLElement[] {
   return [
-    <PostGrid<Post> {...grid} posts={posts} />,
+    <PostGrid<Post> {...postGridProps} posts={posts} />,
     lightbox.createView()
   ];
 }

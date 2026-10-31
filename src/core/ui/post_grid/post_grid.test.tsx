@@ -21,7 +21,7 @@ interface Setup {
   layout: Signal<GridLayout>;
   columnCount: Signal<number>;
   sizeObserver: MemorySizeObserver;
-  onPlainClick: Mock<(post: MediaItem) => boolean>;
+  onPlainClick: Mock<(mediaItem: MediaItem) => boolean>;
 }
 
 function createPost(postId: string): MediaItem {
@@ -35,7 +35,7 @@ function setup(...postIds: string[]): Setup {
   const layout = new Signal<GridLayout>("grid");
   const columnCount = new Signal(2);
   const sizeObserver = new MemorySizeObserver();
-  const onPlainClick = vi.fn<(post: MediaItem) => boolean>(() => true);
+  const onPlainClick = vi.fn<(mediaItem: MediaItem) => boolean>(() => true);
   const { result: element, dispose } = render(document, () => (
     <PostGrid
       posts={posts}
@@ -47,21 +47,21 @@ function setup(...postIds: string[]): Setup {
       imageLoaderService={createImageLoaderService()}
       getSize={getSize}
       createActions={createActions}
-      getPostUrl={post => `https://posts/${post.id}`}
+      getPostUrl={mediaItem => `https://posts/${mediaItem.id}`}
       onPlainClick={onPlainClick}
     />
   ));
   return { element, dispose, posts, changed, tileLocator, layout, columnCount, sizeObserver, onPlainClick };
 }
 
-function getSize(post: MediaItem): Size {
-  return { width: Number(post.id) * 100, height: 100 };
+function getSize(mediaItem: MediaItem): Size {
+  return { width: Number(mediaItem.id) * 100, height: 100 };
 }
 
-function createActions(post: MediaItem): Node[] {
+function createActions(mediaItem: MediaItem): Node[] {
   const action = document.createElement("button");
 
-  action.dataset.postId = post.id;
+  action.dataset.postId = mediaItem.id;
   return [action];
 }
 

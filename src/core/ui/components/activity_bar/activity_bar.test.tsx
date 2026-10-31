@@ -13,7 +13,7 @@ const ITEMS: readonly ActivityBarItem[] = [
 
 interface Setup {
   element: HTMLElement;
-  renderView: Mock<(item: ActivityBarItem) => HTMLElement>;
+  renderView: Mock<(activityBarItem: ActivityBarItem) => HTMLElement>;
   disposeView: Mock<(id: string) => void>;
   onValueChange: Mock<(id: string | null) => void>;
   dispose: () => void;
@@ -22,9 +22,9 @@ interface Setup {
 function setup(initial: string | null = null): Setup {
   const value = new Signal<string | null>(initial);
   const disposeView = vi.fn<(id: string) => void>();
-  const renderView = vi.fn((item: ActivityBarItem): HTMLElement => {
-    onCleanup(() => disposeView(item.id));
-    return <p>{item.label}</p>;
+  const renderView = vi.fn((activityBarItem: ActivityBarItem): HTMLElement => {
+    onCleanup(() => disposeView(activityBarItem.id));
+    return <p>{activityBarItem.label}</p>;
   });
   const onValueChange = vi.fn((id: string | null): void => {
     value.value = id;

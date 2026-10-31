@@ -15,9 +15,9 @@ const DESCRIBERS: Describers = {
   interrupted: () => "Couldn't finish loading"
 };
 
-export function describeFavoritesLoadState(state: FavoritesLoadState): string {
-  const describe = DESCRIBERS[state.phase] as (state: FavoritesLoadState) => string;
-  return describe(state);
+export function describeFavoritesLoadState(favoritesLoadState: FavoritesLoadState): string {
+  const describe = DESCRIBERS[favoritesLoadState.phase] as (favoritesLoadState: FavoritesLoadState) => string;
+  return describe(favoritesLoadState);
 }
 
 function describeProgress(loadedCount: number, expectedCount: number | null): string {

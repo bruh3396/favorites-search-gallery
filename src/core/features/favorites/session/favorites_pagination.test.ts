@@ -15,10 +15,10 @@ import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
-  pagination: FavoritesPagination;
-  search: FavoritesSearch;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+  favoritesPagination: FavoritesPagination;
+  favoritesSearch: FavoritesSearch;
+  favoritesCollection: FavoritesCollection;
+  favoritesSearchIndex: FavoritesSearchIndex;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
 }
 
@@ -39,23 +39,23 @@ function createStoredValue<T>(initial: T): StoredValue<T> {
 }
 
 function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
-  const collection = new FavoritesCollection(new StringInterner());
-  const index = new FavoritesSearchIndex(new StringInterner());
+  const favoritesCollection = new FavoritesCollection(new StringInterner());
+  const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const favoritesPaginationPreferences = { pageSize: createStoredValue(2), infiniteScroll: createStoredValue(infiniteScroll) };
 
-  index.rebuild(collection.append(posts));
-  const search = new FavoritesSearch(
-    { settings: buildFavoritesSearchSettings() },
-    { searchIndex: index, blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }), randomSource: new MemoryRandomSource([0.5]) }
+  favoritesSearchIndex.rebuild(favoritesCollection.append(posts));
+  const favoritesSearch = new FavoritesSearch(
+    { favoritesSearchSettings: buildFavoritesSearchSettings() },
+    { favoritesSearchIndex, favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }), randomSource: new MemoryRandomSource([0.5]) }
   );
-  const pagination = new FavoritesPagination({ search, preferences: favoritesPaginationPreferences });
+  const favoritesPagination = new FavoritesPagination({ favoritesSearch, preferences: favoritesPaginationPreferences });
 
-  search.start();
-  return { pagination, search, collection, index, favoritesPaginationPreferences };
+  favoritesSearch.start();
+  return { favoritesPagination, favoritesSearch, favoritesCollection, favoritesSearchIndex, favoritesPaginationPreferences };
 }
 
-function getItemPostIds(pagination: FavoritesPagination): string[] {
-  return pagination.items.value.map(favorite => favorite.id);
+function getItemPostIds(favoritesPagination: FavoritesPagination): string[] {
+  return favoritesPagination.pageFavorites.value.map(favorite => favorite.id);
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
@@ -64,103 +64,103 @@ function createTaggedPosts(...tags: string[]): Post[] {
 
 describe("FavoritesPagination", () => {
   test("shows the first page of the results", () => {
-    const { pagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+    const { favoritesPagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    expect(getItemPostIds(pagination)).toEqual(["1", "2"]);
-    expect([pagination.pageNumber.value, pagination.pageCount.value]).toEqual([1, 3]);
+    expect(getItemPostIds(favoritesPagination)).toEqual(["1", "2"]);
+    expect([favoritesPagination.pageNumber.value, favoritesPagination.pageCount.value]).toEqual([1, 3]);
   });
 
   test("counts one page when there are no results", () => {
-    expect(setup([]).pagination.pageCount.value).toBe(1);
+    expect(setup([]).favoritesPagination.pageCount.value).toBe(1);
   });
 
   test("pages by the current page size", () => {
-    const { pagination, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+    const { favoritesPagination, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
     favoritesPaginationPreferences.pageSize.set(3);
-    expect(getItemPostIds(pagination)).toEqual(["1", "2", "3"]);
+    expect(getItemPostIds(favoritesPagination)).toEqual(["1", "2", "3"]);
   });
 
   test.each([
     { name: "page size", act: (favoritesPaginationPreferences: FavoritesPaginationPreferences): void => favoritesPaginationPreferences.pageSize.set(1) },
     { name: "infinite scroll", act: (favoritesPaginationPreferences: FavoritesPaginationPreferences): void => favoritesPaginationPreferences.infiniteScroll.set(true) }
   ])("goes back to the first page when the $name changes", ({ act }) => {
-    const { pagination, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+    const { favoritesPagination, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    pagination.goTo(2);
+    favoritesPagination.goTo(2);
     act(favoritesPaginationPreferences);
-    expect(pagination.pageNumber.value).toBe(1);
+    expect(favoritesPagination.pageNumber.value).toBe(1);
   });
 
   test.each([
-    { name: "submit", act: (search: FavoritesSearch): void => search.submit("a") },
-    { name: "updateSettings", act: (search: FavoritesSearch): void => search.updateSettings({ sortKey: "score" }) },
-    { name: "invert", act: (search: FavoritesSearch): void => search.invert() },
-    { name: "shuffle", act: (search: FavoritesSearch): void => search.shuffle() },
-    { name: "clearFilters", act: (search: FavoritesSearch): void => search.clearFilters() }
+    { name: "submit", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.submit("a") },
+    { name: "updateSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateSettings({ sortKey: "score" }) },
+    { name: "invert", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.invert() },
+    { name: "shuffle", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.shuffle() },
+    { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() }
   ])("goes back to the first page on $name", ({ act }) => {
-    const { pagination, search } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+    const { favoritesPagination, favoritesSearch } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    pagination.goTo(3);
-    act(search);
-    expect(pagination.pageNumber.value).toBe(1);
+    favoritesPagination.goTo(3);
+    act(favoritesSearch);
+    expect(favoritesPagination.pageNumber.value).toBe(1);
   });
 
   test("shows the new results and the first page together", () => {
-    const { pagination, search } = setup(createTaggedPosts("a", "b", "a", "b", "a"));
+    const { favoritesPagination, favoritesSearch } = setup(createTaggedPosts("a", "b", "a", "b", "a"));
     const seen: Array<[number, number]> = [];
 
-    pagination.goTo(2);
+    favoritesPagination.goTo(2);
     const stop = effect(() => {
-      seen.push([search.results.value.length, pagination.pageNumber.value]);
+      seen.push([favoritesSearch.matchedFavorites.value.length, favoritesPagination.pageNumber.value]);
     });
 
-    search.submit("a");
+    favoritesSearch.submit("a");
     expect(seen).toEqual([[5, 2], [3, 1]]);
     stop();
   });
 
   test("stays on the page when more favorites arrive", () => {
-    const { pagination, collection, index } = setup(createTaggedPosts("a", "a", "a"));
+    const { favoritesPagination, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("a", "a", "a"));
 
-    pagination.goTo(2);
-    index.add(collection.append([createPost({ id: "4", tags: "a" }), createPost({ id: "5", tags: "a" })]));
-    expect(getItemPostIds(pagination)).toEqual(["3", "4"]);
+    favoritesPagination.goTo(2);
+    favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "4", tags: "a" }), createPost({ id: "5", tags: "a" })]));
+    expect(getItemPostIds(favoritesPagination)).toEqual(["3", "4"]);
   });
 
   describe("items", () => {
     test("reruns an effect that reads it when the results change", () => {
-      const { pagination, collection, index } = setup(createTaggedPosts("a"));
+      const { favoritesPagination, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("a"));
       const seen: string[][] = [];
       const stop = effect(() => {
-        seen.push(getItemPostIds(pagination));
+        seen.push(getItemPostIds(favoritesPagination));
       });
 
-      index.add(collection.append([createPost({ id: "2", tags: "a" })]));
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "2", tags: "a" })]));
       expect(seen).toEqual([["1"], ["1", "2"]]);
       stop();
     });
 
     test("leaves an effect that reads it alone while the results grow past the page", () => {
-      const { pagination, search, collection, index } = setup(createTaggedPosts("a", "a"));
-      const seen: Array<readonly Favorite[]> = [];
+      const { favoritesPagination, favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createTaggedPosts("a", "a"));
+      const seenFavorites: Array<readonly Favorite[]> = [];
       const stop = effect(() => {
-        seen.push(pagination.items.value);
+        seenFavorites.push(favoritesPagination.pageFavorites.value);
       });
 
-      index.add(collection.append([createPost({ id: "3", tags: "a" })]));
-      expect(search.results.value).toHaveLength(3);
-      expect(seen).toHaveLength(1);
+      favoritesSearchIndex.add(favoritesCollection.append([createPost({ id: "3", tags: "a" })]));
+      expect(favoritesSearch.matchedFavorites.value).toHaveLength(3);
+      expect(seenFavorites).toHaveLength(1);
       stop();
     });
   });
 
   describe("goTo", () => {
     test("shows the given page", () => {
-      const { pagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+      const { favoritesPagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-      pagination.goTo(3);
-      expect(getItemPostIds(pagination)).toEqual(["5"]);
+      favoritesPagination.goTo(3);
+      expect(getItemPostIds(favoritesPagination)).toEqual(["5"]);
     });
 
     test.each([
@@ -168,50 +168,50 @@ describe("FavoritesPagination", () => {
       { pageNumber: -3, current: 1 },
       { pageNumber: 4, current: 3 }
     ])("clamps page $pageNumber to page $current", ({ pageNumber, current }) => {
-      const { pagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+      const { favoritesPagination } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-      pagination.goTo(pageNumber);
-      expect(pagination.pageNumber.value).toBe(current);
+      favoritesPagination.goTo(pageNumber);
+      expect(favoritesPagination.pageNumber.value).toBe(current);
     });
   });
 
   describe("goToContaining", () => {
     test("shows the numbered page containing the favorite", () => {
-      const { pagination, search } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+      const { favoritesPagination, favoritesSearch } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-      pagination.goToContaining(search.results.peek()[4]);
-      expect(pagination.pageNumber.value).toBe(3);
-      expect(getItemPostIds(pagination)).toEqual(["5"]);
+      favoritesPagination.goToContaining(favoritesSearch.matchedFavorites.peek()[4]);
+      expect(favoritesPagination.pageNumber.value).toBe(3);
+      expect(getItemPostIds(favoritesPagination)).toEqual(["5"]);
     });
 
     test("grows the infinite scroll prefix to include the favorite", () => {
       const posts = Array.from({ length: 30 }, (_, index) => createPost({ id: String(index + 1) }));
-      const { pagination, search } = setup(posts, { infiniteScroll: true });
+      const { favoritesPagination, favoritesSearch } = setup(posts, { infiniteScroll: true });
 
-      pagination.goToContaining(search.results.peek()[27]);
-      expect(pagination.pageNumber.value).toBe(2);
-      expect(getItemPostIds(pagination)).toHaveLength(30);
+      favoritesPagination.goToContaining(favoritesSearch.matchedFavorites.peek()[27]);
+      expect(favoritesPagination.pageNumber.value).toBe(2);
+      expect(getItemPostIds(favoritesPagination)).toHaveLength(30);
     });
 
     test("leaves the current page alone when the favorite is absent", () => {
-      const { pagination, collection } = setup(createTaggedPosts("a", "a", "a"));
-      const [unindexed] = collection.append([createPost({ id: "99" })]);
+      const { favoritesPagination, favoritesCollection } = setup(createTaggedPosts("a", "a", "a"));
+      const [unindexedArenaFavorite] = favoritesCollection.append([createPost({ id: "99" })]);
 
-      pagination.goTo(2);
-      pagination.goToContaining(unindexed);
-      expect(pagination.pageNumber.value).toBe(2);
+      favoritesPagination.goTo(2);
+      favoritesPagination.goToContaining(unindexedArenaFavorite);
+      expect(favoritesPagination.pageNumber.value).toBe(2);
     });
   });
 
   describe("dispose", () => {
     test("stops going back to the first page", () => {
-      const { pagination, search, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
+      const { favoritesPagination, favoritesSearch, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-      pagination.goTo(3);
-      pagination.dispose();
-      search.updateSettings({ sortKey: "score" });
+      favoritesPagination.goTo(3);
+      favoritesPagination.dispose();
+      favoritesSearch.updateSettings({ sortKey: "score" });
       favoritesPaginationPreferences.pageSize.set(1);
-      expect(pagination.pageNumber.value).toBe(3);
+      expect(favoritesPagination.pageNumber.value).toBe(3);
     });
   });
 });

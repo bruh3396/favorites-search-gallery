@@ -15,19 +15,19 @@ export const LightboxViewportClass = {
 } as const;
 
 export interface LightboxViewportProps {
-  zoom: LightboxViewportGestureHandlersDependencies["zoom"] & Pick<LightboxZoom, "view" | "glides" | "setFrameSize" | "setFocusPoint">;
+  zoom: LightboxViewportGestureHandlersDependencies["lightboxZoom"] & Pick<LightboxZoom, "view" | "glides" | "setFrameSize" | "setFocusPoint">;
   sizeObserver: SizeObserver;
   handlers: LightboxViewportGestureHandlersDependencies["handlers"];
   closesOnPress: Readable<boolean>;
-  content: Child;
+  contentChild: Child;
 }
 
-export function LightboxViewport({ zoom, sizeObserver, handlers, closesOnPress, content }: LightboxViewportProps): HTMLElement {
-  const contentLayer = <div className={LightboxViewportClass.content}>{content}</div> as HTMLElement;
+export function LightboxViewport({ zoom, sizeObserver, handlers, closesOnPress, contentChild }: LightboxViewportProps): HTMLElement {
+  const contentLayer = <div className={LightboxViewportClass.content}>{contentChild}</div> as HTMLElement;
   const root = <div className={LightboxViewportClass.root}>{contentLayer}</div> as HTMLElement;
   const gestures = new Gestures({ dragThreshold: DRAG_THRESHOLD }, {
     element: root,
-    handlers: createLightboxViewportGestureHandlers({ zoom, handlers, closesOnPress })
+    gestureHandlers: createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress })
   });
   const cursor = computed(() => resolveLightboxViewportCursor(zoom, gestures.hoverPoint.value));
 
@@ -47,6 +47,6 @@ export function LightboxViewport({ zoom, sizeObserver, handlers, closesOnPress, 
       root.dataset.cursor = cursor.value;
     }
   });
-  onCleanup(sizeObserver.observe(root, size => zoom.setFrameSize(size)));
+  onCleanup(sizeObserver.observe(root, observedSize => zoom.setFrameSize(observedSize)));
   return root;
 }

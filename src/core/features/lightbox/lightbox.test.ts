@@ -20,14 +20,14 @@ function setup(mode: LightboxMode = "full"): {
   lightbox: Lightbox<Post>;
   scheduler: MemoryScheduler;
   remoteMedia: MemoryRemoteMedia;
-  sequence: MediaSequence<Post>;
+  mediaSequence: MediaSequence<Post>;
   getNeighbors: Mock<MediaSequence<Post>["getNeighbors"]>;
 } {
   const scheduler = new MemoryScheduler();
   const remoteMedia = new MemoryRemoteMedia();
   const storage = { get: (): undefined => undefined, set: (): void => undefined };
   const getNeighbors = vi.fn<MediaSequence<Post>["getNeighbors"]>(() => Promise.resolve([NEIGHBOR]));
-  const sequence: MediaSequence<Post> = {
+  const mediaSequence: MediaSequence<Post> = {
     getNext: () => Promise.resolve(undefined),
     getPrevious: () => Promise.resolve(undefined),
     getNeighbors,
@@ -43,7 +43,7 @@ function setup(mode: LightboxMode = "full"): {
     locateItem: () => undefined,
     mode: new Signal(mode)
   });
-  return { lightbox, scheduler, remoteMedia, sequence, getNeighbors };
+  return { lightbox, scheduler, remoteMedia, mediaSequence, getNeighbors };
 }
 
 function createView(lightbox: Lightbox<Post>): HTMLElement {
@@ -60,29 +60,29 @@ afterEach(() => {
 
 describe("createLightbox", () => {
   test("opens on an item and reports it settled after a moment", () => {
-    const { lightbox, scheduler, sequence } = setup();
+    const { lightbox, scheduler, mediaSequence } = setup();
     const settled = vi.fn();
 
     lightbox.settled.on(settled);
-    lightbox.open(sequence, IMAGE);
+    lightbox.open(mediaSequence, IMAGE);
     expect(lightbox.isOpen.value).toBe(true);
     scheduler.advance(LONGER_THAN_ANY_DELAY);
     expect(settled).toHaveBeenCalledWith(IMAGE);
   });
 
   test("reports whether it opened, and stays closed while off", () => {
-    const { lightbox: full, sequence } = setup();
-    const { lightbox: off } = setup("off");
+    const { lightbox: fullLightbox, mediaSequence } = setup();
+    const { lightbox: offLightbox } = setup("off");
 
-    expect([full.open(sequence, IMAGE), off.open(sequence, IMAGE), off.isOpen.value]).toEqual([true, false, false]);
+    expect([fullLightbox.open(mediaSequence, IMAGE), offLightbox.open(mediaSequence, IMAGE), offLightbox.isOpen.value]).toEqual([true, false, false]);
   });
 
   test("loads a settled item and its neighbours", async() => {
-    const { lightbox, scheduler, remoteMedia, sequence } = setup();
+    const { lightbox, scheduler, remoteMedia, mediaSequence } = setup();
     const decodeStill = vi.spyOn(remoteMedia, "decodeStill");
 
     createView(lightbox);
-    lightbox.open(sequence, IMAGE);
+    lightbox.open(mediaSequence, IMAGE);
     scheduler.advance(LONGER_THAN_ANY_DELAY);
     await flushMicrotasks();
     expect(decodeStill).toHaveBeenNthCalledWith(1, IMAGE.media, expect.any(AbortSignal));
@@ -100,12 +100,12 @@ describe("createLightbox", () => {
   });
 
   test("closes from its view and reports the item it closed on", () => {
-    const { lightbox, sequence } = setup();
+    const { lightbox, mediaSequence } = setup();
     const closed = vi.fn();
     const view = createView(lightbox);
 
     lightbox.closed.on(closed);
-    lightbox.open(sequence, IMAGE);
+    lightbox.open(mediaSequence, IMAGE);
     view.dispatchEvent(new MouseEvent("mousedown", { button: 2, bubbles: true, view: window }));
     expect(lightbox.isOpen.value).toBe(false);
     expect(closed).toHaveBeenCalledWith(IMAGE);
@@ -113,14 +113,14 @@ describe("createLightbox", () => {
 
   describe("dispose", () => {
     test("closes, drops the pending settle, and stops loading neighbours", () => {
-      const { lightbox, scheduler, sequence, getNeighbors } = setup();
+      const { lightbox, scheduler, mediaSequence, getNeighbors } = setup();
       const settled = vi.fn();
 
       lightbox.settled.on(settled);
-      lightbox.open(sequence, IMAGE);
+      lightbox.open(mediaSequence, IMAGE);
       lightbox.dispose();
       expect(lightbox.isOpen.value).toBe(false);
-      lightbox.open(sequence, IMAGE);
+      lightbox.open(mediaSequence, IMAGE);
       scheduler.advance(LONGER_THAN_ANY_DELAY);
       expect(settled).toHaveBeenCalledOnce();
       expect(getNeighbors).not.toHaveBeenCalled();

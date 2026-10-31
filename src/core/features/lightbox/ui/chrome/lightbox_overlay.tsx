@@ -9,11 +9,11 @@ export const LightboxOverlayClass = {
 } as const;
 
 export interface LightboxOverlayProps {
-  topEdge?: Child;
-  topStart?: Child;
-  topEnd?: Child;
-  startEdge?: Child;
-  endEdge?: Child;
+  topEdgeChild?: Child;
+  topStartChild?: Child;
+  topEndChild?: Child;
+  startEdgeChild?: Child;
+  endEdgeChild?: Child;
   onSlotEnter: () => void;
   onSlotLeave: () => void;
 }
@@ -24,13 +24,13 @@ export function LightboxOverlay(props: LightboxOverlayProps): HTMLElement {
   ) as HTMLElement;
   return (
     <div className={LightboxOverlayClass.root}>
-      {slot(`${LightboxOverlayClass.slot} ${LightboxOverlayClass.startEdge}`, props.startEdge)}
-      {slot(`${LightboxOverlayClass.slot} ${LightboxOverlayClass.endEdge}`, props.endEdge)}
+      {slot(`${LightboxOverlayClass.slot} ${LightboxOverlayClass.startEdge}`, props.startEdgeChild)}
+      {slot(`${LightboxOverlayClass.slot} ${LightboxOverlayClass.endEdge}`, props.endEdgeChild)}
       <div className={LightboxOverlayClass.top}>
-        {slot(LightboxOverlayClass.slot, props.topStart)}
-        {slot(LightboxOverlayClass.slot, props.topEnd)}
+        {slot(LightboxOverlayClass.slot, props.topStartChild)}
+        {slot(LightboxOverlayClass.slot, props.topEndChild)}
       </div>
-      {props.topEdge}
+      {props.topEdgeChild}
     </div>
   ) as HTMLElement;
 }

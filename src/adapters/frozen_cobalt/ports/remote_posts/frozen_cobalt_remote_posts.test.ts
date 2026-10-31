@@ -19,19 +19,29 @@ interface Setup {
 }
 
 function createFrozenCobaltPost(postId: string): FrozenCobaltPost {
-  const fileURL = `https://example.com/${postId}.png`;
-  return { id: postId, width: 10, height: 10, score: 0, rating: "e", change: 0, fileURL, tagCategories: { apple: 0 } };
+  return {
+    id: postId,
+    width: 10,
+    height: 10,
+    score: 0,
+    rating: "explicit",
+    changedAt: 0,
+    directory: 1234,
+    stem: postId,
+    extension: "png",
+    tagCategoryByName: { apple: "general" }
+  };
 }
 
-function mintMedia({ url }: { url: string; tags: string }): Media | null {
-  return url.endsWith(".png") ? { kind: "image", locator: url } : null;
+function mintMedia({ directory, stem, extension }: { directory: number; stem: string; extension: string; tags: string }): Media {
+  return { kind: "image", locator: `${directory}/${stem}.${extension}` };
 }
 
 function setup(...results: FrozenCobaltPostResult[]): Setup {
   const scheduler = new MemoryScheduler();
   const randomSource = new MemoryRandomSource([0.5]);
-  const nextResult = (postId: string): FrozenCobaltPostResult => results.shift() ?? { status: "error", id: postId };
-  const frozenCobaltClient = { fetchPost: vi.fn((id: string) => Promise.resolve(nextResult(id))) };
+  const nextResult = (): FrozenCobaltPostResult => results.shift() ?? { status: "retry" };
+  const frozenCobaltClient = { fetchPost: vi.fn(() => Promise.resolve(nextResult())) };
   const remotePosts = new FrozenCobaltRemotePosts({ frozenCobaltClient, mintMedia, scheduler, randomSource });
   return { remotePosts, frozenCobaltClient, scheduler };
 }
@@ -50,21 +60,13 @@ async function fetchRemotePost(
 describe("FrozenCobaltRemotePosts", () => {
   test("delivers a served post with the media minted from its file", async() => {
     const bundle = setup({ status: "ok", post: createFrozenCobaltPost("1") });
-    const media = { kind: "image", locator: "https://example.com/1.png" };
+    const media = { kind: "image", locator: "1234/1.png" };
 
     expect((await fetchRemotePost(bundle, { id: "1", status: "active" })).post).toMatchObject({ id: "1", width: 10, media });
   });
 
-  test("rejects at once a post whose file can't be minted", async() => {
-    const post = { ...createFrozenCobaltPost("1"), fileURL: "https://example.com/1.webm" };
-    const bundle = setup({ status: "ok", post });
-
-    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toMatchObject({ reason: "unknown_file" });
-    expect(bundle.frozenCobaltClient.fetchPost).toHaveBeenCalledOnce();
-  });
-
   test("rejects at once as unavailable a post Frozen Cobalt reports deleted", async() => {
-    const bundle = setup({ status: "deleted", id: "1" });
+    const bundle = setup({ status: "deleted" });
 
     await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toEqual(new PostUnavailableError("1"));
     expect(bundle.frozenCobaltClient.fetchPost).toHaveBeenCalledOnce();
@@ -86,12 +88,8 @@ describe("FrozenCobaltRemotePosts", () => {
     expect(bundle.frozenCobaltClient.fetchPost).toHaveBeenCalledOnce();
   });
 
-  test.each<FrozenCobaltPostResult>([
-    { status: "deferred", id: "1" },
-    { status: "rate_limited", id: "1" },
-    { status: "error", id: "1" }
-  ])("asks again after a $status result", async result => {
-    const bundle = setup(result, { status: "ok", post: createFrozenCobaltPost("1") });
+  test("asks again after a retry result", async() => {
+    const bundle = setup({ status: "retry" }, { status: "ok", post: createFrozenCobaltPost("1") });
 
     expect((await fetchRemotePost(bundle, { id: "1", status: "active" })).post.id).toBe("1");
     expect(bundle.frozenCobaltClient.fetchPost).toHaveBeenCalledTimes(2);
@@ -103,10 +101,10 @@ describe("FrozenCobaltRemotePosts", () => {
     await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toThrow("Unexpected value");
   });
 
-  test("retries a server error, then rejects when Frozen Cobalt keeps failing", async() => {
+  test("rejects when Frozen Cobalt keeps asking for a retry", async() => {
     const bundle = setup();
 
-    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toMatchObject({ reason: "server_error" });
+    await expect(fetchRemotePost(bundle, { id: "1", status: "active" })).rejects.toMatchObject({ reason: "retry", subject: "1" });
     expect(bundle.frozenCobaltClient.fetchPost.mock.calls.length).toBeGreaterThan(1);
   });
 });

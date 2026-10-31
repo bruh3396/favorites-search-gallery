@@ -1,7 +1,7 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
 import { FrozenCobaltError, isRetryableFrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
-import { MediaMinter } from "@/core/domain/media/media_minter";
+import { FrozenCobaltMediaMinter } from "@/adapters/frozen_cobalt/client/frozen_cobalt_media_minter";
 import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/post_unavailable_error";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
@@ -13,7 +13,7 @@ import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
 export interface FrozenCobaltRemotePostsDependencies {
   frozenCobaltClient: Pick<FrozenCobaltClient, "fetchPost">;
-  mintMedia: MediaMinter;
+  mintMedia: FrozenCobaltMediaMinter;
   scheduler: Scheduler;
   randomSource: RandomSource;
 }
@@ -47,12 +47,8 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
         return decodeFrozenCobaltPost(result.post, this.dependencies.mintMedia);
       case "deleted":
         throw new PostUnavailableError(postId);
-      case "deferred":
-        throw new FrozenCobaltError("deferred", { subject: postId });
-      case "rate_limited":
-        throw new FrozenCobaltError("rate_limited", { subject: postId });
-      case "error":
-        throw new FrozenCobaltError("server_error", { subject: postId });
+      case "retry":
+        throw new FrozenCobaltError("retry", { subject: postId });
       default:
         throw new UnreachableError(result);
     }

@@ -12,17 +12,17 @@ export interface LightboxNavigationConfiguration {
 
 interface State<T extends MediaItem> {
   readonly current: T;
-  readonly sequence: MediaSequence<T>;
+  readonly mediaSequence: MediaSequence<T>;
 }
 
 export class LightboxNavigation<T extends MediaItem> {
   private readonly state = new Signal<State<T> | undefined>(undefined);
   private readonly isOpenState = computed(() => this.state.value !== undefined);
   private readonly currentItemState = computed(() => this.state.value?.current);
-  private readonly sequenceState = computed(() => this.state.value?.sequence);
+  private readonly sequenceState = computed(() => this.state.value?.mediaSequence);
   private readonly positionState = computed(() => {
     const state = this.state.value;
-    return state?.sequence.positionOf(state.current);
+    return state?.mediaSequence.positionOf(state.current);
   });
   private readonly settledEmitter = new Emitter<T>();
   private readonly closedEmitter = new Emitter<T>();
@@ -56,8 +56,8 @@ export class LightboxNavigation<T extends MediaItem> {
     return this.closedEmitter;
   }
 
-  public open(sequence: MediaSequence<T>, item: T): void {
-    this.state.value = { current: item, sequence };
+  public open(mediaSequence: MediaSequence<T>, item: T): void {
+    this.state.value = { current: item, mediaSequence };
     this.settle(item);
   }
 
@@ -78,23 +78,23 @@ export class LightboxNavigation<T extends MediaItem> {
   }
 
   public goToNext(): Promise<void> {
-    return this.goToNeighbor((sequence, item) => sequence.getNext(item));
+    return this.goToNeighbor((mediaSequence, item) => mediaSequence.getNext(item));
   }
 
   public goToPrevious(): Promise<void> {
-    return this.goToNeighbor((sequence, item) => sequence.getPrevious(item));
+    return this.goToNeighbor((mediaSequence, item) => mediaSequence.getPrevious(item));
   }
 
-  private async goToNeighbor(find: (sequence: MediaSequence<T>, item: T) => Promise<T | undefined>): Promise<void> {
-    const before = this.state.peek();
+  private async goToNeighbor(find: (mediaSequence: MediaSequence<T>, item: T) => Promise<T | undefined>): Promise<void> {
+    const currentState = this.state.peek();
 
-    if (before === undefined) {
+    if (currentState === undefined) {
       return;
     }
-    const neighbor = await find(before.sequence, before.current);
+    const neighbor = await find(currentState.mediaSequence, currentState.current);
 
-    if (neighbor !== undefined && this.state.peek() === before) {
-      this.state.value = { ...before, current: neighbor };
+    if (neighbor !== undefined && this.state.peek() === currentState) {
+      this.state.value = { ...currentState, current: neighbor };
       this.settle(neighbor);
     }
   }

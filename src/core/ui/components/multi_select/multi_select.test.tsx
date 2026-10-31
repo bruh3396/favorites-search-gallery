@@ -18,16 +18,16 @@ interface Setup {
   dispose: () => void;
   value: Signal<readonly Action[]>;
   disabled: Signal<boolean>;
-  onValueChange: (next: readonly Action[]) => void;
+  onValueChange: (actions: readonly Action[]) => void;
   toggles: HTMLButtonElement[];
 }
 
-function setup(initial: readonly Action[] = []): Setup {
-  const value = new Signal(initial);
+function setup(actions: readonly Action[] = []): Setup {
+  const value = new Signal(actions);
   const disabled = new Signal(false);
   const onValueChange = vi.fn();
   const { result: element, dispose } = render(document, () => (
-    <MultiSelect<Action> choices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} />
+    <MultiSelect<Action> controlChoices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} />
   ));
   return { element, dispose, value, disabled, onValueChange, toggles: [...element.querySelectorAll("button")] };
 }
@@ -52,7 +52,7 @@ describe("MultiSelect", () => {
 
   test("is medium unless told otherwise", () => {
     const value = new Signal<readonly string[]>([]);
-    const { result } = render(document, () => <MultiSelect<string> choices={CHOICES} value={value} onValueChange={vi.fn()} size="small" />);
+    const { result } = render(document, () => <MultiSelect<string> controlChoices={CHOICES} value={value} onValueChange={vi.fn()} size="small" />);
 
     expect(setup().element.dataset.size).toBe("medium");
     expect(result.dataset.size).toBe("small");

@@ -14,47 +14,47 @@ const TERM_UPDATE_DELAY = 1_500;
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
 
 interface Setup {
-  reindexer: FavoritesReindexer;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+  favoritesReindexer: FavoritesReindexer;
+  favoritesCollection: FavoritesCollection;
+  favoritesSearchIndex: FavoritesSearchIndex;
   scheduler: MemoryScheduler;
 }
 
 function setup(posts: Post[] = []): Setup {
-  const collection = new FavoritesCollection(new StringInterner());
-  const index = buildFavoritesSearchIndex();
+  const favoritesCollection = new FavoritesCollection(new StringInterner());
+  const favoritesSearchIndex = buildFavoritesSearchIndex();
   const scheduler = new MemoryScheduler();
 
-  index.add(collection.append(posts));
-  return { reindexer: new FavoritesReindexer({ collection, index, scheduler }), collection, index, scheduler };
+  favoritesSearchIndex.add(favoritesCollection.append(posts));
+  return { favoritesReindexer: new FavoritesReindexer({ favoritesCollection, favoritesSearchIndex, scheduler }), favoritesCollection, favoritesSearchIndex, scheduler };
 }
 
 describe("FavoritesReindexer", () => {
   test("copies the refreshed post onto its favorite", () => {
-    const { reindexer, collection } = setup([createPost({ id: "1", tags: "apple" })]);
+    const { favoritesReindexer, favoritesCollection } = setup([createPost({ id: "1", tags: "apple" })]);
 
-    reindexer.reindex(createPost({ id: "1", tags: "apple banana" }));
-    expect(collection.getAll().find(favorite => favorite.id === "1")?.tags).toEqual(new Set(["apple", "banana"]));
+    favoritesReindexer.reindex(createPost({ id: "1", tags: "apple banana" }));
+    expect(favoritesCollection.getAll().find(arenaFavorite => arenaFavorite.id === "1")?.tags).toEqual(new Set(["apple", "banana"]));
   });
 
   test("makes the refreshed tags searchable once the update delay passes", () => {
-    const { reindexer, index, scheduler } = setup([createPost({ id: "1", tags: "apple" })]);
+    const { favoritesReindexer, favoritesSearchIndex, scheduler } = setup([createPost({ id: "1", tags: "apple" })]);
 
-    reindexer.reindex(createPost({ id: "1", tags: "banana" }));
+    favoritesReindexer.reindex(createPost({ id: "1", tags: "banana" }));
     scheduler.advance(TERM_UPDATE_DELAY - 1);
-    expect(searchFavoritePostIds(index, "banana")).toEqual([]);
+    expect(searchFavoritePostIds(favoritesSearchIndex, "banana")).toEqual([]);
 
     scheduler.advance(1);
-    expect(searchFavoritePostIds(index, "banana")).toEqual(["1"]);
-    expect(searchFavoritePostIds(index, "apple")).toEqual([]);
+    expect(searchFavoritePostIds(favoritesSearchIndex, "banana")).toEqual(["1"]);
+    expect(searchFavoritePostIds(favoritesSearchIndex, "apple")).toEqual([]);
   });
 
   test("ignores a post missing from the collection", () => {
-    const { reindexer, collection } = setup();
-    const hydrated: Favorite[] = [];
+    const { favoritesReindexer, favoritesCollection } = setup();
+    const hydratedFavorites: Favorite[] = [];
 
-    collection.hydrated.on(favorite => hydrated.push(favorite));
-    reindexer.reindex(createPost({ id: "9", media: MEDIA }));
-    expect(hydrated).toEqual([]);
+    favoritesCollection.hydrated.on(favorite => hydratedFavorites.push(favorite));
+    favoritesReindexer.reindex(createPost({ id: "9", media: MEDIA }));
+    expect(hydratedFavorites).toEqual([]);
   });
 });

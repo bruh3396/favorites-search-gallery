@@ -16,51 +16,51 @@ export const SettingsScreenClass = {
 } as const;
 
 export interface SettingsScreenProps {
-  layout: SettingsLayout;
-  descriptors: readonly SettingDescriptor[];
+  settingsLayout: SettingsLayout;
+  settingDescriptors: readonly SettingDescriptor[];
   descriptionsVisible?: Readable<boolean>;
   query?: Readable<string>;
-  size?: ControlSize;
-  scheduler: StepperScheduler;
+  controlSize?: ControlSize;
+  stepperScheduler: StepperScheduler;
 }
 
 interface SectionProps {
-  section: SettingSection;
-  descriptors: readonly SettingDescriptor[];
+  settingSection: SettingSection;
+  settingDescriptors: readonly SettingDescriptor[];
   matches: Readable<ReadonlySet<string>>;
   descriptionsVisible: Readable<boolean> | undefined;
-  size: ControlSize;
-  scheduler: StepperScheduler;
+  controlSize: ControlSize;
+  stepperScheduler: StepperScheduler;
 }
 
-export function SettingsScreen({ layout, descriptors, descriptionsVisible, query, size = "medium", scheduler }: SettingsScreenProps): HTMLElement {
-  const descriptorsById = new Map(descriptors.map(descriptor => [descriptor.id, descriptor]));
-  const sectionsWithSettings = layout
-    .map(section => ({ section, title: section.title, descriptors: section.settings.map(id => getDescriptor(descriptorsById, id)) }))
-    .filter(entry => entry.descriptors.length > 0);
-  const index = new SettingsIndex(sectionsWithSettings);
-  const matches = computed(() => index.match(query?.value ?? ""));
+export function SettingsScreen({ settingsLayout, settingDescriptors, descriptionsVisible, query, controlSize = "medium", stepperScheduler }: SettingsScreenProps): HTMLElement {
+  const descriptorsById = new Map(settingDescriptors.map(settingDescriptor => [settingDescriptor.id, settingDescriptor]));
+  const sectionsWithSettings = settingsLayout
+    .map(settingSection => ({ section: settingSection, title: settingSection.title, settingDescriptors: settingSection.settings.map(id => getDescriptor(descriptorsById, id)) }))
+    .filter(entry => entry.settingDescriptors.length > 0);
+  const settingsIndex = new SettingsIndex(sectionsWithSettings);
+  const matches = computed(() => settingsIndex.match(query?.value ?? ""));
   return (
-    <div className={SettingsScreenClass.root} dataset={{ size }}>
+    <div className={SettingsScreenClass.root} dataset={{ size: controlSize }}>
       {sectionsWithSettings.map(entry => (
         <Section
-          section={entry.section}
-          descriptors={entry.descriptors}
+          settingSection={entry.section}
+          settingDescriptors={entry.settingDescriptors}
           matches={matches}
           descriptionsVisible={descriptionsVisible}
-          size={size}
-          scheduler={scheduler}
+          controlSize={controlSize}
+          stepperScheduler={stepperScheduler}
         />
       ))}
     </div>
   );
 }
 
-function Section({ section, descriptors, matches, descriptionsVisible, size, scheduler }: SectionProps): HTMLElement {
-  const settings = descriptors.map(descriptor => (
-    <Setting descriptor={descriptor} descriptionVisible={descriptionsVisible} size={size} scheduler={scheduler} />
+function Section({ settingSection, settingDescriptors, matches, descriptionsVisible, controlSize, stepperScheduler }: SectionProps): HTMLElement {
+  const settings = settingDescriptors.map(settingDescriptor => (
+    <Setting descriptor={settingDescriptor} descriptionVisible={descriptionsVisible} controlSize={controlSize} stepperScheduler={stepperScheduler} />
   ));
-  const heading = <h3 className={SettingsScreenClass.heading}>{section.title}</h3>;
+  const heading = <h3 className={SettingsScreenClass.heading}>{settingSection.title}</h3>;
   const element = (
     <section className={SettingsScreenClass.section}>
       {heading}
@@ -69,9 +69,9 @@ function Section({ section, descriptors, matches, descriptionsVisible, size, sch
   );
   const showMatches = (shown: ReadonlySet<string>): void => {
     settings.forEach((setting, position) => {
-      setting.hidden = !shown.has(descriptors[position].id);
+      setting.hidden = !shown.has(settingDescriptors[position].id);
     });
-    element.hidden = !descriptors.some(descriptor => shown.has(descriptor.id));
+    element.hidden = !settingDescriptors.some(settingDescriptor => shown.has(settingDescriptor.id));
   };
 
   element.ariaLabelledByElements = [heading];

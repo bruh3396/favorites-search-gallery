@@ -16,12 +16,12 @@ export const SearchBoxClass = {
 export interface SearchBoxProps {
   label: string;
   query: Readable<string>;
-  trailing?: Child;
+  trailingChild?: Child;
   focusRequests?: Occurrence<void>;
   onSearch: (query: string) => void;
 }
 
-export function SearchBox({ label, query, trailing, focusRequests, onSearch }: SearchBoxProps): HTMLElement {
+export function SearchBox({ label, query, trailingChild, focusRequests, onSearch }: SearchBoxProps): HTMLElement {
   const input = <input className={SearchBoxClass.input} type="search" spellcheck={false}
     placeholder={label} aria-label={label} value={query} /> as HTMLInputElement;
 
@@ -52,7 +52,7 @@ export function SearchBox({ label, query, trailing, focusRequests, onSearch }: S
         >
           {createIcon("close", SearchBoxClass.icon)}
         </button>
-        {trailing}
+        {trailingChild}
       </form>
     </search>
   );

@@ -7,36 +7,36 @@ import { flushMicrotasks } from "@/testing/async";
 const POST = createPost({ id: "42", media: { kind: "video", locator: "42" } });
 
 function setup(fetchOriginal: () => Promise<Blob> = () => Promise.resolve(new Blob([], { type: "video/mp4" }))): {
-  actions: PostActions;
+  postActions: PostActions;
   opened: string[];
   saved: { file: Blob; name: string }[];
 } {
   const opened: string[] = [];
   const saved: { file: Blob; name: string }[] = [];
-  const actions = new PostActions({
+  const postActions = new PostActions({
     remoteMedia: { resolveOriginalUrl: (media): Promise<string> => Promise.resolve(`original/${media.locator}`), fetchOriginal },
     remotePages: { postUrl: (postId): string => `post/${postId}` },
     navigator: { open: (url): number => opened.push(url) },
     fileSaver: { save: (file, name): number => saved.push({ file, name }) }
   });
-  return { actions, opened, saved };
+  return { postActions, opened, saved };
 }
 
 describe("PostActions", () => {
   describe("openPostPage", () => {
     test("opens the post's page", () => {
-      const { actions, opened } = setup();
+      const { postActions, opened } = setup();
 
-      actions.openPostPage(POST);
+      postActions.openPostPage(POST);
       expect(opened).toEqual(["post/42"]);
     });
   });
 
   describe("openOriginal", () => {
     test("opens the post's original file", async() => {
-      const { actions, opened } = setup();
+      const { postActions, opened } = setup();
 
-      actions.openOriginal(POST);
+      postActions.openOriginal(POST);
       await flushMicrotasks();
       expect(opened).toEqual(["original/42"]);
     });
@@ -44,7 +44,7 @@ describe("PostActions", () => {
     test("logs a url that can't be resolved", async() => {
       const logError = vi.spyOn(console, "error").mockImplementation(doNothing);
       const opened: string[] = [];
-      const actions = new PostActions({
+      const postActions = new PostActions({
         remoteMedia: {
           resolveOriginalUrl: (): Promise<never> => Promise.reject(new Error("gone")),
           fetchOriginal: (): Promise<never> => Promise.reject(new Error("gone"))
@@ -54,7 +54,7 @@ describe("PostActions", () => {
         fileSaver: { save: doNothing }
       });
 
-      actions.openOriginal(POST);
+      postActions.openOriginal(POST);
       await flushMicrotasks();
       expect(opened).toEqual([]);
       expect(logError).toHaveBeenCalledOnce();
@@ -64,25 +64,25 @@ describe("PostActions", () => {
 
   describe("download", () => {
     test("saves the original named by the post id and file type", async() => {
-      const { actions, saved } = setup();
+      const { postActions, saved } = setup();
 
-      actions.download(POST);
+      postActions.download(POST);
       await flushMicrotasks();
       expect(saved.map(file => file.name)).toEqual(["42.mp4"]);
     });
 
     test("names a file with no type by the post id alone", async() => {
-      const { actions, saved } = setup(() => Promise.resolve(new Blob([])));
+      const { postActions, saved } = setup(() => Promise.resolve(new Blob([])));
 
-      actions.download(POST);
+      postActions.download(POST);
       await flushMicrotasks();
       expect(saved.map(file => file.name)).toEqual(["42"]);
     });
 
     test("opens the original instead when it can't be fetched", async() => {
-      const { actions, opened, saved } = setup(() => Promise.reject(new Error("blocked")));
+      const { postActions, opened, saved } = setup(() => Promise.reject(new Error("blocked")));
 
-      actions.download(POST);
+      postActions.download(POST);
       await flushMicrotasks();
       expect(saved).toEqual([]);
       expect(opened).toEqual(["original/42"]);

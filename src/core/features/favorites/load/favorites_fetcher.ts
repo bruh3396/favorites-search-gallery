@@ -17,10 +17,10 @@ interface MutableFetchProgress {
 export interface FavoritesFetcherDependencies {
   localFavorites: LocalFavorites;
   remoteFavorites: Pick<RemoteFavorites, "fetchCount" | "fetchAll">;
-  collection: Pick<FavoritesCollection, "append" | "getAllPostIds">;
-  index: Pick<FavoritesSearchIndex, "add">;
+  favoritesCollection: Pick<FavoritesCollection, "append" | "getAllPostIds">;
+  favoritesSearchIndex: Pick<FavoritesSearchIndex, "add">;
   postLibrary: PostLibrary;
-  report: (state: FavoritesLoadState) => void;
+  onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState) => void;
 }
 
 export class FavoritesFetcher {
@@ -31,18 +31,18 @@ export class FavoritesFetcher {
   }
 
   public async fetchAll(): Promise<FavoritesLoadResult> {
-    const { remoteFavorites, localFavorites, collection, report } = this.dependencies;
-    const progress: MutableFetchProgress = { loadedCount: 0, expectedCount: null, isFetching: true };
+    const { remoteFavorites, localFavorites, favoritesCollection, onFavoritesLoadStateChange } = this.dependencies;
+    const mutableFetchProgress: MutableFetchProgress = { loadedCount: 0, expectedCount: null, isFetching: true };
     const reportProgress = (): void => {
-      if (progress.isFetching) {
-        report({ phase: "fetching", loadedCount: progress.loadedCount, expectedCount: progress.expectedCount });
+      if (mutableFetchProgress.isFetching) {
+        onFavoritesLoadStateChange({ phase: "fetching", loadedCount: mutableFetchProgress.loadedCount, expectedCount: mutableFetchProgress.expectedCount });
       }
     };
     let appending = Promise.resolve();
 
     remoteFavorites.fetchCount()
       .then(count => {
-        progress.expectedCount = count;
+        mutableFetchProgress.expectedCount = count;
         reportProgress();
       })
       .catch(() => undefined);
@@ -53,26 +53,26 @@ export class FavoritesFetcher {
         appending = appending.then(async() => {
           const favorites = await this.ingest(posts);
 
-          progress.loadedCount += favorites.length;
+          mutableFetchProgress.loadedCount += favorites.length;
           reportProgress();
         });
       });
       await appending;
     } finally {
-      progress.isFetching = false;
+      mutableFetchProgress.isFetching = false;
     }
-    report({ phase: "saving" });
-    await localFavorites.setAll([...collection.getAllPostIds()]);
+    onFavoritesLoadStateChange({ phase: "saving" });
+    await localFavorites.setAll([...favoritesCollection.getAllPostIds()]);
     return { newCount: 0, unfavoritedCount: 0 };
   }
 
   private async ingest(posts: readonly Readonly<Post>[]): Promise<readonly Favorite[]> {
-    const { collection, index, postLibrary } = this.dependencies;
-    const adopted = await postLibrary.adopt(posts);
-    const favorites = collection.append(adopted);
+    const { favoritesCollection, favoritesSearchIndex, postLibrary } = this.dependencies;
+    const adoptedPosts = await postLibrary.adopt(posts);
+    const arenaFavorites = favoritesCollection.append(adoptedPosts);
 
-    index.add(favorites);
-    postLibrary.refresh(adopted).catch(console.error);
-    return favorites;
+    favoritesSearchIndex.add(arenaFavorites);
+    postLibrary.refresh(adoptedPosts).catch(console.error);
+    return arenaFavorites;
   }
 }

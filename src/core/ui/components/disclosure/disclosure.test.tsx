@@ -16,13 +16,13 @@ interface Setup {
   content: HTMLElement;
 }
 
-function setup(props: Partial<DisclosureProps> = {}): Setup {
+function setup(partialDisclosureProps: Partial<DisclosureProps> = {}): Setup {
   const value = new Signal(false);
   const disabled = new Signal(false);
   const onValueChange = vi.fn();
   const content = document.createElement("p");
   const { result: element, dispose } = render(document, () => (
-    <Disclosure title="General" content={content} value={value} disabled={disabled} onValueChange={onValueChange} {...props} />
+    <Disclosure title="General" content={content} value={value} disabled={disabled} onValueChange={onValueChange} {...partialDisclosureProps} />
   ));
   const [trigger, region] = element.children as unknown as [HTMLButtonElement, HTMLElement];
   return { element, dispose, value, disabled, onValueChange, trigger, region, content };

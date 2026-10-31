@@ -31,15 +31,15 @@ interface Setup {
   chooseView: (label: string) => void;
 }
 
-function setup(initial: ShownFavorite | undefined): Setup {
-  const favorite = new Signal<ShownFavorite | undefined>(initial);
+function setup(shownFavorite: ShownFavorite | undefined): Setup {
+  const favorite = new Signal<ShownFavorite | undefined>(shownFavorite);
   const clipboard = new MemoryClipboard();
   const favoriteLightboxTagsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox.details;
   const { result: element } = render(document, () => {
-    const { title, controls, body } = createFavoriteLightboxDetails({
-      favorite, tagsPreferences: favoriteLightboxTagsPreferences, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
+    const { titleChild, controlsChild, bodyChild } = createFavoriteLightboxDetails({
+      favorite, favoriteLightboxTagsPreferences, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
     });
-    return <div>{title}{controls}{body}</div> as HTMLElement;
+    return <div>{titleChild}{controlsChild}{bodyChild}</div> as HTMLElement;
   });
   const copyButton = element.querySelector<HTMLButtonElement>(`.${FavoriteLightboxDetailsClass.id} button`)!;
   const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"View settings\"]")!;

@@ -10,7 +10,7 @@ import { onCleanup } from "@/core/utils/reactive/scope";
 
 interface Setup {
   element: HTMLElement;
-  manager: TabManager<string>;
+  tabManager: TabManager<string>;
   renderPanel: Mock<(tab: Tab<string>) => HTMLElement>;
   disposePanel: Mock<(value: string) => void>;
   onAdd: Mock<() => void>;
@@ -20,20 +20,20 @@ interface Setup {
 }
 
 function setup(values: readonly string[] = ["Home", "apple"]): Setup {
-  const manager = new TabManager<string>({ dispose: vi.fn() });
+  const tabManager = new TabManager<string>({ dispose: vi.fn() });
   const disposePanel = vi.fn<(value: string) => void>();
   const renderPanel = vi.fn((tab: Tab<string>): HTMLElement => {
     onCleanup(() => disposePanel(tab.value));
     return <p>{tab.value}</p>;
   });
   const onAdd = vi.fn<() => void>();
-  const onClose = vi.fn((tabId: string): void => manager.close(tabId));
+  const onClose = vi.fn((tabId: string): void => tabManager.close(tabId));
   const stripVisible = new Signal(true);
 
-  values.forEach((value, index) => manager.open(value, value, { closable: index > 0 }));
+  values.forEach((value, index) => tabManager.open(value, value, { closable: index > 0 }));
   const { result: element, dispose } = render(document, () => (
     <Tabs
-      manager={manager}
+      tabManager={tabManager}
       label={tab => new Signal(tab.value)}
       renderPanel={renderPanel}
       stripVisible={stripVisible}
@@ -44,7 +44,7 @@ function setup(values: readonly string[] = ["Home", "apple"]): Setup {
   ));
 
   document.body.append(element);
-  return { element, manager, renderPanel, disposePanel, onAdd, onClose, stripVisible, dispose };
+  return { element, tabManager, renderPanel, disposePanel, onAdd, onClose, stripVisible, dispose };
 }
 
 function isStripHidden(element: HTMLElement): boolean {
@@ -82,19 +82,19 @@ describe("Tabs", () => {
   });
 
   test("keeps the panel when other tabs open or close", () => {
-    const { element, manager, renderPanel } = setup(["Home", "apple", "banana"]);
+    const { element, tabManager, renderPanel } = setup(["Home", "apple", "banana"]);
 
-    manager.open("cherry", "cherry");
-    manager.close("banana");
+    tabManager.open("cherry", "cherry");
+    tabManager.close("banana");
     expect([readPanel(element), renderPanel.mock.calls.length]).toEqual(["Home", 1]);
   });
 
   test("shows the neighbour's panel when the active tab closes", () => {
-    const { element, manager } = setup();
+    const { element, tabManager } = setup();
 
-    manager.activate("apple");
+    tabManager.activate("apple");
     element.querySelector<HTMLButtonElement>("button[aria-label='Close apple']")!.click();
-    expect([readPanel(element), manager.tabs.value.length]).toEqual(["Home", 1]);
+    expect([readPanel(element), tabManager.tabs.value.length]).toEqual(["Home", 1]);
   });
 
   test("reports the tab whose close button is clicked", () => {

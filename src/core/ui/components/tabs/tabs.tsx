@@ -11,20 +11,20 @@ export const TabsClass = {
 } as const;
 
 export interface TabsProps<T> {
-  manager: TabManager<T>;
+  tabManager: TabManager<T>;
   label: (tab: Tab<T>) => Readable<string>;
   renderPanel: (tab: Tab<T>) => HTMLElement;
   stripVisible: Readable<boolean>;
-  trailing?: Child;
+  trailingChild?: Child;
   onAdd: () => void;
   onClose: (tabId: string) => void;
   onCloseAll: () => void;
 }
 
-export function Tabs<T>({ manager, label, renderPanel, stripVisible, trailing, onAdd, onClose, onCloseAll }: TabsProps<T>): HTMLElement {
+export function Tabs<T>({ tabManager, label, renderPanel, stripVisible, trailingChild, onAdd, onClose, onCloseAll }: TabsProps<T>): HTMLElement {
   const createPanelScope = captureScope();
-  const activeTab = computed(() => manager.tabs.value.find(tab => tab.id === manager.activeTabId.value) ?? null);
-  const items = computed(() => manager.tabs.value.map(tab => ({ id: tab.id, label: label(tab), closable: tab.closable })));
+  const activeTab = computed(() => tabManager.tabs.value.find(tab => tab.id === tabManager.activeTabId.value) ?? null);
+  const items = computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: label(tab), closable: tab.closable })));
   const panel = <div className={TabsClass.panel} role="tabpanel" />;
   let shown: Scoped<HTMLElement> | null = null;
 
@@ -39,11 +39,11 @@ export function Tabs<T>({ manager, label, renderPanel, stripVisible, trailing, o
   const strip = (
     <TabStrip
       tabs={items}
-      activeTabId={manager.activeTabId}
-      trailing={trailing}
-      onActivate={tabId => manager.activate(tabId)}
+      activeTabId={tabManager.activeTabId}
+      trailingChild={trailingChild}
+      onActivate={tabId => tabManager.activate(tabId)}
       onClose={onClose}
-      onMove={(tabId, index) => manager.move(tabId, index)}
+      onMove={(tabId, index) => tabManager.move(tabId, index)}
       onAdd={onAdd}
       onCloseAll={onCloseAll}
     />

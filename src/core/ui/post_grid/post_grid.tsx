@@ -48,8 +48,8 @@ class PostGridImplementation<T extends MediaItem> {
   private readonly sizing: Readable<GridSizing>;
   private readonly list: KeyedList<T>;
 
-  constructor(private readonly props: PostGridProps<T>) {
-    const { layout, columnCount } = props.settings;
+  constructor(private readonly postGridProps: PostGridProps<T>) {
+    const { layout, columnCount } = postGridProps.settings;
 
     this.root = <div className={PostGridClass.root} />;
     this.gridWidth = new Signal(0);
@@ -58,10 +58,10 @@ class PostGridImplementation<T extends MediaItem> {
   }
 
   public create(): HTMLElement {
-    const { posts, changed, tileLocator, sizeObserver } = this.props;
+    const { posts, changed, tileLocator, sizeObserver } = this.postGridProps;
 
-    onCleanup(sizeObserver.observe(this.root, size => {
-      this.gridWidth.value = size.devicePixelWidth;
+    onCleanup(sizeObserver.observe(this.root, observedSize => {
+      this.gridWidth.value = observedSize.devicePixelWidth;
     }));
     effect(() => this.reconcilePosts(posts.value));
     onCleanup(changed.on(post => this.list.recreate(post)));
@@ -73,7 +73,7 @@ class PostGridImplementation<T extends MediaItem> {
   }
 
   private reconcilePosts(posts: readonly T[]): void {
-    const { layout, columnCount } = this.props.settings;
+    const { layout, columnCount } = this.postGridProps.settings;
 
     tileGrid(this.root, this.list.reconcile(posts), { layout: layout.value, columnCount: columnCount.value });
   }
@@ -82,12 +82,12 @@ class PostGridImplementation<T extends MediaItem> {
     const {
       getSize, createActions, visibilityObserver, imageLoaderService, getPostUrl,
       onPlainClick, onCtrlClick
-    } = this.props;
+    } = this.postGridProps;
     return new KeyedList<T>({
       getKey: (post): string => post.id,
       create: (post): HTMLElement => (
         <Tile
-          post={post}
+          mediaItem={post}
           size={getSize(post)}
           sizing={this.sizing}
           actions={createActions(post)}

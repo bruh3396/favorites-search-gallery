@@ -20,10 +20,10 @@ function findStandIn(): HTMLCanvasElement | null {
   return document.body.querySelector<HTMLCanvasElement>(":scope > canvas");
 }
 
-function setup(overrides: Partial<LightboxCloserDependencies<Post>> = {}): {
-  closer: LightboxCloser<Post>;
+function setup(partialLightboxCloserDependencies: Partial<LightboxCloserDependencies<Post>> = {}): {
+  lightboxCloser: LightboxCloser<Post>;
   close: () => void;
-  locateItem: (item: Post) => Element | undefined;
+  locateItem: (post: Post) => Element | undefined;
 } {
   vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
   onTestFinished(() => {
@@ -33,23 +33,23 @@ function setup(overrides: Partial<LightboxCloserDependencies<Post>> = {}): {
   const close = vi.fn();
   const thumb = document.createElement("div");
   const locateItem = vi.fn(() => thumb);
-  const closer = new LightboxCloser<Post>({
-    navigation: { currentItem: new Signal<Post | undefined>(POST), close },
+  const lightboxCloser = new LightboxCloser<Post>({
+    lightboxNavigation: { currentItem: new Signal<Post | undefined>(POST), close },
     shownMedia: new Signal<LightboxMediaElement | undefined>(createShownMedia()),
     inFullscreen: new Signal(false),
     morphDuration: new Signal(250),
     locateItem,
-    ...overrides
+    ...partialLightboxCloserDependencies
   });
-  return { closer, close, locateItem };
+  return { lightboxCloser, close, locateItem };
 }
 
 describe("LightboxCloser", () => {
   describe("close", () => {
     test("morphs the shown media back to the item's thumb", () => {
-      const { closer, close, locateItem } = setup();
+      const { lightboxCloser, close, locateItem } = setup();
 
-      closer.close();
+      lightboxCloser.close();
       expect(findStandIn()).not.toBeNull();
       expect(close).toHaveBeenCalledOnce();
       expect(locateItem).toHaveBeenCalledWith(POST);
@@ -57,9 +57,9 @@ describe("LightboxCloser", () => {
 
     test("closes without morphing with no current item", () => {
       const close = vi.fn();
-      const { closer } = setup({ navigation: { currentItem: new Signal<Post | undefined>(undefined), close } });
+      const { lightboxCloser } = setup({ lightboxNavigation: { currentItem: new Signal<Post | undefined>(undefined), close } });
 
-      closer.close();
+      lightboxCloser.close();
       expect(findStandIn()).toBeNull();
       expect(close).toHaveBeenCalledOnce();
     });
@@ -67,10 +67,10 @@ describe("LightboxCloser", () => {
     test.each<[string, Partial<LightboxCloserDependencies<Post>>]>([
       ["no shown media", { shownMedia: new Signal<LightboxMediaElement | undefined>(undefined) }],
       ["fullscreen", { inFullscreen: new Signal(true) }]
-    ])("closes without morphing with %s", (_, overrides) => {
-      const { closer, close, locateItem } = setup(overrides);
+    ])("closes without morphing with %s", (_, partialLightboxCloserDependencies) => {
+      const { lightboxCloser, close, locateItem } = setup(partialLightboxCloserDependencies);
 
-      closer.close();
+      lightboxCloser.close();
       expect(findStandIn()).toBeNull();
       expect(locateItem).not.toHaveBeenCalled();
       expect(close).toHaveBeenCalledOnce();

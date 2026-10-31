@@ -17,11 +17,8 @@ describe("isRetryableFrozenCobaltError", () => {
   test.each<[FrozenCobaltErrorReason, boolean]>([
     ["timeout", true],
     ["network", true],
-    ["rate_limited", true],
-    ["deferred", true],
-    ["server_error", true],
-    ["malformed", false],
-    ["unknown_file", false]
+    ["retry", true],
+    ["malformed", false]
   ])("classifies %s as retryable: %s", (reason, expected) => {
     expect(isRetryableFrozenCobaltError(new FrozenCobaltError(reason))).toBe(expected);
   });

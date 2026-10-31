@@ -29,8 +29,8 @@ function createStoredValue<T>(initial: T): SettingPreference<T> {
   };
 }
 
-function createSwitchSetting(id: string, preference = createStoredValue(false)): SwitchSetting {
-  return { id, kind: "switch", label: id, preference };
+function createSwitchSetting(id: string, settingPreference = createStoredValue(false)): SwitchSetting {
+  return { id, kind: "switch", label: id, settingPreference };
 }
 
 interface Setup {
@@ -40,11 +40,11 @@ interface Setup {
   sections: HTMLElement[];
 }
 
-function setup(props: Partial<SettingsScreenProps> = {}): Setup {
+function setup(partialSettingsScreenProps: Partial<SettingsScreenProps> = {}): Setup {
   const query = new Signal("");
-  const descriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
+  const switchSettings = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
   const { result: element, dispose } = render(document, () => (
-    <SettingsScreen layout={LAYOUT} descriptors={descriptors} query={query} scheduler={SCHEDULER} {...props} />
+    <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={switchSettings} query={query} stepperScheduler={SCHEDULER} {...partialSettingsScreenProps} />
   ));
   return { element, dispose, query, sections: [...element.querySelectorAll<HTMLElement>("section")] };
 }
@@ -74,11 +74,11 @@ describe("SettingsScreen", () => {
   });
 
   test("refuses a layout that names a setting with no descriptor", () => {
-    expect(() => setup({ layout: [{ id: "general", title: "General", settings: ["missing"] }] })).toThrow("\"missing\"");
+    expect(() => setup({ settingsLayout: [{ id: "general", title: "General", settings: ["missing"] }] })).toThrow("\"missing\"");
   });
 
   test("draws sections and rows at the host's size", () => {
-    const { element } = setup({ size: "small" });
+    const { element } = setup({ controlSize: "small" });
     const sizes = [...element.querySelectorAll<HTMLElement>("[data-size]")].map(sized => sized.dataset.size);
 
     expect(new Set([element.dataset.size, ...sizes])).toEqual(new Set(["small"]));
@@ -87,7 +87,7 @@ describe("SettingsScreen", () => {
   test("hides and shows every caption as told", () => {
     const descriptors = ["autoplay", "hints", "loop"].map(id => ({ ...createSwitchSetting(id), description: `About ${id}.` }));
     const descriptionsVisible = new Signal(false);
-    const { element } = setup({ descriptors, descriptionsVisible });
+    const { element } = setup({ settingDescriptors: descriptors, descriptionsVisible });
     const captions = [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow-description")];
     const readDescriptionHiddenStates = (): boolean[] => captions.map(caption => caption.hidden);
 
@@ -120,12 +120,12 @@ describe("SettingsScreen", () => {
   });
 
   test("stops following its preferences and query once disposed", () => {
-    const hints = createStoredValue(false);
-    const descriptors = [createSwitchSetting("hints", hints), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
-    const { element, query, dispose } = setup({ descriptors });
+    const settingPreference = createStoredValue(false);
+    const switchSettings = [createSwitchSetting("hints", settingPreference), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
+    const { element, query, dispose } = setup({ settingDescriptors: switchSettings });
 
     dispose();
-    hints.set(true);
+    settingPreference.set(true);
     query.value = "loop";
     expect(element.querySelector("[role=switch]")?.getAttribute("aria-checked")).toBe("false");
     expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);

@@ -6,10 +6,12 @@ const frozenCobaltPost = {
   width: 10,
   height: 10,
   score: 0,
-  rating: "e",
-  change: 0,
-  fileURL: "",
-  tagCategories: { apple: 0, alice: null }
+  rating: "explicit",
+  changedAt: 0,
+  directory: 1234,
+  stem: "a1b2c3",
+  extension: "jpg",
+  tagCategoryByName: { apple: "general" }
 };
 
 describe("parseFrozenCobaltPostResult", () => {
@@ -19,8 +21,8 @@ describe("parseFrozenCobaltPostResult", () => {
     expect(parseFrozenCobaltPostResult(result, "1")).toBe(result);
   });
 
-  test("accepts each failure status with its id", () => {
-    const results = ["rate_limited", "error", "deleted", "deferred"].map(status => ({ status, id: "1" }));
+  test("accepts each failure status", () => {
+    const results = ["deleted", "retry"].map(status => ({ status }));
 
     expect(results.map(result => parseFrozenCobaltPostResult(result, "1"))).toEqual(results);
   });
@@ -32,10 +34,7 @@ describe("parseFrozenCobaltPostResult", () => {
   });
 
   test("rejects an unknown status", () => {
-    expect(() => parseFrozenCobaltPostResult({
-          status: "gone",
-          id: "1"
-        }, "1")).toThrow(expect.objectContaining({ reason: "malformed" }));
+    expect(() => parseFrozenCobaltPostResult({ status: "deferred" }, "1")).toThrow(expect.objectContaining({ reason: "malformed" }));
   });
 
   test("rejects a non-object", () => {

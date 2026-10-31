@@ -11,10 +11,10 @@ export interface FavoritesTab {
   readonly tileLocator: TileLocator<Favorite>;
 }
 
-export function createFavoritesTab(session: FavoritesSession): FavoritesTab {
+export function createFavoritesTab(favoritesSession: FavoritesSession): FavoritesTab {
   return {
-    session,
-    title: computed(() => session.query.value || "New"),
+    session: favoritesSession,
+    title: computed(() => favoritesSession.query.value || "New"),
     focusSearch: new Emitter(),
     tileLocator: new TileLocator()
   };

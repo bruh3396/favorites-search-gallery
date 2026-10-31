@@ -6,8 +6,8 @@ import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function renderPosition(position: MediaSequencePosition | undefined): HTMLElement {
-  return render(document, () => <LightboxPosition position={new Signal(position)} />).result as HTMLElement;
+function renderPosition(mediaSequencePosition: MediaSequencePosition | undefined): HTMLElement {
+  return render(document, () => <LightboxPosition position={new Signal(mediaSequencePosition)} />).result as HTMLElement;
 }
 
 describe("LightboxPosition", () => {

@@ -11,9 +11,9 @@ interface Setup {
   control: HTMLElement;
 }
 
-function setup(props: Partial<SettingRowProps> = {}): Setup {
-  const control = props.control ?? document.createElement("button");
-  const { result: element, dispose } = render(document, () => <SettingRow label="Columns" {...props} control={control} />);
+function setup(partialSettingRowProps: Partial<SettingRowProps> = {}): Setup {
+  const control = partialSettingRowProps.control ?? document.createElement("button");
+  const { result: element, dispose } = render(document, () => <SettingRow label="Columns" {...partialSettingRowProps} control={control} />);
   return { element, dispose, control };
 }
 
@@ -57,7 +57,7 @@ describe("SettingRow", () => {
 
   test("is medium unless told otherwise", () => {
     expect(setup().element.dataset.size).toBe("medium");
-    expect(setup({ size: "small" }).element.dataset.size).toBe("small");
+    expect(setup({ controlSize: "small" }).element.dataset.size).toBe("small");
   });
 
   test("hides and shows its description as told", () => {

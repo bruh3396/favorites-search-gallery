@@ -45,18 +45,18 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   visibilityObserver = IDLE_VISIBILITY_OBSERVER
 } = {}): ShadowRoot {
   const container = document.createElement("div");
-  const client = new MemoryClient(posts);
+  const memoryClient = new MemoryClient(posts);
 
   composeFavoritesApp({ userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
-    remoteFavorites: new MemoryRemoteFavorites(client),
-    remotePosts: new MemoryRemotePosts(client),
+    remoteFavorites: new MemoryRemoteFavorites(memoryClient),
+    remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
-    remotePages: new MemoryRemotePages(client),
+    remotePages: new MemoryRemotePages(memoryClient),
     scheduler,
     randomSource: new MemoryRandomSource(),
     localKeyedValues,
@@ -209,7 +209,7 @@ describe("composeFavoritesApp", () => {
 
     openThemeMenu(root);
     findThemeOption(root, "Cherry").click();
-    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.cherry.light.accent}, ${THEME_DEFINITIONS.cherry.dark.accent})`);
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.cherry.lightColors.accent}, ${THEME_DEFINITIONS.cherry.darkColors.accent})`);
     expect(localKeyedValues.get("favorites-search-gallery:preferences")).toMatchObject({ shared: { theme: "cherry" } });
   });
 
@@ -219,10 +219,10 @@ describe("composeFavoritesApp", () => {
 
     openThemeMenu(root);
     findThemeOption(root, "Forest").dispatchEvent(new PointerEvent("pointermove"));
-    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.forest.light.accent}, ${THEME_DEFINITIONS.forest.dark.accent})`);
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.forest.lightColors.accent}, ${THEME_DEFINITIONS.forest.darkColors.accent})`);
     expect(localKeyedValues.get("favorites-search-gallery:preferences")).not.toMatchObject({ shared: { theme: "forest" } });
     root.querySelector("[role=\"listbox\"]")!.dispatchEvent(new PointerEvent("pointerleave"));
-    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.rule34.light.accent}, ${THEME_DEFINITIONS.rule34.dark.accent})`);
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.rule34.lightColors.accent}, ${THEME_DEFINITIONS.rule34.darkColors.accent})`);
   });
 
   test("applies the theme picked before on mount", () => {
@@ -232,7 +232,7 @@ describe("composeFavoritesApp", () => {
     const app = mount(localKeyedValues).querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
     expect(app.style.getPropertyValue("--fsg-theme-surface"))
-      .toBe(`light-dark(${THEME_DEFINITIONS.forest.light.surface}, ${THEME_DEFINITIONS.forest.dark.surface})`);
+      .toBe(`light-dark(${THEME_DEFINITIONS.forest.lightColors.surface}, ${THEME_DEFINITIONS.forest.darkColors.surface})`);
   });
 
   test("leaves the site's color scheme alone on mount", () => {

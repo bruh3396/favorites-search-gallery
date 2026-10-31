@@ -15,10 +15,10 @@ export function LightboxAutoplayBar({ countdown }: LightboxAutoplayBarProps): HT
   const root = <div className={LightboxAutoplayBarClass.root} aria-hidden="true" /> as HTMLElement;
 
   effect(() => {
-    const shown = countdown.value;
+    const currentCountdown = countdown.value;
 
-    root.hidden = shown === undefined;
-    root.replaceChildren(...(shown === undefined ? [] : [createFill(root.ownerDocument, shown.duration)]));
+    root.hidden = currentCountdown === undefined;
+    root.replaceChildren(...(currentCountdown === undefined ? [] : [createFill(root.ownerDocument, currentCountdown.duration)]));
   });
   return root;
 }

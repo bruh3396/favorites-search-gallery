@@ -28,16 +28,16 @@ function createStoredValue<T>(initial: T): SettingPreference<T> & { writes: T[] 
   };
 }
 
-function createSwitchSetting(preference: SettingPreference<boolean>, disabled?: Readable<boolean>): SwitchSetting {
-  return { id: "autoplay", kind: "switch", label: "Autoplay", preference, disabled };
+function createSwitchSetting(settingPreference: SettingPreference<boolean>, disabled?: Readable<boolean>): SwitchSetting {
+  return { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference, disabled };
 }
 
-function createLayoutSetting(preference: SettingPreference<Layout>, control: ChoiceSetting["control"]): ChoiceSetting<Layout> {
-  return { id: "layout", kind: "choice", label: "Layout", preference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
+function createLayoutSetting(settingPreference: SettingPreference<Layout>, control: ChoiceSetting["control"]): ChoiceSetting<Layout> {
+  return { id: "layout", kind: "choice", label: "Layout", settingPreference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
 }
 
-function createSizeSetting(preference: SettingPreference<number>, inverted?: boolean): SliderSetting {
-  return { id: "size", kind: "slider", label: "Size", preference, min: 1, max: 20, step: 1, inverted };
+function createSizeSetting(settingPreference: SettingPreference<number>, inverted?: boolean): SliderSetting {
+  return { id: "size", kind: "slider", label: "Size", settingPreference, min: 1, max: 20, step: 1, inverted };
 }
 
 function slide(input: HTMLInputElement, to: number): void {
@@ -45,13 +45,13 @@ function slide(input: HTMLInputElement, to: number): void {
   input.dispatchEvent(new Event("input"));
 }
 
-function setup(props: SettingProps): { element: HTMLElement; dispose: () => void } {
-  const { result: element, dispose } = render(document, () => <Setting {...props} />);
+function setup(settingProps: SettingProps): { element: HTMLElement; dispose: () => void } {
+  const { result: element, dispose } = render(document, () => <Setting {...settingProps} />);
   return { element, dispose };
 }
 
-function renderSetting(descriptor: SettingDescriptor): HTMLElement {
-  return setup({ descriptor, scheduler: SCHEDULER }).element;
+function renderSetting(settingDescriptor: SettingDescriptor): HTMLElement {
+  return setup({ descriptor: settingDescriptor, stepperScheduler: SCHEDULER }).element;
 }
 
 function queryButtons(element: HTMLElement): HTMLButtonElement[] {
@@ -79,16 +79,16 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
     },
     runNext: (): void => pending()
   };
-  const descriptor: NumberSetting = { id: "columns", kind: "number", label: "Columns", preference, min: 0, max: 10, step: 1, writeOnEveryStep };
-  const { element } = setup({ descriptor, scheduler });
+  const numberSetting: NumberSetting = { id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep };
+  const { element } = setup({ descriptor: numberSetting, stepperScheduler: scheduler });
   return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, scheduler };
 }
 
 describe("Setting", () => {
   test("refuses a descriptor of an unknown kind", () => {
-    const descriptor = { ...createSwitchSetting(createStoredValue(false)), kind: "color" } as unknown as SettingDescriptor;
+    const settingDescriptor = { ...createSwitchSetting(createStoredValue(false)), kind: "color" } as unknown as SettingDescriptor;
 
-    expect(() => renderSetting(descriptor)).toThrow("Unexpected value");
+    expect(() => renderSetting(settingDescriptor)).toThrow("Unexpected value");
   });
 
   test("labels the row and captions it from the descriptor", () => {
@@ -98,8 +98,8 @@ describe("Setting", () => {
   });
 
   test("draws the row and its control at one size", () => {
-    const descriptor = createSwitchSetting(createStoredValue(false));
-    const { element } = setup({ descriptor, size: "small", scheduler: SCHEDULER });
+    const switchSetting = createSwitchSetting(createStoredValue(false));
+    const { element } = setup({ descriptor: switchSetting, controlSize: "small", stepperScheduler: SCHEDULER });
 
     expect([element.dataset.size, queryButtons(element)[0].dataset.size]).toEqual(["small", "small"]);
   });
@@ -107,7 +107,7 @@ describe("Setting", () => {
   test("hides and shows its caption as told", () => {
     const descriptor = { ...createSwitchSetting(createStoredValue(false)), description: "Plays videos when opened." };
     const descriptionVisible = new Signal(false);
-    const { element } = setup({ descriptor, descriptionVisible, scheduler: SCHEDULER });
+    const { element } = setup({ descriptor, descriptionVisible, stepperScheduler: SCHEDULER });
 
     expect(element.querySelector<HTMLElement>(".fsg-SettingRow-description")?.hidden).toBe(true);
   });
@@ -153,11 +153,11 @@ describe("Setting", () => {
 
   test("passes a dropdown's previews through", () => {
     const previewed: (string | null)[] = [];
-    const descriptor: ChoiceSetting<Layout> = {
+    const choiceSetting: ChoiceSetting<Layout> = {
       ...createLayoutSetting(createStoredValue<Layout>("row"), "dropdown"),
       onPreview: member => previewed.push(member)
     };
-    const dropdown = renderSetting(descriptor).querySelector<HTMLElement>("[role=\"combobox\"]")!;
+    const dropdown = renderSetting(choiceSetting).querySelector<HTMLElement>("[role=\"combobox\"]")!;
 
     dropdown.click();
     dropdown.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown" }));
@@ -211,10 +211,10 @@ describe("Setting", () => {
 
   test("toggles one of several choices", () => {
     const preference = createStoredValue<readonly Layout[]>(["column"]);
-    const descriptor: ChoicesSetting<Layout> = {
-      id: "layouts", kind: "choices", label: "Layouts", preference, members: LAYOUTS, labels: LAYOUT_LABELS
+    const choicesSetting: ChoicesSetting<Layout> = {
+      id: "layouts", kind: "choices", label: "Layouts", settingPreference: preference, members: LAYOUTS, labels: LAYOUT_LABELS
     };
-    const buttons = queryButtons(renderSetting(descriptor));
+    const buttons = queryButtons(renderSetting(choicesSetting));
 
     buttons[2].click();
     expect(preference.value).toEqual(["column", "square"]);
@@ -222,8 +222,8 @@ describe("Setting", () => {
 
   test("steps a number within its bounds", () => {
     const preference = createStoredValue(10);
-    const descriptor: NumberSetting = { id: "columns", kind: "number", label: "Columns", preference, min: 2, max: 10, step: 1 };
-    const element = renderSetting(descriptor);
+    const numberSetting: NumberSetting = { id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1 };
+    const element = renderSetting(numberSetting);
     const input = element.querySelector("input");
 
     expect(input?.value).toBe("10");
@@ -289,7 +289,7 @@ describe("Setting", () => {
 
   test("stops following its preference once disposed", () => {
     const preference = createStoredValue(false);
-    const { element, dispose } = setup({ descriptor: createSwitchSetting(preference), scheduler: SCHEDULER });
+    const { element, dispose } = setup({ descriptor: createSwitchSetting(preference), stepperScheduler: SCHEDULER });
     const [control] = queryButtons(element);
 
     dispose();

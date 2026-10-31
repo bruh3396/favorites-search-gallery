@@ -5,10 +5,7 @@ export type FrozenCobaltErrorReason =
   | "network"
   | "http"
   | "malformed"
-  | "rate_limited"
-  | "deferred"
-  | "server_error"
-  | "unknown_file";
+  | "retry";
 
 export interface FrozenCobaltErrorDetails {
   readonly subject?: string;
@@ -39,14 +36,11 @@ export function isRetryableFrozenCobaltError(error: unknown): boolean {
   switch (error.reason) {
     case "timeout":
     case "network":
-    case "rate_limited":
-    case "deferred":
-    case "server_error":
+    case "retry":
       return true;
     case "http":
       return error.status === 429 || (error.status ?? 0) >= 500;
     case "malformed":
-    case "unknown_file":
       return false;
     default:
       throw new UnreachableError(error.reason);

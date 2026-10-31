@@ -10,7 +10,7 @@ export interface LightboxMouseListeners {
   onAuxclick(event: MouseEvent): void;
 }
 
-export function createLightboxMouseListeners(handlers: LightboxMouseCommandHandlers): LightboxMouseListeners {
+export function createLightboxMouseListeners(lightboxMouseCommandHandlers: LightboxMouseCommandHandlers): LightboxMouseListeners {
   return {
     onWheel: (event): void => {
       if (event.ctrlKey) {
@@ -24,13 +24,13 @@ export function createLightboxMouseListeners(handlers: LightboxMouseCommandHandl
         if (event.view !== null) {
           swallowNextContextmenu(event.view);
         }
-        handlers.close();
+        lightboxMouseCommandHandlers.close();
       }
     },
     onAuxclick: (event): void => {
       if (event.button === MIDDLE_BUTTON) {
         event.preventDefault();
-        handlers.openPostPage();
+        lightboxMouseCommandHandlers.openPostPage();
       }
     }
   };

@@ -26,7 +26,7 @@ describe("LightboxButton", () => {
 
   test("names its shortcut in its title and to assistive technology", () => {
     const { result: button } = render(document, () => (
-      <LightboxButton icon="play" label="Autoplay" shortcut={{ text: "Space", ariaName: "Space" }} onClick={vi.fn()} />
+      <LightboxButton icon="play" label="Autoplay" lightboxShortcut={{ text: "Space", ariaName: "Space" }} onClick={vi.fn()} />
     ));
 
     expect([button.title, button.getAttribute("aria-keyshortcuts")]).toEqual(["Autoplay (Space)", "Space"]);

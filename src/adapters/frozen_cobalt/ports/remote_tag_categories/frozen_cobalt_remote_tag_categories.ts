@@ -2,7 +2,7 @@ import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobal
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
 import { TagCategory } from "@/core/domain/tag_category/tag_category";
-import { decodeFrozenCobaltTagCategory } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
+import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
 export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {
   constructor(private readonly frozenCobaltClient: Pick<FrozenCobaltClient, "fetchTagCategory">) { }
@@ -15,9 +15,15 @@ export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {
   private async fetchCategory(tagName: string): Promise<[string, TagCategory]> {
     const result = await this.frozenCobaltClient.fetchTagCategory(tagName);
 
-    if (result.status === "rate_limited") {
-      throw new FrozenCobaltError("rate_limited", { subject: tagName });
+    switch (result.status) {
+      case "ok":
+        return [tagName, result.category];
+      case "not_found":
+        return [tagName, "general"];
+      case "retry":
+        throw new FrozenCobaltError("retry", { subject: tagName });
+      default:
+        throw new UnreachableError(result);
     }
-    return [tagName, decodeFrozenCobaltTagCategory(result.category)];
   }
 }

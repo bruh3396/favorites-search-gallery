@@ -33,29 +33,29 @@ function createStoredValue<T>({ id, initial, log }: { id: string; initial: T; lo
 function renderAll(ownerDocument: Document, descriptors: readonly SettingDescriptor[]): HTMLElement {
   return render(ownerDocument, () => (
     <div>
-      {descriptors.map(descriptor => <Setting descriptor={descriptor} size="small" scheduler={SCHEDULER} />)}
+      {descriptors.map(descriptor => <Setting descriptor={descriptor} controlSize="small" stepperScheduler={SCHEDULER} />)}
     </div>
   )).result;
 }
 
 function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
   return renderAll(ownerDocument, [
-    { id: "autoplay", kind: "switch", label: "Autoplay", preference: createStoredValue({ id: "autoplay", initial: true, log }) },
+    { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference: createStoredValue({ id: "autoplay", initial: true, log }) },
     {
       id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
-      preference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
+      settingPreference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     {
       id: "sort", kind: "choice", label: "Sort layout", control: "dropdown",
-      preference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
+      settingPreference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     {
       id: "ratings", kind: "choices", label: "Ratings",
-      preference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
+      settingPreference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
     },
-    { id: "columns", kind: "number", label: "Columns", preference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
+    { id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
     {
-      id: "tileSize", kind: "slider", label: "Tile size", preference: createStoredValue({ id: "columnCount", initial: 6, log }),
+      id: "tileSize", kind: "slider", label: "Tile size", settingPreference: createStoredValue({ id: "columnCount", initial: 6, log }),
       min: 1, max: 10, step: 1, inverted: true
     }
   ]);
@@ -64,10 +64,10 @@ function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
 function renderDependent(ownerDocument: Document, log: Log): HTMLElement {
   const infiniteScroll = createStoredValue({ id: "infiniteScroll", initial: false, log });
   return renderAll(ownerDocument, [
-    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", preference: infiniteScroll },
+    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScroll },
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
-      preference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
+      settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
       disabled: infiniteScroll
     }
   ]);

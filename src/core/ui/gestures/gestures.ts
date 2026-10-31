@@ -10,13 +10,13 @@ export interface GesturesConfiguration {
 
 export interface GesturesDependencies {
   element: HTMLElement;
-  handlers: GestureHandlers;
+  gestureHandlers: GestureHandlers;
 }
 
 interface MutablePress {
   readonly pointerId: number;
-  readonly start: Point;
-  last: Point;
+  readonly startPoint: Point;
+  lastPoint: Point;
   moved: boolean;
   readonly canDrag: boolean;
 }
@@ -26,13 +26,13 @@ export class Gestures {
   private readonly hoverPointState = new Signal<Point | undefined>(undefined);
   private readonly dragThreshold: number;
   private readonly element: HTMLElement;
-  private readonly handlers: GestureHandlers;
-  private press: MutablePress | undefined;
+  private readonly gestureHandlers: GestureHandlers;
+  private mutablePress: MutablePress | undefined;
 
   constructor(configuration: GesturesConfiguration, dependencies: GesturesDependencies) {
     this.dragThreshold = configuration.dragThreshold;
     this.element = dependencies.element;
-    this.handlers = dependencies.handlers;
+    this.gestureHandlers = dependencies.gestureHandlers;
     this.listen("pointerdown", this.onPointerDown);
     this.listen("pointermove", this.onPointerMove);
     this.listen("pointerup", this.onPointerUp);
@@ -61,12 +61,12 @@ export class Gestures {
     }
     const point = this.locate(event);
 
-    if (this.handlers.onPress({ point, modifiers: readModifiers(event) })) {
+    if (this.gestureHandlers.onPress({ point, modifierState: readModifiers(event) })) {
       return;
     }
-    const canDrag = this.handlers.canDrag();
+    const canDrag = this.gestureHandlers.canDrag();
 
-    this.press = { pointerId: event.pointerId, start: point, last: point, moved: false, canDrag };
+    this.mutablePress = { pointerId: event.pointerId, startPoint: point, lastPoint: point, moved: false, canDrag };
 
     if (canDrag) {
       this.element.setPointerCapture(event.pointerId);
@@ -74,36 +74,36 @@ export class Gestures {
   };
 
   private readonly onPointerMove = (event: PointerEvent): void => {
-    const press = this.press;
+    const mutablePress = this.mutablePress;
     const point = this.locate(event);
 
     this.hoverPointState.value = point;
 
-    if (press?.pointerId !== event.pointerId) {
+    if (mutablePress?.pointerId !== event.pointerId) {
       return;
     }
 
-    if (press.canDrag) {
-      this.handlers.onDrag({ point, delta: { x: point.x - press.last.x, y: point.y - press.last.y } });
+    if (mutablePress.canDrag) {
+      this.gestureHandlers.onDrag({ point, deltaPoint: { x: point.x - mutablePress.lastPoint.x, y: point.y - mutablePress.lastPoint.y } });
     }
-    press.last = point;
-    press.moved ||= Math.hypot(point.x - press.start.x, point.y - press.start.y) > this.dragThreshold;
+    mutablePress.lastPoint = point;
+    mutablePress.moved ||= Math.hypot(point.x - mutablePress.startPoint.x, point.y - mutablePress.startPoint.y) > this.dragThreshold;
 
-    if (press.canDrag && press.moved) {
+    if (mutablePress.canDrag && mutablePress.moved) {
       this.isDraggingState.value = true;
     }
   };
 
   private readonly onPointerUp = (event: PointerEvent): void => {
-    const press = this.press;
+    const mutablePress = this.mutablePress;
 
-    if (press?.pointerId !== event.pointerId) {
+    if (mutablePress?.pointerId !== event.pointerId) {
       return;
     }
     this.endPress();
 
-    if (!press.moved) {
-      this.handlers.onTap({ point: this.locate(event), modifiers: readModifiers(event) });
+    if (!mutablePress.moved) {
+      this.gestureHandlers.onTap({ point: this.locate(event), modifierState: readModifiers(event) });
     }
   };
 
@@ -112,18 +112,18 @@ export class Gestures {
   };
 
   private readonly endPress = (): void => {
-    this.press = undefined;
+    this.mutablePress = undefined;
     this.isDraggingState.value = false;
   };
 
   private readonly onWheel = (event: WheelEvent): void => {
-    if (this.handlers.onWheel({ point: this.locate(event), delta: { x: event.deltaX, y: event.deltaY }, modifiers: readModifiers(event) })) {
+    if (this.gestureHandlers.onWheel({ point: this.locate(event), deltaPoint: { x: event.deltaX, y: event.deltaY }, modifierState: readModifiers(event) })) {
       event.preventDefault();
     }
   };
 
   private readonly onDragStart = (event: DragEvent): void => {
-    if (this.handlers.canDrag()) {
+    if (this.gestureHandlers.canDrag()) {
       event.preventDefault();
     }
   };

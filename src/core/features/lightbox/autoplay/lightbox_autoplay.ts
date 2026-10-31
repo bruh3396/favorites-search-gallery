@@ -10,13 +10,13 @@ export interface LightboxAutoplayConfiguration {
 
 export interface LightboxAutoplayDependencies {
   scheduler: Pick<Scheduler, "schedule">;
-  navigation: Pick<LightboxNavigation<MediaItem>, "isOpen" | "currentItem" | "goToNext">;
+  lightboxNavigation: Pick<LightboxNavigation<MediaItem>, "isOpen" | "currentItem" | "goToNext">;
   canCountDown: Readable<boolean>;
   video: Readable<HTMLVideoElement | undefined>;
 }
 
 export interface LightboxAutoplayCountdown {
-  readonly item: MediaItem;
+  readonly mediaItem: MediaItem;
   readonly duration: number;
 }
 
@@ -27,21 +27,21 @@ export class LightboxAutoplay {
   private releaseVideo: (() => void) | undefined;
 
   constructor(configuration: LightboxAutoplayConfiguration, dependencies: LightboxAutoplayDependencies) {
-    const { scheduler, navigation, canCountDown, video } = dependencies;
-    const { isOpen, currentItem } = navigation;
+    const { scheduler, lightboxNavigation, canCountDown, video } = dependencies;
+    const { isOpen, currentItem } = lightboxNavigation;
     const showNext = (): void => {
-      navigation.goToNext().catch(console.error);
+      lightboxNavigation.goToNext().catch(console.error);
     };
 
     this.countdown = computed(() => {
-      const item = currentItem.value;
-      return this.isPlayingState.value && item !== undefined && canCountDown.value ? { item, duration: configuration.interval } : undefined;
+      const mediaItem = currentItem.value;
+      return this.isPlayingState.value && mediaItem !== undefined && canCountDown.value ? { mediaItem, duration: configuration.interval } : undefined;
     });
     effect(() => {
-      const countdown = this.countdown.value;
+      const lightboxAutoplayCountdown = this.countdown.value;
 
       this.cancelStep?.();
-      this.cancelStep = countdown === undefined ? undefined : scheduler.schedule(showNext, countdown.duration);
+      this.cancelStep = lightboxAutoplayCountdown === undefined ? undefined : scheduler.schedule(showNext, lightboxAutoplayCountdown.duration);
     });
     effect(() => {
       const shown = video.value;

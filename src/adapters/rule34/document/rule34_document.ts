@@ -118,12 +118,20 @@ export class Rule34Document {
     if (postList === null) {
       return null;
     }
+    const paginator = postList.querySelector<HTMLElement>(PAGINATOR_SELECTOR);
+    const content = document.createElement("div");
     const claimed = document.createElement("div");
 
-    claimed.className = POST_LIST_CONTENT_CLASS;
-    claimed.style.flex = "1";
+    paginator?.remove();
+    content.className = POST_LIST_CONTENT_CLASS;
+    content.style.flex = "1";
+    content.append(claimed);
+
+    if (paginator !== null) {
+      content.append(paginator);
+    }
     postList.querySelectorAll(POST_LIST_NATIVE_CHILDREN_SELECTOR).forEach(purgeNativeContent);
-    postList.append(claimed);
+    postList.append(content);
     return claimed;
   }
 }

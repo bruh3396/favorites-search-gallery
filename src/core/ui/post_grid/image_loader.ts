@@ -12,8 +12,8 @@ export interface ImageLoaderDependencies {
   media: Media;
   targetWidth: Readable<number>;
   decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
-  decodeDebouncer: Pick<BatchDebouncer, "add">;
-  paintLimiter: Pick<RateLimiter, "run">;
+  batchDebouncer: Pick<BatchDebouncer, "add">;
+  paintRateLimiter: Pick<RateLimiter, "run">;
   enabled: Readable<boolean>;
   paused: Readable<boolean>;
 }
@@ -65,7 +65,7 @@ export class ImageLoader {
       }
       this.cancel();
     }
-    this.cancelHeldDecode = this.dependencies.decodeDebouncer.add(() => {
+    this.cancelHeldDecode = this.dependencies.batchDebouncer.add(() => {
       this.cancelHeldDecode = undefined;
       this.decode();
     });
@@ -109,7 +109,7 @@ export class ImageLoader {
     this.abortController = controller;
     this.requestedWidth = width;
     this.dependencies.decodeStill(this.dependencies.media, controller.signal, width)
-      .then(bitmap => this.dependencies.paintLimiter.run(() => {
+      .then(bitmap => this.dependencies.paintRateLimiter.run(() => {
         if (!isCurrent()) {
           bitmap.close();
           return Promise.resolve();

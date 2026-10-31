@@ -14,8 +14,8 @@ interface Setup {
   dispose: () => void;
 }
 
-function setup(trailing?: HTMLElement): Setup {
-  const options = { label: "Search favorites", query: new Signal(""), trailing, focusRequests: new Emitter<void>(), onSearch: vi.fn() };
+function setup(trailingChild?: HTMLElement): Setup {
+  const options = { label: "Search favorites", query: new Signal(""), trailingChild, focusRequests: new Emitter<void>(), onSearch: vi.fn() };
   const { result: element, dispose } = render(document, () => <SearchBox {...options} />);
 
   document.body.append(element);
@@ -100,10 +100,10 @@ describe("SearchBox", () => {
   });
 
   test("shows trailing content inside the field", () => {
-    const trailing = document.createElement("span");
-    const { input } = setup(trailing);
+    const trailingChild = document.createElement("span");
+    const { input } = setup(trailingChild);
 
-    expect(input.form!.contains(trailing)).toBe(true);
+    expect(input.form!.contains(trailingChild)).toBe(true);
   });
 
   test("styles every class it sets", () => {

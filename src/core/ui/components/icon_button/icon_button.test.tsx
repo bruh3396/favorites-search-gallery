@@ -5,8 +5,8 @@ import ICON_BUTTON_CSS from "@/core/ui/components/icon_button/icon_button.css?in
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(props: Partial<IconButtonProps> = {}): HTMLButtonElement {
-  return render(document, () => <IconButton icon="scan" label="Zen" onClick={() => undefined} {...props} />).result as HTMLButtonElement;
+function setup(partialIconButtonProps: Partial<IconButtonProps> = {}): HTMLButtonElement {
+  return render(document, () => <IconButton icon="scan" label="Zen" onClick={() => undefined} {...partialIconButtonProps} />).result as HTMLButtonElement;
 }
 
 describe("IconButton", () => {

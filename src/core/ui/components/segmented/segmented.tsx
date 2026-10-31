@@ -10,8 +10,8 @@ export const SegmentedClass = {
   icon: "fsg-Segmented-icon"
 } as const;
 
-export interface SegmentedProps<T> extends ControlProps<T> {
-  choices: readonly ControlChoice<T>[];
+export interface SegmentedProps<Value> extends ControlProps<Value> {
+  controlChoices: readonly ControlChoice<Value>[];
 }
 
 const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => number>> = {
@@ -23,16 +23,16 @@ const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => numbe
   End: (_, count) => count - 1
 };
 
-export function Segmented<T>({ choices, value, disabled = new Signal(false), onValueChange, size = "medium" }: SegmentedProps<T>): HTMLElement {
-  const findCheckedIndex = (checked: T): number => choices.findIndex(choice => choice.value === checked);
+export function Segmented<Value>({ controlChoices, value, disabled = new Signal(false), onValueChange, size: controlSize = "medium" }: SegmentedProps<Value>): HTMLElement {
+  const findCheckedIndex = (checkedValue: Value): number => controlChoices.findIndex(controlChoice => controlChoice.value === checkedValue);
   const checkedIndex = computed(() => findCheckedIndex(value.value));
   const tabStop = computed(() => Math.max(checkedIndex.value, 0));
   const select = (index: number): void => {
     if (index !== findCheckedIndex(value.peek())) {
-      onValueChange(choices[index].value);
+      onValueChange(controlChoices[index].value);
     }
   };
-  const buttons = choices.map(({ label, icon }, index) => (
+  const buttons = controlChoices.map(({ label, icon }, index) => (
     <button
       className={SegmentedClass.option}
       type="button"
@@ -61,7 +61,7 @@ export function Segmented<T>({ choices, value, disabled = new Signal(false), onV
     select(to);
   };
   return (
-    <div className={SegmentedClass.root} role="radiogroup" dataset={{ size }} onKeydown={moveFocus}>
+    <div className={SegmentedClass.root} role="radiogroup" dataset={{ size: controlSize }} onKeydown={moveFocus}>
       {buttons}
     </div>
   );

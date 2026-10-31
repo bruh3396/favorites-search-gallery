@@ -14,20 +14,26 @@ function createRemoteTagCategories(results: Record<string, FrozenCobaltTagResult
 }
 
 describe("FrozenCobaltRemoteTagCategories", () => {
-  test("decodes each tag's category", async() => {
+  test("returns each tag's category", async() => {
     const remoteTagCategories = createRemoteTagCategories({
-      apple: { status: "ok", category: 0 },
-      alice: { status: "ok", category: 4 }
+      apple: { status: "ok", category: "general" },
+      alice: { status: "ok", category: "character" }
     });
     const expected = new Map([["apple", "general"], ["alice", "character"]]);
 
     expect(await remoteTagCategories.fetch(["apple", "alice"])).toEqual(expected);
   });
 
-  test("leaves out tags that were rate limited or failed", async() => {
+  test("treats a tag Frozen Cobalt can't find as general", async() => {
+    const remoteTagCategories = createRemoteTagCategories({ old_tag: { status: "not_found" } });
+
+    expect(await remoteTagCategories.fetch(["old_tag"])).toEqual(new Map([["old_tag", "general"]]));
+  });
+
+  test("leaves out tags to retry or that failed", async() => {
     const remoteTagCategories = createRemoteTagCategories({
-      apple: { status: "ok", category: 1 },
-      alice: { status: "rate_limited" }
+      apple: { status: "ok", category: "artist" },
+      alice: { status: "retry" }
     });
 
     expect(await remoteTagCategories.fetch(["apple", "alice", "bob"])).toEqual(new Map([["apple", "artist"]]));

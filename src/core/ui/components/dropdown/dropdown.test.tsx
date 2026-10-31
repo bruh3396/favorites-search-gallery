@@ -18,17 +18,17 @@ interface Setup {
   dispose: () => void;
   value: Signal<Sort>;
   disabled: Signal<boolean>;
-  onValueChange: Mock<(next: Sort) => void>;
+  onValueChange: Mock<(sort: Sort) => void>;
   onPreview: Mock<(previewed: Sort | null) => void>;
 }
 
-function setup(initial: Sort = "score"): Setup {
-  const value = new Signal<Sort>(initial);
+function setup(initialSort: Sort = "score"): Setup {
+  const value = new Signal<Sort>(initialSort);
   const disabled = new Signal(false);
-  const onValueChange = vi.fn<(next: Sort) => void>();
+  const onValueChange = vi.fn<(nextSort: Sort) => void>();
   const onPreview = vi.fn<(previewed: Sort | null) => void>();
   const { result, dispose } = render(document, () => (
-    <Dropdown<Sort> choices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} onPreview={onPreview} />
+    <Dropdown<Sort> controlChoices={CHOICES} value={value} disabled={disabled} onValueChange={onValueChange} onPreview={onPreview} />
   ));
   const container = document.createElement("div");
 
@@ -62,7 +62,7 @@ describe("Dropdown", () => {
   });
 
   test("is medium unless told otherwise", () => {
-    const { result } = render(document, () => <Dropdown<string> choices={CHOICES} value={new Signal("score")} onValueChange={vi.fn()} size="small" />);
+    const { result } = render(document, () => <Dropdown<string> controlChoices={CHOICES} value={new Signal("score")} onValueChange={vi.fn()} size="small" />);
 
     expect(setup().trigger.dataset.size).toBe("medium");
     expect(result.dataset.size).toBe("small");
@@ -145,7 +145,7 @@ describe("Dropdown", () => {
   test("works with values that are not strings", () => {
     const onValueChange = vi.fn();
     const choices = [{ value: 10, label: "Ten" }, { value: 20, label: "Twenty" }];
-    const { result } = render(document, () => <Dropdown choices={choices} value={new Signal(10)} onValueChange={onValueChange} />);
+    const { result } = render(document, () => <Dropdown controlChoices={choices} value={new Signal(10)} onValueChange={onValueChange} />);
 
     press(result, "ArrowDown");
     press(result, "ArrowDown");

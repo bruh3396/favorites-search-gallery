@@ -73,11 +73,11 @@ describe("LightboxToolbar", () => {
     ["Fullscreen", "toggleFullscreen"],
     ["Open post page", "openPostPage"],
     ["Close", "close"]
-  ])("runs %s's command when clicked", (label, command) => {
+  ])("runs %s's command when clicked", (label, lightboxCommand) => {
     const { root, handlers } = setup();
 
     findButton(root, label).click();
-    expect(handlers[command]).toHaveBeenCalledOnce();
+    expect(handlers[lightboxCommand]).toHaveBeenCalledOnce();
   });
 
   test.each([

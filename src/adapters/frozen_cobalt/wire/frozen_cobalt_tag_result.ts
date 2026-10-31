@@ -1,10 +1,12 @@
-import { FrozenCobaltTagCategoryCode, isFrozenCobaltTagCategoryCode } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_category_code";
+import { FrozenCobaltTagCategory, isFrozenCobaltTagCategory } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_category";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
-import { isRecord } from "@/core/utils/guard/guard";
+import { isOneOf, isRecord } from "@/core/utils/guard/guard";
+
+const TAG_FAILURE_STATUSES = ["not_found", "retry"] as const;
 
 export type FrozenCobaltTagResult =
-  | { readonly status: "ok"; readonly category: FrozenCobaltTagCategoryCode }
-  | { readonly status: "rate_limited" };
+  | { readonly status: "ok"; readonly category: FrozenCobaltTagCategory }
+  | { readonly status: typeof TAG_FAILURE_STATUSES[number] };
 
 export function parseFrozenCobaltTagResult(value: unknown, tagName: string): FrozenCobaltTagResult {
   if (!isTagResult(value)) {
@@ -17,5 +19,5 @@ function isTagResult(value: unknown): value is FrozenCobaltTagResult {
   if (!isRecord(value)) {
     return false;
   }
-  return value.status === "ok" ? isFrozenCobaltTagCategoryCode(value.category) : value.status === "rate_limited";
+  return value.status === "ok" ? isFrozenCobaltTagCategory(value.category) : isOneOf(TAG_FAILURE_STATUSES, value.status);
 }

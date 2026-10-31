@@ -17,7 +17,7 @@ describe("LightboxAutoplayBar", () => {
     const { result: bar } = render(document, () => <LightboxAutoplayBar countdown={countdown} />);
 
     expect([bar.hidden, bar.childElementCount]).toEqual([true, 0]);
-    countdown.value = { item: createPost(), duration: 5_000 };
+    countdown.value = { mediaItem: createPost(), duration: 5_000 };
     expect(bar.hidden).toBe(false);
     expect((bar.firstElementChild as HTMLElement).style.animationDuration).toBe("5000ms");
     countdown.value = undefined;
@@ -25,11 +25,11 @@ describe("LightboxAutoplayBar", () => {
   });
 
   test("restarts the fill for each new countdown", () => {
-    const countdown = new Signal<LightboxAutoplayCountdown | undefined>({ item: createPost({ id: "1" }), duration: 5_000 });
+    const countdown = new Signal<LightboxAutoplayCountdown | undefined>({ mediaItem: createPost({ id: "1" }), duration: 5_000 });
     const { result: bar } = render(document, () => <LightboxAutoplayBar countdown={countdown} />);
     const first = bar.firstElementChild;
 
-    countdown.value = { item: createPost({ id: "2" }), duration: 5_000 };
+    countdown.value = { mediaItem: createPost({ id: "2" }), duration: 5_000 };
     expect(bar.firstElementChild).not.toBe(first);
   });
 });

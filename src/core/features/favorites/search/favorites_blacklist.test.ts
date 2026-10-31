@@ -12,20 +12,20 @@ describe("FavoritesBlacklist", () => {
     { isForced: true, isBlacklistEnabled: false },
     { isForced: true, isBlacklistEnabled: true }
   ])("excludes the blacklisted tags when forced is $isForced and enabled is $isBlacklistEnabled", ({ isForced, isBlacklistEnabled }) => {
-    const blacklist = new FavoritesBlacklist({ blacklistedTags: ["apple", "banana"], force: isForced });
+    const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags: ["apple", "banana"], force: isForced });
 
-    expect(blacklist.apply(MATCHES, { isBlacklistEnabled })).toEqual(SearchExpression.and([EXCLUSIONS, MATCHES]));
+    expect(favoritesBlacklist.apply(MATCHES, { isBlacklistEnabled })).toEqual(SearchExpression.and([EXCLUSIONS, MATCHES]));
   });
 
   test("leaves the matches alone while disabled and not forced", () => {
-    const blacklist = new FavoritesBlacklist({ blacklistedTags: ["apple", "banana"], force: false });
+    const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags: ["apple", "banana"], force: false });
 
-    expect(blacklist.apply(MATCHES, { isBlacklistEnabled: false })).toBe(MATCHES);
+    expect(favoritesBlacklist.apply(MATCHES, { isBlacklistEnabled: false })).toBe(MATCHES);
   });
 
   test("leaves the matches alone when nothing is blacklisted", () => {
-    const blacklist = new FavoritesBlacklist({ blacklistedTags: [], force: true });
+    const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags: [], force: true });
 
-    expect(blacklist.apply(MATCHES, { isBlacklistEnabled: true })).toBe(MATCHES);
+    expect(favoritesBlacklist.apply(MATCHES, { isBlacklistEnabled: true })).toBe(MATCHES);
   });
 });

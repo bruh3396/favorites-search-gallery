@@ -10,19 +10,19 @@ export const AppRootClass = {
 
 export interface AppRootProps {
   colorScheme: ColorScheme;
-  theme: ThemeDefinition;
-  font: AppFont;
+  themeDefinition: ThemeDefinition;
+  appFont: AppFont;
   styles: readonly string[];
 }
 
-export function mountAppRoot(container: HTMLElement, { colorScheme, theme, font, styles }: AppRootProps): HTMLElement {
+export function mountAppRoot(container: HTMLElement, { colorScheme, themeDefinition, appFont, styles }: AppRootProps): HTMLElement {
   const shadowRoot = container.attachShadow({ mode: "open" });
   const root = container.ownerDocument.createElement("div");
 
   root.className = AppRootClass.root;
   root.style.colorScheme = colorScheme;
-  applyTheme(root, theme);
-  installAppFont(root, font);
+  applyTheme(root, themeDefinition);
+  installAppFont(root, appFont);
   shadowRoot.adoptedStyleSheets = styles.map(createStyleSheet);
   shadowRoot.append(root);
   return root;

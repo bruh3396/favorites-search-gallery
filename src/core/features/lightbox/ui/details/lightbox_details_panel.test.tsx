@@ -5,18 +5,18 @@ import DETAILS_PANEL_CSS from "@/core/features/lightbox/ui/details/lightbox_deta
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(overrides: Partial<LightboxDetailsPanelProps> = {}): { panel: HTMLElement; isOpen: Signal<boolean>; props: LightboxDetailsPanelProps } {
+function setup(partialLightboxDetailsPanelProps: Partial<LightboxDetailsPanelProps> = {}): { panel: HTMLElement; isOpen: Signal<boolean>; lightboxDetailsPanelProps: LightboxDetailsPanelProps } {
   const isOpen = new Signal(false);
-  const props: LightboxDetailsPanelProps = {
+  const lightboxDetailsPanelProps: LightboxDetailsPanelProps = {
     isOpen,
-    content: "content",
+    contentChild: "content",
     onClose: vi.fn(),
     onPointerenter: vi.fn(),
     onPointerleave: vi.fn(),
-    ...overrides
+    ...partialLightboxDetailsPanelProps
   };
-  const { result: panel } = render(document, () => <LightboxDetailsPanel {...props} /> as HTMLElement);
-  return { panel, isOpen, props };
+  const { result: panel } = render(document, () => <LightboxDetailsPanel {...lightboxDetailsPanelProps} /> as HTMLElement);
+  return { panel, isOpen, lightboxDetailsPanelProps };
 }
 
 describe("LightboxDetailsPanel", () => {
@@ -29,14 +29,14 @@ describe("LightboxDetailsPanel", () => {
   });
 
   test("shows its title beside the close button", () => {
-    const { panel } = setup({ title: "#12" });
+    const { panel } = setup({ titleChild: "#12" });
     const closeButton = panel.querySelector("[aria-label=\"Hide details\"]")!;
 
     expect(closeButton.parentElement!.textContent).toContain("#12");
   });
 
   test("keeps its controls outside the scrolling content", () => {
-    const { panel } = setup({ controls: "controls" });
+    const { panel } = setup({ controlsChild: "controls" });
 
     expect(panel.querySelector(`.${LightboxDetailsPanelClass.content}`)!.textContent).not.toContain("controls");
     expect(panel.textContent).toContain("controls");
@@ -53,18 +53,18 @@ describe("LightboxDetailsPanel", () => {
   });
 
   test("closes from its close button", () => {
-    const { panel, props } = setup();
+    const { panel, lightboxDetailsPanelProps } = setup();
 
     panel.querySelector<HTMLButtonElement>("[aria-label=\"Hide details\"]")!.click();
-    expect(props.onClose).toHaveBeenCalledOnce();
+    expect(lightboxDetailsPanelProps.onClose).toHaveBeenCalledOnce();
   });
 
   test("reports the pointer entering and leaving", () => {
-    const { panel, props } = setup();
+    const { panel, lightboxDetailsPanelProps } = setup();
 
     panel.dispatchEvent(new PointerEvent("pointerenter"));
     panel.dispatchEvent(new PointerEvent("pointerleave"));
-    expect(props.onPointerenter).toHaveBeenCalledOnce();
-    expect(props.onPointerleave).toHaveBeenCalledOnce();
+    expect(lightboxDetailsPanelProps.onPointerenter).toHaveBeenCalledOnce();
+    expect(lightboxDetailsPanelProps.onPointerleave).toHaveBeenCalledOnce();
   });
 });

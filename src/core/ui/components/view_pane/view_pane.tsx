@@ -25,22 +25,22 @@ export interface ViewPaneProps {
   children?: Child;
 }
 
-export function ViewPane({ title, actions = [], children }: ViewPaneProps): HTMLElement {
+export function ViewPane({ title, actions: viewPaneActions = [], children }: ViewPaneProps): HTMLElement {
   return (
     <section className={ViewPaneClass.root}>
       <header className={ViewPaneClass.header}>
         <h2 className={ViewPaneClass.title}>{title}</h2>
         <div className={ViewPaneClass.toolbar} role="toolbar" aria-label={title}>
-          {actions.map(action => (
+          {viewPaneActions.map(viewPaneAction => (
             <button
               className={ViewPaneClass.action}
               type="button"
-              aria-label={action.label}
-              title={action.label}
-              disabled={action.disabled}
-              onClick={action.onClick}
+              aria-label={viewPaneAction.label}
+              title={viewPaneAction.label}
+              disabled={viewPaneAction.disabled}
+              onClick={viewPaneAction.onClick}
             >
-              {createIcon(action.icon, ViewPaneClass.icon)}
+              {createIcon(viewPaneAction.icon, ViewPaneClass.icon)}
             </button>
           ))}
         </div>

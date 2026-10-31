@@ -8,38 +8,38 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 
 describe("ArenaFavorite", () => {
   test("allocates its own slot and writes the post into it", () => {
-    const arena = new FavoritesColumnarArena(new StringInterner());
+    const favoritesColumnarArena = new FavoritesColumnarArena(new StringInterner());
 
-    arena.allocate();
-    const favorite = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", score: 99 }), arena);
+    favoritesColumnarArena.allocate();
+    const arenaFavorite = new ArenaFavorite(createPost({ id: "42", tags: "apple banana", score: 99 }), favoritesColumnarArena);
 
-    expect(favorite.slot).toBe(1);
-    expect(favorite.id).toBe("42");
-    expect(favorite.tags).toEqual(new Set(["apple", "banana"]));
-    expect(favorite.getMetric("score")).toBe(99);
+    expect(arenaFavorite.slot).toBe(1);
+    expect(arenaFavorite.id).toBe("42");
+    expect(arenaFavorite.tags).toEqual(new Set(["apple", "banana"]));
+    expect(arenaFavorite.getMetric("score")).toBe(99);
   });
 
   test("reads media and the new flag from the arena", () => {
-    const arena = new FavoritesColumnarArena(new StringInterner());
-    const favorite = new ArenaFavorite(createPost({ id: "1", media: { kind: "video", locator: "12/abc.mp4" } }), arena);
+    const favoritesColumnarArena = new FavoritesColumnarArena(new StringInterner());
+    const arenaFavorite = new ArenaFavorite(createPost({ id: "1", media: { kind: "video", locator: "12/abc.mp4" } }), favoritesColumnarArena);
 
-    arena.markNew(favorite.slot);
-    expect(favorite.media).toEqual({ kind: "video", locator: "12/abc.mp4" });
-    expect(favorite.isNew).toBe(true);
+    favoritesColumnarArena.markNew(arenaFavorite.slot);
+    expect(arenaFavorite.media).toEqual({ kind: "video", locator: "12/abc.mp4" });
+    expect(arenaFavorite.isNew).toBe(true);
   });
 
   test.each(RATINGS)("reads the bit of a %s rating from the arena", rating => {
-    const favorite = new ArenaFavorite(createPost({ id: "1", rating }), new FavoritesColumnarArena(new StringInterner()));
+    const arenaFavorite = new ArenaFavorite(createPost({ id: "1", rating }), new FavoritesColumnarArena(new StringInterner()));
 
-    expect(favorite.ratingBit).toBe(toRatingMask(rating));
+    expect(arenaFavorite.ratingBit).toBe(toRatingMask(rating));
   });
 
   test("keeps distinct favorites on independent slots", () => {
-    const arena = new FavoritesColumnarArena(new StringInterner());
-    const first = new ArenaFavorite(createPost({ id: "10", tags: "one" }), arena);
-    const second = new ArenaFavorite(createPost({ id: "20", tags: "two" }), arena);
+    const favoritesColumnarArena = new FavoritesColumnarArena(new StringInterner());
+    const firstArenaFavorite = new ArenaFavorite(createPost({ id: "10", tags: "one" }), favoritesColumnarArena);
+    const secondArenaFavorite = new ArenaFavorite(createPost({ id: "20", tags: "two" }), favoritesColumnarArena);
 
-    expect([first.id, second.id]).toEqual(["10", "20"]);
-    expect([first.tags, second.tags]).toEqual([new Set(["one"]), new Set(["two"])]);
+    expect([firstArenaFavorite.id, secondArenaFavorite.id]).toEqual(["10", "20"]);
+    expect([firstArenaFavorite.tags, secondArenaFavorite.tags]).toEqual([new Set(["one"]), new Set(["two"])]);
   });
 });

@@ -5,9 +5,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import VIEW_PANE_CSS from "@/core/ui/components/view_pane/view_pane.css?inline";
 import { expectClassesStyled } from "@/testing/css";
 
-function setup(actions: readonly ViewPaneAction[] = []): HTMLElement {
+function setup(viewPaneActions: readonly ViewPaneAction[] = []): HTMLElement {
   return render(document, () => (
-    <ViewPane title="Settings" actions={actions}>
+    <ViewPane title="Settings" actions={viewPaneActions}>
       <p>Body</p>
     </ViewPane>
   )).result;

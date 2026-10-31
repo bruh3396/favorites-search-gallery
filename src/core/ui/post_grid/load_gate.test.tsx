@@ -8,70 +8,70 @@ function createPost(postId: string): MediaItem {
 
 describe("LoadGate", () => {
   test("opens after every current post has loaded", () => {
-    const gate = new LoadGate();
-    const firstLoaded = gate.onLoaded("1");
-    const secondLoaded = gate.onLoaded("2");
+    const loadGate = new LoadGate();
+    const firstLoaded = loadGate.onLoaded("1");
+    const secondLoaded = loadGate.onLoaded("2");
 
-    gate.setPosts([createPost("1"), createPost("2")]);
-    expect(gate.isOpen.value).toBe(false);
+    loadGate.setPosts([createPost("1"), createPost("2")]);
+    expect(loadGate.isOpen.value).toBe(false);
 
     firstLoaded();
-    expect(gate.isOpen.value).toBe(false);
+    expect(loadGate.isOpen.value).toBe(false);
 
     secondLoaded();
-    expect(gate.isOpen.value).toBe(true);
+    expect(loadGate.isOpen.value).toBe(true);
   });
 
   test("stays closed when there are no posts", () => {
-    const gate = new LoadGate();
+    const loadGate = new LoadGate();
 
-    gate.setPosts([]);
-    expect(gate.isOpen.value).toBe(false);
+    loadGate.setPosts([]);
+    expect(loadGate.isOpen.value).toBe(false);
   });
 
   test("closes when a new unloaded post joins the current posts", () => {
-    const gate = new LoadGate();
-    const firstLoaded = gate.onLoaded("1");
+    const loadGate = new LoadGate();
+    const firstLoaded = loadGate.onLoaded("1");
 
-    gate.setPosts([createPost("1")]);
+    loadGate.setPosts([createPost("1")]);
     firstLoaded();
-    expect(gate.isOpen.value).toBe(true);
+    expect(loadGate.isOpen.value).toBe(true);
 
-    gate.setPosts([createPost("1"), createPost("2")]);
-    expect(gate.isOpen.value).toBe(false);
+    loadGate.setPosts([createPost("1"), createPost("2")]);
+    expect(loadGate.isOpen.value).toBe(false);
   });
 
   test("ignores a completion from an outdated post instance", () => {
-    const gate = new LoadGate();
-    const staleLoaded = gate.onLoaded("1");
-    const currentLoaded = gate.onLoaded("1");
+    const loadGate = new LoadGate();
+    const staleLoaded = loadGate.onLoaded("1");
+    const currentLoaded = loadGate.onLoaded("1");
 
-    gate.setPosts([createPost("1")]);
+    loadGate.setPosts([createPost("1")]);
     staleLoaded();
-    expect(gate.isOpen.value).toBe(false);
+    expect(loadGate.isOpen.value).toBe(false);
 
     currentLoaded();
-    expect(gate.isOpen.value).toBe(true);
+    expect(loadGate.isOpen.value).toBe(true);
   });
 
   test("forgets a loaded post once it leaves the grid", () => {
-    const gate = new LoadGate();
-    const loaded = gate.onLoaded("1");
+    const loadGate = new LoadGate();
+    const loaded = loadGate.onLoaded("1");
 
-    gate.setPosts([createPost("1")]);
+    loadGate.setPosts([createPost("1")]);
     loaded();
-    gate.setPosts([createPost("2")]);
-    gate.setPosts([createPost("1")]);
-    expect(gate.isOpen.value).toBe(false);
+    loadGate.setPosts([createPost("2")]);
+    loadGate.setPosts([createPost("1")]);
+    expect(loadGate.isOpen.value).toBe(false);
   });
 
   test("ignores completion from a post no longer in the grid", () => {
-    const gate = new LoadGate();
-    const loaded = gate.onLoaded("1");
+    const loadGate = new LoadGate();
+    const loaded = loadGate.onLoaded("1");
 
-    gate.setPosts([createPost("1")]);
-    gate.setPosts([]);
+    loadGate.setPosts([createPost("1")]);
+    loadGate.setPosts([]);
     loaded();
-    expect(gate.isOpen.value).toBe(false);
+    expect(loadGate.isOpen.value).toBe(false);
   });
 });

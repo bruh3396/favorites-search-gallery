@@ -30,7 +30,7 @@ interface StepButtonProps {
   label: string;
   icon: Icon;
   disabled: Readable<boolean>;
-  gesture: StepGesture;
+  stepGesture: StepGesture;
   onStep: () => void;
 }
 
@@ -46,17 +46,17 @@ export function Stepper({
   min,
   max,
   step = 1,
-  size = "medium",
+  size: controlSize = "medium",
   isFocused,
-  scheduler,
+  scheduler: stepperScheduler,
   value,
   disabled = new Signal(false),
   onValueChange,
   onValueCommit = doNothing
 }: StepperProps): HTMLElement {
   const upper = typeof max === "number" ? new Signal(max) : max;
-  const gesture = new StepGesture({
-    schedule: (task, delay): (() => void) => scheduler.schedule(task, delay),
+  const stepGesture = new StepGesture({
+    schedule: (task, delay): (() => void) => stepperScheduler.schedule(task, delay),
     getValue: (): number => value.peek(),
     commit: onValueCommit
   });
@@ -66,7 +66,7 @@ export function Stepper({
     }
   };
   const stepBy = (direction: 1 | -1): void => reportIfChanged(stepFrom(value.peek(), { direction, min, max: upper.peek(), step }));
-  const finishGesture = (): void => gesture.finish();
+  const finishGesture = (): void => stepGesture.finish();
   const input = (
     <input
       className={StepperClass.input}
@@ -82,13 +82,13 @@ export function Stepper({
 
         if (direction !== undefined) {
           event.preventDefault();
-          gesture.begin();
+          stepGesture.begin();
           stepBy(direction);
         }
       }}
       onKeyup={event => {
         if (KEY_DIRECTIONS[event.key] !== undefined) {
-          gesture.finish();
+          stepGesture.finish();
         }
       }}
       onBlur={finishGesture}
@@ -98,9 +98,9 @@ export function Stepper({
         event.currentTarget.value = String(value.peek());
 
         if (!Number.isNaN(typed)) {
-          gesture.begin();
+          stepGesture.begin();
           reportIfChanged(Math.min(upper.peek(), Math.max(min, typed)));
-          gesture.finish();
+          stepGesture.finish();
         }
       }}
     />
@@ -108,7 +108,7 @@ export function Stepper({
 
   effect(() => {
     if (disabled.value) {
-      gesture.finish();
+      stepGesture.finish();
     }
   });
 
@@ -121,12 +121,12 @@ export function Stepper({
     });
   }
   return (
-    <div className={StepperClass.root} dataset={{ size }}>
+    <div className={StepperClass.root} dataset={{ size: controlSize }}>
       <StepButton
         label="Decrease"
         icon="subtract"
         disabled={computed(() => disabled.value || value.value <= min)}
-        gesture={gesture}
+        stepGesture={stepGesture}
         onStep={() => stepBy(-1)}
       />
       {input}
@@ -134,15 +134,15 @@ export function Stepper({
         label="Increase"
         icon="add"
         disabled={computed(() => disabled.value || value.value >= upper.value)}
-        gesture={gesture}
+        stepGesture={stepGesture}
         onStep={() => stepBy(1)}
       />
     </div>
   );
 }
 
-function StepButton({ label, icon, disabled, gesture, onStep }: StepButtonProps): HTMLElement {
-  const finishGesture = (): void => gesture.finish();
+function StepButton({ label, icon, disabled, stepGesture, onStep }: StepButtonProps): HTMLElement {
+  const finishGesture = (): void => stepGesture.finish();
   const stepIfEnabled = (): boolean => {
     if (disabled.peek()) {
       return false;
@@ -162,16 +162,16 @@ function StepButton({ label, icon, disabled, gesture, onStep }: StepButtonProps)
           return;
         }
         event.preventDefault();
-        gesture.finish();
-        gesture.begin();
+        stepGesture.finish();
+        stepGesture.begin();
         onStep();
-        gesture.repeat(stepIfEnabled);
+        stepGesture.repeat(stepIfEnabled);
       }}
       onClick={event => {
         if (event.detail === 0) {
-          gesture.begin();
+          stepGesture.begin();
           onStep();
-          gesture.finish();
+          stepGesture.finish();
         }
       }}
       onPointerup={finishGesture}

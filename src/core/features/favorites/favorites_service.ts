@@ -47,7 +47,7 @@ export interface FavoritesService {
   readonly loadState: Readable<FavoritesLoadState>;
   readonly loadStatus: Readable<string>;
   readonly searchable: Fact;
-  createSession: (configuration: FavoritesSessionConfiguration) => FavoritesSession;
+  createSession: (favoritesSessionConfiguration: FavoritesSessionConfiguration) => FavoritesSession;
   isFavorited: (postId: string) => boolean;
   countFavoritesWithTag: (tag: string) => number;
   load: () => Promise<void>;
@@ -56,30 +56,30 @@ export interface FavoritesService {
 export function createFavoritesService(configuration: FavoritesServiceConfiguration, dependencies: FavoritesServiceDependencies): FavoritesService {
   const loaded = new Milestone();
   const stringInterner = new StringInterner();
-  const collection = new FavoritesCollection(stringInterner);
-  const searchIndex = new FavoritesSearchIndex(stringInterner);
-  const blacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
-  const actions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, {
+  const favoritesCollection = new FavoritesCollection(stringInterner);
+  const favoritesSearchIndex = new FavoritesSearchIndex(stringInterner);
+  const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
+  const favoritesActions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, {
     ...dependencies,
     acceptsChanges: (): boolean => !configuration.userOwnsFavorites || loaded.reached
   });
-  const loader = new FavoritesLoader({ ...dependencies, collection, index: searchIndex });
+  const favoritesLoader = new FavoritesLoader({ ...dependencies, favoritesCollection, favoritesSearchIndex });
   return {
-    actions,
-    hydrated: collection.hydrated,
-    loadState: loader.state,
-    loadStatus: computed(() => describeFavoritesLoadState(loader.state.value)),
-    searchable: searchIndex.populated,
-    createSession: sessionConfiguration => new FavoritesSession(sessionConfiguration, {
-      searchIndex,
-      blacklist,
+    actions: favoritesActions,
+    hydrated: favoritesCollection.hydrated,
+    loadState: favoritesLoader.state,
+    loadStatus: computed(() => describeFavoritesLoadState(favoritesLoader.state.value)),
+    searchable: favoritesSearchIndex.populated,
+    createSession: favoritesSessionConfiguration => new FavoritesSession(favoritesSessionConfiguration, {
+      favoritesSearchIndex,
+      favoritesBlacklist,
       randomSource: dependencies.randomSource,
       favoritesPaginationPreferences: dependencies.favoritesPaginationPreferences
     }),
-    isFavorited: postId => actions.isFavorited(postId),
-    countFavoritesWithTag: tag => searchIndex.countFavoritesWithTag(tag),
+    isFavorited: postId => favoritesActions.isFavorited(postId),
+    countFavoritesWithTag: tag => favoritesSearchIndex.countFavoritesWithTag(tag),
     load: async(): Promise<void> => {
-      await loader.load();
+      await favoritesLoader.load();
       loaded.reach();
     }
   };

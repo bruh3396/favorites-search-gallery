@@ -58,7 +58,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   const lightboxPreferences = postListPreferences.lightbox;
   const postListService = createPostListService({ remotePostList });
   const posts = computed(() => postListService.page.value.posts);
-  const sequence = new ListSequence({ wraps: false }, posts);
+  const listSequence = new ListSequence({ wraps: false }, posts);
   const tileLocator = new TileLocator<Post>();
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Post>({
@@ -71,7 +71,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {
     remoteMedia, scheduler, enabled: gridPreferences.hdTilesEnabled, paused: lightbox.isOpen
   });
-  const grid: Omit<PostGridProps<Post>, "posts"> = {
+  const postGridProps: Omit<PostGridProps<Post>, "posts"> = {
     changed: postListService.changed,
     tileLocator,
     settings: gridPreferences,
@@ -81,15 +81,15 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
     getSize: post => ({ width: post.width, height: post.height }),
     createActions: () => [],
     getPostUrl: post => remotePages.postUrl(post.id),
-    onPlainClick: post => lightbox.open(sequence, post)
+    onPlainClick: post => lightbox.open(listSequence, post)
   };
-  const renderApp = (): HTMLElement[] => PostListApp({ posts, grid, lightbox });
+  const renderApp = (): HTMLElement[] => PostListApp({ posts, postGridProps, lightbox });
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {
         colorScheme: sharedPreferences.colorScheme.peek(),
-        theme: THEME_DEFINITIONS[sharedPreferences.theme.peek()],
-        font: DEFAULT_APP_FONT,
+        themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()],
+        appFont: DEFAULT_APP_FONT,
         styles: POST_LIST_APP_STYLES
       });
 

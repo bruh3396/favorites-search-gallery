@@ -1,6 +1,6 @@
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
-import { TagCategory, TagCategoryMap } from "@/core/domain/tag_category/tag_category";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
@@ -50,28 +50,28 @@ export function FavoriteLightboxTags({ favorite, organization, alignment, size, 
   let shown: Scoped<HTMLElement[]> | undefined;
 
   effect(() => {
-    const isShown = favorite.value;
-    const showGroups = (categories: TagCategoryMap): void => {
-      if (favorite.peek() === isShown && isShown !== undefined) {
-        groups.value = groupTagsByCategory(isShown.tags, categories);
+    const currentFavorite = favorite.value;
+    const showGroups = (categories: ReadonlyMap<string, TagCategory>): void => {
+      if (favorite.peek() === currentFavorite && currentFavorite !== undefined) {
+        groups.value = groupTagsByCategory(currentFavorite.tags, categories);
       }
     };
 
     groups.value = [];
 
-    if (isShown !== undefined) {
-      localTagCategories.getMany([...isShown.tags]).then(showGroups, (error: unknown) => {
+    if (currentFavorite !== undefined) {
+      localTagCategories.getMany([...currentFavorite.tags]).then(showGroups, (error: unknown) => {
         console.error(error);
         showGroups(new Map());
       });
     }
   });
   effect(() => {
-    const shownGroups = groups.value;
+    const currentGroups = groups.value;
     const shownOrganization = organization.value;
 
     shown?.dispose();
-    shown = createGroupsScope(() => renderGroups(shownGroups, shownOrganization, collapsedTagCount));
+    shown = createGroupsScope(() => renderGroups(currentGroups, shownOrganization, collapsedTagCount));
     groupList.replaceChildren(...shown.result);
   });
   onCleanup(() => shown?.dispose());
@@ -82,7 +82,7 @@ export function FavoriteLightboxTags({ favorite, organization, alignment, size, 
   ) as HTMLElement;
 }
 
-function groupTagsByCategory(tags: Iterable<string>, categories: TagCategoryMap): TagGroup[] {
+function groupTagsByCategory(tags: Iterable<string>, categories: ReadonlyMap<string, TagCategory>): TagGroup[] {
   const groups = new Map<TagGroupCategory, string[]>(GROUP_ORDER.map(category => [category, []]));
 
   for (const tag of tags) {
@@ -97,21 +97,21 @@ function toGroupCategory(category: TagCategory | undefined): TagGroupCategory {
   return category === undefined || category === "unknown" ? "general" : category;
 }
 
-function renderGroups(groups: readonly TagGroup[], organization: TagOrganization, collapsedTagCount: number): HTMLElement[] {
+function renderGroups(tagGroups: readonly TagGroup[], organization: TagOrganization, collapsedTagCount: number): HTMLElement[] {
   if (organization === "category") {
-    return groups.map(group => <TagGroupSection group={group} collapsedTagCount={collapsedTagCount} />);
+    return tagGroups.map(tagGroup => <TagGroupSection tagGroup={tagGroup} collapsedTagCount={collapsedTagCount} />);
   }
-  return groups.length === 0 ? [] : [<TagList tags={groups.flatMap(group => group.tags).sort()} />];
+  return tagGroups.length === 0 ? [] : [<TagList tags={tagGroups.flatMap(tagGroup => tagGroup.tags).sort()} />];
 }
 
-function TagGroupSection({ group, collapsedTagCount }: { group: TagGroup; collapsedTagCount: number }): HTMLElement {
-  const expanded = new Signal(group.tags.length <= collapsedTagCount);
-  const hiddenCount = group.tags.length - collapsedTagCount;
+function TagGroupSection({ tagGroup, collapsedTagCount }: { tagGroup: TagGroup; collapsedTagCount: number }): HTMLElement {
+  const expanded = new Signal(tagGroup.tags.length <= collapsedTagCount);
+  const hiddenCount = tagGroup.tags.length - collapsedTagCount;
   return (
     <section className={FavoriteLightboxTagsClass.group}>
-      <h3 className={FavoriteLightboxTagsClass.heading}>{HEADINGS[group.category]}</h3>
+      <h3 className={FavoriteLightboxTagsClass.heading}>{HEADINGS[tagGroup.category]}</h3>
       <ul className={FavoriteLightboxTagsClass.list}>
-        {group.tags.map((tag, index) => (
+        {tagGroup.tags.map((tag, index) => (
           <li className={FavoriteLightboxTagsClass.tag} hidden={index < collapsedTagCount ? false : computed(() => !expanded.value)}>{tag}</li>
         ))}
         <li hidden={expanded}>

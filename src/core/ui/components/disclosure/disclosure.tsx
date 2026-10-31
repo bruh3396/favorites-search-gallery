@@ -14,7 +14,7 @@ export interface DisclosureProps extends ControlProps<boolean> {
   content: HTMLElement;
 }
 
-export function Disclosure({ title, content, value, disabled = new Signal(false), size = "medium", onValueChange }: DisclosureProps): HTMLElement {
+export function Disclosure({ title, content, value, disabled = new Signal(false), size: controlSize = "medium", onValueChange }: DisclosureProps): HTMLElement {
   const region = <div hidden={computed(() => !value.value)}>{content}</div>;
   const trigger = (
     <button
@@ -31,7 +31,7 @@ export function Disclosure({ title, content, value, disabled = new Signal(false)
 
   trigger.ariaControlsElements = [region];
   return (
-    <div className={DisclosureClass.root} dataset={{ size }}>
+    <div className={DisclosureClass.root} dataset={{ size: controlSize }}>
       {trigger}
       {region}
     </div>

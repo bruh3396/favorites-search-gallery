@@ -14,11 +14,11 @@ export interface SettingRowProps {
   description?: string;
   descriptionVisible?: Readable<boolean>;
   control: HTMLElement;
-  size?: ControlSize;
+  controlSize?: ControlSize;
   onActivate?: () => void;
 }
 
-export function SettingRow({ label, description, descriptionVisible, control, size = "medium", onActivate }: SettingRowProps): HTMLElement {
+export function SettingRow({ label, description, descriptionVisible, control, controlSize = "medium", onActivate }: SettingRowProps): HTMLElement {
   const labelElement = <span className={SettingRowClass.label}>{label}</span>;
   const hidden = computed(() => descriptionVisible?.value === false);
   const descriptionElement = description === undefined ? undefined : <span className={SettingRowClass.description} hidden={hidden}>{description}</span>;
@@ -31,7 +31,7 @@ export function SettingRow({ label, description, descriptionVisible, control, si
   return (
     <div
       className={SettingRowClass.root}
-      dataset={onActivate === undefined ? { size } : { size, activatable: "" }}
+      dataset={onActivate === undefined ? { size: controlSize } : { size: controlSize, activatable: "" }}
       onClick={event => {
         if (onActivate !== undefined && !control.contains(event.target as Node)) {
           onActivate();

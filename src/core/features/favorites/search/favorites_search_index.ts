@@ -11,13 +11,13 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 import { shuffleDeterministically } from "@/core/utils/collection/array_utilities";
 
 export class FavoritesSearchIndex {
-  private readonly engine: BitSearchEngine<Favorite>;
-  private readonly indexes = new Emitter<readonly Favorite[]>();
-  private readonly rebuilds = new Emitter<void>();
-  private readonly populatedMilestone = new Milestone();
+  private readonly bitSearchEngine: BitSearchEngine<Favorite>;
+  readonly #indexed = new Emitter<readonly Favorite[]>();
+  readonly #rebuilt = new Emitter<void>();
+  readonly #populated = new Milestone();
 
   constructor(stringInterner: StringInterner) {
-    this.engine = new BitSearchEngine<Favorite>({
+    this.bitSearchEngine = new BitSearchEngine<Favorite>({
       getTerms: favorite => favorite.tags,
       getMetric: (favorite, metric) => favorite.getMetric(metric),
       stringInterner
@@ -25,54 +25,54 @@ export class FavoritesSearchIndex {
   }
 
   public get indexed(): Occurrence<readonly Favorite[]> {
-    return this.indexes;
+    return this.#indexed;
   }
 
   public get rebuilt(): Occurrence<void> {
-    return this.rebuilds;
+    return this.#rebuilt;
   }
 
   public get populated(): Fact {
-    return this.populatedMilestone;
+    return this.#populated;
   }
 
   public add(favorites: readonly Favorite[]): void {
-    this.engine.add(favorites);
+    this.bitSearchEngine.add(favorites);
 
     if (favorites.length > 0) {
       this.markPopulated();
     }
-    this.indexes.emit(favorites);
+    this.#indexed.emit(favorites);
   }
 
-  public update(updates: readonly TermUpdate<Favorite>[]): void {
-    this.engine.update(updates);
+  public update(termUpdates: readonly TermUpdate<Favorite>[]): void {
+    this.bitSearchEngine.update(termUpdates);
   }
 
   public rebuild(favorites: readonly Favorite[]): void {
-    this.engine.rebuild(favorites);
+    this.bitSearchEngine.rebuild(favorites);
 
     if (favorites.length > 0) {
       this.markPopulated();
     }
-    this.rebuilds.emit();
+    this.#rebuilt.emit();
   }
 
-  public search(request: FavoritesSearchRequest): readonly Favorite[] {
-    return this.order(this.match(request), request);
+  public search(favoritesSearchRequest: FavoritesSearchRequest): readonly Favorite[] {
+    return this.order(this.match(favoritesSearchRequest), favoritesSearchRequest);
   }
 
   public countFavoritesWithTag(tag: string): number {
-    return this.engine.countDocsWithTerm(tag);
+    return this.bitSearchEngine.countDocsWithTerm(tag);
   }
 
-  public match({ expression, allowedRatings }: FavoritesSearchRequest, candidates?: readonly Favorite[]): readonly Favorite[] {
-    return expression === undefined ? [] : this.filterByRating(this.engine.search(expression, candidates), allowedRatings);
+  public match({ searchExpression, allowedRatings }: FavoritesSearchRequest, candidateFavorites?: readonly Favorite[]): readonly Favorite[] {
+    return searchExpression === undefined ? [] : this.filterByRating(this.bitSearchEngine.search(searchExpression, candidateFavorites), allowedRatings);
   }
 
   private markPopulated(): void {
-    if (!this.populatedMilestone.peek()) {
-      this.populatedMilestone.reach();
+    if (!this.#populated.peek()) {
+      this.#populated.reach();
     }
   }
 
@@ -84,8 +84,8 @@ export class FavoritesSearchIndex {
     return shuffleDeterministically(favorites, seed, favorite => favorite.numericId);
   }
 
-  private order(favorites: readonly Favorite[], request: FavoritesSearchRequest): readonly Favorite[] {
-    return request.isShuffled ? this.shuffle(favorites, request.shuffleSeed) : this.sort(favorites, request);
+  private order(favorites: readonly Favorite[], favoritesSearchRequest: FavoritesSearchRequest): readonly Favorite[] {
+    return favoritesSearchRequest.isShuffled ? this.shuffle(favorites, favoritesSearchRequest.shuffleSeed) : this.sort(favorites, favoritesSearchRequest);
   }
 
   private sort(favorites: readonly Favorite[], { sortKey, isSortAscending, shuffleSeed }: FavoritesSearchRequest): readonly Favorite[] {

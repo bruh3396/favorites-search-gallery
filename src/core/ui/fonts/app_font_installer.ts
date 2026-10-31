@@ -1,9 +1,9 @@
 import { AppFont } from "@/core/ui/fonts/app_font";
 
-export function installAppFont(root: HTMLElement, font: AppFont): void {
-  for (const face of font.faces) {
-    root.ownerDocument.fonts.add(new FontFace(face.family, `url(${face.source})`, { weight: face.weight }));
+export function installAppFont(root: HTMLElement, appFont: AppFont): void {
+  for (const appFontFace of appFont.faces) {
+    root.ownerDocument.fonts.add(new FontFace(appFontFace.family, `url(${appFontFace.source})`, { weight: appFontFace.weight }));
   }
-  root.style.setProperty("--fsg-font-family", font.text);
-  root.style.setProperty("--fsg-font-family-numeric", font.numeric);
+  root.style.setProperty("--fsg-font-family", appFont.text);
+  root.style.setProperty("--fsg-font-family-numeric", appFont.numeric);
 }

@@ -35,36 +35,36 @@ export interface Lightbox<T extends MediaItem> {
   readonly settled: Occurrence<T>;
   readonly closed: Occurrence<T>;
   readonly mediaCorrected: Occurrence<MediaItem>;
-  open(sequence: MediaSequence<T>, item: T): boolean;
+  open(mediaSequence: MediaSequence<T>, item: T): boolean;
   prefetch(item: T): void;
   createView(): HTMLElement;
   dispose(): void;
 }
 
 export function createLightbox<T extends MediaItem>(dependencies: LightboxDependencies<T>): Lightbox<T> {
-  const navigation = new LightboxNavigation<T>({ settleDelay: SETTLE_DELAY }, dependencies.scheduler);
-  const retentionList = new LightboxRetentionList<T>({ capacity: RETENTION_CAPACITY }, navigation);
-  const resolver = new LightboxMediaResolver(media => dependencies.remoteMedia.resolveMedia(media));
+  const lightboxNavigation = new LightboxNavigation<T>({ settleDelay: SETTLE_DELAY }, dependencies.scheduler);
+  const lightboxRetentionList = new LightboxRetentionList<T>({ capacity: RETENTION_CAPACITY }, lightboxNavigation);
+  const lightboxMediaResolver = new LightboxMediaResolver(media => dependencies.remoteMedia.resolveMedia(media));
   return {
-    isOpen: navigation.isOpen,
-    settled: navigation.settled,
-    closed: navigation.closed,
-    mediaCorrected: resolver.corrected,
-    open: (sequence, item): boolean => {
+    isOpen: lightboxNavigation.isOpen,
+    settled: lightboxNavigation.settled,
+    closed: lightboxNavigation.closed,
+    mediaCorrected: lightboxMediaResolver.corrected,
+    open: (mediaSequence, item): boolean => {
       if (dependencies.mode.peek() === "off") {
         return false;
       }
-      navigation.open(sequence, item);
+      lightboxNavigation.open(mediaSequence, item);
       return true;
     },
-    prefetch: (item): void => retentionList.retain([item]),
+    prefetch: (item): void => lightboxRetentionList.retain([item]),
     createView: (): HTMLElement => composeLightboxDialog(
       { keymap: DEFAULT_LIGHTBOX_KEYMAP },
-      { ...dependencies, resolver, navigation, retainedItems: retentionList.items }
+      { ...dependencies, lightboxActions: dependencies.actions, lightboxDetails: dependencies.details, lightboxMediaResolver, lightboxNavigation, retainedItems: lightboxRetentionList.items }
     ),
     dispose: (): void => {
-      retentionList.dispose();
-      navigation.dispose();
+      lightboxRetentionList.dispose();
+      lightboxNavigation.dispose();
     }
   };
 }

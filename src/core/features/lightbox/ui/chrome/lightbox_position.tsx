@@ -14,10 +14,10 @@ export function LightboxPosition({ position }: LightboxPositionProps): HTMLEleme
   return <span className={LightboxPositionClass.root}>{computed(() => formatPosition(position.value))}</span> as HTMLElement;
 }
 
-function formatPosition(position: MediaSequencePosition | undefined): string {
-  if (position === undefined) {
+function formatPosition(mediaSequencePosition: MediaSequencePosition | undefined): string {
+  if (mediaSequencePosition === undefined) {
     return "";
   }
-  const shown = (position.index + 1).toLocaleString();
-  return position.total === undefined ? shown : `${shown} / ${position.total.toLocaleString()}`;
+  const shown = (mediaSequencePosition.index + 1).toLocaleString();
+  return mediaSequencePosition.total === undefined ? shown : `${shown} / ${mediaSequencePosition.total.toLocaleString()}`;
 }

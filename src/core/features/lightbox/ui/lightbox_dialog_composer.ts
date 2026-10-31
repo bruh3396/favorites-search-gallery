@@ -43,14 +43,14 @@ export interface LightboxDialogDependencies<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule">;
   sizeObserver: SizeObserver;
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
-  resolver: LightboxMediaResolver;
-  actions: LightboxActions;
-  navigation: Pick<LightboxNavigation<T>, "isOpen" | "currentItem" | "position" | "goToNext" | "goToPrevious" | "close">;
+  lightboxMediaResolver: LightboxMediaResolver;
+  lightboxActions: LightboxActions;
+  lightboxNavigation: Pick<LightboxNavigation<T>, "isOpen" | "currentItem" | "position" | "goToNext" | "goToPrevious" | "close">;
   retainedItems: Readable<readonly T[]>;
   volume: StoredValue<number>;
   muted: StoredValue<boolean>;
   locateItem: (item: T) => Element | undefined;
-  details?: LightboxDetails<T>;
+  lightboxDetails?: LightboxDetails<T>;
   mode: Readable<LightboxMode>;
 }
 
@@ -58,63 +58,63 @@ export function composeLightboxDialog<T extends MediaItem>(
   configuration: LightboxDialogConfiguration,
   dependencies: LightboxDialogDependencies<T>
 ): HTMLElement {
-  const { scheduler, sizeObserver, remoteMedia, resolver, actions, navigation, retainedItems, volume, muted, locateItem, details, mode } = dependencies;
+  const { scheduler, sizeObserver, remoteMedia, lightboxMediaResolver, lightboxActions, lightboxNavigation, retainedItems, volume, muted, locateItem, lightboxDetails, mode } = dependencies;
   const simple = computed(() => mode.value === "simple");
-  const stage = new LightboxStage<T>(
+  const lightboxStage = new LightboxStage<T>(
     { gifCapacity: GIF_CAPACITY, videoCapacity: VIDEO_CAPACITY },
-    { remoteMedia, resolver, currentItem: navigation.currentItem, retainedItems, volume, muted }
+    { remoteMedia, lightboxMediaResolver, currentItem: lightboxNavigation.currentItem, retainedItems, volume, muted }
   );
-  const overlayVisibility = new LightboxOverlayVisibility({ idleDelay: OVERLAY_IDLE_DELAY, leaveDelay: OVERLAY_LEAVE_DELAY }, scheduler);
-  const fullscreen = new LightboxFullscreen(currentDocument());
-  const zoom = new LightboxZoom(
+  const lightboxOverlayVisibility = new LightboxOverlayVisibility({ idleDelay: OVERLAY_IDLE_DELAY, leaveDelay: OVERLAY_LEAVE_DELAY }, scheduler);
+  const lightboxFullscreen = new LightboxFullscreen(currentDocument());
+  const lightboxZoom = new LightboxZoom(
     { minimumScale: ZOOM_MINIMUM_SCALE, maximumScale: ZOOM_MAXIMUM_SCALE },
-    { currentItem: navigation.currentItem, mediaSize: stage.mediaSize, enabled: computed(() => !simple.value) }
+    { currentItem: lightboxNavigation.currentItem, mediaSize: lightboxStage.mediaSize, enabled: computed(() => !simple.value) }
   );
-  const autoplay = new LightboxAutoplay({ interval: AUTOPLAY_INTERVAL }, {
+  const lightboxAutoplay = new LightboxAutoplay({ interval: AUTOPLAY_INTERVAL }, {
     scheduler,
-    navigation,
-    canCountDown: computed(() => stage.mediaSize.value !== undefined && !zoom.isZoomed.value),
-    video: stage.video
+    lightboxNavigation,
+    canCountDown: computed(() => lightboxStage.mediaSize.value !== undefined && !lightboxZoom.isZoomed.value),
+    video: lightboxStage.video
   });
-  const closer = new LightboxCloser<T>({
-    navigation,
-    shownMedia: stage.shownMedia,
-    inFullscreen: fullscreen.inFullscreen,
+  const lightboxCloser = new LightboxCloser<T>({
+    lightboxNavigation,
+    shownMedia: lightboxStage.shownMedia,
+    inFullscreen: lightboxFullscreen.inFullscreen,
     morphDuration: computed(() => (simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION)),
     locateItem
   });
-  const handlers = limitToSimpleCommands(createLightboxCommandHandlers({ navigation, stage, fullscreen, zoom, autoplay, closer, actions, details }), simple);
+  const handlers = limitToSimpleCommands(createLightboxCommandHandlers({ lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails }), simple);
 
   effect(() => {
-    if (!navigation.isOpen.value) {
-      fullscreen.exit();
+    if (!lightboxNavigation.isOpen.value) {
+      lightboxFullscreen.exit();
     }
   });
   return h(LightboxDialog, {
-    isOpen: navigation.isOpen,
-    position: navigation.position,
-    currentItem: navigation.currentItem,
-    details,
+    isOpen: lightboxNavigation.isOpen,
+    position: lightboxNavigation.position,
+    currentItem: lightboxNavigation.currentItem,
+    lightboxDetails,
     simple,
-    closesOnPress: computed(() => simple.value && stage.video.value === undefined),
-    stage,
-    overlayVisibility,
-    inFullscreen: fullscreen.inFullscreen,
-    zoom,
-    autoplay,
+    closesOnPress: computed(() => simple.value && lightboxStage.video.value === undefined),
+    lightboxStage,
+    lightboxOverlayVisibility,
+    inFullscreen: lightboxFullscreen.inFullscreen,
+    lightboxZoom,
+    lightboxAutoplay,
     sizeObserver,
     handlers,
     keymap: configuration.keymap,
-    keyListener: createLightboxKeyListener(configuration.keymap, handlers),
-    mouseListeners: createLightboxMouseListeners(handlers)
+    onKeydown: createLightboxKeyListener(configuration.keymap, handlers),
+    lightboxMouseListeners: createLightboxMouseListeners(handlers)
   });
 }
 
 function limitToSimpleCommands(handlers: CommandHandlers<LightboxCommand>, simple: Readable<boolean>): CommandHandlers<LightboxCommand> {
   const entries = Object.entries(handlers) as Array<[LightboxCommand, () => void]>;
-  return Object.fromEntries(entries.map(([command, run]) => [
-    command, (): void => {
-      if (!simple.peek() || SIMPLE_COMMANDS.has(command)) {
+  return Object.fromEntries(entries.map(([lightboxCommand, run]) => [
+    lightboxCommand, (): void => {
+      if (!simple.peek() || SIMPLE_COMMANDS.has(lightboxCommand)) {
         run();
       }
     }

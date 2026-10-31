@@ -1,9 +1,10 @@
 import { Media } from "@/core/domain/media/media";
 import { MediaKind } from "@/core/domain/media/media_kind";
-import { Rule34CdnFileExtension, rule34CdnFileExtensionKind } from "@/adapters/rule34_cdn/client/rule34_cdn_file_extension";
+import { Rule34CdnFileExtension, isRule34CdnFileExtension } from "@/adapters/rule34_cdn/client/rule34_cdn_file_extension";
 import { Rule34CdnImageDecoder, Rule34CdnImageDecoderDependencies } from "@/adapters/rule34_cdn/client/rule34_cdn_image_decoder";
 import { buildRule34CdnFileUrl, buildRule34CdnPreviewUrl, buildRule34CdnWimgUrl } from "@/adapters/rule34_cdn/client/rule34_cdn_url_builder";
 import { mintRule34CdnMedia } from "@/adapters/rule34_cdn/client/rule34_cdn_media_minter";
+import { parseRule34CdnFileUrl } from "@/adapters/rule34_cdn/client/rule34_cdn_file_url_parser";
 import { readRule34CdnLocator } from "@/adapters/rule34_cdn/client/rule34_cdn_locator";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/rule34_cdn_extension_prober";
 import { Rule34CdnVideoDurationProber } from "@/adapters/rule34_cdn/client/rule34_cdn_video_duration_prober";
@@ -27,16 +28,19 @@ export class Rule34CdnClient {
     this.imageDecoder = new Rule34CdnImageDecoder(dependencies);
   }
 
-  public mintMedia(file: { url: string; tags: string }): Media | null {
-    return mintRule34CdnMedia(file);
+  public mintMediaFromUrl({ url, tags }: { url: string; tags: string }): Media | null {
+    const locator = parseRule34CdnFileUrl(url);
+    return locator === null ? null : mintRule34CdnMedia({ locator, tags });
   }
 
-  public async resolveMedia(media: Media): Promise<Media> {
-    if (readRule34CdnLocator(media.locator).extension !== null) {
-      return media;
-    }
-    const extension = await this.extensionProber.probe(media.locator, media.kind);
-    return extension === null ? media : { kind: rule34CdnFileExtensionKind(extension), locator: `${media.locator}.${extension}` };
+  public mintMediaFromParts({ directory, stem, extension, tags }: { directory: number; stem: string; extension: string; tags: string }): Media {
+    const locator = { directory: String(directory), stem, extension: isRule34CdnFileExtension(extension) ? extension : null };
+    return mintRule34CdnMedia({ locator, tags });
+  }
+
+  // Correcting the tag guess is off for now: the probe turned post list videos into their jpg stills
+  public resolveMedia(media: Media): Promise<Media> {
+    return Promise.resolve(media);
   }
 
   public previewUrl(media: Media): string {

@@ -8,57 +8,57 @@ interface Box extends Size {
 
 interface Frame {
   readonly box: Box;
-  readonly bounds?: Box;
+  readonly boundsBox?: Box;
 }
 
 const STAND_IN_RADIUS = 8;
 
-export function morphLightboxMedia(source: LightboxMediaElement, duration: number, update: () => Element | undefined): void {
-  const view = source.ownerDocument.defaultView;
-  const intrinsic = measureIntrinsicSize(source);
-  const start = fitInside(source.getBoundingClientRect(), intrinsic);
+export function morphLightboxMedia(sourceLightboxMediaElement: LightboxMediaElement, duration: number, update: () => Element | undefined): void {
+  const view = sourceLightboxMediaElement.ownerDocument.defaultView;
+  const intrinsicSize = measureIntrinsicSize(sourceLightboxMediaElement);
+  const startBox = fitInside(sourceLightboxMediaElement.getBoundingClientRect(), intrinsicSize);
 
-  if (view === null || isEmpty(intrinsic) || isEmpty(start)) {
+  if (view === null || isEmpty(intrinsicSize) || isEmpty(startBox)) {
     update();
     return;
   }
-  const standIn = drawStandIn(view, source, { start, intrinsic });
+  const standIn = drawStandIn(view, sourceLightboxMediaElement, { startBox, intrinsicSize });
 
-  source.ownerDocument.body.append(standIn);
+  sourceLightboxMediaElement.ownerDocument.body.append(standIn);
   const target = update();
 
   if (target === undefined) {
     standIn.remove();
     return;
   }
-  fly(view, standIn, { start, target, duration });
+  fly(view, standIn, { startBox, target, duration });
 }
 
 function isEmpty({ width, height }: Size): boolean {
   return !(width > 0 && height > 0);
 }
 
-function drawStandIn(view: Window, source: LightboxMediaElement, { start, intrinsic }: { start: Box; intrinsic: Size }): HTMLCanvasElement {
-  const canvas = source.ownerDocument.createElement("canvas");
-  const density = Math.min(view.devicePixelRatio, intrinsic.width / start.width);
+function drawStandIn(view: Window, sourceLightboxMediaElement: LightboxMediaElement, { startBox, intrinsicSize }: { startBox: Box; intrinsicSize: Size }): HTMLCanvasElement {
+  const canvas = sourceLightboxMediaElement.ownerDocument.createElement("canvas");
+  const density = Math.min(view.devicePixelRatio, intrinsicSize.width / startBox.width);
 
-  canvas.width = Math.max(1, Math.round(start.width * density));
-  canvas.height = Math.max(1, Math.round(start.height * density));
-  canvas.getContext("2d")?.drawImage(source, 0, 0, canvas.width, canvas.height);
-  pin(canvas, start);
-  cover(canvas, start, { box: start });
+  canvas.width = Math.max(1, Math.round(startBox.width * density));
+  canvas.height = Math.max(1, Math.round(startBox.height * density));
+  canvas.getContext("2d")?.drawImage(sourceLightboxMediaElement, 0, 0, canvas.width, canvas.height);
+  pin(canvas, startBox);
+  cover(canvas, startBox, { box: startBox });
   return canvas;
 }
 
-function measureIntrinsicSize(source: LightboxMediaElement): Size {
-  if (source instanceof HTMLVideoElement) {
-    return { width: source.videoWidth, height: source.videoHeight };
+function measureIntrinsicSize(sourceLightboxMediaElement: LightboxMediaElement): Size {
+  if (sourceLightboxMediaElement instanceof HTMLVideoElement) {
+    return { width: sourceLightboxMediaElement.videoWidth, height: sourceLightboxMediaElement.videoHeight };
   }
 
-  if (source instanceof HTMLImageElement) {
-    return { width: source.naturalWidth, height: source.naturalHeight };
+  if (sourceLightboxMediaElement instanceof HTMLImageElement) {
+    return { width: sourceLightboxMediaElement.naturalWidth, height: sourceLightboxMediaElement.naturalHeight };
   }
-  return { width: source.width, height: source.height };
+  return { width: sourceLightboxMediaElement.width, height: sourceLightboxMediaElement.height };
 }
 
 function fitInside(box: Box, { width, height }: Size): Box {
@@ -67,7 +67,7 @@ function fitInside(box: Box, { width, height }: Size): Box {
   return { left: box.left + ((box.width - fitted.width) / 2), top: box.top + ((box.height - fitted.height) / 2), ...fitted };
 }
 
-function fly(view: Window, standIn: HTMLCanvasElement, { start, target, duration }: { start: Box; target: Element; duration: number }): void {
+function fly(view: Window, standIn: HTMLCanvasElement, { startBox, target, duration }: { startBox: Box; target: Element; duration: number }): void {
   const reveal = hide(target);
   const viewport = { left: 0, top: 0, width: view.innerWidth, height: view.innerHeight };
   const destination = findClippingAncestor(view, target)?.getBoundingClientRect();
@@ -84,9 +84,9 @@ function fly(view: Window, standIn: HTMLCanvasElement, { start, target, duration
     startTime ??= time;
     const progress = Math.min((time - startTime) / duration, 1);
     const amount = easeOut(progress);
-    const bounds = destination === undefined ? undefined : interpolate(viewport, destination, amount);
+    const box = destination === undefined ? undefined : interpolate(viewport, destination, amount);
 
-    cover(standIn, start, { box: interpolate(start, target.getBoundingClientRect(), amount), bounds });
+    cover(standIn, startBox, { box: interpolate(startBox, target.getBoundingClientRect(), amount), boundsBox: box });
     view.requestAnimationFrame(progress < 1 ? step : land);
   };
 
@@ -118,23 +118,23 @@ function easeOut(progress: number): number {
   return 1 - ((1 - progress) ** 3);
 }
 
-function interpolate(from: Box, to: Box, amount: number): Box {
+function interpolate(fromBox: Box, toBox: Box, amount: number): Box {
   const between = (a: number, b: number): number => a + ((b - a) * amount);
   return {
-    left: between(from.left, to.left),
-    top: between(from.top, to.top),
-    width: between(from.width, to.width),
-    height: between(from.height, to.height)
+    left: between(fromBox.left, toBox.left),
+    top: between(fromBox.top, toBox.top),
+    width: between(fromBox.width, toBox.width),
+    height: between(fromBox.height, toBox.height)
   };
 }
 
-function pin(standIn: HTMLElement, start: Box): void {
+function pin(standIn: HTMLElement, startBox: Box): void {
   const properties: Record<string, string> = {
     "position": "fixed",
-    "left": `${start.left}px`,
-    "top": `${start.top}px`,
-    "width": `${start.width}px`,
-    "height": `${start.height}px`,
+    "left": `${startBox.left}px`,
+    "top": `${startBox.top}px`,
+    "width": `${startBox.width}px`,
+    "height": `${startBox.height}px`,
     "margin": "0",
     "transform-origin": "0 0",
     "will-change": "transform, clip-path",
@@ -147,21 +147,21 @@ function pin(standIn: HTMLElement, start: Box): void {
   }
 }
 
-function cover(standIn: HTMLElement, start: Box, { box, bounds }: Frame): void {
-  const scale = Math.max(box.width / start.width, box.height / start.height);
-  const insetX = (start.width - (box.width / scale)) / 2;
-  const insetY = (start.height - (box.height / scale)) / 2;
-  const translateX = box.left - start.left - (insetX * scale);
-  const translateY = box.top - start.top - (insetY * scale);
-  const local = bounds === undefined ? { left: 0, top: 0, width: start.width, height: start.height } : {
-    left: (bounds.left - start.left - translateX) / scale,
-    top: (bounds.top - start.top - translateY) / scale,
-    width: bounds.width / scale,
-    height: bounds.height / scale
+function cover(standIn: HTMLElement, startBox: Box, { box, boundsBox }: Frame): void {
+  const scale = Math.max(box.width / startBox.width, box.height / startBox.height);
+  const insetX = (startBox.width - (box.width / scale)) / 2;
+  const insetY = (startBox.height - (box.height / scale)) / 2;
+  const translateX = box.left - startBox.left - (insetX * scale);
+  const translateY = box.top - startBox.top - (insetY * scale);
+  const local = boundsBox === undefined ? { left: 0, top: 0, width: startBox.width, height: startBox.height } : {
+    left: (boundsBox.left - startBox.left - translateX) / scale,
+    top: (boundsBox.top - startBox.top - translateY) / scale,
+    width: boundsBox.width / scale,
+    height: boundsBox.height / scale
   };
   const top = Math.max(insetY, local.top);
-  const right = Math.max(insetX, start.width - local.left - local.width);
-  const bottom = Math.max(insetY, start.height - local.top - local.height);
+  const right = Math.max(insetX, startBox.width - local.left - local.width);
+  const bottom = Math.max(insetY, startBox.height - local.top - local.height);
   const left = Math.max(insetX, local.left);
 
   standIn.style.setProperty("transform", `translate(${translateX}px, ${translateY}px) scale(${scale})`);

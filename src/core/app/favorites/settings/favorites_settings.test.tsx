@@ -9,14 +9,14 @@ import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
 
 function setup(): { favoritesPreferences: AppPreferences["favorites"]; queryInput: (type: string, label: string) => HTMLInputElement } {
-  const storage = new MemoryLocalKeyedValues();
-  const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, storage, ["favorites"]);
+  const localKeyedValues = new MemoryLocalKeyedValues();
+  const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, localKeyedValues, ["favorites"]);
   const { result: element } = render(document, () => (
     <FavoritesSettings
       favoritesPreferences={favoritesPreferences}
-      sharedPreferences={createSharedPreferences(storage, "light", new MemoryHostPage())}
+      sharedPreferences={createSharedPreferences(localKeyedValues, "light", new MemoryHostPage())}
       onThemePreview={() => undefined}
-      scheduler={new MemoryScheduler()}
+      stepperScheduler={new MemoryScheduler()}
     />
   ));
   return { favoritesPreferences, queryInput: (type, label) => element.querySelector<HTMLInputElement>(`input[type="${type}"][aria-label="${label}"]`)! };

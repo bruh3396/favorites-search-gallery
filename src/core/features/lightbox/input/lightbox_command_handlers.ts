@@ -11,20 +11,20 @@ import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { MediaItem } from "@/core/domain/media/media_item";
 
 export interface LightboxCommandHandlersDependencies<T extends MediaItem> {
-  readonly navigation: Pick<LightboxNavigation<T>, "currentItem" | "goToNext" | "goToPrevious">;
-  readonly stage: Pick<LightboxStage<T>, "togglePause" | "toggleMute">;
-  readonly fullscreen: Pick<LightboxFullscreen, "toggle">;
-  readonly zoom: Pick<LightboxZoom, "isZoomed" | "toggle" | "zoomOut">;
-  readonly autoplay: Pick<LightboxAutoplay, "toggle">;
-  readonly closer: Pick<LightboxCloser<T>, "close">;
-  readonly actions: LightboxActions;
-  readonly details?: Pick<LightboxDetails<T>, "isOpen">;
+  readonly lightboxNavigation: Pick<LightboxNavigation<T>, "currentItem" | "goToNext" | "goToPrevious">;
+  readonly lightboxStage: Pick<LightboxStage<T>, "togglePause" | "toggleMute">;
+  readonly lightboxFullscreen: Pick<LightboxFullscreen, "toggle">;
+  readonly lightboxZoom: Pick<LightboxZoom, "isZoomed" | "toggle" | "zoomOut">;
+  readonly lightboxAutoplay: Pick<LightboxAutoplay, "toggle">;
+  readonly lightboxCloser: Pick<LightboxCloser<T>, "close">;
+  readonly lightboxActions: LightboxActions;
+  readonly lightboxDetails?: Pick<LightboxDetails<T>, "isOpen">;
 }
 
 export function createLightboxCommandHandlers<T extends MediaItem>(dependencies: LightboxCommandHandlersDependencies<T>): CommandHandlers<LightboxCommand> {
-  const { navigation, stage, fullscreen, zoom, autoplay, closer, actions, details } = dependencies;
+  const { lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails } = dependencies;
   const withCurrentItem = (run: (item: T) => void) => (): void => {
-    const item = navigation.currentItem.peek();
+    const item = lightboxNavigation.currentItem.peek();
 
     if (item !== undefined) {
       run(item);
@@ -32,21 +32,21 @@ export function createLightboxCommandHandlers<T extends MediaItem>(dependencies:
   };
   return {
     showNext: (): void => {
-      navigation.goToNext().catch(console.error);
+      lightboxNavigation.goToNext().catch(console.error);
     },
     showPrevious: (): void => {
-      navigation.goToPrevious().catch(console.error);
+      lightboxNavigation.goToPrevious().catch(console.error);
     },
-    toggleAutoplay: (): void => autoplay.toggle(),
-    togglePause: (): void => stage.togglePause(),
-    toggleMute: (): void => stage.toggleMute(),
-    toggleFullscreen: (): void => fullscreen.toggle(),
-    toggleZoom: (): void => zoom.toggle(),
-    toggleDetails: (): void => details?.isOpen.set(!details.isOpen.peek()),
-    dismiss: (): void => (zoom.isZoomed.peek() ? zoom.zoomOut() : closer.close()),
-    download: withCurrentItem(item => actions.download(item)),
-    openPostPage: withCurrentItem(item => actions.openPostPage(item)),
-    openOriginal: withCurrentItem(item => actions.openOriginal(item)),
-    close: (): void => closer.close()
+    toggleAutoplay: (): void => lightboxAutoplay.toggle(),
+    togglePause: (): void => lightboxStage.togglePause(),
+    toggleMute: (): void => lightboxStage.toggleMute(),
+    toggleFullscreen: (): void => lightboxFullscreen.toggle(),
+    toggleZoom: (): void => lightboxZoom.toggle(),
+    toggleDetails: (): void => lightboxDetails?.isOpen.set(!lightboxDetails.isOpen.peek()),
+    dismiss: (): void => (lightboxZoom.isZoomed.peek() ? lightboxZoom.zoomOut() : lightboxCloser.close()),
+    download: withCurrentItem(item => lightboxActions.download(item)),
+    openPostPage: withCurrentItem(item => lightboxActions.openPostPage(item)),
+    openOriginal: withCurrentItem(item => lightboxActions.openOriginal(item)),
+    close: (): void => lightboxCloser.close()
   };
 }

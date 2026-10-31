@@ -7,7 +7,7 @@ const SLOT_COUNTS = [5, 6, 7, 9];
 interface Sequence {
   pageNumber: number;
   pageCount: number;
-  terms: readonly PageTerm[];
+  pageTerms: readonly PageTerm[];
 }
 
 function listSequences(slotCount: number): Sequence[] {
@@ -15,14 +15,14 @@ function listSequences(slotCount: number): Sequence[] {
 
   for (let pageCount = 1; pageCount <= 30; pageCount += 1) {
     for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
-      sequences.push({ pageNumber, pageCount, terms: listPageTerms({ pageNumber, pageCount, slotCount }) });
+      sequences.push({ pageNumber, pageCount, pageTerms: listPageTerms({ pageNumber, pageCount, slotCount }) });
     }
   }
   return sequences;
 }
 
-function listPageNumbers(terms: readonly PageTerm[]): number[] {
-  return terms.filter((term): term is number => term !== "gap");
+function listPageNumbers(pageTerms: readonly PageTerm[]): number[] {
+  return pageTerms.filter((pageTerm): pageTerm is number => pageTerm !== "gap");
 }
 
 describe("listPageTerms", () => {
@@ -55,30 +55,30 @@ describe("listPageTerms", () => {
   });
 
   test.each(SLOT_COUNTS)("always lists the current page with %i slots", slotCount => {
-    for (const { pageNumber, terms } of listSequences(slotCount)) {
-      expect(terms).toContain(pageNumber);
+    for (const { pageNumber, pageTerms } of listSequences(slotCount)) {
+      expect(pageTerms).toContain(pageNumber);
     }
   });
 
   test.each(SLOT_COUNTS)("fills every slot once pages outnumber %i slots", slotCount => {
-    for (const { pageCount, terms } of listSequences(slotCount)) {
-      expect(terms).toHaveLength(Math.min(pageCount, slotCount));
+    for (const { pageCount, pageTerms } of listSequences(slotCount)) {
+      expect(pageTerms).toHaveLength(Math.min(pageCount, slotCount));
     }
   });
 
   test.each(SLOT_COUNTS)("lists page numbers once each, in increasing order, with %i slots", slotCount => {
-    for (const { terms } of listSequences(slotCount)) {
-      const pages = listPageNumbers(terms);
+    for (const { pageTerms } of listSequences(slotCount)) {
+      const pages = listPageNumbers(pageTerms);
 
       expect(pages).toEqual([...new Set(pages)].sort((a, b) => a - b));
     }
   });
 
   test.each(SLOT_COUNTS)("puts a gap only where two or more pages are hidden with %i slots", slotCount => {
-    for (const { terms } of listSequences(slotCount)) {
-      terms.forEach((term, index) => {
-        if (term === "gap") {
-          expect((terms[index + 1] as number) - (terms[index - 1] as number)).toBeGreaterThan(2);
+    for (const { pageTerms } of listSequences(slotCount)) {
+      pageTerms.forEach((pageTerm, index) => {
+        if (pageTerm === "gap") {
+          expect((pageTerms[index + 1] as number) - (pageTerms[index - 1] as number)).toBeGreaterThan(2);
         }
       });
     }

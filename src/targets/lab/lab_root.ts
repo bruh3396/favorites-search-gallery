@@ -6,5 +6,5 @@ import UI_CSS from "@/core/ui/styles.css?inline";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export function mountLabRoot(container: HTMLElement, colorScheme: ColorScheme): HTMLElement {
-  return mountAppRoot(container, { colorScheme, theme: THEME_DEFINITIONS[DEFAULT_THEME], font: INSTRUMENT_FONT, styles: [UI_CSS, LAB_CSS] });
+  return mountAppRoot(container, { colorScheme, themeDefinition: THEME_DEFINITIONS[DEFAULT_THEME], appFont: INSTRUMENT_FONT, styles: [UI_CSS, LAB_CSS] });
 }

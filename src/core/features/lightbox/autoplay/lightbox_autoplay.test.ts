@@ -10,7 +10,7 @@ const INTERVAL = 1_000;
 const POSTS = createPosts("1", "2");
 
 function setup(): {
-  autoplay: LightboxAutoplay;
+  lightboxAutoplay: LightboxAutoplay;
   dispose: () => void;
   scheduler: MemoryScheduler;
   goToNext: () => Promise<void>;
@@ -25,11 +25,11 @@ function setup(): {
   const currentItem = new Signal<Post | undefined>(POSTS[0]);
   const canCountDown = new Signal(true);
   const video = new Signal<HTMLVideoElement | undefined>(undefined);
-  const { result: autoplay, dispose } = createScope(() => new LightboxAutoplay(
+  const { result: lightboxAutoplay, dispose } = createScope(() => new LightboxAutoplay(
     { interval: INTERVAL },
-    { scheduler, navigation: { isOpen, currentItem, goToNext }, canCountDown, video }
+    { scheduler, lightboxNavigation: { isOpen, currentItem, goToNext }, canCountDown, video }
   ));
-  return { autoplay, dispose, scheduler, goToNext, isOpen, currentItem, canCountDown, video };
+  return { lightboxAutoplay, dispose, scheduler, goToNext, isOpen, currentItem, canCountDown, video };
 }
 
 function createLoopingVideo(): HTMLVideoElement {
@@ -41,17 +41,17 @@ function createLoopingVideo(): HTMLVideoElement {
 
 describe("LightboxAutoplay", () => {
   test("starts stopped, without a countdown", () => {
-    const { autoplay } = setup();
+    const { lightboxAutoplay } = setup();
 
-    expect(autoplay.isPlaying.value).toBe(false);
-    expect(autoplay.countdown.value).toBeUndefined();
+    expect(lightboxAutoplay.isPlaying.value).toBe(false);
+    expect(lightboxAutoplay.countdown.value).toBeUndefined();
   });
 
   test("shows the next item once the interval passes", () => {
-    const { autoplay, scheduler, goToNext } = setup();
+    const { lightboxAutoplay, scheduler, goToNext } = setup();
 
-    autoplay.toggle();
-    expect(autoplay.countdown.value).toEqual({ item: POSTS[0], duration: INTERVAL });
+    lightboxAutoplay.toggle();
+    expect(lightboxAutoplay.countdown.value).toEqual({ mediaItem: POSTS[0], duration: INTERVAL });
     scheduler.advance(INTERVAL - 1);
     expect(goToNext).not.toHaveBeenCalled();
     scheduler.advance(1);
@@ -59,9 +59,9 @@ describe("LightboxAutoplay", () => {
   });
 
   test("restarts the countdown when the item changes", () => {
-    const { autoplay, scheduler, goToNext, currentItem } = setup();
+    const { lightboxAutoplay, scheduler, goToNext, currentItem } = setup();
 
-    autoplay.toggle();
+    lightboxAutoplay.toggle();
     scheduler.advance(INTERVAL / 2);
     currentItem.value = POSTS[1];
     scheduler.advance(INTERVAL / 2);
@@ -71,60 +71,60 @@ describe("LightboxAutoplay", () => {
   });
 
   test("holds the countdown while it can't count down", () => {
-    const { autoplay, scheduler, goToNext, canCountDown } = setup();
+    const { lightboxAutoplay, scheduler, goToNext, canCountDown } = setup();
 
-    autoplay.toggle();
+    lightboxAutoplay.toggle();
     canCountDown.value = false;
-    expect(autoplay.countdown.value).toBeUndefined();
+    expect(lightboxAutoplay.countdown.value).toBeUndefined();
     scheduler.advance(INTERVAL);
     expect(goToNext).not.toHaveBeenCalled();
   });
 
   test("holds the countdown without a current item", () => {
-    const { autoplay, currentItem } = setup();
+    const { lightboxAutoplay, currentItem } = setup();
 
     currentItem.value = undefined;
-    autoplay.toggle();
-    expect(autoplay.countdown.value).toBeUndefined();
+    lightboxAutoplay.toggle();
+    expect(lightboxAutoplay.countdown.value).toBeUndefined();
   });
 
   test("shows the next item when the shown video ends instead of looping it", () => {
-    const { autoplay, goToNext, video } = setup();
+    const { lightboxAutoplay, goToNext, video } = setup();
     const shown = createLoopingVideo();
 
     video.value = shown;
-    autoplay.toggle();
+    lightboxAutoplay.toggle();
     expect(shown.loop).toBe(false);
     shown.dispatchEvent(new Event("ended"));
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
   test("loops the video again once stopped", () => {
-    const { autoplay, goToNext, video } = setup();
+    const { lightboxAutoplay, goToNext, video } = setup();
     const shown = createLoopingVideo();
 
     video.value = shown;
-    autoplay.toggle();
-    autoplay.toggle();
+    lightboxAutoplay.toggle();
+    lightboxAutoplay.toggle();
     expect(shown.loop).toBe(true);
     shown.dispatchEvent(new Event("ended"));
     expect(goToNext).not.toHaveBeenCalled();
   });
 
   test("stops when the lightbox closes", () => {
-    const { autoplay, isOpen } = setup();
+    const { lightboxAutoplay, isOpen } = setup();
 
-    autoplay.toggle();
+    lightboxAutoplay.toggle();
     isOpen.value = false;
-    expect(autoplay.isPlaying.value).toBe(false);
+    expect(lightboxAutoplay.isPlaying.value).toBe(false);
   });
 
   test("cancels its countdown and releases the video when its scope is disposed", () => {
-    const { autoplay, dispose, scheduler, goToNext, video } = setup();
+    const { lightboxAutoplay, dispose, scheduler, goToNext, video } = setup();
     const shown = createLoopingVideo();
 
     video.value = shown;
-    autoplay.toggle();
+    lightboxAutoplay.toggle();
     dispose();
     scheduler.advance(INTERVAL);
     expect(goToNext).not.toHaveBeenCalled();
@@ -133,13 +133,13 @@ describe("LightboxAutoplay", () => {
 
   describe("toggle", () => {
     test("starts and stops playing", () => {
-      const { autoplay } = setup();
+      const { lightboxAutoplay } = setup();
 
-      autoplay.toggle();
-      expect(autoplay.isPlaying.value).toBe(true);
-      autoplay.toggle();
-      expect(autoplay.isPlaying.value).toBe(false);
-      expect(autoplay.countdown.value).toBeUndefined();
+      lightboxAutoplay.toggle();
+      expect(lightboxAutoplay.isPlaying.value).toBe(true);
+      lightboxAutoplay.toggle();
+      expect(lightboxAutoplay.isPlaying.value).toBe(false);
+      expect(lightboxAutoplay.countdown.value).toBeUndefined();
     });
   });
 });

@@ -22,7 +22,7 @@ import { flushMicrotasks } from "@/testing/async";
 
 interface Setup {
   favoritesService: FavoritesService;
-  session: FavoritesSession;
+  favoritesSession: FavoritesSession;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
   localFavorites: MemoryLocalFavorites;
   hydratedPostIds: string[];
@@ -30,7 +30,7 @@ interface Setup {
 
 interface Created {
   favoritesService: FavoritesService;
-  client: MemoryClient;
+  memoryClient: MemoryClient;
   localFavorites: MemoryLocalFavorites;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
 }
@@ -52,22 +52,22 @@ function createStoredValue<T>(initial: T): StoredValue<T> {
 }
 
 function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Created {
-  const client = new MemoryClient(posts);
+  const memoryClient = new MemoryClient(posts);
   const localFavorites = new MemoryLocalFavorites();
   const favoritesPaginationPreferences = { pageSize: createStoredValue(2), infiniteScroll: createStoredValue(false) };
   const favoritesService = createFavoritesService({ userOwnsFavorites, blacklistedTags: [] }, {
     localFavorites,
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),
-    remoteFavorites: new MemoryRemoteFavorites(client),
-    remotePosts: new MemoryRemotePosts(client),
+    remoteFavorites: new MemoryRemoteFavorites(memoryClient),
+    remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
-    remotePages: new MemoryRemotePages(client),
+    remotePages: new MemoryRemotePages(memoryClient),
     scheduler: new MemoryScheduler(),
     randomSource: new MemoryRandomSource([0.25, 0.5]),
     favoritesPaginationPreferences
   });
-  return { favoritesService, client, localFavorites, favoritesPaginationPreferences };
+  return { favoritesService, memoryClient, localFavorites, favoritesPaginationPreferences };
 }
 
 async function setup(posts: Post[], { localPostIds = [] }: { localPostIds?: string[] } = {}): Promise<Setup> {
@@ -75,38 +75,38 @@ async function setup(posts: Post[], { localPostIds = [] }: { localPostIds?: stri
   const hydratedPostIds: string[] = [];
 
   await localFavorites.setAll(localPostIds);
-  const session = createStartedSession(favoritesService);
+  const favoritesSession = createStartedSession(favoritesService);
 
   favoritesService.hydrated.on(favorite => hydratedPostIds.push(favorite.id));
   await favoritesService.load();
-  return { favoritesService, session, favoritesPaginationPreferences, localFavorites, hydratedPostIds };
+  return { favoritesService, favoritesSession, favoritesPaginationPreferences, localFavorites, hydratedPostIds };
 }
 
-function readPostIds(client: MemoryClient): string[] {
-  return client.readFavorites().map(post => post.id);
+function readPostIds(memoryClient: MemoryClient): string[] {
+  return memoryClient.readFavorites().map(post => post.id);
 }
 
 function createStartedSession(favoritesService: FavoritesService): FavoritesSession {
-  const session = favoritesService.createSession({ settings: buildFavoritesSearchSettings() });
+  const favoritesSession = favoritesService.createSession({ favoritesSearchSettings: buildFavoritesSearchSettings() });
 
-  session.start();
-  return session;
+  favoritesSession.start();
+  return favoritesSession;
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
   return tags.map((tag, index) => createPost({ id: String(index + 1), tags: tag }));
 }
 
-function getResultPostIds(session: FavoritesSession): string[] {
-  return session.results.value.map(favorite => favorite.id);
+function getResultPostIds(favoritesSession: FavoritesSession): string[] {
+  return favoritesSession.matchedFavorites.value.map(favorite => favorite.id);
 }
 
 describe("createFavoritesService", () => {
   test("loads the remote favorites and shows them all", async() => {
-    const { favoritesService, session } = await setup(createTaggedPosts("apple", "banana", "cherry"));
+    const { favoritesService, favoritesSession } = await setup(createTaggedPosts("apple", "banana", "cherry"));
 
     expect(favoritesService.loadState.value.phase).toBe("loaded");
-    expect(getResultPostIds(session)).toEqual(["1", "2", "3"]);
+    expect(getResultPostIds(favoritesSession)).toEqual(["1", "2", "3"]);
   });
 
   test("becomes searchable once favorites are loaded", async() => {
@@ -127,39 +127,39 @@ describe("createFavoritesService", () => {
   });
 
   test("shows the favorites matching the typed query", async() => {
-    const { session } = await setup(createTaggedPosts("apple", "banana", "apple"));
+    const { favoritesSession } = await setup(createTaggedPosts("apple", "banana", "apple"));
 
-    session.submit("apple");
-    expect(getResultPostIds(session)).toEqual(["1", "3"]);
+    favoritesSession.submit("apple");
+    expect(getResultPostIds(favoritesSession)).toEqual(["1", "3"]);
   });
 
   test("searches each session on its own", async() => {
-    const { favoritesService, session } = await setup(createTaggedPosts("apple", "banana", "apple"));
-    const other = createStartedSession(favoritesService);
+    const { favoritesService, favoritesSession } = await setup(createTaggedPosts("apple", "banana", "apple"));
+    const otherFavoritesSession = createStartedSession(favoritesService);
 
-    session.submit("apple");
-    other.submit("banana");
-    expect([getResultPostIds(session), getResultPostIds(other)]).toEqual([["1", "3"], ["2"]]);
+    favoritesSession.submit("apple");
+    otherFavoritesSession.submit("banana");
+    expect([getResultPostIds(favoritesSession), getResultPostIds(otherFavoritesSession)]).toEqual([["1", "3"], ["2"]]);
   });
 
   test("shows the page of the results it went to", async() => {
-    const { session } = await setup(createTaggedPosts("apple", "banana", "cherry"));
+    const { favoritesSession } = await setup(createTaggedPosts("apple", "banana", "cherry"));
 
-    session.goTo(2);
-    expect(session.pageItems.value.map(favorite => favorite.id)).toEqual(["3"]);
+    favoritesSession.goTo(2);
+    expect(favoritesSession.pageFavorites.value.map(favorite => favorite.id)).toEqual(["3"]);
   });
 
   test("goes back to the first page when its page size changes", async() => {
-    const { session, favoritesPaginationPreferences } = await setup(createTaggedPosts("a", "a", "a", "a", "a"));
+    const { favoritesSession, favoritesPaginationPreferences } = await setup(createTaggedPosts("a", "a", "a", "a", "a"));
 
-    session.goTo(2);
+    favoritesSession.goTo(2);
     favoritesPaginationPreferences.pageSize.set(1);
-    expect(session.pageNumber.value).toBe(1);
+    expect(favoritesSession.pageNumber.value).toBe(1);
   });
 
   test("publishes each placeholder once it is hydrated", async() => {
-    const remote = ["1", "2"].map(id => createPost({ id, media: { kind: "image", locator: `${id}.jpg` } }));
-    const { hydratedPostIds } = await setup(remote, { localPostIds: ["1", "2"] });
+    const remoteFavoritePosts = ["1", "2"].map(id => createPost({ id, media: { kind: "image", locator: `${id}.jpg` } }));
+    const { hydratedPostIds } = await setup(remoteFavoritePosts, { localPostIds: ["1", "2"] });
 
     await flushMicrotasks();
     expect(hydratedPostIds.toSorted()).toEqual(["1", "2"]);
@@ -172,10 +172,10 @@ describe("createFavoritesService", () => {
   });
 
   test("blocks removing a favorite from the user's own favorites until loading finishes", async() => {
-    const { favoritesService, client } = create(createTaggedPosts("apple"));
+    const { favoritesService, memoryClient } = create(createTaggedPosts("apple"));
 
     expect(await favoritesService.actions.remove("1")).toBe(false);
-    expect(readPostIds(client)).toEqual(["1"]);
+    expect(readPostIds(memoryClient)).toEqual(["1"]);
     await favoritesService.load();
     expect(await favoritesService.actions.remove("1")).toBe(true);
   });

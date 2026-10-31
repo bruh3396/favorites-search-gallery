@@ -327,16 +327,28 @@ describe("Rule34Document", () => {
   });
 
   describe("claimPostListContent", () => {
-    test("replaces everything in the post list but the sidebar with an empty element", () => {
+    test("replaces everything in the post list but the sidebar and paginator with an empty element", () => {
       const postList = addPostList("1", "2");
-      const [sidebar, ...natives] = [...postList.children];
+      const [sidebar, native, paginator] = [...postList.children];
+      const claimed = new Rule34Document().claimPostListContent();
+      const content = claimed?.parentElement;
+
+      expect([...postList.children]).toEqual([sidebar, content]);
+      expect(content?.className).toBe("content");
+      expect(content?.style.flexGrow).toBe("1");
+      expect([...content?.children ?? []]).toEqual([claimed, paginator]);
+      expect(claimed?.childElementCount).toBe(0);
+      expect([native.isConnected, native.attributes.length]).toEqual([false, 0]);
+    });
+
+    test("keeps a paginator nested in the native content", () => {
+      const postList = addPostList("1");
+      const paginator = postList.querySelector("#paginator");
+
+      postList.querySelector(".content")?.append(paginator as HTMLElement);
       const claimed = new Rule34Document().claimPostListContent();
 
-      expect([...postList.children]).toEqual([sidebar, claimed]);
-      expect(claimed?.className).toBe("content");
-      expect(claimed?.style.flexGrow).toBe("1");
-      expect(claimed?.childElementCount).toBe(0);
-      expect(natives.map(native => [native.isConnected, native.attributes.length])).toEqual([[false, 0], [false, 0]]);
+      expect(claimed?.nextElementSibling).toBe(paginator);
     });
 
     test("claims nothing when the page has no post list", () => {

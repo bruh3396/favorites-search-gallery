@@ -57,7 +57,7 @@ function setup(decode: DecodeStill = () => Promise.resolve(createBitmap() as unk
   const paused = new Signal(false);
   const imageLoader = new ImageLoader({ maxCanvasHeight: MAX_CANVAS_HEIGHT }, {
     canvas, media: MEDIA, targetWidth, decodeStill, enabled, paused,
-    decodeDebouncer: new BatchDebouncer(DECODE_DEBOUNCE, scheduler), paintLimiter: new RateLimiter(PAINT_RATE_LIMIT, scheduler)
+    batchDebouncer: new BatchDebouncer(DECODE_DEBOUNCE, scheduler), paintRateLimiter: new RateLimiter(PAINT_RATE_LIMIT, scheduler)
   });
   const showNow = (): void => {
     imageLoader.show();
@@ -72,31 +72,31 @@ function createBitmap(width = WIDTH / 2, height = WIDTH / 4): FakeBitmap {
   return { width, height, close: vi.fn() };
 }
 
-async function drawnSize(bitmap: FakeBitmap): Promise<number[]> {
-  const { canvas, drawImage, showNow } = setup(() => Promise.resolve(bitmap as unknown as ImageBitmap));
+async function drawnSize(fakeBitmap: FakeBitmap): Promise<number[]> {
+  const { canvas, drawImage, showNow } = setup(() => Promise.resolve(fakeBitmap as unknown as ImageBitmap));
 
   showNow();
   await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
-  expect(drawImage).toHaveBeenCalledWith(bitmap, 0, 0, canvas.width, canvas.height);
+  expect(drawImage).toHaveBeenCalledWith(fakeBitmap, 0, 0, canvas.width, canvas.height);
   return [canvas.width, canvas.height];
 }
 
 describe("ImageLoader", () => {
   test("decodes the image at the target width and draws it when shown", async() => {
     const pendingDecode = deferred<ImageBitmap>();
-    const bitmap = createBitmap();
+    const fakeBitmap = createBitmap();
     const { canvas, decodeStill, drawImage, showNow } = setup(() => pendingDecode.promise);
 
     showNow();
     expect(decodeStill).toHaveBeenCalledExactlyOnceWith(MEDIA, expect.any(AbortSignal), WIDTH);
     expect(canvas.hidden).toBe(true);
 
-    pendingDecode.resolve(bitmap as unknown as ImageBitmap);
+    pendingDecode.resolve(fakeBitmap as unknown as ImageBitmap);
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
 
-    expect(drawImage).toHaveBeenCalledExactlyOnceWith(bitmap as unknown as ImageBitmap, 0, 0, bitmap.width, bitmap.height);
-    expect([canvas.width, canvas.height, canvas.hidden]).toEqual([bitmap.width, bitmap.height, false]);
-    expect(bitmap.close).toHaveBeenCalledOnce();
+    expect(drawImage).toHaveBeenCalledExactlyOnceWith(fakeBitmap as unknown as ImageBitmap, 0, 0, fakeBitmap.width, fakeBitmap.height);
+    expect([canvas.width, canvas.height, canvas.hidden]).toEqual([fakeBitmap.width, fakeBitmap.height, false]);
+    expect(fakeBitmap.close).toHaveBeenCalledOnce();
   });
 
   test("waits for the tile to stay in view before decoding", () => {
@@ -246,7 +246,7 @@ describe("ImageLoader", () => {
 
   test("aborts a request and closes its bitmap if the result arrives later", async() => {
     const pendingDecode = deferred<ImageBitmap>();
-    const bitmap = createBitmap();
+    const fakeBitmap = createBitmap();
     const { imageLoader, canvas, decodeStill, drawImage, showNow } = setup(() => pendingDecode.promise);
 
     showNow();
@@ -255,8 +255,8 @@ describe("ImageLoader", () => {
     imageLoader.cancel();
 
     expect(signal.aborted).toBe(true);
-    pendingDecode.resolve(bitmap as unknown as ImageBitmap);
-    await vi.waitFor(() => expect(bitmap.close).toHaveBeenCalledOnce());
+    pendingDecode.resolve(fakeBitmap as unknown as ImageBitmap);
+    await vi.waitFor(() => expect(fakeBitmap.close).toHaveBeenCalledOnce());
 
     expect(drawImage).not.toHaveBeenCalled();
     expect(canvas.hidden).toBe(true);
@@ -264,22 +264,22 @@ describe("ImageLoader", () => {
 
   test("closes a decoded bitmap without drawing it when cancelled while waiting to paint", async() => {
     const { scheduler, drawImage } = setup();
-    const decodeDebouncer = new BatchDebouncer(DECODE_DEBOUNCE, scheduler);
-    const paintLimiter = new RateLimiter(PAINT_RATE_LIMIT, scheduler);
-    const bitmaps = [createBitmap(), createBitmap()];
-    const [first, second] = bitmaps.map(bitmap => new ImageLoader({ maxCanvasHeight: MAX_CANVAS_HEIGHT }, {
-      canvas: document.createElement("canvas"), media: MEDIA, targetWidth: new Signal(WIDTH), paintLimiter, decodeDebouncer,
+    const batchDebouncer = new BatchDebouncer(DECODE_DEBOUNCE, scheduler);
+    const rateLimiter = new RateLimiter(PAINT_RATE_LIMIT, scheduler);
+    const fakeBitmaps = [createBitmap(), createBitmap()];
+    const [firstImageLoader, secondImageLoader] = fakeBitmaps.map(fakeBitmap => new ImageLoader({ maxCanvasHeight: MAX_CANVAS_HEIGHT }, {
+      canvas: document.createElement("canvas"), media: MEDIA, targetWidth: new Signal(WIDTH), paintRateLimiter: rateLimiter, batchDebouncer,
       enabled: new Signal(true), paused: new Signal(false),
-      decodeStill: (): Promise<ImageBitmap> => Promise.resolve(bitmap as unknown as ImageBitmap)
+      decodeStill: (): Promise<ImageBitmap> => Promise.resolve(fakeBitmap as unknown as ImageBitmap)
     }));
 
-    first.show();
-    second.show();
+    firstImageLoader.show();
+    secondImageLoader.show();
     scheduler.advance(QUIET_PERIOD);
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
-    second.cancel();
+    secondImageLoader.cancel();
     scheduler.advance(1_000);
-    await vi.waitFor(() => expect(bitmaps[1].close).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(fakeBitmaps[1].close).toHaveBeenCalledOnce());
     expect(drawImage).toHaveBeenCalledOnce();
   });
 

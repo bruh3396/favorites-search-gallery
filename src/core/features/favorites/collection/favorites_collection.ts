@@ -14,67 +14,67 @@ interface FavoriteOverwrite {
 }
 
 export class FavoritesCollection {
-  private readonly list = new IdentifiedList<ArenaFavorite>();
-  private readonly arena: FavoritesColumnarArena;
-  private readonly hydratedFavorites = new Emitter<Favorite>();
+  private readonly favorites = new IdentifiedList<ArenaFavorite>();
+  private readonly columnarArena: FavoritesColumnarArena;
+  readonly #hydrated = new Emitter<Favorite>();
 
   constructor(stringInterner: StringInterner) {
-    this.arena = new FavoritesColumnarArena(stringInterner);
+    this.columnarArena = new FavoritesColumnarArena(stringInterner);
   }
 
   public get hydrated(): Occurrence<Favorite> {
-    return this.hydratedFavorites;
+    return this.#hydrated;
   }
 
   public get size(): number {
-    return this.list.size;
+    return this.favorites.size;
   }
 
   public append(posts: Post[]): ArenaFavorite[] {
-    const favorites = posts.map(post => new ArenaFavorite(post, this.arena));
+    const arenaFavorites = posts.map(post => new ArenaFavorite(post, this.columnarArena));
 
-    this.list.append(favorites);
-    return favorites;
+    this.favorites.append(arenaFavorites);
+    return arenaFavorites;
   }
 
   public prependAsNew(posts: Post[]): ArenaFavorite[] {
-    const favorites = posts.map(post => this.list.get(post.id) ?? new ArenaFavorite(post, this.arena));
+    const arenaFavorites = posts.map(post => this.favorites.get(post.id) ?? new ArenaFavorite(post, this.columnarArena));
 
-    this.list.prepend(favorites);
-    favorites.forEach(favorite => this.arena.markNew(favorite.slot));
-    return favorites;
+    this.favorites.prepend(arenaFavorites);
+    arenaFavorites.forEach(arenaFavorite => this.columnarArena.markNew(arenaFavorite.slot));
+    return arenaFavorites;
   }
 
   public getAll(): ArenaFavorite[] {
-    return this.list.getAll();
+    return this.favorites.getAll();
   }
 
   public slice(start: number, end: number): ArenaFavorite[] {
-    return this.list.slice(start, end);
+    return this.favorites.slice(start, end);
   }
 
   public getAllPostIds(): Set<string> {
-    return this.list.getAllIds();
+    return this.favorites.getAllIds();
   }
 
   public overwrite(post: Post): FavoriteOverwrite | undefined {
-    const favorite = this.list.get(post.id);
+    const arenaFavorite = this.favorites.get(post.id);
 
-    if (favorite === undefined) {
+    if (arenaFavorite === undefined) {
       return undefined;
     }
-    const previousTags = favorite.tags;
-    const wasMediaAvailable = hasMedia(favorite.media);
+    const previousTags = arenaFavorite.tags;
+    const wasMediaAvailable = hasMedia(arenaFavorite.media);
 
-    this.arena.write(favorite.slot, post);
+    this.columnarArena.write(arenaFavorite.slot, post);
 
-    if (!wasMediaAvailable && hasMedia(favorite.media)) {
-      this.hydratedFavorites.emit(favorite);
+    if (!wasMediaAvailable && hasMedia(arenaFavorite.media)) {
+      this.#hydrated.emit(arenaFavorite);
     }
-    return { favorite, previousTags };
+    return { favorite: arenaFavorite, previousTags };
   }
 
   public compact(): void {
-    this.arena.compact();
+    this.columnarArena.compact();
   }
 }

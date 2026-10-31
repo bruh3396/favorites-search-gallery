@@ -55,26 +55,26 @@ function createCatalog(log: Log): Catalog {
   const infiniteScroll = createStoredValue({ id: "infiniteScroll", initial: false, log });
   const descriptors: SettingDescriptor[] = [
     {
-      id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", preference: hints
+      id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", settingPreference: hints
     },
     {
       id: "ratings", kind: "choices", label: "Ratings", description: "Which ratings search includes.",
-      preference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
+      settingPreference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
     },
     {
       id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
-      preference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
+      settingPreference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
-    { id: "columns", kind: "number", label: "Columns", preference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
+    { id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
     {
       id: "sort", kind: "choice", label: "Sort layout", control: "dropdown",
-      preference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
+      settingPreference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
-    { id: "autoplay", kind: "switch", label: "Autoplay", preference: createStoredValue({ id: "autoplay", initial: true, log }) },
-    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", preference: infiniteScroll },
+    { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference: createStoredValue({ id: "autoplay", initial: true, log }) },
+    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScroll },
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
-      preference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
+      settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
       disabled: infiniteScroll
     }
   ];
@@ -90,7 +90,7 @@ function createHostVariants(): StoryVariant[] {
       const { descriptors, hints } = catalog;
       return render(ownerDocument, () => (
         <div className="kit-Panel" dataset={{ size }}>
-          <SettingsScreen layout={layout} descriptors={descriptors} size={size} scheduler={SCHEDULER} descriptionsVisible={hints} />
+          <SettingsScreen settingsLayout={layout} settingDescriptors={descriptors} controlSize={size} stepperScheduler={SCHEDULER} descriptionsVisible={hints} />
         </div>
       )).result;
     }

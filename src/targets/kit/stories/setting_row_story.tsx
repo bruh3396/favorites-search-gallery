@@ -50,7 +50,7 @@ function renderSegmentedRow(ownerDocument: Document, log: Log): HTMLElement {
       description="How thumbnails are arranged."
       control={
         <Segmented<string>
-          choices={LAYOUTS}
+          controlChoices={LAYOUTS}
           size="small"
           value={layout}
           onValueChange={next => {
@@ -71,7 +71,7 @@ function renderDropdownRow(ownerDocument: Document, log: Log): HTMLElement {
       description="A long caption, to show it wrapping under the label while the control keeps its size on the right."
       control={
         <Dropdown<string>
-          choices={SORTS}
+          controlChoices={SORTS}
           size="small"
           value={sort}
           onValueChange={next => {

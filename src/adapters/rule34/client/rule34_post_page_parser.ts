@@ -1,6 +1,6 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Rating } from "@/core/domain/post/rating";
-import { TagCategory, TagCategoryMap, isTagCategory } from "@/core/domain/tag_category/tag_category";
+import { TagCategory, isTagCategory } from "@/core/domain/tag_category/tag_category";
 import { Media } from "@/core/domain/media/media";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { MediaMinter } from "@/core/domain/media/media_minter";
@@ -33,7 +33,7 @@ export function parseRule34PostPage(html: string, mintMedia: MediaMinter): Categ
   };
 }
 
-function parseTagCategories(dom: Document): TagCategoryMap {
+function parseTagCategories(dom: Document): ReadonlyMap<string, TagCategory> {
   const categoryMap = new Map<string, TagCategory>();
 
   for (const tag of [...dom.querySelectorAll(".tag")]) {

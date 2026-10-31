@@ -46,7 +46,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
-  const mintMedia: MediaMinter = file => rule34CdnClient.mintMedia(file);
+  const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
   const rule34Document = {
     isFirstFavoritesPage: (): boolean => false,
     keepPaginator: (): void => { },
@@ -65,7 +65,12 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     localKeyedValues: new BrowserLocalKeyedValues(),
     remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch: boundFetch, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({
-      primary: new FrozenCobaltRemotePosts({ frozenCobaltClient, mintMedia, scheduler, randomSource }),
+      primary: new FrozenCobaltRemotePosts({
+        frozenCobaltClient,
+        mintMedia: file => rule34CdnClient.mintMediaFromParts(file),
+        scheduler,
+        randomSource
+      }),
       fallback: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
     }),
     remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),

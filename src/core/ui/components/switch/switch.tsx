@@ -9,7 +9,7 @@ export const SwitchClass = {
 
 export type SwitchProps = ControlProps<boolean>;
 
-export function Switch({ value, disabled = new Signal(false), onValueChange, size = "medium" }: SwitchProps): HTMLElement {
+export function Switch({ value, disabled = new Signal(false), onValueChange, size: controlSize = "medium" }: SwitchProps): HTMLElement {
   return (
     <button
       className={SwitchClass.root}
@@ -17,7 +17,7 @@ export function Switch({ value, disabled = new Signal(false), onValueChange, siz
       role="switch"
       aria-checked={computed(() => String(value.value))}
       disabled={disabled}
-      dataset={{ size }}
+      dataset={{ size: controlSize }}
       onClick={() => onValueChange(!value.peek())}
     >
       <span className={SwitchClass.thumb} />

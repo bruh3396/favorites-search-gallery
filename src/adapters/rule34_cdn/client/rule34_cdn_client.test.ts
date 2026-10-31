@@ -61,8 +61,22 @@ function media(kind: Media["kind"], locator: string): Media {
 
 describe("Rule34CdnClient", () => {
   test("mints media from a file url", () => {
-    expect(setup().rule34CdnClient.mintMedia({ url: "https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", tags: "" }))
+    expect(setup().rule34CdnClient.mintMediaFromUrl({ url: "https://api-cdn.rule34.xxx/images/1234/a1b2c3.mp4", tags: "" }))
       .toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
+  });
+
+  test("mints nothing from a url that isn't a Rule34 file", () => {
+    expect(setup().rule34CdnClient.mintMediaFromUrl({ url: "https://example.com/a.png", tags: "" })).toBeNull();
+  });
+
+  test("mints media from a file's parts", () => {
+    expect(setup().rule34CdnClient.mintMediaFromParts({ directory: 1234, stem: "a1b2c3", extension: "mp4", tags: "" }))
+      .toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
+  });
+
+  test("leaves an unknown extension off the parts' locator, guessing the kind from the tags", () => {
+    expect(setup().rule34CdnClient.mintMediaFromParts({ directory: 1234, stem: "a1b2c3", extension: "webm", tags: "video" }))
+      .toEqual({ kind: "video", locator: "1234/a1b2c3" });
   });
 
   test("resolves media with an extension without asking the host", async() => {
@@ -73,25 +87,12 @@ describe("Rule34CdnClient", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  test("resolves media without an extension to the kind of the file found", async() => {
-    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(GIF_ORIGINAL));
+  test("keeps the tag guess for media without an extension, without asking the host", async() => {
+    const { rule34CdnClient, fetch } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.jpg"));
+    const guessed = media("video", "1234/a1b2c3");
 
-    expect(await settled(scheduler, rule34CdnClient.resolveMedia(media("image", "1234/a1b2c3"))))
-      .toEqual(media("gif", "1234/a1b2c3.gif"));
-  });
-
-  test("resolves untagged media to a video when only the mp4 exists", async() => {
-    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.mp4"));
-
-    expect(await settled(scheduler, rule34CdnClient.resolveMedia(media("image", "1234/a1b2c3"))))
-      .toEqual(media("video", "1234/a1b2c3.mp4"));
-  });
-
-  test("resolves media to itself when no file is found", async() => {
-    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(""));
-    const unknown = media("image", "1234/a1b2c3");
-
-    expect(await settled(scheduler, rule34CdnClient.resolveMedia(unknown))).toBe(unknown);
+    expect(await rule34CdnClient.resolveMedia(guessed)).toBe(guessed);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   test("addresses a preview on the thumbnail host", () => {

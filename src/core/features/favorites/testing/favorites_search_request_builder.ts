@@ -8,7 +8,7 @@ interface FavoritesSearchRequestOverrides extends Partial<FavoritesSearchRequest
 
 export function buildFavoritesSearchRequest({ query = "", ...overrides }: FavoritesSearchRequestOverrides = {}): FavoritesSearchRequest {
   return {
-    expression: parseSearchExpression(query),
+    searchExpression: parseSearchExpression(query),
     isShuffled: false,
     shuffleSeed: 1,
     sortKey: "favorited",

@@ -19,7 +19,7 @@ export interface LightboxStageConfiguration {
 
 export interface LightboxStageDependencies<T extends MediaItem> {
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
-  resolver: LightboxMediaResolver;
+  lightboxMediaResolver: LightboxMediaResolver;
   currentItem: Readable<T | undefined>;
   retainedItems: Readable<readonly T[]>;
   volume: StoredValue<number>;
@@ -39,10 +39,10 @@ export class LightboxStage<T extends MediaItem> {
   private readonly muted: StoredValue<boolean>;
 
   constructor(configuration: LightboxStageConfiguration, dependencies: LightboxStageDependencies<T>) {
-    const { remoteMedia, resolver, currentItem, retainedItems, volume, muted } = dependencies;
+    const { remoteMedia, lightboxMediaResolver, currentItem, retainedItems, volume, muted } = dependencies;
     const ownerDocument = currentDocument();
-    const resolvedItems = computed(() => resolver.readResolved(retainedItems.value));
-    const imageCache = new LightboxMediaCache<HTMLCanvasElement>({ kind: "image" }, {
+    const resolvedItems = computed(() => lightboxMediaResolver.readResolved(retainedItems.value));
+    const imageLightboxMediaCache = new LightboxMediaCache<HTMLCanvasElement>({ kind: "image" }, {
       load: async(media, signal): Promise<HTMLCanvasElement> => {
         const bitmap = await remoteMedia.decodeStill(media, signal);
         const canvas = drawBitmap(ownerDocument, bitmap);
@@ -55,11 +55,11 @@ export class LightboxStage<T extends MediaItem> {
         canvas.height = 0;
       }
     });
-    const gifCache = new LightboxMediaCache<HTMLImageElement>({ kind: "gif", capacity: configuration.gifCapacity }, {
+    const gifLightboxMediaCache = new LightboxMediaCache<HTMLImageElement>({ kind: "gif", capacity: configuration.gifCapacity }, {
       load: (media, signal): Promise<HTMLImageElement> => remoteMedia.loadOriginal(media, signal),
       release: (gif): void => gif.removeAttribute("src")
     });
-    const videoCache = new LightboxMediaCache<HTMLVideoElement>({ kind: "video", capacity: configuration.videoCapacity }, {
+    const videoLightboxMediaCache = new LightboxMediaCache<HTMLVideoElement>({ kind: "video", capacity: configuration.videoCapacity }, {
       load: async(media, signal): Promise<HTMLVideoElement> => {
         const url = await remoteMedia.resolveOriginalUrl(media);
 
@@ -72,15 +72,15 @@ export class LightboxStage<T extends MediaItem> {
     this.volume = volume;
     this.muted = muted;
     this.videoPool = new LightboxVideoPool({ capacity: configuration.videoCapacity }, () => this.createVideo(ownerDocument));
-    this.image = showCurrent(imageCache, currentItem);
-    this.gif = showCurrent(gifCache, currentItem);
-    this.video = showCurrent(videoCache, currentItem);
+    this.image = showCurrent(imageLightboxMediaCache, currentItem);
+    this.gif = showCurrent(gifLightboxMediaCache, currentItem);
+    this.video = showCurrent(videoLightboxMediaCache, currentItem);
     this.previewUrl = new Resource({
       source: currentItem,
       load: (item: T): Promise<string> => resolveDecodedUrl(ownerDocument, remoteMedia.resolvePreviewUrl(item.media))
     }).value;
     this.shownPreviewUrl = computed(() => {
-      const isVideo = resolver.readMedia(currentItem.value?.id ?? "")?.kind === "video";
+      const isVideo = lightboxMediaResolver.readMedia(currentItem.value?.id ?? "")?.kind === "video";
       const isCovered = isVideo || this.image.value !== undefined || this.gif.value !== undefined;
       return isCovered ? undefined : this.previewUrl.value;
     });
@@ -97,11 +97,11 @@ export class LightboxStage<T extends MediaItem> {
     effect(() => {
       const current = currentItem.value;
 
-      resolver.resolve(current === undefined ? retainedItems.value : [current, ...retainedItems.value]);
+      lightboxMediaResolver.resolve(current === undefined ? retainedItems.value : [current, ...retainedItems.value]);
     });
-    effect(() => imageCache.retain(resolvedItems.value));
-    effect(() => gifCache.retain(resolvedItems.value));
-    effect(() => videoCache.retain(resolvedItems.value));
+    effect(() => imageLightboxMediaCache.retain(resolvedItems.value));
+    effect(() => gifLightboxMediaCache.retain(resolvedItems.value));
+    effect(() => videoLightboxMediaCache.retain(resolvedItems.value));
     effect(() => {
       const video = this.video.value;
 
@@ -111,9 +111,9 @@ export class LightboxStage<T extends MediaItem> {
       }
     });
     onCleanup(() => {
-      imageCache.dispose();
-      gifCache.dispose();
-      videoCache.dispose();
+      imageLightboxMediaCache.dispose();
+      gifLightboxMediaCache.dispose();
+      videoLightboxMediaCache.dispose();
     });
   }
 
@@ -173,6 +173,6 @@ async function resolveDecodedUrl(ownerDocument: Document, url: string): Promise<
   return url;
 }
 
-function showCurrent<V>(cache: LightboxMediaCache<V>, currentItem: Readable<MediaItem | undefined>): Readable<V | undefined> {
-  return computed(() => cache.loaded.value.get(currentItem.value?.id ?? ""));
+function showCurrent<V>(lightboxMediaCache: LightboxMediaCache<V>, currentItem: Readable<MediaItem | undefined>): Readable<V | undefined> {
+  return computed(() => lightboxMediaCache.loaded.value.get(currentItem.value?.id ?? ""));
 }

@@ -27,7 +27,7 @@ function variant(label: string, { choices, value: initial, disabled = false, siz
       const selected = new Signal(initial);
       const { result: element } = render(ownerDocument, () => (
         <Dropdown
-          choices={choices}
+          controlChoices={choices}
           value={selected}
           disabled={new Signal(disabled)}
           size={size}

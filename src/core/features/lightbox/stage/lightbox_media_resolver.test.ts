@@ -14,67 +14,67 @@ function resolveAsGiven(media: Media): Promise<Media> {
 describe("LightboxMediaResolver", () => {
   describe("readResolved", () => {
     test("returns items with the media they resolved to", async() => {
-      const resolver = new LightboxMediaResolver(() => Promise.resolve(GIF));
+      const lightboxMediaResolver = new LightboxMediaResolver(() => Promise.resolve(GIF));
 
-      resolver.resolve([UNTAGGED]);
+      lightboxMediaResolver.resolve([UNTAGGED]);
       await flushMicrotasks();
-      expect(resolver.readResolved([UNTAGGED])).toEqual([{ id: "1", media: GIF }]);
+      expect(lightboxMediaResolver.readResolved([UNTAGGED])).toEqual([{ id: "1", media: GIF }]);
     });
 
     test("leaves out items still resolving", () => {
-      const resolver = new LightboxMediaResolver(() => new Promise(() => undefined));
+      const lightboxMediaResolver = new LightboxMediaResolver(() => new Promise(() => undefined));
 
-      resolver.resolve([UNTAGGED]);
-      expect(resolver.readResolved([UNTAGGED])).toEqual([]);
+      lightboxMediaResolver.resolve([UNTAGGED]);
+      expect(lightboxMediaResolver.readResolved([UNTAGGED])).toEqual([]);
     });
 
     test("returns only the items asked for", async() => {
-      const resolver = new LightboxMediaResolver(resolveAsGiven);
+      const lightboxMediaResolver = new LightboxMediaResolver(resolveAsGiven);
 
-      resolver.resolve([UNTAGGED, VIDEO]);
+      lightboxMediaResolver.resolve([UNTAGGED, VIDEO]);
       await flushMicrotasks();
-      expect(resolver.readResolved([VIDEO])).toEqual([VIDEO]);
+      expect(lightboxMediaResolver.readResolved([VIDEO])).toEqual([VIDEO]);
     });
   });
 
   describe("resolve", () => {
     test("resolves each item once", async() => {
       const resolveMedia = vi.fn(resolveAsGiven);
-      const resolver = new LightboxMediaResolver(resolveMedia);
+      const lightboxMediaResolver = new LightboxMediaResolver(resolveMedia);
 
-      resolver.resolve([UNTAGGED]);
-      resolver.resolve([UNTAGGED, VIDEO]);
+      lightboxMediaResolver.resolve([UNTAGGED]);
+      lightboxMediaResolver.resolve([UNTAGGED, VIDEO]);
       await flushMicrotasks();
-      resolver.resolve([UNTAGGED, VIDEO]);
+      lightboxMediaResolver.resolve([UNTAGGED, VIDEO]);
       expect(resolveMedia.mock.calls.map(([media]) => media)).toEqual([UNTAGGED.media, VIDEO.media]);
     });
 
     test("keeps the media it was given when resolving fails", async() => {
-      const resolver = new LightboxMediaResolver(() => Promise.reject(new Error("offline")));
+      const lightboxMediaResolver = new LightboxMediaResolver(() => Promise.reject(new Error("offline")));
 
-      resolver.resolve([UNTAGGED]);
+      lightboxMediaResolver.resolve([UNTAGGED]);
       await flushMicrotasks();
-      expect(resolver.readMedia("1")).toEqual(UNTAGGED.media);
+      expect(lightboxMediaResolver.readMedia("1")).toEqual(UNTAGGED.media);
     });
   });
 
   describe("corrected", () => {
     test("reports an item whose media resolves to another kind", async() => {
-      const resolver = new LightboxMediaResolver(() => Promise.resolve(GIF));
+      const lightboxMediaResolver = new LightboxMediaResolver(() => Promise.resolve(GIF));
       const corrected = vi.fn();
 
-      resolver.corrected.on(corrected);
-      resolver.resolve([UNTAGGED]);
+      lightboxMediaResolver.corrected.on(corrected);
+      lightboxMediaResolver.resolve([UNTAGGED]);
       await flushMicrotasks();
       expect(corrected).toHaveBeenCalledExactlyOnceWith({ id: "1", media: GIF });
     });
 
     test("stays quiet when the kind holds", async() => {
-      const resolver = new LightboxMediaResolver(() => Promise.resolve({ kind: "image", locator: "animation.png" }));
+      const lightboxMediaResolver = new LightboxMediaResolver(() => Promise.resolve({ kind: "image", locator: "animation.png" }));
       const corrected = vi.fn();
 
-      resolver.corrected.on(corrected);
-      resolver.resolve([UNTAGGED]);
+      lightboxMediaResolver.corrected.on(corrected);
+      lightboxMediaResolver.resolve([UNTAGGED]);
       await flushMicrotasks();
       expect(corrected).not.toHaveBeenCalled();
     });

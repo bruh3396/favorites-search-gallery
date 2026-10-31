@@ -44,23 +44,23 @@ async function fetchPostResult({ frozenCobaltClient, scheduler }: Setup, postId:
 
 describe("FrozenCobaltClient", () => {
   test("batches posts asked for together into one request to its origin", async() => {
-    const fetch = createFetch(({ ids }) => answerEach(ids, id => ({ status: "deleted", id })));
+    const fetch = createFetch(({ ids }) => answerEach(ids, id => ({ status: id === "1" ? "deleted" : "retry" })));
     const { frozenCobaltClient, scheduler } = setup(fetch);
     const fetched = Promise.all([frozenCobaltClient.fetchPost("1"), frozenCobaltClient.fetchPost("2")]);
 
     await advanceAndSettle(scheduler, 10_000);
-    expect(await fetched).toEqual([{ status: "deleted", id: "1" }, { status: "deleted", id: "2" }]);
-    expect(readRequests(fetch)).toEqual([{ url: `${ORIGIN}/post`, body: { ids: ["1", "2"] } }]);
+    expect(await fetched).toEqual([{ status: "deleted" }, { status: "retry" }]);
+    expect(readRequests(fetch)).toEqual([{ url: `${ORIGIN}/posts`, body: { ids: ["1", "2"] } }]);
   });
 
   test("batches tag categories asked for together into one request", async() => {
-    const fetch = createFetch(({ tagNames }) => answerEach(tagNames, () => ({ status: "ok", category: 0 })));
+    const fetch = createFetch(({ tagNames }) => answerEach(tagNames, () => ({ status: "ok", category: "general" })));
     const { frozenCobaltClient, scheduler } = setup(fetch);
     const fetched = Promise.all([frozenCobaltClient.fetchTagCategory("apple"), frozenCobaltClient.fetchTagCategory("alice")]);
 
     await advanceAndSettle(scheduler, 10_000);
     expect(await fetched).toHaveLength(2);
-    expect(readRequests(fetch)).toEqual([{ url: `${ORIGIN}/tag`, body: { tagNames: ["apple", "alice"] } }]);
+    expect(readRequests(fetch)).toEqual([{ url: `${ORIGIN}/tags`, body: { tagNames: ["apple", "alice"] } }]);
   });
 
   test("rejects a post whose result is malformed", async() => {

@@ -20,13 +20,13 @@ export interface ActivityBarItem {
 export interface ActivityBarProps {
   items: readonly ActivityBarItem[];
   value: Readable<string | null>;
-  renderView: (item: ActivityBarItem) => HTMLElement;
+  renderView: (activityBarItem: ActivityBarItem) => HTMLElement;
   onValueChange: (id: string | null) => void;
 }
 
-export function ActivityBar({ items, value, renderView, onValueChange }: ActivityBarProps): HTMLElement {
+export function ActivityBar({ items: activityBarItems, value, renderView, onValueChange }: ActivityBarProps): HTMLElement {
   const createViewScope = captureScope();
-  const activeItem = computed(() => items.find(item => item.id === value.value) ?? null);
+  const activeItem = computed(() => activityBarItems.find(activityBarItem => activityBarItem.id === value.value) ?? null);
   const view = (
     <div
       className={ActivityBarClass.view}
@@ -36,32 +36,32 @@ export function ActivityBar({ items, value, renderView, onValueChange }: Activit
     />
   );
   let shown: Scoped<HTMLElement> | null = null;
-  let shownItem: ActivityBarItem | null = null;
+  let shownActivityBarItem: ActivityBarItem | null = null;
 
   effect(() => {
-    const item = activeItem.value;
+    const activityBarItem = activeItem.value;
 
-    if (item === null || item === shownItem) {
+    if (activityBarItem === null || activityBarItem === shownActivityBarItem) {
       return;
     }
     shown?.dispose();
-    shown = createViewScope(() => untracked(() => renderView(item)));
-    shownItem = item;
+    shown = createViewScope(() => untracked(() => renderView(activityBarItem)));
+    shownActivityBarItem = activityBarItem;
     view.replaceChildren(shown.result);
   });
   onCleanup(() => shown?.dispose());
 
-  const buttons = items.map(item => {
+  const buttons = activityBarItems.map(activityBarItem => {
     const button = (
       <button
         className={ActivityBarClass.item}
         type="button"
-        aria-label={item.label}
-        title={item.label}
-        aria-pressed={computed(() => String(value.value === item.id))}
-        onClick={() => onValueChange(value.peek() === item.id ? null : item.id)}
+        aria-label={activityBarItem.label}
+        title={activityBarItem.label}
+        aria-pressed={computed(() => String(value.value === activityBarItem.id))}
+        onClick={() => onValueChange(value.peek() === activityBarItem.id ? null : activityBarItem.id)}
       >
-        {createIcon(item.icon, ActivityBarClass.icon)}
+        {createIcon(activityBarItem.icon, ActivityBarClass.icon)}
       </button>
     );
 

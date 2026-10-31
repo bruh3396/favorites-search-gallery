@@ -12,91 +12,91 @@ import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
-  session: FavoritesSession;
-  collection: FavoritesCollection;
-  index: FavoritesSearchIndex;
+  favoritesSession: FavoritesSession;
+  favoritesCollection: FavoritesCollection;
+  favoritesSearchIndex: FavoritesSearchIndex;
 }
 
 function setup(posts: Post[]): Setup {
-  const collection = new FavoritesCollection(new StringInterner());
-  const index = new FavoritesSearchIndex(new StringInterner());
-  const storage = new MemoryLocalKeyedValues();
+  const favoritesCollection = new FavoritesCollection(new StringInterner());
+  const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
+  const localKeyedValues = new MemoryLocalKeyedValues();
   const favoritesPaginationPreferences = {
-    pageSize: new KeyedStoredValue({ key: "pageSize", defaultValue: 2 }, { storage }),
-    infiniteScroll: new KeyedStoredValue({ key: "infiniteScroll", defaultValue: false }, { storage })
+    pageSize: new KeyedStoredValue({ key: "pageSize", defaultValue: 2 }, { storage: localKeyedValues }),
+    infiniteScroll: new KeyedStoredValue({ key: "infiniteScroll", defaultValue: false }, { storage: localKeyedValues })
   };
 
-  index.rebuild(collection.append(posts));
-  const session = new FavoritesSession({ settings: buildFavoritesSearchSettings() }, {
-    searchIndex: index,
-    blacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
+  favoritesSearchIndex.rebuild(favoritesCollection.append(posts));
+  const favoritesSession = new FavoritesSession({ favoritesSearchSettings: buildFavoritesSearchSettings() }, {
+    favoritesSearchIndex,
+    favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
     favoritesPaginationPreferences
   });
 
-  session.start();
-  return { session, collection, index };
+  favoritesSession.start();
+  return { favoritesSession, favoritesCollection, favoritesSearchIndex };
 }
 
 function createTaggedPosts(...tags: string[]): Post[] {
   return tags.map((tag, index) => createPost({ id: String(index + 1), tags: tag }));
 }
 
-function getPagePostIds(session: FavoritesSession): string[] {
-  return session.pageItems.value.map(favorite => favorite.id);
+function getPagePostIds(favoritesSession: FavoritesSession): string[] {
+  return favoritesSession.pageFavorites.value.map(favorite => favorite.id);
 }
 
 describe("FavoritesSession", () => {
   test("pages the results of its search", () => {
-    const { session } = setup(createTaggedPosts("a", "b", "a"));
+    const { favoritesSession } = setup(createTaggedPosts("a", "b", "a"));
 
-    expect([getPagePostIds(session), session.pageCount.value]).toEqual([["1", "2"], 2]);
+    expect([getPagePostIds(favoritesSession), favoritesSession.pageCount.value]).toEqual([["1", "2"], 2]);
   });
 
   test("follows the submitted query", () => {
-    const { session } = setup([]);
+    const { favoritesSession } = setup([]);
 
-    session.submit("apple");
-    expect(session.query.value).toBe("apple");
+    favoritesSession.submit("apple");
+    expect(favoritesSession.query.value).toBe("apple");
   });
 
   describe("isFiltered", () => {
     test("reports a query as a filter until the filters are cleared", () => {
-      const { session } = setup([]);
+      const { favoritesSession } = setup([]);
 
-      session.submit("apple");
-      expect(session.isFiltered.value).toBe(true);
-      session.clearFilters();
-      expect(session.isFiltered.value).toBe(false);
+      favoritesSession.submit("apple");
+      expect(favoritesSession.isFiltered.value).toBe(true);
+      favoritesSession.clearFilters();
+      expect(favoritesSession.isFiltered.value).toBe(false);
     });
   });
 
   describe("submit", () => {
     test("shows the first page of the new results", () => {
-      const { session } = setup(createTaggedPosts("a", "b", "a", "a", "a"));
+      const { favoritesSession } = setup(createTaggedPosts("a", "b", "a", "a", "a"));
 
-      session.goTo(2);
-      session.submit("a");
-      expect([session.pageNumber.value, getPagePostIds(session)]).toEqual([1, ["1", "3"]]);
+      favoritesSession.goTo(2);
+      favoritesSession.submit("a");
+      expect([favoritesSession.pageNumber.value, getPagePostIds(favoritesSession)]).toEqual([1, ["1", "3"]]);
     });
   });
 
   describe("goToPageContaining", () => {
     test("goes to the page holding the result", () => {
-      const { session } = setup(createTaggedPosts("a", "a", "a"));
+      const { favoritesSession } = setup(createTaggedPosts("a", "a", "a"));
 
-      session.goToPageContaining(session.results.peek()[2]);
-      expect(getPagePostIds(session)).toEqual(["3"]);
+      favoritesSession.goToPageContaining(favoritesSession.matchedFavorites.peek()[2]);
+      expect(getPagePostIds(favoritesSession)).toEqual(["3"]);
     });
   });
 
   describe("dispose", () => {
     test("stops following newly indexed favorites", () => {
-      const { session, collection, index } = setup([]);
+      const { favoritesSession, favoritesCollection, favoritesSearchIndex } = setup([]);
 
-      session.dispose();
-      index.add(collection.append(createTaggedPosts("a")));
-      expect(session.results.value).toEqual([]);
+      favoritesSession.dispose();
+      favoritesSearchIndex.add(favoritesCollection.append(createTaggedPosts("a")));
+      expect(favoritesSession.matchedFavorites.value).toEqual([]);
     });
   });
 });

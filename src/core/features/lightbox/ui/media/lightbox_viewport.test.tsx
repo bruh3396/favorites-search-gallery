@@ -15,12 +15,12 @@ const FRAME = { width: 800, height: 600 };
 function setup(): {
   root: HTMLElement;
   contentLayer: HTMLElement;
-  zoom: LightboxZoom;
+  lightboxZoom: LightboxZoom;
   sizeObserver: MemorySizeObserver;
   close: () => void;
   dispose: () => void;
 } {
-  const zoom = new LightboxZoom(
+  const lightboxZoom = new LightboxZoom(
     { minimumScale: 2, maximumScale: 8 },
     {
       currentItem: new Signal<Post | undefined>(createPost()),
@@ -33,11 +33,11 @@ function setup(): {
   const close = vi.fn();
   const handlers = { close, showNext: vi.fn(), showPrevious: vi.fn(), openOriginal: vi.fn() };
   const { result: root, dispose } = render(document, () => (
-    <LightboxViewport zoom={zoom} sizeObserver={sizeObserver} handlers={handlers} closesOnPress={new Signal(false)} content={content} />
+    <LightboxViewport zoom={lightboxZoom} sizeObserver={sizeObserver} handlers={handlers} closesOnPress={new Signal(false)} contentChild={content} />
   ));
 
   sizeObserver.resize(root, FRAME);
-  return { root, contentLayer: content.parentElement!, zoom, sizeObserver, close, dispose };
+  return { root, contentLayer: content.parentElement!, lightboxZoom, sizeObserver, close, dispose };
 }
 
 function point(type: string, x: number, y: number): PointerEvent {
@@ -55,9 +55,9 @@ describe("LightboxViewport", () => {
   });
 
   test("sizes the zoom's frame to the viewport", () => {
-    const { zoom } = setup();
+    const { lightboxZoom } = setup();
 
-    expect(zoom.canZoom.value).toBe(true);
+    expect(lightboxZoom.canZoom.value).toBe(true);
   });
 
   test("zooms in at a tap on the media, keeping that point in place", () => {
@@ -77,11 +77,11 @@ describe("LightboxViewport", () => {
   });
 
   test("zooms around the hovered point", () => {
-    const { root, zoom } = setup();
+    const { root, lightboxZoom } = setup();
 
     root.dispatchEvent(point("pointermove", 500, 300));
-    zoom.toggle();
-    expect(zoom.view.value).toEqual(expect.objectContaining({ x: -500, y: -300 }));
+    lightboxZoom.toggle();
+    expect(lightboxZoom.view.value).toEqual(expect.objectContaining({ x: -500, y: -300 }));
   });
 
   test("shows the cursor for what a tap would do", () => {
@@ -110,10 +110,10 @@ describe("LightboxViewport", () => {
   });
 
   test("stops sizing the frame once its scope is disposed", () => {
-    const { root, zoom, sizeObserver, dispose } = setup();
+    const { root, lightboxZoom, sizeObserver, dispose } = setup();
 
     dispose();
     sizeObserver.resize(root, { width: 0, height: 0 });
-    expect(zoom.canZoom.value).toBe(true);
+    expect(lightboxZoom.canZoom.value).toBe(true);
   });
 });

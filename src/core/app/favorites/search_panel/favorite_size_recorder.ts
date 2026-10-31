@@ -11,18 +11,18 @@ export interface FavoriteSizeRecorderConfiguration {
 }
 
 export interface FavoriteSizeRecorderDependencies {
-  storedSizes: StoredValue<readonly Size[]>;
+  sizes: StoredValue<readonly Size[]>;
   scheduler: Pick<Scheduler, "schedule">;
   results: Readable<readonly Favorite[]>;
 }
 
 export class FavoriteSizeRecorder {
-  private readonly storedSizes: StoredValue<readonly Size[]>;
   private readonly measuredCount: number;
+  readonly #sizes: StoredValue<readonly Size[]>;
 
-  constructor({ measuredCount, recordDelay }: FavoriteSizeRecorderConfiguration, { storedSizes, scheduler, results }: FavoriteSizeRecorderDependencies) {
+  constructor({ measuredCount, recordDelay }: FavoriteSizeRecorderConfiguration, { sizes, scheduler, results }: FavoriteSizeRecorderDependencies) {
     this.measuredCount = measuredCount;
-    this.storedSizes = storedSizes;
+    this.#sizes = sizes;
     const recordDebounced = createDebouncedTask(
       { delay: recordDelay, leading: false }, scheduler,
       (favorites: readonly Favorite[]) => this.record(favorites)
@@ -40,20 +40,20 @@ export class FavoriteSizeRecorder {
   }
 
   public get sizes(): readonly Size[] {
-    return this.storedSizes.peek();
+    return this.#sizes.peek();
   }
 
   public record(favorites: readonly Favorite[]): void {
     const sizes = measure(favorites.slice(0, this.measuredCount));
 
-    if (sizes.length > 0 && !sameSizes(sizes, this.storedSizes.peek())) {
-      this.storedSizes.set(sizes);
+    if (sizes.length > 0 && !sameSizes(sizes, this.#sizes.peek())) {
+      this.#sizes.set(sizes);
     }
   }
 }
 
-function sameSizes(first: readonly Size[], second: readonly Size[]): boolean {
-  return first.length === second.length && first.every((size, index) => size.width === second[index].width && size.height === second[index].height);
+function sameSizes(firstSizes: readonly Size[], secondSizes: readonly Size[]): boolean {
+  return firstSizes.length === secondSizes.length && firstSizes.every((size, index) => size.width === secondSizes[index].width && size.height === secondSizes[index].height);
 }
 
 function measure(favorites: readonly Favorite[]): Size[] {

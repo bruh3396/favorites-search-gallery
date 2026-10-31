@@ -93,12 +93,12 @@ describe("Paginator", () => {
   });
 
   test("disables stepping past either end", () => {
-    const first = setup({ pageNumber: 1, pageCount: 3 });
-    const last = setup({ pageNumber: 3, pageCount: 3 });
+    const firstSetup = setup({ pageNumber: 1, pageCount: 3 });
+    const lastSetup = setup({ pageNumber: 3, pageCount: 3 });
 
-    expect(findButton(first.element, "Previous page").disabled).toBe(true);
-    expect(findButton(first.element, "Next page").disabled).toBe(false);
-    expect(findButton(last.element, "Next page").disabled).toBe(true);
+    expect(findButton(firstSetup.element, "Previous page").disabled).toBe(true);
+    expect(findButton(firstSetup.element, "Next page").disabled).toBe(false);
+    expect(findButton(lastSetup.element, "Next page").disabled).toBe(true);
   });
 
   test("disables itself while there is only one page", () => {

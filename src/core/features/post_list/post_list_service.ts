@@ -27,15 +27,15 @@ export function createPostListService(dependencies: PostListServiceDependencies)
       page.value = await dependencies.remotePostList.fetchPage(index);
     },
     correctMedia: (postId, media): void => {
-      const current = page.peek();
-      const post = current.posts.find(candidate => candidate.id === postId);
+      const currentPage = page.peek();
+      const post = currentPage.posts.find(candidatePost => candidatePost.id === postId);
 
       if (post === undefined) {
         return;
       }
       const corrected = { ...post, media };
 
-      page.value = { ...current, posts: current.posts.map(candidate => (candidate === post ? corrected : candidate)) };
+      page.value = { ...currentPage, posts: currentPage.posts.map(candidatePost => (candidatePost === post ? corrected : candidatePost)) };
       changed.emit(corrected);
     }
   };

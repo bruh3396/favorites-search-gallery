@@ -8,10 +8,12 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { TagCategory } from "@/core/domain/tag_category/tag_category";
+import { daysToMilliseconds } from "@/core/utils/number/number_utilities";
 import { partition } from "@/core/utils/collection/array_utilities";
 
 const WRITE_COALESCING = { flushSize: 25, flushTimeout: 2_000 };
-const POST_TIME_TO_LIVE = 28 * 24 * 60 * 60 * 1_000;
+const POST_TIME_TO_LIVE_DAYS = 28;
+const POST_TIME_TO_LIVE_JITTER_DAYS = 7;
 
 function createPlaceholder(postId: string): Post {
   return { id: postId, width: 0, height: 0, score: 0, rating: "explicit", changedAt: 0, tags: "", media: NO_MEDIA, status: "active" };
@@ -29,7 +31,11 @@ function isStale(post: Post, now: number): boolean {
   if (post.status === "purged") {
     return false;
   }
-  return post.fetchedAt === undefined || now - post.fetchedAt > POST_TIME_TO_LIVE;
+  return post.fetchedAt === undefined || now - post.fetchedAt > getPostTimeToLive(post);
+}
+
+function getPostTimeToLive(post: Post): number {
+  return daysToMilliseconds(POST_TIME_TO_LIVE_DAYS + (Number(post.id) % POST_TIME_TO_LIVE_JITTER_DAYS));
 }
 
 export interface PostLibraryDependencies {
@@ -38,7 +44,7 @@ export interface PostLibraryDependencies {
   remotePosts: RemotePosts;
   remoteMedia: Pick<RemoteMedia, "probeDurationSeconds">;
   scheduler: Scheduler;
-  onRefresh: (refreshed: Post) => void;
+  onRefresh: (refreshedPost: Post) => void;
 }
 
 export class PostLibrary {
@@ -73,9 +79,9 @@ export class PostLibrary {
   }
 
   public async refresh(posts: Post[]): Promise<void> {
-    const [placeholders, others] = partition(posts, isPlaceholder);
+    const [placeholderPosts, otherPosts] = partition(posts, isPlaceholder);
 
-    await Promise.all([...placeholders, ...others].map(post => this.refreshOne(post)));
+    await Promise.all([...placeholderPosts, ...otherPosts].map(post => this.refreshOne(post)));
   }
 
   private async getManyOrPlaceholders(postIds: readonly string[]): Promise<Post[]> {
@@ -88,19 +94,19 @@ export class PostLibrary {
   }
 
   private async refreshOne(post: Post): Promise<void> {
-    const { post: current, tagCategories } = await this.refetchIfStale(post);
-    const refreshed = await this.fillDuration(current);
+    const { post: refetchedPost, tagCategories } = await this.refetchIfStale(post);
+    const refreshedPost = await this.fillDuration(refetchedPost);
 
     this.saveTagCategories(tagCategories);
 
-    if (refreshed === post) {
+    if (refreshedPost === post) {
       return;
     }
 
-    if (hasDimensions(refreshed)) {
-      this.localPostsWriter.schedule(refreshed);
+    if (hasDimensions(refreshedPost)) {
+      this.localPostsWriter.schedule(refreshedPost);
     }
-    this.dependencies.onRefresh(refreshed);
+    this.dependencies.onRefresh(refreshedPost);
   }
 
   private saveTagCategories(tagCategories: ReadonlyMap<string, TagCategory>): void {
@@ -126,9 +132,9 @@ export class PostLibrary {
     return durationSeconds === undefined ? post : { ...post, durationSeconds };
   }
 
-  private async fetchFresh(stale: Post): Promise<CategorizedPost> {
+  private async fetchFresh(stalePost: Post): Promise<CategorizedPost> {
     const { remotePosts, scheduler } = this.dependencies;
-    const { post, tagCategories } = await remotePosts.fetch(stale);
-    return { post: { ...stale, ...post, fetchedAt: scheduler.now() }, tagCategories };
+    const { post, tagCategories } = await remotePosts.fetch(stalePost);
+    return { post: { ...stalePost, ...post, fetchedAt: scheduler.now() }, tagCategories };
   }
 }

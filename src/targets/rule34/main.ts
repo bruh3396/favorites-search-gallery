@@ -73,7 +73,7 @@ function createRule34Dependencies(environment: Environment, rule34Document: Rule
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
-  const mintMedia: MediaMinter = file => rule34CdnClient.mintMedia(file);
+  const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
   const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
   const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
   return {
@@ -97,7 +97,12 @@ function startFavoritesApp(environment: Environment, dependencies: Rule34Depende
   const frozenCobaltClient = createFrozenCobaltClient(environment, dependencies);
   const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
   const remotePosts = new FallbackRemotePosts({
-    primary: new FrozenCobaltRemotePosts({ frozenCobaltClient, mintMedia, scheduler, randomSource }),
+    primary: new FrozenCobaltRemotePosts({
+      frozenCobaltClient,
+      mintMedia: file => rule34CdnClient.mintMediaFromParts(file),
+      scheduler,
+      randomSource
+    }),
     fallback: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
   });
 

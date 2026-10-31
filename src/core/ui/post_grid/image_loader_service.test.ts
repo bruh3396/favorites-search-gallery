@@ -20,11 +20,11 @@ describe("ImageLoaderService", () => {
       const scheduler = new MemoryScheduler();
       const remoteMedia = new MemoryRemoteMedia();
       const decodeStill = vi.spyOn(remoteMedia, "decodeStill").mockReturnValue(new Promise<ImageBitmap>(() => undefined));
-      const service = createImageLoaderService({ remoteMedia, scheduler }, { decodeDebounce: { delay: 100 }, decodeRateLimit: { concurrency: 2, ratePerSecond: 1_000 } });
-      const loaders = Array.from({ length: 3 }, () =>
-        service.createLoader(document.createElement("canvas"), MEDIA, new Signal(500)));
+      const imageLoaderService = createImageLoaderService({ remoteMedia, scheduler }, { batchDebouncerConfiguration: { delay: 100 }, decodeRateLimiterConfiguration: { concurrency: 2, ratePerSecond: 1_000 } });
+      const imageLoaders = Array.from({ length: 3 }, () =>
+        imageLoaderService.createLoader(document.createElement("canvas"), MEDIA, new Signal(500)));
 
-      loaders.forEach(loader => loader.show());
+      imageLoaders.forEach(imageLoader => imageLoader.show());
       await advanceAndSettle(scheduler, 1_000);
       expect(decodeStill).toHaveBeenCalledTimes(2);
     });

@@ -12,12 +12,12 @@ interface SettingBase {
 
 export interface SwitchSetting extends SettingBase {
   readonly kind: "switch";
-  readonly preference: SettingPreference<boolean>;
+  readonly settingPreference: SettingPreference<boolean>;
 }
 
 export interface ChoiceSetting<M extends string = string> extends SettingBase {
   readonly kind: "choice";
-  readonly preference: SettingPreference<M>;
+  readonly settingPreference: SettingPreference<M>;
   readonly members: readonly M[];
   readonly labels: Readonly<Record<M, string>>;
   readonly icons?: Readonly<Record<M, Icon>>;
@@ -27,14 +27,14 @@ export interface ChoiceSetting<M extends string = string> extends SettingBase {
 
 export interface ChoicesSetting<M extends string = string> extends SettingBase {
   readonly kind: "choices";
-  readonly preference: SettingPreference<readonly M[]>;
+  readonly settingPreference: SettingPreference<readonly M[]>;
   readonly members: readonly M[];
   readonly labels: Readonly<Record<M, string>>;
 }
 
 export interface NumberSetting extends SettingBase {
   readonly kind: "number";
-  readonly preference: SettingPreference<number>;
+  readonly settingPreference: SettingPreference<number>;
   readonly min: number;
   readonly max: number;
   readonly step: number;
@@ -43,7 +43,7 @@ export interface NumberSetting extends SettingBase {
 
 export interface SliderSetting extends SettingBase {
   readonly kind: "slider";
-  readonly preference: SettingPreference<number>;
+  readonly settingPreference: SettingPreference<number>;
   readonly min: number;
   readonly max: number;
   readonly step: number;

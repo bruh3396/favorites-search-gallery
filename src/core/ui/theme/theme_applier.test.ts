@@ -10,7 +10,7 @@ describe("applyTheme", () => {
   test("writes each theme color on the root as its light and dark pair", () => {
     const root = document.createElement("div");
 
-    applyTheme(root, { light: createColors("#aaaaa"), dark: createColors("#bbbbb") });
+    applyTheme(root, { lightColors: createColors("#aaaaa"), darkColors: createColors("#bbbbb") });
     expect([
       root.style.getPropertyValue("--fsg-theme-surface"),
       root.style.getPropertyValue("--fsg-theme-on-accent")
@@ -20,8 +20,8 @@ describe("applyTheme", () => {
   test("replaces the colors of the theme applied before", () => {
     const root = document.createElement("div");
 
-    applyTheme(root, { light: createColors("#aaaaa"), dark: createColors("#bbbbb") });
-    applyTheme(root, { light: createColors("#ccccc"), dark: createColors("#ddddd") });
+    applyTheme(root, { lightColors: createColors("#aaaaa"), darkColors: createColors("#bbbbb") });
+    applyTheme(root, { lightColors: createColors("#ccccc"), darkColors: createColors("#ddddd") });
     expect(root.style.getPropertyValue("--fsg-theme-accent")).toBe("light-dark(#ccccc5, #ddddd5)");
   });
 });
