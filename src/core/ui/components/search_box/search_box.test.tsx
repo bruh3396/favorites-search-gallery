@@ -53,6 +53,25 @@ function pressSearch(element: HTMLElement, event: MouseEvent): boolean {
   return element.querySelector("button[type=submit]")!.dispatchEvent(event);
 }
 
+interface HistorySetup {
+  input: HTMLInputElement;
+  onSearch: Mock<(query: string) => void>;
+}
+
+function setupHistory(submittedQueries: readonly string[] = ["dog", "cat"]): HistorySetup {
+  const onSearch = vi.fn<(query: string) => void>();
+  const { result: element } = render(document, () => (
+    <SearchBox label="Search" query={new Signal("")} submittedQueries={new Signal(submittedQueries)} onSearch={onSearch} />
+  ));
+
+  document.body.append(element);
+  return { input: element.querySelector("input")!, onSearch };
+}
+
+function press(input: HTMLInputElement, key: string, modifiers: KeyboardEventInit = {}): boolean {
+  return input.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...modifiers }));
+}
+
 afterEach(() => {
   document.body.replaceChildren();
 });
@@ -156,6 +175,103 @@ describe("SearchBox", () => {
     const isMenuShown = pressSearch(element, new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
 
     expect(isMenuShown).toBe(true);
+  });
+
+  test("recalls older queries on ↑ and newer ones on ↓, back to what was typed", () => {
+    const { input } = setupHistory();
+    const shownTexts: string[] = [];
+
+    type(input, "fox");
+
+    for (const key of ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown"]) {
+      press(input, key);
+      shownTexts.push(input.value);
+    }
+    expect(shownTexts).toEqual(["dog", "cat", "dog", "fox"]);
+  });
+
+  test("recalls the query before the one still in the box after searching", () => {
+    const { input } = setupHistory(["cherry", "banana"]);
+
+    type(input, "cherry");
+    submit(input);
+    press(input, "ArrowUp");
+    expect(input.value).toBe("banana");
+  });
+
+  test("puts the caret at the end of a recalled query", () => {
+    const { input } = setupHistory();
+
+    press(input, "ArrowUp");
+    expect([input.selectionStart, input.selectionEnd]).toEqual([3, 3]);
+  });
+
+  test("recalls without searching", () => {
+    const { input, onSearch } = setupHistory();
+
+    press(input, "ArrowUp");
+    expect(onSearch).not.toHaveBeenCalled();
+  });
+
+  test("leaves ↑ to the field when nothing is left to recall", () => {
+    const { input } = setupHistory([]);
+
+    type(input, "fox");
+    expect([press(input, "ArrowUp"), input.value]).toEqual([true, "fox"]);
+  });
+
+  test.each([{ shiftKey: true }, { altKey: true }, { ctrlKey: true }, { metaKey: true }, { isComposing: true }])("ignores ↑ with %o", modifiers => {
+    const { input } = setupHistory();
+
+    type(input, "fox");
+    press(input, "ArrowUp", modifiers);
+    expect(input.value).toBe("fox");
+  });
+
+  test("ignores ↑ another handler already took", () => {
+    const { input } = setupHistory();
+
+    input.parentElement!.addEventListener("keydown", event => event.preventDefault(), { capture: true });
+    type(input, "fox");
+    press(input, "ArrowUp");
+    expect(input.value).toBe("fox");
+  });
+
+  test("recalls from the newest query again after typing", () => {
+    const { input } = setupHistory();
+
+    press(input, "ArrowUp");
+    press(input, "ArrowUp");
+    type(input, "owl");
+    press(input, "ArrowUp");
+    expect(input.value).toBe("dog");
+  });
+
+  test("leaves other keys to the field", () => {
+    const { input } = setupHistory();
+
+    type(input, "fox");
+    expect([press(input, "Enter"), input.value]).toEqual([true, "fox"]);
+  });
+
+  test("recalls from the newest query again after clearing", () => {
+    const { input } = setupHistory();
+
+    press(input, "ArrowUp");
+    press(input, "ArrowUp");
+    input.form!.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    press(input, "ArrowUp");
+    expect(input.value).toBe("dog");
+  });
+
+  test("recalls from the newest query again after searching", () => {
+    const { input } = setupHistory();
+
+    press(input, "ArrowUp");
+    press(input, "ArrowUp");
+    submit(input);
+    press(input, "ArrowUp");
+    expect(input.value).toBe("dog");
   });
 
   test("shows trailing content inside the field", () => {

@@ -38,7 +38,17 @@ export default defineConfig({
     exclude: EXCLUDED_TESTS,
     projects: [
       { extends: true, test: { name: "node", exclude: [...EXCLUDED_TESTS, ...DOM_TESTS] } },
-      { extends: true, test: { name: "dom", include: DOM_TESTS, environment: "happy-dom", setupFiles: ["src/testing/dom_setup.ts"], css: { include: [/src\/core\/.+\.css/] } } }
+      {
+        extends: true,
+        test: {
+          name: "dom",
+          include: DOM_TESTS,
+          environment: "happy-dom",
+          environmentOptions: { happyDOM: { settings: { disableCSSFileLoading: true, handleDisabledFileLoadingAsSuccess: true } } },
+          setupFiles: ["src/testing/dom_setup.ts"],
+          css: { include: [/src\/core\/.+\.css/] }
+        }
+      }
     ],
     isolate: false,
     pool: "threads",

@@ -109,5 +109,24 @@ describe("APP_STORAGE_SCHEMA", () => {
       localKeyedValues.set("favorites", { 1: { sizes: [{ width: "wide" }] } });
       expect(createFavoritesState(localKeyedValues).get("1").sizes.value).toEqual(Array.from({ length: 24 }, () => ({ width: 1, height: 1 })));
     });
+
+    function createFavoritesSearchHistory(localKeyedValues: MemoryLocalKeyedValues): AppState["favoritesSearchHistory"] {
+      return createStoredTree(APP_STORAGE_SCHEMA.state, localKeyedValues, ["favoritesSearchHistory"]).favoritesSearchHistory;
+    }
+
+    test("starts with no search history and restores the one it stores", () => {
+      const localKeyedValues = new MemoryLocalKeyedValues();
+
+      expect(createFavoritesSearchHistory(localKeyedValues).value).toEqual([]);
+      createFavoritesSearchHistory(localKeyedValues).set(["cat", "dog"]);
+      expect(createFavoritesSearchHistory(localKeyedValues).value).toEqual(["cat", "dog"]);
+    });
+
+    test("falls back to no search history for a stored list it doesn't recognize", () => {
+      const localKeyedValues = new MemoryLocalKeyedValues();
+
+      localKeyedValues.set("favoritesSearchHistory", ["cat", 2]);
+      expect(createFavoritesSearchHistory(localKeyedValues).value).toEqual([]);
+    });
   });
 });

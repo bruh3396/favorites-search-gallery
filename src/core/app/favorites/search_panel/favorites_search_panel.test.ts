@@ -63,12 +63,13 @@ function setup(): Setup {
     pageNumber,
     pageCount: computed(() => Math.max(1, Math.ceil(searchResults.value.length / PAGE_SIZE))),
     goTo,
-    clearFilters,
-    submit
+    clearFilters
   };
   const { result: element, dispose } = render(document, () => h(FavoritesSearchPanel, {
     favoritesService,
     favoritesSession,
+    submittedQueries: new Signal<readonly string[]>(["cat"]),
+    submit,
     focusSearch: new Emitter<void>(),
     trailingChild,
     skeleton,
@@ -162,6 +163,14 @@ describe("FavoritesSearchPanel", () => {
     input.value = "cat";
     input.form!.dispatchEvent(new Event("submit"));
     expect(submit).toHaveBeenCalledExactlyOnceWith("cat");
+  });
+
+  test("recalls a submitted query with ↑", () => {
+    const { element } = setup();
+    const input = element.querySelector("input[type=search]") as HTMLInputElement;
+
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true }));
+    expect(input.value).toBe("cat");
   });
 
   test("counts the results while favorites load", () => {

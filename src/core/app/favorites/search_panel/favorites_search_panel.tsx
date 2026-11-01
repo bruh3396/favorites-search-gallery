@@ -1,4 +1,5 @@
 import { Child, h } from "@/core/ui/h/h";
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
@@ -6,7 +7,6 @@ import { FavoritesSession } from "@/core/features/favorites/session/favorites_se
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
-import { computed } from "@/core/utils/reactive/signal";
 import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 
 export const FavoritesSearchPanelClass = {
@@ -21,7 +21,9 @@ export const FavoritesSearchPanelClass = {
 
 export interface FavoritesSearchPanelProps {
   favoritesService: Pick<FavoritesService, "loadState" | "searchable">;
-  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "pageNumber" | "pageCount" | "goTo" | "clearFilters" | "submit">;
+  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "pageNumber" | "pageCount" | "goTo" | "clearFilters">;
+  submittedQueries: Readable<readonly string[]>;
+  submit: (query: string) => void;
   focusSearch: Emitter<void>;
   trailingChild: Child;
   skeleton: Node;
@@ -30,7 +32,7 @@ export interface FavoritesSearchPanelProps {
 }
 
 export function FavoritesSearchPanel({
-  favoritesService, favoritesSession, focusSearch, trailingChild, skeleton, grid, searchElsewhere
+  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, trailingChild, skeleton, grid, searchElsewhere
 }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
@@ -64,6 +66,7 @@ export function FavoritesSearchPanel({
           <SearchBox
             label="Search favorites"
             query={favoritesSession.query}
+            submittedQueries={submittedQueries}
             trailingChild={[
               <IconButton className={FavoritesSearchPanelClass.filter} icon="filter" label="Filters" disabled={true} />,
               <span className={FavoritesSearchPanelClass.count}>
@@ -72,7 +75,7 @@ export function FavoritesSearchPanel({
             ]}
             focusRequests={focusSearch}
             onSearch={query => {
-              favoritesSession.submit(query);
+              submit(query);
               body.scrollTop = 0;
             }}
             searchElsewhere={searchElsewhere}

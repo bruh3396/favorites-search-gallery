@@ -1,3 +1,4 @@
+import { THEME_DEFINITIONS, ThemeColors } from "@/core/ui/theme/theme";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
@@ -21,6 +22,35 @@ function addHeader(): HTMLElement {
   header.id = "header";
   document.body.append(header);
   return header;
+}
+
+function addStylesheet(href: string): HTMLLinkElement {
+  const stylesheet = document.createElement("link");
+
+  stylesheet.rel = "stylesheet";
+  stylesheet.title = "default";
+  stylesheet.setAttribute("href", href);
+  document.head.append(stylesheet);
+  return stylesheet;
+}
+
+function readHeaderColors(header: HTMLElement): { background: string; text: string } {
+  const link = document.createElement("a");
+
+  header.append(link);
+  return { background: getComputedStyle(header).backgroundColor, text: getComputedStyle(link).color };
+}
+
+function readExpectedColors({ surface, accent }: ThemeColors): { background: string; text: string } {
+  const probe = document.createElement("div");
+
+  probe.style.backgroundColor = surface;
+  probe.style.color = accent;
+  return { background: probe.style.backgroundColor, text: probe.style.color };
+}
+
+function readSiteColor(element: HTMLElement, name: string): string {
+  return getComputedStyle(element).getPropertyValue(name).trim();
 }
 
 function createPaginator(text: string): HTMLElement {
@@ -155,17 +185,17 @@ describe("Rule34Document", () => {
     });
   });
 
-  describe("readTheme", () => {
-    test("reads the theme from the site's cookie", () => {
+  describe("readColorScheme", () => {
+    test("reads the color scheme from the site's theme cookie", () => {
       visit("page=favorites&id=1", "theme=dark");
 
-      expect(new Rule34Document().readTheme()).toBe("dark");
+      expect(new Rule34Document().readColorScheme()).toBe("dark");
     });
 
     test("reads light without a dark theme cookie", () => {
       visit("page=favorites&id=1");
 
-      expect(new Rule34Document().readTheme()).toBe("light");
+      expect(new Rule34Document().readColorScheme()).toBe("light");
     });
   });
 
@@ -187,7 +217,7 @@ describe("Rule34Document", () => {
     });
   });
 
-  describe("setTheme", () => {
+  describe("setColorScheme", () => {
     afterEach(() => {
       document.cookie = "theme=; max-age=0; path=/";
     });
@@ -195,9 +225,72 @@ describe("Rule34Document", () => {
     test.each<[ColorScheme, string]>([
       ["dark", "theme=dark"],
       ["light", "theme=light"]
-    ])("remembers the theme in the site's cookie (%s)", (colorScheme, cookie) => {
-      new Rule34Document().setTheme(colorScheme);
+    ])("remembers the color scheme in the site's cookie (%s)", (colorScheme, cookie) => {
+      new Rule34Document().setColorScheme(colorScheme);
       expect(document.cookie).toContain(cookie);
+    });
+
+    test.each<[string, ColorScheme, string]>([
+      ["https://rule34.xxx//css/desktop.css?46", "dark", "https://rule34.xxx//css/desktop-dark.css?46"],
+      ["https://rule34.xxx//css/desktop-dark.css?46", "light", "https://rule34.xxx//css/desktop.css?46"],
+      ["https://rule34.xxx//css/mobile.css?46", "dark", "https://rule34.xxx//css/mobile-dark.css?46"]
+    ])("swaps the site's stylesheet %s to %s", (href, colorScheme, swappedHref) => {
+      const stylesheet = addStylesheet(href);
+
+      new Rule34Document().setColorScheme(colorScheme);
+      expect(stylesheet.getAttribute("href")).toBe(swappedHref);
+    });
+
+    test("leaves a stylesheet already in the color scheme untouched, so it isn't reloaded", () => {
+      const stylesheet = addStylesheet("https://rule34.xxx//css/desktop-dark.css?46");
+      const observer = new MutationObserver(() => { });
+
+      observer.observe(stylesheet, { attributes: true });
+      new Rule34Document().setColorScheme("dark");
+      expect(observer.takeRecords()).toEqual([]);
+      observer.disconnect();
+    });
+
+    test("recolors the site's header for the new color scheme", () => {
+      const header = addHeader();
+      const rule34Document = new Rule34Document();
+
+      rule34Document.setTheme(THEME_DEFINITIONS.cherry);
+      rule34Document.setColorScheme("dark");
+      expect(readHeaderColors(header)).toEqual(readExpectedColors(THEME_DEFINITIONS.cherry.darkColors));
+    });
+  });
+
+  describe("setTheme", () => {
+    afterEach(() => {
+      document.cookie = "theme=; max-age=0; path=/";
+    });
+
+    test("colors the site's header with the theme for the site's color scheme", () => {
+      const header = addHeader();
+
+      document.cookie = "theme=dark; path=/";
+      new Rule34Document().setTheme(THEME_DEFINITIONS.frost);
+      expect(readHeaderColors(header)).toEqual(readExpectedColors(THEME_DEFINITIONS.frost.darkColors));
+    });
+
+    test("colors the rest of the site through the site's color variables", () => {
+      const sidebar = document.createElement("div");
+      const { text, accent } = THEME_DEFINITIONS.frost.lightColors;
+
+      document.body.append(sidebar);
+      new Rule34Document().setTheme(THEME_DEFINITIONS.frost);
+      expect([readSiteColor(sidebar, "--c-text"), readSiteColor(sidebar, "--c-link")]).toEqual([text, accent]);
+    });
+
+    test("replaces the previous theme instead of stacking another", () => {
+      const header = addHeader();
+      const rule34Document = new Rule34Document();
+
+      rule34Document.setTheme(THEME_DEFINITIONS.frost);
+      rule34Document.setTheme(THEME_DEFINITIONS.cherry);
+      expect(readHeaderColors(header)).toEqual(readExpectedColors(THEME_DEFINITIONS.cherry.lightColors));
+      expect(document.head.querySelectorAll("style")).toHaveLength(1);
     });
   });
 

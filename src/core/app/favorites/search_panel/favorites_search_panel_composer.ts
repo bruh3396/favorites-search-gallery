@@ -13,6 +13,7 @@ import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
+import { SearchHistory } from "@/core/utils/search_history/search_history";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
 import { TabStripToggle } from "@/core/app/favorites/search_panel/tab_strip_toggle";
@@ -23,6 +24,7 @@ export interface FavoritesSearchPanelDependencies {
   favoritesService: Pick<FavoritesService, "loadState" | "searchable" | "hydrated">;
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination" | "tabStripVisible">;
   tabCount: Readable<number>;
+  searchHistory: Pick<SearchHistory, "submittedQueries" | "record">;
   favoriteSizeRecorder: Pick<FavoriteSizeRecorder, "sizes">;
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
@@ -36,12 +38,17 @@ export interface FavoritesSearchPanelDependencies {
 
 export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependencies: FavoritesSearchPanelDependencies): HTMLElement {
   const {
-    favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator,
-    lightbox, postActions, enterZen
+    favoritesService, favoritesPreferences, tabCount, searchHistory, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages,
+    navigator, lightbox, postActions, enterZen
   } = dependencies;
   return h(FavoritesSearchPanel, {
     favoritesService,
     favoritesSession: favoritesTab.session,
+    submittedQueries: searchHistory.submittedQueries,
+    submit: query => {
+      favoritesTab.session.submit(query);
+      searchHistory.record(query);
+    },
     focusSearch: favoritesTab.focusSearch,
     trailingChild: [
       h(TabStripToggle, { visible: favoritesPreferences.tabStripVisible, tabCount }),

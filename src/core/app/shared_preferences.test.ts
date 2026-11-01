@@ -20,13 +20,13 @@ describe("createSharedPreferences", () => {
     const { localKeyedValues, hostPage, sharedPreferences } = setup();
 
     sharedPreferences.colorScheme.set("light");
-    expect([hostPage.colorScheme, localKeyedValues.get("favorites-search-gallery:preferences")]).toEqual(["light", undefined]);
+    expect([hostPage.colorScheme, localKeyedValues.get("favorites-search-gallery")]).toEqual(["light", undefined]);
   });
 
   test("stores the theme under the shared preferences", () => {
     const { localKeyedValues, sharedPreferences } = setup();
 
     sharedPreferences.theme.set("cherry");
-    expect(localKeyedValues.get("favorites-search-gallery:preferences")).toEqual({ shared: { theme: "cherry" } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toEqual({ preferences: { shared: { theme: "cherry" } } });
   });
 });

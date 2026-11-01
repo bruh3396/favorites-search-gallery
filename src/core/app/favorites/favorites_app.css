@@ -3,6 +3,7 @@
     position: relative;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     block-size: 100%;
     border-block-start: 1px solid var(--fsg-color-outline-variant);
     background: var(--fsg-color-surface-dim);

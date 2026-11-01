@@ -1,3 +1,4 @@
+import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/search_history/search_history";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -7,6 +8,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
@@ -38,6 +40,7 @@ interface Setup {
   open: Mock<(sequence: unknown, favorite: Favorite) => boolean>;
   enterZen: Mock<() => void>;
   navigator: MemoryNavigator;
+  searchHistory: SearchHistory;
 }
 
 function setup(posts: Post[] = []): Setup {
@@ -55,6 +58,12 @@ function setup(posts: Post[] = []): Setup {
   const open = vi.fn<(sequence: unknown, favorite: Favorite) => boolean>(() => true);
   const enterZen = vi.fn<() => void>();
   const navigator = new MemoryNavigator();
+  const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, {
+    submittedQueries: new KeyedStoredValue<readonly string[]>(
+      { key: "submittedQueries", defaultValue: [] },
+      { storedValueStorage: new MemoryLocalKeyedValues() }
+    )
+  });
 
   favoritesPreferences.pagination.pageSize.set(2);
   favoritesSearchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
@@ -71,6 +80,7 @@ function setup(posts: Post[] = []): Setup {
     favoritesService: { loadState: new Signal<FavoritesLoadState>({ phase: "starting" }), searchable: new Milestone(), hydrated: new Emitter<Favorite>() },
     favoritesPreferences,
     tabCount: new Signal(1),
+    searchHistory,
     favoriteSizeRecorder: { sizes: [] },
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
@@ -81,7 +91,7 @@ function setup(posts: Post[] = []): Setup {
     postActions: { openOriginal: vi.fn() },
     enterZen
   }));
-  return { element, dispose, favoritesSession, watched, open, enterZen, navigator };
+  return { element, dispose, favoritesSession, watched, open, enterZen, navigator, searchHistory };
 }
 
 function queryTileLinks(element: HTMLElement): HTMLAnchorElement[] {
@@ -124,6 +134,17 @@ describe("composeFavoritesSearchPanel", () => {
     input.value = "cat dog";
     element.querySelector("button[type=submit]")!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     expect(navigator.opened).toEqual(["#search-cat%20dog"]);
+  });
+
+  test("searches the tab and remembers each submitted query, newest first", () => {
+    const { element, favoritesSession, searchHistory } = setup();
+    const input = element.querySelector<HTMLInputElement>("input[type=search]")!;
+
+    for (const query of ["cat", "dog"]) {
+      input.value = query;
+      input.form!.dispatchEvent(new Event("submit"));
+    }
+    expect([favoritesSession.query.value, searchHistory.submittedQueries.value]).toEqual(["dog", ["dog", "cat"]]);
   });
 
   test("enters zen from the zen button", () => {

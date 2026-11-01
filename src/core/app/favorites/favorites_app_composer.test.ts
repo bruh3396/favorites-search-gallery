@@ -127,7 +127,7 @@ describe("composeFavoritesApp", () => {
   test("uses the column count kept in the favorites preferences, not the post list's", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { grid: { columnCount: 4 } }, postList: { grid: { columnCount: 7 } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { grid: { columnCount: 4 } }, postList: { grid: { columnCount: 7 } } } });
     const grid = mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
     expect(grid.style.getPropertyValue("--fsg-GridTiler-columnCount")).toBe("4");
@@ -161,7 +161,7 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
     clickSettingsSwitch(root, "HD");
 
-    expect(localKeyedValues.get("favorites-search-gallery:preferences")).toMatchObject({ favorites: { grid: { hdTilesEnabled: false } } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { grid: { hdTilesEnabled: false } } } });
   });
 
   test("stores infinite scroll when it is switched on in the Settings tool", () => {
@@ -171,7 +171,7 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
     clickSettingsSwitch(root, "Infinite scroll");
 
-    expect(localKeyedValues.get("favorites-search-gallery:preferences")).toMatchObject({ favorites: { pagination: { infiniteScroll: true } } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { pagination: { infiniteScroll: true } } } });
   });
 
   test("stores the post list on with the preferences both apps read when it is switched on in the Settings tool", () => {
@@ -181,7 +181,7 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
     clickSettingsSwitch(root, "Enhance search pages");
 
-    expect(localKeyedValues.get("favorites-search-gallery:preferences")).toMatchObject({ shared: { postListEnabled: true } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { shared: { postListEnabled: true } } });
   });
 
   test("hides the native header when it is switched off in the Settings tool", () => {
@@ -212,7 +212,7 @@ describe("composeFavoritesApp", () => {
     openThemeMenu(root);
     findThemeOption(root, "Cherry").click();
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.cherry.lightColors.accent}, ${THEME_DEFINITIONS.cherry.darkColors.accent})`);
-    expect(localKeyedValues.get("favorites-search-gallery:preferences")).toMatchObject({ shared: { theme: "cherry" } });
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { shared: { theme: "cherry" } } });
   });
 
   test("previews a hovered theme without storing it, and restores the picked one when the pointer leaves", () => {
@@ -222,7 +222,7 @@ describe("composeFavoritesApp", () => {
     openThemeMenu(root);
     findThemeOption(root, "Forest").dispatchEvent(new PointerEvent("pointermove"));
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.forest.lightColors.accent}, ${THEME_DEFINITIONS.forest.darkColors.accent})`);
-    expect(localKeyedValues.get("favorites-search-gallery:preferences")).not.toMatchObject({ shared: { theme: "forest" } });
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toMatchObject({ preferences: { shared: { theme: "forest" } } });
     root.querySelector("[role=\"listbox\"]")!.dispatchEvent(new PointerEvent("pointerleave"));
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.rule34.lightColors.accent}, ${THEME_DEFINITIONS.rule34.darkColors.accent})`);
   });
@@ -230,7 +230,7 @@ describe("composeFavoritesApp", () => {
   test("applies the theme picked before on mount", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { shared: { theme: "forest" } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { shared: { theme: "forest" } } });
     const app = mount(localKeyedValues).querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
     expect(app.style.getPropertyValue("--fsg-theme-surface"))
@@ -248,7 +248,7 @@ describe("composeFavoritesApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const hostPage = new MemoryHostPage(true);
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { nativeHeaderVisible: false } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { nativeHeaderVisible: false } } });
     mount(localKeyedValues, [], { hostPage });
     expect(hostPage.headerVisible).toBe(false);
   });
@@ -260,12 +260,12 @@ describe("composeFavoritesApp", () => {
 
     mount(localKeyedValues, posts, { scheduler });
     await flushMicrotasks();
-    expect(localKeyedValues.get("favorites-search-gallery:state")).not.toHaveProperty(["favorites", "1", "sizes"]);
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty(["state", "favorites", "1", "sizes"]);
     scheduler.advance(499);
-    expect(localKeyedValues.get("favorites-search-gallery:state")).not.toHaveProperty(["favorites", "1", "sizes"]);
+    expect(localKeyedValues.get("favorites-search-gallery")).not.toHaveProperty(["state", "favorites", "1", "sizes"]);
     scheduler.advance(1);
-    expect(localKeyedValues.get("favorites-search-gallery:state")).toMatchObject({
-      favorites: { 1: { sizes: [{ width: 300, height: 200 }, { width: 100, height: 400 }] } }
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
+      state: { favorites: { 1: { sizes: [{ width: 300, height: 200 }, { width: 100, height: 400 }] } } }
     });
   });
 
@@ -274,15 +274,15 @@ describe("composeFavoritesApp", () => {
     const scheduler = new MemoryScheduler();
     const posts = [createPost({ id: "1", width: 300, height: 200 }), createPost({ id: "2", width: 100, height: 400 })];
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { pagination: { pageSize: 1 } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pagination: { pageSize: 1 } } } });
     const root = mount(localKeyedValues, posts, { scheduler });
 
     await flushMicrotasks();
     root.querySelector<HTMLButtonElement>(`.${PageSlotClass.page}[data-page-number="2"]`)!.click();
     expect(root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent).toBe("2");
     scheduler.advance(500);
-    expect(localKeyedValues.get("favorites-search-gallery:state")).toMatchObject({
-      favorites: { 1: { sizes: [{ width: 300, height: 200 }, { width: 100, height: 400 }] } }
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
+      state: { favorites: { 1: { sizes: [{ width: 300, height: 200 }, { width: 100, height: 400 }] } } }
     });
   });
 
@@ -335,14 +335,14 @@ describe("composeFavoritesApp", () => {
   test("draws the skeleton recorded for the favorites' owner", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:state", { favorites: { 1: { sizes: [{ width: 4, height: 3 }] } } });
+    localKeyedValues.set("favorites-search-gallery", { state: { favorites: { 1: { sizes: [{ width: 4, height: 3 }] } } } });
     expect(readAspectRatios(querySkeleton(mount(localKeyedValues)))).toEqual(["4 / 3"]);
   });
 
   test("draws the default skeleton when only another owner's skeleton is recorded", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:state", { favorites: { 2: { sizes: [{ width: 4, height: 3 }] } } });
+    localKeyedValues.set("favorites-search-gallery", { state: { favorites: { 2: { sizes: [{ width: 4, height: 3 }] } } } });
     const ratios = readAspectRatios(querySkeleton(mount(localKeyedValues)));
 
     expect(ratios).not.toHaveLength(0);
@@ -354,7 +354,7 @@ describe("composeFavoritesApp", () => {
     const previousScrollIntoView = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "scrollIntoView");
     const scrolls: Array<{ target: HTMLElement; shown: Element | null; page: string | null }> = [];
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { pagination: { pageSize: 1 } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pagination: { pageSize: 1 } } } });
     const media = { kind: "image" as const, locator: "data:image/png;base64,AA==" };
     const root = mount(localKeyedValues, [createPost({ id: "1", media }), createPost({ id: "2", media })]);
     const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
@@ -395,7 +395,7 @@ describe("composeFavoritesApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const scheduler = new MemoryScheduler();
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { pagination: { pageSize: 1 } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pagination: { pageSize: 1 } } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })], { scheduler });
     const readPage = (): string | null | undefined => root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent;
 
@@ -418,7 +418,7 @@ describe("composeFavoritesApp", () => {
   ])("steps the lightbox past the last result to position $position when infinite scroll is $infiniteScroll", async({ infiniteScroll, position }) => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { pagination: { pageSize: 50, infiniteScroll } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pagination: { pageSize: 50, infiniteScroll } } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" })]);
 
     await flushMicrotasks();
@@ -471,7 +471,7 @@ describe("composeFavoritesApp", () => {
   test("opens the lightbox bare in simple mode", async() => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { favorites: { lightbox: { mode: "simple" } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { lightbox: { mode: "simple" } } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" })]);
 
     await flushMicrotasks();

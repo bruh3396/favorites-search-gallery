@@ -1,3 +1,4 @@
+import { THEME_DEFINITIONS, ThemeDefinition } from "@/core/ui/theme/theme";
 import { describe, expect, test, vi } from "vitest";
 import { AppMode } from "@/core/boundary/app_mode";
 import { ColorScheme } from "@/core/boundary/color_scheme";
@@ -7,7 +8,8 @@ interface Rule34Document {
   clearNativePage: ReturnType<typeof vi.fn<() => void>>;
   claimPostListContent: ReturnType<typeof vi.fn<() => HTMLElement | null>>;
   setHeaderVisible: ReturnType<typeof vi.fn<(visible: boolean) => void>>;
-  setTheme: ReturnType<typeof vi.fn<(colorScheme: ColorScheme) => void>>;
+  setColorScheme: ReturnType<typeof vi.fn<(colorScheme: ColorScheme) => void>>;
+  setTheme: ReturnType<typeof vi.fn<(themeDefinition: ThemeDefinition) => void>>;
   reflectPostListPage: ReturnType<typeof vi.fn<(pageIndex: number) => void>>;
   setPaginatorVisible: ReturnType<typeof vi.fn<(visible: boolean) => void>>;
 }
@@ -20,7 +22,8 @@ function createRule34Document(postListContent: HTMLElement | null = POST_LIST_CO
     clearNativePage: vi.fn<() => void>(),
     claimPostListContent: vi.fn<() => HTMLElement | null>(() => postListContent),
     setHeaderVisible: vi.fn<(visible: boolean) => void>(),
-    setTheme: vi.fn<(colorScheme: ColorScheme) => void>(),
+    setColorScheme: vi.fn<(colorScheme: ColorScheme) => void>(),
+    setTheme: vi.fn<(themeDefinition: ThemeDefinition) => void>(),
     reflectPostListPage: vi.fn<(pageIndex: number) => void>(),
     setPaginatorVisible: vi.fn<(visible: boolean) => void>()
   };
@@ -74,11 +77,18 @@ describe("Rule34HostPage", () => {
     expect(rule34Document.setHeaderVisible.mock.calls).toEqual([[false], [true]]);
   });
 
-  test("remembers the theme on the site", () => {
+  test("sets the site's color scheme", () => {
     const rule34Document = createRule34Document();
 
     new Rule34HostPage({ appMode: "favorites" }, { rule34Document, claimBodyContent }).setColorScheme("dark");
-    expect(rule34Document.setTheme.mock.calls).toEqual([["dark"]]);
+    expect(rule34Document.setColorScheme.mock.calls).toEqual([["dark"]]);
+  });
+
+  test("themes the site", () => {
+    const rule34Document = createRule34Document();
+
+    new Rule34HostPage({ appMode: "favorites" }, { rule34Document, claimBodyContent }).setTheme(THEME_DEFINITIONS.cherry);
+    expect(rule34Document.setTheme.mock.calls).toEqual([[THEME_DEFINITIONS.cherry]]);
   });
 
   test("reflects the search page on the site's paginator and address", () => {

@@ -52,7 +52,7 @@ describe("composePostListApp", () => {
   test("lays the grid out in the layout kept in the post list preferences, not the favorites'", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { postList: { grid: { layout: "row" } }, favorites: { grid: { layout: "square" } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { grid: { layout: "row" } }, favorites: { grid: { layout: "square" } } } });
     expect(mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}`)!.dataset.layout).toBe("row");
   });
 
@@ -60,7 +60,7 @@ describe("composePostListApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const click = new MouseEvent("click", { bubbles: true, cancelable: true });
 
-    localKeyedValues.set("favorites-search-gallery:preferences", { postList: { lightbox: { mode: "off" } } });
+    localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { lightbox: { mode: "off" } } } });
     const root = mount(localKeyedValues, [createPost({ id: "1" })]);
 
     root.querySelector(`.${TileClass.link}`)!.dispatchEvent(click);

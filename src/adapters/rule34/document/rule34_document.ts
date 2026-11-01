@@ -1,3 +1,4 @@
+import { ThemeColors, ThemeDefinition } from "@/core/ui/theme/theme";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
@@ -5,6 +6,12 @@ import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 const TAG_BLACKLIST_ENCODINGS = 3;
 const COOKIE_LIFETIME_SECONDS = 365 * 24 * 60 * 60;
 const HEADER_SELECTOR = "#header";
+const HEADER_BACKGROUND_SELECTOR = "#header, #site-title, #navbar, #subnavbar";
+const HEADER_TEXT_SELECTOR = "#header *";
+const CURRENT_NAV_TAB_SELECTOR = "#navbar li.current-page";
+const HIGHLIGHT_ACCENT_SHARE = "30%";
+const NATIVE_STYLESHEET_SELECTOR = "link[rel=\"stylesheet\"][title=\"default\"]";
+const NATIVE_STYLESHEET_NAME = /(desktop|mobile)(?:-dark)?\.css/;
 const PAGINATOR_SELECTOR = "#paginator";
 const NATIVE_CONTENT_SELECTOR = "#content, div:has(.thumb)";
 const POST_LIST_SELECTOR = "#post-list";
@@ -22,6 +29,8 @@ const UNUSED_GLOBALS = [
 
 export class Rule34Document {
   private readonly postListPaginators = new Map<number, HTMLElement>();
+  private themeDefinition: ThemeDefinition | null = null;
+  private pageThemeStyle: HTMLStyleElement | null = null;
 
   public readPageName(): Rule34PageName | null {
     const page = readQueryParam("page");
@@ -57,7 +66,7 @@ export class Rule34Document {
     return readCookie("user_id");
   }
 
-  public readTheme(): ColorScheme {
+  public readColorScheme(): ColorScheme {
     return readCookie("theme") === "dark" ? "dark" : "light";
   }
 
@@ -70,8 +79,15 @@ export class Rule34Document {
     return tags.split(/\s+/).filter(tag => tag !== "");
   }
 
-  public setTheme(colorScheme: ColorScheme): void {
+  public setColorScheme(colorScheme: ColorScheme): void {
     document.cookie = `theme=${colorScheme}; max-age=${COOKIE_LIFETIME_SECONDS}; path=/`;
+    swapNativeStylesheet(colorScheme);
+    this.drawPageTheme();
+  }
+
+  public setTheme(themeDefinition: ThemeDefinition): void {
+    this.themeDefinition = themeDefinition;
+    this.drawPageTheme();
   }
 
   public setHeaderVisible(visible: boolean): void {
@@ -134,6 +150,40 @@ export class Rule34Document {
     postList.append(content);
     return claimed;
   }
+
+  private drawPageTheme(): void {
+    if (this.themeDefinition === null) {
+      return;
+    }
+    const { lightColors: lightThemeColors, darkColors: darkThemeColors } = this.themeDefinition;
+
+    if (this.pageThemeStyle === null) {
+      this.pageThemeStyle = document.createElement("style");
+      document.head.append(this.pageThemeStyle);
+    }
+    this.pageThemeStyle.textContent = describePageTheme(this.readColorScheme() === "dark" ? darkThemeColors : lightThemeColors);
+  }
+}
+
+function describePageTheme({ surface, sunken, text, muted, accent }: ThemeColors): string {
+  const highlight = `color-mix(in srgb, ${accent} ${HIGHLIGHT_ACCENT_SHARE}, ${surface})`;
+  const siteColors = [
+    ["--c-bg", surface],
+    ["--c-bg-alt", sunken],
+    ["--c-bg-deep", sunken],
+    ["--c-bg-highlight", highlight],
+    ["--c-bg-overlay", surface],
+    ["--c-text", text],
+    ["--c-text-soft", muted],
+    ["--c-link", accent],
+    ["--c-link-soft", accent]
+  ];
+  return [
+    `* { ${siteColors.map(([name, color]) => `${name}: ${color} !important;`).join(" ")} }`,
+    `${HEADER_BACKGROUND_SELECTOR} { background-color: ${surface} !important; }`,
+    `${CURRENT_NAV_TAB_SELECTOR} { background: ${highlight} !important; }`,
+    `${HEADER_TEXT_SELECTOR} { color: ${accent} !important; }`
+  ].join("\n");
 }
 
 function readQueryParam(name: string): string | null {
@@ -149,6 +199,20 @@ function readCookie(key: string): string {
   const prefix = `${key}=`;
   const cookie = document.cookie.split(";").map(entry => entry.trimStart()).find(entry => entry.startsWith(prefix));
   return cookie === undefined ? "" : cookie.substring(prefix.length);
+}
+
+function swapNativeStylesheet(colorScheme: ColorScheme): void {
+  const stylesheet = document.querySelector<HTMLLinkElement>(NATIVE_STYLESHEET_SELECTOR);
+  const href = stylesheet?.getAttribute("href") ?? null;
+
+  if (stylesheet === null || href === null) {
+    return;
+  }
+  const swappedHref = href.replace(NATIVE_STYLESHEET_NAME, (_name, platform: string) => `${platform}${colorScheme === "dark" ? "-dark" : ""}.css`);
+
+  if (swappedHref !== href) {
+    stylesheet.setAttribute("href", swappedHref);
+  }
 }
 
 function setPageOffset(offset: number): void {

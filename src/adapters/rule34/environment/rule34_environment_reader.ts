@@ -9,7 +9,7 @@ const MODES: Record<Rule34PageName, AppMode> = {
 };
 
 export function readRule34Environment(rule34Document: Pick<Rule34Document,
-  "readPageName" | "readUserId" | "readFavoritesOwnerId" | "readTagBlacklist" | "readTheme">): HostEnvironment | null {
+  "readPageName" | "readUserId" | "readFavoritesOwnerId" | "readTagBlacklist" | "readColorScheme">): HostEnvironment | null {
   const pageName = rule34Document.readPageName();
 
   if (pageName === null) {
@@ -23,6 +23,6 @@ export function readRule34Environment(rule34Document: Pick<Rule34Document,
     favoritesOwnerId: appMode === "favorites" ? favoritesPageOwnerId : userId,
     ownsFavorites: appMode === "favorites" && userId === favoritesPageOwnerId,
     blacklistedTags: rule34Document.readTagBlacklist(),
-    colorScheme: rule34Document.readTheme()
+    colorScheme: rule34Document.readColorScheme()
   };
 }

@@ -98,7 +98,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
       });
 
       appRoot.append(...render(container.ownerDocument, renderApp).result);
-      bindAppearance(appRoot, sharedPreferences);
+      bindAppearance(appRoot, { sharedPreferences, hostPage });
     }
   };
 }

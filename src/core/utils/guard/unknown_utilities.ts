@@ -10,6 +10,10 @@ export function isInUnitInterval(value: unknown): value is number {
   return Number.isFinite(value) && (value as number) >= 0 && (value as number) <= 1;
 }
 
+export function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+
 export function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
 }

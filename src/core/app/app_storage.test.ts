@@ -3,31 +3,28 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { createAppStorage } from "@/core/app/app_storage";
 
 describe("createAppStorage", () => {
-  test("keeps preferences and state under one key each", () => {
+  test("keeps preferences and state under one key", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const { preferences: preferencesStoredValueStorage, state: stateStoredValueStorage } = createAppStorage(localKeyedValues);
 
     preferencesStoredValueStorage.set("shared", { postListEnabled: true });
     stateStoredValueStorage.set("favorites", { 1: { sizes: [] } });
-    expect([localKeyedValues.get("favorites-search-gallery:preferences"), localKeyedValues.get("favorites-search-gallery:state")]).toEqual([
-      { shared: { postListEnabled: true } },
-      { favorites: { 1: { sizes: [] } } }
-    ]);
+    expect(localKeyedValues.get("favorites-search-gallery")).toEqual({
+      preferences: { shared: { postListEnabled: true } },
+      state: { favorites: { 1: { sizes: [] } } }
+    });
   });
 
-  test("never rewrites one branch when the other writes", () => {
+  test("keeps one branch when the other writes", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
-    const { preferences: preferencesStoredValueStorage, state: stateStoredValueStorage } = createAppStorage(localKeyedValues);
-    const writtenKeys: string[] = [];
+    const { preferences: preferencesStoredValueStorage } = createAppStorage(localKeyedValues);
+    const { state: otherTabStateStoredValueStorage } = createAppStorage(localKeyedValues);
 
+    otherTabStateStoredValueStorage.set("favorites", {});
     preferencesStoredValueStorage.set("shared", { theme: "cherry" });
-    const set = localKeyedValues.set.bind(localKeyedValues);
-
-    localKeyedValues.set = (key, value): void => {
-      writtenKeys.push(key);
-      set(key, value);
-    };
-    stateStoredValueStorage.set("favorites", {});
-    expect(writtenKeys).toEqual(["favorites-search-gallery:state"]);
+    expect(localKeyedValues.get("favorites-search-gallery")).toEqual({
+      preferences: { shared: { theme: "cherry" } },
+      state: { favorites: {} }
+    });
   });
 });

@@ -1,6 +1,7 @@
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { ColorScheme } from "@/core/boundary/color_scheme";
+import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { bindAppearance } from "@/core/app/appearance_binder";
@@ -16,14 +17,22 @@ function accentOf(theme: Theme): string {
   return `light-dark(${lightThemeColors.accent}, ${darkThemeColors.accent})`;
 }
 
-function setup(previewedTheme?: Signal<Theme | null>): { appRoot: HTMLElement; theme: StoredValue<Theme>; colorScheme: StoredValue<ColorScheme> } {
+interface Setup {
+  appRoot: HTMLElement;
+  hostPage: MemoryHostPage;
+  theme: StoredValue<Theme>;
+  colorScheme: StoredValue<ColorScheme>;
+}
+
+function setup(previewedTheme?: Signal<Theme | null>): Setup {
   const appRoot = document.createElement("div");
   const theme = createStoredValue<Theme>("ink");
   const colorScheme = createStoredValue<ColorScheme>("dark");
-  const { dispose } = render(document, () => bindAppearance(appRoot, { theme, colorScheme }, previewedTheme));
+  const hostPage = new MemoryHostPage();
+  const { dispose } = render(document, () => bindAppearance(appRoot, { sharedPreferences: { theme, colorScheme }, hostPage, previewedTheme }));
 
   onTestFinished(dispose);
-  return { appRoot, theme, colorScheme };
+  return { appRoot, hostPage, theme, colorScheme };
 }
 
 describe("bindAppearance", () => {
@@ -48,5 +57,15 @@ describe("bindAppearance", () => {
 
     previewedTheme.value = null;
     expect([previewedAccent, readAccent(appRoot)]).toEqual([accentOf("frost"), accentOf("ink")]);
+  });
+
+  test("hands the shown theme to the host page, previewed or stored", () => {
+    const previewedTheme = new Signal<Theme | null>("frost");
+    const { hostPage, theme } = setup(previewedTheme);
+    const previewedThemeDefinition = hostPage.themeDefinition;
+
+    previewedTheme.value = null;
+    theme.set("cherry");
+    expect([previewedThemeDefinition, hostPage.themeDefinition]).toEqual([THEME_DEFINITIONS.frost, THEME_DEFINITIONS.cherry]);
   });
 });

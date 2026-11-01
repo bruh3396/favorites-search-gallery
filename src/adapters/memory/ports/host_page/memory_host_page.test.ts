@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 
 describe("MemoryHostPage", () => {
   test("has no header unless told it has one", () => {
@@ -28,6 +29,14 @@ describe("MemoryHostPage", () => {
     expect(hostPage.colorScheme).toBe("light");
     hostPage.setColorScheme("dark");
     expect(hostPage.colorScheme).toBe("dark");
+  });
+
+  test("remembers its theme", () => {
+    const hostPage = new MemoryHostPage();
+
+    expect(hostPage.themeDefinition).toBeNull();
+    hostPage.setTheme(THEME_DEFINITIONS.cherry);
+    expect(hostPage.themeDefinition).toBe(THEME_DEFINITIONS.cherry);
   });
 
   test("remembers the search page it last reflected", () => {

@@ -1,4 +1,5 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
+import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/search_history/search_history";
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/favorites_app";
 import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
@@ -76,8 +77,10 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const appStorage = createAppStorage(localKeyedValues);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, colorScheme, hostPage);
   const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites"]);
-  const { favorites: favoritesState } = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites"]);
+  const appState = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites", "favoritesSearchHistory"]);
+  const { favorites: favoritesState, favoritesSearchHistory } = appState;
   const ownerState = favoritesState.get(favoritesOwnerId);
+  const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, { submittedQueries: favoritesSearchHistory });
   const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
   const favoritesService = createFavoritesService({ userOwnsFavorites: configuration.userOwnsFavorites, blacklistedTags: configuration.blacklistedTags }, {
     localFavorites, remoteFavorites, remotePages, scheduler, postLibrary, randomSource,
@@ -132,7 +135,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
           }
         }),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, {
-          favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder,
+          favoritesService, favoritesPreferences, tabCount, searchHistory, favoriteSizeRecorder,
           visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, lightbox, postActions,
           enterZen: (): void => {
             zenEnabled.value = true;
@@ -141,7 +144,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       })).result);
       const windowFill = fillWindow(appRoot, sizeObserver);
 
-      bindAppearance(appRoot, sharedPreferences, previewedTheme);
+      bindAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
       listenForHotkeys(container.ownerDocument, KEYMAP, {
         toggleZen: () => {
           zenEnabled.value = !zenEnabled.peek();

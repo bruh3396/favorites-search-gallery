@@ -1,9 +1,15 @@
 import { describe, expect, test } from "vitest";
-import { isBoolean, isInUnitInterval, isNumber, isOneOf, isRecord } from "@/core/utils/guard/unknown_utilities";
+import { isBoolean, isInUnitInterval, isNumber, isOneOf, isRecord, isString } from "@/core/utils/guard/unknown_utilities";
 
 describe("isNumber", () => {
   test("accepts only numbers", () => {
     expect([1, "1", null].map(isNumber)).toEqual([true, false, false]);
+  });
+});
+
+describe("isString", () => {
+  test("accepts only strings", () => {
+    expect(["", "a", 1, null].map(isString)).toEqual([true, true, false, false]);
   });
 });
 

@@ -92,7 +92,7 @@ async function main(): Promise<void> {
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
   const scheduler = new BrowserScheduler();
   const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, claimBodyContent });
-  const localKeyedValues = new NamespacedLocalKeyedValues(LAB_NAMESPACE, new BrowserLocalKeyedValues());
+  const localKeyedValues = new NamespacedLocalKeyedValues({ namespace: LAB_NAMESPACE }, new BrowserLocalKeyedValues());
   const labContainer = hostPage.claimContent();
   const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["favorites"]).favorites;
 

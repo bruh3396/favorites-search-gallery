@@ -10,8 +10,9 @@ export interface AppStorage {
 }
 
 export function createAppStorage(localKeyedValues: LocalKeyedValues): AppStorage {
+  const namespacedLocalKeyedValues = new NamespacedLocalKeyedValues({ namespace: APP_STORAGE_KEY, uncached: true }, localKeyedValues);
   return {
-    preferences: new NamespacedLocalKeyedValues(`${APP_STORAGE_KEY}:preferences`, localKeyedValues),
-    state: new NamespacedLocalKeyedValues(`${APP_STORAGE_KEY}:state`, localKeyedValues)
+    preferences: new NamespacedLocalKeyedValues({ namespace: "preferences" }, namespacedLocalKeyedValues),
+    state: new NamespacedLocalKeyedValues({ namespace: "state" }, namespacedLocalKeyedValues)
   };
 }

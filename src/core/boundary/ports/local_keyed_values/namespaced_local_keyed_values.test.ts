@@ -4,7 +4,7 @@ import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_va
 
 function setup(): { innerLocalKeyedValues: MemoryLocalKeyedValues; namespacedLocalKeyedValues: NamespacedLocalKeyedValues } {
   const innerLocalKeyedValues = new MemoryLocalKeyedValues();
-  return { innerLocalKeyedValues, namespacedLocalKeyedValues: new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues) };
+  return { innerLocalKeyedValues, namespacedLocalKeyedValues: new NamespacedLocalKeyedValues({ namespace: "preferences" }, innerLocalKeyedValues) };
 }
 
 describe("NamespacedLocalKeyedValues", () => {
@@ -23,7 +23,7 @@ describe("NamespacedLocalKeyedValues", () => {
 
     innerLocalKeyedValues.set("preferences", { theme: "dark" });
 
-    expect(new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues).get("theme")).toBe("dark");
+    expect(new NamespacedLocalKeyedValues({ namespace: "preferences" }, innerLocalKeyedValues).get("theme")).toBe("dark");
   });
 
   test.each([null, 3, "text", [1, 2]])("treats a stored value that isn't an object as empty (%s)", stored => {
@@ -31,7 +31,7 @@ describe("NamespacedLocalKeyedValues", () => {
 
     innerLocalKeyedValues.set("preferences", stored);
 
-    expect(new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues).get("0")).toBeUndefined();
+    expect(new NamespacedLocalKeyedValues({ namespace: "preferences" }, innerLocalKeyedValues).get("0")).toBeUndefined();
   });
 
   test("returns undefined for a missing key", () => {
@@ -71,12 +71,29 @@ describe("NamespacedLocalKeyedValues", () => {
 
   test("never reverts what another tab wrote since it loaded", () => {
     const innerLocalKeyedValues = new MemoryLocalKeyedValues();
-    const tabLocalKeyedValues = new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues);
-    const otherTabLocalKeyedValues = new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues);
+    const tabLocalKeyedValues = new NamespacedLocalKeyedValues({ namespace: "preferences" }, innerLocalKeyedValues);
+    const otherTabLocalKeyedValues = new NamespacedLocalKeyedValues({ namespace: "preferences" }, innerLocalKeyedValues);
 
     otherTabLocalKeyedValues.set("columns", 5);
     tabLocalKeyedValues.set("theme", "dark");
 
     expect(innerLocalKeyedValues.get("preferences")).toEqual({ columns: 5, theme: "dark" });
+  });
+
+  test("never reverts what another tab wrote when nested in an uncached namespace", () => {
+    const innerLocalKeyedValues = new MemoryLocalKeyedValues();
+    const tabLocalKeyedValues = new NamespacedLocalKeyedValues(
+      { namespace: "preferences" },
+      new NamespacedLocalKeyedValues({ namespace: "app", uncached: true }, innerLocalKeyedValues)
+    );
+    const otherTabLocalKeyedValues = new NamespacedLocalKeyedValues(
+      { namespace: "preferences" },
+      new NamespacedLocalKeyedValues({ namespace: "app", uncached: true }, innerLocalKeyedValues)
+    );
+
+    otherTabLocalKeyedValues.set("columns", 5);
+    tabLocalKeyedValues.set("theme", "dark");
+
+    expect(innerLocalKeyedValues.get("app")).toEqual({ preferences: { columns: 5, theme: "dark" } });
   });
 });

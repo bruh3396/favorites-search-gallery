@@ -17,7 +17,7 @@ function createRule34Document(visit: Visit): Parameters<typeof readRule34Environ
     readPageName: () => pageName,
     readFavoritesOwnerId: () => favoritesOwnerId,
     readUserId: () => userId,
-    readTheme: () => theme,
+    readColorScheme: () => theme,
     readTagBlacklist: () => [...tagBlacklist]
   };
 }

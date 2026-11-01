@@ -13,6 +13,10 @@ export function createFieldsGuard<T extends object>(fields: FieldGuards<T>): Gua
   return (raw): raw is T => isRecord(raw) && entries.every(([key, accepts]) => accepts(raw[key]));
 }
 
+export function createListGuard<T>(accepts: Guard<T>): Guard<readonly T[]> {
+  return (raw): raw is readonly T[] => Array.isArray(raw) && raw.every(accepts);
+}
+
 export function createSameKindGuard<T>(example: T): Guard<T> {
   return (raw): raw is T => getKind(raw) === getKind(example);
 }

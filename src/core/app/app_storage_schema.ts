@@ -5,8 +5,8 @@ import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_
 import { TAG_ALIGNMENTS, TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
 import { TAG_ORGANIZATIONS, TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
 import { TAG_SIZES, TagSize } from "@/core/app/favorites/lightbox/tag_size";
-import { createFieldsGuard, createOneOfGuard } from "@/core/utils/guard/guard";
-import { isInUnitInterval, isNumber } from "@/core/utils/guard/unknown_utilities";
+import { createFieldsGuard, createListGuard, createOneOfGuard } from "@/core/utils/guard/guard";
+import { isInUnitInterval, isNumber, isString } from "@/core/utils/guard/unknown_utilities";
 import { Size } from "@/core/utils/geometry/size";
 import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
 import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
@@ -23,7 +23,8 @@ const LIGHTBOX = {
   muted: createStoredValueDefinition(false)
 };
 
-const isSize = createFieldsGuard<Size>({ width: isNumber, height: isNumber });
+const isSizeList = createListGuard(createFieldsGuard<Size>({ width: isNumber, height: isNumber }));
+const NO_QUERIES: readonly string[] = [];
 const PLACEHOLDER_FAVORITE_SIZES: readonly Size[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
 
 export const APP_STORAGE_SCHEMA = {
@@ -60,7 +61,8 @@ export const APP_STORAGE_SCHEMA = {
     favorites: new StoredMapDefinition({
       workspace: createStoredValueDefinition(DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC),
       sizes: createStoredValueDefinition(PLACEHOLDER_FAVORITE_SIZES, isSizeList)
-    })
+    }),
+    favoritesSearchHistory: createStoredValueDefinition(NO_QUERIES, createListGuard(isString))
   }
 };
 
@@ -70,8 +72,4 @@ function isToolId(stored: unknown): stored is string | null {
 
 function isPageSize(stored: unknown): stored is number {
   return Number.isInteger(stored) && (stored as number) >= 1;
-}
-
-function isSizeList(stored: unknown): stored is readonly Size[] {
-  return Array.isArray(stored) && stored.every(isSize);
 }

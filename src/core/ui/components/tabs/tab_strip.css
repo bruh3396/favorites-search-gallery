@@ -10,14 +10,15 @@
 .fsg-TabStrip-list {
   display: flex;
   min-inline-size: 0;
-  overflow: hidden;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
 .fsg-TabStrip-tab {
   display: flex;
   align-items: center;
   position: relative;
-  min-inline-size: 0;
+  min-inline-size: 72px;
   max-inline-size: 240px;
   border-inline-end: 1px solid var(--fsg-color-outline-variant);
 }
