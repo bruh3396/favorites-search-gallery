@@ -97,4 +97,34 @@ describe("MemoryScheduler", () => {
   test("resolves a paint wait without advancing time", async() => {
     await expect(new MemoryScheduler().waitForPaint()).resolves.toBeUndefined();
   });
+
+  test("runs requested frames at the current time, once each", () => {
+    const scheduler = new MemoryScheduler(100);
+    const onFrame = vi.fn();
+
+    scheduler.requestFrame(onFrame);
+    scheduler.runFrame();
+    scheduler.runFrame();
+    expect(onFrame.mock.calls).toEqual([[100]]);
+  });
+
+  test("defers a frame requested during a frame to the next one", () => {
+    const scheduler = new MemoryScheduler();
+    const onFrame = vi.fn();
+
+    scheduler.requestFrame(() => scheduler.requestFrame(onFrame));
+    scheduler.runFrame();
+    expect(onFrame).not.toHaveBeenCalled();
+    scheduler.runFrame();
+    expect(onFrame).toHaveBeenCalledOnce();
+  });
+
+  test("never runs a cancelled frame", () => {
+    const scheduler = new MemoryScheduler();
+    const onFrame = vi.fn();
+
+    scheduler.requestFrame(onFrame)();
+    scheduler.runFrame();
+    expect(onFrame).not.toHaveBeenCalled();
+  });
 });

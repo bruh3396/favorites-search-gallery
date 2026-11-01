@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { createOneOfGuard } from "@/core/utils/guard/guard";
-import { isNumber } from "@/core/utils/guard/unknown_utilities";
 import { createSetCodec } from "@/core/utils/codec/codec";
 import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
+import { isNumber } from "@/core/utils/guard/unknown_utilities";
 
 describe("createStoredValueDefinition", () => {
   test("accepts only values of the default's kind when given no guard", () => {

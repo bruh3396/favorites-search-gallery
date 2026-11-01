@@ -6,12 +6,12 @@ const WIDE = { width: 4_000, height: 2_000 };
 
 describe("pickDecodeWidth", () => {
   test.each([
-    ["column", 2_000, LARGE, 500],
-    ["grid", 2_000, LARGE, 500],
-    ["square", 2_000, LARGE, 500],
-    ["square", 2_000, WIDE, 1_000],
-    ["row", 2_000, WIDE, 1_000]
-  ] as const)("returns the width a %s tile shows in a %i px grid", (layout, gridWidth, size, expected) => {
+    { layout: "column", gridWidth: 2_000, size: LARGE, expected: 500 },
+    { layout: "grid", gridWidth: 2_000, size: LARGE, expected: 500 },
+    { layout: "square", gridWidth: 2_000, size: LARGE, expected: 500 },
+    { layout: "square", gridWidth: 2_000, size: WIDE, expected: 1_000 },
+    { layout: "row", gridWidth: 2_000, size: WIDE, expected: 1_000 }
+  ] as const)("returns the width a $layout tile shows in a $gridWidth px grid", ({ layout, gridWidth, size, expected }) => {
     expect(pickDecodeWidth({ layout, columnCount: 4, gridWidth }, size)).toBe(expected);
   });
 

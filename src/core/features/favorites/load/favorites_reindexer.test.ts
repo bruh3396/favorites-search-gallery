@@ -1,5 +1,3 @@
-import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -7,8 +5,10 @@ import { FavoritesReindexer } from "@/core/features/favorites/load/favorites_rei
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
-import { createPost } from "@/testing/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
+import { createPost } from "@/testing/post";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 
 const TERM_UPDATE_DELAY = 1_500;
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
@@ -26,7 +26,12 @@ function setup(posts: Post[] = []): Setup {
   const scheduler = new MemoryScheduler();
 
   favoritesSearchIndex.add(favoritesCollection.append(posts));
-  return { favoritesReindexer: new FavoritesReindexer({ favoritesCollection, favoritesSearchIndex, scheduler }), favoritesCollection, favoritesSearchIndex, scheduler };
+  return {
+    favoritesReindexer: new FavoritesReindexer({ favoritesCollection, favoritesSearchIndex, scheduler }),
+    favoritesCollection,
+    favoritesSearchIndex,
+    scheduler
+  };
 }
 
 describe("FavoritesReindexer", () => {

@@ -1,6 +1,4 @@
 import { createPost, createPosts } from "@/testing/post";
-import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -16,8 +14,10 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 
 interface FetcherSources {
   pages?: Post[][];
@@ -126,7 +126,7 @@ describe("FavoritesFetcher", () => {
     });
 
     test("reports the loaded and expected counts, then saving", async() => {
-      const { favoritesFetcher, favoritesLoadStates: favoritesLoadStates } = setup({ pages: [createPosts("1", "2"), createPosts("3")] });
+      const { favoritesFetcher, favoritesLoadStates } = setup({ pages: [createPosts("1", "2"), createPosts("3")] });
 
       await favoritesFetcher.fetchAll();
       expect(favoritesLoadStates[0]).toEqual({ phase: "fetching", loadedCount: 0, expectedCount: null });
@@ -135,7 +135,7 @@ describe("FavoritesFetcher", () => {
     });
 
     test("keeps fetching without an expected count when counting fails", async() => {
-      const { favoritesFetcher, favoritesLoadStates: favoritesLoadStates, localFavorites } = setup({ pages: [createPosts("1")], count: Promise.reject(new Error("refused")) });
+      const { favoritesFetcher, favoritesLoadStates, localFavorites } = setup({ pages: [createPosts("1")], count: Promise.reject(new Error("refused")) });
 
       await favoritesFetcher.fetchAll();
       expect(favoritesLoadStates).toContainEqual({ phase: "fetching", loadedCount: 1, expectedCount: null });
@@ -151,7 +151,7 @@ describe("FavoritesFetcher", () => {
 
     test("ignores an expected count that arrives after fetching", async() => {
       const count = Promise.withResolvers<number | null>();
-      const { favoritesFetcher, favoritesLoadStates: favoritesLoadStates } = setup({ pages: [createPosts("1")], count: count.promise });
+      const { favoritesFetcher, favoritesLoadStates } = setup({ pages: [createPosts("1")], count: count.promise });
 
       await favoritesFetcher.fetchAll();
       count.resolve(1);
@@ -167,7 +167,10 @@ describe("FavoritesFetcher", () => {
     });
 
     test("refreshes the fetched posts in the background", async() => {
-      const { favoritesFetcher, refreshedPosts } = setup({ pages: [[createPost({ id: "1", tags: "apple" })]], remotePosts: [createPost({ id: "1", tags: "apple banana" })] });
+      const { favoritesFetcher, refreshedPosts } = setup({
+        pages: [[createPost({ id: "1", tags: "apple" })]],
+        remotePosts: [createPost({ id: "1", tags: "apple banana" })]
+      });
 
       await favoritesFetcher.fetchAll();
       await flushMicrotasks();

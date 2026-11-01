@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
+import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
-import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
 import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
 
 function createStorage(entries: Record<string, unknown> = {}): StoredValueStorage & { entries: Record<string, unknown> } {

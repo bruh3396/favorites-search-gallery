@@ -8,7 +8,9 @@ const LEAVE_DELAY = 1_000;
 
 function setup(): { lightboxOverlayVisibility: LightboxOverlayVisibility; scheduler: MemoryScheduler; dispose: () => void } {
   const scheduler = new MemoryScheduler();
-  const { result: lightboxOverlayVisibility, dispose } = createScope(() => new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler));
+  const { result: lightboxOverlayVisibility, dispose } = createScope(() => {
+    return new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler);
+  });
   return { lightboxOverlayVisibility, scheduler, dispose };
 }
 

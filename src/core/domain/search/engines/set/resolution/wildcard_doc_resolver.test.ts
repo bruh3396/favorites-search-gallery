@@ -1,8 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Doc {
   id: string;

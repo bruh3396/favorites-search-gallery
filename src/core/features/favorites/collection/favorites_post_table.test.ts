@@ -1,9 +1,9 @@
-import { POST_STATUSES } from "@/core/domain/post/post_status";
-import { RATINGS } from "@/core/domain/post/rating";
-import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
 import { FavoritesPostTable } from "@/core/features/favorites/collection/favorites_post_table";
+import { POST_STATUSES } from "@/core/domain/post/post_status";
+import { RATINGS } from "@/core/domain/post/rating";
 import { createPost } from "@/testing/post";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 
 describe("FavoritesPostTable", () => {
   describe("getMetric", () => {

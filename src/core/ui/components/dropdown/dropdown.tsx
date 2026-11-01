@@ -1,6 +1,6 @@
+import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { ControlProps } from "@/core/ui/components/control/control_props";
-import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
@@ -22,7 +22,9 @@ export interface DropdownProps<Value> extends ControlProps<Value> {
 const MENU_GAP = 4;
 const NO_OPTION = -1;
 
-export function Dropdown<Value>({ controlChoices, value, disabled = new Signal(false), onValueChange, onPreview, size: controlSize = "medium" }: DropdownProps<Value>): HTMLElement {
+export function Dropdown<Value>({
+  controlChoices, value, disabled = new Signal(false), onValueChange, onPreview, size: controlSize = "medium"
+}: DropdownProps<Value>): HTMLElement {
   const selectedIndex = computed(() => controlChoices.findIndex(controlChoice => controlChoice.value === value.value));
   const open = new Signal(false);
   const active = new Signal(NO_OPTION);

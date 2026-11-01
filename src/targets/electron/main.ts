@@ -3,12 +3,12 @@ import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favori
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
-import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/browser_local_keyed_values";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/browser_random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
+import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
 import { Environment } from "@/core/boundary/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
@@ -25,6 +25,7 @@ import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/rule34_remote_favorites";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_remote_pages";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
+import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 
 declare const USE_LOCAL_SERVER: boolean;
 declare const FAVORITES_OWNER_ID: string;
@@ -79,6 +80,8 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     scheduler,
     randomSource,
     sizeObserver: new BrowserSizeObserver(),
+
+    viewport: new BrowserViewport(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
@@ -86,11 +89,9 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
   };
 }
 
-const browserHostPage = new BrowserHostPage();
-
 composeFavoritesApp({
   userOwnsFavorites: ENVIRONMENT.ownsFavorites,
   blacklistedTags: ENVIRONMENT.blacklistedTags,
   favoritesOwnerId: ENVIRONMENT.favoritesOwnerId,
   colorScheme: ENVIRONMENT.colorScheme
-}, createFavoritesAppDependencies()).mount(browserHostPage.claimContent());
+}, createFavoritesAppDependencies()).mount(claimBodyContent());

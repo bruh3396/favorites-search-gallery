@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardResolver } from "@/core/domain/search/indexes/wildcard_resolver";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 const TERMS = ["banana", "bandana", "cabana", "canvas", "brand"];
 

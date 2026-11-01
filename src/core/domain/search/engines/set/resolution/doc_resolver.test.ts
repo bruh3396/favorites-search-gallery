@@ -7,8 +7,8 @@ import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_ind
 import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
 import { Searchable } from "@/core/domain/search/searchable";
-import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>> };
 

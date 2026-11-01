@@ -70,12 +70,12 @@ describe("Rule34CdnClient", () => {
   });
 
   test("mints media from a file's parts", () => {
-    expect(setup().rule34CdnClient.mintMediaFromParts({ directory: 1234, stem: "a1b2c3", extension: "mp4", tags: "" }))
+    expect(setup().rule34CdnClient.mintMediaFromParts({ directory: 1_234, stem: "a1b2c3", extension: "mp4", tags: "" }))
       .toEqual({ kind: "video", locator: "1234/a1b2c3.mp4" });
   });
 
   test("leaves an unknown extension off the parts' locator, guessing the kind from the tags", () => {
-    expect(setup().rule34CdnClient.mintMediaFromParts({ directory: 1234, stem: "a1b2c3", extension: "webm", tags: "video" }))
+    expect(setup().rule34CdnClient.mintMediaFromParts({ directory: 1_234, stem: "a1b2c3", extension: "webm", tags: "video" }))
       .toEqual({ kind: "video", locator: "1234/a1b2c3" });
   });
 

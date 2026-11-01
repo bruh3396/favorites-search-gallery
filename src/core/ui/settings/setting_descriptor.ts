@@ -50,4 +50,9 @@ export interface SliderSettingDescriptor extends SettingBase {
   readonly inverted?: boolean;
 }
 
-export type SettingDescriptor = SwitchSettingDescriptor | ChoiceSettingDescriptor | ChoicesSettingDescriptor | NumberSettingDescriptor | SliderSettingDescriptor;
+export type SettingDescriptor =
+  | SwitchSettingDescriptor
+  | ChoiceSettingDescriptor
+  | ChoicesSettingDescriptor
+  | NumberSettingDescriptor
+  | SliderSettingDescriptor;

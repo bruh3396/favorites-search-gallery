@@ -1,7 +1,4 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
-import { TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
-import { TagSize } from "@/core/app/favorites/lightbox/tag_size";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { CopyIdButton } from "@/core/app/favorites/lightbox/copy_id_button";
@@ -10,9 +7,12 @@ import { FavoriteLightboxTags } from "@/core/app/favorites/lightbox/favorite_lig
 import { LightboxButton } from "@/core/features/lightbox/ui/chrome/lightbox_button";
 import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
+import { StoredValue } from "@/core/utils/storage/stored_value";
+import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
+import { TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
+import { TagSize } from "@/core/app/favorites/lightbox/tag_size";
 import { h } from "@/core/ui/h/h";
 
 export const FavoriteLightboxDetailsClass = {
@@ -58,7 +58,12 @@ export function createFavoriteLightboxDetails(props: FavoriteLightboxDetailsProp
   return {
     titleChild: <FavoriteLightboxTitle {...props} viewOpen={viewOpen} />,
     controlsChild: <FavoriteLightboxViewSettings {...props} viewOpen={viewOpen} />,
-    bodyChild: <FavoriteLightboxTags favorite={favorite} {...favoriteLightboxDetailsPreferences} localTagCategories={localTagCategories} collapsedTagCount={collapsedTagCount} />
+    bodyChild: <FavoriteLightboxTags
+      favorite={favorite}
+      {...favoriteLightboxDetailsPreferences}
+      localTagCategories={localTagCategories}
+      collapsedTagCount={collapsedTagCount}
+    />
   };
 }
 
@@ -77,7 +82,11 @@ function FavoriteLightboxTitle({ favorite, clipboard, scheduler, copiedDuration,
   ) as HTMLElement;
 }
 
-function ViewOption<Value>({ label, controlChoices, value }: { label: string; controlChoices: readonly ControlChoice<Value>[]; value: StoredValue<Value> }): HTMLElement {
+function ViewOption<Value>({ label, controlChoices, value }: {
+  label: string;
+  controlChoices: readonly ControlChoice<Value>[];
+  value: StoredValue<Value>;
+}): HTMLElement {
   return (
     <div className={FavoriteLightboxDetailsClass.viewOption} role="group" aria-label={label}>
       <Segmented controlChoices={controlChoices} value={value} onValueChange={nextValue => value.set(nextValue)} />

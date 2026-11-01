@@ -3,7 +3,10 @@ import { getNeighborhoodValues } from "@/core/utils/number/neighborhood";
 
 describe("getNeighborhoodValues", () => {
   const letters = ["a", "b", "c", "d", "e"];
-  const neighborhood = { isInBounds: (position: number): boolean => position >= 0 && position < letters.length, at: (position: number): string => letters[position] };
+  const neighborhood = {
+    isInBounds: (position: number): boolean => position >= 0 && position < letters.length,
+    at: (position: number): string => letters[position]
+  };
 
   test("returns nothing for a center out of bounds", () => {
     expect(getNeighborhoodValues(-1, 3, neighborhood)).toStrictEqual([]);

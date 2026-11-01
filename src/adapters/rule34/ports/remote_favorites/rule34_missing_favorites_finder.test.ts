@@ -148,7 +148,10 @@ describe("Rule34MissingFavoritesFinder", () => {
     const localPostIds = createLocalPostIds(100);
     const fakeRemote = createFakeRemote(removePostIds(localPostIds, ["local52"]));
     const scheduler = new MemoryScheduler();
-    const rule34MissingFavoritesFinder = new Rule34MissingFavoritesFinder({ pageSize: PAGE_SIZE, fetchDelay: FETCH_DELAY }, { fetch: fakeRemote.fetch, scheduler });
+    const rule34MissingFavoritesFinder = new Rule34MissingFavoritesFinder(
+      { pageSize: PAGE_SIZE, fetchDelay: FETCH_DELAY },
+      { fetch: fakeRemote.fetch, scheduler }
+    );
     const found = rule34MissingFavoritesFinder.findMissing(localPostIds, 0);
 
     await advanceAndSettle(scheduler, 0);

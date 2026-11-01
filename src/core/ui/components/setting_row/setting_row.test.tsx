@@ -80,7 +80,9 @@ describe("SettingRow", () => {
 
   test("activates on a click outside its control", () => {
     let activations = 0;
-    const { element } = setup({ onActivate: () => activations++ });
+    const { element } = setup({ onActivate: () => {
+      activations += 1;
+    } });
 
     element.querySelector<HTMLElement>(`.${SettingRowClass.label}`)?.click();
     expect(activations).toBe(1);
@@ -88,7 +90,9 @@ describe("SettingRow", () => {
 
   test("leaves a click on its control to the control", () => {
     let activations = 0;
-    const { control } = setup({ onActivate: () => activations++ });
+    const { control } = setup({ onActivate: () => {
+      activations += 1;
+    } });
 
     control.click();
     expect(activations).toBe(0);

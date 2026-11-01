@@ -1,11 +1,11 @@
-import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { SettingPreference } from "@/core/ui/settings/setting_preference";
-import { SettingsLayout } from "@/core/ui/settings/settings_layout";
-import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { ControlSize } from "@/core/ui/components/control/control_size";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
+import { SettingsLayout } from "@/core/ui/settings/settings_layout";
+import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { Signal } from "@/core/utils/reactive/signal";
 
 const SCHEDULER = new BrowserScheduler();
@@ -90,7 +90,13 @@ function createHostVariants(): StoryVariant[] {
       const { settingDescriptors, hintsSettingPreference } = catalog;
       return render(ownerDocument, () => (
         <div className="kit-Panel" dataset={{ size: controlSize }}>
-          <SettingsScreen settingsLayout={settingsLayout} settingDescriptors={settingDescriptors} controlSize={controlSize} stepperScheduler={SCHEDULER} descriptionsVisible={hintsSettingPreference} />
+          <SettingsScreen
+            settingsLayout={settingsLayout}
+            settingDescriptors={settingDescriptors}
+            controlSize={controlSize}
+            stepperScheduler={SCHEDULER}
+            descriptionsVisible={hintsSettingPreference}
+          />
         </div>
       )).result;
     }

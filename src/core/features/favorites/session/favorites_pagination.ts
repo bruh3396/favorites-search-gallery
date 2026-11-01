@@ -18,10 +18,10 @@ export interface FavoritesPaginationDependencies {
 const INFINITE_SCROLL_PAGE_SIZE = 25;
 
 export class FavoritesPagination {
-  private readonly requestedPageNumber: Signal<number>;
   public readonly pageCount: Readable<number>;
   public readonly pageNumber: Readable<number>;
   public readonly pageFavorites: Readable<readonly Favorite[]>;
+  private readonly requestedPageNumber: Signal<number>;
   private readonly stopListening: Array<() => void>;
 
   constructor(private readonly dependencies: FavoritesPaginationDependencies) {

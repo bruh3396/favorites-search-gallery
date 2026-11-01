@@ -148,7 +148,12 @@ function Tab({ stripItem: tabStripItem, activeTabId, onActivate, onClose, onDrop
         <span className={TabStripClass.label}>{tabStripItem.label}</span>
       </button>
       {tabStripItem.closable && (
-        <button className={TabStripClass.close} type="button" aria-label={computed(() => `Close ${tabStripItem.label.value}`)} onClick={() => onClose(tabStripItem.id)}>
+        <button
+          className={TabStripClass.close}
+          type="button"
+          aria-label={computed(() => `Close ${tabStripItem.label.value}`)}
+          onClick={() => onClose(tabStripItem.id)}
+        >
           {createIcon("close", TabStripClass.icon)}
         </button>
       )}

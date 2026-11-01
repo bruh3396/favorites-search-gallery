@@ -1,5 +1,5 @@
-import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { Searchable } from "@/core/domain/search/searchable";
 import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
 import { WildcardPattern } from "@/core/domain/search/terms/wildcard_pattern";

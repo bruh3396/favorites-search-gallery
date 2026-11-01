@@ -1,8 +1,8 @@
 import { ChoiceSettingDescriptor, ChoicesSettingDescriptor, NumberSettingDescriptor, SettingDescriptor, SliderSettingDescriptor, SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { ControlChoice } from "@/core/ui/components/control/control_choice";
-import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { Stepper, StepperScheduler } from "@/core/ui/components/stepper/stepper";
+import { ControlChoice } from "@/core/ui/components/control/control_choice";
+import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Dropdown } from "@/core/ui/components/dropdown/dropdown";
 import { MultiSelect } from "@/core/ui/components/multi_select/multi_select";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
@@ -66,7 +66,13 @@ function SwitchControl({ descriptor: { settingPreference, disabled }, controlSiz
 
 function ChoiceControl({ descriptor: choiceSettingDescriptor, controlSize }: SettingControlProps<ChoiceSettingDescriptor>): HTMLElement {
   const { settingPreference, disabled, control, onPreview } = choiceSettingDescriptor;
-  const props = { controlChoices: createChoices(choiceSettingDescriptor), value: settingPreference, disabled, size: controlSize, onValueChange: (next: string): void => settingPreference.set(next) };
+  const props = {
+    controlChoices: createChoices(choiceSettingDescriptor),
+    value: settingPreference,
+    disabled,
+    size: controlSize,
+    onValueChange: (next: string): void => settingPreference.set(next)
+  };
   return control === "segmented" ? <Segmented<string> {...props} /> : <Dropdown<string> {...props} onPreview={onPreview} />;
 }
 

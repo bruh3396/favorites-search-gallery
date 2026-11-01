@@ -142,6 +142,71 @@ describe("Dropdown", () => {
     expect(trigger.getAttribute("aria-expanded")).toBe("false");
   });
 
+  test("shows no label for a value among no choices", () => {
+    expect(setup("none").trigger.textContent).toBe("");
+  });
+
+  test("previews a hovered option once while the pointer stays on it", () => {
+    const { trigger, onPreview } = setup();
+
+    trigger.click();
+    queryOptions()[1].dispatchEvent(new PointerEvent("pointermove"));
+    queryOptions()[1].dispatchEvent(new PointerEvent("pointermove"));
+    expect(onPreview.mock.calls).toEqual([["score"], ["date"]]);
+  });
+
+  test("stays open when pressed on itself", () => {
+    const { trigger } = setup();
+
+    trigger.click();
+    queryOptions()[1].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, composed: true }));
+    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  });
+
+  test("ignores other keys", () => {
+    const { trigger, onValueChange } = setup();
+
+    press(trigger, "a");
+    const wasOpened = queryMenu() !== null;
+
+    trigger.click();
+    press(trigger, "a");
+    expect([wasOpened, queryMenu() !== null, onValueChange.mock.calls]).toEqual([false, true, []]);
+  });
+
+  test("steps from the chosen option once the pointer has left the menu", () => {
+    const { trigger, onPreview } = setup("date");
+
+    trigger.click();
+    queryMenu()!.dispatchEvent(new PointerEvent("pointerleave"));
+    press(trigger, "ArrowDown");
+    expect(onPreview).toHaveBeenLastCalledWith("random");
+  });
+
+  test("closes on Tab without choosing", () => {
+    const { trigger, onValueChange } = setup();
+
+    trigger.click();
+    press(trigger, "ArrowDown");
+    press(trigger, "Tab");
+    expect([queryMenu(), onValueChange.mock.calls]).toEqual([null, []]);
+  });
+
+  test("opens upward when there is more room above than below", () => {
+    const { trigger } = setup();
+
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(new DOMRect(10, 700, 100, 30));
+    vi.spyOn(document.documentElement, "clientHeight", "get").mockReturnValue(768);
+    vi.spyOn(HTMLElement.prototype, "scrollHeight", "get").mockReturnValue(200);
+    onTestFinished(() => {
+      vi.restoreAllMocks();
+    });
+    trigger.click();
+    const { top, bottom, maxBlockSize } = queryMenu()!.style;
+
+    expect([top, bottom, maxBlockSize]).toEqual(["", "72px", "692px"]);
+  });
+
   test("works with values that are not strings", () => {
     const onValueChange = vi.fn();
     const choices = [{ value: 10, label: "Ten" }, { value: 20, label: "Twenty" }];

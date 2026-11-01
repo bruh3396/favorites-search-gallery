@@ -67,11 +67,15 @@ function createDeferredFetcher(lastIndex: number): {
   return { fetch, requested, settle };
 }
 
+interface FetcherTiming {
+  computeRetryDelay?: (retryCount: number) => number;
+  fetchDelay?: number;
+}
+
 function createFetcher(
   delivered: Post[][],
   fetch: (index: number) => Promise<Post[]>,
-  computeRetryDelay: (retryCount: number) => number,
-  fetchDelay = 0
+  { computeRetryDelay = NO_DELAY, fetchDelay = 0 }: FetcherTiming = {}
 ): Rule34AllFavoritesFetcher {
   return new Rule34AllFavoritesFetcher({ fetchDelay }, {
     onPostsFound: (posts): number => delivered.push(posts),
@@ -100,7 +104,7 @@ describe("Rule34AllFavoritesFetcher", () => {
   test("delivers pages in index order when they complete in order", async() => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
-    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll();
+    const run = createFetcher(delivered, pages.fetch).fetchAll();
 
     await flushMicrotasks();
     await pages.settle(0);
@@ -115,7 +119,7 @@ describe("Rule34AllFavoritesFetcher", () => {
   test("delivers in index order even when a later page completes first", async() => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
-    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll();
+    const run = createFetcher(delivered, pages.fetch).fetchAll();
 
     await flushMicrotasks();
     await pages.settle(2);
@@ -135,7 +139,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
     const firstPagePosts = [createPost({ id: "first" })];
-    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll(firstPagePosts);
+    const run = createFetcher(delivered, pages.fetch).fetchAll(firstPagePosts);
 
     await flushMicrotasks();
     expect(delivered).toEqual([firstPagePosts]);
@@ -155,7 +159,7 @@ describe("Rule34AllFavoritesFetcher", () => {
       .mockImplementationOnce(() => Promise.reject(new Error("boom")))
       .mockImplementation((index: number) => Promise.resolve(index > 1 ? [] : createPage(index)));
 
-    await runToEnd(createFetcher(delivered, fetch, NO_DELAY).fetchAll());
+    await runToEnd(createFetcher(delivered, fetch).fetchAll());
 
     expect(flattenPostIds(delivered)).toEqual(["page0", "page1"]);
     const page0Attempts = fetch.mock.calls.filter(([index]) => index === 0).length;
@@ -167,7 +171,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     const delivered: Post[][] = [];
     const fetch = vi.fn((index: number) => Promise.resolve(index >= 2 ? [] : createPage(index)));
 
-    await runToEnd(createFetcher(delivered, fetch, NO_DELAY).fetchAll());
+    await runToEnd(createFetcher(delivered, fetch).fetchAll());
     expect(flattenPostIds(delivered)).toEqual(["page0", "page1"]);
   });
 
@@ -175,7 +179,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(0);
     let hasFinished = false;
-    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll()
+    const run = createFetcher(delivered, pages.fetch).fetchAll()
       .then(() => {
         hasFinished = true;
       });
@@ -211,7 +215,7 @@ describe("Rule34AllFavoritesFetcher", () => {
     });
     const computeRetryDelay = vi.fn((retryCount: number) => retryDelay * retryCount);
 
-    await runToEnd(createFetcher([], fetch, computeRetryDelay, fetchDelay).fetchAll());
+    await runToEnd(createFetcher([], fetch, { computeRetryDelay, fetchDelay }).fetchAll());
 
     expect(computeRetryDelay.mock.calls.map(([retryCount]) => retryCount)).toEqual([1, 2]);
     expect(requests).toEqual([
@@ -237,7 +241,7 @@ describe("Rule34AllFavoritesFetcher", () => {
       });
     });
     let hasFinished = false;
-    const run = createFetcher(delivered, fetch, NO_DELAY).fetchAll()
+    const run = createFetcher(delivered, fetch).fetchAll()
       .then(() => {
         hasFinished = true;
       });

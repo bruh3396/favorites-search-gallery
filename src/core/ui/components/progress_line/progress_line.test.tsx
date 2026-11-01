@@ -1,8 +1,8 @@
-import { Progress } from "@/core/ui/components/progress_line/progress";
 import { ProgressLine, ProgressLineClass } from "@/core/ui/components/progress_line/progress_line";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PROGRESS_LINE_CSS from "@/core/ui/components/progress_line/progress_line.css?inline";
+import { Progress } from "@/core/ui/components/progress_line/progress";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 

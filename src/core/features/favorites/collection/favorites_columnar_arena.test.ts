@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
-import { createPost } from "@/testing/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { createPost } from "@/testing/post";
 
 function setup(tags: string): { favoritesColumnarArena: FavoritesColumnarArena; slot: number } {
   const favoritesColumnarArena = new FavoritesColumnarArena(new StringInterner());

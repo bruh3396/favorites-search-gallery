@@ -1,6 +1,6 @@
-import { parseSearchQuery } from "@/core/domain/search/parsers/search_query_parser";
 import { describe, expect, test } from "vitest";
 import { Fruit } from "@/core/domain/search/testing/fruit";
+import { parseSearchQuery } from "@/core/domain/search/parsers/search_query_parser";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
 function serializeQuery(query: string): string {
@@ -66,7 +66,11 @@ describe("parseSearchQuery", () => {
   });
 
   test("parses and terms mixed with or groups", () => {
-    expectLiterals("apple ( banana ~ cherry ~ lime ) grape ( orange ~ pear ) kiwi", ["apple", "grape", "kiwi"], [["orange", "pear"], ["banana", "cherry", "lime"]]);
+    expectLiterals(
+      "apple ( banana ~ cherry ~ lime ) grape ( orange ~ pear ) kiwi",
+      ["apple", "grape", "kiwi"],
+      [["orange", "pear"], ["banana", "cherry", "lime"]]
+    );
   });
 
   test("parses a negated group as and terms", () => {

@@ -1,5 +1,5 @@
-import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { ColorScheme } from "@/core/boundary/color_scheme";
+import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 
 const TAG_BLACKLIST_ENCODINGS = 3;

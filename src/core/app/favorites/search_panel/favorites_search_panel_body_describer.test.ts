@@ -2,7 +2,9 @@ import { FavoritesSearchPanelBodyInput, describeFavoritesSearchPanelBody } from 
 import { describe, expect, test } from "vitest";
 
 function describeWith(partialFavoritesSearchPanelBodyInput: Partial<FavoritesSearchPanelBodyInput>): ReturnType<typeof describeFavoritesSearchPanelBody> {
-  return describeFavoritesSearchPanelBody({ resultCount: 0, isSearchable: false, loadPhase: "fetching", query: "", isFiltered: false, ...partialFavoritesSearchPanelBodyInput });
+  return describeFavoritesSearchPanelBody({
+    resultCount: 0, isSearchable: false, loadPhase: "fetching", query: "", isFiltered: false, ...partialFavoritesSearchPanelBodyInput
+  });
 }
 
 describe("describeFavoritesSearchPanelBody", () => {

@@ -3,6 +3,7 @@ import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 export class MemoryViewport implements Viewport {
   public scrollLocked = false;
   public zoomLocked = false;
+  public devicePixelRatio = 1;
 
   public lockScroll(): void {
     this.scrollLocked = true;
@@ -14,5 +15,9 @@ export class MemoryViewport implements Viewport {
 
   public lockZoom(): void {
     this.zoomLocked = true;
+  }
+
+  public readDevicePixelRatio(): number {
+    return this.devicePixelRatio;
   }
 }

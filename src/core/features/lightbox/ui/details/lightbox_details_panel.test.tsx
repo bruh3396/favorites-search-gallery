@@ -5,7 +5,11 @@ import DETAILS_PANEL_CSS from "@/core/features/lightbox/ui/details/lightbox_deta
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
-function setup(partialLightboxDetailsPanelProps: Partial<LightboxDetailsPanelProps> = {}): { panel: HTMLElement; isOpen: Signal<boolean>; lightboxDetailsPanelProps: LightboxDetailsPanelProps } {
+function setup(partialLightboxDetailsPanelProps: Partial<LightboxDetailsPanelProps> = {}): {
+  panel: HTMLElement;
+  isOpen: Signal<boolean>;
+  lightboxDetailsPanelProps: LightboxDetailsPanelProps;
+} {
   const isOpen = new Signal(false);
   const lightboxDetailsPanelProps: LightboxDetailsPanelProps = {
     isOpen,

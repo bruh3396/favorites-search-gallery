@@ -1,7 +1,6 @@
-import { Fact } from "@/core/utils/reactive/fact";
-import { Milestone } from "@/core/utils/reactive/milestone";
 import { FavoritesSession, FavoritesSessionConfiguration } from "@/core/features/favorites/session/favorites_session";
 import { Readable, computed } from "@/core/utils/reactive/signal";
+import { Fact } from "@/core/utils/reactive/fact";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -13,6 +12,7 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
+import { Milestone } from "@/core/utils/reactive/milestone";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";

@@ -1,8 +1,8 @@
 import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
-import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { LightboxActions } from "@/core/features/lightbox/actions/lightbox_actions";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { LightboxCloser } from "@/core/features/lightbox/closer/lightbox_closer";
+import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen/lightbox_fullscreen";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
@@ -11,18 +11,20 @@ import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { MediaItem } from "@/core/domain/media/media_item";
 
 export interface LightboxCommandHandlersDependencies<T extends MediaItem> {
-  readonly lightboxNavigation: Pick<LightboxNavigation<T>, "currentItem" | "goToNext" | "goToPrevious">;
-  readonly lightboxStage: Pick<LightboxStage<T>, "togglePause" | "toggleMute">;
-  readonly lightboxFullscreen: Pick<LightboxFullscreen, "toggle">;
-  readonly lightboxZoom: Pick<LightboxZoom, "isZoomed" | "toggle" | "zoomOut">;
-  readonly lightboxAutoplay: Pick<LightboxAutoplay, "toggle">;
-  readonly lightboxCloser: Pick<LightboxCloser<T>, "close">;
-  readonly lightboxActions: LightboxActions;
-  readonly lightboxDetails?: Pick<LightboxDetails<T>, "isOpen">;
+  lightboxNavigation: Pick<LightboxNavigation<T>, "currentItem" | "goToNext" | "goToPrevious">;
+  lightboxStage: Pick<LightboxStage<T>, "togglePause" | "toggleMute">;
+  lightboxFullscreen: Pick<LightboxFullscreen, "toggle">;
+  lightboxZoom: Pick<LightboxZoom, "isZoomed" | "toggle" | "zoomOut">;
+  lightboxAutoplay: Pick<LightboxAutoplay, "toggle">;
+  lightboxCloser: Pick<LightboxCloser<T>, "close">;
+  lightboxActions: LightboxActions;
+  lightboxDetails?: Pick<LightboxDetails<T>, "isOpen">;
 }
 
 export function createLightboxCommandHandlers<T extends MediaItem>(dependencies: LightboxCommandHandlersDependencies<T>): CommandHandlers<LightboxCommand> {
-  const { lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails } = dependencies;
+  const {
+    lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails
+  } = dependencies;
   const withCurrentItem = (run: (item: T) => void) => (): void => {
     const item = lightboxNavigation.currentItem.peek();
 

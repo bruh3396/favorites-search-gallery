@@ -1,6 +1,6 @@
+import { describe, expect, test, vi } from "vitest";
 import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
-import { describe, expect, test, vi } from "vitest";
 import { createLightboxKeyListener } from "@/core/features/lightbox/input/lightbox_key_listener";
 
 function setup(): { showNext: () => void; listener: (event: KeyboardEvent) => void } {

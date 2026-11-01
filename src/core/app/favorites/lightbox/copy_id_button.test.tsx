@@ -1,5 +1,5 @@
 import { CopyIdButton, CopyIdButtonClass } from "@/core/app/favorites/lightbox/copy_id_button";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/memory_clipboard";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
@@ -19,7 +19,10 @@ function setup(initial: string | undefined): Setup {
   const postId = new Signal<string | undefined>(initial);
   const clipboard = new MemoryClipboard();
   const scheduler = new MemoryScheduler();
-  const { result: button } = render(document, () => <CopyIdButton postId={postId} clipboard={clipboard} scheduler={scheduler} copiedDuration={1_500} /> as HTMLButtonElement);
+  const { result: button } = render(
+    document,
+    () => <CopyIdButton postId={postId} clipboard={clipboard} scheduler={scheduler} copiedDuration={1_500} /> as HTMLButtonElement
+  );
   const readPostId = (): string => button.firstChild?.textContent ?? "";
   const isCopiedShown = (): boolean => !button.querySelector<HTMLElement>(`.${CopyIdButtonClass.copied}`)!.hidden;
   return { postId, clipboard, scheduler, button, readPostId, isCopiedShown };
@@ -51,6 +54,21 @@ describe("CopyIdButton", () => {
     await flushMicrotasks();
     postId.value = "34";
     expect(isCopiedShown()).toBe(false);
+  });
+
+  test("cancels a pending confirmation reset once disposed", async() => {
+    const postId = new Signal<string | undefined>("12");
+    const cancelReset = vi.fn();
+    const scheduler = { schedule: vi.fn(() => cancelReset) };
+    const { result: button, dispose } = render(
+      document,
+      () => <CopyIdButton postId={postId} clipboard={new MemoryClipboard()} scheduler={scheduler} copiedDuration={1_500} />
+    );
+
+    button.click();
+    await flushMicrotasks();
+    dispose();
+    expect(cancelReset).toHaveBeenCalledOnce();
   });
 
   test("copies nothing without an id", async() => {

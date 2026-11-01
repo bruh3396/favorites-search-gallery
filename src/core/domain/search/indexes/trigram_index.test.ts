@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { TrigramIndex } from "@/core/domain/search/indexes/trigram_index";
 import { compareStrings } from "@/core/utils/string/string_utilities";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 const terms = ["banana", "bandana", "cabana", "canvas", "abandon", "and", "an", "sandbox", "brand", "nan_ana"];
 const sortedTerms = new SortedArray<string>((a, b) => compareStrings(a, b), terms);

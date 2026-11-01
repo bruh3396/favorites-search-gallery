@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { BitEvaluator } from "@/core/domain/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
 import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { Searchable } from "@/core/domain/search/searchable";
-import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 interface Item extends Searchable { id: string }
 
@@ -15,7 +15,7 @@ function createItem(id: string, ...tags: string[]): Item {
 }
 
 function createEvaluator(items: Item[]): BitEvaluator<Item> {
-  const bitIndex = new BitIndex<Item>({ getTerms: item => item.tags, stringInterner: new StringInterner() });
+  const bitIndex = new BitIndex<Item>({ getTerms: (item): Iterable<string> => item.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(items);
   const metricBitIndex = new MetricBitIndex<Item>(item => item.id.length);
@@ -59,8 +59,7 @@ describe("parseSearchExpression", () => {
   });
 
   test("preserves a literal glued-parenthesis term", () => {
-    const items = [createItem("a", "apple_(red)"), createItem("b", "banana")];
-    const bitEvaluator = createEvaluator(items);
+    const bitEvaluator = createEvaluator([createItem("a", "apple_(red)"), createItem("b", "banana")]);
 
     expect(bitEvaluator.evaluate(parseSearchExpression("apple_(red)")).map(item => item.id)).toEqual(["a"]);
   });

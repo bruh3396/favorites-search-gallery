@@ -1,10 +1,14 @@
 import { LightboxMediaElement } from "@/core/features/lightbox/stage/lightbox_media_element";
-import { morphLightboxMedia } from "@/core/features/lightbox/closer/lightbox_media_morpher";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
 import { MediaItem } from "@/core/domain/media/media_item";
 import { Readable } from "@/core/utils/reactive/signal";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { Viewport } from "@/core/boundary/ports/viewport/viewport";
+import { morphLightboxMedia } from "@/core/features/lightbox/closer/lightbox_media_morpher";
 
 export interface LightboxCloserDependencies<T extends MediaItem> {
+  scheduler: Pick<Scheduler, "requestFrame">;
+  viewport: Pick<Viewport, "readDevicePixelRatio">;
   lightboxNavigation: Pick<LightboxNavigation<T>, "currentItem" | "close">;
   shownMedia: Readable<LightboxMediaElement | undefined>;
   inFullscreen: Readable<boolean>;
@@ -16,7 +20,7 @@ export class LightboxCloser<T extends MediaItem> {
   constructor(private readonly dependencies: LightboxCloserDependencies<T>) { }
 
   public close(): void {
-    const { lightboxNavigation, shownMedia, inFullscreen, morphDuration, locateItem } = this.dependencies;
+    const { scheduler, viewport, lightboxNavigation, shownMedia, inFullscreen, morphDuration, locateItem } = this.dependencies;
     const item = lightboxNavigation.currentItem.peek();
     const source = shownMedia.peek();
 
@@ -24,7 +28,7 @@ export class LightboxCloser<T extends MediaItem> {
       lightboxNavigation.close();
       return;
     }
-    morphLightboxMedia(source, morphDuration.peek(), () => {
+    morphLightboxMedia(source, { duration: morphDuration.peek(), pixelRatio: viewport.readDevicePixelRatio(), scheduler }, () => {
       lightboxNavigation.close();
       return locateItem(item);
     });

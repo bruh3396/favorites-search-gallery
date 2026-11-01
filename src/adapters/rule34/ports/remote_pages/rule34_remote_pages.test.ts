@@ -8,7 +8,10 @@ import { createPost } from "@/testing/post";
 
 type FetchPostPage = (postId: string) => Promise<CategorizedPost>;
 
-function createRemotePages(fetchPostPage: FetchPostPage = () => Promise.resolve({ post: createPost({ id: "7" }), tagCategories: new Map() })): Rule34RemotePages {
+function createRemotePages(fetchPostPage: FetchPostPage = () => Promise.resolve({
+  post: createPost({ id: "7" }),
+  tagCategories: new Map()
+})): Rule34RemotePages {
   return new Rule34RemotePages({
     rule34Client: {
       postPageUrl: (postId: string): string => `post:${postId}`,

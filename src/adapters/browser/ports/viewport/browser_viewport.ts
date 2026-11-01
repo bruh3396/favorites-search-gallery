@@ -23,6 +23,10 @@ export class BrowserViewport implements Viewport {
     }
   }
 
+  public readDevicePixelRatio(): number {
+    return devicePixelRatio;
+  }
+
   private scroller(): HTMLElement {
     const scroller = document.scrollingElement;
     return scroller instanceof HTMLElement ? scroller : document.documentElement;

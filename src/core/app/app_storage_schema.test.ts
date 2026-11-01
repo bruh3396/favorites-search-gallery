@@ -73,7 +73,11 @@ describe("APP_STORAGE_SCHEMA", () => {
   test("shows details tags by category, left aligned, at medium size by default", () => {
     const favoritesLightboxDetailsPreferences = createFavorites().lightbox.details;
 
-    expect([favoritesLightboxDetailsPreferences.organization.value, favoritesLightboxDetailsPreferences.alignment.value, favoritesLightboxDetailsPreferences.size.value]).toEqual(["category", "start", "medium"]);
+    expect([
+      favoritesLightboxDetailsPreferences.organization.value,
+      favoritesLightboxDetailsPreferences.alignment.value,
+      favoritesLightboxDetailsPreferences.size.value
+    ]).toEqual(["category", "start", "medium"]);
   });
 
   test("falls back to the default details size for an unknown one", () => {
@@ -93,7 +97,10 @@ describe("APP_STORAGE_SCHEMA", () => {
       const sizes = [{ width: 3, height: 2 }];
 
       createFavoritesState(localKeyedValues).get("1").sizes.set(sizes);
-      expect([createFavoritesState(localKeyedValues).get("1").sizes.value, createFavoritesState(localKeyedValues).get("2").sizes.value.length]).toEqual([sizes, 24]);
+      expect([
+        createFavoritesState(localKeyedValues).get("1").sizes.value,
+        createFavoritesState(localKeyedValues).get("2").sizes.value.length
+      ]).toEqual([sizes, 24]);
     });
 
     test("falls back to placeholder sizes for a stored list it doesn't recognize", () => {

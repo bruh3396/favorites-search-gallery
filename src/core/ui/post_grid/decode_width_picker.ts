@@ -1,5 +1,5 @@
-import { Size } from "@/core/utils/geometry/size";
 import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
+import { Size } from "@/core/utils/geometry/size";
 
 const DECODE_WIDTH_STEP = 250;
 const MAX_DECODE_WIDTH = 2_000;

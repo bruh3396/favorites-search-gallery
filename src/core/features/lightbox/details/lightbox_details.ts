@@ -1,7 +1,7 @@
 import { Child } from "@/core/ui/h/h";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Readable } from "@/core/utils/reactive/signal";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 
 export interface LightboxDetailsContent {
   readonly titleChild?: Child;

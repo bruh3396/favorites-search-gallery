@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardIndex } from "@/core/domain/search/indexes/wildcard_index";
 import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 const terms = ["banana", "band", "bandana", "brand", "grand", "island", "orange", "sand"].slice().sort();
 

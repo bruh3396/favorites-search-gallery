@@ -1,20 +1,20 @@
 import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { describe, expect, test, vi } from "vitest";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
-import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { createStoredTree } from "@/core/utils/storage/stored_tree";
-import { createPost } from "@/testing/post";
-import { effect } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { createPost } from "@/testing/post";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
+import { effect } from "@/core/utils/reactive/signal";
 
 interface Setup {
   favoritesWorkspace: FavoritesWorkspace;
@@ -28,7 +28,10 @@ function createWorkspace(localKeyedValues: MemoryLocalKeyedValues, posts: Post[]
   favoritesPaginationPreferences.pageSize.set(2);
   favoritesSearchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
   return new FavoritesWorkspace({
-    favoritesWorkspaceSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storedValueStorage: localKeyedValues, codec: FAVORITES_WORKSPACE_SNAPSHOT_CODEC }),
+    favoritesWorkspaceSnapshot: new KeyedStoredValue(
+      { key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT },
+      { storedValueStorage: localKeyedValues, codec: FAVORITES_WORKSPACE_SNAPSHOT_CODEC }
+    ),
     createSession: (favoritesSearchSettings): FavoritesSession => {
       const favoritesSession = new FavoritesSession({ favoritesSearchSettings }, {
         favoritesSearchIndex,
@@ -99,7 +102,8 @@ describe("FavoritesWorkspace", () => {
   test("activates the first tab when the stored active tab is missing or out of range", () => {
     const favoritesSearchSettings = [{ query: "apple" }, { query: "banana" }];
 
-    expect([undefined, 2, -1, 0.5, "1"].map(activeIndex => readActiveIndex(setup({ tabGroups: [{ favoritesSearchSettings, activeIndex }] }).favoritesWorkspace)))
+    expect([undefined, 2, -1, 0.5, "1"]
+      .map(activeIndex => readActiveIndex(setup({ tabGroups: [{ favoritesSearchSettings, activeIndex }] }).favoritesWorkspace)))
       .toEqual([0, 0, 0, 0, 0]);
   });
 

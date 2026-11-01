@@ -1,4 +1,5 @@
 import { Mock, describe, expect, test, vi } from "vitest";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -6,11 +7,9 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { createImageLoaderService } from "@/testing/image_loader_service";
+import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
-import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
-import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
@@ -19,16 +18,16 @@ import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal } from "@/core/utils/reactive/signal";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { createStoredTree } from "@/core/utils/storage/stored_tree";
-import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
-import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
+import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
+import { createImageLoaderService } from "@/testing/image_loader_service";
+import { createPost } from "@/testing/post";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { render } from "@/core/ui/h/h";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {
   element: HTMLElement;

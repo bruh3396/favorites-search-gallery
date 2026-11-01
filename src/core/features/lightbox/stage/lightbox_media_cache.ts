@@ -1,7 +1,7 @@
-import { Media } from "@/core/domain/media/media";
-import { MediaKind } from "@/core/domain/media/media_kind";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
+import { Media } from "@/core/domain/media/media";
 import { MediaItem } from "@/core/domain/media/media_item";
+import { MediaKind } from "@/core/domain/media/media_kind";
 
 export interface LightboxMediaCacheConfiguration {
   readonly kind: MediaKind;

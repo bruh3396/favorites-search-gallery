@@ -1,7 +1,7 @@
-import { IndexedDbStoreName } from "@/adapters/browser/indexed_db/indexed_db_store_name";
-import { MediaMinter } from "@/core/domain/media/media_minter";
 import { LegacyMigration, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
+import { IndexedDbStoreName } from "@/adapters/browser/indexed_db/indexed_db_store_name";
 import { LegacyDatabaseNames } from "@/adapters/browser/indexed_db/legacy_database_names";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 
 const VERSION = 1;
 

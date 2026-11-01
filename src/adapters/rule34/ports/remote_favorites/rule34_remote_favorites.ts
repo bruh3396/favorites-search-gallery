@@ -1,15 +1,15 @@
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Post } from "@/core/domain/post/post";
+import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34AllFavoritesFetcher } from "@/adapters/rule34/ports/remote_favorites/rule34_all_favorites_fetcher";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/rule34_favorite_actions";
 import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
-import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_new_favorites_finder";
 import { Rule34MissingFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_missing_favorites_finder";
+import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_new_favorites_finder";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 

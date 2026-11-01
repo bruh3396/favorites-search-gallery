@@ -9,7 +9,9 @@ export class SettingsIndex {
   private readonly searchTexts: ReadonlyMap<string, string>;
 
   constructor(sections: readonly SettingsIndexSection[]) {
-    this.searchTexts = new Map(sections.flatMap(({ title, settingDescriptors }) => settingDescriptors.map(settingDescriptor => [settingDescriptor.id, collectSearchText(settingDescriptor, title)] as const)));
+    this.searchTexts = new Map(sections.flatMap(({ title, settingDescriptors }) => {
+      return settingDescriptors.map(settingDescriptor => [settingDescriptor.id, collectSearchText(settingDescriptor, title)] as const);
+    }));
   }
 
   public match(query: string): ReadonlySet<string> {

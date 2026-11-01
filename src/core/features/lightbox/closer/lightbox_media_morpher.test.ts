@@ -1,5 +1,6 @@
-import { describe, expect, onTestFinished, test, vi } from "vitest";
-import { morphLightboxMedia } from "@/core/features/lightbox/closer/lightbox_media_morpher";
+import { LightboxMediaMorph, morphLightboxMedia } from "@/core/features/lightbox/closer/lightbox_media_morpher";
+import { afterEach, describe, expect, onTestFinished, test, vi } from "vitest";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 const MORPH_DURATION = 250;
 
@@ -10,14 +11,24 @@ interface Rect {
   height: number;
 }
 
-function stubFrames(): (time: number) => void {
-  const queued: FrameRequestCallback[] = [];
+interface Frames {
+  scheduler: MemoryScheduler;
+  runFrame: (time: number) => void;
+}
 
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(callback => queued.push(callback));
-  onTestFinished(() => {
-    vi.restoreAllMocks();
-  });
-  return time => queued.splice(0).forEach(callback => callback(time));
+function createFrames(): Frames {
+  const scheduler = new MemoryScheduler();
+  return {
+    scheduler,
+    runFrame: (time): void => {
+      scheduler.advance(time - scheduler.now());
+      scheduler.runFrame();
+    }
+  };
+}
+
+function createMorph(scheduler: MemoryScheduler, duration = MORPH_DURATION): LightboxMediaMorph {
+  return { duration, pixelRatio: 1, scheduler };
 }
 
 function moveTo(element: Element, rect: Rect): void {
@@ -59,13 +70,17 @@ function readVisibleBox(element: HTMLElement): number[] {
   return box.map(value => Math.round(value * 1_000) / 1_000);
 }
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe("morphLightboxMedia", () => {
   test("covers the source's drawn media with a stand-in before the page changes", () => {
-    stubFrames();
+    const { scheduler } = createFrames();
     const target = createTarget();
     let standIn: HTMLCanvasElement | null = null;
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => {
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => {
       standIn = findStandIn();
       return target;
     });
@@ -75,12 +90,12 @@ describe("morphLightboxMedia", () => {
   });
 
   test("draws the stand-in no larger than the source's own pixels", () => {
-    stubFrames();
+    const { scheduler } = createFrames();
     const source = createSource();
 
     source.width = 150;
     source.height = 150;
-    morphLightboxMedia(source, MORPH_DURATION, createTarget);
+    morphLightboxMedia(source, createMorph(scheduler), createTarget);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -89,9 +104,9 @@ describe("morphLightboxMedia", () => {
   });
 
   test("flies the stand-in onto the target, then removes it", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, createTarget);
+    morphLightboxMedia(createSource(), createMorph(scheduler), createTarget);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -103,9 +118,9 @@ describe("morphLightboxMedia", () => {
   });
 
   test("lands on the target after the given duration", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
 
-    morphLightboxMedia(createSource(), 100, createTarget);
+    morphLightboxMedia(createSource(), createMorph(scheduler, 100), createTarget);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -116,11 +131,11 @@ describe("morphLightboxMedia", () => {
   });
 
   test("hides the target during the flight and restores its visibility on landing", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
     const target = createTarget();
 
     target.style.setProperty("visibility", "visible", "important");
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => target);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => target);
     runFrame(0);
     expect(target.style.visibility).toBe("hidden");
     runFrame(MORPH_DURATION);
@@ -129,12 +144,12 @@ describe("morphLightboxMedia", () => {
   });
 
   test("flies to an SVG target without changing its visibility", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
     const target = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
     document.body.append(target);
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => target);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => target);
     runFrame(0);
 
     expect(target.getAttribute("visibility")).toBeNull();
@@ -146,10 +161,10 @@ describe("morphLightboxMedia", () => {
   });
 
   test("restores the target's visibility when it leaves the page mid-flight", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
     const target = createTarget();
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => target);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -157,10 +172,10 @@ describe("morphLightboxMedia", () => {
   });
 
   test("lands on the target where it is now when it moves mid-flight", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
     const target = createTarget();
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => target);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => target);
     const standIn = findStandIn()!;
 
     onTestFinished(() => standIn.remove());
@@ -171,7 +186,7 @@ describe("morphLightboxMedia", () => {
   });
 
   test("narrows the stand-in from the viewport to the target's nearest clipping ancestor", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
     const pane = document.createElement("div");
     const wrapper = document.createElement("div");
     const target = createTarget();
@@ -183,7 +198,7 @@ describe("morphLightboxMedia", () => {
     document.body.append(pane);
     onTestFinished(() => pane.remove());
     moveTo(pane, { left: 0, top: 100, width: 400, height: 400 });
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => target);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => target);
     const standIn = findStandIn()!;
 
     runFrame(0);
@@ -194,10 +209,10 @@ describe("morphLightboxMedia", () => {
   });
 
   test("drops the stand-in when the target leaves the page mid-flight", () => {
-    const runFrame = stubFrames();
+    const { scheduler, runFrame } = createFrames();
     const target = createTarget();
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => target);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => target);
     runFrame(0);
     target.remove();
     runFrame(MORPH_DURATION / 2);
@@ -205,28 +220,29 @@ describe("morphLightboxMedia", () => {
   });
 
   test("drops the stand-in as the page changes when there is no target", () => {
-    stubFrames();
+    const { scheduler } = createFrames();
+    const requestFrame = vi.spyOn(scheduler, "requestFrame");
 
-    morphLightboxMedia(createSource(), MORPH_DURATION, () => undefined);
+    morphLightboxMedia(createSource(), createMorph(scheduler), () => undefined);
     expect(findStandIn()).toBeNull();
-    expect(window.requestAnimationFrame).not.toHaveBeenCalled();
+    expect(requestFrame).not.toHaveBeenCalled();
   });
 
   test("updates the page without a stand-in when the source has nothing drawn yet", () => {
-    stubFrames();
+    const { scheduler } = createFrames();
     const update = vi.fn(() => undefined);
 
-    morphLightboxMedia(document.createElement("img"), MORPH_DURATION, update);
+    morphLightboxMedia(document.createElement("img"), createMorph(scheduler), update);
     expect(update).toHaveBeenCalledOnce();
     expect(findStandIn()).toBeNull();
   });
 
   test("updates the page without a stand-in when the video has no frame yet", () => {
-    stubFrames();
+    const { scheduler } = createFrames();
     const update = vi.fn(() => undefined);
     const video = Object.defineProperties(document.createElement("video"), { videoWidth: { value: 0 }, videoHeight: { value: 0 } });
 
-    morphLightboxMedia(video, MORPH_DURATION, update);
+    morphLightboxMedia(video, createMorph(scheduler), update);
     expect(update).toHaveBeenCalledOnce();
     expect(findStandIn()).toBeNull();
   });

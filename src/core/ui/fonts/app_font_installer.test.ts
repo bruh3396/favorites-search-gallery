@@ -1,6 +1,10 @@
-import { AppFont } from "@/core/ui/fonts/app_font";
-import { installAppFont } from "@/core/ui/fonts/app_font_installer";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { AppFont } from "@/core/ui/fonts/app_font";
+import { GEIST_FONT } from "@/core/ui/fonts/geist_font";
+import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument_font";
+import { INTER_FONT } from "@/core/ui/fonts/inter_font";
+import { PLEX_FONT } from "@/core/ui/fonts/plex_font";
+import { installAppFont } from "@/core/ui/fonts/app_font_installer";
 
 const FONT: AppFont = {
   name: "Test",
@@ -47,5 +51,12 @@ describe("installAppFont", () => {
       new FakeFontFace("Text Sans", "url(data:font/woff2;base64,AAAA)", { weight: "400" }),
       new FakeFontFace("Number Mono", "url(data:font/woff2;base64,BBBB)", { weight: "600" })
     ]);
+  });
+
+  test.each([GEIST_FONT, INSTRUMENT_FONT, INTER_FONT, PLEX_FONT])("adds only faces that $name's font stacks name", appFont => {
+    const fonts = stubFonts();
+
+    installAppFont(document.createElement("div"), appFont);
+    expect([...fonts].every(fontFace => `${appFont.text}, ${appFont.numeric}`.includes((fontFace as FakeFontFace).family))).toBe(true);
   });
 });

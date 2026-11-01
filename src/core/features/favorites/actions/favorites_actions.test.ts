@@ -12,7 +12,7 @@ interface Setup {
   remoteFavoriteChanges: RemoteFavoriteChanges;
 }
 
-function createAnsweringRemote(isAdded: boolean, isRemoved: boolean): RemoteFavoriteChanges {
+function createAnsweringRemote({ isAdded, isRemoved }: { isAdded: boolean; isRemoved: boolean }): RemoteFavoriteChanges {
   return {
     add: vi.fn((): Promise<boolean> => Promise.resolve(isAdded)),
     remove: vi.fn((): Promise<boolean> => Promise.resolve(isRemoved))
@@ -27,7 +27,7 @@ interface SetupOptions {
 
 async function setup({
   favoritedByDefault = true,
-  remoteFavoriteChanges = createAnsweringRemote(true, true),
+  remoteFavoriteChanges = createAnsweringRemote({ isAdded: true, isRemoved: true }),
   acceptsChanges = (): boolean => true
 }: SetupOptions = {}): Promise<Setup> {
   const localFavorites = new MemoryLocalFavorites();
@@ -61,7 +61,7 @@ describe("FavoritesActions", () => {
   });
 
   test("keeps a favorite whose removal fails", async() => {
-    const { favoritesActions, localFavorites } = await setup({ remoteFavoriteChanges: createAnsweringRemote(true, false) });
+    const { favoritesActions, localFavorites } = await setup({ remoteFavoriteChanges: createAnsweringRemote({ isAdded: true, isRemoved: false }) });
 
     expect(await favoritesActions.remove("1")).toBe(false);
     expect(favoritesActions.isFavorited("1")).toBe(true);
@@ -83,7 +83,7 @@ describe("FavoritesActions", () => {
   });
 
   test("leaves a favorite unmarked when adding fails", async() => {
-    const { favoritesActions } = await setup({ favoritedByDefault: false, remoteFavoriteChanges: createAnsweringRemote(false, true) });
+    const { favoritesActions } = await setup({ favoritedByDefault: false, remoteFavoriteChanges: createAnsweringRemote({ isAdded: false, isRemoved: true }) });
 
     expect(await favoritesActions.add("1")).toBe(false);
     expect(favoritesActions.isFavorited("1")).toBe(false);

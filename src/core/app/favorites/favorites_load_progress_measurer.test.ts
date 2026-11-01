@@ -6,9 +6,12 @@ describe("measureFavoritesLoadProgress", () => {
   test.each([
     { favoritesLoadState: { phase: "fetching", loadedCount: 150, expectedCount: 600 }, progress: 0.25 },
     { favoritesLoadState: { phase: "restoring", loadedCount: 300, expectedCount: 600 }, progress: 0.5 }
-  ] satisfies { favoritesLoadState: FavoritesLoadState; progress: number }[])("measures the share counted so far while $favoritesLoadState.phase", ({ favoritesLoadState, progress }) => {
-    expect(measureFavoritesLoadProgress(favoritesLoadState)).toBe(progress);
-  });
+  ] satisfies { favoritesLoadState: FavoritesLoadState; progress: number }[])(
+    "measures the share counted so far while $favoritesLoadState.phase",
+    ({ favoritesLoadState, progress }) => {
+      expect(measureFavoritesLoadProgress(favoritesLoadState)).toBe(progress);
+    }
+  );
 
   test.each([
     { phase: "fetching", loadedCount: 150, expectedCount: null },

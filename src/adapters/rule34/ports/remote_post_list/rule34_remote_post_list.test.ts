@@ -2,9 +2,9 @@ import { Mock, describe, expect, test, vi } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
+import { PostListPage } from "@/core/domain/post_list/post_list_page";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
-import { PostListPage } from "@/core/domain/post_list/post_list_page";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 import { createPost } from "@/testing/post";
 

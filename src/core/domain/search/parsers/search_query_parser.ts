@@ -1,5 +1,5 @@
-import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { SearchQuery } from "@/core/domain/search/expressions/search_query";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { desugarNestedOrGroups } from "@/core/domain/search/parsers/nested_or_group_desugarer";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";

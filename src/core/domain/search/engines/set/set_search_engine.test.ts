@@ -2,8 +2,8 @@ import { describe, expect, test } from "vitest";
 import { Metric } from "@/core/domain/search/metric";
 import { Searchable } from "@/core/domain/search/searchable";
 import { SetSearchEngine } from "@/core/domain/search/engines/set/set_search_engine";
-import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 type Doc = Searchable & { name: string; tags: Set<string>; metrics: Partial<Record<Metric, number>>; getMetric: (metric: Metric) => number };
 
@@ -24,7 +24,11 @@ const cherryDoc = createDoc("cherry", ["red", "tart", "fruit"], { score: 30 });
 const docs = [appleDoc, bananaDoc, cherryDoc];
 
 function createEngine(seedDocs: Doc[] = docs): SetSearchEngine<Doc> {
-  return new SetSearchEngine<Doc>({ getTerms: doc => doc.tags, getMetric: (doc, metric) => doc.getMetric(metric), stringInterner: new StringInterner() }, seedDocs);
+  return new SetSearchEngine<Doc>({
+    getTerms: doc => doc.tags,
+    getMetric: (doc, metric) => doc.getMetric(metric),
+    stringInterner: new StringInterner()
+  }, seedDocs);
 }
 
 function search(query: string, setSearchEngine: SetSearchEngine<Doc> = createEngine(), candidateDocs: Doc[] = docs): string[] {
@@ -144,7 +148,11 @@ describe("SetSearchEngine", () => {
     });
 
     test("rebuilds the corpus from a fresh set of docs", () => {
-      const setSearchEngine = new SetSearchEngine<Doc>({ getTerms: doc => doc.tags, getMetric: (doc, metric) => doc.getMetric(metric), stringInterner: new StringInterner() });
+      const setSearchEngine = new SetSearchEngine<Doc>({
+        getTerms: (doc): Iterable<string> => doc.tags,
+        getMetric: (doc, metric): number => doc.getMetric(metric),
+        stringInterner: new StringInterner()
+      });
       const kiwiDoc = createDoc("kiwi", ["green", "fuzzy"]);
 
       expect(search("green", setSearchEngine, [kiwiDoc])).toEqual([]);

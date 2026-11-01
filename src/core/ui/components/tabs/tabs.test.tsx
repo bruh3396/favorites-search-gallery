@@ -1,10 +1,10 @@
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
-import { Tab } from "@/core/ui/tabs/tab";
-import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { Tabs, TabsClass } from "@/core/ui/components/tabs/tabs";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import TABS_CSS from "@/core/ui/components/tabs/tabs.css?inline";
+import { Tab } from "@/core/ui/tabs/tab";
+import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { expectClassesStyled } from "@/testing/css_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
@@ -111,6 +111,19 @@ describe("Tabs", () => {
     expect(onAdd).toHaveBeenCalledOnce();
   });
 
+  test("moves a tab dropped on another", () => {
+    const { element, tabManager } = setup(["Home", "apple", "banana"]);
+    const target = findTab(element, "Home").parentElement!;
+    const dataTransfer = new DataTransfer();
+    const event = new MouseEvent("drop", { bubbles: true, cancelable: true, clientX: 0 });
+
+    dataTransfer.setData("application/x-fsg-tab", tabManager.tabs.value[2].id);
+    Object.defineProperty(event, "dataTransfer", { value: dataTransfer });
+    target.getBoundingClientRect = (): DOMRect => ({ left: 0, width: 100 }) as DOMRect;
+    target.dispatchEvent(event);
+    expect(tabManager.tabs.value.map(tab => tab.value)).toEqual(["banana", "Home", "apple"]);
+  });
+
   test("hides and shows the strip while keeping the shown panel", () => {
     const { element, renderPanel, disposePanel, stripVisible } = setup();
 
@@ -118,9 +131,8 @@ describe("Tabs", () => {
     const wasHidden = isStripHidden(element);
 
     stripVisible.value = true;
-    expect([
-      wasHidden, isStripHidden(element), readPanel(element), renderPanel.mock.calls.length, disposePanel.mock.calls
-    ]).toEqual([true, false, "Home", 1, []]);
+    expect([wasHidden, isStripHidden(element), readPanel(element), renderPanel.mock.calls.length, disposePanel.mock.calls])
+      .toEqual([true, false, "Home", 1, []]);
   });
 
   test("disposes the shown panel when it is disposed", () => {

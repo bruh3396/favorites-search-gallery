@@ -1,9 +1,9 @@
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { LIGHTBOX_ICON_PATHS, LightboxIcon } from "@/core/features/lightbox/ui/chrome/lightbox_icon";
-import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { LightboxToolbar, LightboxToolbarClass } from "@/core/features/lightbox/ui/chrome/lightbox_toolbar";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { Signal } from "@/core/utils/reactive/signal";
 import TOOLBAR_CSS from "@/core/features/lightbox/ui/chrome/lightbox_toolbar.css?inline";
 import { expectClassesStyled } from "@/testing/css_utilities";

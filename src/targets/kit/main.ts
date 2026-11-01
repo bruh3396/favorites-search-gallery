@@ -1,10 +1,7 @@
-import { AppFont } from "@/core/ui/fonts/app_font";
-import { installAppFont } from "@/core/ui/fonts/app_font_installer";
 import { DEFAULT_THEME, THEME_DEFINITIONS } from "@/core/ui/theme/theme";
-import { applyTheme } from "@/core/ui/theme/theme_applier";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
-import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
+import { AppFont } from "@/core/ui/fonts/app_font";
 import { GEIST_FONT } from "@/core/ui/fonts/geist_font";
 import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument_font";
 import { INTER_FONT } from "@/core/ui/fonts/inter_font";
@@ -16,6 +13,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Switch } from "@/core/ui/components/switch/switch";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { VERDANA_FONT } from "@/core/ui/fonts/verdana_font";
+import { applyTheme } from "@/core/ui/theme/theme_applier";
+import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
+import { installAppFont } from "@/core/ui/fonts/app_font_installer";
 
 interface StoryEntry {
   readonly id: string;
@@ -76,13 +76,13 @@ function renderNavigation(): HTMLElement {
   return navigation;
 }
 
-function showSelectedStory(navigation: HTMLElement, main: HTMLElement, log: (message: string) => void): void {
+function showSelectedStory(navigation: HTMLElement, stories: HTMLElement, log: (message: string) => void): void {
   const selectedStoryEntry = STORIES.find(({ id }) => `#${id}` === location.hash) ?? STORIES[0];
 
   for (const link of navigation.querySelectorAll("a")) {
     link.ariaCurrent = link.hash === `#${selectedStoryEntry.id}` ? "page" : null;
   }
-  main.replaceChildren(renderStory(selectedStoryEntry.story, log));
+  stories.replaceChildren(renderStory(selectedStoryEntry.story, log));
 }
 
 const FONTS: readonly AppFont[] = [SYSTEM_FONT, VERDANA_FONT, INSTRUMENT_FONT, INTER_FONT, GEIST_FONT, PLEX_FONT];
@@ -128,7 +128,7 @@ function renderToolbar(app: HTMLElement): HTMLElement {
 }
 
 function main(): void {
-  const shadowRoot = new BrowserHostPage().claimContent().attachShadow({ mode: "open" });
+  const shadowRoot = claimBodyContent().attachShadow({ mode: "open" });
   const app = createElement("div", "fsg-App kit-Page");
   const navigation = renderNavigation();
   const stories = createElement("main", "");

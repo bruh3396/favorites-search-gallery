@@ -107,6 +107,22 @@ describe("PageSlot", () => {
     expect(onPageChange).not.toHaveBeenCalled();
   });
 
+  test("keeps the field open on other keys", () => {
+    const { element, onPageChange } = setup("gap");
+    const field = openField(element);
+
+    field.value = "15";
+    field.dispatchEvent(new KeyboardEvent("keydown", { key: "5", bubbles: true }));
+    expect([field.hidden, field.value, vi.mocked(onPageChange).mock.calls]).toEqual([false, "15", []]);
+  });
+
+  test("reports nothing from the page button of a gap", () => {
+    const { element, onPageChange } = setup("gap");
+
+    element.querySelector<HTMLButtonElement>(`.${PageSlotClass.page}`)!.click();
+    expect(onPageChange).not.toHaveBeenCalled();
+  });
+
   test("styles every class it sets", () => {
     expectClassesStyled(PageSlotClass, PAGE_SLOT_CSS);
   });

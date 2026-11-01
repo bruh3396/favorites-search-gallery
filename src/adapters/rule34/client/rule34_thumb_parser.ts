@@ -1,7 +1,7 @@
 import { removeExtraWhitespace, removeNonNumericCharacters } from "@/core/utils/string/string_utilities";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 import { NO_MEDIA } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { MediaMinter } from "@/core/domain/media/media_minter";
 
 export function parseRule34Thumb(thumb: HTMLElement, mintMedia: MediaMinter): Post | null {
   const postId = parsePostId(thumb);

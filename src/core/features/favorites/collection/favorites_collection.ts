@@ -1,9 +1,9 @@
-import { Emitter } from "@/core/utils/reactive/emitter";
-import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
 import { IdentifiedList } from "@/core/utils/collection/identified_list";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Post } from "@/core/domain/post/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { hasMedia } from "@/core/domain/media/media";

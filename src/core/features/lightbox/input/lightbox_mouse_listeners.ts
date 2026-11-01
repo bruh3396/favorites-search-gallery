@@ -1,4 +1,3 @@
-
 const MIDDLE_BUTTON = 1;
 const RIGHT_BUTTON = 2;
 
@@ -48,6 +47,6 @@ function swallowNextContextmenu(view: Window): void {
 
   view.addEventListener("contextmenu", swallow, true);
   view.addEventListener("mousedown", disarm, true);
-}import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+}
+import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
-

@@ -1,15 +1,15 @@
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { Media } from "@/core/domain/media/media";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
-import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
-import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import {
   buildRule34FavoritesPageUrl,
   buildRule34PostListUrl,
   buildRule34PostPageUrl,
   buildRule34ProfilePageUrl
 } from "@/adapters/rule34/client/rule34_url_builder";
+import { Media } from "@/core/domain/media/media";
+import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
+import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 

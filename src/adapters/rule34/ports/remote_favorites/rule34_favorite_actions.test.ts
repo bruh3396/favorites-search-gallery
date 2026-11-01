@@ -1,7 +1,7 @@
-import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/rule34_favorite_actions";
 import { describe, expect, test, vi } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/rule34_favorite_actions";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;

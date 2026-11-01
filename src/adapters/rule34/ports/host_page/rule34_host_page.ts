@@ -12,15 +12,15 @@ export interface Rule34HostPageDependencies {
     Rule34Document,
     "clearNativePage" | "claimPostListContent" | "setHeaderVisible" | "setTheme" | "reflectPostListPage" | "setPaginatorVisible"
   >;
-  page: { claimContent: () => HTMLElement };
+  claimBodyContent: () => HTMLElement;
 }
 
 const CLAIMS: Record<AppMode, (rule34HostPageDependencies: Rule34HostPageDependencies) => HTMLElement> = {
-  favorites: ({ rule34Document, page }): HTMLElement => {
+  favorites: ({ rule34Document, claimBodyContent }): HTMLElement => {
     rule34Document.clearNativePage();
-    return page.claimContent();
+    return claimBodyContent();
   },
-  postList: ({ rule34Document, page }): HTMLElement => rule34Document.claimPostListContent() ?? page.claimContent()
+  postList: ({ rule34Document, claimBodyContent }): HTMLElement => rule34Document.claimPostListContent() ?? claimBodyContent()
 };
 
 export class Rule34HostPage implements HostPage {

@@ -27,6 +27,10 @@ describe("MemoryRemoteMedia", () => {
     expect((await new MemoryRemoteMedia().loadOriginal(IMAGE)).src).toBe(IMAGE.locator);
   });
 
+  test("fetches every original as its locator's text", async() => {
+    expect(await (await new MemoryRemoteMedia().fetchOriginal(IMAGE)).text()).toBe(IMAGE.locator);
+  });
+
   test("has no durations", async() => {
     expect(await new MemoryRemoteMedia().probeDurationSeconds()).toBe(0);
   });

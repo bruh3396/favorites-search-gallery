@@ -1,5 +1,5 @@
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Signal } from "@/core/utils/reactive/signal";
 
 export interface FavoritesActionsConfiguration {

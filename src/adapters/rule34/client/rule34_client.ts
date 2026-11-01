@@ -1,7 +1,3 @@
-import { CategorizedPost } from "@/core/domain/post/categorized_post";
-import { Post } from "@/core/domain/post/post";
-import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
-import { sendOkRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 import {
   buildRule34FavoritesPageUrl,
   buildRule34PostListPageUrl,
@@ -9,16 +5,20 @@ import {
   buildRule34PostPageUrl,
   buildRule34ProfilePageUrl
 } from "@/adapters/rule34/client/rule34_url_builder";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
+import { MediaMinter } from "@/core/domain/media/media_minter";
+import { Post } from "@/core/domain/post/post";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RateLimiter } from "@/core/utils/async/rate_limiter";
+import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
+import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
 import { Rule34PostListPage } from "@/adapters/rule34/client/rule34_post_list_page";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { parseRule34FavoritesPage } from "@/adapters/rule34/client/rule34_favorites_page_parser";
 import { parseRule34PostListPage } from "@/adapters/rule34/client/rule34_post_list_page_parser";
 import { parseRule34PostPage } from "@/adapters/rule34/client/rule34_post_page_parser";
 import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_favorite_count_parser";
-import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
-import { RateLimiter } from "@/core/utils/async/rate_limiter";
-import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
-import { MediaMinter } from "@/core/domain/media/media_minter";
-import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { sendOkRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 
 export interface Rule34ClientDependencies {
   fetch: Rule34Fetch;

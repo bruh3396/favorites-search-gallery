@@ -1,7 +1,7 @@
-import { TermDelta } from "@/core/domain/search/engines/term_delta";
-import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { insertSorted, removeValue } from "@/core/utils/collection/array_utilities";
 import { DurablePostings } from "@/core/domain/search/engines/bit/indexes/durable_postings";
+import { TermDelta } from "@/core/domain/search/engines/term_delta";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 
 export class DraftPostings {
   private positionsByTerm = new Map<string, number[]>();

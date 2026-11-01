@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
+import { createOneOfGuard } from "@/core/utils/guard/guard";
 import { createSetCodec } from "@/core/utils/codec/codec";
 import { effect } from "@/core/utils/reactive/signal";
-import { createOneOfGuard } from "@/core/utils/guard/guard";
 
 function createStorage(entries: Record<string, unknown> = {}): StoredValueStorage & { entries: Record<string, unknown> } {
   return {

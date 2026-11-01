@@ -38,4 +38,10 @@ describe("FrozenCobaltRemoteTagCategories", () => {
 
     expect(await remoteTagCategories.fetch(["apple", "alice", "bob"])).toEqual(new Map([["apple", "artist"]]));
   });
+
+  test("leaves out a tag with a status it doesn't know", async() => {
+    const remoteTagCategories = createRemoteTagCategories({ apple: { status: "bogus" } as never });
+
+    expect(await remoteTagCategories.fetch(["apple"])).toEqual(new Map());
+  });
 });

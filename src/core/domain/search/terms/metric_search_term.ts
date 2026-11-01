@@ -1,8 +1,8 @@
-import { SearchTerm } from "@/core/domain/search/terms/search_term";
-import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
-import { MetricSearchable } from "@/core/domain/search/searchable";
 import { MetricComparator } from "@/core/domain/search/metric_comparator";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
+import { MetricSearchable } from "@/core/domain/search/searchable";
+import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 
 type Comparator = (a: number, b: number) => boolean;
 
@@ -23,7 +23,9 @@ export class MetricSearchTerm extends SearchTerm {
     super(parsedTerm);
     this.compare = comparators[metricComparison.comparator];
     this.leftValue = (metricSearchable): number => metricSearchable.getMetric(metricComparison.metric);
-    this.rightValue = metricComparison.isRelative ? (metricSearchable): number => metricSearchable.getMetric(metricComparison.rightHandMetric) : (): number => metricComparison.value;
+    this.rightValue = metricComparison.isRelative ? (metricSearchable): number => {
+      return metricSearchable.getMetric(metricComparison.rightHandMetric);
+    } : (): number => metricComparison.value;
     this.comparison = metricComparison;
   }
 

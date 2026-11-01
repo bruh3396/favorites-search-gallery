@@ -1,18 +1,18 @@
-import { Size } from "@/core/utils/geometry/size";
-import { MediaItem } from "@/core/domain/media/media_item";
-import { GridLayout } from "@/core/ui/post_grid/grid_layout";
-import { tileGrid } from "@/core/ui/post_grid/grid_tiler";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
+import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { KeyedList } from "@/core/ui/h/keyed_list";
+import { MediaItem } from "@/core/domain/media/media_item";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { Size } from "@/core/utils/geometry/size";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
+import { tileGrid } from "@/core/ui/post_grid/grid_tiler";
 
 export const PostGridClass = {
   root: "fsg-PostGrid"

@@ -1,13 +1,13 @@
-import { AppPreferences } from "@/core/app/app_preferences";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
-import { SharedPreferences } from "@/core/app/shared_preferences";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
-import { SettingsLayout } from "@/core/ui/settings/settings_layout";
-import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
+import { AppPreferences } from "@/core/app/app_preferences";
 import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
+import { SettingsLayout } from "@/core/ui/settings/settings_layout";
+import { SettingsScreen } from "@/core/ui/settings/settings_screen";
+import { SharedPreferences } from "@/core/app/shared_preferences";
 import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
@@ -85,6 +85,9 @@ function createDescriptors({
       settingPreference: favoritesPreferences.pagination.pageSize, min: 1, max: 5_000, step: 25,
       disabled: favoritesPreferences.pagination.infiniteScroll
     },
-    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", keywords: ["pagination", "scroll"], settingPreference: favoritesPreferences.pagination.infiniteScroll }
+    {
+      id: "infiniteScroll", kind: "switch", label: "Infinite scroll", keywords: ["pagination", "scroll"],
+      settingPreference: favoritesPreferences.pagination.infiniteScroll
+    }
   ];
 }

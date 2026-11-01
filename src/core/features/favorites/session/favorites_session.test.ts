@@ -3,13 +3,13 @@ import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_b
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
-import { createPost } from "@/testing/post";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { createPost } from "@/testing/post";
 
 interface Setup {
   favoritesSession: FavoritesSession;

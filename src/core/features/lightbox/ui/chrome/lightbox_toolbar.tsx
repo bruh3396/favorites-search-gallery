@@ -1,8 +1,8 @@
+import { Readable, computed } from "@/core/utils/reactive/signal";
 import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { Keymap } from "@/core/ui/hotkeys/keymap";
-import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
-import { Readable, computed } from "@/core/utils/reactive/signal";
 import { LightboxButton } from "@/core/features/lightbox/ui/chrome/lightbox_button";
+import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { findLightboxShortcut } from "@/core/features/lightbox/input/lightbox_shortcut_finder";
 import { h } from "@/core/ui/h/h";
 

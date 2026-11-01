@@ -1,6 +1,6 @@
-import { Fruit } from "@/core/domain/search/testing/fruit";
-import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { SearchCaseAssertion, SearchCaseGroup } from "@/core/domain/search/testing/search_case";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit } from "@/core/domain/search/testing/fruit";
 
 const { fruits, fruitNames, allTerms } = FRUIT_CORPUS;
 

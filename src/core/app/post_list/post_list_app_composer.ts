@@ -1,10 +1,11 @@
+import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
+import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { ColorScheme } from "@/core/boundary/color_scheme";
+import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
-import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
 import { ListSequence } from "@/core/domain/media/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
@@ -19,6 +20,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
+import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { bindAppearance } from "@/core/app/appearance_binder";
 import { computed } from "@/core/utils/reactive/signal";
@@ -28,7 +30,6 @@ import { createPostListService } from "@/core/features/post_list/post_list_servi
 import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
-import { render } from "@/core/ui/h/h";
 
 export interface PostListAppConfiguration {
   readonly colorScheme: ColorScheme;
@@ -37,6 +38,7 @@ export interface PostListAppConfiguration {
 export interface PostListAppDependencies {
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
+  viewport: Viewport;
   scheduler: Scheduler;
   remoteMedia: RemoteMedia;
   remotePages: RemotePages;
@@ -49,21 +51,20 @@ export interface PostListAppDependencies {
 
 export function composePostListApp(configuration: PostListAppConfiguration, dependencies: PostListAppDependencies): MountableApp {
   const {
-    visibilityObserver, sizeObserver, scheduler, remoteMedia, remotePages, remotePostList, localKeyedValues, navigator, fileSaver, hostPage
+    visibilityObserver, sizeObserver, viewport, scheduler, remoteMedia, remotePages, remotePostList, localKeyedValues, navigator, fileSaver, hostPage
   } = dependencies;
   const appStorage = createAppStorage(localKeyedValues);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, configuration.colorScheme, hostPage);
   const { postList: postListPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["postList"]);
   const gridPreferences = postListPreferences.grid;
-  const lightboxPreferences = postListPreferences.lightbox;
   const postListService = createPostListService({ remotePostList });
   const posts = computed(() => postListService.page.value.posts);
   const listSequence = new ListSequence({ wraps: false }, posts);
   const tileLocator = new TileLocator<Post>();
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightbox = createLightbox<Post>({
-    scheduler, sizeObserver, remoteMedia, actions: postActions,
-    mode: lightboxPreferences.mode, volume: lightboxPreferences.volume, muted: lightboxPreferences.muted,
+    scheduler, sizeObserver, viewport, remoteMedia, actions: postActions,
+    preferences: postListPreferences.lightbox,
     locateItem: post => tileLocator.locate(post)
   });
 
@@ -83,7 +84,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
     getPostUrl: post => remotePages.postUrl(post.id),
     onPlainClick: post => lightbox.open(listSequence, post)
   };
-  const renderApp = (): HTMLElement[] => PostListApp({ posts, postGridProps, lightbox });
+  const renderApp = (): HTMLElement[] => h(PostListApp, { posts, postGridProps, lightbox });
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {

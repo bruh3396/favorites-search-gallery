@@ -58,4 +58,25 @@ describe("BrowserScheduler", () => {
     expect(wake).toHaveBeenCalledOnce();
     vi.unstubAllGlobals();
   });
+
+  test("hands a requested frame the browser's frame time", () => {
+    const frames: FrameRequestCallback[] = [];
+    const onFrame = vi.fn();
+
+    vi.stubGlobal("requestAnimationFrame", (frame: FrameRequestCallback): number => frames.push(frame));
+    new BrowserScheduler().requestFrame(onFrame);
+    frames.forEach(frame => frame(16));
+    expect(onFrame).toHaveBeenCalledWith(16);
+    vi.unstubAllGlobals();
+  });
+
+  test("cancels a requested frame through the browser", () => {
+    const cancelAnimationFrame = vi.fn();
+
+    vi.stubGlobal("requestAnimationFrame", (): number => 7);
+    vi.stubGlobal("cancelAnimationFrame", cancelAnimationFrame);
+    new BrowserScheduler().requestFrame(vi.fn())();
+    expect(cancelAnimationFrame).toHaveBeenCalledWith(7);
+    vi.unstubAllGlobals();
+  });
 });

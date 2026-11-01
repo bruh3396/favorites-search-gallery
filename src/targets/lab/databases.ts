@@ -1,12 +1,12 @@
 import { CachePage, fetchCachePage } from "@/targets/lab/local_frozen_cobalt";
 import { IndexedDbClient, IndexedDbClientConfiguration } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
+import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
 import { Post } from "@/core/domain/post/post";
-import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
-import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
-import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
+import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 
 export const LAB_NAMESPACE = "fsg-lab";
 export const LAB_OWNER_ID = "lab";

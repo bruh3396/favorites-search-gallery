@@ -1,5 +1,3 @@
-import { Post } from "@/core/domain/post/post";
-import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { describe, expect, test } from "vitest";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -7,10 +5,12 @@ import { FavoritesSearch } from "@/core/features/favorites/session/favorites_sea
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
-import { createPost } from "@/testing/post";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
-import { effect } from "@/core/utils/reactive/signal";
+import { Post } from "@/core/domain/post/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { createPost } from "@/testing/post";
+import { effect } from "@/core/utils/reactive/signal";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 
 interface Options {
   blacklistedTags?: readonly string[];
@@ -289,7 +289,10 @@ describe("FavoritesSearch", () => {
     });
 
     test("keeps the blacklist outside the inversion", () => {
-      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana", "cherry"), { blacklistedTags: ["apple"], partialFavoritesSearchSettings: { isBlacklistEnabled: true } });
+      const { favoritesSearch } = setup(
+        createTaggedPosts("apple", "banana", "cherry"),
+        { blacklistedTags: ["apple"], partialFavoritesSearchSettings: { isBlacklistEnabled: true } }
+      );
 
       favoritesSearch.submit("banana");
       favoritesSearch.invert();
@@ -319,7 +322,8 @@ describe("FavoritesSearch", () => {
       favoritesSearch.submit("apple");
       favoritesSearch.shuffle();
       favoritesSearch.clearFilters();
-      expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 2 ** 31 }));
+      expect(favoritesSearch.settings.value)
+        .toEqual(buildFavoritesSearchSettings({ sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 2 ** 31 }));
     });
   });
 
@@ -365,7 +369,10 @@ describe("FavoritesSearch", () => {
 
   describe("when favorites are indexed", () => {
     test("keeps the searched results in place and appends the arrivals in arrival order", () => {
-      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(createScoredPosts(1, 3, 2), { partialFavoritesSearchSettings: { sortKey: "score" } });
+      const { favoritesSearch, favoritesCollection, favoritesSearchIndex } = setup(
+        createScoredPosts(1, 3, 2),
+        { partialFavoritesSearchSettings: { sortKey: "score" } }
+      );
 
       favoritesSearchIndex.add(favoritesCollection.append(createScoredPosts(5, 4)));
       expect(getResultPostIds(favoritesSearch)).toEqual(["3", "2", "1", "5", "4"]);

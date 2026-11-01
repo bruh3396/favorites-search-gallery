@@ -1,9 +1,9 @@
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
-import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
 import { TagSize } from "@/core/app/favorites/lightbox/tag_size";
 import { h } from "@/core/ui/h/h";
@@ -43,7 +43,14 @@ export interface FavoriteLightboxTagsProps {
   collapsedTagCount: number;
 }
 
-export function FavoriteLightboxTags({ favorite, organization, alignment, size, localTagCategories, collapsedTagCount }: FavoriteLightboxTagsProps): HTMLElement {
+export function FavoriteLightboxTags({
+  favorite,
+  organization,
+  alignment,
+  size,
+  localTagCategories,
+  collapsedTagCount
+}: FavoriteLightboxTagsProps): HTMLElement {
   const groups = new Signal<readonly TagGroup[]>([]);
   const groupList = <div />;
   const createGroupsScope = captureScope();
@@ -83,13 +90,9 @@ export function FavoriteLightboxTags({ favorite, organization, alignment, size, 
 }
 
 function groupTagsByCategory(tags: Iterable<string>, categories: ReadonlyMap<string, TagCategory>): TagGroup[] {
-  const groups = new Map<TagGroupCategory, string[]>(GROUP_ORDER.map(category => [category, []]));
-
-  for (const tag of tags) {
-    groups.get(toGroupCategory(categories.get(tag)))?.push(tag);
-  }
+  const tagList = [...tags];
   return GROUP_ORDER
-    .map(category => ({ category, tags: (groups.get(category) ?? []).sort() }))
+    .map(category => ({ category, tags: tagList.filter(tag => toGroupCategory(categories.get(tag)) === category).sort() }))
     .filter(group => group.tags.length > 0);
 }
 

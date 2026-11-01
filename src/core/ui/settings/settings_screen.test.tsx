@@ -1,11 +1,11 @@
-import { SettingPreference } from "@/core/ui/settings/setting_preference";
-import { SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen, SettingsScreenClass, SettingsScreenProps } from "@/core/ui/settings/settings_screen";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import SCREEN_CSS from "@/core/ui/settings/settings_screen.css?inline";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
+import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { Signal } from "@/core/utils/reactive/signal";
+import { SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 const SCHEDULER = { schedule: (): (() => void) => () => undefined };
@@ -44,7 +44,13 @@ function setup(partialSettingsScreenProps: Partial<SettingsScreenProps> = {}): S
   const query = new Signal("");
   const switchSettingDescriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
   const { result: element, dispose } = render(document, () => (
-    <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={switchSettingDescriptors} query={query} stepperScheduler={SCHEDULER} {...partialSettingsScreenProps} />
+    <SettingsScreen
+      settingsLayout={LAYOUT}
+      settingDescriptors={switchSettingDescriptors}
+      query={query}
+      stepperScheduler={SCHEDULER}
+      {...partialSettingsScreenProps}
+    />
   ));
   return { element, dispose, query, sections: [...element.querySelectorAll<HTMLElement>("section")] };
 }

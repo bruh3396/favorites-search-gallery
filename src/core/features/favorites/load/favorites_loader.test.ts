@@ -1,6 +1,4 @@
 import { createPost, createPosts } from "@/testing/post";
-import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -17,10 +15,12 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_r
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
+import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
 import { effect } from "@/core/utils/reactive/signal";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { hasMedia } from "@/core/domain/media/media";
-import { StringInterner } from "@/core/utils/string/string_interner";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 
 const MEDIA = { kind: "image", locator: "1/a.jpg" } as const;
 
@@ -95,7 +95,10 @@ describe("FavoritesLoader", () => {
 
     test("restores the stored favorites and syncs them when a membership is stored", async() => {
       const localFavoritePosts = [createPost({ id: "1", media: MEDIA })];
-      const { favoritesLoader, favoritesSearchIndex } = await setup({ localFavoritePosts, remoteFavoritePosts: [createPost({ id: "2", media: MEDIA }), ...localFavoritePosts] });
+      const { favoritesLoader, favoritesSearchIndex } = await setup({
+        localFavoritePosts,
+        remoteFavoritePosts: [createPost({ id: "2", media: MEDIA }), ...localFavoritePosts]
+      });
       const phases = recordPhases(favoritesLoader);
 
       await favoritesLoader.load();
@@ -150,7 +153,10 @@ describe("FavoritesLoader", () => {
     });
 
     test("hydrates and announces a restored placeholder once its post is refreshed", async() => {
-      const { favoritesLoader, favoritesCollection } = await setup({ localFavoritePosts: [createPost({ id: "1" })], remoteFavoritePosts: [createPost({ id: "1", tags: "apple", media: MEDIA })] });
+      const { favoritesLoader, favoritesCollection } = await setup({
+        localFavoritePosts: [createPost({ id: "1" })],
+        remoteFavoritePosts: [createPost({ id: "1", tags: "apple", media: MEDIA })]
+      });
       const hydratedFavorites: Favorite[] = [];
 
       favoritesCollection.hydrated.on(favorite => hydratedFavorites.push(favorite));

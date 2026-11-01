@@ -1,6 +1,6 @@
+import { describe, expect, test } from "vitest";
 import { PageTerm } from "@/core/ui/components/paginator/page_term";
 import { listPageTerms } from "@/core/ui/components/paginator/page_term_lister";
-import { describe, expect, test } from "vitest";
 
 const SLOT_COUNTS = [5, 6, 7, 9];
 

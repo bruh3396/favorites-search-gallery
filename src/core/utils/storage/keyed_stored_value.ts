@@ -1,9 +1,9 @@
 import { Codec, createGuardedCodec } from "@/core/utils/codec/codec";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
-import { Signal } from "@/core/utils/reactive/signal";
 import { createSameKindGuard } from "@/core/utils/guard/guard";
 
 export interface KeyedStoredValueConfiguration<T> {

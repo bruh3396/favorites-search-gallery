@@ -1,9 +1,9 @@
-import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
-import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { PrefixIndex } from "@/core/domain/search/indexes/prefix_index";
 import { SortedArray } from "@/core/utils/collection/sorted_array";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TrigramIndex } from "@/core/domain/search/indexes/trigram_index";
+import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
+import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { compareStrings } from "@/core/utils/string/string_utilities";
 
 export class WildcardIndex {

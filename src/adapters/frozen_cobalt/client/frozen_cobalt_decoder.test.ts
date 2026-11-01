@@ -1,7 +1,7 @@
-import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
-import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 import { describe, expect, test, vi } from "vitest";
+import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
 import { Media } from "@/core/domain/media/media";
+import { decodeFrozenCobaltPost } from "@/adapters/frozen_cobalt/client/frozen_cobalt_decoder";
 
 const frozenCobaltPost: FrozenCobaltPost = {
   id: "123",
@@ -10,7 +10,7 @@ const frozenCobaltPost: FrozenCobaltPost = {
   score: 100,
   rating: "questionable",
   changedAt: 1_234_567_890,
-  directory: 1234,
+  directory: 1_234,
   stem: "a1b2c3",
   extension: "jpg",
   tagCategoryByName: { tag1: "general", tag2: "character" }
@@ -45,7 +45,7 @@ describe("decodeFrozenCobaltPost", () => {
     const minted = vi.fn(mintMedia);
 
     decodeFrozenCobaltPost(frozenCobaltPost, minted);
-    expect(minted).toHaveBeenCalledWith({ directory: 1234, stem: "a1b2c3", extension: "jpg", tags: "tag1 tag2" });
+    expect(minted).toHaveBeenCalledWith({ directory: 1_234, stem: "a1b2c3", extension: "jpg", tags: "tag1 tag2" });
   });
 
   test("keeps each tag's category", () => {

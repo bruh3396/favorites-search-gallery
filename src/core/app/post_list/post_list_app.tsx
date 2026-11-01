@@ -1,6 +1,6 @@
-import { Lightbox } from "@/core/features/lightbox/lightbox";
-import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
 import { PostGrid, PostGridProps } from "@/core/ui/post_grid/post_grid";
+import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
+import { Lightbox } from "@/core/features/lightbox/lightbox";
 import { Post } from "@/core/domain/post/post";
 import { Readable } from "@/core/utils/reactive/signal";
 import UI_CSS from "@/core/ui/styles.css?inline";

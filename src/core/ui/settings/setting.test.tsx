@@ -1,9 +1,9 @@
 import { ChoiceSettingDescriptor, ChoicesSettingDescriptor, NumberSettingDescriptor, SettingDescriptor, SliderSettingDescriptor, SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { SettingPreference } from "@/core/ui/settings/setting_preference";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Setting, SettingProps } from "@/core/ui/settings/setting";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
 
 const LAYOUTS = ["column", "row", "square"] as const;
 const LAYOUT_LABELS = { column: "Column", row: "Row", square: "Square" };
@@ -36,7 +36,7 @@ function createLayoutSetting(settingPreference: SettingPreference<Layout>, contr
   return { id: "layout", kind: "choice", label: "Layout", settingPreference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
 }
 
-function createSizeSetting(settingPreference: SettingPreference<number>, inverted?: boolean): SliderSettingDescriptor {
+function createSizeSetting(settingPreference: SettingPreference<number>, { inverted }: { inverted?: boolean } = {}): SliderSettingDescriptor {
   return { id: "size", kind: "slider", label: "Size", settingPreference, min: 1, max: 20, step: 1, inverted };
 }
 
@@ -79,7 +79,9 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
     },
     runNext: (): void => pending()
   };
-  const numberSettingDescriptor: NumberSettingDescriptor = { id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep };
+  const numberSettingDescriptor: NumberSettingDescriptor = {
+    id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep
+  };
   const { element } = setup({ descriptor: numberSettingDescriptor, stepperScheduler: scheduler });
   return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, scheduler };
 }
@@ -222,7 +224,9 @@ describe("Setting", () => {
 
   test("steps a number within its bounds", () => {
     const preference = createStoredValue(10);
-    const numberSettingDescriptor: NumberSettingDescriptor = { id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1 };
+    const numberSettingDescriptor: NumberSettingDescriptor = {
+      id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1
+    };
     const element = renderSetting(numberSettingDescriptor);
     const input = element.querySelector("input");
 
@@ -269,7 +273,7 @@ describe("Setting", () => {
 
   test("runs an inverted slider from its max to its min", () => {
     const preference = createStoredValue(6);
-    const input = renderSetting(createSizeSetting(preference, true)).querySelector("input")!;
+    const input = renderSetting(createSizeSetting(preference, { inverted: true })).querySelector("input")!;
 
     expect(input.value).toBe("15");
     slide(input, 20);

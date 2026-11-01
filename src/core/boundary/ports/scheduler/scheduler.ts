@@ -3,4 +3,5 @@ export interface Scheduler {
   schedule: (task: () => void, delay: number) => () => void;
   sleep: (duration: number) => Promise<void>;
   waitForPaint: () => Promise<void>;
+  requestFrame: (onFrame: (time: number) => void) => () => void;
 }

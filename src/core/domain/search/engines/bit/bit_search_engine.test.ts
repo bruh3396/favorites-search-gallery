@@ -1,11 +1,11 @@
-import { Fruit } from "@/core/domain/search/testing/fruit";
-import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { MetricSearchable, Searchable } from "@/core/domain/search/searchable";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
-import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit } from "@/core/domain/search/testing/fruit";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TermUpdate } from "@/core/domain/search/engines/term_update";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 type MetricDoc = MetricSearchable & { name: string };
 
@@ -47,7 +47,11 @@ function createMetricDoc(name: string, metrics: Record<string, number>, tags: st
 }
 
 function createMetricEngine(metricDocs: MetricDoc[]): BitSearchEngine<MetricDoc> {
-  return new BitSearchEngine<MetricDoc>({ getTerms: metricDoc => metricDoc.tags, getMetric: (metricDoc, metric) => metricDoc.getMetric(metric), stringInterner: new StringInterner() }, metricDocs);
+  return new BitSearchEngine<MetricDoc>({
+    getTerms: metricDoc => metricDoc.tags,
+    getMetric: (metricDoc, metric) => metricDoc.getMetric(metric),
+    stringInterner: new StringInterner()
+  }, metricDocs);
 }
 
 function searchMetricNames(bitSearchEngine: BitSearchEngine<MetricDoc>, query: string): string[] {
@@ -84,7 +88,10 @@ describe("BitSearchEngine", () => {
         id: i,
         tags: new Set([`n${i}`, i % 2 === 0 ? "even" : "odd", i < 50 ? "low" : "high"])
       }));
-      const bitSearchEngine = new BitSearchEngine<Item>({ getTerms: item => item.tags, getMetric: () => 0, stringInterner: new StringInterner() }, postItems);
+      const bitSearchEngine = new BitSearchEngine<Item>(
+        { getTerms: (item): Iterable<string> => item.tags, getMetric: (): number => 0, stringInterner: new StringInterner() },
+        postItems
+      );
       const items = bitSearchEngine.search(parseSearchExpression("low ( even ~ -high )"));
 
       expect(items.map(item => item.id)).toEqual(postItems.filter(item => item.id < 50).map(item => item.id));
@@ -148,7 +155,10 @@ describe("BitSearchEngine", () => {
 
   describe("index", () => {
     test("re-indexes the corpus", () => {
-      const bitSearchEngine = new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, []);
+      const bitSearchEngine = new BitSearchEngine<Fruit>(
+        { getTerms: (fruit): Iterable<string> => fruit.tags, getMetric: (): number => 0, stringInterner: new StringInterner() },
+        []
+      );
 
       expect(bitSearchEngine.search(parseSearchExpression("red"))).toEqual([]);
       bitSearchEngine.rebuild(FRUIT_CORPUS.fruits);
@@ -182,7 +192,8 @@ describe("BitSearchEngine", () => {
 
       taggedItems.forEach((taggedItem, i) => {
         bitSearchEngine.add([taggedItem]);
-        expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("shared")))).toEqual(taggedItems.slice(0, i + 1).map(taggedItem => taggedItem.id).sort());
+        expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("shared"))))
+          .toEqual(taggedItems.slice(0, i + 1).map(({ id }) => id).sort());
       });
     });
 

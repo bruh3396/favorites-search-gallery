@@ -153,9 +153,9 @@ describe("PostLibrary", () => {
   });
 
   test.each([
-    ["leaves", "13", 34 * DAY, 0],
-    ["refreshes", "13", (34 * DAY) + 1, 1]
-  ])("%s a post past 28 days plus its id remainder of 7 in days", async(_, id, age, refreshCount) => {
+    { outcome: "leaves", id: "13", age: 34 * DAY, refreshCount: 0 },
+    { outcome: "refreshes", id: "13", age: (34 * DAY) + 1, refreshCount: 1 }
+  ])("$outcome a post past 28 days plus its id remainder of 7 in days", async({ id, age, refreshCount }) => {
     const { postLibrary, onRefresh } = setup([createPost({ ...DIMENSIONS, id })]);
 
     await postLibrary.refresh([createPost({ id, fetchedAt: NOW - age })]);

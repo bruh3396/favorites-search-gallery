@@ -17,7 +17,10 @@ export class FavoritesBlacklist {
   }
 
   public apply(searchExpression: SearchExpression, { isBlacklistEnabled }: Pick<FavoritesSearchSettings, "isBlacklistEnabled">): SearchExpression {
-    return (this.force || isBlacklistEnabled) && this.searchExpression !== undefined ? SearchExpression.and([this.searchExpression, searchExpression]) : searchExpression;
+    return (this.force || isBlacklistEnabled) && this.searchExpression !== undefined ? SearchExpression.and([
+      this.searchExpression,
+      searchExpression
+    ]) : searchExpression;
   }
 }
 

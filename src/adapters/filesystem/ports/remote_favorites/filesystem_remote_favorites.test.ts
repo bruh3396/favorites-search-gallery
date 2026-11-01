@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
+import { FilesystemPostFile } from "@/adapters/filesystem/client/filesystem_post_file";
 import { FilesystemRemoteFavorites } from "@/adapters/filesystem/ports/remote_favorites/filesystem_remote_favorites";
 import { Post } from "@/core/domain/post/post";
-import { FilesystemPostFile } from "@/adapters/filesystem/client/filesystem_post_file";
 import { createPost } from "@/testing/post";
 
 function createRemoteFavorites(...files: [id: string, modifiedAt: number][]): FilesystemRemoteFavorites {

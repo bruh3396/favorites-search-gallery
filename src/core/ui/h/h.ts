@@ -35,15 +35,19 @@ export function currentDocument(): Document {
   return DocumentContext.read();
 }
 
-export type Component<P> = (props: P) => HTMLElement;
+export type Component<P, R extends HTMLElement | readonly HTMLElement[] = HTMLElement> = (props: P) => R;
 
-export function h<P>(component: Component<P>, props: P, ...children: Child[]): HTMLElement;
+export function h<P, R extends HTMLElement | readonly HTMLElement[]>(component: Component<P, R>, props: P, ...children: Child[]): R;
 export function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
   props: Props<HTMLElementTagNameMap[K]> | null,
   ...children: Child[]
 ): HTMLElementTagNameMap[K];
-export function h(tag: string | Component<unknown>, props: object | null, ...children: Child[]): HTMLElement {
+export function h(
+  tag: string | Component<unknown, HTMLElement | readonly HTMLElement[]>,
+  props: object | null,
+  ...children: Child[]
+): HTMLElement | readonly HTMLElement[] {
   if (typeof tag === "function") {
     const componentProps = children.length === 0 ? props ?? {} : { ...props, children };
     return untracked(() => tag(componentProps));

@@ -1,13 +1,14 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
 import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
+import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/lightbox_viewport";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
-import { LightboxViewportClass } from "@/core/features/lightbox/ui/media/lightbox_viewport";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
+import { MemoryViewport } from "@/adapters/memory/ports/viewport/memory_viewport";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { composeLightboxDialog } from "@/core/features/lightbox/ui/lightbox_dialog_composer";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
@@ -16,7 +17,7 @@ import { render } from "@/core/ui/h/h";
 const IMAGE = createPost({ id: "1", media: { kind: "image", locator: "image.jpg" } });
 const LONGER_THAN_ANY_INTERVAL = 60_000;
 
-function setup(mode: LightboxMode = "full"): {
+function setup(mode: LightboxMode = "full", locateItem: (post: Post) => Element | undefined = () => undefined): {
   view: HTMLElement;
   isOpen: Signal<boolean>;
   scheduler: MemoryScheduler;
@@ -36,6 +37,7 @@ function setup(mode: LightboxMode = "full"): {
   const { result: view } = render(document, () => composeLightboxDialog<Post>({ keymap: { ArrowRight: "showNext", " ": "toggleAutoplay", d: "download" } }, {
     scheduler,
     sizeObserver: new MemorySizeObserver(),
+    viewport: new MemoryViewport(),
     remoteMedia,
     lightboxMediaResolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
     lightboxActions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download },
@@ -48,10 +50,12 @@ function setup(mode: LightboxMode = "full"): {
       close
     },
     retainedItems,
-    volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
-    muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
-    locateItem: () => undefined,
-    mode: new Signal<LightboxMode>(mode)
+    lightboxPreferences: {
+      mode: new Signal<LightboxMode>(mode),
+      volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage })
+    },
+    locateItem
   }));
 
   document.body.append(view);
@@ -63,6 +67,7 @@ function pressKey(view: HTMLElement, key: string): void {
 }
 
 afterEach(() => {
+  vi.restoreAllMocks();
   Reflect.deleteProperty(document, "fullscreenElement");
   Reflect.deleteProperty(document, "exitFullscreen");
   document.body.replaceChildren();
@@ -89,9 +94,8 @@ describe("composeLightboxDialog", () => {
     const { view, isOpen, close } = setup("simple");
 
     isOpen.value = true;
-    view.querySelector(`.${LightboxViewportClass.root}`)!.dispatchEvent(
-      new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 })
-    );
+    view.querySelector(`.${LightboxViewportClass.root}`)!
+      .dispatchEvent(new PointerEvent("pointerdown", { button: 0, isPrimary: true, pointerId: 1, clientX: 10, clientY: 10 }));
     expect(close).toHaveBeenCalledOnce();
   });
 
@@ -105,6 +109,31 @@ describe("composeLightboxDialog", () => {
     await flushMicrotasks();
     scheduler.advance(LONGER_THAN_ANY_INTERVAL);
     expect(goToNext).toHaveBeenCalledOnce();
+  });
+
+  test.each<[LightboxMode, number]>([
+    ["simple", 200],
+    ["full", 250]
+  ])("morphs back to the item's thumb over %s mode's %ims", async(mode, duration) => {
+    const thumb = document.createElement("div");
+    const isThumbHidden = (): boolean => thumb.style.getPropertyValue("visibility") === "hidden";
+
+    document.body.append(thumb);
+    vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 100, 100));
+    const { view, retainedItems, scheduler } = setup(mode, () => thumb);
+
+    retainedItems.value = [IMAGE];
+    await flushMicrotasks();
+    view.dispatchEvent(new Event("close"));
+    scheduler.runFrame();
+    scheduler.advance(duration - 1);
+    scheduler.runFrame();
+    const wasHiddenBeforeEnd = isThumbHidden();
+
+    scheduler.advance(1);
+    scheduler.runFrame();
+    scheduler.runFrame();
+    expect([wasHiddenBeforeEnd, isThumbHidden()]).toEqual([true, false]);
   });
 
   test("leaves fullscreen once the lightbox closes", () => {

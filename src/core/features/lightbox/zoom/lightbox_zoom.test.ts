@@ -1,8 +1,8 @@
 import { FIT_LIGHTBOX_ZOOM_VIEW, LightboxZoom, LightboxZoomView } from "@/core/features/lightbox/zoom/lightbox_zoom";
-import { Size } from "@/core/utils/geometry/size";
 import { describe, expect, test } from "vitest";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
+import { Size } from "@/core/utils/geometry/size";
 import { createPosts } from "@/testing/post";
 
 const POSTS = createPosts("1", "2");

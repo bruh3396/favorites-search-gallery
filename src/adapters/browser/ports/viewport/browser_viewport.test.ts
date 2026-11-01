@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, onTestFinished, test, vi } from "vitest";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 
 const LOCKED = "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no";
@@ -51,5 +51,14 @@ describe("BrowserViewport", () => {
     viewport.lockScroll();
     viewport.unlockScroll();
     expect(document.documentElement.style.overflowY).toBe("");
+  });
+
+  test("reads the screen's device pixel ratio", () => {
+    vi.stubGlobal("devicePixelRatio", 2);
+    onTestFinished(() => {
+      vi.unstubAllGlobals();
+    });
+
+    expect(new BrowserViewport().readDevicePixelRatio()).toBe(2);
   });
 });

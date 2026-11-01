@@ -4,7 +4,9 @@ import { SharedPreferences } from "@/core/app/shared_preferences";
 import { applyTheme } from "@/core/ui/theme/theme_applier";
 
 export function bindAppearance(
-  appRoot: HTMLElement, sharedPreferences: Pick<SharedPreferences, "theme" | "colorScheme">, previewedTheme?: Readable<Theme | null>
+  appRoot: HTMLElement,
+  sharedPreferences: Pick<SharedPreferences, "theme" | "colorScheme">,
+  previewedTheme?: Readable<Theme | null>
 ): void {
   effect(() => {
     appRoot.style.colorScheme = sharedPreferences.colorScheme.value;

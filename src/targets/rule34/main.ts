@@ -1,16 +1,17 @@
-import { Environment } from "@/core/boundary/environment";
-import { AppMode } from "@/core/boundary/app_mode";
 import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { AppMode } from "@/core/boundary/app_mode";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
-import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/browser_local_keyed_values";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/browser_random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
+import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
+import { Environment } from "@/core/boundary/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";
@@ -18,6 +19,7 @@ import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorite
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { Media } from "@/core/domain/media/media";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
@@ -30,9 +32,9 @@ import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_r
 import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
@@ -76,7 +78,7 @@ function createRule34Dependencies(environment: Environment, rule34Document: Rule
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
   const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
   const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
-  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, page: new BrowserHostPage() });
+  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, claimBodyContent });
   return {
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,
     hostPage, localKeyedValues: new BrowserLocalKeyedValues()
@@ -100,7 +102,7 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
   const remotePosts = new FallbackRemotePosts({
     primaryRemotePosts: new FrozenCobaltRemotePosts({
       frozenCobaltClient,
-      mintMedia: file => rule34CdnClient.mintMediaFromParts(file),
+      mintMedia: (file): Media => rule34CdnClient.mintMediaFromParts(file),
       scheduler,
       randomSource
     }),
@@ -119,6 +121,8 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
     localKeyedValues,
     hostPage,
     sizeObserver: new BrowserSizeObserver(),
+
+    viewport: new BrowserViewport(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
@@ -147,6 +151,8 @@ function startPostListApp(environment: Environment, {
     scheduler,
     visibilityObserver: new BrowserVisibilityObserver(),
     sizeObserver: new BrowserSizeObserver(),
+
+    viewport: new BrowserViewport(),
     remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
     remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     remotePostList,

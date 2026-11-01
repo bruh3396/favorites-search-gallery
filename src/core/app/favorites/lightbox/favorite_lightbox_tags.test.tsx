@@ -26,6 +26,7 @@ interface Setup {
   getMany: Mock<(names: readonly string[]) => Promise<Map<string, TagCategory>>>;
   readGroups: () => string[][];
   clickShowMore: () => void;
+  dispose: () => void;
 }
 
 function setup(shownFavorite: ShownFavorite | undefined, categories: ReadonlyMap<string, TagCategory> = new Map()): Setup {
@@ -37,13 +38,20 @@ function setup(shownFavorite: ShownFavorite | undefined, categories: ReadonlyMap
     const category = categories.get(name);
     return category === undefined ? [] : [[name, category] as const];
   }))));
-  const { result: element } = render(document, () => (
-    <FavoriteLightboxTags favorite={favorite} organization={organization} alignment={alignment} size={size} localTagCategories={{ getMany }} collapsedTagCount={6} />
+  const { result: element, dispose } = render(document, () => (
+    <FavoriteLightboxTags
+      favorite={favorite}
+      organization={organization}
+      alignment={alignment}
+      size={size}
+      localTagCategories={{ getMany }}
+      collapsedTagCount={6}
+    />
   ));
   const readGroups = (): string[][] => [...element.querySelectorAll(`.${FavoriteLightboxTagsClass.group}`)]
     .map(group => [...group.querySelectorAll<HTMLElement>("h3, li:not([hidden])")].map(item => item.textContent ?? ""));
   const clickShowMore = (): void => element.querySelector<HTMLButtonElement>(`.${FavoriteLightboxTagsClass.showMore}`)!.click();
-  return { element, favorite, organization, alignment, size, getMany, readGroups, clickShowMore };
+  return { element, favorite, organization, alignment, size, getMany, readGroups, clickShowMore, dispose };
 }
 
 describe("FavoriteLightboxTags", () => {
@@ -66,7 +74,13 @@ describe("FavoriteLightboxTags", () => {
   });
 
   test("orders groups artist, character, copyright, meta, general", async() => {
-    const categories = new Map<string, TagCategory>([["highres", "metadata"], ["solo", "general"], ["overwatch", "copyright"], ["tracer", "character"], ["alice", "artist"]]);
+    const categories = new Map<string, TagCategory>([
+      ["highres", "metadata"],
+      ["solo", "general"],
+      ["overwatch", "copyright"],
+      ["tracer", "character"],
+      ["alice", "artist"]
+    ]);
     const { readGroups } = setup(createFavorite([...categories.keys()]), categories);
 
     await flushMicrotasks();
@@ -147,6 +161,15 @@ describe("FavoriteLightboxTags", () => {
     await flushMicrotasks();
     organization.value = "list";
     expect(readGroups()).toEqual([["alice", "b", "c", "d", "e", "f", "solo"]]);
+  });
+
+  test("stops expanding groups once disposed", async() => {
+    const { readGroups, clickShowMore, dispose } = setup(createFavorite(["a", "b", "c", "d", "e", "f", "g"]));
+
+    await flushMicrotasks();
+    dispose();
+    clickShowMore();
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 1 more"]]);
   });
 
   test("exposes its alignment and size for styling", () => {

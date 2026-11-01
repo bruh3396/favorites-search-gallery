@@ -1,12 +1,12 @@
-import { Post } from "@/core/domain/post/post";
-import { toRatingMask } from "@/core/domain/post/rating_mask";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
-import { buildFavoritesSearchRequest } from "@/core/features/favorites/testing/favorites_search_request_builder";
+import { Post } from "@/core/domain/post/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchRequest } from "@/core/features/favorites/testing/favorites_search_request_builder";
+import { toRatingMask } from "@/core/domain/post/rating_mask";
 
 interface Setup {
   favoritesCollection: FavoritesCollection;
@@ -49,7 +49,9 @@ describe("FavoritesSearchIndex", () => {
       const addedArenaFavorites = favoritesCollection.append(createTaggedPosts("apple"));
       const announced: string[][] = [];
 
-      favoritesSearchIndex.indexed.on(favorites => announced.push(getPostIds(favoritesSearchIndex.match(buildFavoritesSearchRequest({ query: "apple" }), favorites))));
+      favoritesSearchIndex.indexed.on(favorites => {
+        announced.push(getPostIds(favoritesSearchIndex.match(buildFavoritesSearchRequest({ query: "apple" }), favorites)));
+      });
       favoritesSearchIndex.add(addedArenaFavorites);
       expect(announced).toEqual([["1"]]);
     });
@@ -167,7 +169,8 @@ describe("FavoritesSearchIndex", () => {
     test("shuffles instead of sorting while shuffled", () => {
       const { favoritesSearchIndex } = setup(createNumberedPosts(20));
 
-      expect(favoritesSearchIndex.search(buildFavoritesSearchRequest({ isShuffled: true }))).not.toEqual(favoritesSearchIndex.search(buildFavoritesSearchRequest()));
+      expect(favoritesSearchIndex.search(buildFavoritesSearchRequest({ isShuffled: true })))
+        .not.toEqual(favoritesSearchIndex.search(buildFavoritesSearchRequest()));
     });
 
     test("returns the same order for the same seed regardless of the indexed order", () => {
@@ -186,7 +189,9 @@ describe("FavoritesSearchIndex", () => {
     });
 
     test("keeps the shuffled order of the favorites that still match a narrower search", () => {
-      const { favoritesSearchIndex } = setup(createTaggedPosts(...Array.from({ length: 20 }, (_, position) => (position % 2 === 0 ? "apple" : "apple banana"))));
+      const { favoritesSearchIndex } = setup(createTaggedPosts(...Array.from({ length: 20 }, (_, position) => {
+        return position % 2 === 0 ? "apple" : "apple banana";
+      })));
       const everythingPostIds = getPostIds(favoritesSearchIndex.search(buildFavoritesSearchRequest({ isShuffled: true })));
       const narrowedPostIds = getPostIds(favoritesSearchIndex.search(buildFavoritesSearchRequest({ isShuffled: true, query: "banana" })));
 
@@ -228,7 +233,8 @@ describe("FavoritesSearchIndex", () => {
     test("keeps the indexed order regardless of the sort order", () => {
       const { favorites, favoritesSearchIndex } = setup(["1", "3", "2"].map(id => createPost({ id, score: Number(id) })));
 
-      expect(getPostIds(favoritesSearchIndex.match(buildFavoritesSearchRequest({ sortKey: "score", isSortAscending: true }), favorites))).toEqual(["1", "3", "2"]);
+      expect(getPostIds(favoritesSearchIndex.match(buildFavoritesSearchRequest({ sortKey: "score", isSortAscending: true }), favorites)))
+        .toEqual(["1", "3", "2"]);
     });
 
     test("negates within the candidates only", () => {

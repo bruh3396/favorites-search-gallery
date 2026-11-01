@@ -1,6 +1,6 @@
+import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { Metric } from "@/core/domain/search/metric";
-import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
 
 function createFruit(name: FruitName, tags: string[], metrics: Partial<Record<Metric, number>>): Fruit {
   return {

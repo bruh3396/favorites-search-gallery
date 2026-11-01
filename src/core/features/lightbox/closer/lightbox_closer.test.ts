@@ -1,6 +1,8 @@
 import { LightboxCloser, LightboxCloserDependencies } from "@/core/features/lightbox/closer/lightbox_closer";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { LightboxMediaElement } from "@/core/features/lightbox/stage/lightbox_media_element";
+import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { MemoryViewport } from "@/adapters/memory/ports/viewport/memory_viewport";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
@@ -25,7 +27,6 @@ function setup(partialLightboxCloserDependencies: Partial<LightboxCloserDependen
   close: () => void;
   locateItem: (post: Post) => Element | undefined;
 } {
-  vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
   onTestFinished(() => {
     findStandIn()?.remove();
     vi.restoreAllMocks();
@@ -34,6 +35,8 @@ function setup(partialLightboxCloserDependencies: Partial<LightboxCloserDependen
   const thumb = document.createElement("div");
   const locateItem = vi.fn(() => thumb);
   const lightboxCloser = new LightboxCloser<Post>({
+    scheduler: new MemoryScheduler(),
+    viewport: new MemoryViewport(),
     lightboxNavigation: { currentItem: new Signal<Post | undefined>(POST), close },
     shownMedia: new Signal<LightboxMediaElement | undefined>(createShownMedia()),
     inFullscreen: new Signal(false),

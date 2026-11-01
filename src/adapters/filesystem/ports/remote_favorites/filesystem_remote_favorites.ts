@@ -1,6 +1,6 @@
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { FilesystemClient } from "@/adapters/filesystem/client/filesystem_client";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class FilesystemRemoteFavorites implements RemoteFavorites {
   constructor(private readonly filesystemClient: Pick<FilesystemClient, "readPostFiles" | "countPostFiles" | "deletePostFile">) { }

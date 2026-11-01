@@ -1,4 +1,3 @@
-import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -6,6 +5,7 @@ import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term"
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
 import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
+import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { union } from "@/core/utils/collection/set_utilities";

@@ -1,13 +1,13 @@
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { LightboxMediaCache } from "@/core/features/lightbox/stage/lightbox_media_cache";
+import { LightboxMediaElement } from "@/core/features/lightbox/stage/lightbox_media_element";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
 import { LightboxVideoPool } from "@/core/features/lightbox/stage/lightbox_video_pool";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { LightboxMediaElement } from "@/core/features/lightbox/stage/lightbox_media_element";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Resource } from "@/core/utils/reactive/resource";
 import { Size } from "@/core/utils/geometry/size";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { currentDocument } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
 import { playVideo } from "@/core/features/lightbox/stage/video_utilities";

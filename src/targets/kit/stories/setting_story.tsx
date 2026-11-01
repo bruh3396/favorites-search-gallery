@@ -1,8 +1,8 @@
-import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { SettingPreference } from "@/core/ui/settings/setting_preference";
 import { h, render } from "@/core/ui/h/h";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { Setting } from "@/core/ui/settings/setting";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
+import { SettingPreference } from "@/core/ui/settings/setting_preference";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 

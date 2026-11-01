@@ -1,6 +1,6 @@
+import { SortedArray } from "@/core/utils/collection/sorted_array";
 import { TermDelta } from "@/core/domain/search/engines/term_delta";
 import { TermUpdate } from "@/core/domain/search/engines/term_update";
-import { SortedArray } from "@/core/utils/collection/sorted_array";
 
 export class InvertedIndex<Doc> {
   private readonly terms: SortedArray<string> = new SortedArray<string>();

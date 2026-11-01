@@ -1,7 +1,7 @@
-import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
-import { FrozenCobaltIdentity } from "@/adapters/frozen_cobalt/client/frozen_cobalt_identity";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { advanceAndSettle, flushMicrotasks } from "@/testing/microtask_utilities";
+import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
+import { FrozenCobaltIdentity } from "@/adapters/frozen_cobalt/client/frozen_cobalt_identity";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 type Fetch = Mock<(url: string, init: RequestInit) => Promise<Response>>;
@@ -64,7 +64,10 @@ describe("FrozenCobaltClient", () => {
   });
 
   test("rejects a post whose result is malformed", async() => {
-    await expect(fetchPostResult(setup(createFetch(() => ({ 1: { status: "ok", post: { id: "1" } } }))), "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
+    await expect(fetchPostResult(setup(createFetch(() => ({ 1: { status: "ok", post: { id: "1" } } }))), "1")).rejects.toMatchObject({
+      reason: "malformed",
+      subject: "1"
+    });
   });
 
   test("rejects a post the response leaves out as malformed", async() => {
@@ -83,11 +86,15 @@ describe("FrozenCobaltClient", () => {
   });
 
   test("rejects with the status when the server answers with an error", async() => {
-    await expect(fetchPostResult(setup(vi.fn(() => Promise.resolve(new Response("", { status: 503 })))), "1")).rejects.toMatchObject({ reason: "http", status: 503 });
+    await expect(fetchPostResult(setup(vi.fn(() => Promise.resolve(new Response("", { status: 503 })))), "1")).rejects.toMatchObject({
+      reason: "http",
+      status: 503
+    });
   });
 
   test("rejects as a network failure when the request can't be sent", async() => {
     const offline = new TypeError("Failed to fetch");
+
     await expect(fetchPostResult(setup(vi.fn(() => Promise.reject(offline))), "1")).rejects.toMatchObject({ reason: "network", cause: offline });
   });
 

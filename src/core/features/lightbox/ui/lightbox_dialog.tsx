@@ -1,10 +1,10 @@
+import { Readable, effect } from "@/core/utils/reactive/signal";
 import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { Keymap } from "@/core/ui/hotkeys/keymap";
-import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
-import { Readable, effect } from "@/core/utils/reactive/signal";
 import { LightboxArrow } from "@/core/features/lightbox/ui/chrome/lightbox_arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { LightboxAutoplayBar } from "@/core/features/lightbox/ui/chrome/lightbox_autoplay_bar";
+import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanel } from "@/core/features/lightbox/ui/details/lightbox_details_panel";
 import { LightboxGif } from "@/core/features/lightbox/ui/media/lightbox_gif";
@@ -93,7 +93,13 @@ export function LightboxDialog<T extends MediaItem>(props: LightboxDialogProps<T
             keymap={props.keymap}
           />
         }
-        startEdgeChild={<LightboxArrow direction="previous" lightboxShortcut={findLightboxShortcut(props.keymap, "showPrevious")} onClick={handlers.showPrevious} />}
+        startEdgeChild={
+          <LightboxArrow
+            direction="previous"
+            lightboxShortcut={findLightboxShortcut(props.keymap, "showPrevious")}
+            onClick={handlers.showPrevious}
+          />
+        }
         endEdgeChild={<LightboxArrow direction="next" lightboxShortcut={findLightboxShortcut(props.keymap, "showNext")} onClick={handlers.showNext} />}
       />
       <LightboxZoomChip pixelScale={lightboxZoom.pixelScale} />

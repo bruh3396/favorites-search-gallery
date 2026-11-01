@@ -1,14 +1,14 @@
+import { Mock, describe, expect, test, vi } from "vitest";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
-import { Post } from "@/core/domain/post/post";
-import { PostStatus } from "@/core/domain/post/post_status";
+import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
 import { FrozenCobaltPostResult } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post_result";
-import { Mock, describe, expect, test, vi } from "vitest";
-import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";
 import { Media } from "@/core/domain/media/media";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { Post } from "@/core/domain/post/post";
+import { PostStatus } from "@/core/domain/post/post_status";
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/post_unavailable_error";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 
@@ -26,7 +26,7 @@ function createFrozenCobaltPost(postId: string): FrozenCobaltPost {
     score: 0,
     rating: "explicit",
     changedAt: 0,
-    directory: 1234,
+    directory: 1_234,
     stem: postId,
     extension: "png",
     tagCategoryByName: { apple: "general" }

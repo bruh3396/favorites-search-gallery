@@ -1,5 +1,5 @@
-import { isBoolean, isInUnitInterval, isNumber, isOneOf, isRecord } from "@/core/utils/guard/unknown_utilities";
 import { describe, expect, test } from "vitest";
+import { isBoolean, isInUnitInterval, isNumber, isOneOf, isRecord } from "@/core/utils/guard/unknown_utilities";
 
 describe("isNumber", () => {
   test("accepts only numbers", () => {

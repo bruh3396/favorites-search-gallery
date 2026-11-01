@@ -3,9 +3,9 @@ import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
 import { Metric } from "@/core/domain/search/metric";
 import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Doc {
   readonly id: number;
@@ -22,7 +22,7 @@ function getMetric(doc: Doc, metric: Metric): number {
 }
 
 function setup(): (term: string) => number[] {
-  const bitIndex = new BitIndex<Doc>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
+  const bitIndex = new BitIndex<Doc>({ getTerms: (doc): Iterable<string> => doc.tags, stringInterner: new StringInterner() });
   const metricBitIndex = new MetricBitIndex<Doc>(getMetric);
   const wildcardPostingResolver = new WildcardPostingResolver({ bitIndex, stringInterner: new StringInterner() });
   const postingResolver = new PostingResolver(bitIndex, metricBitIndex, wildcardPostingResolver);

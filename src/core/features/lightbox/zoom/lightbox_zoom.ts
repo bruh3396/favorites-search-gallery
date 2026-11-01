@@ -108,7 +108,10 @@ export class LightboxZoom {
     } else if (frame !== undefined) {
       const scale = Math.max(1 / computeFitRatio(frame), this.minimumScale);
 
-      this.zoomed.value = { lightboxZoomView: zoomAt(frame, FIT_LIGHTBOX_ZOOM_VIEW, { scale, point: point ?? this.focusPoint ?? computeCenter(frame) }), glides: true };
+      this.zoomed.value = {
+        lightboxZoomView: zoomAt(frame, FIT_LIGHTBOX_ZOOM_VIEW, { scale, point: point ?? this.focusPoint ?? computeCenter(frame) }),
+        glides: true
+      };
     }
   }
 

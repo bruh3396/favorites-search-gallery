@@ -12,7 +12,7 @@ function createDoc(id: string, ...tags: string[]): Doc {
 }
 
 function createIndex(docs: readonly Doc[]): BitIndex<Doc> {
-  const bitIndex = new BitIndex<Doc>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
+  const bitIndex = new BitIndex<Doc>({ getTerms: (doc): Iterable<string> => doc.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(docs);
   return bitIndex;
@@ -87,7 +87,7 @@ describe("BitIndex", () => {
   });
 
   test("rebuilds cleanly, discarding the previous corpus", () => {
-    const bitIndex = new BitIndex<Doc>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
+    const bitIndex = new BitIndex<Doc>({ getTerms: (doc): Iterable<string> => doc.tags, stringInterner: new StringInterner() });
 
     bitIndex.build([appleDoc]);
     bitIndex.build([lemonDoc]);

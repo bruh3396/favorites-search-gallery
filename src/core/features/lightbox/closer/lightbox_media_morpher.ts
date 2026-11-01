@@ -1,4 +1,5 @@
 import { LightboxMediaElement } from "@/core/features/lightbox/stage/lightbox_media_element";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Size } from "@/core/utils/geometry/size";
 
 interface Box extends Size {
@@ -11,9 +12,19 @@ interface Frame {
   readonly boundsBox?: Box;
 }
 
+export interface LightboxMediaMorph {
+  readonly duration: number;
+  readonly pixelRatio: number;
+  readonly scheduler: Pick<Scheduler, "requestFrame">;
+}
+
 const STAND_IN_RADIUS = 8;
 
-export function morphLightboxMedia(sourceLightboxMediaElement: LightboxMediaElement, duration: number, update: () => Element | undefined): void {
+export function morphLightboxMedia(
+  sourceLightboxMediaElement: LightboxMediaElement,
+  { duration, pixelRatio, scheduler }: LightboxMediaMorph,
+  update: () => Element | undefined
+): void {
   const view = sourceLightboxMediaElement.ownerDocument.defaultView;
   const intrinsicSize = measureIntrinsicSize(sourceLightboxMediaElement);
   const startBox = fitInside(sourceLightboxMediaElement.getBoundingClientRect(), intrinsicSize);
@@ -22,7 +33,7 @@ export function morphLightboxMedia(sourceLightboxMediaElement: LightboxMediaElem
     update();
     return;
   }
-  const standIn = drawStandIn(view, sourceLightboxMediaElement, { startBox, intrinsicSize });
+  const standIn = drawStandIn(sourceLightboxMediaElement, { startBox, intrinsicSize, pixelRatio });
 
   sourceLightboxMediaElement.ownerDocument.body.append(standIn);
   const target = update();
@@ -31,16 +42,19 @@ export function morphLightboxMedia(sourceLightboxMediaElement: LightboxMediaElem
     standIn.remove();
     return;
   }
-  fly(view, standIn, { startBox, target, duration });
+  fly(view, standIn, { startBox, target, duration, scheduler });
 }
 
 function isEmpty({ width, height }: Size): boolean {
   return !(width > 0 && height > 0);
 }
 
-function drawStandIn(view: Window, sourceLightboxMediaElement: LightboxMediaElement, { startBox, intrinsicSize }: { startBox: Box; intrinsicSize: Size }): HTMLCanvasElement {
+function drawStandIn(
+  sourceLightboxMediaElement: LightboxMediaElement,
+  { startBox, intrinsicSize, pixelRatio }: { startBox: Box; intrinsicSize: Size; pixelRatio: number }
+): HTMLCanvasElement {
   const canvas = sourceLightboxMediaElement.ownerDocument.createElement("canvas");
-  const density = Math.min(view.devicePixelRatio, intrinsicSize.width / startBox.width);
+  const density = Math.min(pixelRatio, intrinsicSize.width / startBox.width);
 
   canvas.width = Math.max(1, Math.round(startBox.width * density));
   canvas.height = Math.max(1, Math.round(startBox.height * density));
@@ -67,7 +81,11 @@ function fitInside(box: Box, { width, height }: Size): Box {
   return { left: box.left + ((box.width - fitted.width) / 2), top: box.top + ((box.height - fitted.height) / 2), ...fitted };
 }
 
-function fly(view: Window, standIn: HTMLCanvasElement, { startBox, target, duration }: { startBox: Box; target: Element; duration: number }): void {
+function fly(
+  view: Window,
+  standIn: HTMLCanvasElement,
+  { startBox, target, duration, scheduler }: { startBox: Box; target: Element; duration: number; scheduler: Pick<Scheduler, "requestFrame"> }
+): void {
   const reveal = hide(target);
   const viewport = { left: 0, top: 0, width: view.innerWidth, height: view.innerHeight };
   const destination = findClippingAncestor(view, target)?.getBoundingClientRect();
@@ -87,10 +105,10 @@ function fly(view: Window, standIn: HTMLCanvasElement, { startBox, target, durat
     const box = destination === undefined ? undefined : interpolate(viewport, destination, amount);
 
     cover(standIn, startBox, { box: interpolate(startBox, target.getBoundingClientRect(), amount), boundsBox: box });
-    view.requestAnimationFrame(progress < 1 ? step : land);
+    scheduler.requestFrame(progress < 1 ? step : land);
   };
 
-  view.requestAnimationFrame(step);
+  scheduler.requestFrame(step);
 }
 
 function findClippingAncestor(view: Window, element: Element): Element | undefined {

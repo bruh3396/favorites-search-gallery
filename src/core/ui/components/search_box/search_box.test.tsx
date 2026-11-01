@@ -99,6 +99,14 @@ describe("SearchBox", () => {
     expect(document.activeElement).not.toBe(input);
   });
 
+  test("works without focus requests", () => {
+    const onSearch = vi.fn();
+    const { result: element } = render(document, () => <SearchBox label="Search" query={new Signal("cat")} onSearch={onSearch} />);
+
+    element.querySelector("form")!.dispatchEvent(new Event("submit", { cancelable: true }));
+    expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
+  });
+
   test("shows trailing content inside the field", () => {
     const trailingChild = document.createElement("span");
     const { input } = setup(trailingChild);

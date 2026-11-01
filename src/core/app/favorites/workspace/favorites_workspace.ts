@@ -2,11 +2,11 @@ import { Codec, createListCodec, createRecordCodec } from "@/core/utils/codec/co
 import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { FavoritesTab, createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { Readable, batch, computed, effect } from "@/core/utils/reactive/signal";
-import { Tab } from "@/core/ui/tabs/tab";
-import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { StoredValue } from "@/core/utils/storage/stored_value";
+import { Tab } from "@/core/ui/tabs/tab";
+import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export interface FavoritesWorkspaceDependencies {
@@ -23,7 +23,9 @@ export interface FavoritesWorkspaceSnapshot {
   readonly tabGroups: readonly TabGroup[];
 }
 
-export const DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT: FavoritesWorkspaceSnapshot = { tabGroups: [{ favoritesSearchSettings: [DEFAULT_FAVORITES_SEARCH_SETTINGS], activeIndex: 0 }] };
+export const DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT: FavoritesWorkspaceSnapshot = {
+  tabGroups: [{ favoritesSearchSettings: [DEFAULT_FAVORITES_SEARCH_SETTINGS], activeIndex: 0 }]
+};
 const TABS_CODEC = createListCodec(createRecordCodec(DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS));
 const TAB_GROUPS_CODEC = createListCodec<TabGroup>({
   decode: (stored): TabGroup | undefined => {
@@ -31,7 +33,10 @@ const TAB_GROUPS_CODEC = createListCodec<TabGroup>({
       return undefined;
     }
     const favoritesSearchSettings = TABS_CODEC.decode(stored.favoritesSearchSettings);
-    return favoritesSearchSettings !== undefined && favoritesSearchSettings.length > 0 ? { favoritesSearchSettings, activeIndex: decodeActiveIndex(stored.activeIndex, favoritesSearchSettings.length) } : undefined;
+    return favoritesSearchSettings !== undefined && favoritesSearchSettings.length > 0 ? {
+      favoritesSearchSettings,
+      activeIndex: decodeActiveIndex(stored.activeIndex, favoritesSearchSettings.length)
+    } : undefined;
   },
   encode: (tabGroup): unknown => ({ favoritesSearchSettings: TABS_CODEC.encode(tabGroup.favoritesSearchSettings), activeIndex: tabGroup.activeIndex })
 });
@@ -106,7 +111,14 @@ export class FavoritesWorkspace {
 
   private createSnapshot(): FavoritesWorkspaceSnapshot {
     const tabs = this.tabManager.tabs.value;
-    return { tabGroups: [{ favoritesSearchSettings: tabs.map(tab => tab.value.session.searchSettings.value), activeIndex: tabs.indexOf(this.findActiveTab()) }] };
+    return {
+      tabGroups: [
+        {
+          favoritesSearchSettings: tabs.map(tab => tab.value.session.searchSettings.value),
+          activeIndex: tabs.indexOf(this.findActiveTab())
+        }
+      ]
+    };
   }
 
   private findActiveTab(): Tab<FavoritesTab> {

@@ -14,7 +14,9 @@ describe("isFilteringFavoritesSearchSettings", () => {
   });
 
   test("ignores ordering settings", () => {
-    expect(isFilteringFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 7 })).toBe(false);
+    expect(isFilteringFavoritesSearchSettings({
+      ...DEFAULT_FAVORITES_SEARCH_SETTINGS, sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 7
+    })).toBe(false);
   });
 });
 

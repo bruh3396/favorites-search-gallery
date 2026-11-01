@@ -1,15 +1,15 @@
 import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
-import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { SetEvaluator } from "@/core/domain/search/engines/set/logic/set_evaluator";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 const { fruits, invertedIndex } = FRUIT_CORPUS;
 const positionIndex = new PositionIndex<Fruit>();
@@ -99,7 +99,10 @@ describe("SetEvaluator", () => {
 
   test("still excludes a negated root's matches when the candidate list dwarfs the index", () => {
     const unindexedFruits: Fruit[] = Array.from({ length: fruits.length * 3 }, () => ({ name: "apple", tags: new Set<string>(), getMetric: (): number => 0 }));
-    const actualFruitNames = setEvaluator.evaluate(SearchExpression.not(parseSearchExpression("red")), [...fruits, ...unindexedFruits]).map(fruit => fruit.name).sort();
+    const actualFruitNames = setEvaluator
+      .evaluate(SearchExpression.not(parseSearchExpression("red")), [...fruits, ...unindexedFruits])
+      .map(fruit => fruit.name)
+      .sort();
 
     expect(actualFruitNames).toEqual(["banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
   });

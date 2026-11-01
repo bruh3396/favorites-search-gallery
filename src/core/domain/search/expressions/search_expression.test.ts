@@ -16,13 +16,15 @@ describe("SearchExpression", () => {
 
   describe("and", () => {
     test("joins children that must all match", () => {
-      expect(SearchExpression.and([appleSearchExpression, bananaSearchExpression]).node).toEqual({ kind: "and", childExpressions: [appleSearchExpression, bananaSearchExpression] });
+      expect(SearchExpression.and([appleSearchExpression, bananaSearchExpression]).node)
+        .toEqual({ kind: "and", childExpressions: [appleSearchExpression, bananaSearchExpression] });
     });
   });
 
   describe("or", () => {
     test("joins children of which any may match", () => {
-      expect(SearchExpression.or([appleSearchExpression, bananaSearchExpression]).node).toEqual({ kind: "or", childExpressions: [appleSearchExpression, bananaSearchExpression] });
+      expect(SearchExpression.or([appleSearchExpression, bananaSearchExpression]).node)
+        .toEqual({ kind: "or", childExpressions: [appleSearchExpression, bananaSearchExpression] });
     });
   });
 

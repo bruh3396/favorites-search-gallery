@@ -1,6 +1,6 @@
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { ControlProps } from "@/core/ui/components/control/control_props";
-import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
 
@@ -23,7 +23,9 @@ const KEY_STEPS: Readonly<Record<string, (index: number, count: number) => numbe
   End: (_, count) => count - 1
 };
 
-export function Segmented<Value>({ controlChoices, value, disabled = new Signal(false), onValueChange, size: controlSize = "medium" }: SegmentedProps<Value>): HTMLElement {
+export function Segmented<Value>({
+  controlChoices, value, disabled = new Signal(false), onValueChange, size: controlSize = "medium"
+}: SegmentedProps<Value>): HTMLElement {
   const findCheckedIndex = (checkedValue: Value): number => controlChoices.findIndex(controlChoice => controlChoice.value === checkedValue);
   const checkedIndex = computed(() => findCheckedIndex(value.value));
   const tabStop = computed(() => Math.max(checkedIndex.value, 0));

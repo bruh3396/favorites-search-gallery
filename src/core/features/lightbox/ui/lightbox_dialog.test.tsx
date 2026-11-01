@@ -1,9 +1,10 @@
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
-import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { LightboxDialog, LightboxDialogClass } from "@/core/features/lightbox/ui/lightbox_dialog";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import DIALOG_CSS from "@/core/features/lightbox/ui/lightbox_dialog.css?inline";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
+import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanelClass } from "@/core/features/lightbox/ui/details/lightbox_details_panel";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
@@ -18,7 +19,6 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 const IDLE_DELAY = 100;
@@ -238,6 +238,16 @@ describe("LightboxDialog", () => {
     dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)!.dispatchEvent(new PointerEvent("pointerenter"));
     scheduler.advance(LEAVE_DELAY);
     expect(dialog.hasAttribute("data-idle")).toBe(false);
+  });
+
+  test("idles the overlay once the pointer leaves the details panel", () => {
+    const { dialog, scheduler } = setupOpen(createDetails());
+    const panel = dialog.querySelector(`.${LightboxDetailsPanelClass.root}`)!;
+
+    panel.dispatchEvent(new PointerEvent("pointerenter"));
+    panel.dispatchEvent(new PointerEvent("pointerleave"));
+    scheduler.advance(IDLE_DELAY);
+    expect(dialog.hasAttribute("data-idle")).toBe(true);
   });
 
   test("takes focus back when focus moves into the video", () => {

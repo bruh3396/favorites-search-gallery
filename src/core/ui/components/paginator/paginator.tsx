@@ -1,8 +1,8 @@
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { PageSlot } from "@/core/ui/components/paginator/page_slot";
-import { listPageTerms } from "@/core/ui/components/paginator/page_term_lister";
 import { h } from "@/core/ui/h/h";
+import { listPageTerms } from "@/core/ui/components/paginator/page_term_lister";
 
 export const PaginatorClass = {
   root: "fsg-Paginator",

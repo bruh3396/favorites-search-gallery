@@ -1,7 +1,5 @@
 import { FavoritesPagination, FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
-import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
-import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -9,10 +7,11 @@ import { FavoritesSearch } from "@/core/features/favorites/session/favorites_sea
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
-import { StoredValue } from "@/core/utils/storage/stored_value";
-import { createPost } from "@/testing/post";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { createPost } from "@/testing/post";
+import { createStoredValue } from "@/testing/stored_value";
+import { effect } from "@/core/utils/reactive/signal";
 
 interface Setup {
   favoritesPagination: FavoritesPagination;
@@ -20,22 +19,6 @@ interface Setup {
   favoritesCollection: FavoritesCollection;
   favoritesSearchIndex: FavoritesSearchIndex;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
-}
-
-function createStoredValue<T>(initial: T): StoredValue<T> {
-  const current = new Signal(initial);
-  const changed = new Emitter<T>();
-  return {
-    get value(): T {
-      return current.value;
-    },
-    peek: (): T => current.peek(),
-    set: (value: T): void => {
-      current.value = value;
-      changed.emit(value);
-    },
-    changed
-  };
 }
 
 function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
@@ -83,7 +66,10 @@ describe("FavoritesPagination", () => {
 
   test.each([
     { name: "page size", act: (favoritesPaginationPreferences: FavoritesPaginationPreferences): void => favoritesPaginationPreferences.pageSize.set(1) },
-    { name: "infinite scroll", act: (favoritesPaginationPreferences: FavoritesPaginationPreferences): void => favoritesPaginationPreferences.infiniteScroll.set(true) }
+    {
+      name: "infinite scroll",
+      act: (favoritesPaginationPreferences: FavoritesPaginationPreferences): void => favoritesPaginationPreferences.infiniteScroll.set(true)
+    }
   ])("goes back to the first page when the $name changes", ({ act }) => {
     const { favoritesPagination, favoritesPaginationPreferences } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 

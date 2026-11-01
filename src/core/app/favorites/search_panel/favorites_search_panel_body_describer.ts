@@ -13,14 +13,16 @@ export interface FavoritesSearchPanelBodyInput {
   readonly isFiltered: boolean;
 }
 
-export function describeFavoritesSearchPanelBody({ resultCount, isSearchable, loadPhase, query, isFiltered }: FavoritesSearchPanelBodyInput): FavoritesSearchPanelBody {
+export function describeFavoritesSearchPanelBody({
+  resultCount, isSearchable, loadPhase, query, isFiltered
+}: FavoritesSearchPanelBodyInput): FavoritesSearchPanelBody {
   if (resultCount > 0) {
     return { kind: "results" };
   }
 
   if (isSearchable) {
     const isLoading = loadPhase !== "loaded" && loadPhase !== "interrupted";
-    return { kind: "empty", message: describeNoMatches(query, isFiltered, isLoading), offersClear: isFiltered };
+    return { kind: "empty", message: describeNoMatches(query, { isFiltered, isLoading }), offersClear: isFiltered };
   }
 
   switch (loadPhase) {
@@ -36,7 +38,7 @@ export function describeFavoritesSearchPanelBody({ resultCount, isSearchable, lo
   }
 }
 
-function describeNoMatches(query: string, isFiltered: boolean, isLoading: boolean): string {
+function describeNoMatches(query: string, { isFiltered, isLoading }: { isFiltered: boolean; isLoading: boolean }): string {
   const suffix = isLoading ? " yet" : "";
 
   if (query !== "") {

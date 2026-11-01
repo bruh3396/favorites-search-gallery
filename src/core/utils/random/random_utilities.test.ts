@@ -1,5 +1,5 @@
-import { randomBoolean, randomFloatInRange, randomInt, randomIntInRange, seededFloat, shuffleInPlace } from "@/core/utils/random/random_utilities";
 import { describe, expect, test } from "vitest";
+import { randomBoolean, randomFloatInRange, randomInt, randomIntInRange, seededFloat, shuffleInPlace } from "@/core/utils/random/random_utilities";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 
 const randomSource = new MemoryRandomSource([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 0.8, 0.5]);

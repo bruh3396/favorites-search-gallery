@@ -1,4 +1,4 @@
-import { camelToKebabCase, capitalize, compareStrings, computeTrigrams, copyString,escapeParentheses, getPluralSuffix, isEmptyString, isOnlyDigits, listPrefixes, listSubstrings, removeExtraWhitespace, removeLeadingModifiers, removeNonNumericCharacters, replaceSpacesWithUnderscores, snakeToCamelCase, toLowerUnderscored } from "@/core/utils/string/string_utilities";
+import { camelToKebabCase, capitalize, compareStrings, computeTrigrams, copyString, escapeParentheses, getPluralSuffix, isEmptyString, isOnlyDigits, listPrefixes, listSubstrings, removeExtraWhitespace, removeLeadingModifiers, removeNonNumericCharacters, replaceSpacesWithUnderscores, snakeToCamelCase, toLowerUnderscored } from "@/core/utils/string/string_utilities";
 import { describe, expect, test } from "vitest";
 
 describe("toLowerUnderscored", () => {

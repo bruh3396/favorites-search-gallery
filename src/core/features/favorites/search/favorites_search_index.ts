@@ -1,13 +1,13 @@
-import { Emitter } from "@/core/utils/reactive/emitter";
-import { Occurrence } from "@/core/utils/reactive/occurrence";
-import { Fact } from "@/core/utils/reactive/fact";
-import { Milestone } from "@/core/utils/reactive/milestone";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
+import { Emitter } from "@/core/utils/reactive/emitter";
+import { Fact } from "@/core/utils/reactive/fact";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request";
-import { TermUpdate } from "@/core/domain/search/engines/term_update";
+import { Milestone } from "@/core/utils/reactive/milestone";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { shuffleDeterministically } from "@/core/utils/collection/array_utilities";
 
 export class FavoritesSearchIndex {
@@ -18,8 +18,8 @@ export class FavoritesSearchIndex {
 
   constructor(stringInterner: StringInterner) {
     this.bitSearchEngine = new BitSearchEngine<Favorite>({
-      getTerms: favorite => favorite.tags,
-      getMetric: (favorite, metric) => favorite.getMetric(metric),
+      getTerms: (favorite): Iterable<string> => favorite.tags,
+      getMetric: (favorite, metric): number => favorite.getMetric(metric),
       stringInterner
     });
   }

@@ -1,7 +1,7 @@
-import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
-import { Point } from "@/core/utils/geometry/point";
-import { Gestures } from "@/core/ui/gestures/gestures";
 import { Mock, describe, expect, test, vi } from "vitest";
+import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
+import { Gestures } from "@/core/ui/gestures/gestures";
+import { Point } from "@/core/utils/geometry/point";
 import { createScope } from "@/core/utils/reactive/scope";
 
 const DRAG_THRESHOLD = 5;

@@ -19,4 +19,12 @@ describe("MemoryViewport", () => {
     viewport.unlockScroll();
     expect(viewport.scrollLocked).toBe(false);
   });
+
+  test("reads back the device pixel ratio it was given", () => {
+    const viewport = new MemoryViewport();
+
+    expect(viewport.readDevicePixelRatio()).toBe(1);
+    viewport.devicePixelRatio = 2;
+    expect(viewport.readDevicePixelRatio()).toBe(2);
+  });
 });

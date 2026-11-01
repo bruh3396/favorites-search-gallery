@@ -10,16 +10,16 @@ import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_detai
 import { LightboxDialog } from "@/core/features/lightbox/ui/lightbox_dialog";
 import { LightboxFullscreen } from "@/core/features/lightbox/fullscreen/lightbox_fullscreen";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
-import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visibility/lightbox_overlay_visibility";
+import { LightboxPreferences } from "@/core/features/lightbox/lightbox_preferences";
 import { LightboxStage } from "@/core/features/lightbox/stage/lightbox_stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { createLightboxCommandHandlers } from "@/core/features/lightbox/input/lightbox_command_handlers";
 import { createLightboxKeyListener } from "@/core/features/lightbox/input/lightbox_key_listener";
 import { createLightboxMouseListeners } from "@/core/features/lightbox/input/lightbox_mouse_listeners";
@@ -33,32 +33,43 @@ const ZOOM_MAXIMUM_SCALE = 8;
 const AUTOPLAY_INTERVAL = 3_000;
 const FULL_MORPH_DURATION = 250;
 const SIMPLE_MORPH_DURATION = 200;
-const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>(["showNext", "showPrevious", "togglePause", "dismiss", "close", "openPostPage", "openOriginal"]);
+const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>([
+  "showNext",
+  "showPrevious",
+  "togglePause",
+  "dismiss",
+  "close",
+  "openPostPage",
+  "openOriginal"
+]);
 
 export interface LightboxDialogConfiguration {
   readonly keymap: Keymap<LightboxCommand>;
 }
 
 export interface LightboxDialogDependencies<T extends MediaItem> {
-  scheduler: Pick<Scheduler, "schedule">;
+  scheduler: Pick<Scheduler, "schedule" | "requestFrame">;
   sizeObserver: SizeObserver;
+  viewport: Pick<Viewport, "readDevicePixelRatio">;
   remoteMedia: Pick<RemoteMedia, "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
   lightboxMediaResolver: LightboxMediaResolver;
   lightboxActions: LightboxActions;
   lightboxNavigation: Pick<LightboxNavigation<T>, "isOpen" | "currentItem" | "position" | "goToNext" | "goToPrevious" | "close">;
   retainedItems: Readable<readonly T[]>;
-  volume: StoredValue<number>;
-  muted: StoredValue<boolean>;
+  lightboxPreferences: LightboxPreferences;
   locateItem: (item: T) => Element | undefined;
   lightboxDetails?: LightboxDetails<T>;
-  mode: Readable<LightboxMode>;
 }
 
 export function composeLightboxDialog<T extends MediaItem>(
   configuration: LightboxDialogConfiguration,
   dependencies: LightboxDialogDependencies<T>
 ): HTMLElement {
-  const { scheduler, sizeObserver, remoteMedia, lightboxMediaResolver, lightboxActions, lightboxNavigation, retainedItems, volume, muted, locateItem, lightboxDetails, mode } = dependencies;
+  const {
+    scheduler, sizeObserver, viewport, remoteMedia, lightboxMediaResolver, lightboxActions, lightboxNavigation,
+    retainedItems, lightboxPreferences, locateItem, lightboxDetails
+  } = dependencies;
+  const { mode, volume, muted } = lightboxPreferences;
   const simple = computed(() => mode.value === "simple");
   const lightboxStage = new LightboxStage<T>(
     { gifCapacity: GIF_CAPACITY, videoCapacity: VIDEO_CAPACITY },
@@ -77,13 +88,20 @@ export function composeLightboxDialog<T extends MediaItem>(
     video: lightboxStage.video
   });
   const lightboxCloser = new LightboxCloser<T>({
+    scheduler,
+    viewport,
     lightboxNavigation,
     shownMedia: lightboxStage.shownMedia,
     inFullscreen: lightboxFullscreen.inFullscreen,
     morphDuration: computed(() => (simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION)),
     locateItem
   });
-  const handlers = limitToSimpleCommands(createLightboxCommandHandlers({ lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails }), simple);
+  const handlers = limitToSimpleCommands(
+    createLightboxCommandHandlers({
+      lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails
+    }),
+    simple
+  );
 
   effect(() => {
     if (!lightboxNavigation.isOpen.value) {

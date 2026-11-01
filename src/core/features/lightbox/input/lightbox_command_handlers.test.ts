@@ -1,10 +1,10 @@
 import { LightboxCommandHandlersDependencies, createLightboxCommandHandlers } from "@/core/features/lightbox/input/lightbox_command_handlers";
 import { describe, expect, test, vi } from "vitest";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { createPost } from "@/testing/post";
 
 const POST = createPost();
@@ -123,7 +123,10 @@ describe("createLightboxCommandHandlers", () => {
 
     const goToNext = vi.fn(() => Promise.reject(error));
 
-    createLightboxCommandHandlers({ ...lightboxCommandHandlersDependencies, lightboxNavigation: { ...lightboxCommandHandlersDependencies.lightboxNavigation, goToNext } }).showNext();
+    createLightboxCommandHandlers({
+      ...lightboxCommandHandlersDependencies,
+      lightboxNavigation: { ...lightboxCommandHandlersDependencies.lightboxNavigation, goToNext }
+    }).showNext();
     await Promise.resolve();
     expect(log).toHaveBeenCalledWith(error);
     log.mockRestore();

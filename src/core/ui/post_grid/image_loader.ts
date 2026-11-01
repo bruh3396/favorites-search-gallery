@@ -110,10 +110,6 @@ export class ImageLoader {
     this.requestedWidth = width;
     this.dependencies.decodeStill(this.dependencies.media, controller.signal, width)
       .then(bitmap => this.dependencies.paintRateLimiter.run(() => {
-        if (!isCurrent()) {
-          bitmap.close();
-          return Promise.resolve();
-        }
         drawBitmap(this.dependencies.canvas, bitmap, { width, maxHeight: this.configuration.maxCanvasHeight });
         this.drawnWidth = width;
         this.abortController = undefined;

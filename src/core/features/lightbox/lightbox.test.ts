@@ -1,13 +1,14 @@
 import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
+import { MemoryViewport } from "@/adapters/memory/ports/viewport/memory_viewport";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { render } from "@/core/ui/h/h";
@@ -36,12 +37,15 @@ function setup(mode: LightboxMode = "full"): {
   const lightbox = createLightbox<Post>({
     scheduler,
     sizeObserver: new MemorySizeObserver(),
+    viewport: new MemoryViewport(),
     remoteMedia,
     actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download: vi.fn() },
-    volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
-    muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
-    locateItem: () => undefined,
-    mode: new Signal(mode)
+    preferences: {
+      mode: new Signal(mode),
+      volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage })
+    },
+    locateItem: () => undefined
   });
   return { lightbox, scheduler, remoteMedia, mediaSequence, getNeighbors };
 }

@@ -1,7 +1,7 @@
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { AppPreferences } from "@/core/app/app_preferences";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { AppPreferences } from "@/core/app/app_preferences";
 import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_settings";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";

@@ -9,8 +9,8 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
-import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";

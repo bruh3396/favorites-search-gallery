@@ -1,6 +1,6 @@
+import { describe, expect, test } from "vitest";
 import { Point } from "@/core/utils/geometry/point";
 import { Rect } from "@/core/utils/geometry/rect";
-import { describe, expect, test } from "vitest";
 import { Signal } from "@/core/utils/reactive/signal";
 import { resolveLightboxViewportCursor } from "@/core/features/lightbox/viewport_gestures/lightbox_viewport_cursor_resolver";
 

@@ -2,14 +2,15 @@ import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favori
 import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPendingReset, readCorpusSize, readFavoriteCount } from "@/targets/lab/databases";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
-import { BrowserHostPage } from "@/adapters/browser/ports/host_page/browser_host_page";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/browser_local_keyed_values";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
 import { BrowserRandomSource } from "@/adapters/browser/ports/random_source/browser_random_source";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
+import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
 import { Environment } from "@/core/boundary/environment";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
@@ -26,7 +27,7 @@ import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/rule34_host_pa
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_remote_pages";
 import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountLabScreen } from "@/targets/lab/lab_screen";
@@ -35,7 +36,11 @@ import { readRule34Environment } from "@/adapters/rule34/environment/rule34_envi
 
 declare const SCRIPT_VERSION: string;
 
-type LabBase = Pick<FavoritesAppDependencies, "scheduler" | "hostPage" | "localKeyedValues">;
+interface LabBase {
+  readonly scheduler: FavoritesAppDependencies["scheduler"];
+  readonly hostPage: FavoritesAppDependencies["hostPage"];
+  readonly localKeyedValues: FavoritesAppDependencies["localKeyedValues"];
+}
 
 function createFavoritesAppDependencies(environment: Environment, rule34Document: Rule34Document, labBase: LabBase): FavoritesAppDependencies {
   const { scheduler } = labBase;
@@ -49,6 +54,8 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
     ...labBase,
     randomSource,
     sizeObserver: new BrowserSizeObserver(),
+
+    viewport: new BrowserViewport(),
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
@@ -84,7 +91,7 @@ async function main(): Promise<void> {
   await applyPendingReset();
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
   const scheduler = new BrowserScheduler();
-  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, page: new BrowserHostPage() });
+  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, claimBodyContent });
   const localKeyedValues = new NamespacedLocalKeyedValues(LAB_NAMESPACE, new BrowserLocalKeyedValues());
   const labContainer = hostPage.claimContent();
   const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["favorites"]).favorites;

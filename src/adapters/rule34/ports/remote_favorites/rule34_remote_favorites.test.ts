@@ -1,9 +1,9 @@
 import { Rule34RemoteFavorites, Rule34RemoteFavoritesDependencies } from "@/adapters/rule34/ports/remote_favorites/rule34_remote_favorites";
 import { describe, expect, test, vi } from "vitest";
-import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
+import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 import { createPost } from "@/testing/post";
@@ -97,7 +97,11 @@ async function findNewPostIds(clientOptions: ClientOptions, localPostIds: string
   return getPostIds(await found);
 }
 
-async function findMissingPostIds(clientOptions: ClientOptions, localPostIds: string[], remoteStart = 0, settleTime = SETTLE_TIME): Promise<string[]> {
+async function findMissingPostIds(
+  clientOptions: ClientOptions,
+  localPostIds: string[],
+  { remoteStart = 0, settleTime = SETTLE_TIME }: { remoteStart?: number; settleTime?: number } = {}
+): Promise<string[]> {
   const { remoteFavorites, scheduler } = setup(clientOptions);
   const found = remoteFavorites.findMissing(localPostIds, remoteStart);
 
@@ -285,7 +289,7 @@ describe("Rule34RemoteFavorites", () => {
       const localPostIds = getPostIds(remotePosts).slice(2);
       const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(remotePosts.filter(post => post.id !== localPostIds[3])));
 
-      expect(await findMissingPostIds({ fetchPage }, localPostIds, 2)).toEqual([localPostIds[3]]);
+      expect(await findMissingPostIds({ fetchPage }, localPostIds, { remoteStart: 2 })).toEqual([localPostIds[3]]);
     });
 
     test("fetches the first page fresh instead of trusting the one on screen", async() => {
@@ -298,7 +302,7 @@ describe("Rule34RemoteFavorites", () => {
     test("gives up on a page refused twenty times", async() => {
       const fetchPage = vi.fn<FetchPage>(() => Promise.reject(new Rule34Error("http", { status: 403 })));
 
-      await expect(findMissingPostIds({ fetchPage }, ["page0-0"], 0, GIVE_UP_TIME)).rejects.toThrow(Rule34Error);
+      await expect(findMissingPostIds({ fetchPage }, ["page0-0"], { settleTime: GIVE_UP_TIME })).rejects.toThrow(Rule34Error);
       expect(fetchPage).toHaveBeenCalledTimes(MAX_FETCH_ATTEMPTS);
     });
   });

@@ -1,5 +1,5 @@
-import { ControlProps } from "@/core/ui/components/control/control_props";
 import { Signal, computed } from "@/core/utils/reactive/signal";
+import { ControlProps } from "@/core/ui/components/control/control_props";
 import { h } from "@/core/ui/h/h";
 
 export const DisclosureClass = {

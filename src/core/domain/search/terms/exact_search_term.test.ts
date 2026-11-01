@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
 import { FRUIT_VOCABULARY } from "@/core/domain/search/testing/fruit_vocabulary";
+import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
 const positiveCases = [
   ["banana", true],

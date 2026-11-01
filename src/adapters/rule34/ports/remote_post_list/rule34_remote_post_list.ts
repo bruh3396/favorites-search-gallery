@@ -1,10 +1,10 @@
+import { PostListPage } from "@/core/domain/post_list/post_list_page";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { PostListPage } from "@/core/domain/post_list/post_list_page";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
 export interface Rule34RemotePostListDependencies {

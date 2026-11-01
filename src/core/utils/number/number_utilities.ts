@@ -8,7 +8,8 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 export function rescale(value: number, fromNumberRange: NumberRange, toNumberRange: NumberRange): number {
-  return Math.round(toNumberRange.min + (((value - fromNumberRange.min) / (fromNumberRange.max - fromNumberRange.min)) * (toNumberRange.max - toNumberRange.min)));
+  return Math.round(toNumberRange.min +
+    (((value - fromNumberRange.min) / (fromNumberRange.max - fromNumberRange.min)) * (toNumberRange.max - toNumberRange.min)));
 }
 
 export function rescaleGeometric(value: number, fromNumberRange: NumberRange, toNumberRange: NumberRange): number {

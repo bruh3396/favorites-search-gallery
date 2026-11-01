@@ -33,10 +33,16 @@ interface SectionProps {
   stepperScheduler: StepperScheduler;
 }
 
-export function SettingsScreen({ settingsLayout, settingDescriptors, descriptionsVisible, query, controlSize = "medium", stepperScheduler }: SettingsScreenProps): HTMLElement {
+export function SettingsScreen({
+  settingsLayout, settingDescriptors, descriptionsVisible, query, controlSize = "medium", stepperScheduler
+}: SettingsScreenProps): HTMLElement {
   const descriptorsById = new Map(settingDescriptors.map(settingDescriptor => [settingDescriptor.id, settingDescriptor]));
   const sectionsWithSettings = settingsLayout
-    .map(settingSection => ({ section: settingSection, title: settingSection.title, settingDescriptors: settingSection.settings.map(id => getDescriptor(descriptorsById, id)) }))
+    .map(settingSection => ({
+      section: settingSection,
+      title: settingSection.title,
+      settingDescriptors: settingSection.settings.map(id => getDescriptor(descriptorsById, id))
+    }))
     .filter(entry => entry.settingDescriptors.length > 0);
   const settingsIndex = new SettingsIndex(sectionsWithSettings);
   const matches = computed(() => settingsIndex.match(query?.value ?? ""));

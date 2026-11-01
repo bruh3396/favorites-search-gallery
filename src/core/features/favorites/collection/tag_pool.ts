@@ -1,5 +1,5 @@
-import { grow } from "@/core/utils/collection/array_utilities";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { grow } from "@/core/utils/collection/array_utilities";
 
 const INITIAL_SLOT_COUNT = 1_024;
 const INITIAL_TAG_COUNT = 1_024;

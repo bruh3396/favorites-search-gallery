@@ -1,6 +1,4 @@
 import { createPost, createPosts } from "@/testing/post";
-import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
-import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
@@ -17,8 +15,10 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
-import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
+import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 
 interface ReloaderSources {
   localFavoritePosts: Post[];
@@ -38,7 +38,9 @@ function createClient(localFavoritePosts: readonly Post[], remoteFavoritePosts: 
   return memoryClient;
 }
 
-async function setup({ localFavoritePosts, remoteFavoritePosts, unstoredPostIds = [], storedFavoritePosts = [], purgedPostIds = [], paint = Promise.resolve() }: ReloaderSources): Promise<{
+async function setup({
+  localFavoritePosts, remoteFavoritePosts, unstoredPostIds = [], storedFavoritePosts = [], purgedPostIds = [], paint = Promise.resolve()
+}: ReloaderSources): Promise<{
   favoritesReloader: FavoritesReloader;
   favoritesCollection: FavoritesCollection;
   favoritesSearchIndex: FavoritesSearchIndex;
@@ -85,7 +87,10 @@ async function setup({ localFavoritePosts, remoteFavoritePosts, unstoredPostIds 
 
   await localPosts.setMany([...localFavoritePosts.filter(post => !unstoredPostIds.includes(post.id)), ...storedFavoritePosts]);
   await localFavorites.prepend(localPostIds);
-  return { favoritesReloader, favoritesCollection, favoritesSearchIndex, localFavorites, localPosts, remoteFavorites, remotePages, localPostIds, favoritesLoadStates, refreshedPostIds };
+  return {
+    favoritesReloader, favoritesCollection, favoritesSearchIndex, localFavorites, localPosts,
+    remoteFavorites, remotePages, localPostIds, favoritesLoadStates, refreshedPostIds
+  };
 }
 
 function getPostIds(favorites: readonly Favorite[]): string[] {
@@ -96,7 +101,10 @@ describe("FavoritesReloader", () => {
   describe("reload", () => {
     test("restores the stored favorites in local order and reports progress", async() => {
       const posts = createPosts("1", "2");
-      const { favoritesReloader, favoritesCollection, localPostIds, favoritesLoadStates: favoritesLoadStates } = await setup({ localFavoritePosts: posts, remoteFavoritePosts: posts });
+      const { favoritesReloader, favoritesCollection, localPostIds, favoritesLoadStates } = await setup({
+        localFavoritePosts: posts,
+        remoteFavoritePosts: posts
+      });
 
       await favoritesReloader.reload(localPostIds);
       expect(getPostIds(favoritesCollection.getAll())).toEqual(["1", "2"]);
@@ -108,7 +116,11 @@ describe("FavoritesReloader", () => {
     });
 
     test("restores a placeholder for a favorite whose post isn't stored", async() => {
-      const { favoritesReloader, favoritesCollection, localPostIds } = await setup({ localFavoritePosts: createPosts("1"), remoteFavoritePosts: [], unstoredPostIds: ["1"] });
+      const { favoritesReloader, favoritesCollection, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1"),
+        remoteFavoritePosts: [],
+        unstoredPostIds: ["1"]
+      });
 
       await favoritesReloader.reload(localPostIds);
       expect(favoritesCollection.getAll().find(arenaFavorite => arenaFavorite.id === "1")?.media.locator).toBe("");
@@ -117,7 +129,11 @@ describe("FavoritesReloader", () => {
     test("reports indexing and indexes only once the page has painted", async() => {
       const paint = Promise.withResolvers<void>();
       const posts = createPosts("1");
-      const { favoritesReloader, favoritesSearchIndex, localPostIds, favoritesLoadStates: favoritesLoadStates } = await setup({ localFavoritePosts: posts, remoteFavoritePosts: posts, paint: paint.promise });
+      const { favoritesReloader, favoritesSearchIndex, localPostIds, favoritesLoadStates } = await setup({
+        localFavoritePosts: posts,
+        remoteFavoritePosts: posts,
+        paint: paint.promise
+      });
       const reloading = favoritesReloader.reload(localPostIds);
 
       await flushMicrotasks();
@@ -152,7 +168,10 @@ describe("FavoritesReloader", () => {
     });
 
     test("refreshes the restored and pulled posts", async() => {
-      const { favoritesReloader, localPostIds, refreshedPostIds } = await setup({ localFavoritePosts: createPosts("1"), remoteFavoritePosts: createPosts("2", "1") });
+      const { favoritesReloader, localPostIds, refreshedPostIds } = await setup({
+        localFavoritePosts: createPosts("1"),
+        remoteFavoritePosts: createPosts("2", "1")
+      });
 
       await favoritesReloader.reload(localPostIds);
       await flushMicrotasks();
@@ -182,35 +201,51 @@ describe("FavoritesReloader", () => {
     });
 
     test("finds missing favorites only below the new ones", async() => {
-      const { favoritesReloader, localFavorites, localPostIds } = await setup({ localFavoritePosts: createPosts("1", "2", "3"), remoteFavoritePosts: createPosts("4", "1", "3") });
+      const { favoritesReloader, localFavorites, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1", "2", "3"),
+        remoteFavoritePosts: createPosts("4", "1", "3")
+      });
 
       expect(await favoritesReloader.reload(localPostIds)).toEqual({ newCount: 1, unfavoritedCount: 1 });
       expect(await localFavorites.getAll()).toEqual(["4", "1", "3"]);
     });
 
     test("puts favorites missing from the local ids first and marks them new", async() => {
-      const { favoritesReloader, favoritesCollection, localPostIds } = await setup({ localFavoritePosts: createPosts("1", "2"), remoteFavoritePosts: createPosts("3", "1", "2") });
+      const { favoritesReloader, favoritesCollection, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1", "2"),
+        remoteFavoritePosts: createPosts("3", "1", "2")
+      });
 
       expect(await favoritesReloader.reload(localPostIds)).toEqual({ newCount: 1, unfavoritedCount: 0 });
       expect(favoritesCollection.getAll().map(arenaFavorite => [arenaFavorite.id, arenaFavorite.isNew])).toEqual([["3", true], ["1", false], ["2", false]]);
     });
 
     test("moves a re-favorite to the front, marks it new, and counts it as added", async() => {
-      const { favoritesReloader, favoritesCollection, localPostIds } = await setup({ localFavoritePosts: createPosts("1", "2", "3"), remoteFavoritePosts: createPosts("4", "2", "1", "3") });
+      const { favoritesReloader, favoritesCollection, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1", "2", "3"),
+        remoteFavoritePosts: createPosts("4", "2", "1", "3")
+      });
 
       expect(await favoritesReloader.reload(localPostIds)).toEqual({ newCount: 2, unfavoritedCount: 0 });
-      expect(favoritesCollection.getAll().map(arenaFavorite => [arenaFavorite.id, arenaFavorite.isNew])).toEqual([["4", true], ["2", true], ["1", false], ["3", false]]);
+      expect(favoritesCollection.getAll().map(arenaFavorite => [arenaFavorite.id, arenaFavorite.isNew]))
+        .toEqual([["4", true], ["2", true], ["1", false], ["3", false]]);
     });
 
     test("stores the new part of the membership ahead of the local ids, moving re-favorites up", async() => {
-      const { favoritesReloader, localFavorites, localPostIds } = await setup({ localFavoritePosts: createPosts("1", "2", "3"), remoteFavoritePosts: createPosts("4", "2", "1", "3") });
+      const { favoritesReloader, localFavorites, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1", "2", "3"),
+        remoteFavoritePosts: createPosts("4", "2", "1", "3")
+      });
 
       await favoritesReloader.reload(localPostIds);
       expect(await localFavorites.getAll()).toEqual(["4", "2", "1", "3"]);
     });
 
     test("deletes unfavorited favorites from the membership only", async() => {
-      const { favoritesReloader, favoritesCollection, localFavorites, localPostIds } = await setup({ localFavoritePosts: createPosts("1", "2", "3"), remoteFavoritePosts: createPosts("1", "3") });
+      const { favoritesReloader, favoritesCollection, localFavorites, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1", "2", "3"),
+        remoteFavoritePosts: createPosts("1", "3")
+      });
 
       expect(await favoritesReloader.reload(localPostIds)).toEqual({ newCount: 0, unfavoritedCount: 1 });
       expect(await localFavorites.getAll()).toEqual(["1", "3"]);
@@ -231,7 +266,10 @@ describe("FavoritesReloader", () => {
     });
 
     test("changes nothing for a missing favorite whose check fails", async() => {
-      const { favoritesReloader, localFavorites, localPosts, remotePages, localPostIds } = await setup({ localFavoritePosts: createPosts("1", "2", "3"), remoteFavoritePosts: createPosts("1", "3") });
+      const { favoritesReloader, localFavorites, localPosts, remotePages, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1", "2", "3"),
+        remoteFavoritePosts: createPosts("1", "3")
+      });
 
       vi.spyOn(remotePages, "postExists").mockRejectedValue(new Error("down"));
       expect(await favoritesReloader.reload(localPostIds)).toEqual({ newCount: 0, unfavoritedCount: 0 });
@@ -266,7 +304,10 @@ describe("FavoritesReloader", () => {
     });
 
     test("keeps the pulled membership when finding missing favorites fails", async() => {
-      const { favoritesReloader, localFavorites, remoteFavorites, localPostIds } = await setup({ localFavoritePosts: createPosts("1"), remoteFavoritePosts: createPosts("2", "1") });
+      const { favoritesReloader, localFavorites, remoteFavorites, localPostIds } = await setup({
+        localFavoritePosts: createPosts("1"),
+        remoteFavoritePosts: createPosts("2", "1")
+      });
 
       vi.spyOn(remoteFavorites, "findMissing").mockRejectedValue(new Error("refused"));
       await expect(favoritesReloader.reload(localPostIds)).rejects.toThrow("refused");

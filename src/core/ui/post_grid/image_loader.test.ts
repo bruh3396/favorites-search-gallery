@@ -1,6 +1,6 @@
-import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
+import { ImageLoader } from "@/core/ui/post_grid/image_loader";
 import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
@@ -166,6 +166,18 @@ describe("ImageLoader", () => {
     await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
     targetWidth.value = WIDTH / 2;
     showNow();
+    expect(decodeStill).toHaveBeenCalledOnce();
+  });
+
+  test("drops a held decode once the target width shrinks back to the drawn one", async() => {
+    const { imageLoader, scheduler, decodeStill, drawImage, targetWidth, showNow } = setup();
+
+    showNow();
+    await vi.waitFor(() => expect(drawImage).toHaveBeenCalledOnce());
+    targetWidth.value = WIDTH * 2;
+    imageLoader.show();
+    targetWidth.value = WIDTH;
+    scheduler.advance(QUIET_PERIOD);
     expect(decodeStill).toHaveBeenCalledOnce();
   });
 

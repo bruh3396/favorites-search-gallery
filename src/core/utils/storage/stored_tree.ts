@@ -1,9 +1,9 @@
-import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StoredMap } from "@/core/utils/storage/stored_map";
+import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
-import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export type StoredTree<S> = {
@@ -13,7 +13,11 @@ export type StoredTree<S> = {
     StoredTree<S[K]>;
 };
 
-export function createStoredTree<S extends object, B extends keyof S & string>(schema: S, storedValueStorage: StoredValueStorage, branches: readonly B[]): Pick<StoredTree<S>, B> {
+export function createStoredTree<S extends object, B extends keyof S & string>(
+  schema: S,
+  storedValueStorage: StoredValueStorage,
+  branches: readonly B[]
+): Pick<StoredTree<S>, B> {
   return Object.fromEntries(branches.map(branch => [branch, createNode(branch, schema[branch], storedValueStorage)])) as Pick<StoredTree<S>, B>;
 }
 

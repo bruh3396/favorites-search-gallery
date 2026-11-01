@@ -8,7 +8,7 @@ const frozenCobaltPost = {
   score: 0,
   rating: "explicit",
   changedAt: 0,
-  directory: 1234,
+  directory: 1_234,
   stem: "a1b2c3",
   extension: "jpg",
   tagCategoryByName: { apple: "general" }

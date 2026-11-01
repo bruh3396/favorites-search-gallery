@@ -4,8 +4,8 @@ import { exportCorpus, importCorpus, pickCorpusFile, pullCorpus, requestReset, s
 import { exportRealDatabases, importRealDatabases, requestPurge } from "@/targets/lab/real_data";
 import { h, render } from "@/core/ui/h/h";
 import { ColorScheme } from "@/core/boundary/color_scheme";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { SettingRow } from "@/core/ui/components/setting_row/setting_row";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Switch } from "@/core/ui/components/switch/switch";
 import { mountLabRoot } from "@/targets/lab/lab_root";
 

@@ -1,4 +1,4 @@
-import { FavoritesLoadStatePhase, FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesLoadState, FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
 
 type Describers = { readonly [Phase in FavoritesLoadStatePhase]: (state: Extract<FavoritesLoadState, { phase: Phase }>) => string };
 

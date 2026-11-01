@@ -22,6 +22,7 @@ describe("createAppStorage", () => {
 
     preferencesStoredValueStorage.set("shared", { theme: "cherry" });
     const set = localKeyedValues.set.bind(localKeyedValues);
+
     localKeyedValues.set = (key, value): void => {
       writtenKeys.push(key);
       set(key, value);

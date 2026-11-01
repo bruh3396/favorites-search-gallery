@@ -53,7 +53,8 @@ export class FavoriteSizeRecorder {
 }
 
 function sameSizes(firstSizes: readonly Size[], secondSizes: readonly Size[]): boolean {
-  return firstSizes.length === secondSizes.length && firstSizes.every((size, index) => size.width === secondSizes[index].width && size.height === secondSizes[index].height);
+  return firstSizes.length === secondSizes.length &&
+    firstSizes.every((size, index) => size.width === secondSizes[index].width && size.height === secondSizes[index].height);
 }
 
 function measure(favorites: readonly Favorite[]): Size[] {

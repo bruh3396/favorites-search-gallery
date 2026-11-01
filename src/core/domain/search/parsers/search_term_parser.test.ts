@@ -1,10 +1,10 @@
-import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
-import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { describe, expect, test } from "vitest";
 import { parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { ExactSearchTerm } from "@/core/domain/search/terms/exact_search_term";
 import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
+import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
+import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 
 const normalTerms = [
   "",

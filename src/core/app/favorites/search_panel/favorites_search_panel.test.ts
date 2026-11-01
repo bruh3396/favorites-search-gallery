@@ -32,7 +32,15 @@ interface Setup {
 }
 
 function createFavorite(postId: string): Favorite {
-  return { id: postId, numericId: Number(postId), media: { kind: "image", locator: `images/${postId}` }, isNew: false, ratingBit: 0, tags: new Set(), getMetric: () => 100 };
+  return {
+    id: postId,
+    numericId: Number(postId),
+    media: { kind: "image", locator: `images/${postId}` },
+    isNew: false,
+    ratingBit: 0,
+    tags: new Set(),
+    getMetric: () => 100
+  };
 }
 
 function setup(): Setup {

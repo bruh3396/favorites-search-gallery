@@ -1,6 +1,6 @@
-import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class MemoryRemoteFavorites implements RemoteFavorites {
   constructor(private readonly memoryClient: Pick<MemoryClient, "readFavorites" | "addFavorite" | "removeFavorite">) { }

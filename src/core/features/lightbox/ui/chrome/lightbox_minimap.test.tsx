@@ -1,8 +1,8 @@
 import { LightboxMinimap, LightboxMinimapClass } from "@/core/features/lightbox/ui/chrome/lightbox_minimap";
-import { Rect } from "@/core/utils/geometry/rect";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import MINIMAP_CSS from "@/core/features/lightbox/ui/chrome/lightbox_minimap.css?inline";
+import { Rect } from "@/core/utils/geometry/rect";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 

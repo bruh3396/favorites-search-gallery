@@ -105,6 +105,21 @@ describe("PageStepper", () => {
     expect([field.value, vi.mocked(onPageChange).mock.calls]).toEqual(["3", []]);
   });
 
+  test("selects the field's text when focused", () => {
+    const { field } = setup();
+    const select = vi.spyOn(field, "select");
+
+    field.focus();
+    expect(select).toHaveBeenCalledOnce();
+  });
+
+  test("goes nowhere on other keys", () => {
+    const { field, onPageChange } = setup();
+
+    type(field, "144", "4");
+    expect([field.value, vi.mocked(onPageChange).mock.calls]).toEqual(["144", []]);
+  });
+
   test("follows the page number and the page count", () => {
     const { element, field, pageNumber, pageCount } = setup();
 

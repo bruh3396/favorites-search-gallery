@@ -28,7 +28,9 @@ export interface FavoritesSearchPanelProps {
   grid: Node;
 }
 
-export function FavoritesSearchPanel({ favoritesService, favoritesSession, focusSearch, trailingChild, skeleton, grid }: FavoritesSearchPanelProps): HTMLElement {
+export function FavoritesSearchPanel({
+  favoritesService, favoritesSession, focusSearch, trailingChild, skeleton, grid
+}: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
     isSearchable: favoritesService.searchable.reached,

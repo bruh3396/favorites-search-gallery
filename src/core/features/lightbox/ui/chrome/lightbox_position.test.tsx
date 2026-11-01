@@ -1,8 +1,8 @@
 import { LightboxPosition, LightboxPositionClass } from "@/core/features/lightbox/ui/chrome/lightbox_position";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import POSITION_CSS from "@/core/features/lightbox/ui/chrome/lightbox_position.css?inline";
 import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
+import POSITION_CSS from "@/core/features/lightbox/ui/chrome/lightbox_position.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 

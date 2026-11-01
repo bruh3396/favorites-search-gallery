@@ -1,6 +1,6 @@
 import { createFieldsGuard, createOneOfGuard, createSameKindGuard } from "@/core/utils/guard/guard";
-import { isNumber } from "@/core/utils/guard/unknown_utilities";
 import { describe, expect, test } from "vitest";
+import { isNumber } from "@/core/utils/guard/unknown_utilities";
 
 describe("createOneOfGuard", () => {
   test("accepts only members", () => {

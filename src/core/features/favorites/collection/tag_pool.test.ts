@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { TagPool } from "@/core/features/favorites/collection/tag_pool";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { TagPool } from "@/core/features/favorites/collection/tag_pool";
 
 interface Setup {
   tagPool: TagPool;

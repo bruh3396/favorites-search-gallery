@@ -1,6 +1,6 @@
 import { ALL_RATINGS_MASK, isRatingMask } from "@/core/domain/post/rating_mask";
 import { FAVORITES_SORT_KEYS, FavoritesSortKey } from "@/core/features/favorites/search/favorites_sort_key";
-import { createOneOfGuard, createSameKindGuard, FieldGuards } from "@/core/utils/guard/guard";
+import { FieldGuards, createOneOfGuard, createSameKindGuard } from "@/core/utils/guard/guard";
 import { isBoolean } from "@/core/utils/guard/unknown_utilities";
 
 export interface FavoritesSearchSettings {

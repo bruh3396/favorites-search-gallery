@@ -59,6 +59,12 @@ describe("h", () => {
     expect(render(document, () => h(Greeting, { name: "Ann" })).result.outerHTML).toBe("<p>Hi Ann</p>");
   });
 
+  test("returns every element a fragment component builds", () => {
+    const Pair = ({ name }: { name: string }): HTMLElement[] => [h("p", {}, name), h("dialog", null)];
+
+    expect(render(document, () => h(Pair, { name: "Ann" })).result.map(element => element.outerHTML)).toEqual(["<p>Ann</p>", "<dialog></dialog>"]);
+  });
+
   test("passes a component its children as the children prop", () => {
     const Wrap = ({ children }: { children?: Child }): HTMLElement => h("div", {}, children);
 

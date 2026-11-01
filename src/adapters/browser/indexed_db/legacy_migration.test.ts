@@ -2,9 +2,9 @@ import "fake-indexeddb/auto";
 import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
+import { MediaMinter } from "@/core/domain/media/media_minter";
 import { mintRule34CdnMedia } from "@/adapters/rule34_cdn/client/rule34_cdn_media_minter";
 import { parseRule34CdnFileUrl } from "@/adapters/rule34_cdn/client/rule34_cdn_file_url_parser";
-import { MediaMinter } from "@/core/domain/media/media_minter";
 
 type Row = Record<string, unknown>;
 
@@ -151,6 +151,23 @@ describe("prepareLegacyMigration", () => {
       .map(([, post]) => (post as { id: string }).id);
 
     expect(addedPostIds).toEqual(["1", "2"]);
+  });
+
+  test("keeps migrating when a write is rejected", async() => {
+    await createLegacyDatabase({ name: "FavoritesV2", stores: { user1: [createLegacyPost("1")] }, keyed: false });
+    await createLegacyDatabase({ name: "TagCategories", stores: { tagCategories: [{ id: "alice", category: "artist" }] }, keyed: false });
+    const add = IDBObjectStore.prototype.add;
+
+    vi.spyOn(IDBObjectStore.prototype, "add").mockImplementation(function addTwice(this: IDBObjectStore, ...args) {
+      if (this.name === "tagCategories") {
+        add.apply(this, args);
+      }
+      return add.apply(this, args);
+    });
+    const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMediaFromUrl);
+
+    expect(await read(indexedDbClient, "tagCategories", "alice")).toBe("artist");
+    expect(await read(indexedDbClient, "favorites", "1")).toEqual(["1"]);
   });
 
   test("uses a known extension when the file URL is a thumbnail", async() => {

@@ -29,13 +29,16 @@ describe("LightboxOverlay", () => {
     expect(Object.values(children).every(child => root.contains(child))).toBe(true);
   });
 
-  test.each<SlottedEdge>(["topStartChild", "topEndChild", "startEdgeChild", "endEdgeChild"])("reports the pointer entering and leaving the %s slot", slottedEdge => {
-    const { children, lightboxOverlayProps } = setup();
-    const slot = children[slottedEdge].parentElement!;
+  test.each<SlottedEdge>(["topStartChild", "topEndChild", "startEdgeChild", "endEdgeChild"])(
+    "reports the pointer entering and leaving the %s slot",
+    slottedEdge => {
+      const { children, lightboxOverlayProps } = setup();
+      const slot = children[slottedEdge].parentElement!;
 
-    slot.dispatchEvent(new PointerEvent("pointerenter"));
-    expect(lightboxOverlayProps.onSlotEnter).toHaveBeenCalledOnce();
-    slot.dispatchEvent(new PointerEvent("pointerleave"));
-    expect(lightboxOverlayProps.onSlotLeave).toHaveBeenCalledOnce();
-  });
+      slot.dispatchEvent(new PointerEvent("pointerenter"));
+      expect(lightboxOverlayProps.onSlotEnter).toHaveBeenCalledOnce();
+      slot.dispatchEvent(new PointerEvent("pointerleave"));
+      expect(lightboxOverlayProps.onSlotLeave).toHaveBeenCalledOnce();
+    }
+  );
 });

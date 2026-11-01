@@ -5,9 +5,9 @@ import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { Searchable } from "@/core/domain/search/searchable";
+import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Item extends Searchable { id: string }
 
@@ -16,7 +16,7 @@ function createItem(id: string, ...tags: string[]): Item {
 }
 
 function createEvaluator(items: Item[]): BitEvaluator<Item> {
-  const bitIndex = new BitIndex<Item>({ getTerms: item => item.tags, stringInterner: new StringInterner() });
+  const bitIndex = new BitIndex<Item>({ getTerms: (item): Iterable<string> => item.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(items);
   const metricBitIndex = new MetricBitIndex<Item>(item => item.id.length);
@@ -157,18 +157,18 @@ describe("BitEvaluator", () => {
   });
 
   test("resolves a prefix wildcard leaf", () => {
-    const items = [createItem("1", "apple"), createItem("2", "banana"), createItem("3", "cherry")];
+    const fruitItems = [createItem("1", "apple"), createItem("2", "banana"), createItem("3", "cherry")];
 
-    expect(evaluateIds(items, createLeaf("*a*"))).toEqual(["1", "2"]);
+    expect(evaluateIds(fruitItems, createLeaf("*a*"))).toEqual(["1", "2"]);
   });
 
   test("resolves a metric leaf inside a nested tree", () => {
-    const items = [createItem("aa", "x"), createItem("bbbb", "x"), createItem("cccccc", "y")];
+    const measuredItems = [createItem("aa", "x"), createItem("bbbb", "x"), createItem("cccccc", "y")];
     const searchExpression = SearchExpression.and([
       createLeaf("id:>3"),
       SearchExpression.or([createLeaf("x"), createLeaf("y")])
     ]);
 
-    expect(evaluateIds(items, searchExpression)).toEqual(["bbbb", "cccccc"]);
+    expect(evaluateIds(measuredItems, searchExpression)).toEqual(["bbbb", "cccccc"]);
   });
 });

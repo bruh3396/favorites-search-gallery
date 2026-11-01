@@ -1,8 +1,8 @@
+import { isMissingPageRule34Error, isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
-import { isRetryableRule34Error, isMissingPageRule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34RemotePagesDependencies {

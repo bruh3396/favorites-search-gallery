@@ -1,9 +1,9 @@
-import { CategorizedPost } from "@/core/domain/post/categorized_post";
-import { Post } from "@/core/domain/post/post";
 import { NO_MEDIA, hasMedia } from "@/core/domain/media/media";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { CoalescingExecutor } from "@/core/utils/async/coalescing_executor";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
+import { Post } from "@/core/domain/post/post";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

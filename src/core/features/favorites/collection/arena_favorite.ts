@@ -1,8 +1,8 @@
-import { Metric } from "@/core/domain/search/metric";
-import { Post } from "@/core/domain/post/post";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
 import { Media } from "@/core/domain/media/media";
+import { Metric } from "@/core/domain/search/metric";
+import { Post } from "@/core/domain/post/post";
 
 export class ArenaFavorite implements Favorite {
   public readonly slot: number;

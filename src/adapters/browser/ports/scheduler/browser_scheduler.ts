@@ -17,4 +17,9 @@ export class BrowserScheduler implements Scheduler {
   public waitForPaint(): Promise<void> {
     return new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve)));
   }
+
+  public requestFrame(onFrame: (time: number) => void): () => void {
+    const handle = requestAnimationFrame(onFrame);
+    return (): void => cancelAnimationFrame(handle);
+  }
 }

@@ -1,12 +1,12 @@
 import { LightboxStage, LightboxStageDependencies } from "@/core/features/lightbox/stage/lightbox_stage";
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Signal } from "@/core/utils/reactive/signal";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { createPost } from "@/testing/post";
+import { createStoredValue } from "@/testing/stored_value";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { render } from "@/core/ui/h/h";
 
@@ -16,20 +16,6 @@ const VIDEO = createPost({ id: "3", media: { kind: "video", locator: "clip.mp4" 
 const OTHER_VIDEO = createPost({ id: "4", media: { kind: "video", locator: "other.mp4" } });
 
 type RemoteMedia = LightboxStageDependencies<Post>["remoteMedia"];
-
-function createStoredValue<T>(initial: T): StoredValue<T> {
-  const current = new Signal(initial);
-  return {
-    get value(): T {
-      return current.value;
-    },
-    peek: () => current.peek(),
-    set: (value: T): void => {
-      current.value = value;
-    },
-    changed: new Emitter<T>()
-  };
-}
 
 function createGif(media: Media): HTMLImageElement {
   const gif = document.createElement("img");

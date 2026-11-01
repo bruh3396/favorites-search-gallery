@@ -40,7 +40,10 @@ export class Rule34MissingFavoritesFinder {
     }
     const localList = { postIds: localPostIds, indexByPostId: new Map(localPostIds.map((id, index) => [id, index])), remoteStart };
     const localListStartCheckpoint = this.createLocalListStart(localList);
-    const remoteEndCheckpoint = this.createCheckpoint(localList, await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localPostIds.length - 1)));
+    const remoteEndCheckpoint = this.createCheckpoint(
+      localList,
+      await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localPostIds.length - 1))
+    );
     const removedBeforeRemoteEnd = await this.findMissingBetween(localList, localListStartCheckpoint, remoteEndCheckpoint);
     const removedAfterRemoteEnd = localPostIds.slice(remoteEndCheckpoint.localIndex + 1);
     return [...removedBeforeRemoteEnd, ...removedAfterRemoteEnd];
@@ -52,10 +55,18 @@ export class Rule34MissingFavoritesFinder {
     }
 
     if (bottomCheckpoint.remotePage.index === topCheckpoint.remotePage.index + 1) {
-      return localList.postIds.slice(topCheckpoint.localIndex + 1, bottomCheckpoint.localIndex + 1).filter(id => !bottomCheckpoint.remotePage.postIds.includes(id));
+      return localList.postIds
+        .slice(topCheckpoint.localIndex + 1, bottomCheckpoint.localIndex + 1)
+        .filter(id => !bottomCheckpoint.remotePage.postIds.includes(id));
     }
-    const middleCheckpoint = this.createCheckpoint(localList, await this.fetchPageAfterDelay(Math.floor((topCheckpoint.remotePage.index + bottomCheckpoint.remotePage.index) / 2)));
-    return [...await this.findMissingBetween(localList, topCheckpoint, middleCheckpoint), ...await this.findMissingBetween(localList, middleCheckpoint, bottomCheckpoint)];
+    const middleCheckpoint = this.createCheckpoint(
+      localList,
+      await this.fetchPageAfterDelay(Math.floor((topCheckpoint.remotePage.index + bottomCheckpoint.remotePage.index) / 2))
+    );
+    return [
+      ...await this.findMissingBetween(localList, topCheckpoint, middleCheckpoint),
+      ...await this.findMissingBetween(localList, middleCheckpoint, bottomCheckpoint)
+    ];
   }
 
   private createLocalListStart(localList: LocalList): Checkpoint {

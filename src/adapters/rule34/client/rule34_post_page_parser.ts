@@ -1,9 +1,9 @@
-import { CategorizedPost } from "@/core/domain/post/categorized_post";
-import { Rating } from "@/core/domain/post/rating";
 import { TagCategory, isTagCategory } from "@/core/domain/tag_category/tag_category";
+import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Media } from "@/core/domain/media/media";
-import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { MediaMinter } from "@/core/domain/media/media_minter";
+import { Rating } from "@/core/domain/post/rating";
+import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";
 
 const STATISTIC_ENTRY = /(\S+):\s+(\S+)/g;

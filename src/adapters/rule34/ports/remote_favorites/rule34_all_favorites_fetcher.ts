@@ -50,6 +50,7 @@ export class Rule34AllFavoritesFetcher {
         await this.dependencies.scheduler.sleep(PENDING_POLL_INTERVAL);
         continue;
       }
+
       if (pendingPage.retryCount > 0) {
         await this.dependencies.scheduler.sleep(this.dependencies.computeRetryDelay(pendingPage.retryCount));
       }

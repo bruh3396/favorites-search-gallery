@@ -8,6 +8,7 @@ interface ScheduledTask {
 export class MemoryScheduler implements Scheduler {
   private time: number;
   private scheduledTasks: ScheduledTask[] = [];
+  private frameRequests: Array<(time: number) => void> = [];
 
   constructor(startAt = 0) {
     this.time = startAt;
@@ -34,6 +35,20 @@ export class MemoryScheduler implements Scheduler {
     return Promise.resolve();
   }
 
+  public requestFrame(onFrame: (time: number) => void): () => void {
+    this.frameRequests.push(onFrame);
+    return (): void => {
+      this.frameRequests = this.frameRequests.filter(frameRequest => frameRequest !== onFrame);
+    };
+  }
+
+  public runFrame(): void {
+    const dueFrameRequests = this.frameRequests;
+
+    this.frameRequests = [];
+    dueFrameRequests.forEach(frameRequest => frameRequest(this.time));
+  }
+
   public advance(duration: number): void {
     const end = this.time + duration;
 
@@ -49,7 +64,9 @@ export class MemoryScheduler implements Scheduler {
     return this.scheduledTasks
       .filter(scheduledTask => scheduledTask.dueAt <= end)
       .reduce<ScheduledTask | undefined>(
-        (earliestScheduledTask, scheduledTask) => (earliestScheduledTask === undefined || scheduledTask.dueAt < earliestScheduledTask.dueAt ? scheduledTask : earliestScheduledTask),
+        (earliestScheduledTask, scheduledTask) => {
+          return earliestScheduledTask === undefined || scheduledTask.dueAt < earliestScheduledTask.dueAt ? scheduledTask : earliestScheduledTask;
+        },
         undefined
       );
   }

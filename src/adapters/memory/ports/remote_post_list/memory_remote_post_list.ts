@@ -1,6 +1,6 @@
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
-import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 import { PostListPage } from "@/core/domain/post_list/post_list_page";
+import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 
 export interface MemoryRemotePostListConfiguration {
   readonly pageSize: number;

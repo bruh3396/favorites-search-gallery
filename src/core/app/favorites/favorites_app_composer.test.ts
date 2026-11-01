@@ -1,4 +1,3 @@
-import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
@@ -22,10 +21,12 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_r
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
+import { MemoryViewport } from "@/adapters/memory/ports/viewport/memory_viewport";
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { SegmentedClass } from "@/core/ui/components/segmented/segmented";
+import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
@@ -56,6 +57,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver,
     sizeObserver: new MemorySizeObserver(),
+    viewport: new MemoryViewport(),
     remotePages: new MemoryRemotePages(memoryClient),
     scheduler,
     randomSource: new MemoryRandomSource(),
@@ -431,7 +433,6 @@ describe("composeFavoritesApp", () => {
     const posts = [createPost({ id: "1", media: { kind: "image", locator: "data:image/png;base64,AA==" } })];
     const root = mount(new MemoryLocalKeyedValues(), posts, { scheduler });
 
-    vi.spyOn(window, "requestAnimationFrame").mockImplementation(() => 0);
     vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 100, 100));
     onTestFinished(() => {
       findStandIn()?.remove();

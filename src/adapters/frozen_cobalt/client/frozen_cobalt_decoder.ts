@@ -1,6 +1,6 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
-import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
 import { FrozenCobaltMediaMinter } from "@/adapters/frozen_cobalt/client/frozen_cobalt_media_minter";
+import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
 
 export function decodeFrozenCobaltPost(frozenCobaltPost: FrozenCobaltPost, mintMedia: FrozenCobaltMediaMinter): CategorizedPost {
   const tagCategories = new Map(Object.entries(frozenCobaltPost.tagCategoryByName));

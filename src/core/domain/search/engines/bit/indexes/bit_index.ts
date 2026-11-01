@@ -1,5 +1,3 @@
-import { TermDelta } from "@/core/domain/search/engines/term_delta";
-import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { BitAlgebra } from "@/core/domain/search/engines/bit/indexes/bit_algebra";
 import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
 import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
@@ -7,6 +5,8 @@ import { DraftPostings } from "@/core/domain/search/engines/bit/indexes/draft_po
 import { DurablePostings } from "@/core/domain/search/engines/bit/indexes/durable_postings";
 import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { TermDelta } from "@/core/domain/search/engines/term_delta";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 
 export interface BitIndexDependencies<Doc> {
   getTerms: (doc: Doc) => Iterable<string>;

@@ -1,6 +1,5 @@
 import { FavoritesService, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { describe, expect, test } from "vitest";
-import { Emitter } from "@/core/utils/reactive/emitter";
 import { FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
@@ -14,10 +13,9 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_r
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
-import { StoredValue } from "@/core/utils/storage/stored_value";
-import { Signal } from "@/core/utils/reactive/signal";
-import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { createPost } from "@/testing/post";
+import { createStoredValue } from "@/testing/stored_value";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 interface Setup {
@@ -33,22 +31,6 @@ interface Created {
   memoryClient: MemoryClient;
   localFavorites: MemoryLocalFavorites;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
-}
-
-function createStoredValue<T>(initial: T): StoredValue<T> {
-  const signal = new Signal(initial);
-  const changes = new Emitter<T>();
-  return {
-    get value(): T {
-      return signal.value;
-    },
-    peek: (): T => signal.peek(),
-    set: (value: T): void => {
-      signal.value = value;
-      changes.emit(value);
-    },
-    changed: changes
-  };
 }
 
 function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Created {

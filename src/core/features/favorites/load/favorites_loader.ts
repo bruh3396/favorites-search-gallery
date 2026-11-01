@@ -39,7 +39,11 @@ export class FavoritesLoader {
   constructor(dependencies: FavoritesLoaderDependencies) {
     const favoritesReindexer = new FavoritesReindexer(dependencies);
     const postLibrary = new PostLibrary({ ...dependencies, onRefresh: (refreshedPost): void => favoritesReindexer.reindex(refreshedPost) });
-    const pathDependencies = { ...dependencies, postLibrary, onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState): void => this.report(favoritesLoadState) };
+    const pathDependencies = {
+      ...dependencies,
+      postLibrary,
+      onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState): void => this.report(favoritesLoadState)
+    };
 
     this.dependencies = dependencies;
     this.fetcher = new FavoritesFetcher(pathDependencies);

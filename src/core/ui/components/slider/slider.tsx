@@ -1,5 +1,5 @@
-import { ControlProps } from "@/core/ui/components/control/control_props";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
+import { ControlProps } from "@/core/ui/components/control/control_props";
 import { doNothing } from "@/core/utils/function/function_utilities";
 import { h } from "@/core/ui/h/h";
 

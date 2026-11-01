@@ -1,3 +1,4 @@
+import { isMissingPageRule34Error, isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
 import { PostPurgedError } from "@/core/boundary/ports/remote_posts/post_purged_error";
@@ -5,7 +6,6 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
-import { isRetryableRule34Error, isMissingPageRule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34RemotePostsDependencies {

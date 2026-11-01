@@ -1,5 +1,6 @@
-import { Favorite } from "@/core/features/favorites/favorite";
 import { AppPreferences } from "@/core/app/app_preferences";
+import { Favorite } from "@/core/features/favorites/favorite";
+import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
@@ -12,7 +13,6 @@ import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
-import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
 import { TabStripToggle } from "@/core/app/favorites/search_panel/tab_strip_toggle";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -60,7 +60,10 @@ export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependen
       createActions: () => [],
       visibilityObserver, sizeObserver, imageLoaderService,
       getPostUrl: favorite => remotePages.postUrl(favorite.id),
-      onPlainClick: favorite => lightbox.open(new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, favoritesTab.session.matchedFavorites), favorite),
+      onPlainClick: favorite => lightbox.open(
+        new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, favoritesTab.session.matchedFavorites),
+        favorite
+      ),
       onCtrlClick: favorite => postActions.openOriginal(favorite)
     })
   });

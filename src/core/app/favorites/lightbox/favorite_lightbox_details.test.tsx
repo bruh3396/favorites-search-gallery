@@ -34,10 +34,17 @@ interface Setup {
 function setup(shownFavorite: ShownFavorite | undefined): Setup {
   const favorite = new Signal<ShownFavorite | undefined>(shownFavorite);
   const clipboard = new MemoryClipboard();
-  const favoriteLightboxDetailsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox.details;
+  const favoriteLightboxDetailsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"])
+    .favorites.lightbox.details;
   const { result: element } = render(document, () => {
     const { titleChild, controlsChild, bodyChild } = createFavoriteLightboxDetails({
-      favorite, preferences: favoriteLightboxDetailsPreferences, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
+      favorite,
+      preferences: favoriteLightboxDetailsPreferences,
+      localTagCategories: { getMany: () => Promise.resolve(new Map()) },
+      clipboard,
+      scheduler: new MemoryScheduler(),
+      copiedDuration: 1_500,
+      collapsedTagCount: 6
     });
     return <div>{titleChild}{controlsChild}{bodyChild}</div> as HTMLElement;
   });
@@ -101,7 +108,11 @@ describe("createFavoriteLightboxDetails", () => {
     chooseView("One list");
     chooseView("Centered");
     chooseView("Large");
-    expect([favoriteLightboxDetailsPreferences.organization.value, favoriteLightboxDetailsPreferences.alignment.value, favoriteLightboxDetailsPreferences.size.value]).toEqual(["list", "center", "large"]);
+    expect([
+      favoriteLightboxDetailsPreferences.organization.value,
+      favoriteLightboxDetailsPreferences.alignment.value,
+      favoriteLightboxDetailsPreferences.size.value
+    ]).toEqual(["list", "center", "large"]);
     expect([tags.dataset.alignment, tags.dataset.size]).toEqual(["center", "large"]);
   });
 });

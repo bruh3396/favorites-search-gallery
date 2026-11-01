@@ -60,8 +60,10 @@ describe("RelativeMetricIndex", () => {
     test("shares one Set object between reverse-ordered keys rather than duplicating it", () => {
       const relativeMetricIndex = createIndex();
 
-      expect(relativeMetricIndex.getDocs(createComparison("width", ":>", "height"))).toBe(relativeMetricIndex.getDocs(createComparison("height", ":<", "width")));
-      expect(relativeMetricIndex.getDocs(createComparison("width", ":<", "height"))).toBe(relativeMetricIndex.getDocs(createComparison("height", ":>", "width")));
+      expect(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))
+        .toBe(relativeMetricIndex.getDocs(createComparison("height", ":<", "width")));
+      expect(relativeMetricIndex.getDocs(createComparison("width", ":<", "height")))
+        .toBe(relativeMetricIndex.getDocs(createComparison("height", ":>", "width")));
       expect(relativeMetricIndex.getDocs(createComparison("width", ":", "height"))).toBe(relativeMetricIndex.getDocs(createComparison("height", ":", "width")));
     });
 

@@ -1,16 +1,18 @@
 import { describe, expect, test } from "vitest";
-import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
-import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 const NO_BLACKLIST = new FavoritesBlacklist({ blacklistedTags: [], force: false });
 
 describe("compileFavoritesSearchRequest", () => {
   test("copies the sort, rating, and shuffle settings", () => {
-    const favoritesSearchSettings = buildFavoritesSearchSettings({ sortKey: "score", isSortAscending: true, allowedRatings: 1, isShuffled: true, shuffleSeed: 7 });
+    const favoritesSearchSettings = buildFavoritesSearchSettings({
+      sortKey: "score", isSortAscending: true, allowedRatings: 1, isShuffled: true, shuffleSeed: 7
+    });
 
     expect(compileFavoritesSearchRequest(favoritesSearchSettings, NO_BLACKLIST))
       .toMatchObject({ sortKey: "score", isSortAscending: true, allowedRatings: 1, isShuffled: true, shuffleSeed: 7 });
@@ -35,6 +37,9 @@ describe("compileFavoritesSearchRequest", () => {
     const favoritesSearchSettings = buildFavoritesSearchSettings({ query: "cat", isInverted: true });
 
     expect(compileFavoritesSearchRequest(favoritesSearchSettings, favoritesBlacklist).searchExpression)
-      .toEqual(SearchExpression.and([SearchExpression.and([SearchExpression.not(SearchExpression.term(parseExactSearchTerm("apple")))]), SearchExpression.not(parseSearchExpression("cat"))]));
+      .toEqual(SearchExpression.and([
+        SearchExpression.and([SearchExpression.not(SearchExpression.term(parseExactSearchTerm("apple")))]),
+        SearchExpression.not(parseSearchExpression("cat"))
+      ]));
   });
 });

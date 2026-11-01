@@ -49,7 +49,8 @@ describe("createRecordCodec", () => {
   });
 
   test("stores only the fields it has a guard for", () => {
-    expect(createRecordCodec(DEFAULT_PALETTE, { main: createOneOfGuard(COLORS), isMuted: isBoolean }).encode({ main: "blue", isMuted: true, other: 1 } as Palette))
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: createOneOfGuard(COLORS), isMuted: isBoolean })
+      .encode({ main: "blue", isMuted: true, other: 1 } as Palette))
       .toEqual({ main: "blue", isMuted: true });
   });
 });
