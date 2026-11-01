@@ -21,8 +21,8 @@ export function parseSearchExpression(query: string): SearchExpression {
 }
 
 export function parseExclusions(tags: readonly string[]): SearchExpression | undefined {
-  const exclusions = tags.map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag.toLowerCase()))));
-  return exclusions.length === 0 ? undefined : SearchExpression.and(exclusions);
+  const exclusionSearchExpressions = tags.map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag.toLowerCase()))));
+  return exclusionSearchExpressions.length === 0 ? undefined : SearchExpression.and(exclusionSearchExpressions);
 }
 
 function normalize(query: string): string {
@@ -39,7 +39,7 @@ class Parser {
   constructor(private readonly tokens: string[]) { }
 
   public parseTopLevel(): SearchExpression {
-    const members: SearchExpression[] = [];
+    const memberSearchExpressions: SearchExpression[] = [];
 
     while (!this.atEnd()) {
       const token = this.peek();
@@ -51,9 +51,9 @@ class Parser {
       if (token === CLOSE) {
         throw new Error(`unmatched ')' at token ${this.cursor + 1}`);
       }
-      members.push(this.parseMember());
+      memberSearchExpressions.push(this.parseMember());
     }
-    return SearchExpression.and(members);
+    return SearchExpression.and(memberSearchExpressions);
   }
 
   private parseMember(): SearchExpression {
@@ -63,20 +63,20 @@ class Parser {
   private parseGroup(): SearchExpression {
     const openAt = this.cursor + 1;
     const isNegated = this.advance() === NEGATED_OPEN;
-    const members: SearchExpression[] = [this.parseGroupMember(openAt)];
+    const memberSearchExpressions: SearchExpression[] = [this.parseGroupMember(openAt)];
     let separator: string | null = null;
 
     while (!this.atEnd() && this.peek() !== CLOSE) {
       separator = this.readSeparator(separator, openAt);
-      members.push(this.parseGroupMember(openAt));
+      memberSearchExpressions.push(this.parseGroupMember(openAt));
     }
 
     if (this.atEnd()) {
       throw new Error(`unclosed '(' at token ${openAt}`);
     }
     this.advance();
-    const group = separator === OR ? SearchExpression.or(members) : SearchExpression.and(members);
-    return isNegated ? SearchExpression.not(group) : group;
+    const groupSearchExpression = separator === OR ? SearchExpression.or(memberSearchExpressions) : SearchExpression.and(memberSearchExpressions);
+    return isNegated ? SearchExpression.not(groupSearchExpression) : groupSearchExpression;
   }
 
   private readSeparator(current: string | null, openAt: number): string {

@@ -10,9 +10,9 @@ export interface SearchEngineDependencies<Doc> {
 }
 
 export interface SearchEngine<Doc> {
-  search(expression: SearchExpression, candidates?: readonly Doc[]): readonly Doc[];
+  search(searchExpression: SearchExpression, candidateDocs?: readonly Doc[]): readonly Doc[];
   countDocsWithTerm(term: string): number;
   rebuild(docs: readonly Doc[]): void;
   add(docs: readonly Doc[]): void;
-  update(updates: readonly TermUpdate<Doc>[]): void;
+  update(termUpdates: readonly TermUpdate<Doc>[]): void;
 }

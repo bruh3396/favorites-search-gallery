@@ -7,16 +7,16 @@ import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
 const DOCS = ["apple", "banana", "cherry"];
 
 function setup(): BitAlgebra<string> {
-  const table = new DocTable<string>();
-  const algebra = new BitAlgebra(table);
+  const docTable = new DocTable<string>();
+  const bitAlgebra = new BitAlgebra(docTable);
 
-  table.reset(DOCS.length, DOCS.length);
-  algebra.reset();
+  docTable.reset(DOCS.length, DOCS.length);
+  bitAlgebra.reset();
   DOCS.forEach((doc, position) => {
-    table.place(doc, position);
-    algebra.occupy(position);
+    docTable.place(doc, position);
+    bitAlgebra.occupy(position);
   });
-  return algebra;
+  return bitAlgebra;
 }
 
 function createBitSet(...positions: number[]): BitSet {
@@ -29,59 +29,59 @@ function createBitSet(...positions: number[]): BitSet {
 describe("BitAlgebra", () => {
   describe("universe", () => {
     test("holds every occupied position", () => {
-      const algebra = setup();
+      const bitAlgebra = setup();
 
-      expect(algebra.docsFrom(algebra.universe())).toEqual(DOCS);
+      expect(bitAlgebra.docsFrom(bitAlgebra.universe())).toEqual(DOCS);
     });
 
     test("returns a copy the caller may change", () => {
-      const algebra = setup();
+      const bitAlgebra = setup();
 
-      algebra.universe().clear(0);
-      expect(algebra.docsFrom(algebra.universe())).toEqual(DOCS);
+      bitAlgebra.universe().clear(0);
+      expect(bitAlgebra.docsFrom(bitAlgebra.universe())).toEqual(DOCS);
     });
   });
 
   describe("empty", () => {
     test("holds nothing at the table's width", () => {
-      const empty = setup().empty();
+      const emptyBitSet = setup().empty();
 
-      expect(empty.size).toBe(64);
-      expect(empty.isEmpty()).toBe(true);
+      expect(emptyBitSet.size).toBe(64);
+      expect(emptyBitSet.isEmpty()).toBe(true);
     });
   });
 
   describe("reset", () => {
     test("vacates every position", () => {
-      const algebra = setup();
+      const bitAlgebra = setup();
 
-      algebra.reset();
-      expect(algebra.universe().isEmpty()).toBe(true);
+      bitAlgebra.reset();
+      expect(bitAlgebra.universe().isEmpty()).toBe(true);
     });
   });
 
   describe("bitSetFrom", () => {
     test("expands a sparse posting to the table's width", () => {
-      const algebra = setup();
+      const bitAlgebra = setup();
 
-      expect(algebra.docsFrom(algebra.bitSetFrom(new SparsePosting(Uint8Array.of(0, 2))))).toEqual(["apple", "cherry"]);
+      expect(bitAlgebra.docsFrom(bitAlgebra.bitSetFrom(new SparsePosting(Uint8Array.of(0, 2))))).toEqual(["apple", "cherry"]);
     });
   });
 
   describe("complementOf", () => {
     test("holds the occupied positions outside the set", () => {
-      const algebra = setup();
+      const bitAlgebra = setup();
 
-      expect(algebra.docsFrom(algebra.complementOf(createBitSet(1)))).toEqual(["apple", "cherry"]);
+      expect(bitAlgebra.docsFrom(bitAlgebra.complementOf(createBitSet(1)))).toEqual(["apple", "cherry"]);
     });
   });
 
   describe("unionOf", () => {
     test("holds the positions of any posting", () => {
-      const algebra = setup();
-      const union = algebra.unionOf([new SparsePosting(Uint8Array.of(0)), new DensePosting(createBitSet(2))]);
+      const bitAlgebra = setup();
+      const unionBitSet = bitAlgebra.unionOf([new SparsePosting(Uint8Array.of(0)), new DensePosting(createBitSet(2))]);
 
-      expect(algebra.docsFrom(union)).toEqual(["apple", "cherry"]);
+      expect(bitAlgebra.docsFrom(unionBitSet)).toEqual(["apple", "cherry"]);
     });
 
     test("holds nothing for no postings", () => {

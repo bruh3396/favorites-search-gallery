@@ -15,105 +15,105 @@ export class BitEvaluator<Doc> {
     private readonly postingResolver: PostingResolver<Doc>
   ) { }
 
-  public evaluate(expression: SearchExpression): readonly Doc[] {
-    return this.bitIndex.docsFrom(this.evaluateToBitSet(expression));
+  public evaluate(searchExpression: SearchExpression): readonly Doc[] {
+    return this.bitIndex.docsFrom(this.evaluateToBitSet(searchExpression));
   }
 
-  public evaluateToBitSet(expression: SearchExpression): BitSet {
-    const value = this.resolve(expression);
-    const bitset = this.bitIndex.bitSetFrom(value.posting);
-    return value.isNegated ? this.bitIndex.complementOf(bitset) : bitset;
+  public evaluateToBitSet(searchExpression: SearchExpression): BitSet {
+    const value = this.resolve(searchExpression);
+    const bitSet = this.bitIndex.bitSetFrom(value.posting);
+    return value.isNegated ? this.bitIndex.complementOf(bitSet) : bitSet;
   }
 
-  private resolve(expr: SearchExpression): Value {
-    switch (expr.node.kind) {
-      case "term": return { posting: this.postingResolver.resolve(expr.node.term), isNegated: expr.node.term.isNegated };
-      case "and": return this.intersect(expr.node.children);
-      case "or": return this.union(expr.node.children);
+  private resolve(searchExpression: SearchExpression): Value {
+    switch (searchExpression.node.kind) {
+      case "term": return { posting: this.postingResolver.resolve(searchExpression.node.term), isNegated: searchExpression.node.term.isNegated };
+      case "and": return this.intersect(searchExpression.node.childExpressions);
+      case "or": return this.union(searchExpression.node.childExpressions);
       case "not":
       default: {
-        const value = this.resolve(expr.node.child);
+        const value = this.resolve(searchExpression.node.childExpression);
         return { posting: value.posting, isNegated: !value.isNegated };
       }
     }
   }
 
-  private intersect(children: SearchExpression[]): Value {
-    const values = children.map(child => this.resolve(child));
-    const { positives, negatives } = this.partition(values);
+  private intersect(childSearchExpressions: SearchExpression[]): Value {
+    const values = childSearchExpressions.map(childSearchExpression => this.resolve(childSearchExpression));
+    const { positivePostings, negativePostings } = this.partition(values);
 
-    if (positives.length === 1 && negatives.length === 0) {
-      return { posting: positives[0], isNegated: false };
+    if (positivePostings.length === 1 && negativePostings.length === 0) {
+      return { posting: positivePostings[0], isNegated: false };
     }
-    const result = this.intersectPostings(positives);
+    const bitSet = this.intersectPostings(positivePostings);
 
-    if (result === null) {
+    if (bitSet === null) {
       return { posting: EMPTY_POSTING, isNegated: false };
     }
 
-    negatives.sort((a, b) => b.cardinality - a.cardinality);
+    negativePostings.sort((a, b) => b.cardinality - a.cardinality);
 
-    for (const negative of negatives) {
-      if (negative.andNotInto(result)) {
+    for (const negativePosting of negativePostings) {
+      if (negativePosting.andNotInto(bitSet)) {
         return { posting: EMPTY_POSTING, isNegated: false };
       }
     }
-    return { posting: new DensePosting(result), isNegated: false };
+    return { posting: new DensePosting(bitSet), isNegated: false };
   }
 
-  private partition(values: Value[]): { positives: Posting[]; negatives: Posting[] } {
-    const positives: Posting[] = [];
-    const negatives: Posting[] = [];
+  private partition(values: Value[]): { positivePostings: Posting[]; negativePostings: Posting[] } {
+    const positivePostings: Posting[] = [];
+    const negativePostings: Posting[] = [];
 
     for (const value of values) {
-      (value.isNegated ? negatives : positives).push(value.posting);
+      (value.isNegated ? negativePostings : positivePostings).push(value.posting);
     }
-    return { positives, negatives };
+    return { positivePostings, negativePostings };
   }
 
   private intersectPostings(postings: Posting[]): BitSet | null {
     if (postings.length === 0) {
       return this.bitIndex.universe();
     }
-    let smallest = postings[0];
+    let smallestPosting = postings[0];
 
     for (let i = 1; i < postings.length; i += 1) {
-      if (postings[i].cardinality < smallest.cardinality) {
-        smallest = postings[i];
+      if (postings[i].cardinality < smallestPosting.cardinality) {
+        smallestPosting = postings[i];
       }
     }
-    const result = smallest.toBitSet(this.bitIndex.width);
+    const bitSet = smallestPosting.toBitSet(this.bitIndex.width);
 
-    for (const positive of postings) {
-      if (positive === smallest) {
+    for (const positivePosting of postings) {
+      if (positivePosting === smallestPosting) {
         continue;
       }
 
-      if (positive.andInto(result)) {
+      if (positivePosting.andInto(bitSet)) {
         return null;
       }
     }
-    return result;
+    return bitSet;
   }
 
-  private union(children: SearchExpression[]): Value {
-    const result = this.bitIndex.empty();
+  private union(childSearchExpressions: SearchExpression[]): Value {
+    const bitSet = this.bitIndex.empty();
     let needsUniverseMask = false;
 
-    for (const child of children) {
-      const value = this.resolve(child);
+    for (const childSearchExpression of childSearchExpressions) {
+      const value = this.resolve(childSearchExpression);
 
       if (value.isNegated) {
-        value.posting.orComplementInto(result);
+        value.posting.orComplementInto(bitSet);
         needsUniverseMask = true;
       } else {
-        value.posting.orInto(result);
+        value.posting.orInto(bitSet);
       }
     }
 
     if (needsUniverseMask) {
-      result.andInPlace(this.bitIndex.universe());
+      bitSet.andInPlace(this.bitIndex.universe());
     }
-    return { posting: new DensePosting(result), isNegated: false };
+    return { posting: new DensePosting(bitSet), isNegated: false };
   }
 }

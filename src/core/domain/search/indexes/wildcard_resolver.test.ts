@@ -10,14 +10,14 @@ class ListResolver extends WildcardResolver<string[]> {
 }
 
 function createResolver(terms: string[] = TERMS): ListResolver {
-  const r = new ListResolver(new StringInterner());
+  const listResolver = new ListResolver(new StringInterner());
 
-  r.index(terms);
-  return r;
+  listResolver.index(terms);
+  return listResolver;
 }
 
-function resolve(r: ListResolver, pattern: string): string[] {
-  return r.resolve(parseWildcardSearchTerm(pattern));
+function resolve(listResolver: ListResolver, pattern: string): string[] {
+  return listResolver.resolve(parseWildcardSearchTerm(pattern));
 }
 
 describe("WildcardResolver", () => {
@@ -27,61 +27,61 @@ describe("WildcardResolver", () => {
     });
 
     test("returns whatever combine produces for an empty match, including a falsy value", () => {
-      const r = createResolver();
+      const listResolver = createResolver();
 
-      r.combine.mockReturnValue([]);
-      expect(resolve(r, "zzz*")).toEqual([]);
+      listResolver.combine.mockReturnValue([]);
+      expect(resolve(listResolver, "zzz*")).toEqual([]);
     });
 
     test("memoizes per wildcard shape and combines each shape once", () => {
-      const r = createResolver();
+      const listResolver = createResolver();
 
-      resolve(r, "ban*");
-      resolve(r, "ban*");
-      resolve(r, "*ana");
-      expect(r.combine).toHaveBeenCalledTimes(2);
+      resolve(listResolver, "ban*");
+      resolve(listResolver, "ban*");
+      resolve(listResolver, "*ana");
+      expect(listResolver.combine).toHaveBeenCalledTimes(2);
     });
 
     test("caches a result even when combine returns undefined-like empties", () => {
-      const r = createResolver();
+      const listResolver = createResolver();
 
-      r.combine.mockReturnValue([]);
-      const term = parseWildcardSearchTerm("zzz*");
+      listResolver.combine.mockReturnValue([]);
+      const wildcardSearchTerm = parseWildcardSearchTerm("zzz*");
 
-      r.resolve(term);
-      r.resolve(term);
-      expect(r.combine).toHaveBeenCalledOnce();
+      listResolver.resolve(wildcardSearchTerm);
+      listResolver.resolve(wildcardSearchTerm);
+      expect(listResolver.combine).toHaveBeenCalledOnce();
     });
   });
 
   describe("index", () => {
     test("rebuilds the matcher and invalidates the cache", () => {
-      const r = createResolver();
+      const listResolver = createResolver();
 
-      resolve(r, "ban*");
-      r.index(TERMS);
-      resolve(r, "ban*");
-      expect(r.combine).toHaveBeenCalledTimes(2);
+      resolve(listResolver, "ban*");
+      listResolver.index(TERMS);
+      resolve(listResolver, "ban*");
+      expect(listResolver.combine).toHaveBeenCalledTimes(2);
     });
   });
 
   describe("add", () => {
     test("makes a new term matchable and invalidates the cache", () => {
-      const r = createResolver();
+      const listResolver = createResolver();
 
-      expect(resolve(r, "ban*")).toEqual(["bandana", "banana"].sort());
-      r.add("bang");
-      expect(resolve(r, "ban*")).toEqual(["banana", "bandana", "bang"].sort());
+      expect(resolve(listResolver, "ban*")).toEqual(["bandana", "banana"].sort());
+      listResolver.add("bang");
+      expect(resolve(listResolver, "ban*")).toEqual(["banana", "bandana", "bang"].sort());
     });
   });
 
   describe("remove", () => {
     test("drops a term and invalidates the cache", () => {
-      const r = createResolver();
+      const listResolver = createResolver();
 
-      expect(resolve(r, "ban*")).toEqual(["bandana", "banana"].sort());
-      r.remove("bandana");
-      expect(resolve(r, "ban*")).toEqual(["banana"]);
+      expect(resolve(listResolver, "ban*")).toEqual(["bandana", "banana"].sort());
+      listResolver.remove("bandana");
+      expect(resolve(listResolver, "ban*")).toEqual(["banana"]);
     });
   });
 });

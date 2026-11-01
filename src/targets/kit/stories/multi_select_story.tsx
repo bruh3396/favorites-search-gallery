@@ -7,7 +7,7 @@ import { Story } from "@/targets/kit/story";
 interface MultiSelectState {
   readonly values: readonly string[];
   readonly disabled?: boolean;
-  readonly size?: ControlSize;
+  readonly controlSize?: ControlSize;
 }
 
 const ACTIONS = [
@@ -16,7 +16,7 @@ const ACTIONS = [
   { value: "open", label: "Open" }
 ] as const;
 
-function variant(label: string, { values, disabled = false, size }: MultiSelectState): Story["variants"][number] {
+function variant(label: string, { values, disabled = false, controlSize }: MultiSelectState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
@@ -26,7 +26,7 @@ function variant(label: string, { values, disabled = false, size }: MultiSelectS
           controlChoices={ACTIONS}
           value={pressed}
           disabled={new Signal(disabled)}
-          size={size}
+          size={controlSize}
           onValueChange={next => {
             log(`MultiSelect "${label}" → [${next.join(", ")}]`);
             pressed.value = next;
@@ -45,7 +45,7 @@ export const MULTI_SELECT_STORY: Story = {
   variants: [
     variant("Two pressed", { values: ["favorite", "open"] }),
     variant("One pressed (locked)", { values: ["download"] }),
-    variant("Small", { values: ["favorite", "download", "open"], size: "small" }),
+    variant("Small", { values: ["favorite", "download", "open"], controlSize: "small" }),
     variant("Disabled", { values: ["favorite"], disabled: true })
   ]
 };

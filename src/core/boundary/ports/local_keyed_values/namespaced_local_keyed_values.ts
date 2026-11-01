@@ -3,12 +3,12 @@ import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local
 type Entries = Readonly<Record<string, unknown>>;
 
 export class NamespacedLocalKeyedValues implements LocalKeyedValues {
-  private readonly inner: LocalKeyedValues;
+  private readonly innerLocalKeyedValues: LocalKeyedValues;
   private readonly namespace: string;
   private entries: Entries;
 
-  constructor(namespace: string, inner: LocalKeyedValues) {
-    this.inner = inner;
+  constructor(namespace: string, innerLocalKeyedValues: LocalKeyedValues) {
+    this.innerLocalKeyedValues = innerLocalKeyedValues;
     this.namespace = namespace;
     this.entries = this.readStored();
   }
@@ -28,17 +28,17 @@ export class NamespacedLocalKeyedValues implements LocalKeyedValues {
   }
 
   public clear(): void {
-    this.inner.remove(this.namespace);
+    this.innerLocalKeyedValues.remove(this.namespace);
     this.entries = {};
   }
 
   private save(entries: Entries): void {
     this.entries = entries;
-    this.inner.set(this.namespace, entries);
+    this.innerLocalKeyedValues.set(this.namespace, entries);
   }
 
   private readStored(): Entries {
-    const stored = this.inner.get(this.namespace);
+    const stored = this.innerLocalKeyedValues.get(this.namespace);
     return typeof stored === "object" && stored !== null && !Array.isArray(stored) ? stored as Entries : {};
   }
 }

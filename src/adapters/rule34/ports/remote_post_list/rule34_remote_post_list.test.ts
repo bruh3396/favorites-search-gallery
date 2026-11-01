@@ -11,7 +11,7 @@ import { createPost } from "@/testing/post";
 type FetchPostListPage = Mock<(searchQuery: string, pageIndex: number) => Promise<Post[]>>;
 
 interface Setup {
-  postList: Rule34RemotePostList;
+  remotePostList: Rule34RemotePostList;
   scheduler: MemoryScheduler;
   readPostListPage: Mock<(pageIndex: number) => Post[]>;
   fetchPostListPage: FetchPostListPage;
@@ -20,18 +20,18 @@ interface Setup {
 const LANDING_PAGE = [createPost({ id: "1" })];
 const OTHER_PAGE = [createPost({ id: "2" })];
 
-function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolve(OTHER_PAGE)), initialPage: Post[] = LANDING_PAGE): Setup {
+function setup(fetchPostListPage: FetchPostListPage = vi.fn(() => Promise.resolve(OTHER_PAGE)), initialPagePosts: Post[] = LANDING_PAGE): Setup {
   const scheduler = new MemoryScheduler();
-  const readPostListPage = vi.fn((): Post[] => initialPage);
+  const readPostListPage = vi.fn((): Post[] => initialPagePosts);
   const rule34Client = { readPostListPage, fetchPostListPage };
   const rule34Document = { readSearchQuery: (): string => "apple banana", readPostListPageIndex: (): number => 2 };
-  const postList = new Rule34RemotePostList({ rule34Client, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
-  return { postList, scheduler, readPostListPage, fetchPostListPage };
+  const remotePostList = new Rule34RemotePostList({ rule34Client, rule34Document, scheduler, randomSource: new MemoryRandomSource([1]) });
+  return { remotePostList, scheduler, readPostListPage, fetchPostListPage };
 }
 
 async function fetchFirstPage(fetchPostListPage: FetchPostListPage): Promise<PostListPage> {
-  const { postList, scheduler } = setup(fetchPostListPage);
-  const fetched = postList.fetchPage(0);
+  const { remotePostList, scheduler } = setup(fetchPostListPage);
+  const fetched = remotePostList.fetchPage(0);
 
   fetched.catch(() => { });
   await advanceAndSettle(scheduler, 10_000);
@@ -40,34 +40,34 @@ async function fetchFirstPage(fetchPostListPage: FetchPostListPage): Promise<Pos
 
 describe("Rule34RemotePostList", () => {
   test("reads the page the browser opened", () => {
-    const { postList } = setup();
+    const { remotePostList } = setup();
 
-    expect(postList.readInitialPage()).toEqual({ index: 2, posts: LANDING_PAGE });
+    expect(remotePostList.readInitialPage()).toEqual({ index: 2, posts: LANDING_PAGE });
   });
 
   test("captures the native page when constructed and reuses it", async() => {
-    const { postList, readPostListPage, fetchPostListPage } = setup();
+    const { remotePostList, readPostListPage, fetchPostListPage } = setup();
 
     expect(readPostListPage).toHaveBeenCalledExactlyOnceWith(2);
-    expect(await postList.fetchPage(2)).toBe(postList.readInitialPage());
-    expect(await postList.fetchPage(2)).toBe(postList.readInitialPage());
+    expect(await remotePostList.fetchPage(2)).toBe(remotePostList.readInitialPage());
+    expect(await remotePostList.fetchPage(2)).toBe(remotePostList.readInitialPage());
     expect(readPostListPage).toHaveBeenCalledOnce();
     expect(fetchPostListPage).not.toHaveBeenCalled();
   });
 
   test("keeps an empty native page as the initial page", async() => {
-    const { postList, readPostListPage, fetchPostListPage } = setup(undefined, []);
+    const { remotePostList, readPostListPage, fetchPostListPage } = setup(undefined, []);
 
-    expect(postList.readInitialPage()).toEqual({ index: 2, posts: [] });
-    expect(await postList.fetchPage(2)).toBe(postList.readInitialPage());
+    expect(remotePostList.readInitialPage()).toEqual({ index: 2, posts: [] });
+    expect(await remotePostList.fetchPage(2)).toBe(remotePostList.readInitialPage());
     expect(readPostListPage).toHaveBeenCalledOnce();
     expect(fetchPostListPage).not.toHaveBeenCalled();
   });
 
   test("fetches any other page of the same search", async() => {
-    const { postList, fetchPostListPage } = setup();
+    const { remotePostList, fetchPostListPage } = setup();
 
-    expect(await postList.fetchPage(5)).toEqual({ index: 5, posts: OTHER_PAGE });
+    expect(await remotePostList.fetchPage(5)).toEqual({ index: 5, posts: OTHER_PAGE });
     expect(fetchPostListPage).toHaveBeenCalledWith("apple banana", 5);
   });
 

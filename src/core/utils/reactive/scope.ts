@@ -11,7 +11,7 @@ class Scope {
   private readonly cleanups = new Set<Cleanup>();
   private readonly values = new Map<ScopeContext<unknown>, unknown>();
 
-  constructor(private readonly parent: Scope | null) { }
+  constructor(private readonly parentScope: Scope | null) { }
 
   public add(cleanup: Cleanup): Cleanup {
     this.cleanups.add(cleanup);
@@ -23,7 +23,7 @@ class Scope {
   }
 
   public find<T>(context: ScopeContext<T>): T | undefined {
-    return this.values.has(context) ? this.values.get(context) as T : this.parent?.find(context);
+    return this.values.has(context) ? this.values.get(context) as T : this.parentScope?.find(context);
   }
 
   public dispose(): void {
@@ -38,20 +38,20 @@ class Scope {
 }
 
 // eslint-disable-next-line functional/no-let
-let current: Scope | null = null;
+let currentScope: Scope | null = null;
 
 export class ScopeContext<T> {
   constructor(private readonly name: string) { }
 
   public provide(value: T): void {
-    if (current === null) {
+    if (currentScope === null) {
       throw new Error(`${this.name} can only be provided inside a scope`);
     }
-    current.provide(this, value);
+    currentScope.provide(this, value);
   }
 
   public read(): T {
-    const value = current?.find(this);
+    const value = currentScope?.find(this);
 
     if (value === undefined) {
       throw new Error(`No ${this.name} was provided to this scope`);
@@ -61,28 +61,28 @@ export class ScopeContext<T> {
 }
 
 export function createScope<T>(build: () => T): Scoped<T> {
-  return createScopeIn(current, build);
+  return createScopeIn(currentScope, build);
 }
 
 export function captureScope(): <T>(build: () => T) => Scoped<T> {
-  const owner = current;
-  return build => createScopeIn(owner, build);
+  const ownerScope = currentScope;
+  return build => createScopeIn(ownerScope, build);
 }
 
 export function onCleanup(cleanup: Cleanup): Cleanup {
-  return current?.add(cleanup) ?? doNothing;
+  return currentScope?.add(cleanup) ?? doNothing;
 }
 
-function createScopeIn<T>(parent: Scope | null, build: () => T): Scoped<T> {
-  const scope = new Scope(parent);
-  const detach = parent?.add(() => scope.dispose()) ?? doNothing;
+function createScopeIn<T>(parentScope: Scope | null, build: () => T): Scoped<T> {
+  const scope = new Scope(parentScope);
+  const detach = parentScope?.add(() => scope.dispose()) ?? doNothing;
   const dispose = (): void => {
     detach();
     scope.dispose();
   };
-  const previous = current;
+  const previousScope = currentScope;
 
-  current = scope;
+  currentScope = scope;
 
   try {
     return { result: build(), dispose };
@@ -90,6 +90,6 @@ function createScopeIn<T>(parent: Scope | null, build: () => T): Scoped<T> {
     dispose();
     throw error;
   } finally {
-    current = previous;
+    currentScope = previousScope;
   }
 }

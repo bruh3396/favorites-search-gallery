@@ -11,14 +11,14 @@ const ITEMS: readonly ActivityBarItem[] = [
   { id: "help", label: "Help", icon: "help" }
 ];
 
-function renderView(item: ActivityBarItem, log: (message: string) => void): HTMLElement {
-  if (item.id !== "settings") {
-    return <ViewPane title={item.label}><p className="kit-Placeholder">{item.label} content</p></ViewPane>;
+function renderView(activityBarItem: ActivityBarItem, log: (message: string) => void): HTMLElement {
+  if (activityBarItem.id !== "settings") {
+    return <ViewPane title={activityBarItem.label}><p className="kit-Placeholder">{activityBarItem.label} content</p></ViewPane>;
   }
   const nothingChanged = new Signal(false);
   return (
     <ViewPane
-      title={item.label}
+      title={activityBarItem.label}
       actions={[
         {
           label: "Reset all",
@@ -40,16 +40,16 @@ function variant(label: string, initial: string | null): StoryVariant {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
-      const value = new Signal<string | null>(initial);
+      const activeItemId = new Signal<string | null>(initial);
       const { result } = render(ownerDocument, () => (
         <div className="kit-Frame">
           <ActivityBar
             items={ITEMS}
-            value={value}
-            renderView={item => renderView(item, log)}
+            value={activeItemId}
+            renderView={activityBarItem => renderView(activityBarItem, log)}
             onValueChange={next => {
               log(`ActivityBar "${label}" → ${String(next)}`);
-              value.value = next;
+              activeItemId.value = next;
             }}
           />
         </div>

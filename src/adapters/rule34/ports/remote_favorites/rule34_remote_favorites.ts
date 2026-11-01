@@ -23,20 +23,20 @@ export interface Rule34RemoteFavoritesDependencies {
 
 const FETCH_DELAY = 1_000;
 const MINIMUM_LOCAL_RUN_LENGTH = 25;
-const MAX_FETCH_ATTEMPTS = 5;
+const MAX_FETCH_ATTEMPTS = 20;
 const RETRY_BASE_DELAY = 1_500;
-const RETRY_BACKOFF_BASE = 7;
+const RETRY_MAX_DELAY = 60_000;
 
 export class Rule34RemoteFavorites implements RemoteFavorites {
   private readonly favoritesOwnerId: string;
-  private firstPageFavorites: Post[] | null;
+  private firstPagePosts: Post[] | null;
   private readonly retry: Retry;
   private readonly favoriteActions: Rule34FavoriteActions;
 
   constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
     this.favoritesOwnerId = dependencies.rule34Document.readFavoritesOwnerId();
-    this.firstPageFavorites = dependencies.rule34Client.readFirstFavoritesPage();
-    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
+    this.firstPagePosts = dependencies.rule34Client.readFirstFavoritesPage();
+    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY, maxDelay: RETRY_MAX_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
       isRetryable: isRetryableRule34Error
@@ -71,18 +71,18 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   }
 
   private takeFirstPageFavorites(): Post[] | undefined {
-    const firstPage = this.firstPageFavorites ?? undefined;
+    const firstPagePosts = this.firstPagePosts ?? undefined;
 
-    this.firstPageFavorites = null;
-    return firstPage;
+    this.firstPagePosts = null;
+    return firstPagePosts;
   }
 
   private createAllFavoritesFetcher(onFavoritesFound: (posts: Post[]) => void): Rule34AllFavoritesFetcher {
-    return new Rule34AllFavoritesFetcher({
+    return new Rule34AllFavoritesFetcher({ fetchDelay: FETCH_DELAY }, {
       onPostsFound: onFavoritesFound,
       fetch: (pageIndex): Promise<Post[]> => this.fetch(pageIndex),
       shouldRetry: (error, failureCount): boolean => failureCount < MAX_FETCH_ATTEMPTS && isRetryableRule34Error(error),
-      delayForRetry: (retryCount): number => computeRetryDelay(retryCount, FETCH_DELAY),
+      computeRetryDelay: (retryCount): number => this.retry.computeDelay(retryCount),
       scheduler: this.dependencies.scheduler
     });
   }
@@ -104,8 +104,4 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   private fetch(pageIndex: number): Promise<Post[]> {
     return this.dependencies.rule34Client.fetchFavoritesPage(this.favoritesOwnerId, pageIndex);
   }
-}
-
-function computeRetryDelay(retryCount: number, fetchDelay: number): number {
-  return (RETRY_BACKOFF_BASE ** retryCount) + fetchDelay;
 }

@@ -47,10 +47,10 @@ function createElement<K extends keyof HTMLElementTagNameMap>(tag: K, className:
   return element;
 }
 
-function renderVariant(variant: StoryVariant, log: (message: string) => void): HTMLElement {
+function renderVariant(storyVariant: StoryVariant, log: (message: string) => void): HTMLElement {
   const item = createElement("li", "kit-Variant");
 
-  item.append(createElement("span", "kit-Variant-label", variant.label), variant.render(document, log));
+  item.append(createElement("span", "kit-Variant-label", storyVariant.label), storyVariant.render(document, log));
   return item;
 }
 
@@ -58,7 +58,7 @@ function renderStory(story: Story, log: (message: string) => void): HTMLElement 
   const section = createElement("section", "kit-Story");
   const variants = createElement("ul", "kit-Story-variants");
 
-  variants.append(...story.variants.map(variant => renderVariant(variant, log)));
+  variants.append(...story.variants.map(storyVariant => renderVariant(storyVariant, log)));
   section.append(createElement("h2", "kit-Story-title", story.title), variants);
   return section;
 }
@@ -77,12 +77,12 @@ function renderNavigation(): HTMLElement {
 }
 
 function showSelectedStory(navigation: HTMLElement, main: HTMLElement, log: (message: string) => void): void {
-  const selected = STORIES.find(({ id }) => `#${id}` === location.hash) ?? STORIES[0];
+  const selectedStoryEntry = STORIES.find(({ id }) => `#${id}` === location.hash) ?? STORIES[0];
 
   for (const link of navigation.querySelectorAll("a")) {
-    link.ariaCurrent = link.hash === `#${selected.id}` ? "page" : null;
+    link.ariaCurrent = link.hash === `#${selectedStoryEntry.id}` ? "page" : null;
   }
-  main.replaceChildren(renderStory(selected.story, log));
+  main.replaceChildren(renderStory(selectedStoryEntry.story, log));
 }
 
 const FONTS: readonly AppFont[] = [SYSTEM_FONT, VERDANA_FONT, INSTRUMENT_FONT, INTER_FONT, GEIST_FONT, PLEX_FONT];
@@ -106,11 +106,11 @@ function renderFontPicker(app: HTMLElement): HTMLElement {
   const item = createElement("div", "kit-Toolbar-item", "Font");
   const name = new Signal<string>(FONTS[0].name);
   const { result: font } = render(document, () => h(Segmented<string>, {
-    controlChoices: FONTS.map(choice => ({ value: choice.name, label: choice.name })),
+    controlChoices: FONTS.map(appFont => ({ value: appFont.name, label: appFont.name })),
     size: "small",
     value: name,
     onValueChange: next => {
-      installAppFont(app, FONTS.find(choice => choice.name === next) ?? SYSTEM_FONT);
+      installAppFont(app, FONTS.find(appFont => appFont.name === next) ?? SYSTEM_FONT);
       name.value = next;
     }
   }));

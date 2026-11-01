@@ -13,17 +13,17 @@ export class FrozenCobaltRemoteTagCategories implements RemoteTagCategories {
   }
 
   private async fetchCategory(tagName: string): Promise<[string, TagCategory]> {
-    const result = await this.frozenCobaltClient.fetchTagCategory(tagName);
+    const frozenCobaltTagResult = await this.frozenCobaltClient.fetchTagCategory(tagName);
 
-    switch (result.status) {
+    switch (frozenCobaltTagResult.status) {
       case "ok":
-        return [tagName, result.category];
+        return [tagName, frozenCobaltTagResult.category];
       case "not_found":
         return [tagName, "general"];
       case "retry":
         throw new FrozenCobaltError("retry", { subject: tagName });
       default:
-        throw new UnreachableError(result);
+        throw new UnreachableError(frozenCobaltTagResult);
     }
   }
 }

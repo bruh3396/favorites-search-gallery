@@ -14,9 +14,9 @@ interface Setup {
 function setup(respond: Fetch): Setup {
   const fetch = vi.fn<Fetch>(respond);
   const scheduler = new MemoryScheduler();
-  const prober = new Rule34CdnExtensionProber({ fetch, scheduler });
+  const rule34CdnExtensionProber = new Rule34CdnExtensionProber({ fetch, scheduler });
   const probe = async(locator: string, guess: MediaKind = "image"): Promise<string | null> => {
-    const pending = prober.probe(locator, guess);
+    const pending = rule34CdnExtensionProber.probe(locator, guess);
 
     await advanceAndSettle(scheduler, 1_000);
     return pending;

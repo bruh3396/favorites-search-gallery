@@ -13,19 +13,19 @@ const docs: Doc[] = [
   { score: 8, width: 300 }
 ];
 
-const index = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metric as "score" | "width"]);
+const metricIndex = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metric as "score" | "width"]);
 
-index.build(new Set(docs));
+metricIndex.build(new Set(docs));
 
 function findMatchingScores(operator: ":" | ":<" | ":>", value: number): number[] {
-  return [...index.docsMatching({ metric: "score", operator, value })].map(doc => doc.score).sort();
+  return [...metricIndex.docsMatching({ metric: "score", comparator: operator, value })].map(doc => doc.score).sort();
 }
 
 function createIndex(): MetricIndex<Doc> {
-  const mutable = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metric as "score" | "width"]);
+  const mutableMetricIndex = new MetricIndex<Doc>(["score", "width"], (doc, metric) => doc[metric as "score" | "width"]);
 
-  mutable.build(new Set(docs.map(doc => ({ ...doc }))));
-  return mutable;
+  mutableMetricIndex.build(new Set(docs.map(doc => ({ ...doc }))));
+  return mutableMetricIndex;
 }
 
 describe("MetricIndex", () => {
@@ -63,98 +63,98 @@ describe("MetricIndex", () => {
     });
 
     test("indexes each metric independently", () => {
-      expect([...index.docsMatching({ metric: "width", operator: ":>", value: 250 })].map(doc => doc.width).sort()).toEqual([300, 400]);
+      expect([...metricIndex.docsMatching({ metric: "width", comparator: ":>", value: 250 })].map(doc => doc.width).sort()).toEqual([300, 400]);
     });
 
     test("returns nothing for an unindexed metric", () => {
-      expect([...index.docsMatching({ metric: "height", operator: ":>", value: 0 })]).toEqual([]);
+      expect([...metricIndex.docsMatching({ metric: "height", comparator: ":>", value: 0 })]).toEqual([]);
     });
 
     test("returns nothing before build", () => {
-      expect([...new MetricIndex<Doc>(["score"], doc => doc.score).docsMatching({ metric: "score", operator: ":>", value: 0 })]).toEqual([]);
+      expect([...new MetricIndex<Doc>(["score"], doc => doc.score).docsMatching({ metric: "score", comparator: ":>", value: 0 })]).toEqual([]);
     });
   });
 
   describe("add", () => {
     test("does nothing before build, leaving the doc to a later build", () => {
-      const unbuilt = new MetricIndex<Doc>(["score"], doc => doc.score);
+      const unbuiltMetricIndex = new MetricIndex<Doc>(["score"], doc => doc.score);
       const extra = { score: 6, width: 500 };
 
-      unbuilt.add(extra);
-      expect(unbuilt.docsMatching({ metric: "score", operator: ":", value: 6 }).size).toBe(0);
+      unbuiltMetricIndex.add(extra);
+      expect(unbuiltMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 6 }).size).toBe(0);
 
-      unbuilt.build(new Set([extra]));
-      expect(unbuilt.docsMatching({ metric: "score", operator: ":", value: 6 }).size).toBe(1);
+      unbuiltMetricIndex.build(new Set([extra]));
+      expect(unbuiltMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 6 }).size).toBe(1);
     });
 
     test("makes a new doc findable in every metric", () => {
-      const mutable = createIndex();
+      const mutableMetricIndex = createIndex();
 
-      mutable.add({ score: 6, width: 500 });
-      expect([...mutable.docsMatching({ metric: "score", operator: ":", value: 6 })].map(doc => doc.score)).toEqual([6]);
-      expect([...mutable.docsMatching({ metric: "width", operator: ":", value: 500 })].map(doc => doc.width)).toEqual([500]);
+      mutableMetricIndex.add({ score: 6, width: 500 });
+      expect([...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 6 })].map(doc => doc.score)).toEqual([6]);
+      expect([...mutableMetricIndex.docsMatching({ metric: "width", comparator: ":", value: 500 })].map(doc => doc.width)).toEqual([500]);
     });
 
     test("keeps entries sorted so ranges stay correct", () => {
-      const mutable = createIndex();
+      const mutableMetricIndex = createIndex();
 
-      mutable.add({ score: 4, width: 250 });
-      expect([...mutable.docsMatching({ metric: "score", operator: ":<", value: 5 })].map(doc => doc.score).sort()).toEqual([3, 4]);
+      mutableMetricIndex.add({ score: 4, width: 250 });
+      expect([...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":<", value: 5 })].map(doc => doc.score).sort()).toEqual([3, 4]);
     });
   });
 
   describe("remove", () => {
     test("drops a doc from every metric", () => {
-      const mutable = createIndex();
-      const [target] = [...mutable.docsMatching({ metric: "score", operator: ":", value: 8 })];
+      const mutableMetricIndex = createIndex();
+      const [doc] = [...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 8 })];
 
-      mutable.remove(target);
-      expect([...mutable.docsMatching({ metric: "score", operator: ":", value: 8 })]).toEqual([]);
-      expect([...mutable.docsMatching({ metric: "width", operator: ":", value: 300 })]).toEqual([]);
+      mutableMetricIndex.remove(doc);
+      expect([...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 8 })]).toEqual([]);
+      expect([...mutableMetricIndex.docsMatching({ metric: "width", comparator: ":", value: 300 })]).toEqual([]);
     });
 
     test("drops only the matching doc among equal values", () => {
-      const mutable = createIndex();
-      const [first] = [...mutable.docsMatching({ metric: "score", operator: ":", value: 5 })];
+      const mutableMetricIndex = createIndex();
+      const [firstDoc] = [...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 5 })];
 
-      mutable.remove(first);
-      expect(mutable.docsMatching({ metric: "score", operator: ":", value: 5 }).size).toBe(1);
+      mutableMetricIndex.remove(firstDoc);
+      expect(mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 5 }).size).toBe(1);
     });
 
     test("finds a doc past others sharing its value", () => {
-      const mutable = createIndex();
-      const [, second] = [...mutable.docsMatching({ metric: "score", operator: ":", value: 5 })];
+      const mutableMetricIndex = createIndex();
+      const [, secondDoc] = [...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 5 })];
 
-      mutable.remove(second);
-      expect([...mutable.docsMatching({ metric: "score", operator: ":", value: 5 })]).not.toContain(second);
-      expect(mutable.docsMatching({ metric: "score", operator: ":", value: 5 }).size).toBe(1);
+      mutableMetricIndex.remove(secondDoc);
+      expect([...mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 5 })]).not.toContain(secondDoc);
+      expect(mutableMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 5 }).size).toBe(1);
     });
 
     test("does nothing before build", () => {
-      const unbuilt = new MetricIndex<Doc>(["score"], doc => doc.score);
+      const unbuiltMetricIndex = new MetricIndex<Doc>(["score"], doc => doc.score);
 
-      unbuilt.remove(docs[0]);
-      unbuilt.build(new Set(docs));
-      expect(unbuilt.docsMatching({ metric: "score", operator: ":", value: 3 }).size).toBe(1);
+      unbuiltMetricIndex.remove(docs[0]);
+      unbuiltMetricIndex.build(new Set(docs));
+      expect(unbuiltMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 3 }).size).toBe(1);
     });
 
     test("ignores an absent doc", () => {
-      const mutable = createIndex();
+      const mutableMetricIndex = createIndex();
 
-      mutable.remove({ score: 999, width: 999 });
-      expect(mutable.docsMatching({ metric: "score", operator: ":<", value: 100 }).size).toBe(4);
+      mutableMetricIndex.remove({ score: 999, width: 999 });
+      expect(mutableMetricIndex.docsMatching({ metric: "score", comparator: ":<", value: 100 }).size).toBe(4);
     });
   });
 
   describe("invalidate", () => {
     test("makes ensureBuilt rebuild from the given docs", () => {
-      const rebuilt = new MetricIndex<Doc>(["score"], doc => doc.score);
+      const rebuiltMetricIndex = new MetricIndex<Doc>(["score"], doc => doc.score);
       const extra = { score: 6, width: 500 };
 
-      rebuilt.ensureBuilt(new Set(docs));
-      rebuilt.invalidate();
-      rebuilt.ensureBuilt(new Set([...docs, extra]));
-      expect([...rebuilt.docsMatching({ metric: "score", operator: ":", value: 6 })]).toEqual([extra]);
+      rebuiltMetricIndex.ensureBuilt(new Set(docs));
+      rebuiltMetricIndex.invalidate();
+      rebuiltMetricIndex.ensureBuilt(new Set([...docs, extra]));
+      expect([...rebuiltMetricIndex.docsMatching({ metric: "score", comparator: ":", value: 6 })]).toEqual([extra]);
     });
   });
 });

@@ -23,12 +23,12 @@ const LabScreenClass = {
 
 type LabArea = "posts" | "favorites" | "benchmarks" | "storage" | "settings";
 
-const AREAS: readonly { id: LabArea; title: string }[] = [
-  { id: "posts", title: "Posts" },
-  { id: "favorites", title: "Favorites" },
-  { id: "benchmarks", title: "Benchmarks" },
-  { id: "storage", title: "Storage" },
-  { id: "settings", title: "Settings" }
+const AREAS: readonly { labArea: LabArea; title: string }[] = [
+  { labArea: "posts", title: "Posts" },
+  { labArea: "favorites", title: "Favorites" },
+  { labArea: "benchmarks", title: "Benchmarks" },
+  { labArea: "storage", title: "Storage" },
+  { labArea: "settings", title: "Settings" }
 ];
 const FAVORITE_COUNT_STEP = 10_000;
 const IMPORT_WARNING = "Replace your real favorites databases with the ones in a backup file?";
@@ -40,7 +40,7 @@ export interface LabScreenConfiguration {
 }
 
 export interface LabScreenDependencies {
-  scheduler: StepperScheduler;
+  stepperScheduler: StepperScheduler;
   postCount: Readable<number | null>;
   favoriteCount: Readable<number | null>;
   nativeHeaderVisible: StoredValue<boolean>;
@@ -48,11 +48,11 @@ export interface LabScreenDependencies {
 }
 
 function readArea(): LabArea {
-  return AREAS.find(({ id }) => `#${id}` === location.hash)?.id ?? "posts";
+  return AREAS.find(({ labArea }) => `#${labArea}` === location.hash)?.labArea ?? "posts";
 }
 
-export function mountLabScreen(container: HTMLElement, configuration: LabScreenConfiguration, dependencies: LabScreenDependencies): void {
-  const { postCount, favoriteCount } = dependencies;
+export function mountLabScreen(container: HTMLElement, labScreenConfiguration: LabScreenConfiguration, labScreenDependencies: LabScreenDependencies): void {
+  const { postCount, favoriteCount } = labScreenDependencies;
   const area = new Signal(readArea());
   const message = new Signal("Counting posts…");
   const isBusy = new Signal(false);
@@ -66,9 +66,9 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
       isBusy.value = false;
     });
   };
-  const select = (next: LabArea): void => {
-    history.replaceState(null, "", `#${next}`);
-    area.value = next;
+  const select = (nextLabArea: LabArea): void => {
+    history.replaceState(null, "", `#${nextLabArea}`);
+    area.value = nextLabArea;
   };
   const reportProgress = (verb: string) => (total: number): void => {
     message.value = `${verb} ${total.toLocaleString()} posts…`;
@@ -93,7 +93,7 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
   };
   const start = async(): Promise<void> => {
     await setFavoriteCount(count.peek());
-    dependencies.onStart();
+    labScreenDependencies.onStart();
   };
   const runOnRealData = (task: () => Promise<string>, warning?: string): void => {
     if (warning !== undefined && !confirm(warning)) {
@@ -112,14 +112,14 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
   const button = (label: string, onClick: () => void): HTMLElement => (
     <button className={LabScreenClass.button} type="button" disabled={isBusy} onClick={onClick}>{label}</button>
   );
-  const section = (id: LabArea, ...children: HTMLElement[]): HTMLElement => (
-    <section className={LabScreenClass.section} hidden={computed(() => area.value !== id)}>
-      <h2 className={LabScreenClass.title}>{AREAS.find(entry => entry.id === id)?.title}</h2>
+  const section = (labArea: LabArea, ...children: HTMLElement[]): HTMLElement => (
+    <section className={LabScreenClass.section} hidden={computed(() => area.value !== labArea)}>
+      <h2 className={LabScreenClass.title}>{AREAS.find(entry => entry.labArea === labArea)?.title}</h2>
       {children}
     </section>
   );
 
-  mountLabRoot(container, configuration.colorScheme).append(render(document, () => {
+  mountLabRoot(container, labScreenConfiguration.colorScheme).append(render(document, () => {
     effect(() => {
       const posts = postCount.value;
 
@@ -133,9 +133,9 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
     return (
       <div className={LabScreenClass.root}>
         <nav className={LabScreenClass.nav} aria-label="Lab">
-          {AREAS.map(({ id, title }) => (
+          {AREAS.map(({ labArea, title }) => (
             <button className={LabScreenClass.navLink} type="button"
-              aria-current={computed(() => (area.value === id ? "page" : null))} onClick={() => select(id)}>
+              aria-current={computed(() => (area.value === labArea ? "page" : null))} onClick={() => select(labArea)}>
               {title}
             </button>
           ))}
@@ -162,7 +162,7 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
                 min={0}
                 max={computed(() => postCount.value ?? 0)}
                 step={FAVORITE_COUNT_STEP}
-                scheduler={dependencies.scheduler}
+                scheduler={labScreenDependencies.stepperScheduler}
                 value={count}
                 disabled={isBusy}
                 onValueChange={next => {
@@ -185,7 +185,7 @@ export function mountLabScreen(container: HTMLElement, configuration: LabScreenC
             "settings",
             <SettingRow
               label="Native header"
-              control={<Switch value={dependencies.nativeHeaderVisible} onValueChange={next => dependencies.nativeHeaderVisible.set(next)} />}
+              control={<Switch value={labScreenDependencies.nativeHeaderVisible} onValueChange={next => labScreenDependencies.nativeHeaderVisible.set(next)} />}
             />
           )}
         </main>

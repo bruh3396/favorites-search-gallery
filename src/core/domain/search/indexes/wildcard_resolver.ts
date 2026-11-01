@@ -26,14 +26,14 @@ export abstract class WildcardResolver<V> {
     this.cache.clear();
   }
 
-  public resolve(term: WildcardSearchTerm): V {
-    const key = term.resolutionInputs.regex.source;
+  public resolve(wildcardSearchTerm: WildcardSearchTerm): V {
+    const key = wildcardSearchTerm.resolutionInputs.regex.source;
     const cached = this.cache.get(key);
 
     if (cached !== undefined) {
       return cached;
     }
-    const union = this.combine(this.wildcardIndex.matchingTerms(term));
+    const union = this.combine(this.wildcardIndex.matchingTerms(wildcardSearchTerm));
 
     this.cache.set(key, union);
     return union;

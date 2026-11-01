@@ -70,13 +70,14 @@ function createDeferredFetcher(lastIndex: number): {
 function createFetcher(
   delivered: Post[][],
   fetch: (index: number) => Promise<Post[]>,
-  delayForRetry: (retryCount: number) => number
+  computeRetryDelay: (retryCount: number) => number,
+  fetchDelay = 0
 ): Rule34AllFavoritesFetcher {
-  return new Rule34AllFavoritesFetcher({
+  return new Rule34AllFavoritesFetcher({ fetchDelay }, {
     onPostsFound: (posts): number => delivered.push(posts),
     fetch,
     shouldRetry: () => true,
-    delayForRetry,
+    computeRetryDelay,
     scheduler
   });
 }
@@ -86,11 +87,11 @@ function createCappedFetcher(
   fetch: (index: number) => Promise<Post[]>,
   shouldRetry: (error: unknown, failureCount: number) => boolean
 ): Rule34AllFavoritesFetcher {
-  return new Rule34AllFavoritesFetcher({
+  return new Rule34AllFavoritesFetcher({ fetchDelay: 0 }, {
     onPostsFound: (posts): number => delivered.push(posts),
     fetch,
     shouldRetry,
-    delayForRetry: NO_DELAY,
+    computeRetryDelay: NO_DELAY,
     scheduler
   });
 }
@@ -133,11 +134,11 @@ describe("Rule34AllFavoritesFetcher", () => {
   test("delivers the provided first page immediately and begins fetching at index 1", async() => {
     const delivered: Post[][] = [];
     const pages = createDeferredFetcher(2);
-    const first = [createPost({ id: "first" })];
-    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll(first);
+    const firstPagePosts = [createPost({ id: "first" })];
+    const run = createFetcher(delivered, pages.fetch, NO_DELAY).fetchAll(firstPagePosts);
 
     await flushMicrotasks();
-    expect(delivered).toEqual([first]);
+    expect(delivered).toEqual([firstPagePosts]);
     expect(pages.requested).not.toContain(0);
 
     await pages.settle(1);
@@ -194,19 +195,62 @@ describe("Rule34AllFavoritesFetcher", () => {
     expect(flattenPostIds(delivered)).toEqual(["page0"]);
   });
 
-  test("passes the retry count to the delay function so backoff can grow", async() => {
-    const delivered: Post[][] = [];
-    const seenRetryCounts: number[] = [];
-    const delayForRetry = vi.fn((retryCount: number) => {
-      seenRetryCounts.push(retryCount);
-      return 0;
-    });
-    const fetch = vi.fn()
-      .mockImplementationOnce(() => Promise.reject(new Error("boom")))
-      .mockImplementation((index: number) => Promise.resolve(index > 0 ? [] : createPage(index)));
+  test("waits the backoff before retrying the failed page and only the fetch delay after it", async() => {
+    const fetchDelay = 100;
+    const retryDelay = 1_000;
+    const requests: { index: number; at: number }[] = [];
+    let page0Failures = 0;
+    const fetch = vi.fn((index: number): Promise<Post[]> => {
+      requests.push({ index, at: scheduler.now() });
 
-    await runToEnd(createFetcher(delivered, fetch, delayForRetry).fetchAll());
-    expect(seenRetryCounts).toContain(1);
+      if (index === 0 && page0Failures < 2) {
+        page0Failures += 1;
+        return Promise.reject(new Error("boom"));
+      }
+      return Promise.resolve(index > 1 ? [] : createPage(index));
+    });
+    const computeRetryDelay = vi.fn((retryCount: number) => retryDelay * retryCount);
+
+    await runToEnd(createFetcher([], fetch, computeRetryDelay, fetchDelay).fetchAll());
+
+    expect(computeRetryDelay.mock.calls.map(([retryCount]) => retryCount)).toEqual([1, 2]);
+    expect(requests).toEqual([
+      { index: 0, at: 0 },
+      { index: 0, at: fetchDelay + retryDelay },
+      { index: 0, at: (2 * fetchDelay) + (3 * retryDelay) },
+      { index: 1, at: (3 * fetchDelay) + (3 * retryDelay) },
+      { index: 2, at: (4 * fetchDelay) + (3 * retryDelay) }
+    ]);
+  });
+
+  test("waits for a retry still in flight after the last page is found", async() => {
+    const delivered: Post[][] = [];
+    let finishRetry: ResolvePosts = () => { };
+    let page0Attempts = 0;
+    const fetch = vi.fn((index: number): Promise<Post[]> => {
+      if (index !== 0) {
+        return Promise.resolve([]);
+      }
+      page0Attempts += 1;
+      return page0Attempts === 1 ? Promise.reject(new Error("boom")) : new Promise<Post[]>(resolve => {
+        finishRetry = resolve;
+      });
+    });
+    let hasFinished = false;
+    const run = createFetcher(delivered, fetch, NO_DELAY).fetchAll()
+      .then(() => {
+        hasFinished = true;
+      });
+
+    for (let polls = 0; polls < 10; polls += 1) {
+      await advanceAndSettle(scheduler, POLL_STEP);
+    }
+    expect(page0Attempts).toBe(2);
+    expect(hasFinished).toBe(false);
+
+    finishRetry(createPage(0));
+    await runToEnd(run);
+    expect(flattenPostIds(delivered)).toEqual(["page0"]);
   });
 
   test("stops requesting pages and rejects once a failure shouldn't be retried", async() => {

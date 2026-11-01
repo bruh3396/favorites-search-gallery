@@ -32,7 +32,7 @@ const ZOOM_MINIMUM_SCALE = 2;
 const ZOOM_MAXIMUM_SCALE = 8;
 const AUTOPLAY_INTERVAL = 3_000;
 const FULL_MORPH_DURATION = 250;
-const SIMPLE_MORPH_DURATION = 120;
+const SIMPLE_MORPH_DURATION = 200;
 const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>(["showNext", "showPrevious", "togglePause", "dismiss", "close", "openPostPage", "openOriginal"]);
 
 export interface LightboxDialogConfiguration {

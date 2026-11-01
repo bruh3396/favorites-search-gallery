@@ -3,44 +3,44 @@ import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { Post } from "@/core/domain/post/post";
 
 export class MemoryRemoteFavorites implements RemoteFavorites {
-  constructor(private readonly memory: Pick<MemoryClient, "readFavorites" | "addFavorite" | "removeFavorite">) { }
+  constructor(private readonly memoryClient: Pick<MemoryClient, "readFavorites" | "addFavorite" | "removeFavorite">) { }
 
   public fetchCount(): Promise<number | null> {
-    return Promise.resolve(this.memory.readFavorites().length);
+    return Promise.resolve(this.memoryClient.readFavorites().length);
   }
 
   public fetchAll(onFavoritesFound: (posts: Post[]) => void): Promise<void> {
-    onFavoritesFound(this.memory.readFavorites());
+    onFavoritesFound(this.memoryClient.readFavorites());
     return Promise.resolve();
   }
 
   public findNew(localPostIds: readonly string[]): Promise<Post[]> {
-    return Promise.resolve(takeAboveLocalOrder(this.memory.readFavorites(), localPostIds));
+    return Promise.resolve(takeAboveLocalOrder(this.memoryClient.readFavorites(), localPostIds));
   }
 
   public findMissing(localPostIds: readonly string[]): Promise<string[]> {
-    const remotePostIds = new Set(this.memory.readFavorites().map(post => post.id));
+    const remotePostIds = new Set(this.memoryClient.readFavorites().map(post => post.id));
     return Promise.resolve(localPostIds.filter(id => !remotePostIds.has(id)));
   }
 
   public add(postId: string): Promise<boolean> {
-    this.memory.addFavorite(postId);
+    this.memoryClient.addFavorite(postId);
     return Promise.resolve(true);
   }
 
   public remove(postId: string): Promise<boolean> {
-    this.memory.removeFavorite(postId);
+    this.memoryClient.removeFavorite(postId);
     return Promise.resolve(true);
   }
 }
 
-function takeAboveLocalOrder(remoteFavorites: Post[], localPostIds: readonly string[]): Post[] {
+function takeAboveLocalOrder(remotePosts: Post[], localPostIds: readonly string[]): Post[] {
   const localIndexByPostId = new Map(localPostIds.map((id, index) => [id, index]));
-  let remoteStart = remoteFavorites.length;
+  let remoteStart = remotePosts.length;
   let nextLocalIndex = Infinity;
 
-  for (let remoteIndex = remoteFavorites.length - 1; remoteIndex >= 0; remoteIndex -= 1) {
-    const localIndex = localIndexByPostId.get(remoteFavorites[remoteIndex].id);
+  for (let remoteIndex = remotePosts.length - 1; remoteIndex >= 0; remoteIndex -= 1) {
+    const localIndex = localIndexByPostId.get(remotePosts[remoteIndex].id);
 
     if (localIndex === undefined || localIndex >= nextLocalIndex) {
       break;
@@ -48,5 +48,5 @@ function takeAboveLocalOrder(remoteFavorites: Post[], localPostIds: readonly str
     nextLocalIndex = localIndex;
     remoteStart = remoteIndex;
   }
-  return remoteFavorites.slice(0, remoteStart);
+  return remotePosts.slice(0, remoteStart);
 }

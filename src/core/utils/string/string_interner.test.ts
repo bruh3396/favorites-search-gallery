@@ -8,10 +8,10 @@ describe("StringInterner", () => {
     });
 
     test("returns the same value when a string is interned again", () => {
-      const interner = new StringInterner();
-      const first = interner.intern(["fi", "rst_tag"].join(""));
+      const stringInterner = new StringInterner();
+      const first = stringInterner.intern(["fi", "rst_tag"].join(""));
 
-      expect(interner.intern(["first", "_tag"].join(""))).toBe(first);
+      expect(stringInterner.intern(["first", "_tag"].join(""))).toBe(first);
     });
   });
 });

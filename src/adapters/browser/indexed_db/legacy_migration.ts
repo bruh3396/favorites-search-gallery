@@ -70,9 +70,9 @@ export async function prepareLegacyMigration(
     deleteLegacyDatabases();
     return NO_MIGRATION;
   }
-  const legacy = await readLegacy(legacyDatabaseNames, legacyDatabases);
+  const legacyData = await readLegacy(legacyDatabaseNames, legacyDatabases);
   return {
-    writeToNewDatabase: (transaction): void => writeToTarget(transaction, legacy, mintMedia),
+    writeToNewDatabase: (transaction): void => writeToTarget(transaction, legacyData, mintMedia),
     deleteLegacyDatabases
   };
 }
@@ -85,14 +85,14 @@ async function listDatabaseNames(): Promise<Set<string | undefined> | null> {
   }
 }
 
-async function readLegacy(names: LegacyDatabaseNames, present: string[]): Promise<LegacyData> {
+async function readLegacy(legacyDatabaseNames: LegacyDatabaseNames, present: string[]): Promise<LegacyData> {
   const read = (name: string): Promise<Map<string, unknown[]>> => (
     present.includes(name) ? readDatabase(name) : Promise.resolve(new Map())
   );
   const [favorites, posts, tagCategories] = await Promise.all([
-    read(names.favorites),
-    read(names.posts),
-    read(names.tagCategories)
+    read(legacyDatabaseNames.favorites),
+    read(legacyDatabaseNames.posts),
+    read(legacyDatabaseNames.tagCategories)
   ]);
   return {
     posts: (posts.get("posts") ?? []).filter(isLegacyPost),
@@ -130,34 +130,34 @@ function readDatabase(name: string): Promise<Map<string, unknown[]>> {
   });
 }
 
-function writeToTarget(transaction: IDBTransaction, legacy: LegacyData, mintMedia: MediaMinter): void {
+function writeToTarget(transaction: IDBTransaction, legacyData: LegacyData, mintMedia: MediaMinter): void {
   const posts = transaction.objectStore("posts");
   const favorites = transaction.objectStore("favorites");
   const tagCategories = transaction.objectStore("tagCategories");
-  const allPosts = removeDuplicateIds([...legacy.posts, ...[...legacy.favorites.values()].flat()]);
+  const allLegacyPosts = removeDuplicateIds([...legacyData.posts, ...[...legacyData.favorites.values()].flat()]);
 
-  for (const post of allPosts.map(legacyPost => convertPost(legacyPost, mintMedia))) {
+  for (const post of allLegacyPosts.map(legacyPost => convertPost(legacyPost, mintMedia))) {
     if (post !== null) {
       addIfAbsent(posts, post);
     }
   }
 
-  for (const [storeName, rows] of legacy.favorites) {
+  for (const [storeName, favoriteLegacyPosts] of legacyData.favorites) {
     const ownerId = storeName.slice(OWNER_PREFIX.length);
 
-    if (storeName.startsWith(OWNER_PREFIX) && ownerId !== "" && rows.length > 0) {
-      addIfAbsent(favorites, rows.map(row => row.id).reverse(), ownerId);
+    if (storeName.startsWith(OWNER_PREFIX) && ownerId !== "" && favoriteLegacyPosts.length > 0) {
+      addIfAbsent(favorites, favoriteLegacyPosts.map(legacyPost => legacyPost.id).reverse(), ownerId);
     }
   }
 
-  for (const { id, category } of legacy.tagCategories) {
+  for (const { id, category } of legacyData.tagCategories) {
     addIfAbsent(tagCategories, category, id);
   }
 }
 
-function removeDuplicateIds(posts: LegacyPost[]): LegacyPost[] {
+function removeDuplicateIds(legacyPosts: LegacyPost[]): LegacyPost[] {
   const seenPostIds = new Set<string>();
-  return posts.filter(post => !seenPostIds.has(post.id) && seenPostIds.add(post.id));
+  return legacyPosts.filter(legacyPost => !seenPostIds.has(legacyPost.id) && seenPostIds.add(legacyPost.id));
 }
 
 function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): void {
@@ -167,24 +167,24 @@ function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): 
   };
 }
 
-function convertPost(legacy: LegacyPost, mintMedia: MediaMinter): Post | null {
-  const media = mintLegacyMedia(legacy, mintMedia);
+function convertPost(legacyPost: LegacyPost, mintMedia: MediaMinter): Post | null {
+  const media = mintLegacyMedia(legacyPost, mintMedia);
 
   if (media === null) {
     return null;
   }
   return {
-    id: legacy.id,
-    width: legacy.width,
-    height: legacy.height,
-    score: legacy.score,
-    rating: RATING_BY_INITIAL[legacy.rating.charAt(0).toLowerCase()] ?? "explicit",
-    changedAt: legacy.change * 1_000,
+    id: legacyPost.id,
+    width: legacyPost.width,
+    height: legacyPost.height,
+    score: legacyPost.score,
+    rating: RATING_BY_INITIAL[legacyPost.rating.charAt(0).toLowerCase()] ?? "explicit",
+    changedAt: legacyPost.change * 1_000,
     media,
-    tags: legacy.tags,
-    ...(legacy.duration === undefined ? {} : { durationSeconds: legacy.duration }),
-    status: legacy.deleted === true ? "deleted" : "active",
-    ...(legacy.fetchedAt === undefined ? {} : { fetchedAt: legacy.fetchedAt })
+    tags: legacyPost.tags,
+    ...(legacyPost.duration === undefined ? {} : { durationSeconds: legacyPost.duration }),
+    status: legacyPost.deleted === true ? "deleted" : "active",
+    ...(legacyPost.fetchedAt === undefined ? {} : { fetchedAt: legacyPost.fetchedAt })
   };
 }
 
@@ -203,11 +203,11 @@ function expandCompressedPreview(previewURL: string): string {
 }
 
 function isLegacyPost(value: unknown): value is LegacyPost {
-  const post = value as Partial<LegacyPost> | null;
-  return typeof post?.id === "string" && typeof post.fileURL === "string" && typeof post.tags === "string";
+  const partialLegacyPost = value as Partial<LegacyPost> | null;
+  return typeof partialLegacyPost?.id === "string" && typeof partialLegacyPost.fileURL === "string" && typeof partialLegacyPost.tags === "string";
 }
 
 function isLegacyTagCategory(value: unknown): value is LegacyTagCategory {
-  const mapping = value as Partial<LegacyTagCategory> | null;
-  return typeof mapping?.id === "string" && TAG_CATEGORIES.includes(mapping.category ?? "");
+  const partialLegacyTagCategory = value as Partial<LegacyTagCategory> | null;
+  return typeof partialLegacyTagCategory?.id === "string" && TAG_CATEGORIES.includes(partialLegacyTagCategory.category ?? "");
 }

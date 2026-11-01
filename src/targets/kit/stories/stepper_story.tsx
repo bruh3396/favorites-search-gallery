@@ -11,29 +11,29 @@ interface StepperState {
   readonly max?: number;
   readonly step?: number;
   readonly disabled?: boolean;
-  readonly size?: ControlSize;
+  readonly controlSize?: ControlSize;
 }
 
 const SCHEDULER = new BrowserScheduler();
 
-function variant(label: string, { value, min = 0, max = 100, step, disabled = false, size }: StepperState): Story["variants"][number] {
+function variant(label: string, { value, min = 0, max = 100, step, disabled = false, controlSize }: StepperState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
-      const current = new Signal(value);
+      const stepperValue = new Signal(value);
       return render(ownerDocument, () => (
         <Stepper
           label={label}
           min={min}
           max={max}
           step={step}
-          size={size}
+          size={controlSize}
           scheduler={SCHEDULER}
-          value={current}
+          value={stepperValue}
           disabled={new Signal(disabled)}
           onValueChange={next => {
             log(`Stepper "${label}" → ${next}`);
-            current.value = next;
+            stepperValue.value = next;
           }}
         />
       )).result;
@@ -48,7 +48,7 @@ export const STEPPER_STORY: Story = {
     variant("Step 5, off grid", { value: 12, step: 5 }),
     variant("Step 0.1, 0–1", { value: 0.5, max: 1, step: 0.1 }),
     variant("At the max", { value: 10, max: 10 }),
-    variant("Small", { value: 3, size: "small" }),
+    variant("Small", { value: 3, controlSize: "small" }),
     variant("Disabled", { value: 40, disabled: true })
   ]
 };

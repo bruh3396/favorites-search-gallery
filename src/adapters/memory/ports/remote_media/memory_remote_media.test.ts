@@ -10,10 +10,10 @@ describe("MemoryRemoteMedia", () => {
   });
 
   test("gives the locator as every URL", async() => {
-    const source = new MemoryRemoteMedia();
+    const remoteMedia = new MemoryRemoteMedia();
 
-    expect(source.resolvePreviewUrl(IMAGE)).toBe(IMAGE.locator);
-    expect(await source.resolveOriginalUrl(IMAGE)).toBe(IMAGE.locator);
+    expect(remoteMedia.resolvePreviewUrl(IMAGE)).toBe(IMAGE.locator);
+    expect(await remoteMedia.resolveOriginalUrl(IMAGE)).toBe(IMAGE.locator);
   });
 
   test("decodes every still as a one-pixel bitmap", async() => {

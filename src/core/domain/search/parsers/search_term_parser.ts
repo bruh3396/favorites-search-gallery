@@ -26,18 +26,18 @@ export function parseSearchTerm(term: string): SearchTerm {
 }
 
 export function parseNumericSearchTerm(term: string): NumericSearchTerm {
-  const parsed = parseNegation(term);
-  return new NumericSearchTerm(parsed, parseMetricComparison(`id:${parsed.value}`));
+  const parsedTerm = parseNegation(term);
+  return new NumericSearchTerm(parsedTerm, parseMetricComparison(`id:${parsedTerm.value}`));
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
-  const parsed = parseNegation(removeDuplicateAsterisks(term));
-  return new WildcardSearchTerm(parsed, { matchType: chooseWildcardMatchType(parsed.value), regex: buildWildcardRegex(parsed.value) });
+  const parsedTerm = parseNegation(removeDuplicateAsterisks(term));
+  return new WildcardSearchTerm(parsedTerm, { matchType: chooseWildcardMatchType(parsedTerm.value), regex: buildWildcardRegex(parsedTerm.value) });
 }
 
 export function parseMetricSearchTerm(term: string): MetricSearchTerm {
-  const parsed = parseNegation(term);
-  return new MetricSearchTerm(parsed, parseMetricComparison(parsed.value));
+  const parsedTerm = parseNegation(term);
+  return new MetricSearchTerm(parsedTerm, parseMetricComparison(parsedTerm.value));
 }
 
 export function parseExactSearchTerm(term: string): ExactSearchTerm {

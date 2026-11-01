@@ -10,28 +10,28 @@ import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_t
 export class PostingResolver<Doc> {
   constructor(
     private readonly bitIndex: BitIndex<Doc>,
-    private readonly metricIndex: MetricBitIndex<Doc>,
-    private readonly wildcardResolver: WildcardPostingResolver<Doc>
+    private readonly metricBitIndex: MetricBitIndex<Doc>,
+    private readonly wildcardPostingResolver: WildcardPostingResolver<Doc>
   ) { }
 
-  public resolve(term: SearchTerm): Posting {
-    if (term instanceof NumericSearchTerm) {
-      return this.postingForNumeric(term);
+  public resolve(searchTerm: SearchTerm): Posting {
+    if (searchTerm instanceof NumericSearchTerm) {
+      return this.postingForNumeric(searchTerm);
     }
 
-    if (term instanceof WildcardSearchTerm) {
-      return this.wildcardResolver.resolve(term) ?? EMPTY_POSTING;
+    if (searchTerm instanceof WildcardSearchTerm) {
+      return this.wildcardPostingResolver.resolve(searchTerm) ?? EMPTY_POSTING;
     }
 
-    if (term instanceof MetricSearchTerm) {
-      return this.metricIndex.getPosting(term.comparison);
+    if (searchTerm instanceof MetricSearchTerm) {
+      return this.metricBitIndex.getPosting(searchTerm.comparison);
     }
-    return this.bitIndex.findPosting(term.value) ?? EMPTY_POSTING;
+    return this.bitIndex.findPosting(searchTerm.value) ?? EMPTY_POSTING;
   }
 
-  private postingForNumeric(term: NumericSearchTerm): Posting {
-    const taggedPosting = this.bitIndex.findPosting(term.value) ?? EMPTY_POSTING;
-    const idPosting = this.metricIndex.getPosting(term.idComparison);
-    return new DensePosting(this.bitIndex.unionOf([taggedPosting, idPosting]));
+  private postingForNumeric(numericSearchTerm: NumericSearchTerm): Posting {
+    const taggedPosting = this.bitIndex.findPosting(numericSearchTerm.value) ?? EMPTY_POSTING;
+    const idDensePosting = this.metricBitIndex.getPosting(numericSearchTerm.idMetricComparison);
+    return new DensePosting(this.bitIndex.unionOf([taggedPosting, idDensePosting]));
   }
 }

@@ -25,7 +25,7 @@ function createRule34Document(visit: Visit): Parameters<typeof readRule34Environ
 describe("readRule34Environment", () => {
   test("runs in favorites mode on a favorites page, keyed by the viewed page", () => {
     expect(readRule34Environment(createRule34Document({ pageName: "favorites", favoritesOwnerId: "123", userId: "9" })))
-      .toMatchObject({ mode: "favorites", favoritesOwnerId: "123", ownsFavorites: false });
+      .toMatchObject({ appMode: "favorites", favoritesOwnerId: "123", ownsFavorites: false });
   });
 
   test("owns the favorites on the viewer's own favorites page", () => {
@@ -36,7 +36,7 @@ describe("readRule34Environment", () => {
 
   test("runs in posts mode on a post list, keyed by the logged-in user", () => {
     expect(readRule34Environment(createRule34Document({ pageName: "postList", userId: "9" })))
-      .toMatchObject({ mode: "postList", favoritesOwnerId: "9", ownsFavorites: false });
+      .toMatchObject({ appMode: "postList", favoritesOwnerId: "9", ownsFavorites: false });
   });
 
   test("never owns the favorites on a post list, even logged out", () => {

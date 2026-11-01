@@ -2,7 +2,7 @@ import { FrozenCobaltPost, isFrozenCobaltPost } from "@/adapters/frozen_cobalt/w
 import { isRecord } from "@/core/utils/guard/guard";
 
 export interface CachePage {
-  readonly posts: readonly FrozenCobaltPost[];
+  readonly frozenCobaltPosts: readonly FrozenCobaltPost[];
   readonly next: number | null;
 }
 
@@ -20,5 +20,5 @@ export async function fetchCachePage(after: number): Promise<CachePage> {
   if (!isRecord(page) || !Array.isArray(page.posts) || !page.posts.every(isFrozenCobaltPost) || !(page.next === null || typeof page.next === "number")) {
     throw new Error("Local Frozen Cobalt sent a malformed page");
   }
-  return { posts: page.posts, next: page.next };
+  return { frozenCobaltPosts: page.posts, next: page.next };
 }

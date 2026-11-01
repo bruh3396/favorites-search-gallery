@@ -3,7 +3,7 @@ import { MetricComparator } from "@/core/domain/search/searchable";
 
 export interface MetricComparison {
   readonly metric: Metric;
-  readonly operator: MetricComparator;
+  readonly comparator: MetricComparator;
   readonly rightHandMetric: Metric;
   readonly value: number;
   readonly isRelative: boolean;
@@ -15,12 +15,12 @@ const metricPattern = METRICS.join("|");
 export const metricComparisonRegex: RegExp = new RegExp(`^-?(${metricPattern})(:[<>]?)(\\d+|${metricPattern})$`);
 
 export function parseMetricComparison(term: string): MetricComparison {
-  const { metric, operator, value } = extractExpression(term);
+  const { metric, metricComparator, value } = extractExpression(term);
 
   if (isMetric(value)) {
     return {
       metric,
-      operator,
+      comparator: metricComparator,
       isRelative: true,
       rightHandMetric: value,
       value: 0,
@@ -29,7 +29,7 @@ export function parseMetricComparison(term: string): MetricComparison {
   }
   return {
     metric,
-    operator,
+    comparator: metricComparator,
     isRelative: false,
     rightHandMetric: "id",
     value,
@@ -37,18 +37,18 @@ export function parseMetricComparison(term: string): MetricComparison {
   };
 }
 
-function extractExpression(term: string): { metric: Metric; operator: MetricComparator; value: Metric | number } {
+function extractExpression(term: string): { metric: Metric; metricComparator: MetricComparator; value: Metric | number } {
   const match = metricComparisonRegex.exec(term);
 
   if (match === null || match.length !== 4) {
     return {
       metric: "width",
-      operator: ":",
+      metricComparator: ":",
       value: 0
     };
   }
   const metric = match[1] as Metric;
-  const operator = match[2] as MetricComparator;
+  const metricComparator = match[2] as MetricComparator;
   const value = isMetric(match[3]) ? match[3] : Number(match[3]);
-  return { metric, operator, value };
+  return { metric, metricComparator, value };
 }

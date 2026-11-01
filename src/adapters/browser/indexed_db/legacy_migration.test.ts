@@ -9,8 +9,8 @@ import { MediaMinter } from "@/core/domain/media/media_minter";
 type Row = Record<string, unknown>;
 
 const mintMediaFromUrl: MediaMinter = ({ url, tags }) => {
-  const locator = parseRule34CdnFileUrl(url);
-  return locator === null ? null : mintRule34CdnMedia({ locator, tags });
+  const rule34CdnLocator = parseRule34CdnFileUrl(url);
+  return rule34CdnLocator === null ? null : mintRule34CdnMedia({ rule34CdnLocator, tags });
 };
 
 function createLegacyPost(postId: string, overrides: Row = {}): Row {

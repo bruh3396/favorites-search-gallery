@@ -28,14 +28,14 @@ const ADD_ANSWERS: Record<number, Rule34AddFavoriteAnswer> = {
 };
 
 export class Rule34FavoriteActions {
-  private readonly addLimiter: RateLimiter;
-  private readonly removeLimiter: RateLimiter;
+  private readonly addRateLimiter: RateLimiter;
+  private readonly removeRateLimiter: RateLimiter;
   private readonly removeRetry: Retry;
   private readonly intents = new Map<string, Intent>();
 
   constructor(private readonly dependencies: Rule34FavoriteActionsDependencies) {
-    this.addLimiter = new RateLimiter(ADD_RATE_LIMIT, dependencies.scheduler);
-    this.removeLimiter = new RateLimiter(REMOVE_RATE_LIMIT, dependencies.scheduler);
+    this.addRateLimiter = new RateLimiter(ADD_RATE_LIMIT, dependencies.scheduler);
+    this.removeRateLimiter = new RateLimiter(REMOVE_RATE_LIMIT, dependencies.scheduler);
     this.removeRetry = new Retry({ attempts: REMOVE_ATTEMPTS, baseDelay: REMOVE_RETRY_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
@@ -45,7 +45,7 @@ export class Rule34FavoriteActions {
 
   public add(postId: string): Promise<Rule34AddFavoriteAnswer | null> {
     this.intents.set(postId, "add");
-    return this.addLimiter.run(async() => {
+    return this.addRateLimiter.run(async() => {
       if (!this.claimIntent(postId, "add")) {
         return null;
       }
@@ -57,7 +57,7 @@ export class Rule34FavoriteActions {
 
   public remove(postId: string): Promise<boolean> {
     this.intents.set(postId, "remove");
-    return this.removeLimiter.run(async() => {
+    return this.removeRateLimiter.run(async() => {
       if (!this.claimIntent(postId, "remove")) {
         return false;
       }

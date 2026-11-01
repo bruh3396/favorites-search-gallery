@@ -22,8 +22,8 @@ function setup(posts: Post[]): Setup {
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const localKeyedValues = new MemoryLocalKeyedValues();
   const favoritesPaginationPreferences = {
-    pageSize: new KeyedStoredValue({ key: "pageSize", defaultValue: 2 }, { storage: localKeyedValues }),
-    infiniteScroll: new KeyedStoredValue({ key: "infiniteScroll", defaultValue: false }, { storage: localKeyedValues })
+    pageSize: new KeyedStoredValue({ key: "pageSize", defaultValue: 2 }, { storedValueStorage: localKeyedValues }),
+    infiniteScroll: new KeyedStoredValue({ key: "infiniteScroll", defaultValue: false }, { storedValueStorage: localKeyedValues })
   };
 
   favoritesSearchIndex.rebuild(favoritesCollection.append(posts));

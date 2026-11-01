@@ -81,17 +81,17 @@ describe("Rule34CdnClient", () => {
 
   test("resolves media with an extension without asking the host", async() => {
     const { rule34CdnClient, fetch } = setup();
-    const known = media("image", "1234/a1b2c3.png");
+    const knownMedia = media("image", "1234/a1b2c3.png");
 
-    expect(await rule34CdnClient.resolveMedia(known)).toBe(known);
+    expect(await rule34CdnClient.resolveMedia(knownMedia)).toBe(knownMedia);
     expect(fetch).not.toHaveBeenCalled();
   });
 
   test("keeps the tag guess for media without an extension, without asking the host", async() => {
     const { rule34CdnClient, fetch } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.jpg"));
-    const guessed = media("video", "1234/a1b2c3");
+    const guessedMedia = media("video", "1234/a1b2c3");
 
-    expect(await rule34CdnClient.resolveMedia(guessed)).toBe(guessed);
+    expect(await rule34CdnClient.resolveMedia(guessedMedia)).toBe(guessedMedia);
     expect(fetch).not.toHaveBeenCalled();
   });
 

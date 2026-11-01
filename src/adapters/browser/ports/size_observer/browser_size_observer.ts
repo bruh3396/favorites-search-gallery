@@ -2,7 +2,7 @@ import { ObservedSize } from "@/core/utils/geometry/observed_size";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 
 export class BrowserSizeObserver implements SizeObserver {
-  private readonly subscriptions = new Map<Element, { onResize:(size: ObservedSize) => void }>();
+  private readonly subscriptions = new Map<Element, { onResize:(observedSize: ObservedSize) => void }>();
 
   private readonly observer = new ResizeObserver(entries => {
     for (const entry of entries) {
@@ -17,7 +17,7 @@ export class BrowserSizeObserver implements SizeObserver {
     }
   });
 
-  public observe(element: Element, onResize: (size: ObservedSize) => void): () => void {
+  public observe(element: Element, onResize: (observedSize: ObservedSize) => void): () => void {
     const subscription = { onResize };
 
     this.subscriptions.set(element, subscription);

@@ -12,15 +12,15 @@ function createRemoteFavorites(...postIds: string[]): MemoryRemoteFavorites {
   return new MemoryRemoteFavorites(createMemory(...postIds));
 }
 
-async function fetchAllPostIds(source: MemoryRemoteFavorites): Promise<string[]> {
-  const delivered: Post[] = [];
+async function fetchAllPostIds(remoteFavorites: MemoryRemoteFavorites): Promise<string[]> {
+  const deliveredPosts: Post[] = [];
 
-  await source.fetchAll(posts => delivered.push(...posts));
-  return delivered.map(post => post.id);
+  await remoteFavorites.fetchAll(posts => deliveredPosts.push(...posts));
+  return deliveredPosts.map(post => post.id);
 }
 
-async function findNewPostIds(source: MemoryRemoteFavorites, localPostIds: string[]): Promise<string[]> {
-  return (await source.findNew(localPostIds)).map(post => post.id);
+async function findNewPostIds(remoteFavorites: MemoryRemoteFavorites, localPostIds: string[]): Promise<string[]> {
+  return (await remoteFavorites.findNew(localPostIds)).map(post => post.id);
 }
 
 describe("MemoryRemoteFavorites", () => {
@@ -57,17 +57,17 @@ describe("MemoryRemoteFavorites", () => {
   });
 
   test("removes a favorite from the list", async() => {
-    const memory = createMemory("3", "1", "2");
+    const memoryClient = createMemory("3", "1", "2");
 
-    expect(await new MemoryRemoteFavorites(memory).remove("1")).toBe(true);
-    expect(memory.readFavorites().map(post => post.id)).toEqual(["3", "2"]);
+    expect(await new MemoryRemoteFavorites(memoryClient).remove("1")).toBe(true);
+    expect(memoryClient.readFavorites().map(post => post.id)).toEqual(["3", "2"]);
   });
 
   test("adds a favorite to the front of the list", async() => {
-    const memory = createMemory("3", "1", "2");
+    const memoryClient = createMemory("3", "1", "2");
 
-    memory.removeFavorite("1");
-    expect(await new MemoryRemoteFavorites(memory).add("1")).toBe(true);
-    expect(memory.readFavorites().map(post => post.id)).toEqual(["1", "3", "2"]);
+    memoryClient.removeFavorite("1");
+    expect(await new MemoryRemoteFavorites(memoryClient).add("1")).toBe(true);
+    expect(memoryClient.readFavorites().map(post => post.id)).toEqual(["1", "3", "2"]);
   });
 });

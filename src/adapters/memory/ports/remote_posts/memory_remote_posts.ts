@@ -5,10 +5,10 @@ import { PostPurgedError } from "@/core/boundary/ports/remote_posts/post_purged_
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 
 export class MemoryRemotePosts implements RemotePosts {
-  constructor(private readonly memory: Pick<MemoryClient, "readPost">) { }
+  constructor(private readonly memoryClient: Pick<MemoryClient, "readPost">) { }
 
   public fetch({ id }: Pick<Post, "id">): Promise<CategorizedPost> {
-    const post = this.memory.readPost(id);
+    const post = this.memoryClient.readPost(id);
     return post === undefined ? Promise.reject(new PostPurgedError(id)) : Promise.resolve({ post, tagCategories: new Map() });
   }
 }

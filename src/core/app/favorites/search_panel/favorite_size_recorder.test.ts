@@ -25,7 +25,7 @@ function setup(
   localKeyedValues = new MemoryLocalKeyedValues(),
   { results = new Signal<readonly Favorite[]>([]), scheduler = new MemoryScheduler() } = {}
 ): FavoriteSizeRecorder {
-  const sizes = new KeyedStoredValue({ key: "sizes", defaultValue: PLACEHOLDER_SIZES }, { storage: localKeyedValues });
+  const sizes = new KeyedStoredValue({ key: "sizes", defaultValue: PLACEHOLDER_SIZES }, { storedValueStorage: localKeyedValues });
   return new FavoriteSizeRecorder({ measuredCount: 3, recordDelay: 100 }, { sizes, results, scheduler });
 }
 

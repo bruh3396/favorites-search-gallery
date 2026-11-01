@@ -5,7 +5,7 @@ import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser
 
 function serializeQuery(query: string): string {
   const searchQuery = parseSearchQuery<Fruit>(query);
-  return JSON.stringify({ orGroups: searchQuery.orGroups, andTerms: searchQuery.andTerms });
+  return JSON.stringify({ orGroups: searchQuery.orGroups, andTerms: searchQuery.searchTerms });
 }
 
 function expectEquivalent(query1: string, query2: string): void {
@@ -24,23 +24,23 @@ describe("buildSearchTermGroup", () => {
 
 describe("sortSearchTermGroup", () => {
   test("orders terms by cost", () => {
-    const term = parseSearchTerm("mango");
-    const negatedTerm = parseSearchTerm("-mango");
-    const wildcardTerm = parseSearchTerm("*mango");
-    const wildcardNegatedTerm = parseSearchTerm("-*mango");
-    const terms = [wildcardTerm, negatedTerm, term, wildcardNegatedTerm];
+    const searchTerm = parseSearchTerm("mango");
+    const negatedSearchTerm = parseSearchTerm("-mango");
+    const wildcardSearchTerm = parseSearchTerm("*mango");
+    const wildcardNegatedSearchTerm = parseSearchTerm("-*mango");
+    const searchTerms = [wildcardSearchTerm, negatedSearchTerm, searchTerm, wildcardNegatedSearchTerm];
 
-    expect(term.cost).toBeLessThan(wildcardTerm.cost);
-    expect(sortSearchTermGroup(terms)).toStrictEqual([term, negatedTerm, wildcardTerm, wildcardNegatedTerm]);
+    expect(searchTerm.cost).toBeLessThan(wildcardSearchTerm.cost);
+    expect(sortSearchTermGroup(searchTerms)).toStrictEqual([searchTerm, negatedSearchTerm, wildcardSearchTerm, wildcardNegatedSearchTerm]);
   });
 });
 
 describe("normalizeSearchQuery", () => {
   function normalize(andTerms: string[], orGroups: string[][]): { andTerms: string[]; orGroups: string[][] } {
-    const query = normalizeSearchQuery<Fruit>(buildSearchTermGroup(andTerms), orGroups.map(buildSearchTermGroup));
+    const searchQuery = normalizeSearchQuery<Fruit>(buildSearchTermGroup(andTerms), orGroups.map(buildSearchTermGroup));
     return {
-      andTerms: query.andTerms.map(term => term.literal),
-      orGroups: query.orGroups.map(orGroup => orGroup.map(term => term.literal))
+      andTerms: searchQuery.searchTerms.map(searchTerm => searchTerm.literal),
+      orGroups: searchQuery.orGroups.map(searchTerms => searchTerms.map(searchTerm => searchTerm.literal))
     };
   }
 
@@ -165,7 +165,7 @@ describe("parseSearchQuery", () => {
   test("parses a query of only an asterisk to no terms", () => {
     const searchQuery = parseSearchQuery<Fruit>("*");
 
-    expect(searchQuery.andTerms).toEqual([]);
+    expect(searchQuery.searchTerms).toEqual([]);
     expect(searchQuery.orGroups).toEqual([]);
   });
 });

@@ -4,7 +4,7 @@ import { Searchable } from "@/core/domain/search/searchable";
 export abstract class SearchTerm {
   public readonly value: string;
   public readonly isNegated: boolean;
-  public matches: (item: Searchable) => boolean;
+  public matches: (searchable: Searchable) => boolean;
   protected abstract readonly baseCost: number;
 
   constructor({ value, isNegated }: ParsedTerm) {
@@ -21,6 +21,6 @@ export abstract class SearchTerm {
     return this.isNegated ? `-${this.value}` : this.value;
   }
 
-  protected abstract matchesPositive(item: Searchable): boolean;
-  protected abstract matchesNegated(item: Searchable): boolean;
+  protected abstract matchesPositive(searchable: Searchable): boolean;
+  protected abstract matchesNegated(searchable: Searchable): boolean;
 }

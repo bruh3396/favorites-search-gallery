@@ -46,16 +46,16 @@ function createStoredValue<T>({ id, initial, log }: { id: string; initial: T; lo
 }
 
 interface Catalog {
-  readonly descriptors: SettingDescriptor[];
-  readonly hints: SettingPreference<boolean>;
+  readonly settingDescriptors: SettingDescriptor[];
+  readonly hintsSettingPreference: SettingPreference<boolean>;
 }
 
 function createCatalog(log: Log): Catalog {
-  const hints = createStoredValue({ id: "hints", initial: true, log });
-  const infiniteScroll = createStoredValue({ id: "infiniteScroll", initial: false, log });
-  const descriptors: SettingDescriptor[] = [
+  const hintsSettingPreference = createStoredValue({ id: "hints", initial: true, log });
+  const infiniteScrollSettingPreference = createStoredValue({ id: "infiniteScroll", initial: false, log });
+  const settingDescriptors: SettingDescriptor[] = [
     {
-      id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", settingPreference: hints
+      id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", settingPreference: hintsSettingPreference
     },
     {
       id: "ratings", kind: "choices", label: "Ratings", description: "Which ratings search includes.",
@@ -71,33 +71,33 @@ function createCatalog(log: Log): Catalog {
       settingPreference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference: createStoredValue({ id: "autoplay", initial: true, log }) },
-    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScroll },
+    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScrollSettingPreference },
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      disabled: infiniteScroll
+      disabled: infiniteScrollSettingPreference
     }
   ];
-  return { descriptors, hints };
+  return { settingDescriptors, hintsSettingPreference };
 }
 
 function createHostVariants(): StoryVariant[] {
   let catalog: Catalog | undefined;
-  const host = (label: string, { layout, size }: { layout: SettingsLayout; size: ControlSize }): StoryVariant => ({
+  const host = (label: string, { settingsLayout, controlSize }: { settingsLayout: SettingsLayout; controlSize: ControlSize }): StoryVariant => ({
     label,
     render: (ownerDocument, log): HTMLElement => {
       catalog ??= createCatalog(log);
-      const { descriptors, hints } = catalog;
+      const { settingDescriptors, hintsSettingPreference } = catalog;
       return render(ownerDocument, () => (
-        <div className="kit-Panel" dataset={{ size }}>
-          <SettingsScreen settingsLayout={layout} settingDescriptors={descriptors} controlSize={size} stepperScheduler={SCHEDULER} descriptionsVisible={hints} />
+        <div className="kit-Panel" dataset={{ size: controlSize }}>
+          <SettingsScreen settingsLayout={settingsLayout} settingDescriptors={settingDescriptors} controlSize={controlSize} stepperScheduler={SCHEDULER} descriptionsVisible={hintsSettingPreference} />
         </div>
       )).result;
     }
   });
   return [
-    host("Favorites drawer", { layout: FAVORITES_LAYOUT, size: "medium" }),
-    host("Post-list menu", { layout: POST_LIST_LAYOUT, size: "small" })
+    host("Favorites drawer", { settingsLayout: FAVORITES_LAYOUT, controlSize: "medium" }),
+    host("Post-list menu", { settingsLayout: POST_LIST_LAYOUT, controlSize: "small" })
   ];
 }
 

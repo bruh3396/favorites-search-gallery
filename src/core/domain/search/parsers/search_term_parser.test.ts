@@ -77,10 +77,10 @@ describe("parseSearchTerm", () => {
   });
 
   test("keeps an explicit id metric a metric term, without expanding it to the tag", () => {
-    const term = parseSearchTerm("id:200");
+    const searchTerm = parseSearchTerm("id:200");
 
-    expect(term).toBeInstanceOf(MetricSearchTerm);
-    expect(term).not.toBeInstanceOf(NumericSearchTerm);
+    expect(searchTerm).toBeInstanceOf(MetricSearchTerm);
+    expect(searchTerm).not.toBeInstanceOf(NumericSearchTerm);
   });
 });
 
@@ -119,8 +119,8 @@ describe("parseWildcardSearchTerm", () => {
   });
 
   test("matches nothing for a pattern that is not a valid regex", () => {
-    const term = parseWildcardSearchTerm("*[");
+    const wildcardSearchTerm = parseWildcardSearchTerm("*[");
 
-    expect(term.matches({ tags: new Set(["[", "a["]) })).toBe(false);
+    expect(wildcardSearchTerm.matches({ tags: new Set(["[", "a["]) })).toBe(false);
   });
 });

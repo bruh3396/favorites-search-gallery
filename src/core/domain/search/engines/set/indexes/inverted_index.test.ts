@@ -2,113 +2,113 @@ import { Fruit, FruitName } from "@/core/domain/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 
-function createDoc(name: FruitName, tags: string[]): Fruit {
-  return { name, tags: new Set(tags), getMetric: (): number => 0 };
+function createDoc(fruitName: FruitName, tags: string[]): Fruit {
+  return { name: fruitName, tags: new Set(tags), getMetric: (): number => 0 };
 }
 
-function createIndex(...docs: Fruit[]): InvertedIndex<Fruit> {
-  const index = new InvertedIndex<Fruit>(fruit => fruit.tags);
+function createIndex(...fruits: Fruit[]): InvertedIndex<Fruit> {
+  const invertedIndex = new InvertedIndex<Fruit>(fruit => fruit.tags);
 
-  for (const doc of docs) {
-    index.addDoc(doc);
+  for (const fruit of fruits) {
+    invertedIndex.addDoc(fruit);
   }
-  return index;
+  return invertedIndex;
 }
 
 describe("InvertedIndex", () => {
   describe("addDoc", () => {
     test("returns only the terms that were not already indexed", () => {
-      const index = createIndex();
+      const invertedIndex = createIndex();
 
-      expect(index.addDoc(createDoc("apple", ["red", "sweet"]))).toEqual(["red", "sweet"]);
-      expect(index.addDoc(createDoc("cherry", ["red", "tart"]))).toEqual(["tart"]);
+      expect(invertedIndex.addDoc(createDoc("apple", ["red", "sweet"]))).toEqual(["red", "sweet"]);
+      expect(invertedIndex.addDoc(createDoc("cherry", ["red", "tart"]))).toEqual(["tart"]);
     });
 
     test("indexes a doc again after it was removed", () => {
-      const pineapple = createDoc("pineapple", ["yellow", "unique_tag"]);
-      const index = createIndex(createDoc("apple", ["red"]));
+      const pineappleFruit = createDoc("pineapple", ["yellow", "unique_tag"]);
+      const invertedIndex = createIndex(createDoc("apple", ["red"]));
 
-      index.addDoc(pineapple);
-      index.removeDoc(pineapple);
-      index.addDoc(pineapple);
-      expect(index.indexedTerms()).toContain("unique_tag");
-      expect(index.docsForTerm("unique_tag")?.has(pineapple)).toBe(true);
+      invertedIndex.addDoc(pineappleFruit);
+      invertedIndex.removeDoc(pineappleFruit);
+      invertedIndex.addDoc(pineappleFruit);
+      expect(invertedIndex.indexedTerms()).toContain("unique_tag");
+      expect(invertedIndex.docsForTerm("unique_tag")?.has(pineappleFruit)).toBe(true);
     });
   });
 
   describe("addDocs", () => {
     test("indexes every doc and leaves the terms sorted", () => {
-      const index = createIndex();
+      const invertedIndex = createIndex();
 
-      index.addDocs([createDoc("kiwi", ["zebra", "apple"]), createDoc("mango", ["mango", "banana"])]);
+      invertedIndex.addDocs([createDoc("kiwi", ["zebra", "apple"]), createDoc("mango", ["mango", "banana"])]);
 
-      expect(index.indexedTerms()).toEqual(["apple", "banana", "mango", "zebra"]);
+      expect(invertedIndex.indexedTerms()).toEqual(["apple", "banana", "mango", "zebra"]);
     });
   });
 
   describe("updateDocs", () => {
     test("reports terms that gained their first doc and terms that lost their last", () => {
-      const apple = createDoc("apple", ["red", "sweet"]);
-      const index = createIndex(apple);
+      const appleFruit = createDoc("apple", ["red", "sweet"]);
+      const invertedIndex = createIndex(appleFruit);
 
-      expect(index.updateDocs([{ doc: apple, oldTerms: new Set(["red", "sweet"]), newTerms: new Set(["red", "crisp"]) }]))
+      expect(invertedIndex.updateDocs([{ doc: appleFruit, oldTerms: new Set(["red", "sweet"]), newTerms: new Set(["red", "crisp"]) }]))
         .toEqual({ added: ["crisp"], removed: ["sweet"] });
-      expect(index.indexedTerms()).toEqual(["crisp", "red"]);
+      expect(invertedIndex.indexedTerms()).toEqual(["crisp", "red"]);
     });
 
     test("ignores old terms that were never indexed", () => {
-      const apple = createDoc("apple", ["red"]);
-      const index = createIndex(apple);
+      const appleFruit = createDoc("apple", ["red"]);
+      const invertedIndex = createIndex(appleFruit);
 
-      expect(index.updateDocs([{ doc: apple, oldTerms: new Set(["red", "ghost"]), newTerms: new Set(["red"]) }]))
+      expect(invertedIndex.updateDocs([{ doc: appleFruit, oldTerms: new Set(["red", "ghost"]), newTerms: new Set(["red"]) }]))
         .toEqual({ added: [], removed: [] });
     });
 
     test("keeps a term that other docs still carry", () => {
-      const apple = createDoc("apple", ["red"]);
-      const cherry = createDoc("cherry", ["red"]);
-      const index = createIndex(apple, cherry);
+      const appleFruit = createDoc("apple", ["red"]);
+      const cherryFruit = createDoc("cherry", ["red"]);
+      const invertedIndex = createIndex(appleFruit, cherryFruit);
 
-      expect(index.updateDocs([{ doc: apple, oldTerms: new Set(["red"]), newTerms: new Set() }]))
+      expect(invertedIndex.updateDocs([{ doc: appleFruit, oldTerms: new Set(["red"]), newTerms: new Set() }]))
         .toEqual({ added: [], removed: [] });
-      expect(index.docsForTerm("red")).toEqual(new Set([cherry]));
+      expect(invertedIndex.docsForTerm("red")).toEqual(new Set([cherryFruit]));
     });
 
     test("adds a doc to a term that is already indexed without reporting it", () => {
-      const apple = createDoc("apple", ["red"]);
-      const cherry = createDoc("cherry", ["tart"]);
-      const index = createIndex(apple, cherry);
+      const appleFruit = createDoc("apple", ["red"]);
+      const cherryFruit = createDoc("cherry", ["tart"]);
+      const invertedIndex = createIndex(appleFruit, cherryFruit);
 
-      expect(index.updateDocs([{ doc: cherry, oldTerms: new Set(["tart"]), newTerms: new Set(["tart", "red"]) }]))
+      expect(invertedIndex.updateDocs([{ doc: cherryFruit, oldTerms: new Set(["tart"]), newTerms: new Set(["tart", "red"]) }]))
         .toEqual({ added: [], removed: [] });
-      expect(index.docsForTerm("red")).toEqual(new Set([apple, cherry]));
+      expect(invertedIndex.docsForTerm("red")).toEqual(new Set([appleFruit, cherryFruit]));
     });
   });
 
   describe("removeDoc", () => {
     test("drops a term once its last doc is removed", () => {
-      const pineapple = createDoc("pineapple", ["yellow", "unique_tag"]);
-      const index = createIndex(createDoc("apple", ["yellow"]), pineapple);
+      const pineappleFruit = createDoc("pineapple", ["yellow", "unique_tag"]);
+      const invertedIndex = createIndex(createDoc("apple", ["yellow"]), pineappleFruit);
 
-      index.removeDoc(pineapple);
-      expect(index.indexedTerms()).not.toContain("unique_tag");
-      expect(index.docsForTerm("unique_tag")).toBeUndefined();
+      invertedIndex.removeDoc(pineappleFruit);
+      expect(invertedIndex.indexedTerms()).not.toContain("unique_tag");
+      expect(invertedIndex.docsForTerm("unique_tag")).toBeUndefined();
     });
 
     test("skips terms that are not indexed", () => {
-      const index = createIndex(createDoc("apple", ["red"]));
+      const invertedIndex = createIndex(createDoc("apple", ["red"]));
 
-      expect(index.removeDoc(createDoc("kiwi", ["green"]))).toEqual([]);
-      expect(index.indexedTerms()).toEqual(["red"]);
+      expect(invertedIndex.removeDoc(createDoc("kiwi", ["green"]))).toEqual([]);
+      expect(invertedIndex.indexedTerms()).toEqual(["red"]);
     });
 
     test("returns only the terms whose last doc was removed", () => {
-      const apple = createDoc("apple", ["red", "sweet"]);
-      const cherry = createDoc("cherry", ["red", "tart"]);
-      const index = createIndex(apple, cherry);
+      const appleFruit = createDoc("apple", ["red", "sweet"]);
+      const cherryFruit = createDoc("cherry", ["red", "tart"]);
+      const invertedIndex = createIndex(appleFruit, cherryFruit);
 
-      expect(index.removeDoc(cherry)).toEqual(["tart"]);
-      expect(index.removeDoc(apple).sort()).toEqual(["red", "sweet"]);
+      expect(invertedIndex.removeDoc(cherryFruit)).toEqual(["tart"]);
+      expect(invertedIndex.removeDoc(appleFruit).sort()).toEqual(["red", "sweet"]);
     });
   });
 });

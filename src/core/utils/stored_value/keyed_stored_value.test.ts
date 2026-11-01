@@ -19,7 +19,7 @@ describe("KeyedStoredValue", () => {
   test("starts from the stored value", () => {
     const storage = createStorage({ size: 4 });
 
-    expect(new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage }).value).toBe(4);
+    expect(new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: storage }).value).toBe(4);
   });
 
   test.each([
@@ -28,12 +28,12 @@ describe("KeyedStoredValue", () => {
   ])("starts from the default when %s", (_, entries) => {
     const storage = createStorage(entries);
 
-    expect(new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage }).value).toBe(6);
+    expect(new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: storage }).value).toBe(6);
   });
 
   test("stores what is set and reruns the effects that read it", () => {
     const storage = createStorage();
-    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage });
+    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: storage });
     const seen: number[] = [];
 
     effect(() => {
@@ -47,12 +47,12 @@ describe("KeyedStoredValue", () => {
   test("stores nothing when set to its current value", () => {
     const storage = createStorage();
 
-    new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage }).set(6);
+    new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: storage }).set(6);
     expect(storage.entries).toEqual({});
   });
 
   test("tells its listeners what is set, after the effects see it", () => {
-    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage: createStorage() });
+    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: createStorage() });
     const seen: string[] = [];
 
     effect(() => {
@@ -64,7 +64,7 @@ describe("KeyedStoredValue", () => {
   });
 
   test("tells its listeners nothing when set to its current value", () => {
-    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage: createStorage() });
+    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: createStorage() });
     const seen: number[] = [];
 
     preference.changed.on(value => seen.push(value));
@@ -73,7 +73,7 @@ describe("KeyedStoredValue", () => {
   });
 
   test("stops telling a listener once it stops listening", () => {
-    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storage: createStorage() });
+    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: createStorage() });
     const seen: number[] = [];
 
     preference.changed.on(value => seen.push(value))();
@@ -84,7 +84,7 @@ describe("KeyedStoredValue", () => {
   test("decodes and encodes through its codec", () => {
     const storage = createStorage({ colors: ["red"] });
     const codec = createSetCodec(oneOf(["red", "blue"] as const));
-    const preference = new KeyedStoredValue({ key: "colors", defaultValue: new Set<"red" | "blue">() }, { storage, codec });
+    const preference = new KeyedStoredValue({ key: "colors", defaultValue: new Set<"red" | "blue">() }, { storedValueStorage: storage, codec });
 
     expect(preference.value).toEqual(new Set(["red"]));
     preference.set(new Set(["red", "blue"]));

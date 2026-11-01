@@ -23,7 +23,7 @@ interface RemotePage {
 }
 
 interface Checkpoint {
-  readonly page: RemotePage;
+  readonly remotePage: RemotePage;
   readonly localIndex: number;
   readonly removedAbove: number;
 }
@@ -39,57 +39,57 @@ export class Rule34MissingFavoritesFinder {
       return [];
     }
     const localList = { postIds: localPostIds, indexByPostId: new Map(localPostIds.map((id, index) => [id, index])), remoteStart };
-    const localListStart = this.createLocalListStart(localList);
-    const remoteEnd = this.createCheckpoint(localList, await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localPostIds.length - 1)));
-    const removedBeforeRemoteEnd = await this.findMissingBetween(localList, localListStart, remoteEnd);
-    const removedAfterRemoteEnd = localPostIds.slice(remoteEnd.localIndex + 1);
+    const localListStartCheckpoint = this.createLocalListStart(localList);
+    const remoteEndCheckpoint = this.createCheckpoint(localList, await this.fetchLastNonEmptyPage(this.calculatePageIndex(remoteStart + localPostIds.length - 1)));
+    const removedBeforeRemoteEnd = await this.findMissingBetween(localList, localListStartCheckpoint, remoteEndCheckpoint);
+    const removedAfterRemoteEnd = localPostIds.slice(remoteEndCheckpoint.localIndex + 1);
     return [...removedBeforeRemoteEnd, ...removedAfterRemoteEnd];
   }
 
-  private async findMissingBetween(localList: LocalList, top: Checkpoint, bottom: Checkpoint): Promise<string[]> {
-    if (top.removedAbove === bottom.removedAbove) {
+  private async findMissingBetween(localList: LocalList, topCheckpoint: Checkpoint, bottomCheckpoint: Checkpoint): Promise<string[]> {
+    if (topCheckpoint.removedAbove === bottomCheckpoint.removedAbove) {
       return [];
     }
 
-    if (bottom.page.index === top.page.index + 1) {
-      return localList.postIds.slice(top.localIndex + 1, bottom.localIndex + 1).filter(id => !bottom.page.postIds.includes(id));
+    if (bottomCheckpoint.remotePage.index === topCheckpoint.remotePage.index + 1) {
+      return localList.postIds.slice(topCheckpoint.localIndex + 1, bottomCheckpoint.localIndex + 1).filter(id => !bottomCheckpoint.remotePage.postIds.includes(id));
     }
-    const middle = this.createCheckpoint(localList, await this.fetchPageAfterDelay(Math.floor((top.page.index + bottom.page.index) / 2)));
-    return [...await this.findMissingBetween(localList, top, middle), ...await this.findMissingBetween(localList, middle, bottom)];
+    const middleCheckpoint = this.createCheckpoint(localList, await this.fetchPageAfterDelay(Math.floor((topCheckpoint.remotePage.index + bottomCheckpoint.remotePage.index) / 2)));
+    return [...await this.findMissingBetween(localList, topCheckpoint, middleCheckpoint), ...await this.findMissingBetween(localList, middleCheckpoint, bottomCheckpoint)];
   }
 
   private createLocalListStart(localList: LocalList): Checkpoint {
-    return { page: { index: this.calculatePageIndex(localList.remoteStart) - 1, postIds: [] }, localIndex: -1, removedAbove: 0 };
+    return { remotePage: { index: this.calculatePageIndex(localList.remoteStart) - 1, postIds: [] }, localIndex: -1, removedAbove: 0 };
   }
 
-  private createCheckpoint(localList: LocalList, page: RemotePage): Checkpoint {
-    const lastPostId = page.postIds.at(-1);
+  private createCheckpoint(localList: LocalList, remotePage: RemotePage): Checkpoint {
+    const lastPostId = remotePage.postIds.at(-1);
     const localIndex = lastPostId === undefined ? undefined : localList.indexByPostId.get(lastPostId);
 
     if (localIndex === undefined) {
-      return { page, localIndex: -1, removedAbove: 0 };
+      return { remotePage, localIndex: -1, removedAbove: 0 };
     }
-    const remoteIndex = this.calculateRemoteIndex(page, page.postIds.length - 1);
-    return { page, localIndex, removedAbove: localList.remoteStart + localIndex - remoteIndex };
+    const remoteIndex = this.calculateRemoteIndex(remotePage, remotePage.postIds.length - 1);
+    return { remotePage, localIndex, removedAbove: localList.remoteStart + localIndex - remoteIndex };
   }
 
   private calculatePageIndex(remoteIndex: number): number {
     return Math.floor(remoteIndex / this.configuration.pageSize);
   }
 
-  private calculateRemoteIndex(page: RemotePage, indexOnPage: number): number {
-    return (page.index * this.configuration.pageSize) + indexOnPage;
+  private calculateRemoteIndex(remotePage: RemotePage, indexOnPage: number): number {
+    return (remotePage.index * this.configuration.pageSize) + indexOnPage;
   }
 
   private async fetchLastNonEmptyPage(pageIndex: number): Promise<RemotePage> {
     return this.stepBackPastEmptyPages(await this.fetchPage(pageIndex));
   }
 
-  private async stepBackPastEmptyPages(page: RemotePage): Promise<RemotePage> {
-    if (page.postIds.length === 0 && page.index > 0) {
-      return this.stepBackPastEmptyPages(await this.fetchPageAfterDelay(page.index - 1));
+  private async stepBackPastEmptyPages(remotePage: RemotePage): Promise<RemotePage> {
+    if (remotePage.postIds.length === 0 && remotePage.index > 0) {
+      return this.stepBackPastEmptyPages(await this.fetchPageAfterDelay(remotePage.index - 1));
     }
-    return page;
+    return remotePage;
   }
 
   private async fetchPageAfterDelay(index: number): Promise<RemotePage> {

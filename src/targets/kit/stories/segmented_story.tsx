@@ -6,10 +6,10 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 
 interface SegmentedState {
-  readonly choices: readonly ControlChoice<string>[];
+  readonly controlChoices: readonly ControlChoice<string>[];
   readonly value: string;
   readonly disabled?: boolean;
-  readonly size?: ControlSize;
+  readonly controlSize?: ControlSize;
 }
 
 const LAYOUTS = [
@@ -23,17 +23,17 @@ const ORDERS = [
   { value: "ascending", label: "Ascending" }
 ] as const;
 
-function variant(label: string, { choices, value: initial, disabled = false, size }: SegmentedState): Story["variants"][number] {
+function variant(label: string, { controlChoices, value: initial, disabled = false, controlSize }: SegmentedState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
       const selected = new Signal(initial);
       const { result: element } = render(ownerDocument, () => (
         <Segmented
-          controlChoices={choices}
+          controlChoices={controlChoices}
           value={selected}
           disabled={new Signal(disabled)}
-          size={size}
+          size={controlSize}
           onValueChange={next => {
             log(`Segmented "${label}" → ${next}`);
             selected.value = next;
@@ -50,9 +50,9 @@ function variant(label: string, { choices, value: initial, disabled = false, siz
 export const SEGMENTED_STORY: Story = {
   title: "Segmented",
   variants: [
-    variant("Three choices", { choices: LAYOUTS, value: "column" }),
-    variant("Two choices", { choices: ORDERS, value: "descending" }),
-    variant("Small", { choices: LAYOUTS, value: "row", size: "small" }),
-    variant("Disabled", { choices: LAYOUTS, value: "square", disabled: true })
+    variant("Three choices", { controlChoices: LAYOUTS, value: "column" }),
+    variant("Two choices", { controlChoices: ORDERS, value: "descending" }),
+    variant("Small", { controlChoices: LAYOUTS, value: "row", controlSize: "small" }),
+    variant("Disabled", { controlChoices: LAYOUTS, value: "square", disabled: true })
   ]
 };

@@ -35,10 +35,10 @@ function createPage(): Page {
   };
 }
 
-function clearsNativePage(mode: AppMode): boolean {
+function clearsNativePage(appMode: AppMode): boolean {
   const rule34Document = createRule34Document();
 
-  new Rule34HostPage({ mode }, { rule34Document, page: createPage() }).claimContent();
+  new Rule34HostPage({ appMode }, { rule34Document, page: createPage() }).claimContent();
   return rule34Document.clearNativePage.mock.calls.length > 0;
 }
 
@@ -52,26 +52,26 @@ describe("Rule34HostPage", () => {
   });
 
   test("gives the app the browser page's content element on the favorites page", () => {
-    const hostPage = new Rule34HostPage({ mode: "favorites" }, { rule34Document: createRule34Document(), page: createPage() });
+    const hostPage = new Rule34HostPage({ appMode: "favorites" }, { rule34Document: createRule34Document(), page: createPage() });
 
     expect(hostPage.claimContent()).toBe(CONTENT);
   });
 
   test("gives the app the post list's content element", () => {
-    const hostPage = new Rule34HostPage({ mode: "postList" }, { rule34Document: createRule34Document(), page: createPage() });
+    const hostPage = new Rule34HostPage({ appMode: "postList" }, { rule34Document: createRule34Document(), page: createPage() });
 
     expect(hostPage.claimContent()).toBe(POST_LIST_CONTENT);
   });
 
   test("falls back to the browser page's content element when the post list has none", () => {
-    const hostPage = new Rule34HostPage({ mode: "postList" }, { rule34Document: createRule34Document(null), page: createPage() });
+    const hostPage = new Rule34HostPage({ appMode: "postList" }, { rule34Document: createRule34Document(null), page: createPage() });
 
     expect(hostPage.claimContent()).toBe(CONTENT);
   });
 
   test("shows and hides the site's header", () => {
     const rule34Document = createRule34Document();
-    const hostPage = new Rule34HostPage({ mode: "favorites" }, { rule34Document, page: createPage() });
+    const hostPage = new Rule34HostPage({ appMode: "favorites" }, { rule34Document, page: createPage() });
 
     expect(hostPage.hasHeader).toBe(true);
     hostPage.setHeaderVisible(false);
@@ -82,20 +82,20 @@ describe("Rule34HostPage", () => {
   test("remembers the theme on the site", () => {
     const rule34Document = createRule34Document();
 
-    new Rule34HostPage({ mode: "favorites" }, { rule34Document, page: createPage() }).setColorScheme("dark");
+    new Rule34HostPage({ appMode: "favorites" }, { rule34Document, page: createPage() }).setColorScheme("dark");
     expect(rule34Document.setTheme.mock.calls).toEqual([["dark"]]);
   });
 
   test("reflects the search page on the site's paginator and address", () => {
     const rule34Document = createRule34Document();
 
-    new Rule34HostPage({ mode: "postList" }, { rule34Document, page: createPage() }).reflectSearchPage(3);
+    new Rule34HostPage({ appMode: "postList" }, { rule34Document, page: createPage() }).reflectSearchPage(3);
     expect(rule34Document.reflectPostListPage.mock.calls).toEqual([[3]]);
   });
 
   test("shows and hides the site's paginator", () => {
     const rule34Document = createRule34Document();
-    const hostPage = new Rule34HostPage({ mode: "postList" }, { rule34Document, page: createPage() });
+    const hostPage = new Rule34HostPage({ appMode: "postList" }, { rule34Document, page: createPage() });
 
     hostPage.setPaginatorVisible(false);
     hostPage.setPaginatorVisible(true);

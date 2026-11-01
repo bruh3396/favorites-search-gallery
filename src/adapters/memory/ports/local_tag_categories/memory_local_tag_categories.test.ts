@@ -4,30 +4,30 @@ import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 describe("MemoryLocalTagCategories", () => {
   test("reads back what it wrote, skipping missing tags", async() => {
-    const tagCategories = new MemoryLocalTagCategories();
+    const localTagCategories = new MemoryLocalTagCategories();
 
-    await tagCategories.setMany(new Map([["alice", "character"], ["bob", "artist"]]));
+    await localTagCategories.setMany(new Map([["alice", "character"], ["bob", "artist"]]));
 
-    expect(await tagCategories.getMany(["bob", "missing", "alice"])).toEqual(new Map([["bob", "artist"], ["alice", "character"]]));
+    expect(await localTagCategories.getMany(["bob", "missing", "alice"])).toEqual(new Map([["bob", "artist"], ["alice", "character"]]));
   });
 
   test("overwrites a tag's category", async() => {
-    const tagCategories = new MemoryLocalTagCategories();
+    const localTagCategories = new MemoryLocalTagCategories();
 
-    await tagCategories.setMany(new Map([["alice", "general"]]));
-    await tagCategories.setMany(new Map([["alice", "character"]]));
+    await localTagCategories.setMany(new Map([["alice", "general"]]));
+    await localTagCategories.setMany(new Map([["alice", "character"]]));
 
-    expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
+    expect(await localTagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
   });
 
   test("ignores mutations to a map after writing or reading it", async() => {
-    const tagCategories = new MemoryLocalTagCategories();
+    const localTagCategories = new MemoryLocalTagCategories();
     const written = new Map([["alice", "character"]] as const);
 
-    await tagCategories.setMany(written);
+    await localTagCategories.setMany(written);
     written.clear();
-    (await tagCategories.getMany(["alice"]) as Map<string, TagCategory>).clear();
+    (await localTagCategories.getMany(["alice"]) as Map<string, TagCategory>).clear();
 
-    expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
+    expect(await localTagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
   });
 });

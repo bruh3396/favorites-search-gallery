@@ -7,10 +7,10 @@ import { Switch } from "@/core/ui/components/switch/switch";
 interface SwitchState {
   readonly checked: boolean;
   readonly disabled?: boolean;
-  readonly size?: ControlSize;
+  readonly controlSize?: ControlSize;
 }
 
-function variant(label: string, { checked: initial, disabled = false, size }: SwitchState): Story["variants"][number] {
+function variant(label: string, { checked: initial, disabled = false, controlSize }: SwitchState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
@@ -19,7 +19,7 @@ function variant(label: string, { checked: initial, disabled = false, size }: Sw
         <Switch
           value={checked}
           disabled={new Signal(disabled)}
-          size={size}
+          size={controlSize}
           onValueChange={next => {
             log(`Switch "${label}" → ${next}`);
             checked.value = next;
@@ -40,7 +40,7 @@ export const SWITCH_STORY: Story = {
     variant("On", { checked: true }),
     variant("Disabled off", { checked: false, disabled: true }),
     variant("Disabled on", { checked: true, disabled: true }),
-    variant("Small", { checked: false, size: "small" }),
-    variant("Small on", { checked: true, size: "small" })
+    variant("Small", { checked: false, controlSize: "small" }),
+    variant("Small on", { checked: true, controlSize: "small" })
   ]
 };

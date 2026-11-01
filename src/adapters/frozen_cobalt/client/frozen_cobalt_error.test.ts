@@ -19,8 +19,8 @@ describe("isRetryableFrozenCobaltError", () => {
     ["network", true],
     ["retry", true],
     ["malformed", false]
-  ])("classifies %s as retryable: %s", (reason, expected) => {
-    expect(isRetryableFrozenCobaltError(new FrozenCobaltError(reason))).toBe(expected);
+  ])("classifies %s as retryable: %s", (frozenCobaltErrorReason, expected) => {
+    expect(isRetryableFrozenCobaltError(new FrozenCobaltError(frozenCobaltErrorReason))).toBe(expected);
   });
 
   test.each([

@@ -20,7 +20,7 @@ describe("parseMetricComparison", () => {
   test("parses a comparison against a number", () => {
     expect(parseMetricComparison("score:>10")).toEqual({
       metric: "score",
-      operator: ":>",
+      comparator: ":>",
       isRelative: false,
       rightHandMetric: "id",
       value: 10,
@@ -31,7 +31,7 @@ describe("parseMetricComparison", () => {
   test("parses a comparison against another metric", () => {
     expect(parseMetricComparison("width:<height")).toEqual({
       metric: "width",
-      operator: ":<",
+      comparator: ":<",
       isRelative: true,
       rightHandMetric: "height",
       value: 0,
@@ -44,10 +44,10 @@ describe("parseMetricComparison", () => {
   });
 
   test("ignores a leading negation", () => {
-    expect(parseMetricComparison("-score:5")).toMatchObject({ metric: "score", operator: ":", value: 5 });
+    expect(parseMetricComparison("-score:5")).toMatchObject({ metric: "score", comparator: ":", value: 5 });
   });
 
   test("falls back to width:0 for a term that isn't a comparison", () => {
-    expect(parseMetricComparison("apple")).toMatchObject({ metric: "width", operator: ":", value: 0, isRelative: false });
+    expect(parseMetricComparison("apple")).toMatchObject({ metric: "width", comparator: ":", value: 0, isRelative: false });
   });
 });

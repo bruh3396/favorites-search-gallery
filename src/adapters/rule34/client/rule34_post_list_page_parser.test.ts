@@ -12,10 +12,10 @@ const THUMBS = `
 
 describe("parseRule34PostListPage", () => {
   test("reads each thumb as a post, in order, with the page's paginator", () => {
-    const page = parseRule34PostListPage(createPage(`${THUMBS}<div id="paginator">1 2 3</div>`), () => null);
+    const rule34PostListPage = parseRule34PostListPage(createPage(`${THUMBS}<div id="paginator">1 2 3</div>`), () => null);
 
-    expect(page.posts.map(post => post.id)).toEqual(["1", "2"]);
-    expect(page.paginator?.textContent).toBe("1 2 3");
+    expect(rule34PostListPage.posts.map(post => post.id)).toEqual(["1", "2"]);
+    expect(rule34PostListPage.paginator?.textContent).toBe("1 2 3");
   });
 
   test("reads an empty page past the last result, with no paginator", () => {

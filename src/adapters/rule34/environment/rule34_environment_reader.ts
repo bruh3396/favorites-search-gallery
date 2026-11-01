@@ -14,13 +14,13 @@ export function readRule34Environment(rule34Document: Pick<Rule34Document,
   if (pageName === null) {
     return null;
   }
-  const mode = MODES[pageName];
+  const appMode = MODES[pageName];
   const userId = rule34Document.readUserId();
   const favoritesPageOwnerId = rule34Document.readFavoritesOwnerId();
   return {
-    mode,
-    favoritesOwnerId: mode === "favorites" ? favoritesPageOwnerId : userId,
-    ownsFavorites: mode === "favorites" && userId === favoritesPageOwnerId,
+    appMode,
+    favoritesOwnerId: appMode === "favorites" ? favoritesPageOwnerId : userId,
+    ownsFavorites: appMode === "favorites" && userId === favoritesPageOwnerId,
     blacklistedTags: rule34Document.readTagBlacklist(),
     colorScheme: rule34Document.readTheme()
   };

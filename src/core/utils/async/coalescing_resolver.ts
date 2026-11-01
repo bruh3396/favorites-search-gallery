@@ -12,9 +12,9 @@ export class CoalescingResolver<K, V> {
   private readonly executor: CoalescingExecutor<K>;
   private readonly resolve: (coalesced: K[]) => Promise<ReadonlyMap<K, V>>;
 
-  constructor(configuration: CoalescingResolverConfiguration, dependencies: CoalescingResolverDependencies<K, V>) {
+  constructor(coalescingExecutorConfiguration: CoalescingResolverConfiguration, dependencies: CoalescingResolverDependencies<K, V>) {
     this.resolve = dependencies.resolve;
-    this.executor = new CoalescingExecutor<K>(configuration, {
+    this.executor = new CoalescingExecutor<K>(coalescingExecutorConfiguration, {
       execute: (coalesced): void => this.resolveCoalesced(coalesced),
       scheduler: dependencies.scheduler
     });

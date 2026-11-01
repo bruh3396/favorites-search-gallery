@@ -25,28 +25,28 @@ export class MetricBitIndex<Doc> {
     this.relativeCache.clear();
   }
 
-  public getPosting(comparison: MetricComparison): DensePosting {
-    const bitSet = comparison.isRelative ? this.relativeBitset(comparison) : this.absoluteBitset(comparison);
+  public getPosting(metricComparison: MetricComparison): DensePosting {
+    const bitSet = metricComparison.isRelative ? this.relativeBitset(metricComparison) : this.absoluteBitset(metricComparison);
     return new DensePosting(bitSet);
   }
 
-  private absoluteBitset(comparison: MetricComparison): BitSet {
-    const axis = this.getAxis(comparison.metric);
-    const result = new BitSet(this.width);
-    const [start, end] = this.matchingSpan(axis, comparison.operator, comparison.value);
+  private absoluteBitset(metricComparison: MetricComparison): BitSet {
+    const metricAxis = this.getAxis(metricComparison.metric);
+    const bitSet = new BitSet(this.width);
+    const [start, end] = this.matchingSpan(metricAxis, metricComparison.comparator, metricComparison.value);
 
     for (let i = start; i < end; i += 1) {
-      result.set(axis.positionsSortedByValue[i]);
+      bitSet.set(metricAxis.positionsSortedByValue[i]);
     }
-    return result;
+    return bitSet;
   }
 
-  private matchingSpan(axis: MetricAxis, operator: MetricComparator, value: number): [number, number] {
-    const { valuesByPosition, positionsSortedByValue } = axis;
+  private matchingSpan(metricAxis: MetricAxis, metricComparator: MetricComparator, value: number): [number, number] {
+    const { valuesByPosition, positionsSortedByValue } = metricAxis;
     const lowerBound = findFirstIndexWhere(positionsSortedByValue.length, i => valuesByPosition[positionsSortedByValue[i]] >= value);
     const upperBound = findFirstIndexWhere(positionsSortedByValue.length, i => valuesByPosition[positionsSortedByValue[i]] > value);
 
-    switch (operator) {
+    switch (metricComparator) {
       case ":<": return [0, lowerBound];
       case ":>": return [upperBound, positionsSortedByValue.length];
       default: return [lowerBound, upperBound];
@@ -65,10 +65,10 @@ export class MetricBitIndex<Doc> {
   }
 
   private getAxis(metric: Metric): MetricAxis {
-    const cached = this.axes.get(metric);
+    const cachedMetricAxis = this.axes.get(metric);
 
-    if (cached !== undefined) {
-      return cached;
+    if (cachedMetricAxis !== undefined) {
+      return cachedMetricAxis;
     }
     const valuesByPosition = new Float64Array(this.width);
     const positions = Int32Array.from(this.livePositions());
@@ -76,44 +76,44 @@ export class MetricBitIndex<Doc> {
     for (const position of positions) {
       valuesByPosition[position] = this.getMetric(this.docsByPosition[position], metric);
     }
-    const axis: MetricAxis = {
+    const metricAxis: MetricAxis = {
       valuesByPosition,
       positionsSortedByValue: positions.sort((a, b) => valuesByPosition[a] - valuesByPosition[b])
     };
 
-    this.axes.set(metric, axis);
-    return axis;
+    this.axes.set(metric, metricAxis);
+    return metricAxis;
   }
 
-  private relativeBitset(comparison: MetricComparison): BitSet {
-    const key = `${comparison.metric}${comparison.operator}${comparison.rightHandMetric}`;
-    const cached = this.relativeCache.get(key);
+  private relativeBitset(metricComparison: MetricComparison): BitSet {
+    const key = `${metricComparison.metric}${metricComparison.comparator}${metricComparison.rightHandMetric}`;
+    const cachedBitSet = this.relativeCache.get(key);
 
-    if (cached !== undefined) {
-      return cached;
+    if (cachedBitSet !== undefined) {
+      return cachedBitSet;
     }
-    const bitset = this.buildRelativeBitset(comparison);
+    const bitSet = this.buildRelativeBitset(metricComparison);
 
-    this.relativeCache.set(key, bitset);
-    return bitset;
+    this.relativeCache.set(key, bitSet);
+    return bitSet;
   }
 
-  private buildRelativeBitset(comparison: MetricComparison): BitSet {
-    const left = this.getAxis(comparison.metric).valuesByPosition;
-    const right = this.getAxis(comparison.rightHandMetric).valuesByPosition;
-    const matches = this.relativeComparator(comparison.operator);
-    const result = new BitSet(this.width);
+  private buildRelativeBitset(metricComparison: MetricComparison): BitSet {
+    const left = this.getAxis(metricComparison.metric).valuesByPosition;
+    const right = this.getAxis(metricComparison.rightHandMetric).valuesByPosition;
+    const matches = this.relativeComparator(metricComparison.comparator);
+    const bitSet = new BitSet(this.width);
 
     for (const position of this.livePositions()) {
       if (matches(left[position], right[position])) {
-        result.set(position);
+        bitSet.set(position);
       }
     }
-    return result;
+    return bitSet;
   }
 
-  private relativeComparator(operator: MetricComparator): (a: number, b: number) => boolean {
-    switch (operator) {
+  private relativeComparator(metricComparator: MetricComparator): (a: number, b: number) => boolean {
+    switch (metricComparator) {
       case ":<": return (a, b): boolean => a < b;
       case ":>": return (a, b): boolean => a > b;
       default: return (a, b): boolean => a === b;

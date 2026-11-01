@@ -27,9 +27,9 @@ describe("FilesystemClient", () => {
     await writePostFile("1", 1_000);
     await writeFile(join(directory, "notes.txt"), "not a post");
 
-    const files = await new FilesystemClient(directory).readPostFiles();
+    const filesystemPostFiles = await new FilesystemClient(directory).readPostFiles();
 
-    expect(files.map(file => [file.post.id, file.modifiedAt])).toEqual([["1", 1_000_000]]);
+    expect(filesystemPostFiles.map(filesystemPostFile => [filesystemPostFile.post.id, filesystemPostFile.modifiedAt])).toEqual([["1", 1_000_000]]);
   });
 
   test("counts post files only", async() => {
@@ -43,10 +43,10 @@ describe("FilesystemClient", () => {
   test("deletes a post's file, and ignores a post without one", async() => {
     await writeFile(join(directory, "1.json"), "{}");
     await writeFile(join(directory, "2.json"), "{}");
-    const client = new FilesystemClient(directory);
+    const filesystemClient = new FilesystemClient(directory);
 
-    await client.deletePostFile("1");
-    await client.deletePostFile("9");
+    await filesystemClient.deletePostFile("1");
+    await filesystemClient.deletePostFile("9");
     expect(await readdir(directory)).toEqual(["2.json"]);
   });
 });

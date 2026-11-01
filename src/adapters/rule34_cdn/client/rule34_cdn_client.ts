@@ -29,13 +29,13 @@ export class Rule34CdnClient {
   }
 
   public mintMediaFromUrl({ url, tags }: { url: string; tags: string }): Media | null {
-    const locator = parseRule34CdnFileUrl(url);
-    return locator === null ? null : mintRule34CdnMedia({ locator, tags });
+    const rule34CdnLocator = parseRule34CdnFileUrl(url);
+    return rule34CdnLocator === null ? null : mintRule34CdnMedia({ rule34CdnLocator, tags });
   }
 
   public mintMediaFromParts({ directory, stem, extension, tags }: { directory: number; stem: string; extension: string; tags: string }): Media {
-    const locator = { directory: String(directory), stem, extension: isRule34CdnFileExtension(extension) ? extension : null };
-    return mintRule34CdnMedia({ locator, tags });
+    const rule34CdnLocator = { directory: String(directory), stem, extension: isRule34CdnFileExtension(extension) ? extension : null };
+    return mintRule34CdnMedia({ rule34CdnLocator, tags });
   }
 
   // Correcting the tag guess is off for now: the probe turned post list videos into their jpg stills

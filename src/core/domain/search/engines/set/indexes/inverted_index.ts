@@ -47,11 +47,11 @@ export class InvertedIndex<Doc> {
     return newTerms;
   }
 
-  public updateDocs(updates: readonly TermUpdate<Doc>[]): TermDelta {
+  public updateDocs(termUpdates: readonly TermUpdate<Doc>[]): TermDelta {
     const added: string[] = [];
     const removed: string[] = [];
 
-    for (const { doc, oldTerms, newTerms } of updates) {
+    for (const { doc, oldTerms, newTerms } of termUpdates) {
       this.docs.add(doc);
 
       for (const term of oldTerms.difference(newTerms)) {

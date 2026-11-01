@@ -37,8 +37,8 @@ declare const SCRIPT_VERSION: string;
 
 type LabBase = Pick<FavoritesAppDependencies, "scheduler" | "hostPage" | "localKeyedValues">;
 
-function createFavoritesAppDependencies(environment: Environment, rule34Document: Rule34Document, base: LabBase): FavoritesAppDependencies {
-  const { scheduler } = base;
+function createFavoritesAppDependencies(environment: Environment, rule34Document: Rule34Document, labBase: LabBase): FavoritesAppDependencies {
+  const { scheduler } = labBase;
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
@@ -46,7 +46,7 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
   const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
   const indexedDbClient = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, mintMedia);
   return {
-    ...base,
+    ...labBase,
     randomSource,
     sizeObserver: new BrowserSizeObserver(),
     navigator: new BrowserNavigator(),
@@ -63,20 +63,20 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
   };
 }
 
-function startApp(environment: Environment, dependencies: FavoritesAppDependencies, container: HTMLElement): void {
+function startApp(environment: Environment, favoritesAppDependencies: FavoritesAppDependencies, container: HTMLElement): void {
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
-  }, dependencies).mount(container);
+  }, favoritesAppDependencies).mount(container);
 }
 
 async function main(): Promise<void> {
   const rule34Document = new Rule34Document();
   const hostEnvironment = readRule34Environment(rule34Document);
 
-  if (hostEnvironment?.mode !== "favorites") {
+  if (hostEnvironment?.appMode !== "favorites") {
     return;
   }
   document.title = "FSG Lab";
@@ -84,7 +84,7 @@ async function main(): Promise<void> {
   await applyPendingReset();
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
   const scheduler = new BrowserScheduler();
-  const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
+  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, page: new BrowserHostPage() });
   const localKeyedValues = new NamespacedLocalKeyedValues(LAB_NAMESPACE, new BrowserLocalKeyedValues());
   const labContainer = hostPage.claimContent();
   const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["favorites"]).favorites;
@@ -96,7 +96,7 @@ async function main(): Promise<void> {
   const favoriteCount = new Signal<number | null>(null);
 
   mountLabScreen(labContainer, { colorScheme: environment.colorScheme }, {
-    scheduler,
+    stepperScheduler: scheduler,
     postCount,
     favoriteCount,
     nativeHeaderVisible,

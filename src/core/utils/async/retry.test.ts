@@ -57,5 +57,17 @@ describe("Retry", () => {
       await advanceAndSettle(scheduler, 10);
       expect(task).toHaveBeenCalledTimes(3);
     });
+
+  });
+
+  describe("computeDelay", () => {
+    test("doubles the delay each failure up to the maximum", () => {
+      const retry = new Retry(
+        { attempts: 10, baseDelay: 100, maxDelay: 300 },
+        { scheduler: new MemoryScheduler(), randomSource: new MemoryRandomSource([1]), isRetryable: () => true }
+      );
+
+      expect([1, 2, 3, 4].map(failureCount => retry.computeDelay(failureCount))).toEqual([100, 200, 300, 300]);
+    });
   });
 });

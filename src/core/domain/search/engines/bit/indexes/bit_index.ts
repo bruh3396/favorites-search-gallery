@@ -14,19 +14,19 @@ export interface BitIndexDependencies<Doc> {
 }
 
 export class BitIndex<Doc> {
-  private readonly docs = new DocTable<Doc>();
-  private readonly algebra = new BitAlgebra<Doc>(this.docs);
-  private readonly draft = new DraftPostings();
-  private readonly postings = new DurablePostings();
+  private readonly docTable = new DocTable<Doc>();
+  private readonly algebra = new BitAlgebra<Doc>(this.docTable);
+  private readonly draftPostings = new DraftPostings();
+  private readonly durablePostings = new DurablePostings();
 
   constructor(private readonly dependencies: BitIndexDependencies<Doc>) { }
 
   public get size(): number {
-    return this.docs.size;
+    return this.docTable.size;
   }
 
   public get width(): number {
-    return this.docs.width;
+    return this.docTable.width;
   }
 
   public universe(): BitSet {
@@ -37,16 +37,16 @@ export class BitIndex<Doc> {
     return this.algebra.empty();
   }
 
-  public docsFrom(bitset: BitSet): readonly Doc[] {
-    return this.algebra.docsFrom(bitset);
+  public docsFrom(bitSet: BitSet): readonly Doc[] {
+    return this.algebra.docsFrom(bitSet);
   }
 
   public bitSetFrom(posting: Posting): BitSet {
     return this.algebra.bitSetFrom(posting);
   }
 
-  public complementOf(bitset: BitSet): BitSet {
-    return this.algebra.complementOf(bitset);
+  public complementOf(bitSet: BitSet): BitSet {
+    return this.algebra.complementOf(bitSet);
   }
 
   public unionOf(postings: readonly Posting[]): BitSet {
@@ -54,13 +54,13 @@ export class BitIndex<Doc> {
   }
 
   public allDocs(): readonly Doc[] {
-    return this.docs.allDocs();
+    return this.docTable.allDocs();
   }
 
   public build(docs: readonly Doc[], minCapacity: number = docs.length): void {
-    this.docs.reset(docs.length, minCapacity);
+    this.docTable.reset(docs.length, minCapacity);
     this.algebra.reset();
-    this.draft.reset();
+    this.draftPostings.reset();
 
     for (let position = 0; position < docs.length; position += 1) {
       this.place(docs[position], position);
@@ -69,12 +69,12 @@ export class BitIndex<Doc> {
   }
 
   public add(docs: readonly Doc[]): string[] {
-    if (!this.docs.canFit(docs.length)) {
-      this.build(this.docs.liveDocs(), this.docs.size + docs.length);
+    if (!this.docTable.canFit(docs.length)) {
+      this.build(this.docTable.liveDocs(), this.docTable.size + docs.length);
     }
     return this.mutate(() => {
       const newTerms = new Set<string>();
-      const positions = this.docs.allocate(docs.length);
+      const positions = this.docTable.allocate(docs.length);
 
       docs.forEach((doc, i) => {
         for (const term of this.place(doc, positions[i])) {
@@ -85,25 +85,25 @@ export class BitIndex<Doc> {
     });
   }
 
-  public update(updates: readonly TermUpdate<Doc>[]): TermDelta {
-    return this.mutate(() => this.draft.applyUpdates(updates, doc => this.docs.findPosition(doc)));
+  public update(termUpdates: readonly TermUpdate<Doc>[]): TermDelta {
+    return this.mutate(() => this.draftPostings.applyUpdates(termUpdates, doc => this.docTable.findPosition(doc)));
   }
 
   public indexedTerms(): string[] {
-    return this.postings.terms();
+    return this.durablePostings.terms();
   }
 
   public findPosting(term: string): Posting | undefined {
-    return this.postings.findPosting(term);
+    return this.durablePostings.findPosting(term);
   }
 
   private place(doc: Doc, position: number): string[] {
-    this.docs.place(doc, position);
+    this.docTable.place(doc, position);
     this.algebra.occupy(position);
     const newTerms: string[] = [];
 
     for (const term of this.dependencies.getTerms(doc)) {
-      if (this.draft.add(this.dependencies.stringInterner.intern(term), position)) {
+      if (this.draftPostings.add(this.dependencies.stringInterner.intern(term), position)) {
         newTerms.push(term);
       }
     }
@@ -111,7 +111,7 @@ export class BitIndex<Doc> {
   }
 
   private mutate<T>(apply: () => T): T {
-    this.draft.hydrateFrom(this.postings);
+    this.draftPostings.hydrateFrom(this.durablePostings);
     const result = apply();
 
     this.materialize();
@@ -119,7 +119,7 @@ export class BitIndex<Doc> {
   }
 
   private materialize(): void {
-    this.postings.materializeFrom(this.draft.entries(), this.docs.width);
-    this.draft.reset();
+    this.durablePostings.materializeFrom(this.draftPostings.entries(), this.docTable.width);
+    this.draftPostings.reset();
   }
 }

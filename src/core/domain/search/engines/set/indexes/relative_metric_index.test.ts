@@ -9,27 +9,27 @@ function createDoc(name: string, metrics: Partial<Record<Metric, number>>): Doc 
   return { name, metrics };
 }
 
-const wide = createDoc("wide", { width: 1_920, height: 1_080 });
-const tall = createDoc("tall", { width: 720, height: 1_280 });
-const square = createDoc("square", { width: 1_080, height: 1_080 });
-const docs = [wide, tall, square];
+const wideDoc = createDoc("wide", { width: 1_920, height: 1_080 });
+const tallDoc = createDoc("tall", { width: 720, height: 1_280 });
+const squareDoc = createDoc("square", { width: 1_080, height: 1_080 });
+const docs = [wideDoc, tallDoc, squareDoc];
 
 const metrics: Metric[] = ["width", "height"];
-const getMetric = (item: Doc, metric: Metric): number => item.metrics[metric] ?? 0;
+const getMetric = (doc: Doc, metric: Metric): number => doc.metrics[metric] ?? 0;
 
-function createComparison(metric: Metric, operator: MetricComparison["operator"], rightHandMetric: Metric): MetricComparison {
-  return { metric, operator, value: 0, rightHandMetric, isRelative: true, isTautological: false } as MetricComparison;
+function createComparison(metric: Metric, metricComparator: MetricComparison["comparator"], rightHandMetric: Metric): MetricComparison {
+  return { metric, comparator: metricComparator, value: 0, rightHandMetric, isRelative: true, isTautological: false } as MetricComparison;
 }
 
 function getSortedNames(set: ReadonlySet<Doc>): string[] {
-  return [...set].map(item => item.name).sort();
+  return [...set].map(doc => doc.name).sort();
 }
 
 function createIndex(): RelativeMetricIndex<Doc> {
-  const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
+  const relativeMetricIndex = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
-  index.build(new Set(docs));
-  return index;
+  relativeMetricIndex.build(new Set(docs));
+  return relativeMetricIndex;
 }
 
 describe("RelativeMetricIndex", () => {
@@ -47,10 +47,10 @@ describe("RelativeMetricIndex", () => {
     });
 
     test("resolves reverse-ordered inequality to the same docs (aliasing)", () => {
-      const index = createIndex();
+      const relativeMetricIndex = createIndex();
 
-      expect(getSortedNames(index.getDocs(createComparison("height", ":<", "width")))).toEqual(["wide"]);
-      expect(getSortedNames(index.getDocs(createComparison("height", ":>", "width")))).toEqual(["tall"]);
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("height", ":<", "width")))).toEqual(["wide"]);
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("height", ":>", "width")))).toEqual(["tall"]);
     });
 
     test("resolves reverse-ordered equality to the same docs (aliasing)", () => {
@@ -58,84 +58,84 @@ describe("RelativeMetricIndex", () => {
     });
 
     test("shares one Set object between reverse-ordered keys rather than duplicating it", () => {
-      const index = createIndex();
+      const relativeMetricIndex = createIndex();
 
-      expect(index.getDocs(createComparison("width", ":>", "height"))).toBe(index.getDocs(createComparison("height", ":<", "width")));
-      expect(index.getDocs(createComparison("width", ":<", "height"))).toBe(index.getDocs(createComparison("height", ":>", "width")));
-      expect(index.getDocs(createComparison("width", ":", "height"))).toBe(index.getDocs(createComparison("height", ":", "width")));
+      expect(relativeMetricIndex.getDocs(createComparison("width", ":>", "height"))).toBe(relativeMetricIndex.getDocs(createComparison("height", ":<", "width")));
+      expect(relativeMetricIndex.getDocs(createComparison("width", ":<", "height"))).toBe(relativeMetricIndex.getDocs(createComparison("height", ":>", "width")));
+      expect(relativeMetricIndex.getDocs(createComparison("width", ":", "height"))).toBe(relativeMetricIndex.getDocs(createComparison("height", ":", "width")));
     });
 
     test("partitions the collection between the three sets of a pair (trichotomy)", () => {
-      const index = createIndex();
-      const greater = index.getDocs(createComparison("width", ":>", "height"));
-      const less = index.getDocs(createComparison("width", ":<", "height"));
-      const equal = index.getDocs(createComparison("width", ":", "height"));
+      const relativeMetricIndex = createIndex();
+      const greater = relativeMetricIndex.getDocs(createComparison("width", ":>", "height"));
+      const less = relativeMetricIndex.getDocs(createComparison("width", ":<", "height"));
+      const equal = relativeMetricIndex.getDocs(createComparison("width", ":", "height"));
 
       expect(greater.size + less.size + equal.size).toBe(docs.length);
     });
 
     test("resolves to nothing before build", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
+      const relativeMetricIndex = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
-      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual([]);
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))).toEqual([]);
     });
   });
 
   describe("ensureBuilt", () => {
     test("builds once and is idempotent", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
+      const relativeMetricIndex = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
-      index.ensureBuilt(new Set(docs));
-      index.ensureBuilt(new Set());
-      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
+      relativeMetricIndex.ensureBuilt(new Set(docs));
+      relativeMetricIndex.ensureBuilt(new Set());
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
     });
   });
 
   describe("add", () => {
     test("does nothing before build, leaving the doc to a later build", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
-      const extra = createDoc("extra", { width: 4_000, height: 100 });
+      const relativeMetricIndex = new RelativeMetricIndex<Doc>(metrics, getMetric);
+      const doc = createDoc("extra", { width: 4_000, height: 100 });
 
-      index.add(extra);
-      index.build(new Set([...docs, extra]));
-      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
+      relativeMetricIndex.add(doc);
+      relativeMetricIndex.build(new Set([...docs, doc]));
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
     });
 
     test("places the doc into the right partition after build", () => {
-      const index = createIndex();
-      const extra = createDoc("extra", { width: 100, height: 4_000 });
+      const relativeMetricIndex = createIndex();
+      const doc = createDoc("extra", { width: 100, height: 4_000 });
 
-      index.add(extra);
-      expect(getSortedNames(index.getDocs(createComparison("width", ":<", "height")))).toEqual(["extra", "tall"]);
+      relativeMetricIndex.add(doc);
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":<", "height")))).toEqual(["extra", "tall"]);
     });
   });
 
   describe("invalidate", () => {
     test("makes ensureBuilt rebuild from the given docs", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
-      const extra = createDoc("extra", { width: 4_000, height: 100 });
+      const relativeMetricIndex = new RelativeMetricIndex<Doc>(metrics, getMetric);
+      const doc = createDoc("extra", { width: 4_000, height: 100 });
 
-      index.ensureBuilt(new Set(docs));
-      index.invalidate();
-      index.ensureBuilt(new Set([...docs, extra]));
-      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
+      relativeMetricIndex.ensureBuilt(new Set(docs));
+      relativeMetricIndex.invalidate();
+      relativeMetricIndex.ensureBuilt(new Set([...docs, doc]));
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))).toEqual(["extra", "wide"]);
     });
   });
 
   describe("remove", () => {
     test("does nothing before build", () => {
-      const index = new RelativeMetricIndex<Doc>(metrics, getMetric);
+      const relativeMetricIndex = new RelativeMetricIndex<Doc>(metrics, getMetric);
 
-      index.remove(wide);
-      index.build(new Set(docs));
-      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
+      relativeMetricIndex.remove(wideDoc);
+      relativeMetricIndex.build(new Set(docs));
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))).toEqual(["wide"]);
     });
 
     test("drops the doc from every partition", () => {
-      const index = createIndex();
+      const relativeMetricIndex = createIndex();
 
-      index.remove(wide);
-      expect(getSortedNames(index.getDocs(createComparison("width", ":>", "height")))).toEqual([]);
+      relativeMetricIndex.remove(wideDoc);
+      expect(getSortedNames(relativeMetricIndex.getDocs(createComparison("width", ":>", "height")))).toEqual([]);
     });
   });
 });

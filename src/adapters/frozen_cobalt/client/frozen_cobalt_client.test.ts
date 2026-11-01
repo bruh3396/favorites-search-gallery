@@ -25,16 +25,16 @@ function answerEach(keys: string[], result: (key: string) => unknown): Record<st
   return Object.fromEntries(keys.map(key => [key, result(key)]));
 }
 
-function setup(fetch: Fetch = createFetch(), identity?: FrozenCobaltIdentity): Setup {
+function setup(fetch: Fetch = createFetch(), frozenCobaltIdentity?: FrozenCobaltIdentity): Setup {
   const scheduler = new MemoryScheduler();
-  return { frozenCobaltClient: new FrozenCobaltClient({ origin: ORIGIN, identity }, { scheduler, fetch }), scheduler, fetch };
+  return { frozenCobaltClient: new FrozenCobaltClient({ origin: ORIGIN, identity: frozenCobaltIdentity }, { scheduler, fetch }), scheduler, fetch };
 }
 
 function readRequests(fetch: Fetch): { url: string; body: unknown }[] {
   return fetch.mock.calls.map(([url, init]) => ({ url, body: JSON.parse(String(init.body)) as unknown }));
 }
 
-async function fetchPostResult({ frozenCobaltClient, scheduler }: Setup, postId: string): Promise<unknown> {
+async function fetchPostResult({ frozenCobaltClient, scheduler }: Pick<Setup, "frozenCobaltClient" | "scheduler">, postId: string): Promise<unknown> {
   const fetched = frozenCobaltClient.fetchPost(postId);
 
   fetched.catch(() => { });
@@ -64,43 +64,31 @@ describe("FrozenCobaltClient", () => {
   });
 
   test("rejects a post whose result is malformed", async() => {
-    const bundle = setup(createFetch(() => ({ 1: { status: "ok", post: { id: "1" } } })));
-
-    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
+    await expect(fetchPostResult(setup(createFetch(() => ({ 1: { status: "ok", post: { id: "1" } } }))), "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
   });
 
   test("rejects a post the response leaves out as malformed", async() => {
-    const bundle = setup(createFetch(() => ({})));
-
-    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
+    await expect(fetchPostResult(setup(createFetch(() => ({}))), "1")).rejects.toMatchObject({ reason: "malformed", subject: "1" });
   });
 
   test("rejects a response that isn't a JSON object as malformed", async() => {
-    const bundle = setup(vi.fn(() => Promise.resolve(new Response("<html>"))));
-
-    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({
+    await expect(fetchPostResult(setup(vi.fn(() => Promise.resolve(new Response("<html>")))), "1")).rejects.toMatchObject({
       reason: "malformed",
       cause: expect.any(SyntaxError)
     });
   });
 
   test("rejects a response that is JSON but not an object as malformed", async() => {
-    const bundle = setup(vi.fn(() => Promise.resolve(new Response("[]"))));
-
-    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "malformed" });
+    await expect(fetchPostResult(setup(vi.fn(() => Promise.resolve(new Response("[]")))), "1")).rejects.toMatchObject({ reason: "malformed" });
   });
 
   test("rejects with the status when the server answers with an error", async() => {
-    const bundle = setup(vi.fn(() => Promise.resolve(new Response("", { status: 503 }))));
-
-    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "http", status: 503 });
+    await expect(fetchPostResult(setup(vi.fn(() => Promise.resolve(new Response("", { status: 503 })))), "1")).rejects.toMatchObject({ reason: "http", status: 503 });
   });
 
   test("rejects as a network failure when the request can't be sent", async() => {
     const offline = new TypeError("Failed to fetch");
-    const bundle = setup(vi.fn(() => Promise.reject(offline)));
-
-    await expect(fetchPostResult(bundle, "1")).rejects.toMatchObject({ reason: "network", cause: offline });
+    await expect(fetchPostResult(setup(vi.fn(() => Promise.reject(offline))), "1")).rejects.toMatchObject({ reason: "network", cause: offline });
   });
 
   test("aborts a request that outlasts the timeout", async() => {

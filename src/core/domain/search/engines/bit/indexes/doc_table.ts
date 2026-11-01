@@ -46,14 +46,14 @@ export class DocTable<Doc> {
   }
 
   public liveDocs(): readonly Doc[] {
-    const live: Doc[] = [];
+    const liveDocs: Doc[] = [];
 
     for (const doc of this.docs) {
       if (doc !== undefined) {
-        live.push(doc);
+        liveDocs.push(doc);
       }
     }
-    return live;
+    return liveDocs;
   }
 
   public allDocs(): readonly Doc[] {

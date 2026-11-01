@@ -2,25 +2,25 @@ import { SearchTerm } from "@/core/domain/search/terms/search_term";
 
 type SearchExpressionNode =
   | { readonly kind: "term"; readonly term: SearchTerm }
-  | { readonly kind: "and"; readonly children: SearchExpression[] }
-  | { readonly kind: "or"; readonly children: SearchExpression[] }
-  | { readonly kind: "not"; readonly child: SearchExpression };
+  | { readonly kind: "and"; readonly childExpressions: SearchExpression[] }
+  | { readonly kind: "or"; readonly childExpressions: SearchExpression[] }
+  | { readonly kind: "not"; readonly childExpression: SearchExpression };
 
 export class SearchExpression {
-  public static term(term: SearchTerm): SearchExpression {
-    return new SearchExpression({ kind: "term", term });
+  public static term(searchTerm: SearchTerm): SearchExpression {
+    return new SearchExpression({ kind: "term", term: searchTerm });
   }
 
-  public static and(children: SearchExpression[]): SearchExpression {
-    return new SearchExpression({ kind: "and", children });
+  public static and(childSearchExpressions: SearchExpression[]): SearchExpression {
+    return new SearchExpression({ kind: "and", childExpressions: childSearchExpressions });
   }
 
-  public static or(children: SearchExpression[]): SearchExpression {
-    return new SearchExpression({ kind: "or", children });
+  public static or(childSearchExpressions: SearchExpression[]): SearchExpression {
+    return new SearchExpression({ kind: "or", childExpressions: childSearchExpressions });
   }
 
-  public static not(child: SearchExpression): SearchExpression {
-    return new SearchExpression({ kind: "not", child });
+  public static not(childSearchExpression: SearchExpression): SearchExpression {
+    return new SearchExpression({ kind: "not", childExpression: childSearchExpression });
   }
 
   constructor(public readonly node: SearchExpressionNode) { }

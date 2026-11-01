@@ -1,9 +1,10 @@
-import { Fruit, fruitDocs } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit, fruits } from "@/core/domain/search/testing/fruit_corpus";
 import { MetricSearchable, Searchable } from "@/core/domain/search/searchable";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { StringInterner } from "@/core/utils/string/string_interner";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 
 type MetricDoc = MetricSearchable & { name: string };
 
@@ -13,43 +14,43 @@ interface TaggedItem extends Searchable {
 }
 
 function createFruitEngine(): BitSearchEngine<Fruit> {
-  return new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, fruitDocs);
+  return new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, fruits);
 }
 
 function searchFruitNames(query: string): string[] {
-  return createFruitEngine().search(parseSearchExpression(query)).map(doc => doc.name).sort();
+  return createFruitEngine().search(parseSearchExpression(query)).map(fruit => fruit.name).sort();
 }
 
 function createTaggedItem(id: string, ...tags: string[]): TaggedItem {
   return { id, tags: new Set(tags) };
 }
 
-function createTaggedEngine(items: TaggedItem[]): BitSearchEngine<TaggedItem> {
-  return new BitSearchEngine<TaggedItem>({ getTerms: item => item.tags, getMetric: () => 0, stringInterner: new StringInterner() }, items);
+function createTaggedEngine(taggedItems: TaggedItem[]): BitSearchEngine<TaggedItem> {
+  return new BitSearchEngine<TaggedItem>({ getTerms: taggedItem => taggedItem.tags, getMetric: () => 0, stringInterner: new StringInterner() }, taggedItems);
 }
 
-function getSortedIds(items: readonly TaggedItem[]): string[] {
-  return items.map(item => item.id).sort();
+function getSortedIds(taggedItems: readonly TaggedItem[]): string[] {
+  return taggedItems.map(taggedItem => taggedItem.id).sort();
 }
 
-function createCorrection(item: TaggedItem, ...newTags: string[]): { doc: TaggedItem; oldTerms: Set<string>; newTerms: Set<string> } {
-  const oldTerms = new Set(item.tags);
+function createCorrection(taggedItem: TaggedItem, ...newTags: string[]): TermUpdate<TaggedItem> {
+  const oldTerms = new Set(taggedItem.tags);
 
-  item.tags.clear();
-  newTags.forEach(tag => item.tags.add(tag));
-  return { doc: item, oldTerms, newTerms: item.tags };
+  taggedItem.tags.clear();
+  newTags.forEach(tag => taggedItem.tags.add(tag));
+  return { doc: taggedItem, oldTerms, newTerms: taggedItem.tags };
 }
 
 function createMetricDoc(name: string, metrics: Record<string, number>, tags: string[] = []): MetricDoc {
   return { name, tags: new Set(tags), getMetric: (metric): number => metrics[metric] ?? 0 };
 }
 
-function createMetricEngine(docs: MetricDoc[]): BitSearchEngine<MetricDoc> {
-  return new BitSearchEngine<MetricDoc>({ getTerms: doc => doc.tags, getMetric: (doc, metric) => doc.getMetric(metric), stringInterner: new StringInterner() }, docs);
+function createMetricEngine(metricDocs: MetricDoc[]): BitSearchEngine<MetricDoc> {
+  return new BitSearchEngine<MetricDoc>({ getTerms: metricDoc => metricDoc.tags, getMetric: (metricDoc, metric) => metricDoc.getMetric(metric), stringInterner: new StringInterner() }, metricDocs);
 }
 
-function searchMetricNames(engine: BitSearchEngine<MetricDoc>, query: string): string[] {
-  return engine.search(parseSearchExpression(query)).map(doc => doc.name).sort();
+function searchMetricNames(bitSearchEngine: BitSearchEngine<MetricDoc>, query: string): string[] {
+  return bitSearchEngine.search(parseSearchExpression(query)).map(metricDoc => metricDoc.name).sort();
 }
 
 function createIdEngine(): BitSearchEngine<MetricDoc> {
@@ -63,13 +64,13 @@ function createIdEngine(): BitSearchEngine<MetricDoc> {
 describe("BitSearchEngine", () => {
   describe("search", () => {
     test("returns the whole corpus for an empty query", () => {
-      expect(createFruitEngine().search(parseSearchExpression(""))).toEqual(fruitDocs);
+      expect(createFruitEngine().search(parseSearchExpression(""))).toEqual(fruits);
     });
 
     test("returns results in corpus order", () => {
-      const result = createFruitEngine().search(parseSearchExpression("sweet"));
+      const matchedFruits = createFruitEngine().search(parseSearchExpression("sweet"));
 
-      expect(result.map(doc => doc.name)).toEqual(fruitDocs.filter(doc => doc.tags.has("sweet")).map(doc => doc.name));
+      expect(matchedFruits.map(fruit => fruit.name)).toEqual(fruits.filter(fruit => fruit.tags.has("sweet")).map(fruit => fruit.name));
     });
 
     test("returns nothing when a required term matches no doc", () => {
@@ -78,36 +79,36 @@ describe("BitSearchEngine", () => {
 
     test("handles negated OR across a multi-word corpus without phantom matches", () => {
       interface Item extends Searchable { id: number }
-      const posts: Item[] = Array.from({ length: 100 }, (_, i) => ({
+      const postItems: Item[] = Array.from({ length: 100 }, (_, i) => ({
         id: i,
         tags: new Set([`n${i}`, i % 2 === 0 ? "even" : "odd", i < 50 ? "low" : "high"])
       }));
-      const engine = new BitSearchEngine<Item>({ getTerms: post => post.tags, getMetric: () => 0, stringInterner: new StringInterner() }, posts);
-      const result = engine.search(parseSearchExpression("low ( even ~ -high )"));
+      const bitSearchEngine = new BitSearchEngine<Item>({ getTerms: item => item.tags, getMetric: () => 0, stringInterner: new StringInterner() }, postItems);
+      const items = bitSearchEngine.search(parseSearchExpression("low ( even ~ -high )"));
 
-      expect(result.map(p => p.id)).toEqual(posts.filter(p => p.id < 50).map(p => p.id));
-      expect(result.every(p => p.id < 50)).toBe(true);
+      expect(items.map(item => item.id)).toEqual(postItems.filter(item => item.id < 50).map(item => item.id));
+      expect(items.every(item => item.id < 50)).toBe(true);
     });
 
     test("filters results to the given candidate subset", () => {
-      const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
-      const engine = createTaggedEngine(items);
+      const taggedItems = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
+      const bitSearchEngine = createTaggedEngine(taggedItems);
 
-      expect(getSortedIds(engine.search(parseSearchExpression("apple"), [items[0], items[2]]))).toEqual(["1", "3"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apple"), [taggedItems[0], taggedItems[2]]))).toEqual(["1", "3"]);
     });
 
     test("returns only the candidate subset for an empty query", () => {
-      const items = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
-      const engine = createTaggedEngine(items);
+      const taggedItems = [createTaggedItem("1", "apple"), createTaggedItem("2", "apple"), createTaggedItem("3", "apple")];
+      const bitSearchEngine = createTaggedEngine(taggedItems);
 
-      expect(getSortedIds(engine.search(parseSearchExpression(""), [items[0], items[2]]))).toEqual(["1", "3"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression(""), [taggedItems[0], taggedItems[2]]))).toEqual(["1", "3"]);
     });
 
     test("returns the same docs for a repeated relative metric query", () => {
-      const engine = createMetricEngine([createMetricDoc("wide", { width: 20, height: 10 }), createMetricDoc("tall", { width: 10, height: 20 })]);
+      const bitSearchEngine = createMetricEngine([createMetricDoc("wide", { width: 20, height: 10 }), createMetricDoc("tall", { width: 10, height: 20 })]);
 
-      expect(searchMetricNames(engine, "width:>height")).toEqual(["wide"]);
-      expect(searchMetricNames(engine, "width:>height")).toEqual(["wide"]);
+      expect(searchMetricNames(bitSearchEngine, "width:>height")).toEqual(["wide"]);
+      expect(searchMetricNames(bitSearchEngine, "width:>height")).toEqual(["wide"]);
     });
 
     test("matches a bare numeric token to the favorite with that id", () => {
@@ -146,126 +147,126 @@ describe("BitSearchEngine", () => {
 
   describe("index", () => {
     test("re-indexes the corpus", () => {
-      const engine = new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, []);
+      const bitSearchEngine = new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, []);
 
-      expect(engine.search(parseSearchExpression("red"))).toEqual([]);
-      engine.rebuild(fruitDocs);
-      expect(engine.search(parseSearchExpression("red")).length).toBeGreaterThan(0);
+      expect(bitSearchEngine.search(parseSearchExpression("red"))).toEqual([]);
+      bitSearchEngine.rebuild(fruits);
+      expect(bitSearchEngine.search(parseSearchExpression("red")).length).toBeGreaterThan(0);
     });
   });
 
   describe("add", () => {
     test("makes new docs matchable, including by wildcard and empty query", () => {
-      const engine = createTaggedEngine([createTaggedItem("1", "apple")]);
+      const bitSearchEngine = createTaggedEngine([createTaggedItem("1", "apple")]);
 
-      engine.add([createTaggedItem("2", "cot")]);
-      expect(getSortedIds(engine.search(parseSearchExpression("cot")))).toEqual(["2"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("( c* ~ a* )")))).toEqual(["1", "2"]);
-      expect(engine.search(parseSearchExpression("")).length).toBe(2);
+      bitSearchEngine.add([createTaggedItem("2", "cot")]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("cot")))).toEqual(["2"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("( c* ~ a* )")))).toEqual(["1", "2"]);
+      expect(bitSearchEngine.search(parseSearchExpression("")).length).toBe(2);
     });
 
     test("grows capacity when adds exceed the initial width", () => {
-      const engine = createTaggedEngine([createTaggedItem("seed", "tag")]);
+      const bitSearchEngine = createTaggedEngine([createTaggedItem("seed", "tag")]);
 
       for (let i = 0; i < 200; i += 1) {
-        engine.add([createTaggedItem(`x${i}`, "tag")]);
+        bitSearchEngine.add([createTaggedItem(`x${i}`, "tag")]);
       }
-      expect(engine.search(parseSearchExpression("tag")).length).toBe(201);
-      expect(engine.search(parseSearchExpression("")).length).toBe(201);
+      expect(bitSearchEngine.search(parseSearchExpression("tag")).length).toBe(201);
+      expect(bitSearchEngine.search(parseSearchExpression("")).length).toBe(201);
     });
 
     test("stays correct when a term crosses the sparse/dense threshold", () => {
-      const engine = createTaggedEngine([]);
-      const items = Array.from({ length: 5 }, (_, i) => createTaggedItem(String(i), "shared"));
+      const bitSearchEngine = createTaggedEngine([]);
+      const taggedItems = Array.from({ length: 5 }, (_, i) => createTaggedItem(String(i), "shared"));
 
-      items.forEach((item, i) => {
-        engine.add([item]);
-        expect(getSortedIds(engine.search(parseSearchExpression("shared")))).toEqual(items.slice(0, i + 1).map(it => it.id).sort());
+      taggedItems.forEach((taggedItem, i) => {
+        bitSearchEngine.add([taggedItem]);
+        expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("shared")))).toEqual(taggedItems.slice(0, i + 1).map(taggedItem => taggedItem.id).sort());
       });
     });
 
     test("makes added docs visible to a relative metric query already answered", () => {
-      const engine = createMetricEngine([createMetricDoc("wide", { width: 20, height: 10 })]);
+      const bitSearchEngine = createMetricEngine([createMetricDoc("wide", { width: 20, height: 10 })]);
 
-      expect(searchMetricNames(engine, "width:>height")).toEqual(["wide"]);
-      engine.add([createMetricDoc("wider", { width: 30, height: 10 })]);
-      expect(searchMetricNames(engine, "width:>height")).toEqual(["wide", "wider"]);
+      expect(searchMetricNames(bitSearchEngine, "width:>height")).toEqual(["wide"]);
+      bitSearchEngine.add([createMetricDoc("wider", { width: 30, height: 10 })]);
+      expect(searchMetricNames(bitSearchEngine, "width:>height")).toEqual(["wide", "wider"]);
     });
   });
 
   describe("update", () => {
     test("reflects corrected tags for a doc", () => {
-      const target = createTaggedItem("1", "ct");
-      const engine = createTaggedEngine([target]);
+      const taggedItem = createTaggedItem("1", "ct");
+      const bitSearchEngine = createTaggedEngine([taggedItem]);
 
-      engine.update([createCorrection(target, "apple")]);
+      bitSearchEngine.update([createCorrection(taggedItem, "apple")]);
 
-      expect(engine.search(parseSearchExpression("ct"))).toEqual([]);
-      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1"]);
+      expect(bitSearchEngine.search(parseSearchExpression("ct"))).toEqual([]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apple")))).toEqual(["1"]);
     });
 
     test("drops a term no doc references and adds a new one, keeping wildcards correct", () => {
-      const a = createTaggedItem("1", "apple", "unique");
-      const b = createTaggedItem("2", "apple");
-      const engine = createTaggedEngine([a, b]);
+      const firstTaggedItem = createTaggedItem("1", "apple", "unique");
+      const secondTaggedItem = createTaggedItem("2", "apple");
+      const bitSearchEngine = createTaggedEngine([firstTaggedItem, secondTaggedItem]);
 
-      engine.update([createCorrection(a, "apple", "fresh")]);
+      bitSearchEngine.update([createCorrection(firstTaggedItem, "apple", "fresh")]);
 
-      expect(engine.search(parseSearchExpression("unique"))).toEqual([]);
-      expect(engine.search(parseSearchExpression("uni*"))).toEqual([]);
-      expect(getSortedIds(engine.search(parseSearchExpression("fresh")))).toEqual(["1"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("fre*")))).toEqual(["1"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1", "2"]);
+      expect(bitSearchEngine.search(parseSearchExpression("unique"))).toEqual([]);
+      expect(bitSearchEngine.search(parseSearchExpression("uni*"))).toEqual([]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("fresh")))).toEqual(["1"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("fre*")))).toEqual(["1"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apple")))).toEqual(["1", "2"]);
     });
 
     test("still resolves a wildcard over terms it left untouched", () => {
-      const banana = createTaggedItem("3", "banana");
-      const engine = createTaggedEngine([
+      const bananaTaggedItem = createTaggedItem("3", "banana");
+      const bitSearchEngine = createTaggedEngine([
         createTaggedItem("1", "apple"),
         createTaggedItem("2", "apricot"),
-        banana
+        bananaTaggedItem
       ]);
 
-      engine.update([createCorrection(banana, "cherry")]);
+      bitSearchEngine.update([createCorrection(bananaTaggedItem, "cherry")]);
 
-      expect(getSortedIds(engine.search(parseSearchExpression("ap*")))).toEqual(["1", "2"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("apricot")))).toEqual(["2"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("cherry")))).toEqual(["3"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("ap*")))).toEqual(["1", "2"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apple")))).toEqual(["1"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apricot")))).toEqual(["2"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("cherry")))).toEqual(["3"]);
     });
 
     test("keeps wildcard resolution intact across a batch of docs sharing a term", () => {
-      const engine = createTaggedEngine([]);
-      const shared = Array.from({ length: 20 }, (_, i) => createTaggedItem(String(i), "shared"));
+      const bitSearchEngine = createTaggedEngine([]);
+      const sharedTaggedItems = Array.from({ length: 20 }, (_, i) => createTaggedItem(String(i), "shared"));
 
-      engine.add(shared);
-      expect(getSortedIds(engine.search(parseSearchExpression("shar*"))).length).toBe(20);
+      bitSearchEngine.add(sharedTaggedItems);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("shar*"))).length).toBe(20);
 
-      engine.update(shared.map(item => createCorrection(item, "moved")));
-      expect(engine.search(parseSearchExpression("shar*"))).toEqual([]);
-      expect(engine.search(parseSearchExpression("shared"))).toEqual([]);
-      expect(getSortedIds(engine.search(parseSearchExpression("moved"))).length).toBe(20);
+      bitSearchEngine.update(sharedTaggedItems.map(taggedItem => createCorrection(taggedItem, "moved")));
+      expect(bitSearchEngine.search(parseSearchExpression("shar*"))).toEqual([]);
+      expect(bitSearchEngine.search(parseSearchExpression("shared"))).toEqual([]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("moved"))).length).toBe(20);
     });
 
     test("ignores old terms that were never indexed", () => {
-      const target = createTaggedItem("1", "apple");
-      const engine = createTaggedEngine([target, createTaggedItem("2", "apple")]);
+      const taggedItem = createTaggedItem("1", "apple");
+      const bitSearchEngine = createTaggedEngine([taggedItem, createTaggedItem("2", "apple")]);
 
-      engine.update([{ doc: target, oldTerms: new Set(["apple", "ghost"]), newTerms: new Set(["apple", "fresh"]) }]);
+      bitSearchEngine.update([{ doc: taggedItem, oldTerms: new Set(["apple", "ghost"]), newTerms: new Set(["apple", "fresh"]) }]);
 
-      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1", "2"]);
-      expect(getSortedIds(engine.search(parseSearchExpression("fresh")))).toEqual(["1"]);
-      expect(engine.search(parseSearchExpression("ghost"))).toEqual([]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apple")))).toEqual(["1", "2"]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("fresh")))).toEqual(["1"]);
+      expect(bitSearchEngine.search(parseSearchExpression("ghost"))).toEqual([]);
     });
 
     test("ignores docs that were never indexed", () => {
-      const engine = createTaggedEngine([createTaggedItem("1", "apple")]);
-      const stranger = createTaggedItem("stranger", "apple");
+      const bitSearchEngine = createTaggedEngine([createTaggedItem("1", "apple")]);
+      const strangerTaggedItem = createTaggedItem("stranger", "apple");
 
-      engine.update([createCorrection(stranger, "fresh")]);
+      bitSearchEngine.update([createCorrection(strangerTaggedItem, "fresh")]);
 
-      expect(engine.search(parseSearchExpression("fresh"))).toEqual([]);
-      expect(getSortedIds(engine.search(parseSearchExpression("apple")))).toEqual(["1"]);
+      expect(bitSearchEngine.search(parseSearchExpression("fresh"))).toEqual([]);
+      expect(getSortedIds(bitSearchEngine.search(parseSearchExpression("apple")))).toEqual(["1"]);
     });
   });
 });

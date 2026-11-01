@@ -17,11 +17,11 @@ const PROBE_ORDERS: Record<MediaKind, readonly Rule34CdnFileExtension[]> = {
 };
 
 export class Rule34CdnExtensionProber {
-  private readonly limiter: RateLimiter;
+  private readonly rateLimiter: RateLimiter;
   private readonly probes = new Map<string, Promise<Rule34CdnFileExtension | null>>();
 
   constructor(private readonly dependencies: Rule34CdnExtensionProberDependencies) {
-    this.limiter = new RateLimiter(PROBE_RATE_LIMIT, dependencies.scheduler);
+    this.rateLimiter = new RateLimiter(PROBE_RATE_LIMIT, dependencies.scheduler);
   }
 
   public probe(locator: string, guess: MediaKind): Promise<Rule34CdnFileExtension | null> {
@@ -41,17 +41,17 @@ export class Rule34CdnExtensionProber {
     return probe;
   }
 
-  private async findExtension(locator: string, order: readonly Rule34CdnFileExtension[]): Promise<Rule34CdnFileExtension | null> {
-    for (const extension of order) {
-      if (await this.exists(buildRule34CdnFileUrl(locator, extension))) {
-        return extension;
+  private async findExtension(locator: string, rule34CdnFileExtensions: readonly Rule34CdnFileExtension[]): Promise<Rule34CdnFileExtension | null> {
+    for (const rule34CdnFileExtension of rule34CdnFileExtensions) {
+      if (await this.exists(buildRule34CdnFileUrl(locator, rule34CdnFileExtension))) {
+        return rule34CdnFileExtension;
       }
     }
     return null;
   }
 
   private exists(url: string): Promise<boolean> {
-    return this.limiter.run(() => this.dependencies.fetch(url, { method: "HEAD" }))
+    return this.rateLimiter.run(() => this.dependencies.fetch(url, { method: "HEAD" }))
       .then(response => response.ok, () => false);
   }
 }

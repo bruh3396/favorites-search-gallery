@@ -48,20 +48,20 @@ export class IndexedDbClient {
 
   private async migrateAndOpen(): Promise<IDBDatabase> {
     const { databaseName, legacyDatabaseNames } = this.configuration;
-    const migration = await prepareLegacyMigration(databaseName, legacyDatabaseNames, this.mintLegacyMedia);
-    const database = await this.openWithMigration(migration);
+    const legacyMigration = await prepareLegacyMigration(databaseName, legacyDatabaseNames, this.mintLegacyMedia);
+    const database = await this.openWithMigration(legacyMigration);
 
-    migration.deleteLegacyDatabases();
+    legacyMigration.deleteLegacyDatabases();
     return database;
   }
 
-  private openWithMigration(migration: LegacyMigration): Promise<IDBDatabase> {
+  private openWithMigration(legacyMigration: LegacyMigration): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.configuration.databaseName, VERSION);
 
       request.onupgradeneeded = (): void => {
         createStores(request.result);
-        migration.writeToNewDatabase(request.transaction!);
+        legacyMigration.writeToNewDatabase(request.transaction!);
       };
       request.onsuccess = (): void => {
         request.result.onversionchange = (): void => {

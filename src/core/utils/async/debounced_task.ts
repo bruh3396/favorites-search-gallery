@@ -7,11 +7,11 @@ export type DebouncedTask<Args extends unknown[]> = {
 };
 
 export function createDebouncedTask<Args extends unknown[]>(
-  configuration: DebouncerConfiguration,
+  debouncerConfiguration: DebouncerConfiguration,
   scheduler: Pick<Scheduler, "schedule">,
   task: (...args: Args) => void
 ): DebouncedTask<Args> {
-  const debouncer = new Debouncer(configuration, scheduler);
+  const debouncer = new Debouncer(debouncerConfiguration, scheduler);
   return Object.assign(
     (...args: Args): void => {
       debouncer.debounce(() => task(...args));

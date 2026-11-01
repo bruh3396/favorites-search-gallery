@@ -3,7 +3,7 @@ import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 
 export interface Rule34HostPageConfiguration {
-  readonly mode: AppMode;
+  readonly appMode: AppMode;
 }
 
 export interface Rule34HostPageDependencies {
@@ -14,7 +14,7 @@ export interface Rule34HostPageDependencies {
   page: { claimContent: () => HTMLElement };
 }
 
-const CLAIMS: Record<AppMode, (dependencies: Rule34HostPageDependencies) => HTMLElement> = {
+const CLAIMS: Record<AppMode, (rule34HostPageDependencies: Rule34HostPageDependencies) => HTMLElement> = {
   favorites: ({ rule34Document, page }): HTMLElement => {
     rule34Document.clearNativePage();
     return page.claimContent();
@@ -47,6 +47,6 @@ export class Rule34HostPage implements HostPage {
   }
 
   public claimContent(): HTMLElement {
-    return CLAIMS[this.configuration.mode](this.dependencies);
+    return CLAIMS[this.configuration.appMode](this.dependencies);
   }
 }

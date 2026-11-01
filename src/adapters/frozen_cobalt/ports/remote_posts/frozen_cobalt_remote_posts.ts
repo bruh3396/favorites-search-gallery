@@ -40,17 +40,17 @@ export class FrozenCobaltRemotePosts implements RemotePosts {
   }
 
   private async fetchOnce(postId: string): Promise<CategorizedPost> {
-    const result = await this.dependencies.frozenCobaltClient.fetchPost(postId);
+    const frozenCobaltPostResult = await this.dependencies.frozenCobaltClient.fetchPost(postId);
 
-    switch (result.status) {
+    switch (frozenCobaltPostResult.status) {
       case "ok":
-        return decodeFrozenCobaltPost(result.post, this.dependencies.mintMedia);
+        return decodeFrozenCobaltPost(frozenCobaltPostResult.post, this.dependencies.mintMedia);
       case "deleted":
         throw new PostUnavailableError(postId);
       case "retry":
         throw new FrozenCobaltError("retry", { subject: postId });
       default:
-        throw new UnreachableError(result);
+        throw new UnreachableError(frozenCobaltPostResult);
     }
   }
 }

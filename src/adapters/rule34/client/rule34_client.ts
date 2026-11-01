@@ -42,8 +42,8 @@ export class Rule34Client {
     if (!this.dependencies.rule34Document.isFirstFavoritesPage()) {
       return null;
     }
-    const favorites = parseRule34FavoritesPage(document, this.dependencies.mintMedia);
-    return favorites.length > 0 ? favorites : null;
+    const favoritePosts = parseRule34FavoritesPage(document, this.dependencies.mintMedia);
+    return favoritePosts.length > 0 ? favoritePosts : null;
   }
 
   public readPostListPage(pageIndex: number): Post[] {
@@ -89,9 +89,9 @@ export class Rule34Client {
     return running;
   }
 
-  private keepPaginator(pageIndex: number, page: Rule34PostListPage): Post[] {
-    this.dependencies.rule34Document.keepPaginator(pageIndex, page.paginator);
-    return page.posts;
+  private keepPaginator(pageIndex: number, rule34PostListPage: Rule34PostListPage): Post[] {
+    this.dependencies.rule34Document.keepPaginator(pageIndex, rule34PostListPage.paginator);
+    return rule34PostListPage.posts;
   }
 
   private async fetchHtml(url: string): Promise<string> {

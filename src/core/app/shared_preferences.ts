@@ -15,7 +15,7 @@ export function createSharedPreferences(storedValueStorage: StoredValueStorage, 
   return {
     ...sharedPreferences,
     colorScheme: new KeyedStoredValue({ key: "colorScheme", defaultValue: colorScheme }, {
-      storage: { get: () => colorScheme, set: (_key, value) => hostPage.setColorScheme(value as ColorScheme) }
+      storedValueStorage: { get: () => colorScheme, set: (_key, value) => hostPage.setColorScheme(value as ColorScheme) }
     })
   };
 }

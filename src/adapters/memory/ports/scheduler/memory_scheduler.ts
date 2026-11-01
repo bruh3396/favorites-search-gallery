@@ -7,7 +7,7 @@ interface ScheduledTask {
 
 export class MemoryScheduler implements Scheduler {
   private time: number;
-  private scheduled: ScheduledTask[] = [];
+  private scheduledTasks: ScheduledTask[] = [];
 
   constructor(startAt = 0) {
     this.time = startAt;
@@ -20,9 +20,9 @@ export class MemoryScheduler implements Scheduler {
   public schedule(task: () => void, delay: number): () => void {
     const entry = { task, dueAt: this.time + delay };
 
-    this.scheduled.push(entry);
+    this.scheduledTasks.push(entry);
     return (): void => {
-      this.scheduled = this.scheduled.filter(scheduled => scheduled !== entry);
+      this.scheduledTasks = this.scheduledTasks.filter(scheduledTask => scheduledTask !== entry);
     };
   }
 
@@ -37,19 +37,19 @@ export class MemoryScheduler implements Scheduler {
   public advance(duration: number): void {
     const end = this.time + duration;
 
-    for (let next = this.nextDue(end); next !== undefined; next = this.nextDue(end)) {
-      this.scheduled = this.scheduled.filter(scheduled => scheduled !== next);
-      this.time = next.dueAt;
-      next.task();
+    for (let nextScheduledTask = this.nextDue(end); nextScheduledTask !== undefined; nextScheduledTask = this.nextDue(end)) {
+      this.scheduledTasks = this.scheduledTasks.filter(scheduledTask => scheduledTask !== nextScheduledTask);
+      this.time = nextScheduledTask.dueAt;
+      nextScheduledTask.task();
     }
     this.time = end;
   }
 
   private nextDue(end: number): ScheduledTask | undefined {
-    return this.scheduled
-      .filter(scheduled => scheduled.dueAt <= end)
+    return this.scheduledTasks
+      .filter(scheduledTask => scheduledTask.dueAt <= end)
       .reduce<ScheduledTask | undefined>(
-        (earliest, scheduled) => (earliest === undefined || scheduled.dueAt < earliest.dueAt ? scheduled : earliest),
+        (earliestScheduledTask, scheduledTask) => (earliestScheduledTask === undefined || scheduledTask.dueAt < earliestScheduledTask.dueAt ? scheduledTask : earliestScheduledTask),
         undefined
       );
   }

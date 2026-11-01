@@ -6,7 +6,7 @@ export const COLOR_SCHEMES = ["light", "dark"] as const;
 export type ColorScheme = (typeof COLOR_SCHEMES)[number];
 
 export interface HostEnvironment {
-  readonly mode: AppMode;
+  readonly appMode: AppMode;
   readonly favoritesOwnerId: string;
   readonly ownsFavorites: boolean;
   readonly blacklistedTags: readonly string[];

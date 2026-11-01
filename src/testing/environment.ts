@@ -3,7 +3,7 @@ import { Environment } from "@/core/boundary/environment";
 export function createEnvironment(overrides: Partial<Environment> = {}): Environment {
   return {
     version: "0",
-    mode: "favorites",
+    appMode: "favorites",
     device: "desktop",
     pointer: "hover",
     canvasBudget: "full",

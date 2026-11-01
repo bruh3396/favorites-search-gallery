@@ -8,7 +8,7 @@ type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type FetchMock = ReturnType<typeof vi.fn<Fetch>>;
 
 interface Setup {
-  actions: Rule34FavoriteActions;
+  rule34FavoriteActions: Rule34FavoriteActions;
   fetch: FetchMock;
   scheduler: MemoryScheduler;
 }
@@ -16,8 +16,8 @@ interface Setup {
 function setup(respond: Fetch = (): Promise<Response> => Promise.resolve(new Response("3"))): Setup {
   const fetch = vi.fn<Fetch>(respond);
   const scheduler = new MemoryScheduler();
-  const actions = new Rule34FavoriteActions({ fetch, scheduler, randomSource: new MemoryRandomSource([1]) });
-  return { actions, fetch, scheduler };
+  const rule34FavoriteActions = new Rule34FavoriteActions({ fetch, scheduler, randomSource: new MemoryRandomSource([1]) });
+  return { rule34FavoriteActions, fetch, scheduler };
 }
 
 function addFavoriteUrl(postId: string): string {
@@ -38,9 +38,9 @@ function readRequestedUrls(fetch: FetchMock): string[] {
 
 describe("Rule34FavoriteActions", () => {
   test("upvotes the post, favorites it, and reads the site's answer when adding", async() => {
-    const { actions, fetch } = setup();
+    const { rule34FavoriteActions, fetch } = setup();
 
-    expect(await actions.add("7")).toBe("added");
+    expect(await rule34FavoriteActions.add("7")).toBe("added");
     expect(readRequestedUrls(fetch)).toEqual([postVoteUrl("7"), addFavoriteUrl("7")]);
   });
 
@@ -51,31 +51,31 @@ describe("Rule34FavoriteActions", () => {
     ["3", "added"],
     ["?", "error"]
   ])("reads the site's add answer %s as %s", async(siteAnswer, answer) => {
-    const { actions } = setup(() => Promise.resolve(new Response(siteAnswer)));
+    const { rule34FavoriteActions } = setup(() => Promise.resolve(new Response(siteAnswer)));
 
-    expect(await actions.add("7")).toBe(answer);
+    expect(await rule34FavoriteActions.add("7")).toBe(answer);
   });
 
   test("ignores a failed upvote when adding", async() => {
-    const { actions } = setup(url => (
+    const { rule34FavoriteActions } = setup(url => (
       url === postVoteUrl("7") ? Promise.reject(new TypeError("offline")) : Promise.resolve(new Response("3"))
     ));
 
-    expect(await actions.add("7")).toBe("added");
+    expect(await rule34FavoriteActions.add("7")).toBe("added");
   });
 
   test("unfavorites the post when removing", async() => {
-    const { actions, fetch } = setup();
+    const { rule34FavoriteActions, fetch } = setup();
 
-    expect(await actions.remove("8")).toBe(true);
+    expect(await rule34FavoriteActions.remove("8")).toBe(true);
     expect(readRequestedUrls(fetch)).toEqual([removeFavoriteUrl("8")]);
   });
 
   test("retries a remove that hits a network failure", async() => {
-    const { actions, fetch, scheduler } = setup();
+    const { rule34FavoriteActions, fetch, scheduler } = setup();
 
     fetch.mockRejectedValueOnce(new TypeError("offline"));
-    const removed = actions.remove("8");
+    const removed = rule34FavoriteActions.remove("8");
 
     await advanceAndSettle(scheduler, 1_000);
     expect(await removed).toBe(true);
@@ -83,11 +83,11 @@ describe("Rule34FavoriteActions", () => {
   });
 
   test("cancels a post's waiting add when the post is removed", async() => {
-    const { actions, fetch, scheduler } = setup();
-    const first = actions.add("1");
-    const second = actions.add("2");
+    const { rule34FavoriteActions, fetch, scheduler } = setup();
+    const first = rule34FavoriteActions.add("1");
+    const second = rule34FavoriteActions.add("2");
 
-    await actions.remove("2");
+    await rule34FavoriteActions.remove("2");
     await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe("added");
     expect(await second).toBeNull();
@@ -95,11 +95,11 @@ describe("Rule34FavoriteActions", () => {
   });
 
   test("cancels a post's waiting remove when the post is added", async() => {
-    const { actions, fetch, scheduler } = setup();
-    const first = actions.remove("1");
-    const second = actions.remove("2");
+    const { rule34FavoriteActions, fetch, scheduler } = setup();
+    const first = rule34FavoriteActions.remove("1");
+    const second = rule34FavoriteActions.remove("2");
 
-    await actions.add("2");
+    await rule34FavoriteActions.add("2");
     await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe(true);
     expect(await second).toBe(false);
@@ -107,10 +107,10 @@ describe("Rule34FavoriteActions", () => {
   });
 
   test("ignores a second add of a post still waiting", async() => {
-    const { actions, fetch, scheduler } = setup();
-    const first = actions.add("1");
-    const waiting = actions.add("2");
-    const again = actions.add("2");
+    const { rule34FavoriteActions, fetch, scheduler } = setup();
+    const first = rule34FavoriteActions.add("1");
+    const waiting = rule34FavoriteActions.add("2");
+    const again = rule34FavoriteActions.add("2");
 
     await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe("added");

@@ -14,7 +14,7 @@ function createDoc(id: string, ...tags: string[]): Doc {
   return { id, tags };
 }
 
-const corpus: Doc[] = [
+const defaultDocs: Doc[] = [
   createDoc("banana", "banana"),
   createDoc("bandana", "bandana"),
   createDoc("cabana", "cabana"),
@@ -24,28 +24,28 @@ const corpus: Doc[] = [
 
 interface Harness {
   bitIndex: BitIndex<Doc>;
-  resolver: WildcardPostingResolver<Doc>;
+  wildcardPostingResolver: WildcardPostingResolver<Doc>;
   unions: number;
   resolveIds(pattern: string): string[];
 }
 
-function setup(docs: Doc[] = corpus): Harness {
-  const bitIndex = new BitIndex<Doc>({ getTerms: d => d.tags, stringInterner: new StringInterner() });
+function setup(docs: Doc[] = defaultDocs): Harness {
+  const bitIndex = new BitIndex<Doc>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(docs);
   const unionSpy = vi.spyOn(bitIndex, "unionOf");
-  const resolver = new WildcardPostingResolver({ bitIndex: bitIndex, stringInterner: new StringInterner() });
+  const wildcardPostingResolver = new WildcardPostingResolver({ bitIndex, stringInterner: new StringInterner() });
 
-  resolver.index(bitIndex.indexedTerms());
+  wildcardPostingResolver.index(bitIndex.indexedTerms());
   return {
     bitIndex,
-    resolver,
+    wildcardPostingResolver,
     get unions(): number {
       return unionSpy.mock.calls.length;
     },
     resolveIds(pattern: string): string[] {
-      const posting: Posting | undefined = resolver.resolve(parseWildcardSearchTerm(pattern));
-      return posting === undefined ? [] : bitIndex.docsFrom(posting.toBitSet(bitIndex.width)).map(d => d.id).sort();
+      const posting: Posting | undefined = wildcardPostingResolver.resolve(parseWildcardSearchTerm(pattern));
+      return posting === undefined ? [] : bitIndex.docsFrom(posting.toBitSet(bitIndex.width)).map(doc => doc.id).sort();
     }
   };
 }
@@ -73,49 +73,49 @@ describe("WildcardPostingResolver", () => {
     });
 
     test("skips resolver terms that have no posting in the index", () => {
-      const h = setup();
+      const harness = setup();
 
-      h.resolver.add("bang");
-      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      harness.wildcardPostingResolver.add("bang");
+      expect(harness.resolveIds("ban*")).toEqual(["banana", "bandana"]);
     });
 
     test("unions a pattern once and serves the same posting on repeat", () => {
-      const h = setup();
-      const term = parseWildcardSearchTerm("ban*");
-      const first = h.resolver.resolve(term);
-      const second = h.resolver.resolve(term);
+      const harness = setup();
+      const wildcardSearchTerm = parseWildcardSearchTerm("ban*");
+      const firstPosting = harness.wildcardPostingResolver.resolve(wildcardSearchTerm);
+      const secondPosting = harness.wildcardPostingResolver.resolve(wildcardSearchTerm);
 
-      expect(h.unions).toBe(1);
-      expect(second).toBe(first);
+      expect(harness.unions).toBe(1);
+      expect(secondPosting).toBe(firstPosting);
     });
 
     test("keys the cache per wildcard shape", () => {
-      const h = setup();
+      const harness = setup();
 
-      h.resolver.resolve(parseWildcardSearchTerm("ban*"));
-      h.resolver.resolve(parseWildcardSearchTerm("*ana"));
-      h.resolver.resolve(parseWildcardSearchTerm("*and*"));
-      expect(h.unions).toBe(3);
+      harness.wildcardPostingResolver.resolve(parseWildcardSearchTerm("ban*"));
+      harness.wildcardPostingResolver.resolve(parseWildcardSearchTerm("*ana"));
+      harness.wildcardPostingResolver.resolve(parseWildcardSearchTerm("*and*"));
+      expect(harness.unions).toBe(3);
     });
 
     test("caches the empty result without re-resolving", () => {
-      const h = setup();
-      const term = parseWildcardSearchTerm("zzz*");
+      const harness = setup();
+      const wildcardSearchTerm = parseWildcardSearchTerm("zzz*");
 
-      expect(h.resolver.resolve(term)).toBeUndefined();
-      expect(h.resolver.resolve(term)).toBeUndefined();
-      expect(h.unions).toBe(0);
+      expect(harness.wildcardPostingResolver.resolve(wildcardSearchTerm)).toBeUndefined();
+      expect(harness.wildcardPostingResolver.resolve(wildcardSearchTerm)).toBeUndefined();
+      expect(harness.unions).toBe(0);
     });
   });
 
   describe("index", () => {
     test("invalidates the cached union", () => {
-      const h = setup();
+      const harness = setup();
 
-      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
-      h.resolver.index(h.bitIndex.indexedTerms());
-      expect(h.resolveIds("ban*")).toEqual(["banana", "bandana"]);
-      expect(h.unions).toBe(2);
+      expect(harness.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      harness.wildcardPostingResolver.index(harness.bitIndex.indexedTerms());
+      expect(harness.resolveIds("ban*")).toEqual(["banana", "bandana"]);
+      expect(harness.unions).toBe(2);
     });
   });
 });

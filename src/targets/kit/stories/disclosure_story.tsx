@@ -7,10 +7,10 @@ import { Story } from "@/targets/kit/story";
 interface DisclosureState {
   readonly open: boolean;
   readonly disabled?: boolean;
-  readonly size?: ControlSize;
+  readonly controlSize?: ControlSize;
 }
 
-function variant(label: string, { open: initial, disabled = false, size }: DisclosureState): Story["variants"][number] {
+function variant(label: string, { open: initial, disabled = false, controlSize }: DisclosureState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
@@ -21,7 +21,7 @@ function variant(label: string, { open: initial, disabled = false, size }: Discl
           content={<p>Whatever the section holds.</p>}
           value={open}
           disabled={new Signal(disabled)}
-          size={size}
+          size={controlSize}
           onValueChange={next => {
             log(`Disclosure "${label}" → ${next}`);
             open.value = next;
@@ -39,6 +39,6 @@ export const DISCLOSURE_STORY: Story = {
     variant("Closed", { open: false }),
     variant("Open", { open: true }),
     variant("Disabled", { open: false, disabled: true }),
-    variant("Small open", { open: true, size: "small" })
+    variant("Small open", { open: true, controlSize: "small" })
   ]
 };

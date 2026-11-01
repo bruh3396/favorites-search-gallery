@@ -9,25 +9,25 @@ const meaninglessTerm = /^\**$/;
 
 export function parseSearchQuery<Doc>(query: string): SearchQuery<Doc> {
   const termGroups = parseTermGroups(query);
-  const andTerms = buildSearchTermGroup(termGroups.andTerms);
+  const searchTerms = buildSearchTermGroup(termGroups.andTerms);
   const orGroups = termGroups.orGroups.map(buildSearchTermGroup);
-  return normalizeSearchQuery<Doc>(andTerms, orGroups);
+  return normalizeSearchQuery<Doc>(searchTerms, orGroups);
 }
 
-export function normalizeSearchQuery<Doc>(andTerms: SearchTerm[], orGroups: SearchTerm[][]): SearchQuery<Doc> {
-  const flattenedAndTerms = [...andTerms];
+export function normalizeSearchQuery<Doc>(andSearchTerms: SearchTerm[], orGroups: SearchTerm[][]): SearchQuery<Doc> {
+  const flattenedAndSearchTerms = [...andSearchTerms];
   const multiTermOrGroups: SearchTerm[][] = [];
 
-  for (const orGroup of orGroups) {
-    const deduped = dedupe(orGroup);
+  for (const orGroupSearchTerms of orGroups) {
+    const dedupedSearchTerms = dedupe(orGroupSearchTerms);
 
-    if (deduped.length === 1) {
-      flattenedAndTerms.push(deduped[0]);
+    if (dedupedSearchTerms.length === 1) {
+      flattenedAndSearchTerms.push(dedupedSearchTerms[0]);
     } else {
-      multiTermOrGroups.push(sortSearchTermGroup(deduped));
+      multiTermOrGroups.push(sortSearchTermGroup(dedupedSearchTerms));
     }
   }
-  return new SearchQuery<Doc>(sortSearchTermGroup(dedupe(flattenedAndTerms)), multiTermOrGroups.sort((a, b) => a.length - b.length));
+  return new SearchQuery<Doc>(sortSearchTermGroup(dedupe(flattenedAndSearchTerms)), multiTermOrGroups.sort((a, b) => a.length - b.length));
 }
 
 export function parseTermGroups(normalized: string): { orGroups: string[][]; andTerms: string[] } {
@@ -39,13 +39,13 @@ export function buildSearchTermGroup(terms: string[]): SearchTerm[] {
   return terms.map(parseSearchTerm);
 }
 
-export function sortSearchTermGroup(terms: SearchTerm[]): SearchTerm[] {
-  return [...terms].sort((a, b) => a.cost - b.cost);
+export function sortSearchTermGroup(searchTerms: SearchTerm[]): SearchTerm[] {
+  return [...searchTerms].sort((a, b) => a.cost - b.cost);
 }
 
-function dedupe(terms: SearchTerm[]): SearchTerm[] {
+function dedupe(searchTerms: SearchTerm[]): SearchTerm[] {
   const seen = new Set<string>();
-  return terms.filter(term => !seen.has(term.literal) && seen.add(term.literal));
+  return searchTerms.filter(searchTerm => !seen.has(searchTerm.literal) && seen.add(searchTerm.literal));
 }
 
 function parseAndTerms(query: string): string[] {

@@ -8,48 +8,48 @@ function createSnippet(name: string, query = "apple"): Snippet {
 
 describe("MemoryLocalSnippets", () => {
   test("reads back what it wrote", async() => {
-    const snippets = new MemoryLocalSnippets();
+    const localSnippets = new MemoryLocalSnippets();
 
-    await snippets.setMany([createSnippet("fruits"), createSnippet("pets")]);
+    await localSnippets.setMany([createSnippet("fruits"), createSnippet("pets")]);
 
-    expect(await snippets.getAll()).toEqual([createSnippet("fruits"), createSnippet("pets")]);
+    expect(await localSnippets.getAll()).toEqual([createSnippet("fruits"), createSnippet("pets")]);
   });
 
   test("overwrites a snippet with the same name", async() => {
-    const snippets = new MemoryLocalSnippets();
+    const localSnippets = new MemoryLocalSnippets();
 
-    await snippets.setMany([createSnippet("fruits", "apple")]);
-    await snippets.setMany([createSnippet("fruits", "banana")]);
+    await localSnippets.setMany([createSnippet("fruits", "apple")]);
+    await localSnippets.setMany([createSnippet("fruits", "banana")]);
 
-    expect(await snippets.getAll()).toEqual([createSnippet("fruits", "banana")]);
+    expect(await localSnippets.getAll()).toEqual([createSnippet("fruits", "banana")]);
   });
 
   test("deletes snippets by name", async() => {
-    const snippets = new MemoryLocalSnippets();
+    const localSnippets = new MemoryLocalSnippets();
 
-    await snippets.setMany([createSnippet("fruits"), createSnippet("pets")]);
-    await snippets.deleteMany(["fruits", "missing"]);
+    await localSnippets.setMany([createSnippet("fruits"), createSnippet("pets")]);
+    await localSnippets.deleteMany(["fruits", "missing"]);
 
-    expect(await snippets.getAll()).toEqual([createSnippet("pets")]);
+    expect(await localSnippets.getAll()).toEqual([createSnippet("pets")]);
   });
 
   test("replaces every snippet", async() => {
-    const snippets = new MemoryLocalSnippets();
+    const localSnippets = new MemoryLocalSnippets();
 
-    await snippets.setMany([createSnippet("fruits")]);
-    await snippets.replaceAll([createSnippet("pets")]);
+    await localSnippets.setMany([createSnippet("fruits")]);
+    await localSnippets.replaceAll([createSnippet("pets")]);
 
-    expect(await snippets.getAll()).toEqual([createSnippet("pets")]);
+    expect(await localSnippets.getAll()).toEqual([createSnippet("pets")]);
   });
 
   test("is unaffected by mutating a snippet after writing or reading it", async() => {
-    const snippets = new MemoryLocalSnippets();
-    const written = createSnippet("fruits");
+    const localSnippets = new MemoryLocalSnippets();
+    const writtenSnippet = createSnippet("fruits");
 
-    await snippets.setMany([written]);
-    Object.assign(written, { query: "changed" });
-    Object.assign((await snippets.getAll())[0], { query: "changed" });
+    await localSnippets.setMany([writtenSnippet]);
+    Object.assign(writtenSnippet, { query: "changed" });
+    Object.assign((await localSnippets.getAll())[0], { query: "changed" });
 
-    expect(await snippets.getAll()).toEqual([createSnippet("fruits")]);
+    expect(await localSnippets.getAll()).toEqual([createSnippet("fruits")]);
   });
 });

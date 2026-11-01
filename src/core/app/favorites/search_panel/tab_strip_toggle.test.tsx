@@ -15,7 +15,7 @@ interface Setup {
 }
 
 function setup(): Setup {
-  const visible = new KeyedStoredValue({ key: "tabStripVisible", defaultValue: true }, { storage: new MemoryLocalKeyedValues() });
+  const visible = new KeyedStoredValue({ key: "tabStripVisible", defaultValue: true }, { storedValueStorage: new MemoryLocalKeyedValues() });
   const tabCount = new Signal(1);
   const element = render(document, () => <TabStripToggle visible={visible} tabCount={tabCount} />).result as HTMLButtonElement;
   return { element, visible, tabCount };

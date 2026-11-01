@@ -47,21 +47,21 @@ function readStores(transaction: IDBTransaction, storeNames: string[]): Promise<
   }));
 }
 
-async function writeDatabase(backup: DatabaseBackup): Promise<void> {
-  const open = indexedDB.open(backup.database, backup.version);
+async function writeDatabase(databaseBackup: DatabaseBackup): Promise<void> {
+  const open = indexedDB.open(databaseBackup.database, databaseBackup.version);
 
   open.onupgradeneeded = (): void => {
-    for (const [name, { keyPath, autoIncrement: isAutoIncrement }] of Object.entries(backup.stores)) {
+    for (const [name, { keyPath, autoIncrement: isAutoIncrement }] of Object.entries(databaseBackup.stores)) {
       open.result.createObjectStore(name, keyPath === null ? { autoIncrement: isAutoIncrement } : { keyPath, autoIncrement: isAutoIncrement });
     }
   };
   const db = await promised(open);
-  const storeNames = Object.keys(backup.stores);
+  const storeNames = Object.keys(databaseBackup.stores);
 
   if (storeNames.length > 0) {
     const transaction = db.transaction(storeNames, "readwrite");
 
-    for (const [name, { keyPath, rows }] of Object.entries(backup.stores)) {
+    for (const [name, { keyPath, rows }] of Object.entries(databaseBackup.stores)) {
       const store = transaction.objectStore(name);
 
       for (const [key, value] of rows) {
@@ -118,11 +118,11 @@ export async function importRealDatabases(): Promise<string> {
   if (picked === null) {
     return "Import cancelled.";
   }
-  const backups = Array.isArray(picked) ? picked : [picked];
+  const databaseBackups = Array.isArray(picked) ? picked : [picked];
 
   await deleteRealDatabases();
-  await Promise.all(backups.map(writeDatabase));
-  return `Imported ${backups.map(backup => backup.database).join(", ")}. Open your favorites page without &lab.`;
+  await Promise.all(databaseBackups.map(writeDatabase));
+  return `Imported ${databaseBackups.map(databaseBackup => databaseBackup.database).join(", ")}. Open your favorites page without &lab.`;
 }
 
 export function requestPurge(): void {

@@ -20,7 +20,7 @@ interface Tracker {
   track: (source: Source) => void;
 }
 
-let running: Tracker | null = null;
+let runningTracker: Tracker | null = null;
 let batchDepth = 0;
 const batchedEffects = new Set<Effect>();
 
@@ -37,7 +37,7 @@ export class Signal<T> implements Readable<T>, Source {
   constructor(private current: T) { }
 
   public get value(): T {
-    running?.track(this);
+    runningTracker?.track(this);
     return this.current;
   }
 
@@ -85,7 +85,7 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
   constructor(private readonly fn: () => T, private readonly equals: (previous: T, next: T) => boolean) { }
 
   public get value(): T {
-    running?.track(this);
+    runningTracker?.track(this);
     return this.peek();
   }
 
@@ -144,16 +144,16 @@ class Computed<T> implements Readable<T>, Source, Reader, Tracker {
 
   private compute(): T {
     const previousSources = this.sources;
-    const previous = running;
+    const previousTracker = runningTracker;
 
     this.sources = new Set();
     // eslint-disable-next-line consistent-this, @typescript-eslint/no-this-alias
-    running = this;
+    runningTracker = this;
 
     try {
       return this.fn();
     } finally {
-      running = previous;
+      runningTracker = previousTracker;
       this.release(previousSources);
     }
   }
@@ -204,11 +204,11 @@ class Effect implements Reader, Tracker {
       return;
     }
     const previousSources = this.sources;
-    const previous = running;
+    const previousTracker = runningTracker;
 
     this.sources = new Map();
     // eslint-disable-next-line consistent-this, @typescript-eslint/no-this-alias
-    running = this;
+    runningTracker = this;
     this.executing = true;
     this.hasRun = true;
 
@@ -216,7 +216,7 @@ class Effect implements Reader, Tracker {
       this.fn();
       this.recordVersions();
     } finally {
-      running = previous;
+      runningTracker = previousTracker;
       this.executing = false;
       this.release(previousSources);
     }
@@ -259,25 +259,25 @@ class Effect implements Reader, Tracker {
 }
 
 export function effect(fn: () => void): () => void {
-  const created = new Effect(fn);
-  const detach = onCleanup(() => created.dispose());
+  const createdEffect = new Effect(fn);
+  const detach = onCleanup(() => createdEffect.dispose());
 
-  created.run();
+  createdEffect.run();
   return () => {
     detach();
-    created.dispose();
+    createdEffect.dispose();
   };
 }
 
 export function untracked<T>(fn: () => T): T {
-  const previous = running;
+  const previousTracker = runningTracker;
 
-  running = null;
+  runningTracker = null;
 
   try {
     return fn();
   } finally {
-    running = previous;
+    runningTracker = previousTracker;
   }
 }
 

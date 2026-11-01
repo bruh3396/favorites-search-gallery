@@ -7,13 +7,13 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
-export function rescale(value: number, from: NumberRange, to: NumberRange): number {
-  return Math.round(to.min + (((value - from.min) / (from.max - from.min)) * (to.max - to.min)));
+export function rescale(value: number, fromNumberRange: NumberRange, toNumberRange: NumberRange): number {
+  return Math.round(toNumberRange.min + (((value - fromNumberRange.min) / (fromNumberRange.max - fromNumberRange.min)) * (toNumberRange.max - toNumberRange.min)));
 }
 
-export function rescaleGeometric(value: number, from: NumberRange, to: NumberRange): number {
-  const t = (value - from.min) / (from.max - from.min);
-  return Math.round(to.min * ((to.max / to.min) ** t));
+export function rescaleGeometric(value: number, fromNumberRange: NumberRange, toNumberRange: NumberRange): number {
+  const t = (value - fromNumberRange.min) / (fromNumberRange.max - fromNumberRange.min);
+  return Math.round(toNumberRange.min * ((toNumberRange.max / toNumberRange.min) ** t));
 }
 
 export function roundUpToMultiple(value: number, multiple: number): number {

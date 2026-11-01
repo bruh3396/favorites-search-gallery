@@ -15,20 +15,20 @@ function createItem(id: string, ...tags: string[]): Item {
 }
 
 function createEvaluator(items: Item[]): BitEvaluator<Item> {
-  const bitIndex = new BitIndex<Item>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
+  const bitIndex = new BitIndex<Item>({ getTerms: item => item.tags, stringInterner: new StringInterner() });
 
   bitIndex.build(items);
-  const metricIndex = new MetricBitIndex<Item>(doc => doc.id.length);
+  const metricBitIndex = new MetricBitIndex<Item>(item => item.id.length);
 
-  metricIndex.build(bitIndex.width, bitIndex.allDocs());
-  const wildcardResolver = new WildcardPostingResolver({ bitIndex: bitIndex, stringInterner: new StringInterner() });
+  metricBitIndex.build(bitIndex.width, bitIndex.allDocs());
+  const wildcardPostingResolver = new WildcardPostingResolver({ bitIndex, stringInterner: new StringInterner() });
 
-  wildcardResolver.index(bitIndex.indexedTerms());
-  const resolver = new PostingResolver(bitIndex, metricIndex, wildcardResolver);
-  return new BitEvaluator(bitIndex, resolver);
+  wildcardPostingResolver.index(bitIndex.indexedTerms());
+  const postingResolver = new PostingResolver(bitIndex, metricBitIndex, wildcardPostingResolver);
+  return new BitEvaluator(bitIndex, postingResolver);
 }
 
-const corpus: Item[] = [
+const items: Item[] = [
   createItem("1", "red", "sweet", "small"),
   createItem("2", "red", "sour", "big"),
   createItem("3", "green", "sweet", "big"),
@@ -37,7 +37,7 @@ const corpus: Item[] = [
 ];
 
 function evaluateIds(query: string): string[] {
-  return createEvaluator(corpus).evaluate(parseSearchExpression(query)).map(doc => doc.id).sort();
+  return createEvaluator(items).evaluate(parseSearchExpression(query)).map(item => item.id).sort();
 }
 
 describe("parseSearchExpression", () => {
@@ -60,9 +60,9 @@ describe("parseSearchExpression", () => {
 
   test("preserves a literal glued-parenthesis term", () => {
     const items = [createItem("a", "apple_(red)"), createItem("b", "banana")];
-    const evaluator = createEvaluator(items);
+    const bitEvaluator = createEvaluator(items);
 
-    expect(evaluator.evaluate(parseSearchExpression("apple_(red)")).map(d => d.id)).toEqual(["a"]);
+    expect(bitEvaluator.evaluate(parseSearchExpression("apple_(red)")).map(item => item.id)).toEqual(["a"]);
   });
 
   test("parses a ~ group as an OR", () => {
@@ -142,12 +142,12 @@ describe("parseSearchExpression", () => {
 
 describe("parseExclusions", () => {
   function evaluateExclusionIds(items: Item[], tags: readonly string[]): string[] {
-    const exclusions = parseExclusions(tags);
-    return exclusions === undefined ? [] : createEvaluator(items).evaluate(exclusions).map(doc => doc.id).sort();
+    const exclusionSearchExpression = parseExclusions(tags);
+    return exclusionSearchExpression === undefined ? [] : createEvaluator(items).evaluate(exclusionSearchExpression).map(item => item.id).sort();
   }
 
   test("excludes docs with any of the tags", () => {
-    expect(evaluateExclusionIds(corpus, ["RED", "blue"])).toEqual(["3", "4"]);
+    expect(evaluateExclusionIds(items, ["RED", "blue"])).toEqual(["3", "4"]);
   });
 
   test("excludes a tag literally instead of parsing it as syntax", () => {

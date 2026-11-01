@@ -16,9 +16,9 @@ interface FakeRemote {
 }
 
 interface FinderRun {
-  remote: FakeRemote;
+  fakeRemote: FakeRemote;
   localPostIds: string[];
-  firstPage?: Post[];
+  firstPagePosts?: Post[];
   minimumLocalRunLength?: number;
 }
 
@@ -45,19 +45,19 @@ function createFakeRemote(remotePostIds: string[]): FakeRemote {
   };
 }
 
-function createFinder(remote: FakeRemote, minimumLocalRunLength: number): Rule34NewFavoritesFinder {
+function createFinder(fakeRemote: FakeRemote, minimumLocalRunLength: number): Rule34NewFavoritesFinder {
   return new Rule34NewFavoritesFinder(
     { pageSize: PAGE_SIZE, minimumLocalRunLength, fetchDelay: NO_DELAY },
-    { fetch: remote.fetch, scheduler: { sleep: (): Promise<void> => Promise.resolve() } }
+    { fetch: fakeRemote.fetch, scheduler: { sleep: (): Promise<void> => Promise.resolve() } }
   );
 }
 
-async function runFinder({ remote, localPostIds, firstPage, minimumLocalRunLength = MINIMUM_LOCAL_RUN_LENGTH }: FinderRun): Promise<string[]> {
-  return (await createFinder(remote, minimumLocalRunLength).findNew(localPostIds, firstPage)).map(post => post.id);
+async function runFinder({ fakeRemote, localPostIds, firstPagePosts, minimumLocalRunLength = MINIMUM_LOCAL_RUN_LENGTH }: FinderRun): Promise<string[]> {
+  return (await createFinder(fakeRemote, minimumLocalRunLength).findNew(localPostIds, firstPagePosts)).map(post => post.id);
 }
 
 function findNewPostIds(localPostIds: string[], remotePostIds: string[]): Promise<string[]> {
-  return runFinder({ remote: createFakeRemote(remotePostIds), localPostIds });
+  return runFinder({ fakeRemote: createFakeRemote(remotePostIds), localPostIds });
 }
 
 describe("Rule34NewFavoritesFinder", () => {
@@ -121,10 +121,10 @@ describe("Rule34NewFavoritesFinder", () => {
   });
 
   test("reads one more page to learn that a full last page ends the remote's list", async() => {
-    const remote = createFakeRemote(["new0", "new1", "local0", "local1", "local2"]);
+    const fakeRemote = createFakeRemote(["new0", "new1", "local0", "local1", "local2"]);
 
-    expect(await runFinder({ remote, localPostIds: createLocalPostIds(3) })).toEqual(["new0", "new1"]);
-    expect(remote.requested).toEqual([0, 1]);
+    expect(await runFinder({ fakeRemote, localPostIds: createLocalPostIds(3) })).toEqual(["new0", "new1"]);
+    expect(fakeRemote.requested).toEqual([0, 1]);
   });
 
   test("finds nothing new when every favorite was removed", async() => {
@@ -143,64 +143,64 @@ describe("Rule34NewFavoritesFinder", () => {
 
   test("makes no request when the page on screen shows nothing new", async() => {
     const localPostIds = createLocalPostIds(23);
-    const remote = createFakeRemote(localPostIds);
+    const fakeRemote = createFakeRemote(localPostIds);
 
-    expect(await runFinder({ remote, localPostIds, firstPage: createPagePosts(localPostIds, 0) })).toEqual([]);
-    expect(remote.requested).toEqual([]);
+    expect(await runFinder({ fakeRemote, localPostIds, firstPagePosts: createPagePosts(localPostIds, 0) })).toEqual([]);
+    expect(fakeRemote.requested).toEqual([]);
   });
 
   test("fetches the pages after the page on screen", async() => {
     const localPostIds = createLocalPostIds(23);
     const remotePostIds = [...createNewPostIds(7), ...localPostIds];
-    const remote = createFakeRemote(remotePostIds);
+    const fakeRemote = createFakeRemote(remotePostIds);
 
-    expect(await runFinder({ remote, localPostIds, firstPage: createPagePosts(remotePostIds, 0) })).toEqual(createNewPostIds(7));
-    expect(remote.requested).toEqual([1, 2]);
+    expect(await runFinder({ fakeRemote, localPostIds, firstPagePosts: createPagePosts(remotePostIds, 0) })).toEqual(createNewPostIds(7));
+    expect(fakeRemote.requested).toEqual([1, 2]);
   });
 
   test("reads past a page of local favorites when the minimum local run length is longer than a page", async() => {
     const localPostIds = createLocalPostIds(23);
     const refavoritedPostIds = ["local10", "local11", "local12", "local13", "local14", "local15"];
     const remotePostIds = [...refavoritedPostIds, ...localPostIds.filter(id => !refavoritedPostIds.includes(id))];
-    const remote = createFakeRemote(remotePostIds);
+    const fakeRemote = createFakeRemote(remotePostIds);
 
-    expect(await runFinder({ remote, localPostIds, minimumLocalRunLength: 8 })).toEqual(refavoritedPostIds);
-    expect(remote.requested).toEqual([0, 1, 2]);
+    expect(await runFinder({ fakeRemote, localPostIds, minimumLocalRunLength: 8 })).toEqual(refavoritedPostIds);
+    expect(fakeRemote.requested).toEqual([0, 1, 2]);
   });
 
   test("stops inside the first page when the minimum local run length is shorter than a page", async() => {
     const localPostIds = createLocalPostIds(23);
-    const remote = createFakeRemote(["new0", ...localPostIds]);
+    const fakeRemote = createFakeRemote(["new0", ...localPostIds]);
 
-    expect(await runFinder({ remote, localPostIds, minimumLocalRunLength: 2 })).toEqual(["new0"]);
-    expect(remote.requested).toEqual([0]);
+    expect(await runFinder({ fakeRemote, localPostIds, minimumLocalRunLength: 2 })).toEqual(["new0"]);
+    expect(fakeRemote.requested).toEqual([0]);
   });
 
   test("passes on a failed request", async() => {
     const refused = new Error("refused");
-    const remote: FakeRemote = { requested: [], fetch: () => Promise.reject(refused) };
+    const fakeRemote: FakeRemote = { requested: [], fetch: () => Promise.reject(refused) };
 
-    await expect(runFinder({ remote, localPostIds: createLocalPostIds(23) })).rejects.toBe(refused);
+    await expect(runFinder({ fakeRemote, localPostIds: createLocalPostIds(23) })).rejects.toBe(refused);
   });
 
   test("waits the fetch delay before every page after the first", async() => {
     const localPostIds = createLocalPostIds(23);
-    const remote = createFakeRemote([...createNewPostIds(12), ...localPostIds]);
+    const fakeRemote = createFakeRemote([...createNewPostIds(12), ...localPostIds]);
     const scheduler = new MemoryScheduler();
-    const finder = new Rule34NewFavoritesFinder(
+    const rule34NewFavoritesFinder = new Rule34NewFavoritesFinder(
       { pageSize: PAGE_SIZE, minimumLocalRunLength: MINIMUM_LOCAL_RUN_LENGTH, fetchDelay: FETCH_DELAY },
-      { fetch: remote.fetch, scheduler }
+      { fetch: fakeRemote.fetch, scheduler }
     );
-    const found = finder.findNew(localPostIds);
+    const found = rule34NewFavoritesFinder.findNew(localPostIds);
 
     await advanceAndSettle(scheduler, 0);
-    expect(remote.requested).toEqual([0]);
+    expect(fakeRemote.requested).toEqual([0]);
 
     await advanceAndSettle(scheduler, FETCH_DELAY - 1);
-    expect(remote.requested).toEqual([0]);
+    expect(fakeRemote.requested).toEqual([0]);
 
     await advanceAndSettle(scheduler, 1);
-    expect(remote.requested).toEqual([0, 1]);
+    expect(fakeRemote.requested).toEqual([0, 1]);
 
     await advanceAndSettle(scheduler, FETCH_DELAY * 10);
     expect((await found).map(post => post.id)).toEqual(createNewPostIds(12));

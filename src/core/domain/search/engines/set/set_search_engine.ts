@@ -1,53 +1,53 @@
-import { METRICS } from "@/core/domain/search/metric";
 import { SearchEngine, SearchEngineDependencies } from "@/core/domain/search/engines/search_engine";
-import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
+import { METRICS } from "@/core/domain/search/metric";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { SetEvaluator } from "@/core/domain/search/engines/set/logic/set_evaluator";
+import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
 
 export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
-  private readonly termIndex: InvertedIndex<Doc>;
+  private readonly invertedIndex: InvertedIndex<Doc>;
   private readonly metricIndex: MetricIndex<Doc>;
   private readonly relativeMetricIndex: RelativeMetricIndex<Doc>;
   private readonly positionIndex: PositionIndex<Doc>;
-  private readonly wildcardResolver: WildcardDocResolver<Doc>;
-  private readonly setEvaluator: SetEvaluator<Doc>;
+  private readonly wildcardDocResolver: WildcardDocResolver<Doc>;
+  private readonly evaluator: SetEvaluator<Doc>;
 
   constructor({ getTerms, getMetric, stringInterner }: SearchEngineDependencies<Doc>, docs: readonly Doc[] = []) {
-    this.termIndex = new InvertedIndex<Doc>(getTerms);
+    this.invertedIndex = new InvertedIndex<Doc>(getTerms);
     this.metricIndex = new MetricIndex<Doc>([...METRICS], getMetric);
     this.relativeMetricIndex = new RelativeMetricIndex<Doc>([...METRICS], getMetric);
     this.positionIndex = new PositionIndex<Doc>();
-    this.wildcardResolver = new WildcardDocResolver<Doc>({ termIndex: this.termIndex, stringInterner });
-    this.setEvaluator = new SetEvaluator<Doc>(
-      this.termIndex,
+    this.wildcardDocResolver = new WildcardDocResolver<Doc>({ invertedIndex: this.invertedIndex, stringInterner });
+    this.evaluator = new SetEvaluator<Doc>(
+      this.invertedIndex,
       new DocResolver<Doc>({
-        termIndex: this.termIndex,
+        invertedIndex: this.invertedIndex,
         metricIndex: this.metricIndex,
         relativeMetricIndex: this.relativeMetricIndex,
         positionIndex: this.positionIndex,
-        wildcardResolver: this.wildcardResolver
+        wildcardDocResolver: this.wildcardDocResolver
       })
     );
     this.rebuild(docs);
   }
 
-  public search(expression: SearchExpression, candidates?: readonly Doc[]): readonly Doc[] {
-    return this.setEvaluator.evaluate(expression, candidates);
+  public search(searchExpression: SearchExpression, candidateDocs?: readonly Doc[]): readonly Doc[] {
+    return this.evaluator.evaluate(searchExpression, candidateDocs);
   }
 
   public countDocsWithTerm(term: string): number {
-    return this.termIndex.docsForTerm(term)?.size ?? 0;
+    return this.invertedIndex.docsForTerm(term)?.size ?? 0;
   }
 
   public rebuild(docs: readonly Doc[]): void {
-    this.termIndex.addDocs(docs);
-    this.wildcardResolver.index(this.termIndex.indexedTerms());
+    this.invertedIndex.addDocs(docs);
+    this.wildcardDocResolver.index(this.invertedIndex.indexedTerms());
     this.positionIndex.build(docs);
     this.metricIndex.invalidate();
     this.relativeMetricIndex.invalidate();
@@ -55,17 +55,17 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
 
   public add(docs: readonly Doc[]): void {
     for (const doc of docs) {
-      this.termIndex.addDoc(doc).forEach(term => this.wildcardResolver.add(term));
+      this.invertedIndex.addDoc(doc).forEach(term => this.wildcardDocResolver.add(term));
       this.positionIndex.add(doc);
       this.metricIndex.add(doc);
       this.relativeMetricIndex.add(doc);
     }
   }
 
-  public update(updates: readonly TermUpdate<Doc>[]): void {
-    const { added, removed } = this.termIndex.updateDocs(updates);
+  public update(termUpdates: readonly TermUpdate<Doc>[]): void {
+    const { added, removed } = this.invertedIndex.updateDocs(termUpdates);
 
-    added.forEach(term => this.wildcardResolver.add(term));
-    removed.forEach(term => this.wildcardResolver.remove(term));
+    added.forEach(term => this.wildcardDocResolver.add(term));
+    removed.forEach(term => this.wildcardDocResolver.remove(term));
   }
 }

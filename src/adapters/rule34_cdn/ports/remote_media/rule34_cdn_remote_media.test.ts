@@ -9,7 +9,7 @@ const BITMAP = { close: (): void => undefined } as ImageBitmap;
 const IMAGE = document.createElement("img");
 const FILE = new Blob(["video"], { type: "video/mp4" });
 
-interface Rule34Cdn {
+interface FakeRule34CdnClient {
   resolveMedia: ReturnType<typeof vi.fn<(media: Media) => Promise<Media>>>;
   previewUrl: ReturnType<typeof vi.fn<(media: Media) => string>>;
   originalUrl: ReturnType<typeof vi.fn<(media: Media) => Promise<string>>>;
@@ -19,8 +19,8 @@ interface Rule34Cdn {
   probeDurationSeconds: ReturnType<typeof vi.fn<(media: Media) => Promise<number>>>;
 }
 
-function setup(): { remoteMedia: Rule34CdnRemoteMedia; rule34CdnClient: Rule34Cdn } {
-  const rule34CdnClient: Rule34Cdn = {
+function setup(): { remoteMedia: Rule34CdnRemoteMedia; rule34CdnClient: FakeRule34CdnClient } {
+  const rule34CdnClient: FakeRule34CdnClient = {
     resolveMedia: vi.fn(() => Promise.resolve(RESOLVED)),
     previewUrl: vi.fn((media: Media) => `https://preview/${media.locator}`),
     originalUrl: vi.fn(() => Promise.resolve(ORIGINAL)),

@@ -20,13 +20,13 @@ const RETRY_BASE_DELAY = 1_000;
 export class Rule34RemotePostList implements RemotePostList {
   private readonly searchQuery: string;
   private readonly retry: Retry;
-  private readonly initialPage: PostListPage;
+  private readonly initialPostListPage: PostListPage;
 
   constructor(private readonly dependencies: Rule34RemotePostListDependencies) {
     this.searchQuery = dependencies.rule34Document.readSearchQuery();
     const initialIndex = dependencies.rule34Document.readPostListPageIndex();
 
-    this.initialPage = { index: initialIndex, posts: dependencies.rule34Client.readPostListPage(initialIndex) };
+    this.initialPostListPage = { index: initialIndex, posts: dependencies.rule34Client.readPostListPage(initialIndex) };
     this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
       scheduler: dependencies.scheduler,
       randomSource: dependencies.randomSource,
@@ -35,12 +35,12 @@ export class Rule34RemotePostList implements RemotePostList {
   }
 
   public readInitialPage(): PostListPage {
-    return this.initialPage;
+    return this.initialPostListPage;
   }
 
   public fetchPage(index: number): Promise<PostListPage> {
-    if (index === this.initialPage.index) {
-      return Promise.resolve(this.initialPage);
+    if (index === this.initialPostListPage.index) {
+      return Promise.resolve(this.initialPostListPage);
     }
     return this.retry.retry(() => this.dependencies.rule34Client.fetchPostListPage(this.searchQuery, index))
       .then(posts => ({ index, posts }));

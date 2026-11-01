@@ -18,8 +18,8 @@ describe("isRetryableRule34Error", () => {
   test.each<[Rule34ErrorReason, boolean]>([
     ["network", true],
     ["malformed", false]
-  ])("classifies %s as retryable: %s", (reason, expected) => {
-    expect(isRetryableRule34Error(new Rule34Error(reason))).toBe(expected);
+  ])("classifies %s as retryable: %s", (rule34ErrorReason, expected) => {
+    expect(isRetryableRule34Error(new Rule34Error(rule34ErrorReason))).toBe(expected);
   });
 
   test.each([

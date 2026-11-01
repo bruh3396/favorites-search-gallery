@@ -30,10 +30,10 @@ function createStoredValue<T>({ id, initial, log }: { id: string; initial: T; lo
   };
 }
 
-function renderAll(ownerDocument: Document, descriptors: readonly SettingDescriptor[]): HTMLElement {
+function renderAll(ownerDocument: Document, settingDescriptors: readonly SettingDescriptor[]): HTMLElement {
   return render(ownerDocument, () => (
     <div>
-      {descriptors.map(descriptor => <Setting descriptor={descriptor} controlSize="small" stepperScheduler={SCHEDULER} />)}
+      {settingDescriptors.map(settingDescriptor => <Setting descriptor={settingDescriptor} controlSize="small" stepperScheduler={SCHEDULER} />)}
     </div>
   )).result;
 }
@@ -62,13 +62,13 @@ function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
 }
 
 function renderDependent(ownerDocument: Document, log: Log): HTMLElement {
-  const infiniteScroll = createStoredValue({ id: "infiniteScroll", initial: false, log });
+  const infiniteScrollSettingPreference = createStoredValue({ id: "infiniteScroll", initial: false, log });
   return renderAll(ownerDocument, [
-    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScroll },
+    { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScrollSettingPreference },
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      disabled: infiniteScroll
+      disabled: infiniteScrollSettingPreference
     }
   ]);
 }

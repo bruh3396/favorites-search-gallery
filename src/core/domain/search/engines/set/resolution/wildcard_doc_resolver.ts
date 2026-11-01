@@ -3,23 +3,23 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardResolver } from "@/core/domain/search/indexes/wildcard_resolver";
 
 export interface WildcardDocResolverDependencies<Doc> {
-  termIndex: InvertedIndex<Doc>;
+  invertedIndex: InvertedIndex<Doc>;
   stringInterner: StringInterner;
 }
 
 export class WildcardDocResolver<Doc> extends WildcardResolver<ReadonlySet<Doc>> {
-  private readonly termIndex: InvertedIndex<Doc>;
+  private readonly invertedIndex: InvertedIndex<Doc>;
 
-  constructor({ termIndex, stringInterner }: WildcardDocResolverDependencies<Doc>) {
+  constructor({ invertedIndex, stringInterner }: WildcardDocResolverDependencies<Doc>) {
     super(stringInterner);
-    this.termIndex = termIndex;
+    this.invertedIndex = invertedIndex;
   }
 
   protected combine(matches: string[]): ReadonlySet<Doc> {
     const docs = new Set<Doc>();
 
     for (const term of matches) {
-      this.termIndex.docsForTerm(term)?.forEach(doc => docs.add(doc));
+      this.invertedIndex.docsForTerm(term)?.forEach(doc => docs.add(doc));
     }
     return docs;
   }

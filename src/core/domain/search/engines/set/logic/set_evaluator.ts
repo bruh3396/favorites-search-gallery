@@ -13,36 +13,36 @@ interface Value<Doc> {
 
 export class SetEvaluator<Doc> {
   constructor(
-    private readonly termIndex: InvertedIndex<Doc>,
-    private readonly resolver: DocResolver<Doc>
+    private readonly invertedIndex: InvertedIndex<Doc>,
+    private readonly docResolver: DocResolver<Doc>
   ) { }
 
-  public evaluate(expression: SearchExpression, docs?: readonly Doc[]): readonly Doc[] {
-    const value = this.resolve(expression);
+  public evaluate(searchExpression: SearchExpression, docs?: readonly Doc[]): readonly Doc[] {
+    const value = this.resolve(searchExpression);
 
     if (value.isNegated) {
-      return this.materialize(this.termIndex.allDocs(), value.docs, docs);
+      return this.materialize(this.invertedIndex.allDocs(), value.docs, docs);
     }
     return this.materialize(value.docs, EMPTY_EXCLUSIONS, docs);
   }
 
-  private resolve(expression: SearchExpression): Value<Doc> {
-    const node = expression.node;
+  private resolve(searchExpression: SearchExpression): Value<Doc> {
+    const searchExpressionNode = searchExpression.node;
 
-    switch (node.kind) {
-      case "term": return { docs: this.resolver.resolve(node.term), isNegated: node.term.isNegated };
-      case "and": return this.intersect(node.children);
-      case "or": return this.union(node.children);
+    switch (searchExpressionNode.kind) {
+      case "term": return { docs: this.docResolver.resolve(searchExpressionNode.term), isNegated: searchExpressionNode.term.isNegated };
+      case "and": return this.intersect(searchExpressionNode.childExpressions);
+      case "or": return this.union(searchExpressionNode.childExpressions);
       case "not":
       default: {
-        const value = this.resolve(node.child);
+        const value = this.resolve(searchExpressionNode.childExpression);
         return { docs: value.docs, isNegated: !value.isNegated };
       }
     }
   }
 
-  private intersect(children: SearchExpression[]): Value<Doc> {
-    const { positives, negatives } = this.partition(children.map(child => this.resolve(child)));
+  private intersect(childSearchExpressions: SearchExpression[]): Value<Doc> {
+    const { positives, negatives } = this.partition(childSearchExpressions.map(childSearchExpression => this.resolve(childSearchExpression)));
     const included = this.docsWithAll(positives);
 
     if (included.size === 0 || negatives.length === 0) {
@@ -59,8 +59,8 @@ export class SetEvaluator<Doc> {
     return { docs: matches, isNegated: false };
   }
 
-  private union(children: SearchExpression[]): Value<Doc> {
-    const { positives, negatives } = this.partition(children.map(child => this.resolve(child)));
+  private union(childSearchExpressions: SearchExpression[]): Value<Doc> {
+    const { positives, negatives } = this.partition(childSearchExpressions.map(childSearchExpression => this.resolve(childSearchExpression)));
 
     if (negatives.length === 0) {
       return { docs: this.docsWithAny(positives), isNegated: false };
@@ -69,7 +69,7 @@ export class SetEvaluator<Doc> {
     const excludedByAll = this.docsWithAll(negatives);
     const matches = new Set<Doc>();
 
-    for (const doc of this.termIndex.allDocs()) {
+    for (const doc of this.invertedIndex.allDocs()) {
       if (included.has(doc) || !excludedByAll.has(doc)) {
         matches.add(doc);
       }
@@ -89,21 +89,21 @@ export class SetEvaluator<Doc> {
 
   private materialize(candidates: ReadonlySet<Doc>, exclusions: ReadonlySet<Doc>, docs?: readonly Doc[]): readonly Doc[] {
     if (docs === undefined || candidates.size <= docs.length * SELECTIVE_QUERY_FRACTION) {
-      const matches: Doc[] = [];
+      const matchedDocs: Doc[] = [];
 
       for (const doc of candidates) {
         if (!exclusions.has(doc)) {
-          matches.push(doc);
+          matchedDocs.push(doc);
         }
       }
-      return this.resolver.sortByPosition(matches);
+      return this.docResolver.sortByPosition(matchedDocs);
     }
     return docs.filter(doc => candidates.has(doc) && !exclusions.has(doc));
   }
 
   private docsWithAll(docSets: ReadonlySet<Doc>[]): ReadonlySet<Doc> {
     if (docSets.length === 0) {
-      return this.termIndex.allDocs();
+      return this.invertedIndex.allDocs();
     }
     const sorted = [...docSets].sort((a, b) => a.size - b.size);
     const [smallest, ...remaining] = sorted;

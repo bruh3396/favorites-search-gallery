@@ -6,10 +6,10 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { Story } from "@/targets/kit/story";
 
 interface DropdownState {
-  readonly choices: readonly ControlChoice<string>[];
+  readonly controlChoices: readonly ControlChoice<string>[];
   readonly value: string;
   readonly disabled?: boolean;
-  readonly size?: ControlSize;
+  readonly controlSize?: ControlSize;
 }
 
 const SORTS = [
@@ -20,17 +20,17 @@ const SORTS = [
 
 const COLUMNS = Array.from({ length: 12 }, (_, index) => ({ value: String(index + 1), label: `${index + 1} columns` }));
 
-function variant(label: string, { choices, value: initial, disabled = false, size }: DropdownState): Story["variants"][number] {
+function variant(label: string, { controlChoices, value: initial, disabled = false, controlSize }: DropdownState): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
       const selected = new Signal(initial);
       const { result: element } = render(ownerDocument, () => (
         <Dropdown
-          controlChoices={choices}
+          controlChoices={controlChoices}
           value={selected}
           disabled={new Signal(disabled)}
-          size={size}
+          size={controlSize}
           onValueChange={next => {
             log(`Dropdown "${label}" → ${next}`);
             selected.value = next;
@@ -47,9 +47,9 @@ function variant(label: string, { choices, value: initial, disabled = false, siz
 export const DROPDOWN_STORY: Story = {
   title: "Dropdown",
   variants: [
-    variant("Three choices", { choices: SORTS, value: "score" }),
-    variant("Long list", { choices: COLUMNS, value: "6" }),
-    variant("Small", { choices: SORTS, value: "date", size: "small" }),
-    variant("Disabled", { choices: SORTS, value: "random", disabled: true })
+    variant("Three choices", { controlChoices: SORTS, value: "score" }),
+    variant("Long list", { controlChoices: COLUMNS, value: "6" }),
+    variant("Small", { controlChoices: SORTS, value: "date", controlSize: "small" }),
+    variant("Disabled", { controlChoices: SORTS, value: "random", disabled: true })
   ]
 };

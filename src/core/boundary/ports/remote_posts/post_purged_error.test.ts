@@ -3,11 +3,11 @@ import { PostPurgedError } from "@/core/boundary/ports/remote_posts/post_purged_
 
 describe("PostPurgedError", () => {
   test("names the post the site no longer has", () => {
-    const error = new PostPurgedError("123");
+    const postPurgedError = new PostPurgedError("123");
 
-    expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe("PostPurgedError");
-    expect(error.postId).toBe("123");
-    expect(error.message).toBe("Post 123 was purged from the site");
+    expect(postPurgedError).toBeInstanceOf(Error);
+    expect(postPurgedError.name).toBe("PostPurgedError");
+    expect(postPurgedError.postId).toBe("123");
+    expect(postPurgedError.message).toBe("Post 123 was purged from the site");
   });
 });

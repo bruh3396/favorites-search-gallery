@@ -10,15 +10,15 @@ const RATE_LIMIT = { concurrency: 3, ratePerSecond: 5 };
 const METADATA_BYTE_RANGES = [500_000, 1_000_000, 2_000_000, 4_000_000];
 
 export class Rule34CdnVideoDurationProber {
-  private readonly limiter: RateLimiter;
+  private readonly rateLimiter: RateLimiter;
   private readonly idleVideos: HTMLVideoElement[] = [];
 
   constructor(private readonly dependencies: Rule34CdnVideoDurationProberDependencies) {
-    this.limiter = new RateLimiter(RATE_LIMIT, dependencies.scheduler);
+    this.rateLimiter = new RateLimiter(RATE_LIMIT, dependencies.scheduler);
   }
 
   public probeSeconds(url: string): Promise<number> {
-    return this.limiter.run(() => this.probeWithIncreasingByteRanges(url));
+    return this.rateLimiter.run(() => this.probeWithIncreasingByteRanges(url));
   }
 
   private probeWithIncreasingByteRanges(url: string): Promise<number> {

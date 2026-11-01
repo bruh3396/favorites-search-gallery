@@ -63,17 +63,17 @@ export class RelativeMetricIndex<Doc> {
     }
   }
 
-  public getDocs(comparison: MetricComparison): ReadonlySet<Doc> {
-    return this.sets.get(this.key(comparison.metric, comparison.operator, comparison.rightHandMetric)) ?? EMPTY;
+  public getDocs(metricComparison: MetricComparison): ReadonlySet<Doc> {
+    return this.sets.get(this.key(metricComparison.metric, metricComparison.comparator, metricComparison.rightHandMetric)) ?? EMPTY;
   }
 
   private buildPair(left: Metric, right: Metric, docs: ReadonlySet<Doc>): void {
-    const pair: MetricPair<Doc> = { left, right, greater: new Set<Doc>(), less: new Set<Doc>(), equal: new Set<Doc>() };
+    const metricPair: MetricPair<Doc> = { left, right, greater: new Set<Doc>(), less: new Set<Doc>(), equal: new Set<Doc>() };
 
     for (const doc of docs) {
-      this.partition(doc, pair);
+      this.partition(doc, metricPair);
     }
-    this.aliasPair(pair);
+    this.aliasPair(metricPair);
   }
 
   private placeInPair(doc: Doc, left: Metric, right: Metric): void {

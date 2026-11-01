@@ -10,9 +10,9 @@ export class DraftPostings {
     this.positionsByTerm = new Map<string, number[]>();
   }
 
-  public hydrateFrom(source: DurablePostings): void {
+  public hydrateFrom(durablePostings: DurablePostings): void {
     this.reset();
-    source.forEachPosting((term, positions) => this.positionsByTerm.set(term, positions));
+    durablePostings.forEachPosting((term, positions) => this.positionsByTerm.set(term, positions));
   }
 
   public entries(): IterableIterator<[string, number[]]> {
@@ -30,11 +30,11 @@ export class DraftPostings {
     return false;
   }
 
-  public applyUpdates<Doc>(updates: readonly TermUpdate<Doc>[], findPosition: (doc: Doc) => number | undefined): TermDelta {
-    const touched = updates.reduce((acc, { oldTerms, newTerms }) => acc.union(oldTerms.symmetricDifference(newTerms)), new Set<string>());
+  public applyUpdates<Doc>(termUpdates: readonly TermUpdate<Doc>[], findPosition: (doc: Doc) => number | undefined): TermDelta {
+    const touched = termUpdates.reduce((acc, { oldTerms, newTerms }) => acc.union(oldTerms.symmetricDifference(newTerms)), new Set<string>());
     const preexisting = new Set<string>([...touched].filter(term => this.positionsByTerm.has(term)));
 
-    for (const { doc, oldTerms, newTerms } of updates) {
+    for (const { doc, oldTerms, newTerms } of termUpdates) {
       const position = findPosition(doc);
 
       if (position !== undefined) {

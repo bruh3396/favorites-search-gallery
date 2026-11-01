@@ -4,7 +4,7 @@ import { PackedPostings } from "@/core/domain/search/engines/bit/indexes/packed_
 
 export class DurablePostings {
   private densePostings = new Map<string, DensePosting>();
-  private readonly sparsePostings = new PackedPostings();
+  private readonly sparsePackedPostings = new PackedPostings();
 
   public materializeFrom(entries: Iterable<[string, number[]]>, capacity: number): void {
     const threshold = Math.ceil(capacity / 32);
@@ -23,36 +23,36 @@ export class DurablePostings {
         maxPosition = Math.max(maxPosition, positions[positions.length - 1]);
       }
     }
-    this.sparsePostings.pack(sparse, sparsePositions, maxPosition);
+    this.sparsePackedPostings.pack(sparse, sparsePositions, maxPosition);
   }
 
   public terms(): string[] {
-    return [...this.densePostings.keys(), ...this.sparsePostings.terms()];
+    return [...this.densePostings.keys(), ...this.sparsePackedPostings.terms()];
   }
 
   public findPosting(term: string): Posting | undefined {
-    const dense = this.densePostings.get(term);
+    const densePosting = this.densePostings.get(term);
 
-    if (dense !== undefined) {
-      return dense;
+    if (densePosting !== undefined) {
+      return densePosting;
     }
-    const sparse = this.sparsePostings.findPositions(term);
+    const sparse = this.sparsePackedPostings.findPositions(term);
     return sparse === undefined ? undefined : new SparsePosting(sparse);
   }
 
   public forEachPosting(visit: (term: string, positions: number[]) => void): void {
-    for (const [term, posting] of this.densePostings) {
-      visit(term, posting.positions());
+    for (const [term, densePosting] of this.densePostings) {
+      visit(term, densePosting.positions());
     }
-    this.sparsePostings.forEachTerm((term, positions) => visit(term, [...positions]));
+    this.sparsePackedPostings.forEachTerm((term, positionArray) => visit(term, [...positionArray]));
   }
 }
 
 function createBitset(positions: number[], capacity: number): BitSet {
-  const bits = new BitSet(capacity);
+  const bitSet = new BitSet(capacity);
 
   for (const position of positions) {
-    bits.set(position);
+    bitSet.set(position);
   }
-  return bits;
+  return bitSet;
 }

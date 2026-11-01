@@ -80,7 +80,7 @@ function FavoriteLightboxTitle({ favorite, clipboard, scheduler, copiedDuration,
 function ViewOption<Value>({ label, controlChoices, value }: { label: string; controlChoices: readonly ControlChoice<Value>[]; value: StoredValue<Value> }): HTMLElement {
   return (
     <div className={FavoriteLightboxDetailsClass.viewOption} role="group" aria-label={label}>
-      <Segmented controlChoices={controlChoices} value={value} onValueChange={next => value.set(next)} />
+      <Segmented controlChoices={controlChoices} value={value} onValueChange={nextValue => value.set(nextValue)} />
     </div>
   ) as HTMLElement;
 }

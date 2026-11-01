@@ -37,30 +37,30 @@ export class BitSet {
     return cardinality;
   }
 
-  public orInPlace(other: BitSet): void {
-    this.assertSameSize(other);
+  public orInPlace(bitSet: BitSet): void {
+    this.assertSameSize(bitSet);
 
     for (let i = 0; i < this.words.length; i += 1) {
-      this.words[i] |= other.words[i];
+      this.words[i] |= bitSet.words[i];
     }
   }
 
-  public andInPlace(other: BitSet): boolean {
-    this.assertSameSize(other);
+  public andInPlace(bitSet: BitSet): boolean {
+    this.assertSameSize(bitSet);
     let remaining = 0;
 
     for (let i = 0; i < this.words.length; i += 1) {
-      this.words[i] &= other.words[i];
+      this.words[i] &= bitSet.words[i];
       remaining |= this.words[i];
     }
     return remaining === 0;
   }
 
-  public andPositionsInPlace(positions: PositionArray): boolean {
+  public andPositionsInPlace(positionArray: PositionArray): boolean {
     const survivors: number[] = [];
     let count = 0;
 
-    for (const position of positions) {
+    for (const position of positionArray) {
       if (this.has(position)) {
         survivors[count] = position;
         count += 1;
@@ -74,32 +74,32 @@ export class BitSet {
     return count === 0;
   }
 
-  public andNotInPlace(other: BitSet): boolean {
-    this.assertSameSize(other);
+  public andNotInPlace(bitSet: BitSet): boolean {
+    this.assertSameSize(bitSet);
     let remaining = 0;
 
     for (let i = 0; i < this.words.length; i += 1) {
-      this.words[i] &= ~other.words[i];
+      this.words[i] &= ~bitSet.words[i];
       remaining |= this.words[i];
     }
     return remaining === 0;
   }
 
-  public orComplementInPlace(other: BitSet): this {
-    this.assertSameSize(other);
+  public orComplementInPlace(bitSet: BitSet): this {
+    this.assertSameSize(bitSet);
 
     for (let i = 0; i < this.words.length; i += 1) {
-      this.words[i] |= ~other.words[i];
+      this.words[i] |= ~bitSet.words[i];
     }
     this.clearHighBits();
     return this;
   }
 
   public clone(): BitSet {
-    const copy = new BitSet(this.size);
+    const bitSet = new BitSet(this.size);
 
-    copy.words.set(this.words);
-    return copy;
+    bitSet.words.set(this.words);
+    return bitSet;
   }
 
   public fill(): void {
@@ -173,9 +173,9 @@ export class BitSet {
     }
   }
 
-  private assertSameSize(other: BitSet): void {
-    if (other.size !== this.size) {
-      throw new Error(`BitSet size mismatch: ${this.size} vs ${other.size}`);
+  private assertSameSize(bitSet: BitSet): void {
+    if (bitSet.size !== this.size) {
+      throw new Error(`BitSet size mismatch: ${this.size} vs ${bitSet.size}`);
     }
   }
 }

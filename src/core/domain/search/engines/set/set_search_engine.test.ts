@@ -18,17 +18,17 @@ function createDoc(name: string, tags: string[], metrics: Partial<Record<Metric,
   };
 }
 
-const apple = createDoc("apple", ["red", "sweet", "fruit"], { score: 10 });
-const banana = createDoc("banana", ["yellow", "sweet", "fruit"], { score: 20 });
-const cherry = createDoc("cherry", ["red", "tart", "fruit"], { score: 30 });
-const docs = [apple, banana, cherry];
+const appleDoc = createDoc("apple", ["red", "sweet", "fruit"], { score: 10 });
+const bananaDoc = createDoc("banana", ["yellow", "sweet", "fruit"], { score: 20 });
+const cherryDoc = createDoc("cherry", ["red", "tart", "fruit"], { score: 30 });
+const docs = [appleDoc, bananaDoc, cherryDoc];
 
-function createEngine(seed: Doc[] = docs): SetSearchEngine<Doc> {
-  return new SetSearchEngine<Doc>({ getTerms: item => item.tags, getMetric: (item, metric) => item.getMetric(metric), stringInterner: new StringInterner() }, seed);
+function createEngine(seedDocs: Doc[] = docs): SetSearchEngine<Doc> {
+  return new SetSearchEngine<Doc>({ getTerms: doc => doc.tags, getMetric: (doc, metric) => doc.getMetric(metric), stringInterner: new StringInterner() }, seedDocs);
 }
 
-function search(query: string, engineToSearch: SetSearchEngine<Doc> = createEngine(), candidates: Doc[] = docs): string[] {
-  return engineToSearch.search(parseSearchExpression(query), candidates).map(item => item.name).sort();
+function search(query: string, setSearchEngine: SetSearchEngine<Doc> = createEngine(), candidateDocs: Doc[] = docs): string[] {
+  return setSearchEngine.search(parseSearchExpression(query), candidateDocs).map(doc => doc.name).sort();
 }
 
 describe("SetSearchEngine", () => {
@@ -68,91 +68,91 @@ describe("SetSearchEngine", () => {
 
   describe("add", () => {
     test("makes a new doc and its terms searchable, including by wildcard", () => {
-      const searchEngine = createEngine();
-      const mango = createDoc("mango", ["orange", "tropical"]);
-      const candidates = [...docs, mango];
+      const setSearchEngine = createEngine();
+      const mangoDoc = createDoc("mango", ["orange", "tropical"]);
+      const candidateDocs = [...docs, mangoDoc];
 
-      expect(search("orange", searchEngine, candidates)).toEqual([]);
-      expect(search("trop*", searchEngine, candidates)).toEqual([]);
+      expect(search("orange", setSearchEngine, candidateDocs)).toEqual([]);
+      expect(search("trop*", setSearchEngine, candidateDocs)).toEqual([]);
 
-      searchEngine.add([mango]);
+      setSearchEngine.add([mangoDoc]);
 
-      expect(search("orange", searchEngine, candidates)).toEqual(["mango"]);
-      expect(search("trop*", searchEngine, candidates)).toEqual(["mango"]);
+      expect(search("orange", setSearchEngine, candidateDocs)).toEqual(["mango"]);
+      expect(search("trop*", setSearchEngine, candidateDocs)).toEqual(["mango"]);
     });
 
     test("makes a new doc matchable by metric queries that already ran", () => {
-      const searchEngine = createEngine();
-      const durian = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
-      const candidates = [...docs, durian];
+      const setSearchEngine = createEngine();
+      const durianDoc = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
+      const candidateDocs = [...docs, durianDoc];
 
-      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
-      expect(search("width:>height", searchEngine, candidates)).toEqual([]);
+      expect(search("score:>25", setSearchEngine, candidateDocs)).toEqual(["cherry"]);
+      expect(search("width:>height", setSearchEngine, candidateDocs)).toEqual([]);
 
-      searchEngine.add([durian]);
+      setSearchEngine.add([durianDoc]);
 
-      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
-      expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
+      expect(search("score:>25", setSearchEngine, candidateDocs)).toEqual(["cherry", "durian"]);
+      expect(search("width:>height", setSearchEngine, candidateDocs)).toEqual(["durian"]);
     });
   });
 
   describe("update", () => {
     test("drops a doc's now-unreferenced terms from the wildcard resolver", () => {
-      const plum = createDoc("plum", ["red", "tart", "fruit"], { score: 30 });
-      const candidates = [apple, banana, plum];
-      const searchEngine = createEngine(candidates);
+      const plumDoc = createDoc("plum", ["red", "tart", "fruit"], { score: 30 });
+      const candidateDocs = [appleDoc, bananaDoc, plumDoc];
+      const setSearchEngine = createEngine(candidateDocs);
 
-      expect(search("tar*", searchEngine, candidates)).toEqual(["plum"]);
+      expect(search("tar*", setSearchEngine, candidateDocs)).toEqual(["plum"]);
 
-      const oldTerms = new Set(plum.tags);
+      const oldTerms = new Set(plumDoc.tags);
 
-      plum.tags.clear();
-      ["red", "fruit"].forEach(tag => plum.tags.add(tag));
-      searchEngine.update([{ doc: plum, oldTerms, newTerms: plum.tags }]);
+      plumDoc.tags.clear();
+      ["red", "fruit"].forEach(tag => plumDoc.tags.add(tag));
+      setSearchEngine.update([{ doc: plumDoc, oldTerms, newTerms: plumDoc.tags }]);
 
-      expect(search("tar*", searchEngine, candidates)).toEqual([]);
-      expect(search("red", searchEngine, candidates)).toEqual(["apple", "plum"]);
+      expect(search("tar*", setSearchEngine, candidateDocs)).toEqual([]);
+      expect(search("red", setSearchEngine, candidateDocs)).toEqual(["apple", "plum"]);
     });
 
     test("makes a doc's newly introduced terms searchable, including by wildcard", () => {
-      const kiwi = createDoc("kiwi", ["green"]);
-      const candidates = [apple, kiwi];
-      const searchEngine = createEngine(candidates);
-      const oldTerms = new Set(kiwi.tags);
+      const kiwiDoc = createDoc("kiwi", ["green"]);
+      const candidateDocs = [appleDoc, kiwiDoc];
+      const setSearchEngine = createEngine(candidateDocs);
+      const oldTerms = new Set(kiwiDoc.tags);
 
-      kiwi.tags.add("fuzzy");
-      searchEngine.update([{ doc: kiwi, oldTerms, newTerms: kiwi.tags }]);
+      kiwiDoc.tags.add("fuzzy");
+      setSearchEngine.update([{ doc: kiwiDoc, oldTerms, newTerms: kiwiDoc.tags }]);
 
-      expect(search("fuzzy", searchEngine, candidates)).toEqual(["kiwi"]);
-      expect(search("fuz*", searchEngine, candidates)).toEqual(["kiwi"]);
+      expect(search("fuzzy", setSearchEngine, candidateDocs)).toEqual(["kiwi"]);
+      expect(search("fuz*", setSearchEngine, candidateDocs)).toEqual(["kiwi"]);
     });
   });
 
   describe("index", () => {
     test("makes new docs matchable by metric queries that already ran", () => {
-      const searchEngine = createEngine();
-      const durian = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
-      const candidates = [...docs, durian];
+      const setSearchEngine = createEngine();
+      const durianDoc = createDoc("durian", ["spiky"], { score: 40, width: 50, height: 10 });
+      const candidateDocs = [...docs, durianDoc];
 
-      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry"]);
-      expect(search("width:>height", searchEngine, candidates)).toEqual([]);
+      expect(search("score:>25", setSearchEngine, candidateDocs)).toEqual(["cherry"]);
+      expect(search("width:>height", setSearchEngine, candidateDocs)).toEqual([]);
 
-      searchEngine.rebuild([durian]);
+      setSearchEngine.rebuild([durianDoc]);
 
-      expect(search("score:>25", searchEngine, candidates)).toEqual(["cherry", "durian"]);
-      expect(search("width:>height", searchEngine, candidates)).toEqual(["durian"]);
+      expect(search("score:>25", setSearchEngine, candidateDocs)).toEqual(["cherry", "durian"]);
+      expect(search("width:>height", setSearchEngine, candidateDocs)).toEqual(["durian"]);
     });
 
     test("rebuilds the corpus from a fresh set of docs", () => {
-      const searchEngine = new SetSearchEngine<Doc>({ getTerms: item => item.tags, getMetric: (item, metric) => item.getMetric(metric), stringInterner: new StringInterner() });
-      const kiwi = createDoc("kiwi", ["green", "fuzzy"]);
+      const setSearchEngine = new SetSearchEngine<Doc>({ getTerms: doc => doc.tags, getMetric: (doc, metric) => doc.getMetric(metric), stringInterner: new StringInterner() });
+      const kiwiDoc = createDoc("kiwi", ["green", "fuzzy"]);
 
-      expect(search("green", searchEngine, [kiwi])).toEqual([]);
+      expect(search("green", setSearchEngine, [kiwiDoc])).toEqual([]);
 
-      searchEngine.rebuild([kiwi]);
+      setSearchEngine.rebuild([kiwiDoc]);
 
-      expect(search("green", searchEngine, [kiwi])).toEqual(["kiwi"]);
-      expect(search("fuz*", searchEngine, [kiwi])).toEqual(["kiwi"]);
+      expect(search("green", setSearchEngine, [kiwiDoc])).toEqual(["kiwi"]);
+      expect(search("fuz*", setSearchEngine, [kiwiDoc])).toEqual(["kiwi"]);
     });
   });
 });

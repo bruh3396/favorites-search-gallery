@@ -12,7 +12,7 @@ export interface KeyedStoredValueConfiguration<T> {
 }
 
 export interface KeyedStoredValueDependencies<T> {
-  storage: StoredValueStorage;
+  storedValueStorage: StoredValueStorage;
   codec?: Codec<T>;
 }
 
@@ -28,7 +28,7 @@ export class KeyedStoredValue<T> implements StoredValue<T> {
     const { key, defaultValue } = configuration;
 
     this.codec = dependencies.codec ?? createGuardedCodec(sameKindAs(defaultValue));
-    this.current = new Signal(this.codec.decode(dependencies.storage.get(key)) ?? defaultValue);
+    this.current = new Signal(this.codec.decode(dependencies.storedValueStorage.get(key)) ?? defaultValue);
   }
 
   public get value(): T {
@@ -47,7 +47,7 @@ export class KeyedStoredValue<T> implements StoredValue<T> {
     if (Object.is(value, this.current.peek())) {
       return;
     }
-    this.dependencies.storage.set(this.configuration.key, this.codec.encode(value));
+    this.dependencies.storedValueStorage.set(this.configuration.key, this.codec.encode(value));
     this.current.value = value;
     this.changes.emit(value);
   }

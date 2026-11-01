@@ -4,24 +4,24 @@ import { MemoryRemotePostList } from "@/adapters/memory/ports/remote_post_list/m
 import { createPost } from "@/testing/post";
 
 function createPostList(): MemoryRemotePostList {
-  const memory = new MemoryClient(["1", "2", "3", "4", "5"].map(id => createPost({ id })));
-  return new MemoryRemotePostList({ pageSize: 2, initialPageIndex: 1 }, memory);
+  const memoryClient = new MemoryClient(["1", "2", "3", "4", "5"].map(id => createPost({ id })));
+  return new MemoryRemotePostList({ pageSize: 2, initialPageIndex: 1 }, memoryClient);
 }
 
 async function pageAt(index: number): Promise<{ index: number; postIds: string[] }> {
-  const page = await createPostList().fetchPage(index);
-  return { index: page.index, postIds: page.posts.map(post => post.id) };
+  const postListPage = await createPostList().fetchPage(index);
+  return { index: postListPage.index, postIds: postListPage.posts.map(post => post.id) };
 }
 
 describe("MemoryRemotePostList", () => {
   test("reads the configured initial page", async() => {
-    const postList = createPostList();
-    const page = postList.readInitialPage();
+    const remotePostList = createPostList();
+    const postListPage = remotePostList.readInitialPage();
 
-    expect(page.index).toBe(1);
-    expect(page.posts.map(post => post.id)).toEqual(["3", "4"]);
-    expect(postList.readInitialPage()).toBe(page);
-    await expect(postList.fetchPage(1)).resolves.toBe(page);
+    expect(postListPage.index).toBe(1);
+    expect(postListPage.posts.map(post => post.id)).toEqual(["3", "4"]);
+    expect(remotePostList.readInitialPage()).toBe(postListPage);
+    await expect(remotePostList.fetchPage(1)).resolves.toBe(postListPage);
   });
 
   test("serves each page of posts in order, with a short last page and empty pages past it", async() => {

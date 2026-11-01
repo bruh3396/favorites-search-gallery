@@ -2,81 +2,81 @@ import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 
-function setup(): { store: MemoryLocalKeyedValues; namespaced: NamespacedLocalKeyedValues } {
-  const store = new MemoryLocalKeyedValues();
-  return { store, namespaced: new NamespacedLocalKeyedValues("preferences", store) };
+function setup(): { innerLocalKeyedValues: MemoryLocalKeyedValues; namespacedLocalKeyedValues: NamespacedLocalKeyedValues } {
+  const innerLocalKeyedValues = new MemoryLocalKeyedValues();
+  return { innerLocalKeyedValues, namespacedLocalKeyedValues: new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues) };
 }
 
 describe("NamespacedLocalKeyedValues", () => {
   test("keeps its keys as one object under the namespace key", () => {
-    const { store, namespaced } = setup();
+    const { innerLocalKeyedValues, namespacedLocalKeyedValues } = setup();
 
-    namespaced.set("theme", "dark");
-    namespaced.set("columns", 5);
+    namespacedLocalKeyedValues.set("theme", "dark");
+    namespacedLocalKeyedValues.set("columns", 5);
 
-    expect(store.get("preferences")).toEqual({ theme: "dark", columns: 5 });
-    expect(namespaced.get("theme")).toBe("dark");
+    expect(innerLocalKeyedValues.get("preferences")).toEqual({ theme: "dark", columns: 5 });
+    expect(namespacedLocalKeyedValues.get("theme")).toBe("dark");
   });
 
   test("loads what was already stored", () => {
-    const store = new MemoryLocalKeyedValues();
+    const innerLocalKeyedValues = new MemoryLocalKeyedValues();
 
-    store.set("preferences", { theme: "dark" });
+    innerLocalKeyedValues.set("preferences", { theme: "dark" });
 
-    expect(new NamespacedLocalKeyedValues("preferences", store).get("theme")).toBe("dark");
+    expect(new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues).get("theme")).toBe("dark");
   });
 
   test.each([null, 3, "text", [1, 2]])("treats a stored value that isn't an object as empty (%s)", stored => {
-    const store = new MemoryLocalKeyedValues();
+    const innerLocalKeyedValues = new MemoryLocalKeyedValues();
 
-    store.set("preferences", stored);
+    innerLocalKeyedValues.set("preferences", stored);
 
-    expect(new NamespacedLocalKeyedValues("preferences", store).get("0")).toBeUndefined();
+    expect(new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues).get("0")).toBeUndefined();
   });
 
   test("returns undefined for a missing key", () => {
-    expect(setup().namespaced.get("missing")).toBeUndefined();
+    expect(setup().namespacedLocalKeyedValues.get("missing")).toBeUndefined();
   });
 
   test("removes a key and leaves the rest", () => {
-    const { store, namespaced } = setup();
+    const { innerLocalKeyedValues, namespacedLocalKeyedValues } = setup();
 
-    namespaced.set("theme", "dark");
-    namespaced.set("columns", 5);
-    namespaced.remove("theme");
+    namespacedLocalKeyedValues.set("theme", "dark");
+    namespacedLocalKeyedValues.set("columns", 5);
+    namespacedLocalKeyedValues.remove("theme");
 
-    expect(namespaced.get("theme")).toBeUndefined();
-    expect(store.get("preferences")).toEqual({ columns: 5 });
+    expect(namespacedLocalKeyedValues.get("theme")).toBeUndefined();
+    expect(innerLocalKeyedValues.get("preferences")).toEqual({ columns: 5 });
   });
 
   test("clears the whole namespace", () => {
-    const { store, namespaced } = setup();
+    const { innerLocalKeyedValues, namespacedLocalKeyedValues } = setup();
 
-    namespaced.set("theme", "dark");
-    namespaced.clear();
+    namespacedLocalKeyedValues.set("theme", "dark");
+    namespacedLocalKeyedValues.clear();
 
-    expect(namespaced.get("theme")).toBeUndefined();
-    expect(store.get("preferences")).toBeUndefined();
+    expect(namespacedLocalKeyedValues.get("theme")).toBeUndefined();
+    expect(innerLocalKeyedValues.get("preferences")).toBeUndefined();
   });
 
   test("leaves other keys of the wrapped store alone", () => {
-    const { store, namespaced } = setup();
+    const { innerLocalKeyedValues, namespacedLocalKeyedValues } = setup();
 
-    store.set("searchSnippets", ["a"]);
-    namespaced.set("theme", "dark");
-    namespaced.clear();
+    innerLocalKeyedValues.set("searchSnippets", ["a"]);
+    namespacedLocalKeyedValues.set("theme", "dark");
+    namespacedLocalKeyedValues.clear();
 
-    expect(store.get("searchSnippets")).toEqual(["a"]);
+    expect(innerLocalKeyedValues.get("searchSnippets")).toEqual(["a"]);
   });
 
   test("never reverts what another tab wrote since it loaded", () => {
-    const store = new MemoryLocalKeyedValues();
-    const tab = new NamespacedLocalKeyedValues("preferences", store);
-    const otherTab = new NamespacedLocalKeyedValues("preferences", store);
+    const innerLocalKeyedValues = new MemoryLocalKeyedValues();
+    const tabLocalKeyedValues = new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues);
+    const otherTabLocalKeyedValues = new NamespacedLocalKeyedValues("preferences", innerLocalKeyedValues);
 
-    otherTab.set("columns", 5);
-    tab.set("theme", "dark");
+    otherTabLocalKeyedValues.set("columns", 5);
+    tabLocalKeyedValues.set("theme", "dark");
 
-    expect(store.get("preferences")).toEqual({ columns: 5, theme: "dark" });
+    expect(innerLocalKeyedValues.get("preferences")).toEqual({ columns: 5, theme: "dark" });
   });
 });

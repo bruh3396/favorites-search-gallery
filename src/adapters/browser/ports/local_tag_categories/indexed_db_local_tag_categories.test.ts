@@ -14,21 +14,21 @@ function createLocalTagCategories(): IndexedDbLocalTagCategories {
 
 describe("IndexedDbLocalTagCategories", () => {
   test("reads back what it wrote, skipping missing tags", async() => {
-    const tagCategories = createLocalTagCategories();
+    const localTagCategories = createLocalTagCategories();
 
-    await tagCategories.setMany(new Map([["alice", "character"], ["bob", "artist"]]));
+    await localTagCategories.setMany(new Map([["alice", "character"], ["bob", "artist"]]));
 
-    const found = await tagCategories.getMany(["bob", "missing", "alice"]);
+    const found = await localTagCategories.getMany(["bob", "missing", "alice"]);
 
     expect(found).toEqual(new Map([["bob", "artist"], ["alice", "character"]]));
   });
 
   test("overwrites a tag's category", async() => {
-    const tagCategories = createLocalTagCategories();
+    const localTagCategories = createLocalTagCategories();
 
-    await tagCategories.setMany(new Map([["alice", "general"]]));
-    await tagCategories.setMany(new Map([["alice", "character"]]));
+    await localTagCategories.setMany(new Map([["alice", "general"]]));
+    await localTagCategories.setMany(new Map([["alice", "character"]]));
 
-    expect(await tagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
+    expect(await localTagCategories.getMany(["alice"])).toEqual(new Map([["alice", "character"]]));
   });
 });

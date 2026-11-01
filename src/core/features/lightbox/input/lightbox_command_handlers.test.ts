@@ -101,7 +101,7 @@ describe("createLightboxCommandHandlers", () => {
 
   test("flips the details panel's open state", () => {
     const { lightboxCommandHandlersDependencies } = setup();
-    const isOpen = new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() });
+    const isOpen = new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storedValueStorage: new MemoryLocalKeyedValues() });
     const handlers = createLightboxCommandHandlers({ ...lightboxCommandHandlersDependencies, lightboxDetails: { isOpen } });
 
     handlers.toggleDetails();

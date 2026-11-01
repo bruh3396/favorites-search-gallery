@@ -28,7 +28,7 @@ function createWorkspace(): FavoritesWorkspace {
   const favoritesPaginationPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.pagination;
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   return new FavoritesWorkspace({
-    favoritesWorkspaceSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storage: new MemoryLocalKeyedValues() }),
+    favoritesWorkspaceSnapshot: new KeyedStoredValue({ key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT }, { storedValueStorage: new MemoryLocalKeyedValues() }),
     createSession: (favoritesSearchSettings): FavoritesSession => new FavoritesSession({ favoritesSearchSettings }, {
       favoritesSearchIndex,
       favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),

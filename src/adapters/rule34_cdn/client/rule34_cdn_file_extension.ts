@@ -16,6 +16,6 @@ export function isRule34CdnFileExtension(extension: string): extension is Rule34
   return (FILE_EXTENSIONS as readonly string[]).includes(extension);
 }
 
-export function rule34CdnFileExtensionKind(extension: Rule34CdnFileExtension): MediaKind {
-  return EXTENSION_KINDS[extension];
+export function rule34CdnFileExtensionKind(rule34CdnFileExtension: Rule34CdnFileExtension): MediaKind {
+  return EXTENSION_KINDS[rule34CdnFileExtension];
 }

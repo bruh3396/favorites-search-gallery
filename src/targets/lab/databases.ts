@@ -21,19 +21,19 @@ const WRITE_BATCH_SIZE = 10_000;
 const rule34CdnClient = new Rule34CdnClient({ fetch: fetch.bind(globalThis), scheduler: new BrowserScheduler(), loadImage, decodeBitmap });
 const indexedDbClient = new IndexedDbClient(LAB_INDEXED_DB_CONFIGURATION, file => rule34CdnClient.mintMediaFromUrl(file));
 const localPosts = new IndexedDbLocalPosts(indexedDbClient);
-const labFavorites = new IndexedDbLocalFavorites({ ownerId: LAB_OWNER_ID }, indexedDbClient);
-const corpusOrder = new IndexedDbLocalFavorites({ ownerId: CORPUS_OWNER_ID }, indexedDbClient);
+const labLocalFavorites = new IndexedDbLocalFavorites({ ownerId: LAB_OWNER_ID }, indexedDbClient);
+const corpusLocalFavorites = new IndexedDbLocalFavorites({ ownerId: CORPUS_OWNER_ID }, indexedDbClient);
 
 export async function readCorpusSize(): Promise<number> {
-  return (await corpusOrder.getAll()).length;
+  return (await corpusLocalFavorites.getAll()).length;
 }
 
 export async function readFavoriteCount(): Promise<number> {
-  return (await labFavorites.getAll()).length;
+  return (await labLocalFavorites.getAll()).length;
 }
 
 export async function setFavoriteCount(count: number): Promise<void> {
-  await labFavorites.setAll((await corpusOrder.getAll()).slice(0, count));
+  await labLocalFavorites.setAll((await corpusLocalFavorites.getAll()).slice(0, count));
 }
 
 export function requestReset(): void {
@@ -69,20 +69,20 @@ export async function pickCorpusFile(): Promise<File | null> {
 
 export async function importCorpus(file: File, onProgress: (count: number) => void): Promise<void> {
   const postIds: string[] = [];
-  let batch: Post[] = [];
+  let batchPosts: Post[] = [];
 
   for await (const line of readLines(file)) {
     if (line.trim() !== "") {
-      batch.push(JSON.parse(line) as Post);
+      batchPosts.push(JSON.parse(line) as Post);
     }
 
-    if (batch.length === WRITE_BATCH_SIZE) {
-      postIds.push(...await writePosts(batch));
-      batch = [];
+    if (batchPosts.length === WRITE_BATCH_SIZE) {
+      postIds.push(...await writePosts(batchPosts));
+      batchPosts = [];
       onProgress(postIds.length);
     }
   }
-  postIds.push(...await writePosts(batch));
+  postIds.push(...await writePosts(batchPosts));
   await writeCorpusOrder(postIds);
 }
 
@@ -91,12 +91,12 @@ export async function pullCorpus(onProgress: (count: number) => void): Promise<v
   let nextPage: Promise<CachePage> | null = fetchCachePage(0);
 
   while (nextPage !== null) {
-    const page: CachePage = await nextPage;
+    const cachePage: CachePage = await nextPage;
 
-    nextPage = page.next === null ? null : fetchCachePage(page.next);
-    const posts = page.posts.flatMap(post => {
+    nextPage = cachePage.next === null ? null : fetchCachePage(cachePage.next);
+    const posts = cachePage.frozenCobaltPosts.flatMap(frozenCobaltPost => {
       try {
-        return [decodeFrozenCobaltPost(post, file => rule34CdnClient.mintMediaFromParts(file)).post];
+        return [decodeFrozenCobaltPost(frozenCobaltPost, file => rule34CdnClient.mintMediaFromParts(file)).post];
       } catch {
         return [];
       }
@@ -109,7 +109,7 @@ export async function pullCorpus(onProgress: (count: number) => void): Promise<v
 }
 
 export async function exportCorpus(): Promise<number> {
-  const postIds = await corpusOrder.getAll();
+  const postIds = await corpusLocalFavorites.getAll();
   const parts: string[] = [];
 
   for (let start = 0; start < postIds.length; start += WRITE_BATCH_SIZE) {
@@ -138,8 +138,8 @@ async function writePosts(posts: readonly Post[]): Promise<string[]> {
 }
 
 async function writeCorpusOrder(postIds: readonly string[]): Promise<void> {
-  await corpusOrder.setAll(postIds);
-  await labFavorites.setAll(postIds);
+  await corpusLocalFavorites.setAll(postIds);
+  await labLocalFavorites.setAll(postIds);
 }
 
 async function *readLines(file: File): AsyncGenerator<string> {

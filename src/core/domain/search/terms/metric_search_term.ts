@@ -15,22 +15,22 @@ export class MetricSearchTerm extends SearchTerm {
   public readonly comparison: MetricComparison;
   protected override readonly baseCost: number = 0;
   private compare: Comparator;
-  private rightValue: (item: MetricSearchable) => number;
-  private leftValue: (item: MetricSearchable) => number;
+  private rightValue: (metricSearchable: MetricSearchable) => number;
+  private leftValue: (metricSearchable: MetricSearchable) => number;
 
-  constructor(parsed: ParsedTerm, comparison: MetricComparison) {
-    super(parsed);
-    this.compare = comparators[comparison.operator];
-    this.leftValue = (item): number => item.getMetric(comparison.metric);
-    this.rightValue = comparison.isRelative ? (item): number => item.getMetric(comparison.rightHandMetric) : (): number => comparison.value;
-    this.comparison = comparison;
+  constructor(parsedTerm: ParsedTerm, metricComparison: MetricComparison) {
+    super(parsedTerm);
+    this.compare = comparators[metricComparison.comparator];
+    this.leftValue = (metricSearchable): number => metricSearchable.getMetric(metricComparison.metric);
+    this.rightValue = metricComparison.isRelative ? (metricSearchable): number => metricSearchable.getMetric(metricComparison.rightHandMetric) : (): number => metricComparison.value;
+    this.comparison = metricComparison;
   }
 
-  protected override matchesPositive(item: MetricSearchable): boolean {
-    return this.compare(this.leftValue(item), this.rightValue(item));
+  protected override matchesPositive(metricSearchable: MetricSearchable): boolean {
+    return this.compare(this.leftValue(metricSearchable), this.rightValue(metricSearchable));
   }
 
-  protected override matchesNegated(item: MetricSearchable): boolean {
-    return !this.compare(this.leftValue(item), this.rightValue(item));
+  protected override matchesNegated(metricSearchable: MetricSearchable): boolean {
+    return !this.compare(this.leftValue(metricSearchable), this.rightValue(metricSearchable));
   }
 }

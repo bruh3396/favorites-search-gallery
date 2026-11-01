@@ -6,10 +6,10 @@ import { advanceAndSettle } from "@/testing/async";
 describe("RateLimiter", () => {
   test("starts tasks no faster than its rate", async() => {
     const scheduler = new MemoryScheduler();
-    const limiter = new RateLimiter({ concurrency: 10, ratePerSecond: 10 }, scheduler);
+    const rateLimiter = new RateLimiter({ concurrency: 10, ratePerSecond: 10 }, scheduler);
     const task = vi.fn(() => Promise.resolve());
 
-    [1, 2, 3].forEach(() => limiter.run(task));
+    [1, 2, 3].forEach(() => rateLimiter.run(task));
     await advanceAndSettle(scheduler, 0);
     expect(task).toHaveBeenCalledOnce();
     await advanceAndSettle(scheduler, 100);
@@ -27,12 +27,12 @@ describe("RateLimiter", () => {
 
   test("runs no more tasks at once than its concurrency", async() => {
     const scheduler = new MemoryScheduler();
-    const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
+    const rateLimiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
     const first = Promise.withResolvers<void>();
     const second = vi.fn(() => Promise.resolve());
 
-    limiter.run(() => first.promise);
-    limiter.run(second);
+    rateLimiter.run(() => first.promise);
+    rateLimiter.run(second);
     await advanceAndSettle(scheduler, 100);
     expect(second).not.toHaveBeenCalled();
     first.resolve();
@@ -50,16 +50,16 @@ describe("RateLimiter", () => {
 
   test("drops a waiting task when its signal aborts", async() => {
     const scheduler = new MemoryScheduler();
-    const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
+    const rateLimiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
     const first = Promise.withResolvers<void>();
     const controller = new AbortController();
     const dropped = vi.fn(() => Promise.resolve());
     const next = vi.fn(() => Promise.resolve());
 
-    limiter.run(() => first.promise);
-    const waiting = limiter.run(dropped, controller.signal);
+    rateLimiter.run(() => first.promise);
+    const waiting = rateLimiter.run(dropped, controller.signal);
 
-    limiter.run(next);
+    rateLimiter.run(next);
     controller.abort(new Error("left"));
     await expect(waiting).rejects.toThrow("left");
     first.resolve();
@@ -70,12 +70,12 @@ describe("RateLimiter", () => {
 
   test("rejects a task whose signal already aborted without taking a slot", async() => {
     const scheduler = new MemoryScheduler();
-    const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
+    const rateLimiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
     const task = vi.fn(() => Promise.resolve());
     const next = vi.fn(() => Promise.resolve());
 
-    await expect(limiter.run(task, AbortSignal.abort(new Error("gone")))).rejects.toThrow("gone");
-    limiter.run(next);
+    await expect(rateLimiter.run(task, AbortSignal.abort(new Error("gone")))).rejects.toThrow("gone");
+    rateLimiter.run(next);
     await advanceAndSettle(scheduler, 0);
     expect(task).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledOnce();
@@ -83,12 +83,12 @@ describe("RateLimiter", () => {
 
   test("skips a task whose signal aborts while it waits for its turn", async() => {
     const scheduler = new MemoryScheduler();
-    const limiter = new RateLimiter({ concurrency: 2, ratePerSecond: 1 }, scheduler);
+    const rateLimiter = new RateLimiter({ concurrency: 2, ratePerSecond: 1 }, scheduler);
     const controller = new AbortController();
     const task = vi.fn(() => Promise.resolve());
 
-    limiter.run(() => Promise.resolve());
-    const waiting = limiter.run(task, controller.signal);
+    rateLimiter.run(() => Promise.resolve());
+    const waiting = rateLimiter.run(task, controller.signal);
 
     controller.abort(new Error("left"));
     await advanceAndSettle(scheduler, 1_000);
@@ -98,11 +98,11 @@ describe("RateLimiter", () => {
 
   test("frees the slot when a task fails", async() => {
     const scheduler = new MemoryScheduler();
-    const limiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
+    const rateLimiter = new RateLimiter({ concurrency: 1, ratePerSecond: 1_000 }, scheduler);
     const next = vi.fn(() => Promise.resolve());
 
-    limiter.run(() => Promise.reject(new Error("down"))).catch(() => { });
-    limiter.run(next);
+    rateLimiter.run(() => Promise.reject(new Error("down"))).catch(() => { });
+    rateLimiter.run(next);
     await advanceAndSettle(scheduler, 100);
     expect(next).toHaveBeenCalledOnce();
   });

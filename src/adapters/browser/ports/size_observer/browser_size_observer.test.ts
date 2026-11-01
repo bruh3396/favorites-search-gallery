@@ -17,8 +17,8 @@ class FakeResizeObserver {
     FakeResizeObserver.instances.push(this);
   }
 
-  public emit(entries: readonly ObservedResize[]): void {
-    this.callback(entries as unknown as ResizeObserverEntry[], this as unknown as ResizeObserver);
+  public emit(observedResizes: readonly ObservedResize[]): void {
+    this.callback(observedResizes as unknown as ResizeObserverEntry[], this as unknown as ResizeObserver);
   }
 }
 
@@ -41,15 +41,15 @@ describe("BrowserSizeObserver", () => {
     const element = createTarget();
     const onResize = vi.fn();
     const sizeObserver = new BrowserSizeObserver();
-    const resizeObserver = FakeResizeObserver.instances[0];
+    const fakeResizeObserver = FakeResizeObserver.instances[0];
 
     sizeObserver.observe(element, onResize);
-    resizeObserver.emit([
+    fakeResizeObserver.emit([
       { target: element, contentRect: { width: 1_000, height: 500 } },
       { target: createTarget(), contentRect: { width: 1, height: 1 } }
     ]);
 
-    expect(resizeObserver.observe).toHaveBeenCalledWith(element);
+    expect(fakeResizeObserver.observe).toHaveBeenCalledWith(element);
     expect(onResize.mock.calls).toEqual([[{ width: 1_000, height: 500, devicePixelWidth: 1_000 }]]);
   });
 
@@ -80,12 +80,12 @@ describe("BrowserSizeObserver", () => {
     const element = createTarget();
     const onResize = vi.fn();
     const sizeObserver = new BrowserSizeObserver();
-    const resizeObserver = FakeResizeObserver.instances[0];
+    const fakeResizeObserver = FakeResizeObserver.instances[0];
 
     sizeObserver.observe(element, onResize)();
-    resizeObserver.emit([{ target: element, contentRect: { width: 1, height: 1 } }]);
+    fakeResizeObserver.emit([{ target: element, contentRect: { width: 1, height: 1 } }]);
 
-    expect(resizeObserver.unobserve).toHaveBeenCalledWith(element);
+    expect(fakeResizeObserver.unobserve).toHaveBeenCalledWith(element);
     expect(onResize).not.toHaveBeenCalled();
   });
 
@@ -93,14 +93,14 @@ describe("BrowserSizeObserver", () => {
     const element = createTarget();
     const onNewResize = vi.fn();
     const sizeObserver = new BrowserSizeObserver();
-    const resizeObserver = FakeResizeObserver.instances[0];
+    const fakeResizeObserver = FakeResizeObserver.instances[0];
     const stopOldSubscription = sizeObserver.observe(element, vi.fn());
 
     sizeObserver.observe(element, onNewResize);
     stopOldSubscription();
-    resizeObserver.emit([{ target: element, contentRect: { width: 2, height: 3 } }]);
+    fakeResizeObserver.emit([{ target: element, contentRect: { width: 2, height: 3 } }]);
 
-    expect(resizeObserver.unobserve).not.toHaveBeenCalled();
+    expect(fakeResizeObserver.unobserve).not.toHaveBeenCalled();
     expect(onNewResize).toHaveBeenCalledWith({ width: 2, height: 3, devicePixelWidth: 2 });
   });
 });

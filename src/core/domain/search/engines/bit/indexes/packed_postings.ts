@@ -1,19 +1,19 @@
 import { PositionArray } from "@/core/domain/search/engines/bit/posting/position_array";
 
 export class PackedPostings {
-  private positions: PositionArray = new Uint8Array(0);
+  private positionArray: PositionArray = new Uint8Array(0);
   private offsets: Uint32Array = new Uint32Array(0);
   private readonly slotByTerm = new Map<string, number>();
 
   public pack(sparseTerms: ReadonlyArray<readonly [string, number[]]>, totalPositions: number, maxPosition: number): void {
     this.slotByTerm.clear();
-    this.positions = newPositionArray(totalPositions, maxPosition);
+    this.positionArray = newPositionArray(totalPositions, maxPosition);
     this.offsets = new Uint32Array(sparseTerms.length + 1);
     let cursor = 0;
     let slot = 0;
 
     for (const [term, positions] of sparseTerms) {
-      this.positions.set(positions, cursor);
+      this.positionArray.set(positions, cursor);
       this.slotByTerm.set(term, slot);
       this.offsets[slot] = cursor;
       cursor += positions.length;
@@ -35,14 +35,14 @@ export class PackedPostings {
     return slot === undefined ? undefined : this.positionsAt(slot);
   }
 
-  public forEachTerm(visit: (term: string, positions: PositionArray) => void): void {
+  public forEachTerm(visit: (term: string, positionArray: PositionArray) => void): void {
     for (const [term, slot] of this.slotByTerm) {
       visit(term, this.positionsAt(slot));
     }
   }
 
   private positionsAt(slot: number): PositionArray {
-    return this.positions.subarray(this.offsets[slot], this.offsets[slot + 1]);
+    return this.positionArray.subarray(this.offsets[slot], this.offsets[slot + 1]);
   }
 }
 

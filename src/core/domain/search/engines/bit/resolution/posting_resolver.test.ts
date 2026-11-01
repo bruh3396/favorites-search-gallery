@@ -23,14 +23,14 @@ function getMetric(doc: Doc, metric: Metric): number {
 
 function setup(): (term: string) => number[] {
   const bitIndex = new BitIndex<Doc>({ getTerms: doc => doc.tags, stringInterner: new StringInterner() });
-  const metricIndex = new MetricBitIndex<Doc>(getMetric);
-  const wildcardResolver = new WildcardPostingResolver({ bitIndex: bitIndex, stringInterner: new StringInterner() });
-  const resolver = new PostingResolver(bitIndex, metricIndex, wildcardResolver);
+  const metricBitIndex = new MetricBitIndex<Doc>(getMetric);
+  const wildcardPostingResolver = new WildcardPostingResolver({ bitIndex, stringInterner: new StringInterner() });
+  const postingResolver = new PostingResolver(bitIndex, metricBitIndex, wildcardPostingResolver);
 
   bitIndex.build([apple, cherry, lemon]);
-  metricIndex.build(bitIndex.width, bitIndex.allDocs());
-  wildcardResolver.index(bitIndex.indexedTerms());
-  return term => bitIndex.docsFrom(bitIndex.bitSetFrom(resolver.resolve(parseSearchTerm(term)))).map(doc => doc.id);
+  metricBitIndex.build(bitIndex.width, bitIndex.allDocs());
+  wildcardPostingResolver.index(bitIndex.indexedTerms());
+  return term => bitIndex.docsFrom(bitIndex.bitSetFrom(postingResolver.resolve(parseSearchTerm(term)))).map(doc => doc.id);
 }
 
 describe("PostingResolver", () => {

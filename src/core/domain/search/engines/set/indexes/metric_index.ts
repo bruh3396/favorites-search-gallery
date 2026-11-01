@@ -2,7 +2,7 @@ import { Metric } from "@/core/domain/search/metric";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";
 
-type AbsoluteComparison = Pick<MetricComparison, "metric" | "operator" | "value">;
+type AbsoluteComparison = Pick<MetricComparison, "metric" | "comparator" | "value">;
 
 interface Entry<Doc> {
   readonly value: number;
@@ -69,8 +69,8 @@ export class MetricIndex<Doc> {
     }
   }
 
-  public docsMatching(comparison: AbsoluteComparison): ReadonlySet<Doc> {
-    const { entries, start, end } = this.matchingRange(comparison);
+  public docsMatching(absoluteComparison: AbsoluteComparison): ReadonlySet<Doc> {
+    const { entries, start, end } = this.matchingRange(absoluteComparison);
     const docs = new Set<Doc>();
 
     for (let index = start; index < end; index += 1) {
@@ -79,16 +79,16 @@ export class MetricIndex<Doc> {
     return docs;
   }
 
-  private matchingRange(comparison: AbsoluteComparison): { entries: Entry<Doc>[]; start: number; end: number } {
-    const entries = this.entriesByMetric.get(comparison.metric) ?? [];
+  private matchingRange(absoluteComparison: AbsoluteComparison): { entries: Entry<Doc>[]; start: number; end: number } {
+    const entries = this.entriesByMetric.get(absoluteComparison.metric) ?? [];
 
-    switch (comparison.operator) {
+    switch (absoluteComparison.comparator) {
       case ":<":
-        return { entries, start: 0, end: this.lowerBound(entries, comparison.value) };
+        return { entries, start: 0, end: this.lowerBound(entries, absoluteComparison.value) };
       case ":>":
-        return { entries, start: this.upperBound(entries, comparison.value), end: entries.length };
+        return { entries, start: this.upperBound(entries, absoluteComparison.value), end: entries.length };
       default:
-        return { entries, start: this.lowerBound(entries, comparison.value), end: this.upperBound(entries, comparison.value) };
+        return { entries, start: this.lowerBound(entries, absoluteComparison.value), end: this.upperBound(entries, absoluteComparison.value) };
     }
   }
 

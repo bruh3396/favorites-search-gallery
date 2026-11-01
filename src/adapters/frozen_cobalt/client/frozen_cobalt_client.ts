@@ -35,8 +35,8 @@ export class FrozenCobaltClient {
     private readonly configuration: FrozenCobaltClientConfiguration,
     private readonly dependencies: FrozenCobaltClientDependencies
   ) {
-    const postLimiter = new RateLimiter(POST_RATE_LIMIT, dependencies.scheduler);
-    const tagLimiter = new RateLimiter(TAG_RATE_LIMIT, dependencies.scheduler);
+    const postRateLimiter = new RateLimiter(POST_RATE_LIMIT, dependencies.scheduler);
+    const tagRateLimiter = new RateLimiter(TAG_RATE_LIMIT, dependencies.scheduler);
 
     this.headers = {
       "Content-Type": "application/json",
@@ -45,11 +45,11 @@ export class FrozenCobaltClient {
       "X-Platform": configuration.identity?.platform ?? ""
     };
     this.postResolver = new CoalescingResolver(REQUEST_COALESCING, {
-      resolve: (postIds): Promise<Resolved> => postLimiter.run(() => this.requestBatch("posts", { ids: postIds }, postIds)),
+      resolve: (postIds): Promise<Resolved> => postRateLimiter.run(() => this.requestBatch("posts", { ids: postIds }, postIds)),
       scheduler: dependencies.scheduler
     });
     this.tagResolver = new CoalescingResolver(REQUEST_COALESCING, {
-      resolve: (tagNames): Promise<Resolved> => tagLimiter.run(() => this.requestBatch("tags", { tagNames }, tagNames)),
+      resolve: (tagNames): Promise<Resolved> => tagRateLimiter.run(() => this.requestBatch("tags", { tagNames }, tagNames)),
       scheduler: dependencies.scheduler
     });
   }

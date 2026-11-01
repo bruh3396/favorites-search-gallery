@@ -52,7 +52,7 @@ interface Rule34Dependencies {
   localKeyedValues: LocalKeyedValues;
 }
 
-type StartApp = (environment: Environment, dependencies: Rule34Dependencies) => void;
+type StartApp = (environment: Environment, rule34Dependencies: Rule34Dependencies) => void;
 
 const APPS: Record<AppMode, StartApp> = {
   favorites: startFavoritesApp,
@@ -75,7 +75,7 @@ function createRule34Dependencies(environment: Environment, rule34Document: Rule
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
   const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
   const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
-  const hostPage = new Rule34HostPage({ mode: environment.mode }, { rule34Document, page: new BrowserHostPage() });
+  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, page: new BrowserHostPage() });
   return {
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,
     hostPage, localKeyedValues: new BrowserLocalKeyedValues()
@@ -92,18 +92,18 @@ function createFrozenCobaltClient(
   }, { scheduler, fetch });
 }
 
-function startFavoritesApp(environment: Environment, dependencies: Rule34Dependencies): void {
-  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = dependencies;
-  const frozenCobaltClient = createFrozenCobaltClient(environment, dependencies);
+function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34Dependencies): void {
+  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = rule34Dependencies;
+  const frozenCobaltClient = createFrozenCobaltClient(environment, rule34Dependencies);
   const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
   const remotePosts = new FallbackRemotePosts({
-    primary: new FrozenCobaltRemotePosts({
+    primaryRemotePosts: new FrozenCobaltRemotePosts({
       frozenCobaltClient,
       mintMedia: file => rule34CdnClient.mintMediaFromParts(file),
       scheduler,
       randomSource
     }),
-    fallback: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
+    fallbackRemotePosts: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
   });
 
   frozenCobaltClient.ping();
@@ -160,7 +160,7 @@ function main(): void {
   const rule34Document = new Rule34Document();
   const environment = readEnvironment(rule34Document);
 
-  APPS[environment.mode](environment, createRule34Dependencies(environment, rule34Document));
+  APPS[environment.appMode](environment, createRule34Dependencies(environment, rule34Document));
 }
 
 main();

@@ -5,16 +5,16 @@ import { DurablePostings } from "@/core/domain/search/engines/bit/indexes/durabl
 const CAPACITY = 64;
 
 function setup(entries: [string, number[]][]): DurablePostings {
-  const postings = new DurablePostings();
+  const durablePostings = new DurablePostings();
 
-  postings.materializeFrom(entries, CAPACITY);
-  return postings;
+  durablePostings.materializeFrom(entries, CAPACITY);
+  return durablePostings;
 }
 
-function collectPostings(postings: DurablePostings): Record<string, number[]> {
+function collectPostings(durablePostings: DurablePostings): Record<string, number[]> {
   const collected: Record<string, number[]> = {};
 
-  postings.forEachPosting((term, positions) => {
+  durablePostings.forEachPosting((term, positions) => {
     collected[term] = positions;
   });
   return collected;
@@ -31,19 +31,19 @@ describe("DurablePostings", () => {
     });
 
     test("replaces what was stored before", () => {
-      const postings = setup([["fruit", [0, 1, 2]], ["sweet", [0]]]);
+      const durablePostings = setup([["fruit", [0, 1, 2]], ["sweet", [0]]]);
 
-      postings.materializeFrom([["sour", [3]]], CAPACITY);
-      expect(postings.terms()).toEqual(["sour"]);
+      durablePostings.materializeFrom([["sour", [3]]], CAPACITY);
+      expect(durablePostings.terms()).toEqual(["sour"]);
     });
   });
 
   describe("findPosting", () => {
     test("returns a posting with the term's positions", () => {
-      const postings = setup([["fruit", [0, 1, 2]], ["sweet", [5]]]);
+      const durablePostings = setup([["fruit", [0, 1, 2]], ["sweet", [5]]]);
 
-      expect(postings.findPosting("fruit")?.toBitSet(CAPACITY).positions()).toEqual([0, 1, 2]);
-      expect(postings.findPosting("sweet")?.toBitSet(CAPACITY).positions()).toEqual([5]);
+      expect(durablePostings.findPosting("fruit")?.toBitSet(CAPACITY).positions()).toEqual([0, 1, 2]);
+      expect(durablePostings.findPosting("sweet")?.toBitSet(CAPACITY).positions()).toEqual([5]);
     });
 
     test("returns undefined for an unknown term", () => {
@@ -63,10 +63,10 @@ describe("DurablePostings", () => {
     });
 
     test("hands out positions the visitor may change", () => {
-      const postings = setup([["sweet", [5]]]);
+      const durablePostings = setup([["sweet", [5]]]);
 
-      postings.forEachPosting((_, positions) => positions.push(9));
-      expect(collectPostings(postings)).toEqual({ sweet: [5] });
+      durablePostings.forEachPosting((_, positions) => positions.push(9));
+      expect(collectPostings(durablePostings)).toEqual({ sweet: [5] });
     });
   });
 });

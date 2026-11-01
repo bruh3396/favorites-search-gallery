@@ -38,8 +38,8 @@ function setup(mode: LightboxMode = "full"): {
     sizeObserver: new MemorySizeObserver(),
     remoteMedia,
     actions: { openPostPage: vi.fn(), openOriginal: vi.fn(), download: vi.fn() },
-    volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storage }),
-    muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storage }),
+    volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
+    muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
     locateItem: () => undefined,
     mode: new Signal(mode)
   });

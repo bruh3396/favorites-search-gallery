@@ -9,39 +9,39 @@ function mutateTags(post: Readonly<Post>, tags: string): void {
 
 describe("MemoryLocalPosts", () => {
   test("reads back what it wrote, in the order asked, skipping missing ids", async() => {
-    const posts = new MemoryLocalPosts();
+    const localPosts = new MemoryLocalPosts();
 
-    await posts.setMany([createPost({ id: "1", tags: "apple" }), createPost({ id: "2", tags: "banana" })]);
+    await localPosts.setMany([createPost({ id: "1", tags: "apple" }), createPost({ id: "2", tags: "banana" })]);
 
-    expect((await posts.getMany(["2", "missing", "1"])).map(post => post.tags)).toEqual(["banana", "apple"]);
+    expect((await localPosts.getMany(["2", "missing", "1"])).map(post => post.tags)).toEqual(["banana", "apple"]);
   });
 
   test("overwrites a post with the same id", async() => {
-    const posts = new MemoryLocalPosts();
+    const localPosts = new MemoryLocalPosts();
 
-    await posts.setMany([createPost({ id: "1", tags: "old" })]);
-    await posts.setMany([createPost({ id: "1", tags: "new" })]);
+    await localPosts.setMany([createPost({ id: "1", tags: "old" })]);
+    await localPosts.setMany([createPost({ id: "1", tags: "new" })]);
 
-    expect((await posts.getMany(["1"])).map(post => post.tags)).toEqual(["new"]);
+    expect((await localPosts.getMany(["1"])).map(post => post.tags)).toEqual(["new"]);
   });
 
   test("writes only posts it does not hold yet through setManyIfAbsent", async() => {
-    const posts = new MemoryLocalPosts();
+    const localPosts = new MemoryLocalPosts();
 
-    await posts.setMany([createPost({ id: "1", tags: "complete" })]);
-    await posts.setManyIfAbsent([createPost({ id: "1", tags: "scraped" }), createPost({ id: "2", tags: "scraped" })]);
+    await localPosts.setMany([createPost({ id: "1", tags: "complete" })]);
+    await localPosts.setManyIfAbsent([createPost({ id: "1", tags: "scraped" }), createPost({ id: "2", tags: "scraped" })]);
 
-    expect((await posts.getMany(["1", "2"])).map(post => post.tags)).toEqual(["complete", "scraped"]);
+    expect((await localPosts.getMany(["1", "2"])).map(post => post.tags)).toEqual(["complete", "scraped"]);
   });
 
   test("is unaffected by mutating a post after writing or reading it", async() => {
-    const posts = new MemoryLocalPosts();
-    const written = createPost({ id: "1", tags: "apple" });
+    const localPosts = new MemoryLocalPosts();
+    const writtenPost = createPost({ id: "1", tags: "apple" });
 
-    await posts.setMany([written]);
-    mutateTags(written, "changed");
-    mutateTags((await posts.getMany(["1"]))[0], "changed");
+    await localPosts.setMany([writtenPost]);
+    mutateTags(writtenPost, "changed");
+    mutateTags((await localPosts.getMany(["1"]))[0], "changed");
 
-    expect((await posts.getMany(["1"]))[0].tags).toBe("apple");
+    expect((await localPosts.getMany(["1"]))[0].tags).toBe("apple");
   });
 });

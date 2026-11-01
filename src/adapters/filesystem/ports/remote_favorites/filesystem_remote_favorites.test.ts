@@ -5,19 +5,19 @@ import { FilesystemPostFile } from "@/adapters/filesystem/client/filesystem_post
 import { createPost } from "@/testing/post";
 
 function createRemoteFavorites(...files: [id: string, modifiedAt: number][]): FilesystemRemoteFavorites {
-  const postFiles: FilesystemPostFile[] = files.map(([id, modifiedAt]) => ({ post: createPost({ id }), modifiedAt }));
+  const filesystemPostFiles: FilesystemPostFile[] = files.map(([id, modifiedAt]) => ({ post: createPost({ id }), modifiedAt }));
   return new FilesystemRemoteFavorites({
-    readPostFiles: () => Promise.resolve([...postFiles]),
-    countPostFiles: () => Promise.resolve(postFiles.length),
+    readPostFiles: () => Promise.resolve([...filesystemPostFiles]),
+    countPostFiles: () => Promise.resolve(filesystemPostFiles.length),
     deletePostFile: () => Promise.resolve()
   });
 }
 
-async function fetchAllPostIds(source: FilesystemRemoteFavorites): Promise<string[]> {
-  const delivered: Post[] = [];
+async function fetchAllPostIds(remoteFavorites: FilesystemRemoteFavorites): Promise<string[]> {
+  const deliveredPosts: Post[] = [];
 
-  await source.fetchAll(posts => delivered.push(...posts));
-  return delivered.map(post => post.id);
+  await remoteFavorites.fetchAll(posts => deliveredPosts.push(...posts));
+  return deliveredPosts.map(post => post.id);
 }
 
 describe("FilesystemRemoteFavorites", () => {
@@ -30,9 +30,9 @@ describe("FilesystemRemoteFavorites", () => {
   });
 
   test("finds the posts newer than the local favorites, newest first", async() => {
-    const found = await createRemoteFavorites(["1", 1], ["2", 2], ["3", 3], ["4", 4]).findNew(["2", "1"]);
+    const foundPosts = await createRemoteFavorites(["1", 1], ["2", 2], ["3", 3], ["4", 4]).findNew(["2", "1"]);
 
-    expect(found.map(post => post.id)).toEqual(["4", "3"]);
+    expect(foundPosts.map(post => post.id)).toEqual(["4", "3"]);
   });
 
   test("finds the local ids that have no post file, in local order", async() => {

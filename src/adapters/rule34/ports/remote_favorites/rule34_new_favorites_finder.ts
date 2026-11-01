@@ -23,30 +23,30 @@ export class Rule34NewFavoritesFinder {
     private readonly dependencies: Rule34NewFavoritesFinderDependencies
   ) { }
 
-  public async findNew(localPostIds: readonly string[], firstPage?: Post[]): Promise<Post[]> {
+  public async findNew(localPostIds: readonly string[], firstPagePosts?: Post[]): Promise<Post[]> {
     const localFavoriteIndexByPostId = new Map(localPostIds.map((id, index) => [id, index]));
-    const remoteFavorites: Post[] = [];
+    const remotePosts: Post[] = [];
     let pageIndex = 0;
-    let page = firstPage ?? await this.dependencies.fetch(pageIndex);
+    let pagePosts = firstPagePosts ?? await this.dependencies.fetch(pageIndex);
 
-    remoteFavorites.push(...page);
-    let localRun = this.findLocalRun(remoteFavorites, localFavoriteIndexByPostId);
+    remotePosts.push(...pagePosts);
+    let localRun = this.findLocalRun(remotePosts, localFavoriteIndexByPostId);
 
-    while (localRun.length < this.configuration.minimumLocalRunLength && page.length >= this.configuration.pageSize) {
+    while (localRun.length < this.configuration.minimumLocalRunLength && pagePosts.length >= this.configuration.pageSize) {
       pageIndex += 1;
       await this.dependencies.scheduler.sleep(this.configuration.fetchDelay);
-      page = await this.dependencies.fetch(pageIndex);
-      remoteFavorites.push(...page);
-      localRun = this.findLocalRun(remoteFavorites, localFavoriteIndexByPostId);
+      pagePosts = await this.dependencies.fetch(pageIndex);
+      remotePosts.push(...pagePosts);
+      localRun = this.findLocalRun(remotePosts, localFavoriteIndexByPostId);
     }
-    return remoteFavorites.slice(0, localRun.remoteStart);
+    return remotePosts.slice(0, localRun.remoteStart);
   }
 
-  private findLocalRun(remoteFavorites: readonly Post[], localFavoriteIndexByPostId: ReadonlyMap<string, number>): LocalRun {
+  private findLocalRun(remotePosts: readonly Post[], localFavoriteIndexByPostId: ReadonlyMap<string, number>): LocalRun {
     let remoteStart = 0;
     let lastLocalIndex = -1;
 
-    for (const [remoteIndex, post] of remoteFavorites.entries()) {
+    for (const [remoteIndex, post] of remotePosts.entries()) {
       const localIndex = localFavoriteIndexByPostId.get(post.id);
 
       if (localIndex === undefined) {
@@ -64,6 +64,6 @@ export class Rule34NewFavoritesFinder {
         return { remoteStart, length };
       }
     }
-    return { remoteStart, length: remoteFavorites.length - remoteStart };
+    return { remoteStart, length: remotePosts.length - remoteStart };
   }
 }

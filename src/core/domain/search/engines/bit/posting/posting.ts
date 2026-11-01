@@ -4,94 +4,94 @@ import { PositionArray } from "@/core/domain/search/engines/bit/posting/position
 export interface Posting {
   readonly cardinality: number;
   toBitSet(size: number): BitSet;
-  andInto(working: BitSet): boolean;
-  andNotInto(working: BitSet): boolean;
-  orInto(accumulator: BitSet): void;
-  orComplementInto(accumulator: BitSet): void;
+  andInto(workingBitSet: BitSet): boolean;
+  andNotInto(workingBitSet: BitSet): boolean;
+  orInto(accumulatorBitSet: BitSet): void;
+  orComplementInto(accumulatorBitSet: BitSet): void;
 }
 
 export class DensePosting implements Posting {
   private cachedCount = -1;
 
-  constructor(private readonly bits: BitSet) { }
+  constructor(private readonly bitSet: BitSet) { }
 
   public get cardinality(): number {
     if (this.cachedCount < 0) {
-      this.cachedCount = this.bits.cardinality();
+      this.cachedCount = this.bitSet.cardinality();
     }
     return this.cachedCount;
   }
 
   public toBitSet(): BitSet {
-    return this.bits.clone();
+    return this.bitSet.clone();
   }
 
   public positions(): number[] {
-    return this.bits.positions();
+    return this.bitSet.positions();
   }
 
-  public andInto(working: BitSet): boolean {
-    return working.andInPlace(this.bits);
+  public andInto(workingBitSet: BitSet): boolean {
+    return workingBitSet.andInPlace(this.bitSet);
   }
 
-  public andNotInto(working: BitSet): boolean {
-    return working.andNotInPlace(this.bits);
+  public andNotInto(workingBitSet: BitSet): boolean {
+    return workingBitSet.andNotInPlace(this.bitSet);
   }
 
-  public orInto(accumulator: BitSet): void {
-    accumulator.orInPlace(this.bits);
+  public orInto(accumulatorBitSet: BitSet): void {
+    accumulatorBitSet.orInPlace(this.bitSet);
   }
 
-  public orComplementInto(accumulator: BitSet): void {
-    accumulator.orComplementInPlace(this.bits);
+  public orComplementInto(accumulatorBitSet: BitSet): void {
+    accumulatorBitSet.orComplementInPlace(this.bitSet);
   }
 }
 
 export class SparsePosting implements Posting {
-  constructor(private readonly positions: PositionArray) { }
+  constructor(private readonly positionArray: PositionArray) { }
 
   public get cardinality(): number {
-    return this.positions.length;
+    return this.positionArray.length;
   }
 
   public toBitSet(size: number): BitSet {
-    const working = new BitSet(size);
+    const workingBitSet = new BitSet(size);
 
-    for (const position of this.positions) {
-      working.set(position);
+    for (const position of this.positionArray) {
+      workingBitSet.set(position);
     }
-    return working;
+    return workingBitSet;
   }
 
-  public andInto(working: BitSet): boolean {
-    return working.andPositionsInPlace(this.positions);
+  public andInto(workingBitSet: BitSet): boolean {
+    return workingBitSet.andPositionsInPlace(this.positionArray);
   }
 
-  public andNotInto(working: BitSet): boolean {
-    for (const position of this.positions) {
-      working.clear(position);
+  public andNotInto(workingBitSet: BitSet): boolean {
+    for (const position of this.positionArray) {
+      workingBitSet.clear(position);
     }
-    return working.isEmpty();
+    return workingBitSet.isEmpty();
   }
 
-  public orInto(accumulator: BitSet): void {
-    for (const position of this.positions) {
-      accumulator.set(position);
+  public orInto(accumulatorBitSet: BitSet): void {
+    for (const position of this.positionArray) {
+      accumulatorBitSet.set(position);
     }
   }
 
-  public orComplementInto(accumulator: BitSet): void {
+  public orComplementInto(accumulatorBitSet: BitSet): void {
     const zerosAtPositions: number[] = [];
 
-    for (const position of this.positions) {
-      if (!accumulator.has(position)) {
+    for (const position of this.positionArray) {
+      if (!accumulatorBitSet.has(position)) {
         zerosAtPositions.push(position);
       }
     }
-    accumulator.fill();
+    accumulatorBitSet.fill();
 
     for (const position of zerosAtPositions) {
-      accumulator.clear(position);
+      accumulatorBitSet.clear(position);
     }
   }
 }
@@ -103,20 +103,20 @@ class EmptyPosting implements Posting {
     return new BitSet(size);
   }
 
-  public andInto(working: BitSet): boolean {
-    working.andPositionsInPlace(EMPTY_POSITIONS);
+  public andInto(workingBitSet: BitSet): boolean {
+    workingBitSet.andPositionsInPlace(EMPTY_POSITIONS);
     return true;
   }
 
-  public andNotInto(working: BitSet): boolean {
-    return working.isEmpty();
+  public andNotInto(workingBitSet: BitSet): boolean {
+    return workingBitSet.isEmpty();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public orInto(_accumulator: BitSet): void { }
 
-  public orComplementInto(accumulator: BitSet): void {
-    accumulator.fill();
+  public orComplementInto(accumulatorBitSet: BitSet): void {
+    accumulatorBitSet.fill();
   }
 }
 

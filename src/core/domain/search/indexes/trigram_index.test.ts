@@ -68,35 +68,35 @@ describe("TrigramIndex", () => {
 
   describe("add", () => {
     test("makes a new term findable", () => {
-      const index = new TrigramIndex(sortedTerms, new StringInterner());
+      const trigramIndex = new TrigramIndex(sortedTerms, new StringInterner());
 
-      expectSameTerms(index.termsMatching("mango"), []);
-      index.add("mango");
-      expect(index.termsMatching("mango")).toContain("mango");
+      expectSameTerms(trigramIndex.termsMatching("mango"), []);
+      trigramIndex.add("mango");
+      expect(trigramIndex.termsMatching("mango")).toContain("mango");
     });
   });
 
   describe("remove", () => {
     test("drops a term from its trigram buckets", () => {
-      const index = new TrigramIndex(sortedTerms, new StringInterner());
+      const trigramIndex = new TrigramIndex(sortedTerms, new StringInterner());
 
-      index.remove("banana");
-      expect(index.termsMatching("ana")).not.toContain("banana");
+      trigramIndex.remove("banana");
+      expect(trigramIndex.termsMatching("ana")).not.toContain("banana");
     });
 
     test("leaves a trigram unmatched once its last term is removed", () => {
-      const index = new TrigramIndex(new SortedArray<string>((a, b) => compareStrings(a, b), ["kiwi"]), new StringInterner());
+      const trigramIndex = new TrigramIndex(new SortedArray<string>((a, b) => compareStrings(a, b), ["kiwi"]), new StringInterner());
 
-      index.remove("kiwi");
-      expectSameTerms(index.termsMatching("kiwi"), []);
+      trigramIndex.remove("kiwi");
+      expectSameTerms(trigramIndex.termsMatching("kiwi"), []);
     });
 
     test("changes nothing for an unindexed term", () => {
-      const index = new TrigramIndex(sortedTerms, new StringInterner());
+      const trigramIndex = new TrigramIndex(sortedTerms, new StringInterner());
 
-      index.remove("zzzz");
-      index.remove("bananas");
-      expect(index.termsMatching("ana")).toContain("banana");
+      trigramIndex.remove("zzzz");
+      trigramIndex.remove("bananas");
+      expect(trigramIndex.termsMatching("ana")).toContain("banana");
     });
   });
 });

@@ -7,13 +7,13 @@ describe("BrowserLocalKeyedValues", () => {
   });
 
   test("reads back what it wrote, as a copy", () => {
-    const store = new BrowserLocalKeyedValues();
+    const localKeyedValues = new BrowserLocalKeyedValues();
     const value = { theme: "dark", columns: [5, 2] };
 
-    store.set("preferences", value);
+    localKeyedValues.set("preferences", value);
 
-    expect(store.get("preferences")).toEqual(value);
-    expect(store.get("preferences")).not.toBe(value);
+    expect(localKeyedValues.get("preferences")).toEqual(value);
+    expect(localKeyedValues.get("preferences")).not.toBe(value);
   });
 
   test("keeps values in localStorage as JSON", () => {
@@ -33,11 +33,11 @@ describe("BrowserLocalKeyedValues", () => {
   });
 
   test("removes a key", () => {
-    const store = new BrowserLocalKeyedValues();
+    const localKeyedValues = new BrowserLocalKeyedValues();
 
-    store.set("preferences", {});
-    store.remove("preferences");
+    localKeyedValues.set("preferences", {});
+    localKeyedValues.remove("preferences");
 
-    expect(store.get("preferences")).toBeUndefined();
+    expect(localKeyedValues.get("preferences")).toBeUndefined();
   });
 });

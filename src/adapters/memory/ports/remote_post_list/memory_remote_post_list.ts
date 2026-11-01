@@ -9,23 +9,23 @@ export interface MemoryRemotePostListConfiguration {
 
 export class MemoryRemotePostList implements RemotePostList {
   private readonly pageSize: number;
-  private readonly initialPage: PostListPage;
+  private readonly initialPostListPage: PostListPage;
 
-  constructor(configuration: MemoryRemotePostListConfiguration, private readonly memory: Pick<MemoryClient, "readPosts">) {
+  constructor(configuration: MemoryRemotePostListConfiguration, private readonly memoryClient: Pick<MemoryClient, "readPosts">) {
     this.pageSize = configuration.pageSize;
-    this.initialPage = this.readPage(configuration.initialPageIndex);
+    this.initialPostListPage = this.readPage(configuration.initialPageIndex);
   }
 
   public readInitialPage(): PostListPage {
-    return this.initialPage;
+    return this.initialPostListPage;
   }
 
   public fetchPage(index: number): Promise<PostListPage> {
-    return Promise.resolve(index === this.initialPage.index ? this.initialPage : this.readPage(index));
+    return Promise.resolve(index === this.initialPostListPage.index ? this.initialPostListPage : this.readPage(index));
   }
 
   private readPage(index: number): PostListPage {
     const start = index * this.pageSize;
-    return { index, posts: this.memory.readPosts().slice(start, start + this.pageSize) };
+    return { index, posts: this.memoryClient.readPosts().slice(start, start + this.pageSize) };
   }
 }

@@ -5,8 +5,8 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 
 const terms = ["banana", "band", "bandana", "brand", "grand", "island", "orange", "sand"].slice().sort();
 
-function matches(index: WildcardIndex, pattern: string): string[] {
-  return [...index.matchingTerms(parseWildcardSearchTerm(pattern))].sort();
+function matches(wildcardIndex: WildcardIndex, pattern: string): string[] {
+  return [...wildcardIndex.matchingTerms(parseWildcardSearchTerm(pattern))].sort();
 }
 
 function createIndex(): WildcardIndex {
@@ -42,29 +42,29 @@ describe("WildcardIndex", () => {
 
   describe("add", () => {
     test("makes a new term matchable", () => {
-      const index = new WildcardIndex(new StringInterner(), terms);
+      const wildcardIndex = new WildcardIndex(new StringInterner(), terms);
 
-      index.add("bandit");
-      expect(matches(index, "ban*")).toEqual(["banana", "band", "bandana", "bandit"]);
+      wildcardIndex.add("bandit");
+      expect(matches(wildcardIndex, "ban*")).toEqual(["banana", "band", "bandana", "bandit"]);
     });
   });
 
   describe("remove", () => {
     test("drops a term from matches", () => {
-      const index = new WildcardIndex(new StringInterner(), terms);
+      const wildcardIndex = new WildcardIndex(new StringInterner(), terms);
 
-      index.remove("band");
-      expect(matches(index, "ban*")).toEqual(["banana", "bandana"]);
+      wildcardIndex.remove("band");
+      expect(matches(wildcardIndex, "ban*")).toEqual(["banana", "bandana"]);
     });
   });
 
   describe("index", () => {
     test("replaces the corpus", () => {
-      const index = new WildcardIndex(new StringInterner(), terms);
+      const wildcardIndex = new WildcardIndex(new StringInterner(), terms);
 
-      index.index(["kiwi", "kumquat"]);
-      expect(matches(index, "ban*")).toEqual([]);
-      expect(matches(index, "k*")).toEqual(["kiwi", "kumquat"]);
+      wildcardIndex.index(["kiwi", "kumquat"]);
+      expect(matches(wildcardIndex, "ban*")).toEqual([]);
+      expect(matches(wildcardIndex, "k*")).toEqual(["kiwi", "kumquat"]);
     });
   });
 });

@@ -30,7 +30,7 @@ declare const USE_LOCAL_SERVER: boolean;
 declare const FAVORITES_OWNER_ID: string;
 
 const ENVIRONMENT: Environment = {
-  mode: "favorites",
+  appMode: "favorites",
   favoritesOwnerId: FAVORITES_OWNER_ID,
   ownsFavorites: true,
   blacklistedTags: [],
@@ -65,13 +65,13 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     localKeyedValues: new BrowserLocalKeyedValues(),
     remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch: boundFetch, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({
-      primary: new FrozenCobaltRemotePosts({
+      primaryRemotePosts: new FrozenCobaltRemotePosts({
         frozenCobaltClient,
         mintMedia: file => rule34CdnClient.mintMediaFromParts(file),
         scheduler,
         randomSource
       }),
-      fallback: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
+      fallbackRemotePosts: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
     }),
     remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
     visibilityObserver: new BrowserVisibilityObserver(),
@@ -86,11 +86,11 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
   };
 }
 
-const hostPage = new BrowserHostPage();
+const browserHostPage = new BrowserHostPage();
 
 composeFavoritesApp({
   userOwnsFavorites: ENVIRONMENT.ownsFavorites,
   blacklistedTags: ENVIRONMENT.blacklistedTags,
   favoritesOwnerId: ENVIRONMENT.favoritesOwnerId,
   colorScheme: ENVIRONMENT.colorScheme
-}, createFavoritesAppDependencies()).mount(hostPage.claimContent());
+}, createFavoritesAppDependencies()).mount(browserHostPage.claimContent());

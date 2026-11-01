@@ -1,4 +1,4 @@
-import { Fruit, FruitName, fruitDocs, index } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit, FruitName, fruits, invertedIndex } from "@/core/domain/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -12,25 +12,24 @@ import { StringInterner } from "@/core/utils/string/string_interner";
 
 const positionIndex = new PositionIndex<Fruit>();
 
-positionIndex.build(fruitDocs);
-const wildcardResolver = new WildcardDocResolver<Fruit>({ termIndex: index, stringInterner: new StringInterner() });
+positionIndex.build(fruits);
+const wildcardDocResolver = new WildcardDocResolver<Fruit>({ invertedIndex, stringInterner: new StringInterner() });
 
-wildcardResolver.index(index.indexedTerms());
+wildcardDocResolver.index(invertedIndex.indexedTerms());
 const metricIndex = new MetricIndex<Fruit>([], () => 0);
 const relativeMetricIndex = new RelativeMetricIndex<Fruit>([], () => 0);
-const docResolver = new DocResolver<Fruit>({ termIndex: index, metricIndex, relativeMetricIndex, positionIndex, wildcardResolver });
-const searcher = new SetEvaluator<Fruit>(index, docResolver);
+const docResolver = new DocResolver<Fruit>({ invertedIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardDocResolver });
+const setEvaluator = new SetEvaluator<Fruit>(invertedIndex, docResolver);
 
-function expectMatches(query: string, expectedNames: FruitName[]): void {
-  const expected = [...expectedNames].sort();
-  const actual = searcher.evaluate(parseSearchExpression(query), fruitDocs).map(item => item.name).sort();
+function expectMatches(query: string, expectedFruitNames: FruitName[]): void {
+  const actualFruitNames = setEvaluator.evaluate(parseSearchExpression(query), fruits).map(fruit => fruit.name).sort();
 
-  expect(actual, query).toEqual(expected);
+  expect(actualFruitNames, query).toEqual([...expectedFruitNames].sort());
 }
 
 describe("SetEvaluator", () => {
   test("returns every doc for an empty query", () => {
-    expectMatches("", fruitDocs.map(doc => doc.name));
+    expectMatches("", fruits.map(fruit => fruit.name));
   });
 
   test("matches a single exact term", () => {
@@ -91,15 +90,15 @@ describe("SetEvaluator", () => {
   });
 
   test("matches every doc outside a negated root expression", () => {
-    const actual = searcher.evaluate(SearchExpression.not(parseSearchExpression("red")), fruitDocs).map(item => item.name).sort();
+    const actualFruitNames = setEvaluator.evaluate(SearchExpression.not(parseSearchExpression("red")), fruits).map(fruit => fruit.name).sort();
 
-    expect(actual).toEqual(["banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
+    expect(actualFruitNames).toEqual(["banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
   });
 
   test("still excludes a negated root's matches when the candidate list dwarfs the index", () => {
-    const unindexed: Fruit[] = Array.from({ length: fruitDocs.length * 3 }, () => ({ name: "apple", tags: new Set<string>(), getMetric: (): number => 0 }));
-    const actual = searcher.evaluate(SearchExpression.not(parseSearchExpression("red")), [...fruitDocs, ...unindexed]).map(item => item.name).sort();
+    const unindexedFruits: Fruit[] = Array.from({ length: fruits.length * 3 }, () => ({ name: "apple", tags: new Set<string>(), getMetric: (): number => 0 }));
+    const actualFruitNames = setEvaluator.evaluate(SearchExpression.not(parseSearchExpression("red")), [...fruits, ...unindexedFruits]).map(fruit => fruit.name).sort();
 
-    expect(actual).toEqual(["banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
+    expect(actualFruitNames).toEqual(["banana", "blueberry", "grape", "kiwi", "mango", "orange", "pear"]);
   });
 });

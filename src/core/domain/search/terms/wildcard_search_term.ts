@@ -12,13 +12,13 @@ export class WildcardSearchTerm extends SearchTerm {
   private readonly prefix: string;
   private readonly substring: string;
 
-  constructor(parsed: ParsedTerm, { matchType, regex }: WildcardPattern) {
-    super(parsed);
-    this.baseCost = matchType;
-    this.matchType = matchType;
+  constructor(parsedTerm: ParsedTerm, { matchType: wildcardMatchType, regex }: WildcardPattern) {
+    super(parsedTerm);
+    this.baseCost = wildcardMatchType;
+    this.matchType = wildcardMatchType;
     this.regex = regex;
-    this.prefix = parsed.value.slice(0, -1);
-    this.substring = parsed.value.slice(1, -1);
+    this.prefix = parsedTerm.value.slice(0, -1);
+    this.substring = parsedTerm.value.slice(1, -1);
   }
 
   public get resolutionInputs(): WildcardResolutionInputs {
@@ -30,16 +30,16 @@ export class WildcardSearchTerm extends SearchTerm {
     };
   }
 
-  protected override matchesPositive(item: Searchable): boolean {
+  protected override matchesPositive(searchable: Searchable): boolean {
     switch (this.matchType) {
-      case WildcardMatchType.Prefix: return this.matchesPrefix(item);
-      case WildcardMatchType.Substring: return this.matchesSubstring(item);
-      default: return this.matchesRegex(item);
+      case WildcardMatchType.Prefix: return this.matchesPrefix(searchable);
+      case WildcardMatchType.Substring: return this.matchesSubstring(searchable);
+      default: return this.matchesRegex(searchable);
     }
   }
 
-  protected override matchesNegated(item: Searchable): boolean {
-    return !this.matchesPositive(item);
+  protected override matchesNegated(searchable: Searchable): boolean {
+    return !this.matchesPositive(searchable);
   }
 
   private fragment(): string {
@@ -51,8 +51,8 @@ export class WildcardSearchTerm extends SearchTerm {
     }
   }
 
-  private matchesPrefix(item: Searchable): boolean {
-    for (const tag of item.tags.values()) {
+  private matchesPrefix(searchable: Searchable): boolean {
+    for (const tag of searchable.tags.values()) {
       if (tag.startsWith(this.prefix)) {
         return true;
       }
@@ -64,8 +64,8 @@ export class WildcardSearchTerm extends SearchTerm {
     return false;
   }
 
-  private matchesSubstring(item: Searchable): boolean {
-    for (const tag of item.tags.values()) {
+  private matchesSubstring(searchable: Searchable): boolean {
+    for (const tag of searchable.tags.values()) {
       if (tag.includes(this.substring)) {
         return true;
       }
@@ -73,8 +73,8 @@ export class WildcardSearchTerm extends SearchTerm {
     return false;
   }
 
-  private matchesRegex(item: Searchable): boolean {
-    for (const tag of item.tags.values()) {
+  private matchesRegex(searchable: Searchable): boolean {
+    for (const tag of searchable.tags.values()) {
       if (this.regex.test(tag)) {
         return true;
       }

@@ -13,8 +13,8 @@ class FakeIntersectionObserver {
     FakeIntersectionObserver.instances.push(this);
   }
 
-  public emit(entries: readonly ObservedIntersection[]): void {
-    this.callback(entries as IntersectionObserverEntry[], this as unknown as IntersectionObserver);
+  public emit(observedIntersections: readonly ObservedIntersection[]): void {
+    this.callback(observedIntersections as IntersectionObserverEntry[], this as unknown as IntersectionObserver);
   }
 }
 
@@ -37,17 +37,17 @@ describe("BrowserVisibilityObserver", () => {
     const unrelatedElement = createTarget();
     const onVisibilityChange = vi.fn();
     const visibilityObserver = new BrowserVisibilityObserver();
-    const intersectionObserver = FakeIntersectionObserver.instances[0];
+    const fakeIntersectionObserver = FakeIntersectionObserver.instances[0];
 
     visibilityObserver.observe(element, onVisibilityChange);
-    intersectionObserver.emit([
+    fakeIntersectionObserver.emit([
       { target: element, isIntersecting: true, intersectionRatio: 0.5 },
       { target: element, isIntersecting: false, intersectionRatio: 0.5 },
       { target: element, isIntersecting: true, intersectionRatio: 0 },
       { target: unrelatedElement, isIntersecting: true, intersectionRatio: 1 }
     ]);
 
-    expect(intersectionObserver.observe).toHaveBeenCalledWith(element);
+    expect(fakeIntersectionObserver.observe).toHaveBeenCalledWith(element);
     expect(onVisibilityChange.mock.calls).toEqual([[true], [false], [false]]);
   });
 
@@ -55,13 +55,13 @@ describe("BrowserVisibilityObserver", () => {
     const element = createTarget();
     const onVisibilityChange = vi.fn();
     const visibilityObserver = new BrowserVisibilityObserver();
-    const intersectionObserver = FakeIntersectionObserver.instances[0];
+    const fakeIntersectionObserver = FakeIntersectionObserver.instances[0];
     const stopObserving = visibilityObserver.observe(element, onVisibilityChange);
 
     stopObserving();
-    intersectionObserver.emit([{ target: element, isIntersecting: true, intersectionRatio: 1 }]);
+    fakeIntersectionObserver.emit([{ target: element, isIntersecting: true, intersectionRatio: 1 }]);
 
-    expect(intersectionObserver.unobserve).toHaveBeenCalledWith(element);
+    expect(fakeIntersectionObserver.unobserve).toHaveBeenCalledWith(element);
     expect(onVisibilityChange).not.toHaveBeenCalled();
   });
 
@@ -70,19 +70,19 @@ describe("BrowserVisibilityObserver", () => {
     const onOldVisibilityChange = vi.fn();
     const onNewVisibilityChange = vi.fn();
     const visibilityObserver = new BrowserVisibilityObserver();
-    const intersectionObserver = FakeIntersectionObserver.instances[0];
+    const fakeIntersectionObserver = FakeIntersectionObserver.instances[0];
     const stopOldSubscription = visibilityObserver.observe(element, onOldVisibilityChange);
     const stopNewSubscription = visibilityObserver.observe(element, onNewVisibilityChange);
 
     stopOldSubscription();
-    intersectionObserver.emit([{ target: element, isIntersecting: true, intersectionRatio: 1 }]);
+    fakeIntersectionObserver.emit([{ target: element, isIntersecting: true, intersectionRatio: 1 }]);
 
-    expect(intersectionObserver.unobserve).not.toHaveBeenCalled();
+    expect(fakeIntersectionObserver.unobserve).not.toHaveBeenCalled();
     expect(onOldVisibilityChange).not.toHaveBeenCalled();
     expect(onNewVisibilityChange).toHaveBeenCalledWith(true);
 
     stopNewSubscription();
 
-    expect(intersectionObserver.unobserve).toHaveBeenCalledWith(element);
+    expect(fakeIntersectionObserver.unobserve).toHaveBeenCalledWith(element);
   });
 });

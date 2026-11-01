@@ -2,18 +2,18 @@ import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { FrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
 import { FrozenCobaltMediaMinter } from "@/adapters/frozen_cobalt/client/frozen_cobalt_media_minter";
 
-export function decodeFrozenCobaltPost(post: FrozenCobaltPost, mintMedia: FrozenCobaltMediaMinter): CategorizedPost {
-  const tagCategories = new Map(Object.entries(post.tagCategoryByName));
+export function decodeFrozenCobaltPost(frozenCobaltPost: FrozenCobaltPost, mintMedia: FrozenCobaltMediaMinter): CategorizedPost {
+  const tagCategories = new Map(Object.entries(frozenCobaltPost.tagCategoryByName));
   const tags = [...tagCategories.keys()].join(" ");
   return {
     post: {
-      id: post.id,
-      width: post.width,
-      height: post.height,
-      score: post.score,
-      rating: post.rating,
-      changedAt: post.changedAt * 1_000,
-      media: mintMedia({ directory: post.directory, stem: post.stem, extension: post.extension, tags }),
+      id: frozenCobaltPost.id,
+      width: frozenCobaltPost.width,
+      height: frozenCobaltPost.height,
+      score: frozenCobaltPost.score,
+      rating: frozenCobaltPost.rating,
+      changedAt: frozenCobaltPost.changedAt * 1_000,
+      media: mintMedia({ directory: frozenCobaltPost.directory, stem: frozenCobaltPost.stem, extension: frozenCobaltPost.extension, tags }),
       tags,
       status: "active"
     },

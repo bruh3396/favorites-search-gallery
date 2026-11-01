@@ -1,37 +1,37 @@
 import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
-export interface ResourceDependencies<S, T> {
-  source: Readable<S | undefined>;
-  load: (source: S) => T | Promise<T>;
-  disposeValue?: (value: T) => void;
+export interface ResourceDependencies<Source, Value> {
+  source: Readable<Source | undefined>;
+  load: (source: Source) => Value | Promise<Value>;
+  disposeValue?: (value: Value) => void;
 }
 
-export class Resource<S, T> {
-  private readonly valueState = new Signal<T | undefined>(undefined);
-  private readonly loadingState = new Signal(false);
-  private readonly errorState = new Signal<unknown>(undefined);
-  private readonly disposeValue: (value: T) => void;
+export class Resource<Source, Value> {
+  private readonly disposeValue: (value: Value) => void;
   private readonly stopEffect: () => void;
   private requestVersion = 0;
   private isDisposed = false;
+  readonly #value = new Signal<Value | undefined>(undefined);
+  readonly #loading = new Signal(false);
+  readonly #error = new Signal<unknown>(undefined);
 
-  constructor(private readonly dependencies: ResourceDependencies<S, T>) {
+  constructor(private readonly dependencies: ResourceDependencies<Source, Value>) {
     this.disposeValue = dependencies.disposeValue ?? ((): void => { });
     this.stopEffect = effect(() => this.loadSource(dependencies.source.value));
     onCleanup(() => this.dispose());
   }
 
-  public get value(): Readable<T | undefined> {
-    return this.valueState;
+  public get value(): Readable<Value | undefined> {
+    return this.#value;
   }
 
   public get loading(): Readable<boolean> {
-    return this.loadingState;
+    return this.#loading;
   }
 
   public get error(): Readable<unknown> {
-    return this.errorState;
+    return this.#error;
   }
 
   public dispose(): void {
@@ -44,32 +44,32 @@ export class Resource<S, T> {
     this.clearValue();
   }
 
-  private loadSource(source: S | undefined): void {
+  private loadSource(source: Source | undefined): void {
     this.requestVersion += 1;
     const requestVersion = this.requestVersion;
 
     this.clearValue();
-    this.errorState.value = undefined;
+    this.#error.value = undefined;
 
     if (source === undefined) {
-      this.loadingState.value = false;
+      this.#loading.value = false;
       return;
     }
-    this.loadingState.value = true;
+    this.#loading.value = true;
 
     Promise.resolve()
       .then(() => this.dependencies.load(source))
-      .then(result => {
+      .then(value => {
         if (this.isCurrent(requestVersion)) {
-          this.valueState.value = result;
-          this.loadingState.value = false;
+          this.#value.value = value;
+          this.#loading.value = false;
         } else {
-          this.disposeValue(result);
+          this.disposeValue(value);
         }
       }, reason => {
         if (this.isCurrent(requestVersion)) {
-          this.errorState.value = reason;
-          this.loadingState.value = false;
+          this.#error.value = reason;
+          this.#loading.value = false;
         }
       });
   }
@@ -79,11 +79,11 @@ export class Resource<S, T> {
   }
 
   private clearValue(): void {
-    const previous = this.valueState.peek();
+    const currentValue = this.#value.peek();
 
-    if (previous !== undefined) {
-      this.disposeValue(previous);
-      this.valueState.value = undefined;
+    if (currentValue !== undefined) {
+      this.disposeValue(currentValue);
+      this.#value.value = undefined;
     }
   }
 }

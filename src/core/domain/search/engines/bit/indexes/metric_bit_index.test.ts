@@ -17,21 +17,21 @@ const wide = { name: "wide", score: 8, width: 400, height: 200 };
 const peer = { name: "peer", score: 5, width: 50, height: 10 };
 
 interface Setup {
-  index: MetricBitIndex<Doc>;
+  metricBitIndex: MetricBitIndex<Doc>;
   getMetric: ReturnType<typeof vi.fn<(doc: Doc, metric: Metric) => number>>;
   findNames: (term: string) => string[];
 }
 
 function setup(docsByPosition: (Doc | undefined)[] = [square, tall, wide, peer]): Setup {
   const getMetric = vi.fn((doc: Doc, metric: Metric): number => doc[metric as "score" | "width" | "height"]);
-  const index = new MetricBitIndex<Doc>(getMetric);
+  const metricBitIndex = new MetricBitIndex<Doc>(getMetric);
   const docs = docsByPosition as readonly Doc[];
 
-  index.build(WIDTH, docs);
+  metricBitIndex.build(WIDTH, docs);
   return {
-    index,
+    metricBitIndex,
     getMetric,
-    findNames: (term: string): string[] => index.getPosting(parseMetricComparison(term)).toBitSet().gather(docs).map(doc => doc.name).sort()
+    findNames: (term: string): string[] => metricBitIndex.getPosting(parseMetricComparison(term)).toBitSet().gather(docs).map(doc => doc.name).sort()
   };
 }
 
@@ -76,13 +76,13 @@ describe("MetricBitIndex", () => {
 
   describe("build", () => {
     test("forgets the metrics read before", () => {
-      const { index, findNames } = setup();
+      const { metricBitIndex, findNames } = setup();
 
       findNames("score:5");
       findNames("width:height");
-      index.build(WIDTH, [wide]);
-      expect(index.getPosting(parseMetricComparison("score:>0")).cardinality).toBe(1);
-      expect(index.getPosting(parseMetricComparison("width:height")).cardinality).toBe(0);
+      metricBitIndex.build(WIDTH, [wide]);
+      expect(metricBitIndex.getPosting(parseMetricComparison("score:>0")).cardinality).toBe(1);
+      expect(metricBitIndex.getPosting(parseMetricComparison("width:height")).cardinality).toBe(0);
     });
   });
 });

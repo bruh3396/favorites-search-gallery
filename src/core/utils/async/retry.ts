@@ -4,6 +4,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 export interface RetryConfiguration {
   readonly attempts: number;
   readonly baseDelay: number;
+  readonly maxDelay?: number;
 }
 
 export interface RetryDependencies {
@@ -22,6 +23,11 @@ export class Retry {
     return this.attempt(task, 1);
   }
 
+  public computeDelay(failureCount: number): number {
+    const exponentialDelay = this.configuration.baseDelay * (2 ** (failureCount - 1));
+    return this.dependencies.randomSource.next() * Math.min(exponentialDelay, this.configuration.maxDelay ?? Infinity);
+  }
+
   private async attempt<T>(task: () => Promise<T>, count: number): Promise<T> {
     try {
       return await task();
@@ -33,12 +39,7 @@ export class Retry {
         throw error;
       }
 
-      const delay =
-        this.dependencies.randomSource.next() *
-        this.configuration.baseDelay *
-        (2 ** (count - 1));
-
-      await this.dependencies.scheduler.sleep(delay);
+      await this.dependencies.scheduler.sleep(this.computeDelay(count));
       return this.attempt(task, count + 1);
     }
   }

@@ -25,18 +25,18 @@ const SAMPLE_POST_COUNT = 300;
 const FAVORITES_OWNER_ID = "demo";
 
 function createDemoDependencies(): FavoritesAppDependencies {
-  const memory = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
+  const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
   const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null);
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     localKeyedValues: new BrowserLocalKeyedValues(),
-    remoteFavorites: new MemoryRemoteFavorites(memory),
-    remotePosts: new MemoryRemotePosts(memory),
+    remoteFavorites: new MemoryRemoteFavorites(memoryClient),
+    remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
     visibilityObserver: new BrowserVisibilityObserver(),
-    remotePages: new MemoryRemotePages(memory),
+    remotePages: new MemoryRemotePages(memoryClient),
     scheduler: new BrowserScheduler(),
     randomSource: new BrowserRandomSource(),
     sizeObserver: new BrowserSizeObserver(),
@@ -47,11 +47,11 @@ function createDemoDependencies(): FavoritesAppDependencies {
   };
 }
 
-const hostPage = new BrowserHostPage();
+const browserHostPage = new BrowserHostPage();
 
 composeFavoritesApp({
   userOwnsFavorites: true,
   blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
   colorScheme: readPreferredColorScheme()
-}, createDemoDependencies()).mount(hostPage.claimContent());
+}, createDemoDependencies()).mount(browserHostPage.claimContent());

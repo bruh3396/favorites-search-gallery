@@ -14,7 +14,7 @@ function createFetch(width: number): Fetch {
 function setup(): { remotePosts: FallbackRemotePosts; primary: Fetch; fallback: Fetch } {
   const primary = createFetch(1);
   const fallback = createFetch(2);
-  return { remotePosts: new FallbackRemotePosts({ primary: { fetch: primary }, fallback: { fetch: fallback } }), primary, fallback };
+  return { remotePosts: new FallbackRemotePosts({ primaryRemotePosts: { fetch: primary }, fallbackRemotePosts: { fetch: fallback } }), primary, fallback };
 }
 
 describe("FallbackRemotePosts", () => {

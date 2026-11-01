@@ -22,68 +22,68 @@ describe("IndexedDbLocalFavorites", () => {
   });
 
   test("keeps the newest ids first", async() => {
-    const favorites = createLocalFavorites();
+    const localFavorites = createLocalFavorites();
 
-    await favorites.prepend(["2", "1"]);
-    await favorites.prepend(["4", "3"]);
+    await localFavorites.prepend(["2", "1"]);
+    await localFavorites.prepend(["4", "3"]);
 
-    expect(await favorites.getAll()).toEqual(["4", "3", "2", "1"]);
+    expect(await localFavorites.getAll()).toEqual(["4", "3", "2", "1"]);
   });
 
   test("replaces every id it holds when setting all", async() => {
-    const favorites = createLocalFavorites();
+    const localFavorites = createLocalFavorites();
 
-    await favorites.prepend(["2", "1"]);
-    await favorites.setAll(["4", "3"]);
+    await localFavorites.prepend(["2", "1"]);
+    await localFavorites.setAll(["4", "3"]);
 
-    expect(await favorites.getAll()).toEqual(["4", "3"]);
+    expect(await localFavorites.getAll()).toEqual(["4", "3"]);
   });
 
   test("moves an id it already holds to the front", async() => {
-    const favorites = createLocalFavorites();
+    const localFavorites = createLocalFavorites();
 
-    await favorites.prepend(["3", "2", "1"]);
-    await favorites.prepend(["1"]);
+    await localFavorites.prepend(["3", "2", "1"]);
+    await localFavorites.prepend(["1"]);
 
-    expect(await favorites.getAll()).toEqual(["1", "3", "2"]);
+    expect(await localFavorites.getAll()).toEqual(["1", "3", "2"]);
   });
 
   test("keeps one copy of an id given twice in one call", async() => {
-    const favorites = createLocalFavorites();
+    const localFavorites = createLocalFavorites();
 
-    await favorites.prepend(["2", "1", "2"]);
+    await localFavorites.prepend(["2", "1", "2"]);
 
-    expect(await favorites.getAll()).toEqual(["2", "1"]);
+    expect(await localFavorites.getAll()).toEqual(["2", "1"]);
   });
 
   test("removes the given ids and keeps the rest in order", async() => {
-    const favorites = createLocalFavorites();
+    const localFavorites = createLocalFavorites();
 
-    await favorites.prepend(["4", "3", "2", "1"]);
-    await favorites.remove(["3", "1"]);
+    await localFavorites.prepend(["4", "3", "2", "1"]);
+    await localFavorites.remove(["3", "1"]);
 
-    expect(await favorites.getAll()).toEqual(["4", "2"]);
+    expect(await localFavorites.getAll()).toEqual(["4", "2"]);
   });
 
   test("leaves other owners alone when removing", async() => {
     const indexedDbClient = createIndexedDb();
-    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDbClient);
-    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDbClient);
+    const firstLocalFavorites = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDbClient);
+    const secondLocalFavorites = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDbClient);
 
-    await first.prepend(["1"]);
-    await second.prepend(["1"]);
-    await first.remove(["1"]);
+    await firstLocalFavorites.prepend(["1"]);
+    await secondLocalFavorites.prepend(["1"]);
+    await firstLocalFavorites.remove(["1"]);
 
-    expect(await second.getAll()).toEqual(["1"]);
+    expect(await secondLocalFavorites.getAll()).toEqual(["1"]);
   });
 
   test("keeps owners in one namespace apart", async() => {
     const indexedDbClient = createIndexedDb();
-    const first = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDbClient);
-    const second = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDbClient);
+    const firstLocalFavorites = new IndexedDbLocalFavorites({ ownerId: "1" }, indexedDbClient);
+    const secondLocalFavorites = new IndexedDbLocalFavorites({ ownerId: "2" }, indexedDbClient);
 
-    await first.prepend(["1"]);
+    await firstLocalFavorites.prepend(["1"]);
 
-    expect(await second.getAll()).toEqual([]);
+    expect(await secondLocalFavorites.getAll()).toEqual([]);
   });
 });

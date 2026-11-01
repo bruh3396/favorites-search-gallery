@@ -54,8 +54,8 @@ function setup(lightboxDetails?: LightboxDetails<Post>): {
       lightboxMediaResolver: new LightboxMediaResolver(media => remoteMedia.resolveMedia(media)),
       currentItem,
       retainedItems: new Signal<readonly Post[]>([]),
-      volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storage }),
-      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storage })
+      volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage })
     });
     return (
       <LightboxDialog
@@ -92,7 +92,7 @@ function setupOpen(lightboxDetails?: LightboxDetails<Post>): ReturnType<typeof s
 
 function createDetails(): LightboxDetails<Post> & { isOpen: KeyedStoredValue<boolean> } {
   return {
-    isOpen: new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storage: new MemoryLocalKeyedValues() }),
+    isOpen: new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storedValueStorage: new MemoryLocalKeyedValues() }),
     createContent: () => ({ bodyChild: <p>details content</p> })
   };
 }

@@ -9,63 +9,63 @@ describe("PositionIndex", () => {
   describe("findPosition", () => {
     test("reflects build order", () => {
       const [a, b, c] = createDocs("a", "b", "c");
-      const index = new PositionIndex<{ name: string }>();
+      const positionIndex = new PositionIndex<{ name: string }>();
 
-      index.build([a, b, c]);
-      expect(index.findPosition(a)).toBe(0);
-      expect(index.findPosition(b)).toBe(1);
-      expect(index.findPosition(c)).toBe(2);
+      positionIndex.build([a, b, c]);
+      expect(positionIndex.findPosition(a)).toBe(0);
+      expect(positionIndex.findPosition(b)).toBe(1);
+      expect(positionIndex.findPosition(c)).toBe(2);
     });
 
     test("returns -1 for an unknown doc", () => {
       const [a] = createDocs("a");
-      const index = new PositionIndex<{ name: string }>();
+      const positionIndex = new PositionIndex<{ name: string }>();
 
-      index.build([]);
-      expect(index.findPosition(a)).toBe(-1);
+      positionIndex.build([]);
+      expect(positionIndex.findPosition(a)).toBe(-1);
     });
   });
 
   describe("add", () => {
     test("appends at the next position", () => {
       const [a, b] = createDocs("a", "b");
-      const index = new PositionIndex<{ name: string }>();
+      const positionIndex = new PositionIndex<{ name: string }>();
 
-      index.build([a]);
-      index.add(b);
-      expect(index.findPosition(b)).toBe(1);
+      positionIndex.build([a]);
+      positionIndex.add(b);
+      expect(positionIndex.findPosition(b)).toBe(1);
     });
 
     test("ignores a doc already indexed", () => {
       const [a, b] = createDocs("a", "b");
-      const index = new PositionIndex<{ name: string }>();
+      const positionIndex = new PositionIndex<{ name: string }>();
 
-      index.build([a, b]);
-      index.add(a);
-      expect(index.findPosition(a)).toBe(0);
-      expect(index.findPosition(b)).toBe(1);
+      positionIndex.build([a, b]);
+      positionIndex.add(a);
+      expect(positionIndex.findPosition(a)).toBe(0);
+      expect(positionIndex.findPosition(b)).toBe(1);
     });
   });
 
   describe("sort", () => {
     test("orders docs by their indexed position", () => {
       const [a, b, c] = createDocs("a", "b", "c");
-      const index = new PositionIndex<{ name: string }>();
+      const positionIndex = new PositionIndex<{ name: string }>();
 
-      index.build([a, b, c]);
-      expect(index.sort([c, a, b])).toEqual([a, b, c]);
+      positionIndex.build([a, b, c]);
+      expect(positionIndex.sort([c, a, b])).toEqual([a, b, c]);
     });
   });
 
   describe("build", () => {
     test("replaces any prior positions", () => {
       const [a, b] = createDocs("a", "b");
-      const index = new PositionIndex<{ name: string }>();
+      const positionIndex = new PositionIndex<{ name: string }>();
 
-      index.build([a, b]);
-      index.build([b, a]);
-      expect(index.findPosition(b)).toBe(0);
-      expect(index.findPosition(a)).toBe(1);
+      positionIndex.build([a, b]);
+      positionIndex.build([b, a]);
+      expect(positionIndex.findPosition(b)).toBe(0);
+      expect(positionIndex.findPosition(a)).toBe(1);
     });
   });
 });

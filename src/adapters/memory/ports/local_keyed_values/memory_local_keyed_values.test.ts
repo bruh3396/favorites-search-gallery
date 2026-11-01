@@ -3,11 +3,11 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 
 describe("MemoryLocalKeyedValues", () => {
   test("reads back what it wrote", () => {
-    const store = new MemoryLocalKeyedValues();
+    const localKeyedValues = new MemoryLocalKeyedValues();
 
-    store.set("preferences", { theme: "dark" });
+    localKeyedValues.set("preferences", { theme: "dark" });
 
-    expect(store.get("preferences")).toEqual({ theme: "dark" });
+    expect(localKeyedValues.get("preferences")).toEqual({ theme: "dark" });
   });
 
   test("returns undefined for a missing key", () => {
@@ -15,22 +15,22 @@ describe("MemoryLocalKeyedValues", () => {
   });
 
   test("removes a key", () => {
-    const store = new MemoryLocalKeyedValues();
+    const localKeyedValues = new MemoryLocalKeyedValues();
 
-    store.set("preferences", {});
-    store.remove("preferences");
+    localKeyedValues.set("preferences", {});
+    localKeyedValues.remove("preferences");
 
-    expect(store.get("preferences")).toBeUndefined();
+    expect(localKeyedValues.get("preferences")).toBeUndefined();
   });
 
   test("is unaffected by mutating a value after writing or reading it", () => {
-    const store = new MemoryLocalKeyedValues();
+    const localKeyedValues = new MemoryLocalKeyedValues();
     const written = { columns: [5] };
 
-    store.set("preferences", written);
+    localKeyedValues.set("preferences", written);
     written.columns.push(2);
-    (store.get("preferences") as typeof written).columns.push(7);
+    (localKeyedValues.get("preferences") as typeof written).columns.push(7);
 
-    expect(store.get("preferences")).toEqual({ columns: [5] });
+    expect(localKeyedValues.get("preferences")).toEqual({ columns: [5] });
   });
 });

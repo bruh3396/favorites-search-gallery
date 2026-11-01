@@ -2,19 +2,19 @@ import { describe, expect, test } from "vitest";
 import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
 
 function setup(occupiedCount: number, minCapacity: number = occupiedCount): DocTable<string> {
-  const table = new DocTable<string>();
+  const docTable = new DocTable<string>();
 
-  table.reset(occupiedCount, minCapacity);
-  return table;
+  docTable.reset(occupiedCount, minCapacity);
+  return docTable;
 }
 
 describe("DocTable", () => {
   test("starts empty", () => {
-    const table = new DocTable<string>();
+    const docTable = new DocTable<string>();
 
-    expect(table.size).toBe(0);
-    expect(table.width).toBe(0);
-    expect(table.liveDocs()).toEqual([]);
+    expect(docTable.size).toBe(0);
+    expect(docTable.width).toBe(0);
+    expect(docTable.liveDocs()).toEqual([]);
   });
 
   describe("reset", () => {
@@ -33,65 +33,65 @@ describe("DocTable", () => {
     });
 
     test("forgets every placed doc", () => {
-      const table = setup(1);
+      const docTable = setup(1);
 
-      table.place("apple", 0);
-      table.reset(0, 0);
-      expect(table.size).toBe(0);
-      expect(table.findPosition("apple")).toBeUndefined();
-      expect(table.liveDocs()).toEqual([]);
+      docTable.place("apple", 0);
+      docTable.reset(0, 0);
+      expect(docTable.size).toBe(0);
+      expect(docTable.findPosition("apple")).toBeUndefined();
+      expect(docTable.liveDocs()).toEqual([]);
     });
   });
 
   describe("place", () => {
     test("finds a placed doc by its position", () => {
-      const table = setup(2);
+      const docTable = setup(2);
 
-      table.place("apple", 0);
-      table.place("banana", 1);
-      expect(table.size).toBe(2);
-      expect(table.findPosition("banana")).toBe(1);
-      expect(table.findPosition("cherry")).toBeUndefined();
+      docTable.place("apple", 0);
+      docTable.place("banana", 1);
+      expect(docTable.size).toBe(2);
+      expect(docTable.findPosition("banana")).toBe(1);
+      expect(docTable.findPosition("cherry")).toBeUndefined();
     });
   });
 
   describe("allocate", () => {
     test("hands out the lowest free positions past the occupied ones, ascending", () => {
-      const table = setup(3);
+      const docTable = setup(3);
 
-      expect(table.allocate(2)).toEqual([3, 4]);
-      expect(table.allocate(1)).toEqual([5]);
+      expect(docTable.allocate(2)).toEqual([3, 4]);
+      expect(docTable.allocate(1)).toEqual([5]);
     });
   });
 
   describe("canFit", () => {
     test("returns whether more docs fit below the width", () => {
-      const table = setup(0);
+      const docTable = setup(0);
 
-      table.place("apple", 0);
-      expect(table.canFit(62)).toBe(true);
-      expect(table.canFit(63)).toBe(false);
+      docTable.place("apple", 0);
+      expect(docTable.canFit(62)).toBe(true);
+      expect(docTable.canFit(63)).toBe(false);
     });
   });
 
   describe("liveDocs", () => {
     test("lists placed docs in position order, skipping holes", () => {
-      const table = setup(0);
+      const docTable = setup(0);
 
-      table.place("cherry", 5);
-      table.place("apple", 1);
-      expect(table.liveDocs()).toEqual(["apple", "cherry"]);
+      docTable.place("cherry", 5);
+      docTable.place("apple", 1);
+      expect(docTable.liveDocs()).toEqual(["apple", "cherry"]);
     });
   });
 
   describe("allDocs", () => {
     test("returns docs by position, holes included", () => {
-      const table = setup(0);
+      const docTable = setup(0);
 
-      table.place("apple", 1);
-      expect(table.allDocs()).toHaveLength(64);
-      expect(table.allDocs()[0]).toBeUndefined();
-      expect(table.allDocs()[1]).toBe("apple");
+      docTable.place("apple", 1);
+      expect(docTable.allDocs()).toHaveLength(64);
+      expect(docTable.allDocs()[0]).toBeUndefined();
+      expect(docTable.allDocs()[1]).toBe("apple");
     });
   });
 });

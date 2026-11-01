@@ -9,9 +9,9 @@ export function buildRule34CdnPreviewUrl(locator: string): string {
   return `${WIMG_ORIGIN}/thumbnails//${directory}/thumbnail_${stem}.jpg`;
 }
 
-export function buildRule34CdnFileUrl(locator: string, extension: Rule34CdnFileExtension): string {
+export function buildRule34CdnFileUrl(locator: string, rule34CdnFileExtension: Rule34CdnFileExtension): string {
   const { directory, stem } = readRule34CdnLocator(locator);
-  return `${ORIGIN}/images//${directory}/${stem}.${extension}`;
+  return `${ORIGIN}/images//${directory}/${stem}.${rule34CdnFileExtension}`;
 }
 
 export function buildRule34CdnWimgUrl(url: string): string {
