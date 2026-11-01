@@ -115,7 +115,7 @@ describe("FavoritesSearchPanel", () => {
 
     searchable.reach();
     settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
-    expect([isHidden(skeleton), emptyState.hidden, emptyState.querySelector("p")!.textContent]).toEqual([true, false, "No favorites match \"cat\" yet"]);
+    expect([isHidden(skeleton), isHidden(emptyState), emptyState.querySelector("p")!.textContent]).toEqual([true, false, "No favorites match \"cat\" yet"]);
   });
 
   test("hides the empty state once results arrive", () => {
@@ -123,7 +123,7 @@ describe("FavoritesSearchPanel", () => {
 
     loadState.value = LOADED;
     searchResults.value = [createFavorite("1")];
-    expect(emptyState.hidden).toBe(true);
+    expect(isHidden(emptyState)).toBe(true);
   });
 
   test("clears the filters on request", () => {

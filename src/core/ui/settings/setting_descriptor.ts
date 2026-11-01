@@ -6,7 +6,6 @@ import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 interface SettingBase {
   readonly id: string;
   readonly label: string;
-  readonly description?: string;
   readonly keywords?: readonly string[];
   readonly disabled?: Readable<boolean>;
 }

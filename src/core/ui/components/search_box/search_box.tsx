@@ -1,14 +1,13 @@
 import { Child, h } from "@/core/ui/h/h";
+import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Readable } from "@/core/utils/reactive/signal";
-import { createIcon } from "@/core/ui/components/icon/icon";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const SearchBoxClass = {
   root: "fsg-SearchBox",
   field: "fsg-SearchBox-field",
   submit: "fsg-SearchBox-submit",
-  icon: "fsg-SearchBox-icon",
   input: "fsg-SearchBox-input",
   clear: "fsg-SearchBox-clear"
 } as const;
@@ -37,21 +36,17 @@ export function SearchBox({ label, query, trailingChild, focusRequests, onSearch
           onSearch(input.value);
         }}
       >
-        <button className={SearchBoxClass.submit} type="submit" aria-label="Search">
-          {createIcon("search", SearchBoxClass.icon)}
-        </button>
+        <IconButton className={SearchBoxClass.submit} icon="search" label="Search" type="submit" />
         {input}
-        <button
+        <IconButton
           className={SearchBoxClass.clear}
-          type="button"
-          aria-label="Clear search"
+          icon="close"
+          label="Clear search"
           onClick={() => {
             input.value = "";
             input.focus();
           }}
-        >
-          {createIcon("close", SearchBoxClass.icon)}
-        </button>
+        />
         {trailingChild}
       </form>
     </search>

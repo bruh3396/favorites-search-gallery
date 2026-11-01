@@ -29,22 +29,11 @@
   opacity: 0.5;
 }
 
-.fsg-SettingRow-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-inline-size: 0;
-}
-
 .fsg-SettingRow-label {
+  min-inline-size: 0;
   font-size: var(--fsg-typescale-label-large-size);
 }
 
 .fsg-SettingRow[data-size="small"] .fsg-SettingRow-label {
   font-size: 13px;
-}
-
-.fsg-SettingRow-description {
-  color: var(--fsg-color-on-surface-variant);
-  font-size: var(--fsg-typescale-label-medium-size);
 }

@@ -17,7 +17,6 @@ export const SettingsScreenClass = {
 export interface SettingsScreenProps {
   settingsLayout: SettingsLayout;
   settingDescriptors: readonly SettingDescriptor[];
-  descriptionsVisible?: Readable<boolean>;
   query?: Readable<string>;
   controlSize?: ControlSize;
 }
@@ -30,7 +29,7 @@ interface SectionProps {
 }
 
 export function SettingsScreen({
-  settingsLayout, settingDescriptors, descriptionsVisible, query, controlSize = "medium"
+  settingsLayout, settingDescriptors, query, controlSize = "medium"
 }: SettingsScreenProps): HTMLElement {
   const descriptorsById = new Map(settingDescriptors.map(settingDescriptor => [settingDescriptor.id, settingDescriptor]));
   const sectionsWithSettings = settingsLayout
@@ -50,7 +49,7 @@ export function SettingsScreen({
           settingDescriptors={entry.settingDescriptors}
           matches={matches}
           renderSetting={settingDescriptor => (
-            <Setting descriptor={settingDescriptor} descriptionVisible={descriptionsVisible} controlSize={controlSize} />
+            <Setting descriptor={settingDescriptor} controlSize={controlSize} />
           )}
         />
       ))}

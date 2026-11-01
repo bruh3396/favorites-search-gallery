@@ -17,14 +17,14 @@ const RATINGS = ["safe", "questionable", "explicit"] as const;
 const RATING_LABELS = { safe: "Safe", questionable: "Questionable", explicit: "Explicit" };
 
 const FAVORITES_LAYOUT: SettingsLayout = [
-  { id: "general", title: "General", settings: ["hints", "ratings"] },
+  { id: "general", title: "General", settings: ["ratings"] },
   { id: "layout", title: "Layout", settings: ["layout", "columns", "sort"] },
   { id: "gallery", title: "Gallery", settings: ["autoplay"] },
   { id: "paging", title: "Paging", settings: ["infiniteScroll", "resultsPerPage"] }
 ];
 
 const POST_LIST_LAYOUT: SettingsLayout = [
-  { id: "general", title: "General", settings: ["hints", "autoplay"] },
+  { id: "general", title: "General", settings: ["autoplay"] },
   { id: "paging", title: "Paging", settings: ["infiniteScroll", "resultsPerPage"] },
   { id: "layout", title: "Layout", settings: ["columns"] }
 ];
@@ -45,24 +45,15 @@ function createStoredValue<T>({ id, initial, log }: { id: string; initial: T; lo
   };
 }
 
-interface Catalog {
-  readonly settingDescriptors: SettingDescriptor[];
-  readonly hintsSettingPreference: SettingPreference<boolean>;
-}
-
-function createCatalog(log: Log): Catalog {
-  const hintsSettingPreference = createStoredValue({ id: "hints", initial: true, log });
+function createSettingDescriptors(log: Log): SettingDescriptor[] {
   const infiniteScrollSettingPreference = createStoredValue({ id: "infiniteScroll", initial: false, log });
-  const settingDescriptors: SettingDescriptor[] = [
+  return [
     {
-      id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", settingPreference: hintsSettingPreference
-    },
-    {
-      id: "ratings", kind: "choices", label: "Ratings", description: "Which ratings search includes.",
+      id: "ratings", kind: "choices", label: "Ratings",
       settingPreference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
     },
     {
-      id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
+      id: "layout", kind: "choice", label: "Layout", control: "segmented",
       settingPreference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     {
@@ -76,28 +67,25 @@ function createCatalog(log: Log): Catalog {
     { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference: createStoredValue({ id: "autoplay", initial: true, log }) },
     { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScrollSettingPreference },
     {
-      id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
+      id: "resultsPerPage", kind: "number", label: "Results per page",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
       stepperScheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
     }
   ];
-  return { settingDescriptors, hintsSettingPreference };
 }
 
 function createHostVariants(): StoryVariant[] {
-  let catalog: Catalog | undefined;
+  let settingDescriptors: SettingDescriptor[] | undefined;
   const host = (label: string, { settingsLayout, controlSize }: { settingsLayout: SettingsLayout; controlSize: ControlSize }): StoryVariant => ({
     label,
     render: (ownerDocument, log): HTMLElement => {
-      catalog ??= createCatalog(log);
-      const { settingDescriptors, hintsSettingPreference } = catalog;
+      settingDescriptors ??= createSettingDescriptors(log);
       return render(ownerDocument, () => (
         <div className="kit-Panel" dataset={{ size: controlSize }}>
           <SettingsScreen
             settingsLayout={settingsLayout}
-            settingDescriptors={settingDescriptors}
+            settingDescriptors={settingDescriptors!}
             controlSize={controlSize}
-            descriptionsVisible={hintsSettingPreference}
           />
         </div>
       )).result;

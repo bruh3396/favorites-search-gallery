@@ -13,7 +13,8 @@ import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
 import TAB_STRIP_TOGGLE_CSS from "@/core/app/favorites/search_panel/tab_strip_toggle.css?inline";
-import { Tabs } from "@/core/ui/components/tabs/tabs";
+import { TabPanel } from "@/core/ui/components/tabs/tab_panel";
+import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 import { doNothing } from "@/core/utils/function/function_utilities";
@@ -35,6 +36,7 @@ export const FavoritesAppClass = {
   root: "fsg-FavoritesApp",
   loadLine: "fsg-FavoritesApp-loadLine",
   panes: "fsg-FavoritesApp-panes",
+  tabs: "fsg-FavoritesApp-tabs",
   zenHint: "fsg-FavoritesApp-zenHint"
 } as const;
 
@@ -53,6 +55,7 @@ export interface FavoritesAppProps {
 export function FavoritesApp({
   favoritesService, favoritesWorkspace, lightboxView, favoritesPreferences, zenEnabled, renderTool, renderPanel
 }: FavoritesAppProps): HTMLElement[] {
+  const { tabManager } = favoritesWorkspace;
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
       <div className={FavoritesAppClass.loadLine}>
@@ -72,16 +75,21 @@ export function FavoritesApp({
           )}
           onValueChange={id => favoritesPreferences.activeTool.set(id)}
         />
-        <Tabs<FavoritesTab>
-          tabManager={favoritesWorkspace.tabManager}
-          label={({ value: favoritesTab }) => favoritesTab.title}
-          renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)}
-          stripVisible={favoritesPreferences.tabStripVisible}
-          trailingChild={<StatusText text={favoritesService.loadStatus} />}
-          onAdd={() => favoritesWorkspace.openBlankTab()}
-          onClose={tabId => favoritesWorkspace.closeTab(tabId)}
-          onCloseAll={() => favoritesWorkspace.closeAllTabs()}
-        />
+        <div className={FavoritesAppClass.tabs}>
+          <div hidden={computed(() => !favoritesPreferences.tabStripVisible.value)}>
+            <TabStrip
+              tabs={computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable })))}
+              activeTabId={tabManager.activeTabId}
+              trailingChild={<StatusText text={favoritesService.loadStatus} />}
+              onActivate={tabId => tabManager.activate(tabId)}
+              onClose={tabId => favoritesWorkspace.closeTab(tabId)}
+              onMove={(tabId, index) => tabManager.move(tabId, index)}
+              onAdd={() => favoritesWorkspace.openBlankTab()}
+              onCloseAll={() => favoritesWorkspace.closeAllTabs()}
+            />
+          </div>
+          <TabPanel<FavoritesTab> tabManager={tabManager} renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)} />
+        </div>
       </main>
       <div className={FavoritesAppClass.zenHint} role="status" hidden={computed(() => !zenEnabled.value)} data-zen-stage="">
         Press Z or Esc to exit Zen

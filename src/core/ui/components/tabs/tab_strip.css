@@ -75,49 +75,21 @@
   white-space: nowrap;
 }
 
-.fsg-TabStrip-close,
-.fsg-TabStrip-add,
-.fsg-TabStrip-closeAll {
-  display: grid;
-  place-items: center;
-  min-inline-size: var(--fsg-control-size-small);
-  color: var(--fsg-color-on-surface-variant);
-  cursor: pointer;
-}
-
-.fsg-TabStrip-close,
-.fsg-TabStrip-add {
-  padding: 3px;
-}
-
 .fsg-TabStrip-tab:only-child .fsg-TabStrip-close {
   display: none;
 }
 
 .fsg-TabStrip-close {
   margin-inline-end: 4px;
-  block-size: var(--fsg-control-size-small);
-  border-radius: var(--fsg-shape-corner-small);
 }
 
 .fsg-TabStrip-add {
   align-self: center;
-  block-size: var(--fsg-control-size-small);
   margin-inline: 6px;
-  border-radius: var(--fsg-shape-corner-small);
 }
 
 .fsg-TabStrip-closeAll {
-  min-inline-size: var(--fsg-control-size-small);
-  block-size: var(--fsg-control-size-small);
   margin-inline-end: -6px;
-  padding: 1px;
-  border-radius: var(--fsg-shape-corner-small);
-}
-
-.fsg-TabStrip-closeAll .fsg-TabStrip-icon {
-  inline-size: 20px;
-  block-size: 20px;
 }
 
 .fsg-TabStrip-trailing {
@@ -129,27 +101,7 @@
   white-space: nowrap;
 }
 
-.fsg-TabStrip-icon {
-  inline-size: 16px;
-  block-size: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-}
-
-.fsg-TabStrip-close:hover,
-.fsg-TabStrip-add:hover,
-.fsg-TabStrip-closeAll:hover {
-  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
-  background-clip: content-box;
-  color: inherit;
-}
-
-.fsg-TabStrip-select:focus-visible,
-.fsg-TabStrip-close:focus-visible,
-.fsg-TabStrip-add:focus-visible,
-.fsg-TabStrip-closeAll:focus-visible {
+.fsg-TabStrip-select:focus-visible {
   outline: 2px solid var(--fsg-color-primary);
   outline-offset: -2px;
 }

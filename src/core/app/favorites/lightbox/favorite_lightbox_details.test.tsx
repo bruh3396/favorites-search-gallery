@@ -60,11 +60,11 @@ describe("createFavoriteLightboxDetails", () => {
   test("opens and closes the view settings from the settings button", () => {
     const { viewButton, viewSettings } = setup();
 
-    expect(viewSettings.hidden).toBe(true);
+    expect(viewSettings.closest("[hidden]") !== null).toBe(true);
     viewButton.click();
-    expect([viewSettings.hidden, viewButton.getAttribute("aria-pressed")]).toEqual([false, "true"]);
+    expect([viewSettings.closest("[hidden]") !== null, viewButton.getAttribute("aria-pressed")]).toEqual([false, "true"]);
     viewButton.click();
-    expect(viewSettings.hidden).toBe(true);
+    expect(viewSettings.closest("[hidden]") !== null).toBe(true);
   });
 
   test("remembers the chosen view and shows the tags in it", () => {

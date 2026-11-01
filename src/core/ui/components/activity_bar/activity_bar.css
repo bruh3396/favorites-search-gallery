@@ -15,39 +15,9 @@
   background: color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%);
 }
 
-.fsg-ActivityBar-item {
-  display: grid;
-  place-items: center;
-  inline-size: var(--fsg-control-size-large);
-  block-size: var(--fsg-control-size-large);
-  border-radius: var(--fsg-shape-corner-small);
-  color: var(--fsg-color-on-surface-variant);
-  cursor: pointer;
-}
-
-.fsg-ActivityBar-item:hover {
-  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
-  color: inherit;
-}
-
 .fsg-ActivityBar-item[aria-pressed="true"] {
   background: var(--fsg-color-surface-container-highest);
   color: var(--fsg-color-on-surface);
-}
-
-.fsg-ActivityBar-item:focus-visible {
-  outline: 2px solid var(--fsg-color-primary);
-  outline-offset: -2px;
-}
-
-.fsg-ActivityBar-icon {
-  inline-size: 24px;
-  block-size: 24px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 .fsg-ActivityBar-view {

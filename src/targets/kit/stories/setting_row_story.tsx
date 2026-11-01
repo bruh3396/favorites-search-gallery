@@ -47,7 +47,6 @@ function renderSegmentedRow(ownerDocument: Document, log: Log): HTMLElement {
   return render(ownerDocument, () => (
     <SettingRow
       label="Layout"
-      description="How thumbnails are arranged."
       control={
         <Segmented<string>
           controlChoices={LAYOUTS}
@@ -68,7 +67,6 @@ function renderDropdownRow(ownerDocument: Document, log: Log): HTMLElement {
   return render(ownerDocument, () => (
     <SettingRow
       label="Sort by"
-      description="A long caption, to show it wrapping under the label while the control keeps its size on the right."
       control={
         <Dropdown<string>
           controlChoices={SORTS}
@@ -103,7 +101,6 @@ function renderDependentRows(ownerDocument: Document, log: Log): HTMLElement {
       />
       <SettingRow
         label="Results per page"
-        description="Disabled while infinite scroll is on."
         control={
           <Stepper
             label="Results per page"
@@ -128,9 +125,9 @@ function renderDependentRows(ownerDocument: Document, log: Log): HTMLElement {
 export const SETTING_ROW_STORY: Story = {
   title: "Setting row",
   variants: [
-    { label: "Switch, no description", render: renderSwitchRow },
+    { label: "Switch", render: renderSwitchRow },
     { label: "Segmented", render: renderSegmentedRow },
-    { label: "Dropdown, long caption", render: renderDropdownRow },
+    { label: "Dropdown", render: renderDropdownRow },
     { label: "Disabled by another setting", render: renderDependentRows }
   ]
 };

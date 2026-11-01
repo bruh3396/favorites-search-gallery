@@ -5,7 +5,7 @@ import { SettingsIndex } from "@/core/ui/settings/settings_index";
 const PREFERENCE = { value: false, peek: (): boolean => false, set: (): void => undefined };
 
 const DESCRIPTORS: SettingDescriptor[] = [
-  { id: "hints", kind: "switch", label: "Hints", description: "Show a caption under each setting.", settingPreference: PREFERENCE },
+  { id: "hints", kind: "switch", label: "Hints", settingPreference: PREFERENCE },
   { id: "autoplay", kind: "switch", label: "Autoplay", keywords: ["video"], settingPreference: PREFERENCE },
   {
     id: "layout", kind: "choice", label: "Layout", control: "segmented", members: ["column", "row"], labels: { column: "Column", row: "Row" },
@@ -29,9 +29,8 @@ describe("SettingsIndex", () => {
       expect(searchSettings("   ")).toEqual(["hints", "autoplay", "layout"]);
     });
 
-    test("matches a setting by any part of its label, description, keywords, section title, or choice labels", () => {
+    test("matches a setting by any part of its label, keywords, section title, or choice labels", () => {
       expect(searchSettings("int")).toEqual(["hints"]);
-      expect(searchSettings("caption")).toEqual(["hints"]);
       expect(searchSettings("video")).toEqual(["autoplay"]);
       expect(searchSettings("general")).toEqual(["hints", "autoplay"]);
       expect(searchSettings("column")).toEqual(["layout"]);

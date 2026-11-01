@@ -1,12 +1,12 @@
 import { Child, h } from "@/core/ui/h/h";
-import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/search_box";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
+import { SearchBox } from "@/core/ui/components/search_box/search_box";
 import { computed } from "@/core/utils/reactive/signal";
-import { createIcon } from "@/core/ui/components/icon/icon";
 import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 
 export const FavoritesSearchPanelClass = {
@@ -41,17 +41,18 @@ export function FavoritesSearchPanel({
   const body: HTMLElement = (
     <div className={FavoritesSearchPanelClass.body} data-zen-stage="">
       <div hidden={computed(() => panelBody.value.kind !== "skeleton")}>{skeleton}</div>
-      <EmptyState
-        isShown={computed(() => panelBody.value.kind === "empty")}
-        message={computed(() => (panelBody.value.kind === "empty" ? panelBody.value.message : ""))}
-        action={computed(() => (panelBody.value.kind === "empty" && panelBody.value.offersClear ? {
-          label: "Clear",
-          onClick: (): void => {
-            favoritesSession.clearFilters();
-            focusSearch.emit();
-          }
-        } : null))}
-      />
+      <div hidden={computed(() => panelBody.value.kind !== "empty")}>
+        <EmptyState
+          message={computed(() => (panelBody.value.kind === "empty" ? panelBody.value.message : ""))}
+          action={computed(() => (panelBody.value.kind === "empty" && panelBody.value.offersClear ? {
+            label: "Clear",
+            onClick: (): void => {
+              favoritesSession.clearFilters();
+              focusSearch.emit();
+            }
+          } : null))}
+        />
+      </div>
       {grid}
     </div>
   );
@@ -63,9 +64,7 @@ export function FavoritesSearchPanel({
             label="Search favorites"
             query={favoritesSession.query}
             trailingChild={[
-              <button className={FavoritesSearchPanelClass.filter} type="button" aria-label="Filters" aria-disabled="true">
-                {createIcon("filter", SearchBoxClass.icon)}
-              </button>,
+              <IconButton className={FavoritesSearchPanelClass.filter} icon="filter" label="Filters" disabled={true} />,
               <span className={FavoritesSearchPanelClass.count}>
                 {computed(() => describeResultCount(favoritesSession.matchedFavorites.value.length))}
               </span>

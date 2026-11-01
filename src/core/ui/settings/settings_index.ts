@@ -21,8 +21,8 @@ export class SettingsIndex {
 }
 
 function collectSearchText(settingDescriptor: SettingDescriptor, sectionTitle: string): string {
-  const { label, description = "", keywords = [] } = settingDescriptor;
-  return [sectionTitle, label, description, ...keywords, ...collectChoiceLabels(settingDescriptor)].join("\n").toLowerCase();
+  const { label, keywords = [] } = settingDescriptor;
+  return [sectionTitle, label, ...keywords, ...collectChoiceLabels(settingDescriptor)].join("\n").toLowerCase();
 }
 
 function collectChoiceLabels(settingDescriptor: SettingDescriptor): string[] {

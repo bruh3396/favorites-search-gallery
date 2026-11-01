@@ -1,4 +1,4 @@
-import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details";
@@ -50,7 +50,11 @@ export function createFavoriteLightboxDetails({
   const viewOpen = new Signal(false);
   return {
     titleChild: <FavoriteLightboxTitle copyIdButton={copyIdButton} viewOpen={viewOpen} />,
-    controlsChild: <FavoriteLightboxViewSettings favoriteLightboxDetailsPreferences={favoriteLightboxDetailsPreferences} viewOpen={viewOpen} />,
+    controlsChild: (
+      <div hidden={computed(() => !viewOpen.value)}>
+        <FavoriteLightboxViewSettings favoriteLightboxDetailsPreferences={favoriteLightboxDetailsPreferences} />
+      </div>
+    ),
     bodyChild: tags
   };
 }
@@ -82,12 +86,11 @@ function ViewOption<Value>({ label, controlChoices, value }: {
 
 interface FavoriteLightboxViewSettingsProps {
   favoriteLightboxDetailsPreferences: FavoriteLightboxDetailsPreferences;
-  viewOpen: Readable<boolean>;
 }
 
-function FavoriteLightboxViewSettings({ favoriteLightboxDetailsPreferences, viewOpen }: FavoriteLightboxViewSettingsProps): HTMLElement {
+function FavoriteLightboxViewSettings({ favoriteLightboxDetailsPreferences }: FavoriteLightboxViewSettingsProps): HTMLElement {
   return (
-    <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View settings" hidden={computed(() => !viewOpen.value)}>
+    <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View settings">
       <ViewOption label="Organization" controlChoices={ORGANIZATION_CHOICES} value={favoriteLightboxDetailsPreferences.organization} />
       <ViewOption label="Alignment" controlChoices={ALIGNMENT_CHOICES} value={favoriteLightboxDetailsPreferences.alignment} />
       <ViewOption label="Size" controlChoices={SIZE_CHOICES} value={favoriteLightboxDetailsPreferences.size} />

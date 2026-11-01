@@ -42,7 +42,7 @@ function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
   return renderAll(ownerDocument, [
     { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference: createStoredValue({ id: "autoplay", initial: true, log }) },
     {
-      id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
+      id: "layout", kind: "choice", label: "Layout", control: "segmented",
       settingPreference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
     {
@@ -69,7 +69,7 @@ function renderDependent(ownerDocument: Document, log: Log): HTMLElement {
   return renderAll(ownerDocument, [
     { id: "infiniteScroll", kind: "switch", label: "Infinite scroll", settingPreference: infiniteScrollSettingPreference },
     {
-      id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
+      id: "resultsPerPage", kind: "number", label: "Results per page",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
       stepperScheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
     }

@@ -18,6 +18,31 @@ describe("IconButton", () => {
     expect([element.type, element.getAttribute("aria-label")]).toEqual(["button", "Show tabs (3 open)"]);
   });
 
+  test("shows its label as a tooltip", () => {
+    expect(setup({ label: "Zen" }).title).toBe("Zen");
+  });
+
+  test("submits its form when it is a submit button", () => {
+    expect(setup({ type: "submit" }).type).toBe("submit");
+  });
+
+  test("disables itself while told to", () => {
+    const disabled = new Signal(true);
+    const element = setup({ disabled });
+    const wasDisabled = element.disabled;
+
+    disabled.value = false;
+    expect([wasDisabled, element.disabled]).toEqual([true, false]);
+  });
+
+  test("keeps the classes it is given beside its own", () => {
+    expect(setup({ className: "fsg-Host-action" }).className).toBe(`${IconButtonClass.root} fsg-Host-action`);
+  });
+
+  test("defaults to the medium size", () => {
+    expect([setup().dataset.size, setup({ size: "small" }).dataset.size]).toEqual(["medium", "small"]);
+  });
+
   test("calls back when clicked", () => {
     const onClick = vi.fn<() => void>();
 

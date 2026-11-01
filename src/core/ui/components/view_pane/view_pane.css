@@ -32,41 +32,6 @@
   gap: 2px;
 }
 
-.fsg-ViewPane-action {
-  display: grid;
-  place-items: center;
-  inline-size: var(--fsg-control-size-small);
-  block-size: var(--fsg-control-size-small);
-  border-radius: var(--fsg-shape-corner-small);
-  color: var(--fsg-color-on-surface-variant);
-  cursor: pointer;
-}
-
-.fsg-ViewPane-action:hover:not(:disabled) {
-  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
-  color: inherit;
-}
-
-.fsg-ViewPane-action:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-
-.fsg-ViewPane-action:focus-visible {
-  outline: 2px solid var(--fsg-color-primary);
-  outline-offset: -2px;
-}
-
-.fsg-ViewPane-icon {
-  inline-size: 16px;
-  block-size: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .fsg-ViewPane-body {
   flex: 1;
   min-block-size: 0;

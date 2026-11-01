@@ -1,21 +1,43 @@
 .fsg-IconButton {
+  --fsg-IconButton-size: var(--fsg-control-size-medium);
+  --fsg-IconButton-icon-size: 18px;
+
   display: grid;
   flex: none;
   place-items: center;
   position: relative;
-  inline-size: var(--fsg-control-size-medium);
-  block-size: var(--fsg-control-size-medium);
+  box-sizing: border-box;
+  inline-size: var(--fsg-IconButton-size);
+  block-size: var(--fsg-IconButton-size);
   padding: 0;
   border: 0;
-  border-radius: var(--fsg-shape-corner-small);
+  border-radius: var(--fsg-IconButton-corner, var(--fsg-shape-corner-small));
   background: none;
   color: var(--fsg-color-on-surface-variant);
   cursor: pointer;
 }
 
-.fsg-IconButton:hover {
-  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+.fsg-IconButton[data-size="small"] {
+  --fsg-IconButton-size: var(--fsg-control-size-small);
+  --fsg-IconButton-icon-size: 16px;
+
+  padding: 3px;
+  background-clip: content-box;
+}
+
+.fsg-IconButton[data-size="large"] {
+  --fsg-IconButton-size: var(--fsg-control-size-large);
+  --fsg-IconButton-icon-size: 24px;
+}
+
+.fsg-IconButton:where(:hover:enabled) {
+  background-color: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
   color: inherit;
+}
+
+.fsg-IconButton:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .fsg-IconButton:focus-visible {
@@ -24,8 +46,8 @@
 }
 
 .fsg-IconButton-icon {
-  inline-size: 18px;
-  block-size: 18px;
+  inline-size: var(--fsg-IconButton-icon-size);
+  block-size: var(--fsg-IconButton-icon-size);
   fill: none;
   stroke: currentColor;
   stroke-width: 2;

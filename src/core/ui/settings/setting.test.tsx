@@ -94,10 +94,10 @@ describe("Setting", () => {
     expect(() => renderSetting(settingDescriptor)).toThrow("Unexpected value");
   });
 
-  test("labels the row and captions it from the descriptor", () => {
-    const element = renderSetting({ ...createSwitchSetting(createStoredValue(false)), description: "Plays videos when opened." });
+  test("labels the row from the descriptor", () => {
+    const element = renderSetting(createSwitchSetting(createStoredValue(false)));
 
-    expect(element.textContent).toBe("AutoplayPlays videos when opened.");
+    expect(element.textContent).toBe("Autoplay");
   });
 
   test("draws the row and its control at one size", () => {
@@ -105,14 +105,6 @@ describe("Setting", () => {
     const { element } = setup({ descriptor: switchSettingDescriptor, controlSize: "small" });
 
     expect([element.dataset.size, queryButtons(element)[0].dataset.size]).toEqual(["small", "small"]);
-  });
-
-  test("hides and shows its caption as told", () => {
-    const descriptor = { ...createSwitchSetting(createStoredValue(false)), description: "Plays videos when opened." };
-    const descriptionVisible = new Signal(false);
-    const { element } = setup({ descriptor, descriptionVisible });
-
-    expect(element.querySelector<HTMLElement>(".fsg-SettingRow-description")?.hidden).toBe(true);
   });
 
   test("shows a switch's preference and follows it", () => {

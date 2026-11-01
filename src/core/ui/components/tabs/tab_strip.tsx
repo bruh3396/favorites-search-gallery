@@ -1,7 +1,7 @@
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { KeyedList } from "@/core/ui/h/keyed_list";
-import { createIcon } from "@/core/ui/components/icon/icon";
 
 export const TabStripClass = {
   root: "fsg-TabStrip",
@@ -12,7 +12,6 @@ export const TabStripClass = {
   close: "fsg-TabStrip-close",
   add: "fsg-TabStrip-add",
   closeAll: "fsg-TabStrip-closeAll",
-  icon: "fsg-TabStrip-icon",
   trailing: "fsg-TabStrip-trailing"
 } as const;
 
@@ -82,14 +81,10 @@ export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose
   return (
     <div className={TabStripClass.root}>
       {list}
-      <button className={TabStripClass.add} type="button" aria-label="New tab" onClick={onAdd}>
-        {createIcon("add", TabStripClass.icon)}
-      </button>
+      <IconButton className={TabStripClass.add} icon="add" label="New tab" size="small" onClick={onAdd} />
       <div className={TabStripClass.trailing}>
         {trailingChild}
-        <button className={TabStripClass.closeAll} type="button" aria-label="Close all tabs" onClick={onCloseAll}>
-          {createIcon("ban", TabStripClass.icon)}
-        </button>
+        <IconButton className={TabStripClass.closeAll} icon="ban" label="Close all tabs" size="small" onClick={onCloseAll} />
       </div>
     </div>
   );
@@ -148,14 +143,13 @@ function Tab({ stripItem: tabStripItem, activeTabId, onActivate, onClose, onDrop
         <span className={TabStripClass.label}>{tabStripItem.label}</span>
       </button>
       {tabStripItem.closable && (
-        <button
+        <IconButton
           className={TabStripClass.close}
-          type="button"
-          aria-label={computed(() => `Close ${tabStripItem.label.value}`)}
+          icon="close"
+          label={computed(() => `Close ${tabStripItem.label.value}`)}
+          size="small"
           onClick={() => onClose(tabStripItem.id)}
-        >
-          {createIcon("close", TabStripClass.icon)}
-        </button>
+        />
       )}
     </div>
   );

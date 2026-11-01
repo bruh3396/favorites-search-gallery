@@ -29,6 +29,14 @@
     background: var(--fsg-color-surface);
   }
 
+  .fsg-FavoritesApp-tabs {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
   .fsg-FavoritesApp-panes .fsg-ActivityBar-rail::before {
     content: "";
     flex: none;

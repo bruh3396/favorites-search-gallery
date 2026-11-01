@@ -87,18 +87,6 @@ describe("SettingsScreen", () => {
     expect(new Set([element.dataset.size, ...sizes])).toEqual(new Set(["small"]));
   });
 
-  test("hides and shows every caption as told", () => {
-    const descriptors = ["autoplay", "hints", "loop"].map(id => ({ ...createSwitchSetting(id), description: `About ${id}.` }));
-    const descriptionsVisible = new Signal(false);
-    const { element } = setup({ settingDescriptors: descriptors, descriptionsVisible });
-    const captions = [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow-description")];
-    const readDescriptionHiddenStates = (): boolean[] => captions.map(caption => caption.hidden);
-
-    expect(readDescriptionHiddenStates()).toEqual([true, true, true]);
-    descriptionsVisible.value = true;
-    expect(readDescriptionHiddenStates()).toEqual([false, false, false]);
-  });
-
   test("shows only the rows a query matches, and only the sections holding one", () => {
     const { element, sections, query } = setup();
 

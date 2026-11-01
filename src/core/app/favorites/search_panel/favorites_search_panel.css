@@ -23,20 +23,7 @@
   }
 
   .fsg-FavoritesSearchPanel-filter {
-    display: grid;
-    flex: none;
-    place-items: center;
-    align-self: center;
-    inline-size: var(--fsg-control-size-medium);
-    block-size: var(--fsg-control-size-medium);
     margin-inline-end: 4px;
-    padding: 0;
-    border: 0;
-    border-radius: var(--fsg-shape-corner-full);
-    background: none;
-    color: var(--fsg-color-on-surface-variant);
-    opacity: 0.5;
-    cursor: default;
   }
 
   .fsg-FavoritesSearchPanel-count {

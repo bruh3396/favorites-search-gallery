@@ -1,33 +1,22 @@
-import { Readable, computed } from "@/core/utils/reactive/signal";
 import { ControlSize } from "@/core/ui/components/control/control_size";
 import { h } from "@/core/ui/h/h";
 
 export const SettingRowClass = {
   root: "fsg-SettingRow",
-  text: "fsg-SettingRow-text",
-  label: "fsg-SettingRow-label",
-  description: "fsg-SettingRow-description"
+  label: "fsg-SettingRow-label"
 } as const;
 
 export interface SettingRowProps {
   label: string;
-  description?: string;
-  descriptionVisible?: Readable<boolean>;
   control: HTMLElement;
   controlSize?: ControlSize;
   onActivate?: () => void;
 }
 
-export function SettingRow({ label, description, descriptionVisible, control, controlSize = "medium", onActivate }: SettingRowProps): HTMLElement {
+export function SettingRow({ label, control, controlSize = "medium", onActivate }: SettingRowProps): HTMLElement {
   const labelElement = <span className={SettingRowClass.label}>{label}</span>;
-  const hidden = computed(() => descriptionVisible?.value === false);
-  const descriptionElement = description === undefined ? undefined : <span className={SettingRowClass.description} hidden={hidden}>{description}</span>;
 
   control.ariaLabelledByElements = [labelElement];
-
-  if (descriptionElement !== undefined) {
-    control.ariaDescribedByElements = [descriptionElement];
-  }
   return (
     <div
       className={SettingRowClass.root}
@@ -38,10 +27,7 @@ export function SettingRow({ label, description, descriptionVisible, control, co
         }
       }}
     >
-      <div className={SettingRowClass.text}>
-        {labelElement}
-        {descriptionElement}
-      </div>
+      {labelElement}
       {control}
     </div>
   );

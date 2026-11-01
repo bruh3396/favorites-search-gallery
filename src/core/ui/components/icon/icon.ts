@@ -9,7 +9,7 @@ const ICON_PATHS = {
   add: "M12 5v14M5 12h14",
   subtract: "M5 12h14",
   filter: "M4 5h16l-6 7.5V19l-4 2v-8.5z",
-  ban: "M19 12a7 7 0 1 1-14 0a7 7 0 1 1 14 0M7.05 7.05l9.9 9.9",
+  ban: "M20.75 12a8.75 8.75 0 1 1-17.5 0a8.75 8.75 0 1 1 17.5 0M5.81 5.81l12.38 12.38",
   chevronLeft: "M15 18l-6-6l6-6",
   chevronRight: "M9 18l6-6l-6-6",
   chevronDown: "M6 9l6 6l6-6",

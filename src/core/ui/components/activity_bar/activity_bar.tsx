@@ -1,13 +1,13 @@
-import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
+import { Icon } from "@/core/ui/components/icon/icon";
+import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { h } from "@/core/ui/h/h";
 
 export const ActivityBarClass = {
   root: "fsg-ActivityBar",
   rail: "fsg-ActivityBar-rail",
   item: "fsg-ActivityBar-item",
-  icon: "fsg-ActivityBar-icon",
   view: "fsg-ActivityBar-view"
 } as const;
 
@@ -53,16 +53,14 @@ export function ActivityBar({ items: activityBarItems, value, renderView, onValu
 
   const buttons = activityBarItems.map(activityBarItem => {
     const button = (
-      <button
+      <IconButton
         className={ActivityBarClass.item}
-        type="button"
-        aria-label={activityBarItem.label}
-        title={activityBarItem.label}
-        aria-pressed={computed(() => String(value.value === activityBarItem.id))}
+        icon={activityBarItem.icon}
+        label={activityBarItem.label}
+        size="large"
+        pressed={computed(() => value.value === activityBarItem.id)}
         onClick={() => onValueChange(value.peek() === activityBarItem.id ? null : activityBarItem.id)}
-      >
-        {createIcon(activityBarItem.icon, ActivityBarClass.icon)}
-      </button>
+      />
     );
 
     button.ariaControlsElements = [view];

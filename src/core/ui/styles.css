@@ -18,7 +18,7 @@
 @import "./components/page_stepper/page_stepper.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
-@import "./components/tabs/tabs.css" layer(components);
+@import "./components/tabs/tab_panel.css" layer(components);
 @import "./components/empty_state/empty_state.css" layer(components);
 @import "./components/slider/slider.css" layer(components);
 @import "./components/activity_bar/activity_bar.css" layer(components);

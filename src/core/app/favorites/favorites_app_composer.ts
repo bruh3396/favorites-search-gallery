@@ -7,10 +7,8 @@ import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/color_scheme";
-import { CopyIdButton } from "@/core/app/favorites/lightbox/copy_id_button";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoriteLightboxTags } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_settings";
@@ -32,9 +30,9 @@ import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer"
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { bindAppearance } from "@/core/app/appearance_binder";
+import { composeFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details_composer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
@@ -101,15 +99,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     locateItem: favorite => favoritesWorkspace.locate(favorite),
     details: {
       isOpen: lightboxPreferences.details.isOpen,
-      createContent: favorite => createFavoriteLightboxDetails({
-        preferences: lightboxPreferences.details,
-        copyIdButton: h(CopyIdButton, { postId: computed(() => favorite.value?.id), clipboard, scheduler, copiedDuration: 1_500 }),
-        tags: h(FavoriteLightboxTags, {
-          favorite, localTagCategories, collapsedTagCount: 6,
-          organization: lightboxPreferences.details.organization,
-          alignment: lightboxPreferences.details.alignment,
-          size: lightboxPreferences.details.size
-        })
+      createContent: favorite => composeFavoriteLightboxDetails(favorite, {
+        preferences: lightboxPreferences.details, clipboard, scheduler, localTagCategories
       })
     }
   });

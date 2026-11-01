@@ -13,14 +13,13 @@ export interface EmptyStateAction {
 }
 
 export interface EmptyStateProps {
-  isShown: Readable<boolean>;
   message: Readable<string>;
   action?: Readable<EmptyStateAction | null>;
 }
 
-export function EmptyState({ isShown, message, action }: EmptyStateProps): HTMLElement {
+export function EmptyState({ message, action }: EmptyStateProps): HTMLElement {
   return (
-    <div className={EmptyStateClass.root} hidden={computed(() => !isShown.value)}>
+    <div className={EmptyStateClass.root}>
       <p className={EmptyStateClass.message}>{message}</p>
       {action && (
         <button

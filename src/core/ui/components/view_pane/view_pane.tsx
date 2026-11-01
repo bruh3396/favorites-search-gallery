@@ -1,5 +1,6 @@
 import { Child, Reactive, h } from "@/core/ui/h/h";
-import { Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { Icon } from "@/core/ui/components/icon/icon";
+import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export const ViewPaneClass = {
@@ -7,8 +8,6 @@ export const ViewPaneClass = {
   header: "fsg-ViewPane-header",
   title: "fsg-ViewPane-title",
   toolbar: "fsg-ViewPane-toolbar",
-  action: "fsg-ViewPane-action",
-  icon: "fsg-ViewPane-icon",
   body: "fsg-ViewPane-body"
 } as const;
 
@@ -32,16 +31,13 @@ export function ViewPane({ title, actions: viewPaneActions = [], children }: Vie
         <h2 className={ViewPaneClass.title}>{title}</h2>
         <div className={ViewPaneClass.toolbar} role="toolbar" aria-label={title}>
           {viewPaneActions.map(viewPaneAction => (
-            <button
-              className={ViewPaneClass.action}
-              type="button"
-              aria-label={viewPaneAction.label}
-              title={viewPaneAction.label}
+            <IconButton
+              icon={viewPaneAction.icon}
+              label={viewPaneAction.label}
+              size="small"
               disabled={viewPaneAction.disabled}
               onClick={viewPaneAction.onClick}
-            >
-              {createIcon(viewPaneAction.icon, ViewPaneClass.icon)}
-            </button>
+            />
           ))}
         </div>
       </header>

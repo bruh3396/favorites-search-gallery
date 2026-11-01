@@ -1,5 +1,5 @@
 import { ChoiceSettingDescriptor, ChoicesSettingDescriptor, NumberSettingDescriptor, SettingDescriptor, SliderSettingDescriptor, SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
+import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Dropdown } from "@/core/ui/components/dropdown/dropdown";
@@ -14,7 +14,6 @@ import { h } from "@/core/ui/h/h";
 
 export interface SettingProps {
   descriptor: SettingDescriptor;
-  descriptionVisible?: Readable<boolean>;
   controlSize?: ControlSize;
 }
 
@@ -23,13 +22,11 @@ interface SettingControlProps<D extends SettingDescriptor = SettingDescriptor> {
   controlSize: ControlSize;
 }
 
-export function Setting({ descriptor: settingDescriptor, descriptionVisible, controlSize = "medium" }: SettingProps): HTMLElement {
+export function Setting({ descriptor: settingDescriptor, controlSize = "medium" }: SettingProps): HTMLElement {
   const control = <SettingControl descriptor={settingDescriptor} controlSize={controlSize} />;
   return (
     <SettingRow
       label={settingDescriptor.label}
-      description={settingDescriptor.description}
-      descriptionVisible={descriptionVisible}
       control={control}
       controlSize={controlSize}
       onActivate={createActivation(control)}
