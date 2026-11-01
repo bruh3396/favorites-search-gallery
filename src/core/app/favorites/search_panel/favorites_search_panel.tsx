@@ -26,10 +26,11 @@ export interface FavoritesSearchPanelProps {
   trailingChild: Child;
   skeleton: Node;
   grid: Node;
+  searchElsewhere: (query: string) => void;
 }
 
 export function FavoritesSearchPanel({
-  favoritesService, favoritesSession, focusSearch, trailingChild, skeleton, grid
+  favoritesService, favoritesSession, focusSearch, trailingChild, skeleton, grid, searchElsewhere
 }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
@@ -74,6 +75,7 @@ export function FavoritesSearchPanel({
               favoritesSession.submit(query);
               body.scrollTop = 0;
             }}
+            searchElsewhere={searchElsewhere}
           />
         </div>
         <Paginator

@@ -23,7 +23,7 @@ describe("MemoryLocalKeyedValues", () => {
     expect(localKeyedValues.get("preferences")).toBeUndefined();
   });
 
-  test("is unaffected by mutating a value after writing or reading it", () => {
+  test("keeps its copy when a written or read value is mutated", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const written = { columns: [5] };
 

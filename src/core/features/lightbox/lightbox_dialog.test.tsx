@@ -22,7 +22,7 @@ function setup(detailsOpen?: Signal<boolean>): {
   const isOpen = new Signal(false);
   const simple = new Signal(false);
   const scheduler = new MemoryScheduler();
-  const handlers = { close: vi.fn(), showNext: vi.fn(), showPrevious: vi.fn() };
+  const handlers = { close: vi.fn() };
   const onKeydown = vi.fn();
   let focusMedia = (): void => undefined;
   const { result: dialog } = render(document, () => (
@@ -32,16 +32,13 @@ function setup(detailsOpen?: Signal<boolean>): {
       detailsOpen={detailsOpen}
       lightboxOverlayVisibility={new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler)}
       handlers={handlers}
-      keymap={{}}
       onKeydown={onKeydown}
       lightboxMouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn() }}
       renderViewport={onMediaFocus => {
         focusMedia = onMediaFocus;
         return <div>viewport</div>;
       }}
-      positionChild={<span>position</span>}
-      autoplayBarChild={<span>autoplay bar</span>}
-      toolbarChild={<span>toolbar</span>}
+      overlayChild={<span>overlay</span>}
       zoomChild={<span>zoom</span>}
       detailsPanelChild={detailsOpen === undefined ? undefined : <aside>details panel</aside>}
     />
@@ -58,10 +55,6 @@ function setupOpen(detailsOpen?: Signal<boolean>): ReturnType<typeof setup> {
   return result;
 }
 
-function findButton(dialog: HTMLElement, label: string): HTMLButtonElement {
-  return dialog.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`)!;
-}
-
 afterEach(() => {
   document.body.replaceChildren();
 });
@@ -74,7 +67,7 @@ describe("LightboxDialog", () => {
   test("places every slot it is given", () => {
     const { dialog } = setup(new Signal(false));
 
-    expect(["viewport", "position", "autoplay bar", "toolbar", "zoom", "details panel"].every(text => dialog.textContent.includes(text))).toBe(true);
+    expect(["viewport", "overlay", "zoom", "details panel"].every(text => dialog.textContent.includes(text))).toBe(true);
   });
 
   test("opens as a focused modal with the lightbox and closes with it", () => {
@@ -121,28 +114,6 @@ describe("LightboxDialog", () => {
     expect(dialog.hasAttribute("data-idle")).toBe(false);
     scheduler.advance(1);
     expect(dialog.hasAttribute("data-idle")).toBe(true);
-  });
-
-  test("keeps the overlay awake while the pointer is over the chrome", () => {
-    const { dialog, scheduler } = setupOpen();
-    const slot = findButton(dialog, "Next").parentElement!;
-
-    slot.dispatchEvent(new PointerEvent("pointerenter"));
-    scheduler.advance(LEAVE_DELAY);
-    expect(dialog.hasAttribute("data-idle")).toBe(false);
-    slot.dispatchEvent(new PointerEvent("pointerleave"));
-    scheduler.advance(IDLE_DELAY);
-    expect(dialog.hasAttribute("data-idle")).toBe(true);
-  });
-
-  test.each<[string, "showPrevious" | "showNext"]>([
-    ["Previous", "showPrevious"],
-    ["Next", "showNext"]
-  ])("runs %s's command from its arrow", (label, lightboxCommand) => {
-    const { dialog, handlers } = setupOpen();
-
-    findButton(dialog, label).click();
-    expect(handlers[lightboxCommand]).toHaveBeenCalledOnce();
   });
 
   test("marks itself while the details panel is open", () => {

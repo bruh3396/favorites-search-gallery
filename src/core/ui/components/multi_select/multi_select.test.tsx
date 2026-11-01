@@ -41,7 +41,7 @@ function readLockedStates(toggles: HTMLButtonElement[]): boolean[] {
 }
 
 describe("MultiSelect", () => {
-  test("is a group of toggle buttons, one per option, each its own tab stop", () => {
+  test("renders a group of toggle buttons, one per option, each its own tab stop", () => {
     const { element, toggles } = setup();
 
     expect(element.getAttribute("role")).toBe("group");
@@ -50,7 +50,7 @@ describe("MultiSelect", () => {
     expect(readPressedStates(toggles)).toEqual([false, false, false]);
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     const value = new Signal<readonly string[]>([]);
     const { result } = render(document, () => <MultiSelect<string> controlChoices={CHOICES} value={value} onValueChange={vi.fn()} size="small" />);
 

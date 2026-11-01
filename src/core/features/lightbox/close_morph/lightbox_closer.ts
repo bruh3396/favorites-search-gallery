@@ -11,7 +11,7 @@ export interface LightboxCloserDependencies<T extends MediaItem> {
   viewport: Pick<Viewport, "readDevicePixelRatio">;
   lightboxNavigation: Pick<LightboxNavigation<T>, "currentItem" | "close">;
   shownMedia: Readable<LightboxMediaElement | undefined>;
-  inFullscreen: Readable<boolean>;
+  canMorph: Readable<boolean>;
   morphDuration: Readable<number>;
   locateItem: (item: T) => Element | undefined;
 }
@@ -20,11 +20,11 @@ export class LightboxCloser<T extends MediaItem> {
   constructor(private readonly dependencies: LightboxCloserDependencies<T>) { }
 
   public close(): void {
-    const { scheduler, viewport, lightboxNavigation, shownMedia, inFullscreen, morphDuration, locateItem } = this.dependencies;
+    const { scheduler, viewport, lightboxNavigation, shownMedia, canMorph, morphDuration, locateItem } = this.dependencies;
     const item = lightboxNavigation.currentItem.peek();
     const source = shownMedia.peek();
 
-    if (item === undefined || source === undefined || inFullscreen.peek()) {
+    if (item === undefined || source === undefined || !canMorph.peek()) {
       lightboxNavigation.close();
       return;
     }

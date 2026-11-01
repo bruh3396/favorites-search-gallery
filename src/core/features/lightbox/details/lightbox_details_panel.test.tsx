@@ -46,7 +46,7 @@ describe("LightboxDetailsPanel", () => {
     expect(panel.textContent).toContain("controls");
   });
 
-  test("is inert while closed and interactive while open", () => {
+  test("stays inert while closed and turns interactive while open", () => {
     const { panel, isOpen } = setup();
 
     expect(panel.inert).toBe(true);

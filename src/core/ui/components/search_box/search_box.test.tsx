@@ -1,5 +1,5 @@
+import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/search_box";
-import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import SEARCH_BOX_CSS from "@/core/ui/components/search_box/search_box.css?inline";
@@ -31,12 +31,34 @@ function submit(input: HTMLInputElement): void {
   input.form!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
 }
 
+interface ElsewhereSetup {
+  element: HTMLElement;
+  onSearch: Mock<(query: string) => void>;
+  searchElsewhere: Mock<(query: string) => void>;
+}
+
+function setupElsewhere(): ElsewhereSetup {
+  const onSearch = vi.fn<(query: string) => void>();
+  const searchElsewhere = vi.fn<(query: string) => void>();
+  const { result: element } = render(document, () => (
+    <SearchBox label="Search" query={new Signal("")} onSearch={onSearch} searchElsewhere={searchElsewhere} />
+  ));
+
+  document.body.append(element);
+  type(element.querySelector("input")!, "cat");
+  return { element, onSearch, searchElsewhere };
+}
+
+function pressSearch(element: HTMLElement, event: MouseEvent): boolean {
+  return element.querySelector("button[type=submit]")!.dispatchEvent(event);
+}
+
 afterEach(() => {
   document.body.replaceChildren();
 });
 
 describe("SearchBox", () => {
-  test("is a search landmark around a labelled search field", () => {
+  test("renders a search landmark around a labelled search field", () => {
     const { element, input } = setup();
 
     expect(element.tagName).toBe("SEARCH");
@@ -105,6 +127,35 @@ describe("SearchBox", () => {
 
     element.querySelector("form")!.dispatchEvent(new Event("submit", { cancelable: true }));
     expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
+  });
+
+  test("searches elsewhere, not here, when Search is right-clicked", () => {
+    const { element, onSearch, searchElsewhere } = setupElsewhere();
+    const isMenuShown = pressSearch(element, new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+
+    expect([searchElsewhere.mock.calls, onSearch.mock.calls, isMenuShown]).toEqual([[["cat"]], [], false]);
+  });
+
+  test("searches elsewhere, not here, when Search is Ctrl- or Cmd-clicked", () => {
+    const { element, onSearch, searchElsewhere } = setupElsewhere();
+
+    pressSearch(element, new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }));
+    pressSearch(element, new MouseEvent("click", { bubbles: true, cancelable: true, metaKey: true }));
+    expect([searchElsewhere.mock.calls, onSearch.mock.calls]).toEqual([[["cat"], ["cat"]], []]);
+  });
+
+  test("still searches here on a plain click when it can search elsewhere", () => {
+    const { element, onSearch, searchElsewhere } = setupElsewhere();
+
+    pressSearch(element, new MouseEvent("click", { bubbles: true, cancelable: true }));
+    expect([searchElsewhere.mock.calls, onSearch.mock.calls]).toEqual([[], [["cat"]]]);
+  });
+
+  test("leaves the right-click menu alone without a place to search elsewhere", () => {
+    const { element } = setup();
+    const isMenuShown = pressSearch(element, new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+
+    expect(isMenuShown).toBe(true);
   });
 
   test("shows trailing content inside the field", () => {

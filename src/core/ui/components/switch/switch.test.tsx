@@ -22,7 +22,7 @@ function setup(partialSwitchProps: Partial<SwitchProps> = {}): Setup {
 }
 
 describe("Switch", () => {
-  test("is a switch button showing its value", () => {
+  test("renders a switch button showing its value", () => {
     const { element } = setup();
 
     expect(element.getAttribute("role")).toBe("switch");
@@ -30,7 +30,7 @@ describe("Switch", () => {
     expect(element.getAttribute("aria-checked")).toBe("false");
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     expect(setup().element.dataset.size).toBe("medium");
     expect(setup({ size: "small" }).element.dataset.size).toBe("small");
   });
@@ -69,7 +69,7 @@ describe("Switch", () => {
     expect(onValueChange).not.toHaveBeenCalled();
   });
 
-  test("is enabled unless given a disabled state", () => {
+  test("stays enabled unless given a disabled state", () => {
     const { result } = render(document, () => <Switch value={new Signal(false)} onValueChange={vi.fn()} />);
 
     expect((result as HTMLButtonElement).disabled).toBe(false);

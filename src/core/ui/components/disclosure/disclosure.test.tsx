@@ -29,7 +29,7 @@ function setup(partialDisclosureProps: Partial<DisclosureProps> = {}): Setup {
 }
 
 describe("Disclosure", () => {
-  test("is a titled button that controls its content, closed while its value is false", () => {
+  test("renders a titled button that controls its content, closed while its value is false", () => {
     const { trigger, region, content } = setup();
 
     expect(trigger.type).toBe("button");
@@ -40,7 +40,7 @@ describe("Disclosure", () => {
     expect(region.contains(content)).toBe(true);
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     expect(setup().element.dataset.size).toBe("medium");
     expect(setup({ size: "small" }).element.dataset.size).toBe("small");
   });

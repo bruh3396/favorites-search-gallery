@@ -8,7 +8,6 @@ import {
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { Post } from "@/core/domain/post/post";
-import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
@@ -23,7 +22,6 @@ import { sendOkRule34Request } from "@/adapters/rule34/client/rule34_request_sen
 export interface Rule34ClientDependencies {
   fetch: Rule34Fetch;
   scheduler: Scheduler;
-  randomSource: RandomSource;
   mintMedia: MediaMinter;
   rule34Document: Pick<Rule34Document, "isFirstFavoritesPage" | "keepPaginator">;
 }

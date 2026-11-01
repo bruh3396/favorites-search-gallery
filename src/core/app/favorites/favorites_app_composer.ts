@@ -70,7 +70,7 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
 }
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
-  const { favoritesOwnerId, colorScheme, ...favoritesServiceConfiguration } = configuration;
+  const { favoritesOwnerId, colorScheme } = configuration;
   const { localFavorites, localPosts, localTagCategories, remoteFavorites, remotePosts, remoteMedia, remotePages, scheduler, randomSource } = dependencies;
   const { localKeyedValues, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard } = dependencies;
   const appStorage = createAppStorage(localKeyedValues);
@@ -79,7 +79,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const { favorites: favoritesState } = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites"]);
   const ownerState = favoritesState.get(favoritesOwnerId);
   const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
-  const favoritesService = createFavoritesService(favoritesServiceConfiguration, {
+  const favoritesService = createFavoritesService({ userOwnsFavorites: configuration.userOwnsFavorites, blacklistedTags: configuration.blacklistedTags }, {
     localFavorites, remoteFavorites, remotePages, scheduler, postLibrary, randomSource,
     favoritesPaginationPreferences: favoritesPreferences.pagination
   });
@@ -133,7 +133,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         }),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, {
           favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder,
-          visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox, postActions,
+          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, lightbox, postActions,
           enterZen: (): void => {
             zenEnabled.value = true;
           }

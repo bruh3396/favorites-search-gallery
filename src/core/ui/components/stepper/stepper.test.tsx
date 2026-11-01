@@ -92,7 +92,7 @@ function keyDown(input: HTMLInputElement, key: string): KeyboardEvent {
 }
 
 describe("Stepper", () => {
-  test("is a named number input between decrease and increase buttons that stay out of the tab order", () => {
+  test("renders a named number input between decrease and increase buttons that stay out of the tab order", () => {
     const { element, input, decrement, increment } = setup({ step: 2 });
 
     expect([...element.children]).toEqual([decrement, input, increment]);
@@ -102,7 +102,7 @@ describe("Stepper", () => {
     expect([decrement.tabIndex, increment.tabIndex]).toEqual([-1, -1]);
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     expect(setup().element.dataset.size).toBe("medium");
     expect(setup({ size: "small" }).element.dataset.size).toBe("small");
   });

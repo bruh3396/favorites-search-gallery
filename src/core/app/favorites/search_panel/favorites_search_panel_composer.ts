@@ -8,6 +8,7 @@ import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { Lightbox } from "@/core/features/lightbox/lightbox";
 import { ListSequence } from "@/core/domain/media/list_sequence";
+import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { Readable } from "@/core/utils/reactive/signal";
@@ -26,7 +27,8 @@ export interface FavoritesSearchPanelDependencies {
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
   imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
-  remotePages: Pick<RemotePages, "postUrl">;
+  remotePages: Pick<RemotePages, "postUrl" | "searchUrl">;
+  navigator: Pick<Navigator, "open">;
   lightbox: Pick<Lightbox<Favorite>, "open">;
   postActions: Pick<PostActions, "openOriginal">;
   enterZen: () => void;
@@ -34,8 +36,8 @@ export interface FavoritesSearchPanelDependencies {
 
 export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependencies: FavoritesSearchPanelDependencies): HTMLElement {
   const {
-    favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages, lightbox,
-    postActions, enterZen
+    favoritesService, favoritesPreferences, tabCount, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator,
+    lightbox, postActions, enterZen
   } = dependencies;
   return h(FavoritesSearchPanel, {
     favoritesService,
@@ -65,6 +67,7 @@ export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependen
         favorite
       ),
       onCtrlClick: favorite => postActions.openOriginal(favorite)
-    })
+    }),
+    searchElsewhere: query => navigator.open(remotePages.searchUrl(query))
   });
 }

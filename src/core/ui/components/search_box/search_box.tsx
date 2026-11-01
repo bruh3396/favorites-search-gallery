@@ -18,14 +18,29 @@ export interface SearchBoxProps {
   trailingChild?: Child;
   focusRequests?: Occurrence<void>;
   onSearch: (query: string) => void;
+  searchElsewhere?: (query: string) => void;
 }
 
-export function SearchBox({ label, query, trailingChild, focusRequests, onSearch }: SearchBoxProps): HTMLElement {
+export function SearchBox({ label, query, trailingChild, focusRequests, onSearch, searchElsewhere }: SearchBoxProps): HTMLElement {
   const input = <input className={SearchBoxClass.input} type="search" spellcheck={false}
     placeholder={label} aria-label={label} value={query} /> as HTMLInputElement;
+  const submitButton = <IconButton className={SearchBoxClass.submit} icon="search" label="Search" type="submit" />;
 
   if (focusRequests !== undefined) {
     onCleanup(focusRequests.on(() => input.focus()));
+  }
+
+  if (searchElsewhere !== undefined) {
+    submitButton.addEventListener("contextmenu", event => {
+      event.preventDefault();
+      searchElsewhere(input.value);
+    });
+    submitButton.addEventListener("click", event => {
+      if (event.ctrlKey || event.metaKey) {
+        event.preventDefault();
+        searchElsewhere(input.value);
+      }
+    });
   }
   return (
     <search className={SearchBoxClass.root}>
@@ -36,7 +51,7 @@ export function SearchBox({ label, query, trailingChild, focusRequests, onSearch
           onSearch(input.value);
         }}
       >
-        <IconButton className={SearchBoxClass.submit} icon="search" label="Search" type="submit" />
+        {submitButton}
         {input}
         <IconButton
           className={SearchBoxClass.clear}

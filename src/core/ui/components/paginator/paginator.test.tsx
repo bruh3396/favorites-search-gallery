@@ -34,7 +34,7 @@ afterEach(() => {
 });
 
 describe("Paginator", () => {
-  test("is a labelled navigation landmark", () => {
+  test("renders a labelled navigation landmark", () => {
     const { element } = setup();
 
     expect(element.tagName).toBe("NAV");

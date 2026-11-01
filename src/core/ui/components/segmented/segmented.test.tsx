@@ -62,7 +62,7 @@ afterEach(() => {
 });
 
 describe("Segmented", () => {
-  test("is a radio group with one radio button per option", () => {
+  test("renders a radio group with one radio button per option", () => {
     const { element, radios } = setup();
 
     expect(element.getAttribute("role")).toBe("radiogroup");
@@ -77,7 +77,7 @@ describe("Segmented", () => {
     expect(readTabIndexes(radios)).toEqual([0, -1, -1]);
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     const { result } = render(document, () => <Segmented<string> controlChoices={CHOICES} value={new Signal("row")} onValueChange={vi.fn()} size="small" />);
 
     expect(setup().element.dataset.size).toBe("medium");
@@ -116,7 +116,7 @@ describe("Segmented", () => {
     ["ArrowLeft", "column", 2],
     ["Home", "square", 0],
     ["End", "column", 2]
-  ] as const)("%s from %s focuses and reports option %i", (key, from, to) => {
+  ] as const)("moves on %s from %s to option %i, focusing and reporting it", (key, from, to) => {
     const { radios, onValueChange } = setup(from);
     const index = CHOICES.findIndex(choice => choice.value === from);
 

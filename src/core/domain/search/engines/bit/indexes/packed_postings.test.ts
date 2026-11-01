@@ -41,7 +41,7 @@ describe("PackedPostings", () => {
     expect(packedPostings.has("c")).toBe(false);
   });
 
-  test("forEachTerm visits every term with its positions", () => {
+  test("visits every term with its positions", () => {
     const visited: [string, number[]][] = [];
 
     createPackedPostings({ a: [0, 5], b: [2] }).forEachTerm((term, positionArray) => visited.push([term, [...positionArray]]));
@@ -83,7 +83,7 @@ describe("PackedPostings", () => {
     expect(packedPostings.findPositions("x")).toBeUndefined();
   });
 
-  test("rebuild replaces prior contents", () => {
+  test("replaces prior contents when packed again", () => {
     const packedPostings = new PackedPostings();
 
     packedPostings.pack([["a", [1, 2, 3]]], 3, 3);

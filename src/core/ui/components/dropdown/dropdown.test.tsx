@@ -61,7 +61,7 @@ describe("Dropdown", () => {
     expect(queryMenu()).toBeNull();
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     const { result } = render(document, () => <Dropdown<string> controlChoices={CHOICES} value={new Signal("score")} onValueChange={vi.fn()} size="small" />);
 
     expect(setup().trigger.dataset.size).toBe("medium");

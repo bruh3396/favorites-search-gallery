@@ -101,6 +101,26 @@ describe("composeLightboxDialog", () => {
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
+  test("steps from its arrows", () => {
+    const { view, goToNext } = setup();
+
+    view.querySelector<HTMLButtonElement>("[aria-label=\"Next\"]")!.click();
+    expect(goToNext).toHaveBeenCalledOnce();
+  });
+
+  test("keeps the overlay awake while the pointer is over the chrome", () => {
+    const { view, isOpen, scheduler } = setup();
+    const slot = view.querySelector<HTMLButtonElement>("[aria-label=\"Next\"]")!.parentElement!;
+
+    isOpen.value = true;
+    slot.dispatchEvent(new PointerEvent("pointerenter"));
+    scheduler.advance(LONGER_THAN_ANY_INTERVAL);
+    expect(view.hasAttribute("data-idle")).toBe(false);
+    slot.dispatchEvent(new PointerEvent("pointerleave"));
+    scheduler.advance(LONGER_THAN_ANY_INTERVAL);
+    expect(view.hasAttribute("data-idle")).toBe(true);
+  });
+
   test("ignores commands beyond stepping, pausing, closing and opening in simple mode", () => {
     const { view, goToNext, download } = setup("simple");
 

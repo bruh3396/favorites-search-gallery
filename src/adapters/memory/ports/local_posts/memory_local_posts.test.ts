@@ -34,7 +34,7 @@ describe("MemoryLocalPosts", () => {
     expect((await localPosts.getMany(["1", "2"])).map(post => post.tags)).toEqual(["complete", "scraped"]);
   });
 
-  test("is unaffected by mutating a post after writing or reading it", async() => {
+  test("keeps its copy when a written or read post is mutated", async() => {
     const localPosts = new MemoryLocalPosts();
     const writtenPost = createPost({ id: "1", tags: "apple" });
 

@@ -9,6 +9,7 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
@@ -36,6 +37,7 @@ interface Setup {
   watched: Set<Element>;
   open: Mock<(sequence: unknown, favorite: Favorite) => boolean>;
   enterZen: Mock<() => void>;
+  navigator: MemoryNavigator;
 }
 
 function setup(posts: Post[] = []): Setup {
@@ -52,6 +54,7 @@ function setup(posts: Post[] = []): Setup {
   };
   const open = vi.fn<(sequence: unknown, favorite: Favorite) => boolean>(() => true);
   const enterZen = vi.fn<() => void>();
+  const navigator = new MemoryNavigator();
 
   favoritesPreferences.pagination.pageSize.set(2);
   favoritesSearchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
@@ -73,11 +76,12 @@ function setup(posts: Post[] = []): Setup {
     sizeObserver: new MemorySizeObserver(),
     imageLoaderService: createImageLoaderService({ scheduler }),
     remotePages: new MemoryRemotePages(new MemoryClient([])),
+    navigator,
     lightbox: { open },
     postActions: { openOriginal: vi.fn() },
     enterZen
   }));
-  return { element, dispose, favoritesSession, watched, open, enterZen };
+  return { element, dispose, favoritesSession, watched, open, enterZen, navigator };
 }
 
 function queryTileLinks(element: HTMLElement): HTMLAnchorElement[] {
@@ -111,6 +115,15 @@ describe("composeFavoritesSearchPanel", () => {
 
     queryTileLinks(element)[0].click();
     expect(open.mock.calls.map(([, favorite]) => favorite.id)).toEqual(["1"]);
+  });
+
+  test("opens the typed query on the site when Search is right-clicked", () => {
+    const { element, navigator } = setup();
+    const input = element.querySelector<HTMLInputElement>("input[type=search]")!;
+
+    input.value = "cat dog";
+    element.querySelector("button[type=submit]")!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
+    expect(navigator.opened).toEqual(["#search-cat%20dog"]);
   });
 
   test("enters zen from the zen button", () => {

@@ -53,7 +53,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     keepPaginator: (): void => { },
     readFavoritesOwnerId: (): string => ENVIRONMENT.favoritesOwnerId
   };
-  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
+  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, mintMedia, rule34Document });
   const frozenCobaltClient = new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
     identity: { userId: ENVIRONMENT.favoritesOwnerId, version: ENVIRONMENT.version, platform: ENVIRONMENT.device }

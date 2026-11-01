@@ -72,7 +72,8 @@ function setup(): Setup {
     focusSearch: new Emitter<void>(),
     trailingChild,
     skeleton,
-    grid
+    grid,
+    searchElsewhere: vi.fn()
   }));
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {

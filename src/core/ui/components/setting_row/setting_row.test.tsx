@@ -34,7 +34,7 @@ describe("SettingRow", () => {
     expect(element.querySelector("[id]")).toBeNull();
   });
 
-  test("is medium unless told otherwise", () => {
+  test("defaults to medium unless given a size", () => {
     expect(setup().element.dataset.size).toBe("medium");
     expect(setup({ controlSize: "small" }).element.dataset.size).toBe("small");
   });

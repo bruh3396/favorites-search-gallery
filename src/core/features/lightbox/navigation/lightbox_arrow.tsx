@@ -29,7 +29,7 @@ export function LightboxArrow({ direction: lightboxArrowDirection, lightboxShort
       type="button"
       aria-label={label}
       aria-keyshortcuts={lightboxShortcut?.ariaName ?? null}
-      title={lightboxShortcut === undefined ? label : `${label} (${lightboxShortcut.text})`}
+      title={label}
       onClick={() => onClick()}
     >
       {plate}

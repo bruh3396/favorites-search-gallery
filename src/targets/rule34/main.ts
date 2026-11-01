@@ -77,7 +77,7 @@ function createRule34Dependencies(environment: Environment, rule34Document: Rule
   const boundFetch = fetch.bind(globalThis);
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
   const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
-  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Document });
+  const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, mintMedia, rule34Document });
   const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, claimBodyContent });
   return {
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,

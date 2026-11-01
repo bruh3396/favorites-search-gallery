@@ -6,7 +6,6 @@ import {
   buildRule34ProfilePageUrl
 } from "@/adapters/rule34/client/rule34_url_builder";
 import { Media } from "@/core/domain/media/media";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
@@ -53,7 +52,7 @@ function setup(
   const keepPaginator = vi.fn<KeepPaginator>();
   const mintMedia = ({ url }: { url: string }): Media => ({ kind: "image", locator: url });
   const rule34Document = { isFirstFavoritesPage: (): boolean => isFirstFavoritesPage, keepPaginator };
-  const dependencies = { fetch, scheduler: new MemoryScheduler(), randomSource: new MemoryRandomSource(), mintMedia, rule34Document };
+  const dependencies = { fetch, scheduler: new MemoryScheduler(), mintMedia, rule34Document };
   return { rule34Client: new Rule34Client(dependencies), fetch, keepPaginator };
 }
 

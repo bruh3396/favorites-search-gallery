@@ -3,6 +3,7 @@ import { currentDocument, h } from "@/core/ui/h/h";
 import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { Keymap } from "@/core/ui/hotkeys/keymap";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
+import { LightboxArrow } from "@/core/features/lightbox/navigation/lightbox_arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { LightboxAutoplayBar } from "@/core/features/lightbox/autoplay/lightbox_autoplay_bar";
 import { LightboxCloser } from "@/core/features/lightbox/close_morph/lightbox_closer";
@@ -16,6 +17,7 @@ import { LightboxImage } from "@/core/features/lightbox/media/lightbox_image";
 import { LightboxMediaResolver } from "@/core/features/lightbox/media/lightbox_media_resolver";
 import { LightboxMinimap } from "@/core/features/lightbox/zoom/lightbox_minimap";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
+import { LightboxOverlay } from "@/core/features/lightbox/overlay/lightbox_overlay";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay/lightbox_overlay_visibility";
 import { LightboxPosition } from "@/core/features/lightbox/navigation/lightbox_position";
 import { LightboxPreferences } from "@/core/features/lightbox/lightbox_preferences";
@@ -104,7 +106,7 @@ export function composeLightboxDialog<T extends MediaItem>(
     viewport,
     lightboxNavigation,
     shownMedia: lightboxStage.shownMedia,
-    inFullscreen: lightboxFullscreen.inFullscreen,
+    canMorph: computed(() => !lightboxFullscreen.inFullscreen.value),
     morphDuration: computed(() => (simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION)),
     locateItem
   });
@@ -128,7 +130,6 @@ export function composeLightboxDialog<T extends MediaItem>(
     detailsOpen: lightboxDetails?.isOpen,
     lightboxOverlayVisibility,
     handlers,
-    keymap,
     onKeydown: createLightboxKeyListener(keymap, handlers),
     lightboxMouseListeners: createLightboxMouseListeners(handlers),
     renderViewport: onMediaFocus => h(LightboxViewport, {
@@ -143,14 +144,22 @@ export function composeLightboxDialog<T extends MediaItem>(
         h(LightboxVideo, { element: lightboxStage.video, onClick: handlers.togglePause, onFocusIn: onMediaFocus })
       ]
     }),
-    positionChild: h(LightboxPosition, { position: lightboxNavigation.position }),
-    autoplayBarChild: h(LightboxAutoplayBar, { countdown: lightboxAutoplay.countdown }),
-    toolbarChild: h(LightboxToolbar, {
-      isAutoplaying: lightboxAutoplay.isPlaying,
-      inFullscreen: lightboxFullscreen.inFullscreen,
-      detailsOpen: lightboxDetails?.isOpen,
-      handlers,
-      keymap
+    overlayChild: h(LightboxOverlay, {
+      onSlotEnter: () => lightboxOverlayVisibility.hold(),
+      onSlotLeave: () => lightboxOverlayVisibility.release(),
+      topEdgeChild: h(LightboxAutoplayBar, { countdown: lightboxAutoplay.countdown }),
+      topStartChild: h(LightboxPosition, { position: lightboxNavigation.position }),
+      topEndChild: h(LightboxToolbar, {
+        isAutoplaying: lightboxAutoplay.isPlaying,
+        inFullscreen: lightboxFullscreen.inFullscreen,
+        detailsOpen: lightboxDetails?.isOpen,
+        handlers,
+        keymap
+      }),
+      startEdgeChild: h(LightboxArrow, {
+        direction: "previous", lightboxShortcut: findLightboxShortcut(keymap, "showPrevious"), onClick: handlers.showPrevious
+      }),
+      endEdgeChild: h(LightboxArrow, { direction: "next", lightboxShortcut: findLightboxShortcut(keymap, "showNext"), onClick: handlers.showNext })
     }),
     zoomChild: [
       h(LightboxZoomChip, { pixelScale: lightboxZoom.pixelScale }),

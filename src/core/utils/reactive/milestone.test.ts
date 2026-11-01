@@ -3,7 +3,7 @@ import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
 
 describe("Milestone", () => {
-  test("is not reached at first", () => {
+  test("starts unreached", () => {
     expect(new Milestone().reached).toBe(false);
   });
 
@@ -43,11 +43,11 @@ describe("Milestone", () => {
 });
 
 describe("when", () => {
-  test("is reached at once when the condition already holds", () => {
+  test("reaches at once when the condition already holds", () => {
     expect(when(() => true).reached).toBe(true);
   });
 
-  test("is reached once the signals the condition reads make it hold", async() => {
+  test("reaches once the signals the condition reads make it hold", async() => {
     const count = new Signal(0);
     const fact = when(() => count.value >= 2);
 

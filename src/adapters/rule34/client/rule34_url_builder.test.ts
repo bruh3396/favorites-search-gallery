@@ -41,7 +41,7 @@ describe("buildRule34ProfilePageUrl", () => {
 });
 
 describe("favorite action urls", () => {
-  test("address adding, upvoting, and removing a favorite", () => {
+  test("addresses adding, upvoting, and removing a favorite", () => {
     expect(buildRule34AddFavoriteUrl("7")).toBe("https://rule34.xxx/public/addfav.php?id=7");
     expect(buildRule34PostVoteUrl("7")).toBe("https://rule34.xxx/index.php?page=post&s=vote&type=up&id=7");
     expect(buildRule34RemoveFavoriteUrl("7")).toBe("https://rule34.xxx/index.php?page=favorites&s=delete&id=7");

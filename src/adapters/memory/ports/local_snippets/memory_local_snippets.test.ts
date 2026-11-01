@@ -42,7 +42,7 @@ describe("MemoryLocalSnippets", () => {
     expect(await localSnippets.getAll()).toEqual([createSnippet("pets")]);
   });
 
-  test("is unaffected by mutating a snippet after writing or reading it", async() => {
+  test("keeps its copy when a written or read snippet is mutated", async() => {
     const localSnippets = new MemoryLocalSnippets();
     const writtenSnippet = createSnippet("fruits");
 

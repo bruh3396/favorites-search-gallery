@@ -23,9 +23,11 @@ export class Rule34CdnClient {
   private readonly imageDecoder: Rule34CdnImageDecoder;
 
   constructor(private readonly dependencies: Rule34CdnClientDependencies) {
-    this.extensionProber = new Rule34CdnExtensionProber(dependencies);
-    this.videoDurationProber = new Rule34CdnVideoDurationProber(dependencies);
-    this.imageDecoder = new Rule34CdnImageDecoder(dependencies);
+    const { fetch, scheduler, loadImage, decodeBitmap } = dependencies;
+
+    this.extensionProber = new Rule34CdnExtensionProber({ fetch, scheduler });
+    this.videoDurationProber = new Rule34CdnVideoDurationProber({ fetch, scheduler });
+    this.imageDecoder = new Rule34CdnImageDecoder({ fetch, loadImage, decodeBitmap });
   }
 
   public mintMediaFromUrl({ url, tags }: { url: string; tags: string }): Media | null {

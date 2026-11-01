@@ -17,14 +17,14 @@ describe("measureFavoritesLoadProgress", () => {
     { phase: "fetching", loadedCount: 150, expectedCount: null },
     { phase: "restoring", loadedCount: 0, expectedCount: 0 },
     ...(["starting", "saving", "pulling", "indexing", "checkingMissing"] as const).map(phase => ({ phase }))
-  ] satisfies FavoritesLoadState[])("is indeterminate while $phase without a share", state => {
+  ] satisfies FavoritesLoadState[])("measures indeterminate while $phase without a share", state => {
     expect(measureFavoritesLoadProgress(state)).toBe("indeterminate");
   });
 
   test.each([
     { phase: "loaded", newCount: 0, unfavoritedCount: 0 },
     { phase: "interrupted" }
-  ] satisfies FavoritesLoadState[])("is idle once $phase", state => {
+  ] satisfies FavoritesLoadState[])("measures idle once $phase", state => {
     expect(measureFavoritesLoadProgress(state)).toBe("idle");
   });
 });

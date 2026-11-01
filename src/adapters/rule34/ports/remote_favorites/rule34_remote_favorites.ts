@@ -41,7 +41,11 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
       randomSource: dependencies.randomSource,
       isRetryable: isRetryableRule34Error
     });
-    this.favoriteActions = new Rule34FavoriteActions(dependencies);
+    this.favoriteActions = new Rule34FavoriteActions({
+      fetch: dependencies.fetch,
+      scheduler: dependencies.scheduler,
+      randomSource: dependencies.randomSource
+    });
   }
 
   public fetchCount(): Promise<number | null> {

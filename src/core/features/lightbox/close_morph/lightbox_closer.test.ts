@@ -39,7 +39,7 @@ function setup(partialLightboxCloserDependencies: Partial<LightboxCloserDependen
     viewport: new MemoryViewport(),
     lightboxNavigation: { currentItem: new Signal<Post | undefined>(POST), close },
     shownMedia: new Signal<LightboxMediaElement | undefined>(createShownMedia()),
-    inFullscreen: new Signal(false),
+    canMorph: new Signal(true),
     morphDuration: new Signal(250),
     locateItem,
     ...partialLightboxCloserDependencies
@@ -69,7 +69,7 @@ describe("LightboxCloser", () => {
 
     test.each<[string, Partial<LightboxCloserDependencies<Post>>]>([
       ["no shown media", { shownMedia: new Signal<LightboxMediaElement | undefined>(undefined) }],
-      ["fullscreen", { inFullscreen: new Signal(true) }]
+      ["morphing barred", { canMorph: new Signal(false) }]
     ])("closes without morphing with %s", (_, partialLightboxCloserDependencies) => {
       const { lightboxCloser, close, locateItem } = setup(partialLightboxCloserDependencies);
 

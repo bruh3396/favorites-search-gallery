@@ -120,7 +120,7 @@ describe("FrozenCobaltClient", () => {
     expect(fetch.mock.calls.map(([url, init]) => [url, init.headers])).toEqual([[`${ORIGIN}/ping`, headers]]);
   });
 
-  test("is anonymous unless given an identity", async() => {
+  test("sends empty identity headers unless given an identity", async() => {
     const { frozenCobaltClient, fetch } = setup();
     const headers = { "Content-Type": "application/json", "X-User-Id": "", "X-Version": "", "X-Platform": "" };
 

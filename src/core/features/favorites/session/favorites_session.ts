@@ -25,8 +25,13 @@ export class FavoritesSession {
   private readonly pagination: FavoritesPagination;
 
   constructor(configuration: FavoritesSessionConfiguration, dependencies: FavoritesSessionDependencies) {
-    this.search = new FavoritesSearch(configuration, dependencies);
-    this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: dependencies.favoritesPaginationPreferences });
+    const { favoritesSearchIndex, favoritesBlacklist, randomSource, favoritesPaginationPreferences } = dependencies;
+
+    this.search = new FavoritesSearch(
+      { favoritesSearchSettings: configuration.favoritesSearchSettings },
+      { favoritesSearchIndex, favoritesBlacklist, randomSource }
+    );
+    this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: favoritesPaginationPreferences });
     this.query = computed(() => this.search.settings.value.query);
     this.isFiltered = computed(() => isFilteringFavoritesSearchSettings(this.search.settings.value));
   }
