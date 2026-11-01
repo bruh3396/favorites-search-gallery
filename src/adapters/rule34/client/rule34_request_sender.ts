@@ -1,0 +1,19 @@
+import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
+import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
+
+export async function sendRule34Request(fetch: Rule34Fetch, url: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (cause) {
+    throw new Rule34Error("network", { subject: url, cause });
+  }
+}
+
+export async function sendOkRule34Request(fetch: Rule34Fetch, url: string, init?: RequestInit): Promise<Response> {
+  const response = await sendRule34Request(fetch, url, init);
+
+  if (!response.ok) {
+    throw new Rule34Error("http", { subject: url, status: response.status });
+  }
+  return response;
+}

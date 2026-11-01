@@ -1,4 +1,4 @@
-import { Fruit, FruitName } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
 import { describe, expect, test } from "vitest";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 

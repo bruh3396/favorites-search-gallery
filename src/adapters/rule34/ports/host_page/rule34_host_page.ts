@@ -1,4 +1,5 @@
-import { AppMode, ColorScheme } from "@/core/boundary/environment";
+import { AppMode } from "@/core/boundary/app_mode";
+import { ColorScheme } from "@/core/boundary/color_scheme";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 

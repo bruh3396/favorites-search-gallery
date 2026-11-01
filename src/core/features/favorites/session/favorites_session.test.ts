@@ -8,7 +8,7 @@ import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {

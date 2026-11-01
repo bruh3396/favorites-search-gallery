@@ -5,7 +5,7 @@ import { Post } from "@/core/domain/post/post";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
 import { PostListPage } from "@/core/domain/post_list/post_list_page";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 import { createPost } from "@/testing/post";
 
 type FetchPostListPage = Mock<(searchQuery: string, pageIndex: number) => Promise<Post[]>>;

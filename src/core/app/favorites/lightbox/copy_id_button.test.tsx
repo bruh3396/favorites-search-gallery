@@ -4,7 +4,7 @@ import { h, render } from "@/core/ui/h/h";
 import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/memory_clipboard";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 interface Setup {
   postId: Signal<string | undefined>;

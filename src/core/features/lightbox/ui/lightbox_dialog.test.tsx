@@ -18,8 +18,8 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
-import { expectClassesStyled } from "@/testing/css";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 const IDLE_DELAY = 100;
 const LEAVE_DELAY = 500;

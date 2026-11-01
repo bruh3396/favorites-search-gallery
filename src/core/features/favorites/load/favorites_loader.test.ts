@@ -4,7 +4,7 @@ import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorit
 import { describe, expect, test, vi } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
-import { FavoritesLoadPhase } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesLoader } from "@/core/features/favorites/load/favorites_loader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
@@ -18,7 +18,7 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { effect } from "@/core/utils/reactive/signal";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { hasMedia } from "@/core/domain/media/media";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
@@ -62,8 +62,8 @@ async function setup({ localFavoritePosts = [], remoteFavoritePosts }: LoadSourc
   return { favoritesLoader, favoritesCollection, favoritesSearchIndex, localFavorites, remoteFavorites, scheduler };
 }
 
-function recordPhases(favoritesLoader: FavoritesLoader): FavoritesLoadPhase[] {
-  const phases: FavoritesLoadPhase[] = [];
+function recordPhases(favoritesLoader: FavoritesLoader): FavoritesLoadStatePhase[] {
+  const phases: FavoritesLoadStatePhase[] = [];
 
   effect(() => {
     phases.push(favoritesLoader.state.value.phase);

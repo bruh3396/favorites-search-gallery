@@ -7,9 +7,9 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { createPost } from "@/testing/post";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { render } from "@/core/ui/h/h";
 
 const IMAGE = createPost({ id: "1", media: { kind: "image", locator: "image.jpg" } });

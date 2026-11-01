@@ -8,8 +8,8 @@ import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
 import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
 import { TagSize } from "@/core/app/favorites/lightbox/tag_size";
-import { expectClassesStyled } from "@/testing/css";
-import { flushMicrotasks } from "@/testing/async";
+import { expectClassesStyled } from "@/testing/css_utilities";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 type ShownFavorite = Pick<Favorite, "tags">;
 

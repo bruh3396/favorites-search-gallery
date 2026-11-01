@@ -59,7 +59,7 @@ export function Tile(props: TileProps): HTMLElement {
     </div>
   );
 
-  setAspectRatio(root, size);
+  setTileAspectRatio(root, size);
   onCleanup(props.visibilityObserver.observe(root, isVisible => {
     visible.value = isVisible;
   }));
@@ -114,7 +114,7 @@ function setHrefOnInteraction(link: HTMLAnchorElement, href: string): void {
 function showPreview({ root, preview }: PreviewElements, url: string): void {
   const takeShapeFromPreview = (): void => {
     if (root.style.getPropertyValue(ASPECT_RATIO_PROPERTY) === "") {
-      setAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
+      setTileAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
     }
   };
 
@@ -135,7 +135,7 @@ function showPreview({ root, preview }: PreviewElements, url: string): void {
   }
 }
 
-export function setAspectRatio(root: HTMLElement, { width, height }: Size): void {
+export function setTileAspectRatio(root: HTMLElement, { width, height }: Size): void {
   if (width > 0 && height > 0) {
     root.style.setProperty(ASPECT_RATIO_PROPERTY, `${width} / ${height}`);
   }

@@ -16,7 +16,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface FetcherSources {

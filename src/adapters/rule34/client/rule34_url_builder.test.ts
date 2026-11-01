@@ -6,22 +6,13 @@ import {
   buildRule34PostPageUrl,
   buildRule34PostVoteUrl,
   buildRule34ProfilePageUrl,
-  buildRule34RemoveFavoriteUrl,
-  rule34FavoritesPageOffset,
-  rule34PostListPageIndex,
-  rule34PostListPageOffset
+  buildRule34RemoveFavoriteUrl
 } from "@/adapters/rule34/client/rule34_url_builder";
 import { describe, expect, test } from "vitest";
 
 describe("buildRule34FavoritesPageUrl", () => {
-  test("addresses a user's favorites at a post offset", () => {
-    expect(buildRule34FavoritesPageUrl("9", 100)).toBe("https://rule34.xxx/index.php?page=favorites&s=view&id=9&pid=100");
-  });
-});
-
-describe("rule34FavoritesPageOffset", () => {
-  test("converts a page index to its post offset", () => {
-    expect(rule34FavoritesPageOffset(2)).toBe(100);
+  test("addresses a page of a user's favorites by its post offset", () => {
+    expect(buildRule34FavoritesPageUrl("9", 2)).toBe("https://rule34.xxx/index.php?page=favorites&s=view&id=9&pid=100");
   });
 });
 
@@ -34,18 +25,6 @@ describe("buildRule34PostListUrl", () => {
 describe("buildRule34PostListPageUrl", () => {
   test("addresses a page of a search by its post offset", () => {
     expect(buildRule34PostListPageUrl("apple banana", 2)).toBe("https://rule34.xxx/index.php?page=post&s=list&tags=apple%20banana&pid=84");
-  });
-});
-
-describe("rule34PostListPageOffset", () => {
-  test("converts a page index to its post offset", () => {
-    expect(rule34PostListPageOffset(3)).toBe(126);
-  });
-});
-
-describe("rule34PostListPageIndex", () => {
-  test("converts a post offset to its page index", () => {
-    expect(rule34PostListPageIndex(126)).toBe(3);
   });
 });
 

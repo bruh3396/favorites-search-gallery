@@ -10,10 +10,10 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { createPost } from "@/testing/post";
 import { effect } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface Setup {

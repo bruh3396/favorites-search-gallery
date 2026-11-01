@@ -1,4 +1,5 @@
-import { AppMode, HostEnvironment } from "@/core/boundary/environment";
+import { HostEnvironment } from "@/core/boundary/environment";
+import { AppMode } from "@/core/boundary/app_mode";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 

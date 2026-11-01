@@ -8,8 +8,7 @@ import {
   buildRule34FavoritesPageUrl,
   buildRule34PostListUrl,
   buildRule34PostPageUrl,
-  buildRule34ProfilePageUrl,
-  rule34FavoritesPageOffset
+  buildRule34ProfilePageUrl
 } from "@/adapters/rule34/client/rule34_url_builder";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -107,7 +106,7 @@ describe("Rule34Client", () => {
       const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(createThumb("7"))));
 
       expect((await rule34Client.fetchFavoritesPage("9", 2)).map(post => post.id)).toEqual(["7"]);
-      expect(fetch).toHaveBeenCalledWith(buildRule34FavoritesPageUrl("9", rule34FavoritesPageOffset(2)), undefined);
+      expect(fetch).toHaveBeenCalledWith(buildRule34FavoritesPageUrl("9", 2), undefined);
     });
   });
 

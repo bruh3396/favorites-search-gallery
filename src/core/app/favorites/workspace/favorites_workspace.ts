@@ -6,8 +6,8 @@ import { Tab } from "@/core/ui/tabs/tab";
 import { TabManager } from "@/core/ui/tabs/tab_manager";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
-import { isRecord } from "@/core/utils/guard/guard";
+import { StoredValue } from "@/core/utils/storage/stored_value";
+import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export interface FavoritesWorkspaceDependencies {
   favoritesWorkspaceSnapshot: StoredValue<FavoritesWorkspaceSnapshot>;

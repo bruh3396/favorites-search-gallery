@@ -4,7 +4,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { Size } from "@/core/utils/geometry/size";
 
 const PLACEHOLDER_SIZES: readonly Size[] = [{ width: 1, height: 1 }, { width: 1, height: 1 }];

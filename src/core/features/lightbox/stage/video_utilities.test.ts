@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { playVideo } from "@/core/features/lightbox/stage/video_utilities";
 
 function createVideoPlaying(play: () => Promise<void>): HTMLVideoElement {

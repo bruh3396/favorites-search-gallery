@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ColorScheme } from "@/core/boundary/environment";
+import { ColorScheme } from "@/core/boundary/color_scheme";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";
 

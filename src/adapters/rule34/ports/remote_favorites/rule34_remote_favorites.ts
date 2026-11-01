@@ -1,5 +1,5 @@
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { RULE34_FAVORITES_PER_PAGE } from "@/adapters/rule34/client/rule34_url_builder";
+import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Post } from "@/core/domain/post/post";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { Retry } from "@/core/utils/async/retry";
@@ -88,14 +88,14 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
   }
 
   private createNewFavoritesFinder(): Rule34NewFavoritesFinder {
-    return new Rule34NewFavoritesFinder({ pageSize: RULE34_FAVORITES_PER_PAGE, minimumLocalRunLength: MINIMUM_LOCAL_RUN_LENGTH, fetchDelay: FETCH_DELAY }, {
+    return new Rule34NewFavoritesFinder({ pageSize: RULE34_PAGE_SIZE.favorites, minimumLocalRunLength: MINIMUM_LOCAL_RUN_LENGTH, fetchDelay: FETCH_DELAY }, {
       fetch: (pageIndex): Promise<Post[]> => this.retry.retry(() => this.fetch(pageIndex)),
       scheduler: this.dependencies.scheduler
     });
   }
 
   private createMissingFavoritesFinder(): Rule34MissingFavoritesFinder {
-    return new Rule34MissingFavoritesFinder({ pageSize: RULE34_FAVORITES_PER_PAGE, fetchDelay: FETCH_DELAY }, {
+    return new Rule34MissingFavoritesFinder({ pageSize: RULE34_PAGE_SIZE.favorites, fetchDelay: FETCH_DELAY }, {
       fetch: (pageIndex): Promise<Post[]> => this.retry.retry(() => this.fetch(pageIndex)),
       scheduler: this.dependencies.scheduler
     });

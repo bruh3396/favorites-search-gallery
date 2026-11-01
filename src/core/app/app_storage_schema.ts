@@ -5,51 +5,51 @@ import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_
 import { TAG_ALIGNMENTS, TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
 import { TAG_ORGANIZATIONS, TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
 import { TAG_SIZES, TagSize } from "@/core/app/favorites/lightbox/tag_size";
-import { hasFields, isInUnitInterval, isNumber, oneOf } from "@/core/utils/guard/guard";
+import { createFieldsGuard, createOneOfGuard } from "@/core/utils/guard/guard";
+import { isInUnitInterval, isNumber } from "@/core/utils/guard/unknown_utilities";
 import { Size } from "@/core/utils/geometry/size";
-import { StoredTree } from "@/core/utils/stored_value/stored_tree";
-import { defineStoredMap } from "@/core/utils/stored_value/stored_map_definition";
-import { defineStoredValue } from "@/core/utils/stored_value/stored_value_definition";
+import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
+import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
 
 const POST_GRID = {
-  layout: defineStoredValue<GridLayout>("column", oneOf(GRID_LAYOUTS)),
-  columnCount: defineStoredValue(6),
-  hdTilesEnabled: defineStoredValue(true)
+  layout: createStoredValueDefinition<GridLayout>("column", createOneOfGuard(GRID_LAYOUTS)),
+  columnCount: createStoredValueDefinition(6),
+  hdTilesEnabled: createStoredValueDefinition(true)
 };
 
 const LIGHTBOX = {
-  mode: defineStoredValue<LightboxMode>("full", oneOf(LIGHTBOX_MODES)),
-  volume: defineStoredValue(1, isInUnitInterval),
-  muted: defineStoredValue(false)
+  mode: createStoredValueDefinition<LightboxMode>("full", createOneOfGuard(LIGHTBOX_MODES)),
+  volume: createStoredValueDefinition(1, isInUnitInterval),
+  muted: createStoredValueDefinition(false)
 };
 
-const isSize = hasFields<Size>({ width: isNumber, height: isNumber });
+const isSize = createFieldsGuard<Size>({ width: isNumber, height: isNumber });
 const PLACEHOLDER_FAVORITE_SIZES: readonly Size[] = Array.from({ length: 24 }, () => ({ width: 1, height: 1 }));
 
 export const APP_STORAGE_SCHEMA = {
   preferences: {
     shared: {
-      postListEnabled: defineStoredValue(false),
-      theme: defineStoredValue<Theme>(DEFAULT_THEME, oneOf(THEMES))
+      postListEnabled: createStoredValueDefinition(false),
+      theme: createStoredValueDefinition<Theme>(DEFAULT_THEME, createOneOfGuard(THEMES))
     },
     favorites: {
       grid: POST_GRID,
       lightbox: {
         ...LIGHTBOX,
         details: {
-          isOpen: defineStoredValue(false),
-          organization: defineStoredValue<TagOrganization>("category", oneOf(TAG_ORGANIZATIONS)),
-          alignment: defineStoredValue<TagAlignment>("start", oneOf(TAG_ALIGNMENTS)),
-          size: defineStoredValue<TagSize>("medium", oneOf(TAG_SIZES))
+          isOpen: createStoredValueDefinition(false),
+          organization: createStoredValueDefinition<TagOrganization>("category", createOneOfGuard(TAG_ORGANIZATIONS)),
+          alignment: createStoredValueDefinition<TagAlignment>("start", createOneOfGuard(TAG_ALIGNMENTS)),
+          size: createStoredValueDefinition<TagSize>("medium", createOneOfGuard(TAG_SIZES))
         }
       },
       pagination: {
-        pageSize: defineStoredValue(50, isPageSize),
-        infiniteScroll: defineStoredValue(false)
+        pageSize: createStoredValueDefinition(50, isPageSize),
+        infiniteScroll: createStoredValueDefinition(false)
       },
-      tabStripVisible: defineStoredValue(true),
-      nativeHeaderVisible: defineStoredValue(true),
-      activeTool: defineStoredValue<string | null>(null, isToolId)
+      tabStripVisible: createStoredValueDefinition(true),
+      nativeHeaderVisible: createStoredValueDefinition(true),
+      activeTool: createStoredValueDefinition<string | null>(null, isToolId)
     },
     postList: {
       grid: POST_GRID,
@@ -57,15 +57,12 @@ export const APP_STORAGE_SCHEMA = {
     }
   },
   state: {
-    favorites: defineStoredMap({
-      workspace: defineStoredValue(DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC),
-      sizes: defineStoredValue(PLACEHOLDER_FAVORITE_SIZES, isSizeList)
+    favorites: new StoredMapDefinition({
+      workspace: createStoredValueDefinition(DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC),
+      sizes: createStoredValueDefinition(PLACEHOLDER_FAVORITE_SIZES, isSizeList)
     })
   }
 };
-
-export type AppPreferences = StoredTree<typeof APP_STORAGE_SCHEMA.preferences>;
-export type AppState = StoredTree<typeof APP_STORAGE_SCHEMA.state>;
 
 function isToolId(stored: unknown): stored is string | null {
   return stored === null || typeof stored === "string";

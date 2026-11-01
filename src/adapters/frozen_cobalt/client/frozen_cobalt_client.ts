@@ -6,7 +6,7 @@ import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt
 import { FrozenCobaltIdentity } from "@/adapters/frozen_cobalt/client/frozen_cobalt_identity";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { isRecord } from "@/core/utils/guard/guard";
+import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export interface FrozenCobaltClientConfiguration {
   readonly origin: string;

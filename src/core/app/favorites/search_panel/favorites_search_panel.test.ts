@@ -1,4 +1,4 @@
-import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings, filtersFavorites } from "@/core/features/favorites/search/favorites_search_settings";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
@@ -10,7 +10,7 @@ import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_loa
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { PageSlotClass } from "@/core/ui/components/paginator/page_slot";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 const PAGE_SIZE = 2;
 
@@ -50,7 +50,7 @@ function setup(): Setup {
   const favoritesService = { loadState, searchable };
   const favoritesSession = {
     query: computed(() => settings.value.query),
-    isFiltered: computed(() => filtersFavorites(settings.value)),
+    isFiltered: computed(() => isFilteringFavoritesSearchSettings(settings.value)),
     matchedFavorites: searchResults,
     pageNumber,
     pageCount: computed(() => Math.max(1, Math.ceil(searchResults.value.length / PAGE_SIZE))),

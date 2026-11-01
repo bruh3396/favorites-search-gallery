@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import STATUS_TEXT_CSS from "@/core/ui/components/status_text/status_text.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 describe("StatusText", () => {
   test("shows the text and follows it", () => {

@@ -3,7 +3,7 @@ import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import DROPDOWN_CSS from "@/core/ui/components/dropdown/dropdown.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 type Sort = "score" | "date" | "random" | "none";
 

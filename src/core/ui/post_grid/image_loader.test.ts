@@ -6,7 +6,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Signal } from "@/core/utils/reactive/signal";
 import { doNothing } from "@/core/utils/function/function_utilities";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
 const DECODE_DEBOUNCE = { delay: 100 };

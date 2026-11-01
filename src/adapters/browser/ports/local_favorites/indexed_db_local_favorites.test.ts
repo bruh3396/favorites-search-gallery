@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 function createIndexedDb(): IndexedDbClient {
-  return new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null);
+  return new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, () => null);
 }
 
 function createLocalFavorites(ownerId = "1"): IndexedDbLocalFavorites {

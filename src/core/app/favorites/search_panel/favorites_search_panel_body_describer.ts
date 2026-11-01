@@ -1,4 +1,4 @@
-import { FavoritesLoadPhase } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
 
 export type FavoritesSearchPanelBody =
   | { readonly kind: "skeleton" }
@@ -8,7 +8,7 @@ export type FavoritesSearchPanelBody =
 export interface FavoritesSearchPanelBodyInput {
   readonly resultCount: number;
   readonly isSearchable: boolean;
-  readonly loadPhase: FavoritesLoadPhase;
+  readonly loadPhase: FavoritesLoadStatePhase;
   readonly query: string;
   readonly isFiltered: boolean;
 }

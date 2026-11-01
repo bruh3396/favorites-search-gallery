@@ -14,11 +14,11 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_r
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 interface Setup {
   favoritesService: FavoritesService;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_fetch";
+import { sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 
 const URL = "https://rule34.xxx/index.php";

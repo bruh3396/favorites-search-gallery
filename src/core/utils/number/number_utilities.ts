@@ -1,5 +1,5 @@
 import { NumberRange } from "@/core/utils/number/number_range";
-import { getValuesAround } from "@/core/utils/number/neighborhood";
+import { getNeighborhoodValues } from "@/core/utils/number/neighborhood";
 
 const ALL_NON_NEGATIVE: NumberRange = { min: 0, max: Number.MAX_SAFE_INTEGER };
 
@@ -37,7 +37,7 @@ export function daysToMilliseconds(days: number): number {
 }
 
 export function getNumbersAround(initial: number, count: number, { min, max }: NumberRange = ALL_NON_NEGATIVE): number[] {
-  return getValuesAround(initial, count, {
+  return getNeighborhoodValues(initial, count, {
     isInBounds: value => value >= min && value <= max,
     at: value => value
   }).sort((a, b) => a - b);

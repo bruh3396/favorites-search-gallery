@@ -1,11 +1,11 @@
 import { Rule34RemoteFavorites, Rule34RemoteFavoritesDependencies } from "@/adapters/rule34/ports/remote_favorites/rule34_remote_favorites";
 import { describe, expect, test, vi } from "vitest";
-import { RULE34_FAVORITES_PER_PAGE } from "@/adapters/rule34/client/rule34_url_builder";
+import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 import { createPost } from "@/testing/post";
 
 const FAVORITES_OWNER_ID = "123";
@@ -273,7 +273,7 @@ describe("Rule34RemoteFavorites", () => {
 
   describe("findMissing", () => {
     test("finds the local favorites the remote list no longer has", async() => {
-      const remotePosts = createPage(0, RULE34_FAVORITES_PER_PAGE);
+      const remotePosts = createPage(0, RULE34_PAGE_SIZE.favorites);
       const localPostIds = getPostIds(remotePosts);
       const fetchPage = vi.fn<FetchPage>(() => Promise.resolve(remotePosts.filter(post => post.id !== localPostIds[3])));
 

@@ -8,7 +8,7 @@ import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { createPost } from "@/testing/post";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const WRITE_DELAY = 2_000;
 const WRITE_BATCH_SIZE = 25;

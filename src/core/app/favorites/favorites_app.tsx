@@ -3,7 +3,7 @@ import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
-import { AppPreferences } from "@/core/app/app_storage_schema";
+import { AppPreferences } from "@/core/app/app_preferences";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_details.css?inline";

@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import ARROW_CSS from "@/core/features/lightbox/ui/chrome/lightbox_arrow.css?inline";
 import { LIGHTBOX_ICON_PATHS } from "@/core/features/lightbox/ui/chrome/lightbox_icon";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 describe("LightboxArrow", () => {
   test("styles every class it sets", () => {

@@ -1,4 +1,4 @@
-import { getValuesAround } from "@/core/utils/number/neighborhood";
+import { getNeighborhoodValues } from "@/core/utils/number/neighborhood";
 import { hashInt } from "@/core/utils/number/number_utilities";
 
 export function isIndexInBounds<V>(array: readonly V[], index: number): boolean {
@@ -26,7 +26,7 @@ export function findFirstIndexWhere(length: number, satisfiedAt: (index: number)
 }
 
 export function getItemsAround<V>(array: readonly V[], startIndex: number, limit: number): V[] {
-  return getValuesAround(startIndex, limit, { isInBounds: index => isIndexInBounds(array, index), at: index => array[index] });
+  return getNeighborhoodValues(startIndex, limit, { isInBounds: index => isIndexInBounds(array, index), at: index => array[index] });
 }
 
 export function getWrappedItemsAround<V>(array: readonly V[], startIndex: number, limit: number): V[] {

@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import ICON_BUTTON_CSS from "@/core/ui/components/icon_button/icon_button.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup(partialIconButtonProps: Partial<IconButtonProps> = {}): HTMLButtonElement {
   return render(document, () => <IconButton icon="scan" label="Zen" onClick={() => undefined} {...partialIconButtonProps} />).result as HTMLButtonElement;

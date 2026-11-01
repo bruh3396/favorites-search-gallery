@@ -3,7 +3,7 @@ import { TabStrip, TabStripClass, TabStripItem } from "@/core/ui/components/tabs
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import TAB_STRIP_CSS from "@/core/ui/components/tabs/tab_strip.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;

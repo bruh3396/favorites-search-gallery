@@ -1,14 +1,14 @@
-import { Fruit, FruitName, fruitNames, allTerms, fruits } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit } from "@/core/domain/search/testing/fruit";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
+import { SearchCaseAssertion, SearchCaseGroup } from "@/core/domain/search/testing/search_case";
 
-export type QueryAssertion = (query: string, expectedFruitNames: FruitName[]) => void;
-export type SearchCase = { query: string; expectedFruitNames: FruitName[] };
-export type SearchCaseGroup = { name: string; cases?: SearchCase[]; run?: (assert: QueryAssertion) => void; isAST?: boolean };
+const { fruits, fruitNames, allTerms } = FRUIT_CORPUS;
 
 function matchesTagOrId(fruit: Fruit, tag: string): boolean {
   return fruit.tags.has(tag) || ((/^\d+$/).test(tag) && fruit.getMetric("id") === Number(tag));
 }
 
-export const searchCaseGroups: SearchCaseGroup[] = [
+export const SEARCH_CASES: SearchCaseGroup[] = [
   {
     name: "empty",
     cases: [
@@ -27,7 +27,7 @@ export const searchCaseGroups: SearchCaseGroup[] = [
   },
   {
     name: "names",
-    run: (assert: QueryAssertion): void => {
+    run: (assert: SearchCaseAssertion): void => {
       for (const fruit of fruits) {
         assert(fruit.name, [fruit.name]);
       }
@@ -162,7 +162,7 @@ export const searchCaseGroups: SearchCaseGroup[] = [
   },
   {
     name: "all tags",
-    run: (assert: QueryAssertion): void => {
+    run: (assert: SearchCaseAssertion): void => {
       const orAllQuery = `( ${[...allTerms].join(" ~ ")} )`;
       const andAllQuery = `${[...allTerms].join(" ")}`;
 

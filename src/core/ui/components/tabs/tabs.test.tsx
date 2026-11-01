@@ -5,7 +5,7 @@ import { Tabs, TabsClass } from "@/core/ui/components/tabs/tabs";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import TABS_CSS from "@/core/ui/components/tabs/tabs.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 interface Setup {

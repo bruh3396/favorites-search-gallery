@@ -23,7 +23,7 @@ import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";

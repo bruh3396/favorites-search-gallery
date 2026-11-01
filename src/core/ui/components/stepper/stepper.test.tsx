@@ -3,7 +3,7 @@ import { Stepper, StepperClass, StepperProps, StepperScheduler } from "@/core/ui
 import { h, render } from "@/core/ui/h/h";
 import STEPPER_CSS from "@/core/ui/components/stepper/stepper.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface PendingTask {
   task: () => void;

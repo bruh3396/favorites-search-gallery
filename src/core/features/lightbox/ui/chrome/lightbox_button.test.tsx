@@ -4,7 +4,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import BUTTON_CSS from "@/core/features/lightbox/ui/chrome/lightbox_button.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function readIconPath(button: HTMLElement): string | null | undefined {
   return button.querySelector("path")?.getAttribute("d");

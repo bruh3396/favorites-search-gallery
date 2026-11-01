@@ -1,4 +1,4 @@
-import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
@@ -19,14 +19,14 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_r
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
-import { readPreferredColorScheme } from "@/adapters/browser/environment/browser_environment_reader";
+import { readBrowserColorScheme } from "@/adapters/browser/environment/browser_color_scheme_reader";
 
 const SAMPLE_POST_COUNT = 300;
 const FAVORITES_OWNER_ID = "demo";
 
 function createDemoDependencies(): FavoritesAppDependencies {
   const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
-  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null);
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, () => null);
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
@@ -53,5 +53,5 @@ composeFavoritesApp({
   userOwnsFavorites: true,
   blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
-  colorScheme: readPreferredColorScheme()
+  colorScheme: readBrowserColorScheme()
 }, createDemoDependencies()).mount(browserHostPage.claimContent());

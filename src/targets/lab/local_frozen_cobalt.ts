@@ -1,5 +1,5 @@
 import { FrozenCobaltPost, isFrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
-import { isRecord } from "@/core/utils/guard/guard";
+import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export interface CachePage {
   readonly frozenCobaltPosts: readonly FrozenCobaltPost[];

@@ -1,5 +1,5 @@
 import { DEFAULT_THEME, THEME_DEFINITIONS } from "@/core/ui/theme/theme";
-import { ColorScheme } from "@/core/boundary/environment";
+import { ColorScheme } from "@/core/boundary/color_scheme";
 import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument_font";
 import LAB_CSS from "@/targets/lab/styles.css?inline";
 import UI_CSS from "@/core/ui/styles.css?inline";

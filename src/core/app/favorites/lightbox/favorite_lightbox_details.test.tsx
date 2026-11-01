@@ -1,4 +1,4 @@
-import { FavoriteLightboxDetailsClass, FavoriteLightboxTagsPreferences, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
+import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsPreferences, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
@@ -9,9 +9,9 @@ import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/memory_clipbo
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
-import { expectClassesStyled } from "@/testing/css";
-import { flushMicrotasks } from "@/testing/async";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
+import { expectClassesStyled } from "@/testing/css_utilities";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 type ShownFavorite = Pick<Favorite, "id" | "tags">;
 
@@ -23,7 +23,7 @@ interface Setup {
   element: HTMLElement;
   favorite: Signal<ShownFavorite | undefined>;
   clipboard: MemoryClipboard;
-  favoriteLightboxTagsPreferences: FavoriteLightboxTagsPreferences;
+  favoriteLightboxDetailsPreferences: FavoriteLightboxDetailsPreferences;
   copyButton: HTMLButtonElement;
   viewButton: HTMLButtonElement;
   viewSettings: HTMLElement;
@@ -34,10 +34,10 @@ interface Setup {
 function setup(shownFavorite: ShownFavorite | undefined): Setup {
   const favorite = new Signal<ShownFavorite | undefined>(shownFavorite);
   const clipboard = new MemoryClipboard();
-  const favoriteLightboxTagsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox.details;
+  const favoriteLightboxDetailsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox.details;
   const { result: element } = render(document, () => {
     const { titleChild, controlsChild, bodyChild } = createFavoriteLightboxDetails({
-      favorite, favoriteLightboxTagsPreferences, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
+      favorite, preferences: favoriteLightboxDetailsPreferences, localTagCategories: { getMany: () => Promise.resolve(new Map()) }, clipboard, scheduler: new MemoryScheduler(), copiedDuration: 1_500, collapsedTagCount: 6
     });
     return <div>{titleChild}{controlsChild}{bodyChild}</div> as HTMLElement;
   });
@@ -47,7 +47,7 @@ function setup(shownFavorite: ShownFavorite | undefined): Setup {
   const readPostId = (): string => copyButton.firstChild?.textContent ?? "";
   const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
     .find(button => button.getAttribute("aria-label") === label)!.click();
-  return { element, favorite, clipboard, favoriteLightboxTagsPreferences, copyButton, viewButton, viewSettings, readPostId, chooseView };
+  return { element, favorite, clipboard, favoriteLightboxDetailsPreferences, copyButton, viewButton, viewSettings, readPostId, chooseView };
 }
 
 describe("createFavoriteLightboxDetails", () => {
@@ -95,13 +95,13 @@ describe("createFavoriteLightboxDetails", () => {
   });
 
   test("remembers the chosen view and shows the tags in it", () => {
-    const { element, favoriteLightboxTagsPreferences, chooseView } = setup(createFavorite("1"));
+    const { element, favoriteLightboxDetailsPreferences, chooseView } = setup(createFavorite("1"));
     const tags = element.querySelector<HTMLElement>(`.${FavoriteLightboxTagsClass.root}`)!;
 
     chooseView("One list");
     chooseView("Centered");
     chooseView("Large");
-    expect([favoriteLightboxTagsPreferences.organization.value, favoriteLightboxTagsPreferences.alignment.value, favoriteLightboxTagsPreferences.size.value]).toEqual(["list", "center", "large"]);
+    expect([favoriteLightboxDetailsPreferences.organization.value, favoriteLightboxDetailsPreferences.alignment.value, favoriteLightboxDetailsPreferences.size.value]).toEqual(["list", "center", "large"]);
     expect([tags.dataset.alignment, tags.dataset.size]).toEqual(["center", "large"]);
   });
 });

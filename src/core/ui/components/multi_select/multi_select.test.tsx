@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import MULTI_SELECT_CSS from "@/core/ui/components/multi_select/multi_select.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 type Action = "favorite" | "download" | "open";
 

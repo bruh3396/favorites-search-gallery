@@ -5,7 +5,7 @@ import { LightboxMediaCache } from "@/core/features/lightbox/stage/lightbox_medi
 import { Post } from "@/core/domain/post/post";
 import { createPost } from "@/testing/post";
 import { doNothing } from "@/core/utils/function/function_utilities";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 interface Load {
   readonly media: Media;

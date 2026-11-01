@@ -44,15 +44,15 @@ export function parseExactSearchTerm(term: string): ExactSearchTerm {
   return new ExactSearchTerm(parseNegation(term));
 }
 
-export function isNumericTerm(term: string): boolean {
+function isNumericTerm(term: string): boolean {
   return (/^-?\d+$/).test(term);
 }
 
-export function isWildcardTerm(term: string): boolean {
+function isWildcardTerm(term: string): boolean {
   return term.includes("*");
 }
 
-export function isMetricTerm(term: string): boolean {
+function isMetricTerm(term: string): boolean {
   return metricComparisonRegex.test(term);
 }
 

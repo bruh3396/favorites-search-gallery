@@ -1,7 +1,7 @@
 import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
 import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { describe, expect, test } from "vitest";
-import { isMetricTerm, isNumericTerm, isWildcardTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { ExactSearchTerm } from "@/core/domain/search/terms/exact_search_term";
 import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
@@ -30,50 +30,29 @@ function parseMatchType(term: string): WildcardMatchType {
   return parseWildcardSearchTerm(term).matchType;
 }
 
-describe("isWildcardTerm", () => {
-  test("distinguishes wildcard terms from normal terms", () => {
-    expect(normalTerms.every(term => !isWildcardTerm(term))).toBe(true);
-    expect(wildcardTerms.every(term => isWildcardTerm(term))).toBe(true);
-  });
-});
-
-describe("isMetricTerm", () => {
-  test("rejects normal and wildcard terms", () => {
-    expect(normalTerms.every(term => !isMetricTerm(term))).toBe(true);
-    expect(wildcardTerms.every(term => !isMetricTerm(term))).toBe(true);
-  });
-
-  test("accepts every metric and comparator, and nothing else around them", () => {
-    for (const metric of ["width", "height", "id", "score", "duration"]) {
-      for (const comparator of [":", ":<", ":>"]) {
-        expect(isMetricTerm(`${metric}${comparator}0`)).toBe(true);
-        expect(isMetricTerm(`${metric}${comparator}${metric}`)).toBe(true);
-        expect(isMetricTerm(`apple${comparator}${metric}`)).toBe(false);
-        expect(isMetricTerm(`${metric}${comparator}banana`)).toBe(false);
-      }
-    }
-  });
-});
-
-describe("isNumericTerm", () => {
-  test("accepts bare numerics, negated or not", () => {
-    expect(["0", "7", "200", "-200"].every(term => isNumericTerm(term))).toBe(true);
-  });
-
-  test("rejects non-numerics", () => {
-    expect(["", "-", "a12345", "100cal", "200*", "id:200", "mango"].every(term => !isNumericTerm(term))).toBe(true);
-  });
-});
-
 describe("parseSearchTerm", () => {
   test("classifies terms into wildcard and exact", () => {
     expect(wildcardTerms.every(term => parseSearchTerm(term) instanceof WildcardSearchTerm)).toBe(true);
     expect(normalTerms.every(term => parseSearchTerm(term) instanceof ExactSearchTerm)).toBe(true);
   });
 
-  test("parses a bare numeric as a numeric term", () => {
-    expect(parseSearchTerm("200")).toBeInstanceOf(NumericSearchTerm);
-    expect(parseSearchTerm("-200")).toBeInstanceOf(NumericSearchTerm);
+  test("parses every metric and comparator as a metric term, and nothing else around them", () => {
+    for (const metric of ["width", "height", "id", "score", "duration"]) {
+      for (const comparator of [":", ":<", ":>"]) {
+        expect(parseSearchTerm(`${metric}${comparator}0`)).toBeInstanceOf(MetricSearchTerm);
+        expect(parseSearchTerm(`${metric}${comparator}${metric}`)).toBeInstanceOf(MetricSearchTerm);
+        expect(parseSearchTerm(`apple${comparator}${metric}`)).toBeInstanceOf(ExactSearchTerm);
+        expect(parseSearchTerm(`${metric}${comparator}banana`)).toBeInstanceOf(ExactSearchTerm);
+      }
+    }
+  });
+
+  test("parses a bare numeric as a numeric term, negated or not", () => {
+    expect(["0", "7", "200", "-200"].every(term => parseSearchTerm(term) instanceof NumericSearchTerm)).toBe(true);
+  });
+
+  test("parses nothing else as a numeric term", () => {
+    expect(["", "-", "a12345", "100cal", "200*", "id:200", "mango"].every(term => !(parseSearchTerm(term) instanceof NumericSearchTerm))).toBe(true);
   });
 
   test("keeps an explicit id metric a metric term, without expanding it to the tag", () => {

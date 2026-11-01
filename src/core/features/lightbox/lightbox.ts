@@ -9,7 +9,7 @@ import { LightboxRetentionList } from "@/core/features/lightbox/retention_list/l
 import { MediaItem } from "@/core/domain/media/media_item";
 import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";

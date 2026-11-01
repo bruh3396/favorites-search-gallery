@@ -1,5 +1,7 @@
-import { FruitName, fruits } from "@/core/domain/search/testing/fruit_corpus";
-import { QueryAssertion, searchCaseGroups } from "@/core/domain/search/testing/search_cases";
+import { FruitName } from "@/core/domain/search/testing/fruit";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
+import { SearchCaseAssertion } from "@/core/domain/search/testing/search_case";
+import { SEARCH_CASES } from "@/core/domain/search/testing/search_cases";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { Metric } from "@/core/domain/search/metric";
@@ -7,7 +9,8 @@ import { SearchEngine } from "@/core/domain/search/engines/search_engine";
 import { Searchable } from "@/core/domain/search/searchable";
 import { SetSearchEngine } from "@/core/domain/search/engines/set/set_search_engine";
 import { parseSearchQuery } from "@/core/domain/search/parsers/search_query_parser";
-import { tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 type Doc = Searchable & { name: string; getMetric?: (metric: Metric) => number };
@@ -18,8 +21,14 @@ const getTerms = (doc: Doc): Iterable<string> => doc.tags;
 const getName = (doc: Doc): string => doc.name;
 
 function searchWithEngine(searchEngine: SearchEngine<Doc>, query: string, docs: Doc[]): string[] {
-  const searchExpression = tryParseSearchExpression(query);
-  return searchExpression === undefined ? [] : searchEngine.search(searchExpression, docs).map(getName);
+  let searchExpression: SearchExpression;
+
+  try {
+    searchExpression = parseSearchExpression(query);
+  } catch {
+    return [];
+  }
+  return searchEngine.search(searchExpression, docs).map(getName);
 }
 
 function createDoc(name: string, ...tags: string[]): Doc {
@@ -72,11 +81,11 @@ const implementations:{ name: string; implementation: Searcher; supportsAST: boo
 
 for (const { name, implementation, supportsAST } of implementations) {
   describe(name, () => {
-    const assertMatches: QueryAssertion = (query: string, expectedFruitNames: FruitName[]): void => {
-      expect(implementation(query, fruits).sort(), query).toEqual([...expectedFruitNames].sort());
+    const assertMatches: SearchCaseAssertion = (query: string, expectedFruitNames: FruitName[]): void => {
+      expect(implementation(query, FRUIT_CORPUS.fruits).sort(), query).toEqual([...expectedFruitNames].sort());
     };
 
-    for (const searchCaseGroup of searchCaseGroups) {
+    for (const searchCaseGroup of SEARCH_CASES) {
       if (searchCaseGroup.isAST && !supportsAST) {
         continue;
       }

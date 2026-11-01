@@ -14,7 +14,7 @@ export function parseSearchQuery<Doc>(query: string): SearchQuery<Doc> {
   return normalizeSearchQuery<Doc>(searchTerms, orGroups);
 }
 
-export function normalizeSearchQuery<Doc>(andSearchTerms: SearchTerm[], orGroups: SearchTerm[][]): SearchQuery<Doc> {
+function normalizeSearchQuery<Doc>(andSearchTerms: SearchTerm[], orGroups: SearchTerm[][]): SearchQuery<Doc> {
   const flattenedAndSearchTerms = [...andSearchTerms];
   const multiTermOrGroups: SearchTerm[][] = [];
 
@@ -30,16 +30,16 @@ export function normalizeSearchQuery<Doc>(andSearchTerms: SearchTerm[], orGroups
   return new SearchQuery<Doc>(sortSearchTermGroup(dedupe(flattenedAndSearchTerms)), multiTermOrGroups.sort((a, b) => a.length - b.length));
 }
 
-export function parseTermGroups(normalized: string): { orGroups: string[][]; andTerms: string[] } {
+function parseTermGroups(normalized: string): { orGroups: string[][]; andTerms: string[] } {
   normalized = desugarNestedOrGroups(removeExtraWhitespace(normalized).toLowerCase());
   return { andTerms: parseAndTerms(normalized), orGroups: parseOrGroups(normalized) };
 }
 
-export function buildSearchTermGroup(terms: string[]): SearchTerm[] {
+function buildSearchTermGroup(terms: string[]): SearchTerm[] {
   return terms.map(parseSearchTerm);
 }
 
-export function sortSearchTermGroup(searchTerms: SearchTerm[]): SearchTerm[] {
+function sortSearchTermGroup(searchTerms: SearchTerm[]): SearchTerm[] {
   return [...searchTerms].sort((a, b) => a.cost - b.cost);
 }
 

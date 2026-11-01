@@ -1,6 +1,6 @@
 import { FrozenCobaltTagCategory, isFrozenCobaltTagCategory } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_category";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
-import { isOneOf, isRecord } from "@/core/utils/guard/guard";
+import { isOneOf, isRecord } from "@/core/utils/guard/unknown_utilities";
 
 const TAG_FAILURE_STATUSES = ["not_found", "retry"] as const;
 

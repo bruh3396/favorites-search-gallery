@@ -28,7 +28,7 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountLabScreen } from "@/targets/lab/lab_screen";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
 import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";

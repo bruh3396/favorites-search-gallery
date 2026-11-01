@@ -9,7 +9,7 @@ import { FavoritesSearch } from "@/core/features/favorites/session/favorites_sea
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { createPost } from "@/testing/post";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { StringInterner } from "@/core/utils/string/string_interner";

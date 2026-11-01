@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { MediaKind } from "@/core/domain/media/media_kind";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/rule34_cdn_extension_prober";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { parseExclusions, tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
@@ -16,17 +17,17 @@ describe("compileFavoritesSearchRequest", () => {
   });
 
   test("parses the query into the expression", () => {
-    expect(compileFavoritesSearchRequest(buildFavoritesSearchSettings({ query: "cat" }), NO_BLACKLIST).searchExpression).toEqual(tryParseSearchExpression("cat"));
+    expect(compileFavoritesSearchRequest(buildFavoritesSearchSettings({ query: "cat" }), NO_BLACKLIST).searchExpression).toEqual(parseSearchExpression("cat"));
   });
 
-  test("returns no expression for an invalid query", () => {
-    expect(compileFavoritesSearchRequest(buildFavoritesSearchSettings({ query: "( cat" }), NO_BLACKLIST).searchExpression).toBeUndefined();
+  test.each(["( cat", "cat ~ dog", "( )"])("returns no expression for an invalid query (%s)", query => {
+    expect(compileFavoritesSearchRequest(buildFavoritesSearchSettings({ query }), NO_BLACKLIST).searchExpression).toBeUndefined();
   });
 
   test("negates the query when inverted", () => {
     const favoritesSearchSettings = buildFavoritesSearchSettings({ query: "cat", isInverted: true });
 
-    expect(compileFavoritesSearchRequest(favoritesSearchSettings, NO_BLACKLIST).searchExpression).toEqual(SearchExpression.not(tryParseSearchExpression("cat")!));
+    expect(compileFavoritesSearchRequest(favoritesSearchSettings, NO_BLACKLIST).searchExpression).toEqual(SearchExpression.not(parseSearchExpression("cat")));
   });
 
   test("keeps the blacklist outside the inversion", () => {
@@ -34,6 +35,6 @@ describe("compileFavoritesSearchRequest", () => {
     const favoritesSearchSettings = buildFavoritesSearchSettings({ query: "cat", isInverted: true });
 
     expect(compileFavoritesSearchRequest(favoritesSearchSettings, favoritesBlacklist).searchExpression)
-      .toEqual(SearchExpression.and([parseExclusions(["apple"])!, SearchExpression.not(tryParseSearchExpression("cat")!)]));
+      .toEqual(SearchExpression.and([SearchExpression.and([SearchExpression.not(SearchExpression.term(parseExactSearchTerm("apple")))]), SearchExpression.not(parseSearchExpression("cat"))]));
   });
 });

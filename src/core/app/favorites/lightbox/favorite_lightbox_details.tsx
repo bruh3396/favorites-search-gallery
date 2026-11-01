@@ -10,7 +10,7 @@ import { FavoriteLightboxTags } from "@/core/app/favorites/lightbox/favorite_lig
 import { LightboxButton } from "@/core/features/lightbox/ui/chrome/lightbox_button";
 import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { h } from "@/core/ui/h/h";
@@ -36,7 +36,7 @@ const SIZE_CHOICES: readonly ControlChoice<TagSize>[] = [
   { value: "large", label: "Large", icon: "textLarge" }
 ];
 
-export interface FavoriteLightboxTagsPreferences {
+export interface FavoriteLightboxDetailsPreferences {
   readonly organization: StoredValue<TagOrganization>;
   readonly alignment: StoredValue<TagAlignment>;
   readonly size: StoredValue<TagSize>;
@@ -44,7 +44,7 @@ export interface FavoriteLightboxTagsPreferences {
 
 export interface FavoriteLightboxDetailsProps {
   favorite: Readable<Pick<Favorite, "id" | "tags"> | undefined>;
-  favoriteLightboxTagsPreferences: FavoriteLightboxTagsPreferences;
+  preferences: FavoriteLightboxDetailsPreferences;
   localTagCategories: Pick<LocalTagCategories, "getMany">;
   clipboard: Pick<Clipboard, "write">;
   scheduler: Pick<Scheduler, "schedule">;
@@ -53,12 +53,12 @@ export interface FavoriteLightboxDetailsProps {
 }
 
 export function createFavoriteLightboxDetails(props: FavoriteLightboxDetailsProps): LightboxDetailsContent {
-  const { favorite, favoriteLightboxTagsPreferences, localTagCategories, collapsedTagCount } = props;
+  const { favorite, preferences: favoriteLightboxDetailsPreferences, localTagCategories, collapsedTagCount } = props;
   const viewOpen = new Signal(false);
   return {
     titleChild: <FavoriteLightboxTitle {...props} viewOpen={viewOpen} />,
     controlsChild: <FavoriteLightboxViewSettings {...props} viewOpen={viewOpen} />,
-    bodyChild: <FavoriteLightboxTags favorite={favorite} {...favoriteLightboxTagsPreferences} localTagCategories={localTagCategories} collapsedTagCount={collapsedTagCount} />
+    bodyChild: <FavoriteLightboxTags favorite={favorite} {...favoriteLightboxDetailsPreferences} localTagCategories={localTagCategories} collapsedTagCount={collapsedTagCount} />
   };
 }
 
@@ -85,12 +85,12 @@ function ViewOption<Value>({ label, controlChoices, value }: { label: string; co
   ) as HTMLElement;
 }
 
-function FavoriteLightboxViewSettings({ favoriteLightboxTagsPreferences, viewOpen }: PartProps): HTMLElement {
+function FavoriteLightboxViewSettings({ preferences: favoriteLightboxDetailsPreferences, viewOpen }: PartProps): HTMLElement {
   return (
     <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View settings" hidden={computed(() => !viewOpen.value)}>
-      <ViewOption label="Organization" controlChoices={ORGANIZATION_CHOICES} value={favoriteLightboxTagsPreferences.organization} />
-      <ViewOption label="Alignment" controlChoices={ALIGNMENT_CHOICES} value={favoriteLightboxTagsPreferences.alignment} />
-      <ViewOption label="Size" controlChoices={SIZE_CHOICES} value={favoriteLightboxTagsPreferences.size} />
+      <ViewOption label="Organization" controlChoices={ORGANIZATION_CHOICES} value={favoriteLightboxDetailsPreferences.organization} />
+      <ViewOption label="Alignment" controlChoices={ALIGNMENT_CHOICES} value={favoriteLightboxDetailsPreferences.alignment} />
+      <ViewOption label="Size" controlChoices={SIZE_CHOICES} value={favoriteLightboxDetailsPreferences.size} />
     </div>
   ) as HTMLElement;
 }

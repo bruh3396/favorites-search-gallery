@@ -1,5 +1,5 @@
-import { parseExactSearchTerm, parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
+import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";
 
 const OPEN = "(";
@@ -7,22 +7,9 @@ const NEGATED_OPEN = "-(";
 const CLOSE = ")";
 const OR = "~";
 
-export function tryParseSearchExpression(query: string): SearchExpression | undefined {
-  try {
-    return parseSearchExpression(query);
-  } catch {
-    return undefined;
-  }
-}
-
 export function parseSearchExpression(query: string): SearchExpression {
   const tokens = tokenize(normalize(query));
   return new Parser(tokens).parseTopLevel();
-}
-
-export function parseExclusions(tags: readonly string[]): SearchExpression | undefined {
-  const exclusionSearchExpressions = tags.map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag.toLowerCase()))));
-  return exclusionSearchExpressions.length === 0 ? undefined : SearchExpression.and(exclusionSearchExpressions);
 }
 
 function normalize(query: string): string {

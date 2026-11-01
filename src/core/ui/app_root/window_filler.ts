@@ -5,7 +5,7 @@ export interface WindowFill {
   dispose: () => void;
 }
 
-export function fillRestOfWindow(element: HTMLElement, sizeObserver: SizeObserver): WindowFill {
+export function fillWindow(element: HTMLElement, sizeObserver: SizeObserver): WindowFill {
   const page = element.ownerDocument.documentElement;
   const refit = (): void => {
     const top = element.getBoundingClientRect().top + page.scrollTop;

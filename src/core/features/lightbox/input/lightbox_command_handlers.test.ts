@@ -4,7 +4,7 @@ import { LightboxCommand } from "@/core/features/lightbox/input/lightbox_command
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { createPost } from "@/testing/post";
 
 const POST = createPost();

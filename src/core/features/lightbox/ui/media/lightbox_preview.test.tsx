@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PREVIEW_CSS from "@/core/features/lightbox/ui/media/lightbox_preview.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 describe("LightboxPreview", () => {
   test("styles every class it sets", () => {

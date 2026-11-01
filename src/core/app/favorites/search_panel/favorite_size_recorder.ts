@@ -2,7 +2,7 @@ import { Readable, effect } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Size } from "@/core/utils/geometry/size";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { createDebouncedTask } from "@/core/utils/async/debounced_task";
 
 export interface FavoriteSizeRecorderConfiguration {

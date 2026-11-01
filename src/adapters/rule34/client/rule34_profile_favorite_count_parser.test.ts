@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_page_parser";
+import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_favorite_count_parser";
 
 describe("parseRule34ProfileFavoriteCount", () => {
   test("reads the count from the favorites link", () => {

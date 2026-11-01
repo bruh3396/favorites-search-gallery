@@ -5,7 +5,7 @@ import AUTOPLAY_BAR_CSS from "@/core/features/lightbox/ui/chrome/lightbox_autopl
 import { LightboxAutoplayCountdown } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 describe("LightboxAutoplayBar", () => {
   test("styles every class it sets", () => {

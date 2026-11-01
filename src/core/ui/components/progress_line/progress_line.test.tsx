@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PROGRESS_LINE_CSS from "@/core/ui/components/progress_line/progress_line.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup(initialProgress: Progress): { element: HTMLElement; progress: Signal<Progress>; dispose: () => void } {
   const progress = new Signal<Progress>(initialProgress);

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
-import { searchable } from "@/core/domain/search/testing/fruit_corpus";
+import { FRUIT_VOCABULARY } from "@/core/domain/search/testing/fruit_vocabulary";
 
 const positiveCases = [
   ["banana", true],
@@ -41,7 +41,7 @@ const invalidCases = [
 
 describe("ExactSearchTerm", () => {
   test("rejects an empty term", () => {
-    expect(parseExactSearchTerm("").matches(searchable)).toBe(false);
+    expect(parseExactSearchTerm("").matches(FRUIT_VOCABULARY)).toBe(false);
   });
 
   test("costs less than its negated form", () => {
@@ -49,11 +49,11 @@ describe("ExactSearchTerm", () => {
   });
 
   test.each(positiveCases)("matches %s against the fruit doc", (term, expected) => {
-    expect(parseExactSearchTerm(term).matches(searchable)).toBe(expected);
+    expect(parseExactSearchTerm(term).matches(FRUIT_VOCABULARY)).toBe(expected);
   });
 
   test.each(negatedCases)("inverts the match for %s", (term, expected) => {
-    expect(parseExactSearchTerm(term).matches(searchable)).toBe(expected);
+    expect(parseExactSearchTerm(term).matches(FRUIT_VOCABULARY)).toBe(expected);
   });
 
   test.each(invalidCases)("rejects the invalid term '%s'", (term, expected) => {

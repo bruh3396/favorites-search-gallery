@@ -9,12 +9,12 @@ import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_loa
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { StringInterner } from "@/core/utils/string/string_interner";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
-import { expectClassesStyled } from "@/testing/css";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   elements: HTMLElement[];

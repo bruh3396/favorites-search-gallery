@@ -17,7 +17,7 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
 interface ReloaderSources {

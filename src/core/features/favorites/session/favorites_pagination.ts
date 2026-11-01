@@ -1,7 +1,7 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSearch } from "@/core/features/favorites/session/favorites_search";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { clamp } from "@/core/utils/number/number_utilities";
 import { haveSameItems } from "@/core/utils/collection/array_utilities";
 

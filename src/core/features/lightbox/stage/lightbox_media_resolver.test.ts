@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
 import { Media } from "@/core/domain/media/media";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const UNTAGGED = { id: "1", media: { kind: "image", locator: "animation" } } as const;
 const GIF: Media = { kind: "gif", locator: "animation.gif" };

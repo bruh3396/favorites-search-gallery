@@ -1,6 +1,6 @@
 import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { parseExclusions } from "@/core/domain/search/parsers/search_expression_parser";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
 export interface FavoritesBlacklistConfiguration {
   readonly blacklistedTags: readonly string[];
@@ -12,11 +12,16 @@ export class FavoritesBlacklist {
   private readonly force: boolean;
 
   constructor({ blacklistedTags, force }: FavoritesBlacklistConfiguration) {
-    this.searchExpression = parseExclusions(blacklistedTags);
+    this.searchExpression = buildExclusionSearchExpression(blacklistedTags);
     this.force = force;
   }
 
   public apply(searchExpression: SearchExpression, { isBlacklistEnabled }: Pick<FavoritesSearchSettings, "isBlacklistEnabled">): SearchExpression {
     return (this.force || isBlacklistEnabled) && this.searchExpression !== undefined ? SearchExpression.and([this.searchExpression, searchExpression]) : searchExpression;
   }
+}
+
+function buildExclusionSearchExpression(tags: readonly string[]): SearchExpression | undefined {
+  const exclusionSearchExpressions = tags.map(tag => SearchExpression.not(SearchExpression.term(parseExactSearchTerm(tag.toLowerCase()))));
+  return exclusionSearchExpressions.length === 0 ? undefined : SearchExpression.and(exclusionSearchExpressions);
 }

@@ -1,6 +1,7 @@
 import { Codec, createFieldsCodec, createGuardedCodec, createListCodec, createRecordCodec, createSetCodec } from "@/core/utils/codec/codec";
 import { describe, expect, test } from "vitest";
-import { isBoolean, oneOf } from "@/core/utils/guard/guard";
+import { createOneOfGuard } from "@/core/utils/guard/guard";
+import { isBoolean } from "@/core/utils/guard/unknown_utilities";
 
 const COLORS = ["red", "blue"] as const;
 
@@ -10,7 +11,7 @@ interface Palette {
 }
 
 function createPaletteCodec(): Codec<Partial<Palette>> {
-  return createFieldsCodec<Palette>({ main: oneOf(COLORS), isMuted: isBoolean });
+  return createFieldsCodec<Palette>({ main: createOneOfGuard(COLORS), isMuted: isBoolean });
 }
 
 describe("createFieldsCodec", () => {
@@ -39,36 +40,36 @@ describe("createRecordCodec", () => {
   const DEFAULT_PALETTE: Palette = { main: "red", isMuted: false };
 
   test("fills each missing or rejected field from the default", () => {
-    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).decode({ main: "green", isMuted: true }))
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: createOneOfGuard(COLORS), isMuted: isBoolean }).decode({ main: "green", isMuted: true }))
       .toEqual({ main: "red", isMuted: true });
   });
 
   test("decodes nothing from a value that isn't a record", () => {
-    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).decode("red")).toBeUndefined();
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: createOneOfGuard(COLORS), isMuted: isBoolean }).decode("red")).toBeUndefined();
   });
 
   test("stores only the fields it has a guard for", () => {
-    expect(createRecordCodec(DEFAULT_PALETTE, { main: oneOf(COLORS), isMuted: isBoolean }).encode({ main: "blue", isMuted: true, other: 1 } as Palette))
+    expect(createRecordCodec(DEFAULT_PALETTE, { main: createOneOfGuard(COLORS), isMuted: isBoolean }).encode({ main: "blue", isMuted: true, other: 1 } as Palette))
       .toEqual({ main: "blue", isMuted: true });
   });
 });
 
 describe("createGuardedCodec", () => {
   test("decodes a value its guard accepts and stores it as is", () => {
-    const codec = createGuardedCodec(oneOf(COLORS));
+    const codec = createGuardedCodec(createOneOfGuard(COLORS));
 
     expect(codec.decode("red")).toBe("red");
     expect(codec.encode("blue")).toBe("blue");
   });
 
   test("decodes nothing from a value its guard rejects", () => {
-    expect(createGuardedCodec(oneOf(COLORS)).decode("green")).toBeUndefined();
+    expect(createGuardedCodec(createOneOfGuard(COLORS)).decode("green")).toBeUndefined();
   });
 });
 
 describe("createSetCodec", () => {
   test("stores a set as an array and decodes it back", () => {
-    const codec = createSetCodec(oneOf(COLORS));
+    const codec = createSetCodec(createOneOfGuard(COLORS));
     const stored = codec.encode(new Set(["red", "blue"]));
 
     expect(stored).toEqual(["red", "blue"]);
@@ -79,7 +80,7 @@ describe("createSetCodec", () => {
     ["a non-array", { red: true }],
     ["an array with a rejected member", ["red", "green"]]
   ])("decodes nothing from %s", (_, stored) => {
-    expect(createSetCodec(oneOf(COLORS)).decode(stored)).toBeUndefined();
+    expect(createSetCodec(createOneOfGuard(COLORS)).decode(stored)).toBeUndefined();
   });
 });
 
@@ -93,10 +94,10 @@ describe("createListCodec", () => {
   });
 
   test("drops an entry its codec rejects and keeps the rest", () => {
-    expect(createListCodec(createGuardedCodec(oneOf(COLORS))).decode(["red", "green", "blue"])).toEqual(["red", "blue"]);
+    expect(createListCodec(createGuardedCodec(createOneOfGuard(COLORS))).decode(["red", "green", "blue"])).toEqual(["red", "blue"]);
   });
 
   test("decodes nothing from a non-array", () => {
-    expect(createListCodec(createGuardedCodec(oneOf(COLORS))).decode({ 0: "red" })).toBeUndefined();
+    expect(createListCodec(createGuardedCodec(createOneOfGuard(COLORS))).decode({ 0: "red" })).toBeUndefined();
   });
 });

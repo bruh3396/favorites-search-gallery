@@ -9,7 +9,7 @@ import { Scoped } from "@/core/utils/reactive/scope";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Size } from "@/core/utils/geometry/size";
 import { TileClass } from "@/core/ui/post_grid/tile";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup({ sizes = [{ width: 4, height: 3 }, { width: 1, height: 2 }], layout = new Signal<GridLayout>("grid"),
   columnCount = new Signal(2), count = 50 }: Partial<SkeletonGridProps> = {}): Scoped<HTMLElement> {

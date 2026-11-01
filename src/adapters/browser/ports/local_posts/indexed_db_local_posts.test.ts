@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 function createLocalPosts(): IndexedDbLocalPosts {
-  return new IndexedDbLocalPosts(new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null));
+  return new IndexedDbLocalPosts(new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, () => null));
 }
 
 describe("IndexedDbLocalPosts", () => {

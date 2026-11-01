@@ -4,7 +4,7 @@ import { h, render } from "@/core/ui/h/h";
 import PAGE_SLOT_CSS from "@/core/ui/components/paginator/page_slot.css?inline";
 import { PageTerm } from "@/core/ui/components/paginator/page_term";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;

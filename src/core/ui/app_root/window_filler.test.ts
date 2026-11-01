@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
-import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
+import { fillWindow } from "@/core/ui/app_root/window_filler";
 
 function setup(): { element: HTMLElement; sizeObserver: MemorySizeObserver; moveTo: (top: number) => void } {
   const element = document.createElement("div");
@@ -13,18 +13,18 @@ function setup(): { element: HTMLElement; sizeObserver: MemorySizeObserver; move
   return { element, sizeObserver, moveTo };
 }
 
-describe("fillRestOfWindow", () => {
+describe("fillWindow", () => {
   test("sizes the element to the window below its top", () => {
     const { element, sizeObserver } = setup();
 
-    fillRestOfWindow(element, sizeObserver);
+    fillWindow(element, sizeObserver);
     expect(element.style.blockSize).toBe("calc(100dvh - 40px)");
   });
 
   test("refits when the page resizes", () => {
     const { element, sizeObserver, moveTo } = setup();
 
-    fillRestOfWindow(element, sizeObserver);
+    fillWindow(element, sizeObserver);
     moveTo(0);
     sizeObserver.resize(document.documentElement, { width: 800, height: 600 });
     expect(element.style.blockSize).toBe("calc(100dvh - 0px)");
@@ -32,7 +32,7 @@ describe("fillRestOfWindow", () => {
 
   test("refits when told, for a move that leaves the page's size unchanged", () => {
     const { element, sizeObserver, moveTo } = setup();
-    const { refit } = fillRestOfWindow(element, sizeObserver);
+    const { refit } = fillWindow(element, sizeObserver);
 
     moveTo(0);
     refit();
@@ -42,7 +42,7 @@ describe("fillRestOfWindow", () => {
   test("stops refitting once disposed", () => {
     const { element, sizeObserver, moveTo } = setup();
 
-    fillRestOfWindow(element, sizeObserver).dispose();
+    fillWindow(element, sizeObserver).dispose();
     moveTo(0);
     sizeObserver.resize(document.documentElement, { width: 800, height: 600 });
     expect(element.style.blockSize).toBe("calc(100dvh - 40px)");

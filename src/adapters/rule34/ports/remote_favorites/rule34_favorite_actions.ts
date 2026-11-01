@@ -1,5 +1,6 @@
 import { buildRule34AddFavoriteUrl, buildRule34PostVoteUrl, buildRule34RemoveFavoriteUrl } from "@/adapters/rule34/client/rule34_url_builder";
-import { Rule34Fetch, sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_fetch";
+import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
+import { sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Retry } from "@/core/utils/async/retry";

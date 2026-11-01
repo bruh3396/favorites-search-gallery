@@ -1,5 +1,5 @@
 import "fake-indexeddb/auto";
-import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { beforeEach, describe, expect, test } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 function createLocalTagCategories(): IndexedDbLocalTagCategories {
-  return new IndexedDbLocalTagCategories(new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, () => null));
+  return new IndexedDbLocalTagCategories(new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, () => null));
 }
 
 describe("IndexedDbLocalTagCategories", () => {

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
-import { StoredValueStorage } from "@/core/utils/stored_value/stored_value_storage";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
-import { defineStoredMap } from "@/core/utils/stored_value/stored_map_definition";
-import { defineStoredValue } from "@/core/utils/stored_value/stored_value_definition";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
+import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
+import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
 
 function createStorage(entries: Record<string, unknown> = {}): StoredValueStorage & { entries: Record<string, unknown> } {
   return {
@@ -15,9 +15,9 @@ function createStorage(entries: Record<string, unknown> = {}): StoredValueStorag
 }
 
 const SCHEMA = {
-  panel: { size: defineStoredValue(6), isOpen: defineStoredValue(false), view: { dense: defineStoredValue(false) } },
-  other: { size: defineStoredValue(1) },
-  volume: defineStoredValue(1)
+  panel: { size: createStoredValueDefinition(6), isOpen: createStoredValueDefinition(false), view: { dense: createStoredValueDefinition(false) } },
+  other: { size: createStoredValueDefinition(1) },
+  volume: createStoredValueDefinition(1)
 };
 
 describe("createStoredTree", () => {
@@ -44,7 +44,7 @@ describe("createStoredTree", () => {
   });
 
   describe("a map", () => {
-    const MAP_SCHEMA = { owners: defineStoredMap({ size: defineStoredValue(6), view: { dense: defineStoredValue(false) } }) };
+    const MAP_SCHEMA = { owners: new StoredMapDefinition({ size: createStoredValueDefinition(6), view: { dense: createStoredValueDefinition(false) } }) };
 
     test("stores each key's entry in its own section", () => {
       const storage = createStorage({ owners: { a: { size: 4 } } });

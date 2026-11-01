@@ -1,4 +1,4 @@
-import { ColorScheme } from "@/core/boundary/environment";
+import { ColorScheme } from "@/core/boundary/color_scheme";
 
 export interface HostPage {
   readonly hasHeader: boolean;

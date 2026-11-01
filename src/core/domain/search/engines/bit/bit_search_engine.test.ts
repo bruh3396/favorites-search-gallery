@@ -1,4 +1,5 @@
-import { Fruit, fruits } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit } from "@/core/domain/search/testing/fruit";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { MetricSearchable, Searchable } from "@/core/domain/search/searchable";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
@@ -14,7 +15,7 @@ interface TaggedItem extends Searchable {
 }
 
 function createFruitEngine(): BitSearchEngine<Fruit> {
-  return new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, fruits);
+  return new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, FRUIT_CORPUS.fruits);
 }
 
 function searchFruitNames(query: string): string[] {
@@ -64,13 +65,13 @@ function createIdEngine(): BitSearchEngine<MetricDoc> {
 describe("BitSearchEngine", () => {
   describe("search", () => {
     test("returns the whole corpus for an empty query", () => {
-      expect(createFruitEngine().search(parseSearchExpression(""))).toEqual(fruits);
+      expect(createFruitEngine().search(parseSearchExpression(""))).toEqual(FRUIT_CORPUS.fruits);
     });
 
     test("returns results in corpus order", () => {
       const matchedFruits = createFruitEngine().search(parseSearchExpression("sweet"));
 
-      expect(matchedFruits.map(fruit => fruit.name)).toEqual(fruits.filter(fruit => fruit.tags.has("sweet")).map(fruit => fruit.name));
+      expect(matchedFruits.map(fruit => fruit.name)).toEqual(FRUIT_CORPUS.fruits.filter(fruit => fruit.tags.has("sweet")).map(fruit => fruit.name));
     });
 
     test("returns nothing when a required term matches no doc", () => {
@@ -150,7 +151,7 @@ describe("BitSearchEngine", () => {
       const bitSearchEngine = new BitSearchEngine<Fruit>({ getTerms: fruit => fruit.tags, getMetric: () => 0, stringInterner: new StringInterner() }, []);
 
       expect(bitSearchEngine.search(parseSearchExpression("red"))).toEqual([]);
-      bitSearchEngine.rebuild(fruits);
+      bitSearchEngine.rebuild(FRUIT_CORPUS.fruits);
       expect(bitSearchEngine.search(parseSearchExpression("red")).length).toBeGreaterThan(0);
     });
   });

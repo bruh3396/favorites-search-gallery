@@ -2,7 +2,7 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
-import { isRetryableRule34Error, isRule34PageMissing } from "@/adapters/rule34/client/rule34_error";
+import { isRetryableRule34Error, isMissingPageRule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 
 export interface Rule34RemotePagesDependencies {
@@ -37,7 +37,7 @@ export class Rule34RemotePages implements RemotePages {
     return this.retry.retry(() => this.dependencies.rule34Client.fetchPostPage(postId)).then(
       () => true,
       (error: unknown) => {
-        if (isRule34PageMissing(error)) {
+        if (isMissingPageRule34Error(error)) {
           return false;
         }
         throw error;

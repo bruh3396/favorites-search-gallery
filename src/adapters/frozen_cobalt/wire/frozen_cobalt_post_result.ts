@@ -1,5 +1,5 @@
 import { FrozenCobaltPost, isFrozenCobaltPost } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_post";
-import { isOneOf, isRecord } from "@/core/utils/guard/guard";
+import { isOneOf, isRecord } from "@/core/utils/guard/unknown_utilities";
 import { FrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 
 const POST_FAILURE_STATUSES = ["deleted", "retry"] as const;

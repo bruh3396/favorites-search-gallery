@@ -1,4 +1,5 @@
-import { FieldGuards, Guard, isRecord } from "@/core/utils/guard/guard";
+import { FieldGuards, Guard } from "@/core/utils/guard/guard";
+import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export interface Codec<T> {
   decode: (stored: unknown) => T | undefined;

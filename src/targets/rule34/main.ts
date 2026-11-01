@@ -1,5 +1,6 @@
-import { AppMode, Environment } from "@/core/boundary/environment";
-import { DEFAULT_INDEXED_DB_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
+import { Environment } from "@/core/boundary/environment";
+import { AppMode } from "@/core/boundary/app_mode";
+import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
@@ -33,7 +34,7 @@ import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { createAppStorage } from "@/core/app/app_storage";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
 import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";
 
@@ -95,7 +96,7 @@ function createFrozenCobaltClient(
 function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34Dependencies): void {
   const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = rule34Dependencies;
   const frozenCobaltClient = createFrozenCobaltClient(environment, rule34Dependencies);
-  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CONFIGURATION, mintMedia);
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia);
   const remotePosts = new FallbackRemotePosts({
     primaryRemotePosts: new FrozenCobaltRemotePosts({
       frozenCobaltClient,

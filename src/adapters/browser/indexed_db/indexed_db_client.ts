@@ -1,16 +1,23 @@
-import { INDEXED_DB_STORES, IndexedDbStoreName } from "@/adapters/browser/indexed_db/indexed_db_store_name";
+import { IndexedDbStoreName } from "@/adapters/browser/indexed_db/indexed_db_store_name";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { LegacyMigration, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
 import { LegacyDatabaseNames } from "@/adapters/browser/indexed_db/legacy_database_names";
 
 const VERSION = 1;
 
+const STORES: Readonly<Record<IndexedDbStoreName, IDBObjectStoreParameters>> = {
+  favorites: {},
+  posts: { keyPath: "id" },
+  snippets: { keyPath: "name" },
+  tagCategories: {}
+};
+
 export interface IndexedDbClientConfiguration {
   readonly databaseName: string;
   readonly legacyDatabaseNames: LegacyDatabaseNames | null;
 }
 
-export const DEFAULT_INDEXED_DB_CONFIGURATION: IndexedDbClientConfiguration = {
+export const DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION: IndexedDbClientConfiguration = {
   databaseName: "favorites-search-gallery",
   legacyDatabaseNames: { favorites: "FavoritesV2", posts: "Posts", tagCategories: "TagCategories" }
 };
@@ -24,14 +31,14 @@ export class IndexedDbClient {
   ) {}
 
   public async runTransaction<T>(
-    storeName: IndexedDbStoreName,
+    indexedDbStoreName: IndexedDbStoreName,
     mode: IDBTransactionMode,
     issueRequests: (store: IDBObjectStore) => T
   ): Promise<T> {
     const database = await this.open();
     return new Promise((resolve, reject) => {
-      const transaction = database.transaction(storeName, mode);
-      const result = issueRequests(transaction.objectStore(storeName));
+      const transaction = database.transaction(indexedDbStoreName, mode);
+      const result = issueRequests(transaction.objectStore(indexedDbStoreName));
 
       transaction.oncomplete = (): void => resolve(result);
       transaction.onabort = (): void => reject(transaction.error);
@@ -76,7 +83,7 @@ export class IndexedDbClient {
 }
 
 function createStores(database: IDBDatabase): void {
-  for (const [name, parameters] of Object.entries(INDEXED_DB_STORES)) {
+  for (const [name, parameters] of Object.entries(STORES)) {
     database.createObjectStore(name, parameters);
   }
 }

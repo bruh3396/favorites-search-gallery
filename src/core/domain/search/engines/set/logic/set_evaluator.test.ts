@@ -1,4 +1,5 @@
-import { Fruit, FruitName, fruits, invertedIndex } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
+import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { describe, expect, test } from "vitest";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -10,6 +11,7 @@ import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { StringInterner } from "@/core/utils/string/string_interner";
 
+const { fruits, invertedIndex } = FRUIT_CORPUS;
 const positionIndex = new PositionIndex<Fruit>();
 
 positionIndex.build(fruits);

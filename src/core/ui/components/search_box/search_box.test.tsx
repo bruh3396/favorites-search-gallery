@@ -4,7 +4,7 @@ import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import SEARCH_BOX_CSS from "@/core/ui/components/search_box/search_box.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;

@@ -4,7 +4,7 @@ import { SYSTEM_FONT } from "@/core/ui/fonts/system_font";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import TOKENS_CSS from "@/core/ui/tokens.css?inline";
 import { VERDANA_FONT } from "@/core/ui/fonts/verdana_font";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 const THEME = THEME_DEFINITIONS.slate;
 

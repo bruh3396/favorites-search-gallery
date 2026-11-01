@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 describe("RateLimiter", () => {
   test("starts tasks no faster than its rate", async() => {

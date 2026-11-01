@@ -1,7 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { APP_STORAGE_SCHEMA, AppPreferences, AppState } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { AppPreferences } from "@/core/app/app_preferences";
+import { AppState } from "@/core/app/app_state";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 
 function createFavorites(localKeyedValues = new MemoryLocalKeyedValues()): AppPreferences["favorites"] {
   return createStoredTree(APP_STORAGE_SCHEMA.preferences, localKeyedValues, ["favorites"]).favorites;

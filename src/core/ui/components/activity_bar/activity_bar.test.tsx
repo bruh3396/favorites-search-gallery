@@ -3,7 +3,7 @@ import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import ACTIVITY_BAR_CSS from "@/core/ui/components/activity_bar/activity_bar.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 const ITEMS: readonly ActivityBarItem[] = [

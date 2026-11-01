@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import VIDEO_CSS from "@/core/features/lightbox/ui/media/lightbox_video.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup(): {
   root: HTMLElement;

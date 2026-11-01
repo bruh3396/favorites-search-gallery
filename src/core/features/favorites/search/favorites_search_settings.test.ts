@@ -1,20 +1,20 @@
-import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, filtersFavorites } from "@/core/features/favorites/search/favorites_search_settings";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { describe, expect, test } from "vitest";
 
-describe("filtersFavorites", () => {
+describe("isFilteringFavoritesSearchSettings", () => {
   test("returns false for the default settings", () => {
-    expect(filtersFavorites(DEFAULT_FAVORITES_SEARCH_SETTINGS)).toBe(false);
+    expect(isFilteringFavoritesSearchSettings(DEFAULT_FAVORITES_SEARCH_SETTINGS)).toBe(false);
   });
 
   test("returns true when a filter differs from its default", () => {
-    expect(filtersFavorites({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "apple" })).toBe(true);
-    expect(filtersFavorites({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, isInverted: true })).toBe(true);
-    expect(filtersFavorites({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, allowedRatings: 1 })).toBe(true);
-    expect(filtersFavorites({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, isBlacklistEnabled: true })).toBe(true);
+    expect(isFilteringFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "apple" })).toBe(true);
+    expect(isFilteringFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, isInverted: true })).toBe(true);
+    expect(isFilteringFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, allowedRatings: 1 })).toBe(true);
+    expect(isFilteringFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, isBlacklistEnabled: true })).toBe(true);
   });
 
   test("ignores ordering settings", () => {
-    expect(filtersFavorites({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 7 })).toBe(false);
+    expect(isFilteringFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 7 })).toBe(false);
   });
 });
 

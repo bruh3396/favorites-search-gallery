@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseExclusions, parseSearchExpression, tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 import { BitEvaluator } from "@/core/domain/search/engines/bit/logic/bit_evaluator";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
 import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
@@ -137,38 +137,5 @@ describe("parseSearchExpression", () => {
 
   test("rejects a leading ~ inside a group", () => {
     expect(() => parseSearchExpression("( ~ red )")).toThrow(/no left-hand alternative/);
-  });
-});
-
-describe("parseExclusions", () => {
-  function evaluateExclusionIds(items: Item[], tags: readonly string[]): string[] {
-    const exclusionSearchExpression = parseExclusions(tags);
-    return exclusionSearchExpression === undefined ? [] : createEvaluator(items).evaluate(exclusionSearchExpression).map(item => item.id).sort();
-  }
-
-  test("excludes docs with any of the tags", () => {
-    expect(evaluateExclusionIds(items, ["RED", "blue"])).toEqual(["3", "4"]);
-  });
-
-  test("excludes a tag literally instead of parsing it as syntax", () => {
-    const items = [createItem("a", "apple*"), createItem("b", "apple_pie")];
-
-    expect(evaluateExclusionIds(items, ["apple*"])).toEqual(["b"]);
-  });
-
-  test("returns undefined for no tags", () => {
-    expect(parseExclusions([])).toBeUndefined();
-  });
-});
-
-describe("tryParseSearchExpression", () => {
-  test("returns an expression for valid input", () => {
-    expect(tryParseSearchExpression("red ( sweet ~ juicy )")).not.toBeUndefined();
-  });
-
-  test("returns undefined for malformed input instead of throwing", () => {
-    expect(tryParseSearchExpression("( red")).toBeUndefined();
-    expect(tryParseSearchExpression("red ~ blue")).toBeUndefined();
-    expect(tryParseSearchExpression("( )")).toBeUndefined();
   });
 });

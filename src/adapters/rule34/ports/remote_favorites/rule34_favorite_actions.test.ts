@@ -2,7 +2,7 @@ import { Rule34FavoriteActions } from "@/adapters/rule34/ports/remote_favorites/
 import { describe, expect, test, vi } from "vitest";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type FetchMock = ReturnType<typeof vi.fn<Fetch>>;

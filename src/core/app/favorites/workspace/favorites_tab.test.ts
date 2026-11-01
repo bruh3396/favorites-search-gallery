@@ -6,7 +6,7 @@ import { FavoritesSession } from "@/core/features/favorites/session/favorites_se
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { StringInterner } from "@/core/utils/string/string_interner";
 

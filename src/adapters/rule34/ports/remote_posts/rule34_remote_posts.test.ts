@@ -5,7 +5,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { PostPurgedError } from "@/core/boundary/ports/remote_posts/post_purged_error";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 import { createPost } from "@/testing/post";
 
 type FetchPostPage = Mock<(postId: string) => Promise<CategorizedPost>>;

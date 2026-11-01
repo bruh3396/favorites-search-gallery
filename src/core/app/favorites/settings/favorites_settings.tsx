@@ -1,5 +1,5 @@
-import { AppPreferences } from "@/core/app/app_storage_schema";
-import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment";
+import { AppPreferences } from "@/core/app/app_preferences";
+import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
 import { SharedPreferences } from "@/core/app/shared_preferences";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";

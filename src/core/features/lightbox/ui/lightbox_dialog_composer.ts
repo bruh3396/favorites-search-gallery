@@ -16,7 +16,7 @@ import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay_visi
 import { LightboxStage } from "@/core/features/lightbox/stage/lightbox_stage";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";

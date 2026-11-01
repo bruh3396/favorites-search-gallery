@@ -1,6 +1,7 @@
 import { ALL_RATINGS_MASK, isRatingMask } from "@/core/domain/post/rating_mask";
 import { FAVORITES_SORT_KEYS, FavoritesSortKey } from "@/core/features/favorites/search/favorites_sort_key";
-import { isBoolean, oneOf, sameKindAs, FieldGuards } from "@/core/utils/guard/guard";
+import { createOneOfGuard, createSameKindGuard, FieldGuards } from "@/core/utils/guard/guard";
+import { isBoolean } from "@/core/utils/guard/unknown_utilities";
 
 export interface FavoritesSearchSettings {
   readonly query: string;
@@ -37,14 +38,14 @@ export const UNFILTERED_FAVORITES_SEARCH_SETTINGS: Pick<FavoritesSearchSettings,
   isBlacklistEnabled: DEFAULT_FAVORITES_SEARCH_SETTINGS.isBlacklistEnabled
 };
 
-export function filtersFavorites(favoritesSearchSettings: FavoritesSearchSettings): boolean {
+export function isFilteringFavoritesSearchSettings(favoritesSearchSettings: FavoritesSearchSettings): boolean {
   return FILTER_KEYS.some(key => favoritesSearchSettings[key] !== UNFILTERED_FAVORITES_SEARCH_SETTINGS[key]);
 }
 
 export const FAVORITES_SEARCH_SETTINGS_GUARDS: FieldGuards<FavoritesSearchSettings> = {
-  query: sameKindAs(""),
+  query: createSameKindGuard(""),
   isInverted: isBoolean,
-  sortKey: oneOf(FAVORITES_SORT_KEYS),
+  sortKey: createOneOfGuard(FAVORITES_SORT_KEYS),
   isSortAscending: isBoolean,
   allowedRatings: isRatingMask,
   isBlacklistEnabled: isBoolean,

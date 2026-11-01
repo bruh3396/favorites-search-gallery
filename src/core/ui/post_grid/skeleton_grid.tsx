@@ -1,7 +1,7 @@
 import { GridLayout } from "@/core/ui/post_grid/grid_layout";
 import { tileGrid } from "@/core/ui/post_grid/grid_tiler";
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { TileClass, setAspectRatio } from "@/core/ui/post_grid/tile";
+import { TileClass, setTileAspectRatio } from "@/core/ui/post_grid/tile";
 import { Size } from "@/core/utils/geometry/size";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { clamp } from "@/core/utils/number/number_utilities";
@@ -31,6 +31,6 @@ export function SkeletonGrid({ sizes, layout, columnCount, count }: SkeletonGrid
 function createSkeletonTile(size: Size): HTMLElement {
   const tile = <div className={TileClass.root} />;
 
-  setAspectRatio(tile, size);
+  setTileAspectRatio(tile, size);
   return tile;
 }

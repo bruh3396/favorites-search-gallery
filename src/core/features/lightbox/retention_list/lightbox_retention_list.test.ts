@@ -5,7 +5,7 @@ import { MediaSequence } from "@/core/domain/media/media_sequence";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPosts } from "@/testing/post";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const POSTS = createPosts("1", "2", "3", "4");
 

@@ -3,7 +3,7 @@ export interface Neighborhood<V> {
   at: (position: number) => V;
 }
 
-export function getValuesAround<V>(center: number, count: number, { isInBounds, at }: Neighborhood<V>): V[] {
+export function getNeighborhoodValues<V>(center: number, count: number, { isInBounds, at }: Neighborhood<V>): V[] {
   if (count <= 0 || !isInBounds(center)) {
     return [];
   }

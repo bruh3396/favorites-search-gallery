@@ -1,7 +1,7 @@
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
-import { ColorScheme } from "@/core/boundary/environment";
+import { ColorScheme } from "@/core/boundary/color_scheme";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
@@ -26,7 +26,7 @@ import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list_service";
 import { createSharedPreferences } from "@/core/app/shared_preferences";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { render } from "@/core/ui/h/h";
 

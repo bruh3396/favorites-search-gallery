@@ -2,7 +2,7 @@ import { LightboxOverlay, LightboxOverlayClass, LightboxOverlayProps } from "@/c
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import OVERLAY_CSS from "@/core/features/lightbox/ui/chrome/lightbox_overlay.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 type SlottedEdge = "topStartChild" | "topEndChild" | "startEdgeChild" | "endEdgeChild";
 

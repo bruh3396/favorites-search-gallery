@@ -4,10 +4,10 @@ import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxMediaResolver } from "@/core/features/lightbox/stage/lightbox_media_resolver";
 import { Media } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { render } from "@/core/ui/h/h";
 
 const IMAGE = createPost({ id: "1", media: { kind: "image", locator: "image.jpg" } });

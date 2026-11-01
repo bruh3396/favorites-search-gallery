@@ -1,6 +1,6 @@
-import { buildSearchTermGroup, normalizeSearchQuery, parseSearchQuery, parseTermGroups, sortSearchTermGroup } from "@/core/domain/search/parsers/search_query_parser";
+import { parseSearchQuery } from "@/core/domain/search/parsers/search_query_parser";
 import { describe, expect, test } from "vitest";
-import { Fruit } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit } from "@/core/domain/search/testing/fruit";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
 function serializeQuery(query: string): string {
@@ -16,119 +16,89 @@ function expectNotEquivalent(query1: string, query2: string): void {
   expect(serializeQuery(query1)).not.toBe(serializeQuery(query2));
 }
 
-describe("buildSearchTermGroup", () => {
+function expectLiterals(query: string, andTerms: string[], orGroups: string[][]): void {
+  const searchQuery = parseSearchQuery<Fruit>(query);
+
+  expect({
+    andTerms: searchQuery.searchTerms.map(searchTerm => searchTerm.literal),
+    orGroups: searchQuery.orGroups.map(searchTerms => searchTerms.map(searchTerm => searchTerm.literal))
+  }).toStrictEqual({ andTerms, orGroups });
+}
+
+describe("parseSearchQuery", () => {
   test("parses each string to a term", () => {
-    expect(buildSearchTermGroup(["mango", "*mango", "-mango"])).toStrictEqual([parseSearchTerm("mango"), parseSearchTerm("*mango"), parseSearchTerm("-mango")]);
+    expect(parseSearchQuery<Fruit>("mango").searchTerms).toStrictEqual([parseSearchTerm("mango")]);
   });
-});
 
-describe("sortSearchTermGroup", () => {
   test("orders terms by cost", () => {
-    const searchTerm = parseSearchTerm("mango");
-    const negatedSearchTerm = parseSearchTerm("-mango");
-    const wildcardSearchTerm = parseSearchTerm("*mango");
-    const wildcardNegatedSearchTerm = parseSearchTerm("-*mango");
-    const searchTerms = [wildcardSearchTerm, negatedSearchTerm, searchTerm, wildcardNegatedSearchTerm];
-
-    expect(searchTerm.cost).toBeLessThan(wildcardSearchTerm.cost);
-    expect(sortSearchTermGroup(searchTerms)).toStrictEqual([searchTerm, negatedSearchTerm, wildcardSearchTerm, wildcardNegatedSearchTerm]);
+    expect(parseSearchTerm("mango").cost).toBeLessThan(parseSearchTerm("*mango").cost);
+    expectLiterals("*mango -mango mango -*mango", ["mango", "-mango", "*mango", "-*mango"], []);
   });
-});
-
-describe("normalizeSearchQuery", () => {
-  function normalize(andTerms: string[], orGroups: string[][]): { andTerms: string[]; orGroups: string[][] } {
-    const searchQuery = normalizeSearchQuery<Fruit>(buildSearchTermGroup(andTerms), orGroups.map(buildSearchTermGroup));
-    return {
-      andTerms: searchQuery.searchTerms.map(searchTerm => searchTerm.literal),
-      orGroups: searchQuery.orGroups.map(searchTerms => searchTerms.map(searchTerm => searchTerm.literal))
-    };
-  }
-
-  test("dedupes and terms by literal", () => {
-    expect(normalize(["apple", "apple", "banana"], [])).toEqual({ andTerms: ["apple", "banana"], orGroups: [] });
-  });
-
-  test("keeps a term distinct from its negation", () => {
-    expect(normalize(["apple", "-apple"], [])).toEqual({ andTerms: ["apple", "-apple"], orGroups: [] });
-  });
-
-  test("dedupes terms within an or group", () => {
-    expect(normalize([], [["apple", "apple", "banana"]])).toEqual({ andTerms: [], orGroups: [["apple", "banana"]] });
-  });
-
-  test("flattens an or group that dedupes down to one term into an and term", () => {
-    expect(normalize([], [["apple", "apple"]])).toEqual({ andTerms: ["apple"], orGroups: [] });
-  });
-
-  test("flattens a singleton or group into and terms", () => {
-    expect(normalize(["banana"], [["apple"]])).toEqual({ andTerms: ["banana", "apple"], orGroups: [] });
-  });
-});
-
-describe("parseTermGroups", () => {
-  function expectTermGroups(input: string, expectedOrGroups: string[][], expectedAndTerms: string[]): void {
-    const result = parseTermGroups(input);
-
-    expect(result.orGroups).toStrictEqual(expectedOrGroups);
-    expect(result.andTerms).toStrictEqual(expectedAndTerms);
-  }
 
   test("parses blank input to no terms", () => {
-    expectTermGroups("", [], []);
-    expectTermGroups(" ", [], []);
-    expectTermGroups("\n", [], []);
-    expectTermGroups("\t", [], []);
+    for (const query of ["", " ", "\n", "\t"]) {
+      expectLiterals(query, [], []);
+    }
   });
 
-  test("parses and terms", () => {
-    expectTermGroups("grape", [], ["grape"]);
-    expectTermGroups("cherry banana", [], ["cherry", "banana"]);
-    expectTermGroups("apple orange", [], ["apple", "orange"]);
-    expectTermGroups("apple orange grape", [], ["apple", "orange", "grape"]);
+  test("parses and terms in order", () => {
+    expectLiterals("grape", ["grape"], []);
+    expectLiterals("cherry banana", ["cherry", "banana"], []);
+    expectLiterals("apple orange grape", ["apple", "orange", "grape"], []);
   });
 
   test("keeps parentheses inside a term", () => {
-    expectTermGroups("apple_(red)", [], ["apple_(red)"]);
-    expectTermGroups("apple_(red) banana", [], ["apple_(red)", "banana"]);
-    expectTermGroups("apple_(red) banana_(yellow)", [], ["apple_(red)", "banana_(yellow)"]);
-    expectTermGroups("apple_(red) banana_(yellow) grape", [], ["apple_(red)", "banana_(yellow)", "grape"]);
+    expectLiterals("apple_(red)", ["apple_(red)"], []);
+    expectLiterals("apple_(red) banana_(yellow) grape", ["apple_(red)", "banana_(yellow)", "grape"], []);
   });
 
   test("parses or groups", () => {
-    expectTermGroups("( apple )", [["apple"]], []);
-    expectTermGroups("( apple ) ( banana )", [["apple"], ["banana"]], []);
-    expectTermGroups("( -apple ) ( banana ) ( -grape )", [["-apple"], ["banana"], ["-grape"]], []);
-    expectTermGroups("( apple ~ banana )", [["apple", "banana"]], []);
+    expectLiterals("( apple ~ banana )", [], [["apple", "banana"]]);
+    expectLiterals("( apple ~ banana ) ( grape ~ orange )", [], [["apple", "banana"], ["grape", "orange"]]);
   });
 
   test("parses malformed groups as and terms", () => {
-    expectTermGroups("(apple )", [], ["(apple", ")"]);
-    expectTermGroups("( apple", [], ["(", "apple"]);
-    expectTermGroups("apple )", [], ["apple", ")"]);
-    expectTermGroups("apple (", [], ["apple", "("]);
-    expectTermGroups("(apple)", [], ["(apple)"]);
+    expectLiterals("(apple )", ["(apple", ")"], []);
+    expectLiterals("( apple", ["(", "apple"], []);
+    expectLiterals("apple )", ["apple", ")"], []);
+    expectLiterals("apple (", ["apple", "("], []);
+    expectLiterals("(apple)", ["(apple)"], []);
   });
 
   test("parses and terms mixed with or groups", () => {
-    expectTermGroups("apple ( banana )", [["banana"]], ["apple"]);
-    expectTermGroups("apple ( banana ) grape", [["banana"]], ["apple", "grape"]);
-    expectTermGroups("apple ( banana ) grape ( orange )", [["banana"], ["orange"]], ["apple", "grape"]);
-    expectTermGroups("apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
+    expectLiterals("apple ( banana ~ cherry ~ lime ) grape ( orange ~ pear ) kiwi", ["apple", "grape", "kiwi"], [["orange", "pear"], ["banana", "cherry", "lime"]]);
   });
 
   test("parses a negated group as and terms", () => {
-    expectTermGroups("-( apple )", [], ["-(", "apple", ")"]);
+    expectLiterals("-( apple )", ["apple", ")", "-("], []);
   });
 
   test("ignores extra spaces", () => {
-    expectTermGroups("  apple  ( banana )  grape  ", [["banana"]], ["apple", "grape"]);
-    expectTermGroups("  apple ( banana ) grape ( orange )  ", [["banana"], ["orange"]], ["apple", "grape"]);
-    expectTermGroups("  apple ( banana ~ cherry ~ lime ) grape ( orange ) kiwi  ", [["banana", "cherry", "lime"], ["orange"]], ["apple", "grape", "kiwi"]);
-    expectTermGroups(" apple                  banana    ( cherry )", [["cherry"]], ["apple", "banana"]);
+    expectLiterals("  apple  ( banana ~ cherry )  grape  ", ["apple", "grape"], [["banana", "cherry"]]);
+    expectLiterals(" apple                  banana    ( cherry ~ lime )", ["apple", "banana"], [["cherry", "lime"]]);
   });
-});
 
-describe("parseSearchQuery", () => {
+  test("dedupes and terms by literal", () => {
+    expectLiterals("apple apple banana", ["apple", "banana"], []);
+  });
+
+  test("keeps a term distinct from its negation", () => {
+    expectLiterals("apple -apple", ["apple", "-apple"], []);
+  });
+
+  test("dedupes terms within an or group", () => {
+    expectLiterals("( apple ~ apple ~ banana )", [], [["apple", "banana"]]);
+  });
+
+  test("flattens an or group that dedupes down to one term into an and term", () => {
+    expectLiterals("( apple ~ apple )", ["apple"], []);
+  });
+
+  test("flattens singleton or groups into and terms", () => {
+    expectLiterals("banana ( apple )", ["banana", "apple"], []);
+    expectLiterals("( -apple ) ( banana ) ( -grape )", ["banana", "-apple", "-grape"], []);
+  });
+
   test("ignores the order of terms and groups", () => {
     expectEquivalent("apple ( banana ~ cherry )", "( banana ~ cherry ) apple");
   });

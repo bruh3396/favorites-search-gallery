@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type FetchMock = ReturnType<typeof vi.fn<Fetch>>;

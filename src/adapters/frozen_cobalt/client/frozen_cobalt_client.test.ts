@@ -1,7 +1,7 @@
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
 import { FrozenCobaltIdentity } from "@/adapters/frozen_cobalt/client/frozen_cobalt_identity";
 import { Mock, describe, expect, test, vi } from "vitest";
-import { advanceAndSettle, flushMicrotasks } from "@/testing/async";
+import { advanceAndSettle, flushMicrotasks } from "@/testing/microtask_utilities";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 
 type Fetch = Mock<(url: string, init: RequestInit) => Promise<Response>>;

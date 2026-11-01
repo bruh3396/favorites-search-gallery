@@ -1,5 +1,5 @@
 import { FavoritesPagination, FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
-import { FavoritesSearchSettings, filtersFavorites } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchSettings, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -28,7 +28,7 @@ export class FavoritesSession {
     this.search = new FavoritesSearch(configuration, dependencies);
     this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: dependencies.favoritesPaginationPreferences });
     this.query = computed(() => this.search.settings.value.query);
-    this.isFiltered = computed(() => filtersFavorites(this.search.settings.value));
+    this.isFiltered = computed(() => isFilteringFavoritesSearchSettings(this.search.settings.value));
   }
 
   public get searchSettings(): Readable<FavoritesSearchSettings> {

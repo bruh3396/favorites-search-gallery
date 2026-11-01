@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import PAGINATOR_CSS from "@/core/ui/components/paginator/paginator.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;

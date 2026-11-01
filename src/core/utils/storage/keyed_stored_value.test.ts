@@ -1,9 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { StoredValueStorage } from "@/core/utils/stored_value/stored_value_storage";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { createSetCodec } from "@/core/utils/codec/codec";
 import { effect } from "@/core/utils/reactive/signal";
-import { oneOf } from "@/core/utils/guard/guard";
+import { createOneOfGuard } from "@/core/utils/guard/guard";
 
 function createStorage(entries: Record<string, unknown> = {}): StoredValueStorage & { entries: Record<string, unknown> } {
   return {
@@ -83,7 +83,7 @@ describe("KeyedStoredValue", () => {
 
   test("decodes and encodes through its codec", () => {
     const storage = createStorage({ colors: ["red"] });
-    const codec = createSetCodec(oneOf(["red", "blue"] as const));
+    const codec = createSetCodec(createOneOfGuard(["red", "blue"] as const));
     const preference = new KeyedStoredValue({ key: "colors", defaultValue: new Set<"red" | "blue">() }, { storedValueStorage: storage, codec });
 
     expect(preference.value).toEqual(new Set(["red"]));

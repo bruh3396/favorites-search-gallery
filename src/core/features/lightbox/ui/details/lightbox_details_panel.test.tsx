@@ -3,7 +3,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import DETAILS_PANEL_CSS from "@/core/features/lightbox/ui/details/lightbox_details_panel.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup(partialLightboxDetailsPanelProps: Partial<LightboxDetailsPanelProps> = {}): { panel: HTMLElement; isOpen: Signal<boolean>; lightboxDetailsPanelProps: LightboxDetailsPanelProps } {
   const isOpen = new Signal(false);

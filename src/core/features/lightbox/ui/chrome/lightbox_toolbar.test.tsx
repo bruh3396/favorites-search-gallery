@@ -6,7 +6,7 @@ import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import TOOLBAR_CSS from "@/core/features/lightbox/ui/chrome/lightbox_toolbar.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup(detailsOpen: Signal<boolean> | null = new Signal(false)): {
   root: HTMLElement;

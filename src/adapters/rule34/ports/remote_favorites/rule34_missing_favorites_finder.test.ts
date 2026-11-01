@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { Rule34MissingFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_missing_favorites_finder";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 import { createPost } from "@/testing/post";
 import { seededFloat } from "@/core/utils/random/random_utilities";
 

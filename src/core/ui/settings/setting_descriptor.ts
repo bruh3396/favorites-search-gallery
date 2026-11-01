@@ -10,12 +10,12 @@ interface SettingBase {
   readonly disabled?: Readable<boolean>;
 }
 
-export interface SwitchSetting extends SettingBase {
+export interface SwitchSettingDescriptor extends SettingBase {
   readonly kind: "switch";
   readonly settingPreference: SettingPreference<boolean>;
 }
 
-export interface ChoiceSetting<M extends string = string> extends SettingBase {
+export interface ChoiceSettingDescriptor<M extends string = string> extends SettingBase {
   readonly kind: "choice";
   readonly settingPreference: SettingPreference<M>;
   readonly members: readonly M[];
@@ -25,14 +25,14 @@ export interface ChoiceSetting<M extends string = string> extends SettingBase {
   onPreview?(member: M | null): void;
 }
 
-export interface ChoicesSetting<M extends string = string> extends SettingBase {
+export interface ChoicesSettingDescriptor<M extends string = string> extends SettingBase {
   readonly kind: "choices";
   readonly settingPreference: SettingPreference<readonly M[]>;
   readonly members: readonly M[];
   readonly labels: Readonly<Record<M, string>>;
 }
 
-export interface NumberSetting extends SettingBase {
+export interface NumberSettingDescriptor extends SettingBase {
   readonly kind: "number";
   readonly settingPreference: SettingPreference<number>;
   readonly min: number;
@@ -41,7 +41,7 @@ export interface NumberSetting extends SettingBase {
   readonly writeOnEveryStep?: boolean;
 }
 
-export interface SliderSetting extends SettingBase {
+export interface SliderSettingDescriptor extends SettingBase {
   readonly kind: "slider";
   readonly settingPreference: SettingPreference<number>;
   readonly min: number;
@@ -50,4 +50,4 @@ export interface SliderSetting extends SettingBase {
   readonly inverted?: boolean;
 }
 
-export type SettingDescriptor = SwitchSetting | ChoiceSetting | ChoicesSetting | NumberSetting | SliderSetting;
+export type SettingDescriptor = SwitchSettingDescriptor | ChoiceSettingDescriptor | ChoicesSettingDescriptor | NumberSettingDescriptor | SliderSettingDescriptor;

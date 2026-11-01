@@ -10,4 +10,4 @@ export type FavoritesLoadState =
   | { readonly phase: "loaded"; readonly newCount: number; readonly unfavoritedCount: number }
   | { readonly phase: "interrupted" };
 
-export type FavoritesLoadPhase = FavoritesLoadState["phase"];
+export type FavoritesLoadStatePhase = FavoritesLoadState["phase"];

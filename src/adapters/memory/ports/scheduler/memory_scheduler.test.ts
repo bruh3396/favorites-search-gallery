@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 describe("MemoryScheduler", () => {
   test("runs a task only once time reaches its delay", () => {

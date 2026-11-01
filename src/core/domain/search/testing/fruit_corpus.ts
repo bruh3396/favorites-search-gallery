@@ -1,21 +1,6 @@
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { Metric } from "@/core/domain/search/metric";
-import { MetricSearchable } from "@/core/domain/search/searchable";
-import { buildSearchable } from "@/core/domain/search/testing/searchable_builder";
-
-export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
-export type Fruit = MetricSearchable & { name: FruitName };
-
-export const fruitTerms = new Set([
-  "apple", "apricot", "banana", "blackberry", "blueberry",
-  "cantaloupe", "cherry", "clementine", "coconut", "dragonfruit",
-  "durian", "fig", "grape", "guava", "honeydew",
-  "jackfruit", "kiwano", "kiwi", "lychee", "mango",
-  "nectarine", "orange", "papaya", "passionfruit", "peach",
-  "pear", "persimmon", "pineapple", "plum", "pomegranate",
-  "raspberry", "starfruit", "strawberry", "tangerine", "watermelon"
-].sort());
-export const searchable = buildSearchable([...fruitTerms]);
+import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
 
 function createFruit(name: FruitName, tags: string[], metrics: Partial<Record<Metric, number>>): Fruit {
   return {
@@ -25,7 +10,7 @@ function createFruit(name: FruitName, tags: string[], metrics: Partial<Record<Me
   };
 }
 
-export const fruits: Fruit[] = [
+const fruits: Fruit[] = [
   createFruit("apple", ["apple", "red", "sour", "fiber", "green", "crunchy", "snack", "antioxidants", "low-fat_(dairy)"], { score: 10, width: 400, height: 100, id: 200, duration: 60 }),
   createFruit("banana", ["banana", "yellow", "sour", "fiber", "100cal", "green", "potassium", "smooth", "breakfast", "a12345"], { score: 20, width: 100, height: 400, id: 101, duration: 20 }),
   createFruit("cherry", ["cherry", "red", "sweet", "fiber", "antioxidants", "tart", "small", "snack", "dessert", "88"], { score: 30, width: 200, height: 200, id: 88, duration: 200 }),
@@ -37,8 +22,13 @@ export const fruits: Fruit[] = [
   createFruit("pear", ["pear", "green", "grainy", "fiber", "sweet", "soft", "juicy", "vitamin-c", "lunch"], { score: 40, width: 220, height: 220, id: 808, duration: 40 }),
   createFruit("strawberry", ["strawberry", "red", "sweet", "berry", "juicy", "dessert", "vitamin-c", "smoothie", "antioxidants"], { score: 35, width: 180, height: 320, id: 909, duration: 320 })
 ];
-export const fruitNames = fruits.map(fruit => fruit.name);
-export const allTerms = fruits.flatMap(fruit => [...fruit.tags]);
-export const invertedIndex = new InvertedIndex<Fruit>(fruit => fruit.tags);
+const invertedIndex = new InvertedIndex<Fruit>(fruit => fruit.tags);
 
 fruits.forEach(fruit => invertedIndex.addDoc(fruit));
+
+export const FRUIT_CORPUS = {
+  fruits,
+  fruitNames: fruits.map(fruit => fruit.name),
+  allTerms: fruits.flatMap(fruit => [...fruit.tags]),
+  invertedIndex
+};

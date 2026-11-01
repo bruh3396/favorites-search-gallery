@@ -4,7 +4,7 @@ import { h, render } from "@/core/ui/h/h";
 import POSITION_CSS from "@/core/features/lightbox/ui/chrome/lightbox_position.css?inline";
 import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function renderPosition(mediaSequencePosition: MediaSequencePosition | undefined): HTMLElement {
   return render(document, () => <LightboxPosition position={new Signal(mediaSequencePosition)} />).result as HTMLElement;

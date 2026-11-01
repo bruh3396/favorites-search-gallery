@@ -33,7 +33,7 @@ import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { createPost } from "@/testing/post";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const IDLE_VISIBILITY_OBSERVER: VisibilityObserver = { observe: () => (): void => { } };
 

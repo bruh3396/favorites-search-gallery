@@ -2,7 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { createPost } from "@/testing/post";
 import { doNothing } from "@/core/utils/function/function_utilities";
-import { flushMicrotasks } from "@/testing/async";
+import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const POST = createPost({ id: "42", media: { kind: "video", locator: "42" } });
 

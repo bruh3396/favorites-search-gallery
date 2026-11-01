@@ -1,12 +1,12 @@
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
-import { SwitchSetting } from "@/core/ui/settings/setting_descriptor";
+import { SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen, SettingsScreenClass, SettingsScreenProps } from "@/core/ui/settings/settings_screen";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import SCREEN_CSS from "@/core/ui/settings/settings_screen.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 const SCHEDULER = { schedule: (): (() => void) => () => undefined };
 
@@ -29,7 +29,7 @@ function createStoredValue<T>(initial: T): SettingPreference<T> {
   };
 }
 
-function createSwitchSetting(id: string, settingPreference = createStoredValue(false)): SwitchSetting {
+function createSwitchSetting(id: string, settingPreference = createStoredValue(false)): SwitchSettingDescriptor {
   return { id, kind: "switch", label: id, settingPreference };
 }
 
@@ -42,9 +42,9 @@ interface Setup {
 
 function setup(partialSettingsScreenProps: Partial<SettingsScreenProps> = {}): Setup {
   const query = new Signal("");
-  const switchSettings = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
+  const switchSettingDescriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
   const { result: element, dispose } = render(document, () => (
-    <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={switchSettings} query={query} stepperScheduler={SCHEDULER} {...partialSettingsScreenProps} />
+    <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={switchSettingDescriptors} query={query} stepperScheduler={SCHEDULER} {...partialSettingsScreenProps} />
   ));
   return { element, dispose, query, sections: [...element.querySelectorAll<HTMLElement>("section")] };
 }
@@ -121,8 +121,8 @@ describe("SettingsScreen", () => {
 
   test("stops following its preferences and query once disposed", () => {
     const settingPreference = createStoredValue(false);
-    const switchSettings = [createSwitchSetting("hints", settingPreference), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
-    const { element, query, dispose } = setup({ settingDescriptors: switchSettings });
+    const switchSettingDescriptors = [createSwitchSetting("hints", settingPreference), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
+    const { element, query, dispose } = setup({ settingDescriptors: switchSettingDescriptors });
 
     dispose();
     settingPreference.set(true);

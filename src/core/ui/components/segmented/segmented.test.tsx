@@ -3,7 +3,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import SEGMENTED_CSS from "@/core/ui/components/segmented/segmented.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 type Layout = "column" | "row" | "square" | "none";
 

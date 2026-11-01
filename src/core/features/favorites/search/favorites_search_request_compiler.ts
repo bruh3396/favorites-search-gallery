@@ -2,7 +2,7 @@ import { FavoritesSearchRequest } from "@/core/features/favorites/search/favorit
 import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { tryParseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
+import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 export function compileFavoritesSearchRequest(favoritesSearchSettings: FavoritesSearchSettings, favoritesBlacklist: FavoritesBlacklist): FavoritesSearchRequest {
   const { query, isInverted, sortKey, isSortAscending, allowedRatings, isShuffled, shuffleSeed } = favoritesSearchSettings;
@@ -10,4 +10,12 @@ export function compileFavoritesSearchRequest(favoritesSearchSettings: Favorites
   const querySearchExpression = parsedSearchExpression !== undefined && isInverted ? SearchExpression.not(parsedSearchExpression) : parsedSearchExpression;
   const searchExpression = querySearchExpression === undefined ? undefined : favoritesBlacklist.apply(querySearchExpression, favoritesSearchSettings);
   return { searchExpression, sortKey, isSortAscending, allowedRatings, isShuffled, shuffleSeed };
+}
+
+function tryParseSearchExpression(query: string): SearchExpression | undefined {
+  try {
+    return parseSearchExpression(query);
+  } catch {
+    return undefined;
+  }
 }

@@ -1,9 +1,10 @@
-import { StoredMapDefinition } from "@/core/utils/stored_value/stored_map_definition";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
-import { StoredValueDefinition } from "@/core/utils/stored_value/stored_value_definition";
-import { StoredValueStorage } from "@/core/utils/stored_value/stored_value_storage";
-import { KeyedStoredValue } from "@/core/utils/stored_value/keyed_stored_value";
-import { isRecord } from "@/core/utils/guard/guard";
+import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition";
+import { StoredMap } from "@/core/utils/storage/stored_map";
+import { StoredValue } from "@/core/utils/storage/stored_value";
+import { StoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
+import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
+import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export type StoredTree<S> = {
   readonly [K in keyof S]:
@@ -11,10 +12,6 @@ export type StoredTree<S> = {
     S[K] extends StoredMapDefinition<infer E> ? StoredMap<E> :
     StoredTree<S[K]>;
 };
-
-export interface StoredMap<S> {
-  get: (key: string) => StoredTree<S>;
-}
 
 export function createStoredTree<S extends object, B extends keyof S & string>(schema: S, storedValueStorage: StoredValueStorage, branches: readonly B[]): Pick<StoredTree<S>, B> {
   return Object.fromEntries(branches.map(branch => [branch, createNode(branch, schema[branch], storedValueStorage)])) as Pick<StoredTree<S>, B>;

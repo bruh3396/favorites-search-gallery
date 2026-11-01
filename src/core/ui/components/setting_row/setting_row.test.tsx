@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import SETTING_ROW_CSS from "@/core/ui/components/setting_row/setting_row.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;

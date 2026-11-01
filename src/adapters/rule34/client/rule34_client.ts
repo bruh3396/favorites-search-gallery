@@ -1,19 +1,19 @@
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { Post } from "@/core/domain/post/post";
-import { Rule34Fetch, sendOkRule34Request } from "@/adapters/rule34/client/rule34_fetch";
+import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
+import { sendOkRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 import {
   buildRule34FavoritesPageUrl,
   buildRule34PostListPageUrl,
   buildRule34PostListUrl,
   buildRule34PostPageUrl,
-  buildRule34ProfilePageUrl,
-  rule34FavoritesPageOffset
+  buildRule34ProfilePageUrl
 } from "@/adapters/rule34/client/rule34_url_builder";
 import { Rule34PostListPage } from "@/adapters/rule34/client/rule34_post_list_page";
 import { parseRule34FavoritesPage } from "@/adapters/rule34/client/rule34_favorites_page_parser";
 import { parseRule34PostListPage } from "@/adapters/rule34/client/rule34_post_list_page_parser";
 import { parseRule34PostPage } from "@/adapters/rule34/client/rule34_post_page_parser";
-import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_page_parser";
+import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_favorite_count_parser";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
@@ -59,7 +59,7 @@ export class Rule34Client {
   }
 
   public async fetchFavoritesPage(userId: string, pageIndex: number): Promise<Post[]> {
-    const html = await this.fetchHtml(buildRule34FavoritesPageUrl(userId, rule34FavoritesPageOffset(pageIndex)));
+    const html = await this.fetchHtml(buildRule34FavoritesPageUrl(userId, pageIndex));
     return parseRule34FavoritesPage(new DOMParser().parseFromString(html, "text/html"), this.dependencies.mintMedia);
   }
 

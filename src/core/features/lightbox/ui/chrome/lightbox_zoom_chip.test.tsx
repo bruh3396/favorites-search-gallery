@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import ZOOM_CHIP_CSS from "@/core/features/lightbox/ui/chrome/lightbox_zoom_chip.css?inline";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 function renderChip(pixelScale: number | undefined): HTMLElement {
   return render(document, () => <LightboxZoomChip pixelScale={new Signal(pixelScale)} />).result;

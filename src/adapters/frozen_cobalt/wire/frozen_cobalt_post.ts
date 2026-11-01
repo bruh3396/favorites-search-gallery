@@ -1,6 +1,6 @@
 import { FrozenCobaltTagCategory, isFrozenCobaltTagCategory } from "@/adapters/frozen_cobalt/wire/frozen_cobalt_tag_category";
 import { RATINGS, Rating } from "@/core/domain/post/rating";
-import { isOneOf, isRecord } from "@/core/utils/guard/guard";
+import { isOneOf, isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export type FrozenCobaltPost = {
   readonly id: string;

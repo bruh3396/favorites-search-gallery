@@ -1,7 +1,5 @@
 import { Metric } from "@/core/domain/search/metric";
 
-export type MetricComparator = ":" | ":<" | ":>";
-
 export interface Searchable {
   readonly tags: ReadonlySet<string>;
 }

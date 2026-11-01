@@ -1,9 +1,8 @@
-export type AppMode = "favorites" | "postList";
-export type Device = "desktop" | "mobile";
-export type Pointer = "hover" | "touch";
-export type CanvasBudget = "reduced" | "full";
-export const COLOR_SCHEMES = ["light", "dark"] as const;
-export type ColorScheme = (typeof COLOR_SCHEMES)[number];
+import { AppMode } from "@/core/boundary/app_mode";
+import { CanvasBudget } from "@/core/boundary/canvas_budget";
+import { ColorScheme } from "@/core/boundary/color_scheme";
+import { Device } from "@/core/boundary/device";
+import { Pointer } from "@/core/boundary/pointer";
 
 export interface HostEnvironment {
   readonly appMode: AppMode;

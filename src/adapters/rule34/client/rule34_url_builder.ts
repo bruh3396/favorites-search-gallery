@@ -1,15 +1,10 @@
+import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
+
 const RULE34_ORIGIN = "https://rule34.xxx";
 const INDEX_URL = `${RULE34_ORIGIN}/index.php?page=`;
-const POSTS_PER_POST_LIST_PAGE = 42;
 
-export const RULE34_FAVORITES_PER_PAGE = 50;
-
-export function buildRule34FavoritesPageUrl(userId: string, offset: number): string {
-  return `${INDEX_URL}favorites&s=view&id=${userId}&pid=${offset}`;
-}
-
-export function rule34FavoritesPageOffset(pageIndex: number): number {
-  return pageIndex * RULE34_FAVORITES_PER_PAGE;
+export function buildRule34FavoritesPageUrl(userId: string, pageIndex: number): string {
+  return `${INDEX_URL}favorites&s=view&id=${userId}&pid=${pageIndex * RULE34_PAGE_SIZE.favorites}`;
 }
 
 export function buildRule34PostListUrl(searchQuery: string): string {
@@ -17,15 +12,7 @@ export function buildRule34PostListUrl(searchQuery: string): string {
 }
 
 export function buildRule34PostListPageUrl(searchQuery: string, pageIndex: number): string {
-  return `${buildRule34PostListUrl(searchQuery)}&pid=${rule34PostListPageOffset(pageIndex)}`;
-}
-
-export function rule34PostListPageOffset(pageIndex: number): number {
-  return pageIndex * POSTS_PER_POST_LIST_PAGE;
-}
-
-export function rule34PostListPageIndex(offset: number): number {
-  return Math.round(offset / POSTS_PER_POST_LIST_PAGE);
+  return `${buildRule34PostListUrl(searchQuery)}&pid=${pageIndex * RULE34_PAGE_SIZE.postList}`;
 }
 
 export function buildRule34PostPageUrl(postId: string): string {

@@ -10,7 +10,7 @@ import { Media } from "@/core/domain/media/media";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { PostUnavailableError } from "@/core/boundary/ports/remote_posts/post_unavailable_error";
-import { advanceAndSettle } from "@/testing/async";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 interface Setup {
   remotePosts: FrozenCobaltRemotePosts;

@@ -1,11 +1,12 @@
 import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
-import { MetricComparator, MetricSearchable } from "@/core/domain/search/searchable";
+import { MetricSearchable } from "@/core/domain/search/searchable";
+import { MetricComparator } from "@/core/domain/search/metric_comparator";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 
 type Comparator = (a: number, b: number) => boolean;
 
-export const comparators: Record<MetricComparator, Comparator> = {
+const comparators: Record<MetricComparator, Comparator> = {
   ":": (a, b) => a === b,
   ":<": (a, b) => a < b,
   ":>": (a, b) => a > b

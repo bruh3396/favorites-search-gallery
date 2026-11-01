@@ -1,5 +1,5 @@
 import { Favorite } from "@/core/features/favorites/favorite";
-import { AppPreferences } from "@/core/app/app_storage_schema";
+import { AppPreferences } from "@/core/app/app_preferences";
 import { FavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";

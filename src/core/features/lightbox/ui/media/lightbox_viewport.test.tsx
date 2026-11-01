@@ -8,7 +8,7 @@ import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import VIEWPORT_CSS from "@/core/features/lightbox/ui/media/lightbox_viewport.css?inline";
 import { createPost } from "@/testing/post";
-import { expectClassesStyled } from "@/testing/css";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 const FRAME = { width: 800, height: 600 };
 

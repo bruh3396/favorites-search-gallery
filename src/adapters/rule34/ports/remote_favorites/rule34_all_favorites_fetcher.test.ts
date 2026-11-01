@@ -1,4 +1,4 @@
-import { advanceAndSettle, flushMicrotasks } from "@/testing/async";
+import { advanceAndSettle, flushMicrotasks } from "@/testing/microtask_utilities";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";

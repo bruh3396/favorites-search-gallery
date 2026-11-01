@@ -8,7 +8,7 @@ import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { h, render } from "@/core/ui/h/h";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
-import { ColorScheme } from "@/core/boundary/environment";
+import { ColorScheme } from "@/core/boundary/color_scheme";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_settings";
@@ -29,8 +29,8 @@ import { bindAppearance } from "@/core/app/appearance_binder";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
-import { createStoredTree } from "@/core/utils/stored_value/stored_tree";
-import { fillRestOfWindow } from "@/core/ui/app_root/window_fill";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
+import { fillWindow } from "@/core/ui/app_root/window_filler";
 import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
@@ -87,7 +87,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     details: {
       isOpen: lightboxPreferences.details.isOpen,
       createContent: favorite => createFavoriteLightboxDetails({
-        favorite, favoriteLightboxTagsPreferences: lightboxPreferences.details, localTagCategories, clipboard, scheduler,
+        favorite, preferences: lightboxPreferences.details, localTagCategories, clipboard, scheduler,
         copiedDuration: 1_500, collapsedTagCount: 6
       })
     }
@@ -124,7 +124,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
           }
         })
       })).result);
-      const windowFill = fillRestOfWindow(appRoot, sizeObserver);
+      const windowFill = fillWindow(appRoot, sizeObserver);
 
       bindAppearance(appRoot, sharedPreferences, previewedTheme);
       listenForHotkeys(container.ownerDocument, KEYMAP, {

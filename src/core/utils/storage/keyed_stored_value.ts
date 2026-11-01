@@ -1,10 +1,10 @@
 import { Codec, createGuardedCodec } from "@/core/utils/codec/codec";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
-import { StoredValue } from "@/core/utils/stored_value/stored_value";
-import { StoredValueStorage } from "@/core/utils/stored_value/stored_value_storage";
+import { StoredValue } from "@/core/utils/storage/stored_value";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { Signal } from "@/core/utils/reactive/signal";
-import { sameKindAs } from "@/core/utils/guard/guard";
+import { createSameKindGuard } from "@/core/utils/guard/guard";
 
 export interface KeyedStoredValueConfiguration<T> {
   readonly key: string;
@@ -27,7 +27,7 @@ export class KeyedStoredValue<T> implements StoredValue<T> {
   ) {
     const { key, defaultValue } = configuration;
 
-    this.codec = dependencies.codec ?? createGuardedCodec(sameKindAs(defaultValue));
+    this.codec = dependencies.codec ?? createGuardedCodec(createSameKindGuard(defaultValue));
     this.current = new Signal(this.codec.decode(dependencies.storedValueStorage.get(key)) ?? defaultValue);
   }
 

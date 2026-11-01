@@ -1,5 +1,5 @@
 import { METRICS, Metric, isMetric } from "@/core/domain/search/metric";
-import { MetricComparator } from "@/core/domain/search/searchable";
+import { MetricComparator } from "@/core/domain/search/metric_comparator";
 
 export interface MetricComparison {
   readonly metric: Metric;
