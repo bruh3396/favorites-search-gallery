@@ -1,8 +1,10 @@
 import { NO_MEDIA, hasMedia } from "@/core/domain/media/media";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { CoalescingExecutor } from "@/core/utils/async/coalescing_executor";
+import { Emitter } from "@/core/utils/reactive/emitter";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Post } from "@/core/domain/post/post";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
@@ -40,16 +42,16 @@ function getPostTimeToLive(post: Post): number {
 
 export interface PostLibraryDependencies {
   localPosts: LocalPosts;
-  localTagCategories: LocalTagCategories;
-  remotePosts: RemotePosts;
+  localTagCategories: Pick<LocalTagCategories, "setMany">;
+  remotePosts: Pick<RemotePosts, "fetch">;
   remoteMedia: Pick<RemoteMedia, "probeDurationSeconds">;
   scheduler: Scheduler;
-  onRefresh: (refreshedPost: Post) => void;
 }
 
 export class PostLibrary {
   private readonly dependencies: PostLibraryDependencies;
   private readonly localPostsWriter: CoalescingExecutor<Post>;
+  readonly #refreshed = new Emitter<Post>();
 
   constructor(dependencies: PostLibraryDependencies) {
     this.dependencies = dependencies;
@@ -57,6 +59,10 @@ export class PostLibrary {
       execute: (posts): Promise<void> => dependencies.localPosts.setMany(posts),
       scheduler: dependencies.scheduler
     });
+  }
+
+  public get refreshed(): Occurrence<Post> {
+    return this.#refreshed;
   }
 
   public async stream(postIds: readonly string[], batchSize: number, onBatch: (posts: Post[]) => void): Promise<void> {
@@ -75,7 +81,7 @@ export class PostLibrary {
     const purged = posts.map(post => ({ ...post, status: "purged" as const }));
 
     await this.dependencies.localPosts.setMany(purged);
-    purged.forEach(post => this.dependencies.onRefresh(post));
+    purged.forEach(post => this.#refreshed.emit(post));
   }
 
   public async refresh(posts: Post[]): Promise<void> {
@@ -106,7 +112,7 @@ export class PostLibrary {
     if (hasDimensions(refreshedPost)) {
       this.localPostsWriter.schedule(refreshedPost);
     }
-    this.dependencies.onRefresh(refreshedPost);
+    this.#refreshed.emit(refreshedPost);
   }
 
   private saveTagCategories(tagCategories: ReadonlyMap<string, TagCategory>): void {

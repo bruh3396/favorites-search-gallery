@@ -1,6 +1,6 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { GridSizing } from "@/core/ui/post_grid/grid_sizing";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { GridSizing } from "@/core/ui/post_grid/layout/grid_sizing";
+import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { MediaItem } from "@/core/domain/media/media_item";
 import { PlainPress } from "@/core/ui/post_grid/plain_press";
 import { Size } from "@/core/utils/geometry/size";
@@ -8,7 +8,7 @@ import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/vi
 import { h } from "@/core/ui/h/h";
 import { hasMedia } from "@/core/domain/media/media";
 import { onCleanup } from "@/core/utils/reactive/scope";
-import { pickDecodeWidth } from "@/core/ui/post_grid/decode_width_picker";
+import { pickDecodeWidth } from "@/core/ui/post_grid/image_loading/decode_width_picker";
 
 export const TileClass = {
   root: "fsg-Tile",

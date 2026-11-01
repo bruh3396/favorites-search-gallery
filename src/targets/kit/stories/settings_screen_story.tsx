@@ -65,7 +65,10 @@ function createCatalog(log: Log): Catalog {
       id: "layout", kind: "choice", label: "Layout", description: "How thumbnails are arranged.", control: "segmented",
       settingPreference: createStoredValue({ id: "layout", initial: "column", log }), members: LAYOUTS, labels: LAYOUT_LABELS
     },
-    { id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
+    {
+      id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }),
+      min: 2, max: 20, step: 1, stepperScheduler: SCHEDULER
+    },
     {
       id: "sort", kind: "choice", label: "Sort layout", control: "dropdown",
       settingPreference: createStoredValue({ id: "sort", initial: "row", log }), members: LAYOUTS, labels: LAYOUT_LABELS
@@ -75,7 +78,7 @@ function createCatalog(log: Log): Catalog {
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      disabled: infiniteScrollSettingPreference
+      stepperScheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
     }
   ];
   return { settingDescriptors, hintsSettingPreference };
@@ -94,7 +97,6 @@ function createHostVariants(): StoryVariant[] {
             settingsLayout={settingsLayout}
             settingDescriptors={settingDescriptors}
             controlSize={controlSize}
-            stepperScheduler={SCHEDULER}
             descriptionsVisible={hintsSettingPreference}
           />
         </div>

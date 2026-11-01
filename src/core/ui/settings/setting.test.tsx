@@ -51,7 +51,7 @@ function setup(settingProps: SettingProps): { element: HTMLElement; dispose: () 
 }
 
 function renderSetting(settingDescriptor: SettingDescriptor): HTMLElement {
-  return setup({ descriptor: settingDescriptor, stepperScheduler: SCHEDULER }).element;
+  return setup({ descriptor: settingDescriptor }).element;
 }
 
 function queryButtons(element: HTMLElement): HTMLButtonElement[] {
@@ -80,9 +80,10 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
     runNext: (): void => pending()
   };
   const numberSettingDescriptor: NumberSettingDescriptor = {
-    id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep
+    id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep,
+    stepperScheduler: scheduler
   };
-  const { element } = setup({ descriptor: numberSettingDescriptor, stepperScheduler: scheduler });
+  const { element } = setup({ descriptor: numberSettingDescriptor });
   return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, scheduler };
 }
 
@@ -101,7 +102,7 @@ describe("Setting", () => {
 
   test("draws the row and its control at one size", () => {
     const switchSettingDescriptor = createSwitchSetting(createStoredValue(false));
-    const { element } = setup({ descriptor: switchSettingDescriptor, controlSize: "small", stepperScheduler: SCHEDULER });
+    const { element } = setup({ descriptor: switchSettingDescriptor, controlSize: "small" });
 
     expect([element.dataset.size, queryButtons(element)[0].dataset.size]).toEqual(["small", "small"]);
   });
@@ -109,7 +110,7 @@ describe("Setting", () => {
   test("hides and shows its caption as told", () => {
     const descriptor = { ...createSwitchSetting(createStoredValue(false)), description: "Plays videos when opened." };
     const descriptionVisible = new Signal(false);
-    const { element } = setup({ descriptor, descriptionVisible, stepperScheduler: SCHEDULER });
+    const { element } = setup({ descriptor, descriptionVisible });
 
     expect(element.querySelector<HTMLElement>(".fsg-SettingRow-description")?.hidden).toBe(true);
   });
@@ -225,7 +226,7 @@ describe("Setting", () => {
   test("steps a number within its bounds", () => {
     const preference = createStoredValue(10);
     const numberSettingDescriptor: NumberSettingDescriptor = {
-      id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1
+      id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1, stepperScheduler: SCHEDULER
     };
     const element = renderSetting(numberSettingDescriptor);
     const input = element.querySelector("input");
@@ -293,7 +294,7 @@ describe("Setting", () => {
 
   test("stops following its preference once disposed", () => {
     const preference = createStoredValue(false);
-    const { element, dispose } = setup({ descriptor: createSwitchSetting(preference), stepperScheduler: SCHEDULER });
+    const { element, dispose } = setup({ descriptor: createSwitchSetting(preference) });
     const [control] = queryButtons(element);
 
     dispose();

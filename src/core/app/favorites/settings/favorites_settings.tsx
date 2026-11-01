@@ -2,7 +2,7 @@ import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
 import { AppPreferences } from "@/core/app/app_preferences";
-import { GridLayout } from "@/core/ui/post_grid/grid_layout";
+import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
@@ -39,13 +39,11 @@ const LAYOUT_ICONS: Readonly<Record<GridLayout, Icon>> = {
   row: "layoutRow", square: "layoutSquare", grid: "layoutGrid", column: "layoutColumn", native: "layoutNative"
 };
 
-export function FavoritesSettings({ stepperScheduler, ...props }: FavoritesSettingsProps): HTMLElement {
-  return <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={createDescriptors(props)} controlSize="small" stepperScheduler={stepperScheduler} />;
+export function FavoritesSettings(props: FavoritesSettingsProps): HTMLElement {
+  return <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={createDescriptors(props)} controlSize="small" />;
 }
 
-function createDescriptors({
-  favoritesPreferences, sharedPreferences, onThemePreview
-}: Omit<FavoritesSettingsProps, "stepperScheduler">): SettingDescriptor[] {
+function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePreview, stepperScheduler }: FavoritesSettingsProps): SettingDescriptor[] {
   return [
     {
       id: "postListEnabled", kind: "switch", label: "Enhance search pages", keywords: ["post list", "search"],
@@ -82,7 +80,7 @@ function createDescriptors({
     },
     {
       id: "pageSize", kind: "number", label: "Size", keywords: ["results per page", "count", "pagination"],
-      settingPreference: favoritesPreferences.pagination.pageSize, min: 1, max: 5_000, step: 25,
+      settingPreference: favoritesPreferences.pagination.pageSize, min: 1, max: 5_000, step: 25, stepperScheduler,
       disabled: favoritesPreferences.pagination.infiniteScroll
     },
     {

@@ -1,8 +1,8 @@
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
-import { Tab } from "@/core/ui/tabs/tab";
-import { TabManager } from "@/core/ui/tabs/tab_manager";
+import { Tab } from "@/core/ui/components/tabs/tab";
+import { TabManager } from "@/core/ui/components/tabs/tab_manager";
 import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 
 export const TabsClass = {

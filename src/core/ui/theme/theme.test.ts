@@ -14,7 +14,10 @@ describe("THEME_DEFINITIONS", () => {
   });
 
   test("gives every color of every theme a hex value", () => {
-    const colors = Object.values(THEME_DEFINITIONS).flatMap(({ lightColors: lightThemeColors, darkColors: darkThemeColors }) => [...Object.values(lightThemeColors), ...Object.values(darkThemeColors)]);
+    const colors = Object.values(THEME_DEFINITIONS).flatMap(({ lightColors: lightThemeColors, darkColors: darkThemeColors }) => [
+      ...Object.values(lightThemeColors),
+      ...Object.values(darkThemeColors)
+    ]);
 
     expect(colors.filter(color => !(/^#[0-9a-f]{6}$/).test(color))).toEqual([]);
   });

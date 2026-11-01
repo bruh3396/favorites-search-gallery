@@ -1,0 +1,191 @@
+import { LightboxViewportGestureHandlersDependencies, createLightboxViewportGestureHandlers } from "@/core/features/lightbox/zoom/lightbox_viewport_gesture_handlers";
+import { Mock, describe, expect, test, vi } from "vitest";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
+import { ModifierState } from "@/core/ui/gestures/modifier_state";
+import { Point } from "@/core/utils/geometry/point";
+import { Rect } from "@/core/utils/geometry/rect";
+import { Signal } from "@/core/utils/reactive/signal";
+
+const NO_MODIFIERS: ModifierState = { shift: false, ctrl: false, alt: false, meta: false };
+const ON_MEDIA: Point = { x: 400, y: 300 };
+const OFF_MEDIA: Point = { x: 50, y: 300 };
+
+function setup(): {
+  zoom: {
+    isZoomed: Signal<boolean>;
+    canZoom: Signal<boolean>;
+    mediaRect: Signal<Rect | undefined>;
+    toggle: Mock<LightboxZoom["toggle"]>;
+    zoomBy: Mock<LightboxZoom["zoomBy"]>;
+    zoomOut: Mock<LightboxZoom["zoomOut"]>;
+    panBy: Mock<LightboxZoom["panBy"]>;
+  };
+  handlers: { [K in keyof LightboxViewportGestureHandlersDependencies["handlers"]]: Mock<() => void> };
+} {
+  return {
+    zoom: {
+      isZoomed: new Signal(false),
+      canZoom: new Signal(true),
+      mediaRect: new Signal<Rect | undefined>({ x: 100, y: 0, width: 600, height: 600 }),
+      toggle: vi.fn<LightboxZoom["toggle"]>(),
+      zoomBy: vi.fn<LightboxZoom["zoomBy"]>(),
+      zoomOut: vi.fn<LightboxZoom["zoomOut"]>(),
+      panBy: vi.fn<LightboxZoom["panBy"]>()
+    },
+    handlers: { close: vi.fn(), showNext: vi.fn(), showPrevious: vi.fn(), openOriginal: vi.fn() }
+  };
+}
+
+describe("createLightboxViewportGestureHandlers", () => {
+  describe("canDrag", () => {
+    test("drags only while zoomed", () => {
+      const { zoom, handlers } = setup();
+      const gestureHandlers = createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) });
+
+      expect(gestureHandlers.canDrag()).toBe(false);
+      zoom.isZoomed.value = true;
+      expect(gestureHandlers.canDrag()).toBe(true);
+    });
+  });
+
+  describe("onDrag", () => {
+    test("pans by the drag", () => {
+      const { zoom, handlers } = setup();
+
+      createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) })
+        .onDrag({ point: ON_MEDIA, deltaPoint: { x: 5, y: -3 } });
+      expect(zoom.panBy).toHaveBeenCalledWith(5, -3);
+    });
+  });
+
+  describe("onPress", () => {
+    test("closes on a press off the media", () => {
+      const { zoom, handlers } = setup();
+
+      expect(createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) })
+        .onPress({ point: OFF_MEDIA, modifierState: NO_MODIFIERS })).toBe(true);
+      expect(handlers.close).toHaveBeenCalledOnce();
+    });
+
+    test("leaves a press on the media to the tap", () => {
+      const { zoom, handlers } = setup();
+
+      expect(createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(true) })
+        .onPress({ point: ON_MEDIA, modifierState: NO_MODIFIERS })).toBe(false);
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+
+    test("leaves a press to the tap or drag while zoomed or with ctrl or meta held", () => {
+      const { zoom, handlers } = setup();
+      const gestureHandlers = createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(true) });
+
+      expect(gestureHandlers.onPress({ point: OFF_MEDIA, modifierState: { ...NO_MODIFIERS, ctrl: true } })).toBe(false);
+      expect(gestureHandlers.onPress({ point: OFF_MEDIA, modifierState: { ...NO_MODIFIERS, meta: true } })).toBe(false);
+      zoom.isZoomed.value = true;
+      expect(gestureHandlers.onPress({ point: OFF_MEDIA, modifierState: NO_MODIFIERS })).toBe(false);
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+
+    test("closes on a press anywhere when it can't zoom but closes on press", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.canZoom.value = false;
+      expect(createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(true) })
+        .onPress({ point: ON_MEDIA, modifierState: NO_MODIFIERS })).toBe(true);
+      expect(handlers.close).toHaveBeenCalledOnce();
+    });
+
+    test("does nothing when it can neither zoom nor close on press", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.canZoom.value = false;
+      expect(createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) })
+        .onPress({ point: OFF_MEDIA, modifierState: NO_MODIFIERS })).toBe(false);
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onTap", () => {
+    test.each(["ctrl", "meta"] as const)("opens the original on %s+tap", modifier => {
+      const { zoom, handlers } = setup();
+
+      createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) })
+        .onTap({ point: ON_MEDIA, modifierState: { ...NO_MODIFIERS, [modifier]: true } });
+      expect(handlers.openOriginal).toHaveBeenCalledOnce();
+      expect(zoom.toggle).not.toHaveBeenCalled();
+    });
+
+    test("zooms out while zoomed", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.isZoomed.value = true;
+      createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) })
+        .onTap({ point: OFF_MEDIA, modifierState: NO_MODIFIERS });
+      expect(zoom.zoomOut).toHaveBeenCalledOnce();
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+
+    test("zooms in at a tap on the media", () => {
+      const { zoom, handlers } = setup();
+
+      createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) })
+        .onTap({ point: ON_MEDIA, modifierState: NO_MODIFIERS });
+      expect(zoom.toggle).toHaveBeenCalledWith(ON_MEDIA);
+    });
+
+    test("does nothing when it can't zoom", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.canZoom.value = false;
+      createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(true) })
+        .onTap({ point: ON_MEDIA, modifierState: NO_MODIFIERS });
+      expect(zoom.toggle).not.toHaveBeenCalled();
+      expect(handlers.close).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onWheel", () => {
+    test("zooms in on ctrl+wheel up and out on ctrl+wheel down, at the pointer", () => {
+      const { zoom, handlers } = setup();
+      const gestureHandlers = createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) });
+      const modifiers = { ...NO_MODIFIERS, ctrl: true };
+
+      expect(gestureHandlers.onWheel({ point: ON_MEDIA, deltaPoint: { x: 0, y: -100 }, modifierState: modifiers })).toBe(true);
+      expect(gestureHandlers.onWheel({ point: ON_MEDIA, deltaPoint: { x: 0, y: 100 }, modifierState: modifiers })).toBe(true);
+
+      const [[zoomIn, point], [zoomOut]] = zoom.zoomBy.mock.calls;
+
+      expect([zoomIn > 1, zoomOut < 1, point]).toEqual([true, true, ON_MEDIA]);
+    });
+
+    test("pans against the wheel while zoomed", () => {
+      const { zoom, handlers } = setup();
+
+      zoom.isZoomed.value = true;
+      expect(createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) }).onWheel({
+        point: ON_MEDIA, deltaPoint: { x: 10, y: 20 }, modifierState: NO_MODIFIERS
+      }))
+        .toBe(true);
+      expect(zoom.panBy).toHaveBeenCalledWith(-10, -20);
+    });
+
+    test("shows the next item on wheel down and the previous on wheel up", () => {
+      const { zoom, handlers } = setup();
+      const gestureHandlers = createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) });
+
+      expect(gestureHandlers.onWheel({ point: ON_MEDIA, deltaPoint: { x: 0, y: 100 }, modifierState: NO_MODIFIERS })).toBe(true);
+      expect(gestureHandlers.onWheel({ point: ON_MEDIA, deltaPoint: { x: 0, y: -100 }, modifierState: NO_MODIFIERS })).toBe(true);
+      expect(handlers.showNext).toHaveBeenCalledOnce();
+      expect(handlers.showPrevious).toHaveBeenCalledOnce();
+    });
+
+    test("leaves shift+wheel and sideways scrolling to the page", () => {
+      const { zoom, handlers } = setup();
+      const gestureHandlers = createLightboxViewportGestureHandlers({ lightboxZoom: zoom, handlers, closesOnPress: new Signal(false) });
+
+      expect(gestureHandlers.onWheel({ point: ON_MEDIA, deltaPoint: { x: 0, y: 100 }, modifierState: { ...NO_MODIFIERS, shift: true } })).toBe(false);
+      expect(gestureHandlers.onWheel({ point: ON_MEDIA, deltaPoint: { x: 100, y: 0 }, modifierState: NO_MODIFIERS })).toBe(false);
+      expect(handlers.showNext).not.toHaveBeenCalled();
+    });
+  });
+});

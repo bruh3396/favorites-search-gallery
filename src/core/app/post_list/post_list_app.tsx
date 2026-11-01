@@ -1,22 +1,13 @@
-import { PostGrid, PostGridProps } from "@/core/ui/post_grid/post_grid";
 import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
-import { Lightbox } from "@/core/features/lightbox/lightbox";
-import { Post } from "@/core/domain/post/post";
-import { Readable } from "@/core/utils/reactive/signal";
 import UI_CSS from "@/core/ui/styles.css?inline";
-import { h } from "@/core/ui/h/h";
 
 export const POST_LIST_APP_STYLES = [UI_CSS, LIGHTBOX_CSS];
 
 export interface PostListAppProps {
-  posts: Readable<readonly Post[]>;
-  postGridProps: Omit<PostGridProps<Post>, "posts">;
-  lightbox: Lightbox<Post>;
+  grid: HTMLElement;
+  lightboxView: HTMLElement;
 }
 
-export function PostListApp({ posts, postGridProps, lightbox }: PostListAppProps): HTMLElement[] {
-  return [
-    <PostGrid<Post> {...postGridProps} posts={posts} />,
-    lightbox.createView()
-  ];
+export function PostListApp({ grid, lightboxView }: PostListAppProps): HTMLElement[] {
+  return [grid, lightboxView];
 }

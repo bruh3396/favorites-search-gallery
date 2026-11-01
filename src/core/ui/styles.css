@@ -25,4 +25,4 @@
 @import "./components/view_pane/view_pane.css" layer(components);
 @import "./components/icon_button/icon_button.css" layer(components);
 
-@import "./zen/zen.css" layer(utilities);
+@import "./zen.css" layer(utilities);

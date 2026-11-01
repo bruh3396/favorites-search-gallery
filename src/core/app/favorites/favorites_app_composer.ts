@@ -1,4 +1,4 @@
-import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/favorites_app";
 import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
@@ -7,8 +7,10 @@ import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/color_scheme";
+import { CopyIdButton } from "@/core/app/favorites/lightbox/copy_id_button";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { Favorite } from "@/core/features/favorites/favorite";
+import { FavoriteLightboxTags } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_settings";
@@ -17,10 +19,15 @@ import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { Keymap } from "@/core/ui/hotkeys/keymap";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
+import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
+import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostActions } from "@/core/features/post_actions/post_actions";
+import { PostLibrary } from "@/core/features/favorites/load/post_library";
+import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -48,7 +55,11 @@ export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration
   readonly colorScheme: ColorScheme;
 }
 
-export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "favoritesPaginationPreferences"> {
+export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "favoritesPaginationPreferences" | "postLibrary"> {
+  localPosts: LocalPosts;
+  localTagCategories: LocalTagCategories;
+  remotePosts: RemotePosts;
+  remoteMedia: RemoteMedia;
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
   viewport: Viewport;
@@ -62,15 +73,17 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
   const { favoritesOwnerId, colorScheme, ...favoritesServiceConfiguration } = configuration;
-  const { localKeyedValues, hostPage, ...ports } = dependencies;
-  const { remoteMedia, remotePages, navigator, fileSaver, scheduler, sizeObserver, viewport, visibilityObserver, localTagCategories, clipboard } = ports;
+  const { localFavorites, localPosts, localTagCategories, remoteFavorites, remotePosts, remoteMedia, remotePages, scheduler, randomSource } = dependencies;
+  const { localKeyedValues, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard } = dependencies;
   const appStorage = createAppStorage(localKeyedValues);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, colorScheme, hostPage);
   const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites"]);
   const { favorites: favoritesState } = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites"]);
   const ownerState = favoritesState.get(favoritesOwnerId);
+  const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
   const favoritesService = createFavoritesService(favoritesServiceConfiguration, {
-    ...ports, favoritesPaginationPreferences: favoritesPreferences.pagination
+    localFavorites, remoteFavorites, remotePages, scheduler, postLibrary, randomSource,
+    favoritesPaginationPreferences: favoritesPreferences.pagination
   });
   const favoritesWorkspace = new FavoritesWorkspace({
     favoritesWorkspaceSnapshot: ownerState.workspace,
@@ -89,8 +102,14 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     details: {
       isOpen: lightboxPreferences.details.isOpen,
       createContent: favorite => createFavoriteLightboxDetails({
-        favorite, preferences: lightboxPreferences.details, localTagCategories, clipboard, scheduler,
-        copiedDuration: 1_500, collapsedTagCount: 6
+        preferences: lightboxPreferences.details,
+        copyIdButton: h(CopyIdButton, { postId: computed(() => favorite.value?.id), clipboard, scheduler, copiedDuration: 1_500 }),
+        tags: h(FavoriteLightboxTags, {
+          favorite, localTagCategories, collapsedTagCount: 6,
+          organization: lightboxPreferences.details.organization,
+          alignment: lightboxPreferences.details.alignment,
+          size: lightboxPreferences.details.size
+        })
       })
     }
   });

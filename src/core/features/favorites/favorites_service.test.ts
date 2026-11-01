@@ -13,6 +13,7 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_r
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
+import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
 import { createPost } from "@/testing/post";
 import { createStoredValue } from "@/testing/stored_value";
@@ -37,15 +38,19 @@ function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites
   const memoryClient = new MemoryClient(posts);
   const localFavorites = new MemoryLocalFavorites();
   const favoritesPaginationPreferences = { pageSize: createStoredValue(2), infiniteScroll: createStoredValue(false) };
+  const scheduler = new MemoryScheduler();
   const favoritesService = createFavoritesService({ userOwnsFavorites, blacklistedTags: [] }, {
     localFavorites,
-    localPosts: new MemoryLocalPosts(),
-    localTagCategories: new MemoryLocalTagCategories(),
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
-    remotePosts: new MemoryRemotePosts(memoryClient),
-    remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(memoryClient),
-    scheduler: new MemoryScheduler(),
+    scheduler,
+    postLibrary: new PostLibrary({
+      localPosts: new MemoryLocalPosts(),
+      localTagCategories: new MemoryLocalTagCategories(),
+      remotePosts: new MemoryRemotePosts(memoryClient),
+      remoteMedia: new MemoryRemoteMedia(),
+      scheduler
+    }),
     randomSource: new MemoryRandomSource([0.25, 0.5]),
     favoritesPaginationPreferences
   });

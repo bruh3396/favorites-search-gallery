@@ -8,8 +8,6 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
-const SCHEDULER = { schedule: (): (() => void) => () => undefined };
-
 const LAYOUT: SettingsLayout = [
   { id: "general", title: "General", settings: ["hints", "autoplay"] },
   { id: "empty", title: "Empty", settings: [] },
@@ -48,7 +46,6 @@ function setup(partialSettingsScreenProps: Partial<SettingsScreenProps> = {}): S
       settingsLayout={LAYOUT}
       settingDescriptors={switchSettingDescriptors}
       query={query}
-      stepperScheduler={SCHEDULER}
       {...partialSettingsScreenProps}
     />
   ));

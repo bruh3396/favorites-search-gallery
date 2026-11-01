@@ -25,7 +25,7 @@ const UNTESTED: Readonly<Record<string, string>> = {
   "src/core/ui/fonts/plex_font.ts": FONT,
   "src/core/ui/fonts/system_font.ts": FONT,
   "src/core/ui/fonts/verdana_font.ts": FONT,
-  "src/core/ui/post_grid/grid_layout.ts": OPTION_LIST,
+  "src/core/ui/post_grid/layout/grid_layout.ts": OPTION_LIST,
   "src/core/utils/storage/stored_map_definition.ts": "a marker class holding its entry; covered through stored_tree"
 };
 

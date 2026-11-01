@@ -1,6 +1,7 @@
 import { Icon } from "@/core/ui/components/icon/icon";
 import { Readable } from "@/core/utils/reactive/signal";
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
+import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 
 interface SettingBase {
   readonly id: string;
@@ -39,6 +40,7 @@ export interface NumberSettingDescriptor extends SettingBase {
   readonly max: number;
   readonly step: number;
   readonly writeOnEveryStep?: boolean;
+  readonly stepperScheduler: StepperScheduler;
 }
 
 export interface SliderSettingDescriptor extends SettingBase {

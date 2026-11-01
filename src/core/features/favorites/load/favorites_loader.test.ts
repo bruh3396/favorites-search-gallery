@@ -1,9 +1,10 @@
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test, vi } from "vitest";
-import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
+import { FavoritesFetcher } from "@/core/features/favorites/load/favorites_fetcher";
 import { FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesLoader } from "@/core/features/favorites/load/favorites_loader";
+import { FavoritesReloader } from "@/core/features/favorites/load/favorites_reloader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
@@ -15,10 +16,10 @@ import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_r
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
+import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
 import { effect } from "@/core/utils/reactive/signal";
-import { flushMicrotasks } from "@/testing/microtask_utilities";
 import { hasMedia } from "@/core/domain/media/media";
 import { searchFavoritePostIds } from "@/core/features/favorites/testing/favorite_post_id_searcher";
 
@@ -44,17 +45,27 @@ async function setup({ localFavoritePosts = [], remoteFavoritePosts }: LoadSourc
   const memoryClient = new MemoryClient(remoteFavoritePosts);
   const remoteFavorites = new MemoryRemoteFavorites(memoryClient);
   const scheduler = new MemoryScheduler();
-  const favoritesLoader = new FavoritesLoader({
-    favoritesCollection,
-    favoritesSearchIndex,
-    localFavorites,
+  const postLibrary = new PostLibrary({
     localPosts,
     localTagCategories: new MemoryLocalTagCategories(),
-    remoteFavorites,
     remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
-    remotePages: new MemoryRemotePages(memoryClient),
     scheduler
+  });
+  const favoritesLoader = new FavoritesLoader({
+    localFavorites,
+    scheduler,
+    favoritesCollection,
+    favoritesFetcher: new FavoritesFetcher({ localFavorites, remoteFavorites, favoritesCollection, favoritesSearchIndex, postLibrary }),
+    favoritesReloader: new FavoritesReloader({
+      localFavorites,
+      remoteFavorites,
+      remotePages: new MemoryRemotePages(memoryClient),
+      favoritesCollection,
+      favoritesSearchIndex,
+      postLibrary,
+      waitForPaint: (): Promise<void> => scheduler.waitForPaint()
+    })
   });
 
   await localPosts.setMany(localFavoritePosts.filter(post => hasMedia(post.media)));
@@ -69,10 +80,6 @@ function recordPhases(favoritesLoader: FavoritesLoader): FavoritesLoadStatePhase
     phases.push(favoritesLoader.state.value.phase);
   });
   return phases;
-}
-
-function getPostIds(favorites: readonly Favorite[]): string[] {
-  return favorites.map(favorite => favorite.id);
 }
 
 describe("FavoritesLoader", () => {
@@ -150,20 +157,6 @@ describe("FavoritesLoader", () => {
       await favoritesLoader.load();
       expect(favoritesLoader.state.value).toEqual({ phase: "interrupted" });
       expect(searchFavoritePostIds(favoritesSearchIndex)).toEqual(["1"]);
-    });
-
-    test("hydrates and announces a restored placeholder once its post is refreshed", async() => {
-      const { favoritesLoader, favoritesCollection } = await setup({
-        localFavoritePosts: [createPost({ id: "1" })],
-        remoteFavoritePosts: [createPost({ id: "1", tags: "apple", media: MEDIA })]
-      });
-      const hydratedFavorites: Favorite[] = [];
-
-      favoritesCollection.hydrated.on(favorite => hydratedFavorites.push(favorite));
-      await favoritesLoader.load();
-      await flushMicrotasks();
-      expect(favoritesCollection.getAll().find(arenaFavorite => arenaFavorite.id === "1")?.media).toEqual(MEDIA);
-      expect(getPostIds(hydratedFavorites)).toEqual(["1"]);
     });
   });
 });

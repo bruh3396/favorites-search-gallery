@@ -1,6 +1,6 @@
 import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC } from "@/core/app/favorites/workspace/favorites_workspace";
 import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/theme";
-import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/grid_layout";
+import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { TAG_ALIGNMENTS, TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
 import { TAG_ORGANIZATIONS, TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";

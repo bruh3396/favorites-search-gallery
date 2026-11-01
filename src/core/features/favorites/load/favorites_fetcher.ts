@@ -15,12 +15,11 @@ interface MutableFetchProgress {
 }
 
 export interface FavoritesFetcherDependencies {
-  localFavorites: LocalFavorites;
+  localFavorites: Pick<LocalFavorites, "setAll">;
   remoteFavorites: Pick<RemoteFavorites, "fetchCount" | "fetchAll">;
   favoritesCollection: Pick<FavoritesCollection, "append" | "getAllPostIds">;
   favoritesSearchIndex: Pick<FavoritesSearchIndex, "add">;
-  postLibrary: PostLibrary;
-  onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState) => void;
+  postLibrary: Pick<PostLibrary, "adopt" | "refresh">;
 }
 
 export class FavoritesFetcher {
@@ -30,8 +29,8 @@ export class FavoritesFetcher {
     this.dependencies = dependencies;
   }
 
-  public async fetchAll(): Promise<FavoritesLoadResult> {
-    const { remoteFavorites, localFavorites, favoritesCollection, onFavoritesLoadStateChange } = this.dependencies;
+  public async fetchAll(onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState) => void): Promise<FavoritesLoadResult> {
+    const { remoteFavorites, localFavorites, favoritesCollection } = this.dependencies;
     const mutableFetchProgress: MutableFetchProgress = { loadedCount: 0, expectedCount: null, isFetching: true };
     const reportProgress = (): void => {
       if (mutableFetchProgress.isFetching) {

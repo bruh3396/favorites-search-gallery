@@ -3,8 +3,8 @@ import { Tabs, TabsClass } from "@/core/ui/components/tabs/tabs";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import TABS_CSS from "@/core/ui/components/tabs/tabs.css?inline";
-import { Tab } from "@/core/ui/tabs/tab";
-import { TabManager } from "@/core/ui/tabs/tab_manager";
+import { Tab } from "@/core/ui/components/tabs/tab";
+import { TabManager } from "@/core/ui/components/tabs/tab_manager";
 import { expectClassesStyled } from "@/testing/css_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 

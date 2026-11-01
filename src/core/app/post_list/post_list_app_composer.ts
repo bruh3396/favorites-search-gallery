@@ -1,4 +1,4 @@
-import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loader_service";
+import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
@@ -12,7 +12,7 @@ import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { Post } from "@/core/domain/post/post";
 import { PostActions } from "@/core/features/post_actions/post_actions";
-import { PostGridProps } from "@/core/ui/post_grid/post_grid";
+import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
@@ -72,19 +72,22 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {
     remoteMedia, scheduler, enabled: gridPreferences.hdTilesEnabled, paused: lightbox.isOpen
   });
-  const postGridProps: Omit<PostGridProps<Post>, "posts"> = {
-    changed: postListService.changed,
-    tileLocator,
-    settings: gridPreferences,
-    visibilityObserver,
-    sizeObserver,
-    imageLoaderService,
-    getSize: post => ({ width: post.width, height: post.height }),
-    createActions: () => [],
-    getPostUrl: post => remotePages.postUrl(post.id),
-    onPlainClick: post => lightbox.open(listSequence, post)
-  };
-  const renderApp = (): HTMLElement[] => h(PostListApp, { posts, postGridProps, lightbox });
+  const renderApp = (): HTMLElement[] => h(PostListApp, {
+    grid: h(PostGrid<Post>, {
+      posts,
+      changed: postListService.changed,
+      tileLocator,
+      settings: gridPreferences,
+      visibilityObserver,
+      sizeObserver,
+      imageLoaderService,
+      getSize: post => ({ width: post.width, height: post.height }),
+      createActions: () => [],
+      getPostUrl: post => remotePages.postUrl(post.id),
+      onPlainClick: post => lightbox.open(listSequence, post)
+    }),
+    lightboxView: lightbox.createView()
+  });
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {

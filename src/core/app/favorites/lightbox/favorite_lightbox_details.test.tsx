@@ -1,60 +1,43 @@
 import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsPreferences, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
+import { FavoriteLightboxTags, FavoriteLightboxTagsClass } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoriteLightboxTagsClass } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
 import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_details.css?inline";
-import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/memory_clipboard";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
-import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { expectClassesStyled } from "@/testing/css_utilities";
-import { flushMicrotasks } from "@/testing/microtask_utilities";
-
-type ShownFavorite = Pick<Favorite, "id" | "tags">;
-
-function createFavorite(postId: string, tags: readonly string[] = []): ShownFavorite {
-  return { id: postId, tags: new Set(tags) };
-}
 
 interface Setup {
   element: HTMLElement;
-  favorite: Signal<ShownFavorite | undefined>;
-  clipboard: MemoryClipboard;
   favoriteLightboxDetailsPreferences: FavoriteLightboxDetailsPreferences;
-  copyButton: HTMLButtonElement;
   viewButton: HTMLButtonElement;
   viewSettings: HTMLElement;
-  readPostId: () => string;
   chooseView: (label: string) => void;
 }
 
-function setup(shownFavorite: ShownFavorite | undefined): Setup {
-  const favorite = new Signal<ShownFavorite | undefined>(shownFavorite);
-  const clipboard = new MemoryClipboard();
+function setup(): Setup {
   const favoriteLightboxDetailsPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"])
     .favorites.lightbox.details;
   const { result: element } = render(document, () => {
     const { titleChild, controlsChild, bodyChild } = createFavoriteLightboxDetails({
-      favorite,
       preferences: favoriteLightboxDetailsPreferences,
-      localTagCategories: { getMany: () => Promise.resolve(new Map()) },
-      clipboard,
-      scheduler: new MemoryScheduler(),
-      copiedDuration: 1_500,
-      collapsedTagCount: 6
+      copyIdButton: <button type="button">copy id</button>,
+      tags: <FavoriteLightboxTags
+        favorite={new Signal(undefined)}
+        {...favoriteLightboxDetailsPreferences}
+        localTagCategories={{ getMany: () => Promise.resolve(new Map()) }}
+        collapsedTagCount={6}
+      />
     });
     return <div>{titleChild}{controlsChild}{bodyChild}</div> as HTMLElement;
   });
-  const copyButton = element.querySelector<HTMLButtonElement>(`.${FavoriteLightboxDetailsClass.id} button`)!;
   const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"View settings\"]")!;
   const viewSettings = element.querySelector<HTMLElement>(`.${FavoriteLightboxDetailsClass.view}`)!;
-  const readPostId = (): string => copyButton.firstChild?.textContent ?? "";
   const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
     .find(button => button.getAttribute("aria-label") === label)!.click();
-  return { element, favorite, clipboard, favoriteLightboxDetailsPreferences, copyButton, viewButton, viewSettings, readPostId, chooseView };
+  return { element, favoriteLightboxDetailsPreferences, viewButton, viewSettings, chooseView };
 }
 
 describe("createFavoriteLightboxDetails", () => {
@@ -62,37 +45,20 @@ describe("createFavoriteLightboxDetails", () => {
     expectClassesStyled(FavoriteLightboxDetailsClass, LIGHTBOX_DETAILS_CSS);
   });
 
-  test("shows the shown favorite's id and follows it", () => {
-    const { favorite, readPostId } = setup(createFavorite("12"));
+  test("places the copy id button in its title", () => {
+    const { element } = setup();
 
-    expect(readPostId()).toBe("12");
-    favorite.value = createFavorite("34");
-    expect(readPostId()).toBe("34");
+    expect(element.querySelector(`.${FavoriteLightboxDetailsClass.id}`)!.textContent).toBe("copy id");
   });
 
-  test("copies the shown favorite's id", async() => {
-    const { clipboard, copyButton } = setup(createFavorite("12"));
+  test("places the tags in its body", () => {
+    const { element } = setup();
 
-    copyButton.click();
-    await flushMicrotasks();
-    expect(clipboard.text).toBe("12");
-  });
-
-  test("shows no id without a favorite", () => {
-    const { readPostId } = setup(undefined);
-
-    expect(readPostId()).toBe("");
-  });
-
-  test("shows the favorite's tags in its body", async() => {
-    const { element } = setup(createFavorite("1", ["solo"]));
-
-    await flushMicrotasks();
-    expect(element.querySelector(`.${FavoriteLightboxTagsClass.tag}`)!.textContent).toBe("solo");
+    expect(element.querySelector(`.${FavoriteLightboxTagsClass.root}`)).not.toBeNull();
   });
 
   test("opens and closes the view settings from the settings button", () => {
-    const { viewButton, viewSettings } = setup(createFavorite("1"));
+    const { viewButton, viewSettings } = setup();
 
     expect(viewSettings.hidden).toBe(true);
     viewButton.click();
@@ -102,7 +68,7 @@ describe("createFavoriteLightboxDetails", () => {
   });
 
   test("remembers the chosen view and shows the tags in it", () => {
-    const { element, favoriteLightboxDetailsPreferences, chooseView } = setup(createFavorite("1"));
+    const { element, favoriteLightboxDetailsPreferences, chooseView } = setup();
     const tags = element.querySelector<HTMLElement>(`.${FavoriteLightboxTagsClass.root}`)!;
 
     chooseView("One list");

@@ -5,8 +5,8 @@ import { Readable, batch, computed, effect } from "@/core/utils/reactive/signal"
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { StoredValue } from "@/core/utils/storage/stored_value";
-import { Tab } from "@/core/ui/tabs/tab";
-import { TabManager } from "@/core/ui/tabs/tab_manager";
+import { Tab } from "@/core/ui/components/tabs/tab";
+import { TabManager } from "@/core/ui/components/tabs/tab_manager";
 import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export interface FavoritesWorkspaceDependencies {

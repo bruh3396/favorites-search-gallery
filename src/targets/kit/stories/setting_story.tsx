@@ -33,7 +33,7 @@ function createStoredValue<T>({ id, initial, log }: { id: string; initial: T; lo
 function renderAll(ownerDocument: Document, settingDescriptors: readonly SettingDescriptor[]): HTMLElement {
   return render(ownerDocument, () => (
     <div>
-      {settingDescriptors.map(settingDescriptor => <Setting descriptor={settingDescriptor} controlSize="small" stepperScheduler={SCHEDULER} />)}
+      {settingDescriptors.map(settingDescriptor => <Setting descriptor={settingDescriptor} controlSize="small" />)}
     </div>
   )).result;
 }
@@ -53,7 +53,10 @@ function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
       id: "ratings", kind: "choices", label: "Ratings",
       settingPreference: createStoredValue<readonly string[]>({ id: "ratings", initial: ["safe"], log }), members: RATINGS, labels: RATING_LABELS
     },
-    { id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }), min: 2, max: 20, step: 1 },
+    {
+      id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }),
+      min: 2, max: 20, step: 1, stepperScheduler: SCHEDULER
+    },
     {
       id: "tileSize", kind: "slider", label: "Tile size", settingPreference: createStoredValue({ id: "columnCount", initial: 6, log }),
       min: 1, max: 10, step: 1, inverted: true
@@ -68,7 +71,7 @@ function renderDependent(ownerDocument: Document, log: Log): HTMLElement {
     {
       id: "resultsPerPage", kind: "number", label: "Results per page", description: "Disabled while infinite scroll is on.",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      disabled: infiniteScrollSettingPreference
+      stepperScheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
     }
   ]);
 }

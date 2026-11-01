@@ -1,8 +1,8 @@
 import { SkeletonGrid, SkeletonGridClass, SkeletonGridProps } from "@/core/ui/post_grid/skeleton_grid";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { GridLayout } from "@/core/ui/post_grid/grid_layout";
-import { GridTilerClass } from "@/core/ui/post_grid/grid_tiler";
+import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
+import { GridTilerClass } from "@/core/ui/post_grid/layout/grid_tiler";
 import POST_GRID_CSS from "@/core/ui/post_grid/post_grid.css?inline";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Scoped } from "@/core/utils/reactive/scope";

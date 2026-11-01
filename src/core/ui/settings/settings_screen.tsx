@@ -5,7 +5,6 @@ import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingSection } from "@/core/ui/settings/setting_section";
 import { SettingsIndex } from "@/core/ui/settings/settings_index";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
-import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { h } from "@/core/ui/h/h";
 
 export const SettingsScreenClass = {
@@ -21,20 +20,17 @@ export interface SettingsScreenProps {
   descriptionsVisible?: Readable<boolean>;
   query?: Readable<string>;
   controlSize?: ControlSize;
-  stepperScheduler: StepperScheduler;
 }
 
 interface SectionProps {
   settingSection: SettingSection;
   settingDescriptors: readonly SettingDescriptor[];
   matches: Readable<ReadonlySet<string>>;
-  descriptionsVisible: Readable<boolean> | undefined;
-  controlSize: ControlSize;
-  stepperScheduler: StepperScheduler;
+  renderSetting: (settingDescriptor: SettingDescriptor) => HTMLElement;
 }
 
 export function SettingsScreen({
-  settingsLayout, settingDescriptors, descriptionsVisible, query, controlSize = "medium", stepperScheduler
+  settingsLayout, settingDescriptors, descriptionsVisible, query, controlSize = "medium"
 }: SettingsScreenProps): HTMLElement {
   const descriptorsById = new Map(settingDescriptors.map(settingDescriptor => [settingDescriptor.id, settingDescriptor]));
   const sectionsWithSettings = settingsLayout
@@ -53,19 +49,17 @@ export function SettingsScreen({
           settingSection={entry.section}
           settingDescriptors={entry.settingDescriptors}
           matches={matches}
-          descriptionsVisible={descriptionsVisible}
-          controlSize={controlSize}
-          stepperScheduler={stepperScheduler}
+          renderSetting={settingDescriptor => (
+            <Setting descriptor={settingDescriptor} descriptionVisible={descriptionsVisible} controlSize={controlSize} />
+          )}
         />
       ))}
     </div>
   );
 }
 
-function Section({ settingSection, settingDescriptors, matches, descriptionsVisible, controlSize, stepperScheduler }: SectionProps): HTMLElement {
-  const settings = settingDescriptors.map(settingDescriptor => (
-    <Setting descriptor={settingDescriptor} descriptionVisible={descriptionsVisible} controlSize={controlSize} stepperScheduler={stepperScheduler} />
-  ));
+function Section({ settingSection, settingDescriptors, matches, renderSetting }: SectionProps): HTMLElement {
+  const settings = settingDescriptors.map(renderSetting);
   const heading = <h3 className={SettingsScreenClass.heading}>{settingSection.title}</h3>;
   const element = (
     <section className={SettingsScreenClass.section}>

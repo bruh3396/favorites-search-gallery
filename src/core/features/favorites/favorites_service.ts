@@ -5,20 +5,20 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
+import { FavoritesFetcher } from "@/core/features/favorites/load/favorites_fetcher";
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesLoader } from "@/core/features/favorites/load/favorites_loader";
 import { FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
+import { FavoritesReindexer } from "@/core/features/favorites/load/favorites_reindexer";
+import { FavoritesReloader } from "@/core/features/favorites/load/favorites_reloader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
-import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
-import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { Milestone } from "@/core/utils/reactive/milestone";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
+import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
-import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
-import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { describeFavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state_describer";
@@ -30,13 +30,10 @@ export interface FavoritesServiceConfiguration {
 
 export interface FavoritesServiceDependencies {
   localFavorites: LocalFavorites;
-  localPosts: LocalPosts;
-  localTagCategories: LocalTagCategories;
   remoteFavorites: RemoteFavorites;
-  remotePosts: RemotePosts;
-  remoteMedia: RemoteMedia;
   remotePages: Pick<RemotePages, "postExists">;
   scheduler: Scheduler;
+  postLibrary: PostLibrary;
   randomSource: RandomSource;
   favoritesPaginationPreferences: FavoritesPaginationPreferences;
 }
@@ -59,11 +56,22 @@ export function createFavoritesService(configuration: FavoritesServiceConfigurat
   const favoritesCollection = new FavoritesCollection(stringInterner);
   const favoritesSearchIndex = new FavoritesSearchIndex(stringInterner);
   const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
+  const { localFavorites, remoteFavorites, remotePages, scheduler, postLibrary } = dependencies;
   const favoritesActions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, {
-    ...dependencies,
+    remoteFavorites, localFavorites,
     acceptsChanges: (): boolean => !configuration.userOwnsFavorites || loaded.reached
   });
-  const favoritesLoader = new FavoritesLoader({ ...dependencies, favoritesCollection, favoritesSearchIndex });
+  const favoritesReindexer = new FavoritesReindexer({ scheduler, favoritesCollection, favoritesSearchIndex });
+  const favoritesLoader = new FavoritesLoader({
+    localFavorites, scheduler, favoritesCollection,
+    favoritesFetcher: new FavoritesFetcher({ localFavorites, remoteFavorites, favoritesCollection, favoritesSearchIndex, postLibrary }),
+    favoritesReloader: new FavoritesReloader({
+      localFavorites, remoteFavorites, remotePages, favoritesCollection, favoritesSearchIndex, postLibrary,
+      waitForPaint: (): Promise<void> => scheduler.waitForPaint()
+    })
+  });
+
+  postLibrary.refreshed.on(refreshedPost => favoritesReindexer.reindex(refreshedPost));
   return {
     actions: favoritesActions,
     hydrated: favoritesCollection.hydrated,

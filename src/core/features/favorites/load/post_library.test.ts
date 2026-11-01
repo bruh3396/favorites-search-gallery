@@ -36,9 +36,10 @@ function setup(remotePosts: Post[] = [], probeDurationSeconds: RemoteMedia["prob
     localTagCategories,
     remotePosts: new MemoryRemotePosts(new MemoryClient(remotePosts)),
     remoteMedia: { probeDurationSeconds: probeDuration },
-    scheduler,
-    onRefresh
+    scheduler
   });
+
+  postLibrary.refreshed.on(onRefresh);
   return { postLibrary, localPosts, localTagCategories, scheduler, probeDurationSeconds: probeDuration, onRefresh };
 }
 

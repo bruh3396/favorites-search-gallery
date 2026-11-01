@@ -12,15 +12,16 @@ const RESTORE_BATCH_SIZE = 1_000;
 
 type MissingReason = "unfavorited" | "purged" | "unknown";
 
+type FavoritesLoadStateListener = (favoritesLoadState: FavoritesLoadState) => void;
+
 export interface FavoritesReloaderDependencies {
-  localFavorites: LocalFavorites;
+  localFavorites: Pick<LocalFavorites, "prepend" | "remove">;
   remoteFavorites: Pick<RemoteFavorites, "findNew" | "findMissing">;
   remotePages: Pick<RemotePages, "postExists">;
   favoritesCollection: Pick<FavoritesCollection, "append" | "prependAsNew" | "getAll">;
   favoritesSearchIndex: Pick<FavoritesSearchIndex, "rebuild">;
-  postLibrary: PostLibrary;
+  postLibrary: Pick<PostLibrary, "stream" | "adopt" | "refresh" | "markPurged">;
   waitForPaint: () => Promise<void>;
-  onFavoritesLoadStateChange: (favoritesLoadState: FavoritesLoadState) => void;
 }
 
 export class FavoritesReloader {
@@ -30,9 +31,9 @@ export class FavoritesReloader {
     this.dependencies = dependencies;
   }
 
-  public async reload(localPostIds: readonly string[]): Promise<FavoritesLoadResult> {
-    const { postLibrary, onFavoritesLoadStateChange } = this.dependencies;
-    const restoredPosts = await this.restorePosts(localPostIds);
+  public async reload(localPostIds: readonly string[], onFavoritesLoadStateChange: FavoritesLoadStateListener): Promise<FavoritesLoadResult> {
+    const { postLibrary } = this.dependencies;
+    const restoredPosts = await this.restorePosts(localPostIds, onFavoritesLoadStateChange);
     const existingPostIds = restoredPosts.filter(post => post.status !== "purged").map(post => post.id);
     let newPosts: Post[] = [];
 
@@ -41,7 +42,7 @@ export class FavoritesReloader {
     try {
       newPosts = await this.pullNewPosts(existingPostIds);
     } finally {
-      await this.rebuildSearchIndex();
+      await this.rebuildSearchIndex(onFavoritesLoadStateChange);
       postLibrary.refresh([...newPosts, ...restoredPosts]).catch(console.error);
     }
     onFavoritesLoadStateChange({ phase: "checkingMissing" });
@@ -50,8 +51,8 @@ export class FavoritesReloader {
     return { newCount: newPosts.length, unfavoritedCount };
   }
 
-  private async restorePosts(localPostIds: readonly string[]): Promise<Post[]> {
-    const { favoritesCollection, postLibrary, onFavoritesLoadStateChange } = this.dependencies;
+  private async restorePosts(localPostIds: readonly string[], onFavoritesLoadStateChange: FavoritesLoadStateListener): Promise<Post[]> {
+    const { favoritesCollection, postLibrary } = this.dependencies;
     const restoredPosts: Post[] = [];
     const reportProgress = (): void => onFavoritesLoadStateChange({
       phase: "restoring",
@@ -82,8 +83,8 @@ export class FavoritesReloader {
     return newPosts;
   }
 
-  private async rebuildSearchIndex(): Promise<void> {
-    const { favoritesCollection, favoritesSearchIndex, onFavoritesLoadStateChange, waitForPaint } = this.dependencies;
+  private async rebuildSearchIndex(onFavoritesLoadStateChange: FavoritesLoadStateListener): Promise<void> {
+    const { favoritesCollection, favoritesSearchIndex, waitForPaint } = this.dependencies;
 
     onFavoritesLoadStateChange({ phase: "indexing" });
     await waitForPaint();

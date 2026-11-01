@@ -1,13 +1,7 @@
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
-import { CopyIdButton } from "@/core/app/favorites/lightbox/copy_id_button";
-import { Favorite } from "@/core/features/favorites/favorite";
-import { FavoriteLightboxTags } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
-import { LightboxButton } from "@/core/features/lightbox/ui/chrome/lightbox_button";
+import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details";
-import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
@@ -43,37 +37,29 @@ export interface FavoriteLightboxDetailsPreferences {
 }
 
 export interface FavoriteLightboxDetailsProps {
-  favorite: Readable<Pick<Favorite, "id" | "tags"> | undefined>;
   preferences: FavoriteLightboxDetailsPreferences;
-  localTagCategories: Pick<LocalTagCategories, "getMany">;
-  clipboard: Pick<Clipboard, "write">;
-  scheduler: Pick<Scheduler, "schedule">;
-  copiedDuration: number;
-  collapsedTagCount: number;
+  copyIdButton: Node;
+  tags: Node;
 }
 
-export function createFavoriteLightboxDetails(props: FavoriteLightboxDetailsProps): LightboxDetailsContent {
-  const { favorite, preferences: favoriteLightboxDetailsPreferences, localTagCategories, collapsedTagCount } = props;
+export function createFavoriteLightboxDetails({
+  preferences: favoriteLightboxDetailsPreferences,
+  copyIdButton,
+  tags
+}: FavoriteLightboxDetailsProps): LightboxDetailsContent {
   const viewOpen = new Signal(false);
   return {
-    titleChild: <FavoriteLightboxTitle {...props} viewOpen={viewOpen} />,
-    controlsChild: <FavoriteLightboxViewSettings {...props} viewOpen={viewOpen} />,
-    bodyChild: <FavoriteLightboxTags
-      favorite={favorite}
-      {...favoriteLightboxDetailsPreferences}
-      localTagCategories={localTagCategories}
-      collapsedTagCount={collapsedTagCount}
-    />
+    titleChild: <FavoriteLightboxTitle copyIdButton={copyIdButton} viewOpen={viewOpen} />,
+    controlsChild: <FavoriteLightboxViewSettings favoriteLightboxDetailsPreferences={favoriteLightboxDetailsPreferences} viewOpen={viewOpen} />,
+    bodyChild: tags
   };
 }
 
-type PartProps = FavoriteLightboxDetailsProps & { viewOpen: Signal<boolean> };
-
-function FavoriteLightboxTitle({ favorite, clipboard, scheduler, copiedDuration, viewOpen }: PartProps): HTMLElement {
+function FavoriteLightboxTitle({ copyIdButton, viewOpen }: { copyIdButton: Node; viewOpen: Signal<boolean> }): HTMLElement {
   return (
     <div className={FavoriteLightboxDetailsClass.title}>
       <h2 className={FavoriteLightboxDetailsClass.id}>
-        <CopyIdButton postId={computed(() => favorite.value?.id)} clipboard={clipboard} scheduler={scheduler} copiedDuration={copiedDuration} />
+        {copyIdButton}
       </h2>
       <LightboxButton icon="tune" label="View settings" pressed={viewOpen} onClick={() => {
         viewOpen.value = !viewOpen.value;
@@ -94,7 +80,12 @@ function ViewOption<Value>({ label, controlChoices, value }: {
   ) as HTMLElement;
 }
 
-function FavoriteLightboxViewSettings({ preferences: favoriteLightboxDetailsPreferences, viewOpen }: PartProps): HTMLElement {
+interface FavoriteLightboxViewSettingsProps {
+  favoriteLightboxDetailsPreferences: FavoriteLightboxDetailsPreferences;
+  viewOpen: Readable<boolean>;
+}
+
+function FavoriteLightboxViewSettings({ favoriteLightboxDetailsPreferences, viewOpen }: FavoriteLightboxViewSettingsProps): HTMLElement {
   return (
     <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View settings" hidden={computed(() => !viewOpen.value)}>
       <ViewOption label="Organization" controlChoices={ORGANIZATION_CHOICES} value={favoriteLightboxDetailsPreferences.organization} />

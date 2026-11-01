@@ -1,6 +1,5 @@
 import { ChoiceSettingDescriptor, ChoicesSettingDescriptor, NumberSettingDescriptor, SettingDescriptor, SliderSettingDescriptor, SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { Stepper, StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Dropdown } from "@/core/ui/components/dropdown/dropdown";
@@ -8,6 +7,7 @@ import { MultiSelect } from "@/core/ui/components/multi_select/multi_select";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { SettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { Slider } from "@/core/ui/components/slider/slider";
+import { Stepper } from "@/core/ui/components/stepper/stepper";
 import { Switch } from "@/core/ui/components/switch/switch";
 import { UnreachableError } from "@/core/utils/error/unreachable_error";
 import { h } from "@/core/ui/h/h";
@@ -16,17 +16,15 @@ export interface SettingProps {
   descriptor: SettingDescriptor;
   descriptionVisible?: Readable<boolean>;
   controlSize?: ControlSize;
-  stepperScheduler: StepperScheduler;
 }
 
 interface SettingControlProps<D extends SettingDescriptor = SettingDescriptor> {
   descriptor: D;
   controlSize: ControlSize;
-  stepperScheduler: StepperScheduler;
 }
 
-export function Setting({ descriptor: settingDescriptor, descriptionVisible, controlSize = "medium", stepperScheduler }: SettingProps): HTMLElement {
-  const control = <SettingControl descriptor={settingDescriptor} controlSize={controlSize} stepperScheduler={stepperScheduler} />;
+export function Setting({ descriptor: settingDescriptor, descriptionVisible, controlSize = "medium" }: SettingProps): HTMLElement {
+  const control = <SettingControl descriptor={settingDescriptor} controlSize={controlSize} />;
   return (
     <SettingRow
       label={settingDescriptor.label}
@@ -43,18 +41,18 @@ function createActivation(control: HTMLElement): (() => void) | undefined {
   return control.role === "switch" || control.role === "combobox" ? (): void => control.click() : undefined;
 }
 
-function SettingControl({ descriptor: settingDescriptor, controlSize, stepperScheduler }: SettingControlProps): HTMLElement {
+function SettingControl({ descriptor: settingDescriptor, controlSize }: SettingControlProps): HTMLElement {
   switch (settingDescriptor.kind) {
     case "switch":
-      return <SwitchControl descriptor={settingDescriptor} controlSize={controlSize} stepperScheduler={stepperScheduler} />;
+      return <SwitchControl descriptor={settingDescriptor} controlSize={controlSize} />;
     case "choice":
-      return <ChoiceControl descriptor={settingDescriptor} controlSize={controlSize} stepperScheduler={stepperScheduler} />;
+      return <ChoiceControl descriptor={settingDescriptor} controlSize={controlSize} />;
     case "choices":
-      return <ChoicesControl descriptor={settingDescriptor} controlSize={controlSize} stepperScheduler={stepperScheduler} />;
+      return <ChoicesControl descriptor={settingDescriptor} controlSize={controlSize} />;
     case "number":
-      return <NumberControl descriptor={settingDescriptor} controlSize={controlSize} stepperScheduler={stepperScheduler} />;
+      return <NumberControl descriptor={settingDescriptor} controlSize={controlSize} />;
     case "slider":
-      return <SliderControl descriptor={settingDescriptor} controlSize={controlSize} stepperScheduler={stepperScheduler} />;
+      return <SliderControl descriptor={settingDescriptor} controlSize={controlSize} />;
     default:
       throw new UnreachableError(settingDescriptor);
   }
@@ -90,9 +88,8 @@ function ChoicesControl({ descriptor: choicesSettingDescriptor, controlSize }: S
 }
 
 function NumberControl({
-  descriptor: { settingPreference, disabled, label, min, max, step, writeOnEveryStep = false },
-  controlSize,
-  stepperScheduler
+  descriptor: { settingPreference, disabled, label, min, max, step, writeOnEveryStep = false, stepperScheduler },
+  controlSize
 }: SettingControlProps<NumberSettingDescriptor>): HTMLElement {
   const draft = new Signal(settingPreference.peek());
   const write = (next: number): void => settingPreference.set(next);
