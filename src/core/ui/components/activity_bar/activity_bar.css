@@ -12,7 +12,10 @@
   gap: 4px;
   inline-size: 48px;
   padding-block: 8px;
-  background: color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%);
+  background: light-dark(
+    var(--fsg-color-surface-container),
+    color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%)
+  );
 }
 
 .fsg-ActivityBar-item[aria-pressed="true"] {

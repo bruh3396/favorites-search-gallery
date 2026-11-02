@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
-import { SearchHistory } from "@/core/utils/search_history/search_history";
+import { SearchHistory } from "@/core/utils/collection/search_history";
 
 function createSearchHistory(storedQueries: readonly string[] = [], limit = 25): SearchHistory {
   const submittedQueries = new KeyedStoredValue<readonly string[]>(

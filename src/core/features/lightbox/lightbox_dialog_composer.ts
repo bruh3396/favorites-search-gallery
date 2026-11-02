@@ -11,6 +11,7 @@ import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_comm
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanel } from "@/core/features/lightbox/details/lightbox_details_panel";
 import { LightboxDialog } from "@/core/features/lightbox/lightbox_dialog";
+import { LightboxFrame } from "@/core/features/lightbox/lightbox_frame";
 import { LightboxFullscreen } from "@/core/features/lightbox/lightbox_fullscreen";
 import { LightboxGif } from "@/core/features/lightbox/media/lightbox_gif";
 import { LightboxImage } from "@/core/features/lightbox/media/lightbox_image";
@@ -90,7 +91,11 @@ export function composeLightboxDialog<T extends MediaItem>(
     { remoteMedia, lightboxMediaResolver, currentItem: lightboxNavigation.currentItem, retainedItems, volume, muted }
   );
   const lightboxOverlayVisibility = new LightboxOverlayVisibility({ idleDelay: OVERLAY_IDLE_DELAY, leaveDelay: OVERLAY_LEAVE_DELAY }, scheduler);
-  const lightboxFullscreen = new LightboxFullscreen(currentDocument());
+  let frame: HTMLElement | undefined;
+  const lightboxFullscreen = new LightboxFullscreen({
+    ownerDocument: currentDocument(),
+    requestFullscreen: (): Promise<void> => frame!.requestFullscreen()
+  });
   const lightboxZoom = new LightboxZoom(
     { minimumScale: ZOOM_MINIMUM_SCALE, maximumScale: ZOOM_MAXIMUM_SCALE },
     { currentItem: lightboxNavigation.currentItem, mediaSize: lightboxStage.mediaSize, enabled: computed(() => !simple.value) }
@@ -132,49 +137,51 @@ export function composeLightboxDialog<T extends MediaItem>(
     handlers,
     onKeydown: createLightboxKeyListener(keymap, handlers),
     lightboxMouseListeners: createLightboxMouseListeners(handlers),
-    renderViewport: onMediaFocus => h(LightboxViewport, {
-      zoom: lightboxZoom,
-      sizeObserver,
-      handlers,
-      closesOnPress: computed(() => simple.value && lightboxStage.video.value === undefined),
+    renderFrame: onMediaFocus => (frame = h(LightboxFrame, {
       contentChild: [
-        h(LightboxPreview, { src: lightboxStage.shownPreviewUrl }),
-        h(LightboxImage, { element: lightboxStage.image }),
-        h(LightboxGif, { element: lightboxStage.gif }),
-        h(LightboxVideo, { element: lightboxStage.video, onClick: handlers.togglePause, onFocusIn: onMediaFocus })
-      ]
-    }),
-    overlayChild: h(LightboxOverlay, {
-      onSlotEnter: () => lightboxOverlayVisibility.hold(),
-      onSlotLeave: () => lightboxOverlayVisibility.release(),
-      topEdgeChild: h(LightboxAutoplayBar, { countdown: lightboxAutoplay.countdown }),
-      topStartChild: h(LightboxPosition, { position: lightboxNavigation.position }),
-      topEndChild: h(LightboxToolbar, {
-        isAutoplaying: lightboxAutoplay.isPlaying,
-        inFullscreen: lightboxFullscreen.inFullscreen,
-        detailsOpen: lightboxDetails?.isOpen,
+      h(LightboxViewport, {
+        zoom: lightboxZoom,
+        sizeObserver,
         handlers,
-        keymap
+        closesOnPress: computed(() => simple.value && lightboxStage.video.value === undefined),
+        contentChild: [
+          h(LightboxPreview, { src: lightboxStage.shownPreviewUrl }),
+          h(LightboxImage, { element: lightboxStage.image }),
+          h(LightboxGif, { element: lightboxStage.gif }),
+          h(LightboxVideo, { element: lightboxStage.video, onClick: handlers.togglePause, onFocusIn: onMediaFocus })
+        ]
       }),
-      startEdgeChild: h(LightboxArrow, {
-        direction: "previous", lightboxShortcut: findLightboxShortcut(keymap, "showPrevious"), onClick: handlers.showPrevious
+      h(LightboxOverlay, {
+        onSlotEnter: () => lightboxOverlayVisibility.hold(),
+        onSlotLeave: () => lightboxOverlayVisibility.release(),
+        topEdgeChild: h(LightboxAutoplayBar, { countdown: lightboxAutoplay.countdown }),
+        topStartChild: h(LightboxPosition, { position: lightboxNavigation.position }),
+        topEndChild: h(LightboxToolbar, {
+          isAutoplaying: lightboxAutoplay.isPlaying,
+          inFullscreen: lightboxFullscreen.inFullscreen,
+          detailsOpen: lightboxDetails?.isOpen,
+          handlers,
+          keymap
+        }),
+        startEdgeChild: h(LightboxArrow, {
+          direction: "previous", lightboxShortcut: findLightboxShortcut(keymap, "showPrevious"), onClick: handlers.showPrevious
+        }),
+        endEdgeChild: h(LightboxArrow, { direction: "next", lightboxShortcut: findLightboxShortcut(keymap, "showNext"), onClick: handlers.showNext })
       }),
-      endEdgeChild: h(LightboxArrow, { direction: "next", lightboxShortcut: findLightboxShortcut(keymap, "showNext"), onClick: handlers.showNext })
-    }),
-    zoomChild: [
       h(LightboxZoomChip, { pixelScale: lightboxZoom.pixelScale }),
-      h(LightboxMinimap, { previewUrl: lightboxStage.previewUrl, lightboxZoom })
-    ],
-    detailsPanelChild: lightboxDetails === undefined || lightboxDetailsContent === undefined ? undefined : h(LightboxDetailsPanel, {
-      isOpen: lightboxDetails.isOpen,
-      titleChild: lightboxDetailsContent.titleChild,
-      controlsChild: lightboxDetailsContent.controlsChild,
-      contentChild: lightboxDetailsContent.bodyChild,
-      closeLightboxShortcut: findLightboxShortcut(keymap, "toggleDetails"),
-      onClose: handlers.toggleDetails,
-      onPointerenter: () => lightboxOverlayVisibility.hold(),
-      onPointerleave: () => lightboxOverlayVisibility.release()
-    })
+      h(LightboxMinimap, { previewUrl: lightboxStage.previewUrl, lightboxZoom }),
+      lightboxDetails === undefined || lightboxDetailsContent === undefined ? undefined : h(LightboxDetailsPanel, {
+        isOpen: lightboxDetails.isOpen,
+        titleChild: lightboxDetailsContent.titleChild,
+        controlsChild: lightboxDetailsContent.controlsChild,
+        contentChild: lightboxDetailsContent.bodyChild,
+        closeLightboxShortcut: findLightboxShortcut(keymap, "toggleDetails"),
+        onClose: handlers.toggleDetails,
+        onPointerenter: () => lightboxOverlayVisibility.hold(),
+        onPointerleave: () => lightboxOverlayVisibility.release()
+      })
+      ]
+    }))
   });
 }
 

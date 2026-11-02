@@ -144,7 +144,7 @@ describe("FavoritesSearchPanel", () => {
     searchable.reach();
     settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
     emptyState.querySelector("button")!.click();
-    expect(document.activeElement).toBe(element.querySelector("input[type=search]"));
+    expect(document.activeElement).toBe(element.querySelector("search textarea"));
     element.remove();
   });
 
@@ -158,19 +158,19 @@ describe("FavoritesSearchPanel", () => {
 
   test("submits what is entered in the search box", () => {
     const { element, submit } = setup();
-    const input = element.querySelector("input[type=search]") as HTMLInputElement;
+    const textarea = element.querySelector("search textarea") as HTMLTextAreaElement;
 
-    input.value = "cat";
-    input.form!.dispatchEvent(new Event("submit"));
+    textarea.value = "cat";
+    textarea.form!.dispatchEvent(new Event("submit"));
     expect(submit).toHaveBeenCalledExactlyOnceWith("cat");
   });
 
   test("recalls a submitted query with ↑", () => {
     const { element } = setup();
-    const input = element.querySelector("input[type=search]") as HTMLInputElement;
+    const textarea = element.querySelector("search textarea") as HTMLTextAreaElement;
 
-    input.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true }));
-    expect(input.value).toBe("cat");
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowUp", cancelable: true }));
+    expect(textarea.value).toBe("cat");
   });
 
   test("counts the results while favorites load", () => {
@@ -214,6 +214,17 @@ describe("FavoritesSearchPanel", () => {
     expect(goTo).toHaveBeenCalledExactlyOnceWith(2);
   });
 
+  test("hides the paginator while there is only one page", () => {
+    const { element, searchResults } = setup();
+    const findPageButton = (): HTMLElement => element.querySelector<HTMLElement>(`.${PageSlotClass.page}[data-page-number="1"]`)!;
+
+    searchResults.value = [createFavorite("1")];
+    const onOnePage = isHidden(findPageButton());
+
+    searchResults.value = ["1", "2", "3"].map(createFavorite);
+    expect([onOnePage, isHidden(findPageButton())]).toEqual([true, false]);
+  });
+
   test("scrolls the grid to the top when the paginator changes page", () => {
     const { element, searchResults } = setup();
     const body = element.querySelector<HTMLElement>(`.${FavoritesSearchPanelClass.body}`)!;
@@ -227,11 +238,11 @@ describe("FavoritesSearchPanel", () => {
   test("scrolls the grid to the top when a search is submitted", () => {
     const { element } = setup();
     const body = element.querySelector<HTMLElement>(`.${FavoritesSearchPanelClass.body}`)!;
-    const input = element.querySelector("input[type=search]") as HTMLInputElement;
+    const textarea = element.querySelector("search textarea") as HTMLTextAreaElement;
 
     body.scrollTop = 500;
-    input.value = "cat";
-    input.form!.dispatchEvent(new Event("submit"));
+    textarea.value = "cat";
+    textarea.form!.dispatchEvent(new Event("submit"));
     expect(body.scrollTop).toBe(0);
   });
 

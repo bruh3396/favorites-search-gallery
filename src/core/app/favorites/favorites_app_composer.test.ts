@@ -121,7 +121,7 @@ describe("composeFavoritesApp", () => {
     const app = mount().querySelector<HTMLElement>(`.${AppRootClass.root}`)!;
 
     expect(app.style.colorScheme).toBe("dark");
-    expect(app.querySelector("input[type=search]")).not.toBeNull();
+    expect(app.querySelector("search textarea")).not.toBeNull();
   });
 
   test("uses the column count kept in the favorites preferences, not the post list's", () => {

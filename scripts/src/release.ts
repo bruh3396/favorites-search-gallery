@@ -82,7 +82,7 @@ function isReleaseBranch(branch: string): boolean {
 
 function passesReleaseChecks(tag: string): boolean {
   const env = { ...process.env, RELEASE_VERSION: tag.replace(/^v/, "") };
-  return spawnSync("npm", ["run", "release-checks:local"], { stdio: "inherit", shell: true, env }).status === 0;
+  return spawnSync("npm", ["run", "release-checks"], { stdio: "inherit", shell: true, env }).status === 0;
 }
 
 function isBump(value: string | undefined): value is Bump {
@@ -117,7 +117,7 @@ async function release(): Promise<void> {
   console.log(`\n  last tag:  ${last}\n  next:      ${target}\n`);
 
   if (!passesReleaseChecks(target)) {
-    fail("npm run release-checks:local did not pass");
+    fail("npm run release-checks did not pass");
   }
 
   if (!(await confirm(`\nCreate and push tag ${target}? [y/N] `))) {

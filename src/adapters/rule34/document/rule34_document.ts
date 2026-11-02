@@ -1,4 +1,4 @@
-import { ThemeColors, ThemeDefinition } from "@/core/ui/theme/theme";
+import { THEME_DEFINITIONS, ThemeColors, ThemeDefinition } from "@/core/ui/theme/theme";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
@@ -161,7 +161,9 @@ export class Rule34Document {
       this.pageThemeStyle = document.createElement("style");
       document.head.append(this.pageThemeStyle);
     }
-    this.pageThemeStyle.textContent = describePageTheme(this.readColorScheme() === "dark" ? darkThemeColors : lightThemeColors);
+    const themeColors = this.readColorScheme() === "dark" ? darkThemeColors : lightThemeColors;
+
+    this.pageThemeStyle.textContent = this.themeDefinition === THEME_DEFINITIONS.rule34 ? "" : describePageTheme(themeColors);
   }
 }
 

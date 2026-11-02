@@ -1,19 +1,32 @@
 .fsg-SearchBox {
+  --fsg-SearchBox-height: 30px;
+  --fsg-SearchBox-line-height: 20px;
+
+  position: relative;
   display: block;
   flex: 1 1 auto;
+  block-size: var(--fsg-SearchBox-height);
 }
 
 .fsg-SearchBox-field {
   --fsg-IconButton-corner: var(--fsg-shape-corner-full);
 
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   box-sizing: border-box;
-  block-size: 30px;
+  block-size: var(--fsg-SearchBox-height);
   overflow: hidden;
   border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-shape-corner-full);
+  border-radius: calc(var(--fsg-SearchBox-height) / 2);
   background: var(--fsg-color-surface-dim);
+}
+
+.fsg-SearchBox-field:focus-within {
+  z-index: 1;
+  block-size: calc(var(--fsg-SearchBox-height) + (var(--fsg-SearchBox-line-count, 1) - 1) * var(--fsg-SearchBox-line-height));
 }
 
 .fsg-SearchBox-submit {
@@ -24,30 +37,39 @@
   margin-inline-end: 4px;
 }
 
-.fsg-SearchBox-input:placeholder-shown + .fsg-SearchBox-clear {
+.fsg-SearchBox-textarea:placeholder-shown + .fsg-SearchBox-clear {
   display: none;
 }
 
-.fsg-SearchBox-input {
+.fsg-SearchBox-textarea {
   flex: 1 1 auto;
-  align-self: stretch;
+  box-sizing: content-box;
   min-inline-size: 0;
+  block-size: var(--fsg-SearchBox-line-height);
+  margin: calc((var(--fsg-SearchBox-height) - 2px - var(--fsg-SearchBox-line-height)) / 2) 0;
   padding: 0 4px;
+  overflow: hidden;
   border: 0;
   background: none;
   color: inherit;
   font: inherit;
   font-size: var(--fsg-typescale-label-large-size);
+  line-height: var(--fsg-SearchBox-line-height);
+  white-space: pre;
+  resize: none;
 }
 
-.fsg-SearchBox-input::placeholder {
+.fsg-SearchBox-textarea:focus {
+  block-size: calc(var(--fsg-SearchBox-line-count, 1) * var(--fsg-SearchBox-line-height));
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.fsg-SearchBox-textarea::placeholder {
   color: var(--fsg-color-on-surface-variant);
 }
 
-.fsg-SearchBox-input:focus-visible {
+.fsg-SearchBox-textarea:focus-visible {
   outline: none;
-}
-
-.fsg-SearchBox-input::-webkit-search-cancel-button {
-  appearance: none;
 }

@@ -13,7 +13,7 @@ import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
-import { SearchHistory } from "@/core/utils/search_history/search_history";
+import { SearchHistory } from "@/core/utils/collection/search_history";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
 import { TabStripToggle } from "@/core/app/favorites/search_panel/tab_strip_toggle";

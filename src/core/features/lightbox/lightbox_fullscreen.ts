@@ -1,12 +1,21 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
+export interface LightboxFullscreenDependencies {
+  ownerDocument: Document;
+  requestFullscreen: () => Promise<void>;
+}
+
 export class LightboxFullscreen {
   private readonly ownerDocument: Document;
+  private readonly requestFullscreen: () => Promise<void>;
   private readonly inFullscreenState: Signal<boolean>;
 
-  constructor(ownerDocument: Document) {
+  constructor(dependencies: LightboxFullscreenDependencies) {
+    const { ownerDocument } = dependencies;
+
     this.ownerDocument = ownerDocument;
+    this.requestFullscreen = dependencies.requestFullscreen;
     this.inFullscreenState = new Signal(this.hasFullscreenElement());
     const update = (): void => {
       this.inFullscreenState.value = this.hasFullscreenElement();
@@ -24,7 +33,7 @@ export class LightboxFullscreen {
     if (this.hasFullscreenElement()) {
       this.exit();
     } else {
-      this.ownerDocument.documentElement.requestFullscreen().catch(console.error);
+      this.requestFullscreen().catch(console.error);
     }
   }
 

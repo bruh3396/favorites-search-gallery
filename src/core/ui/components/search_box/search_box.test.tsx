@@ -8,27 +8,29 @@ import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;
-  input: HTMLInputElement;
+  textarea: HTMLTextAreaElement;
   focusRequests: Emitter<void>;
-  onSearch: (query: string) => void;
+  onSearch: Mock<(query: string) => void>;
   dispose: () => void;
 }
 
 function setup(trailingChild?: HTMLElement): Setup {
-  const options = { label: "Search favorites", query: new Signal(""), trailingChild, focusRequests: new Emitter<void>(), onSearch: vi.fn() };
+  const options = {
+    label: "Search favorites", query: new Signal(""), trailingChild, focusRequests: new Emitter<void>(), onSearch: vi.fn<(query: string) => void>()
+  };
   const { result: element, dispose } = render(document, () => <SearchBox {...options} />);
 
   document.body.append(element);
-  return { ...options, element, dispose, input: element.querySelector("input")! };
+  return { ...options, element, dispose, textarea: element.querySelector("textarea")! };
 }
 
-function type(input: HTMLInputElement, text: string): void {
-  input.value = text;
-  input.dispatchEvent(new Event("input", { bubbles: true }));
+function type(textarea: HTMLTextAreaElement, text: string): void {
+  textarea.value = text;
+  textarea.dispatchEvent(new Event("input", { bubbles: true }));
 }
 
-function submit(input: HTMLInputElement): void {
-  input.form!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+function submit(textarea: HTMLTextAreaElement): void {
+  textarea.form!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
 }
 
 interface ElsewhereSetup {
@@ -45,7 +47,7 @@ function setupElsewhere(): ElsewhereSetup {
   ));
 
   document.body.append(element);
-  type(element.querySelector("input")!, "cat");
+  type(element.querySelector("textarea")!, "cat");
   return { element, onSearch, searchElsewhere };
 }
 
@@ -54,7 +56,7 @@ function pressSearch(element: HTMLElement, event: MouseEvent): boolean {
 }
 
 interface HistorySetup {
-  input: HTMLInputElement;
+  textarea: HTMLTextAreaElement;
   onSearch: Mock<(query: string) => void>;
 }
 
@@ -65,11 +67,11 @@ function setupHistory(submittedQueries: readonly string[] = ["dog", "cat"]): His
   ));
 
   document.body.append(element);
-  return { input: element.querySelector("input")!, onSearch };
+  return { textarea: element.querySelector("textarea")!, onSearch };
 }
 
-function press(input: HTMLInputElement, key: string, modifiers: KeyboardEventInit = {}): boolean {
-  return input.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...modifiers }));
+function press(textarea: HTMLTextAreaElement, key: string, modifiers: KeyboardEventInit = {}): boolean {
+  return textarea.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...modifiers }));
 }
 
 afterEach(() => {
@@ -78,66 +80,95 @@ afterEach(() => {
 
 describe("SearchBox", () => {
   test("renders a search landmark around a labelled search field", () => {
-    const { element, input } = setup();
+    const { element, textarea } = setup();
 
     expect(element.tagName).toBe("SEARCH");
-    expect(input.type).toBe("search");
-    expect(input.getAttribute("aria-label")).toBe("Search favorites");
+    expect(textarea.getAttribute("aria-label")).toBe("Search favorites");
   });
 
   test("reports the typed query when submitted, not while typing", () => {
-    const { input, onSearch } = setup();
+    const { textarea, onSearch } = setup();
 
-    type(input, "cat");
+    type(textarea, "cat");
     expect(onSearch).not.toHaveBeenCalled();
-    submit(input);
+    submit(textarea);
     expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
   });
 
-  test("reports an emptied query only when submitted", () => {
-    const { input, onSearch } = setup();
+  test("searches on Enter instead of adding a line break", () => {
+    const { textarea, onSearch } = setup();
 
-    type(input, "cat");
-    submit(input);
-    type(input, "");
-    submit(input);
+    type(textarea, "cat");
+    expect([press(textarea, "Enter"), onSearch.mock.calls]).toEqual([false, [["cat"]]]);
+  });
+
+  test("ignores Shift+Enter, adding no line break and not searching", () => {
+    const { textarea, onSearch } = setup();
+
+    type(textarea, "cat");
+    expect([press(textarea, "Enter", { shiftKey: true }), onSearch.mock.calls]).toEqual([false, []]);
+  });
+
+  test("leaves Enter to the input method while composing", () => {
+    const { textarea, onSearch } = setup();
+
+    type(textarea, "cat");
+    expect([press(textarea, "Enter", { isComposing: true }), onSearch.mock.calls]).toEqual([true, []]);
+  });
+
+  test("turns pasted line breaks into spaces, keeping the caret after them", () => {
+    const { textarea } = setup();
+
+    textarea.value = "cat\r\ndog\nfox";
+    textarea.setSelectionRange(8, 8);
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    expect([textarea.value, textarea.selectionStart]).toEqual(["cat dog fox", 7]);
+  });
+
+  test("reports an emptied query only when submitted", () => {
+    const { textarea, onSearch } = setup();
+
+    type(textarea, "cat");
+    submit(textarea);
+    type(textarea, "");
+    submit(textarea);
     expect(onSearch).toHaveBeenLastCalledWith("");
   });
 
   test("reports the typed query when the search button is clicked", () => {
-    const { element, input, onSearch } = setup();
+    const { element, textarea, onSearch } = setup();
 
-    type(input, "cat");
+    type(textarea, "cat");
     element.querySelector<HTMLButtonElement>("button[type=submit]")!.click();
     expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
   });
 
   test("empties the field without searching when cleared", () => {
-    const { element, input, onSearch } = setup();
+    const { element, textarea, onSearch } = setup();
 
-    type(input, "cat");
+    type(textarea, "cat");
     element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
-    expect(input.value).toBe("");
+    expect(textarea.value).toBe("");
     expect(onSearch).not.toHaveBeenCalled();
   });
 
   test("keeps focus in the field when cleared", () => {
-    const { element, input } = setup();
+    const { element, textarea } = setup();
 
-    type(input, "cat");
+    type(textarea, "cat");
     element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
-    expect(document.activeElement).toBe(input);
+    expect(document.activeElement).toBe(textarea);
   });
 
   test("focuses the field on request until disposed", () => {
-    const { input, focusRequests, dispose } = setup();
+    const { textarea, focusRequests, dispose } = setup();
 
     focusRequests.emit();
-    expect(document.activeElement).toBe(input);
-    input.blur();
+    expect(document.activeElement).toBe(textarea);
+    textarea.blur();
     dispose();
     focusRequests.emit();
-    expect(document.activeElement).not.toBe(input);
+    expect(document.activeElement).not.toBe(textarea);
   });
 
   test("works without focus requests", () => {
@@ -178,107 +209,138 @@ describe("SearchBox", () => {
   });
 
   test("recalls older queries on ↑ and newer ones on ↓, back to what was typed", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
     const shownTexts: string[] = [];
 
-    type(input, "fox");
+    type(textarea, "fox");
 
     for (const key of ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown"]) {
-      press(input, key);
-      shownTexts.push(input.value);
+      press(textarea, key);
+      shownTexts.push(textarea.value);
     }
     expect(shownTexts).toEqual(["dog", "cat", "dog", "fox"]);
   });
 
   test("recalls the query before the one still in the box after searching", () => {
-    const { input } = setupHistory(["cherry", "banana"]);
+    const { textarea } = setupHistory(["cherry", "banana"]);
 
-    type(input, "cherry");
-    submit(input);
-    press(input, "ArrowUp");
-    expect(input.value).toBe("banana");
+    type(textarea, "cherry");
+    submit(textarea);
+    press(textarea, "ArrowUp");
+    expect(textarea.value).toBe("banana");
   });
 
   test("puts the caret at the end of a recalled query", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    press(input, "ArrowUp");
-    expect([input.selectionStart, input.selectionEnd]).toEqual([3, 3]);
+    press(textarea, "ArrowUp");
+    expect([textarea.selectionStart, textarea.selectionEnd]).toEqual([3, 3]);
   });
 
   test("recalls without searching", () => {
-    const { input, onSearch } = setupHistory();
+    const { textarea, onSearch } = setupHistory();
 
-    press(input, "ArrowUp");
+    press(textarea, "ArrowUp");
     expect(onSearch).not.toHaveBeenCalled();
   });
 
   test("leaves ↑ to the field when nothing is left to recall", () => {
-    const { input } = setupHistory([]);
+    const { textarea } = setupHistory([]);
 
-    type(input, "fox");
-    expect([press(input, "ArrowUp"), input.value]).toEqual([true, "fox"]);
+    type(textarea, "fox");
+    expect([press(textarea, "ArrowUp"), textarea.value]).toEqual([true, "fox"]);
   });
 
   test.each([{ shiftKey: true }, { altKey: true }, { ctrlKey: true }, { metaKey: true }, { isComposing: true }])("ignores ↑ with %o", modifiers => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    type(input, "fox");
-    press(input, "ArrowUp", modifiers);
-    expect(input.value).toBe("fox");
+    type(textarea, "fox");
+    press(textarea, "ArrowUp", modifiers);
+    expect(textarea.value).toBe("fox");
   });
 
   test("ignores ↑ another handler already took", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    input.parentElement!.addEventListener("keydown", event => event.preventDefault(), { capture: true });
-    type(input, "fox");
-    press(input, "ArrowUp");
-    expect(input.value).toBe("fox");
+    textarea.parentElement!.addEventListener("keydown", event => event.preventDefault(), { capture: true });
+    type(textarea, "fox");
+    press(textarea, "ArrowUp");
+    expect(textarea.value).toBe("fox");
   });
 
   test("recalls from the newest query again after typing", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    press(input, "ArrowUp");
-    press(input, "ArrowUp");
-    type(input, "owl");
-    press(input, "ArrowUp");
-    expect(input.value).toBe("dog");
+    press(textarea, "ArrowUp");
+    press(textarea, "ArrowUp");
+    type(textarea, "owl");
+    press(textarea, "ArrowUp");
+    expect(textarea.value).toBe("dog");
   });
 
   test("leaves other keys to the field", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    type(input, "fox");
-    expect([press(input, "Enter"), input.value]).toEqual([true, "fox"]);
+    type(textarea, "fox");
+    expect([press(textarea, "ArrowLeft"), textarea.value]).toEqual([true, "fox"]);
+  });
+
+  test("recalls on ↑ and ↓ only from the very start and end once the query wraps", () => {
+    const { textarea } = setupHistory();
+    const recalledTexts: string[] = [];
+
+    Object.defineProperty(textarea, "scrollHeight", { value: 60 });
+    textarea.style.lineHeight = "20px";
+    type(textarea, "fox");
+
+    for (const [key, caret] of [["ArrowUp", 1], ["ArrowUp", 0], ["ArrowDown", 1], ["ArrowDown", 3]] as const) {
+      textarea.setSelectionRange(caret, caret);
+      press(textarea, key);
+      recalledTexts.push(textarea.value);
+    }
+    expect(recalledTexts).toEqual(["fox", "dog", "dog", "fox"]);
   });
 
   test("recalls from the newest query again after clearing", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    press(input, "ArrowUp");
-    press(input, "ArrowUp");
-    input.form!.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
-    press(input, "ArrowUp");
-    expect(input.value).toBe("dog");
+    press(textarea, "ArrowUp");
+    press(textarea, "ArrowUp");
+    textarea.form!.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    press(textarea, "ArrowUp");
+    expect(textarea.value).toBe("dog");
   });
 
   test("recalls from the newest query again after searching", () => {
-    const { input } = setupHistory();
+    const { textarea } = setupHistory();
 
-    press(input, "ArrowUp");
-    press(input, "ArrowUp");
-    submit(input);
-    press(input, "ArrowUp");
-    expect(input.value).toBe("dog");
+    press(textarea, "ArrowUp");
+    press(textarea, "ArrowUp");
+    submit(textarea);
+    press(textarea, "ArrowUp");
+    expect(textarea.value).toBe("dog");
+  });
+
+  test("grows to the wrapped lines of its query, up to 8", () => {
+    const { textarea } = setup();
+    const readLineCount = (): string => textarea.form!.style.getPropertyValue("--fsg-SearchBox-line-count");
+    const lineCounts: string[] = [];
+
+    textarea.style.lineHeight = "20px";
+
+    for (const scrollHeight of [20, 60, 400]) {
+      Object.defineProperty(textarea, "scrollHeight", { value: scrollHeight, configurable: true });
+      type(textarea, "cat");
+      lineCounts.push(readLineCount());
+    }
+    expect(lineCounts).toEqual(["1", "3", "8"]);
   });
 
   test("shows trailing content inside the field", () => {
     const trailingChild = document.createElement("span");
-    const { input } = setup(trailingChild);
+    const { textarea } = setup(trailingChild);
 
-    expect(input.form!.contains(trailingChild)).toBe(true);
+    expect(textarea.form!.contains(trailingChild)).toBe(true);
   });
 
   test("styles every class it sets", () => {

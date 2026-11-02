@@ -32,7 +32,7 @@ const THEME_LABELS: Readonly<Record<Theme, string>> = {
   rule34: "Rule34", cherry: "Cherry", cirrus: "Cirrus", dusk: "Dusk", ember: "Ember", forest: "Forest",
   frost: "Frost", ink: "Ink", parchment: "Parchment", slate: "Slate", venom: "Venom", zeal: "Zeal"
 };
-const LIGHTBOX_MODE_LABELS: Readonly<Record<LightboxMode, string>> = { off: "Off", simple: "Simple", full: "Full" };
+const LIGHTBOX_MODE_LABELS: Readonly<Record<LightboxMode, string>> = { off: "Off", simple: "Reduced", full: "Full" };
 const LAYOUTS: readonly GridLayout[] = ["column", "row", "square", "native"];
 const LAYOUT_LABELS: Readonly<Record<GridLayout, string>> = { row: "Row", square: "Square", grid: "Grid", column: "Column", native: "Native" };
 const LAYOUT_ICONS: Readonly<Record<GridLayout, Icon>> = {
@@ -58,7 +58,7 @@ function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePre
       settingPreference: sharedPreferences.theme, members: THEMES, labels: THEME_LABELS, onPreview: onThemePreview
     },
     {
-      id: "colorScheme", kind: "choice", label: "Color", keywords: ["color scheme", "theme", "dark", "light"], control: "segmented",
+      id: "colorScheme", kind: "choice", label: "Color scheme", keywords: ["color", "theme", "dark", "light"], control: "segmented",
       settingPreference: sharedPreferences.colorScheme, members: COLOR_SCHEMES, labels: COLOR_SCHEME_LABELS, icons: COLOR_SCHEME_ICONS
     },
     {

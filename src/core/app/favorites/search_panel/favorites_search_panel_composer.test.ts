@@ -1,4 +1,4 @@
-import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/search_history/search_history";
+import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/collection/search_history";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -129,20 +129,20 @@ describe("composeFavoritesSearchPanel", () => {
 
   test("opens the typed query on the site when Search is right-clicked", () => {
     const { element, navigator } = setup();
-    const input = element.querySelector<HTMLInputElement>("input[type=search]")!;
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
 
-    input.value = "cat dog";
+    textarea.value = "cat dog";
     element.querySelector("button[type=submit]")!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true }));
     expect(navigator.opened).toEqual(["#search-cat%20dog"]);
   });
 
   test("searches the tab and remembers each submitted query, newest first", () => {
     const { element, favoritesSession, searchHistory } = setup();
-    const input = element.querySelector<HTMLInputElement>("input[type=search]")!;
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
 
     for (const query of ["cat", "dog"]) {
-      input.value = query;
-      input.form!.dispatchEvent(new Event("submit"));
+      textarea.value = query;
+      textarea.form!.dispatchEvent(new Event("submit"));
     }
     expect([favoritesSession.query.value, searchHistory.submittedQueries.value]).toEqual(["dog", ["dog", "cat"]]);
   });

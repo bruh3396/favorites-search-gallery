@@ -74,9 +74,29 @@ export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose
       return element;
     }
   });
-  const list = <div className={TabStripClass.list} role="tablist" />;
+  const list = (
+    <div
+      className={TabStripClass.list}
+      role="tablist"
+      onWheel={event => {
+        if (event.deltaX === 0 && event.deltaY !== 0) {
+          event.preventDefault();
+          list.scrollLeft += event.deltaY;
+        }
+      }}
+    />
+  );
 
-  effect(() => list.replaceChildren(...items.reconcile(tabs.value)));
+  effect(() => {
+    const tabStripItems = tabs.value;
+
+    list.replaceChildren(...items.reconcile(tabStripItems));
+    const activeTab = list.children[tabStripItems.findIndex(tabStripItem => tabStripItem.id === activeTabId.value)];
+
+    if (activeTab !== undefined) {
+      scrollIntoList(list, activeTab);
+    }
+  });
   isRendered = true;
   return (
     <div className={TabStripClass.root}>
@@ -93,6 +113,17 @@ export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose
 function markEntering(element: HTMLElement): void {
   element.dataset.entering = "";
   element.addEventListener("animationend", () => delete element.dataset.entering, { once: true });
+}
+
+function scrollIntoList(list: HTMLElement, tab: Element): void {
+  const listBounds = list.getBoundingClientRect();
+  const tabBounds = tab.getBoundingClientRect();
+
+  if (tabBounds.left < listBounds.left) {
+    list.scrollLeft -= listBounds.left - tabBounds.left;
+  } else if (tabBounds.right > listBounds.right) {
+    list.scrollLeft += tabBounds.right - listBounds.right;
+  }
 }
 
 function readDropSide(event: DragEvent, element: HTMLElement): DropSide {

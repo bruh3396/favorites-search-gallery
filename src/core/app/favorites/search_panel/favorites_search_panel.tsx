@@ -15,6 +15,7 @@ export const FavoritesSearchPanelClass = {
   search: "fsg-FavoritesSearchPanel-search",
   filter: "fsg-FavoritesSearchPanel-filter",
   count: "fsg-FavoritesSearchPanel-count",
+  paginator: "fsg-FavoritesSearchPanel-paginator",
   trailing: "fsg-FavoritesSearchPanel-trailing",
   body: "fsg-FavoritesSearchPanel-body"
 } as const;
@@ -81,14 +82,16 @@ export function FavoritesSearchPanel({
             searchElsewhere={searchElsewhere}
           />
         </div>
-        <Paginator
-          pageNumber={favoritesSession.pageNumber}
-          pageCount={favoritesSession.pageCount}
-          onPageChange={pageNumber => {
-            favoritesSession.goTo(pageNumber);
-            body.scrollTop = 0;
-          }}
-        />
+        <div className={FavoritesSearchPanelClass.paginator} hidden={computed(() => favoritesSession.pageCount.value <= 1)}>
+          <Paginator
+            pageNumber={favoritesSession.pageNumber}
+            pageCount={favoritesSession.pageCount}
+            onPageChange={pageNumber => {
+              favoritesSession.goTo(pageNumber);
+              body.scrollTop = 0;
+            }}
+          />
+        </div>
         <div className={FavoritesSearchPanelClass.trailing}>{trailingChild}</div>
       </header>
       {body}

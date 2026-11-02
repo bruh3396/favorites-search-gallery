@@ -1,10 +1,9 @@
-import { describe, expect, test, vi } from "vitest";
+import { Mock, describe, expect, test, vi } from "vitest";
 import { LightboxFullscreen } from "@/core/features/lightbox/lightbox_fullscreen";
 import { createScope } from "@/core/utils/reactive/scope";
 
 class FakeDocument extends EventTarget {
   public fullscreenElement: Element | null = null;
-  public readonly documentElement = { requestFullscreen: vi.fn(() => Promise.resolve()) };
   public readonly exitFullscreen = vi.fn(() => Promise.resolve());
 
   public changeFullscreenElement(element: Element | null): void {
@@ -13,10 +12,20 @@ class FakeDocument extends EventTarget {
   }
 }
 
-function setup(): { lightboxFullscreen: LightboxFullscreen; fakeDocument: FakeDocument; dispose: () => void } {
+function createLightboxFullscreen(fakeDocument: FakeDocument, requestFullscreen: () => Promise<void>): LightboxFullscreen {
+  return new LightboxFullscreen({ ownerDocument: fakeDocument as unknown as Document, requestFullscreen });
+}
+
+function setup(): {
+  lightboxFullscreen: LightboxFullscreen;
+  fakeDocument: FakeDocument;
+  requestFullscreen: Mock<() => Promise<void>>;
+  dispose: () => void;
+} {
   const fakeDocument = new FakeDocument();
-  const { result: lightboxFullscreen, dispose } = createScope(() => new LightboxFullscreen(fakeDocument as unknown as Document));
-  return { lightboxFullscreen, fakeDocument, dispose };
+  const requestFullscreen = vi.fn(() => Promise.resolve());
+  const { result: lightboxFullscreen, dispose } = createScope(() => createLightboxFullscreen(fakeDocument, requestFullscreen));
+  return { lightboxFullscreen, fakeDocument, requestFullscreen, dispose };
 }
 
 describe("LightboxFullscreen", () => {
@@ -24,7 +33,7 @@ describe("LightboxFullscreen", () => {
     const fakeDocument = new FakeDocument();
 
     fakeDocument.fullscreenElement = document.createElement("div");
-    expect(new LightboxFullscreen(fakeDocument as unknown as Document).inFullscreen.value).toBe(true);
+    expect(createLightboxFullscreen(fakeDocument, () => Promise.resolve()).inFullscreen.value).toBe(true);
   });
 
   test("follows the document's fullscreen changes", () => {
@@ -47,19 +56,19 @@ describe("LightboxFullscreen", () => {
 
   describe("toggle", () => {
     test("enters fullscreen when not in it", () => {
-      const { lightboxFullscreen, fakeDocument } = setup();
+      const { lightboxFullscreen, requestFullscreen } = setup();
 
       lightboxFullscreen.toggle();
-      expect(fakeDocument.documentElement.requestFullscreen).toHaveBeenCalledOnce();
+      expect(requestFullscreen).toHaveBeenCalledOnce();
     });
 
     test("exits fullscreen when in it", () => {
-      const { lightboxFullscreen, fakeDocument } = setup();
+      const { lightboxFullscreen, fakeDocument, requestFullscreen } = setup();
 
       fakeDocument.changeFullscreenElement(document.createElement("div"));
       lightboxFullscreen.toggle();
       expect(fakeDocument.exitFullscreen).toHaveBeenCalledOnce();
-      expect(fakeDocument.documentElement.requestFullscreen).not.toHaveBeenCalled();
+      expect(requestFullscreen).not.toHaveBeenCalled();
     });
   });
 

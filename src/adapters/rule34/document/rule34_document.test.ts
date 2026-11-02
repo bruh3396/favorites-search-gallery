@@ -292,6 +292,16 @@ describe("Rule34Document", () => {
       expect(readHeaderColors(header)).toEqual(readExpectedColors(THEME_DEFINITIONS.cherry.lightColors));
       expect(document.head.querySelectorAll("style")).toHaveLength(1);
     });
+
+    test("leaves the site's own look alone for the rule34 theme", () => {
+      const sidebar = document.createElement("div");
+      const rule34Document = new Rule34Document();
+
+      document.body.append(sidebar);
+      rule34Document.setTheme(THEME_DEFINITIONS.frost);
+      rule34Document.setTheme(THEME_DEFINITIONS.rule34);
+      expect(readSiteColor(sidebar, "--c-text")).toBe("");
+    });
   });
 
   describe("setHeaderVisible", () => {

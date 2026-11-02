@@ -1,4 +1,5 @@
 @import "./lightbox_dialog.css" layer(components);
+@import "./lightbox_frame.css" layer(components);
 @import "./media/lightbox_preview.css" layer(components);
 @import "./media/lightbox_image.css" layer(components);
 @import "./media/lightbox_gif.css" layer(components);

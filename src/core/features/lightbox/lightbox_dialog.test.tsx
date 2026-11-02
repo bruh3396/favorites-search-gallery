@@ -34,13 +34,10 @@ function setup(detailsOpen?: Signal<boolean>): {
       handlers={handlers}
       onKeydown={onKeydown}
       lightboxMouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn() }}
-      renderViewport={onMediaFocus => {
+      renderFrame={onMediaFocus => {
         focusMedia = onMediaFocus;
-        return <div>viewport</div>;
+        return <div>frame</div>;
       }}
-      overlayChild={<span>overlay</span>}
-      zoomChild={<span>zoom</span>}
-      detailsPanelChild={detailsOpen === undefined ? undefined : <aside>details panel</aside>}
     />
   ) as HTMLDialogElement);
 
@@ -64,10 +61,10 @@ describe("LightboxDialog", () => {
     expectClassesStyled(LightboxDialogClass, DIALOG_CSS);
   });
 
-  test("places every slot it is given", () => {
-    const { dialog } = setup(new Signal(false));
+  test("places its frame", () => {
+    const { dialog } = setup();
 
-    expect(["viewport", "overlay", "zoom", "details panel"].every(text => dialog.textContent.includes(text))).toBe(true);
+    expect(dialog.textContent).toContain("frame");
   });
 
   test("opens as a focused modal with the lightbox and closes with it", () => {
@@ -132,7 +129,7 @@ describe("LightboxDialog", () => {
     expect([dialog.hasAttribute("data-simple"), dialog.hasAttribute("data-details-open")]).toEqual([true, false]);
   });
 
-  test("takes focus back when the viewport reports focus moving into its media", () => {
+  test("takes focus back when the frame reports focus moving into its media", () => {
     const { dialog, focusMedia } = setupOpen();
     const other = document.createElement("button");
 

@@ -1,0 +1,12 @@
+.fsg-KeyCap {
+  display: inline-block;
+  min-inline-size: 1.6em;
+  padding: 0.15em 0.45em;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font: inherit;
+  font-size: 0.9em;
+  line-height: 1.2;
+  text-align: center;
+  vertical-align: baseline;
+}

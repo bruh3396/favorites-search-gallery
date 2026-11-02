@@ -1,5 +1,5 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
-import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/search_history/search_history";
+import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/collection/search_history";
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/favorites_app";
 import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";

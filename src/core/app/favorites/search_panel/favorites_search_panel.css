@@ -22,6 +22,10 @@
     min-inline-size: 0;
   }
 
+  .fsg-FavoritesSearchPanel-paginator {
+    flex: none;
+  }
+
   .fsg-FavoritesSearchPanel-filter {
     margin-inline-end: 4px;
   }
@@ -31,7 +35,8 @@
     flex: none;
     align-items: center;
     user-select: none;
-    margin-block: 8px;
+    block-size: 16px;
+    margin-block: 6px;
     padding: 0 16px 0 12px;
     border-inline-start: 1px solid var(--fsg-color-outline-variant);
     color: var(--fsg-color-on-surface-variant);

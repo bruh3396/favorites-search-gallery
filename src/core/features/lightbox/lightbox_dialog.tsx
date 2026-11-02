@@ -17,10 +17,7 @@ export interface LightboxDialogProps {
   handlers: Pick<CommandHandlers<LightboxCommand>, "close">;
   onKeydown: (event: KeyboardEvent) => void;
   lightboxMouseListeners: LightboxMouseListeners;
-  renderViewport: (onMediaFocus: () => void) => Child;
-  overlayChild: Child;
-  zoomChild: Child;
-  detailsPanelChild?: Child;
+  renderFrame: (onMediaFocus: () => void) => Child;
 }
 
 export function LightboxDialog(props: LightboxDialogProps): HTMLDialogElement {
@@ -36,10 +33,7 @@ export function LightboxDialog(props: LightboxDialogProps): HTMLDialogElement {
       onPointerleave={() => lightboxOverlayVisibility.leave()}
       {...props.lightboxMouseListeners}
     >
-      {props.renderViewport(() => dialog.focus({ preventScroll: true }))}
-      {props.overlayChild}
-      {props.zoomChild}
-      {props.detailsPanelChild}
+      {props.renderFrame(() => dialog.focus({ preventScroll: true }))}
     </dialog>
   ) as HTMLDialogElement;
 

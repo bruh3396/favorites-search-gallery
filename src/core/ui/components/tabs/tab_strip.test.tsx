@@ -47,6 +47,18 @@ function findCloseButton(element: HTMLElement, label: string): HTMLButtonElement
   return element.querySelector<HTMLButtonElement>(`button[aria-label="Close ${label}"]`);
 }
 
+function findTabList(element: HTMLElement): HTMLElement {
+  return element.querySelector<HTMLElement>("[role=tablist]")!;
+}
+
+function makeScrollable(list: HTMLElement, scrollLeft = 0): void {
+  Object.defineProperty(list, "scrollLeft", { value: scrollLeft, writable: true });
+}
+
+function placeTab(element: HTMLElement, label: string, bounds: Pick<DOMRect, "left" | "right">): void {
+  findTab(element, label).parentElement!.getBoundingClientRect = (): DOMRect => bounds as DOMRect;
+}
+
 interface Drop {
   draggedTabId: string;
   clientX: number;
@@ -188,6 +200,38 @@ describe("TabStrip", () => {
     apple.dispatchEvent(dragover);
     apple.dispatchEvent(drop);
     expect([dragover.defaultPrevented, drop.defaultPrevented, apple.dataset.drop, onMove.mock.calls]).toEqual([false, false, undefined, []]);
+  });
+
+  test("scrolls the tabs sideways on a vertical wheel, leaving a horizontal wheel to the browser", () => {
+    const { element } = setup();
+    const list = findTabList(element);
+    const vertical = new WheelEvent("wheel", { deltaY: 30, cancelable: true });
+    const horizontal = new WheelEvent("wheel", { deltaX: 30, deltaY: 30, cancelable: true });
+    const still = new WheelEvent("wheel", { cancelable: true });
+
+    makeScrollable(list);
+    list.dispatchEvent(vertical);
+    list.dispatchEvent(horizontal);
+    list.dispatchEvent(still);
+    expect([list.scrollLeft, vertical.defaultPrevented, horizontal.defaultPrevented, still.defaultPrevented]).toEqual([30, true, false, false]);
+  });
+
+  test("scrolls the active tab into view", () => {
+    const { element, activeTabId } = setup([createTab("a"), createTab("b"), createTab("c")], null);
+    const list = findTabList(element);
+    const scrollPositions: number[] = [];
+
+    makeScrollable(list, 100);
+    list.getBoundingClientRect = (): DOMRect => ({ left: 100, right: 300 }) as DOMRect;
+    placeTab(element, "a", { left: 50, right: 150 });
+    placeTab(element, "b", { left: 150, right: 250 });
+    placeTab(element, "c", { left: 250, right: 350 });
+
+    for (const tabId of ["a", "b", "c"]) {
+      activeTabId.value = tabId;
+      scrollPositions.push(list.scrollLeft);
+    }
+    expect(scrollPositions).toEqual([50, 50, 100]);
   });
 
   test("closes all tabs from the close all button", () => {

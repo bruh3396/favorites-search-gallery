@@ -6,6 +6,7 @@ import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { KeyCap } from "@/core/ui/components/key_cap/key_cap";
 import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
 import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_details.css?inline";
 import LIGHTBOX_TAGS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_tags.css?inline";
@@ -92,7 +93,7 @@ export function FavoritesApp({
         </div>
       </main>
       <div className={FavoritesAppClass.zenHint} role="status" hidden={computed(() => !zenEnabled.value)} data-zen-stage="">
-        Press Z or Esc to exit Zen
+        Press <KeyCap label="Z" /> or <KeyCap label="Esc" /> to exit Zen
       </div>
     </div>,
     lightboxView

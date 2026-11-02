@@ -90,6 +90,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   Reflect.deleteProperty(document, "fullscreenElement");
   Reflect.deleteProperty(document, "exitFullscreen");
+  Reflect.deleteProperty(HTMLElement.prototype, "requestFullscreen");
   document.body.replaceChildren();
 });
 
@@ -212,6 +213,20 @@ describe("composeLightboxDialog", () => {
     other.focus();
     view.querySelector(`.${LightboxVideoClass.root}`)!.dispatchEvent(new FocusEvent("focusin"));
     expect(document.activeElement).toBe(view);
+  });
+
+  test("takes fullscreen with an element inside the dialog that holds its controls", () => {
+    const requestFullscreen = vi.fn(() => Promise.resolve());
+    const { view, isOpen } = setup();
+
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", { value: requestFullscreen, configurable: true });
+    isOpen.value = true;
+    const button = view.querySelector<HTMLButtonElement>("[aria-label=\"Fullscreen\"]")!;
+
+    button.click();
+    const target = requestFullscreen.mock.contexts[0] as HTMLElement;
+
+    expect([target === view, view.contains(target), target.contains(button)]).toEqual([false, true, true]);
   });
 
   test("leaves fullscreen once the lightbox closes", () => {
