@@ -31,7 +31,7 @@ function setup(fetch: Fetch = createFetch(), frozenCobaltIdentity?: FrozenCobalt
 }
 
 function readRequests(fetch: Fetch): { url: string; body: unknown }[] {
-  return fetch.mock.calls.map(([url, init]) => ({ url, body: JSON.parse(String(init.body)) as unknown }));
+  return fetch.mock.calls.map(([url, init]) => ({ url: url.split("?")[0], body: JSON.parse(String(init.body)) as unknown }));
 }
 
 async function fetchPostResult({ frozenCobaltClient, scheduler }: Pick<Setup, "frozenCobaltClient" | "scheduler">, postId: string): Promise<unknown> {
@@ -106,27 +106,28 @@ describe("FrozenCobaltClient", () => {
     await expect(fetchPostResult(setup(fetch), "1")).rejects.toMatchObject({ reason: "timeout" });
   });
 
-  test("identifies every request by the identity it was built with", async() => {
+  test("identifies every request by the identity it was built with, in the query string", async() => {
     const { frozenCobaltClient, fetch } = setup(createFetch(), { userId: "9", version: "1.0", platform: "mobile" });
-    const headers = {
-      "Content-Type": "application/json",
-      "X-User-Id": "9",
-      "X-Version": "1.0",
-      "X-Platform": "mobile"
-    };
 
     frozenCobaltClient.ping();
     await flushMicrotasks();
-    expect(fetch.mock.calls.map(([url, init]) => [url, init.headers])).toEqual([[`${ORIGIN}/ping`, headers]]);
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([`${ORIGIN}/ping?user_id=9&version=1.0&platform=mobile`]);
   });
 
-  test("sends empty identity headers unless given an identity", async() => {
+  test("sends empty identity params unless given an identity", async() => {
     const { frozenCobaltClient, fetch } = setup();
-    const headers = { "Content-Type": "application/json", "X-User-Id": "", "X-Version": "", "X-Platform": "" };
 
     frozenCobaltClient.ping();
     await flushMicrotasks();
-    expect(fetch.mock.calls.map(([, init]) => init.headers)).toEqual([headers]);
+    expect(fetch.mock.calls.map(([url]) => url)).toEqual([`${ORIGIN}/ping?user_id=&version=&platform=`]);
+  });
+
+  test("sends only a CORS-safelisted Content-Type, so the browser skips the preflight", async() => {
+    const { frozenCobaltClient, fetch } = setup();
+
+    frozenCobaltClient.ping();
+    await flushMicrotasks();
+    expect(fetch.mock.calls.map(([, init]) => init.headers)).toEqual([{ "Content-Type": "text/plain" }]);
   });
 
   test("swallows a failed ping", async() => {

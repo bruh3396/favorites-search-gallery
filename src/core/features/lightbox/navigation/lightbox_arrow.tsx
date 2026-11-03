@@ -8,7 +8,7 @@ export const LightboxArrowClass = {
   icon: "fsg-LightboxArrow-icon"
 } as const;
 
-export type LightboxArrowDirection = "previous" | "next";
+type LightboxArrowDirection = "previous" | "next";
 
 export interface LightboxArrowProps {
   direction: LightboxArrowDirection;

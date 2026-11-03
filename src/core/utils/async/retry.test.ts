@@ -1,13 +1,12 @@
 import { describe, expect, test, vi } from "vitest";
-import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Retry } from "@/core/utils/async/retry";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 function createRetry(scheduler: MemoryScheduler, isRetryable: (error: unknown) => boolean = () => true): Retry {
   return new Retry(
-    { attempts: 3, baseDelay: 100 },
-    { scheduler, randomSource: new MemoryRandomSource([1]), isRetryable }
+    { attempts: 3 },
+    { scheduler, computeDelay: failureCount => failureCount * 100, isRetryable }
   );
 }
 
@@ -45,7 +44,7 @@ describe("Retry", () => {
       expect(task).toHaveBeenCalledOnce();
     });
 
-    test("waits a random share of a delay that doubles each attempt", async() => {
+    test("waits the delay computed for each failure", async() => {
       const scheduler = new MemoryScheduler();
       const task = vi.fn(() => Promise.reject(new Error("down")));
 
@@ -56,18 +55,6 @@ describe("Retry", () => {
       expect(task).toHaveBeenCalledTimes(2);
       await advanceAndSettle(scheduler, 10);
       expect(task).toHaveBeenCalledTimes(3);
-    });
-
-  });
-
-  describe("computeDelay", () => {
-    test("doubles the delay each failure up to the maximum", () => {
-      const retry = new Retry(
-        { attempts: 10, baseDelay: 100, maxDelay: 300 },
-        { scheduler: new MemoryScheduler(), randomSource: new MemoryRandomSource([1]), isRetryable: (): boolean => true }
-      );
-
-      expect([1, 2, 3, 4].map(failureCount => retry.computeDelay(failureCount))).toEqual([100, 200, 300, 300]);
     });
   });
 });

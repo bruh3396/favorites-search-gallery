@@ -5,6 +5,7 @@ import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { createExponentialBackoff } from "@/core/utils/async/exponential_backoff";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
 type Rule34AddFavoriteAnswer = "error" | "alreadyAdded" | "loggedOut" | "added";
@@ -37,9 +38,9 @@ export class Rule34FavoriteActions {
   constructor(private readonly dependencies: Rule34FavoriteActionsDependencies) {
     this.addRateLimiter = new RateLimiter(ADD_RATE_LIMIT, dependencies.scheduler);
     this.removeRateLimiter = new RateLimiter(REMOVE_RATE_LIMIT, dependencies.scheduler);
-    this.removeRetry = new Retry({ attempts: REMOVE_ATTEMPTS, baseDelay: REMOVE_RETRY_DELAY }, {
+    this.removeRetry = new Retry({ attempts: REMOVE_ATTEMPTS }, {
       scheduler: dependencies.scheduler,
-      randomSource: dependencies.randomSource,
+      computeDelay: createExponentialBackoff({ baseDelay: REMOVE_RETRY_DELAY }, dependencies.randomSource),
       isRetryable: isRetryableRule34Error
     });
   }

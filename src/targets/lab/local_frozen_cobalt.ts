@@ -6,8 +6,8 @@ export interface CachePage {
   readonly next: number | null;
 }
 
-const CACHE_URL = "http://localhost:8787/cache";
-const HEADERS = { "Content-Type": "application/json", "X-User-Id": "0" };
+const CACHE_URL = "http://localhost:8787/cache?user_id=0";
+const HEADERS = { "Content-Type": "text/plain" };
 
 export async function fetchCachePage(after: number): Promise<CachePage> {
   const response = await fetch(CACHE_URL, { method: "POST", headers: HEADERS, body: JSON.stringify({ after }) });

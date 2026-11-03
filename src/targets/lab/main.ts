@@ -1,3 +1,4 @@
+import { Environment, HostEnvironment } from "@/core/boundary/environment";
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPendingReset, readCorpusSize, readFavoriteCount } from "@/targets/lab/databases";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
@@ -12,7 +13,6 @@ import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_sch
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
-import { Environment } from "@/core/boundary/environment";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
@@ -32,7 +32,6 @@ import { createAppStorage } from "@/core/app/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountLabScreen } from "@/targets/lab/lab_screen";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
-import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";
 
 declare const SCRIPT_VERSION: string;
 
@@ -81,11 +80,18 @@ function startApp(environment: Environment, favoritesAppDependencies: FavoritesA
 
 async function main(): Promise<void> {
   const rule34Document = new Rule34Document();
-  const hostEnvironment = readRule34Environment(rule34Document);
 
-  if (hostEnvironment?.appMode !== "favorites") {
+  if (rule34Document.readPageName() !== "favorites") {
     return;
   }
+  const hostEnvironment: HostEnvironment = {
+    appMode: "favorites",
+    favoritesOwnerId: rule34Document.readFavoritesOwnerId(),
+    ownsFavorites: rule34Document.hasRemoveButtons(),
+    blacklistedTags: rule34Document.readTagBlacklist(),
+    colorScheme: rule34Document.readColorScheme()
+  };
+
   document.title = "FSG Lab";
   await applyPendingPurge();
   await applyPendingReset();

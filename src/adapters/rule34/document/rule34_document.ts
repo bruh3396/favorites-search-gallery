@@ -17,6 +17,8 @@ const NATIVE_CONTENT_SELECTOR = "#content, div:has(.thumb)";
 const POST_LIST_SELECTOR = "#post-list";
 const POST_LIST_NATIVE_CHILDREN_SELECTOR = ":scope > :not(.sidebar)";
 const POST_LIST_CONTENT_CLASS = "content";
+const REMOVE_BUTTON_SELECTOR = "a[onclick*=\"page=favorites&s=delete\"]";
+const MY_FAVORITES_SELECTOR = "#my-favorites";
 const UNUSED_SCRIPT = /(?:fluidplayer|awesomplete)/;
 const UNUSED_GLOBALS = [
   "fluidPlayer", "webpackChunkfluid_player", "Awesomplete", "dashjs",
@@ -62,8 +64,13 @@ export class Rule34Document {
     return Math.round(readPageOffset() / RULE34_PAGE_SIZE.postList);
   }
 
-  public readUserId(): string {
-    return readCookie("user_id");
+  public readMyFavoritesUserId(): string {
+    const href = document.querySelector(MY_FAVORITES_SELECTOR)?.getAttribute("href") ?? "";
+    return new URLSearchParams(href.split("?")[1] ?? "").get("id") ?? "";
+  }
+
+  public hasRemoveButtons(): boolean {
+    return document.querySelector(REMOVE_BUTTON_SELECTOR) !== null;
   }
 
   public readColorScheme(): ColorScheme {

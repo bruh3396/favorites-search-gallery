@@ -175,13 +175,27 @@ describe("Rule34Document", () => {
     });
   });
 
-  describe("readUserId", () => {
-    test("reads the logged-in user, or nothing when logged out", () => {
-      visit("page=post&s=list", "theme=dark; user_id=9");
-      expect(new Rule34Document().readUserId()).toBe("9");
+  describe("readMyFavoritesUserId", () => {
+    test("reads the logged-in user from the post list's My Favorites link, or nothing when logged out", () => {
+      const rule34Document = new Rule34Document();
 
-      visit("page=post&s=list");
-      expect(new Rule34Document().readUserId()).toBe("");
+      expect(rule34Document.readMyFavoritesUserId()).toBe("");
+
+      document.body.insertAdjacentHTML("beforeend", "<a href=\"index.php?page=favorites&amp;s=view&amp;id=3702166\" id=\"my-favorites\">My Favorites</a>");
+      expect(rule34Document.readMyFavoritesUserId()).toBe("3702166");
+    });
+  });
+
+  describe("hasRemoveButtons", () => {
+    test("tells the viewer's own favorites page, which has remove buttons, from anyone else's", () => {
+      const rule34Document = new Rule34Document();
+      const removeUrl = "index.php?page=favorites&amp;s=delete&amp;id=1&amp;return_pid=0";
+
+      addContent("1");
+      expect(rule34Document.hasRemoveButtons()).toBe(false);
+
+      document.body.insertAdjacentHTML("beforeend", `<a href="#" onclick="document.location='${removeUrl}'; return false;"><b>Remove</b></a>`);
+      expect(rule34Document.hasRemoveButtons()).toBe(true);
     });
   });
 

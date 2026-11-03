@@ -1,4 +1,5 @@
 import {
+  buildRule34AccountHomePageUrl,
   buildRule34AddFavoriteUrl,
   buildRule34FavoritesPageUrl,
   buildRule34PostListPageUrl,
@@ -37,6 +38,12 @@ describe("buildRule34PostPageUrl", () => {
 describe("buildRule34ProfilePageUrl", () => {
   test("addresses a user's profile", () => {
     expect(buildRule34ProfilePageUrl("9")).toBe("https://rule34.xxx/index.php?page=account&s=profile&id=9");
+  });
+});
+
+describe("buildRule34AccountHomePageUrl", () => {
+  test("addresses the logged-in user's account home", () => {
+    expect(buildRule34AccountHomePageUrl()).toBe("https://rule34.xxx/index.php?page=account&s=home");
   });
 });
 

@@ -7,6 +7,7 @@ import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { createExponentialBackoff } from "@/core/utils/async/exponential_backoff";
 
 export interface Rule34RemotePostsDependencies {
   rule34Client: Pick<Rule34Client, "fetchPostPage">;
@@ -21,9 +22,9 @@ export class Rule34RemotePosts implements RemotePosts {
   private readonly retry: Retry;
 
   constructor(private readonly dependencies: Rule34RemotePostsDependencies) {
-    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
+    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS }, {
       scheduler: dependencies.scheduler,
-      randomSource: dependencies.randomSource,
+      computeDelay: createExponentialBackoff({ baseDelay: RETRY_BASE_DELAY }, dependencies.randomSource),
       isRetryable: isRetryableRule34Error
     });
   }

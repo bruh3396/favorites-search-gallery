@@ -34,7 +34,9 @@ jobs:
           echo "tag=$tag built=$built"
           test "$tag" = "$built"
 
+      - run: cp dist/rule34/favorites_search_gallery.js "dist/rule34/favorites_search_gallery_${GITHUB_REF_NAME}.js"
+
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/rule34/favorites_search_gallery.js
+          files: dist/rule34/favorites_search_gallery_${{ github.ref_name }}.js
           generate_release_notes: true

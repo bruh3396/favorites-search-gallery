@@ -18,7 +18,7 @@ const DOM_TESTS = [
   "src/adapters/memory/ports/host_page/memory_host_page.test.ts",
   "src/adapters/memory/ports/morpher/morpher.test.ts",
   "src/adapters/memory/ports/remote_media/memory_remote_media.test.ts",
-  "src/adapters/rule34/client/{rule34_client,rule34_favorites_page_parser,rule34_post_list_page_parser,rule34_post_page_parser,rule34_profile_favorite_count_parser,rule34_thumb_parser}.test.ts",
+  "src/adapters/rule34/client/{rule34_client,rule34_favorites_page_parser,rule34_post_list_page_parser,rule34_post_page_parser,rule34_profile_favorite_count_parser,rule34_thumb_parser,rule34_user_id_parser}.test.ts",
   "src/adapters/rule34/document/rule34_document.test.ts",
   "src/adapters/rule34_cdn/client/{rule34_cdn_client,rule34_cdn_video_duration_prober}.test.ts",
   "src/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media.test.ts"

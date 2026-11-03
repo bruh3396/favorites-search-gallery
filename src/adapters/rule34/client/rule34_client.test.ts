@@ -1,5 +1,6 @@
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import {
+  buildRule34AccountHomePageUrl,
   buildRule34FavoritesPageUrl,
   buildRule34PostListUrl,
   buildRule34PostPageUrl,
@@ -9,6 +10,7 @@ import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
+import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 
@@ -18,6 +20,7 @@ interface Setup {
   rule34Client: Rule34Client;
   fetch: Mock<Fetch>;
   keepPaginator: Mock<KeepPaginator>;
+  scheduler: MemoryScheduler;
 }
 
 interface DocumentOptions {
@@ -40,6 +43,8 @@ const POST_PAGE = `
 
 const PROFILE_PAGE = "<a href=\"https://rule34.xxx/index.php?page=favorites&s=view&id=9\">1234</a>";
 
+const ACCOUNT_HOME_PAGE = "<div id=\"user-index\"><h4><a href=\"index.php?page=account&amp;s=profile&amp;id=9\">» My Profile</a></h4></div>";
+
 function createThumb(postId: string): string {
   return `<span class="thumb" id="s${postId}"><a id="p${postId}"><img src="https://example.com/thumbnail_${postId}.jpg" title="apple"></a></span>`;
 }
@@ -52,8 +57,9 @@ function setup(
   const keepPaginator = vi.fn<KeepPaginator>();
   const mintMedia = ({ url }: { url: string }): Media => ({ kind: "image", locator: url });
   const rule34Document = { isFirstFavoritesPage: (): boolean => isFirstFavoritesPage, keepPaginator };
-  const dependencies = { fetch, scheduler: new MemoryScheduler(), mintMedia, rule34Document };
-  return { rule34Client: new Rule34Client(dependencies), fetch, keepPaginator };
+  const scheduler = new MemoryScheduler();
+  const dependencies = { fetch, scheduler, mintMedia, rule34Document };
+  return { rule34Client: new Rule34Client(dependencies), fetch, keepPaginator, scheduler };
 }
 
 describe("Rule34Client", () => {
@@ -115,6 +121,47 @@ describe("Rule34Client", () => {
 
       expect(await rule34Client.fetchFavoriteCount("9")).toBe(1_234);
       expect(fetch).toHaveBeenCalledWith(buildRule34ProfilePageUrl("9"), undefined);
+    });
+  });
+
+  describe("fetchUserId", () => {
+    test("reads the logged-in user from the account home page", async() => {
+      const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(ACCOUNT_HOME_PAGE)));
+
+      expect(await rule34Client.fetchUserId()).toBe("9");
+      expect(fetch).toHaveBeenCalledWith(buildRule34AccountHomePageUrl(), undefined);
+    });
+
+    test("retries a refused page a second apart and reads the user once it goes through", async() => {
+      const { rule34Client, fetch, scheduler } = setup();
+
+      fetch
+        .mockResolvedValueOnce(new Response(null, { status: 429 }))
+        .mockResolvedValueOnce(new Response(ACCOUNT_HOME_PAGE));
+      const fetched = rule34Client.fetchUserId();
+
+      await advanceAndSettle(scheduler, 999);
+      expect(fetch).toHaveBeenCalledOnce();
+      await advanceAndSettle(scheduler, 1);
+      expect(await fetched).toBe("9");
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    test("gives up after four refused attempts", async() => {
+      const { rule34Client, fetch, scheduler } = setup(() => Promise.resolve(new Response(null, { status: 403 })));
+      const fetched = rule34Client.fetchUserId();
+
+      fetched.catch(() => { });
+      await advanceAndSettle(scheduler, 3_000);
+      await expect(fetched).rejects.toMatchObject({ reason: "http", status: 403 });
+      expect(fetch).toHaveBeenCalledTimes(4);
+    });
+
+    test("gives up at once on a page that won't come back", async() => {
+      const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(null, { status: 404 })));
+
+      await expect(rule34Client.fetchUserId()).rejects.toMatchObject({ reason: "http", status: 404 });
+      expect(fetch).toHaveBeenCalledOnce();
     });
   });
 

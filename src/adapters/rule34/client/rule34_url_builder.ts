@@ -23,6 +23,10 @@ export function buildRule34ProfilePageUrl(userId: string): string {
   return `${INDEX_URL}account&s=profile&id=${userId}`;
 }
 
+export function buildRule34AccountHomePageUrl(): string {
+  return `${INDEX_URL}account&s=home`;
+}
+
 export function buildRule34AddFavoriteUrl(postId: string): string {
   return `${RULE34_ORIGIN}/public/addfav.php?id=${postId}`;
 }

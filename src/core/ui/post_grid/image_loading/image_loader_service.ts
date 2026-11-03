@@ -9,14 +9,14 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 export interface ImageLoaderServiceConfiguration {
   readonly batchDebouncerConfiguration: BatchDebouncerConfiguration;
   readonly decodeRateLimiterConfiguration: RateLimiterConfiguration;
-  readonly paintRateLimiterConfiguration: RateLimiterConfiguration;
+  readonly drawRateLimiterConfiguration: RateLimiterConfiguration;
   readonly maxCanvasHeight: number;
 }
 
 export const DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION: ImageLoaderServiceConfiguration = {
-  batchDebouncerConfiguration: { delay: 400 },
+  batchDebouncerConfiguration: { delay: 325 },
   decodeRateLimiterConfiguration: { concurrency: 3, ratePerSecond: 20 },
-  paintRateLimiterConfiguration: { concurrency: 1, ratePerSecond: 40 },
+  drawRateLimiterConfiguration: { concurrency: 1, ratePerSecond: 40 },
   maxCanvasHeight: 16_000
 };
 
@@ -30,15 +30,15 @@ export interface ImageLoaderServiceDependencies {
 export class ImageLoaderService {
   private readonly decodeRateLimiter: RateLimiter;
   private readonly batchDebouncer: BatchDebouncer;
-  private readonly paintRateLimiter: RateLimiter;
+  private readonly drawRateLimiter: RateLimiter;
 
   constructor(private readonly configuration: ImageLoaderServiceConfiguration, private readonly dependencies: ImageLoaderServiceDependencies) {
-    const { decodeRateLimiterConfiguration, batchDebouncerConfiguration, paintRateLimiterConfiguration } = configuration;
+    const { decodeRateLimiterConfiguration, batchDebouncerConfiguration, drawRateLimiterConfiguration } = configuration;
     const { scheduler } = dependencies;
 
     this.decodeRateLimiter = new RateLimiter(decodeRateLimiterConfiguration, scheduler);
     this.batchDebouncer = new BatchDebouncer(batchDebouncerConfiguration, scheduler);
-    this.paintRateLimiter = new RateLimiter(paintRateLimiterConfiguration, scheduler);
+    this.drawRateLimiter = new RateLimiter(drawRateLimiterConfiguration, scheduler);
   }
 
   public resolvePreviewUrl(media: Media): string {
@@ -47,10 +47,22 @@ export class ImageLoaderService {
 
   public createLoader(canvas: HTMLCanvasElement, media: Media, targetWidth: Readable<number>): ImageLoader {
     const { maxCanvasHeight } = this.configuration;
-    const { remoteMedia, enabled, paused } = this.dependencies;
+    const { enabled, paused } = this.dependencies;
     return new ImageLoader({ maxCanvasHeight }, {
-      canvas, media, targetWidth, batchDebouncer: this.batchDebouncer, paintRateLimiter: this.paintRateLimiter, enabled, paused,
-      decodeStill: (targetMedia, signal, width) => this.decodeRateLimiter.run(() => remoteMedia.decodeStill(targetMedia, signal, width), signal)
+      canvas, media, targetWidth, batchDebouncer: this.batchDebouncer, enabled, paused,
+      decodeForDraw: (targetMedia, signal, width) => this.decodeForDraw(targetMedia, signal, width)
     });
+  }
+
+  private async decodeForDraw(media: Media, signal: AbortSignal, width: number): Promise<ImageBitmap> {
+    const { remoteMedia } = this.dependencies;
+    const bitmap = await this.decodeRateLimiter.run(() => remoteMedia.decodeStill(media, signal, width), signal);
+
+    try {
+      return await this.drawRateLimiter.run(() => Promise.resolve(bitmap), signal);
+    } catch (error) {
+      bitmap.close();
+      throw error;
+    }
   }
 }

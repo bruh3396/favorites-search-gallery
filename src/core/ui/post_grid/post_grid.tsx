@@ -18,7 +18,7 @@ export const PostGridClass = {
   root: "fsg-PostGrid"
 } as const;
 
-export interface PostGridSettings {
+interface PostGridSettings {
   readonly layout: Readable<GridLayout>;
   readonly columnCount: Readable<number>;
 }

@@ -2,7 +2,7 @@ import { GridSizing } from "@/core/ui/post_grid/layout/grid_sizing";
 import { Size } from "@/core/utils/geometry/size";
 
 const DECODE_WIDTH_STEP = 250;
-const MAX_DECODE_WIDTH = 2_000;
+const MAX_DECODE_WIDTH = 3_000;
 const MIN_DECODE_WIDTH = 100;
 
 export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, { width, height }: Size): number {

@@ -29,7 +29,7 @@ const TAG_RATE_LIMIT = { concurrency: 4, ratePerSecond: 10 };
 export class FrozenCobaltClient {
   private readonly postResolver: CoalescingResolver<string, unknown>;
   private readonly tagResolver: CoalescingResolver<string, unknown>;
-  private readonly headers: Record<string, string>;
+  private readonly urlSearchParams: URLSearchParams;
 
   constructor(
     private readonly configuration: FrozenCobaltClientConfiguration,
@@ -38,12 +38,11 @@ export class FrozenCobaltClient {
     const postRateLimiter = new RateLimiter(POST_RATE_LIMIT, dependencies.scheduler);
     const tagRateLimiter = new RateLimiter(TAG_RATE_LIMIT, dependencies.scheduler);
 
-    this.headers = {
-      "Content-Type": "application/json",
-      "X-User-Id": configuration.identity?.userId ?? "",
-      "X-Version": configuration.identity?.version ?? "",
-      "X-Platform": configuration.identity?.platform ?? ""
-    };
+    this.urlSearchParams = new URLSearchParams({
+      user_id: configuration.identity?.userId ?? "",
+      version: configuration.identity?.version ?? "",
+      platform: configuration.identity?.platform ?? ""
+    });
     this.postResolver = new CoalescingResolver(REQUEST_COALESCING, {
       resolve: (postIds): Promise<Resolved> => postRateLimiter.run(() => this.requestBatch("posts", { ids: postIds }, postIds)),
       scheduler: dependencies.scheduler
@@ -80,9 +79,9 @@ export class FrozenCobaltClient {
     const cancelTimeout = this.dependencies.scheduler.schedule(() => abortController.abort(), REQUEST_TIMEOUT);
 
     try {
-      const response = await this.dependencies.fetch(`${this.configuration.origin}/${endpoint}`, {
+      const response = await this.dependencies.fetch(`${this.configuration.origin}/${endpoint}?${this.urlSearchParams}`, {
         method: "POST",
-        headers: this.headers,
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify(body),
         signal: abortController.signal
       });

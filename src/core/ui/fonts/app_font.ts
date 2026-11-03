@@ -1,4 +1,4 @@
-export interface AppFontFace {
+interface AppFontFace {
   readonly family: string;
   readonly source: string;
   readonly weight: string;

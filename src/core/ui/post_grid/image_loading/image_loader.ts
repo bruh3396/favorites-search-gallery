@@ -1,7 +1,6 @@
 import { Readable, effect } from "@/core/utils/reactive/signal";
 import { BatchDebouncer } from "@/core/utils/async/batch_debouncer";
 import { Media } from "@/core/domain/media/media";
-import { RateLimiter } from "@/core/utils/async/rate_limiter";
 
 export interface ImageLoaderConfiguration {
   readonly maxCanvasHeight: number;
@@ -11,9 +10,8 @@ export interface ImageLoaderDependencies {
   canvas: HTMLCanvasElement;
   media: Media;
   targetWidth: Readable<number>;
-  decodeStill: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
+  decodeForDraw: (media: Media, signal: AbortSignal, width: number) => Promise<ImageBitmap>;
   batchDebouncer: Pick<BatchDebouncer, "add">;
-  paintRateLimiter: Pick<RateLimiter, "run">;
   enabled: Readable<boolean>;
   paused: Readable<boolean>;
 }
@@ -108,13 +106,16 @@ export class ImageLoader {
 
     this.abortController = controller;
     this.requestedWidth = width;
-    this.dependencies.decodeStill(this.dependencies.media, controller.signal, width)
-      .then(bitmap => this.dependencies.paintRateLimiter.run(() => {
+    this.dependencies.decodeForDraw(this.dependencies.media, controller.signal, width)
+      .then(bitmap => {
+        if (!isCurrent()) {
+          bitmap.close();
+          return;
+        }
         drawBitmap(this.dependencies.canvas, bitmap, { width, maxHeight: this.configuration.maxCanvasHeight });
         this.drawnWidth = width;
         this.abortController = undefined;
-        return Promise.resolve();
-      }, controller.signal).catch(() => bitmap.close()))
+      })
       .catch(error => {
         if (isCurrent()) {
           this.abortController = undefined;

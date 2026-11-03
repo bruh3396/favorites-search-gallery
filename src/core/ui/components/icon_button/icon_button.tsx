@@ -7,7 +7,7 @@ export const IconButtonClass = {
   icon: "fsg-IconButton-icon"
 } as const;
 
-export type IconButtonSize = "small" | "medium" | "large";
+type IconButtonSize = "small" | "medium" | "large";
 
 export interface IconButtonProps {
   icon: Reactive<Icon>;

@@ -22,23 +22,25 @@ import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local
 import { Media } from "@/core/domain/media/media";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/rule34_host_page";
+import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 import { Rule34RemoteFavorites } from "@/adapters/rule34/ports/remote_favorites/rule34_remote_favorites";
 import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_remote_pages";
 import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { UnavailableRemotePosts } from "@/core/boundary/ports/remote_posts/unavailable_remote_posts";
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
-import { readRule34Environment } from "@/adapters/rule34/environment/rule34_environment_reader";
 
 declare const SCRIPT_VERSION: string;
 declare const USE_LOCAL_SERVER: boolean;
@@ -55,30 +57,58 @@ interface Rule34Dependencies {
   localKeyedValues: LocalKeyedValues;
 }
 
-type StartApp = (environment: Environment, rule34Dependencies: Rule34Dependencies) => void;
+type StartApp = (environment: Environment, rule34Dependencies: Rule34Dependencies, userId: string) => void;
 
 const APPS: Record<AppMode, StartApp> = {
   favorites: startFavoritesApp,
   postList: startPostListApp
 };
 
-function readEnvironment(rule34Document: Rule34Document): Environment {
-  const hostEnvironment = readRule34Environment(rule34Document);
+const MODES: Record<Rule34PageName, AppMode> = {
+  favorites: "favorites",
+  postList: "postList"
+};
 
-  if (hostEnvironment === null) {
+function readAppMode(rule34Document: Rule34Document): AppMode {
+  const pageName = rule34Document.readPageName();
+
+  if (pageName === null) {
     throw new Error(`Unsupported page: ${location.href}`);
   }
-  return { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment };
+  return MODES[pageName];
 }
 
-function createRule34Dependencies(environment: Environment, rule34Document: Rule34Document): Rule34Dependencies {
+function readEnvironment(appMode: AppMode, rule34Document: Rule34Document, userId: string): Environment {
+  return {
+    version: SCRIPT_VERSION,
+    ...readBrowserEnvironment(),
+    appMode,
+    favoritesOwnerId: appMode === "favorites" ? rule34Document.readFavoritesOwnerId() : userId,
+    ownsFavorites: appMode === "favorites" && rule34Document.hasRemoveButtons(),
+    blacklistedTags: rule34Document.readTagBlacklist(),
+    colorScheme: rule34Document.readColorScheme()
+  };
+}
+
+function readUserId(appMode: AppMode, { rule34Document, rule34Client }: Pick<Rule34Dependencies, "rule34Document" | "rule34Client">): Promise<string> {
+  if (appMode === "postList") {
+    return Promise.resolve(rule34Document.readMyFavoritesUserId());
+  }
+
+  if (rule34Document.hasRemoveButtons()) {
+    return Promise.resolve(rule34Document.readFavoritesOwnerId());
+  }
+  return rule34Client.fetchUserId().catch(() => "");
+}
+
+function createRule34Dependencies(appMode: AppMode, rule34Document: Rule34Document): Rule34Dependencies {
   const scheduler = new BrowserScheduler();
   const randomSource = new BrowserRandomSource();
   const boundFetch = fetch.bind(globalThis);
   const rule34CdnClient = new Rule34CdnClient({ fetch: boundFetch, scheduler, loadImage, decodeBitmap });
   const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
   const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, mintMedia, rule34Document });
-  const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, claimBodyContent });
+  const hostPage = new Rule34HostPage({ appMode }, { rule34Document, claimBodyContent });
   return {
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,
     hostPage, localKeyedValues: new BrowserLocalKeyedValues()
@@ -86,20 +116,29 @@ function createRule34Dependencies(environment: Environment, rule34Document: Rule
 }
 
 function createFrozenCobaltClient(
-  environment: Environment,
-  { fetch, scheduler, rule34Document }: Pick<Rule34Dependencies, "fetch" | "scheduler" | "rule34Document">
+  environment: Pick<Environment, "version" | "device">,
+  userId: string,
+  { fetch, scheduler }: Pick<Rule34Dependencies, "fetch" | "scheduler">
 ): FrozenCobaltClient {
   return new FrozenCobaltClient({
     origin: USE_LOCAL_SERVER ? "http://localhost:8787" : "https://frozencobalt.stream",
-    identity: { userId: rule34Document.readUserId(), version: environment.version, platform: environment.device }
+    identity: { userId, version: environment.version, platform: environment.device }
   }, { scheduler, fetch });
 }
 
-function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34Dependencies): void {
-  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = rule34Dependencies;
-  const frozenCobaltClient = createFrozenCobaltClient(environment, rule34Dependencies);
-  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia);
-  const remotePosts = new FallbackRemotePosts({
+function startRemotePosts(
+  environment: Pick<Environment, "version" | "device">,
+  userId: string,
+  { fetch, scheduler, randomSource, rule34Client, rule34CdnClient }: Pick<Rule34Dependencies,
+    "fetch" | "scheduler" | "randomSource" | "rule34Client" | "rule34CdnClient">
+): RemotePosts {
+  if (userId === "") {
+    return new UnavailableRemotePosts();
+  }
+  const frozenCobaltClient = createFrozenCobaltClient(environment, userId, { fetch, scheduler });
+
+  frozenCobaltClient.ping();
+  return new FallbackRemotePosts({
     primaryRemotePosts: new FrozenCobaltRemotePosts({
       frozenCobaltClient,
       mintMedia: (file): Media => rule34CdnClient.mintMediaFromParts(file),
@@ -108,8 +147,13 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
     }),
     fallbackRemotePosts: new Rule34RemotePosts({ rule34Client, scheduler, randomSource })
   });
+}
 
-  frozenCobaltClient.ping();
+function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34Dependencies, userId: string): void {
+  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = rule34Dependencies;
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia);
+  const remotePosts = startRemotePosts(environment, userId, { fetch, scheduler, randomSource, rule34Client, rule34CdnClient });
+
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
     blacklistedTags: environment.blacklistedTags,
@@ -163,11 +207,13 @@ function startPostListApp(environment: Environment, {
   }).mount(hostPage.claimContent());
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const rule34Document = new Rule34Document();
-  const environment = readEnvironment(rule34Document);
+  const appMode = readAppMode(rule34Document);
+  const rule34Dependencies = createRule34Dependencies(appMode, rule34Document);
+  const userId = await readUserId(appMode, rule34Dependencies);
 
-  APPS[environment.appMode](environment, createRule34Dependencies(environment, rule34Document));
+  APPS[appMode](readEnvironment(appMode, rule34Document, userId), rule34Dependencies, userId);
 }
 
 main();

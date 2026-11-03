@@ -5,6 +5,7 @@ import { Retry } from "@/core/utils/async/retry";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { createExponentialBackoff } from "@/core/utils/async/exponential_backoff";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
 export interface Rule34RemotePostListDependencies {
@@ -27,9 +28,9 @@ export class Rule34RemotePostList implements RemotePostList {
     const initialIndex = dependencies.rule34Document.readPostListPageIndex();
 
     this.initialPostListPage = { index: initialIndex, posts: dependencies.rule34Client.readPostListPage(initialIndex) };
-    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY }, {
+    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS }, {
       scheduler: dependencies.scheduler,
-      randomSource: dependencies.randomSource,
+      computeDelay: createExponentialBackoff({ baseDelay: RETRY_BASE_DELAY }, dependencies.randomSource),
       isRetryable: isRetryableRule34Error
     });
   }

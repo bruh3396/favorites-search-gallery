@@ -11,7 +11,7 @@ export function createImageLoaderService(
     {
       batchDebouncerConfiguration: { delay: 100 },
       decodeRateLimiterConfiguration: { concurrency: 2, ratePerSecond: 1_000 },
-      paintRateLimiterConfiguration: { concurrency: 1, ratePerSecond: 1_000 },
+      drawRateLimiterConfiguration: { concurrency: 1, ratePerSecond: 1_000 },
       maxCanvasHeight: 1_000,
       ...configuration
     },

@@ -11,6 +11,7 @@ import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
 import { Rule34MissingFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_missing_favorites_finder";
 import { Rule34NewFavoritesFinder } from "@/adapters/rule34/ports/remote_favorites/rule34_new_favorites_finder";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { createExponentialBackoff } from "@/core/utils/async/exponential_backoff";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 
 export interface Rule34RemoteFavoritesDependencies {
@@ -30,15 +31,17 @@ const RETRY_MAX_DELAY = 60_000;
 export class Rule34RemoteFavorites implements RemoteFavorites {
   private readonly favoritesOwnerId: string;
   private firstPagePosts: Post[] | null;
+  private readonly computeRetryDelay: (failureCount: number) => number;
   private readonly retry: Retry;
   private readonly favoriteActions: Rule34FavoriteActions;
 
   constructor(private readonly dependencies: Rule34RemoteFavoritesDependencies) {
     this.favoritesOwnerId = dependencies.rule34Document.readFavoritesOwnerId();
     this.firstPagePosts = dependencies.rule34Client.readFirstFavoritesPage();
-    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS, baseDelay: RETRY_BASE_DELAY, maxDelay: RETRY_MAX_DELAY }, {
+    this.computeRetryDelay = createExponentialBackoff({ baseDelay: RETRY_BASE_DELAY, maxDelay: RETRY_MAX_DELAY }, dependencies.randomSource);
+    this.retry = new Retry({ attempts: MAX_FETCH_ATTEMPTS }, {
       scheduler: dependencies.scheduler,
-      randomSource: dependencies.randomSource,
+      computeDelay: this.computeRetryDelay,
       isRetryable: isRetryableRule34Error
     });
     this.favoriteActions = new Rule34FavoriteActions({
@@ -86,7 +89,7 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
       onPostsFound: onFavoritesFound,
       fetch: (pageIndex): Promise<Post[]> => this.fetch(pageIndex),
       shouldRetry: (error, failureCount): boolean => failureCount < MAX_FETCH_ATTEMPTS && isRetryableRule34Error(error),
-      computeRetryDelay: (retryCount): number => this.retry.computeDelay(retryCount),
+      computeRetryDelay: this.computeRetryDelay,
       scheduler: this.dependencies.scheduler
     });
   }

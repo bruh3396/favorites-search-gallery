@@ -31,8 +31,8 @@ describe("pickDecodeWidth", () => {
     expect(pickDecodeWidth({ layout: "column", columnCount: 1, gridWidth: 1_000 }, { width: 600, height: 900 })).toBe(600);
   });
 
-  test("caps at 2000 px", () => {
-    expect(pickDecodeWidth({ layout: "column", columnCount: 1, gridWidth: 3_840 }, { width: 8_000, height: 8_000 })).toBe(2_000);
+  test("caps at 3000 px", () => {
+    expect(pickDecodeWidth({ layout: "column", columnCount: 1, gridWidth: 3_840 }, { width: 8_000, height: 8_000 })).toBe(3_000);
   });
 
   test("treats an unknown size as a square with no cap but the maximum", () => {
