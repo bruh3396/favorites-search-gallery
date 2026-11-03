@@ -1,4 +1,4 @@
-import { EncodedTagCategory, EncodedTagCategoryMap, TagCategoryMap } from "@/types/search";
+import { TagCategory, TagCategoryMap } from "@/types/search";
 import { MediaExtension } from "@/types/media";
 
 export type ServerPost = {
@@ -7,13 +7,22 @@ export type ServerPost = {
   height: number;
   score: number;
   rating: string;
+  changedAt: number;
+  directory: number;
+  stem: string;
+  extension: string;
+  tagCategoryByName: Record<string, TagCategory>;
+};
+
+export type Post = {
+  id: string;
+  width: number;
+  height: number;
+  score: number;
+  rating: string;
   change: number;
   fileURL: string;
   previewURL: string;
-  tagCategories: EncodedTagCategoryMap;
-};
-
-export type Post = Omit<ServerPost, "tagCategories"> & {
   tags: string;
   duration?: number;
   deleted?: boolean;
@@ -28,13 +37,12 @@ export type ParsedPost = {
 
 export type PostResponse =
   | { status: "ok"; post: ServerPost }
-  | { status: "rate_limited"; id: string }
-  | { status: "error"; id: string }
-  | { status: "deleted"; id: string }
-  | { status: "deferred"; id: string };
+  | { status: "deleted" }
+  | { status: "retry" };
 
 export type TagResponse =
-  | { status: "ok"; category: EncodedTagCategory }
-  | { status: "rate_limited" };
+  | { status: "ok"; category: TagCategory }
+  | { status: "not_found" }
+  | { status: "retry" };
 
-export type Route = "ping" | "post" | "tag";
+export type Route = "ping" | "posts" | "tags";

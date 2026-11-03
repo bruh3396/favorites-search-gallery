@@ -5,7 +5,6 @@ import { LocalOverrides } from "@/config/local_overrides";
 import { PostFetchError } from "@/types/errors";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { TagCategory } from "@/types/search";
-import { decodeTagCategory } from "@/lib/domain/tag/category_codec";
 import { fetchPostPageHtml } from "@/lib/remote/fetchers/html";
 import { parsePost } from "@/lib/remote/parsers/post_parser";
 import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page_parser";
@@ -31,13 +30,10 @@ export function fetchPost(id: string, onDeleted?: () => void): Promise<ParsedPos
     switch (response.status) {
       case "ok":
         return parsePost(response.post);
-      case "deferred":
-        return fetchPost(id, onDeleted);
       case "deleted":
         onDeleted?.();
         return fetchDeletedPost(id);
-      case "rate_limited":
-      case "error":
+      case "retry":
       default:
         throw new PostFetchError(response.status);
     }
@@ -50,19 +46,24 @@ export function fetchDeletedPost(id: string): Promise<ParsedPost> {
 
 export function fetchTagCategory(tagName: string): Promise<TagCategory> {
   return tagResolver.schedule(tagName).then((response) => {
-    if (response.status === "rate_limited") {
-      throw new PostFetchError();
+    switch (response.status) {
+      case "ok":
+        return response.category;
+      case "not_found":
+        return "general";
+      case "retry":
+      default:
+        throw new PostFetchError();
     }
-    return decodeTagCategory(response.category);
   });
 }
 
 function fetchPosts(ids: string[]): Promise<Map<string, PostResponse>> {
-  return postLimiter.run(() => fetchRecordAsMap<PostResponse>("post", { ids }));
+  return postLimiter.run(() => fetchRecordAsMap<PostResponse>("posts", { ids }));
 }
 
 function fetchTagCategories(tagNames: string[]): Promise<Map<string, TagResponse>> {
-  return tagLimiter.run(() => fetchRecordAsMap<TagResponse>("tag", { tagNames }));
+  return tagLimiter.run(() => fetchRecordAsMap<TagResponse>("tags", { tagNames }));
 }
 
 function fetchRecordAsMap<T>(route: Route, body: Record<string, unknown>): Promise<Map<string, T>> {
