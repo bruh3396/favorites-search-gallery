@@ -27,13 +27,15 @@ export function readEnvironment(): Environment {
   const agent = navigator.userAgent;
   const onFavoritesPage = url.includes("page=favorites");
   const onMobileDevice = (/iPhone|iPad|iPod|Android/i).test(agent);
-  const userId = readCookie("user_id");
+  const onPostListPage = url.includes("page=post&s=list");
   const favoritesPageId = readQueryParam("id");
+  const onOwnFavoritesPage = onFavoritesPage && hasRemoveButtons();
+  const userId = readUserId(onPostListPage, onOwnFavoritesPage, favoritesPageId);
   const blacklistedTags = readTagBlacklist();
   return {
     version: SCRIPT_VERSION,
     onFavoritesPage,
-    onPostListPage: url.includes("page=post&s=list"),
+    onPostListPage,
     onPostPage: url.includes("page=post&s=view"),
     onFirstFavoritesPage: onFavoritesPage && (readQueryParam("pid") === null || readQueryParam("pid") === "0"),
     usingFirefox: agent.toLowerCase().includes("firefox"),
@@ -42,11 +44,23 @@ export function readEnvironment(): Environment {
     platform: onMobileDevice ? "mobile" : "desktop",
     userId,
     favoritesPageId,
-    userIsOnTheirOwnFavoritesPage: userId === favoritesPageId,
+    userIsOnTheirOwnFavoritesPage: onOwnFavoritesPage,
     blacklistedTags,
     negatedBlacklistedTags: negateTags(blacklistedTags),
     usingDarkMode: readCookie("theme") === "dark"
   };
+}
+
+function hasRemoveButtons(): boolean {
+  return document.querySelector("a[onclick*=\"page=favorites&s=delete\"]") !== null;
+}
+
+function readUserId(onPostListPage: boolean, onOwnFavoritesPage: boolean, favoritesPageId: string | null): string {
+  if (onPostListPage) {
+    const href = document.querySelector("#my-favorites")?.getAttribute("href") ?? "";
+    return new URLSearchParams(href.split("?")[1] ?? "").get("id") ?? "";
+  }
+  return onOwnFavoritesPage ? favoritesPageId ?? "" : "";
 }
 
 function readTagBlacklist(): string {

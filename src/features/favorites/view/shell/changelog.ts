@@ -7,6 +7,10 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.23.4",
+    ["Fixed own favorites and post loading after Rule34 stopped exposing the user id"]
+  ],
+  [
     "v1.23.3",
     ["Fixed some favorites showing as gray boxes that open a broken link"]
   ],
