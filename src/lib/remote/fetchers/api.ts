@@ -12,7 +12,9 @@ import { parsePostFromPostPage } from "@/lib/remote/parsers/post_page_parser";
 const PRODUCTION_SERVER_ORIGIN = "https://frozencobalt.stream";
 const SERVER_ORIGIN = LocalOverrides.serverOrigin ?? PRODUCTION_SERVER_ORIGIN;
 
-const REQUEST_INIT: RequestInit = { method: "POST", headers: { "X-User-Id": "", "X-Version": "", "X-Platform": "" } };
+const REQUEST_INIT: RequestInit = { method: "POST", headers: { "Content-Type": "text/plain" } };
+
+let identityParams = new URLSearchParams({ user_id: "", version: "", platform: "" });
 
 const postLimiter = new RateLimiter(ApiConfig.postRateLimit);
 const tagLimiter = new RateLimiter(ApiConfig.tagRateLimit);
@@ -21,7 +23,7 @@ const postResolver = new CoalescingResolver<string, PostResponse>(ApiConfig.coal
 const tagResolver = new CoalescingResolver<string, TagResponse>(ApiConfig.coalesceSize, ApiConfig.flushTimeout, fetchTagCategories);
 
 export function ping(userId: string, version: string, platform: string): void {
-  REQUEST_INIT.headers = { "X-User-Id": userId, "X-Version": version, "X-Platform": platform };
+  identityParams = new URLSearchParams({ user_id: userId, version, platform });
   fetchApi("ping");
 }
 
@@ -73,5 +75,5 @@ function fetchRecordAsMap<T>(route: Route, body: Record<string, unknown>): Promi
 }
 
 function fetchApi(route: Route, body: Record<string, unknown> = {}): Promise<Response> {
-  return fetch(`${SERVER_ORIGIN}/${route}`, { ...REQUEST_INIT, body: JSON.stringify(body) });
+  return fetch(`${SERVER_ORIGIN}/${route}?${identityParams}`, { ...REQUEST_INIT, body: JSON.stringify(body) });
 }
