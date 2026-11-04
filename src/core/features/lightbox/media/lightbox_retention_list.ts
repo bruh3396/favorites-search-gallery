@@ -1,6 +1,6 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { haveSameItems } from "@/core/utils/collection/array_utilities";
 

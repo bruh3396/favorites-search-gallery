@@ -9,7 +9,7 @@ export function createImageLoaderService(
 ): ImageLoaderService {
   return new ImageLoaderService(
     {
-      batchDebouncerConfiguration: { delay: 100 },
+      batchDebouncerConfiguration: { delay: 100, burstDelay: 50 },
       decodeRateLimiterConfiguration: { concurrency: 2, ratePerSecond: 1_000 },
       drawRateLimiterConfiguration: { concurrency: 1, ratePerSecond: 1_000 },
       maxCanvasHeight: 1_000,

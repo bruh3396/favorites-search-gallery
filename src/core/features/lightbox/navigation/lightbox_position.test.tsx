@@ -1,7 +1,7 @@
 import { LightboxPosition, LightboxPositionClass } from "@/core/features/lightbox/navigation/lightbox_position";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { MediaSequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence";
 import POSITION_CSS from "@/core/features/lightbox/navigation/lightbox_position.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";

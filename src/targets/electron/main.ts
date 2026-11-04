@@ -2,6 +2,7 @@ import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adap
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
+import { BrowserConfirmer } from "@/adapters/browser/ports/confirmer/browser_confirmer";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
 import { BrowserLocalKeyedValues } from "@/adapters/browser/ports/local_keyed_values/browser_local_keyed_values";
 import { BrowserNavigator } from "@/adapters/browser/ports/navigator/browser_navigator";
@@ -85,6 +86,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     clipboard: new BrowserClipboard(navigator.clipboard),
+    confirmer: new BrowserConfirmer(),
     hostPage: new MemoryHostPage()
   };
 }

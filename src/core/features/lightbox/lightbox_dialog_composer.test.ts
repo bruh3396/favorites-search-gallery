@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
+import { Keymap } from "@/core/ui/hotkeys/keymap";
+import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanelClass } from "@/core/features/lightbox/details/lightbox_details_panel";
 import { LightboxMediaResolver } from "@/core/features/lightbox/media/lightbox_media_resolver";
@@ -42,7 +44,8 @@ function setup(
   const close = vi.fn();
   const storage = { get: (): undefined => undefined, set: (): void => undefined };
   const remoteMedia = new MemoryRemoteMedia();
-  const { result: view } = render(document, () => composeLightboxDialog<Post>({ keymap: { ArrowRight: "showNext", " ": "toggleAutoplay", d: "download" } }, {
+  const keymap: Keymap<LightboxCommand> = { ArrowRight: "showNext", " ": "toggleAutoplay", d: "download", f: "toggleFullscreen" };
+  const { result: view } = render(document, () => composeLightboxDialog<Post>({ keymap }, {
     scheduler,
     sizeObserver: new MemorySizeObserver(),
     viewport: new MemoryViewport(),
@@ -122,13 +125,22 @@ describe("composeLightboxDialog", () => {
     expect(view.hasAttribute("data-idle")).toBe(true);
   });
 
-  test("ignores commands beyond stepping, pausing, closing and opening in simple mode", () => {
+  test("ignores commands beyond stepping, playback, fullscreen, closing and opening in simple mode", () => {
     const { view, goToNext, download } = setup("simple");
 
     pressKey(view, "d");
     pressKey(view, "ArrowRight");
     expect(download).not.toHaveBeenCalled();
     expect(goToNext).toHaveBeenCalledOnce();
+  });
+
+  test("takes fullscreen from its key in simple mode", () => {
+    const requestFullscreen = vi.fn(() => Promise.resolve());
+    const { view } = setup("simple");
+
+    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", { value: requestFullscreen, configurable: true });
+    pressKey(view, "f");
+    expect(requestFullscreen).toHaveBeenCalledOnce();
   });
 
   test("closes on a press over a still in simple mode", () => {

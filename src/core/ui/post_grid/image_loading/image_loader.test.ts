@@ -8,9 +8,10 @@ import { doNothing } from "@/core/utils/function/function_utilities";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
 
 const MEDIA: Media = { kind: "image", locator: "images/123" };
-const DECODE_DEBOUNCE = { delay: 100 };
+const DECODE_DEBOUNCE = { delay: 100, burstDelay: 50 };
 const MAX_CANVAS_HEIGHT = 1_000;
 const QUIET_PERIOD = DECODE_DEBOUNCE.delay;
+const BURST_DELAY = DECODE_DEBOUNCE.burstDelay;
 const WIDTH = 500;
 
 interface FakeBitmap {
@@ -97,9 +98,21 @@ describe("ImageLoader", () => {
     expect(fakeBitmap.close).toHaveBeenCalledOnce();
   });
 
-  test("waits for the tile to stay in view before decoding", () => {
+  test("decodes a tile shown after a quiet period without waiting for the delay", () => {
     const { imageLoader, scheduler, decodeForDraw } = setup();
 
+    imageLoader.show();
+    expect(decodeForDraw).not.toHaveBeenCalled();
+    scheduler.advance(BURST_DELAY);
+    expect(decodeForDraw).toHaveBeenCalledOnce();
+  });
+
+  test("waits for a tile shown soon after another to stay in view before decoding", () => {
+    const { imageLoader, scheduler, decodeForDraw } = setup();
+
+    imageLoader.show();
+    imageLoader.cancel();
+    scheduler.advance(BURST_DELAY);
     imageLoader.show();
     imageLoader.show();
     scheduler.advance(QUIET_PERIOD - 1);
@@ -108,7 +121,7 @@ describe("ImageLoader", () => {
     expect(decodeForDraw).toHaveBeenCalledOnce();
   });
 
-  test("never decodes a tile left before the delay passes", () => {
+  test("never decodes a tile left before its decode starts", () => {
     const { imageLoader, scheduler, decodeForDraw } = setup();
 
     imageLoader.show();

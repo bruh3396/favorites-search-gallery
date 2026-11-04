@@ -8,6 +8,27 @@ function setup(): { debouncer: Debouncer; scheduler: MemoryScheduler } {
 }
 
 describe("Debouncer", () => {
+  describe("pending", () => {
+    test("holds from a debounce until its delay has passed", () => {
+      const { debouncer, scheduler } = setup();
+
+      expect(debouncer.pending).toBe(false);
+      debouncer.debounce(vi.fn());
+      scheduler.advance(199);
+      expect(debouncer.pending).toBe(true);
+      scheduler.advance(1);
+      expect(debouncer.pending).toBe(false);
+    });
+
+    test("clears once cancelled", () => {
+      const { debouncer } = setup();
+
+      debouncer.debounce(vi.fn());
+      debouncer.cancel();
+      expect(debouncer.pending).toBe(false);
+    });
+  });
+
   describe("debounce", () => {
     test("runs a task at once after a quiet spell", () => {
       const { debouncer } = setup();

@@ -7,6 +7,7 @@ import { LightboxPositionClass } from "@/core/features/lightbox/navigation/light
 import { LightboxViewportClass } from "@/core/features/lightbox/zoom/lightbox_viewport";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryClipboard } from "@/adapters/memory/ports/clipboard/memory_clipboard";
+import { MemoryConfirmer } from "@/adapters/memory/ports/confirmer/memory_confirmer";
 import { MemoryFileSaver } from "@/adapters/memory/ports/file_saver/memory_file_saver";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
@@ -43,6 +44,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   fileSaver = new MemoryFileSaver(),
   scheduler = new MemoryScheduler(),
   hostPage = new MemoryHostPage(),
+  confirmer = new MemoryConfirmer(),
   visibilityObserver = IDLE_VISIBILITY_OBSERVER
 } = {}): ShadowRoot {
   const container = document.createElement("div");
@@ -65,7 +67,8 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     navigator,
     fileSaver,
     clipboard: new MemoryClipboard(),
-    hostPage
+    hostPage,
+    confirmer
   }).mount(container);
   return container.shadowRoot!;
 }
@@ -93,6 +96,11 @@ function findThemeOption(root: ShadowRoot, label: string): HTMLElement {
 
 function readThemeAccent(root: ShadowRoot): string {
   return root.querySelector<HTMLElement>(`.${AppRootClass.root}`)!.style.getPropertyValue("--fsg-theme-accent");
+}
+
+function clickResetSettings(root: ShadowRoot): void {
+  root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+  root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset all settings\"]")!.click();
 }
 
 function clickLightboxButton(root: ShadowRoot, label: string): void {
@@ -251,6 +259,51 @@ describe("composeFavoritesApp", () => {
     localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { nativeHeaderVisible: false } } });
     mount(localKeyedValues, [], { hostPage });
     expect(hostPage.headerVisible).toBe(false);
+  });
+
+  test("puts every preference back to its default, live and in storage, once the reset is confirmed", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+
+    localKeyedValues.set("favorites-search-gallery", {
+      preferences: { shared: { theme: "forest" }, favorites: { grid: { layout: "square" } }, postList: { grid: { columnCount: 7 } } }
+    });
+    const root = mount(localKeyedValues);
+    const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
+
+    clickResetSettings(root);
+    expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.rule34.lightColors.accent}, ${THEME_DEFINITIONS.rule34.darkColors.accent})`);
+    expect(grid.dataset.layout).toBe("column");
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
+      preferences: { shared: { theme: "rule34" }, favorites: { grid: { layout: "column" } }, postList: { grid: { columnCount: 6 } } }
+    });
+  });
+
+  test("changes nothing when the reset is declined", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const confirmer = new MemoryConfirmer(false);
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { shared: { theme: "forest" } } });
+    clickResetSettings(mount(localKeyedValues, [], { confirmer }));
+    expect(confirmer.questions).toHaveLength(1);
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { shared: { theme: "forest" } } });
+  });
+
+  test("keeps the site's color scheme, the open settings drawer and the app's state through a reset", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const hostPage = new MemoryHostPage();
+    const sizes = [{ width: 4, height: 3 }];
+
+    hostPage.colorScheme = "dark";
+    localKeyedValues.set("favorites-search-gallery", { state: { favorites: { 1: { sizes } } } });
+    const root = mount(localKeyedValues, [], { hostPage });
+
+    clickResetSettings(root);
+    expect(hostPage.colorScheme).toBe("dark");
+    expect(root.querySelector("button[aria-label=\"Reset all settings\"]")?.closest("[hidden]")).toBe(null);
+    expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
+      preferences: { favorites: { activeTool: "settings" } },
+      state: { favorites: { 1: { sizes } } }
+    });
   });
 
   test("records the shapes of the active tab's first results after they settle", async() => {

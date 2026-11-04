@@ -8,6 +8,7 @@ import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/color_scheme";
+import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
@@ -40,6 +41,7 @@ import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { fillWindow } from "@/core/ui/app_root/window_filler";
 import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
+import { resetStoredTree } from "@/core/utils/storage/stored_tree_resetter";
 
 type Command = "toggleZen" | "exitZen";
 
@@ -68,15 +70,17 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
   fileSaver: FileSaver;
   clipboard: Clipboard;
   hostPage: HostPage;
+  confirmer: Confirmer;
 }
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
   const { favoritesOwnerId, colorScheme } = configuration;
   const { localFavorites, localPosts, localTagCategories, remoteFavorites, remotePosts, remoteMedia, remotePages, scheduler, randomSource } = dependencies;
-  const { localKeyedValues, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard } = dependencies;
+  const { localKeyedValues, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard, confirmer } = dependencies;
   const appStorage = createAppStorage(localKeyedValues);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, colorScheme, hostPage);
-  const { favorites: favoritesPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites"]);
+  const appPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites", "postList"]);
+  const { favorites: favoritesPreferences, postList: postListPreferences } = appPreferences;
   const appState = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites", "favoritesSearchHistory"]);
   const { favorites: favoritesState, favoritesSearchHistory } = appState;
   const ownerState = favoritesState.get(favoritesOwnerId);
@@ -117,6 +121,11 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const tabCount = computed(() => favoritesWorkspace.tabManager.tabs.value.length);
   const zenEnabled = new Signal(false);
   const previewedTheme = new Signal<Theme | null>(null);
+  const resetSettings = (): void => {
+    if (confirmer.confirm("Reset all settings to their defaults?")) {
+      resetStoredTree({ sharedPreferences, favoritesPreferences, postListPreferences }, [sharedPreferences.colorScheme, favoritesPreferences.activeTool]);
+    }
+  };
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {
@@ -127,7 +136,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       });
 
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
-        favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled,
+        favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled, resetSettings,
         renderTool: () => h(FavoritesSettings, {
           favoritesPreferences, sharedPreferences, stepperScheduler: scheduler,
           onThemePreview: (theme): void => {

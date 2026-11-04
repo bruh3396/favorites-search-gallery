@@ -2,7 +2,7 @@ import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
-import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";

@@ -51,4 +51,8 @@ export class KeyedStoredValue<T> implements StoredValue<T> {
     this.current.value = value;
     this.changes.emit(value);
   }
+
+  public reset(): void {
+    this.set(this.configuration.defaultValue);
+  }
 }

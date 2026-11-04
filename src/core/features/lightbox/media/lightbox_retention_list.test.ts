@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { LightboxRetentionList } from "@/core/features/lightbox/media/lightbox_retention_list";
-import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPosts } from "@/testing/post";

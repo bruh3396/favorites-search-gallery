@@ -1,7 +1,7 @@
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
-import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 

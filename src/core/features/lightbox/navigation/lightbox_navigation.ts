@@ -1,5 +1,5 @@
 import { DebouncedTask, createDebouncedTask } from "@/core/utils/async/debounced_task";
-import { MediaSequence, MediaSequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaSequence, MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { MediaItem } from "@/core/domain/media/media_item";

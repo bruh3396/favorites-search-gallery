@@ -58,6 +58,7 @@ function setup(): Setup {
     lightboxView,
     favoritesPreferences,
     zenEnabled,
+    resetSettings: () => undefined,
     renderTool: () => document.createElement("form"),
     renderPanel: () => document.createElement("section")
   }));

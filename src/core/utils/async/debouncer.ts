@@ -11,6 +11,10 @@ export class Debouncer {
 
   constructor(private readonly configuration: DebouncerConfiguration, private readonly scheduler: Pick<Scheduler, "schedule">) { }
 
+  public get pending(): boolean {
+    return this.cancelTimer !== undefined;
+  }
+
   public debounce(task: () => void): void {
     const isFirstCall = this.cancelTimer === undefined;
 

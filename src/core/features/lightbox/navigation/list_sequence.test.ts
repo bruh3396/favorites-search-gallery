@@ -1,7 +1,7 @@
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test } from "vitest";
-import { ListSequence } from "@/core/domain/media/list_sequence";
+import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { Post } from "@/core/domain/post/post";
 
 const POSTS = createPosts("1", "2", "3");

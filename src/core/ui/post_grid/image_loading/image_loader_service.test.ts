@@ -26,7 +26,7 @@ describe("ImageLoaderService", () => {
       const remoteMedia = new MemoryRemoteMedia();
       const decodeStill = vi.spyOn(remoteMedia, "decodeStill").mockReturnValue(new Promise<ImageBitmap>(() => undefined));
       const imageLoaderService = createImageLoaderService({ remoteMedia, scheduler }, {
-        batchDebouncerConfiguration: { delay: 100 },
+        batchDebouncerConfiguration: { delay: 100, burstDelay: 50 },
         decodeRateLimiterConfiguration: { concurrency: 2, ratePerSecond: 1_000 }
       });
       const imageLoaders = Array.from({ length: 3 }, () => imageLoaderService.createLoader(document.createElement("canvas"), MEDIA, new Signal(500)));

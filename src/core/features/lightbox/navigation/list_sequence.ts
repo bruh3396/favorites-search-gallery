@@ -1,4 +1,4 @@
-import { MediaSequence, MediaSequencePosition } from "@/core/domain/media/media_sequence";
+import { MediaSequence, MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence";
 import { getItemsAround, getWrappedItemsAround } from "@/core/utils/collection/array_utilities";
 import { MediaItem } from "@/core/domain/media/media_item";
 import { Readable } from "@/core/utils/reactive/signal";

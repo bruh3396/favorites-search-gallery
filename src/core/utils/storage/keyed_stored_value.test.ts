@@ -81,6 +81,16 @@ describe("KeyedStoredValue", () => {
     expect(seen).toEqual([]);
   });
 
+  test("goes back to its default on reset, storing it and telling its listeners", () => {
+    const storage = createStorage({ size: 4 });
+    const preference = new KeyedStoredValue({ key: "size", defaultValue: 6 }, { storedValueStorage: storage });
+    const seen: number[] = [];
+
+    preference.changed.on(value => seen.push(value));
+    preference.reset();
+    expect([preference.value, storage.entries, seen]).toEqual([6, { size: 6 }, [6]]);
+  });
+
   test("decodes and encodes through its codec", () => {
     const storage = createStorage({ colors: ["red"] });
     const codec = createSetCodec(createOneOfGuard(["red", "blue"] as const));

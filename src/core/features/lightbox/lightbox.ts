@@ -6,7 +6,7 @@ import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox
 import { LightboxPreferences } from "@/core/features/lightbox/lightbox_preferences";
 import { LightboxRetentionList } from "@/core/features/lightbox/media/lightbox_retention_list";
 import { MediaItem } from "@/core/domain/media/media_item";
-import { MediaSequence } from "@/core/domain/media/media_sequence";
+import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Readable } from "@/core/utils/reactive/signal";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";

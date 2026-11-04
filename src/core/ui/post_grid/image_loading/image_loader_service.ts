@@ -14,7 +14,7 @@ export interface ImageLoaderServiceConfiguration {
 }
 
 export const DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION: ImageLoaderServiceConfiguration = {
-  batchDebouncerConfiguration: { delay: 325 },
+  batchDebouncerConfiguration: { delay: 325, burstDelay: 100 },
   decodeRateLimiterConfiguration: { concurrency: 3, ratePerSecond: 20 },
   drawRateLimiterConfiguration: { concurrency: 1, ratePerSecond: 40 },
   maxCanvasHeight: 16_000

@@ -52,6 +52,8 @@ const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>([
   "showNext",
   "showPrevious",
   "togglePause",
+  "toggleMute",
+  "toggleFullscreen",
   "dismiss",
   "close",
   "openPostPage",

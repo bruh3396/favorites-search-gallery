@@ -6,7 +6,7 @@ import { ColorScheme } from "@/core/boundary/color_scheme";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
-import { ListSequence } from "@/core/domain/media/list_sequence";
+import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";

@@ -7,7 +7,7 @@ import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { Lightbox } from "@/core/features/lightbox/lightbox";
-import { ListSequence } from "@/core/domain/media/list_sequence";
+import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
