@@ -3,7 +3,9 @@ import { SearchBox, SearchBoxClass } from "@/core/ui/components/search_box/searc
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import SEARCH_BOX_CSS from "@/core/ui/components/search_box/search_box.css?inline";
+import { SearchBoxAssist } from "@/core/ui/components/search_box/search_box_assist";
 import { Signal } from "@/core/utils/reactive/signal";
+import { TextEdit } from "@/core/ui/components/search_box/text_edit";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
@@ -70,12 +72,52 @@ function setupHistory(submittedQueries: readonly string[] = ["dog", "cat"]): His
   return { textarea: element.querySelector("textarea")!, onSearch };
 }
 
+interface AssistedSetup extends HistorySetup {
+  activeDescendantElement: Signal<HTMLElement | null>;
+  textEdits: Emitter<TextEdit>;
+  update: Mock<SearchBoxAssist["update"]>;
+  close: Mock<SearchBoxAssist["close"]>;
+  dispose: () => void;
+}
+
+function setupAssisted(takesKeys: boolean = false): AssistedSetup {
+  const onSearch = vi.fn<(query: string) => void>();
+  const activeDescendantElement = new Signal<HTMLElement | null>(null);
+  const textEdits = new Emitter<TextEdit>();
+  const update = vi.fn<SearchBoxAssist["update"]>();
+  const close = vi.fn<SearchBoxAssist["close"]>();
+  const { result: element, dispose } = render(document, () => (
+    <SearchBox
+      label="Search"
+      query={new Signal("")}
+      submittedQueries={new Signal(["dog"])}
+      assist={{ textEdits, update, close, handleKey: () => takesKeys }}
+      activeDescendantElement={activeDescendantElement}
+      onSearch={onSearch}
+    />
+  ));
+
+  document.body.append(element);
+  return { textarea: element.querySelector("textarea")!, onSearch, activeDescendantElement, textEdits, update, close, dispose };
+}
+
+function stubInsertText(textarea: HTMLTextAreaElement): void {
+  Object.defineProperty(document, "execCommand", {
+    configurable: true,
+    value: (_command: string, _showUi: unknown, text: string): boolean => {
+      textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, "end");
+      return true;
+    }
+  });
+}
+
 function press(textarea: HTMLTextAreaElement, key: string, modifiers: KeyboardEventInit = {}): boolean {
   return textarea.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, cancelable: true, ...modifiers }));
 }
 
 afterEach(() => {
   document.body.replaceChildren();
+  Reflect.deleteProperty(document, "execCommand");
 });
 
 describe("SearchBox", () => {
@@ -322,8 +364,8 @@ describe("SearchBox", () => {
   });
 
   test("grows to the wrapped lines of its query, up to 8", () => {
-    const { textarea } = setup();
-    const readLineCount = (): string => textarea.form!.style.getPropertyValue("--fsg-SearchBox-line-count");
+    const { element, textarea } = setup();
+    const readLineCount = (): string => element.style.getPropertyValue("--fsg-SearchBox-line-count");
     const lineCounts: string[] = [];
 
     textarea.style.lineHeight = "20px";
@@ -341,6 +383,86 @@ describe("SearchBox", () => {
     const { textarea } = setup(trailingChild);
 
     expect(textarea.form!.contains(trailingChild)).toBe(true);
+  });
+
+  test("shows its popup without a press inside it searching", () => {
+    const fieldPopupChild = document.createElement("button");
+    const onSearch = vi.fn<(query: string) => void>();
+    const { result: element } = render(document, () => (
+      <SearchBox label="Search" query={new Signal("")} fieldPopupChild={fieldPopupChild} onSearch={onSearch} />
+    ));
+
+    document.body.append(element);
+    fieldPopupChild.click();
+    expect([element.contains(fieldPopupChild), onSearch.mock.calls]).toEqual([true, []]);
+  });
+
+  test("marks the field as autocompleting from a list when assisted", () => {
+    expect(setupAssisted().textarea.getAttribute("aria-autocomplete")).toBe("list");
+  });
+
+  test("marks nothing without an assist", () => {
+    expect(setup().textarea.hasAttribute("aria-autocomplete")).toBe(false);
+  });
+
+  test("tells its assist the query and caret after flattening line breaks", () => {
+    const { textarea, update } = setupAssisted();
+
+    textarea.value = "cat\ndog";
+    textarea.setSelectionRange(5, 5);
+    textarea.dispatchEvent(new Event("input", { bubbles: true }));
+    expect(update).toHaveBeenCalledExactlyOnceWith("cat dog", 5);
+  });
+
+  test.each(["blur", "click"])("closes its assist on %s", eventName => {
+    const { textarea, close } = setupAssisted();
+
+    textarea.dispatchEvent(new Event(eventName));
+    expect(close).toHaveBeenCalledOnce();
+  });
+
+  test("gives a key its assist took no further action", () => {
+    const { textarea, onSearch } = setupAssisted(true);
+
+    type(textarea, "cat");
+    expect([press(textarea, "Enter"), onSearch.mock.calls]).toEqual([false, []]);
+  });
+
+  test("leaves history alone for a key its assist took", () => {
+    const { textarea } = setupAssisted(true);
+
+    expect([press(textarea, "ArrowUp"), textarea.value]).toEqual([false, ""]);
+  });
+
+  test("still searches on Enter when its assist leaves the key", () => {
+    const { textarea, onSearch } = setupAssisted();
+
+    type(textarea, "cat");
+    press(textarea, "Enter");
+    expect(onSearch).toHaveBeenCalledExactlyOnceWith("cat");
+  });
+
+  test("applies its assist's text edits until disposed", () => {
+    const { textarea, textEdits, dispose } = setupAssisted();
+
+    stubInsertText(textarea);
+    type(textarea, "dog ca fox");
+    textEdits.emit({ start: 4, end: 6, text: "cat" });
+    expect(textarea.value).toBe("dog cat fox");
+    dispose();
+    textEdits.emit({ start: 0, end: 3, text: "owl" });
+    expect(textarea.value).toBe("dog cat fox");
+  });
+
+  test("points the field at its active descendant", () => {
+    const optionElement = document.createElement("li");
+    const { textarea, activeDescendantElement } = setupAssisted();
+
+    document.body.append(optionElement);
+    activeDescendantElement.value = optionElement;
+    expect(textarea.ariaActiveDescendantElement).toBe(optionElement);
+    activeDescendantElement.value = null;
+    expect(textarea.ariaActiveDescendantElement).toBeNull();
   });
 
   test("styles every class it sets", () => {

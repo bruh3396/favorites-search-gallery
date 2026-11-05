@@ -45,6 +45,10 @@ export class SetSearchEngine<Doc> implements SearchEngine<Doc> {
     return this.invertedIndex.docsForTerm(term)?.size ?? 0;
   }
 
+  public getTermsStartingWith(prefix: string): string[] {
+    return this.wildcardDocResolver.getTermsStartingWith(prefix);
+  }
+
   public rebuild(docs: readonly Doc[]): void {
     this.invertedIndex.addDocs(docs);
     this.wildcardDocResolver.index(this.invertedIndex.indexedTerms());

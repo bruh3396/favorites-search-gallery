@@ -1,5 +1,5 @@
 import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/collection/search_history";
-import { Mock, describe, expect, test, vi } from "vitest";
+import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -77,7 +77,13 @@ function setup(posts: Post[] = []): Setup {
   favoritesSession.start();
   const scheduler = new MemoryScheduler();
   const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(favoritesSession), {
-    favoritesService: { loadState: new Signal<FavoritesLoadState>({ phase: "starting" }), searchable: new Milestone(), hydrated: new Emitter<Favorite>() },
+    favoritesService: {
+      loadState: new Signal<FavoritesLoadState>({ phase: "starting" }),
+      searchable: new Milestone(),
+      hydrated: new Emitter<Favorite>(),
+      getTagsStartingWith: prefix => favoritesSearchIndex.getTagsStartingWith(prefix),
+      countFavoritesWithTag: tag => favoritesSearchIndex.countFavoritesWithTag(tag)
+    },
     favoritesPreferences,
     tabCount: new Signal(1),
     searchHistory,
@@ -125,6 +131,57 @@ describe("composeFavoritesSearchPanel", () => {
 
     queryTileLinks(element)[0].click();
     expect(open.mock.calls.map(([, favorite]) => favorite.id)).toEqual(["1"]);
+  });
+
+  test("suggests metatags for the word in the search box", () => {
+    const { element } = setup();
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
+
+    textarea.value = "sc";
+    textarea.dispatchEvent(new Event("input"));
+    expect([...element.querySelectorAll("[role=option]")].map(option => option.textContent)).toEqual(["score:>", "score:<", "score:"]);
+  });
+
+  test("suggests the favorites' tags after the metatags, most used first", () => {
+    const { element } = setup([createPost({ id: "1", tags: "scarf sc_tag" }), createPost({ id: "2", tags: "sc_tag" })]);
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
+
+    textarea.value = "sc";
+    textarea.dispatchEvent(new Event("input"));
+    expect([...element.querySelectorAll("[role=option]")].map(option => option.textContent)).toEqual(["score:>", "score:<", "score:", "sc_tag2", "scarf1"]);
+  });
+
+  test("offers what follows a suggestion accepted with Tab", () => {
+    const { element } = setup();
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
+
+    Object.defineProperty(document, "execCommand", {
+      configurable: true,
+      value: (_command: string, _showUi: unknown, text: string): boolean => {
+        textarea.setRangeText(text, textarea.selectionStart, textarea.selectionEnd, "end");
+        textarea.dispatchEvent(new Event("input"));
+        return true;
+      }
+    });
+    onTestFinished(() => {
+      Reflect.deleteProperty(document, "execCommand");
+    });
+    textarea.value = "cat sc";
+    textarea.dispatchEvent(new Event("input"));
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", cancelable: true }));
+    expect([textarea.value, element.querySelectorAll("[role=option]").length]).toEqual(["cat score:>", 0]);
+  });
+
+  test("points the search box at the highlighted suggestion", () => {
+    const { element } = setup();
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
+
+    document.body.append(element);
+    onTestFinished(() => element.remove());
+    textarea.value = "sc";
+    textarea.dispatchEvent(new Event("input"));
+    textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", cancelable: true }));
+    expect(textarea.ariaActiveDescendantElement).toBe(element.querySelector("[role=option]"));
   });
 
   test("opens the typed query on the site when Search is right-clicked", () => {

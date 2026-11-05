@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseSearchTerm, parseSearchTermNegation, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { ExactSearchTerm } from "@/core/domain/search/terms/exact_search_term";
 import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
@@ -101,5 +101,19 @@ describe("parseWildcardSearchTerm", () => {
     const wildcardSearchTerm = parseWildcardSearchTerm("*[");
 
     expect(wildcardSearchTerm.matches({ tags: new Set(["[", "a["]) })).toBe(false);
+  });
+});
+
+describe("parseSearchTermNegation", () => {
+  test("strips a leading minus and marks the term negated", () => {
+    expect(parseSearchTermNegation("-mango")).toEqual({ isNegated: true, value: "mango" });
+  });
+
+  test("leaves a term without a minus unchanged", () => {
+    expect(parseSearchTermNegation("mango")).toEqual({ isNegated: false, value: "mango" });
+  });
+
+  test("treats a lone minus as a plain term", () => {
+    expect(parseSearchTermNegation("-")).toEqual({ isNegated: false, value: "-" });
   });
 });

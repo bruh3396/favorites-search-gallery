@@ -7,6 +7,7 @@ import { FavoritesSession } from "@/core/features/favorites/session/favorites_se
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
+import { SearchBoxAssist } from "@/core/ui/components/search_box/search_box_assist";
 import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 
 export const FavoritesSearchPanelClass = {
@@ -27,13 +28,17 @@ export interface FavoritesSearchPanelProps {
   submit: (query: string) => void;
   focusSearch: Emitter<void>;
   trailingChild: Child;
+  fieldPopupChild?: Child;
+  searchBoxAssist?: SearchBoxAssist;
+  activeDescendantElement?: Readable<HTMLElement | null>;
   skeleton: Node;
   grid: Node;
   searchElsewhere: (query: string) => void;
 }
 
 export function FavoritesSearchPanel({
-  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, trailingChild, skeleton, grid, searchElsewhere
+  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, trailingChild, fieldPopupChild, searchBoxAssist, activeDescendantElement, skeleton,
+  grid, searchElsewhere
 }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
@@ -74,7 +79,10 @@ export function FavoritesSearchPanel({
                 {computed(() => describeResultCount(favoritesSession.matchedFavorites.value.length))}
               </span>
             ]}
+            fieldPopupChild={fieldPopupChild}
             focusRequests={focusSearch}
+            assist={searchBoxAssist}
+            activeDescendantElement={activeDescendantElement}
             onSearch={query => {
               submit(query);
               body.scrollTop = 0;

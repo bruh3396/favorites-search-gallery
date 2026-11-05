@@ -1,8 +1,10 @@
 import { Child, h } from "@/core/ui/h/h";
+import { Readable, effect } from "@/core/utils/reactive/signal";
 import { HistoryNavigator } from "@/core/ui/components/search_box/history_navigator";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
-import { Readable } from "@/core/utils/reactive/signal";
+import { SearchBoxAssist } from "@/core/ui/components/search_box/search_box_assist";
+import { TextEdit } from "@/core/ui/components/search_box/text_edit";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const SearchBoxClass = {
@@ -10,7 +12,8 @@ export const SearchBoxClass = {
   field: "fsg-SearchBox-field",
   submit: "fsg-SearchBox-submit",
   textarea: "fsg-SearchBox-textarea",
-  clear: "fsg-SearchBox-clear"
+  clear: "fsg-SearchBox-clear",
+  popup: "fsg-SearchBox-popup"
 } as const;
 
 const MAX_LINE_COUNT = 8;
@@ -23,12 +26,18 @@ export interface SearchBoxProps {
   query: Readable<string>;
   submittedQueries?: Readable<readonly string[]>;
   trailingChild?: Child;
+  fieldPopupChild?: Child;
   focusRequests?: Occurrence<void>;
+  assist?: SearchBoxAssist;
+  activeDescendantElement?: Readable<HTMLElement | null>;
   onSearch: (query: string) => void;
   searchElsewhere?: (query: string) => void;
 }
 
-export function SearchBox({ label, query, submittedQueries, trailingChild, focusRequests, onSearch, searchElsewhere }: SearchBoxProps): HTMLElement {
+export function SearchBox({
+  label, query, submittedQueries, trailingChild, fieldPopupChild, focusRequests, assist: searchBoxAssist, activeDescendantElement, onSearch, searchElsewhere
+}: SearchBoxProps): HTMLElement {
+  const root = <search className={SearchBoxClass.root} />;
   const textarea = <textarea className={SearchBoxClass.textarea} rows={1} spellcheck={false}
     placeholder={label} aria-label={label} value={query} /> as HTMLTextAreaElement;
   const submitButton = <IconButton className={SearchBoxClass.submit} icon="search" label="Search" type="submit" />;
@@ -51,7 +60,7 @@ export function SearchBox({ label, query, submittedQueries, trailingChild, focus
         onClick={() => {
           textarea.value = "";
           historyNavigator?.stopRecalling();
-          fitToText(textarea, field);
+          fitToText(textarea, root);
           textarea.focus();
         }}
       />
@@ -60,6 +69,11 @@ export function SearchBox({ label, query, submittedQueries, trailingChild, focus
   ) as HTMLFormElement;
 
   textarea.addEventListener("keydown", event => {
+    if (searchBoxAssist?.handleKey(event)) {
+      event.preventDefault();
+      return;
+    }
+
     if (event.key !== "Enter" || event.isComposing) {
       return;
     }
@@ -71,9 +85,9 @@ export function SearchBox({ label, query, submittedQueries, trailingChild, focus
   });
   textarea.addEventListener("input", () => {
     flattenLineBreaks(textarea);
-    fitToText(textarea, field);
+    fitToText(textarea, root);
   });
-  textarea.addEventListener("focus", () => fitToText(textarea, field));
+  textarea.addEventListener("focus", () => fitToText(textarea, root));
   textarea.addEventListener("blur", () => {
     textarea.scrollTop = 0;
     textarea.scrollLeft = 0;
@@ -90,10 +104,24 @@ export function SearchBox({ label, query, submittedQueries, trailingChild, focus
         event.preventDefault();
         textarea.value = recalledText;
         textarea.setSelectionRange(recalledText.length, recalledText.length);
-        fitToText(textarea, field);
+        fitToText(textarea, root);
       }
     });
     textarea.addEventListener("input", () => historyNavigator.stopRecalling());
+  }
+
+  if (searchBoxAssist !== undefined) {
+    textarea.setAttribute("aria-autocomplete", "list");
+    textarea.addEventListener("input", () => searchBoxAssist.update(textarea.value, textarea.selectionStart));
+    textarea.addEventListener("blur", () => searchBoxAssist.close());
+    textarea.addEventListener("click", () => searchBoxAssist.close());
+    onCleanup(searchBoxAssist.textEdits.on(textEdit => applyTextEdit(textarea, textEdit)));
+  }
+
+  if (activeDescendantElement !== undefined) {
+    effect(() => {
+      textarea.ariaActiveDescendantElement = activeDescendantElement.value;
+    });
   }
 
   if (focusRequests !== undefined) {
@@ -112,7 +140,13 @@ export function SearchBox({ label, query, submittedQueries, trailingChild, focus
       }
     });
   }
-  return <search className={SearchBoxClass.root}>{field}</search>;
+  root.append(field, <div className={SearchBoxClass.popup}>{fieldPopupChild}</div>);
+  return root;
+}
+
+function applyTextEdit(textarea: HTMLTextAreaElement, { start, end, text }: TextEdit): void {
+  textarea.setSelectionRange(start, end);
+  textarea.ownerDocument.execCommand("insertText", false, text);
 }
 
 function flattenLineBreaks(textarea: HTMLTextAreaElement): void {
@@ -136,11 +170,11 @@ function recall(historyNavigator: HistoryNavigator, key: string, textarea: HTMLT
   }
 }
 
-function fitToText(textarea: HTMLTextAreaElement, field: HTMLFormElement): void {
-  field.style.setProperty(LINE_COUNT_PROPERTY, "1");
+function fitToText(textarea: HTMLTextAreaElement, root: HTMLElement): void {
+  root.style.setProperty(LINE_COUNT_PROPERTY, "1");
   const lineCount = countLines(textarea);
 
-  field.style.setProperty(LINE_COUNT_PROPERTY, String(lineCount > 1 ? Math.min(lineCount, MAX_LINE_COUNT) : 1));
+  root.style.setProperty(LINE_COUNT_PROPERTY, String(lineCount > 1 ? Math.min(lineCount, MAX_LINE_COUNT) : 1));
 }
 
 function isWrapped(textarea: HTMLTextAreaElement): boolean {

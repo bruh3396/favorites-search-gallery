@@ -29,6 +29,13 @@
   block-size: calc(var(--fsg-SearchBox-height) + (var(--fsg-SearchBox-line-count, 1) - 1) * var(--fsg-SearchBox-line-height));
 }
 
+.fsg-SearchBox-popup {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: calc(var(--fsg-SearchBox-height) + (var(--fsg-SearchBox-line-count, 1) - 1) * var(--fsg-SearchBox-line-height) + 4px);
+  inset-inline: 0;
+}
+
 .fsg-SearchBox-submit {
   margin-inline-start: 4px;
 }

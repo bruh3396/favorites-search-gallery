@@ -4,7 +4,7 @@ import { findFirstIndexWhere } from "@/core/utils/collection/array_utilities";
 export class PrefixIndex {
   constructor(private readonly terms: SortedArray<string>) {}
 
-  public termsMatchingPrefix(prefix: string): string[] {
+  public getTermsStartingWith(prefix: string): string[] {
     const sorted = this.terms.toArray();
     const result: string[] = [];
     const start = findFirstIndexWhere(sorted.length, index => sorted[index] >= prefix);

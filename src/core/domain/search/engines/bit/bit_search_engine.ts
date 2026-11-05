@@ -35,6 +35,10 @@ export class BitSearchEngine<Doc> implements SearchEngine<Doc> {
     return this.index.findPosting(term)?.cardinality ?? 0;
   }
 
+  public getTermsStartingWith(prefix: string): string[] {
+    return this.wildcardPostingResolver.getTermsStartingWith(prefix);
+  }
+
   public rebuild(docs: readonly Doc[]): void {
     this.index.build(docs);
     this.metricBitIndex.build(this.index.width, this.index.allDocs());

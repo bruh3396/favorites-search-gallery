@@ -23,12 +23,16 @@ export class WildcardIndex {
     this.trigramIndex = new TrigramIndex(this.terms, this.stringInterner);
   }
 
+  public getTermsStartingWith(prefix: string): string[] {
+    return this.prefixIndex.getTermsStartingWith(prefix);
+  }
+
   public matchingTerms(wildcardSearchTerm: WildcardSearchTerm): string[] {
     const wildcardResolutionInputs = wildcardSearchTerm.resolutionInputs;
 
     switch (wildcardResolutionInputs.matchType) {
       case WildcardMatchType.Prefix:
-        return this.prefixIndex.termsMatchingPrefix(wildcardResolutionInputs.fragment);
+        return this.prefixIndex.getTermsStartingWith(wildcardResolutionInputs.fragment);
       case WildcardMatchType.Suffix:
         return this.trigramIndex.termsMatching(wildcardResolutionInputs.fragment).filter(key => key.endsWith(wildcardResolutionInputs.fragment));
       case WildcardMatchType.Substring:

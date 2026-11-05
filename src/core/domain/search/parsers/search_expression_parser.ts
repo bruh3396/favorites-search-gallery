@@ -1,11 +1,9 @@
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
+import { SearchExpressionOperator } from "@/core/domain/search/parsers/search_expression_operator";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";
 
-const OPEN = "(";
-const NEGATED_OPEN = "-(";
-const CLOSE = ")";
-const OR = "~";
+const { open: OPEN, negatedOpen: NEGATED_OPEN, close: CLOSE, or: OR } = SearchExpressionOperator;
 
 export function parseSearchExpression(query: string): SearchExpression {
   const tokens = tokenize(normalize(query));

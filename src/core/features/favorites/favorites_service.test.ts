@@ -113,6 +113,12 @@ describe("createFavoritesService", () => {
     expect(favoritesService.countFavoritesWithTag("apple")).toBe(2);
   });
 
+  test("finds the loaded tags by prefix", async() => {
+    const { favoritesService } = await setup(createTaggedPosts("apple", "apricot", "banana"));
+
+    expect(favoritesService.getTagsStartingWith("ap")).toEqual(["apple", "apricot"]);
+  });
+
   test("shows the favorites matching the typed query", async() => {
     const { favoritesSession } = await setup(createTaggedPosts("apple", "banana", "apple"));
 

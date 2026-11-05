@@ -12,6 +12,7 @@ export interface SearchEngineDependencies<Doc> {
 export interface SearchEngine<Doc> {
   search(searchExpression: SearchExpression, candidateDocs?: readonly Doc[]): readonly Doc[];
   countDocsWithTerm(term: string): number;
+  getTermsStartingWith(prefix: string): string[];
   rebuild(docs: readonly Doc[]): void;
   add(docs: readonly Doc[]): void;
   update(termUpdates: readonly TermUpdate<Doc>[]): void;

@@ -1,0 +1,52 @@
+.fsg-SuggestionList {
+  max-block-size: 320px;
+}
+
+.fsg-SuggestionList-row:hover,
+.fsg-SuggestionList:not(:has([aria-selected="true"])) .fsg-SuggestionList-row:first-child {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-SuggestionList-row[aria-selected="true"] {
+  background: var(--fsg-color-secondary-container);
+  box-shadow: inset 0 0 0 2px var(--fsg-color-primary);
+  color: var(--fsg-color-on-secondary-container);
+}
+
+.fsg-SuggestionList-icon {
+  flex: none;
+  inline-size: 14px;
+  block-size: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.7;
+}
+
+.fsg-SuggestionList-text {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  overflow: hidden;
+  line-height: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fsg-SuggestionList-match {
+  color: var(--fsg-color-primary);
+  font-weight: 700;
+}
+
+.fsg-SuggestionList-detail {
+  flex: 1 1 0;
+  min-inline-size: 0;
+  overflow: hidden;
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-medium-size);
+  line-height: normal;
+  text-align: end;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

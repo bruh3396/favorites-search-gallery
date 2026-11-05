@@ -11,30 +11,30 @@ function createIndex(): PrefixIndex {
 
 describe("PrefixIndex", () => {
   test("finds the contiguous run of terms sharing the prefix", () => {
-    expect(createIndex().termsMatchingPrefix("ban")).toEqual(["banana", "band", "bandana"]);
+    expect(createIndex().getTermsStartingWith("ban")).toEqual(["banana", "band", "bandana"]);
   });
 
   test("matches a single term", () => {
-    expect(createIndex().termsMatchingPrefix("can")).toEqual(["canvas"]);
+    expect(createIndex().getTermsStartingWith("can")).toEqual(["canvas"]);
   });
 
   test("matches a term equal to the prefix", () => {
-    expect(createIndex().termsMatchingPrefix("band")).toEqual(["band", "bandana"]);
+    expect(createIndex().getTermsStartingWith("band")).toEqual(["band", "bandana"]);
   });
 
   test("returns nothing for a prefix that sorts between terms without matching", () => {
-    expect(createIndex().termsMatchingPrefix("bb")).toEqual([]);
+    expect(createIndex().getTermsStartingWith("bb")).toEqual([]);
   });
 
   test("returns nothing for a prefix after every term", () => {
-    expect(createIndex().termsMatchingPrefix("zzz")).toEqual([]);
+    expect(createIndex().getTermsStartingWith("zzz")).toEqual([]);
   });
 
   test("returns every term for an empty prefix", () => {
-    expect(createIndex().termsMatchingPrefix("")).toEqual(terms);
+    expect(createIndex().getTermsStartingWith("")).toEqual(terms);
   });
 
   test("returns nothing from an empty index", () => {
-    expect(new PrefixIndex(new SortedArray()).termsMatchingPrefix("ban")).toEqual([]);
+    expect(new PrefixIndex(new SortedArray()).getTermsStartingWith("ban")).toEqual([]);
   });
 });

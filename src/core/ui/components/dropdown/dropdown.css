@@ -67,34 +67,10 @@
 .fsg-Dropdown-menu {
   position: fixed;
   z-index: 10;
-  box-sizing: border-box;
-  margin: 0;
-  padding: 4px;
-  overflow-y: auto;
-  border: 1px solid var(--fsg-color-outline);
-  border-radius: calc(var(--fsg-shape-corner-small) + 4px);
-  background: var(--fsg-color-surface-container-high);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 28%), 0 2px 6px rgb(0 0 0 / 18%);
-  color: var(--fsg-color-on-surface);
-  font-size: var(--fsg-typescale-label-large-size);
-  list-style: none;
-  overscroll-behavior: contain;
 }
 
 .fsg-Dropdown-menu[data-size="small"] {
   font-size: var(--fsg-typescale-label-medium-size);
-}
-
-.fsg-Dropdown-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  block-size: 30px;
-  padding: 0 8px;
-  border-radius: var(--fsg-shape-corner-small);
-  line-height: 1;
-  cursor: pointer;
-  user-select: none;
 }
 
 .fsg-Dropdown-option[data-active="true"] {

@@ -26,22 +26,22 @@ export function parseSearchTerm(term: string): SearchTerm {
 }
 
 export function parseNumericSearchTerm(term: string): NumericSearchTerm {
-  const parsedTerm = parseNegation(term);
+  const parsedTerm = parseSearchTermNegation(term);
   return new NumericSearchTerm(parsedTerm, parseMetricComparison(`id:${parsedTerm.value}`));
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
-  const parsedTerm = parseNegation(removeDuplicateAsterisks(term));
+  const parsedTerm = parseSearchTermNegation(removeDuplicateAsterisks(term));
   return new WildcardSearchTerm(parsedTerm, { matchType: chooseWildcardMatchType(parsedTerm.value), regex: buildWildcardRegex(parsedTerm.value) });
 }
 
 export function parseMetricSearchTerm(term: string): MetricSearchTerm {
-  const parsedTerm = parseNegation(term);
+  const parsedTerm = parseSearchTermNegation(term);
   return new MetricSearchTerm(parsedTerm, parseMetricComparison(parsedTerm.value));
 }
 
 export function parseExactSearchTerm(term: string): ExactSearchTerm {
-  return new ExactSearchTerm(parseNegation(term));
+  return new ExactSearchTerm(parseSearchTermNegation(term));
 }
 
 function isNumericTerm(term: string): boolean {
@@ -56,7 +56,7 @@ function isMetricTerm(term: string): boolean {
   return metricComparisonRegex.test(term);
 }
 
-function parseNegation(term: string): ParsedTerm {
+export function parseSearchTermNegation(term: string): ParsedTerm {
   const isNegated = term.startsWith("-") && term.length > 1;
   return { isNegated, value: isNegated ? term.substring(1) : term };
 }

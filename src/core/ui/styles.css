@@ -6,6 +6,7 @@
 @import "./components/segmented/segmented.css" layer(components);
 @import "./components/multi_select/multi_select.css" layer(components);
 @import "./components/stepper/stepper.css" layer(components);
+@import "./components/listbox/listbox.css" layer(components);
 @import "./components/dropdown/dropdown.css" layer(components);
 @import "./components/setting_row/setting_row.css" layer(components);
 @import "./components/disclosure/disclosure.css" layer(components);
@@ -17,6 +18,7 @@
 @import "./components/paginator/page_slot.css" layer(components);
 @import "./components/page_stepper/page_stepper.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
+@import "./components/suggestion_list/suggestion_list.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
 @import "./components/tabs/tab_panel.css" layer(components);
 @import "./components/empty_state/empty_state.css" layer(components);

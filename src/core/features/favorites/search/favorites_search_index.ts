@@ -66,6 +66,10 @@ export class FavoritesSearchIndex {
     return this.bitSearchEngine.countDocsWithTerm(tag);
   }
 
+  public getTagsStartingWith(prefix: string): readonly string[] {
+    return this.bitSearchEngine.getTermsStartingWith(prefix);
+  }
+
   public match({ searchExpression, allowedRatings }: FavoritesSearchRequest, candidateFavorites?: readonly Favorite[]): readonly Favorite[] {
     return searchExpression === undefined ? [] : this.filterByRating(this.bitSearchEngine.search(searchExpression, candidateFavorites), allowedRatings);
   }

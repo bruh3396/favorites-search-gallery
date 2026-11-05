@@ -1,4 +1,7 @@
+import { DEFAULT_TAG_SUGGESTER_CONFIGURATION, TagSuggester } from "@/core/features/autocomplete/tag_suggester";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { AppPreferences } from "@/core/app/app_preferences";
+import { Autocomplete } from "@/core/features/autocomplete/autocomplete";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel";
@@ -8,20 +11,21 @@ import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { Lightbox } from "@/core/features/lightbox/lightbox";
 import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
+import { MetatagSuggester } from "@/core/features/autocomplete/metatag_suggester";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
-import { Readable } from "@/core/utils/reactive/signal";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SearchHistory } from "@/core/utils/collection/search_history";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
+import { SuggestionList } from "@/core/ui/components/suggestion_list/suggestion_list";
 import { TabStripToggle } from "@/core/app/favorites/search_panel/tab_strip_toggle";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 
 export interface FavoritesSearchPanelDependencies {
-  favoritesService: Pick<FavoritesService, "loadState" | "searchable" | "hydrated">;
+  favoritesService: Pick<FavoritesService, "loadState" | "searchable" | "hydrated" | "getTagsStartingWith" | "countFavoritesWithTag">;
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination" | "tabStripVisible">;
   tabCount: Readable<number>;
   searchHistory: Pick<SearchHistory, "submittedQueries" | "record">;
@@ -41,6 +45,16 @@ export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependen
     favoritesService, favoritesPreferences, tabCount, searchHistory, favoriteSizeRecorder, visibilityObserver, sizeObserver, imageLoaderService, remotePages,
     navigator, lightbox, postActions, enterZen
   } = dependencies;
+  const autocomplete = new Autocomplete({
+    suggesters: [
+      new MetatagSuggester(),
+      new TagSuggester(DEFAULT_TAG_SUGGESTER_CONFIGURATION, {
+        getTagsStartingWith: favoritesService.getTagsStartingWith,
+        countFavoritesWithTag: favoritesService.countFavoritesWithTag
+      })
+    ]
+  });
+  const activeDescendantElement = new Signal<HTMLElement | null>(null);
   return h(FavoritesSearchPanel, {
     favoritesService,
     favoritesSession: favoritesTab.session,
@@ -54,6 +68,16 @@ export function composeFavoritesSearchPanel(favoritesTab: FavoritesTab, dependen
       h(TabStripToggle, { visible: favoritesPreferences.tabStripVisible, tabCount }),
       h(IconButton, { icon: "scan", label: "Zen", onClick: enterZen })
     ],
+    fieldPopupChild: h("div", { hidden: computed(() => autocomplete.suggestions.value.length === 0) }, h(SuggestionList, {
+      suggestions: autocomplete.suggestions,
+      highlightedIndex: autocomplete.highlightedIndex,
+      onAccept: autocomplete.accept,
+      onActiveDescendantChange: currentActiveDescendantElement => {
+        activeDescendantElement.value = currentActiveDescendantElement;
+      }
+    })),
+    searchBoxAssist: autocomplete,
+    activeDescendantElement,
     skeleton: h(SkeletonGrid, {
       sizes: favoriteSizeRecorder.sizes,
       layout: favoritesPreferences.grid.layout,

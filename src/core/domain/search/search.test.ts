@@ -58,6 +58,23 @@ for (const { name, createEngine } of engines) {
         expect([searchEngine.countDocsWithTerm("apple"), searchEngine.countDocsWithTerm("banana")]).toEqual([1, 1]);
       });
     });
+
+    describe("getTermsStartingWith", () => {
+      test("finds the terms with a prefix, alphabetically", () => {
+        const searchEngine = createEngine([createDoc("a", "apricot"), createDoc("b", "apple", "banana")]);
+
+        expect(searchEngine.getTermsStartingWith("ap")).toEqual(["apple", "apricot"]);
+      });
+
+      test("follows added and corrected docs", () => {
+        const doc = createDoc("a", "apple");
+        const searchEngine = createEngine([doc]);
+
+        searchEngine.add([createDoc("b", "apricot")]);
+        searchEngine.update([{ doc, oldTerms: new Set(["apple"]), newTerms: new Set(["banana"]) }]);
+        expect(searchEngine.getTermsStartingWith("ap")).toEqual(["apricot"]);
+      });
+    });
   });
 }
 

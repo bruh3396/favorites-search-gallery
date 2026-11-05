@@ -1,6 +1,7 @@
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { ControlProps } from "@/core/ui/components/control/control_props";
+import { ListboxClass } from "@/core/ui/components/listbox/listbox";
 import { createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
@@ -34,7 +35,7 @@ export function Dropdown<Value>({
   };
   const options = controlChoices.map(({ label }, index) => (
     <li
-      className={DropdownClass.option}
+      className={`${ListboxClass.option} ${DropdownClass.option}`}
       role="option"
       aria-selected={computed(() => String(selectedIndex.value === index))}
       dataset={{ active: computed(() => String(active.value === index)) }}
@@ -51,7 +52,7 @@ export function Dropdown<Value>({
   ));
   const menu = (
     <ul
-      className={DropdownClass.menu}
+      className={`${ListboxClass.root} ${DropdownClass.menu}`}
       role="listbox"
       dataset={{ size: controlSize }}
       onPointerleave={() => activate(NO_OPTION)}

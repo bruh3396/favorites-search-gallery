@@ -26,6 +26,10 @@ export abstract class WildcardResolver<V> {
     this.cache.clear();
   }
 
+  public getTermsStartingWith(prefix: string): string[] {
+    return this.wildcardIndex.getTermsStartingWith(prefix);
+  }
+
   public resolve(wildcardSearchTerm: WildcardSearchTerm): V {
     const key = wildcardSearchTerm.resolutionInputs.regex.source;
     const cached = this.cache.get(key);

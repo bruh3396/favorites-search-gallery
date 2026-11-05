@@ -75,6 +75,14 @@ describe("FavoritesSearchIndex", () => {
     });
   });
 
+  describe("getTagsStartingWith", () => {
+    test("finds the tags with a prefix, alphabetically", () => {
+      const { favoritesSearchIndex } = setup(createTaggedPosts("apricot", "apple banana"));
+
+      expect(favoritesSearchIndex.getTagsStartingWith("ap")).toEqual(["apple", "apricot"]);
+    });
+  });
+
   describe("rebuild", () => {
     test("searches only the given favorites", () => {
       const { favorites, favoritesSearchIndex } = setup(createTaggedPosts("apple", "apple"));

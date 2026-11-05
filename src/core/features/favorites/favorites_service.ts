@@ -47,6 +47,7 @@ export interface FavoritesService {
   createSession: (favoritesSessionConfiguration: FavoritesSessionConfiguration) => FavoritesSession;
   isFavorited: (postId: string) => boolean;
   countFavoritesWithTag: (tag: string) => number;
+  getTagsStartingWith: (prefix: string) => readonly string[];
   load: () => Promise<void>;
 }
 
@@ -86,6 +87,7 @@ export function createFavoritesService(configuration: FavoritesServiceConfigurat
     }),
     isFavorited: postId => favoritesActions.isFavorited(postId),
     countFavoritesWithTag: tag => favoritesSearchIndex.countFavoritesWithTag(tag),
+    getTagsStartingWith: prefix => favoritesSearchIndex.getTagsStartingWith(prefix),
     load: async(): Promise<void> => {
       await favoritesLoader.load();
       loaded.reach();
