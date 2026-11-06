@@ -1,5 +1,6 @@
 import { FilesystemClient } from "@/adapters/filesystem/client/filesystem_client";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavoriteAddResult } from "@/core/boundary/ports/remote_favorites/remote_favorite_add_result";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class FilesystemRemoteFavorites implements RemoteFavorites {
@@ -22,8 +23,8 @@ export class FilesystemRemoteFavorites implements RemoteFavorites {
     return localPostIds.filter(id => !remotePostIds.has(id));
   }
 
-  public add(): Promise<boolean> {
-    return Promise.resolve(true);
+  public add(): Promise<RemoteFavoriteAddResult> {
+    return Promise.resolve("added");
   }
 
   public async remove(postId: string): Promise<boolean> {

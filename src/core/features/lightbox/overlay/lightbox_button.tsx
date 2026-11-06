@@ -10,7 +10,7 @@ export const LightboxButtonClass = {
 
 export interface LightboxButtonProps {
   icon: Reactive<LightboxIcon>;
-  label: string;
+  label: Reactive<string>;
   lightboxShortcut?: LightboxShortcut;
   pressed?: Readable<boolean>;
   disabled?: Reactive<boolean>;
@@ -26,15 +26,18 @@ export function LightboxButton({ icon, label, lightboxShortcut, pressed, disable
       aria-label={label}
       aria-pressed={pressed === undefined ? null : computed(() => String(pressed.value))}
       aria-keyshortcuts={lightboxShortcut?.ariaName ?? null}
-      title={lightboxShortcut === undefined ? label : `${label} (${lightboxShortcut.text})`}
+      title={computed(() => {
+        const currentLabel = typeof label === "string" ? label : label.value;
+        return lightboxShortcut === undefined ? currentLabel : `${currentLabel} (${lightboxShortcut.text})`;
+      })}
       onClick={() => onClick()}
     />
   ) as HTMLElement;
 
   effect(() => {
-    const shown = typeof icon === "string" ? icon : icon.value;
+    const currentIcon = typeof icon === "string" ? icon : icon.value;
 
-    button.replaceChildren(createLightboxIcon(button.ownerDocument, shown, LightboxButtonClass.icon));
+    button.replaceChildren(createLightboxIcon(button.ownerDocument, currentIcon, LightboxButtonClass.icon));
   });
   return button;
 }

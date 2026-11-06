@@ -51,6 +51,6 @@ describe("FilesystemRemoteFavorites", () => {
   });
 
   test("succeeds on add", async() => {
-    expect(await createRemoteFavorites().add()).toBe(true);
+    expect(await createRemoteFavorites().add()).toBe("added");
   });
 });

@@ -61,12 +61,14 @@ describe("FavoritesSession", () => {
   });
 
   describe("isFiltered", () => {
-    test("reports a query as a filter until the filters are cleared", () => {
+    test("reports a query as a filter until the search is cleared", () => {
       const { favoritesSession } = setup([]);
 
       favoritesSession.submit("apple");
       expect(favoritesSession.isFiltered.value).toBe(true);
       favoritesSession.clearFilters();
+      expect(favoritesSession.isFiltered.value).toBe(true);
+      favoritesSession.clearSearch();
       expect(favoritesSession.isFiltered.value).toBe(false);
     });
   });

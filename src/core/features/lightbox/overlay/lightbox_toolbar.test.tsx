@@ -91,6 +91,20 @@ describe("LightboxToolbar", () => {
     expect(findButton(root, label).title).toBe(title);
   });
 
+  test("renders its leading slot", () => {
+    const { result: root } = render(document, () => (
+      <LightboxToolbar
+        isAutoplaying={new Signal(false)}
+        inFullscreen={new Signal(false)}
+        leadingChild={<button type="button" aria-label="Favorite" />}
+        handlers={{} as CommandHandlers<LightboxCommand>}
+        keymap={{}}
+      />
+    ));
+
+    expect(findButton(root, "Favorite")).not.toBeNull();
+  });
+
   test("shows details as pressed while the details panel is open", () => {
     const detailsOpen = new Signal(false);
     const button = findButton(setup(detailsOpen).root, "Details");

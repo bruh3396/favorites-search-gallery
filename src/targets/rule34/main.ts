@@ -157,6 +157,7 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
 
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
+    userLoggedIn: userId !== "",
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme
@@ -184,8 +185,8 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
 }
 
 function startPostListApp(environment: Environment, {
-  hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, localKeyedValues, scheduler
-}: Rule34Dependencies): void {
+  fetch, mintMedia, hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, localKeyedValues, scheduler
+}: Rule34Dependencies, userId: string): void {
   const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]);
 
   if (!sharedPreferences.postListEnabled.peek()) {
@@ -193,7 +194,12 @@ function startPostListApp(environment: Environment, {
   }
   const remotePostList = new Rule34RemotePostList({ rule34Client, rule34Document, scheduler, randomSource });
 
-  composePostListApp({ colorScheme: environment.colorScheme }, {
+  composePostListApp({ colorScheme: environment.colorScheme, userLoggedIn: userId !== "" }, {
+    remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch, scheduler, randomSource }),
+    localFavorites: new IndexedDbLocalFavorites(
+      { ownerId: environment.favoritesOwnerId },
+      new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia)
+    ),
     scheduler,
     visibilityObserver: new BrowserVisibilityObserver(),
     sizeObserver: new BrowserSizeObserver(),

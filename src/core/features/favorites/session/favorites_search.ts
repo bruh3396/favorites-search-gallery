@@ -1,4 +1,4 @@
-import { FavoritesSearchSettings, UNFILTERED_FAVORITES_SEARCH_SETTINGS } from "@/core/features/favorites/search/favorites_search_settings";
+import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -73,7 +73,11 @@ export class FavoritesSearch {
   }
 
   public clearFilters(): void {
-    this.applySettings(UNFILTERED_FAVORITES_SEARCH_SETTINGS);
+    this.applySettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: this.#settings.peek().query });
+  }
+
+  public clearSearch(): void {
+    this.applySettings(DEFAULT_FAVORITES_SEARCH_SETTINGS);
   }
 
   public updateSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {

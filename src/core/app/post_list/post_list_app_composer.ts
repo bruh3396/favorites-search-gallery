@@ -4,15 +4,18 @@ import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
+import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
+import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { Post } from "@/core/domain/post/post";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
+import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
@@ -33,9 +36,12 @@ import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export interface PostListAppConfiguration {
   readonly colorScheme: ColorScheme;
+  readonly userLoggedIn: boolean;
 }
 
 export interface PostListAppDependencies {
+  remoteFavorites: Pick<RemoteFavorites, "add" | "remove">;
+  localFavorites: Pick<LocalFavorites, "remove">;
   visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
   viewport: Viewport;
@@ -51,7 +57,8 @@ export interface PostListAppDependencies {
 
 export function composePostListApp(configuration: PostListAppConfiguration, dependencies: PostListAppDependencies): MountableApp {
   const {
-    visibilityObserver, sizeObserver, viewport, scheduler, remoteMedia, remotePages, remotePostList, localKeyedValues, navigator, fileSaver, hostPage
+    visibilityObserver, sizeObserver, viewport, scheduler, remoteMedia, remotePages, remotePostList, localKeyedValues, navigator, fileSaver, hostPage,
+    remoteFavorites, localFavorites
   } = dependencies;
   const appStorage = createAppStorage(localKeyedValues);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, configuration.colorScheme, hostPage);
@@ -62,10 +69,20 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   const listSequence = new ListSequence({ wraps: false }, posts);
   const tileLocator = new TileLocator<Post>();
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
+  const favoritesActions = new FavoritesActions({ favoritedByDefault: false, userLoggedIn: configuration.userLoggedIn }, {
+    remoteFavorites, localFavorites,
+    acceptsChanges: (): boolean => true
+  });
   const lightbox = createLightbox<Post>({
     scheduler, sizeObserver, viewport, remoteMedia, actions: postActions,
     preferences: postListPreferences.lightbox,
-    locateItem: post => tileLocator.locate(post)
+    locateItem: post => tileLocator.locate(post),
+    favorite: {
+      isFavorited: post => favoritesActions.isFavorited(post.id),
+      add: (post): void => {
+        favoritesActions.add(post.id).catch(console.error);
+      }
+    }
   });
 
   lightbox.mediaCorrected.on(({ id, media }) => postListService.correctMedia(id, media));

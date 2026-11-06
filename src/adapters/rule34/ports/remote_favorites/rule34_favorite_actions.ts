@@ -2,13 +2,12 @@ import { buildRule34AddFavoriteUrl, buildRule34PostVoteUrl, buildRule34RemoveFav
 import { sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
+import { RemoteFavoriteAddResult } from "@/core/boundary/ports/remote_favorites/remote_favorite_add_result";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { createExponentialBackoff } from "@/core/utils/async/exponential_backoff";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
-
-type Rule34AddFavoriteAnswer = "error" | "alreadyAdded" | "loggedOut" | "added";
 
 export interface Rule34FavoriteActionsDependencies {
   fetch: Rule34Fetch;
@@ -22,9 +21,9 @@ const ADD_RATE_LIMIT = { concurrency: 1, ratePerSecond: 5 };
 const REMOVE_RATE_LIMIT = { concurrency: 1, ratePerSecond: 1 };
 const REMOVE_ATTEMPTS = 3;
 const REMOVE_RETRY_DELAY = 500;
-const ADD_ANSWERS: Record<number, Rule34AddFavoriteAnswer> = {
-  0: "error",
-  1: "alreadyAdded",
+const ADD_ANSWERS: Record<number, RemoteFavoriteAddResult> = {
+  0: "failed",
+  1: "added",
   2: "loggedOut",
   3: "added"
 };
@@ -45,15 +44,15 @@ export class Rule34FavoriteActions {
     });
   }
 
-  public add(postId: string): Promise<Rule34AddFavoriteAnswer | null> {
+  public add(postId: string): Promise<RemoteFavoriteAddResult> {
     this.intents.set(postId, "add");
     return this.addRateLimiter.run(async() => {
       if (!this.claimIntent(postId, "add")) {
-        return null;
+        return "failed";
       }
       sendRule34Request(this.dependencies.fetch, buildRule34PostVoteUrl(postId)).catch(() => { });
       const answer = await (await sendOkRule34Request(this.dependencies.fetch, buildRule34AddFavoriteUrl(postId))).text();
-      return ADD_ANSWERS[parseInt(answer, 10)] ?? "error";
+      return ADD_ANSWERS[parseInt(answer, 10)] ?? "failed";
     });
   }
 

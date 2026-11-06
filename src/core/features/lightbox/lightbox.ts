@@ -1,6 +1,7 @@
 import { DEFAULT_LIGHTBOX_KEYMAP } from "@/core/features/lightbox/commands/default_lightbox_keymap";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
+import { LightboxFavorite } from "@/core/features/lightbox/favorite/lightbox_favorite";
 import { LightboxMediaResolver } from "@/core/features/lightbox/media/lightbox_media_resolver";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
 import { LightboxPreferences } from "@/core/features/lightbox/lightbox_preferences";
@@ -27,6 +28,7 @@ export interface LightboxDependencies<T extends MediaItem> {
   preferences: LightboxPreferences;
   locateItem: (item: T) => Element | undefined;
   details?: LightboxDetails<T>;
+  favorite?: LightboxFavorite<T>;
 }
 
 export interface Lightbox<T extends MediaItem> {
@@ -43,7 +45,7 @@ export interface Lightbox<T extends MediaItem> {
 export function createLightbox<T extends MediaItem>(dependencies: LightboxDependencies<T>): Lightbox<T> {
   const {
     scheduler, sizeObserver, viewport, remoteMedia, locateItem,
-    actions: lightboxActions, preferences: lightboxPreferences, details: lightboxDetails
+    actions: lightboxActions, preferences: lightboxPreferences, details: lightboxDetails, favorite: lightboxFavorite
   } = dependencies;
   const lightboxNavigation = new LightboxNavigation<T>({ settleDelay: SETTLE_DELAY }, scheduler);
   const lightboxRetentionList = new LightboxRetentionList<T>({ capacity: RETENTION_CAPACITY }, lightboxNavigation);
@@ -64,7 +66,7 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
     createView: (): HTMLElement => composeLightboxDialog(
       { keymap: DEFAULT_LIGHTBOX_KEYMAP },
       {
-        scheduler, sizeObserver, viewport, remoteMedia, locateItem, lightboxActions, lightboxDetails, lightboxPreferences,
+        scheduler, sizeObserver, viewport, remoteMedia, locateItem, lightboxActions, lightboxDetails, lightboxFavorite, lightboxPreferences,
         lightboxMediaResolver, lightboxNavigation,
         retainedItems: lightboxRetentionList.items
       }

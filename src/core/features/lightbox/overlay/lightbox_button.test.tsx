@@ -32,6 +32,16 @@ describe("LightboxButton", () => {
     expect([button.title, button.getAttribute("aria-keyshortcuts")]).toEqual(["Autoplay (Space)", "Space"]);
   });
 
+  test("relabels itself when the label changes", () => {
+    const label = new Signal("Add");
+    const { result: button } = render(document, () => (
+      <LightboxButton icon="heartPlus" label={label} lightboxShortcut={{ text: "E", ariaName: "E" }} onClick={vi.fn()} />
+    ));
+
+    label.value = "Added";
+    expect([button.getAttribute("aria-label"), button.title]).toEqual(["Added", "Added (E)"]);
+  });
+
   test("swaps its icon when the icon changes", () => {
     const icon = new Signal<LightboxIcon>("play");
     const { result: button } = render(document, () => <LightboxButton icon={icon} label="Autoplay" onClick={vi.fn()} />);

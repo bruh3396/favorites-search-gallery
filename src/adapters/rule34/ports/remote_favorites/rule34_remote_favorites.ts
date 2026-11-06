@@ -1,6 +1,7 @@
 import { Post } from "@/core/domain/post/post";
 import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
+import { RemoteFavoriteAddResult } from "@/core/boundary/ports/remote_favorites/remote_favorite_add_result";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34AllFavoritesFetcher } from "@/adapters/rule34/ports/remote_favorites/rule34_all_favorites_fetcher";
@@ -68,9 +69,8 @@ export class Rule34RemoteFavorites implements RemoteFavorites {
     return this.dependencies.rule34Client.prioritizeFavorites(() => this.createMissingFavoritesFinder().findMissing(localPostIds, remoteStart));
   }
 
-  public async add(postId: string): Promise<boolean> {
-    const answer = await this.favoriteActions.add(postId);
-    return answer === "added" || answer === "alreadyAdded";
+  public add(postId: string): Promise<RemoteFavoriteAddResult> {
+    return this.favoriteActions.add(postId).catch((): RemoteFavoriteAddResult => "failed");
   }
 
   public remove(postId: string): Promise<boolean> {

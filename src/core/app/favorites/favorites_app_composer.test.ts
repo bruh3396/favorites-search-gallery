@@ -50,7 +50,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   const container = document.createElement("div");
   const memoryClient = new MemoryClient(posts);
 
-  composeFavoritesApp({ userOwnsFavorites: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
+  composeFavoritesApp({ userOwnsFavorites: true, userLoggedIn: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
     localTagCategories: new MemoryLocalTagCategories(),

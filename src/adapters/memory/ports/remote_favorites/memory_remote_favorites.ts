@@ -1,5 +1,6 @@
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { Post } from "@/core/domain/post/post";
+import { RemoteFavoriteAddResult } from "@/core/boundary/ports/remote_favorites/remote_favorite_add_result";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 
 export class MemoryRemoteFavorites implements RemoteFavorites {
@@ -23,9 +24,9 @@ export class MemoryRemoteFavorites implements RemoteFavorites {
     return Promise.resolve(localPostIds.filter(id => !remotePostIds.has(id)));
   }
 
-  public add(postId: string): Promise<boolean> {
+  public add(postId: string): Promise<RemoteFavoriteAddResult> {
     this.memoryClient.addFavorite(postId);
-    return Promise.resolve(true);
+    return Promise.resolve("added");
   }
 
   public remove(postId: string): Promise<boolean> {

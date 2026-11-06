@@ -86,7 +86,11 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const ownerState = favoritesState.get(favoritesOwnerId);
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, { submittedQueries: favoritesSearchHistory });
   const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
-  const favoritesService = createFavoritesService({ userOwnsFavorites: configuration.userOwnsFavorites, blacklistedTags: configuration.blacklistedTags }, {
+  const favoritesService = createFavoritesService({
+    userOwnsFavorites: configuration.userOwnsFavorites,
+    userLoggedIn: configuration.userLoggedIn,
+    blacklistedTags: configuration.blacklistedTags
+  }, {
     localFavorites, remoteFavorites, remotePages, scheduler, postLibrary, randomSource,
     favoritesPaginationPreferences: favoritesPreferences.pagination
   });
@@ -109,6 +113,12 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       createContent: favorite => composeFavoriteLightboxDetails(favorite, {
         preferences: lightboxPreferences.details, clipboard, scheduler, localTagCategories
       })
+    },
+    favorite: {
+      isFavorited: favorite => favoritesService.isFavorited(favorite.id),
+      add: (favorite): void => {
+        favoritesService.actions.add(favorite.id).catch(console.error);
+      }
     }
   });
   const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {

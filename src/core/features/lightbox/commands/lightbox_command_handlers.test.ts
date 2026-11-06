@@ -99,6 +99,20 @@ describe("createLightboxCommandHandlers", () => {
     expect(lightboxCommandHandlersDependencies.lightboxActions.download).toHaveBeenCalledWith(laterPost);
   });
 
+  test("adds the current item as a favorite", () => {
+    const { lightboxCommandHandlersDependencies } = setup();
+    const lightboxFavorite = { add: vi.fn() };
+
+    createLightboxCommandHandlers({ ...lightboxCommandHandlersDependencies, lightboxFavorite }).addFavorite();
+    expect(lightboxFavorite.add).toHaveBeenCalledWith(POST);
+  });
+
+  test("ignores adding a favorite without a favorite action", () => {
+    const { lightboxCommandHandlersDependencies } = setup();
+
+    expect(() => createLightboxCommandHandlers(lightboxCommandHandlersDependencies).addFavorite()).not.toThrow();
+  });
+
   test("flips the details panel's open state", () => {
     const { lightboxCommandHandlersDependencies } = setup();
     const isOpen = new KeyedStoredValue({ key: "detailsOpen", defaultValue: false }, { storedValueStorage: new MemoryLocalKeyedValues() });

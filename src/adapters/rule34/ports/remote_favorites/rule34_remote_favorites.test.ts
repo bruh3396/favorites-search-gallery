@@ -63,14 +63,14 @@ function createClient({
   return rule34Client;
 }
 
-function setup(clientOptions: ClientOptions = {}, addAnswer = "3"): Setup {
+function setup(clientOptions: ClientOptions = {}, addAnswer = "3", fetch = (): Promise<Response> => Promise.resolve(new Response(addAnswer))): Setup {
   const rule34Client = createClient(clientOptions);
   const scheduler = new MemoryScheduler();
   const rule34Document = { readFavoritesOwnerId: (): string => FAVORITES_OWNER_ID };
   const remoteFavorites = new Rule34RemoteFavorites({
     rule34Client,
     rule34Document,
-    fetch: (): Promise<Response> => Promise.resolve(new Response(addAnswer)),
+    fetch,
     scheduler,
     randomSource: new MemoryRandomSource([1])
   });
@@ -309,22 +309,32 @@ describe("Rule34RemoteFavorites", () => {
 
   describe("add", () => {
     test("counts a post the site already had as added", async() => {
-      expect(await setup({}, "1").remoteFavorites.add("7")).toBe(true);
+      expect(await setup({}, "1").remoteFavorites.add("7")).toBe("added");
     });
 
-    test("reports a refused add as not added", async() => {
-      expect(await setup({}, "2").remoteFavorites.add("7")).toBe(false);
+    test("reports a refused add as failed", async() => {
+      expect(await setup({}, "0").remoteFavorites.add("7")).toBe("failed");
     });
 
-    test("reports an add cancelled by a later remove as not added", async() => {
+    test("reports a logged out add", async() => {
+      expect(await setup({}, "2").remoteFavorites.add("7")).toBe("loggedOut");
+    });
+
+    test("reports a rejected request as failed", async() => {
+      const { remoteFavorites } = setup({}, "3", () => Promise.reject(new TypeError("offline")));
+
+      expect(await remoteFavorites.add("7")).toBe("failed");
+    });
+
+    test("reports an add cancelled by a later remove as failed", async() => {
       const { remoteFavorites, scheduler } = setup();
       const first = remoteFavorites.add("1");
       const second = remoteFavorites.add("2");
 
       await remoteFavorites.remove("2");
       await advanceAndSettle(scheduler, 1_000);
-      expect(await first).toBe(true);
-      expect(await second).toBe(false);
+      expect(await first).toBe("added");
+      expect(await second).toBe("failed");
     });
   });
 

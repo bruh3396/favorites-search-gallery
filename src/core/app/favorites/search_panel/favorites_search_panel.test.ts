@@ -23,7 +23,7 @@ interface Setup {
   searchable: Milestone;
   submit: Mock<(query: string) => void>;
   goTo: Mock<(pageNumber: number) => void>;
-  clearFilters: Mock<() => void>;
+  clearSearch: Mock<() => void>;
   settings: Signal<FavoritesSearchSettings>;
   skeleton: HTMLElement;
   emptyState: HTMLElement;
@@ -50,7 +50,7 @@ function setup(): Setup {
   const searchable = new Milestone();
   const submit = vi.fn<(query: string) => void>();
   const goTo = vi.fn<(pageNumber: number) => void>();
-  const clearFilters = vi.fn<() => void>();
+  const clearSearch = vi.fn<() => void>();
   const settings = new Signal(DEFAULT_FAVORITES_SEARCH_SETTINGS);
   const skeleton = document.createElement("div");
   const grid = document.createElement("div");
@@ -63,7 +63,7 @@ function setup(): Setup {
     pageNumber,
     pageCount: computed(() => Math.max(1, Math.ceil(searchResults.value.length / PAGE_SIZE))),
     goTo,
-    clearFilters
+    clearSearch
   };
   const { result: element, dispose } = render(document, () => h(FavoritesSearchPanel, {
     favoritesService,
@@ -78,7 +78,7 @@ function setup(): Setup {
   }));
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
-    element, dispose, searchResults, pageNumber, loadState, searchable, submit, goTo, clearFilters, settings, skeleton, emptyState, grid, trailingChild
+    element, dispose, searchResults, pageNumber, loadState, searchable, submit, goTo, clearSearch, settings, skeleton, emptyState, grid, trailingChild
   };
 }
 
@@ -128,16 +128,16 @@ describe("FavoritesSearchPanel", () => {
     expect(isHidden(emptyState)).toBe(true);
   });
 
-  test("clears the filters on request", () => {
-    const { searchable, settings, emptyState, clearFilters } = setup();
+  test("clears the search on request", () => {
+    const { searchable, settings, emptyState, clearSearch } = setup();
 
     searchable.reach();
     settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
     emptyState.querySelector("button")!.click();
-    expect(clearFilters).toHaveBeenCalledOnce();
+    expect(clearSearch).toHaveBeenCalledOnce();
   });
 
-  test("moves focus to the search box after clearing the filters", () => {
+  test("moves focus to the search box after clearing the search", () => {
     const { element, searchable, settings, emptyState } = setup();
 
     document.body.append(element);

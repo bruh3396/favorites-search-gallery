@@ -83,7 +83,8 @@ describe("FavoritesPagination", () => {
     { name: "updateSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateSettings({ sortKey: "score" }) },
     { name: "invert", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.invert() },
     { name: "shuffle", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.shuffle() },
-    { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() }
+    { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() },
+    { name: "clearSearch", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearSearch() }
   ])("goes back to the first page on $name", ({ act }) => {
     const { favoritesPagination, favoritesSearch } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
 

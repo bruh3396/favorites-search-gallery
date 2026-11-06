@@ -67,7 +67,7 @@ describe("MemoryRemoteFavorites", () => {
     const memoryClient = createMemory("3", "1", "2");
 
     memoryClient.removeFavorite("1");
-    expect(await new MemoryRemoteFavorites(memoryClient).add("1")).toBe(true);
+    expect(await new MemoryRemoteFavorites(memoryClient).add("1")).toBe("added");
     expect(memoryClient.readFavorites().map(post => post.id)).toEqual(["1", "3", "2"]);
   });
 });

@@ -1,9 +1,11 @@
+import { FavoriteAddResult } from "@/core/features/favorites/actions/favorite_add_result";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { Signal } from "@/core/utils/reactive/signal";
 
 export interface FavoritesActionsConfiguration {
   readonly favoritedByDefault: boolean;
+  readonly userLoggedIn: boolean;
 }
 
 export interface FavoritesActionsDependencies {
@@ -17,16 +19,26 @@ export class FavoritesActions {
 
   constructor(private readonly configuration: FavoritesActionsConfiguration, private readonly dependencies: FavoritesActionsDependencies) { }
 
-  public async add(postId: string): Promise<boolean> {
-    if (!this.dependencies.acceptsChanges()) {
-      return false;
+  public async add(postId: string): Promise<FavoriteAddResult> {
+    if (!this.configuration.userLoggedIn) {
+      return "loggedOut";
     }
-    const isAdded = await this.dependencies.remoteFavorites.add(postId);
 
-    if (isAdded) {
-      this.getSignal(postId).value = true;
+    if (!this.dependencies.acceptsChanges()) {
+      return "blocked";
     }
-    return isAdded;
+    const isFavorited = this.getSignal(postId);
+
+    if (isFavorited.peek()) {
+      return "added";
+    }
+    isFavorited.value = true;
+    const remoteFavoriteAddResult = await this.dependencies.remoteFavorites.add(postId);
+
+    if (remoteFavoriteAddResult !== "added") {
+      isFavorited.value = false;
+    }
+    return remoteFavoriteAddResult;
   }
 
   public async remove(postId: string): Promise<boolean> {
@@ -52,9 +64,9 @@ export class FavoritesActions {
     if (existing !== undefined) {
       return existing;
     }
-    const cell = new Signal(this.configuration.favoritedByDefault);
+    const isFavorited = new Signal(this.configuration.favoritedByDefault);
 
-    this.favorited.set(postId, cell);
-    return cell;
+    this.favorited.set(postId, isFavorited);
+    return isFavorited;
   }
 }

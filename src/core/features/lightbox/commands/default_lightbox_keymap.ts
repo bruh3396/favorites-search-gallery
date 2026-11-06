@@ -21,6 +21,8 @@ export const DEFAULT_LIGHTBOX_KEYMAP: Keymap<LightboxCommand> = {
   Z: "toggleZoom",
   i: "toggleDetails",
   I: "toggleDetails",
+  e: "addFavorite",
+  E: "addFavorite",
   Escape: "dismiss",
   Backspace: "close",
   Delete: "close"

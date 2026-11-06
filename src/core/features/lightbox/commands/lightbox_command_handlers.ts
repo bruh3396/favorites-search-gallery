@@ -4,6 +4,7 @@ import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_aut
 import { LightboxCloser } from "@/core/features/lightbox/close_morph/lightbox_closer";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
+import { LightboxFavorite } from "@/core/features/lightbox/favorite/lightbox_favorite";
 import { LightboxFullscreen } from "@/core/features/lightbox/lightbox_fullscreen";
 import { LightboxNavigation } from "@/core/features/lightbox/navigation/lightbox_navigation";
 import { LightboxStage } from "@/core/features/lightbox/media/lightbox_stage";
@@ -19,11 +20,12 @@ export interface LightboxCommandHandlersDependencies<T extends MediaItem> {
   lightboxCloser: Pick<LightboxCloser<T>, "close">;
   lightboxActions: LightboxActions;
   lightboxDetails?: Pick<LightboxDetails<T>, "isOpen">;
+  lightboxFavorite?: Pick<LightboxFavorite<T>, "add">;
 }
 
 export function createLightboxCommandHandlers<T extends MediaItem>(dependencies: LightboxCommandHandlersDependencies<T>): CommandHandlers<LightboxCommand> {
   const {
-    lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails
+    lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails, lightboxFavorite
   } = dependencies;
   const withCurrentItem = (run: (item: T) => void) => (): void => {
     const item = lightboxNavigation.currentItem.peek();
@@ -49,6 +51,7 @@ export function createLightboxCommandHandlers<T extends MediaItem>(dependencies:
     download: withCurrentItem(item => lightboxActions.download(item)),
     openPostPage: withCurrentItem(item => lightboxActions.openPostPage(item)),
     openOriginal: withCurrentItem(item => lightboxActions.openOriginal(item)),
-    close: (): void => lightboxCloser.close()
+    close: (): void => lightboxCloser.close(),
+    addFavorite: withCurrentItem(item => lightboxFavorite?.add(item))
   };
 }

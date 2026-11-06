@@ -93,6 +93,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
 
 composeFavoritesApp({
   userOwnsFavorites: ENVIRONMENT.ownsFavorites,
+  userLoggedIn: true,
   blacklistedTags: ENVIRONMENT.blacklistedTags,
   favoritesOwnerId: ENVIRONMENT.favoritesOwnerId,
   colorScheme: ENVIRONMENT.colorScheme

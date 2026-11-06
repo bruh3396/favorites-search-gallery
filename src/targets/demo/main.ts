@@ -54,6 +54,7 @@ function createDemoDependencies(): FavoritesAppDependencies {
 
 composeFavoritesApp({
   userOwnsFavorites: true,
+  userLoggedIn: true,
   blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
   colorScheme: readBrowserColorScheme()

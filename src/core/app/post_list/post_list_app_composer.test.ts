@@ -25,7 +25,9 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     fetchPage: index => Promise.resolve({ index, posts: [] })
   };
 
-  composePostListApp({ colorScheme: "light" }, {
+  composePostListApp({ colorScheme: "light", userLoggedIn: true }, {
+    remoteFavorites: { add: () => Promise.resolve("added"), remove: () => Promise.resolve(true) },
+    localFavorites: { remove: () => Promise.resolve() },
     scheduler: new MemoryScheduler(),
     visibilityObserver: { observe: (): (() => void) => () => { } },
     sizeObserver: new MemorySizeObserver(),

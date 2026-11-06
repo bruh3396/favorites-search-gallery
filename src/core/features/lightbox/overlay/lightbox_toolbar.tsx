@@ -1,10 +1,10 @@
+import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
 import { Keymap } from "@/core/ui/hotkeys/keymap";
 import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { findLightboxShortcut } from "@/core/features/lightbox/commands/lightbox_shortcut_finder";
-import { h } from "@/core/ui/h/h";
 
 export const LightboxToolbarClass = {
   root: "fsg-LightboxToolbar"
@@ -14,13 +14,15 @@ export interface LightboxToolbarProps {
   isAutoplaying: Readable<boolean>;
   inFullscreen: Readable<boolean>;
   detailsOpen?: Readable<boolean>;
+  leadingChild?: Child;
   handlers: CommandHandlers<LightboxCommand>;
   keymap: Keymap<LightboxCommand>;
 }
 
-export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, handlers, keymap }: LightboxToolbarProps): HTMLElement {
+export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, leadingChild, handlers, keymap }: LightboxToolbarProps): HTMLElement {
   return (
     <div className={LightboxToolbarClass.root}>
+      {leadingChild}
       <LightboxButton
         icon={computed(() => (isAutoplaying.value ? "pause" : "play"))}
         label="Autoplay"

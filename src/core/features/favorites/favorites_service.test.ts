@@ -39,7 +39,7 @@ function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites
   const localFavorites = new MemoryLocalFavorites();
   const favoritesPaginationPreferences = { pageSize: createStoredValue(2), infiniteScroll: createStoredValue(false) };
   const scheduler = new MemoryScheduler();
-  const favoritesService = createFavoritesService({ userOwnsFavorites, blacklistedTags: [] }, {
+  const favoritesService = createFavoritesService({ userOwnsFavorites, userLoggedIn: true, blacklistedTags: [] }, {
     localFavorites,
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePages: new MemoryRemotePages(memoryClient),

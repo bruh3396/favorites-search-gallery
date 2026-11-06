@@ -45,15 +45,15 @@ describe("Rule34FavoriteActions", () => {
   });
 
   test.each([
-    ["0", "error"],
-    ["1", "alreadyAdded"],
+    ["0", "failed"],
+    ["1", "added"],
     ["2", "loggedOut"],
     ["3", "added"],
-    ["?", "error"]
-  ])("reads the site's add answer %s as %s", async(siteAnswer, answer) => {
+    ["?", "failed"]
+  ])("reads the site's add answer %s as %s", async(siteAnswer, remoteFavoriteAddResult) => {
     const { rule34FavoriteActions } = setup(() => Promise.resolve(new Response(siteAnswer)));
 
-    expect(await rule34FavoriteActions.add("7")).toBe(answer);
+    expect(await rule34FavoriteActions.add("7")).toBe(remoteFavoriteAddResult);
   });
 
   test("ignores a failed upvote when adding", async() => {
@@ -90,7 +90,7 @@ describe("Rule34FavoriteActions", () => {
     await rule34FavoriteActions.remove("2");
     await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe("added");
-    expect(await second).toBeNull();
+    expect(await second).toBe("failed");
     expect(readRequestedUrls(fetch)).not.toContain(addFavoriteUrl("2"));
   });
 
@@ -115,7 +115,7 @@ describe("Rule34FavoriteActions", () => {
     await advanceAndSettle(scheduler, 1_000);
     expect(await first).toBe("added");
     expect(await waiting).toBe("added");
-    expect(await again).toBeNull();
+    expect(await again).toBe("failed");
     expect(readRequestedUrls(fetch).filter(url => url === addFavoriteUrl("2"))).toHaveLength(1);
   });
 });

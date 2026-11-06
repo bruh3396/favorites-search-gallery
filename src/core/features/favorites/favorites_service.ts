@@ -25,6 +25,7 @@ import { describeFavoritesLoadState } from "@/core/features/favorites/load/favor
 
 export interface FavoritesServiceConfiguration {
   readonly userOwnsFavorites: boolean;
+  readonly userLoggedIn: boolean;
   readonly blacklistedTags: readonly string[];
 }
 
@@ -58,7 +59,7 @@ export function createFavoritesService(configuration: FavoritesServiceConfigurat
   const favoritesSearchIndex = new FavoritesSearchIndex(stringInterner);
   const favoritesBlacklist = new FavoritesBlacklist({ blacklistedTags: configuration.blacklistedTags, force: !configuration.userOwnsFavorites });
   const { localFavorites, remoteFavorites, remotePages, scheduler, postLibrary } = dependencies;
-  const favoritesActions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites }, {
+  const favoritesActions = new FavoritesActions({ favoritedByDefault: configuration.userOwnsFavorites, userLoggedIn: configuration.userLoggedIn }, {
     remoteFavorites, localFavorites,
     acceptsChanges: (): boolean => !configuration.userOwnsFavorites || loaded.reached
   });

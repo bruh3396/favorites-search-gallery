@@ -10,4 +10,9 @@ describe("createLightboxIcon", () => {
     expect(svg.getAttribute("aria-hidden")).toBe("true");
     expect(svg.querySelector("path")?.getAttribute("d")).toBe(LIGHTBOX_ICON_PATHS.close);
   });
+
+  test("fills only the filled heart", () => {
+    expect(createLightboxIcon(document, "heartFilled", "test-icon").querySelector("path")?.getAttribute("fill")).toBe("currentColor");
+    expect(createLightboxIcon(document, "heartPlus", "test-icon").querySelector("path")?.hasAttribute("fill")).toBe(false);
+  });
 });

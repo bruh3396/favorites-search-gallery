@@ -23,7 +23,7 @@ export const FavoritesSearchPanelClass = {
 
 export interface FavoritesSearchPanelProps {
   favoritesService: Pick<FavoritesService, "loadState" | "searchable">;
-  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "pageNumber" | "pageCount" | "goTo" | "clearFilters">;
+  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "pageNumber" | "pageCount" | "goTo" | "clearSearch">;
   submittedQueries: Readable<readonly string[]>;
   submit: (query: string) => void;
   focusSearch: Emitter<void>;
@@ -56,7 +56,7 @@ export function FavoritesSearchPanel({
           action={computed(() => (panelBody.value.kind === "empty" && panelBody.value.offersClear ? {
             label: "Clear",
             onClick: (): void => {
-              favoritesSession.clearFilters();
+              favoritesSession.clearSearch();
               focusSearch.emit();
             }
           } : null))}

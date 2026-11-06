@@ -6,11 +6,13 @@ import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxArrow } from "@/core/features/lightbox/navigation/lightbox_arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { LightboxAutoplayBar } from "@/core/features/lightbox/autoplay/lightbox_autoplay_bar";
+import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxCloser } from "@/core/features/lightbox/close_morph/lightbox_closer";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanel } from "@/core/features/lightbox/details/lightbox_details_panel";
 import { LightboxDialog } from "@/core/features/lightbox/lightbox_dialog";
+import { LightboxFavorite } from "@/core/features/lightbox/favorite/lightbox_favorite";
 import { LightboxFrame } from "@/core/features/lightbox/lightbox_frame";
 import { LightboxFullscreen } from "@/core/features/lightbox/lightbox_fullscreen";
 import { LightboxGif } from "@/core/features/lightbox/media/lightbox_gif";
@@ -57,7 +59,8 @@ const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>([
   "dismiss",
   "close",
   "openPostPage",
-  "openOriginal"
+  "openOriginal",
+  "addFavorite"
 ]);
 
 export interface LightboxDialogConfiguration {
@@ -76,6 +79,7 @@ export interface LightboxDialogDependencies<T extends MediaItem> {
   lightboxPreferences: LightboxPreferences;
   locateItem: (item: T) => Element | undefined;
   lightboxDetails?: LightboxDetails<T>;
+  lightboxFavorite?: LightboxFavorite<T>;
 }
 
 export function composeLightboxDialog<T extends MediaItem>(
@@ -84,7 +88,7 @@ export function composeLightboxDialog<T extends MediaItem>(
 ): HTMLElement {
   const {
     scheduler, sizeObserver, viewport, remoteMedia, lightboxMediaResolver, lightboxActions, lightboxNavigation,
-    retainedItems, lightboxPreferences, locateItem, lightboxDetails
+    retainedItems, lightboxPreferences, locateItem, lightboxDetails, lightboxFavorite
   } = dependencies;
   const { mode, volume, muted } = lightboxPreferences;
   const simple = computed(() => mode.value === "simple");
@@ -119,7 +123,7 @@ export function composeLightboxDialog<T extends MediaItem>(
   });
   const handlers = limitToSimpleCommands(
     createLightboxCommandHandlers({
-      lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails
+      lightboxNavigation, lightboxStage, lightboxFullscreen, lightboxZoom, lightboxAutoplay, lightboxCloser, lightboxActions, lightboxDetails, lightboxFavorite
     }),
     simple
   );
@@ -131,6 +135,10 @@ export function composeLightboxDialog<T extends MediaItem>(
   });
   const { keymap } = configuration;
   const lightboxDetailsContent = lightboxDetails?.createContent(lightboxNavigation.currentItem);
+  const isFavorited = computed(() => {
+    const currentItem = lightboxNavigation.currentItem.value;
+    return currentItem !== undefined && lightboxFavorite?.isFavorited(currentItem) === true;
+  });
   return h(LightboxDialog, {
     isOpen: lightboxNavigation.isOpen,
     simple,
@@ -162,6 +170,12 @@ export function composeLightboxDialog<T extends MediaItem>(
           isAutoplaying: lightboxAutoplay.isPlaying,
           inFullscreen: lightboxFullscreen.inFullscreen,
           detailsOpen: lightboxDetails?.isOpen,
+          leadingChild: lightboxFavorite === undefined ? undefined : h(LightboxButton, {
+            icon: computed(() => (isFavorited.value ? "heartFilled" : "heartPlus")),
+            label: computed(() => (isFavorited.value ? "Favorited" : "Add to favorites")),
+            lightboxShortcut: findLightboxShortcut(keymap, "addFavorite"),
+            onClick: handlers.addFavorite
+          }),
           handlers,
           keymap
         }),

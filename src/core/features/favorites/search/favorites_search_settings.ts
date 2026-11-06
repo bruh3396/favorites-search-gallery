@@ -31,7 +31,7 @@ export const DEFAULT_FAVORITES_SEARCH_SETTINGS: FavoritesSearchSettings = {
 
 const FILTER_KEYS = ["query", "isInverted", "allowedRatings", "isBlacklistEnabled"] as const;
 
-export const UNFILTERED_FAVORITES_SEARCH_SETTINGS: Pick<FavoritesSearchSettings, (typeof FILTER_KEYS)[number]> = {
+const UNFILTERED_FAVORITES_SEARCH_SETTINGS: Pick<FavoritesSearchSettings, (typeof FILTER_KEYS)[number]> = {
   query: DEFAULT_FAVORITES_SEARCH_SETTINGS.query,
   isInverted: DEFAULT_FAVORITES_SEARCH_SETTINGS.isInverted,
   allowedRatings: DEFAULT_FAVORITES_SEARCH_SETTINGS.allowedRatings,

@@ -301,6 +301,32 @@ describe("FavoritesSearch", () => {
   });
 
   describe("clearFilters", () => {
+    test("shows every favorite the query matches again", () => {
+      const { favoritesSearch } = setup([
+        createPost({ id: "1", tags: "apple", rating: "safe" }),
+        createPost({ id: "2", tags: "apple", rating: "explicit" }),
+        createPost({ id: "3", tags: "banana", rating: "safe" })
+      ]);
+
+      favoritesSearch.submit("apple");
+      favoritesSearch.updateSettings({ allowedRatings: toRatingMask("safe") });
+      favoritesSearch.clearFilters();
+      expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
+    });
+
+    test("puts everything but the query back to its default", () => {
+      const { favoritesSearch } = setup();
+
+      favoritesSearch.submit("apple");
+      favoritesSearch.updateSettings({ sortKey: "score", isSortAscending: true, allowedRatings: toRatingMask("safe"), isBlacklistEnabled: true });
+      favoritesSearch.invert();
+      favoritesSearch.shuffle();
+      favoritesSearch.clearFilters();
+      expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ query: "apple", shuffleSeed: 0 }));
+    });
+  });
+
+  describe("clearSearch", () => {
     test("shows every favorite again", () => {
       const { favoritesSearch } = setup([
         createPost({ id: "1", tags: "apple", rating: "safe" }),
@@ -310,20 +336,18 @@ describe("FavoritesSearch", () => {
       favoritesSearch.updateSettings({ allowedRatings: toRatingMask("safe"), isBlacklistEnabled: true });
       favoritesSearch.submit("banana");
       favoritesSearch.invert();
-      favoritesSearch.clearFilters();
+      favoritesSearch.clearSearch();
       expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
     });
 
-    test("keeps the sort and the shuffle", () => {
+    test("puts every setting back to its default", () => {
       const { favoritesSearch } = setup();
 
+      favoritesSearch.submit("apple");
       favoritesSearch.updateSettings({ sortKey: "score", isSortAscending: true });
       favoritesSearch.shuffle();
-      favoritesSearch.submit("apple");
-      favoritesSearch.shuffle();
-      favoritesSearch.clearFilters();
-      expect(favoritesSearch.settings.value)
-        .toEqual(buildFavoritesSearchSettings({ sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 2 ** 31 }));
+      favoritesSearch.clearSearch();
+      expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ shuffleSeed: 0 }));
     });
   });
 
@@ -333,7 +357,8 @@ describe("FavoritesSearch", () => {
       { name: "updateSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateSettings({ sortKey: "score" }) },
       { name: "invert", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.invert() },
       { name: "shuffle", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.shuffle() },
-      { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() }
+      { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() },
+      { name: "clearSearch", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearSearch() }
     ])("fires once on $name", ({ act }) => {
       const { favoritesSearch } = setup();
       let count = 0;

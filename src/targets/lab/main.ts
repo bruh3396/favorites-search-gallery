@@ -74,6 +74,7 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
 function startApp(environment: Environment, favoritesAppDependencies: FavoritesAppDependencies, container: HTMLElement): void {
   composeFavoritesApp({
     userOwnsFavorites: environment.ownsFavorites,
+    userLoggedIn: true,
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
     colorScheme: environment.colorScheme

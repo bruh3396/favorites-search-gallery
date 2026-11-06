@@ -68,6 +68,10 @@ export class FavoritesSession {
     this.search.clearFilters();
   }
 
+  public clearSearch(): void {
+    this.search.clearSearch();
+  }
+
   public goTo(pageNumber: number): void {
     this.pagination.goTo(pageNumber);
   }
