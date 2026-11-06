@@ -1,5 +1,5 @@
 import { FavoritesPagination, FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
-import { FavoritesSearchSettings, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchSettings, countChangedFavoritesSearchSettings, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -21,6 +21,7 @@ export interface FavoritesSessionDependencies {
 export class FavoritesSession {
   public readonly query: Readable<string>;
   public readonly isFiltered: Readable<boolean>;
+  public readonly changedFilterCount: Readable<number>;
   private readonly search: FavoritesSearch;
   private readonly pagination: FavoritesPagination;
 
@@ -34,6 +35,7 @@ export class FavoritesSession {
     this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: favoritesPaginationPreferences });
     this.query = computed(() => this.search.settings.value.query);
     this.isFiltered = computed(() => isFilteringFavoritesSearchSettings(this.search.settings.value));
+    this.changedFilterCount = computed(() => countChangedFavoritesSearchSettings(this.search.settings.value));
   }
 
   public get searchSettings(): Readable<FavoritesSearchSettings> {
@@ -62,6 +64,18 @@ export class FavoritesSession {
 
   public submit(query: string): void {
     this.search.submit(query);
+  }
+
+  public invert(): void {
+    this.search.invert();
+  }
+
+  public shuffle(): void {
+    this.search.shuffle();
+  }
+
+  public updateSearchSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {
+    this.search.updateSettings(partialFavoritesSearchSettings);
   }
 
   public clearFilters(): void {

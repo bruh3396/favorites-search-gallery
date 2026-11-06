@@ -83,8 +83,9 @@ export class FavoritesSearch {
   public updateSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {
     const sortWasChanged = partialFavoritesSearchSettings.sortKey !== undefined || partialFavoritesSearchSettings.isSortAscending !== undefined;
     const isShuffled = this.#settings.peek().isShuffled && !sortWasChanged;
+    const shuffleSeed = partialFavoritesSearchSettings.sortKey === "random" ? this.drawSeed() : this.#settings.peek().shuffleSeed;
 
-    this.applySettings({ ...partialFavoritesSearchSettings, isShuffled });
+    this.applySettings({ ...partialFavoritesSearchSettings, isShuffled, shuffleSeed });
   }
 
   public dispose(): void {

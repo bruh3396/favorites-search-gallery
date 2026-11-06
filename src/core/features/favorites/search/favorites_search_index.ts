@@ -1,3 +1,4 @@
+import { ALL_POST_STATUSES_MASK } from "@/core/domain/post/post_status_mask";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { Emitter } from "@/core/utils/reactive/emitter";
@@ -70,8 +71,12 @@ export class FavoritesSearchIndex {
     return this.bitSearchEngine.getTermsStartingWith(prefix);
   }
 
-  public match({ searchExpression, allowedRatings }: FavoritesSearchRequest, candidateFavorites?: readonly Favorite[]): readonly Favorite[] {
-    return searchExpression === undefined ? [] : this.filterByRating(this.bitSearchEngine.search(searchExpression, candidateFavorites), allowedRatings);
+  public match({ searchExpression, allowedRatings, allowedStatuses }: FavoritesSearchRequest, candidateFavorites?: readonly Favorite[]): readonly Favorite[] {
+    if (searchExpression === undefined) {
+      return [];
+    }
+    const searchedFavorites = this.bitSearchEngine.search(searchExpression, candidateFavorites);
+    return this.filterByStatus(this.filterByRating(searchedFavorites, allowedRatings), allowedStatuses);
   }
 
   private markPopulated(): void {
@@ -82,6 +87,10 @@ export class FavoritesSearchIndex {
 
   private filterByRating(favorites: readonly Favorite[], allowedRatings: number): readonly Favorite[] {
     return allowedRatings === ALL_RATINGS_MASK ? favorites : favorites.filter(favorite => isRatingAllowed(favorite, allowedRatings));
+  }
+
+  private filterByStatus(favorites: readonly Favorite[], allowedStatuses: number): readonly Favorite[] {
+    return allowedStatuses === ALL_POST_STATUSES_MASK ? favorites : favorites.filter(favorite => isStatusAllowed(favorite, allowedStatuses));
   }
 
   private shuffle(favorites: readonly Favorite[], seed: number): readonly Favorite[] {
@@ -112,4 +121,8 @@ export class FavoritesSearchIndex {
 
 function isRatingAllowed(favorite: Favorite, mask: number): boolean {
   return (favorite.ratingBit & mask) !== 0;
+}
+
+function isStatusAllowed(favorite: Favorite, mask: number): boolean {
+  return (favorite.statusBit & mask) !== 0;
 }

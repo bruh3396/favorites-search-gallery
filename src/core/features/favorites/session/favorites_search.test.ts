@@ -226,6 +226,23 @@ describe("FavoritesSearch", () => {
       favoritesSearch.updateSettings(change);
       expect(favoritesSearch.settings.value.isShuffled).toBe(isShuffled);
     });
+
+    test("draws a new seed each time the random sort is picked", () => {
+      const { favoritesSearch } = setup();
+
+      favoritesSearch.updateSettings({ sortKey: "random" });
+      expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 30);
+      favoritesSearch.updateSettings({ sortKey: "random" });
+      expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 31);
+    });
+
+    test("keeps the random order when a filter changes", () => {
+      const { favoritesSearch } = setup();
+
+      favoritesSearch.updateSettings({ sortKey: "random" });
+      favoritesSearch.updateSettings({ allowedRatings: toRatingMask("safe") });
+      expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 30);
+    });
   });
 
   describe("shuffle", () => {
@@ -278,6 +295,13 @@ describe("FavoritesSearch", () => {
       favoritesSearch.invert();
       favoritesSearch.invert();
       expect(getResultPostIds(favoritesSearch)).toEqual(["1"]);
+    });
+
+    test("shows nothing while the query is empty", () => {
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"));
+
+      favoritesSearch.invert();
+      expect(getResultPostIds(favoritesSearch)).toEqual([]);
     });
 
     test("keeps the inversion for a new query", () => {

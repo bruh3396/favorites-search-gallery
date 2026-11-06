@@ -1,9 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { ArenaFavorite } from "@/core/features/favorites/collection/arena_favorite";
 import { FavoritesColumnarArena } from "@/core/features/favorites/collection/favorites_columnar_arena";
+import { POST_STATUSES } from "@/core/domain/post/post_status";
 import { RATINGS } from "@/core/domain/post/rating";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { createPost } from "@/testing/post";
+import { toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { toRatingMask } from "@/core/domain/post/rating_mask";
 
 describe("ArenaFavorite", () => {
@@ -32,6 +34,12 @@ describe("ArenaFavorite", () => {
     const arenaFavorite = new ArenaFavorite(createPost({ id: "1", rating }), new FavoritesColumnarArena(new StringInterner()));
 
     expect(arenaFavorite.ratingBit).toBe(toRatingMask(rating));
+  });
+
+  test.each(POST_STATUSES)("reads the bit of a %s status from the arena", status => {
+    const arenaFavorite = new ArenaFavorite(createPost({ id: "1", status }), new FavoritesColumnarArena(new StringInterner()));
+
+    expect(arenaFavorite.statusBit).toBe(toPostStatusMask(status));
   });
 
   test("keeps distinct favorites on independent slots", () => {

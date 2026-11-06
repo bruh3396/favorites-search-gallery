@@ -38,6 +38,7 @@ function createFavorite(postId: string): Favorite {
     media: { kind: "image", locator: `images/${postId}` },
     isNew: false,
     ratingBit: 0,
+    statusBit: 0,
     tags: new Set(),
     getMetric: () => 100
   };

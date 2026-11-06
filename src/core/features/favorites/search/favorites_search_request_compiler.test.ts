@@ -11,11 +11,11 @@ const NO_BLACKLIST = new FavoritesBlacklist({ blacklistedTags: [], force: false 
 describe("compileFavoritesSearchRequest", () => {
   test("copies the sort, rating, and shuffle settings", () => {
     const favoritesSearchSettings = buildFavoritesSearchSettings({
-      sortKey: "score", isSortAscending: true, allowedRatings: 1, isShuffled: true, shuffleSeed: 7
+      sortKey: "score", isSortAscending: true, allowedRatings: 1, allowedStatuses: 2, isShuffled: true, shuffleSeed: 7
     });
 
     expect(compileFavoritesSearchRequest(favoritesSearchSettings, NO_BLACKLIST))
-      .toMatchObject({ sortKey: "score", isSortAscending: true, allowedRatings: 1, isShuffled: true, shuffleSeed: 7 });
+      .toMatchObject({ sortKey: "score", isSortAscending: true, allowedRatings: 1, allowedStatuses: 2, isShuffled: true, shuffleSeed: 7 });
   });
 
   test("parses the query into the expression", () => {

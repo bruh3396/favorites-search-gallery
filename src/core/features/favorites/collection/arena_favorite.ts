@@ -38,6 +38,10 @@ export class ArenaFavorite implements Favorite {
     return this.favoritesColumnarArena.getRatingBit(this.slot);
   }
 
+  public get statusBit(): number {
+    return this.favoritesColumnarArena.getStatusBit(this.slot);
+  }
+
   public getMetric(metric: Metric): number {
     return this.favoritesColumnarArena.getMetric(this.slot, metric);
   }

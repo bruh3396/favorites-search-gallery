@@ -45,6 +45,10 @@ export class FavoritesColumnarArena {
     return this.postTable.getRatingBit(slot);
   }
 
+  public getStatusBit(slot: number): number {
+    return this.postTable.getStatusBit(slot);
+  }
+
   public getMetric(slot: number, metric: Metric): number {
     return this.postTable.getMetric(slot, metric);
   }

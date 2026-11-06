@@ -6,6 +6,7 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites
 import { Post } from "@/core/domain/post/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { buildFavoritesSearchRequest } from "@/core/features/favorites/testing/favorites_search_request_builder";
+import { toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { toRatingMask } from "@/core/domain/post/rating_mask";
 
 interface Setup {
@@ -150,6 +151,12 @@ describe("FavoritesSearchIndex", () => {
       expect(getPostIds(favoritesSearchIndex.search(buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe") })))).toEqual(["1"]);
     });
 
+    test("keeps only favorites whose status is allowed", () => {
+      const { favoritesSearchIndex } = setup([createPost({ id: "1", status: "deleted" }), createPost({ id: "2", status: "active" })]);
+
+      expect(getPostIds(favoritesSearchIndex.search(buildFavoritesSearchRequest({ allowedStatuses: toPostStatusMask("deleted") })))).toEqual(["1"]);
+    });
+
     test("returns nothing without an expression", () => {
       const { favoritesSearchIndex } = setup(createTaggedPosts("apple", "banana"));
 
@@ -236,6 +243,23 @@ describe("FavoritesSearchIndex", () => {
       const { favorites, favoritesSearchIndex } = setup([createPost({ id: "1", rating: "safe" }), createPost({ id: "2", rating: "explicit" })]);
 
       expect(getPostIds(favoritesSearchIndex.match(buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe") }), favorites))).toEqual(["1"]);
+    });
+
+    test("keeps only candidates whose status is allowed", () => {
+      const { favorites, favoritesSearchIndex } = setup([createPost({ id: "1", status: "purged" }), createPost({ id: "2", status: "active" })]);
+
+      expect(getPostIds(favoritesSearchIndex.match(buildFavoritesSearchRequest({ allowedStatuses: toPostStatusMask("purged") }), favorites))).toEqual(["1"]);
+    });
+
+    test("keeps candidates allowed by both rating and status", () => {
+      const { favorites, favoritesSearchIndex } = setup([
+        createPost({ id: "1", rating: "safe", status: "deleted" }),
+        createPost({ id: "2", rating: "safe", status: "active" }),
+        createPost({ id: "3", rating: "explicit", status: "deleted" })
+      ]);
+      const favoritesSearchRequest = buildFavoritesSearchRequest({ allowedRatings: toRatingMask("safe"), allowedStatuses: toPostStatusMask("deleted") });
+
+      expect(getPostIds(favoritesSearchIndex.match(favoritesSearchRequest, favorites))).toEqual(["1"]);
     });
 
     test("keeps the indexed order regardless of the sort order", () => {

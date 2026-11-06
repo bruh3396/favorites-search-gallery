@@ -3,6 +3,7 @@ import { FavoritesPostTable } from "@/core/features/favorites/collection/favorit
 import { POST_STATUSES } from "@/core/domain/post/post_status";
 import { RATINGS } from "@/core/domain/post/rating";
 import { createPost } from "@/testing/post";
+import { toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { toRatingMask } from "@/core/domain/post/rating_mask";
 
 describe("FavoritesPostTable", () => {
@@ -84,6 +85,15 @@ describe("FavoritesPostTable", () => {
 
       favoritesPostTable.write(0, createPost({ id: "1", rating }));
       expect(favoritesPostTable.getRatingBit(0)).toBe(toRatingMask(rating));
+    });
+  });
+
+  describe("getStatusBit", () => {
+    test.each(POST_STATUSES)("reads the bit of a %s status", status => {
+      const favoritesPostTable = new FavoritesPostTable();
+
+      favoritesPostTable.write(0, createPost({ id: "1", status }));
+      expect(favoritesPostTable.getStatusBit(0)).toBe(toPostStatusMask(status));
     });
   });
 

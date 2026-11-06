@@ -6,6 +6,7 @@ export interface FavoritesSearchRequest {
   readonly sortKey: FavoritesSortKey;
   readonly isSortAscending: boolean;
   readonly allowedRatings: number;
+  readonly allowedStatuses: number;
   readonly isShuffled: boolean;
   readonly shuffleSeed: number;
 }

@@ -16,6 +16,7 @@ function createFavorite(width: number, height: number): Favorite {
     media: { kind: "image", locator: "" },
     isNew: false,
     ratingBit: 0,
+    statusBit: 0,
     tags: new Set(),
     getMetric: metric => (metric === "width" ? width : height)
   };

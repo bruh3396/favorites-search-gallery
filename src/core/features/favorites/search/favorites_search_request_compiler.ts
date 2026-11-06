@@ -8,11 +8,11 @@ export function compileFavoritesSearchRequest(
   favoritesSearchSettings: FavoritesSearchSettings,
   favoritesBlacklist: FavoritesBlacklist
 ): FavoritesSearchRequest {
-  const { query, isInverted, sortKey, isSortAscending, allowedRatings, isShuffled, shuffleSeed } = favoritesSearchSettings;
+  const { query, isInverted, sortKey, isSortAscending, allowedRatings, allowedStatuses, isShuffled, shuffleSeed } = favoritesSearchSettings;
   const parsedSearchExpression = tryParseSearchExpression(query);
   const querySearchExpression = parsedSearchExpression !== undefined && isInverted ? SearchExpression.not(parsedSearchExpression) : parsedSearchExpression;
   const searchExpression = querySearchExpression === undefined ? undefined : favoritesBlacklist.apply(querySearchExpression, favoritesSearchSettings);
-  return { searchExpression, sortKey, isSortAscending, allowedRatings, isShuffled, shuffleSeed };
+  return { searchExpression, sortKey, isSortAscending, allowedRatings, allowedStatuses, isShuffled, shuffleSeed };
 }
 
 function tryParseSearchExpression(query: string): SearchExpression | undefined {

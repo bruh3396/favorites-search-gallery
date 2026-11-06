@@ -5,4 +5,5 @@ export interface Favorite extends MediaItem, MetricSearchable {
   readonly numericId: number;
   readonly isNew: boolean;
   readonly ratingBit: number;
+  readonly statusBit: number;
 }

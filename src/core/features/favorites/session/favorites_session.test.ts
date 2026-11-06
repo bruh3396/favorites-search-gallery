@@ -73,6 +73,19 @@ describe("FavoritesSession", () => {
     });
   });
 
+  describe("changedFilterCount", () => {
+    test("follows the filters and ignores the query", () => {
+      const { favoritesSession } = setup([]);
+
+      favoritesSession.submit("apple");
+      favoritesSession.invert();
+      favoritesSession.updateSearchSettings({ sortKey: "score" });
+      expect(favoritesSession.changedFilterCount.value).toBe(2);
+      favoritesSession.clearFilters();
+      expect(favoritesSession.changedFilterCount.value).toBe(0);
+    });
+  });
+
   describe("submit", () => {
     test("shows the first page of the new results", () => {
       const { favoritesSession } = setup(createTaggedPosts("a", "b", "a", "a", "a"));
@@ -80,6 +93,34 @@ describe("FavoritesSession", () => {
       favoritesSession.goTo(2);
       favoritesSession.submit("a");
       expect([favoritesSession.pageNumber.value, getPagePostIds(favoritesSession)]).toEqual([1, ["1", "3"]]);
+    });
+  });
+
+  describe("invert", () => {
+    test("shows the favorites not matching the query", () => {
+      const { favoritesSession } = setup(createTaggedPosts("a", "b"));
+
+      favoritesSession.submit("a");
+      favoritesSession.invert();
+      expect(getPagePostIds(favoritesSession)).toEqual(["2"]);
+    });
+  });
+
+  describe("shuffle", () => {
+    test("shuffles the results", () => {
+      const { favoritesSession } = setup(createTaggedPosts("a", "b"));
+
+      favoritesSession.shuffle();
+      expect(favoritesSession.searchSettings.value.isShuffled).toBe(true);
+    });
+  });
+
+  describe("updateSearchSettings", () => {
+    test("searches with the changed settings", () => {
+      const { favoritesSession } = setup([createPost({ id: "1", score: 1 }), createPost({ id: "2", score: 2 })]);
+
+      favoritesSession.updateSearchSettings({ sortKey: "score" });
+      expect(getPagePostIds(favoritesSession)).toEqual(["2", "1"]);
     });
   });
 
