@@ -34,20 +34,27 @@ export const DEFAULT_FAVORITES_SEARCH_SETTINGS: FavoritesSearchSettings = {
 
 const FILTER_KEYS = ["query", "isInverted", "allowedRatings", "allowedStatuses", "isBlacklistEnabled"] as const;
 
+const ORDER_KEYS = ["sortKey", "isSortAscending", "isShuffled"] as const;
+
+const COUNTED_KEY_GROUPS: readonly (readonly (keyof FavoritesSearchSettings)[])[] = [
+  ["sortKey", "isSortAscending"],
+  ["isShuffled"],
+  ["isInverted"],
+  ["isBlacklistEnabled"],
+  ["allowedStatuses"],
+  ["allowedRatings"]
+];
+
 export function isFilteringFavoritesSearchSettings(favoritesSearchSettings: FavoritesSearchSettings): boolean {
   return FILTER_KEYS.some(key => favoritesSearchSettings[key] !== DEFAULT_FAVORITES_SEARCH_SETTINGS[key]);
 }
 
+export function isReorderingFavoritesSearchSettings(favoritesSearchSettings: Pick<FavoritesSearchSettings, (typeof ORDER_KEYS)[number]>): boolean {
+  return ORDER_KEYS.some(key => favoritesSearchSettings[key] !== DEFAULT_FAVORITES_SEARCH_SETTINGS[key]);
+}
+
 export function countChangedFavoritesSearchSettings(favoritesSearchSettings: FavoritesSearchSettings): number {
-  const { isInverted, sortKey, isSortAscending, allowedRatings, allowedStatuses, isBlacklistEnabled, isShuffled } = DEFAULT_FAVORITES_SEARCH_SETTINGS;
-  return [
-    favoritesSearchSettings.sortKey !== sortKey || favoritesSearchSettings.isSortAscending !== isSortAscending,
-    favoritesSearchSettings.isShuffled !== isShuffled,
-    favoritesSearchSettings.isInverted !== isInverted,
-    favoritesSearchSettings.isBlacklistEnabled !== isBlacklistEnabled,
-    favoritesSearchSettings.allowedStatuses !== allowedStatuses,
-    favoritesSearchSettings.allowedRatings !== allowedRatings
-  ].filter(Boolean).length;
+  return COUNTED_KEY_GROUPS.filter(keys => keys.some(key => favoritesSearchSettings[key] !== DEFAULT_FAVORITES_SEARCH_SETTINGS[key])).length;
 }
 
 export const FAVORITES_SEARCH_SETTINGS_GUARDS: FieldGuards<FavoritesSearchSettings> = {

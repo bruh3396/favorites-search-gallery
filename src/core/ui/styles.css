@@ -8,6 +8,9 @@
 @import "./components/stepper/stepper.css" layer(components);
 @import "./components/listbox/listbox.css" layer(components);
 @import "./components/dropdown/dropdown.css" layer(components);
+@import "./components/option_menu/option_menu.css" layer(components);
+@import "./components/chip/chip.css" layer(components);
+@import "./components/chip_menu/chip_menu.css" layer(components);
 @import "./components/setting_row/setting_row.css" layer(components);
 @import "./components/disclosure/disclosure.css" layer(components);
 @import "./settings/settings_screen.css" layer(components);
@@ -26,6 +29,7 @@
 @import "./components/activity_bar/activity_bar.css" layer(components);
 @import "./components/view_pane/view_pane.css" layer(components);
 @import "./components/icon_button/icon_button.css" layer(components);
+@import "./components/count_badge/count_badge.css" layer(components);
 @import "./components/key_cap/key_cap.css" layer(components);
 
 @import "./zen.css" layer(utilities);

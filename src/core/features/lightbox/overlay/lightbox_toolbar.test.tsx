@@ -61,10 +61,17 @@ describe("LightboxToolbar", () => {
   test.each<[string, Signal<boolean> | null, string[]]>([
     ["with details", new Signal(false), ["Autoplay", "Details", "Open post page", "Fullscreen", "Close"]],
     ["without details", null, ["Autoplay", "Open post page", "Fullscreen", "Close"]]
-  ])("orders buttons %s", (_case, detailsOpen, expected) => {
+  ])("orders the shown buttons %s", (_case, detailsOpen, expected) => {
     const { root } = setup(detailsOpen);
+    const shownButtons = [...root.querySelectorAll("button")].filter(button => button.closest("[hidden]") === null);
 
-    expect(Array.from(root.querySelectorAll("button"), button => button.getAttribute("aria-label"))).toEqual(expected);
+    expect(shownButtons.map(button => button.getAttribute("aria-label"))).toEqual(expected);
+  });
+
+  test("hides Download", () => {
+    const { root } = setup(null);
+
+    expect(root.querySelector("button[aria-label=Download]")!.closest("[hidden]")).not.toBeNull();
   });
 
   test.each<[string, LightboxCommand]>([

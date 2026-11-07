@@ -2,6 +2,7 @@ import { Dropdown, DropdownClass } from "@/core/ui/components/dropdown/dropdown"
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import DROPDOWN_CSS from "@/core/ui/components/dropdown/dropdown.css?inline";
+import { OptionMenuClass } from "@/core/ui/components/option_menu/option_menu";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
@@ -42,11 +43,11 @@ function setup(initialSort: Sort = "score"): Setup {
 }
 
 function queryMenu(): HTMLElement | null {
-  return document.querySelector(`.${DropdownClass.menu}`);
+  return document.querySelector(`.${OptionMenuClass.root}`);
 }
 
 function queryOptions(): HTMLElement[] {
-  return [...document.querySelectorAll<HTMLElement>(`.${DropdownClass.option}`)];
+  return [...document.querySelectorAll<HTMLElement>(`.${OptionMenuClass.option}`)];
 }
 
 function press(trigger: HTMLElement, key: string): void {

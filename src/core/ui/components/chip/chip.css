@@ -1,0 +1,44 @@
+.fsg-Chip {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 5px;
+  box-sizing: border-box;
+  block-size: var(--fsg-control-size-small);
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-shape-corner-full);
+  background-color: var(--fsg-color-surface-dim);
+  color: inherit;
+  font: inherit;
+  font-size: var(--fsg-typescale-label-medium-size);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Chip:where(:hover, [aria-expanded="true"]) {
+  border-color: var(--fsg-color-on-surface-variant);
+}
+
+.fsg-Chip:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: 1px;
+}
+
+.fsg-Chip-label {
+  color: var(--fsg-color-on-surface-variant);
+}
+
+.fsg-Chip:where([data-highlighted="true"]) {
+  border-color: var(--fsg-color-primary);
+  background-color: var(--fsg-color-secondary-container);
+  color: var(--fsg-color-on-secondary-container);
+}
+
+.fsg-Chip:where([data-highlighted="true"]) .fsg-Chip-label {
+  color: inherit;
+  opacity: 0.75;
+}

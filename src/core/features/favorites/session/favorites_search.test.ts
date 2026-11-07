@@ -227,19 +227,19 @@ describe("FavoritesSearch", () => {
       expect(favoritesSearch.settings.value.isShuffled).toBe(isShuffled);
     });
 
-    test("draws a new seed each time the random sort is picked", () => {
+    test("keeps the seed each time the random sort is picked", () => {
       const { favoritesSearch } = setup();
 
+      favoritesSearch.shuffle();
+      favoritesSearch.updateSettings({ sortKey: "random" });
       favoritesSearch.updateSettings({ sortKey: "random" });
       expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 30);
-      favoritesSearch.updateSettings({ sortKey: "random" });
-      expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 31);
     });
 
-    test("keeps the random order when a filter changes", () => {
+    test("keeps the seed when a filter changes", () => {
       const { favoritesSearch } = setup();
 
-      favoritesSearch.updateSettings({ sortKey: "random" });
+      favoritesSearch.shuffle();
       favoritesSearch.updateSettings({ allowedRatings: toRatingMask("safe") });
       expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 30);
     });
@@ -259,6 +259,14 @@ describe("FavoritesSearch", () => {
       favoritesSearch.shuffle();
       favoritesSearch.shuffle();
       expect(favoritesSearch.settings.value.shuffleSeed).toBe(2 ** 31);
+    });
+
+    test("stays on the random sort with a new seed", () => {
+      const { favoritesSearch } = setup();
+
+      favoritesSearch.updateSettings({ sortKey: "random" });
+      favoritesSearch.shuffle();
+      expect(favoritesSearch.settings.value).toMatchObject({ sortKey: "random", isShuffled: false, shuffleSeed: 2 ** 30 });
     });
 
     test("reorders the results", () => {
@@ -324,7 +332,27 @@ describe("FavoritesSearch", () => {
     });
   });
 
-  describe("clearFilters", () => {
+  describe("toggleBlacklist", () => {
+    test("hides the blacklisted favorites, then shows them again", () => {
+      const { favoritesSearch } = setup(createTaggedPosts("apple", "banana"), { blacklistedTags: ["apple"] });
+
+      favoritesSearch.toggleBlacklist();
+      const hiddenPostIds = getResultPostIds(favoritesSearch);
+
+      favoritesSearch.toggleBlacklist();
+      expect([hiddenPostIds, getResultPostIds(favoritesSearch)]).toEqual([["2"], ["1", "2"]]);
+    });
+
+    test("stays shuffled", () => {
+      const { favoritesSearch } = setup();
+
+      favoritesSearch.shuffle();
+      favoritesSearch.toggleBlacklist();
+      expect(favoritesSearch.settings.value.isShuffled).toBe(true);
+    });
+  });
+
+  describe("resetSettings", () => {
     test("shows every favorite the query matches again", () => {
       const { favoritesSearch } = setup([
         createPost({ id: "1", tags: "apple", rating: "safe" }),
@@ -334,7 +362,7 @@ describe("FavoritesSearch", () => {
 
       favoritesSearch.submit("apple");
       favoritesSearch.updateSettings({ allowedRatings: toRatingMask("safe") });
-      favoritesSearch.clearFilters();
+      favoritesSearch.resetSettings();
       expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
     });
 
@@ -345,7 +373,7 @@ describe("FavoritesSearch", () => {
       favoritesSearch.updateSettings({ sortKey: "score", isSortAscending: true, allowedRatings: toRatingMask("safe"), isBlacklistEnabled: true });
       favoritesSearch.invert();
       favoritesSearch.shuffle();
-      favoritesSearch.clearFilters();
+      favoritesSearch.resetSettings();
       expect(favoritesSearch.settings.value).toEqual(buildFavoritesSearchSettings({ query: "apple", shuffleSeed: 0 }));
     });
   });
@@ -380,8 +408,9 @@ describe("FavoritesSearch", () => {
       { name: "submit", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.submit("a") },
       { name: "updateSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateSettings({ sortKey: "score" }) },
       { name: "invert", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.invert() },
+      { name: "toggleBlacklist", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.toggleBlacklist() },
       { name: "shuffle", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.shuffle() },
-      { name: "clearFilters", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearFilters() },
+      { name: "resetSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.resetSettings() },
       { name: "clearSearch", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearSearch() }
     ])("fires once on $name", ({ act }) => {
       const { favoritesSearch } = setup();

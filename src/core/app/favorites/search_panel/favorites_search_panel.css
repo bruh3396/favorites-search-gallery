@@ -26,10 +26,6 @@
     flex: none;
   }
 
-  .fsg-FavoritesSearchPanel-filter {
-    margin-inline-end: 4px;
-  }
-
   .fsg-FavoritesSearchPanel-count {
     display: flex;
     flex: none;
@@ -37,6 +33,7 @@
     user-select: none;
     block-size: 16px;
     margin-block: 6px;
+    margin-inline-start: 4px;
     padding: 0 16px 0 12px;
     border-inline-start: 1px solid var(--fsg-color-outline-variant);
     color: var(--fsg-color-on-surface-variant);

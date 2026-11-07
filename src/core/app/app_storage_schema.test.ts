@@ -38,14 +38,6 @@ describe("APP_STORAGE_SCHEMA", () => {
     expect(createFavorites(localKeyedValues).pagination.pageSize.value).toBe(createFavorites().pagination.pageSize.value);
   });
 
-  test("shows the tab strip by default and restores it hidden once stored", () => {
-    const localKeyedValues = new MemoryLocalKeyedValues();
-
-    expect(createFavorites(localKeyedValues).tabStripVisible.value).toBe(true);
-    createFavorites(localKeyedValues).tabStripVisible.set(false);
-    expect(createFavorites(localKeyedValues).tabStripVisible.value).toBe(false);
-  });
-
   test("keeps the post list's grid and lightbox apart from the favorites'", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const { favorites, postList } = createStoredTree(APP_STORAGE_SCHEMA.preferences, localKeyedValues, ["favorites", "postList"]);
@@ -127,6 +119,30 @@ describe("APP_STORAGE_SCHEMA", () => {
 
       localKeyedValues.set("favoritesSearchHistory", ["cat", 2]);
       expect(createFavoritesSearchHistory(localKeyedValues).value).toEqual([]);
+    });
+
+    function createFavoritesTabStripVisible(localKeyedValues: MemoryLocalKeyedValues): AppState["favoritesTabStripVisible"] {
+      return createStoredTree(APP_STORAGE_SCHEMA.state, localKeyedValues, ["favoritesTabStripVisible"]).favoritesTabStripVisible;
+    }
+
+    test("shows the tab strip by default and restores it hidden once stored", () => {
+      const localKeyedValues = new MemoryLocalKeyedValues();
+
+      expect(createFavoritesTabStripVisible(localKeyedValues).value).toBe(true);
+      createFavoritesTabStripVisible(localKeyedValues).set(false);
+      expect(createFavoritesTabStripVisible(localKeyedValues).value).toBe(false);
+    });
+
+    function createFavoritesSearchSettingsVisible(localKeyedValues: MemoryLocalKeyedValues): AppState["favoritesSearchSettingsVisible"] {
+      return createStoredTree(APP_STORAGE_SCHEMA.state, localKeyedValues, ["favoritesSearchSettingsVisible"]).favoritesSearchSettingsVisible;
+    }
+
+    test("hides the search settings by default and restores them shown once stored", () => {
+      const localKeyedValues = new MemoryLocalKeyedValues();
+
+      expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(false);
+      createFavoritesSearchSettingsVisible(localKeyedValues).set(true);
+      expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(true);
     });
   });
 });

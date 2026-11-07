@@ -22,6 +22,7 @@ import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_po
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
+import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -95,13 +96,16 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
       changed: postListService.changed,
       tileLocator,
       settings: gridPreferences,
-      visibilityObserver,
       sizeObserver,
-      imageLoaderService,
-      getSize: post => ({ width: post.width, height: post.height }),
-      createActions: () => [],
-      getPostUrl: post => remotePages.postUrl(post.id),
-      onPlainClick: post => lightbox.open(listSequence, post)
+      createTile: (post, sizing) => h(Tile, {
+        mediaItem: post,
+        size: { width: post.width, height: post.height },
+        sizing,
+        actions: [],
+        visibilityObserver, imageLoaderService,
+        href: remotePages.postUrl(post.id),
+        onPlainClick: () => lightbox.open(listSequence, post)
+      })
     }),
     lightboxView: lightbox.createView()
   });

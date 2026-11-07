@@ -2,6 +2,7 @@ import { describe, expect, onTestFinished, test, vi } from "vitest";
 import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { FavoritesAppClass } from "@/core/app/favorites/favorites_app";
+import { FavoritesSearchPanelClass } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { LightboxButtonClass } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxPositionClass } from "@/core/features/lightbox/navigation/lightbox_position";
 import { LightboxViewportClass } from "@/core/features/lightbox/zoom/lightbox_viewport";
@@ -31,6 +32,7 @@ import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
+import { TabStripClass } from "@/core/ui/components/tabs/tab_strip";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
@@ -111,6 +113,13 @@ function clickSettingsSwitch(root: ShadowRoot, label: string): void {
   [...root.querySelectorAll<HTMLButtonElement>(`.${SwitchClass.root}`)]
     .find(control => control.ariaLabelledByElements?.[0]?.textContent === label)!
     .click();
+}
+
+function dispatchDrag(tab: HTMLElement, type: string, dataTransfer: DataTransfer): void {
+  const event = new MouseEvent(type, { bubbles: true, cancelable: true, clientX: 0 });
+
+  Object.defineProperty(event, "dataTransfer", { value: dataTransfer });
+  tab.dispatchEvent(event);
 }
 
 function pressKey(root: ShadowRoot, key: string): void {
@@ -360,10 +369,57 @@ describe("composeFavoritesApp", () => {
     expect([before, countWatched()]).toEqual([1, 0]);
   });
 
+  test("opens, closes, and closes all tabs from the tab strip", () => {
+    const root = mount();
+    const countTabs = (): number => root.querySelectorAll("[role=tab]").length;
+    const click = (selector: string): void => root.querySelector<HTMLButtonElement>(selector)!.click();
+
+    click(`.${TabStripClass.add}`);
+    click(`.${TabStripClass.add}`);
+    const opened = countTabs();
+
+    click(`.${TabStripClass.close}`);
+    const afterClose = countTabs();
+
+    click(`.${TabStripClass.closeAll}`);
+    expect([opened, afterClose, countTabs()]).toEqual([3, 2, 1]);
+  });
+
+  test("activates a clicked tab and moves a tab dropped on another", () => {
+    const root = mount();
+    const readSelectedTabs = (): (string | null)[] => [...root.querySelectorAll("[role=tab]")].map(tab => tab.getAttribute("aria-selected"));
+
+    root.querySelector<HTMLButtonElement>(`.${TabStripClass.add}`)!.click();
+    const [firstTab, secondTab] = [...root.querySelectorAll<HTMLElement>(`.${TabStripClass.tab}`)];
+    const dataTransfer = new DataTransfer();
+
+    firstTab.querySelector<HTMLButtonElement>("[role=tab]")!.click();
+    const afterClick = readSelectedTabs();
+
+    firstTab.getBoundingClientRect = (): DOMRect => ({ left: 0, width: 100 }) as DOMRect;
+    dispatchDrag(secondTab, "dragstart", dataTransfer);
+    dispatchDrag(firstTab, "drop", dataTransfer);
+    expect([afterClick, readSelectedTabs()]).toEqual([["true", "false"], ["false", "true"]]);
+  });
+
+  test("hides and shows the tab strip from the Tabs toggle, keeping the shown panel", () => {
+    const root = mount();
+    const queryPanel = (): Element | null => root.querySelector(`.${FavoritesSearchPanelClass.root}`);
+    const isStripHidden = (): boolean => root.querySelector("[role=tablist]")!.closest("[hidden]") !== null;
+    const toggle = root.querySelector<HTMLButtonElement>("button[aria-label=\"Tabs\"]")!;
+    const panel = queryPanel();
+
+    toggle.click();
+    const wasHidden = isStripHidden();
+
+    toggle.click();
+    expect([wasHidden, isStripHidden(), queryPanel()]).toEqual([true, false, panel]);
+  });
+
   test("enters zen from the search panel's zen button", () => {
     const root = mount();
 
-    root.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Enter Zen\"]")!.click();
     expect(root.querySelector(`.${FavoritesAppClass.root}`)!.hasAttribute("data-zen")).toBe(true);
   });
 
@@ -380,7 +436,7 @@ describe("composeFavoritesApp", () => {
   test("exits zen on Escape", () => {
     const root = mount();
 
-    root.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Enter Zen\"]")!.click();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     expect(root.querySelector(`.${FavoritesAppClass.root}`)!.hasAttribute("data-zen")).toBe(false);
   });
@@ -562,7 +618,7 @@ describe("composeFavoritesApp", () => {
     expect([navigator.opened, dialog.open]).toEqual([["#post-1", "https://originals/1.png"], true]);
   });
 
-  test.skip("saves the lightbox favorite's original, named by its id, from the download button", async() => {
+  test("saves the lightbox favorite's original, named by its id, from the download button", async() => {
     const fileSaver = new MemoryFileSaver();
     const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { fileSaver });
 

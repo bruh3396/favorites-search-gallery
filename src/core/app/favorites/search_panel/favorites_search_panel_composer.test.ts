@@ -1,6 +1,7 @@
 import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/collection/search_history";
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { CountBadgeClass } from "@/core/ui/components/count_badge/count_badge";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -21,6 +22,7 @@ import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal } from "@/core/utils/reactive/signal";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -41,11 +43,18 @@ interface Setup {
   enterZen: Mock<() => void>;
   navigator: MemoryNavigator;
   searchHistory: SearchHistory;
+  favoritesTabStripVisible: StoredValue<boolean>;
+  tabCount: Signal<number>;
 }
 
-function setup(posts: Post[] = []): Setup {
+function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Setup {
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
+  const { favoritesTabStripVisible, favoritesSearchSettingsVisible } = createStoredTree(
+    APP_STORAGE_SCHEMA.state,
+    new MemoryLocalKeyedValues(),
+    ["favoritesTabStripVisible", "favoritesSearchSettingsVisible"]
+  );
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
     observe: element => {
@@ -58,6 +67,7 @@ function setup(posts: Post[] = []): Setup {
   const open = vi.fn<(sequence: unknown, favorite: Favorite) => boolean>(() => true);
   const enterZen = vi.fn<() => void>();
   const navigator = new MemoryNavigator();
+  const tabCount = new Signal(1);
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, {
     submittedQueries: new KeyedStoredValue<readonly string[]>(
       { key: "submittedQueries", defaultValue: [] },
@@ -76,7 +86,7 @@ function setup(posts: Post[] = []): Setup {
 
   favoritesSession.start();
   const scheduler = new MemoryScheduler();
-  const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(favoritesSession), {
+  const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(favoritesSession), { userOwnsFavorites }, {
     favoritesService: {
       loadState: new Signal<FavoritesLoadState>({ phase: "starting" }),
       searchable: new Milestone(),
@@ -85,7 +95,9 @@ function setup(posts: Post[] = []): Setup {
       countFavoritesWithTag: tag => favoritesSearchIndex.countFavoritesWithTag(tag)
     },
     favoritesPreferences,
-    tabCount: new Signal(1),
+    favoritesTabStripVisible,
+    favoritesSearchSettingsVisible,
+    tabCount,
     searchHistory,
     favoriteSizeRecorder: { sizes: [] },
     visibilityObserver,
@@ -97,7 +109,7 @@ function setup(posts: Post[] = []): Setup {
     postActions: { openOriginal: vi.fn() },
     enterZen
   }));
-  return { element, dispose, favoritesSession, watched, open, enterZen, navigator, searchHistory };
+  return { element, dispose, favoritesSession, watched, open, enterZen, navigator, searchHistory, favoritesTabStripVisible, tabCount };
 }
 
 function queryTileLinks(element: HTMLElement): HTMLAnchorElement[] {
@@ -116,6 +128,13 @@ describe("composeFavoritesSearchPanel", () => {
     const { element } = setup([createPost({ id: "1" })]);
 
     expect(readShownPostUrls(element)).toEqual(["#post-1"]);
+  });
+
+  test("shapes each favorite's tile after its post's size", () => {
+    const { element } = setup([createPost({ id: "1", width: 300, height: 200 })]);
+    const tile = queryTileLinks(element)[0].closest<HTMLElement>(`.${TileClass.root}`)!;
+
+    expect(tile.style.getPropertyValue("--fsg-Tile-aspect-ratio")).toBe("300 / 200");
   });
 
   test("shows only the tab's current page in the grid", () => {
@@ -204,10 +223,86 @@ describe("composeFavoritesSearchPanel", () => {
     expect([favoritesSession.query.value, searchHistory.submittedQueries.value]).toEqual(["dog", ["dog", "cat"]]);
   });
 
+  test("opens and closes the search settings row from the funnel", () => {
+    const { element } = setup();
+    const row = element.querySelector<HTMLElement>("[role=group][aria-label=Filters]")!;
+    const funnel = element.querySelector<HTMLButtonElement>("button[aria-label=Filters]")!;
+    const isRowHidden = (): boolean => row.closest("[hidden]") !== null;
+
+    expect(isRowHidden()).toBe(true);
+    funnel.click();
+    expect(isRowHidden()).toBe(false);
+    funnel.click();
+    expect(isRowHidden()).toBe(true);
+  });
+
+  test("searches the tab from the search settings row and counts the change on the funnel", () => {
+    const { element, favoritesSession } = setup();
+    const funnel = element.querySelector<HTMLButtonElement>("button[aria-label=Filters]")!;
+    const invert = [...element.querySelectorAll("button")].find(button => button.textContent === "Invert")!;
+
+    invert.click();
+    expect([favoritesSession.searchSettings.value.isInverted, funnel.getAttribute("aria-label")]).toEqual([true, "Filters, 1 changed"]);
+  });
+
+  test("counts the changed search settings on the funnel only while there are some, shown or not", () => {
+    const { element, favoritesSession } = setup();
+    const funnel = element.querySelector<HTMLButtonElement>("button[aria-label^=Filters]")!;
+    const badge = funnel.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
+    const readBadge = (): [boolean, string] => [badge.hidden, badge.textContent!];
+    const unchanged = readBadge();
+
+    favoritesSession.invert();
+    favoritesSession.updateSearchSettings({ sortKey: "score" });
+    const changed = readBadge();
+
+    funnel.click();
+    expect([unchanged, changed, readBadge()]).toEqual([[true, "0"], [false, "2"], [false, "2"]]);
+  });
+
+  test("leaves Blacklist out of the search settings row on someone else's favorites", () => {
+    const hasBlacklist = (element: HTMLElement): boolean => [...element.querySelectorAll("button")].some(button => button.textContent === "Blacklist");
+
+    expect([hasBlacklist(setup().element), hasBlacklist(setup([], { userOwnsFavorites: false }).element)]).toEqual([true, false]);
+  });
+
+  test("toggles the tab strip from the Tabs button and reports it as pressed while shown", () => {
+    const { element, favoritesTabStripVisible } = setup();
+    const tabsButton = element.querySelector<HTMLButtonElement>("button[aria-label^=Tabs]")!;
+    const readState = (): [boolean, string | null] => [favoritesTabStripVisible.value, tabsButton.getAttribute("aria-pressed")];
+    const before = readState();
+
+    tabsButton.click();
+    const hidden = readState();
+
+    tabsButton.click();
+    expect([before, hidden, readState()]).toEqual([[true, "true"], [false, "false"], [true, "true"]]);
+  });
+
+  test("counts the open tabs on the Tabs button only while the strip hides more than one", () => {
+    const { element, favoritesTabStripVisible, tabCount } = setup();
+    const tabsButton = element.querySelector<HTMLButtonElement>("button[aria-label^=Tabs]")!;
+    const badge = tabsButton.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
+    const readBadge = (): [boolean, string, string | null] => [badge.hidden, badge.textContent!, tabsButton.getAttribute("aria-label")];
+
+    tabCount.value = 3;
+    const shown = readBadge();
+
+    favoritesTabStripVisible.set(false);
+    const hidden = readBadge();
+
+    tabCount.value = 1;
+    expect([shown, hidden, readBadge()]).toEqual([
+      [true, "0", "Tabs"],
+      [false, "3", "Tabs, 3 open"],
+      [true, "0", "Tabs"]
+    ]);
+  });
+
   test("enters zen from the zen button", () => {
     const { element, enterZen } = setup();
 
-    element.querySelector<HTMLButtonElement>("button[aria-label=Zen]")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label=\"Enter Zen\"]")!.click();
     expect(enterZen).toHaveBeenCalledOnce();
   });
 

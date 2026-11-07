@@ -58,6 +58,26 @@ describe("composePostListApp", () => {
     expect(mount(localKeyedValues).querySelector<HTMLElement>(`.${PostGridClass.root}`)!.dataset.layout).toBe("row");
   });
 
+  test("links each post's tile to its page", () => {
+    const link = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]).querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!;
+
+    link.dispatchEvent(new Event("pointerdown"));
+    expect(link.getAttribute("href")).toBe("#post-1");
+  });
+
+  test("shapes each post's tile after its size", () => {
+    const tile = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1", width: 300, height: 200 })]).querySelector<HTMLElement>(`.${TileClass.root}`)!;
+
+    expect(tile.style.getPropertyValue("--fsg-Tile-aspect-ratio")).toBe("300 / 200");
+  });
+
+  test("opens a clicked post in the lightbox", () => {
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]);
+
+    root.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
+    expect(root.querySelector("dialog")!.open).toBe(true);
+  });
+
   test("leaves a tile's click to its post link while the lightbox is off", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
     const click = new MouseEvent("click", { bubbles: true, cancelable: true });

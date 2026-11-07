@@ -48,7 +48,6 @@ export const APP_STORAGE_SCHEMA = {
         pageSize: createStoredValueDefinition(50, isPageSize),
         infiniteScroll: createStoredValueDefinition(false)
       },
-      tabStripVisible: createStoredValueDefinition(true),
       nativeHeaderVisible: createStoredValueDefinition(true),
       activeTool: createStoredValueDefinition<string | null>(null, isToolId)
     },
@@ -62,7 +61,9 @@ export const APP_STORAGE_SCHEMA = {
       workspace: createStoredValueDefinition(DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC),
       sizes: createStoredValueDefinition(PLACEHOLDER_FAVORITE_SIZES, isSizeList)
     }),
-    favoritesSearchHistory: createStoredValueDefinition(NO_QUERIES, createListGuard(isString))
+    favoritesSearchHistory: createStoredValueDefinition(NO_QUERIES, createListGuard(isString)),
+    favoritesTabStripVisible: createStoredValueDefinition(true),
+    favoritesSearchSettingsVisible: createStoredValueDefinition(false)
   }
 };
 

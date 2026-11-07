@@ -4,17 +4,16 @@ import { Emitter } from "@/core/utils/reactive/emitter";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
 import { SearchBoxAssist } from "@/core/ui/components/search_box/search_box_assist";
 import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
+import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const FavoritesSearchPanelClass = {
   root: "fsg-FavoritesSearchPanel",
   header: "fsg-FavoritesSearchPanel-header",
   search: "fsg-FavoritesSearchPanel-search",
-  filter: "fsg-FavoritesSearchPanel-filter",
   count: "fsg-FavoritesSearchPanel-count",
   paginator: "fsg-FavoritesSearchPanel-paginator",
   trailing: "fsg-FavoritesSearchPanel-trailing",
@@ -23,10 +22,12 @@ export const FavoritesSearchPanelClass = {
 
 export interface FavoritesSearchPanelProps {
   favoritesService: Pick<FavoritesService, "loadState" | "searchable">;
-  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "pageNumber" | "pageCount" | "goTo" | "clearSearch">;
+  favoritesSession: Pick<FavoritesSession, "query" | "isFiltered" | "matchedFavorites" | "searched" | "pageNumber" | "pageCount" | "goTo" | "clearSearch">;
   submittedQueries: Readable<readonly string[]>;
   submit: (query: string) => void;
   focusSearch: Emitter<void>;
+  fieldTrailingChild: Child;
+  subheaderChild: Child;
   trailingChild: Child;
   fieldPopupChild?: Child;
   searchBoxAssist?: SearchBoxAssist;
@@ -37,8 +38,8 @@ export interface FavoritesSearchPanelProps {
 }
 
 export function FavoritesSearchPanel({
-  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, trailingChild, fieldPopupChild, searchBoxAssist, activeDescendantElement, skeleton,
-  grid, searchElsewhere
+  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, fieldTrailingChild, subheaderChild, trailingChild, fieldPopupChild,
+  searchBoxAssist, activeDescendantElement, skeleton, grid, searchElsewhere
 }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
@@ -65,6 +66,10 @@ export function FavoritesSearchPanel({
       {grid}
     </div>
   );
+
+  onCleanup(favoritesSession.searched.on(() => {
+    body.scrollTop = 0;
+  }));
   return (
     <section className={FavoritesSearchPanelClass.root}>
       <header className={FavoritesSearchPanelClass.header}>
@@ -74,7 +79,7 @@ export function FavoritesSearchPanel({
             query={favoritesSession.query}
             submittedQueries={submittedQueries}
             trailingChild={[
-              <IconButton className={FavoritesSearchPanelClass.filter} icon="filter" label="Filters" disabled={true} />,
+              fieldTrailingChild,
               <span className={FavoritesSearchPanelClass.count}>
                 {computed(() => describeResultCount(favoritesSession.matchedFavorites.value.length))}
               </span>
@@ -83,10 +88,7 @@ export function FavoritesSearchPanel({
             focusRequests={focusSearch}
             assist={searchBoxAssist}
             activeDescendantElement={activeDescendantElement}
-            onSearch={query => {
-              submit(query);
-              body.scrollTop = 0;
-            }}
+            onSearch={submit}
             searchElsewhere={searchElsewhere}
           />
         </div>
@@ -102,6 +104,7 @@ export function FavoritesSearchPanel({
         </div>
         <div className={FavoritesSearchPanelClass.trailing}>{trailingChild}</div>
       </header>
+      {subheaderChild}
       {body}
     </section>
   );

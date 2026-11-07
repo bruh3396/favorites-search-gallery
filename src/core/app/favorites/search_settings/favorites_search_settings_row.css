@@ -1,0 +1,15 @@
+@layer components {
+  .fsg-FavoritesSearchSettingsRow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border-block-end: 1px solid var(--fsg-color-outline-variant);
+    background: var(--fsg-color-surface-container);
+  }
+
+  .fsg-FavoritesSearchSettingsRow-reset {
+    margin-inline-start: auto;
+  }
+}

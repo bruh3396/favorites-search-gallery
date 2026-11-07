@@ -1,15 +1,11 @@
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
 import { GridSizing } from "@/core/ui/post_grid/layout/grid_sizing";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { KeyedList } from "@/core/ui/h/keyed_list";
 import { MediaItem } from "@/core/domain/media/media_item";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
-import { Size } from "@/core/utils/geometry/size";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
-import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
-import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { h } from "@/core/ui/h/h";
 import { onCleanup } from "@/core/utils/reactive/scope";
 import { tileGrid } from "@/core/ui/post_grid/layout/grid_tiler";
@@ -28,76 +24,28 @@ export interface PostGridProps<T extends MediaItem> {
   changed: Occurrence<T>;
   tileLocator?: TileLocator<T>;
   settings: PostGridSettings;
-  visibilityObserver: VisibilityObserver;
   sizeObserver: SizeObserver;
-  imageLoaderService: Pick<ImageLoaderService, "resolvePreviewUrl" | "createLoader">;
-  getSize: (post: T) => Size;
-  createActions: (post: T) => readonly Node[];
-  getPostUrl?: (post: T) => string;
-  onPlainClick: (post: T) => boolean;
-  onCtrlClick?: (post: T) => void;
+  createTile: (post: T, sizing: Readable<GridSizing>) => HTMLElement;
 }
 
 export function PostGrid<T extends MediaItem>(props: PostGridProps<T>): HTMLElement {
-  return new PostGridImplementation(props).create();
-}
+  const { posts, changed, tileLocator, settings: { layout, columnCount }, sizeObserver, createTile } = props;
+  const root: HTMLElement = <div className={PostGridClass.root} />;
+  const gridWidth = new Signal(0);
+  const sizing = computed(() => ({ layout: layout.value, columnCount: columnCount.value, gridWidth: gridWidth.value }));
+  const list = new KeyedList<T>({
+    getKey: (post): string => post.id,
+    create: (post): HTMLElement => createTile(post, sizing)
+  });
 
-class PostGridImplementation<T extends MediaItem> {
-  private readonly root: HTMLElement;
-  private readonly gridWidth: Signal<number>;
-  private readonly sizing: Readable<GridSizing>;
-  private readonly list: KeyedList<T>;
+  onCleanup(sizeObserver.observe(root, observedSize => {
+    gridWidth.value = observedSize.devicePixelWidth;
+  }));
+  effect(() => tileGrid(root, list.reconcile(posts.value), { layout: layout.value, columnCount: columnCount.value }));
+  onCleanup(changed.on(post => list.recreate(post)));
 
-  constructor(private readonly postGridProps: PostGridProps<T>) {
-    const { layout, columnCount } = postGridProps.settings;
-
-    this.root = <div className={PostGridClass.root} />;
-    this.gridWidth = new Signal(0);
-    this.sizing = computed(() => ({ layout: layout.value, columnCount: columnCount.value, gridWidth: this.gridWidth.value }));
-    this.list = this.createPostList();
+  if (tileLocator !== undefined) {
+    onCleanup(tileLocator.attach(post => list.get(post)));
   }
-
-  public create(): HTMLElement {
-    const { posts, changed, tileLocator, sizeObserver } = this.postGridProps;
-
-    onCleanup(sizeObserver.observe(this.root, observedSize => {
-      this.gridWidth.value = observedSize.devicePixelWidth;
-    }));
-    effect(() => this.reconcilePosts(posts.value));
-    onCleanup(changed.on(post => this.list.recreate(post)));
-
-    if (tileLocator !== undefined) {
-      onCleanup(tileLocator.attach(post => this.list.get(post)));
-    }
-    return this.root;
-  }
-
-  private reconcilePosts(posts: readonly T[]): void {
-    const { layout, columnCount } = this.postGridProps.settings;
-
-    tileGrid(this.root, this.list.reconcile(posts), { layout: layout.value, columnCount: columnCount.value });
-  }
-
-  private createPostList(): KeyedList<T> {
-    const {
-      getSize, createActions, visibilityObserver, imageLoaderService, getPostUrl,
-      onPlainClick, onCtrlClick
-    } = this.postGridProps;
-    return new KeyedList<T>({
-      getKey: (post): string => post.id,
-      create: (post): HTMLElement => (
-        <Tile
-          mediaItem={post}
-          size={getSize(post)}
-          sizing={this.sizing}
-          actions={createActions(post)}
-          visibilityObserver={visibilityObserver}
-          imageLoaderService={imageLoaderService}
-          href={getPostUrl?.(post)}
-          onPlainClick={() => onPlainClick(post)}
-          onCtrlClick={onCtrlClick === undefined ? undefined : (): void => onCtrlClick(post)}
-        />
-      )
-    });
-  }
+  return root;
 }

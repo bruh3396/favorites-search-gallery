@@ -29,6 +29,8 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { StatusText } from "@/core/ui/components/status_text/status_text";
+import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { bindAppearance } from "@/core/app/appearance_binder";
@@ -81,8 +83,12 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const sharedPreferences = createSharedPreferences(appStorage.preferences, colorScheme, hostPage);
   const appPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites", "postList"]);
   const { favorites: favoritesPreferences, postList: postListPreferences } = appPreferences;
-  const appState = createStoredTree(APP_STORAGE_SCHEMA.state, appStorage.state, ["favorites", "favoritesSearchHistory"]);
-  const { favorites: favoritesState, favoritesSearchHistory } = appState;
+  const appState = createStoredTree(
+    APP_STORAGE_SCHEMA.state,
+    appStorage.state,
+    ["favorites", "favoritesSearchHistory", "favoritesTabStripVisible", "favoritesSearchSettingsVisible"]
+  );
+  const { favorites: favoritesState, favoritesSearchHistory, favoritesTabStripVisible, favoritesSearchSettingsVisible } = appState;
   const ownerState = favoritesState.get(favoritesOwnerId);
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, { submittedQueries: favoritesSearchHistory });
   const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
@@ -128,7 +134,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   lightbox.settled.on(favorite => favoritesWorkspace.turnToPageContaining(favorite));
   lightbox.closed.on(favorite => favoritesWorkspace.reveal(favorite));
 
-  const tabCount = computed(() => favoritesWorkspace.tabManager.tabs.value.length);
+  const { tabManager } = favoritesWorkspace;
+  const tabCount = computed(() => tabManager.tabs.value.length);
   const zenEnabled = new Signal(false);
   const previewedTheme = new Signal<Theme | null>(null);
   const resetSettings = (): void => {
@@ -147,14 +154,24 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
 
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
         favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled, resetSettings,
+        tabsHeaderChild: h("div", { hidden: computed(() => !favoritesTabStripVisible.value) }, h(TabStrip, {
+          tabs: computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable }))),
+          activeTabId: tabManager.activeTabId,
+          trailingChild: h(StatusText, { text: favoritesService.loadStatus }),
+          onActivate: tabId => tabManager.activate(tabId),
+          onClose: tabId => favoritesWorkspace.closeTab(tabId),
+          onMove: (tabId, index) => tabManager.move(tabId, index),
+          onAdd: () => favoritesWorkspace.openBlankTab(),
+          onCloseAll: () => favoritesWorkspace.closeAllTabs()
+        })),
         renderTool: () => h(FavoritesSettings, {
           favoritesPreferences, sharedPreferences, stepperScheduler: scheduler,
           onThemePreview: (theme): void => {
             previewedTheme.value = theme;
           }
         }),
-        renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, {
-          favoritesService, favoritesPreferences, tabCount, searchHistory, favoriteSizeRecorder,
+        renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
+          favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, tabCount, searchHistory, favoriteSizeRecorder,
           visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, lightbox, postActions,
           enterZen: (): void => {
             zenEnabled.value = true;

@@ -5,6 +5,7 @@ import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesSearch } from "@/core/features/favorites/session/favorites_search";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
+import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export interface FavoritesSessionConfiguration {
@@ -21,7 +22,7 @@ export interface FavoritesSessionDependencies {
 export class FavoritesSession {
   public readonly query: Readable<string>;
   public readonly isFiltered: Readable<boolean>;
-  public readonly changedFilterCount: Readable<number>;
+  public readonly changedSearchSettingCount: Readable<number>;
   private readonly search: FavoritesSearch;
   private readonly pagination: FavoritesPagination;
 
@@ -35,7 +36,7 @@ export class FavoritesSession {
     this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: favoritesPaginationPreferences });
     this.query = computed(() => this.search.settings.value.query);
     this.isFiltered = computed(() => isFilteringFavoritesSearchSettings(this.search.settings.value));
-    this.changedFilterCount = computed(() => countChangedFavoritesSearchSettings(this.search.settings.value));
+    this.changedSearchSettingCount = computed(() => countChangedFavoritesSearchSettings(this.search.settings.value));
   }
 
   public get searchSettings(): Readable<FavoritesSearchSettings> {
@@ -44,6 +45,10 @@ export class FavoritesSession {
 
   public get matchedFavorites(): Readable<readonly Favorite[]> {
     return this.search.matchedFavorites;
+  }
+
+  public get searched(): Occurrence<void> {
+    return this.search.searched;
   }
 
   public get pageFavorites(): Readable<readonly Favorite[]> {
@@ -70,6 +75,10 @@ export class FavoritesSession {
     this.search.invert();
   }
 
+  public toggleBlacklist(): void {
+    this.search.toggleBlacklist();
+  }
+
   public shuffle(): void {
     this.search.shuffle();
   }
@@ -78,8 +87,8 @@ export class FavoritesSession {
     this.search.updateSettings(partialFavoritesSearchSettings);
   }
 
-  public clearFilters(): void {
-    this.search.clearFilters();
+  public resetSearchSettings(): void {
+    this.search.resetSettings();
   }
 
   public clearSearch(): void {

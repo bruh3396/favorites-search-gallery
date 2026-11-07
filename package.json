@@ -39,7 +39,7 @@
     "check:titles": "node checks/convention_checker.cjs titles",
     "check:conventions": "node checks/convention_checker.cjs",
     "verify": "npm run test && npm run check:siblings && npm run typecheck && npm run lint",
-    "continuous-integration": "npm run build && npm run verify && npm run check:conventions",
+    "continuous-integration": "npm run build && node scripts/bin/check_runner",
     "release-checks": "npm run continuous-integration && npm run test:frozen-cobalt",
     "release": "npm run compile-scripts && node scripts/bin/release",
     "release:patch": "npm run release -- patch",

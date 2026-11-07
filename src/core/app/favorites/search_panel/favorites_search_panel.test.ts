@@ -18,6 +18,7 @@ interface Setup {
   element: HTMLElement;
   dispose: () => void;
   searchResults: Signal<readonly Favorite[]>;
+  searched: Emitter<void>;
   pageNumber: Signal<number>;
   loadState: Signal<FavoritesLoadState>;
   searchable: Milestone;
@@ -28,6 +29,8 @@ interface Setup {
   skeleton: HTMLElement;
   emptyState: HTMLElement;
   grid: HTMLElement;
+  fieldTrailingChild: HTMLElement;
+  subheaderChild: HTMLElement;
   trailingChild: HTMLElement;
 }
 
@@ -46,6 +49,7 @@ function createFavorite(postId: string): Favorite {
 
 function setup(): Setup {
   const searchResults = new Signal<readonly Favorite[]>([]);
+  const searched = new Emitter<void>();
   const pageNumber = new Signal(1);
   const loadState = new Signal<FavoritesLoadState>({ phase: "starting" });
   const searchable = new Milestone();
@@ -55,12 +59,15 @@ function setup(): Setup {
   const settings = new Signal(DEFAULT_FAVORITES_SEARCH_SETTINGS);
   const skeleton = document.createElement("div");
   const grid = document.createElement("div");
+  const fieldTrailingChild = document.createElement("button");
+  const subheaderChild = document.createElement("div");
   const trailingChild = document.createElement("button");
   const favoritesService = { loadState, searchable };
   const favoritesSession = {
     query: computed(() => settings.value.query),
     isFiltered: computed(() => isFilteringFavoritesSearchSettings(settings.value)),
     matchedFavorites: searchResults,
+    searched,
     pageNumber,
     pageCount: computed(() => Math.max(1, Math.ceil(searchResults.value.length / PAGE_SIZE))),
     goTo,
@@ -72,6 +79,8 @@ function setup(): Setup {
     submittedQueries: new Signal<readonly string[]>(["cat"]),
     submit,
     focusSearch: new Emitter<void>(),
+    fieldTrailingChild,
+    subheaderChild,
     trailingChild,
     skeleton,
     grid,
@@ -79,7 +88,8 @@ function setup(): Setup {
   }));
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
-    element, dispose, searchResults, pageNumber, loadState, searchable, submit, goTo, clearSearch, settings, skeleton, emptyState, grid, trailingChild
+    element, dispose, searchResults, searched, pageNumber, loadState, searchable, submit, goTo, clearSearch, settings, skeleton, emptyState, grid,
+    fieldTrailingChild, subheaderChild, trailingChild
   };
 }
 
@@ -236,15 +246,35 @@ describe("FavoritesSearchPanel", () => {
     expect(body.scrollTop).toBe(0);
   });
 
-  test("scrolls the grid to the top when a search is submitted", () => {
-    const { element } = setup();
+  test("scrolls the grid to the top after each search", () => {
+    const { element, searched } = setup();
     const body = element.querySelector<HTMLElement>(`.${FavoritesSearchPanelClass.body}`)!;
-    const textarea = element.querySelector("search textarea") as HTMLTextAreaElement;
 
     body.scrollTop = 500;
-    textarea.value = "cat";
-    textarea.form!.dispatchEvent(new Event("submit"));
+    searched.emit();
     expect(body.scrollTop).toBe(0);
+  });
+
+  test("stops following searches once disposed", () => {
+    const { element, searched, dispose } = setup();
+    const body = element.querySelector<HTMLElement>(`.${FavoritesSearchPanelClass.body}`)!;
+
+    dispose();
+    body.scrollTop = 500;
+    searched.emit();
+    expect(body.scrollTop).toBe(500);
+  });
+
+  test("shows its field trailing content inside the search field", () => {
+    const { element, fieldTrailingChild } = setup();
+
+    expect(element.querySelector("search form")!.contains(fieldTrailingChild)).toBe(true);
+  });
+
+  test("shows its subheader content", () => {
+    const { element, subheaderChild } = setup();
+
+    expect(element.contains(subheaderChild)).toBe(true);
   });
 
   test("shows its trailing content in the header", () => {

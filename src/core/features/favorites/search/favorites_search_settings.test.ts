@@ -1,5 +1,6 @@
 import {
-  DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, countChangedFavoritesSearchSettings, isFilteringFavoritesSearchSettings
+  DEFAULT_FAVORITES_SEARCH_SETTINGS, FAVORITES_SEARCH_SETTINGS_GUARDS, countChangedFavoritesSearchSettings, isFilteringFavoritesSearchSettings,
+  isReorderingFavoritesSearchSettings
 } from "@/core/features/favorites/search/favorites_search_settings";
 import { describe, expect, test } from "vitest";
 
@@ -28,7 +29,7 @@ describe("countChangedFavoritesSearchSettings", () => {
     expect(countChangedFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, sortKey: "score", isSortAscending: true })).toBe(1);
   });
 
-  test("adds up every changed filter", () => {
+  test("adds up every changed setting", () => {
     expect(countChangedFavoritesSearchSettings({
       ...DEFAULT_FAVORITES_SEARCH_SETTINGS,
       sortKey: "score",
@@ -58,6 +59,26 @@ describe("isFilteringFavoritesSearchSettings", () => {
     expect(isFilteringFavoritesSearchSettings({
       ...DEFAULT_FAVORITES_SEARCH_SETTINGS, sortKey: "score", isSortAscending: true, isShuffled: true, shuffleSeed: 7
     })).toBe(false);
+  });
+});
+
+describe("isReorderingFavoritesSearchSettings", () => {
+  test("returns false for the default settings", () => {
+    expect(isReorderingFavoritesSearchSettings(DEFAULT_FAVORITES_SEARCH_SETTINGS)).toBe(false);
+  });
+
+  test.each([
+    { change: { sortKey: "score" } },
+    { change: { isSortAscending: true } },
+    { change: { isShuffled: true } }
+  ] as const)("returns true after changing $change", ({ change }) => {
+    expect(isReorderingFavoritesSearchSettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, ...change })).toBe(true);
+  });
+
+  test("ignores filters", () => {
+    const filteredSettings = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "apple", isInverted: true };
+
+    expect(isReorderingFavoritesSearchSettings(filteredSettings)).toBe(false);
   });
 });
 

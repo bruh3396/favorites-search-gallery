@@ -119,10 +119,10 @@ export class FavoritesSearchIndex {
   }
 }
 
-function isRatingAllowed(favorite: Favorite, mask: number): boolean {
-  return (favorite.ratingBit & mask) !== 0;
+function isRatingAllowed(favorite: Favorite, allowedRatings: number): boolean {
+  return (favorite.ratingBit & allowedRatings) !== 0;
 }
 
-function isStatusAllowed(favorite: Favorite, mask: number): boolean {
-  return (favorite.statusBit & mask) !== 0;
+function isStatusAllowed(favorite: Favorite, allowedStatuses: number): boolean {
+  return (favorite.statusBit & allowedStatuses) !== 0;
 }

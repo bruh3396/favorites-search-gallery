@@ -1,0 +1,54 @@
+.fsg-OptionMenu {
+  position: fixed;
+  z-index: 10;
+}
+
+.fsg-OptionMenu[data-size="small"] {
+  font-size: var(--fsg-typescale-label-medium-size);
+}
+
+.fsg-OptionMenu-label {
+  flex: 1;
+  overflow: hidden;
+  line-height: normal;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fsg-OptionMenu-check {
+  flex: none;
+  inline-size: 16px;
+  block-size: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fsg-OptionMenu-option[data-active="true"] {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-OptionMenu-option[aria-selected="false"] .fsg-OptionMenu-check {
+  visibility: hidden;
+}
+
+.fsg-OptionMenu-option[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-OptionMenu-option[data-starts-group="true"] {
+  position: relative;
+  margin-block-start: 9px;
+}
+
+.fsg-OptionMenu-option[data-starts-group="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -5px;
+  inset-inline: 0;
+  border-block-start: 1px solid var(--fsg-color-outline);
+}

@@ -68,11 +68,15 @@ export class FavoritesSearch {
     this.applySettings({ isInverted: !this.#settings.peek().isInverted });
   }
 
-  public shuffle(): void {
-    this.applySettings({ isShuffled: true, shuffleSeed: this.drawSeed() });
+  public toggleBlacklist(): void {
+    this.applySettings({ isBlacklistEnabled: !this.#settings.peek().isBlacklistEnabled });
   }
 
-  public clearFilters(): void {
+  public shuffle(): void {
+    this.applySettings({ isShuffled: this.#settings.peek().sortKey !== "random", shuffleSeed: this.drawSeed() });
+  }
+
+  public resetSettings(): void {
     this.applySettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: this.#settings.peek().query });
   }
 
@@ -83,9 +87,8 @@ export class FavoritesSearch {
   public updateSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {
     const sortWasChanged = partialFavoritesSearchSettings.sortKey !== undefined || partialFavoritesSearchSettings.isSortAscending !== undefined;
     const isShuffled = this.#settings.peek().isShuffled && !sortWasChanged;
-    const shuffleSeed = partialFavoritesSearchSettings.sortKey === "random" ? this.drawSeed() : this.#settings.peek().shuffleSeed;
 
-    this.applySettings({ ...partialFavoritesSearchSettings, isShuffled, shuffleSeed });
+    this.applySettings({ ...partialFavoritesSearchSettings, isShuffled });
   }
 
   public dispose(): void {

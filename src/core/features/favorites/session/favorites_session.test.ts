@@ -1,4 +1,4 @@
-import { describe, expect, test } from "vitest";
+import { describe, expect, test, vi } from "vitest";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
@@ -60,29 +60,38 @@ describe("FavoritesSession", () => {
     expect(favoritesSession.query.value).toBe("apple");
   });
 
+  test("reports each search", () => {
+    const { favoritesSession } = setup([]);
+    const onSearched = vi.fn();
+
+    favoritesSession.searched.on(onSearched);
+    favoritesSession.submit("apple");
+    expect(onSearched).toHaveBeenCalledOnce();
+  });
+
   describe("isFiltered", () => {
     test("reports a query as a filter until the search is cleared", () => {
       const { favoritesSession } = setup([]);
 
       favoritesSession.submit("apple");
       expect(favoritesSession.isFiltered.value).toBe(true);
-      favoritesSession.clearFilters();
+      favoritesSession.resetSearchSettings();
       expect(favoritesSession.isFiltered.value).toBe(true);
       favoritesSession.clearSearch();
       expect(favoritesSession.isFiltered.value).toBe(false);
     });
   });
 
-  describe("changedFilterCount", () => {
-    test("follows the filters and ignores the query", () => {
+  describe("changedSearchSettingCount", () => {
+    test("follows the settings and ignores the query", () => {
       const { favoritesSession } = setup([]);
 
       favoritesSession.submit("apple");
       favoritesSession.invert();
       favoritesSession.updateSearchSettings({ sortKey: "score" });
-      expect(favoritesSession.changedFilterCount.value).toBe(2);
-      favoritesSession.clearFilters();
-      expect(favoritesSession.changedFilterCount.value).toBe(0);
+      expect(favoritesSession.changedSearchSettingCount.value).toBe(2);
+      favoritesSession.resetSearchSettings();
+      expect(favoritesSession.changedSearchSettingCount.value).toBe(0);
     });
   });
 
@@ -103,6 +112,15 @@ describe("FavoritesSession", () => {
       favoritesSession.submit("a");
       favoritesSession.invert();
       expect(getPagePostIds(favoritesSession)).toEqual(["2"]);
+    });
+  });
+
+  describe("toggleBlacklist", () => {
+    test("flips the blacklist setting", () => {
+      const { favoritesSession } = setup(createTaggedPosts("a", "b"));
+
+      favoritesSession.toggleBlacklist();
+      expect(favoritesSession.searchSettings.value.isBlacklistEnabled).toBe(true);
     });
   });
 

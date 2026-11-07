@@ -59,8 +59,9 @@
     translate: -50% 0;
     padding: 6px 12px;
     border-radius: var(--fsg-shape-corner-full);
-    background: var(--fsg-color-on-surface);
-    color: var(--fsg-color-surface);
+    background: rgb(50 50 50);
+    box-shadow: 0 10px 30px rgb(0 0 0 / 28%), 0 2px 6px rgb(0 0 0 / 18%);
+    color: rgb(255 255 255);
     font-size: var(--fsg-typescale-label-large-size);
     white-space: nowrap;
     pointer-events: none;

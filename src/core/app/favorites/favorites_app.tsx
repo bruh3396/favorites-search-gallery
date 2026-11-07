@@ -1,8 +1,10 @@
 import { ActivityBar, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
+import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import { AppPreferences } from "@/core/app/app_preferences";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
+import FAVORITES_SEARCH_SETTINGS_ROW_CSS from "@/core/app/favorites/search_settings/favorites_search_settings_row.css?inline";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
@@ -12,20 +14,16 @@ import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbo
 import LIGHTBOX_TAGS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_tags.css?inline";
 import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
-import { StatusText } from "@/core/ui/components/status_text/status_text";
-import TAB_STRIP_TOGGLE_CSS from "@/core/app/favorites/search_panel/tab_strip_toggle.css?inline";
 import { TabPanel } from "@/core/ui/components/tabs/tab_panel";
-import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
-import { h } from "@/core/ui/h/h";
 import { measureFavoritesLoadProgress } from "@/core/app/favorites/favorites_load_progress_measurer";
 
 export const FAVORITES_APP_STYLES = [
   UI_CSS,
   APP_CSS,
   SEARCH_PANEL_CSS,
-  TAB_STRIP_TOGGLE_CSS,
+  FAVORITES_SEARCH_SETTINGS_ROW_CSS,
   LIGHTBOX_CSS,
   LIGHTBOX_DETAILS_CSS,
   LIGHTBOX_TAGS_CSS,
@@ -43,10 +41,11 @@ export const FavoritesAppClass = {
 const TOOLS: readonly ActivityBarItem[] = [{ id: "settings", label: "Settings", icon: "settings"}];
 
 export interface FavoritesAppProps {
-  favoritesService: Pick<FavoritesService, "loadState" | "loadStatus">;
-  favoritesWorkspace: FavoritesWorkspace;
+  favoritesService: Pick<FavoritesService, "loadState">;
+  favoritesWorkspace: Pick<FavoritesWorkspace, "tabManager">;
   lightboxView: HTMLElement;
-  favoritesPreferences: Pick<AppPreferences["favorites"], "activeTool" | "tabStripVisible">;
+  favoritesPreferences: Pick<AppPreferences["favorites"], "activeTool">;
+  tabsHeaderChild: Child;
   zenEnabled: Readable<boolean>;
   resetSettings: () => void;
   renderTool: (activityBarItem: ActivityBarItem) => HTMLElement;
@@ -54,9 +53,8 @@ export interface FavoritesAppProps {
 }
 
 export function FavoritesApp({
-  favoritesService, favoritesWorkspace, lightboxView, favoritesPreferences, zenEnabled, resetSettings, renderTool, renderPanel
+  favoritesService, favoritesWorkspace, lightboxView, favoritesPreferences, tabsHeaderChild, zenEnabled, resetSettings, renderTool, renderPanel
 }: FavoritesAppProps): HTMLElement[] {
-  const { tabManager } = favoritesWorkspace;
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
       <div className={FavoritesAppClass.loadLine}>
@@ -77,19 +75,8 @@ export function FavoritesApp({
           onValueChange={id => favoritesPreferences.activeTool.set(id)}
         />
         <div className={FavoritesAppClass.tabs}>
-          <div hidden={computed(() => !favoritesPreferences.tabStripVisible.value)}>
-            <TabStrip
-              tabs={computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable })))}
-              activeTabId={tabManager.activeTabId}
-              trailingChild={<StatusText text={favoritesService.loadStatus} />}
-              onActivate={tabId => tabManager.activate(tabId)}
-              onClose={tabId => favoritesWorkspace.closeTab(tabId)}
-              onMove={(tabId, index) => tabManager.move(tabId, index)}
-              onAdd={() => favoritesWorkspace.openBlankTab()}
-              onCloseAll={() => favoritesWorkspace.closeAllTabs()}
-            />
-          </div>
-          <TabPanel<FavoritesTab> tabManager={tabManager} renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)} />
+          {tabsHeaderChild}
+          <TabPanel<FavoritesTab> tabManager={favoritesWorkspace.tabManager} renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)} />
         </div>
       </main>
       <div className={FavoritesAppClass.zenHint} role="status" hidden={computed(() => !zenEnabled.value)} data-zen-stage="">

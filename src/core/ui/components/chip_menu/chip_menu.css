@@ -1,0 +1,11 @@
+.fsg-ChipMenu-chevron {
+  flex: none;
+  inline-size: 13px;
+  block-size: 13px;
+  opacity: 0.7;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

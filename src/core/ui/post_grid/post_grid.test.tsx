@@ -1,16 +1,13 @@
-import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
-import { Signal, computed } from "@/core/utils/reactive/signal";
+import { Mock, describe, expect, test, vi } from "vitest";
+import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
-import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
+import { GridSizing } from "@/core/ui/post_grid/layout/grid_sizing";
 import { MediaItem } from "@/core/domain/media/media_item";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
-import { Size } from "@/core/utils/geometry/size";
-import { TileClass } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
-import { createImageLoaderService } from "@/testing/image_loader_service";
 
 interface Setup {
   element: HTMLElement;
@@ -21,7 +18,7 @@ interface Setup {
   layout: Signal<GridLayout>;
   columnCount: Signal<number>;
   sizeObserver: MemorySizeObserver;
-  onPlainClick: Mock<(mediaItem: MediaItem) => boolean>;
+  createTile: Mock<(mediaItem: MediaItem, sizing: Readable<GridSizing>) => HTMLElement>;
 }
 
 function createPost(postId: string): MediaItem {
@@ -35,70 +32,26 @@ function setup(...postIds: string[]): Setup {
   const layout = new Signal<GridLayout>("grid");
   const columnCount = new Signal(2);
   const sizeObserver = new MemorySizeObserver();
-  const onPlainClick = vi.fn<(mediaItem: MediaItem) => boolean>(() => true);
+  const createTile = vi.fn<(mediaItem: MediaItem, sizing: Readable<GridSizing>) => HTMLElement>(mediaItem => <div dataset={{ postId: mediaItem.id }} />);
   const { result: element, dispose } = render(document, () => (
     <PostGrid
       posts={posts}
       changed={changed}
       tileLocator={tileLocator}
       settings={{ layout, columnCount }}
-      visibilityObserver={{ observe: () => (): void => { } }}
       sizeObserver={sizeObserver}
-      imageLoaderService={createImageLoaderService()}
-      getSize={getSize}
-      createActions={createActions}
-      getPostUrl={mediaItem => `https://posts/${mediaItem.id}`}
-      onPlainClick={onPlainClick}
+      createTile={createTile}
     />
   ));
-  return { element, dispose, posts, changed, tileLocator, layout, columnCount, sizeObserver, onPlainClick };
-}
-
-function getSize(mediaItem: MediaItem): Size {
-  return { width: Number(mediaItem.id) * 100, height: 100 };
-}
-
-function createActions(mediaItem: MediaItem): Node[] {
-  const action = document.createElement("button");
-
-  action.dataset.postId = mediaItem.id;
-  return [action];
+  return { element, dispose, posts, changed, tileLocator, layout, columnCount, sizeObserver, createTile };
 }
 
 describe("PostGrid", () => {
-  test("draws a tile for each post", () => {
+  test("draws the tile made for each post", () => {
     const { element } = setup("1", "2", "3");
 
     expect(element.dataset.layout).toBe("grid");
-    expect(element.children).toHaveLength(3);
-  });
-
-  test("shapes each tile after its post's size", () => {
-    const { element } = setup("1", "2");
-
-    expect([...element.children].map(tile => (tile as HTMLElement).style.getPropertyValue("--fsg-Tile-aspect-ratio"))).toEqual(["100 / 100", "200 / 100"]);
-  });
-
-  test("gives each tile the actions made for its post", () => {
-    const { element } = setup("1", "2");
-
-    expect([...element.children].map(tile => tile.querySelector("button")?.dataset.postId)).toEqual(["1", "2"]);
-  });
-
-  test("links each tile to its post's page", () => {
-    const { element } = setup("1", "2");
-
-    const links = [...element.querySelectorAll<HTMLAnchorElement>(`.${TileClass.link}`)];
-
-    links.forEach(link => link.dispatchEvent(new Event("pointerdown")));
-    expect(links.map(link => link.href)).toEqual(["https://posts/1", "https://posts/2"]);
-  });
-
-  test("reports the post whose tile is clicked", () => {
-    const { element, posts, onPlainClick } = setup("1", "2");
-
-    element.querySelectorAll<HTMLElement>(`.${TileClass.link}`)[1].click();
-    expect(onPlainClick).toHaveBeenCalledExactlyOnceWith(posts.value[1]);
+    expect([...element.children].map(tile => (tile as HTMLElement).dataset.postId)).toEqual(["1", "2", "3"]);
   });
 
   test("redraws when the posts change, keeping the tiles of posts still shown", () => {
@@ -128,20 +81,15 @@ describe("PostGrid", () => {
     expect([...element.children]).toEqual(tiles);
   });
 
-  test("sizes its tiles' HD images to its measured device pixel width and its settings", () => {
-    const createLoader = vi.spyOn(ImageLoaderService.prototype, "createLoader");
+  test("gives each tile a sizing that follows its measured device pixel width and its settings", () => {
+    const { element, sizeObserver, columnCount, createTile } = setup("1");
+    const sizing = createTile.mock.calls[0][1];
 
-    onTestFinished(() => {
-      vi.restoreAllMocks();
-    });
-    const { element, sizeObserver, columnCount } = setup("40");
-    const targetWidth = createLoader.mock.calls[0][2];
-
-    expect(targetWidth.value).toBe(0);
+    expect(sizing.value).toEqual({ layout: "grid", columnCount: 2, gridWidth: 0 });
     sizeObserver.resize(element, { width: 500, height: 800, devicePixelWidth: 1_000 });
-    expect(targetWidth.value).toBe(500);
+    expect(sizing.value).toEqual({ layout: "grid", columnCount: 2, gridWidth: 1_000 });
     columnCount.value = 1;
-    expect(targetWidth.value).toBe(1_000);
+    expect(sizing.value).toEqual({ layout: "grid", columnCount: 1, gridWidth: 1_000 });
   });
 
   test("redraws the tile of a post that changed in place, keeping the others", () => {
@@ -179,7 +127,7 @@ describe("PostGrid", () => {
     expect(element.dataset.layout).toBe("grid");
   });
 
-  test("stops what a tile's actions follow once the tile is gone", () => {
+  test("stops what a tile follows once the tile is gone", () => {
     const label = new Signal("a");
     const posts = new Signal<readonly MediaItem[]>([createPost("1")]);
     const seen: string[] = [];
@@ -189,19 +137,15 @@ describe("PostGrid", () => {
         posts={posts}
         changed={new Emitter<MediaItem>()}
         settings={{ layout: new Signal<GridLayout>("grid"), columnCount: new Signal(2) }}
-        visibilityObserver={{ observe: () => ():void => { } }}
         sizeObserver={new MemorySizeObserver()}
-        imageLoaderService={createImageLoaderService()}
-        getSize={getSize}
-        createActions={() => [
+        createTile={() => (
           <button>
             {computed(() => {
               seen.push(label.value);
               return label.value;
             })}
           </button>
-        ]}
-        onPlainClick={() => true}
+        )}
       />
     ));
     posts.value = [];
