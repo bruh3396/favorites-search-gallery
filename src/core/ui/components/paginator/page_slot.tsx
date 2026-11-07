@@ -28,7 +28,7 @@ export function PageSlot({ term, current, pageCount, onPageChange }: PageSlotPro
     <input
       className={PageSlotClass.field}
       type="number"
-      aria-label="Go to page"
+      aria-label="Go to Page"
       min="1"
       max={computed(() => String(pageCount.value))}
       hidden={computed(() => term.value !== "gap" || !isEditing.value)}
@@ -72,7 +72,7 @@ export function PageSlot({ term, current, pageCount, onPageChange }: PageSlotPro
       <button
         className={PageSlotClass.gap}
         type="button"
-        aria-label="Go to page"
+        aria-label="Go to Page"
         hidden={computed(() => term.value !== "gap" || isEditing.value)}
         onClick={() => {
           isEditing.value = true;

@@ -102,7 +102,7 @@ function readThemeAccent(root: ShadowRoot): string {
 
 function clickResetSettings(root: ShadowRoot): void {
   root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-  root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset all settings\"]")!.click();
+  root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Settings\"]")!.click();
 }
 
 function clickLightboxButton(root: ShadowRoot, label: string): void {
@@ -186,7 +186,7 @@ describe("composeFavoritesApp", () => {
     const root = mount(localKeyedValues);
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    clickSettingsSwitch(root, "Infinite scroll");
+    clickSettingsSwitch(root, "Infinite Scroll");
 
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { favorites: { pagination: { infiniteScroll: true } } } });
   });
@@ -196,7 +196,7 @@ describe("composeFavoritesApp", () => {
     const root = mount(localKeyedValues);
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    clickSettingsSwitch(root, "Enhance search pages");
+    clickSettingsSwitch(root, "Enhance Search Pages");
 
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { shared: { postListEnabled: true } } });
   });
@@ -308,7 +308,7 @@ describe("composeFavoritesApp", () => {
 
     clickResetSettings(root);
     expect(hostPage.colorScheme).toBe("dark");
-    expect(root.querySelector("button[aria-label=\"Reset all settings\"]")?.closest("[hidden]")).toBe(null);
+    expect(root.querySelector("button[aria-label=\"Reset All Settings\"]")?.closest("[hidden]")).toBe(null);
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
       preferences: { favorites: { activeTool: "settings" } },
       state: { favorites: { 1: { sizes } } }
@@ -365,7 +365,7 @@ describe("composeFavoritesApp", () => {
     const countWatched = (): number => firstTabTiles.filter(tile => watched.has(tile)).length;
     const before = countWatched();
 
-    root.querySelector<HTMLButtonElement>("button[aria-label='New tab']")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label='New Tab']")!.click();
     expect([before, countWatched()]).toEqual([1, 0]);
   });
 

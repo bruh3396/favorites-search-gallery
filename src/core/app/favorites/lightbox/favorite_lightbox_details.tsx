@@ -17,8 +17,8 @@ export const FavoriteLightboxDetailsClass = {
 } as const;
 
 const ORGANIZATION_CHOICES: readonly ControlChoice<TagOrganization>[] = [
-  { value: "category", label: "By category", icon: "tagsGrouped" },
-  { value: "list", label: "One list", icon: "tagsFlat" }
+  { value: "category", label: "By Category", icon: "tagsGrouped" },
+  { value: "list", label: "One List", icon: "tagsFlat" }
 ];
 const ALIGNMENT_CHOICES: readonly ControlChoice<TagAlignment>[] = [
   { value: "start", label: "Left", icon: "alignLeft" },
@@ -65,7 +65,7 @@ function FavoriteLightboxTitle({ copyIdButton, viewOpen }: { copyIdButton: Node;
       <h2 className={FavoriteLightboxDetailsClass.id}>
         {copyIdButton}
       </h2>
-      <LightboxButton icon="tune" label="View settings" pressed={viewOpen} onClick={() => {
+      <LightboxButton icon="tune" label="View Settings" pressed={viewOpen} onClick={() => {
         viewOpen.value = !viewOpen.value;
       }} />
     </div>
@@ -90,7 +90,7 @@ interface FavoriteLightboxViewSettingsProps {
 
 function FavoriteLightboxViewSettings({ favoriteLightboxDetailsPreferences }: FavoriteLightboxViewSettingsProps): HTMLElement {
   return (
-    <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View settings">
+    <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View Settings">
       <ViewOption label="Organization" controlChoices={ORGANIZATION_CHOICES} value={favoriteLightboxDetailsPreferences.organization} />
       <ViewOption label="Alignment" controlChoices={ALIGNMENT_CHOICES} value={favoriteLightboxDetailsPreferences.alignment} />
       <ViewOption label="Size" controlChoices={SIZE_CHOICES} value={favoriteLightboxDetailsPreferences.size} />

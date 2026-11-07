@@ -102,7 +102,7 @@ function createFavorite(favoritedPostIds: Readable<readonly string[]>): Lightbox
 }
 
 function findFavoriteButton(view: HTMLElement): HTMLButtonElement | null {
-  return view.querySelector<HTMLButtonElement>("[aria-label=\"Add to favorites\"], [aria-label=\"Favorited\"]");
+  return view.querySelector<HTMLButtonElement>("[aria-label=\"Add to Favorites\"], [aria-label=\"Favorited\"]");
 }
 
 function readFavoriteIconPath(view: HTMLElement): string | null | undefined {
@@ -244,7 +244,7 @@ describe("composeLightboxDialog", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([])) });
 
     expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartPlus);
-    expect(findFavoriteButton(view)!.title).toBe("Add to favorites (E)");
+    expect(findFavoriteButton(view)!.title).toBe("Add to Favorites (E)");
   });
 
   test("shows a favorite as favorited", () => {

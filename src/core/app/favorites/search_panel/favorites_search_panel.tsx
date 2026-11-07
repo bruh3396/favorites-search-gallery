@@ -75,7 +75,7 @@ export function FavoritesSearchPanel({
       <header className={FavoritesSearchPanelClass.header}>
         <div className={FavoritesSearchPanelClass.search}>
           <SearchBox
-            label="Search favorites"
+            label="Search Favorites"
             query={favoritesSession.query}
             submittedQueries={submittedQueries}
             trailingChild={[

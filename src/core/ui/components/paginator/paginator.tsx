@@ -35,13 +35,13 @@ export function Paginator({ pageNumber, pageCount, onPageChange }: PaginatorProp
       aria-label="Pagination"
       inert={computed(() => pageCount.value <= 1)}
     >
-      <StepButton label="Previous page" icon="chevronLeft" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <StepButton label="Previous Page" icon="chevronLeft" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
       <ul className={PaginatorClass.list}>
         {Array.from({ length: SLOT_COUNT }, (_, index) => (
           <PageSlot term={computed(() => terms.value[index])} current={pageNumber} pageCount={pageCount} onPageChange={onPageChange} />
         ))}
       </ul>
-      <StepButton label="Next page" icon="chevronRight" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <StepButton label="Next Page" icon="chevronRight" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
     </nav>
   );
 

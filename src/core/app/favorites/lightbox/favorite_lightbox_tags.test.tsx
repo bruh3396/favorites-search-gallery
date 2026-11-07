@@ -112,7 +112,7 @@ describe("FavoriteLightboxTags", () => {
     const { readGroups, clickShowMore } = setup(createFavorite(["a", "b", "c", "d", "e", "f", "g", "h"]));
 
     await flushMicrotasks();
-    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 2 more"]]);
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 2 More"]]);
     clickShowMore();
     expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "g", "h"]]);
   });
@@ -125,7 +125,7 @@ describe("FavoriteLightboxTags", () => {
     clickShowMore();
     favorite.value = createFavorite(tags);
     await flushMicrotasks();
-    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 1 more"]]);
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 1 More"]]);
   });
 
   test("shows a newer favorite's tags when an older lookup resolves late", async() => {
@@ -169,7 +169,7 @@ describe("FavoriteLightboxTags", () => {
     await flushMicrotasks();
     dispose();
     clickShowMore();
-    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 1 more"]]);
+    expect(readGroups()).toEqual([["General", "a", "b", "c", "d", "e", "f", "Show 1 More"]]);
   });
 
   test("exposes its alignment and size for styling", () => {

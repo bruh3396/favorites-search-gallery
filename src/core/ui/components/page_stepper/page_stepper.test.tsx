@@ -45,8 +45,8 @@ describe("PageStepper", () => {
   test("steps to the previous and next pages", () => {
     const { element, onPageChange } = setup({ pageNumber: 5 });
 
-    findButton(element, "Previous page").click();
-    findButton(element, "Next page").click();
+    findButton(element, "Previous Page").click();
+    findButton(element, "Next Page").click();
     expect(vi.mocked(onPageChange).mock.calls).toEqual([[4], [6]]);
   });
 
@@ -55,9 +55,9 @@ describe("PageStepper", () => {
     const lastSetup = setup({ pageNumber: 3, pageCount: 3 });
 
     expect([
-      findButton(firstSetup.element, "Previous page").disabled,
-      findButton(firstSetup.element, "Next page").disabled,
-      findButton(lastSetup.element, "Next page").disabled
+      findButton(firstSetup.element, "Previous Page").disabled,
+      findButton(firstSetup.element, "Next Page").disabled,
+      findButton(lastSetup.element, "Next Page").disabled
     ]).toEqual([true, false, true]);
   });
 

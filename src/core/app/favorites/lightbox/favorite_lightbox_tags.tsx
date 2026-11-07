@@ -121,7 +121,7 @@ function TagGroupSection({ tagGroup, collapsedTagCount }: { tagGroup: TagGroup; 
           <button type="button" className={FavoriteLightboxTagsClass.showMore} onClick={() => {
             expanded.value = true;
           }}>
-            {`Show ${hiddenCount} more`}
+            {`Show ${hiddenCount} More`}
           </button>
         </li>
       </ul>

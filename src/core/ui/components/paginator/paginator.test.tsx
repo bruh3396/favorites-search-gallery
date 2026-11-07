@@ -86,8 +86,8 @@ describe("Paginator", () => {
   test("steps to the previous and next pages", () => {
     const { element, onPageChange } = setup({ pageNumber: 5 });
 
-    findButton(element, "Previous page").click();
-    findButton(element, "Next page").click();
+    findButton(element, "Previous Page").click();
+    findButton(element, "Next Page").click();
     expect(onPageChange).toHaveBeenNthCalledWith(1, 4);
     expect(onPageChange).toHaveBeenNthCalledWith(2, 6);
   });
@@ -96,9 +96,9 @@ describe("Paginator", () => {
     const firstSetup = setup({ pageNumber: 1, pageCount: 3 });
     const lastSetup = setup({ pageNumber: 3, pageCount: 3 });
 
-    expect(findButton(firstSetup.element, "Previous page").disabled).toBe(true);
-    expect(findButton(firstSetup.element, "Next page").disabled).toBe(false);
-    expect(findButton(lastSetup.element, "Next page").disabled).toBe(true);
+    expect(findButton(firstSetup.element, "Previous Page").disabled).toBe(true);
+    expect(findButton(firstSetup.element, "Next Page").disabled).toBe(false);
+    expect(findButton(lastSetup.element, "Next Page").disabled).toBe(true);
   });
 
   test("disables itself while there is only one page", () => {
@@ -112,7 +112,7 @@ describe("Paginator", () => {
   test("goes to a page entered after clicking a gap", () => {
     const { element, onPageChange } = setup({ pageNumber: 10, pageCount: 20 });
 
-    element.querySelector<HTMLButtonElement>("button[aria-label='Go to page']:not([hidden])")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label='Go to Page']:not([hidden])")!.click();
     const field = element.querySelector<HTMLInputElement>("input:not([hidden])")!;
 
     field.value = "15";

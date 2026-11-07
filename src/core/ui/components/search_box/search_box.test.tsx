@@ -18,7 +18,7 @@ interface Setup {
 
 function setup(trailingChild?: HTMLElement): Setup {
   const options = {
-    label: "Search favorites", query: new Signal(""), trailingChild, focusRequests: new Emitter<void>(), onSearch: vi.fn<(query: string) => void>()
+    label: "Search Favorites", query: new Signal(""), trailingChild, focusRequests: new Emitter<void>(), onSearch: vi.fn<(query: string) => void>()
   };
   const { result: element, dispose } = render(document, () => <SearchBox {...options} />);
 
@@ -125,7 +125,7 @@ describe("SearchBox", () => {
     const { element, textarea } = setup();
 
     expect(element.tagName).toBe("SEARCH");
-    expect(textarea.getAttribute("aria-label")).toBe("Search favorites");
+    expect(textarea.getAttribute("aria-label")).toBe("Search Favorites");
   });
 
   test("reports the typed query when submitted, not while typing", () => {
@@ -189,7 +189,7 @@ describe("SearchBox", () => {
     const { element, textarea, onSearch } = setup();
 
     type(textarea, "cat");
-    element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label='Clear Search']")!.click();
     expect(textarea.value).toBe("");
     expect(onSearch).not.toHaveBeenCalled();
   });
@@ -198,7 +198,7 @@ describe("SearchBox", () => {
     const { element, textarea } = setup();
 
     type(textarea, "cat");
-    element.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label='Clear Search']")!.click();
     expect(document.activeElement).toBe(textarea);
   });
 
@@ -348,7 +348,7 @@ describe("SearchBox", () => {
 
     press(textarea, "ArrowUp");
     press(textarea, "ArrowUp");
-    textarea.form!.querySelector<HTMLButtonElement>("button[aria-label='Clear search']")!.click();
+    textarea.form!.querySelector<HTMLButtonElement>("button[aria-label='Clear Search']")!.click();
     press(textarea, "ArrowUp");
     expect(textarea.value).toBe("dog");
   });

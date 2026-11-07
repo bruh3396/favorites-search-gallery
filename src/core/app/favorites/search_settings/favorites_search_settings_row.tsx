@@ -20,7 +20,7 @@ export function FavoritesSearchSettingsRow({ changedSearchSettingCount, resetSea
       <IconButton
         className={FavoritesSearchSettingsRowClass.reset}
         icon="reset"
-        label="Reset filters"
+        label="Reset Filters"
         size="small"
         disabled={computed(() => changedSearchSettingCount.value === 0)}
         onClick={resetSearchSettings}

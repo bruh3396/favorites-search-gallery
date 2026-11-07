@@ -25,7 +25,7 @@ function readShown(element: HTMLElement): string[] {
 }
 
 function openField(element: HTMLElement): HTMLInputElement {
-  element.querySelector<HTMLButtonElement>("[aria-label='Go to page']")!.click();
+  element.querySelector<HTMLButtonElement>("[aria-label='Go to Page']")!.click();
   return element.querySelector("input")!;
 }
 

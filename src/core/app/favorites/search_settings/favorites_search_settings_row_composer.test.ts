@@ -157,7 +157,7 @@ describe("composeFavoritesSearchSettingsRow", () => {
   test("resets from Reset", () => {
     const { row, favoritesSession } = setup();
 
-    row.querySelector<HTMLElement>("button[aria-label=\"Reset filters\"]")!.click();
+    row.querySelector<HTMLElement>("button[aria-label=\"Reset Filters\"]")!.click();
     expect(favoritesSession.resetSearchSettings).toHaveBeenCalledOnce();
   });
 });

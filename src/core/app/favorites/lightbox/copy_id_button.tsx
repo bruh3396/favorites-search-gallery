@@ -42,7 +42,7 @@ export function CopyIdButton({ postId, clipboard, scheduler, copiedDuration }: C
   });
   onCleanup(() => cancelCopied());
   return (
-    <button type="button" className={CopyIdButtonClass.root} title="Copy id" onClick={copyPostId}>
+    <button type="button" className={CopyIdButtonClass.root} title="Copy ID" onClick={copyPostId}>
       {computed(() => postId.value ?? "")}
       <span className={CopyIdButtonClass.copied} hidden={computed(() => !copied.value)}>Copied</span>
     </button>

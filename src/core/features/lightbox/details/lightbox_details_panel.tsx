@@ -32,7 +32,7 @@ export function LightboxDetailsPanel(props: LightboxDetailsPanelProps): HTMLElem
     >
       <div className={LightboxDetailsPanelClass.header}>
         <div className={LightboxDetailsPanelClass.title}>{props.titleChild}</div>
-        <LightboxButton icon="close" label="Hide details" lightboxShortcut={props.closeLightboxShortcut} onClick={props.onClose} />
+        <LightboxButton icon="close" label="Hide Details" lightboxShortcut={props.closeLightboxShortcut} onClick={props.onClose} />
       </div>
       <div className={LightboxDetailsPanelClass.controls}>{props.controlsChild}</div>
       <div className={LightboxDetailsPanelClass.content}>{props.contentChild}</div>

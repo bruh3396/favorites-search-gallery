@@ -172,7 +172,7 @@ export function composeLightboxDialog<T extends MediaItem>(
           detailsOpen: lightboxDetails?.isOpen,
           leadingChild: lightboxFavorite === undefined ? undefined : h(LightboxButton, {
             icon: computed(() => (isFavorited.value ? "heartFilled" : "heartPlus")),
-            label: computed(() => (isFavorited.value ? "Favorited" : "Add to favorites")),
+            label: computed(() => (isFavorited.value ? "Favorited" : "Add to Favorites")),
             lightboxShortcut: findLightboxShortcut(keymap, "addFavorite"),
             onClick: handlers.addFavorite
           }),

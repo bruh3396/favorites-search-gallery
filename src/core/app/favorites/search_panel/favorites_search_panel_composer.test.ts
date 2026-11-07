@@ -242,7 +242,7 @@ describe("composeFavoritesSearchPanel", () => {
     const invert = [...element.querySelectorAll("button")].find(button => button.textContent === "Invert")!;
 
     invert.click();
-    expect([favoritesSession.searchSettings.value.isInverted, funnel.getAttribute("aria-label")]).toEqual([true, "Filters, 1 changed"]);
+    expect([favoritesSession.searchSettings.value.isInverted, funnel.getAttribute("aria-label")]).toEqual([true, "Filters, 1 Changed"]);
   });
 
   test("counts the changed search settings on the funnel only while there are some, shown or not", () => {
@@ -294,7 +294,7 @@ describe("composeFavoritesSearchPanel", () => {
     tabCount.value = 1;
     expect([shown, hidden, readBadge()]).toEqual([
       [true, "0", "Tabs"],
-      [false, "3", "Tabs, 3 open"],
+      [false, "3", "Tabs, 3 Open"],
       [true, "0", "Tabs"]
     ]);
   });

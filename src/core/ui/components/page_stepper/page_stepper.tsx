@@ -61,10 +61,10 @@ export function PageStepper({ pageNumber, pageCount, onPageChange }: PageStepper
   }
   return (
     <nav className={PageStepperClass.root} aria-label="Pages" hidden={computed(() => pageCount.value <= 1)}>
-      <StepButton label="Previous page" text="‹" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <StepButton label="Previous Page" text="‹" target={computed(() => pageNumber.value - 1)} pageCount={pageCount} onPageChange={onPageChange} />
       {field}
       <span className={PageStepperClass.total}>{computed(() => `/ ${pageCount.value.toLocaleString()}`)}</span>
-      <StepButton label="Next page" text="›" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
+      <StepButton label="Next Page" text="›" target={computed(() => pageNumber.value + 1)} pageCount={pageCount} onPageChange={onPageChange} />
     </nav>
   );
 }

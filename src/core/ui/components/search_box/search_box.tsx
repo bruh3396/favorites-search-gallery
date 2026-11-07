@@ -56,7 +56,7 @@ export function SearchBox({
       <IconButton
         className={SearchBoxClass.clear}
         icon="close"
-        label="Clear search"
+        label="Clear Search"
         onClick={() => {
           textarea.value = "";
           historyNavigator?.stopRecalling();

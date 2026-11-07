@@ -59,8 +59,8 @@ describe("LightboxToolbar", () => {
   });
 
   test.each<[string, Signal<boolean> | null, string[]]>([
-    ["with details", new Signal(false), ["Autoplay", "Details", "Open post page", "Fullscreen", "Close"]],
-    ["without details", null, ["Autoplay", "Open post page", "Fullscreen", "Close"]]
+    ["with details", new Signal(false), ["Autoplay", "Details", "Open Post Page", "Fullscreen", "Close"]],
+    ["without details", null, ["Autoplay", "Open Post Page", "Fullscreen", "Close"]]
   ])("orders the shown buttons %s", (_case, detailsOpen, expected) => {
     const { root } = setup(detailsOpen);
     const shownButtons = [...root.querySelectorAll("button")].filter(button => button.closest("[hidden]") === null);
@@ -78,7 +78,7 @@ describe("LightboxToolbar", () => {
     ["Details", "toggleDetails"],
     ["Autoplay", "toggleAutoplay"],
     ["Fullscreen", "toggleFullscreen"],
-    ["Open post page", "openPostPage"],
+    ["Open Post Page", "openPostPage"],
     ["Close", "close"]
   ])("runs %s's command when clicked", (label, lightboxCommand) => {
     const { root, handlers } = setup();
@@ -91,7 +91,7 @@ describe("LightboxToolbar", () => {
     ["Autoplay", "Autoplay (Space)"],
     ["Details", "Details (I)"],
     ["Close", "Close (Esc)"],
-    ["Open post page", "Open post page"]
+    ["Open Post Page", "Open Post Page"]
   ])("titles %s with its key", (label, title) => {
     const { root } = setup();
 

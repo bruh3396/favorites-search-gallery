@@ -46,7 +46,7 @@ export function FavoritesSettings(props: FavoritesSettingsProps): HTMLElement {
 function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePreview, stepperScheduler }: FavoritesSettingsProps): SettingDescriptor[] {
   return [
     {
-      id: "postListEnabled", kind: "switch", label: "Enhance search pages", keywords: ["post list", "search"],
+      id: "postListEnabled", kind: "switch", label: "Enhance Search Pages", keywords: ["post list", "search"],
       settingPreference: sharedPreferences.postListEnabled
     },
     {
@@ -58,7 +58,7 @@ function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePre
       settingPreference: sharedPreferences.theme, members: THEMES, labels: THEME_LABELS, onPreview: onThemePreview
     },
     {
-      id: "colorScheme", kind: "choice", label: "Color scheme", keywords: ["color", "theme", "dark", "light"], control: "segmented",
+      id: "colorScheme", kind: "choice", label: "Color Scheme", keywords: ["color", "theme", "dark", "light"], control: "segmented",
       settingPreference: sharedPreferences.colorScheme, members: COLOR_SCHEMES, labels: COLOR_SCHEME_LABELS, icons: COLOR_SCHEME_ICONS
     },
     {
@@ -84,7 +84,7 @@ function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePre
       disabled: favoritesPreferences.pagination.infiniteScroll
     },
     {
-      id: "infiniteScroll", kind: "switch", label: "Infinite scroll", keywords: ["pagination", "scroll"],
+      id: "infiniteScroll", kind: "switch", label: "Infinite Scroll", keywords: ["pagination", "scroll"],
       settingPreference: favoritesPreferences.pagination.infiniteScroll
     }
   ];

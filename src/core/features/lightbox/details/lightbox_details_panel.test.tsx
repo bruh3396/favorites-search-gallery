@@ -34,7 +34,7 @@ describe("LightboxDetailsPanel", () => {
 
   test("shows its title beside the close button", () => {
     const { panel } = setup({ titleChild: "#12" });
-    const closeButton = panel.querySelector("[aria-label=\"Hide details\"]")!;
+    const closeButton = panel.querySelector("[aria-label=\"Hide Details\"]")!;
 
     expect(closeButton.parentElement!.textContent).toContain("#12");
   });
@@ -59,7 +59,7 @@ describe("LightboxDetailsPanel", () => {
   test("closes from its close button", () => {
     const { panel, lightboxDetailsPanelProps } = setup();
 
-    panel.querySelector<HTMLButtonElement>("[aria-label=\"Hide details\"]")!.click();
+    panel.querySelector<HTMLButtonElement>("[aria-label=\"Hide Details\"]")!.click();
     expect(lightboxDetailsPanelProps.onClose).toHaveBeenCalledOnce();
   });
 

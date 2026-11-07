@@ -81,7 +81,7 @@ export function composeFavoritesSearchPanel(
     focusSearch: favoritesTab.focusSearch,
     fieldTrailingChild: h(CountToggleButton, {
       icon: "filter",
-      label: computed(() => (changedSearchSettingCount.value > 0 ? `Filters, ${changedSearchSettingCount.value} changed` : "Filters")),
+      label: computed(() => (changedSearchSettingCount.value > 0 ? `Filters, ${changedSearchSettingCount.value} Changed` : "Filters")),
       pressed: favoritesSearchSettingsVisible,
       count: changedSearchSettingCount,
       onClick: () => favoritesSearchSettingsVisible.set(!favoritesSearchSettingsVisible.peek())
@@ -94,7 +94,7 @@ export function composeFavoritesSearchPanel(
     trailingChild: [
       h(CountToggleButton, {
         icon: "appWindow",
-        label: computed(() => (hiddenTabCount.value > 0 ? `Tabs, ${hiddenTabCount.value} open` : "Tabs")),
+        label: computed(() => (hiddenTabCount.value > 0 ? `Tabs, ${hiddenTabCount.value} Open` : "Tabs")),
         pressed: favoritesTabStripVisible,
         count: hiddenTabCount,
         onClick: () => favoritesTabStripVisible.set(!favoritesTabStripVisible.peek())

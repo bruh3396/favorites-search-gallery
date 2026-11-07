@@ -33,7 +33,7 @@ function setup(): Setup {
     });
     return <div>{titleChild}{controlsChild}{bodyChild}</div> as HTMLElement;
   });
-  const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"View settings\"]")!;
+  const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"View Settings\"]")!;
   const viewSettings = element.querySelector<HTMLElement>(`.${FavoriteLightboxDetailsClass.view}`)!;
   const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
     .find(button => button.getAttribute("aria-label") === label)!.click();
@@ -71,7 +71,7 @@ describe("createFavoriteLightboxDetails", () => {
     const { element, favoriteLightboxDetailsPreferences, chooseView } = setup();
     const tags = element.querySelector<HTMLElement>(`.${FavoriteLightboxTagsClass.root}`)!;
 
-    chooseView("One list");
+    chooseView("One List");
     chooseView("Centered");
     chooseView("Large");
     expect([

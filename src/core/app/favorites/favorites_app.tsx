@@ -58,7 +58,7 @@ export function FavoritesApp({
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
       <div className={FavoritesAppClass.loadLine}>
-        <ProgressLine label="Loading favorites" progress={computed(() => measureFavoritesLoadProgress(favoritesService.loadState.value))} />
+        <ProgressLine label="Loading Favorites" progress={computed(() => measureFavoritesLoadProgress(favoritesService.loadState.value))} />
       </div>
       <main className={FavoritesAppClass.panes}>
         <ActivityBar
@@ -67,7 +67,7 @@ export function FavoritesApp({
           renderView={activityBarItem => (
             <ViewPane
               title={activityBarItem.label}
-              actions={[{ label: "Reset all settings", icon: "reset", onClick: resetSettings }]}
+              actions={[{ label: "Reset All Settings", icon: "reset", onClick: resetSettings }]}
             >
               {renderTool(activityBarItem)}
             </ViewPane>

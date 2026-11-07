@@ -101,10 +101,10 @@ export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose
   return (
     <div className={TabStripClass.root}>
       {list}
-      <IconButton className={TabStripClass.add} icon="add" label="New tab" size="small" onClick={onAdd} />
+      <IconButton className={TabStripClass.add} icon="add" label="New Tab" size="small" onClick={onAdd} />
       <div className={TabStripClass.trailing}>
         {trailingChild}
-        <IconButton className={TabStripClass.closeAll} icon="ban" label="Close all tabs" size="small" onClick={onCloseAll} />
+        <IconButton className={TabStripClass.closeAll} icon="ban" label="Close All Tabs" size="small" onClick={onCloseAll} />
       </div>
     </div>
   );

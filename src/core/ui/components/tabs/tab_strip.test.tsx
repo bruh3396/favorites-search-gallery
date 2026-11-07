@@ -237,14 +237,14 @@ describe("TabStrip", () => {
   test("closes all tabs from the close all button", () => {
     const { element, onCloseAll } = setup();
 
-    element.querySelector<HTMLButtonElement>("button[aria-label='Close all tabs']")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label='Close All Tabs']")!.click();
     expect(onCloseAll).toHaveBeenCalledOnce();
   });
 
   test("adds a tab from the new tab button", () => {
     const { element, onAdd } = setup();
 
-    element.querySelector<HTMLButtonElement>("button[aria-label='New tab']")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label='New Tab']")!.click();
     expect(onAdd).toHaveBeenCalledOnce();
   });
 });
