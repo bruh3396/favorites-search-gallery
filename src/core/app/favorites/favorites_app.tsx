@@ -5,6 +5,7 @@ import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import { AppPreferences } from "@/core/app/app_preferences";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
 import FAVORITES_SEARCH_SETTINGS_ROW_CSS from "@/core/app/favorites/search_settings/favorites_search_settings_row.css?inline";
+import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
@@ -38,7 +39,7 @@ export const FavoritesAppClass = {
   zenHint: "fsg-FavoritesApp-zenHint"
 } as const;
 
-const TOOLS: readonly ActivityBarItem[] = [{ id: "settings", label: "Settings", icon: "settings"}];
+const TOOLS: readonly ActivityBarItem[] = [FAVORITES_SETTINGS_TOOL];
 
 export interface FavoritesAppProps {
   favoritesService: Pick<FavoritesService, "loadState">;

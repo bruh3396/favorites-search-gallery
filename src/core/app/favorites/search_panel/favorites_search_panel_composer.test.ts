@@ -39,7 +39,7 @@ interface Setup {
   dispose: () => void;
   favoritesSession: FavoritesSession;
   watched: Set<Element>;
-  open: Mock<(sequence: unknown, favorite: Favorite) => boolean>;
+  openLightbox: Mock<(favorite: Favorite) => boolean>;
   enterZen: Mock<() => void>;
   navigator: MemoryNavigator;
   searchHistory: SearchHistory;
@@ -64,7 +64,7 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
       };
     }
   };
-  const open = vi.fn<(sequence: unknown, favorite: Favorite) => boolean>(() => true);
+  const openLightbox = vi.fn<(favorite: Favorite) => boolean>(() => true);
   const enterZen = vi.fn<() => void>();
   const navigator = new MemoryNavigator();
   const tabCount = new Signal(1);
@@ -105,11 +105,11 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
     imageLoaderService: createImageLoaderService({ scheduler }),
     remotePages: new MemoryRemotePages(new MemoryClient([])),
     navigator,
-    lightbox: { open },
+    openLightbox,
     postActions: { openOriginal: vi.fn() },
     enterZen
   }));
-  return { element, dispose, favoritesSession, watched, open, enterZen, navigator, searchHistory, favoritesTabStripVisible, tabCount };
+  return { element, dispose, favoritesSession, watched, openLightbox, enterZen, navigator, searchHistory, favoritesTabStripVisible, tabCount };
 }
 
 function queryTileLinks(element: HTMLElement): HTMLAnchorElement[] {
@@ -146,10 +146,10 @@ describe("composeFavoritesSearchPanel", () => {
   });
 
   test("opens the clicked favorite in the lightbox", () => {
-    const { element, open } = setup([createPost({ id: "1" })]);
+    const { element, openLightbox } = setup([createPost({ id: "1" })]);
 
     queryTileLinks(element)[0].click();
-    expect(open.mock.calls.map(([, favorite]) => favorite.id)).toEqual(["1"]);
+    expect(openLightbox.mock.calls.map(([favorite]) => favorite.id)).toEqual(["1"]);
   });
 
   test("suggests metatags for the word in the search box", () => {

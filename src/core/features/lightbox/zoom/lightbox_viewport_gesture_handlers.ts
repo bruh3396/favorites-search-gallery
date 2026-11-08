@@ -1,4 +1,4 @@
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { GestureHandlers } from "@/core/ui/gestures/gesture_handlers";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";

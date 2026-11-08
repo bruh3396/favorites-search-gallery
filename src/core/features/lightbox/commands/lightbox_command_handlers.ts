@@ -1,4 +1,4 @@
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { LightboxCloser } from "@/core/features/lightbox/close_morph/lightbox_closer";

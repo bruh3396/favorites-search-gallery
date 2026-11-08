@@ -1,4 +1,4 @@
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 
 const MIDDLE_BUTTON = 1;

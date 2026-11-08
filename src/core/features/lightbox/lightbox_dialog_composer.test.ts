@@ -1,7 +1,7 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
-import { Keymap } from "@/core/ui/hotkeys/keymap";
 import { LIGHTBOX_ICON_PATHS } from "@/core/features/lightbox/overlay/lightbox_icon";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
@@ -38,6 +38,7 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
   currentItem: Signal<Post | undefined>;
   scheduler: MemoryScheduler;
   retainedItems: Signal<readonly Post[]>;
+  keyBindings: Signal<KeyBindings<LightboxCommand>>;
   goToNext: () => Promise<void>;
   download: () => void;
   close: () => void;
@@ -51,8 +52,15 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
   const close = vi.fn();
   const storage = { get: (): undefined => undefined, set: (): void => undefined };
   const remoteMedia = new MemoryRemoteMedia();
-  const keymap: Keymap<LightboxCommand> = { ArrowRight: "showNext", " ": "toggleAutoplay", d: "download", f: "toggleFullscreen", e: "addFavorite" };
-  const { result: view } = render(document, () => composeLightboxDialog<Post>({ keymap }, {
+  const defaultKeyBindings: KeyBindings<LightboxCommand> = {
+    showNext: ["ArrowRight"],
+    toggleAutoplay: [" "],
+    download: ["d"],
+    toggleFullscreen: ["f"],
+    addFavorite: ["e"]
+  };
+  const keyBindings = new Signal<KeyBindings<LightboxCommand>>({});
+  const { result: view } = render(document, () => composeLightboxDialog<Post>({ defaultKeyBindings }, {
     scheduler,
     sizeObserver: new MemorySizeObserver(),
     viewport: new MemoryViewport(),
@@ -71,7 +79,8 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
     lightboxPreferences: {
       mode: new Signal<LightboxMode>(mode),
       volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
-      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage })
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
+      keyBindings
     },
     locateItem,
     lightboxDetails,
@@ -79,7 +88,7 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
   }));
 
   document.body.append(view);
-  return { view, isOpen, currentItem, scheduler, retainedItems, goToNext, download, close };
+  return { view, isOpen, currentItem, scheduler, retainedItems, keyBindings, goToNext, download, close };
 }
 
 function pressKey(view: HTMLElement, key: string): void {
@@ -118,10 +127,19 @@ afterEach(() => {
 });
 
 describe("composeLightboxDialog", () => {
-  test("runs the command its keymap gives a key", () => {
+  test("runs the command bound to a key", () => {
     const { view, goToNext } = setup();
 
     pressKey(view, "ArrowRight");
+    expect(goToNext).toHaveBeenCalledOnce();
+  });
+
+  test("follows changed key bindings", () => {
+    const { view, keyBindings, goToNext } = setup();
+
+    keyBindings.value = { showNext: ["n"] };
+    pressKey(view, "ArrowRight");
+    pressKey(view, "n");
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
@@ -244,14 +262,14 @@ describe("composeLightboxDialog", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([])) });
 
     expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartPlus);
-    expect(findFavoriteButton(view)!.title).toBe("Add to Favorites (E)");
+    expect(findFavoriteButton(view)!.title).toBe("Add to Favorites");
   });
 
   test("shows a favorite as favorited", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([IMAGE.id])) });
 
     expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartFilled);
-    expect(findFavoriteButton(view)!.title).toBe("Favorited (E)");
+    expect(findFavoriteButton(view)!.title).toBe("Favorited");
   });
 
   test("offers to add when no item is current", () => {

@@ -17,14 +17,6 @@ describe("LightboxArrow", () => {
     expect(button.querySelector("path")?.getAttribute("d")).toBe(LIGHTBOX_ICON_PATHS[direction]);
   });
 
-  test("names its shortcut to assistive technology but not in its title", () => {
-    const { result: button } = render(document, () => (
-      <LightboxArrow direction="next" lightboxShortcut={{ text: "→", ariaName: "ArrowRight" }} onClick={vi.fn()} />
-    ));
-
-    expect([button.title, button.getAttribute("aria-keyshortcuts")]).toEqual(["Next", "ArrowRight"]);
-  });
-
   test("runs its action when clicked", () => {
     const onClick = vi.fn();
     const { result: button } = render(document, () => <LightboxArrow direction="next" onClick={onClick} />);

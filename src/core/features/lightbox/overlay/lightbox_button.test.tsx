@@ -24,22 +24,12 @@ describe("LightboxButton", () => {
     expect((button as HTMLButtonElement).disabled).toBe(false);
   });
 
-  test("names its shortcut in its title and to assistive technology", () => {
-    const { result: button } = render(document, () => (
-      <LightboxButton icon="play" label="Autoplay" lightboxShortcut={{ text: "Space", ariaName: "Space" }} onClick={vi.fn()} />
-    ));
-
-    expect([button.title, button.getAttribute("aria-keyshortcuts")]).toEqual(["Autoplay (Space)", "Space"]);
-  });
-
   test("relabels itself when the label changes", () => {
     const label = new Signal("Add");
-    const { result: button } = render(document, () => (
-      <LightboxButton icon="heartPlus" label={label} lightboxShortcut={{ text: "E", ariaName: "E" }} onClick={vi.fn()} />
-    ));
+    const { result: button } = render(document, () => <LightboxButton icon="heartPlus" label={label} onClick={vi.fn()} />);
 
     label.value = "Added";
-    expect([button.getAttribute("aria-label"), button.title]).toEqual(["Added", "Added (E)"]);
+    expect([button.getAttribute("aria-label"), button.title]).toEqual(["Added", "Added"]);
   });
 
   test("swaps its icon when the icon changes", () => {

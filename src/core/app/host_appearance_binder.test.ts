@@ -4,7 +4,7 @@ import { ColorScheme } from "@/core/boundary/color_scheme";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
-import { bindAppearance } from "@/core/app/appearance_binder";
+import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { createStoredValue } from "@/testing/stored_value";
 import { render } from "@/core/ui/h/h";
 
@@ -29,13 +29,13 @@ function setup(previewedTheme?: Signal<Theme | null>): Setup {
   const theme = createStoredValue<Theme>("ink");
   const colorScheme = createStoredValue<ColorScheme>("dark");
   const hostPage = new MemoryHostPage();
-  const { dispose } = render(document, () => bindAppearance(appRoot, { sharedPreferences: { theme, colorScheme }, hostPage, previewedTheme }));
+  const { dispose } = render(document, () => bindHostAppearance(appRoot, { sharedPreferences: { theme, colorScheme }, hostPage, previewedTheme }));
 
   onTestFinished(dispose);
   return { appRoot, hostPage, theme, colorScheme };
 }
 
-describe("bindAppearance", () => {
+describe("bindHostAppearance", () => {
   test("applies the color scheme and theme to the app root", () => {
     const { appRoot } = setup();
 

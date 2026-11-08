@@ -10,6 +10,7 @@ import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
+import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
@@ -17,7 +18,7 @@ import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_setti
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
-import { Keymap } from "@/core/ui/hotkeys/keymap";
+import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
@@ -25,6 +26,7 @@ import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
+import { REPEATABLE_FAVORITES_COMMANDS } from "@/core/app/favorites/commands/favorites_command";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
@@ -33,25 +35,19 @@ import { StatusText } from "@/core/ui/components/status_text/status_text";
 import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { bindAppearance } from "@/core/app/appearance_binder";
+import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { composeFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details_composer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { createAppStorage } from "@/core/app/app_storage";
+import { createFavoritesCommandHandlers } from "@/core/app/favorites/commands/favorites_command_handlers";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { fillWindow } from "@/core/ui/app_root/window_filler";
-import { listenForHotkeys } from "@/core/ui/hotkeys/hotkey_listener";
+import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
+import { mergeKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { resetStoredTree } from "@/core/utils/storage/stored_tree_resetter";
-
-type Command = "toggleZen" | "exitZen";
-
-const KEYMAP: Keymap<Command> = {
-  z: "toggleZen",
-  Z: "toggleZen",
-  Escape: "exitZen"
-};
 
 export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration {
   readonly favoritesOwnerId: string;
@@ -127,6 +123,10 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       }
     }
   });
+  const openLightbox = (favoritesSession: FavoritesSession, favorite: Favorite): boolean => lightbox.open(
+    new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, favoritesSession.matchedFavorites),
+    favorite
+  );
   const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {
     remoteMedia, scheduler, enabled: favoritesPreferences.grid.hdTilesEnabled, paused: lightbox.isOpen
   });
@@ -137,6 +137,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const { tabManager } = favoritesWorkspace;
   const tabCount = computed(() => tabManager.tabs.value.length);
   const zenEnabled = new Signal(false);
+  const mergedFavoritesKeyBindings = computed(() => mergeKeyBindings(DEFAULT_FAVORITES_KEY_BINDINGS, favoritesPreferences.keyBindings.value));
   const previewedTheme = new Signal<Theme | null>(null);
   const resetSettings = (): void => {
     if (confirmer.confirm("Reset all settings to their defaults?")) {
@@ -172,7 +173,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         }),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
           favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, tabCount, searchHistory, favoriteSizeRecorder,
-          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, lightbox, postActions,
+          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions,
+          openLightbox: favorite => openLightbox(favoritesTab.session, favorite),
           enterZen: (): void => {
             zenEnabled.value = true;
           }
@@ -180,15 +182,17 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       })).result);
       const windowFill = fillWindow(appRoot, sizeObserver);
 
-      bindAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
-      listenForHotkeys(container.ownerDocument, KEYMAP, {
-        toggleZen: () => {
-          zenEnabled.value = !zenEnabled.peek();
-        },
-        exitZen: () => {
-          zenEnabled.value = false;
+      bindHostAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
+      listenForKeyBindings(
+        { keyBindings: mergedFavoritesKeyBindings, repeatableCommands: REPEATABLE_FAVORITES_COMMANDS },
+        {
+          target: container.ownerDocument,
+          handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {
+            favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, zenEnabled,
+            remotePages, navigator, openLightbox, resetSettings
+          })
         }
-      });
+      );
       effect(() => {
         hostPage.setHeaderVisible(favoritesPreferences.nativeHeaderVisible.value);
         windowFill.refit();

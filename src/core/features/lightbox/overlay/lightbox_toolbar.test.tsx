@@ -2,7 +2,7 @@ import { LIGHTBOX_ICON_PATHS, LightboxIcon } from "@/core/features/lightbox/over
 import { LightboxToolbar, LightboxToolbarClass } from "@/core/features/lightbox/overlay/lightbox_toolbar";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { Signal } from "@/core/utils/reactive/signal";
 import TOOLBAR_CSS from "@/core/features/lightbox/overlay/lightbox_toolbar.css?inline";
@@ -30,7 +30,6 @@ function setup(detailsOpen: Signal<boolean> | null = new Signal(false)): {
       inFullscreen={inFullscreen}
       detailsOpen={detailsOpen ?? undefined}
       handlers={handlers}
-      keymap={{ " ": "toggleAutoplay", i: "toggleDetails", Escape: "dismiss", Backspace: "close" }}
     />
   ));
   return { root, handlers, isAutoplaying, inFullscreen };
@@ -87,17 +86,6 @@ describe("LightboxToolbar", () => {
     expect(handlers[lightboxCommand]).toHaveBeenCalledOnce();
   });
 
-  test.each([
-    ["Autoplay", "Autoplay (Space)"],
-    ["Details", "Details (I)"],
-    ["Close", "Close (Esc)"],
-    ["Open Post Page", "Open Post Page"]
-  ])("titles %s with its key", (label, title) => {
-    const { root } = setup();
-
-    expect(findButton(root, label).title).toBe(title);
-  });
-
   test("renders its leading slot", () => {
     const { result: root } = render(document, () => (
       <LightboxToolbar
@@ -105,7 +93,6 @@ describe("LightboxToolbar", () => {
         inFullscreen={new Signal(false)}
         leadingChild={<button type="button" aria-label="Favorite" />}
         handlers={{} as CommandHandlers<LightboxCommand>}
-        keymap={{}}
       />
     ));
 

@@ -2,6 +2,8 @@ import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
 import { AppPreferences } from "@/core/app/app_preferences";
+import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_grid_layouts";
+import { FAVORITES_SETTING_RANGES } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
@@ -33,7 +35,6 @@ const THEME_LABELS: Readonly<Record<Theme, string>> = {
   frost: "Frost", ink: "Ink", parchment: "Parchment", slate: "Slate", venom: "Venom", zeal: "Zeal"
 };
 const LIGHTBOX_MODE_LABELS: Readonly<Record<LightboxMode, string>> = { off: "Off", simple: "Reduced", full: "Full" };
-const LAYOUTS: readonly GridLayout[] = ["column", "row", "square", "native"];
 const LAYOUT_LABELS: Readonly<Record<GridLayout, string>> = { row: "Row", square: "Square", grid: "Grid", column: "Column", native: "Native" };
 const LAYOUT_ICONS: Readonly<Record<GridLayout, Icon>> = {
   row: "layoutRow", square: "layoutSquare", grid: "layoutGrid", column: "layoutColumn", native: "layoutNative"
@@ -71,16 +72,16 @@ function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePre
     },
     {
       id: "layout", kind: "choice", label: "Layout", keywords: ["grid", "arrangement"], control: "segmented",
-      settingPreference: favoritesPreferences.grid.layout, members: LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
+      settingPreference: favoritesPreferences.grid.layout, members: FAVORITES_GRID_LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
     },
     {
       id: "tileSize", kind: "slider", label: "Size", keywords: ["tile size", "tiles per row", "columns", "zoom", "grid"],
-      settingPreference: favoritesPreferences.grid.columnCount, min: 1, max: 16, step: 1, inverted: true,
+      settingPreference: favoritesPreferences.grid.columnCount, ...FAVORITES_SETTING_RANGES.columnCount, inverted: true,
       disabled: computed(() => favoritesPreferences.grid.layout.value === "native")
     },
     {
       id: "pageSize", kind: "number", label: "Size", keywords: ["results per page", "count", "pagination"],
-      settingPreference: favoritesPreferences.pagination.pageSize, min: 1, max: 5_000, step: 25, stepperScheduler,
+      settingPreference: favoritesPreferences.pagination.pageSize, ...FAVORITES_SETTING_RANGES.pageSize, stepperScheduler,
       disabled: favoritesPreferences.pagination.infiniteScroll
     },
     {

@@ -1,14 +1,14 @@
+import { KeyBindings, mergeKeyBindings } from "@/core/ui/key_bindings/key_bindings";
+import { LightboxCommand, REPEATABLE_LIGHTBOX_COMMANDS } from "@/core/features/lightbox/commands/lightbox_command";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { currentDocument, h } from "@/core/ui/h/h";
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
-import { Keymap } from "@/core/ui/hotkeys/keymap";
+import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxArrow } from "@/core/features/lightbox/navigation/lightbox_arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { LightboxAutoplayBar } from "@/core/features/lightbox/autoplay/lightbox_autoplay_bar";
 import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxCloser } from "@/core/features/lightbox/close_morph/lightbox_closer";
-import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanel } from "@/core/features/lightbox/details/lightbox_details_panel";
 import { LightboxDialog } from "@/core/features/lightbox/lightbox_dialog";
@@ -37,9 +37,9 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { createLightboxCommandHandlers } from "@/core/features/lightbox/commands/lightbox_command_handlers";
-import { createLightboxKeyListener } from "@/core/features/lightbox/commands/lightbox_key_listener";
 import { createLightboxMouseListeners } from "@/core/features/lightbox/commands/lightbox_mouse_listeners";
-import { findLightboxShortcut } from "@/core/features/lightbox/commands/lightbox_shortcut_finder";
+import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
+import { onCleanup } from "@/core/utils/reactive/scope";
 
 const GIF_CAPACITY = 3;
 const VIDEO_CAPACITY = 5;
@@ -64,7 +64,7 @@ const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>([
 ]);
 
 export interface LightboxDialogConfiguration {
-  readonly keymap: Keymap<LightboxCommand>;
+  readonly defaultKeyBindings: KeyBindings<LightboxCommand>;
 }
 
 export interface LightboxDialogDependencies<T extends MediaItem> {
@@ -133,19 +133,18 @@ export function composeLightboxDialog<T extends MediaItem>(
       lightboxFullscreen.exit();
     }
   });
-  const { keymap } = configuration;
+  const mergedLightboxKeyBindings = computed(() => mergeKeyBindings(configuration.defaultKeyBindings, lightboxPreferences.keyBindings.value));
   const lightboxDetailsContent = lightboxDetails?.createContent(lightboxNavigation.currentItem);
   const isFavorited = computed(() => {
     const currentItem = lightboxNavigation.currentItem.value;
     return currentItem !== undefined && lightboxFavorite?.isFavorited(currentItem) === true;
   });
-  return h(LightboxDialog, {
+  const lightboxDialog = h(LightboxDialog, {
     isOpen: lightboxNavigation.isOpen,
     simple,
     detailsOpen: lightboxDetails?.isOpen,
     lightboxOverlayVisibility,
     handlers,
-    onKeydown: createLightboxKeyListener(keymap, handlers),
     lightboxMouseListeners: createLightboxMouseListeners(handlers),
     renderFrame: onMediaFocus => (frame = h(LightboxFrame, {
       contentChild: [
@@ -173,16 +172,12 @@ export function composeLightboxDialog<T extends MediaItem>(
           leadingChild: lightboxFavorite === undefined ? undefined : h(LightboxButton, {
             icon: computed(() => (isFavorited.value ? "heartFilled" : "heartPlus")),
             label: computed(() => (isFavorited.value ? "Favorited" : "Add to Favorites")),
-            lightboxShortcut: findLightboxShortcut(keymap, "addFavorite"),
             onClick: handlers.addFavorite
           }),
-          handlers,
-          keymap
+          handlers
         }),
-        startEdgeChild: h(LightboxArrow, {
-          direction: "previous", lightboxShortcut: findLightboxShortcut(keymap, "showPrevious"), onClick: handlers.showPrevious
-        }),
-        endEdgeChild: h(LightboxArrow, { direction: "next", lightboxShortcut: findLightboxShortcut(keymap, "showNext"), onClick: handlers.showNext })
+        startEdgeChild: h(LightboxArrow, { direction: "previous", onClick: handlers.showPrevious }),
+        endEdgeChild: h(LightboxArrow, { direction: "next", onClick: handlers.showNext })
       }),
       h(LightboxZoomChip, { pixelScale: lightboxZoom.pixelScale }),
       h(LightboxMinimap, { previewUrl: lightboxStage.previewUrl, lightboxZoom }),
@@ -191,7 +186,6 @@ export function composeLightboxDialog<T extends MediaItem>(
         titleChild: lightboxDetailsContent.titleChild,
         controlsChild: lightboxDetailsContent.controlsChild,
         contentChild: lightboxDetailsContent.bodyChild,
-        closeLightboxShortcut: findLightboxShortcut(keymap, "toggleDetails"),
         onClose: handlers.toggleDetails,
         onPointerenter: () => lightboxOverlayVisibility.hold(),
         onPointerleave: () => lightboxOverlayVisibility.release()
@@ -199,6 +193,12 @@ export function composeLightboxDialog<T extends MediaItem>(
       ]
     }))
   });
+
+  onCleanup(listenForKeyBindings(
+    { keyBindings: mergedLightboxKeyBindings, repeatableCommands: REPEATABLE_LIGHTBOX_COMMANDS },
+    { target: lightboxDialog, handlers }
+  ));
+  return lightboxDialog;
 }
 
 function limitToSimpleCommands(handlers: CommandHandlers<LightboxCommand>, simple: Readable<boolean>): CommandHandlers<LightboxCommand> {

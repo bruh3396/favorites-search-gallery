@@ -1,4 +1,4 @@
-import { DEFAULT_LIGHTBOX_KEYMAP } from "@/core/features/lightbox/commands/default_lightbox_keymap";
+import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxFavorite } from "@/core/features/lightbox/favorite/lightbox_favorite";
@@ -64,7 +64,7 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
     },
     prefetch: (item): void => lightboxRetentionList.retain([item]),
     createView: (): HTMLElement => composeLightboxDialog(
-      { keymap: DEFAULT_LIGHTBOX_KEYMAP },
+      { defaultKeyBindings: DEFAULT_LIGHTBOX_KEY_BINDINGS },
       {
         scheduler, sizeObserver, viewport, remoteMedia, locateItem, lightboxActions, lightboxDetails, lightboxFavorite, lightboxPreferences,
         lightboxMediaResolver, lightboxNavigation,

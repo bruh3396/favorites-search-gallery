@@ -26,7 +26,7 @@ import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { bindAppearance } from "@/core/app/appearance_binder";
+import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
@@ -119,7 +119,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
       });
 
       appRoot.append(...render(container.ownerDocument, renderApp).result);
-      bindAppearance(appRoot, { sharedPreferences, hostPage });
+      bindHostAppearance(appRoot, { sharedPreferences, hostPage });
     }
   };
 }

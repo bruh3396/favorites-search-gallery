@@ -16,14 +16,12 @@ function setup(detailsOpen?: Signal<boolean>): {
   simple: Signal<boolean>;
   scheduler: MemoryScheduler;
   handlers: LightboxDialogProps["handlers"];
-  onKeydown: (event: KeyboardEvent) => void;
   focusMedia: () => void;
 } {
   const isOpen = new Signal(false);
   const simple = new Signal(false);
   const scheduler = new MemoryScheduler();
   const handlers = { close: vi.fn() };
-  const onKeydown = vi.fn();
   let focusMedia = (): void => undefined;
   const { result: dialog } = render(document, () => (
     <LightboxDialog
@@ -32,7 +30,6 @@ function setup(detailsOpen?: Signal<boolean>): {
       detailsOpen={detailsOpen}
       lightboxOverlayVisibility={new LightboxOverlayVisibility({ idleDelay: IDLE_DELAY, leaveDelay: LEAVE_DELAY }, scheduler)}
       handlers={handlers}
-      onKeydown={onKeydown}
       lightboxMouseListeners={{ onWheel: vi.fn(), onMousedown: vi.fn(), onAuxclick: vi.fn() }}
       renderFrame={onMediaFocus => {
         focusMedia = onMediaFocus;
@@ -42,7 +39,7 @@ function setup(detailsOpen?: Signal<boolean>): {
   ) as HTMLDialogElement);
 
   document.body.append(dialog);
-  return { dialog, isOpen, simple, scheduler, handlers, onKeydown, focusMedia };
+  return { dialog, isOpen, simple, scheduler, handlers, focusMedia };
 }
 
 function setupOpen(detailsOpen?: Signal<boolean>): ReturnType<typeof setup> {
@@ -83,14 +80,6 @@ describe("LightboxDialog", () => {
 
     dialog.dispatchEvent(new Event("close"));
     expect(handlers.close).toHaveBeenCalledOnce();
-  });
-
-  test("passes keys to its key listener", () => {
-    const { dialog, onKeydown: keyListener } = setupOpen();
-    const event = new KeyboardEvent("keydown", { key: "ArrowRight" });
-
-    dialog.dispatchEvent(event);
-    expect(keyListener).toHaveBeenCalledWith(event);
   });
 
   test("idles the overlay once the pointer rests, and wakes it when the pointer moves", () => {

@@ -1,6 +1,6 @@
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { CommandHandlers } from "@/core/ui/hotkeys/command_handlers";
+import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxMouseListeners } from "@/core/features/lightbox/commands/lightbox_mouse_listeners";
 import { LightboxOverlayVisibility } from "@/core/features/lightbox/overlay/lightbox_overlay_visibility";
@@ -15,7 +15,6 @@ export interface LightboxDialogProps {
   detailsOpen?: Readable<boolean>;
   lightboxOverlayVisibility: Pick<LightboxOverlayVisibility, "visible" | "wake" | "leave">;
   handlers: Pick<CommandHandlers<LightboxCommand>, "close">;
-  onKeydown: (event: KeyboardEvent) => void;
   lightboxMouseListeners: LightboxMouseListeners;
   renderFrame: (onMediaFocus: () => void) => Child;
 }
@@ -28,7 +27,6 @@ export function LightboxDialog(props: LightboxDialogProps): HTMLDialogElement {
       aria-label="Gallery"
       tabIndex={-1}
       onClose={handlers.close}
-      onKeydown={props.onKeydown}
       onPointermove={() => lightboxOverlayVisibility.wake()}
       onPointerleave={() => lightboxOverlayVisibility.leave()}
       {...props.lightboxMouseListeners}

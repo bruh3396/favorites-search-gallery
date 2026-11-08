@@ -43,7 +43,8 @@ function setup(mode: LightboxMode = "full"): {
     preferences: {
       mode: new Signal(mode),
       volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
-      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage })
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
+      keyBindings: new Signal({})
     },
     locateItem: () => undefined
   });
