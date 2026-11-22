@@ -1,5 +1,6 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { KeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
 import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { LIGHTBOX_ICON_PATHS } from "@/core/features/lightbox/overlay/lightbox_icon";
@@ -38,7 +39,7 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
   currentItem: Signal<Post | undefined>;
   scheduler: MemoryScheduler;
   retainedItems: Signal<readonly Post[]>;
-  keyBindings: Signal<KeyBindings<LightboxCommand>>;
+  keyBindingOverrides: Signal<KeyBindingOverrides<LightboxCommand>>;
   goToNext: () => Promise<void>;
   download: () => void;
   close: () => void;
@@ -54,12 +55,21 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
   const remoteMedia = new MemoryRemoteMedia();
   const defaultKeyBindings: KeyBindings<LightboxCommand> = {
     showNext: ["ArrowRight"],
+    showPrevious: [],
     toggleAutoplay: [" "],
-    download: ["d"],
+    togglePause: [],
+    toggleMute: [],
     toggleFullscreen: ["f"],
+    toggleZoom: [],
+    toggleDetails: [],
+    dismiss: [],
+    download: ["d"],
+    openPostPage: [],
+    openOriginal: [],
+    close: [],
     addFavorite: ["e"]
   };
-  const keyBindings = new Signal<KeyBindings<LightboxCommand>>({});
+  const keyBindingOverrides = new Signal<KeyBindingOverrides<LightboxCommand>>({});
   const { result: view } = render(document, () => composeLightboxDialog<Post>({ defaultKeyBindings }, {
     scheduler,
     sizeObserver: new MemorySizeObserver(),
@@ -80,7 +90,7 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
       mode: new Signal<LightboxMode>(mode),
       volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
       muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
-      keyBindings
+      keyBindingOverrides
     },
     locateItem,
     lightboxDetails,
@@ -88,7 +98,7 @@ function setup(mode: LightboxMode = "full", { locateItem = (): undefined => unde
   }));
 
   document.body.append(view);
-  return { view, isOpen, currentItem, scheduler, retainedItems, keyBindings, goToNext, download, close };
+  return { view, isOpen, currentItem, scheduler, retainedItems, keyBindingOverrides, goToNext, download, close };
 }
 
 function pressKey(view: HTMLElement, key: string): void {
@@ -134,10 +144,10 @@ describe("composeLightboxDialog", () => {
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
-  test("follows changed key bindings", () => {
-    const { view, keyBindings, goToNext } = setup();
+  test("follows changed key binding overrides", () => {
+    const { view, keyBindingOverrides, goToNext } = setup();
 
-    keyBindings.value = { showNext: ["n"] };
+    keyBindingOverrides.value = { showNext: ["n"] };
     pressKey(view, "ArrowRight");
     pressKey(view, "n");
     expect(goToNext).toHaveBeenCalledOnce();

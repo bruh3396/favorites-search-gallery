@@ -100,7 +100,7 @@ describe("listenForKeyBindings", () => {
     const link = Object.assign(document.createElement("a"), { href: "#" });
     const plain = document.createElement("div");
 
-    keyBindings.value = { first: [key] };
+    keyBindings.value = { first: [key], second: [] };
     document.body.append(button, link, plain);
     const pressedOnButton = press({ key }, button);
 

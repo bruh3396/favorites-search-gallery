@@ -3,6 +3,7 @@ import { ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar
 import { AppRootClass } from "@/core/ui/app_root/app_root";
 import { FavoritesAppClass } from "@/core/app/favorites/favorites_app";
 import { FavoritesSearchPanelClass } from "@/core/app/favorites/search_panel/favorites_search_panel";
+import { KeyBindingListItemClass } from "@/core/ui/components/key_binding_list/key_binding_list_item";
 import { LightboxButtonClass } from "@/core/features/lightbox/overlay/lightbox_button";
 import { LightboxPositionClass } from "@/core/features/lightbox/navigation/lightbox_position";
 import { LightboxViewportClass } from "@/core/features/lightbox/zoom/lightbox_viewport";
@@ -103,6 +104,10 @@ function readThemeAccent(root: ShadowRoot): string {
 function clickResetSettings(root: ShadowRoot): void {
   root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
   root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Settings\"]")!.click();
+}
+
+function readKeyBindingListItem(root: ShadowRoot, label: string): string | undefined {
+  return [...root.querySelectorAll(`.${KeyBindingListItemClass.root}`)].find(item => item.textContent.startsWith(label))?.textContent;
 }
 
 function clickLightboxButton(root: ShadowRoot, label: string): void {
@@ -313,6 +318,31 @@ describe("composeFavoritesApp", () => {
       preferences: { favorites: { activeTool: "settings" } },
       state: { favorites: { 1: { sizes } } }
     });
+  });
+
+  test("lists the keys of each command in the Keyboard Shortcuts tool, the user's own in place of the defaults", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { keyBindingOverrides: { toggleZen: ["x"] } } } });
+    const root = mount(localKeyedValues);
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Keyboard Shortcuts"]`)!.click();
+    expect([readKeyBindingListItem(root, "Toggle Zen"), readKeyBindingListItem(root, "Go to Next Page")]).toEqual(["Toggle ZenX", "Go to Next Page→"]);
+  });
+
+  test("puts every shortcut back to its default once the reset is confirmed, and keeps them through a settings reset", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+
+    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { keyBindingOverrides: { toggleZen: ["x"] } } } });
+    const root = mount(localKeyedValues);
+
+    clickResetSettings(root);
+    const keptKeyBindingOverrides = (localKeyedValues.get("favorites-search-gallery") as { preferences: { favorites: { keyBindingOverrides: unknown } } })
+      .preferences.favorites.keyBindingOverrides;
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Keyboard Shortcuts"]`)!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Shortcuts\"]")!.click();
+    expect([keptKeyBindingOverrides, readKeyBindingListItem(root, "Toggle Zen")]).toEqual([{ toggleZen: ["x"] }, "Toggle ZenZ"]);
   });
 
   test("records the shapes of the active tab's first results after they settle", async() => {

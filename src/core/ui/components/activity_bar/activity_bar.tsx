@@ -15,16 +15,16 @@ export interface ActivityBarItem {
   readonly id: string;
   readonly label: string;
   readonly icon: Icon;
+  renderView: () => HTMLElement;
 }
 
 export interface ActivityBarProps {
   items: readonly ActivityBarItem[];
   value: Readable<string | null>;
-  renderView: (activityBarItem: ActivityBarItem) => HTMLElement;
   onValueChange: (id: string | null) => void;
 }
 
-export function ActivityBar({ items: activityBarItems, value, renderView, onValueChange }: ActivityBarProps): HTMLElement {
+export function ActivityBar({ items: activityBarItems, value, onValueChange }: ActivityBarProps): HTMLElement {
   const createViewScope = captureScope();
   const activeItem = computed(() => activityBarItems.find(activityBarItem => activityBarItem.id === value.value) ?? null);
   const view = (
@@ -45,7 +45,7 @@ export function ActivityBar({ items: activityBarItems, value, renderView, onValu
       return;
     }
     shown?.dispose();
-    shown = createViewScope(() => untracked(() => renderView(activityBarItem)));
+    shown = createViewScope(() => untracked(() => activityBarItem.renderView()));
     shownActivityBarItem = activityBarItem;
     view.replaceChildren(shown.result);
   });

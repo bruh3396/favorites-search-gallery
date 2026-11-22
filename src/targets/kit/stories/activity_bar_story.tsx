@@ -4,21 +4,15 @@ import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 
-const ITEMS: readonly ActivityBarItem[] = [
-  { id: "settings", label: "Settings", icon: "settings" },
-  { id: "downloads", label: "Downloads", icon: "download" },
-  { id: "changelog", label: "Changelog", icon: "changelog" },
-  { id: "help", label: "Help", icon: "help" }
-];
+function renderPlaceholderView(label: string): HTMLElement {
+  return <ViewPane title={label}><p className="kit-Placeholder">{label} content</p></ViewPane>;
+}
 
-function renderView(activityBarItem: ActivityBarItem, log: (message: string) => void): HTMLElement {
-  if (activityBarItem.id !== "settings") {
-    return <ViewPane title={activityBarItem.label}><p className="kit-Placeholder">{activityBarItem.label} content</p></ViewPane>;
-  }
+function renderSettingsView(log: (message: string) => void): HTMLElement {
   const nothingChanged = new Signal(false);
   return (
     <ViewPane
-      title={activityBarItem.label}
+      title="Settings"
       actions={[
         {
           label: "Reset all",
@@ -41,12 +35,17 @@ function variant(label: string, initial: string | null): StoryVariant {
     label,
     render: (ownerDocument, log): HTMLElement => {
       const activeItemId = new Signal<string | null>(initial);
+      const activityBarItems: readonly ActivityBarItem[] = [
+        { id: "settings", label: "Settings", icon: "settings", renderView: () => renderSettingsView(log) },
+        { id: "downloads", label: "Downloads", icon: "download", renderView: () => renderPlaceholderView("Downloads") },
+        { id: "changelog", label: "Changelog", icon: "changelog", renderView: () => renderPlaceholderView("Changelog") },
+        { id: "help", label: "Help", icon: "help", renderView: () => renderPlaceholderView("Help") }
+      ];
       const { result } = render(ownerDocument, () => (
         <div className="kit-Frame">
           <ActivityBar
-            items={ITEMS}
+            items={activityBarItems}
             value={activeItemId}
-            renderView={activityBarItem => renderView(activityBarItem, log)}
             onValueChange={next => {
               log(`ActivityBar "${label}" → ${String(next)}`);
               activeItemId.value = next;

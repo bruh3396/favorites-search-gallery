@@ -1,11 +1,8 @@
-import { ActivityBar, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
-import { AppPreferences } from "@/core/app/app_preferences";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
 import FAVORITES_SEARCH_SETTINGS_ROW_CSS from "@/core/app/favorites/search_settings/favorites_search_settings_row.css?inline";
-import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
@@ -17,7 +14,6 @@ import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
 import { TabPanel } from "@/core/ui/components/tabs/tab_panel";
 import UI_CSS from "@/core/ui/styles.css?inline";
-import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 import { measureFavoritesLoadProgress } from "@/core/app/favorites/favorites_load_progress_measurer";
 
 export const FAVORITES_APP_STYLES = [
@@ -39,22 +35,18 @@ export const FavoritesAppClass = {
   zenHint: "fsg-FavoritesApp-zenHint"
 } as const;
 
-const TOOLS: readonly ActivityBarItem[] = [FAVORITES_SETTINGS_TOOL];
-
 export interface FavoritesAppProps {
   favoritesService: Pick<FavoritesService, "loadState">;
   favoritesWorkspace: Pick<FavoritesWorkspace, "tabManager">;
   lightboxView: HTMLElement;
-  favoritesPreferences: Pick<AppPreferences["favorites"], "activeTool">;
+  activityBar: HTMLElement;
   tabsHeaderChild: Child;
   zenEnabled: Readable<boolean>;
-  resetSettings: () => void;
-  renderTool: (activityBarItem: ActivityBarItem) => HTMLElement;
   renderPanel: (favoritesTab: FavoritesTab) => HTMLElement;
 }
 
 export function FavoritesApp({
-  favoritesService, favoritesWorkspace, lightboxView, favoritesPreferences, tabsHeaderChild, zenEnabled, resetSettings, renderTool, renderPanel
+  favoritesService, favoritesWorkspace, lightboxView, activityBar, tabsHeaderChild, zenEnabled, renderPanel
 }: FavoritesAppProps): HTMLElement[] {
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
@@ -62,19 +54,7 @@ export function FavoritesApp({
         <ProgressLine label="Loading Favorites" progress={computed(() => measureFavoritesLoadProgress(favoritesService.loadState.value))} />
       </div>
       <main className={FavoritesAppClass.panes}>
-        <ActivityBar
-          items={TOOLS}
-          value={favoritesPreferences.activeTool}
-          renderView={activityBarItem => (
-            <ViewPane
-              title={activityBarItem.label}
-              actions={[{ label: "Reset All Settings", icon: "reset", onClick: resetSettings }]}
-            >
-              {renderTool(activityBarItem)}
-            </ViewPane>
-          )}
-          onValueChange={id => favoritesPreferences.activeTool.set(id)}
-        />
+        {activityBar}
         <div className={FavoritesAppClass.tabs}>
           {tabsHeaderChild}
           <TabPanel<FavoritesTab> tabManager={favoritesWorkspace.tabManager} renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)} />

@@ -47,16 +47,13 @@ function setup(): Setup {
   const lightboxView = document.createElement("dialog");
   const tabsHeader = document.createElement("nav");
   const zenEnabled = new Signal(false);
-  const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const { result: elements } = render(document, () => h(FavoritesApp, {
     favoritesService: { loadState },
     favoritesWorkspace: createWorkspace(),
     lightboxView,
-    favoritesPreferences,
+    activityBar: document.createElement("aside"),
     tabsHeaderChild: tabsHeader,
     zenEnabled,
-    resetSettings: () => undefined,
-    renderTool: () => document.createElement("form"),
     renderPanel: () => document.createElement("section")
   }));
   return { elements, element: elements[0], lightboxView, tabsHeader, loadState, zenEnabled };

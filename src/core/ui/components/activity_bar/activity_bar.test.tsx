@@ -6,14 +6,9 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
-const ITEMS: readonly ActivityBarItem[] = [
-  { id: "settings", label: "Settings", icon: "settings" },
-  { id: "downloads", label: "Downloads", icon: "download" }
-];
-
 interface Setup {
   element: HTMLElement;
-  renderView: Mock<(activityBarItem: ActivityBarItem) => HTMLElement>;
+  renderView: Mock<(id: string) => void>;
   disposeView: Mock<(id: string) => void>;
   onValueChange: Mock<(id: string | null) => void>;
   dispose: () => void;
@@ -21,16 +16,22 @@ interface Setup {
 
 function setup(initial: string | null = null): Setup {
   const value = new Signal<string | null>(initial);
+  const renderView = vi.fn<(id: string) => void>();
   const disposeView = vi.fn<(id: string) => void>();
-  const renderView = vi.fn((activityBarItem: ActivityBarItem): HTMLElement => {
-    onCleanup(() => disposeView(activityBarItem.id));
-    return <p>{activityBarItem.label}</p>;
+  const createItem = (id: string, label: string, icon: ActivityBarItem["icon"]): ActivityBarItem => ({
+    id, label, icon,
+    renderView: (): HTMLElement => {
+      renderView(id);
+      onCleanup(() => disposeView(id));
+      return <p>{label}</p>;
+    }
   });
+  const activityBarItems = [createItem("settings", "Settings", "settings"), createItem("downloads", "Downloads", "download")];
   const onValueChange = vi.fn((id: string | null): void => {
     value.value = id;
   });
   const { result: element, dispose } = render(document, () => (
-    <ActivityBar items={ITEMS} value={value} renderView={renderView} onValueChange={onValueChange} />
+    <ActivityBar items={activityBarItems} value={value} onValueChange={onValueChange} />
   ));
 
   document.body.append(element);

@@ -14,6 +14,7 @@ export const FavoritesSearchPanelClass = {
   root: "fsg-FavoritesSearchPanel",
   header: "fsg-FavoritesSearchPanel-header",
   search: "fsg-FavoritesSearchPanel-search",
+  fieldTrailing: "fsg-FavoritesSearchPanel-fieldTrailing",
   count: "fsg-FavoritesSearchPanel-count",
   paginator: "fsg-FavoritesSearchPanel-paginator",
   trailing: "fsg-FavoritesSearchPanel-trailing",
@@ -79,7 +80,7 @@ export function FavoritesSearchPanel({
             query={favoritesSession.query}
             submittedQueries={submittedQueries}
             trailingChild={[
-              fieldTrailingChild,
+              <span className={FavoritesSearchPanelClass.fieldTrailing}>{fieldTrailingChild}</span>,
               <span className={FavoritesSearchPanelClass.count}>
                 {computed(() => describeResultCount(favoritesSession.matchedFavorites.value.length))}
               </span>

@@ -1,0 +1,26 @@
+.fsg-KeyBindingListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-block-size: calc(var(--fsg-control-size-small) + 12px);
+  padding: 6px 8px 6px 14px;
+}
+
+.fsg-KeyBindingListItem-label {
+  min-inline-size: 0;
+  font-size: 13px;
+}
+
+.fsg-KeyBindingListItem-keys {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.fsg-KeyBindingListItem-unbound {
+  padding-inline: 6px;
+  color: var(--fsg-color-on-surface-variant);
+}

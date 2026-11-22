@@ -7,6 +7,7 @@
     block-size: 100%;
     border-block-start: 1px solid var(--fsg-color-outline-variant);
     background: var(--fsg-color-surface-dim);
+    /* zoom: 0.95; */
   }
 
   .fsg-FavoritesApp-loadLine {

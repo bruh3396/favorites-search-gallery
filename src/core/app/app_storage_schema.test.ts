@@ -137,12 +137,12 @@ describe("APP_STORAGE_SCHEMA", () => {
       return createStoredTree(APP_STORAGE_SCHEMA.state, localKeyedValues, ["favoritesSearchSettingsVisible"]).favoritesSearchSettingsVisible;
     }
 
-    test("hides the search settings by default and restores them shown once stored", () => {
+    test("shows the search settings by default and restores them hidden once stored", () => {
       const localKeyedValues = new MemoryLocalKeyedValues();
 
-      expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(false);
-      createFavoritesSearchSettingsVisible(localKeyedValues).set(true);
       expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(true);
+      createFavoritesSearchSettingsVisible(localKeyedValues).set(false);
+      expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(false);
     });
   });
 });

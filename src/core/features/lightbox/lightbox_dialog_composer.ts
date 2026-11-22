@@ -1,8 +1,8 @@
-import { KeyBindings, mergeKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { LightboxCommand, REPEATABLE_LIGHTBOX_COMMANDS } from "@/core/features/lightbox/commands/lightbox_command";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { currentDocument, h } from "@/core/ui/h/h";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
+import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxArrow } from "@/core/features/lightbox/navigation/lightbox_arrow";
 import { LightboxAutoplay } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
@@ -36,6 +36,7 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
+import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
 import { createLightboxCommandHandlers } from "@/core/features/lightbox/commands/lightbox_command_handlers";
 import { createLightboxMouseListeners } from "@/core/features/lightbox/commands/lightbox_mouse_listeners";
 import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
@@ -133,7 +134,7 @@ export function composeLightboxDialog<T extends MediaItem>(
       lightboxFullscreen.exit();
     }
   });
-  const mergedLightboxKeyBindings = computed(() => mergeKeyBindings(configuration.defaultKeyBindings, lightboxPreferences.keyBindings.value));
+  const keyBindings = computed(() => applyKeyBindingOverrides(configuration.defaultKeyBindings, lightboxPreferences.keyBindingOverrides.value));
   const lightboxDetailsContent = lightboxDetails?.createContent(lightboxNavigation.currentItem);
   const isFavorited = computed(() => {
     const currentItem = lightboxNavigation.currentItem.value;
@@ -195,7 +196,7 @@ export function composeLightboxDialog<T extends MediaItem>(
   });
 
   onCleanup(listenForKeyBindings(
-    { keyBindings: mergedLightboxKeyBindings, repeatableCommands: REPEATABLE_LIGHTBOX_COMMANDS },
+    { keyBindings, repeatableCommands: REPEATABLE_LIGHTBOX_COMMANDS },
     { target: lightboxDialog, handlers }
   ));
   return lightboxDialog;

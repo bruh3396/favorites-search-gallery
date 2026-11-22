@@ -51,4 +51,13 @@ describe("CountToggleButton", () => {
     count.value = 2;
     expect([badge.hidden, badge.textContent]).toEqual([false, "2"]);
   });
+
+  test("hides its badge while pressed", () => {
+    const { element, pressed, count } = setup();
+    const badge = element.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
+
+    count.value = 2;
+    pressed.value = true;
+    expect(badge.hidden).toBe(true);
+  });
 });

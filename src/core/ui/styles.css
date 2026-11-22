@@ -24,6 +24,7 @@
 @import "./components/suggestion_list/suggestion_list.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
 @import "./components/tabs/tab_panel.css" layer(components);
+@import "./components/tabs/tab_list.css" layer(components);
 @import "./components/empty_state/empty_state.css" layer(components);
 @import "./components/slider/slider.css" layer(components);
 @import "./components/activity_bar/activity_bar.css" layer(components);
@@ -31,5 +32,8 @@
 @import "./components/icon_button/icon_button.css" layer(components);
 @import "./components/count_badge/count_badge.css" layer(components);
 @import "./components/key_cap/key_cap.css" layer(components);
+@import "./components/key_binding_list/key_binding_list.css" layer(components);
+@import "./components/key_binding_list/key_binding_list_section.css" layer(components);
+@import "./components/key_binding_list/key_binding_list_item.css" layer(components);
 
 @import "./zen.css" layer(utilities);

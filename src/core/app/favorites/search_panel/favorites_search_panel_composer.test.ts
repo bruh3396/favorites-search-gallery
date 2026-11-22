@@ -229,11 +229,11 @@ describe("composeFavoritesSearchPanel", () => {
     const funnel = element.querySelector<HTMLButtonElement>("button[aria-label=Filters]")!;
     const isRowHidden = (): boolean => row.closest("[hidden]") !== null;
 
-    expect(isRowHidden()).toBe(true);
-    funnel.click();
     expect(isRowHidden()).toBe(false);
     funnel.click();
     expect(isRowHidden()).toBe(true);
+    funnel.click();
+    expect(isRowHidden()).toBe(false);
   });
 
   test("searches the tab from the search settings row and counts the change on the funnel", () => {
@@ -245,11 +245,13 @@ describe("composeFavoritesSearchPanel", () => {
     expect([favoritesSession.searchSettings.value.isInverted, funnel.getAttribute("aria-label")]).toEqual([true, "Filters, 1 Changed"]);
   });
 
-  test("counts the changed search settings on the funnel only while there are some, shown or not", () => {
+  test("counts the changed search settings on the funnel only while there are some and the row is closed", () => {
     const { element, favoritesSession } = setup();
     const funnel = element.querySelector<HTMLButtonElement>("button[aria-label^=Filters]")!;
     const badge = funnel.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
     const readBadge = (): [boolean, string] => [badge.hidden, badge.textContent!];
+
+    funnel.click();
     const unchanged = readBadge();
 
     favoritesSession.invert();
@@ -257,7 +259,7 @@ describe("composeFavoritesSearchPanel", () => {
     const changed = readBadge();
 
     funnel.click();
-    expect([unchanged, changed, readBadge()]).toEqual([[true, "0"], [false, "2"], [false, "2"]]);
+    expect([unchanged, changed, readBadge()]).toEqual([[true, "0"], [false, "2"], [true, "0"]]);
   });
 
   test("leaves Blacklist out of the search settings row on someone else's favorites", () => {

@@ -21,10 +21,11 @@ export interface ViewPaneAction {
 export interface ViewPaneProps {
   title: string;
   actions?: readonly ViewPaneAction[];
+  subheaderChild?: Child;
   children?: Child;
 }
 
-export function ViewPane({ title, actions: viewPaneActions = [], children }: ViewPaneProps): HTMLElement {
+export function ViewPane({ title, actions: viewPaneActions = [], subheaderChild, children }: ViewPaneProps): HTMLElement {
   return (
     <section className={ViewPaneClass.root}>
       <header className={ViewPaneClass.header}>
@@ -41,6 +42,7 @@ export function ViewPane({ title, actions: viewPaneActions = [], children }: Vie
           ))}
         </div>
       </header>
+      {subheaderChild}
       <div className={ViewPaneClass.body}>{children}</div>
     </section>
   );

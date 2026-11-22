@@ -143,8 +143,10 @@ export function OptionMenu({ trigger, items: optionMenuItems, controlSize = "med
 }
 
 function placePopup(trigger: HTMLElement, popup: HTMLElement): void {
-  const anchor = trigger.getBoundingClientRect();
-  const viewportHeight = trigger.ownerDocument.documentElement.clientHeight;
+  const zoom = popup.currentCSSZoom ?? 1;
+  const viewportBox = trigger.getBoundingClientRect();
+  const anchor = { left: viewportBox.left / zoom, top: viewportBox.top / zoom, bottom: viewportBox.bottom / zoom, width: viewportBox.width / zoom };
+  const viewportHeight = trigger.ownerDocument.documentElement.clientHeight / zoom;
   const spaceBelow = viewportHeight - anchor.bottom - (POPUP_GAP * 2);
   const spaceAbove = anchor.top - (POPUP_GAP * 2);
   const isOpeningUp = popup.scrollHeight > spaceBelow && spaceAbove > spaceBelow;

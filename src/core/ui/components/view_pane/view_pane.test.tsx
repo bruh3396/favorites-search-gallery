@@ -28,6 +28,18 @@ describe("ViewPane", () => {
     expect([element.querySelector("h2")?.textContent, element.querySelector("p")?.textContent]).toEqual(["Settings", "Body"]);
   });
 
+  test("keeps its subheader out of the scrolling body", () => {
+    const subheader = document.createElement("nav");
+    const element = render(document, () => (
+      <ViewPane title="Shortcuts" subheaderChild={subheader}>
+        <p>Body</p>
+      </ViewPane>
+    )).result;
+    const body = element.querySelector(`.${ViewPaneClass.body}`)!;
+
+    expect([element.contains(subheader), body.contains(subheader), body.textContent]).toEqual([true, false, "Body"]);
+  });
+
   test("calls an action when its button is clicked", () => {
     const onClick = vi.fn();
     const element = setup([{ label: "Reset all", icon: "reset", onClick }]);

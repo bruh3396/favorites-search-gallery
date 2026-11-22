@@ -6,15 +6,17 @@ import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";
+import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
+import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { FavoritesSettings } from "@/core/app/favorites/settings/favorites_settings";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
@@ -35,9 +37,12 @@ import { StatusText } from "@/core/ui/components/status_text/status_text";
 import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
+import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
 import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { composeFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details_composer";
+import { composeFavoritesKeyBindings } from "@/core/app/favorites/key_bindings/favorites_key_bindings_composer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
+import { composeFavoritesSettings } from "@/core/app/favorites/settings/favorites_settings_composer";
 import { createAppStorage } from "@/core/app/app_storage";
 import { createFavoritesCommandHandlers } from "@/core/app/favorites/commands/favorites_command_handlers";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
@@ -45,7 +50,6 @@ import { createSharedPreferences } from "@/core/app/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { fillWindow } from "@/core/ui/app_root/window_filler";
 import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
-import { mergeKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { resetStoredTree } from "@/core/utils/storage/stored_tree_resetter";
 
@@ -133,15 +137,17 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
 
   lightbox.settled.on(favorite => favoritesWorkspace.turnToPageContaining(favorite));
   lightbox.closed.on(favorite => favoritesWorkspace.reveal(favorite));
-
   const { tabManager } = favoritesWorkspace;
   const tabCount = computed(() => tabManager.tabs.value.length);
   const zenEnabled = new Signal(false);
-  const mergedFavoritesKeyBindings = computed(() => mergeKeyBindings(DEFAULT_FAVORITES_KEY_BINDINGS, favoritesPreferences.keyBindings.value));
+  const keyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_FAVORITES_KEY_BINDINGS, favoritesPreferences.keyBindingOverrides.value));
   const previewedTheme = new Signal<Theme | null>(null);
   const resetSettings = (): void => {
     if (confirmer.confirm("Reset all settings to their defaults?")) {
-      resetStoredTree({ sharedPreferences, favoritesPreferences, postListPreferences }, [sharedPreferences.colorScheme, favoritesPreferences.activeTool]);
+      resetStoredTree(
+        { sharedPreferences, favoritesPreferences, postListPreferences },
+        [sharedPreferences.colorScheme, favoritesPreferences.activeTool, favoritesPreferences.keyBindingOverrides]
+      );
     }
   };
   return {
@@ -154,7 +160,28 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       });
 
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
-        favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), favoritesPreferences, zenEnabled, resetSettings,
+        favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), zenEnabled,
+        activityBar: h(ActivityBar, {
+          items: [
+            {
+              ...FAVORITES_SETTINGS_TOOL,
+              renderView: (): HTMLElement => composeFavoritesSettings({
+                favoritesPreferences, sharedPreferences, stepperScheduler: scheduler, resetSettings,
+                onThemePreview: (theme): void => {
+                  previewedTheme.value = theme;
+                }
+              })
+            },
+            {
+              ...FAVORITES_KEY_BINDINGS_TOOL,
+              renderView: (): HTMLElement => composeFavoritesKeyBindings({
+                keyBindings, keyBindingOverrides: favoritesPreferences.keyBindingOverrides, confirmer
+              })
+            }
+          ],
+          value: favoritesPreferences.activeTool,
+          onValueChange: id => favoritesPreferences.activeTool.set(id)
+        }),
         tabsHeaderChild: h("div", { hidden: computed(() => !favoritesTabStripVisible.value) }, h(TabStrip, {
           tabs: computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable }))),
           activeTabId: tabManager.activeTabId,
@@ -165,12 +192,6 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
           onAdd: () => favoritesWorkspace.openBlankTab(),
           onCloseAll: () => favoritesWorkspace.closeAllTabs()
         })),
-        renderTool: () => h(FavoritesSettings, {
-          favoritesPreferences, sharedPreferences, stepperScheduler: scheduler,
-          onThemePreview: (theme): void => {
-            previewedTheme.value = theme;
-          }
-        }),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
           favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, tabCount, searchHistory, favoriteSizeRecorder,
           visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions,
@@ -184,7 +205,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
 
       bindHostAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
       listenForKeyBindings(
-        { keyBindings: mergedFavoritesKeyBindings, repeatableCommands: REPEATABLE_FAVORITES_COMMANDS },
+        { keyBindings, repeatableCommands: REPEATABLE_FAVORITES_COMMANDS },
         {
           target: container.ownerDocument,
           handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {

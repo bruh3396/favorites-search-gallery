@@ -22,6 +22,14 @@
     min-inline-size: 0;
   }
 
+  .fsg-FavoritesSearchPanel-fieldTrailing {
+    display: contents;
+  }
+
+  .fsg-FavoritesSearchPanel-fieldTrailing [aria-pressed="true"] {
+    color: var(--fsg-color-primary);
+  }
+
   .fsg-FavoritesSearchPanel-paginator {
     flex: none;
   }
