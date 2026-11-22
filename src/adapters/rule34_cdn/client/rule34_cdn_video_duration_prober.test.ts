@@ -3,33 +3,30 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { Rule34CdnVideoDurationProber } from "@/adapters/rule34_cdn/client/rule34_cdn_video_duration_prober";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 
-type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 type Outcome = "loaded" | "error";
 
-const VIDEO_URL = "https://rule34.xxx/images//1234/a1b2c3.mp4";
+const VIDEO_URL = "https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4";
 
 interface Setup {
   rule34CdnVideoDurationProber: Rule34CdnVideoDurationProber;
-  fetch: ReturnType<typeof vi.fn<Fetch>>;
   scheduler: MemoryScheduler;
 }
 
-function respondPartially(): Promise<Response> {
-  return Promise.resolve(new Response("bytes", { status: 206 }));
-}
-
-function playOutcomes(outcomes: Outcome[]): void {
+function playOutcomes(outcomes: Outcome[]): string[] {
   const createElement = Document.prototype.createElement.bind(document);
+  const loadedUrls: string[] = [];
 
   vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
     const element = createElement(tagName);
+    const video = element as HTMLVideoElement;
 
     Object.defineProperty(element, "duration", { value: 12 });
+    Object.defineProperty(element, "load", { value: (): void => undefined });
     Object.defineProperty(element, "src", {
-      set(): void {
+      set(url: string): void {
         const outcome = outcomes.shift();
-        const video = element as HTMLVideoElement;
 
+        loadedUrls.push(url);
         queueMicrotask(() => {
           if (outcome === "loaded") {
             video.onloadedmetadata?.(new Event("loadedmetadata"));
@@ -37,17 +34,16 @@ function playOutcomes(outcomes: Outcome[]): void {
             video.onerror?.(new Event("error"));
           }
         });
-      },
-      get: (): string => "blob:video"
+      }
     });
     return element;
   });
+  return loadedUrls;
 }
 
-function setup(respond: Fetch = respondPartially): Setup {
-  const fetch = vi.fn<Fetch>(respond);
+function setup(): Setup {
   const scheduler = new MemoryScheduler();
-  return { rule34CdnVideoDurationProber: new Rule34CdnVideoDurationProber({ fetch, scheduler }), fetch, scheduler };
+  return { rule34CdnVideoDurationProber: new Rule34CdnVideoDurationProber({ scheduler }), scheduler };
 }
 
 async function settled<T>(scheduler: MemoryScheduler, pending: Promise<T>): Promise<T> {
@@ -62,49 +58,20 @@ afterEach(() => {
 
 describe("Rule34CdnVideoDurationProber", () => {
   describe("probeSeconds", () => {
-    test("probes a video's duration from the start of its file", async() => {
-      const { rule34CdnVideoDurationProber, fetch, scheduler } = setup();
-
-      playOutcomes(["loaded"]);
-
-      expect(await settled(scheduler, rule34CdnVideoDurationProber.probeSeconds(VIDEO_URL))).toBe(12);
-      expect(fetch).toHaveBeenCalledWith(VIDEO_URL, { headers: { Range: "bytes=0-500000" } });
-    });
-
-    test("probes a longer range when the metadata won't load from a shorter one", async() => {
-      const { rule34CdnVideoDurationProber, fetch, scheduler } = setup();
-
-      playOutcomes(["error", "error", "loaded"]);
+    test("reads a video's duration from its metadata", async() => {
+      const { rule34CdnVideoDurationProber, scheduler } = setup();
+      const loadedUrls = playOutcomes(["loaded"]);
 
       expect(await settled(scheduler, rule34CdnVideoDurationProber.probeSeconds(VIDEO_URL))).toBe(12);
-      expect(fetch.mock.calls.map(([, init]) => init?.headers)).toEqual([
-        { Range: "bytes=0-500000" },
-        { Range: "bytes=0-1000000" },
-        { Range: "bytes=0-2000000" }
-      ]);
+      expect(loadedUrls).toEqual([VIDEO_URL]);
     });
 
-    test("accepts a whole file the host serves", async() => {
-      const { rule34CdnVideoDurationProber, scheduler } = setup(() => Promise.resolve(new Response("bytes")));
+    test("rejects a video whose metadata won't load", async() => {
+      const { rule34CdnVideoDurationProber, scheduler } = setup();
 
-      playOutcomes(["loaded"]);
-
-      expect(await settled(scheduler, rule34CdnVideoDurationProber.probeSeconds(VIDEO_URL))).toBe(12);
-    });
-
-    test("rejects once every range fails", async() => {
-      const { rule34CdnVideoDurationProber, fetch, scheduler } = setup();
-
-      playOutcomes(["error", "error", "error", "error"]);
+      playOutcomes(["error"]);
 
       await expect(settled(scheduler, rule34CdnVideoDurationProber.probeSeconds(VIDEO_URL))).rejects.toThrow(`Unable to probe video duration: ${VIDEO_URL}`);
-      expect(fetch).toHaveBeenCalledTimes(4);
-    });
-
-    test("rejects a video the host refuses", async() => {
-      const { rule34CdnVideoDurationProber, scheduler } = setup(() => Promise.resolve(new Response(null, { status: 404 })));
-
-      await expect(settled(scheduler, rule34CdnVideoDurationProber.probeSeconds(VIDEO_URL))).rejects.toThrow("Unable to probe video duration");
     });
 
     test("reuses a video once its probe settles", async() => {

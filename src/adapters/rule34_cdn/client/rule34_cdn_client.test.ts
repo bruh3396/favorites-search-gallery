@@ -110,7 +110,7 @@ describe("Rule34CdnClient", () => {
   test("addresses videos and gifs by their kind", async() => {
     const { rule34CdnClient } = setup();
 
-    expect(await rule34CdnClient.originalUrl(media("video", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.mp4");
+    expect(await rule34CdnClient.originalUrl(media("video", "1234/a1b2c3"))).toBe("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4");
     expect(await rule34CdnClient.originalUrl(media("gif", "1234/a1b2c3"))).toBe("https://rule34.xxx/images//1234/a1b2c3.gif");
   });
 
@@ -154,14 +154,6 @@ describe("Rule34CdnClient", () => {
       .toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
   });
 
-  test("rejects a video duration the host won't serve", async() => {
-    const { rule34CdnClient, scheduler } = setup(createFetchFindingOnly(""));
-    const duration = rule34CdnClient.probeDurationSeconds(media("video", "1234/a1b2c3"));
-
-    duration.catch(() => { });
-    await expect(settled(scheduler, duration)).rejects.toThrow("Unable to probe video duration: https://rule34.xxx/images//1234/a1b2c3.mp4");
-  });
-
   test("decodes a still at full size without a width", async() => {
     const { rule34CdnClient, fetch, decodeBitmap } = setup();
     const signal = new AbortController().signal;
@@ -175,13 +167,13 @@ describe("Rule34CdnClient", () => {
     const { rule34CdnClient, fetch } = setup();
 
     expect(await (await rule34CdnClient.fetchOriginal(media("video", "1234/a1b2c3"))).text()).toBe("bytes");
-    expect(fetch).toHaveBeenCalledExactlyOnceWith("https://rule34.xxx/images//1234/a1b2c3.mp4");
+    expect(fetch).toHaveBeenCalledExactlyOnceWith("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4");
   });
 
   test("rejects an original the host won't serve", async() => {
     const { rule34CdnClient } = setup(createFetchFindingOnly(""));
 
-    await expect(rule34CdnClient.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
+    await expect(rule34CdnClient.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
   });
 
   test("decodes a video's still from the jpg beside it", async() => {

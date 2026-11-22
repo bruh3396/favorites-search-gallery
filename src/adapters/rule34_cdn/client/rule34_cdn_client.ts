@@ -26,7 +26,7 @@ export class Rule34CdnClient {
     const { fetch, scheduler, loadImage, decodeBitmap } = dependencies;
 
     this.extensionProber = new Rule34CdnExtensionProber({ fetch, scheduler });
-    this.videoDurationProber = new Rule34CdnVideoDurationProber({ fetch, scheduler });
+    this.videoDurationProber = new Rule34CdnVideoDurationProber({ scheduler });
     this.imageDecoder = new Rule34CdnImageDecoder({ fetch, loadImage, decodeBitmap });
   }
 

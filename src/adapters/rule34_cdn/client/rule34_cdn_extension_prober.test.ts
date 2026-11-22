@@ -52,13 +52,13 @@ describe("Rule34CdnExtensionProber", () => {
     });
 
     test("finds a video behind an image guess", async() => {
-      const { probe } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.mp4"));
+      const { probe } = setup(createFetchFindingOnly("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4"));
 
       expect(await probe("1234/a1b2c3", "image")).toBe("mp4");
     });
 
     test("tries the guessed kind's extension first", async() => {
-      const { fetch, probe } = setup(createFetchFindingOnly("https://rule34.xxx/images//1234/a1b2c3.mp4"));
+      const { fetch, probe } = setup(createFetchFindingOnly("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4"));
 
       expect(await probe("1234/a1b2c3", "gif")).toBe("mp4");
       expect(probedExtensions(fetch)).toEqual(["gif", "mp4"]);

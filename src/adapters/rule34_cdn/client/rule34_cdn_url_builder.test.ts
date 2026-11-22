@@ -19,6 +19,10 @@ describe("buildRule34CdnFileUrl", () => {
   test("replaces the extension a locator carries", () => {
     expect(buildRule34CdnFileUrl("1234/a1b2c3.mp4", "jpg")).toBe("https://rule34.xxx/images//1234/a1b2c3.jpg");
   });
+
+  test("addresses a video on the video host", () => {
+    expect(buildRule34CdnFileUrl("1234/a1b2c3", "mp4")).toBe("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4");
+  });
 });
 
 describe("buildRule34CdnWimgUrl", () => {
