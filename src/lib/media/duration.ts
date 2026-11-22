@@ -8,6 +8,7 @@ const videoPool: HTMLVideoElement[] = Array.from({ length: Rule34NetworkConfig.v
   const video = document.createElement("video");
 
   video.preload = "metadata";
+  video.muted = true;
   return video;
 });
 
@@ -16,46 +17,32 @@ export function fetchVideoDurationFromFavorite(favorite: Favorite): Promise<numb
 }
 
 export function fetchVideoDuration(url: string): Promise<number> {
-  return videoLimiter.run(() => fetchVideoDurationWithIncreasingByteRanges(url));
+  return videoLimiter.run(() => loadVideoDurationFromPool(url));
 }
 
-function fetchVideoDurationWithIncreasingByteRanges(url: string): Promise<number> {
-  let chain = Promise.reject<number>(new Error());
-
-  for (const range of Rule34NetworkConfig.videoDurationMetadataByteRanges) {
-    chain = chain.catch(() => fetchVideoDurationForRange(url, range));
-  }
-  return chain.catch(() => Promise.reject(new Error(`Unable to read video duration: ${url}`)));
-}
-
-async function fetchVideoDurationForRange(url: string, range: number): Promise<number> {
-  const response = await fetch(url, { headers: { Range: `bytes=0-${range}` } });
-
-  if (!response.ok && response.status !== 206) {
-    throw new Error("Range request failed");
-  }
-  const blob = await response.blob();
+async function loadVideoDurationFromPool(url: string): Promise<number> {
   const video = videoPool.find(v => !v.dataset.busy);
 
   if (video === undefined) {
     throw new Error("No available video element in pool");
   }
-  return loadVideoDuration(video, blob);
+
+  try {
+    return await loadVideoDuration(video, url);
+  } catch {
+    throw new Error(`Unable to read video duration: ${url}`);
+  } finally {
+    video.removeAttribute("src");
+    video.load();
+    video.dataset.busy = "";
+  }
 }
 
-function loadVideoDuration(video: HTMLVideoElement, blob: Blob): Promise<number> {
+function loadVideoDuration(video: HTMLVideoElement, url: string): Promise<number> {
   return new Promise<number>((resolve, reject) => {
     video.dataset.busy = "true";
-    video.onloadedmetadata = (): void => {
-      URL.revokeObjectURL(video.src);
-      video.dataset.busy = "";
-      resolve(video.duration);
-    };
-    video.onerror = (): void => {
-      URL.revokeObjectURL(video.src);
-      video.dataset.busy = "";
-      reject(new Error("Failed to load video metadata"));
-    };
-    video.src = URL.createObjectURL(blob);
+    video.onloadedmetadata = (): void => resolve(video.duration);
+    video.onerror = (): void => reject(new Error("Failed to load video metadata"));
+    video.src = url;
   });
 }

@@ -1,5 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { imageUrlToSampleUrl, imageUrlToThumbUrl, replaceExtension, thumbUrlToImageUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url";
+import { imageUrlToSampleUrl, imageUrlToThumbUrl, replaceExtension, thumbUrlToImageUrl, videoUrl, withRule34Hostname, withRule34WimgHostname } from "@/lib/media/url";
+
+describe("videoUrl", () => {
+  test("addresses the video on the video host", () => {
+    const item = { id: "42", thumbUrl: "https://wimg.rule34.xxx/thumbnails//0123/thumbnail_abc.jpg?42", mediaType: "video" as const };
+
+    expect(videoUrl(item)).toBe("https://ahrimp4.rule34.xxx/images//0123/abc.mp4");
+  });
+});
 
 describe("withRule34Hostname", () => {
   test("one subdomain", () => {

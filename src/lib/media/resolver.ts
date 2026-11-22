@@ -1,6 +1,6 @@
 import { DEFAULT_EXTENSION, allImageExtensions, extensionRegex } from "@/lib/media/constants";
 import { ImageExtension, MediaExtension, MediaItem } from "@/types/media";
-import { imageUrl, imageUrlToSampleUrl, replaceExtension, withExtension } from "@/lib/media/url";
+import { imageUrl, imageUrlToSampleUrl, replaceExtension, withExtension, withRule34VideoHostname } from "@/lib/media/url";
 import { isGif, isVideo } from "@/lib/media/media_type";
 import { RateLimiter } from "@/lib/async/rate_limiting";
 import { Rule34NetworkConfig } from "@/config/rule34_network_config";
@@ -9,8 +9,12 @@ const extensionProbeLimiter = new RateLimiter(Rule34NetworkConfig.extensionProbe
 const cache: Map<string, ImageExtension> = new Map();
 
 export const resolveSampleUrl = async(item: MediaItem): Promise<string> => imageUrlToSampleUrl(await resolveImageUrl(item));
-export const resolveImageUrl = async(item: MediaItem): Promise<string> => replaceExtension(await resolveMediaUrl(item), "mp4", DEFAULT_EXTENSION);
-export const resolveMediaUrl = async(item: MediaItem): Promise<string> => withExtension(imageUrl(item), await resolveExtension(item));
+export const resolveImageUrl = async(item: MediaItem): Promise<string> => replaceExtension(withExtension(imageUrl(item), await resolveExtension(item)), "mp4", DEFAULT_EXTENSION);
+export const resolveMediaUrl = async(item: MediaItem): Promise<string> => {
+  const extension = await resolveExtension(item);
+  const url = withExtension(imageUrl(item), extension);
+  return extension === "mp4" ? withRule34VideoHostname(url) : url;
+};
 
 export const extractExtension = (url: string): MediaExtension | null => extensionRegex.exec(url)?.[1] as MediaExtension ?? null;
 

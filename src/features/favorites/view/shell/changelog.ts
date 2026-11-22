@@ -7,6 +7,10 @@ import { toggleDataset } from "@/utils/browser/dataset";
 
 const releases = new Map<string, string[]>([
   [
+    "v1.23.7",
+    ["Fixed videos not loading after Rule34 moved them to a new server"]
+  ],
+  [
     "v1.23.6",
     ["Updated to the new post server"]
   ],
