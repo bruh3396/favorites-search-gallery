@@ -40,10 +40,10 @@ function setup({ postCount = 0, userOwnsFavorites = true } = {}): Setup {
   const localKeyedValues = new MemoryLocalKeyedValues();
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, localKeyedValues, ["favorites"]).favorites;
   const sharedPreferences = createSharedPreferences(localKeyedValues, "light", { setColorScheme: vi.fn() });
-  const { favoritesTabStripVisible, favoritesSearchSettingsVisible } = createStoredTree(
+  const { favoritesTabStripVisible, favoritesSearchOptionsVisible } = createStoredTree(
     APP_STORAGE_SCHEMA.state,
     localKeyedValues,
-    ["favoritesTabStripVisible", "favoritesSearchSettingsVisible"]
+    ["favoritesTabStripVisible", "favoritesSearchOptionsVisible"]
   );
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const posts = Array.from({ length: postCount }, (_, index) => createPost({ id: String(index + 1) }));
@@ -55,7 +55,7 @@ function setup({ postCount = 0, userOwnsFavorites = true } = {}): Setup {
       { key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT },
       { storedValueStorage: localKeyedValues, codec: FAVORITES_WORKSPACE_SNAPSHOT_CODEC }
     ),
-    createSession: (favoritesSearchSettings): FavoritesSession => new FavoritesSession({ favoritesSearchSettings }, {
+    createSession: (favoritesSearchOptions): FavoritesSession => new FavoritesSession({ favoritesSearchOptions }, {
       favoritesSearchIndex,
       favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
       favoritesPaginationPreferences: favoritesPreferences.pagination,
@@ -66,7 +66,7 @@ function setup({ postCount = 0, userOwnsFavorites = true } = {}): Setup {
   const navigator = new MemoryNavigator();
   const openLightbox = vi.fn<(favoritesSession: FavoritesSession, favorite: Favorite) => boolean>(() => true);
   const handlers = createFavoritesCommandHandlers({ userOwnsFavorites }, {
-    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, zenEnabled,
+    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled,
     remotePages: new MemoryRemotePages(new MemoryClient([])),
     navigator,
     openLightbox,
@@ -93,34 +93,34 @@ describe("createFavoritesCommandHandlers", () => {
     const { handlers, activeSession } = setup();
     const sortKeys = Array.from({ length: 8 }, () => {
       handlers.cycleSort();
-      return activeSession().searchSettings.peek().sortKey;
+      return activeSession().searchOptions.peek().sortKey;
     });
 
     handlers.toggleSortAscending();
     expect(sortKeys.at(-1)).toBe("favorited");
     expect(new Set(sortKeys).size).toBe(8);
-    expect(activeSession().searchSettings.peek().isSortAscending).toBe(true);
+    expect(activeSession().searchOptions.peek().isSortAscending).toBe(true);
   });
 
   test("cycles ratings through all, then each one alone", () => {
     const { handlers, activeSession } = setup();
     const ratings = Array.from({ length: 4 }, () => {
       handlers.cycleRating();
-      return activeSession().searchSettings.peek().allowedRatings;
+      return activeSession().searchOptions.peek().allowedRatings;
     });
 
     expect(ratings.slice(0, 3)).toEqual([toRatingMask("explicit"), toRatingMask("questionable"), toRatingMask("safe")]);
-    expect(activeSession().changedSearchSettingCount.peek()).toBe(0);
+    expect(activeSession().changedSearchOptionCount.peek()).toBe(0);
   });
 
   test("cycles statuses through all, available, then removed", () => {
     const { handlers, activeSession } = setup();
 
     handlers.cycleStatus();
-    const available = activeSession().searchSettings.peek().allowedStatuses;
+    const available = activeSession().searchOptions.peek().allowedStatuses;
 
     handlers.cycleStatus();
-    expect([available, activeSession().searchSettings.peek().allowedStatuses]).toEqual([
+    expect([available, activeSession().searchOptions.peek().allowedStatuses]).toEqual([
       toPostStatusMask("active") | toPostStatusMask("deleted"),
       toPostStatusMask("purged")
     ]);
@@ -132,7 +132,7 @@ describe("createFavoritesCommandHandlers", () => {
 
     ownSetup.handlers.toggleBlacklist();
     othersSetup.handlers.toggleBlacklist();
-    expect([ownSetup.activeSession().searchSettings.peek().isBlacklistEnabled, othersSetup.activeSession().searchSettings.peek().isBlacklistEnabled])
+    expect([ownSetup.activeSession().searchOptions.peek().isBlacklistEnabled, othersSetup.activeSession().searchOptions.peek().isBlacklistEnabled])
       .toEqual([true, false]);
   });
 

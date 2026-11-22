@@ -4,8 +4,8 @@ export const FAVORITES_COMMAND_SECTIONS = [
   {
     title: "Search",
     favoritesCommands: [
-      "focusSearch", "clearSearch", "toggleFilters", "cycleSort", "toggleSortAscending", "shuffle",
-      "cycleRating", "toggleBlacklist", "toggleInvert", "cycleStatus", "resetFilters", "searchElsewhere"
+      "focusSearch", "clearSearch", "toggleSearchOptions", "cycleSort", "toggleSortAscending", "shuffle",
+      "cycleRating", "toggleBlacklist", "toggleInvert", "cycleStatus", "resetSearchOptions", "searchElsewhere"
     ]
   },
   {

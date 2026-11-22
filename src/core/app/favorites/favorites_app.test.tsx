@@ -33,7 +33,7 @@ function createWorkspace(): FavoritesWorkspace {
       { key: "workspace", defaultValue: DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT },
       { storedValueStorage: new MemoryLocalKeyedValues() }
     ),
-    createSession: (favoritesSearchSettings): FavoritesSession => new FavoritesSession({ favoritesSearchSettings }, {
+    createSession: (favoritesSearchOptions): FavoritesSession => new FavoritesSession({ favoritesSearchOptions }, {
       favoritesSearchIndex,
       favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
       favoritesPaginationPreferences,

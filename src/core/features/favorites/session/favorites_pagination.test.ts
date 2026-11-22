@@ -8,7 +8,7 @@ import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { createPost } from "@/testing/post";
 import { createStoredValue } from "@/testing/stored_value";
 import { effect } from "@/core/utils/reactive/signal";
@@ -28,7 +28,7 @@ function setup(posts: Post[], { infiniteScroll = false } = {}): Setup {
 
   favoritesSearchIndex.rebuild(favoritesCollection.append(posts));
   const favoritesSearch = new FavoritesSearch(
-    { favoritesSearchSettings: buildFavoritesSearchSettings() },
+    { favoritesSearchOptions: buildFavoritesSearchOptions() },
     { favoritesSearchIndex, favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }), randomSource: new MemoryRandomSource([0.5]) }
   );
   const favoritesPagination = new FavoritesPagination({ favoritesSearch, preferences: favoritesPaginationPreferences });
@@ -80,11 +80,11 @@ describe("FavoritesPagination", () => {
 
   test.each([
     { name: "submit", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.submit("a") },
-    { name: "updateSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateSettings({ sortKey: "score" }) },
+    { name: "updateOptions", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.updateOptions({ sortKey: "score" }) },
     { name: "invert", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.invert() },
     { name: "toggleBlacklist", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.toggleBlacklist() },
     { name: "shuffle", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.shuffle() },
-    { name: "resetSettings", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.resetSettings() },
+    { name: "resetOptions", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.resetOptions() },
     { name: "clearSearch", act: (favoritesSearch: FavoritesSearch): void => favoritesSearch.clearSearch() }
   ])("goes back to the first page on $name", ({ act }) => {
     const { favoritesPagination, favoritesSearch } = setup(createTaggedPosts("a", "a", "a", "a", "a"));
@@ -197,7 +197,7 @@ describe("FavoritesPagination", () => {
 
       favoritesPagination.goTo(3);
       favoritesPagination.dispose();
-      favoritesSearch.updateSettings({ sortKey: "score" });
+      favoritesSearch.updateOptions({ sortKey: "score" });
       favoritesPaginationPreferences.pageSize.set(1);
       expect(favoritesPagination.pageNumber.value).toBe(3);
     });

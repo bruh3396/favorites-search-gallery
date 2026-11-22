@@ -14,7 +14,7 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { createPost } from "@/testing/post";
 import { createStoredValue } from "@/testing/stored_value";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
@@ -74,7 +74,7 @@ function readPostIds(memoryClient: MemoryClient): string[] {
 }
 
 function createStartedSession(favoritesService: FavoritesService): FavoritesSession {
-  const favoritesSession = favoritesService.createSession({ favoritesSearchSettings: buildFavoritesSearchSettings() });
+  const favoritesSession = favoritesService.createSession({ favoritesSearchOptions: buildFavoritesSearchOptions() });
 
   favoritesSession.start();
   return favoritesSession;

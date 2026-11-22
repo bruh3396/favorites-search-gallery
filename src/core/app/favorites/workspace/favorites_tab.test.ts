@@ -7,11 +7,11 @@ import { FavoritesSession } from "@/core/features/favorites/session/favorites_se
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { StringInterner } from "@/core/utils/string/string_interner";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 
 function setup(): FavoritesTab {
-  return createFavoritesTab(new FavoritesSession({ favoritesSearchSettings: buildFavoritesSearchSettings() }, {
+  return createFavoritesTab(new FavoritesSession({ favoritesSearchOptions: buildFavoritesSearchOptions() }, {
     favoritesSearchIndex: new FavoritesSearchIndex(new StringInterner()),
     favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),

@@ -1,54 +1,54 @@
-import { FavoritesSearchSettingsRow, FavoritesSearchSettingsRowClass } from "@/core/app/favorites/search_settings/favorites_search_settings_row";
+import { FavoritesSearchOptionsRow, FavoritesSearchOptionsRowClass } from "@/core/app/favorites/search_options/favorites_search_options_row";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import FAVORITES_SEARCH_SETTINGS_ROW_CSS from "@/core/app/favorites/search_settings/favorites_search_settings_row.css?inline";
+import FAVORITES_SEARCH_OPTIONS_ROW_CSS from "@/core/app/favorites/search_options/favorites_search_options_row.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   row: HTMLElement;
   reset: HTMLButtonElement;
-  changedSearchSettingCount: Signal<number>;
-  resetSearchSettings: () => void;
+  changedSearchOptionCount: Signal<number>;
+  resetSearchOptions: () => void;
 }
 
 function setup(): Setup {
-  const changedSearchSettingCount = new Signal(0);
-  const resetSearchSettings = vi.fn();
+  const changedSearchOptionCount = new Signal(0);
+  const resetSearchOptions = vi.fn();
   const { result: row } = render(document, () => (
-    <FavoritesSearchSettingsRow changedSearchSettingCount={changedSearchSettingCount} resetSearchSettings={resetSearchSettings}>
+    <FavoritesSearchOptionsRow changedSearchOptionCount={changedSearchOptionCount} resetSearchOptions={resetSearchOptions}>
       <span>Sort</span>
-    </FavoritesSearchSettingsRow>
+    </FavoritesSearchOptionsRow>
   ));
-  return { row, reset: row.querySelector("button")!, changedSearchSettingCount, resetSearchSettings };
+  return { row, reset: row.querySelector("button")!, changedSearchOptionCount, resetSearchOptions };
 }
 
-describe("FavoritesSearchSettingsRow", () => {
-  test("shows its children in a group labeled Filters", () => {
+describe("FavoritesSearchOptionsRow", () => {
+  test("shows its children in a group labeled Search Options", () => {
     const { row } = setup();
 
-    expect([row.textContent, row.role, row.getAttribute("aria-label")]).toEqual(["Sort", "group", "Filters"]);
+    expect([row.textContent, row.role, row.getAttribute("aria-label")]).toEqual(["Sort", "group", "Search Options"]);
   });
 
-  test("enables Reset only while a search setting is changed", () => {
-    const { reset, changedSearchSettingCount } = setup();
+  test("enables Reset only while a search option is changed", () => {
+    const { reset, changedSearchOptionCount } = setup();
 
     expect(reset.disabled).toBe(true);
-    changedSearchSettingCount.value = 1;
+    changedSearchOptionCount.value = 1;
     expect(reset.disabled).toBe(false);
-    changedSearchSettingCount.value = 0;
+    changedSearchOptionCount.value = 0;
     expect(reset.disabled).toBe(true);
   });
 
   test("resets when Reset is pressed", () => {
-    const { reset, changedSearchSettingCount, resetSearchSettings } = setup();
+    const { reset, changedSearchOptionCount, resetSearchOptions } = setup();
 
-    changedSearchSettingCount.value = 2;
+    changedSearchOptionCount.value = 2;
     reset.click();
-    expect(resetSearchSettings).toHaveBeenCalledOnce();
+    expect(resetSearchOptions).toHaveBeenCalledOnce();
   });
 
   test("styles every class it sets", () => {
-    expectClassesStyled(FavoritesSearchSettingsRowClass, FAVORITES_SEARCH_SETTINGS_ROW_CSS);
+    expectClassesStyled(FavoritesSearchOptionsRowClass, FAVORITES_SEARCH_OPTIONS_ROW_CSS);
   });
 });

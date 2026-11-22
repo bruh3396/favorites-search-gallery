@@ -133,16 +133,16 @@ describe("APP_STORAGE_SCHEMA", () => {
       expect(createFavoritesTabStripVisible(localKeyedValues).value).toBe(false);
     });
 
-    function createFavoritesSearchSettingsVisible(localKeyedValues: MemoryLocalKeyedValues): AppState["favoritesSearchSettingsVisible"] {
-      return createStoredTree(APP_STORAGE_SCHEMA.state, localKeyedValues, ["favoritesSearchSettingsVisible"]).favoritesSearchSettingsVisible;
+    function createFavoritesSearchOptionsVisible(localKeyedValues: MemoryLocalKeyedValues): AppState["favoritesSearchOptionsVisible"] {
+      return createStoredTree(APP_STORAGE_SCHEMA.state, localKeyedValues, ["favoritesSearchOptionsVisible"]).favoritesSearchOptionsVisible;
     }
 
-    test("shows the search settings by default and restores them hidden once stored", () => {
+    test("shows the search options by default and restores them hidden once stored", () => {
       const localKeyedValues = new MemoryLocalKeyedValues();
 
-      expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(true);
-      createFavoritesSearchSettingsVisible(localKeyedValues).set(false);
-      expect(createFavoritesSearchSettingsVisible(localKeyedValues).value).toBe(false);
+      expect(createFavoritesSearchOptionsVisible(localKeyedValues).value).toBe(true);
+      createFavoritesSearchOptionsVisible(localKeyedValues).set(false);
+      expect(createFavoritesSearchOptionsVisible(localKeyedValues).value).toBe(false);
     });
   });
 });

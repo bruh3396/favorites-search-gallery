@@ -10,7 +10,7 @@ import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites
 import { FAVORITES_SORT_KEYS } from "@/core/features/favorites/search/favorites_sort_key";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
-import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { LIGHTBOX_MODES } from "@/core/features/lightbox/lightbox_mode";
@@ -30,7 +30,7 @@ export interface FavoritesCommandHandlersDependencies {
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination" | "lightbox" | "nativeHeaderVisible" | "activeTool">;
   sharedPreferences: Pick<SharedPreferences, "theme" | "colorScheme" | "postListEnabled">;
   favoritesTabStripVisible: StoredValue<boolean>;
-  favoritesSearchSettingsVisible: StoredValue<boolean>;
+  favoritesSearchOptionsVisible: StoredValue<boolean>;
   zenEnabled: Signal<boolean>;
   remotePages: Pick<RemotePages, "searchUrl">;
   navigator: Pick<Navigator, "open">;
@@ -46,13 +46,13 @@ export function createFavoritesCommandHandlers(
   dependencies: FavoritesCommandHandlersDependencies
 ): CommandHandlers<FavoritesCommand> {
   const {
-    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, zenEnabled,
+    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled,
     remotePages, navigator, openLightbox, resetSettings
   } = dependencies;
   const { tabManager } = favoritesWorkspace;
   const { grid: favoritesGridPreferences, pagination: favoritesPaginationPreferences } = favoritesPreferences;
   const activeFavoritesSession = (): FavoritesSession => favoritesWorkspace.activeTab.peek().session;
-  const favoritesSearchSettings = (): FavoritesSearchSettings => activeFavoritesSession().searchSettings.peek();
+  const favoritesSearchOptions = (): FavoritesSearchOptions => activeFavoritesSession().searchOptions.peek();
   const activeTabIndex = (): number => tabManager.tabs.peek().findIndex(tab => tab.id === tabManager.activeTabId.peek());
   const activateTabAt = (offset: number): void => {
     const tabs = tabManager.tabs.peek();
@@ -70,19 +70,19 @@ export function createFavoritesCommandHandlers(
   return {
     focusSearch: () => favoritesWorkspace.activeTab.peek().focusSearch.emit(),
     clearSearch: () => activeFavoritesSession().clearSearch(),
-    toggleFilters: () => toggle(favoritesSearchSettingsVisible),
-    cycleSort: () => activeFavoritesSession().updateSearchSettings({ sortKey: findNext(FAVORITES_SORT_KEYS, favoritesSearchSettings().sortKey) }),
-    toggleSortAscending: () => activeFavoritesSession().updateSearchSettings({ isSortAscending: !favoritesSearchSettings().isSortAscending }),
+    toggleSearchOptions: () => toggle(favoritesSearchOptionsVisible),
+    cycleSort: () => activeFavoritesSession().updateSearchOptions({ sortKey: findNext(FAVORITES_SORT_KEYS, favoritesSearchOptions().sortKey) }),
+    toggleSortAscending: () => activeFavoritesSession().updateSearchOptions({ isSortAscending: !favoritesSearchOptions().isSortAscending }),
     shuffle: () => activeFavoritesSession().shuffle(),
-    cycleRating: () => activeFavoritesSession().updateSearchSettings({ allowedRatings: findNext(RATING_CYCLE, favoritesSearchSettings().allowedRatings) }),
+    cycleRating: () => activeFavoritesSession().updateSearchOptions({ allowedRatings: findNext(RATING_CYCLE, favoritesSearchOptions().allowedRatings) }),
     toggleBlacklist: (): void => {
       if (configuration.userOwnsFavorites) {
         activeFavoritesSession().toggleBlacklist();
       }
     },
     toggleInvert: () => activeFavoritesSession().invert(),
-    cycleStatus: () => activeFavoritesSession().updateSearchSettings({ allowedStatuses: findNext(STATUS_CYCLE, favoritesSearchSettings().allowedStatuses) }),
-    resetFilters: () => activeFavoritesSession().resetSearchSettings(),
+    cycleStatus: () => activeFavoritesSession().updateSearchOptions({ allowedStatuses: findNext(STATUS_CYCLE, favoritesSearchOptions().allowedStatuses) }),
+    resetSearchOptions: () => activeFavoritesSession().resetSearchOptions(),
     searchElsewhere: () => navigator.open(remotePages.searchUrl(activeFavoritesSession().query.peek())),
     goToNextPage: () => goToPage(activeFavoritesSession().pageNumber.peek() + 1),
     goToPreviousPage: () => goToPage(activeFavoritesSession().pageNumber.peek() - 1),

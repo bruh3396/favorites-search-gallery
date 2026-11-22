@@ -75,7 +75,7 @@ describe("SuggestionList", () => {
   });
 
   test("keeps suggestions that differ only by icon apart", () => {
-    const { list } = setup([{ text: "cat", icon: "search" }, { text: "cat", icon: "filter" }]);
+    const { list } = setup([{ text: "cat", icon: "search" }, { text: "cat", icon: "sliders" }]);
 
     expect(queryOptions(list)).toHaveLength(2);
   });

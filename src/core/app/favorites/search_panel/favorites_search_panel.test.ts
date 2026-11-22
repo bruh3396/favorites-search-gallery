@@ -1,4 +1,4 @@
-import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { DEFAULT_FAVORITES_SEARCH_OPTIONS, FavoritesSearchOptions, isFilteringFavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { FavoritesSearchPanel, FavoritesSearchPanelClass } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { Signal, computed } from "@/core/utils/reactive/signal";
@@ -25,7 +25,7 @@ interface Setup {
   submit: Mock<(query: string) => void>;
   goTo: Mock<(pageNumber: number) => void>;
   clearSearch: Mock<() => void>;
-  settings: Signal<FavoritesSearchSettings>;
+  favoritesSearchOptions: Signal<FavoritesSearchOptions>;
   skeleton: HTMLElement;
   emptyState: HTMLElement;
   grid: HTMLElement;
@@ -56,7 +56,7 @@ function setup(): Setup {
   const submit = vi.fn<(query: string) => void>();
   const goTo = vi.fn<(pageNumber: number) => void>();
   const clearSearch = vi.fn<() => void>();
-  const settings = new Signal(DEFAULT_FAVORITES_SEARCH_SETTINGS);
+  const favoritesSearchOptions = new Signal(DEFAULT_FAVORITES_SEARCH_OPTIONS);
   const skeleton = document.createElement("div");
   const grid = document.createElement("div");
   const fieldTrailingChild = document.createElement("button");
@@ -64,8 +64,8 @@ function setup(): Setup {
   const trailingChild = document.createElement("button");
   const favoritesService = { loadState, searchable };
   const favoritesSession = {
-    query: computed(() => settings.value.query),
-    isFiltered: computed(() => isFilteringFavoritesSearchSettings(settings.value)),
+    query: computed(() => favoritesSearchOptions.value.query),
+    isFiltered: computed(() => isFilteringFavoritesSearchOptions(favoritesSearchOptions.value)),
     matchedFavorites: searchResults,
     searched,
     pageNumber,
@@ -88,7 +88,7 @@ function setup(): Setup {
   }));
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
-    element, dispose, searchResults, searched, pageNumber, loadState, searchable, submit, goTo, clearSearch, settings, skeleton, emptyState, grid,
+    element, dispose, searchResults, searched, pageNumber, loadState, searchable, submit, goTo, clearSearch, favoritesSearchOptions, skeleton, emptyState, grid,
     fieldTrailingChild, subheaderChild, trailingChild
   };
 }
@@ -124,10 +124,10 @@ describe("FavoritesSearchPanel", () => {
   });
 
   test("says nothing matched, rather than showing the skeleton, while favorites still load", () => {
-    const { searchable, settings, skeleton, emptyState } = setup();
+    const { searchable, favoritesSearchOptions, skeleton, emptyState } = setup();
 
     searchable.reach();
-    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
+    favoritesSearchOptions.value = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "cat" };
     expect([isHidden(skeleton), isHidden(emptyState), emptyState.querySelector("p")!.textContent]).toEqual([true, false, "No favorites match \"cat\" yet"]);
   });
 
@@ -140,29 +140,29 @@ describe("FavoritesSearchPanel", () => {
   });
 
   test("clears the search on request", () => {
-    const { searchable, settings, emptyState, clearSearch } = setup();
+    const { searchable, favoritesSearchOptions, emptyState, clearSearch } = setup();
 
     searchable.reach();
-    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
+    favoritesSearchOptions.value = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "cat" };
     emptyState.querySelector("button")!.click();
     expect(clearSearch).toHaveBeenCalledOnce();
   });
 
   test("moves focus to the search box after clearing the search", () => {
-    const { element, searchable, settings, emptyState } = setup();
+    const { element, searchable, favoritesSearchOptions, emptyState } = setup();
 
     document.body.append(element);
     searchable.reach();
-    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
+    favoritesSearchOptions.value = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "cat" };
     emptyState.querySelector("button")!.click();
     expect(document.activeElement).toBe(element.querySelector("search textarea"));
     element.remove();
   });
 
   test("offers nothing to clear when there are no favorites", () => {
-    const { loadState, settings, emptyState } = setup();
+    const { loadState, favoritesSearchOptions, emptyState } = setup();
 
-    settings.value = { ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: "cat" };
+    favoritesSearchOptions.value = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "cat" };
     loadState.value = LOADED;
     expect([emptyState.querySelector("p")!.textContent, emptyState.querySelector("button")!.hidden]).toEqual(["No favorites yet", true]);
   });

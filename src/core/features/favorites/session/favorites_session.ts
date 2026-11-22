@@ -1,5 +1,5 @@
 import { FavoritesPagination, FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
-import { FavoritesSearchSettings, countChangedFavoritesSearchSettings, isFilteringFavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchOptions, countChangedFavoritesSearchOptions, isFilteringFavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -9,7 +9,7 @@ import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
 export interface FavoritesSessionConfiguration {
-  readonly favoritesSearchSettings: FavoritesSearchSettings;
+  readonly favoritesSearchOptions: FavoritesSearchOptions;
 }
 
 export interface FavoritesSessionDependencies {
@@ -22,7 +22,7 @@ export interface FavoritesSessionDependencies {
 export class FavoritesSession {
   public readonly query: Readable<string>;
   public readonly isFiltered: Readable<boolean>;
-  public readonly changedSearchSettingCount: Readable<number>;
+  public readonly changedSearchOptionCount: Readable<number>;
   private readonly search: FavoritesSearch;
   private readonly pagination: FavoritesPagination;
 
@@ -30,17 +30,17 @@ export class FavoritesSession {
     const { favoritesSearchIndex, favoritesBlacklist, randomSource, favoritesPaginationPreferences } = dependencies;
 
     this.search = new FavoritesSearch(
-      { favoritesSearchSettings: configuration.favoritesSearchSettings },
+      { favoritesSearchOptions: configuration.favoritesSearchOptions },
       { favoritesSearchIndex, favoritesBlacklist, randomSource }
     );
     this.pagination = new FavoritesPagination({ favoritesSearch: this.search, preferences: favoritesPaginationPreferences });
-    this.query = computed(() => this.search.settings.value.query);
-    this.isFiltered = computed(() => isFilteringFavoritesSearchSettings(this.search.settings.value));
-    this.changedSearchSettingCount = computed(() => countChangedFavoritesSearchSettings(this.search.settings.value));
+    this.query = computed(() => this.search.options.value.query);
+    this.isFiltered = computed(() => isFilteringFavoritesSearchOptions(this.search.options.value));
+    this.changedSearchOptionCount = computed(() => countChangedFavoritesSearchOptions(this.search.options.value));
   }
 
-  public get searchSettings(): Readable<FavoritesSearchSettings> {
-    return this.search.settings;
+  public get searchOptions(): Readable<FavoritesSearchOptions> {
+    return this.search.options;
   }
 
   public get matchedFavorites(): Readable<readonly Favorite[]> {
@@ -83,12 +83,12 @@ export class FavoritesSession {
     this.search.shuffle();
   }
 
-  public updateSearchSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {
-    this.search.updateSettings(partialFavoritesSearchSettings);
+  public updateSearchOptions(partialFavoritesSearchOptions: Partial<FavoritesSearchOptions>): void {
+    this.search.updateOptions(partialFavoritesSearchOptions);
   }
 
-  public resetSearchSettings(): void {
-    this.search.resetSettings();
+  public resetSearchOptions(): void {
+    this.search.resetOptions();
   }
 
   public clearSearch(): void {

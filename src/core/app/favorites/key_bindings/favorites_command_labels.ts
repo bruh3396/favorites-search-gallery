@@ -3,7 +3,7 @@ import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_comman
 export const FAVORITES_COMMAND_LABELS: Readonly<Record<FavoritesCommand, string>> = {
   focusSearch: "Focus Search Bar",
   clearSearch: "Clear Search",
-  toggleFilters: "Toggle Filters",
+  toggleSearchOptions: "Toggle Search Options",
   cycleSort: "Cycle Sort",
   toggleSortAscending: "Toggle Ascending",
   shuffle: "Shuffle",
@@ -11,7 +11,7 @@ export const FAVORITES_COMMAND_LABELS: Readonly<Record<FavoritesCommand, string>
   toggleBlacklist: "Toggle Blacklist",
   toggleInvert: "Toggle Invert",
   cycleStatus: "Cycle Status",
-  resetFilters: "Reset Filters",
+  resetSearchOptions: "Reset Search Options",
   searchElsewhere: "Search Rule34",
   goToNextPage: "Go to Next Page",
   goToPreviousPage: "Go to Previous Page",

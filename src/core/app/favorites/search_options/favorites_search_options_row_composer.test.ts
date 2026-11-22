@@ -1,42 +1,42 @@
 import { ALL_POST_STATUSES_MASK, toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { ALL_RATINGS_MASK, toRatingMask } from "@/core/domain/post/rating_mask";
-import { FavoritesSearchSettingsRowDependencies, composeFavoritesSearchSettingsRow } from "@/core/app/favorites/search_settings/favorites_search_settings_row_composer";
+import { FavoritesSearchOptionsRowDependencies, composeFavoritesSearchOptionsRow } from "@/core/app/favorites/search_options/favorites_search_options_row_composer";
 import { describe, expect, onTestFinished, test, vi } from "vitest";
-import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { OptionMenuClass } from "@/core/ui/components/option_menu/option_menu";
 import { Signal } from "@/core/utils/reactive/signal";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { render } from "@/core/ui/h/h";
 
-type FakeFavoritesSession = FavoritesSearchSettingsRowDependencies["favoritesSession"];
+type FakeFavoritesSession = FavoritesSearchOptionsRowDependencies["favoritesSession"];
 
 interface Setup {
   row: HTMLElement;
   favoritesSession: FakeFavoritesSession;
-  searchSettings: Signal<FavoritesSearchSettings>;
-  changedSearchSettingCount: Signal<number>;
+  searchOptions: Signal<FavoritesSearchOptions>;
+  changedSearchOptionCount: Signal<number>;
 }
 
 function setup(userOwnsFavorites = true): Setup {
-  const searchSettings = new Signal(buildFavoritesSearchSettings());
-  const changedSearchSettingCount = new Signal(1);
+  const searchOptions = new Signal(buildFavoritesSearchOptions());
+  const changedSearchOptionCount = new Signal(1);
   const favoritesSession: FakeFavoritesSession = {
-    searchSettings,
-    changedSearchSettingCount,
+    searchOptions,
+    changedSearchOptionCount,
     shuffle: vi.fn(),
     invert: vi.fn(),
     toggleBlacklist: vi.fn(),
-    updateSearchSettings: vi.fn(),
-    resetSearchSettings: vi.fn()
+    updateSearchOptions: vi.fn(),
+    resetSearchOptions: vi.fn()
   };
-  const { result: row, dispose } = render(document, () => composeFavoritesSearchSettingsRow({ userOwnsFavorites }, { favoritesSession }));
+  const { result: row, dispose } = render(document, () => composeFavoritesSearchOptionsRow({ userOwnsFavorites }, { favoritesSession }));
 
   document.body.append(row);
   onTestFinished(() => {
     dispose();
     row.remove();
   });
-  return { row, favoritesSession, searchSettings, changedSearchSettingCount };
+  return { row, favoritesSession, searchOptions, changedSearchOptionCount };
 }
 
 function queryChip(row: HTMLElement, label: string): HTMLElement | undefined {
@@ -48,19 +48,19 @@ function chooseOption(row: HTMLElement, chipLabel: string, optionLabel: string):
   [...document.querySelectorAll<HTMLElement>(`.${OptionMenuClass.option}`)].find(option => option.textContent === optionLabel)!.click();
 }
 
-describe("composeFavoritesSearchSettingsRow", () => {
+describe("composeFavoritesSearchOptionsRow", () => {
   test("updates the sort key from the Sort chip", () => {
     const { row, favoritesSession } = setup();
 
     chooseOption(row, "Sort", "Width");
-    expect(favoritesSession.updateSearchSettings).toHaveBeenCalledExactlyOnceWith({ sortKey: "width" });
+    expect(favoritesSession.updateSearchOptions).toHaveBeenCalledExactlyOnceWith({ sortKey: "width" });
   });
 
   test("updates the sort direction from the Sort chip", () => {
     const { row, favoritesSession } = setup();
 
     chooseOption(row, "Sort", "Ascending");
-    expect(favoritesSession.updateSearchSettings).toHaveBeenCalledExactlyOnceWith({ isSortAscending: true });
+    expect(favoritesSession.updateSearchOptions).toHaveBeenCalledExactlyOnceWith({ isSortAscending: true });
   });
 
   test("shuffles from the Shuffle chip", () => {
@@ -71,11 +71,11 @@ describe("composeFavoritesSearchSettingsRow", () => {
   });
 
   test("highlights Shuffle while shuffled", () => {
-    const { row, searchSettings } = setup();
+    const { row, searchOptions } = setup();
     const chip = queryChip(row, "Shuffle")!;
 
     expect(chip.dataset.highlighted).toBe("false");
-    searchSettings.value = buildFavoritesSearchSettings({ isShuffled: true });
+    searchOptions.value = buildFavoritesSearchOptions({ isShuffled: true });
     expect(chip.dataset.highlighted).toBe("true");
   });
 
@@ -97,12 +97,12 @@ describe("composeFavoritesSearchSettingsRow", () => {
     { label: "Invert", change: { isInverted: true } },
     { label: "Blacklist", change: { isBlacklistEnabled: true } }
   ])("presses and highlights $label while on", ({ label, change }) => {
-    const { row, searchSettings } = setup();
+    const { row, searchOptions } = setup();
     const chip = queryChip(row, label)!;
     const readChip = (): [string | null, string | undefined] => [chip.getAttribute("aria-pressed"), chip.dataset.highlighted];
     const before = readChip();
 
-    searchSettings.value = buildFavoritesSearchSettings(change);
+    searchOptions.value = buildFavoritesSearchOptions(change);
     expect([before, readChip()]).toEqual([["false", "false"], ["true", "true"]]);
   });
 
@@ -114,14 +114,14 @@ describe("composeFavoritesSearchSettingsRow", () => {
     const { row, favoritesSession } = setup();
 
     chooseOption(row, "Status", "Removed");
-    expect(favoritesSession.updateSearchSettings).toHaveBeenCalledExactlyOnceWith({ allowedStatuses: ALL_POST_STATUSES_MASK ^ toPostStatusMask("purged") });
+    expect(favoritesSession.updateSearchOptions).toHaveBeenCalledExactlyOnceWith({ allowedStatuses: ALL_POST_STATUSES_MASK ^ toPostStatusMask("purged") });
   });
 
   test("turns active and deleted off together from Available", () => {
     const { row, favoritesSession } = setup();
 
     chooseOption(row, "Status", "Available");
-    expect(favoritesSession.updateSearchSettings).toHaveBeenCalledExactlyOnceWith({ allowedStatuses: toPostStatusMask("purged") });
+    expect(favoritesSession.updateSearchOptions).toHaveBeenCalledExactlyOnceWith({ allowedStatuses: toPostStatusMask("purged") });
   });
 
   test.each([
@@ -129,9 +129,9 @@ describe("composeFavoritesSearchSettingsRow", () => {
     { allowedStatuses: toPostStatusMask("active") | toPostStatusMask("deleted"), expected: "StatusAvailable" },
     { allowedStatuses: toPostStatusMask("purged"), expected: "StatusRemoved" }
   ])("shows $expected on the Status chip", ({ allowedStatuses, expected }) => {
-    const { row, searchSettings } = setup();
+    const { row, searchOptions } = setup();
 
-    searchSettings.value = buildFavoritesSearchSettings({ allowedStatuses });
+    searchOptions.value = buildFavoritesSearchOptions({ allowedStatuses });
     expect(queryChip(row, "Status")!.textContent).toBe(expected);
   });
 
@@ -139,7 +139,7 @@ describe("composeFavoritesSearchSettingsRow", () => {
     const { row, favoritesSession } = setup();
 
     chooseOption(row, "Rating", "Safe");
-    expect(favoritesSession.updateSearchSettings).toHaveBeenCalledExactlyOnceWith({ allowedRatings: ALL_RATINGS_MASK ^ toRatingMask("safe") });
+    expect(favoritesSession.updateSearchOptions).toHaveBeenCalledExactlyOnceWith({ allowedRatings: ALL_RATINGS_MASK ^ toRatingMask("safe") });
   });
 
   test.each([
@@ -148,16 +148,16 @@ describe("composeFavoritesSearchSettingsRow", () => {
     { allowedRatings: toRatingMask("questionable"), expected: "RatingQuestionable" },
     { allowedRatings: toRatingMask("safe"), expected: "RatingSafe" }
   ])("shows $expected on the Rating chip", ({ allowedRatings, expected }) => {
-    const { row, searchSettings } = setup();
+    const { row, searchOptions } = setup();
 
-    searchSettings.value = buildFavoritesSearchSettings({ allowedRatings });
+    searchOptions.value = buildFavoritesSearchOptions({ allowedRatings });
     expect(queryChip(row, "Rating")!.textContent).toBe(expected);
   });
 
   test("resets from Reset", () => {
     const { row, favoritesSession } = setup();
 
-    row.querySelector<HTMLElement>("button[aria-label=\"Reset Filters\"]")!.click();
-    expect(favoritesSession.resetSearchSettings).toHaveBeenCalledOnce();
+    row.querySelector<HTMLElement>("button[aria-label=\"Reset Search Options\"]")!.click();
+    expect(favoritesSession.resetSearchOptions).toHaveBeenCalledOnce();
   });
 });

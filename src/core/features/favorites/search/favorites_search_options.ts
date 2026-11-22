@@ -4,7 +4,7 @@ import { FAVORITES_SORT_KEYS, FavoritesSortKey } from "@/core/features/favorites
 import { FieldGuards, createOneOfGuard, createSameKindGuard } from "@/core/utils/guard/guard";
 import { isBoolean } from "@/core/utils/guard/unknown_utilities";
 
-export interface FavoritesSearchSettings {
+export interface FavoritesSearchOptions {
   readonly query: string;
   readonly isInverted: boolean;
   readonly sortKey: FavoritesSortKey;
@@ -20,7 +20,7 @@ function isSeed(stored: unknown): stored is number {
   return Number.isInteger(stored) && (stored as number) >= 0;
 }
 
-export const DEFAULT_FAVORITES_SEARCH_SETTINGS: FavoritesSearchSettings = {
+export const DEFAULT_FAVORITES_SEARCH_OPTIONS: FavoritesSearchOptions = {
   query: "",
   isInverted: false,
   sortKey: "favorited",
@@ -36,7 +36,7 @@ const FILTER_KEYS = ["query", "isInverted", "allowedRatings", "allowedStatuses",
 
 const ORDER_KEYS = ["sortKey", "isSortAscending", "isShuffled"] as const;
 
-const COUNTED_KEY_GROUPS: readonly (readonly (keyof FavoritesSearchSettings)[])[] = [
+const COUNTED_KEY_GROUPS: readonly (readonly (keyof FavoritesSearchOptions)[])[] = [
   ["sortKey", "isSortAscending"],
   ["isShuffled"],
   ["isInverted"],
@@ -45,19 +45,19 @@ const COUNTED_KEY_GROUPS: readonly (readonly (keyof FavoritesSearchSettings)[])[
   ["allowedRatings"]
 ];
 
-export function isFilteringFavoritesSearchSettings(favoritesSearchSettings: FavoritesSearchSettings): boolean {
-  return FILTER_KEYS.some(key => favoritesSearchSettings[key] !== DEFAULT_FAVORITES_SEARCH_SETTINGS[key]);
+export function isFilteringFavoritesSearchOptions(favoritesSearchOptions: FavoritesSearchOptions): boolean {
+  return FILTER_KEYS.some(key => favoritesSearchOptions[key] !== DEFAULT_FAVORITES_SEARCH_OPTIONS[key]);
 }
 
-export function isReorderingFavoritesSearchSettings(favoritesSearchSettings: Pick<FavoritesSearchSettings, (typeof ORDER_KEYS)[number]>): boolean {
-  return ORDER_KEYS.some(key => favoritesSearchSettings[key] !== DEFAULT_FAVORITES_SEARCH_SETTINGS[key]);
+export function isReorderingFavoritesSearchOptions(favoritesSearchOptions: Pick<FavoritesSearchOptions, (typeof ORDER_KEYS)[number]>): boolean {
+  return ORDER_KEYS.some(key => favoritesSearchOptions[key] !== DEFAULT_FAVORITES_SEARCH_OPTIONS[key]);
 }
 
-export function countChangedFavoritesSearchSettings(favoritesSearchSettings: FavoritesSearchSettings): number {
-  return COUNTED_KEY_GROUPS.filter(keys => keys.some(key => favoritesSearchSettings[key] !== DEFAULT_FAVORITES_SEARCH_SETTINGS[key])).length;
+export function countChangedFavoritesSearchOptions(favoritesSearchOptions: FavoritesSearchOptions): number {
+  return COUNTED_KEY_GROUPS.filter(keys => keys.some(key => favoritesSearchOptions[key] !== DEFAULT_FAVORITES_SEARCH_OPTIONS[key])).length;
 }
 
-export const FAVORITES_SEARCH_SETTINGS_GUARDS: FieldGuards<FavoritesSearchSettings> = {
+export const FAVORITES_SEARCH_OPTIONS_GUARDS: FieldGuards<FavoritesSearchOptions> = {
   query: createSameKindGuard(""),
   isInverted: isBoolean,
   sortKey: createOneOfGuard(FAVORITES_SORT_KEYS),

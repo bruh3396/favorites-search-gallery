@@ -19,7 +19,7 @@ function setup(): Setup {
     clickCount += 1;
   };
   const element = render(document, () => (
-    <CountToggleButton icon="filter" label="Filters" pressed={pressed} count={count} onClick={countClick} />
+    <CountToggleButton icon="sliders" label="Options" pressed={pressed} count={count} onClick={countClick} />
   )).result as HTMLButtonElement;
   return { element, pressed, count, readClickCount: () => clickCount };
 }
@@ -41,7 +41,7 @@ describe("CountToggleButton", () => {
   });
 
   test("shows its label", () => {
-    expect(setup().element.getAttribute("aria-label")).toBe("Filters");
+    expect(setup().element.getAttribute("aria-label")).toBe("Options");
   });
 
   test("shows its count in a badge", () => {

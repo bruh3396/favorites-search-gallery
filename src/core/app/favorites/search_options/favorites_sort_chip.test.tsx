@@ -1,11 +1,11 @@
 import { Mock, describe, expect, onTestFinished, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
-import { FavoritesSortChip } from "@/core/app/favorites/search_settings/favorites_sort_chip";
+import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
+import { FavoritesSortChip } from "@/core/app/favorites/search_options/favorites_sort_chip";
 import { FavoritesSortKey } from "@/core/features/favorites/search/favorites_sort_key";
 import { OptionMenuClass } from "@/core/ui/components/option_menu/option_menu";
 import { Signal } from "@/core/utils/reactive/signal";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 
 interface Setup {
   chip: HTMLElement;
@@ -13,12 +13,12 @@ interface Setup {
   onSortAscendingChange: Mock<(isSortAscending: boolean) => void>;
 }
 
-function setup(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings> = {}): Setup {
-  const favoritesSearchSettings = new Signal(buildFavoritesSearchSettings(partialFavoritesSearchSettings));
+function setup(partialFavoritesSearchOptions: Partial<FavoritesSearchOptions> = {}): Setup {
+  const favoritesSearchOptions = new Signal(buildFavoritesSearchOptions(partialFavoritesSearchOptions));
   const onSortKeyChange = vi.fn<(sortKey: FavoritesSortKey) => void>();
   const onSortAscendingChange = vi.fn<(isSortAscending: boolean) => void>();
   const { result: chip, dispose } = render(document, () => (
-    <FavoritesSortChip favoritesSearchSettings={favoritesSearchSettings} onSortKeyChange={onSortKeyChange} onSortAscendingChange={onSortAscendingChange} />
+    <FavoritesSortChip favoritesSearchOptions={favoritesSearchOptions} onSortKeyChange={onSortKeyChange} onSortAscendingChange={onSortAscendingChange} />
   ));
   const container = document.createElement("div");
 

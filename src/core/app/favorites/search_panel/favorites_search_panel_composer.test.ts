@@ -26,7 +26,7 @@ import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { createImageLoaderService } from "@/testing/image_loader_service";
@@ -50,10 +50,10 @@ interface Setup {
 function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Setup {
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
-  const { favoritesTabStripVisible, favoritesSearchSettingsVisible } = createStoredTree(
+  const { favoritesTabStripVisible, favoritesSearchOptionsVisible } = createStoredTree(
     APP_STORAGE_SCHEMA.state,
     new MemoryLocalKeyedValues(),
-    ["favoritesTabStripVisible", "favoritesSearchSettingsVisible"]
+    ["favoritesTabStripVisible", "favoritesSearchOptionsVisible"]
   );
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
@@ -77,7 +77,7 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
 
   favoritesPreferences.pagination.pageSize.set(2);
   favoritesSearchIndex.rebuild(new FavoritesCollection(new StringInterner()).append(posts));
-  const favoritesSession = new FavoritesSession({ favoritesSearchSettings: buildFavoritesSearchSettings() }, {
+  const favoritesSession = new FavoritesSession({ favoritesSearchOptions: buildFavoritesSearchOptions() }, {
     favoritesSearchIndex,
     favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
@@ -96,7 +96,7 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
     },
     favoritesPreferences,
     favoritesTabStripVisible,
-    favoritesSearchSettingsVisible,
+    favoritesSearchOptionsVisible,
     tabCount,
     searchHistory,
     favoriteSizeRecorder: { sizes: [] },
@@ -223,46 +223,46 @@ describe("composeFavoritesSearchPanel", () => {
     expect([favoritesSession.query.value, searchHistory.submittedQueries.value]).toEqual(["dog", ["dog", "cat"]]);
   });
 
-  test("opens and closes the search settings row from the funnel", () => {
+  test("opens and closes the search options row from the Search Options button", () => {
     const { element } = setup();
-    const row = element.querySelector<HTMLElement>("[role=group][aria-label=Filters]")!;
-    const funnel = element.querySelector<HTMLButtonElement>("button[aria-label=Filters]")!;
+    const row = element.querySelector<HTMLElement>("[role=group][aria-label='Search Options']")!;
+    const searchOptionsButton = element.querySelector<HTMLButtonElement>("button[aria-label='Search Options']")!;
     const isRowHidden = (): boolean => row.closest("[hidden]") !== null;
 
     expect(isRowHidden()).toBe(false);
-    funnel.click();
+    searchOptionsButton.click();
     expect(isRowHidden()).toBe(true);
-    funnel.click();
+    searchOptionsButton.click();
     expect(isRowHidden()).toBe(false);
   });
 
-  test("searches the tab from the search settings row and counts the change on the funnel", () => {
+  test("searches the tab from the search options row and counts the change on the Search Options button", () => {
     const { element, favoritesSession } = setup();
-    const funnel = element.querySelector<HTMLButtonElement>("button[aria-label=Filters]")!;
+    const searchOptionsButton = element.querySelector<HTMLButtonElement>("button[aria-label='Search Options']")!;
     const invert = [...element.querySelectorAll("button")].find(button => button.textContent === "Invert")!;
 
     invert.click();
-    expect([favoritesSession.searchSettings.value.isInverted, funnel.getAttribute("aria-label")]).toEqual([true, "Filters, 1 Changed"]);
+    expect([favoritesSession.searchOptions.value.isInverted, searchOptionsButton.getAttribute("aria-label")]).toEqual([true, "Search Options, 1 Changed"]);
   });
 
-  test("counts the changed search settings on the funnel only while there are some and the row is closed", () => {
+  test("counts the changed search options on the Search Options button only while there are some and the row is closed", () => {
     const { element, favoritesSession } = setup();
-    const funnel = element.querySelector<HTMLButtonElement>("button[aria-label^=Filters]")!;
-    const badge = funnel.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
+    const searchOptionsButton = element.querySelector<HTMLButtonElement>("button[aria-label^='Search Options']")!;
+    const badge = searchOptionsButton.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
     const readBadge = (): [boolean, string] => [badge.hidden, badge.textContent!];
 
-    funnel.click();
+    searchOptionsButton.click();
     const unchanged = readBadge();
 
     favoritesSession.invert();
-    favoritesSession.updateSearchSettings({ sortKey: "score" });
+    favoritesSession.updateSearchOptions({ sortKey: "score" });
     const changed = readBadge();
 
-    funnel.click();
+    searchOptionsButton.click();
     expect([unchanged, changed, readBadge()]).toEqual([[true, "0"], [false, "2"], [true, "0"]]);
   });
 
-  test("leaves Blacklist out of the search settings row on someone else's favorites", () => {
+  test("leaves Blacklist out of the search options row on someone else's favorites", () => {
     const hasBlacklist = (element: HTMLElement): boolean => [...element.querySelectorAll("button")].some(button => button.textContent === "Blacklist");
 
     expect([hasBlacklist(setup().element), hasBlacklist(setup([], { userOwnsFavorites: false }).element)]).toEqual([true, false]);

@@ -8,7 +8,7 @@ import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_valu
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Post } from "@/core/domain/post/post";
 import { StringInterner } from "@/core/utils/string/string_interner";
-import { buildFavoritesSearchSettings } from "@/core/features/favorites/testing/favorites_search_settings_builder";
+import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { createPost } from "@/testing/post";
 
 interface Setup {
@@ -27,7 +27,7 @@ function setup(posts: Post[]): Setup {
   };
 
   favoritesSearchIndex.rebuild(favoritesCollection.append(posts));
-  const favoritesSession = new FavoritesSession({ favoritesSearchSettings: buildFavoritesSearchSettings() }, {
+  const favoritesSession = new FavoritesSession({ favoritesSearchOptions: buildFavoritesSearchOptions() }, {
     favoritesSearchIndex,
     favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
     randomSource: new MemoryRandomSource(),
@@ -75,23 +75,23 @@ describe("FavoritesSession", () => {
 
       favoritesSession.submit("apple");
       expect(favoritesSession.isFiltered.value).toBe(true);
-      favoritesSession.resetSearchSettings();
+      favoritesSession.resetSearchOptions();
       expect(favoritesSession.isFiltered.value).toBe(true);
       favoritesSession.clearSearch();
       expect(favoritesSession.isFiltered.value).toBe(false);
     });
   });
 
-  describe("changedSearchSettingCount", () => {
-    test("follows the settings and ignores the query", () => {
+  describe("changedSearchOptionCount", () => {
+    test("follows the options and ignores the query", () => {
       const { favoritesSession } = setup([]);
 
       favoritesSession.submit("apple");
       favoritesSession.invert();
-      favoritesSession.updateSearchSettings({ sortKey: "score" });
-      expect(favoritesSession.changedSearchSettingCount.value).toBe(2);
-      favoritesSession.resetSearchSettings();
-      expect(favoritesSession.changedSearchSettingCount.value).toBe(0);
+      favoritesSession.updateSearchOptions({ sortKey: "score" });
+      expect(favoritesSession.changedSearchOptionCount.value).toBe(2);
+      favoritesSession.resetSearchOptions();
+      expect(favoritesSession.changedSearchOptionCount.value).toBe(0);
     });
   });
 
@@ -116,11 +116,11 @@ describe("FavoritesSession", () => {
   });
 
   describe("toggleBlacklist", () => {
-    test("flips the blacklist setting", () => {
+    test("flips the blacklist option", () => {
       const { favoritesSession } = setup(createTaggedPosts("a", "b"));
 
       favoritesSession.toggleBlacklist();
-      expect(favoritesSession.searchSettings.value.isBlacklistEnabled).toBe(true);
+      expect(favoritesSession.searchOptions.value.isBlacklistEnabled).toBe(true);
     });
   });
 
@@ -129,15 +129,15 @@ describe("FavoritesSession", () => {
       const { favoritesSession } = setup(createTaggedPosts("a", "b"));
 
       favoritesSession.shuffle();
-      expect(favoritesSession.searchSettings.value.isShuffled).toBe(true);
+      expect(favoritesSession.searchOptions.value.isShuffled).toBe(true);
     });
   });
 
-  describe("updateSearchSettings", () => {
-    test("searches with the changed settings", () => {
+  describe("updateSearchOptions", () => {
+    test("searches with the changed options", () => {
       const { favoritesSession } = setup([createPost({ id: "1", score: 1 }), createPost({ id: "2", score: 2 })]);
 
-      favoritesSession.updateSearchSettings({ sortKey: "score" });
+      favoritesSession.updateSearchOptions({ sortKey: "score" });
       expect(getPagePostIds(favoritesSession)).toEqual(["2", "1"]);
     });
   });

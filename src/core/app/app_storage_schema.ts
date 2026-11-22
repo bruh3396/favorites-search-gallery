@@ -68,7 +68,7 @@ export const APP_STORAGE_SCHEMA = {
     }),
     favoritesSearchHistory: createStoredValueDefinition(NO_QUERIES, createListGuard(isString)),
     favoritesTabStripVisible: createStoredValueDefinition(true),
-    favoritesSearchSettingsVisible: createStoredValueDefinition(true)
+    favoritesSearchOptionsVisible: createStoredValueDefinition(true)
   }
 };
 

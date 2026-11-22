@@ -86,9 +86,9 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const appState = createStoredTree(
     APP_STORAGE_SCHEMA.state,
     appStorage.state,
-    ["favorites", "favoritesSearchHistory", "favoritesTabStripVisible", "favoritesSearchSettingsVisible"]
+    ["favorites", "favoritesSearchHistory", "favoritesTabStripVisible", "favoritesSearchOptionsVisible"]
   );
-  const { favorites: favoritesState, favoritesSearchHistory, favoritesTabStripVisible, favoritesSearchSettingsVisible } = appState;
+  const { favorites: favoritesState, favoritesSearchHistory, favoritesTabStripVisible, favoritesSearchOptionsVisible } = appState;
   const ownerState = favoritesState.get(favoritesOwnerId);
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, { submittedQueries: favoritesSearchHistory });
   const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
@@ -102,7 +102,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   });
   const favoritesWorkspace = new FavoritesWorkspace({
     favoritesWorkspaceSnapshot: ownerState.workspace,
-    createSession: (favoritesSearchSettings): FavoritesSession => favoritesService.createSession({ favoritesSearchSettings })
+    createSession: (favoritesSearchOptions): FavoritesSession => favoritesService.createSession({ favoritesSearchOptions })
   });
   const favoriteSizeRecorder = new FavoriteSizeRecorder({ measuredCount: 50, recordDelay: 500 }, {
     sizes: ownerState.sizes, scheduler,
@@ -193,7 +193,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
           onCloseAll: () => favoritesWorkspace.closeAllTabs()
         })),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
-          favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, tabCount, searchHistory, favoriteSizeRecorder,
+          favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, tabCount, searchHistory, favoriteSizeRecorder,
           visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions,
           openLightbox: favorite => openLightbox(favoritesTab.session, favorite),
           enterZen: (): void => {
@@ -209,7 +209,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         {
           target: container.ownerDocument,
           handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {
-            favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, zenEnabled,
+            favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled,
             remotePages, navigator, openLightbox, resetSettings
           })
         }

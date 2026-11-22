@@ -1,41 +1,41 @@
 import { Chip } from "@/core/ui/components/chip/chip";
-import { FavoritesSearchSettingsRow } from "@/core/app/favorites/search_settings/favorites_search_settings_row";
+import { FavoritesSearchOptionsRow } from "@/core/app/favorites/search_options/favorites_search_options_row";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
-import { FavoritesSortChip } from "@/core/app/favorites/search_settings/favorites_sort_chip";
+import { FavoritesSortChip } from "@/core/app/favorites/search_options/favorites_sort_chip";
 import { MaskChip } from "@/core/ui/components/mask_chip/mask_chip";
 import { computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 import { toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { toRatingMask } from "@/core/domain/post/rating_mask";
 
-export interface FavoritesSearchSettingsRowConfiguration {
+export interface FavoritesSearchOptionsRowConfiguration {
   readonly userOwnsFavorites: boolean;
 }
 
-export interface FavoritesSearchSettingsRowDependencies {
+export interface FavoritesSearchOptionsRowDependencies {
   favoritesSession: Pick<
     FavoritesSession,
-    "searchSettings" | "changedSearchSettingCount" | "shuffle" | "invert" | "toggleBlacklist" | "updateSearchSettings" | "resetSearchSettings"
+    "searchOptions" | "changedSearchOptionCount" | "shuffle" | "invert" | "toggleBlacklist" | "updateSearchOptions" | "resetSearchOptions"
   >;
 }
 
-export function composeFavoritesSearchSettingsRow(
-  configuration: FavoritesSearchSettingsRowConfiguration,
-  dependencies: FavoritesSearchSettingsRowDependencies
+export function composeFavoritesSearchOptionsRow(
+  configuration: FavoritesSearchOptionsRowConfiguration,
+  dependencies: FavoritesSearchOptionsRowDependencies
 ): HTMLElement {
   const { favoritesSession } = dependencies;
-  const { searchSettings: favoritesSearchSettings } = favoritesSession;
-  const isShuffled = computed(() => favoritesSearchSettings.value.isShuffled);
-  const isInverted = computed(() => favoritesSearchSettings.value.isInverted);
-  const isBlacklistEnabled = computed(() => favoritesSearchSettings.value.isBlacklistEnabled);
-  return h(FavoritesSearchSettingsRow, {
-    changedSearchSettingCount: favoritesSession.changedSearchSettingCount,
-    resetSearchSettings: () => favoritesSession.resetSearchSettings(),
+  const { searchOptions: favoritesSearchOptions } = favoritesSession;
+  const isShuffled = computed(() => favoritesSearchOptions.value.isShuffled);
+  const isInverted = computed(() => favoritesSearchOptions.value.isInverted);
+  const isBlacklistEnabled = computed(() => favoritesSearchOptions.value.isBlacklistEnabled);
+  return h(FavoritesSearchOptionsRow, {
+    changedSearchOptionCount: favoritesSession.changedSearchOptionCount,
+    resetSearchOptions: () => favoritesSession.resetSearchOptions(),
     children: [
       h(FavoritesSortChip, {
-        favoritesSearchSettings,
-        onSortKeyChange: sortKey => favoritesSession.updateSearchSettings({ sortKey }),
-        onSortAscendingChange: isSortAscending => favoritesSession.updateSearchSettings({ isSortAscending })
+        favoritesSearchOptions,
+        onSortKeyChange: sortKey => favoritesSession.updateSearchOptions({ sortKey }),
+        onSortAscendingChange: isSortAscending => favoritesSession.updateSearchOptions({ isSortAscending })
       }),
       h(Chip, { label: "Shuffle", highlighted: isShuffled, onClick: () => favoritesSession.shuffle() }),
       h(Chip, { label: "Invert", highlighted: isInverted, pressed: isInverted, onClick: () => favoritesSession.invert() }),
@@ -51,8 +51,8 @@ export function composeFavoritesSearchSettingsRow(
           { value: toPostStatusMask("active") | toPostStatusMask("deleted"), label: "Available" },
           { value: toPostStatusMask("purged"), label: "Removed" }
         ],
-        value: computed(() => favoritesSearchSettings.value.allowedStatuses),
-        onValueChange: allowedStatuses => favoritesSession.updateSearchSettings({ allowedStatuses })
+        value: computed(() => favoritesSearchOptions.value.allowedStatuses),
+        onValueChange: allowedStatuses => favoritesSession.updateSearchOptions({ allowedStatuses })
       }),
       h(MaskChip, {
         label: "Rating",
@@ -61,8 +61,8 @@ export function composeFavoritesSearchSettingsRow(
           { value: toRatingMask("questionable"), label: "Questionable" },
           { value: toRatingMask("safe"), label: "Safe" }
         ],
-        value: computed(() => favoritesSearchSettings.value.allowedRatings),
-        onValueChange: allowedRatings => favoritesSession.updateSearchSettings({ allowedRatings })
+        value: computed(() => favoritesSearchOptions.value.allowedRatings),
+        onValueChange: allowedRatings => favoritesSession.updateSearchOptions({ allowedRatings })
       })
     ]
   });

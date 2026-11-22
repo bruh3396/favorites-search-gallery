@@ -1,5 +1,5 @@
 @layer components {
-  .fsg-FavoritesSearchSettingsRow {
+  .fsg-FavoritesSearchOptionsRow {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -9,7 +9,7 @@
     background: var(--fsg-color-surface-container);
   }
 
-  .fsg-FavoritesSearchSettingsRow-reset {
+  .fsg-FavoritesSearchOptionsRow-reset {
     margin-inline-start: auto;
   }
 }

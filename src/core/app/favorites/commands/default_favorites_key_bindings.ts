@@ -3,7 +3,7 @@ import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_comman
 export const DEFAULT_FAVORITES_KEY_BINDINGS = {
   focusSearch: ["/"],
   clearSearch: [],
-  toggleFilters: [],
+  toggleSearchOptions: [],
   cycleSort: [],
   toggleSortAscending: [],
   shuffle: [],
@@ -11,7 +11,7 @@ export const DEFAULT_FAVORITES_KEY_BINDINGS = {
   toggleBlacklist: [],
   toggleInvert: [],
   cycleStatus: [],
-  resetFilters: [],
+  resetSearchOptions: [],
   searchElsewhere: [],
   goToNextPage: ["ArrowRight"],
   goToPreviousPage: ["ArrowLeft"],

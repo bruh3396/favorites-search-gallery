@@ -2,28 +2,28 @@ import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 
-export const FavoritesSearchSettingsRowClass = {
-  root: "fsg-FavoritesSearchSettingsRow",
-  reset: "fsg-FavoritesSearchSettingsRow-reset"
+export const FavoritesSearchOptionsRowClass = {
+  root: "fsg-FavoritesSearchOptionsRow",
+  reset: "fsg-FavoritesSearchOptionsRow-reset"
 } as const;
 
-export interface FavoritesSearchSettingsRowProps {
-  changedSearchSettingCount: Readable<number>;
-  resetSearchSettings: () => void;
+export interface FavoritesSearchOptionsRowProps {
+  changedSearchOptionCount: Readable<number>;
+  resetSearchOptions: () => void;
   children: Child;
 }
 
-export function FavoritesSearchSettingsRow({ changedSearchSettingCount, resetSearchSettings, children }: FavoritesSearchSettingsRowProps): HTMLElement {
+export function FavoritesSearchOptionsRow({ changedSearchOptionCount, resetSearchOptions, children }: FavoritesSearchOptionsRowProps): HTMLElement {
   return (
-    <div className={FavoritesSearchSettingsRowClass.root} role="group" aria-label="Filters">
+    <div className={FavoritesSearchOptionsRowClass.root} role="group" aria-label="Search Options">
       {children}
       <IconButton
-        className={FavoritesSearchSettingsRowClass.reset}
+        className={FavoritesSearchOptionsRowClass.reset}
         icon="reset"
-        label="Reset Filters"
+        label="Reset Search Options"
         size="small"
-        disabled={computed(() => changedSearchSettingCount.value === 0)}
-        onClick={resetSearchSettings}
+        disabled={computed(() => changedSearchOptionCount.value === 0)}
+        onClick={resetSearchOptions}
       />
     </div>
   );

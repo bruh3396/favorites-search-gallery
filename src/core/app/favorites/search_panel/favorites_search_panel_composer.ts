@@ -22,7 +22,7 @@ import { StoredValue } from "@/core/utils/storage/stored_value";
 import { SuggestionList } from "@/core/ui/components/suggestion_list/suggestion_list";
 import { Tile } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
-import { composeFavoritesSearchSettingsRow } from "@/core/app/favorites/search_settings/favorites_search_settings_row_composer";
+import { composeFavoritesSearchOptionsRow } from "@/core/app/favorites/search_options/favorites_search_options_row_composer";
 import { h } from "@/core/ui/h/h";
 
 export interface FavoritesSearchPanelConfiguration {
@@ -33,7 +33,7 @@ export interface FavoritesSearchPanelDependencies {
   favoritesService: Pick<FavoritesService, "loadState" | "searchable" | "hydrated" | "getTagsStartingWith" | "countFavoritesWithTag">;
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination">;
   favoritesTabStripVisible: StoredValue<boolean>;
-  favoritesSearchSettingsVisible: StoredValue<boolean>;
+  favoritesSearchOptionsVisible: StoredValue<boolean>;
   tabCount: Readable<number>;
   searchHistory: Pick<SearchHistory, "submittedQueries" | "record">;
   favoriteSizeRecorder: Pick<FavoriteSizeRecorder, "sizes">;
@@ -53,7 +53,7 @@ export function composeFavoritesSearchPanel(
   dependencies: FavoritesSearchPanelDependencies
 ): HTMLElement {
   const {
-    favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchSettingsVisible, tabCount, searchHistory, favoriteSizeRecorder,
+    favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, tabCount, searchHistory, favoriteSizeRecorder,
     visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, openLightbox, postActions, enterZen
   } = dependencies;
   const autocomplete = new Autocomplete({
@@ -66,7 +66,7 @@ export function composeFavoritesSearchPanel(
     ]
   });
   const activeDescendantElement = new Signal<HTMLElement | null>(null);
-  const { changedSearchSettingCount } = favoritesTab.session;
+  const { changedSearchOptionCount } = favoritesTab.session;
   const hiddenTabCount = computed(() => (!favoritesTabStripVisible.value && tabCount.value > 1 ? tabCount.value : 0));
   return h(FavoritesSearchPanel, {
     favoritesService,
@@ -78,16 +78,16 @@ export function composeFavoritesSearchPanel(
     },
     focusSearch: favoritesTab.focusSearch,
     fieldTrailingChild: h(CountToggleButton, {
-      icon: "filter",
-      label: computed(() => (changedSearchSettingCount.value > 0 ? `Filters, ${changedSearchSettingCount.value} Changed` : "Filters")),
-      pressed: favoritesSearchSettingsVisible,
-      count: changedSearchSettingCount,
-      onClick: () => favoritesSearchSettingsVisible.set(!favoritesSearchSettingsVisible.peek())
+      icon: "sliders",
+      label: computed(() => (changedSearchOptionCount.value > 0 ? `Search Options, ${changedSearchOptionCount.value} Changed` : "Search Options")),
+      pressed: favoritesSearchOptionsVisible,
+      count: changedSearchOptionCount,
+      onClick: () => favoritesSearchOptionsVisible.set(!favoritesSearchOptionsVisible.peek())
     }),
     subheaderChild: h(
       "div",
-      { hidden: computed(() => !favoritesSearchSettingsVisible.value) },
-      composeFavoritesSearchSettingsRow({ userOwnsFavorites: configuration.userOwnsFavorites }, { favoritesSession: favoritesTab.session })
+      { hidden: computed(() => !favoritesSearchOptionsVisible.value) },
+      composeFavoritesSearchOptionsRow({ userOwnsFavorites: configuration.userOwnsFavorites }, { favoritesSession: favoritesTab.session })
     ),
     trailingChild: [
       h(CountToggleButton, {

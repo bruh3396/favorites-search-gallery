@@ -2,7 +2,7 @@ import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
-import FAVORITES_SEARCH_SETTINGS_ROW_CSS from "@/core/app/favorites/search_settings/favorites_search_settings_row.css?inline";
+import FAVORITES_SEARCH_OPTIONS_ROW_CSS from "@/core/app/favorites/search_options/favorites_search_options_row.css?inline";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
@@ -20,7 +20,7 @@ export const FAVORITES_APP_STYLES = [
   UI_CSS,
   APP_CSS,
   SEARCH_PANEL_CSS,
-  FAVORITES_SEARCH_SETTINGS_ROW_CSS,
+  FAVORITES_SEARCH_OPTIONS_ROW_CSS,
   LIGHTBOX_CSS,
   LIGHTBOX_DETAILS_CSS,
   LIGHTBOX_TAGS_CSS,

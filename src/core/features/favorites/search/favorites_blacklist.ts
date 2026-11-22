@@ -1,4 +1,4 @@
-import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
@@ -16,7 +16,7 @@ export class FavoritesBlacklist {
     this.force = force;
   }
 
-  public apply(searchExpression: SearchExpression, { isBlacklistEnabled }: Pick<FavoritesSearchSettings, "isBlacklistEnabled">): SearchExpression {
+  public apply(searchExpression: SearchExpression, { isBlacklistEnabled }: Pick<FavoritesSearchOptions, "isBlacklistEnabled">): SearchExpression {
     return (this.force || isBlacklistEnabled) && this.searchExpression !== undefined ? SearchExpression.and([
       this.searchExpression,
       searchExpression

@@ -1,8 +1,8 @@
 import { ALL_POST_STATUSES_MASK } from "@/core/domain/post/post_status_mask";
 import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
-import { FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 
-export function buildFavoritesSearchSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings> = {}): FavoritesSearchSettings {
+export function buildFavoritesSearchOptions(partialFavoritesSearchOptions: Partial<FavoritesSearchOptions> = {}): FavoritesSearchOptions {
   return {
     query: "",
     isInverted: false,
@@ -13,6 +13,6 @@ export function buildFavoritesSearchSettings(partialFavoritesSearchSettings: Par
     isBlacklistEnabled: false,
     isShuffled: false,
     shuffleSeed: 1,
-    ...partialFavoritesSearchSettings
+    ...partialFavoritesSearchOptions
   };
 }

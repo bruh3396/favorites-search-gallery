@@ -1,4 +1,4 @@
-import { DEFAULT_FAVORITES_SEARCH_SETTINGS, FavoritesSearchSettings } from "@/core/features/favorites/search/favorites_search_settings";
+import { DEFAULT_FAVORITES_SEARCH_OPTIONS, FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { Readable, Signal, batch, computed } from "@/core/utils/reactive/signal";
 import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -10,7 +10,7 @@ import { RandomSource } from "@/core/boundary/ports/random_source/random_source"
 import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
 
 export interface FavoritesSearchConfiguration {
-  readonly favoritesSearchSettings: FavoritesSearchSettings;
+  readonly favoritesSearchOptions: FavoritesSearchOptions;
 }
 
 export interface FavoritesSearchDependencies {
@@ -25,24 +25,24 @@ export class FavoritesSearch {
   private readonly request: Readable<FavoritesSearchRequest>;
   private readonly stopListening: Array<() => void>;
   private hasStarted: boolean;
-  readonly #settings: Signal<FavoritesSearchSettings>;
+  readonly #options: Signal<FavoritesSearchOptions>;
   readonly #matchedFavorites: Signal<readonly Favorite[]>;
   readonly #searched: Emitter<void>;
 
   constructor(configuration: FavoritesSearchConfiguration, private readonly dependencies: FavoritesSearchDependencies) {
     this.hasStarted = false;
-    this.#settings = new Signal(configuration.favoritesSearchSettings);
+    this.#options = new Signal(configuration.favoritesSearchOptions);
     this.#matchedFavorites = new Signal<readonly Favorite[]>([]);
     this.#searched = new Emitter<void>();
-    this.request = computed(() => compileFavoritesSearchRequest(this.#settings.value, dependencies.favoritesBlacklist));
+    this.request = computed(() => compileFavoritesSearchRequest(this.#options.value, dependencies.favoritesBlacklist));
     this.stopListening = [
       dependencies.favoritesSearchIndex.indexed.on(favorites => this.appendMatches(favorites)),
       dependencies.favoritesSearchIndex.rebuilt.on(() => this.searchAll())
     ];
   }
 
-  public get settings(): Readable<FavoritesSearchSettings> {
-    return this.#settings;
+  public get options(): Readable<FavoritesSearchOptions> {
+    return this.#options;
   }
 
   public get matchedFavorites(): Readable<readonly Favorite[]> {
@@ -61,34 +61,34 @@ export class FavoritesSearch {
   }
 
   public submit(query: string): void {
-    this.applySettings({ query, isShuffled: false });
+    this.applyOptions({ query, isShuffled: false });
   }
 
   public invert(): void {
-    this.applySettings({ isInverted: !this.#settings.peek().isInverted });
+    this.applyOptions({ isInverted: !this.#options.peek().isInverted });
   }
 
   public toggleBlacklist(): void {
-    this.applySettings({ isBlacklistEnabled: !this.#settings.peek().isBlacklistEnabled });
+    this.applyOptions({ isBlacklistEnabled: !this.#options.peek().isBlacklistEnabled });
   }
 
   public shuffle(): void {
-    this.applySettings({ isShuffled: this.#settings.peek().sortKey !== "random", shuffleSeed: this.drawSeed() });
+    this.applyOptions({ isShuffled: this.#options.peek().sortKey !== "random", shuffleSeed: this.drawSeed() });
   }
 
-  public resetSettings(): void {
-    this.applySettings({ ...DEFAULT_FAVORITES_SEARCH_SETTINGS, query: this.#settings.peek().query });
+  public resetOptions(): void {
+    this.applyOptions({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: this.#options.peek().query });
   }
 
   public clearSearch(): void {
-    this.applySettings(DEFAULT_FAVORITES_SEARCH_SETTINGS);
+    this.applyOptions(DEFAULT_FAVORITES_SEARCH_OPTIONS);
   }
 
-  public updateSettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {
-    const sortWasChanged = partialFavoritesSearchSettings.sortKey !== undefined || partialFavoritesSearchSettings.isSortAscending !== undefined;
-    const isShuffled = this.#settings.peek().isShuffled && !sortWasChanged;
+  public updateOptions(partialFavoritesSearchOptions: Partial<FavoritesSearchOptions>): void {
+    const sortWasChanged = partialFavoritesSearchOptions.sortKey !== undefined || partialFavoritesSearchOptions.isSortAscending !== undefined;
+    const isShuffled = this.#options.peek().isShuffled && !sortWasChanged;
 
-    this.applySettings({ ...partialFavoritesSearchSettings, isShuffled });
+    this.applyOptions({ ...partialFavoritesSearchOptions, isShuffled });
   }
 
   public dispose(): void {
@@ -97,9 +97,9 @@ export class FavoritesSearch {
     }
   }
 
-  private applySettings(partialFavoritesSearchSettings: Partial<FavoritesSearchSettings>): void {
+  private applyOptions(partialFavoritesSearchOptions: Partial<FavoritesSearchOptions>): void {
     batch(() => {
-      this.#settings.value = { ...this.#settings.peek(), ...partialFavoritesSearchSettings };
+      this.#options.value = { ...this.#options.peek(), ...partialFavoritesSearchOptions };
       this.searchAll();
       this.#searched.emit();
     });
