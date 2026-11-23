@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
+import { Rule34CdnVideoDurationProber } from "@/adapters/rule34_cdn/client/rule34_cdn_video_duration_prober";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -174,6 +175,15 @@ describe("Rule34CdnClient", () => {
     const { rule34CdnClient } = setup(createFetchFindingOnly(""));
 
     await expect(rule34CdnClient.fetchOriginal(media("video", "1234/a1b2c3"))).rejects.toThrow("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4 answered 404");
+  });
+
+  test("probes a video's duration at its original", async() => {
+    const { rule34CdnClient } = setup();
+    const probeSeconds = vi.spyOn(Rule34CdnVideoDurationProber.prototype, "probeSeconds").mockResolvedValue(12);
+
+    expect(await rule34CdnClient.probeDurationSeconds(media("video", "1234/a1b2c3"))).toBe(12);
+    expect(probeSeconds).toHaveBeenCalledExactlyOnceWith("https://ahrimp4.rule34.xxx/images//1234/a1b2c3.mp4");
+    probeSeconds.mockRestore();
   });
 
   test("decodes a video's still from the jpg beside it", async() => {

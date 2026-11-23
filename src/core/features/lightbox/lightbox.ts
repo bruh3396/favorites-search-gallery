@@ -37,7 +37,6 @@ export interface Lightbox<T extends MediaItem> {
   readonly closed: Occurrence<T>;
   readonly mediaCorrected: Occurrence<MediaItem>;
   open(mediaSequence: MediaSequence<T>, item: T): boolean;
-  prefetch(item: T): void;
   createView(): HTMLElement;
   dispose(): void;
 }
@@ -62,7 +61,6 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
       lightboxNavigation.open(mediaSequence, item);
       return true;
     },
-    prefetch: (item): void => lightboxRetentionList.retain([item]),
     createView: (): HTMLElement => composeLightboxDialog(
       { defaultKeyBindings: DEFAULT_LIGHTBOX_KEY_BINDINGS },
       {

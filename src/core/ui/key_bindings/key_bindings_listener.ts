@@ -58,6 +58,6 @@ function isPressingControl(event: KeyboardEvent): boolean {
 
 function isFromInnerDialog(event: Event): boolean {
   const eventTargets = event.composedPath();
-  const innerEventTargets = event.currentTarget === null ? [] : eventTargets.slice(0, Math.max(eventTargets.indexOf(event.currentTarget), 0));
+  const innerEventTargets = eventTargets.slice(0, Math.max(eventTargets.findIndex(eventTarget => eventTarget === event.currentTarget), 0));
   return innerEventTargets.some(eventTarget => eventTarget instanceof HTMLDialogElement && eventTarget.open);
 }

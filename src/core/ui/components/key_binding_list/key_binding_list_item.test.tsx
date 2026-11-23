@@ -103,6 +103,48 @@ describe("KeyBindingListItem", () => {
     expect([onKeyChange.mock.calls, readKeyLabels(item)]).toEqual([[], ["D"]]);
   });
 
+  test("returns focus to the key once waiting ends", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d", "a"]));
+
+    pressKey(clickKey(item, "A"), "Escape");
+    expect(document.activeElement).toBe(findButton(item, "Change A"));
+  });
+
+  test("returns focus to the changed key", () => {
+    const keys = new Signal<readonly string[]>(["d", "a"]);
+    const item = renderItem(keys, {
+      onKeyChange: (keyIndex, key) => {
+        keys.value = keys.peek().toSpliced(keyIndex, 1, key);
+      }
+    });
+
+    pressKey(clickKey(item, "A"), "x");
+    expect(document.activeElement).toBe(findButton(item, "Change X"));
+  });
+
+  test("returns focus to Add once waiting for a new key ends", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d"]));
+
+    pressKey(clickAdd(item), "Escape");
+    expect(document.activeElement).toBe(findButton(item, "Add Key"));
+  });
+
+  test("moves focus to the last key when the focused key goes and no Add is offered", () => {
+    const keys = new Signal<readonly string[]>(["d", "a", "x"]);
+    const item = renderItem(keys);
+
+    findButton(item, "Change X")!.focus();
+    keys.value = ["d", "a"];
+    expect(document.activeElement).toBe(findButton(item, "Change A"));
+  });
+
+  test("leaves focus where it went when leaving ends waiting", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d"]));
+
+    clickKey(item, "D").blur();
+    expect(document.activeElement).toBe(document.body);
+  });
+
   test("shows held modifiers, then reports the key pressed with them", () => {
     const onKeyChange = vi.fn();
     const item = renderItem(new Signal<readonly string[]>(["d"]), { onKeyChange });

@@ -32,6 +32,7 @@ export interface KeyBindingListItemProps {
 }
 
 interface KeyConflict {
+  readonly keyIndex: number;
   readonly key: string;
   readonly keyOwnerLabel: string;
 }
@@ -99,13 +100,8 @@ export function KeyBindingListItem({
           {
             label: "Overwrite",
             onClick: (): void => {
-              const currentCapturedKeyIndex = capturedKeyIndex.peek();
-
               endCapture();
-
-              if (currentCapturedKeyIndex !== null) {
-                onKeyChange(currentCapturedKeyIndex, currentKeyConflict.key);
-              }
+              onKeyChange(currentKeyConflict.keyIndex, currentKeyConflict.key);
             }
           },
           { label: "Cancel", onClick: endCapture }
@@ -147,7 +143,7 @@ export function KeyBindingListItem({
           const keyOwnerLabel = findKeyOwnerLabel(key);
 
           if (keyOwnerLabel !== undefined) {
-            keyConflict.value = { key, keyOwnerLabel };
+            keyConflict.value = { keyIndex, key, keyOwnerLabel };
             return;
           }
           endCapture();
@@ -195,9 +191,22 @@ export function KeyBindingListItem({
     </button>
   );
 
+  const addButton = (
+    <IconButton
+      icon="add"
+      label="Add Key"
+      size="small"
+      onClick={() => {
+        capturedKeyIndex.value = keys.peek().length;
+      }}
+    />
+  );
+  const addSlot = <span className={KeyBindingListItemClass.add}>{addButton}</span>;
+
   effect(() => {
     const currentKeys = keys.value;
     const currentCapturedKeyIndex = capturedKeyIndex.value;
+    const focusedKeyIndex = shown?.result.findIndex(element => element.contains(element.ownerDocument.activeElement)) ?? -1;
 
     capture = null;
     shown?.dispose();
@@ -206,7 +215,16 @@ export function KeyBindingListItem({
       ...currentCapturedKeyIndex === currentKeys.length ? [createCaptureGroup(currentKeys.length)] : []
     ]));
     keysElement.replaceChildren(...shown.result.length === 0 ? [unbound] : shown.result);
-    (capture as HTMLElement | null)?.focus();
+    addSlot.hidden = currentCapturedKeyIndex !== null || currentKeys.length >= maxKeyCount;
+
+    if (capture !== null) {
+      (capture as HTMLElement).focus();
+      return;
+    }
+
+    if (focusedKeyIndex !== -1) {
+      (shown.result.at(focusedKeyIndex) ?? (addSlot.hidden ? shown.result.at(-1) : addButton))?.focus();
+    }
   });
   effect(() => {
     const currentRefusedKey = refusedKey.value;
@@ -228,19 +246,7 @@ export function KeyBindingListItem({
     >
       <span className={KeyBindingListItemClass.label}>{label}</span>
       {keysElement}
-      <span
-        className={KeyBindingListItemClass.add}
-        hidden={computed(() => capturedKeyIndex.value !== null || keys.value.length >= maxKeyCount)}
-      >
-        <IconButton
-          icon="add"
-          label="Add Key"
-          size="small"
-          onClick={() => {
-            capturedKeyIndex.value = keys.peek().length;
-          }}
-        />
-      </span>
+      {addSlot}
       {noticeSlot}
     </div>
   );

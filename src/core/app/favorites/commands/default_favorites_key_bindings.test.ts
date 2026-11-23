@@ -9,6 +9,8 @@ describe("DEFAULT_FAVORITES_KEY_BINDINGS", () => {
     ["ArrowLeft", "goToPreviousPage"],
     ["z", "toggleZen"],
     ["Escape", "exitZen"],
+    ["=", "increaseTileSize"],
+    ["-", "decreaseTileSize"],
     ["Enter", "openGallery"]
   ])("binds %j to %s", (key, favoritesCommand) => {
     expect(findCommandInKeyBindings(DEFAULT_FAVORITES_KEY_BINDINGS, key)).toBe(favoritesCommand);

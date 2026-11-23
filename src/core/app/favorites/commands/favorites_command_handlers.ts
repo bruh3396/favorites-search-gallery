@@ -71,13 +71,7 @@ export function createFavoritesCommandHandlers(
     goToNextPage: () => goToPage(activeFavoritesSession().pageNumber.peek() + 1),
     goToPreviousPage: () => goToPage(activeFavoritesSession().pageNumber.peek() - 1),
     openNewTab: () => favoritesWorkspace.openBlankTab(),
-    closeTab: (): void => {
-      const activeTabId = tabManager.activeTabId.peek();
-
-      if (activeTabId !== null) {
-        favoritesWorkspace.closeTab(activeTabId);
-      }
-    },
+    closeTab: () => favoritesWorkspace.closeTab(tabManager.tabs.peek()[Math.max(activeTabIndex(), 0)].id),
     goToNextTab: () => activateTabAt(1),
     goToPreviousTab: () => activateTabAt(-1),
     toggleTabs: () => toggle(favoritesTabStripVisible),

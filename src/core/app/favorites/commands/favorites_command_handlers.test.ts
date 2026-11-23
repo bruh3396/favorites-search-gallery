@@ -14,6 +14,7 @@ import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 import { Signal } from "@/core/utils/reactive/signal";
+import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { createFavoritesCommandHandlers } from "@/core/app/favorites/commands/favorites_command_handlers";
 import { createPost } from "@/testing/post";
@@ -26,6 +27,8 @@ interface Setup {
   favoritesWorkspace: FavoritesWorkspace;
   favoritesPreferences: AppPreferences["favorites"];
   sharedPreferences: SharedPreferences;
+  favoritesTabStripVisible: StoredValue<boolean>;
+  favoritesSearchOptionsVisible: StoredValue<boolean>;
   zenEnabled: Signal<boolean>;
   openLightbox: Mock<(favoritesSession: FavoritesSession, favorite: Favorite) => boolean>;
   activeSession: () => FavoritesSession;
@@ -65,7 +68,18 @@ function setup({ postCount = 0, userOwnsFavorites = true } = {}): Setup {
   });
   const activeSession = (): FavoritesSession => favoritesWorkspace.activeTab.peek().session;
   const activeTabIndex = (): number => favoritesWorkspace.tabManager.tabs.peek().findIndex(tab => tab.id === favoritesWorkspace.tabManager.activeTabId.peek());
-  return { handlers, favoritesWorkspace, favoritesPreferences, sharedPreferences, zenEnabled, openLightbox, activeSession, activeTabIndex };
+  return {
+    handlers,
+    favoritesWorkspace,
+    favoritesPreferences,
+    sharedPreferences,
+    favoritesTabStripVisible,
+    favoritesSearchOptionsVisible,
+    zenEnabled,
+    openLightbox,
+    activeSession,
+    activeTabIndex
+  };
 }
 
 describe("createFavoritesCommandHandlers", () => {
@@ -78,6 +92,46 @@ describe("createFavoritesCommandHandlers", () => {
     handlers.exitZen();
     handlers.exitZen();
     expect([wasEntered, zenEnabled.value]).toEqual([true, false]);
+  });
+
+  test("asks the active tab to focus its search bar", () => {
+    const { handlers, favoritesWorkspace } = setup();
+    const onFocusSearch = vi.fn();
+
+    favoritesWorkspace.activeTab.peek().focusSearch.on(onFocusSearch);
+    handlers.focusSearch();
+    expect(onFocusSearch).toHaveBeenCalledOnce();
+  });
+
+  test("toggles the search options, tab strip, infinite scroll, HD tiles, header and enhanced posts page", () => {
+    const { handlers, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible } = setup();
+    const toggledValues = [
+      favoritesSearchOptionsVisible,
+      favoritesTabStripVisible,
+      favoritesPreferences.pagination.infiniteScroll,
+      favoritesPreferences.grid.hdTilesEnabled,
+      favoritesPreferences.nativeHeaderVisible,
+      sharedPreferences.postListEnabled
+    ];
+    const initialValues = toggledValues.map(storedValue => storedValue.peek());
+
+    handlers.toggleSearchOptions();
+    handlers.toggleTabs();
+    handlers.toggleInfiniteScroll();
+    handlers.toggleHd();
+    handlers.toggleHeader();
+    handlers.toggleEnhancedPostsPage();
+    expect(toggledValues.map(storedValue => storedValue.peek())).toEqual(initialValues.map(value => !value));
+  });
+
+  test("shuffles and inverts the active search", () => {
+    const { handlers, activeSession } = setup();
+
+    handlers.shuffle();
+    handlers.toggleInvert();
+    const { isShuffled, isInverted } = activeSession().searchOptions.peek();
+
+    expect([isShuffled, isInverted]).toEqual([true, true]);
   });
 
   test("cycles the sort, wrapping around, and flips its direction", () => {
