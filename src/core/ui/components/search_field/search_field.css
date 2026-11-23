@@ -1,0 +1,40 @@
+.fsg-SearchField {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  block-size: 28px;
+  box-sizing: border-box;
+  padding-inline: 8px;
+  border-radius: var(--fsg-shape-corner-small);
+  background: var(--fsg-color-surface-container-high);
+  color: var(--fsg-color-on-surface-variant);
+}
+
+.fsg-SearchField:focus-within {
+  box-shadow: inset 0 0 0 1px var(--fsg-color-primary);
+}
+
+.fsg-SearchField-icon {
+  flex: none;
+  inline-size: 14px;
+  block-size: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.fsg-SearchField-input {
+  flex: 1;
+  min-inline-size: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--fsg-color-on-surface);
+  font: inherit;
+  font-size: 13px;
+}
+
+.fsg-SearchField-input::placeholder {
+  color: var(--fsg-color-on-surface-variant);
+}

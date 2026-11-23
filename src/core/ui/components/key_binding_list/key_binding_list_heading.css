@@ -1,0 +1,7 @@
+.fsg-KeyBindingListHeading {
+  margin: 0;
+  padding: 0 6px 6px;
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-medium-size);
+  font-weight: 500;
+}

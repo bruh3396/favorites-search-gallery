@@ -1,0 +1,6 @@
+@layer components {
+  .fsg-FavoritesKeyBindings-searchField {
+    flex: none;
+    padding: 8px 8px 4px;
+  }
+}

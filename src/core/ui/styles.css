@@ -21,6 +21,7 @@
 @import "./components/paginator/page_slot.css" layer(components);
 @import "./components/page_stepper/page_stepper.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
+@import "./components/search_field/search_field.css" layer(components);
 @import "./components/suggestion_list/suggestion_list.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
 @import "./components/tabs/tab_panel.css" layer(components);
@@ -33,6 +34,7 @@
 @import "./components/count_badge/count_badge.css" layer(components);
 @import "./components/key_cap/key_cap.css" layer(components);
 @import "./components/key_binding_list/key_binding_list.css" layer(components);
+@import "./components/key_binding_list/key_binding_list_heading.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_section.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_item.css" layer(components);
 

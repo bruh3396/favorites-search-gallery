@@ -1,11 +1,12 @@
 import { GridSizing } from "@/core/ui/post_grid/layout/grid_sizing";
 import { Size } from "@/core/utils/geometry/size";
 
-const DECODE_WIDTH_STEP = 250;
-const MAX_DECODE_WIDTH = 3_000;
+const DECODE_WIDTHS = [256, 384, 512, 768, 1_024, 1_536, 2_048, 3_072] as const;
+const MAX_DECODE_WIDTH = DECODE_WIDTHS[DECODE_WIDTHS.length - 1];
 const MIN_DECODE_WIDTH = 100;
+const OVERSAMPLE = 2;
 
-export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, { width, height }: Size): number {
+export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, { width, height }: Size, oversample = OVERSAMPLE): number {
   if (layout === "native" || gridWidth <= 0 || columnCount <= 0) {
     return 0;
   }
@@ -21,6 +22,6 @@ export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, 
   if (shownWidth <= MIN_DECODE_WIDTH) {
     return 0;
   }
-  const steppedWidth = Math.ceil(shownWidth / DECODE_WIDTH_STEP) * DECODE_WIDTH_STEP;
-  return Math.min(steppedWidth, MAX_DECODE_WIDTH, width > 0 ? width : Infinity);
+  const listedWidth = DECODE_WIDTHS.find(decodeWidth => decodeWidth >= shownWidth * oversample) ?? MAX_DECODE_WIDTH;
+  return Math.min(listedWidth, width > 0 ? width : Infinity);
 }
