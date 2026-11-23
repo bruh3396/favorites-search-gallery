@@ -3,7 +3,7 @@ import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favori
 import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPendingReset, readCorpusSize, readFavoriteCount } from "@/targets/lab/databases";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserConfirmer } from "@/adapters/browser/ports/confirmer/browser_confirmer";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
@@ -29,7 +29,7 @@ import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_r
 import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
-import { createAppStorage } from "@/core/app/app_storage";
+import { createAppStorage } from "@/core/app/storage/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountLabScreen } from "@/targets/lab/lab_screen";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";

@@ -1,7 +1,7 @@
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
-import { AppPreferences } from "@/core/app/app_preferences";
+import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_grid_layouts";
 import { FAVORITES_SETTING_RANGES } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
@@ -9,7 +9,7 @@ import { Icon } from "@/core/ui/components/icon/icon";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen } from "@/core/ui/settings/settings_screen";
-import { SharedPreferences } from "@/core/app/shared_preferences";
+import { SharedPreferences } from "@/core/app/storage/shared_preferences";
 import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";

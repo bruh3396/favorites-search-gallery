@@ -1,7 +1,7 @@
 import { DEFAULT_FAVORITES_SEARCH_OPTIONS, FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { describe, expect, test, vi } from "vitest";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
@@ -42,7 +42,8 @@ function createWorkspace(localKeyedValues: MemoryLocalKeyedValues, posts: Post[]
 
       vi.spyOn(favoritesSession, "start");
       return favoritesSession;
-    }
+    },
+    randomSource: new MemoryRandomSource([0.25, 0.5])
   });
 }
 
@@ -157,11 +158,19 @@ describe("FavoritesWorkspace", () => {
   });
 
   describe("openBlankTab", () => {
-    test("opens an active tab with the default search options", () => {
+    test("opens an active tab with the default search options and a drawn seed", () => {
       const { favoritesWorkspace } = setup(createStoredWorkspace(["apple"]));
 
       favoritesWorkspace.openBlankTab();
-      expect(favoritesWorkspace.activeTab.value.session.searchOptions.value).toEqual(DEFAULT_FAVORITES_SEARCH_OPTIONS);
+      expect(favoritesWorkspace.activeTab.value.session.searchOptions.value).toEqual({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, shuffleSeed: 2 ** 30 });
+    });
+
+    test("draws a different seed for each tab", () => {
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple"]));
+
+      favoritesWorkspace.openBlankTab();
+      favoritesWorkspace.openBlankTab();
+      expect(readFavoritesSearchOptions(favoritesWorkspace).map(favoritesSearchOptions => favoritesSearchOptions.shuffleSeed)).toEqual([0, 2 ** 30, 2 ** 31]);
     });
 
     test("asks the new tab to focus its search once it is active", () => {
@@ -199,7 +208,8 @@ describe("FavoritesWorkspace", () => {
       const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
 
       favoritesWorkspace.closeAllTabs();
-      expect([readFavoritesSearchOptions(favoritesWorkspace), readActiveIndex(favoritesWorkspace)]).toEqual([[DEFAULT_FAVORITES_SEARCH_OPTIONS], 0]);
+      expect([readFavoritesSearchOptions(favoritesWorkspace), readActiveIndex(favoritesWorkspace)])
+        .toEqual([[{ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, shuffleSeed: 2 ** 30 }], 0]);
     });
 
     test("disposes the closed tabs' sessions", () => {

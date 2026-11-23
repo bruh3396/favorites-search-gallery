@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
-import { createAppStorage } from "@/core/app/app_storage";
+import { createAppStorage } from "@/core/app/storage/app_storage";
 
 describe("createAppStorage", () => {
   test("keeps preferences and state under one key", () => {

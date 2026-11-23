@@ -5,7 +5,7 @@ import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavo
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { h, render } from "@/core/ui/h/h";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/color_scheme";
@@ -43,10 +43,10 @@ import { composeFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/fa
 import { composeFavoritesKeyBindings } from "@/core/app/favorites/key_bindings/favorites_key_bindings_composer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { composeFavoritesSettings } from "@/core/app/favorites/settings/favorites_settings_composer";
-import { createAppStorage } from "@/core/app/app_storage";
+import { createAppStorage } from "@/core/app/storage/app_storage";
 import { createFavoritesCommandHandlers } from "@/core/app/favorites/commands/favorites_command_handlers";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
-import { createSharedPreferences } from "@/core/app/shared_preferences";
+import { createSharedPreferences } from "@/core/app/storage/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { fillWindow } from "@/core/ui/app_root/window_filler";
 import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
@@ -102,7 +102,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   });
   const favoritesWorkspace = new FavoritesWorkspace({
     favoritesWorkspaceSnapshot: ownerState.workspace,
-    createSession: (favoritesSearchOptions): FavoritesSession => favoritesService.createSession({ favoritesSearchOptions })
+    createSession: (favoritesSearchOptions): FavoritesSession => favoritesService.createSession({ favoritesSearchOptions }),
+    randomSource
   });
   const favoriteSizeRecorder = new FavoriteSizeRecorder({ measuredCount: 50, recordDelay: 500 }, {
     sizes: ownerState.sizes, scheduler,

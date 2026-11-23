@@ -366,7 +366,7 @@ describe("FavoritesSearch", () => {
       expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
     });
 
-    test("puts everything but the query back to its default", () => {
+    test("puts everything but the query and the seed back to its default", () => {
       const { favoritesSearch } = setup();
 
       favoritesSearch.submit("apple");
@@ -374,7 +374,7 @@ describe("FavoritesSearch", () => {
       favoritesSearch.invert();
       favoritesSearch.shuffle();
       favoritesSearch.resetOptions();
-      expect(favoritesSearch.options.value).toEqual(buildFavoritesSearchOptions({ query: "apple", shuffleSeed: 0 }));
+      expect(favoritesSearch.options.value).toEqual(buildFavoritesSearchOptions({ query: "apple", shuffleSeed: 2 ** 30 }));
     });
   });
 
@@ -392,14 +392,14 @@ describe("FavoritesSearch", () => {
       expect(getResultPostIds(favoritesSearch)).toEqual(["1", "2"]);
     });
 
-    test("puts every option back to its default", () => {
+    test("puts every option but the seed back to its default", () => {
       const { favoritesSearch } = setup();
 
       favoritesSearch.submit("apple");
       favoritesSearch.updateOptions({ sortKey: "score", isSortAscending: true });
       favoritesSearch.shuffle();
       favoritesSearch.clearSearch();
-      expect(favoritesSearch.options.value).toEqual(buildFavoritesSearchOptions({ shuffleSeed: 0 }));
+      expect(favoritesSearch.options.value).toEqual(buildFavoritesSearchOptions({ shuffleSeed: 2 ** 30 }));
     });
   });
 

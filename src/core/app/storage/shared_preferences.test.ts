@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
-import { createAppStorage } from "@/core/app/app_storage";
-import { createSharedPreferences } from "@/core/app/shared_preferences";
+import { createAppStorage } from "@/core/app/storage/app_storage";
+import { createSharedPreferences } from "@/core/app/storage/shared_preferences";
 
 function setup(): { localKeyedValues: MemoryLocalKeyedValues; hostPage: MemoryHostPage; sharedPreferences: ReturnType<typeof createSharedPreferences> } {
   const localKeyedValues = new MemoryLocalKeyedValues();

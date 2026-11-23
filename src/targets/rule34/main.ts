@@ -1,6 +1,6 @@
 import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { AppMode } from "@/core/boundary/app_mode";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserConfirmer } from "@/adapters/browser/ports/confirmer/browser_confirmer";
@@ -39,7 +39,7 @@ import { UnavailableRemotePosts } from "@/core/boundary/ports/remote_posts/unava
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
-import { createAppStorage } from "@/core/app/app_storage";
+import { createAppStorage } from "@/core/app/storage/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
 

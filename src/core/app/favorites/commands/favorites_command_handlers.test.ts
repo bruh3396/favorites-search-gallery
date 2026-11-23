@@ -1,8 +1,8 @@
 import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { Mock, describe, expect, test, vi } from "vitest";
-import { SharedPreferences, createSharedPreferences } from "@/core/app/shared_preferences";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { AppPreferences } from "@/core/app/app_preferences";
+import { SharedPreferences, createSharedPreferences } from "@/core/app/storage/shared_preferences";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
+import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -59,7 +59,8 @@ function setup({ postCount = 0, userOwnsFavorites = true } = {}): Setup {
       favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
       favoritesPaginationPreferences: favoritesPreferences.pagination,
       randomSource: new MemoryRandomSource()
-    })
+    }),
+    randomSource: new MemoryRandomSource()
   });
   const zenEnabled = new Signal(false);
   const openLightbox = vi.fn<(favoritesSession: FavoritesSession, favorite: Favorite) => boolean>(() => true);

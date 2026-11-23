@@ -3,7 +3,7 @@ import { FavoritesApp, FavoritesAppClass } from "@/core/app/favorites/favorites_
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
@@ -38,7 +38,8 @@ function createWorkspace(): FavoritesWorkspace {
       favoritesBlacklist: new FavoritesBlacklist({ blacklistedTags: [], force: false }),
       favoritesPaginationPreferences,
       randomSource: new MemoryRandomSource()
-    })
+    }),
+    randomSource: new MemoryRandomSource()
   });
 }
 

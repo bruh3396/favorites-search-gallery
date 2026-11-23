@@ -1,6 +1,6 @@
 import { DEFAULT_TAG_SUGGESTER_CONFIGURATION, TagSuggester } from "@/core/features/autocomplete/tag_suggester";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
-import { AppPreferences } from "@/core/app/app_preferences";
+import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { Autocomplete } from "@/core/features/autocomplete/autocomplete";
 import { CountToggleButton } from "@/core/ui/components/count_toggle_button/count_toggle_button";
 import { Favorite } from "@/core/features/favorites/favorite";

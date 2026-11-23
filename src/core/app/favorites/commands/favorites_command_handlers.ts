@@ -3,7 +3,7 @@ import { ALL_RATINGS_MASK, toRatingMask } from "@/core/domain/post/rating_mask";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
 import { FAVORITES_SETTING_RANGES, FavoritesSettingRange } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/core/utils/number/number_utilities";
-import { AppPreferences } from "@/core/app/app_preferences";
+import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_grid_layouts";
 import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
@@ -14,7 +14,7 @@ import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorit
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { LIGHTBOX_MODES } from "@/core/features/lightbox/lightbox_mode";
-import { SharedPreferences } from "@/core/app/shared_preferences";
+import { SharedPreferences } from "@/core/app/storage/shared_preferences";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { THEMES } from "@/core/ui/theme/theme";

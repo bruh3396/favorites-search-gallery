@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
-import { AppPreferences } from "@/core/app/app_preferences";
-import { AppState } from "@/core/app/app_state";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
+import { AppPreferences } from "@/core/app/storage/app_preferences";
+import { AppState } from "@/core/app/storage/app_state";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 

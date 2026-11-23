@@ -1,7 +1,13 @@
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 
+const UINT32_RANGE = 2 ** 32;
+
 export function randomInt(randomSource: RandomSource, max: number): number {
   return Math.floor(randomSource.next() * max);
+}
+
+export function randomUint32(randomSource: RandomSource): number {
+  return randomInt(randomSource, UINT32_RANGE);
 }
 
 export function randomIntInRange(randomSource: RandomSource, min: number, max: number): number {

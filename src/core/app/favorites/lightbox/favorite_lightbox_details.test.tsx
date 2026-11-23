@@ -2,7 +2,7 @@ import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsPreferences, creat
 import { FavoriteLightboxTags, FavoriteLightboxTagsClass } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_details.css?inline";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { Signal } from "@/core/utils/reactive/signal";

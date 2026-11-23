@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { randomBoolean, randomFloatInRange, randomInt, randomIntInRange, seededFloat, shuffleInPlace } from "@/core/utils/random/random_utilities";
+import { randomBoolean, randomFloatInRange, randomInt, randomIntInRange, randomUint32, seededFloat, shuffleInPlace } from "@/core/utils/random/random_utilities";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
 
 const randomSource = new MemoryRandomSource([0.7, 0.2, 0.9, 0.4, 0.1, 0.6, 0.3, 0.8, 0.5]);
@@ -13,6 +13,12 @@ describe("randomInt", () => {
     expect(randomInt(new MemoryRandomSource([0]), 2_000)).toBe(0);
     expect(randomInt(new MemoryRandomSource([0.5]), 2_000)).toBe(1_000);
     expect(randomInt(new MemoryRandomSource([0.9999]), 2_000)).toBe(1_999);
+  });
+});
+
+describe("randomUint32", () => {
+  test("scales the random source to [0, 2^32)", () => {
+    expect([0, 0.25, 0.5].map(value => randomUint32(new MemoryRandomSource([value])))).toEqual([0, 2 ** 30, 2 ** 31]);
   });
 });
 

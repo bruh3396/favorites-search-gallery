@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { CopyIdButtonClass } from "@/core/app/favorites/lightbox/copy_id_button";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteLightboxDetailsClass } from "@/core/app/favorites/lightbox/favorite_lightbox_details";

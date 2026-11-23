@@ -8,6 +8,7 @@ import { FavoritesSearchRequest } from "@/core/features/favorites/search/favorit
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
+import { randomUint32 } from "@/core/utils/random/random_utilities";
 
 export interface FavoritesSearchConfiguration {
   readonly favoritesSearchOptions: FavoritesSearchOptions;
@@ -18,8 +19,6 @@ export interface FavoritesSearchDependencies {
   favoritesBlacklist: FavoritesBlacklist;
   randomSource: RandomSource;
 }
-
-const SEED_RANGE = 2 ** 32;
 
 export class FavoritesSearch {
   private readonly request: Readable<FavoritesSearchRequest>;
@@ -73,15 +72,17 @@ export class FavoritesSearch {
   }
 
   public shuffle(): void {
-    this.applyOptions({ isShuffled: this.#options.peek().sortKey !== "random", shuffleSeed: this.drawSeed() });
+    this.applyOptions({ isShuffled: this.#options.peek().sortKey !== "random", shuffleSeed: randomUint32(this.dependencies.randomSource) });
   }
 
   public resetOptions(): void {
-    this.applyOptions({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: this.#options.peek().query });
+    const { query, shuffleSeed } = this.#options.peek();
+
+    this.applyOptions({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query, shuffleSeed });
   }
 
   public clearSearch(): void {
-    this.applyOptions(DEFAULT_FAVORITES_SEARCH_OPTIONS);
+    this.applyOptions({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, shuffleSeed: this.#options.peek().shuffleSeed });
   }
 
   public updateOptions(partialFavoritesSearchOptions: Partial<FavoritesSearchOptions>): void {
@@ -121,9 +122,5 @@ export class FavoritesSearch {
       // eslint-disable-next-line unicorn/prefer-spread
       this.#matchedFavorites.value = this.#matchedFavorites.peek().concat(matchedFavorites);
     }
-  }
-
-  private drawSeed(): number {
-    return Math.floor(this.dependencies.randomSource.next() * SEED_RANGE);
   }
 }

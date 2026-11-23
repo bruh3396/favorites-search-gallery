@@ -1,7 +1,7 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
 import { h, render } from "@/core/ui/h/h";
-import { APP_STORAGE_SCHEMA } from "@/core/app/app_storage_schema";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
@@ -28,10 +28,10 @@ import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { computed } from "@/core/utils/reactive/signal";
-import { createAppStorage } from "@/core/app/app_storage";
+import { createAppStorage } from "@/core/app/storage/app_storage";
 import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list_service";
-import { createSharedPreferences } from "@/core/app/shared_preferences";
+import { createSharedPreferences } from "@/core/app/storage/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 

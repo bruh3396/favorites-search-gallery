@@ -4,14 +4,17 @@ import { FavoritesTab, createFavoritesTab } from "@/core/app/favorites/workspace
 import { Readable, batch, computed, effect } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Tab } from "@/core/ui/components/tabs/tab";
 import { TabManager } from "@/core/ui/components/tabs/tab_manager";
 import { isRecord } from "@/core/utils/guard/unknown_utilities";
+import { randomUint32 } from "@/core/utils/random/random_utilities";
 
 export interface FavoritesWorkspaceDependencies {
   favoritesWorkspaceSnapshot: StoredValue<FavoritesWorkspaceSnapshot>;
   createSession: (favoritesSearchOptions: FavoritesSearchOptions) => FavoritesSession;
+  randomSource: RandomSource;
 }
 
 interface TabGroup {
@@ -69,7 +72,7 @@ export class FavoritesWorkspace {
   }
 
   public openBlankTab(): void {
-    const tab = this.openTab(DEFAULT_FAVORITES_SEARCH_OPTIONS);
+    const tab = this.openTab({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, shuffleSeed: randomUint32(this.dependencies.randomSource) });
 
     this.tabManager.activate(tab.id);
     tab.value.focusSearch.emit();
