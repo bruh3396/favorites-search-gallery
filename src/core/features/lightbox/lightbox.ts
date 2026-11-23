@@ -1,5 +1,6 @@
-import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
+import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
+import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxFavorite } from "@/core/features/lightbox/favorite/lightbox_favorite";
 import { LightboxMediaResolver } from "@/core/features/lightbox/media/lightbox_media_resolver";
@@ -26,6 +27,7 @@ export interface LightboxDependencies<T extends MediaItem> {
   remoteMedia: Pick<RemoteMedia, "resolveMedia" | "resolvePreviewUrl" | "resolveOriginalUrl" | "decodeStill" | "loadOriginal">;
   actions: LightboxActions;
   preferences: LightboxPreferences;
+  lightboxKeyBindings: Readable<KeyBindings<LightboxCommand>>;
   locateItem: (item: T) => Element | undefined;
   details?: LightboxDetails<T>;
   favorite?: LightboxFavorite<T>;
@@ -43,7 +45,7 @@ export interface Lightbox<T extends MediaItem> {
 
 export function createLightbox<T extends MediaItem>(dependencies: LightboxDependencies<T>): Lightbox<T> {
   const {
-    scheduler, sizeObserver, viewport, remoteMedia, locateItem,
+    scheduler, sizeObserver, viewport, remoteMedia, lightboxKeyBindings, locateItem,
     actions: lightboxActions, preferences: lightboxPreferences, details: lightboxDetails, favorite: lightboxFavorite
   } = dependencies;
   const lightboxNavigation = new LightboxNavigation<T>({ settleDelay: SETTLE_DELAY }, scheduler);
@@ -61,14 +63,11 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
       lightboxNavigation.open(mediaSequence, item);
       return true;
     },
-    createView: (): HTMLElement => composeLightboxDialog(
-      { defaultKeyBindings: DEFAULT_LIGHTBOX_KEY_BINDINGS },
-      {
-        scheduler, sizeObserver, viewport, remoteMedia, locateItem, lightboxActions, lightboxDetails, lightboxFavorite, lightboxPreferences,
-        lightboxMediaResolver, lightboxNavigation,
-        retainedItems: lightboxRetentionList.items
-      }
-    ),
+    createView: (): HTMLElement => composeLightboxDialog({
+      scheduler, sizeObserver, viewport, remoteMedia, locateItem, lightboxActions, lightboxDetails, lightboxFavorite, lightboxPreferences,
+      lightboxKeyBindings, lightboxMediaResolver, lightboxNavigation,
+      retainedItems: lightboxRetentionList.items
+    }),
     dispose: (): void => {
       lightboxRetentionList.dispose();
       lightboxNavigation.dispose();

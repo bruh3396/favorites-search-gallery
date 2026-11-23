@@ -1,5 +1,6 @@
 import { Lightbox, createLightbox } from "@/core/features/lightbox/lightbox";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
+import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
@@ -43,9 +44,9 @@ function setup(mode: LightboxMode = "full"): {
     preferences: {
       mode: new Signal(mode),
       volume: new KeyedStoredValue({ key: "volume", defaultValue: 1 }, { storedValueStorage: storage }),
-      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage }),
-      keyBindingOverrides: new Signal({})
+      muted: new KeyedStoredValue({ key: "muted", defaultValue: false }, { storedValueStorage: storage })
     },
+    lightboxKeyBindings: new Signal(DEFAULT_LIGHTBOX_KEY_BINDINGS),
     locateItem: () => undefined
   });
   return { lightbox, scheduler, remoteMedia, mediaSequence, getNeighbors };

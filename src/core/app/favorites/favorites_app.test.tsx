@@ -23,6 +23,7 @@ interface Setup {
   tabsHeader: HTMLElement;
   loadState: Signal<FavoritesLoadState>;
   zenEnabled: Signal<boolean>;
+  zenExitKeys: Signal<readonly string[]>;
 }
 
 function createWorkspace(): FavoritesWorkspace {
@@ -48,6 +49,7 @@ function setup(): Setup {
   const lightboxView = document.createElement("dialog");
   const tabsHeader = document.createElement("nav");
   const zenEnabled = new Signal(false);
+  const zenExitKeys = new Signal<readonly string[]>(["z", "Escape"]);
   const { result: elements } = render(document, () => h(FavoritesApp, {
     favoritesService: { loadState },
     favoritesWorkspace: createWorkspace(),
@@ -55,9 +57,14 @@ function setup(): Setup {
     activityBar: document.createElement("aside"),
     tabsHeaderChild: tabsHeader,
     zenEnabled,
+    zenExitKeys,
     renderPanel: () => document.createElement("section")
   }));
-  return { elements, element: elements[0], lightboxView, tabsHeader, loadState, zenEnabled };
+  return { elements, element: elements[0], lightboxView, tabsHeader, loadState, zenEnabled, zenExitKeys };
+}
+
+function readZenHint(element: HTMLElement): HTMLElement {
+  return element.querySelector<HTMLElement>(`.${FavoritesAppClass.zenHint}`)!;
 }
 
 describe("FavoritesApp", () => {
@@ -98,11 +105,35 @@ describe("FavoritesApp", () => {
 
   test("shows how to exit Zen only while zen is enabled", () => {
     const { element, zenEnabled } = setup();
-    const hint = element.querySelector<HTMLElement>(`.${FavoritesAppClass.zenHint}`)!;
+    const hint = readZenHint(element);
 
     expect(hint.hidden).toBe(true);
     zenEnabled.value = true;
     expect([hint.hidden, hint.textContent]).toEqual([false, "Press Z or Esc to exit Zen"]);
+  });
+
+  test("names a single Zen exit key alone", () => {
+    const { element, zenEnabled, zenExitKeys } = setup();
+
+    zenEnabled.value = true;
+    zenExitKeys.value = ["x"];
+    expect(readZenHint(element).textContent).toBe("Press X to exit Zen");
+  });
+
+  test("lists many Zen exit keys with the last after or", () => {
+    const { element, zenEnabled, zenExitKeys } = setup();
+
+    zenEnabled.value = true;
+    zenExitKeys.value = ["z", "x", "Escape"];
+    expect(readZenHint(element).textContent).toBe("Press Z, X or Esc to exit Zen");
+  });
+
+  test("hides the Zen hint while no key exits Zen", () => {
+    const { element, zenEnabled, zenExitKeys } = setup();
+
+    zenEnabled.value = true;
+    zenExitKeys.value = [];
+    expect(readZenHint(element).hidden).toBe(true);
   });
 
   test("styles every class it sets", () => {

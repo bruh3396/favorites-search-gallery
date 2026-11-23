@@ -4,6 +4,7 @@ import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ColorScheme } from "@/core/boundary/color_scheme";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
+import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
@@ -26,6 +27,7 @@ import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
+import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
 import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { computed } from "@/core/utils/reactive/signal";
 import { createAppStorage } from "@/core/app/storage/app_storage";
@@ -77,6 +79,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   const lightbox = createLightbox<Post>({
     scheduler, sizeObserver, viewport, remoteMedia, actions: postActions,
     preferences: postListPreferences.lightbox,
+    lightboxKeyBindings: computed(() => applyKeyBindingOverrides(DEFAULT_LIGHTBOX_KEY_BINDINGS, sharedPreferences.lightboxKeyBindingOverrides.value)),
     locateItem: post => tileLocator.locate(post),
     favorite: {
       isFavorited: post => favoritesActions.isFavorited(post.id),

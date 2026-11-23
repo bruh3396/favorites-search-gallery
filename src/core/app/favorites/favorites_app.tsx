@@ -1,5 +1,6 @@
 import { Child, h } from "@/core/ui/h/h";
-import { Readable, computed } from "@/core/utils/reactive/signal";
+import { Readable, computed, effect, untracked } from "@/core/utils/reactive/signal";
+import { Scoped, captureScope } from "@/core/utils/reactive/scope";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
 import FAVORITES_KEY_BINDINGS_CSS from "@/core/app/favorites/key_bindings/favorites_key_bindings.css?inline";
@@ -15,6 +16,7 @@ import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
 import { TabPanel } from "@/core/ui/components/tabs/tab_panel";
 import UI_CSS from "@/core/ui/styles.css?inline";
+import { formatKeyLabel } from "@/core/ui/key_bindings/key_label_formatter";
 import { measureFavoritesLoadProgress } from "@/core/app/favorites/favorites_load_progress_measurer";
 
 export const FAVORITES_APP_STYLES = [
@@ -44,12 +46,24 @@ export interface FavoritesAppProps {
   activityBar: HTMLElement;
   tabsHeaderChild: Child;
   zenEnabled: Readable<boolean>;
+  zenExitKeys: Readable<readonly string[]>;
   renderPanel: (favoritesTab: FavoritesTab) => HTMLElement;
 }
 
 export function FavoritesApp({
-  favoritesService, favoritesWorkspace, lightboxView, activityBar, tabsHeaderChild, zenEnabled, renderPanel
+  favoritesService, favoritesWorkspace, lightboxView, activityBar, tabsHeaderChild, zenEnabled, zenExitKeys, renderPanel
 }: FavoritesAppProps): HTMLElement[] {
+  const zenExitKeyList = <span />;
+  const createZenExitKeysScope = captureScope();
+  let shownZenExitKeys: Scoped<(Node | string)[]> | null = null;
+
+  effect(() => {
+    const currentZenExitKeys = zenExitKeys.value;
+
+    shownZenExitKeys?.dispose();
+    shownZenExitKeys = createZenExitKeysScope(() => untracked(() => listZenExitKeyNodes(currentZenExitKeys)));
+    zenExitKeyList.replaceChildren(...shownZenExitKeys.result);
+  });
   return [
     <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
       <div className={FavoritesAppClass.loadLine}>
@@ -62,10 +76,26 @@ export function FavoritesApp({
           <TabPanel<FavoritesTab> tabManager={favoritesWorkspace.tabManager} renderPanel={({ value: favoritesTab }) => renderPanel(favoritesTab)} />
         </div>
       </main>
-      <div className={FavoritesAppClass.zenHint} role="status" hidden={computed(() => !zenEnabled.value)} data-zen-stage="">
-        Press <KeyCap label="Z" /> or <KeyCap label="Esc" /> to exit Zen
+      <div
+        className={FavoritesAppClass.zenHint}
+        role="status"
+        hidden={computed(() => !zenEnabled.value || zenExitKeys.value.length === 0)}
+        data-zen-stage=""
+      >
+        Press {zenExitKeyList} to exit Zen
       </div>
     </div>,
     lightboxView
   ];
+}
+
+function listZenExitKeyNodes(zenExitKeys: readonly string[]): (Node | string)[] {
+  return zenExitKeys.flatMap((key, keyIndex) => [
+    ...keyIndex === 0 ? [] : [chooseKeySeparator(keyIndex, zenExitKeys.length)],
+    <KeyCap label={formatKeyLabel(key)} />
+  ]);
+}
+
+function chooseKeySeparator(keyIndex: number, keyCount: number): string {
+  return keyIndex === keyCount - 1 ? " or " : ", ";
 }

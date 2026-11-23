@@ -1,33 +1,32 @@
-import { FavoritesKeyBindings, FavoritesKeyBindingsClass, FavoritesKeyBindingsProps } from "@/core/app/favorites/key_bindings/favorites_key_bindings";
+import { FavoritesKeyBindings, FavoritesKeyBindingsClass } from "@/core/app/favorites/key_bindings/favorites_key_bindings";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { EmptyStateClass } from "@/core/ui/components/empty_state/empty_state";
-import { FAVORITES_COMMAND_LABELS } from "@/core/app/favorites/key_bindings/favorites_command_labels";
 import FAVORITES_KEY_BINDINGS_CSS from "@/core/app/favorites/key_bindings/favorites_key_bindings.css?inline";
-import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
+import { FavoritesKeyBindingsRow } from "@/core/app/favorites/key_bindings/favorites_key_bindings_row";
+import { FavoritesKeyBindingsSection } from "@/core/app/favorites/key_bindings/favorites_key_bindings_section";
 import { KeyBindingListItemClass } from "@/core/ui/components/key_binding_list/key_binding_list_item";
-import { KeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
-import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { Signal } from "@/core/utils/reactive/signal";
-import { createKeyBindings } from "@/testing/key_bindings";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
-interface Setup {
-  pane: HTMLElement;
-  keyBindings: Signal<KeyBindings<FavoritesCommand>>;
+function createRow(
+  label: string,
+  keys: readonly string[] = [],
+  partialFavoritesKeyBindingsRow: Partial<FavoritesKeyBindingsRow> = {}
+): FavoritesKeyBindingsRow {
+  return { label, keys: new Signal(keys), findKeyOwnerLabel: () => undefined, onKeyChange: vi.fn(), onKeyRemove: vi.fn(), ...partialFavoritesKeyBindingsRow };
 }
 
-const FAVORITES_COMMANDS = Object.keys(FAVORITES_COMMAND_LABELS) as FavoritesCommand[];
+function createSections(): FavoritesKeyBindingsSection[] {
+  return [
+    { title: "Search", rows: [createRow("Focus Search Bar", ["/"]), createRow("Toggle Search Options")] },
+    { title: "Navigation", rows: [createRow("Go to Next Page", ["ArrowRight"]), createRow("Increase Page Size")] },
+    { title: "View", rows: [createRow("Increase Tile Size"), createRow("Toggle Zen", ["z"])] }
+  ];
+}
 
-function setup(
-  keyBindingOverrides: KeyBindingOverrides<FavoritesCommand> = {},
-  { resetKeyBindings = vi.fn(), onKeyChange = vi.fn(), onKeyRemove = vi.fn() }: Partial<Omit<FavoritesKeyBindingsProps, "keyBindings">> = {}
-): Setup {
-  const keyBindings = new Signal(createKeyBindings(FAVORITES_COMMANDS, keyBindingOverrides));
-  const pane = render(document, () => (
-    <FavoritesKeyBindings keyBindings={keyBindings} resetKeyBindings={resetKeyBindings} onKeyChange={onKeyChange} onKeyRemove={onKeyRemove} />
-  )).result;
-  return { pane, keyBindings };
+function setup(favoritesKeyBindingsSections: readonly FavoritesKeyBindingsSection[] = createSections(), resetKeyBindings = vi.fn()): HTMLElement {
+  return render(document, () => <FavoritesKeyBindings sections={favoritesKeyBindingsSections} resetKeyBindings={resetKeyBindings} />).result;
 }
 
 function readShownItems(pane: HTMLElement): string[] {
@@ -63,66 +62,59 @@ function searchShortcuts(pane: HTMLElement, searchText: string): void {
 }
 
 describe("FavoritesKeyBindings", () => {
-  test("shows one tab per section, starting on Search", () => {
-    const { pane } = setup();
+  test("shows one tab per section, starting on the first", () => {
+    const pane = setup();
 
-    expect([...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent)).toEqual(["Search", "Navigation", "Grid", "Interface"]);
-    expect(readShownItems(pane).slice(0, 2)).toEqual(["Focus Search Bar–", "Toggle Search Options–"]);
+    expect([[...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent), readShownItems(pane)])
+      .toEqual([["Search", "Navigation", "View"], ["Focus Search Bar/", "Toggle Search Options–"]]);
   });
 
-  test("shows only the picked section's commands with their keys, labeled", () => {
-    const { pane } = setup({ goToNextPage: ["ArrowRight", "d"] });
+  test("shows only the picked section's rows", () => {
+    const pane = setup();
 
-    clickTab(pane, "Grid");
-    const gridItems = readShownItems(pane);
-
-    clickTab(pane, "Navigation");
-    expect(gridItems).toEqual(["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–", "Open Gallery–", "Cycle Gallery Mode–"]);
-    expect(readShownItems(pane)[0]).toBe("Go to Next Page→D");
+    clickTab(pane, "View");
+    expect(readShownItems(pane)).toEqual(["Increase Tile Size–", "Toggle ZenZ"]);
   });
 
-  test("follows changed key bindings", () => {
-    const { pane, keyBindings } = setup();
+  test("follows a row's changed keys", () => {
+    const keys = new Signal<readonly string[]>([]);
+    const pane = setup([{ title: "View", rows: [createRow("Toggle Zen", [], { keys })] }]);
 
-    clickTab(pane, "Interface");
-    keyBindings.value = createKeyBindings(FAVORITES_COMMANDS, { toggleZen: ["g"] });
-    expect(readShownItems(pane)[0]).toBe("Toggle ZenG");
+    keys.value = ["g"];
+    expect(readShownItems(pane)).toEqual(["Toggle ZenG"]);
   });
 
   test("asks for a reset when its reset button is clicked", () => {
     const resetKeyBindings = vi.fn();
 
-    setup({}, { resetKeyBindings }).pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
+    setup(createSections(), resetKeyBindings).querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
     expect(resetKeyBindings).toHaveBeenCalledOnce();
   });
 
   test("shows matches from every section under their headings, hiding the tabs", () => {
-    const { pane } = setup();
+    const pane = setup();
 
     searchShortcuts(pane, "size");
-    expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)]).toEqual([
-      ["Navigation", "Grid"],
-      ["Increase Page Size–", "Decrease Page Size–", "Increase Tile Size–", "Decrease Tile Size–"],
-      true
-    ]);
+    expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)])
+      .toEqual([["Navigation", "View"], ["Increase Page Size–", "Increase Tile Size–"], true]);
   });
 
-  test("matches only commands holding every searched word, in any order and any case", () => {
-    const { pane } = setup();
+  test("matches only rows holding every searched word, in any order and any case", () => {
+    const pane = setup();
 
     searchShortcuts(pane, "size TILE increase");
     expect(readShownItems(pane)).toEqual(["Increase Tile Size–"]);
   });
 
   test("matches section titles and keys as shown", () => {
-    const { pane } = setup({ goToNextPage: ["ArrowRight"] });
+    const pane = setup();
 
     searchShortcuts(pane, "navigation →");
     expect(readShownItems(pane)).toEqual(["Go to Next Page→"]);
   });
 
   test("names the search text when nothing matches", () => {
-    const { pane } = setup();
+    const pane = setup();
     const initialEmptyStateMessage = readShownEmptyStateMessage(pane);
 
     searchShortcuts(pane, " nothing ");
@@ -131,38 +123,35 @@ describe("FavoritesKeyBindings", () => {
   });
 
   test("returns to the picked section without headings once the search is cleared", () => {
-    const { pane } = setup();
+    const pane = setup();
 
-    clickTab(pane, "Grid");
+    clickTab(pane, "Navigation");
     searchShortcuts(pane, "zen");
     searchShortcuts(pane, " ");
-    expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)]).toEqual([
-      [],
-      ["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–", "Open Gallery–", "Cycle Gallery Mode–"],
-      false
-    ]);
+    expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)])
+      .toEqual([[], ["Go to Next Page→", "Increase Page Size–"], false]);
   });
 
-  test("reports a changed key with its command", () => {
+  test("reports a changed key to its row", () => {
     const onKeyChange = vi.fn();
-    const { pane } = setup({ toggleSearchOptions: ["c", "x"] }, { onKeyChange });
+    const pane = setup([{ title: "Search", rows: [createRow("Toggle Search Options", ["c", "x"], { onKeyChange })] }]);
 
     document.body.append(pane);
     pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change X\"]")!.click();
     document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "q", bubbles: true, cancelable: true }));
     pane.remove();
-    expect(onKeyChange).toHaveBeenCalledWith("toggleSearchOptions", 1, "q");
+    expect(onKeyChange).toHaveBeenCalledWith(1, "q");
   });
 
-  test("reports a removed key with its command", () => {
+  test("reports a removed key to its row", () => {
     const onKeyRemove = vi.fn();
-    const { pane } = setup({ toggleSearchOptions: ["c", "x"] }, { onKeyRemove });
+    const pane = setup([{ title: "Search", rows: [createRow("Toggle Search Options", ["c", "x"], { onKeyRemove })] }]);
 
     document.body.append(pane);
     pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change X\"]")!.click();
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Remove")!.click();
     pane.remove();
-    expect(onKeyRemove).toHaveBeenCalledWith("toggleSearchOptions", 1);
+    expect(onKeyRemove).toHaveBeenCalledWith(1);
   });
 
   test("styles every class it sets", () => {

@@ -23,8 +23,7 @@ const POST_GRID = {
 const LIGHTBOX = {
   mode: createStoredValueDefinition<LightboxMode>("full", createOneOfGuard(LIGHTBOX_MODES)),
   volume: createStoredValueDefinition(1, isInUnitInterval),
-  muted: createStoredValueDefinition(false),
-  keyBindingOverrides: createStoredValueDefinition<KeyBindingOverrides<LightboxCommand>>({}, isKeyBindingOverrides)
+  muted: createStoredValueDefinition(false)
 };
 
 const isSizeList = createListGuard(createFieldsGuard<Size>({ width: isNumber, height: isNumber }));
@@ -35,7 +34,8 @@ export const APP_STORAGE_SCHEMA = {
   preferences: {
     shared: {
       postListEnabled: createStoredValueDefinition(false),
-      theme: createStoredValueDefinition<Theme>(DEFAULT_THEME, createOneOfGuard(THEMES))
+      theme: createStoredValueDefinition<Theme>(DEFAULT_THEME, createOneOfGuard(THEMES)),
+      lightboxKeyBindingOverrides: createStoredValueDefinition<KeyBindingOverrides<LightboxCommand>>({}, isKeyBindingOverrides)
     },
     favorites: {
       grid: POST_GRID,

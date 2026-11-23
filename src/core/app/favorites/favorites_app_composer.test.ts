@@ -333,16 +333,20 @@ describe("composeFavoritesApp", () => {
   test("puts every shortcut back to its default once the reset is confirmed, and keeps them through a settings reset", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
-    localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { keyBindingOverrides: { toggleZen: ["x"] } } } });
+    localKeyedValues.set("favorites-search-gallery", {
+      preferences: { shared: { lightboxKeyBindingOverrides: { showNext: ["n"] } }, favorites: { keyBindingOverrides: { toggleZen: ["x"] } } }
+    });
     const root = mount(localKeyedValues);
 
     clickResetSettings(root);
-    const keptKeyBindingOverrides = (localKeyedValues.get("favorites-search-gallery") as { preferences: { favorites: { keyBindingOverrides: unknown } } })
-      .preferences.favorites.keyBindingOverrides;
+    const { preferences } = localKeyedValues.get("favorites-search-gallery") as {
+      preferences: { shared: { lightboxKeyBindingOverrides: unknown }; favorites: { keyBindingOverrides: unknown } };
+    };
+    const keptKeyBindingOverrides = [preferences.favorites.keyBindingOverrides, preferences.shared.lightboxKeyBindingOverrides];
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Keyboard Shortcuts"]`)!.click();
     root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
-    expect([keptKeyBindingOverrides, readKeyBindingListItem(root, "Toggle Zen")]).toEqual([{ toggleZen: ["x"] }, "Toggle ZenZ"]);
+    expect([keptKeyBindingOverrides, readKeyBindingListItem(root, "Toggle Zen")]).toEqual([[{ toggleZen: ["x"] }, { showNext: ["n"] }], "Toggle ZenZ"]);
   });
 
   test("records the shapes of the active tab's first results after they settle", async() => {

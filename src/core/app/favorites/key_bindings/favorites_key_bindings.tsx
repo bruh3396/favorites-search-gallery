@@ -1,10 +1,8 @@
-import { KeyBindings, findCommandInKeyBindings } from "@/core/ui/key_bindings/key_bindings";
-import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
+import { Signal, computed } from "@/core/utils/reactive/signal";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
-import { FAVORITES_COMMAND_LABELS } from "@/core/app/favorites/key_bindings/favorites_command_labels";
-import { FAVORITES_COMMAND_SECTIONS } from "@/core/app/favorites/key_bindings/favorites_command_sections";
 import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
-import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
+import { FavoritesKeyBindingsRow } from "@/core/app/favorites/key_bindings/favorites_key_bindings_row";
+import { FavoritesKeyBindingsSection } from "@/core/app/favorites/key_bindings/favorites_key_bindings_section";
 import { KeyBindingList } from "@/core/ui/components/key_binding_list/key_binding_list";
 import { KeyBindingListHeading } from "@/core/ui/components/key_binding_list/key_binding_list_heading";
 import { KeyBindingListItem } from "@/core/ui/components/key_binding_list/key_binding_list_item";
@@ -20,55 +18,46 @@ export const FavoritesKeyBindingsClass = {
 } as const;
 
 export interface FavoritesKeyBindingsProps {
-  keyBindings: Readable<KeyBindings<FavoritesCommand>>;
+  sections: readonly FavoritesKeyBindingsSection[];
   resetKeyBindings: () => void;
-  onKeyChange: (favoritesCommand: FavoritesCommand, keyIndex: number, key: string) => void;
-  onKeyRemove: (favoritesCommand: FavoritesCommand, keyIndex: number) => void;
 }
 
-export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChange, onKeyRemove }: FavoritesKeyBindingsProps): HTMLElement {
-  const selectedSectionTitle = new Signal<string>(FAVORITES_COMMAND_SECTIONS[0].title);
+export function FavoritesKeyBindings({ sections: favoritesKeyBindingsSections, resetKeyBindings }: FavoritesKeyBindingsProps): HTMLElement {
+  const selectedSectionTitle = new Signal<string>(favoritesKeyBindingsSections[0].title);
   const searchText = new Signal("");
   const searchWords = computed(() => searchText.value.toLowerCase().split(/\s+/u).filter(searchWord => searchWord !== ""));
   const isSearching = computed(() => searchWords.value.length > 0);
-  const matchedFavoritesCommands = computed(() => new Set(FAVORITES_COMMAND_SECTIONS.flatMap(({ title, favoritesCommands }) => (
-    favoritesCommands.filter(favoritesCommand => matchesSearchWords(
-      searchWords.value,
-      [title, FAVORITES_COMMAND_LABELS[favoritesCommand], ...keyBindings.value[favoritesCommand].map(formatKeyLabel)]
-    ))
-  ))));
-  const isSectionShown = (title: string, favoritesCommands: readonly FavoritesCommand[]): boolean => {
+  const isRowMatched = (title: string, favoritesKeyBindingsRow: FavoritesKeyBindingsRow): boolean => (
+    matchesSearchWords(searchWords.value, [title, favoritesKeyBindingsRow.label, ...favoritesKeyBindingsRow.keys.value.map(formatKeyLabel)])
+  );
+  const isSectionMatched = (favoritesKeyBindingsSection: FavoritesKeyBindingsSection): boolean => (
+    favoritesKeyBindingsSection.rows.some(favoritesKeyBindingsRow => isRowMatched(favoritesKeyBindingsSection.title, favoritesKeyBindingsRow))
+  );
+  const isSectionShown = (favoritesKeyBindingsSection: FavoritesKeyBindingsSection): boolean => {
     if (isSearching.value) {
-      return favoritesCommands.some(favoritesCommand => matchedFavoritesCommands.value.has(favoritesCommand));
+      return isSectionMatched(favoritesKeyBindingsSection);
     }
-    return selectedSectionTitle.value === title;
+    return selectedSectionTitle.value === favoritesKeyBindingsSection.title;
   };
   const panel = (
     <div>
       <KeyBindingList>
-        {FAVORITES_COMMAND_SECTIONS.map(({ title, favoritesCommands }) => (
-          <div hidden={computed(() => !isSectionShown(title, favoritesCommands))}>
+        {favoritesKeyBindingsSections.map(favoritesKeyBindingsSection => (
+          <div hidden={computed(() => !isSectionShown(favoritesKeyBindingsSection))}>
             <div hidden={computed(() => !isSearching.value)}>
-              <KeyBindingListHeading title={title} />
+              <KeyBindingListHeading title={favoritesKeyBindingsSection.title} />
             </div>
             <KeyBindingListSection>
-              {favoritesCommands.map(favoritesCommand => (
-                <div hidden={computed(() => isSearching.value && !matchedFavoritesCommands.value.has(favoritesCommand))}>
+              {favoritesKeyBindingsSection.rows.map(favoritesKeyBindingsRow => (
+                <div hidden={computed(() => isSearching.value && !isRowMatched(favoritesKeyBindingsSection.title, favoritesKeyBindingsRow))}>
                   <KeyBindingListItem
-                    label={FAVORITES_COMMAND_LABELS[favoritesCommand]}
-                    keys={computed(() => keyBindings.value[favoritesCommand])}
+                    label={favoritesKeyBindingsRow.label}
+                    keys={favoritesKeyBindingsRow.keys}
                     maxKeyCount={3}
                     formatKey={formatKeyLabel}
-                    findKeyOwnerLabel={key => {
-                      const otherFavoritesCommand = findCommandInKeyBindings(keyBindings.peek(), key);
-
-                      if (otherFavoritesCommand === undefined || otherFavoritesCommand === favoritesCommand) {
-                        return undefined;
-                      }
-                      return FAVORITES_COMMAND_LABELS[otherFavoritesCommand];
-                    }}
-                    onKeyChange={(keyIndex, key) => onKeyChange(favoritesCommand, keyIndex, key)}
-                    onKeyRemove={keyIndex => onKeyRemove(favoritesCommand, keyIndex)}
+                    findKeyOwnerLabel={favoritesKeyBindingsRow.findKeyOwnerLabel}
+                    onKeyChange={favoritesKeyBindingsRow.onKeyChange}
+                    onKeyRemove={favoritesKeyBindingsRow.onKeyRemove}
                   />
                 </div>
               ))}
@@ -76,7 +65,7 @@ export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChang
           </div>
         ))}
       </KeyBindingList>
-      <div hidden={computed(() => !isSearching.value || matchedFavoritesCommands.value.size > 0)}>
+      <div hidden={computed(() => !isSearching.value || favoritesKeyBindingsSections.some(isSectionMatched))}>
         <EmptyState message={computed(() => `No keyboard shortcuts match "${searchText.value.trim()}"`)} />
       </div>
     </div>
@@ -98,7 +87,7 @@ export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChang
         <div hidden={isSearching}>
           <TabList
             label="Keyboard Shortcut Groups"
-            controlChoices={FAVORITES_COMMAND_SECTIONS.map(({ title }) => ({ value: title as string, label: title }))}
+            controlChoices={favoritesKeyBindingsSections.map(({ title }) => ({ value: title, label: title }))}
             value={selectedSectionTitle}
             panel={panel}
             onValueChange={title => {

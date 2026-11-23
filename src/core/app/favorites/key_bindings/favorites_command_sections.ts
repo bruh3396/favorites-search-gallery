@@ -17,12 +17,9 @@ export const FAVORITES_COMMAND_SECTIONS = [
     ]
   },
   {
-    title: "Grid",
-    favoritesCommands: ["increaseTileSize", "decreaseTileSize", "cycleLayout", "toggleHd", "openGallery", "cycleGalleryMode"]
-  },
-  {
-    title: "Interface",
+    title: "View",
     favoritesCommands: [
+      "increaseTileSize", "decreaseTileSize", "cycleLayout", "toggleHd", "openGallery", "cycleGalleryMode",
       "toggleZen", "exitZen", "toggleSettings",
       "cycleTheme", "toggleColorScheme", "toggleHeader", "toggleEnhancedPostsPage"
     ]

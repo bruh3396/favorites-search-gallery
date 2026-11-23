@@ -12,6 +12,7 @@ import { ColorScheme } from "@/core/boundary/color_scheme";
 import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";
+import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
 import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -111,9 +112,11 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   });
   const lightboxPreferences = favoritesPreferences.lightbox;
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
+  const lightboxKeyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_LIGHTBOX_KEY_BINDINGS, sharedPreferences.lightboxKeyBindingOverrides.value));
   const lightbox = createLightbox<Favorite>({
     scheduler, sizeObserver, viewport, remoteMedia, actions: postActions,
     preferences: lightboxPreferences,
+    lightboxKeyBindings,
     locateItem: favorite => favoritesWorkspace.locate(favorite),
     details: {
       isOpen: lightboxPreferences.details.isOpen,
@@ -147,7 +150,10 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     if (confirmer.confirm("Reset all settings to their defaults?")) {
       resetStoredTree(
         { sharedPreferences, favoritesPreferences, postListPreferences },
-        [sharedPreferences.colorScheme, favoritesPreferences.activeTool, favoritesPreferences.keyBindingOverrides]
+        [
+          sharedPreferences.colorScheme, sharedPreferences.lightboxKeyBindingOverrides,
+          favoritesPreferences.activeTool, favoritesPreferences.keyBindingOverrides
+        ]
       );
     }
   };
@@ -162,6 +168,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
 
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
         favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), zenEnabled,
+        zenExitKeys: computed(() => [...keyBindings.value.toggleZen, ...keyBindings.value.exitZen]),
         activityBar: h(ActivityBar, {
           items: [
             {
@@ -176,7 +183,9 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
             {
               ...FAVORITES_KEY_BINDINGS_TOOL,
               renderView: (): HTMLElement => composeFavoritesKeyBindings({
-                keyBindings, keyBindingOverrides: favoritesPreferences.keyBindingOverrides, confirmer
+                keyBindings, keyBindingOverrides: favoritesPreferences.keyBindingOverrides,
+                lightboxKeyBindings, lightboxKeyBindingOverrides: sharedPreferences.lightboxKeyBindingOverrides,
+                confirmer
               })
             }
           ],

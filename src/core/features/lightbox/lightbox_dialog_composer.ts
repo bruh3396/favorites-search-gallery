@@ -36,7 +36,6 @@ import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
-import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
 import { createLightboxCommandHandlers } from "@/core/features/lightbox/commands/lightbox_command_handlers";
 import { createLightboxMouseListeners } from "@/core/features/lightbox/commands/lightbox_mouse_listeners";
 import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
@@ -64,10 +63,6 @@ const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>([
   "addFavorite"
 ]);
 
-export interface LightboxDialogConfiguration {
-  readonly defaultKeyBindings: KeyBindings<LightboxCommand>;
-}
-
 export interface LightboxDialogDependencies<T extends MediaItem> {
   scheduler: Pick<Scheduler, "schedule" | "requestFrame">;
   sizeObserver: SizeObserver;
@@ -78,18 +73,16 @@ export interface LightboxDialogDependencies<T extends MediaItem> {
   lightboxNavigation: Pick<LightboxNavigation<T>, "isOpen" | "currentItem" | "position" | "goToNext" | "goToPrevious" | "close">;
   retainedItems: Readable<readonly T[]>;
   lightboxPreferences: LightboxPreferences;
+  lightboxKeyBindings: Readable<KeyBindings<LightboxCommand>>;
   locateItem: (item: T) => Element | undefined;
   lightboxDetails?: LightboxDetails<T>;
   lightboxFavorite?: LightboxFavorite<T>;
 }
 
-export function composeLightboxDialog<T extends MediaItem>(
-  configuration: LightboxDialogConfiguration,
-  dependencies: LightboxDialogDependencies<T>
-): HTMLElement {
+export function composeLightboxDialog<T extends MediaItem>(dependencies: LightboxDialogDependencies<T>): HTMLElement {
   const {
     scheduler, sizeObserver, viewport, remoteMedia, lightboxMediaResolver, lightboxActions, lightboxNavigation,
-    retainedItems, lightboxPreferences, locateItem, lightboxDetails, lightboxFavorite
+    retainedItems, lightboxPreferences, lightboxKeyBindings, locateItem, lightboxDetails, lightboxFavorite
   } = dependencies;
   const { mode, volume, muted } = lightboxPreferences;
   const simple = computed(() => mode.value === "simple");
@@ -134,7 +127,6 @@ export function composeLightboxDialog<T extends MediaItem>(
       lightboxFullscreen.exit();
     }
   });
-  const keyBindings = computed(() => applyKeyBindingOverrides(configuration.defaultKeyBindings, lightboxPreferences.keyBindingOverrides.value));
   const lightboxDetailsContent = lightboxDetails?.createContent(lightboxNavigation.currentItem);
   const isFavorited = computed(() => {
     const currentItem = lightboxNavigation.currentItem.value;
@@ -196,7 +188,7 @@ export function composeLightboxDialog<T extends MediaItem>(
   });
 
   onCleanup(listenForKeyBindings(
-    { keyBindings, repeatableCommands: REPEATABLE_LIGHTBOX_COMMANDS },
+    { keyBindings: lightboxKeyBindings, repeatableCommands: REPEATABLE_LIGHTBOX_COMMANDS },
     { target: lightboxDialog, handlers }
   ));
   return lightboxDialog;
