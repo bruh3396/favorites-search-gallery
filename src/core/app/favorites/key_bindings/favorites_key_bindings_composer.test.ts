@@ -32,13 +32,13 @@ function setup(initialKeyBindingOverrides: KeyBindingOverrides<FavoritesCommand>
 }
 
 function clickResetShortcuts(pane: HTMLElement): void {
-  pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Shortcuts\"]")!.click();
+  pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
 }
 
-function readFirstShownItem(pane: HTMLElement): string {
+function readShownItems(pane: HTMLElement): string[] {
   return [...pane.querySelectorAll<HTMLElement>(`.${KeyBindingListItemClass.root}`)]
-    .find(item => item.closest("[hidden]") === null)!
-    .textContent;
+    .filter(item => item.closest("[hidden]") === null)
+    .map(item => item.textContent);
 }
 
 describe("composeFavoritesKeyBindings", () => {
@@ -46,7 +46,7 @@ describe("composeFavoritesKeyBindings", () => {
     const { pane, confirmer } = setup({ focusSearch: ["/"] });
 
     clickResetShortcuts(pane);
-    expect([confirmer.questions.length, readFirstShownItem(pane)]).toEqual([1, "Focus Search Bar–"]);
+    expect([confirmer.questions.length, readShownItems(pane)[0]]).toEqual([1, "Focus Search Bar–"]);
   });
 
   test("keeps the overrides when the reset is declined", () => {
@@ -54,7 +54,7 @@ describe("composeFavoritesKeyBindings", () => {
 
     confirmer.answer = false;
     clickResetShortcuts(pane);
-    expect(readFirstShownItem(pane)).toBe("Focus Search Bar/");
+    expect(readShownItems(pane)[0]).toBe("Focus Search Bar/");
   });
 
   test("saves a key pressed in place of a clicked one", () => {
@@ -63,8 +63,22 @@ describe("composeFavoritesKeyBindings", () => {
     document.body.append(pane);
     pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change /\"]")!.click();
     document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "F", bubbles: true, cancelable: true }));
-    expect(readFirstShownItem(pane)).toBe("Focus Search BarF");
+    expect(readShownItems(pane)[0]).toBe("Focus Search BarF");
     pane.remove();
+  });
+
+  test("names the command that has a pressed key, and moves the key to the clicked one on Overwrite", () => {
+    const { pane } = setup({ focusSearch: ["/"], toggleSearchOptions: ["c"] });
+
+    document.body.append(pane);
+    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change /\"]")!.click();
+    document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "c", bubbles: true, cancelable: true }));
+    const conflictText = readShownItems(pane)[0];
+
+    [...pane.querySelectorAll("button")].find(button => button.textContent === "Overwrite")!.click();
+    pane.remove();
+    expect([conflictText, ...readShownItems(pane).slice(0, 2)])
+      .toEqual(["Focus Search BarCC is used by Toggle Search OptionsOverwriteCancel", "Focus Search BarC", "Toggle Search Options–"]);
   });
 
   test("saves a removed key", () => {
@@ -73,7 +87,7 @@ describe("composeFavoritesKeyBindings", () => {
     document.body.append(pane);
     pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change /\"]")!.click();
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Remove")!.click();
-    expect(readFirstShownItem(pane)).toBe("Focus Search BarS");
+    expect(readShownItems(pane)[0]).toBe("Focus Search BarS");
     pane.remove();
   });
 });

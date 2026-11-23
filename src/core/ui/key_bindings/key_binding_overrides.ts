@@ -1,5 +1,5 @@
+import { KeyBindings, findCommandInKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { isRecord, isString } from "@/core/utils/guard/unknown_utilities";
-import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { createListGuard } from "@/core/utils/guard/guard";
 
 export type KeyBindingOverrides<Command extends string> = Readonly<Partial<Record<Command, readonly string[]>>>;
@@ -28,7 +28,9 @@ export function replaceKeyInKeyBindingOverrides<Command extends string>(
   if (keys.includes(key)) {
     return keyBindingOverrides;
   }
-  return { ...keyBindingOverrides, [command]: keys.toSpliced(keyIndex, 1, key) };
+  const otherCommand = findCommandInKeyBindings(keyBindings, key);
+  const otherKeyBindingOverrides = otherCommand === undefined ? {} : { [otherCommand]: keyBindings[otherCommand].filter(otherKey => otherKey !== key) };
+  return { ...keyBindingOverrides, ...otherKeyBindingOverrides, [command]: keys.toSpliced(keyIndex, 1, key) };
 }
 
 export function removeKeyFromKeyBindingOverrides<Command extends string>(

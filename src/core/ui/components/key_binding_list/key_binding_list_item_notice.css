@@ -1,0 +1,13 @@
+.fsg-KeyBindingListItemNotice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--fsg-color-on-surface-variant);
+  font-size: 11px;
+}
+
+.fsg-KeyBindingListItemNotice-actions {
+  display: flex;
+  margin-inline-start: auto;
+  gap: 4px;
+}

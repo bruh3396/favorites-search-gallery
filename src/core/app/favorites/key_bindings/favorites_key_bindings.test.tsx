@@ -56,7 +56,7 @@ function clickTab(pane: HTMLElement, label: string): void {
 }
 
 function searchShortcuts(pane: HTMLElement, searchText: string): void {
-  const input = pane.querySelector<HTMLInputElement>("input[aria-label=\"Search Shortcuts\"]")!;
+  const input = pane.querySelector<HTMLInputElement>("input[aria-label=\"Search Keyboard Shortcuts\"]")!;
 
   input.value = searchText;
   input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -66,7 +66,7 @@ describe("FavoritesKeyBindings", () => {
   test("shows one tab per section, starting on Search", () => {
     const { pane } = setup();
 
-    expect([...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent)).toEqual(["Search", "Browse", "Grid", "Misc"]);
+    expect([...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent)).toEqual(["Search", "Navigation", "Grid", "Interface"]);
     expect(readShownItems(pane).slice(0, 2)).toEqual(["Focus Search Bar–", "Toggle Search Options–"]);
   });
 
@@ -76,23 +76,23 @@ describe("FavoritesKeyBindings", () => {
     clickTab(pane, "Grid");
     const gridItems = readShownItems(pane);
 
-    clickTab(pane, "Browse");
-    expect(gridItems).toEqual(["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–"]);
+    clickTab(pane, "Navigation");
+    expect(gridItems).toEqual(["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–", "Open Gallery–", "Cycle Gallery Mode–"]);
     expect(readShownItems(pane)[0]).toBe("Go to Next Page→D");
   });
 
   test("follows changed key bindings", () => {
     const { pane, keyBindings } = setup();
 
-    clickTab(pane, "Misc");
-    keyBindings.value = createKeyBindings(FAVORITES_COMMANDS, { openGallery: ["g"] });
-    expect(readShownItems(pane)[0]).toBe("Open GalleryG");
+    clickTab(pane, "Interface");
+    keyBindings.value = createKeyBindings(FAVORITES_COMMANDS, { toggleZen: ["g"] });
+    expect(readShownItems(pane)[0]).toBe("Toggle ZenG");
   });
 
   test("asks for a reset when its reset button is clicked", () => {
     const resetKeyBindings = vi.fn();
 
-    setup({}, { resetKeyBindings }).pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Shortcuts\"]")!.click();
+    setup({}, { resetKeyBindings }).pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
     expect(resetKeyBindings).toHaveBeenCalledOnce();
   });
 
@@ -101,7 +101,7 @@ describe("FavoritesKeyBindings", () => {
 
     searchShortcuts(pane, "size");
     expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)]).toEqual([
-      ["Browse", "Grid"],
+      ["Navigation", "Grid"],
       ["Increase Page Size–", "Decrease Page Size–", "Increase Tile Size–", "Decrease Tile Size–"],
       true
     ]);
@@ -117,7 +117,7 @@ describe("FavoritesKeyBindings", () => {
   test("matches section titles and keys as shown", () => {
     const { pane } = setup({ goToNextPage: ["ArrowRight"] });
 
-    searchShortcuts(pane, "browse →");
+    searchShortcuts(pane, "navigation →");
     expect(readShownItems(pane)).toEqual(["Go to Next Page→"]);
   });
 
@@ -127,7 +127,7 @@ describe("FavoritesKeyBindings", () => {
 
     searchShortcuts(pane, " nothing ");
     expect([initialEmptyStateMessage, readShownEmptyStateMessage(pane), readShownItems(pane)])
-      .toEqual([null, "No shortcuts match \"nothing\"", []]);
+      .toEqual([null, "No keyboard shortcuts match \"nothing\"", []]);
   });
 
   test("returns to the picked section without headings once the search is cleared", () => {
@@ -138,7 +138,7 @@ describe("FavoritesKeyBindings", () => {
     searchShortcuts(pane, " ");
     expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)]).toEqual([
       [],
-      ["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–"],
+      ["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–", "Open Gallery–", "Cycle Gallery Mode–"],
       false
     ]);
   });

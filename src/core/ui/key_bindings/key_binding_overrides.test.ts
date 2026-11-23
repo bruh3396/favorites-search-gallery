@@ -47,6 +47,11 @@ describe("replaceKeyInKeyBindingOverrides", () => {
   test("adds the key after the last one at the index past it", () => {
     expect(replaceKeyInKeyBindingOverrides<Command>({}, defaultKeyBindings, { command: "unbound", keyIndex: 0, key: "u" })).toEqual({ unbound: ["u"] });
   });
+
+  test("takes the key from the command that had it", () => {
+    expect(replaceKeyInKeyBindingOverrides<Command>({}, defaultKeyBindings, { command: "second", keyIndex: 0, key: "ArrowRight" }))
+      .toEqual({ first: ["a"], second: ["ArrowRight"] });
+  });
 });
 
 describe("removeKeyFromKeyBindingOverrides", () => {

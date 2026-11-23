@@ -1,8 +1,9 @@
 .fsg-KeyBindingListItem {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px 8px;
   min-block-size: calc(var(--fsg-control-size-small) + 12px);
   padding: 6px 8px 6px 14px;
 }
@@ -41,20 +42,9 @@
   gap: 4px;
 }
 
-.fsg-KeyBindingListItem-remove {
-  padding: 0.15em 0.45em;
-  border: none;
-  border-radius: 4px;
-  background: none;
-  color: var(--fsg-color-on-surface-variant);
-  font: inherit;
+.fsg-KeyBindingListItem-captureActions {
+  display: contents;
   font-size: 0.9em;
-  cursor: pointer;
-}
-
-.fsg-KeyBindingListItem-remove:hover,
-.fsg-KeyBindingListItem-remove:focus-visible {
-  color: var(--fsg-color-on-surface);
 }
 
 .fsg-KeyBindingListItem-add {
@@ -77,6 +67,10 @@
   font-size: 0.9em;
   line-height: 1.2;
   outline: none;
+}
+
+.fsg-KeyBindingListItem-notice {
+  flex-basis: 100%;
 }
 
 .fsg-KeyBindingListItem-unbound {

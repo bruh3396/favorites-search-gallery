@@ -341,7 +341,7 @@ describe("composeFavoritesApp", () => {
       .preferences.favorites.keyBindingOverrides;
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Keyboard Shortcuts"]`)!.click();
-    root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Shortcuts\"]")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
     expect([keptKeyBindingOverrides, readKeyBindingListItem(root, "Toggle Zen")]).toEqual([{ toggleZen: ["x"] }, "Toggle ZenZ"]);
   });
 

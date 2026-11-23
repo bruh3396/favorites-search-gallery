@@ -1,7 +1,9 @@
 import { Readable, Signal, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope } from "@/core/utils/reactive/scope";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
+import { KeyBindingListItemNotice } from "@/core/ui/components/key_binding_list/key_binding_list_item_notice";
 import { KeyCap } from "@/core/ui/components/key_cap/key_cap";
+import { TextButton } from "@/core/ui/components/text_button/text_button";
 import { h } from "@/core/ui/h/h";
 import { listHeldKeyPressModifiers } from "@/core/ui/key_bindings/key_press_modifier";
 import { normalizeKeyPress } from "@/core/ui/key_bindings/key_press_normalizer";
@@ -14,8 +16,9 @@ export const KeyBindingListItemClass = {
   key: "fsg-KeyBindingListItem-key",
   captureGroup: "fsg-KeyBindingListItem-captureGroup",
   capture: "fsg-KeyBindingListItem-capture",
-  remove: "fsg-KeyBindingListItem-remove",
-  add: "fsg-KeyBindingListItem-add"
+  captureActions: "fsg-KeyBindingListItem-captureActions",
+  add: "fsg-KeyBindingListItem-add",
+  notice: "fsg-KeyBindingListItem-notice"
 } as const;
 
 export interface KeyBindingListItemProps {
@@ -23,8 +26,14 @@ export interface KeyBindingListItemProps {
   keys: Readable<readonly string[]>;
   maxKeyCount: number;
   formatKey: (key: string) => string;
+  findKeyOwnerLabel: (key: string) => string | undefined;
   onKeyChange: (keyIndex: number, key: string) => void;
   onKeyRemove: (keyIndex: number) => void;
+}
+
+interface KeyConflict {
+  readonly key: string;
+  readonly keyOwnerLabel: string;
 }
 
 const MODIFIER_KEYS: ReadonlySet<string> = new Set(["Control", "Alt", "Meta", "Shift"]);
@@ -38,27 +47,71 @@ const RESERVED_KEYS: ReadonlySet<string> = new Set([
   "F12"
 ]);
 
-export function KeyBindingListItem({ label, keys, maxKeyCount, formatKey, onKeyChange, onKeyRemove }: KeyBindingListItemProps): HTMLElement {
+export function KeyBindingListItem({
+  label, keys, maxKeyCount, formatKey, findKeyOwnerLabel, onKeyChange, onKeyRemove
+}: KeyBindingListItemProps): HTMLElement {
   const createKeysScope = captureScope();
+  const createNoticeScope = captureScope();
   const capturedKeyIndex = new Signal<number | null>(null);
   const heldModifiersDescription = new Signal("");
   const refusedKey = new Signal<string | null>(null);
+  const keyConflict = new Signal<KeyConflict | null>(null);
   const keysElement = <span className={KeyBindingListItemClass.keys} />;
   const unbound = <span className={KeyBindingListItemClass.unbound}>–</span>;
+  const noticeSlot = <div className={KeyBindingListItemClass.notice} />;
   let shown: Scoped<readonly HTMLElement[]> | null = null;
+  let shownNotice: Scoped<HTMLElement | null> | null = null;
   let capture: HTMLElement | null = null;
 
   const endCapture = (): void => {
     heldModifiersDescription.value = "";
     refusedKey.value = null;
+    keyConflict.value = null;
     capturedKeyIndex.value = null;
   };
 
-  const describeCapture = (currentRefusedKey: string | null, currentHeldModifiersDescription: string): string => {
+  const describeCapture = (): string => {
+    const currentRefusedKey = refusedKey.value;
+    const currentKeyConflict = keyConflict.value;
+
     if (currentRefusedKey !== null) {
-      return `${formatKey(currentRefusedKey)} is used by the browser`;
+      return formatKey(currentRefusedKey);
     }
-    return currentHeldModifiersDescription === "" ? "Press a key…" : `${currentHeldModifiersDescription}+…`;
+
+    if (currentKeyConflict !== null) {
+      return formatKey(currentKeyConflict.key);
+    }
+    return heldModifiersDescription.value === "" ? "Press a key…" : `${heldModifiersDescription.value}+…`;
+  };
+
+  const createNotice = (currentRefusedKey: string | null, currentKeyConflict: KeyConflict | null): HTMLElement | null => {
+    if (currentRefusedKey !== null) {
+      return <KeyBindingListItemNotice message={`${formatKey(currentRefusedKey)} is used by the browser`} actions={[]} />;
+    }
+
+    if (currentKeyConflict === null) {
+      return null;
+    }
+    return (
+      <KeyBindingListItemNotice
+        message={`${formatKey(currentKeyConflict.key)} is used by ${currentKeyConflict.keyOwnerLabel}`}
+        actions={[
+          {
+            label: "Overwrite",
+            onClick: (): void => {
+              const currentCapturedKeyIndex = capturedKeyIndex.peek();
+
+              endCapture();
+
+              if (currentCapturedKeyIndex !== null) {
+                onKeyChange(currentCapturedKeyIndex, currentKeyConflict.key);
+              }
+            }
+          },
+          { label: "Cancel", onClick: endCapture }
+        ]}
+      />
+    );
   };
 
   const createCaptureGroup = (keyIndex: number): HTMLElement => {
@@ -75,6 +128,7 @@ export function KeyBindingListItem({ label, keys, maxKeyCount, formatKey, onKeyC
           event.preventDefault();
           heldModifiersDescription.value = describeHeldModifiers(event);
           refusedKey.value = null;
+          keyConflict.value = null;
 
           if (event.key === "Escape") {
             endCapture();
@@ -90,6 +144,12 @@ export function KeyBindingListItem({ label, keys, maxKeyCount, formatKey, onKeyC
             refusedKey.value = key;
             return;
           }
+          const keyOwnerLabel = findKeyOwnerLabel(key);
+
+          if (keyOwnerLabel !== undefined) {
+            keyConflict.value = { key, keyOwnerLabel };
+            return;
+          }
           endCapture();
           onKeyChange(keyIndex, key);
         }}
@@ -97,35 +157,29 @@ export function KeyBindingListItem({ label, keys, maxKeyCount, formatKey, onKeyC
           heldModifiersDescription.value = describeHeldModifiers(event);
         }}
       >
-        {computed(() => describeCapture(refusedKey.value, heldModifiersDescription.value))}
+        {computed(describeCapture)}
       </button>
     );
-    const captureGroup: HTMLElement = (
-      <span
-        className={KeyBindingListItemClass.captureGroup}
-        onFocusout={event => {
-          if (!(event.relatedTarget instanceof Node && captureGroup.contains(event.relatedTarget))) {
-            endCapture();
-          }
+    const removeActions = isRemovable ? [
+      <TextButton
+        label="Remove"
+        onClick={() => {
+          endCapture();
+          onKeyRemove(keyIndex);
         }}
-      >
+      />
+    ] : [];
+    const captureActions = <span className={KeyBindingListItemClass.captureActions} />;
+
+    effect(() => {
+      captureActions.replaceChildren(...keyConflict.value === null ? removeActions : []);
+    });
+    return (
+      <span className={KeyBindingListItemClass.captureGroup}>
         {capture}
-        {isRemovable && (
-          <button
-            className={KeyBindingListItemClass.remove}
-            type="button"
-            onPointerdown={event => event.preventDefault()}
-            onClick={() => {
-              endCapture();
-              onKeyRemove(keyIndex);
-            }}
-          >
-            Remove
-          </button>
-        )}
+        {captureActions}
       </span>
     );
-    return captureGroup;
   };
 
   const createKey = (key: string, keyIndex: number): HTMLElement => (
@@ -154,8 +208,24 @@ export function KeyBindingListItem({ label, keys, maxKeyCount, formatKey, onKeyC
     keysElement.replaceChildren(...shown.result.length === 0 ? [unbound] : shown.result);
     (capture as HTMLElement | null)?.focus();
   });
-  return (
-    <div className={KeyBindingListItemClass.root}>
+  effect(() => {
+    const currentRefusedKey = refusedKey.value;
+    const currentKeyConflict = keyConflict.value;
+
+    shownNotice?.dispose();
+    shownNotice = createNoticeScope(() => untracked(() => createNotice(currentRefusedKey, currentKeyConflict)));
+    noticeSlot.hidden = shownNotice.result === null;
+    noticeSlot.replaceChildren(...shownNotice.result === null ? [] : [shownNotice.result]);
+  });
+  const root: HTMLElement = (
+    <div
+      className={KeyBindingListItemClass.root}
+      onFocusout={event => {
+        if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) {
+          endCapture();
+        }
+      }}
+    >
       <span className={KeyBindingListItemClass.label}>{label}</span>
       {keysElement}
       <span
@@ -171,8 +241,10 @@ export function KeyBindingListItem({ label, keys, maxKeyCount, formatKey, onKeyC
           }}
         />
       </span>
+      {noticeSlot}
     </div>
   );
+  return root;
 }
 
 function describeHeldModifiers(event: KeyboardEvent): string {

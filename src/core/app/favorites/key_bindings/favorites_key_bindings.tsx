@@ -1,3 +1,4 @@
+import { KeyBindings, findCommandInKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
 import { FAVORITES_COMMAND_LABELS } from "@/core/app/favorites/key_bindings/favorites_command_labels";
@@ -8,7 +9,6 @@ import { KeyBindingList } from "@/core/ui/components/key_binding_list/key_bindin
 import { KeyBindingListHeading } from "@/core/ui/components/key_binding_list/key_binding_list_heading";
 import { KeyBindingListItem } from "@/core/ui/components/key_binding_list/key_binding_list_item";
 import { KeyBindingListSection } from "@/core/ui/components/key_binding_list/key_binding_list_section";
-import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { SearchField } from "@/core/ui/components/search_field/search_field";
 import { TabList } from "@/core/ui/components/tabs/tab_list";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
@@ -59,6 +59,14 @@ export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChang
                     keys={computed(() => keyBindings.value[favoritesCommand])}
                     maxKeyCount={3}
                     formatKey={formatKeyLabel}
+                    findKeyOwnerLabel={key => {
+                      const otherFavoritesCommand = findCommandInKeyBindings(keyBindings.peek(), key);
+
+                      if (otherFavoritesCommand === undefined || otherFavoritesCommand === favoritesCommand) {
+                        return undefined;
+                      }
+                      return FAVORITES_COMMAND_LABELS[otherFavoritesCommand];
+                    }}
                     onKeyChange={(keyIndex, key) => onKeyChange(favoritesCommand, keyIndex, key)}
                     onKeyRemove={keyIndex => onKeyRemove(favoritesCommand, keyIndex)}
                   />
@@ -69,18 +77,18 @@ export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChang
         ))}
       </KeyBindingList>
       <div hidden={computed(() => !isSearching.value || matchedFavoritesCommands.value.size > 0)}>
-        <EmptyState message={computed(() => `No shortcuts match "${searchText.value.trim()}"`)} />
+        <EmptyState message={computed(() => `No keyboard shortcuts match "${searchText.value.trim()}"`)} />
       </div>
     </div>
   );
   return (
     <ViewPane
       title={FAVORITES_KEY_BINDINGS_TOOL.label}
-      actions={[{ label: "Reset All Shortcuts", icon: "reset", onClick: resetKeyBindings }]}
+      actions={[{ label: "Reset All Keyboard Shortcuts", icon: "reset", onClick: resetKeyBindings }]}
       subheaderChild={[
         <div className={FavoritesKeyBindingsClass.searchField}>
           <SearchField
-            label="Search Shortcuts"
+            label="Search Keyboard Shortcuts"
             value={searchText}
             onValueChange={value => {
               searchText.value = value;
@@ -89,7 +97,7 @@ export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChang
         </div>,
         <div hidden={isSearching}>
           <TabList
-            label="Sections"
+            label="Keyboard Shortcut Groups"
             controlChoices={FAVORITES_COMMAND_SECTIONS.map(({ title }) => ({ value: title as string, label: title }))}
             value={selectedSectionTitle}
             panel={panel}

@@ -33,9 +33,11 @@
 @import "./components/icon_button/icon_button.css" layer(components);
 @import "./components/count_badge/count_badge.css" layer(components);
 @import "./components/key_cap/key_cap.css" layer(components);
+@import "./components/text_button/text_button.css" layer(components);
 @import "./components/key_binding_list/key_binding_list.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_heading.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_section.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_item.css" layer(components);
+@import "./components/key_binding_list/key_binding_list_item_notice.css" layer(components);
 
 @import "./zen.css" layer(utilities);

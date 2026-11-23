@@ -9,18 +9,21 @@ export const FAVORITES_COMMAND_SECTIONS = [
     ]
   },
   {
-    title: "Browse",
+    title: "Navigation",
     favoritesCommands: [
       "goToNextPage", "goToPreviousPage",
       "openNewTab", "closeTab", "goToNextTab", "goToPreviousTab", "toggleTabs",
       "toggleInfiniteScroll", "increasePageSize", "decreasePageSize"
     ]
   },
-  { title: "Grid", favoritesCommands: ["increaseTileSize", "decreaseTileSize", "cycleLayout", "toggleHd"] },
   {
-    title: "Misc",
+    title: "Grid",
+    favoritesCommands: ["increaseTileSize", "decreaseTileSize", "cycleLayout", "toggleHd", "openGallery", "cycleGalleryMode"]
+  },
+  {
+    title: "Interface",
     favoritesCommands: [
-      "openGallery", "cycleGalleryMode", "toggleZen", "exitZen", "toggleSettings",
+      "toggleZen", "exitZen", "toggleSettings",
       "cycleTheme", "toggleColorScheme", "toggleHeader", "toggleEnhancedPostsPage"
     ]
   }
