@@ -20,7 +20,7 @@ export const FAVORITES_COMMAND_SECTIONS = [
     title: "View",
     favoritesCommands: [
       "increaseTileSize", "decreaseTileSize", "cycleLayout", "toggleHd", "openGallery", "cycleGalleryMode",
-      "toggleZen", "exitZen", "toggleSettings",
+      "toggleZen", "exitZen", "toggleSettings", "toggleKeyboardShortcuts",
       "cycleTheme", "toggleColorScheme", "toggleHeader", "toggleEnhancedPostsPage"
     ]
   }

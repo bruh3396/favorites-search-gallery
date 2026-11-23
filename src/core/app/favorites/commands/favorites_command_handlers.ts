@@ -6,6 +6,7 @@ import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/core/utils/numb
 import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_grid_layouts";
+import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
 import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { FAVORITES_SORT_KEYS } from "@/core/features/favorites/search/favorites_sort_key";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -54,6 +55,9 @@ export function createFavoritesCommandHandlers(
     tabManager.activate(tabs[(activeTabIndex() + offset + tabs.length) % tabs.length].id);
   };
   const goToPage = (pageNumber: number): void => activeFavoritesSession().goTo(pageNumber);
+  const toggleTool = (toolId: string): void => {
+    favoritesPreferences.activeTool.set(favoritesPreferences.activeTool.peek() === toolId ? null : toolId);
+  };
   return {
     focusSearch: () => favoritesWorkspace.activeTab.peek().focusSearch.emit(),
     toggleSearchOptions: () => toggle(favoritesSearchOptionsVisible),
@@ -88,11 +92,8 @@ export function createFavoritesCommandHandlers(
     exitZen: (): void => {
       zenEnabled.value = false;
     },
-    toggleSettings: (): void => {
-      const { id } = FAVORITES_SETTINGS_TOOL;
-
-      favoritesPreferences.activeTool.set(favoritesPreferences.activeTool.peek() === id ? null : id);
-    },
+    toggleSettings: () => toggleTool(FAVORITES_SETTINGS_TOOL.id),
+    toggleKeyboardShortcuts: () => toggleTool(FAVORITES_KEY_BINDINGS_TOOL.id),
     cycleTheme: () => sharedPreferences.theme.set(findNext(THEMES, sharedPreferences.theme.peek())),
     toggleColorScheme: () => sharedPreferences.colorScheme.set(findNext<ColorScheme>(COLOR_SCHEMES, sharedPreferences.colorScheme.peek())),
     toggleHeader: () => toggle(favoritesPreferences.nativeHeaderVisible),

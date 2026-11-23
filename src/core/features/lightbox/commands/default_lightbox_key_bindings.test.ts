@@ -10,7 +10,10 @@ describe("DEFAULT_LIGHTBOX_KEY_BINDINGS", () => {
     ["a", "showPrevious"],
     ["Escape", "dismiss"],
     ["Backspace", "close"],
-    ["Delete", "close"]
+    ["Delete", "close"],
+    ["s", "download"],
+    ["o", "openOriginal"],
+    ["g", "openPostPage"]
   ])("binds %j to %s", (key, lightboxCommand) => {
     expect(findCommandInKeyBindings(DEFAULT_LIGHTBOX_KEY_BINDINGS, key)).toBe(lightboxCommand);
   });

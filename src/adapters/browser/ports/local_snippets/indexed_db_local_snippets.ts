@@ -13,12 +13,19 @@ export class IndexedDbLocalSnippets implements LocalSnippets {
     return request.result;
   }
 
-  public async setMany(snippets: readonly Readonly<Snippet>[]): Promise<void> {
-    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => snippets.forEach(snippet => store.put(snippet)));
+  public async set(snippet: Readonly<Snippet>): Promise<void> {
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => store.put(snippet));
   }
 
-  public async deleteMany(names: readonly string[]): Promise<void> {
-    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => names.forEach(name => store.delete(name)));
+  public async rename(previousName: string, snippet: Readonly<Snippet>): Promise<void> {
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => {
+      store.delete(previousName);
+      store.put(snippet);
+    });
+  }
+
+  public async delete(name: string): Promise<void> {
+    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => store.delete(name));
   }
 
   public async replaceAll(snippets: readonly Readonly<Snippet>[]): Promise<void> {

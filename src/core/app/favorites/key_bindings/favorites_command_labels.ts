@@ -27,6 +27,7 @@ export const FAVORITES_COMMAND_LABELS: Readonly<Record<FavoritesCommand, string>
   toggleZen: "Toggle Zen",
   exitZen: "Exit Zen",
   toggleSettings: "Toggle Settings",
+  toggleKeyboardShortcuts: "Toggle Keyboard Shortcuts",
   cycleTheme: "Cycle Theme",
   toggleColorScheme: "Toggle Color Scheme",
   toggleHeader: "Toggle Header",

@@ -5,7 +5,7 @@ export type FavoritesCommand =
   | "openNewTab" | "closeTab" | "goToNextTab" | "goToPreviousTab" | "toggleTabs"
   | "toggleInfiniteScroll" | "increasePageSize" | "decreasePageSize"
   | "increaseTileSize" | "decreaseTileSize" | "cycleLayout" | "toggleHd"
-  | "toggleZen" | "exitZen" | "toggleSettings" | "cycleTheme" | "toggleColorScheme" | "toggleHeader" | "toggleEnhancedPostsPage"
+  | "toggleZen" | "exitZen" | "toggleSettings" | "toggleKeyboardShortcuts" |"cycleTheme" | "toggleColorScheme" | "toggleHeader" | "toggleEnhancedPostsPage"
   | "openGallery" | "cycleGalleryMode";
 
 export const REPEATABLE_FAVORITES_COMMANDS: ReadonlySet<FavoritesCommand> = new Set<FavoritesCommand>([

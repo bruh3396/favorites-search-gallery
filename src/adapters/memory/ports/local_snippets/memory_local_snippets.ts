@@ -8,18 +8,24 @@ export class MemoryLocalSnippets implements LocalSnippets {
     return Promise.resolve(Array.from(this.snippets.values(), snippet => ({ ...snippet })));
   }
 
-  public setMany(snippets: readonly Readonly<Snippet>[]): Promise<void> {
-    snippets.forEach(snippet => this.snippets.set(snippet.name, { ...snippet }));
+  public set(snippet: Readonly<Snippet>): Promise<void> {
+    this.snippets.set(snippet.name, { ...snippet });
     return Promise.resolve();
   }
 
-  public deleteMany(names: readonly string[]): Promise<void> {
-    names.forEach(name => this.snippets.delete(name));
+  public rename(previousName: string, snippet: Readonly<Snippet>): Promise<void> {
+    this.snippets.delete(previousName);
+    return this.set(snippet);
+  }
+
+  public delete(name: string): Promise<void> {
+    this.snippets.delete(name);
     return Promise.resolve();
   }
 
   public replaceAll(snippets: readonly Readonly<Snippet>[]): Promise<void> {
     this.snippets.clear();
-    return this.setMany(snippets);
+    snippets.forEach(snippet => this.snippets.set(snippet.name, { ...snippet }));
+    return Promise.resolve();
   }
 }

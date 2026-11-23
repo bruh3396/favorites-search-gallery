@@ -11,7 +11,14 @@ describe("DEFAULT_FAVORITES_KEY_BINDINGS", () => {
     ["Escape", "exitZen"],
     ["=", "increaseTileSize"],
     ["-", "decreaseTileSize"],
-    ["Enter", "openGallery"]
+    ["Enter", "openGallery"],
+    ["o", "toggleSearchOptions"],
+    ["]", "increasePageSize"],
+    ["[", "decreasePageSize"],
+    ["l", "cycleLayout"],
+    ["h", "toggleHd"],
+    [",", "toggleSettings"],
+    ["?", "toggleKeyboardShortcuts"]
   ])("binds %j to %s", (key, favoritesCommand) => {
     expect(findCommandInKeyBindings(DEFAULT_FAVORITES_KEY_BINDINGS, key)).toBe(favoritesCommand);
   });

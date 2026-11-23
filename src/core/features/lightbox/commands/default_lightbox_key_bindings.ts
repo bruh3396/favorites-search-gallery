@@ -12,7 +12,7 @@ export const DEFAULT_LIGHTBOX_KEY_BINDINGS = {
   toggleAutoplay: ["p"],
   toggleDetails: ["i"],
   addFavorite: ["e"],
-  openPostPage: [],
-  openOriginal: [],
-  download: []
+  openPostPage: ["g"],
+  openOriginal: ["o"],
+  download: ["s"]
 } as const satisfies Record<LightboxCommand, readonly string[]>;

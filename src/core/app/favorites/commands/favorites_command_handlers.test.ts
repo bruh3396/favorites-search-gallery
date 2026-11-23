@@ -256,6 +256,17 @@ describe("createFavoritesCommandHandlers", () => {
     expect([opened, favoritesPreferences.activeTool.peek()]).toEqual(["settings", null]);
   });
 
+  test("toggles the keyboard shortcuts pane, switching from another pane", () => {
+    const { handlers, favoritesPreferences } = setup();
+
+    handlers.toggleSettings();
+    handlers.toggleKeyboardShortcuts();
+    const opened = favoritesPreferences.activeTool.peek();
+
+    handlers.toggleKeyboardShortcuts();
+    expect([opened, favoritesPreferences.activeTool.peek()]).toEqual(["keyBindings", null]);
+  });
+
   test("cycles the theme, the color scheme and the gallery mode", () => {
     const { handlers, sharedPreferences, favoritesPreferences } = setup();
 
