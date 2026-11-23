@@ -22,9 +22,11 @@ export const FavoritesKeyBindingsClass = {
 export interface FavoritesKeyBindingsProps {
   keyBindings: Readable<KeyBindings<FavoritesCommand>>;
   resetKeyBindings: () => void;
+  onKeyChange: (favoritesCommand: FavoritesCommand, keyIndex: number, key: string) => void;
+  onKeyRemove: (favoritesCommand: FavoritesCommand, keyIndex: number) => void;
 }
 
-export function FavoritesKeyBindings({ keyBindings, resetKeyBindings }: FavoritesKeyBindingsProps): HTMLElement {
+export function FavoritesKeyBindings({ keyBindings, resetKeyBindings, onKeyChange, onKeyRemove }: FavoritesKeyBindingsProps): HTMLElement {
   const selectedSectionTitle = new Signal<string>(FAVORITES_COMMAND_SECTIONS[0].title);
   const searchText = new Signal("");
   const searchWords = computed(() => searchText.value.toLowerCase().split(/\s+/u).filter(searchWord => searchWord !== ""));
@@ -55,7 +57,10 @@ export function FavoritesKeyBindings({ keyBindings, resetKeyBindings }: Favorite
                   <KeyBindingListItem
                     label={FAVORITES_COMMAND_LABELS[favoritesCommand]}
                     keys={computed(() => keyBindings.value[favoritesCommand])}
+                    maxKeyCount={3}
                     formatKey={formatKeyLabel}
+                    onKeyChange={(keyIndex, key) => onKeyChange(favoritesCommand, keyIndex, key)}
+                    onKeyRemove={keyIndex => onKeyRemove(favoritesCommand, keyIndex)}
                   />
                 </div>
               ))}

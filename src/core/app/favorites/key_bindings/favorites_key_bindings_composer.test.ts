@@ -21,6 +21,7 @@ function setup(initialKeyBindingOverrides: KeyBindingOverrides<FavoritesCommand>
   const pane = render(document, () => composeFavoritesKeyBindings({
     keyBindings: computed(() => createKeyBindings(favoritesCommands, keyBindingOverrides.value)),
     keyBindingOverrides: {
+      peek: () => keyBindingOverrides.peek(),
       set: (value): void => {
         keyBindingOverrides.value = value;
       }
@@ -54,5 +55,25 @@ describe("composeFavoritesKeyBindings", () => {
     confirmer.answer = false;
     clickResetShortcuts(pane);
     expect(readFirstShownItem(pane)).toBe("Focus Search Bar/");
+  });
+
+  test("saves a key pressed in place of a clicked one", () => {
+    const { pane } = setup({ focusSearch: ["/"], toggleSearchOptions: ["c"] });
+
+    document.body.append(pane);
+    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change /\"]")!.click();
+    document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "F", bubbles: true, cancelable: true }));
+    expect(readFirstShownItem(pane)).toBe("Focus Search BarF");
+    pane.remove();
+  });
+
+  test("saves a removed key", () => {
+    const { pane } = setup({ focusSearch: ["/", "s"] });
+
+    document.body.append(pane);
+    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change /\"]")!.click();
+    [...pane.querySelectorAll("button")].find(button => button.textContent === "Remove")!.click();
+    expect(readFirstShownItem(pane)).toBe("Focus Search BarS");
+    pane.remove();
   });
 });

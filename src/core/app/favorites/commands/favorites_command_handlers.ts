@@ -14,8 +14,6 @@ import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorit
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { LIGHTBOX_MODES } from "@/core/features/lightbox/lightbox_mode";
-import { Navigator } from "@/core/boundary/ports/navigator/navigator";
-import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SharedPreferences } from "@/core/app/shared_preferences";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
@@ -26,16 +24,13 @@ export interface FavoritesCommandHandlersConfiguration {
 }
 
 export interface FavoritesCommandHandlersDependencies {
-  favoritesWorkspace: Pick<FavoritesWorkspace, "activeTab" | "tabManager" | "openBlankTab" | "closeTab" | "closeAllTabs">;
+  favoritesWorkspace: Pick<FavoritesWorkspace, "activeTab" | "tabManager" | "openBlankTab" | "closeTab">;
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination" | "lightbox" | "nativeHeaderVisible" | "activeTool">;
   sharedPreferences: Pick<SharedPreferences, "theme" | "colorScheme" | "postListEnabled">;
   favoritesTabStripVisible: StoredValue<boolean>;
   favoritesSearchOptionsVisible: StoredValue<boolean>;
   zenEnabled: Signal<boolean>;
-  remotePages: Pick<RemotePages, "searchUrl">;
-  navigator: Pick<Navigator, "open">;
   openLightbox: (favoritesSession: FavoritesSession, favorite: Favorite) => boolean;
-  resetSettings: () => void;
 }
 
 const RATING_CYCLE: readonly number[] = [ALL_RATINGS_MASK, toRatingMask("explicit"), toRatingMask("questionable"), toRatingMask("safe")];
@@ -46,8 +41,7 @@ export function createFavoritesCommandHandlers(
   dependencies: FavoritesCommandHandlersDependencies
 ): CommandHandlers<FavoritesCommand> {
   const {
-    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled,
-    remotePages, navigator, openLightbox, resetSettings
+    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled, openLightbox
   } = dependencies;
   const { tabManager } = favoritesWorkspace;
   const { grid: favoritesGridPreferences, pagination: favoritesPaginationPreferences } = favoritesPreferences;
@@ -59,17 +53,9 @@ export function createFavoritesCommandHandlers(
 
     tabManager.activate(tabs[(activeTabIndex() + offset + tabs.length) % tabs.length].id);
   };
-  const moveActiveTab = (offset: number): void => {
-    const activeTabId = tabManager.activeTabId.peek();
-
-    if (activeTabId !== null) {
-      tabManager.move(activeTabId, clamp(activeTabIndex() + offset, 0, tabManager.tabs.peek().length - 1));
-    }
-  };
   const goToPage = (pageNumber: number): void => activeFavoritesSession().goTo(pageNumber);
   return {
     focusSearch: () => favoritesWorkspace.activeTab.peek().focusSearch.emit(),
-    clearSearch: () => activeFavoritesSession().clearSearch(),
     toggleSearchOptions: () => toggle(favoritesSearchOptionsVisible),
     cycleSort: () => activeFavoritesSession().updateSearchOptions({ sortKey: findNext(FAVORITES_SORT_KEYS, favoritesSearchOptions().sortKey) }),
     toggleSortAscending: () => activeFavoritesSession().updateSearchOptions({ isSortAscending: !favoritesSearchOptions().isSortAscending }),
@@ -82,12 +68,8 @@ export function createFavoritesCommandHandlers(
     },
     toggleInvert: () => activeFavoritesSession().invert(),
     cycleStatus: () => activeFavoritesSession().updateSearchOptions({ allowedStatuses: findNext(STATUS_CYCLE, favoritesSearchOptions().allowedStatuses) }),
-    resetSearchOptions: () => activeFavoritesSession().resetSearchOptions(),
-    searchElsewhere: () => navigator.open(remotePages.searchUrl(activeFavoritesSession().query.peek())),
     goToNextPage: () => goToPage(activeFavoritesSession().pageNumber.peek() + 1),
     goToPreviousPage: () => goToPage(activeFavoritesSession().pageNumber.peek() - 1),
-    goToFirstPage: () => goToPage(1),
-    goToLastPage: () => goToPage(activeFavoritesSession().pageCount.peek()),
     openNewTab: () => favoritesWorkspace.openBlankTab(),
     closeTab: (): void => {
       const activeTabId = tabManager.activeTabId.peek();
@@ -99,9 +81,6 @@ export function createFavoritesCommandHandlers(
     goToNextTab: () => activateTabAt(1),
     goToPreviousTab: () => activateTabAt(-1),
     toggleTabs: () => toggle(favoritesTabStripVisible),
-    moveTabLeft: () => moveActiveTab(-1),
-    moveTabRight: () => moveActiveTab(1),
-    closeAllTabs: () => favoritesWorkspace.closeAllTabs(),
     toggleInfiniteScroll: () => toggle(favoritesPaginationPreferences.infiniteScroll),
     increasePageSize: () => stepUp(favoritesPaginationPreferences.pageSize, FAVORITES_SETTING_RANGES.pageSize),
     decreasePageSize: () => stepDown(favoritesPaginationPreferences.pageSize, FAVORITES_SETTING_RANGES.pageSize),
@@ -123,8 +102,7 @@ export function createFavoritesCommandHandlers(
     cycleTheme: () => sharedPreferences.theme.set(findNext(THEMES, sharedPreferences.theme.peek())),
     toggleColorScheme: () => sharedPreferences.colorScheme.set(findNext<ColorScheme>(COLOR_SCHEMES, sharedPreferences.colorScheme.peek())),
     toggleHeader: () => toggle(favoritesPreferences.nativeHeaderVisible),
-    toggleEnhanceSearchPages: () => toggle(sharedPreferences.postListEnabled),
-    resetSettings,
+    toggleEnhancedPostsPage: () => toggle(sharedPreferences.postListEnabled),
     openGallery: (): void => {
       const favoritesSession = activeFavoritesSession();
       const favorite = favoritesSession.pageFavorites.peek().at(0);

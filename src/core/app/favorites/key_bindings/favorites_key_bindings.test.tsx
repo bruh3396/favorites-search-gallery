@@ -1,4 +1,4 @@
-import { FavoritesKeyBindings, FavoritesKeyBindingsClass } from "@/core/app/favorites/key_bindings/favorites_key_bindings";
+import { FavoritesKeyBindings, FavoritesKeyBindingsClass, FavoritesKeyBindingsProps } from "@/core/app/favorites/key_bindings/favorites_key_bindings";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { EmptyStateClass } from "@/core/ui/components/empty_state/empty_state";
@@ -19,9 +19,14 @@ interface Setup {
 
 const FAVORITES_COMMANDS = Object.keys(FAVORITES_COMMAND_LABELS) as FavoritesCommand[];
 
-function setup(keyBindingOverrides: KeyBindingOverrides<FavoritesCommand> = {}, resetKeyBindings = vi.fn()): Setup {
+function setup(
+  keyBindingOverrides: KeyBindingOverrides<FavoritesCommand> = {},
+  { resetKeyBindings = vi.fn(), onKeyChange = vi.fn(), onKeyRemove = vi.fn() }: Partial<Omit<FavoritesKeyBindingsProps, "keyBindings">> = {}
+): Setup {
   const keyBindings = new Signal(createKeyBindings(FAVORITES_COMMANDS, keyBindingOverrides));
-  const pane = render(document, () => <FavoritesKeyBindings keyBindings={keyBindings} resetKeyBindings={resetKeyBindings} />).result;
+  const pane = render(document, () => (
+    <FavoritesKeyBindings keyBindings={keyBindings} resetKeyBindings={resetKeyBindings} onKeyChange={onKeyChange} onKeyRemove={onKeyRemove} />
+  )).result;
   return { pane, keyBindings };
 }
 
@@ -61,8 +66,8 @@ describe("FavoritesKeyBindings", () => {
   test("shows one tab per section, starting on Search", () => {
     const { pane } = setup();
 
-    expect([...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent)).toEqual(["Search", "Browse", "Grid", "Gallery", "Misc"]);
-    expect(readShownItems(pane).slice(0, 2)).toEqual(["Focus Search Bar–", "Clear Search–"]);
+    expect([...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent)).toEqual(["Search", "Browse", "Grid", "Misc"]);
+    expect(readShownItems(pane).slice(0, 2)).toEqual(["Focus Search Bar–", "Toggle Search Options–"]);
   });
 
   test("shows only the picked section's commands with their keys, labeled", () => {
@@ -80,14 +85,14 @@ describe("FavoritesKeyBindings", () => {
     const { pane, keyBindings } = setup();
 
     clickTab(pane, "Misc");
-    keyBindings.value = createKeyBindings(FAVORITES_COMMANDS, { toggleZen: ["z"] });
-    expect(readShownItems(pane)[0]).toBe("Toggle ZenZ");
+    keyBindings.value = createKeyBindings(FAVORITES_COMMANDS, { openGallery: ["g"] });
+    expect(readShownItems(pane)[0]).toBe("Open GalleryG");
   });
 
   test("asks for a reset when its reset button is clicked", () => {
     const resetKeyBindings = vi.fn();
 
-    setup({}, resetKeyBindings).pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Shortcuts\"]")!.click();
+    setup({}, { resetKeyBindings }).pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Shortcuts\"]")!.click();
     expect(resetKeyBindings).toHaveBeenCalledOnce();
   });
 
@@ -136,6 +141,28 @@ describe("FavoritesKeyBindings", () => {
       ["Increase Tile Size–", "Decrease Tile Size–", "Cycle Layout–", "Toggle HD–"],
       false
     ]);
+  });
+
+  test("reports a changed key with its command", () => {
+    const onKeyChange = vi.fn();
+    const { pane } = setup({ toggleSearchOptions: ["c", "x"] }, { onKeyChange });
+
+    document.body.append(pane);
+    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change X\"]")!.click();
+    document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "q", bubbles: true, cancelable: true }));
+    pane.remove();
+    expect(onKeyChange).toHaveBeenCalledWith("toggleSearchOptions", 1, "q");
+  });
+
+  test("reports a removed key with its command", () => {
+    const onKeyRemove = vi.fn();
+    const { pane } = setup({ toggleSearchOptions: ["c", "x"] }, { onKeyRemove });
+
+    document.body.append(pane);
+    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change X\"]")!.click();
+    [...pane.querySelectorAll("button")].find(button => button.textContent === "Remove")!.click();
+    pane.remove();
+    expect(onKeyRemove).toHaveBeenCalledWith("toggleSearchOptions", 1);
   });
 
   test("styles every class it sets", () => {

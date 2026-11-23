@@ -1,6 +1,7 @@
 import { KeyBindings, findCommandInKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { Readable } from "@/core/utils/reactive/signal";
+import { normalizeKeyPress } from "@/core/ui/key_bindings/key_press_normalizer";
 
 export interface KeyBindingsListenerConfiguration<Command extends string> {
   readonly keyBindings: Readable<KeyBindings<Command>>;
@@ -20,12 +21,11 @@ export function listenForKeyBindings<Command extends string>(
 ): () => void {
   const listener = (event: Event): void => {
     if (
-      !(event instanceof KeyboardEvent) || isModified(event) || event.defaultPrevented || isTyping(event) || isPressingControl(event) ||
-      isFromInnerDialog(event)
+      !(event instanceof KeyboardEvent) || event.defaultPrevented || isTyping(event) || isPressingControl(event) || isFromInnerDialog(event)
     ) {
       return;
     }
-    const command = findCommandInKeyBindings(keyBindings.peek(), event.key);
+    const command = findCommandInKeyBindings(keyBindings.peek(), normalizeKeyPress(event));
 
     if (command === undefined) {
       return;
@@ -44,10 +44,6 @@ export function listenForKeyBindings<Command extends string>(
 
   target.addEventListener("keydown", listener);
   return () => target.removeEventListener("keydown", listener);
-}
-
-function isModified(event: KeyboardEvent): boolean {
-  return event.ctrlKey || event.metaKey || event.altKey;
 }
 
 function isTyping(event: Event): boolean {

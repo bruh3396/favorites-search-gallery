@@ -9,7 +9,12 @@ describe("formatKeyLabel", () => {
     ["Backspace", "Bksp"],
     ["z", "Z"],
     ["/", "/"],
-    ["Home", "Home"]
+    ["Home", "Home"],
+    ["Ctrl+k", "Ctrl+K"],
+    ["Ctrl+ArrowRight", "Ctrl+→"],
+    ["Ctrl+Alt+Meta+ ", "Ctrl+Alt+Meta+Space"],
+    ["+", "+"],
+    ["Ctrl++", "Ctrl++"]
   ])("labels %j as %j", (key, label) => {
     expect(formatKeyLabel(key)).toBe(label);
   });

@@ -209,8 +209,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         {
           target: container.ownerDocument,
           handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {
-            favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled,
-            remotePages, navigator, openLightbox, resetSettings
+            favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled, openLightbox
           })
         }
       );

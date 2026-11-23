@@ -14,10 +14,69 @@
 
 .fsg-KeyBindingListItem-keys {
   display: flex;
+  margin-inline-start: auto;
   flex: none;
   align-items: center;
   gap: 4px;
   font-size: 13px;
+}
+
+.fsg-KeyBindingListItem-key {
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fsg-KeyBindingListItem-key:hover {
+  color: var(--fsg-color-primary);
+}
+
+.fsg-KeyBindingListItem-captureGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fsg-KeyBindingListItem-remove {
+  padding: 0.15em 0.45em;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--fsg-color-on-surface-variant);
+  font: inherit;
+  font-size: 0.9em;
+  cursor: pointer;
+}
+
+.fsg-KeyBindingListItem-remove:hover,
+.fsg-KeyBindingListItem-remove:focus-visible {
+  color: var(--fsg-color-on-surface);
+}
+
+.fsg-KeyBindingListItem-add {
+  flex: none;
+  opacity: 0;
+}
+
+.fsg-KeyBindingListItem:hover .fsg-KeyBindingListItem-add,
+.fsg-KeyBindingListItem-add:focus-within {
+  opacity: 1;
+}
+
+.fsg-KeyBindingListItem-capture {
+  padding: 0.15em 0.45em;
+  border: 1px dashed var(--fsg-color-primary);
+  border-radius: 4px;
+  background: none;
+  color: var(--fsg-color-primary);
+  font: inherit;
+  font-size: 0.9em;
+  line-height: 1.2;
+  outline: none;
 }
 
 .fsg-KeyBindingListItem-unbound {

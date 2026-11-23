@@ -23,6 +23,9 @@ function playOutcomes(outcomes: Outcome[]): string[] {
     Object.defineProperty(element, "duration", { value: 12 });
     Object.defineProperty(element, "load", { value: (): void => undefined });
     Object.defineProperty(element, "src", {
+      get(): string {
+        return loadedUrls.at(-1) ?? "";
+      },
       set(url: string): void {
         const outcome = outcomes.shift();
 

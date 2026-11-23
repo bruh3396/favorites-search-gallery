@@ -272,11 +272,25 @@ describe("SearchBox", () => {
     expect(textarea.value).toBe("banana");
   });
 
-  test("puts the caret at the end of a recalled query", () => {
+  test("puts the caret at the start of a query recalled on ↑ and the end of one recalled on ↓", () => {
+    const { textarea } = setupHistory(["kitten", "dog", "bird"]);
+    const carets: number[][] = [];
+
+    for (const key of ["ArrowUp", "ArrowUp", "ArrowDown"]) {
+      press(textarea, key);
+      carets.push([textarea.selectionStart, textarea.selectionEnd]);
+    }
+    expect(carets).toEqual([[0, 0], [0, 0], [6, 6]]);
+  });
+
+  test("keeps recalling older queries on ↑ while a recalled query wraps", () => {
     const { textarea } = setupHistory();
 
+    Object.defineProperty(textarea, "scrollHeight", { value: 60 });
+    textarea.style.lineHeight = "20px";
     press(textarea, "ArrowUp");
-    expect([textarea.selectionStart, textarea.selectionEnd]).toEqual([3, 3]);
+    press(textarea, "ArrowUp");
+    expect(textarea.value).toBe("cat");
   });
 
   test("recalls without searching", () => {

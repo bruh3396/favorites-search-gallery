@@ -201,7 +201,7 @@ describe("composeFavoritesApp", () => {
     const root = mount(localKeyedValues);
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    clickSettingsSwitch(root, "Enhance Search Pages");
+    clickSettingsSwitch(root, "Enhanced Posts Page");
 
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({ preferences: { shared: { postListEnabled: true } } });
   });

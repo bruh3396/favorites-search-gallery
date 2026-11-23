@@ -2,7 +2,6 @@ import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_comman
 
 export const FAVORITES_COMMAND_LABELS: Readonly<Record<FavoritesCommand, string>> = {
   focusSearch: "Focus Search Bar",
-  clearSearch: "Clear Search",
   toggleSearchOptions: "Toggle Search Options",
   cycleSort: "Cycle Sort",
   toggleSortAscending: "Toggle Ascending",
@@ -11,20 +10,13 @@ export const FAVORITES_COMMAND_LABELS: Readonly<Record<FavoritesCommand, string>
   toggleBlacklist: "Toggle Blacklist",
   toggleInvert: "Toggle Invert",
   cycleStatus: "Cycle Status",
-  resetSearchOptions: "Reset Search Options",
-  searchElsewhere: "Search Rule34",
   goToNextPage: "Go to Next Page",
   goToPreviousPage: "Go to Previous Page",
-  goToFirstPage: "Go to First Page",
-  goToLastPage: "Go to Last Page",
   openNewTab: "Open New Tab",
   closeTab: "Close Tab",
   goToNextTab: "Go to Next Tab",
   goToPreviousTab: "Go to Previous Tab",
   toggleTabs: "Toggle Tabs",
-  moveTabLeft: "Move Tab Left",
-  moveTabRight: "Move Tab Right",
-  closeAllTabs: "Close All Tabs",
   toggleInfiniteScroll: "Toggle Infinite Scroll",
   increasePageSize: "Increase Page Size",
   decreasePageSize: "Decrease Page Size",
@@ -38,8 +30,7 @@ export const FAVORITES_COMMAND_LABELS: Readonly<Record<FavoritesCommand, string>
   cycleTheme: "Cycle Theme",
   toggleColorScheme: "Toggle Color Scheme",
   toggleHeader: "Toggle Header",
-  toggleEnhanceSearchPages: "Toggle Enhance Search Pages",
-  resetSettings: "Reset All Settings",
+  toggleEnhancedPostsPage: "Toggle Enhanced Posts Page",
   openGallery: "Open Gallery",
   cycleGalleryMode: "Cycle Gallery Mode"
 };

@@ -4,25 +4,24 @@ export const FAVORITES_COMMAND_SECTIONS = [
   {
     title: "Search",
     favoritesCommands: [
-      "focusSearch", "clearSearch", "toggleSearchOptions", "cycleSort", "toggleSortAscending", "shuffle",
-      "cycleRating", "toggleBlacklist", "toggleInvert", "cycleStatus", "resetSearchOptions", "searchElsewhere"
+      "focusSearch", "toggleSearchOptions", "cycleSort", "toggleSortAscending", "shuffle",
+      "cycleRating", "toggleBlacklist", "toggleInvert", "cycleStatus"
     ]
   },
   {
     title: "Browse",
     favoritesCommands: [
-      "goToNextPage", "goToPreviousPage", "goToFirstPage", "goToLastPage",
-      "openNewTab", "closeTab", "goToNextTab", "goToPreviousTab", "toggleTabs", "moveTabLeft", "moveTabRight", "closeAllTabs",
+      "goToNextPage", "goToPreviousPage",
+      "openNewTab", "closeTab", "goToNextTab", "goToPreviousTab", "toggleTabs",
       "toggleInfiniteScroll", "increasePageSize", "decreasePageSize"
     ]
   },
   { title: "Grid", favoritesCommands: ["increaseTileSize", "decreaseTileSize", "cycleLayout", "toggleHd"] },
-  { title: "Gallery", favoritesCommands: ["openGallery", "cycleGalleryMode"] },
   {
     title: "Misc",
     favoritesCommands: [
-      "toggleZen", "exitZen", "toggleSettings",
-      "cycleTheme", "toggleColorScheme", "toggleHeader", "toggleEnhanceSearchPages", "resetSettings"
+      "openGallery", "cycleGalleryMode", "toggleZen", "exitZen", "toggleSettings",
+      "cycleTheme", "toggleColorScheme", "toggleHeader", "toggleEnhancedPostsPage"
     ]
   }
 ] as const satisfies readonly { title: string; favoritesCommands: readonly FavoritesCommand[] }[];

@@ -8,7 +8,6 @@ describe("DEFAULT_FAVORITES_KEY_BINDINGS", () => {
     ["ArrowRight", "goToNextPage"],
     ["ArrowLeft", "goToPreviousPage"],
     ["z", "toggleZen"],
-    ["Z", "toggleZen"],
     ["Escape", "exitZen"],
     ["Enter", "openGallery"]
   ])("binds %j to %s", (key, favoritesCommand) => {

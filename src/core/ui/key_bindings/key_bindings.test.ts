@@ -11,15 +11,11 @@ describe("findCommandInKeyBindings", () => {
     expect(findCommandInKeyBindings(keyBindings, "b")).toBe("second");
   });
 
-  test("matches a letter whatever its case", () => {
-    expect(findCommandInKeyBindings(keyBindings, "A")).toBe("first");
-  });
-
   test("finds nothing for an unbound key", () => {
     expect(findCommandInKeyBindings(keyBindings, "x")).toBeUndefined();
   });
 
-  test("keeps the case of named keys", () => {
-    expect(findCommandInKeyBindings(keyBindings, "arrowright")).toBeUndefined();
+  test("matches only the exact key", () => {
+    expect([findCommandInKeyBindings(keyBindings, "A"), findCommandInKeyBindings(keyBindings, "Ctrl+a")]).toEqual([undefined, undefined]);
   });
 });

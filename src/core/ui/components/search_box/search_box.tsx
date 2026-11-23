@@ -102,8 +102,10 @@ export function SearchBox({
 
       if (recalledText !== undefined) {
         event.preventDefault();
+        const caret = event.key === "ArrowUp" ? 0 : recalledText.length;
+
         textarea.value = recalledText;
-        textarea.setSelectionRange(recalledText.length, recalledText.length);
+        textarea.setSelectionRange(caret, caret);
         fitToText(textarea, root);
       }
     });

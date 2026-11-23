@@ -69,12 +69,37 @@ describe("listenForKeyBindings", () => {
     stop();
   });
 
-  test("ignores modified and already claimed presses", () => {
+  test("matches a letter whatever its case", () => {
     const { ranCommands, press, stop } = setup();
 
-    press({ key: "a", ctrlKey: true });
-    press({ key: "a", metaKey: true });
-    press({ key: "a", altKey: true });
+    press({ key: "A", shiftKey: true });
+    expect(ranCommands).toEqual(["first"]);
+    stop();
+  });
+
+  test("runs the command bound to a key with its modifiers, and only with them", () => {
+    const { ranCommands, keyBindings, press, stop } = setup();
+
+    keyBindings.value = { first: ["Ctrl+a"], second: [] };
+    const modifiedPress = press({ key: "a", ctrlKey: true });
+
+    press({ key: "a" });
+    press({ key: "a", ctrlKey: true, altKey: true });
+    expect([modifiedPress.defaultPrevented, ranCommands]).toEqual([true, ["first"]]);
+    stop();
+  });
+
+  test("leaves a modified key to the browser when only the bare key is bound", () => {
+    const { ranCommands, press, stop } = setup();
+    const events = [press({ key: "a", ctrlKey: true }), press({ key: "a", metaKey: true }), press({ key: "a", altKey: true })];
+
+    expect([events.map(event => event.defaultPrevented), ranCommands]).toEqual([[false, false, false], []]);
+    stop();
+  });
+
+  test("ignores already claimed presses", () => {
+    const { ranCommands, press, stop } = setup();
+
     document.body.addEventListener("keydown", event => event.preventDefault(), { once: true });
     press({ key: "a" });
     expect(ranCommands).toEqual([]);

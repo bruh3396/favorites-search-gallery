@@ -4,6 +4,11 @@ title: "[Bug]: "
 labels:
   - bug
 body:
+  - type: markdown
+    attributes:
+      value: |
+        If the script stopped working, try deleting this site's data (cookies, localStorage, IndexedDB) in your browser settings and reloading first.
+
   - type: checkboxes
     id: version
     attributes:

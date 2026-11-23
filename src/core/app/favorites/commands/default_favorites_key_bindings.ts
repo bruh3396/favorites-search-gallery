@@ -2,7 +2,6 @@ import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_comman
 
 export const DEFAULT_FAVORITES_KEY_BINDINGS = {
   focusSearch: ["/"],
-  clearSearch: [],
   toggleSearchOptions: [],
   cycleSort: [],
   toggleSortAscending: [],
@@ -11,20 +10,13 @@ export const DEFAULT_FAVORITES_KEY_BINDINGS = {
   toggleBlacklist: [],
   toggleInvert: [],
   cycleStatus: [],
-  resetSearchOptions: [],
-  searchElsewhere: [],
   goToNextPage: ["ArrowRight"],
   goToPreviousPage: ["ArrowLeft"],
-  goToFirstPage: [],
-  goToLastPage: [],
   openNewTab: [],
   closeTab: [],
   goToNextTab: [],
   goToPreviousTab: [],
   toggleTabs: [],
-  moveTabLeft: [],
-  moveTabRight: [],
-  closeAllTabs: [],
   toggleInfiniteScroll: [],
   increasePageSize: [],
   decreasePageSize: [],
@@ -38,8 +30,7 @@ export const DEFAULT_FAVORITES_KEY_BINDINGS = {
   cycleTheme: [],
   toggleColorScheme: [],
   toggleHeader: [],
-  toggleEnhanceSearchPages: [],
-  resetSettings: [],
+  toggleEnhancedPostsPage: [],
   openGallery: ["Enter"],
   cycleGalleryMode: []
 } as const satisfies Record<FavoritesCommand, readonly string[]>;

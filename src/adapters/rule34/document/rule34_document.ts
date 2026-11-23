@@ -6,7 +6,7 @@ import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 const TAG_BLACKLIST_ENCODINGS = 3;
 const COOKIE_LIFETIME_SECONDS = 365 * 24 * 60 * 60;
 const HEADER_SELECTOR = "#header";
-const HEADER_BACKGROUND_SELECTOR = "#header, #site-title, #navbar, #subnavbar";
+const HEADER_BACKGROUND_SELECTOR = "#header, #site-title, #navbar";
 const HEADER_TEXT_SELECTOR = "#header *";
 const CURRENT_NAV_TAB_SELECTOR = "#navbar li.current-page";
 const HIGHLIGHT_ACCENT_SHARE = "30%";

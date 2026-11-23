@@ -1,11 +1,11 @@
 export type FavoritesCommand =
-  | "focusSearch" | "clearSearch" | "toggleSearchOptions" | "cycleSort" | "toggleSortAscending" | "shuffle"
-  | "cycleRating" | "toggleBlacklist" | "toggleInvert" | "cycleStatus" | "resetSearchOptions" | "searchElsewhere"
-  | "goToNextPage" | "goToPreviousPage" | "goToFirstPage" | "goToLastPage"
-  | "openNewTab" | "closeTab" | "goToNextTab" | "goToPreviousTab" | "toggleTabs" | "moveTabLeft" | "moveTabRight" | "closeAllTabs"
+  | "focusSearch" | "toggleSearchOptions" | "cycleSort" | "toggleSortAscending" | "shuffle"
+  | "cycleRating" | "toggleBlacklist" | "toggleInvert" | "cycleStatus"
+  | "goToNextPage" | "goToPreviousPage"
+  | "openNewTab" | "closeTab" | "goToNextTab" | "goToPreviousTab" | "toggleTabs"
   | "toggleInfiniteScroll" | "increasePageSize" | "decreasePageSize"
   | "increaseTileSize" | "decreaseTileSize" | "cycleLayout" | "toggleHd"
-  | "toggleZen" | "exitZen" | "toggleSettings" | "cycleTheme" | "toggleColorScheme" | "toggleHeader" | "toggleEnhanceSearchPages" | "resetSettings"
+  | "toggleZen" | "exitZen" | "toggleSettings" | "cycleTheme" | "toggleColorScheme" | "toggleHeader" | "toggleEnhancedPostsPage"
   | "openGallery" | "cycleGalleryMode";
 
 export const REPEATABLE_FAVORITES_COMMANDS: ReadonlySet<FavoritesCommand> = new Set<FavoritesCommand>([
@@ -13,8 +13,6 @@ export const REPEATABLE_FAVORITES_COMMANDS: ReadonlySet<FavoritesCommand> = new 
   "goToPreviousPage",
   "goToNextTab",
   "goToPreviousTab",
-  "moveTabLeft",
-  "moveTabRight",
   "increasePageSize",
   "decreasePageSize",
   "increaseTileSize",

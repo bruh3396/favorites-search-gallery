@@ -47,7 +47,7 @@ export function FavoritesSettings(props: FavoritesSettingsProps): HTMLElement {
 function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePreview, stepperScheduler }: FavoritesSettingsProps): SettingDescriptor[] {
   return [
     {
-      id: "postListEnabled", kind: "switch", label: "Enhance Search Pages", keywords: ["post list", "search"],
+      id: "postListEnabled", kind: "switch", label: "Enhanced Posts Page", keywords: ["post list", "search", "enhance", "run"],
       settingPreference: sharedPreferences.postListEnabled
     },
     {

@@ -17,3 +17,24 @@ export function applyKeyBindingOverrides<Command extends string>(
   const commands = Object.keys(defaultKeyBindings) as Command[];
   return Object.fromEntries(commands.map(command => [command, keyBindingOverrides[command] ?? defaultKeyBindings[command]])) as KeyBindings<Command>;
 }
+
+export function replaceKeyInKeyBindingOverrides<Command extends string>(
+  keyBindingOverrides: KeyBindingOverrides<Command>,
+  keyBindings: KeyBindings<Command>,
+  { command, keyIndex, key }: { command: Command; keyIndex: number; key: string }
+): KeyBindingOverrides<Command> {
+  const keys = keyBindings[command];
+
+  if (keys.includes(key)) {
+    return keyBindingOverrides;
+  }
+  return { ...keyBindingOverrides, [command]: keys.toSpliced(keyIndex, 1, key) };
+}
+
+export function removeKeyFromKeyBindingOverrides<Command extends string>(
+  keyBindingOverrides: KeyBindingOverrides<Command>,
+  keyBindings: KeyBindings<Command>,
+  { command, keyIndex }: { command: Command; keyIndex: number }
+): KeyBindingOverrides<Command> {
+  return { ...keyBindingOverrides, [command]: keyBindings[command].toSpliced(keyIndex, 1) };
+}

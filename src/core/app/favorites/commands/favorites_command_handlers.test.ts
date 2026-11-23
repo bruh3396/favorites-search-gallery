@@ -11,11 +11,8 @@ import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_comman
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
-import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
-import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
-import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { createFavoritesCommandHandlers } from "@/core/app/favorites/commands/favorites_command_handlers";
@@ -30,7 +27,6 @@ interface Setup {
   favoritesPreferences: AppPreferences["favorites"];
   sharedPreferences: SharedPreferences;
   zenEnabled: Signal<boolean>;
-  navigator: MemoryNavigator;
   openLightbox: Mock<(favoritesSession: FavoritesSession, favorite: Favorite) => boolean>;
   activeSession: () => FavoritesSession;
   activeTabIndex: () => number;
@@ -63,18 +59,13 @@ function setup({ postCount = 0, userOwnsFavorites = true } = {}): Setup {
     })
   });
   const zenEnabled = new Signal(false);
-  const navigator = new MemoryNavigator();
   const openLightbox = vi.fn<(favoritesSession: FavoritesSession, favorite: Favorite) => boolean>(() => true);
   const handlers = createFavoritesCommandHandlers({ userOwnsFavorites }, {
-    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled,
-    remotePages: new MemoryRemotePages(new MemoryClient([])),
-    navigator,
-    openLightbox,
-    resetSettings: vi.fn()
+    favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled, openLightbox
   });
   const activeSession = (): FavoritesSession => favoritesWorkspace.activeTab.peek().session;
   const activeTabIndex = (): number => favoritesWorkspace.tabManager.tabs.peek().findIndex(tab => tab.id === favoritesWorkspace.tabManager.activeTabId.peek());
-  return { handlers, favoritesWorkspace, favoritesPreferences, sharedPreferences, zenEnabled, navigator, openLightbox, activeSession, activeTabIndex };
+  return { handlers, favoritesWorkspace, favoritesPreferences, sharedPreferences, zenEnabled, openLightbox, activeSession, activeTabIndex };
 }
 
 describe("createFavoritesCommandHandlers", () => {
@@ -136,14 +127,6 @@ describe("createFavoritesCommandHandlers", () => {
       .toEqual([true, false]);
   });
 
-  test("searches elsewhere for the active tab's query", () => {
-    const { handlers, activeSession, navigator } = setup();
-
-    activeSession().submit("cat dog");
-    handlers.searchElsewhere();
-    expect(navigator.opened).toEqual(["#search-cat%20dog"]);
-  });
-
   test("steps through pages, staying in bounds", () => {
     const { handlers, activeSession } = setup({ postCount: 5 });
     const pageNumbers: number[] = [];
@@ -156,16 +139,14 @@ describe("createFavoritesCommandHandlers", () => {
     record();
     handlers.goToNextPage();
     record();
-    handlers.goToLastPage();
+    handlers.goToNextPage();
     record();
     handlers.goToNextPage();
     record();
-    handlers.goToFirstPage();
-    record();
-    expect(pageNumbers).toEqual([1, 2, 3, 3, 1]);
+    expect(pageNumbers).toEqual([1, 2, 3, 3]);
   });
 
-  test("opens, steps between, moves and closes tabs", () => {
+  test("opens, steps between and closes tabs", () => {
     const { handlers, favoritesWorkspace, activeTabIndex } = setup();
     const indexes: number[] = [];
 
@@ -176,12 +157,8 @@ describe("createFavoritesCommandHandlers", () => {
     indexes.push(activeTabIndex());
     handlers.goToPreviousTab();
     indexes.push(activeTabIndex());
-    handlers.moveTabLeft();
-    handlers.moveTabLeft();
-    handlers.moveTabLeft();
-    indexes.push(activeTabIndex());
     handlers.closeTab();
-    expect([indexes, favoritesWorkspace.tabManager.tabs.peek().length]).toEqual([[2, 0, 2, 0], 2]);
+    expect([indexes, favoritesWorkspace.tabManager.tabs.peek().length]).toEqual([[2, 0, 2], 2]);
   });
 
   test("steps page size by 25 and tile size by one column, within the settings' limits", () => {
