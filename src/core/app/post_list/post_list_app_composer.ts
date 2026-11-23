@@ -2,7 +2,7 @@ import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "
 import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";

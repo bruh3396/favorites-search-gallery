@@ -1,6 +1,6 @@
 import { StoredTree, createStoredTree } from "@/core/utils/storage/stored_tree";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StoredValue } from "@/core/utils/storage/stored_value";

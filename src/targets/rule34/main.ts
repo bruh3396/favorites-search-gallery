@@ -1,7 +1,7 @@
 import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
-import { AppMode } from "@/core/boundary/app_mode";
+import { AppMode } from "@/core/boundary/environment/app_mode";
 import { BrowserClipboard } from "@/adapters/browser/ports/clipboard/browser_clipboard";
 import { BrowserConfirmer } from "@/adapters/browser/ports/confirmer/browser_confirmer";
 import { BrowserFileSaver } from "@/adapters/browser/ports/file_saver/browser_file_saver";
@@ -12,7 +12,7 @@ import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_sch
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
-import { Environment } from "@/core/boundary/environment";
+import { Environment } from "@/core/boundary/environment/environment";
 import { FallbackRemotePosts } from "@/core/boundary/ports/remote_posts/fallback_remote_posts";
 import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobalt_client";
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";

@@ -8,7 +8,7 @@ import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";

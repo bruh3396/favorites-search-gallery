@@ -1,6 +1,6 @@
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { describe, expect, onTestFinished, test } from "vitest";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";

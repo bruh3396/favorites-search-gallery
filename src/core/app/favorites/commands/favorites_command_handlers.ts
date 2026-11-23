@@ -1,6 +1,6 @@
 import { ALL_POST_STATUSES_MASK, toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { ALL_RATINGS_MASK, toRatingMask } from "@/core/domain/post/rating_mask";
-import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
+import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { FAVORITES_SETTING_RANGES, FavoritesSettingRange } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/core/utils/number/number_utilities";
 import { AppPreferences } from "@/core/app/storage/app_preferences";

@@ -1,4 +1,4 @@
-import { RuntimeEnvironment } from "@/core/boundary/environment";
+import { RuntimeEnvironment } from "@/core/boundary/environment/environment";
 
 export function readBrowserEnvironment(): RuntimeEnvironment {
   const agent = navigator.userAgent;

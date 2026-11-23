@@ -1,7 +1,7 @@
 import { THEME_DEFINITIONS, ThemeDefinition } from "@/core/ui/theme/theme";
 import { describe, expect, test, vi } from "vitest";
-import { AppMode } from "@/core/boundary/app_mode";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { AppMode } from "@/core/boundary/environment/app_mode";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { Rule34HostPage } from "@/adapters/rule34/ports/host_page/rule34_host_page";
 
 interface Rule34Document {

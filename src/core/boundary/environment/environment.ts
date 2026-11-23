@@ -1,8 +1,8 @@
-import { AppMode } from "@/core/boundary/app_mode";
-import { CanvasBudget } from "@/core/boundary/canvas_budget";
-import { ColorScheme } from "@/core/boundary/color_scheme";
-import { Device } from "@/core/boundary/device";
-import { Pointer } from "@/core/boundary/pointer";
+import { AppMode } from "@/core/boundary/environment/app_mode";
+import { CanvasBudget } from "@/core/boundary/environment/canvas_budget";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
+import { Device } from "@/core/boundary/environment/device";
+import { Pointer } from "@/core/boundary/environment/pointer";
 
 export interface HostEnvironment {
   readonly appMode: AppMode;

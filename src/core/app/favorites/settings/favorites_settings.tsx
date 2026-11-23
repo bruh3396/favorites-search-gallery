@@ -1,4 +1,4 @@
-import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/color_scheme";
+import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { LIGHTBOX_MODES, LightboxMode } from "@/core/features/lightbox/lightbox_mode";
 import { THEMES, Theme } from "@/core/ui/theme/theme";
 import { AppPreferences } from "@/core/app/storage/app_preferences";

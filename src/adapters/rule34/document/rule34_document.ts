@@ -1,5 +1,5 @@
 import { THEME_DEFINITIONS, ThemeColors, ThemeDefinition } from "@/core/ui/theme/theme";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
 

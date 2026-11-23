@@ -1,6 +1,6 @@
 import { THEME_DEFINITIONS, ThemeColors } from "@/core/ui/theme/theme";
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { ColorScheme } from "@/core/boundary/color_scheme";
+import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
 
 const globals = window as unknown as Record<string, unknown>;

@@ -1,4 +1,4 @@
-import { Environment } from "@/core/boundary/environment";
+import { Environment } from "@/core/boundary/environment/environment";
 
 export function createEnvironment(overrides: Partial<Environment> = {}): Environment {
   return {
