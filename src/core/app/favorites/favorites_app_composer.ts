@@ -13,6 +13,7 @@ import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";
 import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
+import { FAVORITES_COMMAND_DEFINITIONS } from "@/core/app/favorites/commands/favorites_command";
 import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
 import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -29,7 +30,6 @@ import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
-import { REPEATABLE_FAVORITES_COMMANDS } from "@/core/app/favorites/commands/favorites_command";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
@@ -215,7 +215,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
 
       bindHostAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
       listenForKeyBindings(
-        { keyBindings, repeatableCommands: REPEATABLE_FAVORITES_COMMANDS },
+        { keyBindings, commandDefinitionByCommand: FAVORITES_COMMAND_DEFINITIONS },
         {
           target: container.ownerDocument,
           handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {

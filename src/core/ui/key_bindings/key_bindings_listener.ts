@@ -1,11 +1,12 @@
 import { KeyBindings, findCommandInKeyBindings } from "@/core/ui/key_bindings/key_bindings";
+import { CommandDefinition } from "@/core/ui/key_bindings/command_definition";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { Readable } from "@/core/utils/reactive/signal";
 import { normalizeKeyPress } from "@/core/ui/key_bindings/key_press_normalizer";
 
 export interface KeyBindingsListenerConfiguration<Command extends string> {
   readonly keyBindings: Readable<KeyBindings<Command>>;
-  readonly repeatableCommands: ReadonlySet<Command>;
+  readonly commandDefinitionByCommand: Readonly<Record<Command, CommandDefinition>>;
 }
 
 export interface KeyBindingsListenerDependencies<Command extends string> {
@@ -16,7 +17,7 @@ export interface KeyBindingsListenerDependencies<Command extends string> {
 const PRESSABLE_SELECTOR = "a[href], button, summary, [role=button], [role=tab], [role=option], [role=menuitem], [role=radio], [role=checkbox], [role=switch]";
 
 export function listenForKeyBindings<Command extends string>(
-  { keyBindings, repeatableCommands }: KeyBindingsListenerConfiguration<Command>,
+  { keyBindings, commandDefinitionByCommand }: KeyBindingsListenerConfiguration<Command>,
   { target, handlers }: KeyBindingsListenerDependencies<Command>
 ): () => void {
   const listener = (event: Event): void => {
@@ -32,7 +33,7 @@ export function listenForKeyBindings<Command extends string>(
     }
     event.preventDefault();
 
-    if (event.repeat && !repeatableCommands.has(command)) {
+    if (event.repeat && commandDefinitionByCommand[command].repeatable !== true) {
       return;
     }
 

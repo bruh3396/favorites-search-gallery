@@ -6,12 +6,11 @@ const SOURCE_ROOT = "src";
 const SKIPPED_FOLDERS = [/\/testing\//, /^src\/targets\//];
 const OPTION_LIST = "an `as const` option list and its type; no behavior to test";
 const FONT = "a font definition object; no behavior to test";
-const COMMAND_LIST = "a command union and its repeatable set; no behavior to test";
+const COMMAND_LIST = "a command definition table and its union; no behavior to test";
 const TOOL = "an activity bar tool descriptor; no behavior to test";
 const UNTESTED: Readonly<Record<string, string>> = {
   "src/adapters/rule34/client/rule34_page_size.ts": "two page size constants; no behavior to test",
   "src/core/app/favorites/commands/favorites_command.ts": COMMAND_LIST,
-  "src/core/app/favorites/key_bindings/favorites_command_labels.ts": "a label per command; no behavior to test",
   "src/core/app/favorites/key_bindings/favorites_key_bindings_tool.ts": TOOL,
   "src/core/app/favorites/settings/favorites_grid_layouts.ts": "a list of layouts; no behavior to test",
   "src/core/app/favorites/settings/favorites_setting_ranges.ts": "range constants; no behavior to test",
@@ -26,7 +25,6 @@ const UNTESTED: Readonly<Record<string, string>> = {
   "src/core/domain/search/terms/wildcard_match_type.ts": "an enum; no behavior to test",
   "src/core/features/favorites/search/favorites_sort_key.ts": OPTION_LIST,
   "src/core/features/lightbox/commands/lightbox_command.ts": COMMAND_LIST,
-  "src/core/features/lightbox/commands/lightbox_command_labels.ts": "a label per command; no behavior to test",
   "src/core/features/lightbox/lightbox_mode.ts": OPTION_LIST,
   "src/core/ui/fonts/default_app_font.ts": "an alias of another font; no behavior to test",
   "src/core/ui/fonts/geist_font.ts": FONT,

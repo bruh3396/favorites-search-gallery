@@ -1,4 +1,4 @@
-import { LightboxCommand, REPEATABLE_LIGHTBOX_COMMANDS } from "@/core/features/lightbox/commands/lightbox_command";
+import { LIGHTBOX_COMMAND_DEFINITIONS, LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
 import { currentDocument, h } from "@/core/ui/h/h";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
@@ -188,7 +188,7 @@ export function composeLightboxDialog<T extends MediaItem>(dependencies: Lightbo
   });
 
   onCleanup(listenForKeyBindings(
-    { keyBindings: lightboxKeyBindings, repeatableCommands: REPEATABLE_LIGHTBOX_COMMANDS },
+    { keyBindings: lightboxKeyBindings, commandDefinitionByCommand: LIGHTBOX_COMMAND_DEFINITIONS },
     { target: lightboxDialog, handlers }
   ));
   return lightboxDialog;

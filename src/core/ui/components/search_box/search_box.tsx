@@ -74,6 +74,12 @@ export function SearchBox({
       return;
     }
 
+    if (event.key === "Escape" && !event.isComposing) {
+      event.preventDefault();
+      textarea.blur();
+      return;
+    }
+
     if (event.key !== "Enter" || event.isComposing) {
       return;
     }

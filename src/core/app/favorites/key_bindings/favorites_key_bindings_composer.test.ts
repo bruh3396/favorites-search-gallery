@@ -1,11 +1,9 @@
+import { FAVORITES_COMMAND_DEFINITIONS, FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
+import { LIGHTBOX_COMMAND_DEFINITIONS, LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
-import { FAVORITES_COMMAND_LABELS } from "@/core/app/favorites/key_bindings/favorites_command_labels";
-import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
 import { KeyBindingListItemClass } from "@/core/ui/components/key_binding_list/key_binding_list_item";
 import { KeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
-import { LIGHTBOX_COMMAND_LABELS } from "@/core/features/lightbox/commands/lightbox_command_labels";
-import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { MemoryConfirmer } from "@/adapters/memory/ports/confirmer/memory_confirmer";
 import { composeFavoritesKeyBindings } from "@/core/app/favorites/key_bindings/favorites_key_bindings_composer";
 import { createKeyBindings } from "@/testing/key_bindings";
@@ -23,8 +21,8 @@ function setup(
   const keyBindingOverrides = new Signal(initialKeyBindingOverrides);
   const lightboxKeyBindingOverrides = new Signal(initialLightboxKeyBindingOverrides);
   const confirmer = new MemoryConfirmer();
-  const favoritesCommands = Object.keys(FAVORITES_COMMAND_LABELS) as FavoritesCommand[];
-  const lightboxCommands = Object.keys(LIGHTBOX_COMMAND_LABELS) as LightboxCommand[];
+  const favoritesCommands = Object.keys(FAVORITES_COMMAND_DEFINITIONS) as FavoritesCommand[];
+  const lightboxCommands = Object.keys(LIGHTBOX_COMMAND_DEFINITIONS) as LightboxCommand[];
   const pane = render(document, () => composeFavoritesKeyBindings({
     keyBindings: computed(() => createKeyBindings(favoritesCommands, keyBindingOverrides.value)),
     keyBindingOverrides: {

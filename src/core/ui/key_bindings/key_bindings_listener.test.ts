@@ -14,7 +14,7 @@ function setup(target: EventTarget = document): {
   const ranCommands: Command[] = [];
   const keyBindings = new Signal<KeyBindings<Command>>({ first: ["a"], second: ["b"] });
   const stop = listenForKeyBindings<Command>(
-    { keyBindings, repeatableCommands: new Set(["second"]) },
+    { keyBindings, commandDefinitionByCommand: { first: { label: "First" }, second: { label: "Second", repeatable: true } } },
     {
       target,
       handlers: {

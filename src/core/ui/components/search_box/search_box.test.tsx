@@ -158,6 +158,22 @@ describe("SearchBox", () => {
     expect([press(textarea, "Enter", { isComposing: true }), onSearch.mock.calls]).toEqual([true, []]);
   });
 
+  test("leaves the field on Escape", () => {
+    const { textarea } = setup();
+
+    textarea.focus();
+    expect(press(textarea, "Escape")).toBe(false);
+    expect(document.activeElement).not.toBe(textarea);
+  });
+
+  test("leaves Escape to the input method while composing", () => {
+    const { textarea } = setup();
+
+    textarea.focus();
+    expect(press(textarea, "Escape", { isComposing: true })).toBe(true);
+    expect(document.activeElement).toBe(textarea);
+  });
+
   test("turns pasted line breaks into spaces, keeping the caret after them", () => {
     const { textarea } = setup();
 
@@ -446,6 +462,14 @@ describe("SearchBox", () => {
     const { textarea } = setupAssisted(true);
 
     expect([press(textarea, "ArrowUp"), textarea.value]).toEqual([false, ""]);
+  });
+
+  test("stays in the field on an Escape its assist took", () => {
+    const { textarea } = setupAssisted(true);
+
+    textarea.focus();
+    press(textarea, "Escape");
+    expect(document.activeElement).toBe(textarea);
   });
 
   test("still searches on Enter when its assist leaves the key", () => {
