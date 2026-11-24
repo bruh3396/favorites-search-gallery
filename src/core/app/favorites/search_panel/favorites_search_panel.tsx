@@ -7,6 +7,7 @@ import { FavoritesSession } from "@/core/features/favorites/session/favorites_se
 import { Paginator } from "@/core/ui/components/paginator/paginator";
 import { SearchBox } from "@/core/ui/components/search_box/search_box";
 import { SearchBoxAssist } from "@/core/ui/components/search_box/search_box_assist";
+import { SearchBoxTextSpan } from "@/core/ui/components/search_box/search_box_text_span";
 import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
@@ -33,6 +34,7 @@ export interface FavoritesSearchPanelProps {
   fieldPopupChild?: Child;
   searchBoxAssist?: SearchBoxAssist;
   activeDescendantElement?: Readable<HTMLElement | null>;
+  getSearchBoxTextSpans?: (query: string) => readonly SearchBoxTextSpan[];
   skeleton: Node;
   grid: Node;
   searchElsewhere: (query: string) => void;
@@ -40,7 +42,7 @@ export interface FavoritesSearchPanelProps {
 
 export function FavoritesSearchPanel({
   favoritesService, favoritesSession, submittedQueries, submit, focusSearch, fieldTrailingChild, subheaderChild, trailingChild, fieldPopupChild,
-  searchBoxAssist, activeDescendantElement, skeleton, grid, searchElsewhere
+  searchBoxAssist, activeDescendantElement, getSearchBoxTextSpans, skeleton, grid, searchElsewhere
 }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
@@ -89,6 +91,7 @@ export function FavoritesSearchPanel({
             focusRequests={focusSearch}
             assist={searchBoxAssist}
             activeDescendantElement={activeDescendantElement}
+            getTextSpans={getSearchBoxTextSpans}
             onSearch={submit}
             searchElsewhere={searchElsewhere}
           />

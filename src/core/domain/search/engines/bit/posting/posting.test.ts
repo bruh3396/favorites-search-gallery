@@ -88,7 +88,7 @@ describe.each(cases)("$name", ({ make }) => {
 describe("EmptyPosting", () => {
   const emptyPosting = EMPTY_POSTING;
 
-  test("has a count of zero", () => {
+  test("counts zero posts", () => {
     expect(emptyPosting.cardinality).toBe(0);
   });
 

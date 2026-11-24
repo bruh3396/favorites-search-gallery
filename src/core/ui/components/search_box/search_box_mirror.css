@@ -1,0 +1,25 @@
+.fsg-SearchBoxMirror {
+  pointer-events: none;
+  overflow: hidden;
+  color: var(--fsg-color-on-surface);
+}
+
+.fsg-SearchBoxMirror-span {
+  border-radius: 2px;
+}
+
+.fsg-SearchBoxMirror-span[data-tone="0"] {
+  color: color-mix(in oklab, light-dark(#0050d0, #ffcc4d), var(--fsg-theme-text) 35%);
+}
+
+.fsg-SearchBoxMirror-span[data-tone="1"] {
+  color: color-mix(in oklab, light-dark(#b0109a, #f08ae0), var(--fsg-theme-text) 35%);
+}
+
+.fsg-SearchBoxMirror-span[data-tone="2"] {
+  color: color-mix(in oklab, light-dark(#8a5a00, #4fd0ff), var(--fsg-theme-text) 35%);
+}
+
+.fsg-SearchBoxMirror-span[data-paired] {
+  box-shadow: 0 0 0 1px var(--fsg-color-on-surface-variant);
+}

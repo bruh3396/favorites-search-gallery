@@ -21,6 +21,8 @@
 @import "./components/paginator/page_slot.css" layer(components);
 @import "./components/page_stepper/page_stepper.css" layer(components);
 @import "./components/search_box/search_box.css" layer(components);
+@import "./components/search_box/search_box_input.css" layer(components);
+@import "./components/search_box/search_box_mirror.css" layer(components);
 @import "./components/search_field/search_field.css" layer(components);
 @import "./components/suggestion_list/suggestion_list.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);

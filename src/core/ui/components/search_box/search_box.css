@@ -24,7 +24,7 @@
   background: var(--fsg-color-surface-dim);
 }
 
-.fsg-SearchBox-field:has(.fsg-SearchBox-textarea:focus) {
+.fsg-SearchBox-field:has(textarea:focus) {
   z-index: 1;
   block-size: calc(var(--fsg-SearchBox-height) + (var(--fsg-SearchBox-line-count, 1) - 1) * var(--fsg-SearchBox-line-height));
 }
@@ -44,39 +44,6 @@
   margin-inline-end: 4px;
 }
 
-.fsg-SearchBox-textarea:placeholder-shown + .fsg-SearchBox-clear {
+.fsg-SearchBox-field:has(textarea:placeholder-shown) .fsg-SearchBox-clear {
   display: none;
-}
-
-.fsg-SearchBox-textarea {
-  flex: 1 1 auto;
-  box-sizing: content-box;
-  min-inline-size: 0;
-  block-size: var(--fsg-SearchBox-line-height);
-  margin: calc((var(--fsg-SearchBox-height) - 2px - var(--fsg-SearchBox-line-height)) / 2) 0;
-  padding: 0 4px;
-  overflow: hidden;
-  border: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: var(--fsg-typescale-label-large-size);
-  line-height: var(--fsg-SearchBox-line-height);
-  white-space: pre;
-  resize: none;
-}
-
-.fsg-SearchBox-textarea:focus {
-  block-size: calc(var(--fsg-SearchBox-line-count, 1) * var(--fsg-SearchBox-line-height));
-  overflow-y: auto;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.fsg-SearchBox-textarea::placeholder {
-  color: var(--fsg-color-on-surface-variant);
-}
-
-.fsg-SearchBox-textarea:focus-visible {
-  outline: none;
 }

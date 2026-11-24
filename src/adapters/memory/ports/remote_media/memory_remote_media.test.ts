@@ -31,7 +31,7 @@ describe("MemoryRemoteMedia", () => {
     expect(await (await new MemoryRemoteMedia().fetchOriginal(IMAGE)).text()).toBe(IMAGE.locator);
   });
 
-  test("has no durations", async() => {
+  test("probes every duration as zero", async() => {
     expect(await new MemoryRemoteMedia().probeDurationSeconds()).toBe(0);
   });
 });

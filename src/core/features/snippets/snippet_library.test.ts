@@ -154,14 +154,15 @@ describe("SnippetLibrary", () => {
   });
 
   describe("recordUse", () => {
-    test("stamps a snippet's last use with the current time", async() => {
-      const { snippetLibrary, localSnippets } = await setup([createSnippet({ name: "fruits", lastUsedAt: 10 })]);
+    test("stamps only that snippet's last use with the current time", async() => {
+      const storedSnippet = createSnippet({ name: "pets", lastUsedAt: 10 });
+      const { snippetLibrary, localSnippets } = await setup([createSnippet({ name: "fruits", lastUsedAt: 10 }), storedSnippet]);
       const usedSnippet = createSnippet({ name: "fruits", lastUsedAt: START_TIME });
 
       await snippetLibrary.recordUse("fruits");
 
-      expect(snippetLibrary.snippets.value).toEqual([usedSnippet]);
-      expect(await localSnippets.getAll()).toEqual([usedSnippet]);
+      expect(snippetLibrary.snippets.value).toEqual([usedSnippet, storedSnippet]);
+      expect(await getStoredSnippets(localSnippets)).toEqual([usedSnippet, storedSnippet]);
     });
 
     test("ignores a name no snippet has", async() => {

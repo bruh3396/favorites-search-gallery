@@ -203,6 +203,17 @@ describe("composeFavoritesSearchPanel", () => {
     expect(textarea.ariaActiveDescendantElement).toBe(element.querySelector("[role=option]"));
   });
 
+  test("colors grouping operators in the search box by depth, leaving a stray ) and a top-level ~ plain", () => {
+    const { element } = setup();
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
+
+    textarea.value = "a ~ b ) ( c -( d ) ~ e )";
+    textarea.dispatchEvent(new Event("input"));
+    const coloredOperators = [...element.querySelectorAll<HTMLElement>("search div[aria-hidden=true] span")].map(span => [span.textContent, span.dataset.tone]);
+
+    expect(coloredOperators).toEqual([["(", "0"], ["-(", "1"], [")", "1"], ["~", "0"], [")", "0"]]);
+  });
+
   test("opens the typed query on the site when Search is right-clicked", () => {
     const { element, navigator } = setup();
     const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;

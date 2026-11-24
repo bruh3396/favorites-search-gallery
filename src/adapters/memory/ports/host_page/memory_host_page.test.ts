@@ -3,7 +3,7 @@ import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_pa
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 
 describe("MemoryHostPage", () => {
-  test("has no header unless told it has one", () => {
+  test("reports no header unless told it has one", () => {
     expect(new MemoryHostPage().hasHeader).toBe(false);
     expect(new MemoryHostPage(true).hasHeader).toBe(true);
   });

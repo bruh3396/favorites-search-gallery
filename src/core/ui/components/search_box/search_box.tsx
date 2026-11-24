@@ -1,25 +1,24 @@
 import { Child, h } from "@/core/ui/h/h";
-import { Readable, effect } from "@/core/utils/reactive/signal";
+import { Readable, Signal, effect } from "@/core/utils/reactive/signal";
 import { HistoryNavigator } from "@/core/ui/components/search_box/history_navigator";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { SearchBoxAssist } from "@/core/ui/components/search_box/search_box_assist";
+import { SearchBoxTextSpan } from "@/core/ui/components/search_box/search_box_text_span";
 import { TextEdit } from "@/core/ui/components/search_box/text_edit";
+import { createSearchBoxInput } from "@/core/ui/components/search_box/search_box_input";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
 export const SearchBoxClass = {
   root: "fsg-SearchBox",
   field: "fsg-SearchBox-field",
   submit: "fsg-SearchBox-submit",
-  textarea: "fsg-SearchBox-textarea",
   clear: "fsg-SearchBox-clear",
   popup: "fsg-SearchBox-popup"
 } as const;
 
 const MAX_LINE_COUNT = 8;
 const LINE_COUNT_PROPERTY = "--fsg-SearchBox-line-count";
-const LINE_BREAK = /[\r\n]/;
-const LINE_BREAKS = /\r\n?|\n/g;
 
 export interface SearchBoxProps {
   label: string;
@@ -30,16 +29,19 @@ export interface SearchBoxProps {
   focusRequests?: Occurrence<void>;
   assist?: SearchBoxAssist;
   activeDescendantElement?: Readable<HTMLElement | null>;
+  getTextSpans?: (text: string) => readonly SearchBoxTextSpan[];
   onSearch: (query: string) => void;
   searchElsewhere?: (query: string) => void;
 }
 
 export function SearchBox({
-  label, query, submittedQueries, trailingChild, fieldPopupChild, focusRequests, assist: searchBoxAssist, activeDescendantElement, onSearch, searchElsewhere
+  label, query, submittedQueries, trailingChild, fieldPopupChild, focusRequests, assist: searchBoxAssist, activeDescendantElement,
+  getTextSpans, onSearch, searchElsewhere
 }: SearchBoxProps): HTMLElement {
   const root = <search className={SearchBoxClass.root} />;
-  const textarea = <textarea className={SearchBoxClass.textarea} rows={1} spellcheck={false}
-    placeholder={label} aria-label={label} value={query} /> as HTMLTextAreaElement;
+  const text = new Signal("");
+  const searchBoxInput = createSearchBoxInput({ label, text, getTextSpans });
+  const { textarea } = searchBoxInput;
   const submitButton = <IconButton className={SearchBoxClass.submit} icon="search" label="Search" type="submit" />;
   const historyNavigator = submittedQueries === undefined ? undefined : new HistoryNavigator({ submittedQueries });
   const field = (
@@ -52,13 +54,13 @@ export function SearchBox({
       }}
     >
       {submitButton}
-      {textarea}
+      {searchBoxInput.root}
       <IconButton
         className={SearchBoxClass.clear}
         icon="close"
         label="Clear Search"
         onClick={() => {
-          textarea.value = "";
+          text.value = "";
           historyNavigator?.stopRecalling();
           fitToText(textarea, root);
           textarea.focus();
@@ -89,15 +91,11 @@ export function SearchBox({
       field.requestSubmit();
     }
   });
-  textarea.addEventListener("input", () => {
-    flattenLineBreaks(textarea);
-    fitToText(textarea, root);
+  effect(() => {
+    text.value = query.value;
   });
+  textarea.addEventListener("input", () => fitToText(textarea, root));
   textarea.addEventListener("focus", () => fitToText(textarea, root));
-  textarea.addEventListener("blur", () => {
-    textarea.scrollTop = 0;
-    textarea.scrollLeft = 0;
-  });
 
   if (historyNavigator !== undefined) {
     textarea.addEventListener("keydown", event => {
@@ -110,7 +108,7 @@ export function SearchBox({
         event.preventDefault();
         const caret = event.key === "ArrowUp" ? 0 : recalledText.length;
 
-        textarea.value = recalledText;
+        text.value = recalledText;
         textarea.setSelectionRange(caret, caret);
         fitToText(textarea, root);
       }
@@ -155,16 +153,6 @@ export function SearchBox({
 function applyTextEdit(textarea: HTMLTextAreaElement, { start, end, text }: TextEdit): void {
   textarea.setSelectionRange(start, end);
   textarea.ownerDocument.execCommand("insertText", false, text);
-}
-
-function flattenLineBreaks(textarea: HTMLTextAreaElement): void {
-  if (!LINE_BREAK.test(textarea.value)) {
-    return;
-  }
-  const textBeforeCaret = textarea.value.slice(0, textarea.selectionStart).replace(LINE_BREAKS, " ");
-
-  textarea.value = textBeforeCaret + textarea.value.slice(textarea.selectionStart).replace(LINE_BREAKS, " ");
-  textarea.setSelectionRange(textBeforeCaret.length, textBeforeCaret.length);
 }
 
 function recall(historyNavigator: HistoryNavigator, key: string, textarea: HTMLTextAreaElement): string | undefined {

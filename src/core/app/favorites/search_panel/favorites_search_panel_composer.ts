@@ -24,6 +24,7 @@ import { Tile } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesSearchOptionsRow } from "@/core/app/favorites/search_options/favorites_search_options_row_composer";
 import { h } from "@/core/ui/h/h";
+import { scanSearchSyntax } from "@/core/domain/search/parsers/search_syntax_scanner";
 
 export interface FavoritesSearchPanelConfiguration {
   readonly userOwnsFavorites: boolean;
@@ -109,6 +110,9 @@ export function composeFavoritesSearchPanel(
     })),
     searchBoxAssist: autocomplete,
     activeDescendantElement,
+    getSearchBoxTextSpans: query => scanSearchSyntax(query).flatMap(({ start, end, depth, matchedStart }) => (
+      depth === 0 ? [] : [{ start, end, tone: depth - 1, matchedStart }]
+    )),
     skeleton: h(SkeletonGrid, {
       sizes: favoriteSizeRecorder.sizes,
       layout: favoritesPreferences.grid.layout,

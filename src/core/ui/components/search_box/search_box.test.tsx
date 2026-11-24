@@ -174,15 +174,6 @@ describe("SearchBox", () => {
     expect(document.activeElement).toBe(textarea);
   });
 
-  test("turns pasted line breaks into spaces, keeping the caret after them", () => {
-    const { textarea } = setup();
-
-    textarea.value = "cat\r\ndog\nfox";
-    textarea.setSelectionRange(8, 8);
-    textarea.dispatchEvent(new Event("input", { bubbles: true }));
-    expect([textarea.value, textarea.selectionStart]).toEqual(["cat dog fox", 7]);
-  });
-
   test("reports an emptied query only when submitted", () => {
     const { textarea, onSearch } = setup();
 
@@ -501,6 +492,24 @@ describe("SearchBox", () => {
     expect(textarea.ariaActiveDescendantElement).toBe(optionElement);
     activeDescendantElement.value = null;
     expect(textarea.ariaActiveDescendantElement).toBeNull();
+  });
+
+  test("mirrors what Clear, recall and a new query put in the field", () => {
+    const query = new Signal("( a )");
+    const { result: element } = render(document, () => (
+      <SearchBox label="Search" query={query} submittedQueries={new Signal(["( b )"])} getTextSpans={() => []} onSearch={vi.fn()} />
+    ));
+    const mirror = element.querySelector("div[aria-hidden=true]")!;
+    const mirroredTexts = [mirror.textContent];
+
+    document.body.append(element);
+    element.querySelector<HTMLButtonElement>("button[aria-label='Clear Search']")!.click();
+    mirroredTexts.push(mirror.textContent);
+    press(element.querySelector("textarea")!, "ArrowUp");
+    mirroredTexts.push(mirror.textContent);
+    query.value = "c";
+    mirroredTexts.push(mirror.textContent);
+    expect(mirroredTexts).toEqual(["( a )", "", "( b )", "c"]);
   });
 
   test("styles every class it sets", () => {

@@ -1,0 +1,67 @@
+.fsg-SearchBoxInput {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-inline-size: 0;
+}
+
+.fsg-SearchBoxInput-textarea {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  block-size: var(--fsg-SearchBox-line-height);
+  overflow: hidden;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  resize: none;
+}
+
+.fsg-SearchBoxInput-mirror {
+  position: absolute;
+  inset: 0;
+}
+
+.fsg-SearchBoxInput-textarea,
+.fsg-SearchBoxInput-mirror {
+  box-sizing: content-box;
+  margin: calc((var(--fsg-SearchBox-height) - 2px - var(--fsg-SearchBox-line-height)) / 2) 0;
+  padding: 0 4px;
+  font-size: var(--fsg-typescale-label-large-size);
+  line-height: var(--fsg-SearchBox-line-height);
+  white-space: pre;
+}
+
+.fsg-SearchBoxInput-textarea:focus {
+  block-size: calc(var(--fsg-SearchBox-line-count, 1) * var(--fsg-SearchBox-line-height));
+  overflow-y: auto;
+}
+
+.fsg-SearchBoxInput-textarea:focus,
+.fsg-SearchBoxInput-textarea:focus + .fsg-SearchBoxInput-mirror {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.fsg-SearchBoxInput-textarea:focus:has(+ .fsg-SearchBoxInput-mirror),
+.fsg-SearchBoxInput-textarea:focus + .fsg-SearchBoxInput-mirror {
+  scrollbar-gutter: stable;
+}
+
+.fsg-SearchBoxInput-textarea:has(+ .fsg-SearchBoxInput-mirror) {
+  color: transparent;
+  caret-color: var(--fsg-color-on-surface);
+}
+
+.fsg-SearchBoxInput-textarea:has(+ .fsg-SearchBoxInput-mirror)::selection {
+  background-color: Highlight;
+  color: transparent;
+}
+
+.fsg-SearchBoxInput-textarea::placeholder {
+  color: var(--fsg-color-on-surface-variant);
+}
+
+.fsg-SearchBoxInput-textarea:focus-visible {
+  outline: none;
+}
