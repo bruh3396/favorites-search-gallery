@@ -17,6 +17,7 @@ import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobal
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
+import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/indexed_db_local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
@@ -63,8 +64,9 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: ENVIRONMENT.favoritesOwnerId }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
-    localKeyedValues: new BrowserLocalKeyedValues(),
+    storedValueStorage: new BrowserLocalKeyedValues(),
     remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch: boundFetch, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({
       primaryRemotePosts: new FrozenCobaltRemotePosts({

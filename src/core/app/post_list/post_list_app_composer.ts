@@ -10,7 +10,6 @@ import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { Post } from "@/core/domain/post/post";
@@ -22,6 +21,7 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
@@ -52,7 +52,7 @@ export interface PostListAppDependencies {
   remoteMedia: RemoteMedia;
   remotePages: RemotePages;
   remotePostList: RemotePostList;
-  localKeyedValues: LocalKeyedValues;
+  storedValueStorage: StoredValueStorage;
   navigator: Navigator;
   fileSaver: FileSaver;
   hostPage: HostPage;
@@ -60,10 +60,10 @@ export interface PostListAppDependencies {
 
 export function composePostListApp(configuration: PostListAppConfiguration, dependencies: PostListAppDependencies): MountableApp {
   const {
-    visibilityObserver, sizeObserver, viewport, scheduler, remoteMedia, remotePages, remotePostList, localKeyedValues, navigator, fileSaver, hostPage,
+    visibilityObserver, sizeObserver, viewport, scheduler, remoteMedia, remotePages, remotePostList, storedValueStorage, navigator, fileSaver, hostPage,
     remoteFavorites, localFavorites
   } = dependencies;
-  const appStorage = createAppStorage(localKeyedValues);
+  const appStorage = createAppStorage(storedValueStorage);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, configuration.colorScheme, hostPage);
   const { postList: postListPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["postList"]);
   const gridPreferences = postListPreferences.grid;

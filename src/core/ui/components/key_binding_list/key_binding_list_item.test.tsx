@@ -58,10 +58,20 @@ describe("KeyBindingListItem", () => {
     expect(readKeyLabels(item)).toEqual(["D", "ARROWRIGHT"]);
   });
 
-  test("shows a dash when no key is bound", () => {
+  test("gives its label a tooltip of the full label, for when it is cut off", () => {
     const item = renderItem(new Signal<readonly string[]>([]));
 
-    expect([readKeyLabels(item), item.textContent]).toEqual([[], "Next Page–"]);
+    expect(item.querySelector("[title]")?.getAttribute("title")).toBe("Next Page");
+  });
+
+  test("offers Not set in place of Add when no key is bound", () => {
+    const keys = new Signal<readonly string[]>([]);
+    const item = renderItem(keys);
+    const isOffered = (label: string): boolean => findButton(item, label)!.closest("[hidden]") === null;
+    const unboundOffers = [isOffered("Not set"), isOffered("Add Key")];
+
+    keys.value = ["d"];
+    expect([readKeyLabels(item).length, unboundOffers, [isOffered("Not set"), isOffered("Add Key")]]).toEqual([1, [true, false], [false, true]]);
   });
 
   test("follows its keys as they change", () => {
@@ -127,6 +137,14 @@ describe("KeyBindingListItem", () => {
 
     pressKey(clickAdd(item), "Escape");
     expect(document.activeElement).toBe(findButton(item, "Add Key"));
+  });
+
+  test("returns focus to Not set once waiting for a first key ends", () => {
+    const item = renderItem(new Signal<readonly string[]>([]));
+
+    findButton(item, "Not set")!.click();
+    pressKey(document.activeElement as HTMLElement, "Escape");
+    expect(document.activeElement).toBe(findButton(item, "Not set"));
   });
 
   test("moves focus to the last key when the focused key goes and no Add is offered", () => {
@@ -250,6 +268,16 @@ describe("KeyBindingListItem", () => {
     expect(item.textContent).toContain("Press a key…");
   });
 
+  test("keeps focus on the capture when Remove is pressed", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d"]));
+
+    clickKey(item, "D");
+    const mousedown = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+
+    findButton(item, "Remove")!.dispatchEvent(mousedown);
+    expect(mousedown.defaultPrevented).toBe(true);
+  });
+
   test("waits for a new key after the last one, with nothing to remove", () => {
     const onKeyChange = vi.fn();
     const item = renderItem(new Signal<readonly string[]>(["d"]), { onKeyChange });
@@ -260,11 +288,11 @@ describe("KeyBindingListItem", () => {
     expect([waitingState, onKeyChange.mock.calls]).toEqual([["Press a key…", ["D"], undefined], [[1, "x"]]]);
   });
 
-  test("adds a first key to an unbound command in place of its dash", () => {
+  test("adds a first key to an unbound command", () => {
     const item = renderItem(new Signal<readonly string[]>([]));
 
-    clickAdd(item);
-    expect(item.textContent).toBe("Next PagePress a key…");
+    findButton(item, "Not set")!.click();
+    expect((document.activeElement as HTMLElement).textContent).toBe("Press a key…");
   });
 
   test("offers no Add once at the most keys", () => {
@@ -274,6 +302,38 @@ describe("KeyBindingListItem", () => {
 
     keys.value = ["d", "a"];
     expect([offersAddBelowMost, findButton(item, "Add Key")!.closest("[hidden]") === null]).toEqual([true, false]);
+  });
+
+  test("starts adding a key when the row is clicked outside its buttons", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d"]));
+
+    item.click();
+    expect([readKeyLabels(item), (document.activeElement as HTMLElement).textContent]).toEqual([["D"], "Press a key…"]);
+  });
+
+  test("adds nothing from a row click once at the most keys", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d", "a"]));
+
+    item.click();
+    expect([readKeyLabels(item), item.textContent.includes("Press a key…")]).toEqual([["D", "A"], false]);
+  });
+
+  test("keeps a capture open when the row is clicked", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d"]));
+    const capture = clickKey(item, "D");
+    const mousedown = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+
+    item.dispatchEvent(mousedown);
+    item.click();
+    expect([mousedown.defaultPrevented, document.activeElement, capture.textContent]).toEqual([true, capture, "Press a key…"]);
+  });
+
+  test("leaves a row mousedown alone when no capture is open", () => {
+    const item = renderItem(new Signal<readonly string[]>(["d"]));
+    const mousedown = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+
+    item.dispatchEvent(mousedown);
+    expect(mousedown.defaultPrevented).toBe(false);
   });
 
   test("styles every class it sets", () => {

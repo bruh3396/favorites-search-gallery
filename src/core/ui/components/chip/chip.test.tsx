@@ -28,6 +28,12 @@ describe("Chip", () => {
     expect(result.dataset.highlighted).toBe("true");
   });
 
+  test("stays unhighlighted when not given a highlight", () => {
+    const { result } = render(document, () => <Chip label="Cancel" />);
+
+    expect(result.dataset.highlighted).toBe("false");
+  });
+
   test("reports being pressed only when given a pressed state", () => {
     const pressed = new Signal(false);
     const { result: pressableChip } = render(document, () => <Chip label="Invert" highlighted={pressed} pressed={pressed} />);
@@ -35,6 +41,15 @@ describe("Chip", () => {
 
     pressed.value = true;
     expect([pressableChip.getAttribute("aria-pressed"), plainChip.hasAttribute("aria-pressed")]).toEqual(["true", false]);
+  });
+
+  test("follows whether it is disabled", () => {
+    const disabled = new Signal(true);
+    const { result } = render(document, () => <Chip label="Save" highlighted={new Signal(false)} disabled={disabled} />);
+    const initiallyDisabled = (result as HTMLButtonElement).disabled;
+
+    disabled.value = false;
+    expect([initiallyDisabled, (result as HTMLButtonElement).disabled]).toEqual([true, false]);
   });
 
   test("reports clicks", () => {

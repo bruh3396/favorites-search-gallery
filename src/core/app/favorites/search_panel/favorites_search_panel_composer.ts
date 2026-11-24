@@ -98,7 +98,7 @@ export function composeFavoritesSearchPanel(
         count: hiddenTabCount,
         onClick: () => favoritesTabStripVisible.set(!favoritesTabStripVisible.peek())
       }),
-      h(IconButton, { icon: "scan", label: "Enter Zen", onClick: enterZen })
+      h(IconButton, { icon: "leaf", label: "Enter Zen", onClick: enterZen })
     ],
     fieldPopupChild: h("div", { hidden: computed(() => autocomplete.suggestions.value.length === 0) }, h(SuggestionList, {
       suggestions: autocomplete.suggestions,

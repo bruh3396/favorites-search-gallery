@@ -18,8 +18,8 @@ import { FrozenCobaltClient } from "@/adapters/frozen_cobalt/client/frozen_cobal
 import { FrozenCobaltRemotePosts } from "@/adapters/frozen_cobalt/ports/remote_posts/frozen_cobalt_remote_posts";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
+import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/indexed_db_local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Media } from "@/core/domain/media/media";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
@@ -35,6 +35,7 @@ import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_r
 import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { UnavailableRemotePosts } from "@/core/boundary/ports/remote_posts/unavailable_remote_posts";
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
@@ -55,7 +56,7 @@ interface Rule34Dependencies {
   rule34Document: Rule34Document;
   rule34CdnClient: Rule34CdnClient;
   hostPage: Rule34HostPage;
-  localKeyedValues: LocalKeyedValues;
+  storedValueStorage: StoredValueStorage;
 }
 
 type StartApp = (environment: Environment, rule34Dependencies: Rule34Dependencies, userId: string) => void;
@@ -112,7 +113,7 @@ function createRule34Dependencies(appMode: AppMode, rule34Document: Rule34Docume
   const hostPage = new Rule34HostPage({ appMode }, { rule34Document, claimBodyContent });
   return {
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,
-    hostPage, localKeyedValues: new BrowserLocalKeyedValues()
+    hostPage, storedValueStorage: new BrowserLocalKeyedValues()
   };
 }
 
@@ -151,7 +152,7 @@ function startRemotePosts(
 }
 
 function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34Dependencies, userId: string): void {
-  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues } = rule34Dependencies;
+  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, storedValueStorage } = rule34Dependencies;
   const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia);
   const remotePosts = startRemotePosts(environment, userId, { fetch, scheduler, randomSource, rule34Client, rule34CdnClient });
 
@@ -164,7 +165,7 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
   }, {
     scheduler,
     randomSource,
-    localKeyedValues,
+    storedValueStorage,
     hostPage,
     sizeObserver: new BrowserSizeObserver(),
 
@@ -175,6 +176,7 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
     confirmer: new BrowserConfirmer(),
     localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch, scheduler, randomSource }),
     remotePosts,
@@ -185,9 +187,9 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
 }
 
 function startPostListApp(environment: Environment, {
-  fetch, mintMedia, hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, localKeyedValues, scheduler
+  fetch, mintMedia, hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, storedValueStorage, scheduler
 }: Rule34Dependencies, userId: string): void {
-  const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]);
+  const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(storedValueStorage).preferences, ["shared"]);
 
   if (!sharedPreferences.postListEnabled.peek()) {
     return;
@@ -208,7 +210,7 @@ function startPostListApp(environment: Environment, {
     remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
     remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     remotePostList,
-    localKeyedValues,
+    storedValueStorage,
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     hostPage

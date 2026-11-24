@@ -1,6 +1,9 @@
+import { DEFAULT_THEME, THEMES } from "@/core/ui/theme/theme";
 import { describe, expect, test } from "vitest";
+import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { createAppStorage } from "@/core/app/storage/app_storage";
+import { createStoredTree } from "@/core/utils/storage/stored_tree";
 
 describe("createAppStorage", () => {
   test("keeps preferences and state under one key", () => {
@@ -26,5 +29,17 @@ describe("createAppStorage", () => {
       preferences: { shared: { theme: "cherry" } },
       state: { favorites: {} }
     });
+  });
+
+  test("keeps a sibling preference another tab wrote", () => {
+    const localKeyedValues = new MemoryLocalKeyedValues();
+    const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]);
+    const { shared: otherTabSharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]);
+    const postListEnabled = !otherTabSharedPreferences.postListEnabled.peek();
+
+    otherTabSharedPreferences.postListEnabled.set(postListEnabled);
+    sharedPreferences.theme.set(THEMES.find(theme => theme !== sharedPreferences.theme.peek()) ?? DEFAULT_THEME);
+    expect(createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]).shared.postListEnabled.peek())
+      .toBe(postListEnabled);
   });
 });

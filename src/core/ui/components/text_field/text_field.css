@@ -1,0 +1,38 @@
+.fsg-TextField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fsg-TextField-label {
+  color: var(--fsg-color-on-surface-variant);
+  font-size: var(--fsg-typescale-label-medium-size);
+}
+
+.fsg-TextField-input {
+  box-sizing: border-box;
+  block-size: var(--fsg-control-size-medium);
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0 10px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-shape-corner-small);
+  outline: 0;
+  background-color: var(--fsg-color-surface-dim);
+  color: var(--fsg-color-on-surface);
+  font: inherit;
+  font-size: 13px;
+  transition: border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-TextField-input:hover {
+  border-color: var(--fsg-color-on-surface-variant);
+}
+
+.fsg-TextField-input:focus {
+  border-color: var(--fsg-color-primary);
+}
+
+.fsg-TextField-supportingText {
+  font-size: var(--fsg-typescale-label-medium-size);
+}

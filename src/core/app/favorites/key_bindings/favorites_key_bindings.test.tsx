@@ -1,13 +1,12 @@
-import { FavoritesKeyBindings, FavoritesKeyBindingsClass } from "@/core/app/favorites/key_bindings/favorites_key_bindings";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { EmptyStateClass } from "@/core/ui/components/empty_state/empty_state";
-import FAVORITES_KEY_BINDINGS_CSS from "@/core/app/favorites/key_bindings/favorites_key_bindings.css?inline";
+import { FavoritesKeyBindings } from "@/core/app/favorites/key_bindings/favorites_key_bindings";
 import { FavoritesKeyBindingsRow } from "@/core/app/favorites/key_bindings/favorites_key_bindings_row";
 import { FavoritesKeyBindingsSection } from "@/core/app/favorites/key_bindings/favorites_key_bindings_section";
 import { KeyBindingListItemClass } from "@/core/ui/components/key_binding_list/key_binding_list_item";
 import { Signal } from "@/core/utils/reactive/signal";
-import { expectClassesStyled } from "@/testing/css_utilities";
+import { readKeyBindingListItemText } from "@/testing/key_binding_list_item_text_reader";
 
 function createRow(
   label: string,
@@ -32,7 +31,7 @@ function setup(favoritesKeyBindingsSections: readonly FavoritesKeyBindingsSectio
 function readShownItems(pane: HTMLElement): string[] {
   return [...pane.querySelectorAll<HTMLElement>(`.${KeyBindingListItemClass.root}`)]
     .filter(item => item.closest("[hidden]") === null)
-    .map(item => item.textContent);
+    .map(readKeyBindingListItemText);
 }
 
 function readShownHeadings(pane: HTMLElement): string[] {
@@ -66,14 +65,14 @@ describe("FavoritesKeyBindings", () => {
     const pane = setup();
 
     expect([[...pane.querySelectorAll("[role=tab]")].map(tab => tab.textContent), readShownItems(pane)])
-      .toEqual([["Search", "Navigation", "View"], ["Focus Search Bar/", "Toggle Search Options–"]]);
+      .toEqual([["Search", "Navigation", "View"], ["Focus Search Bar/", "Toggle Search Options"]]);
   });
 
   test("shows only the picked section's rows", () => {
     const pane = setup();
 
     clickTab(pane, "View");
-    expect(readShownItems(pane)).toEqual(["Increase Tile Size–", "Toggle ZenZ"]);
+    expect(readShownItems(pane)).toEqual(["Increase Tile Size", "Toggle ZenZ"]);
   });
 
   test("follows a row's changed keys", () => {
@@ -96,14 +95,14 @@ describe("FavoritesKeyBindings", () => {
 
     searchShortcuts(pane, "size");
     expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)])
-      .toEqual([["Navigation", "View"], ["Increase Page Size–", "Increase Tile Size–"], true]);
+      .toEqual([["Navigation", "View"], ["Increase Page Size", "Increase Tile Size"], true]);
   });
 
   test("matches only rows holding every searched word, in any order and any case", () => {
     const pane = setup();
 
     searchShortcuts(pane, "size TILE increase");
-    expect(readShownItems(pane)).toEqual(["Increase Tile Size–"]);
+    expect(readShownItems(pane)).toEqual(["Increase Tile Size"]);
   });
 
   test("matches section titles and keys as shown", () => {
@@ -129,7 +128,7 @@ describe("FavoritesKeyBindings", () => {
     searchShortcuts(pane, "zen");
     searchShortcuts(pane, " ");
     expect([readShownHeadings(pane), readShownItems(pane), readTabsHidden(pane)])
-      .toEqual([[], ["Go to Next Page→", "Increase Page Size–"], false]);
+      .toEqual([[], ["Go to Next Page→", "Increase Page Size"], false]);
   });
 
   test("reports a changed key to its row", () => {
@@ -152,9 +151,5 @@ describe("FavoritesKeyBindings", () => {
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Remove")!.click();
     pane.remove();
     expect(onKeyRemove).toHaveBeenCalledWith(1);
-  });
-
-  test("styles every class it sets", () => {
-    expectClassesStyled(FavoritesKeyBindingsClass, FAVORITES_KEY_BINDINGS_CSS);
   });
 });

@@ -187,6 +187,16 @@ describe("FavoritesWorkspace", () => {
     });
   });
 
+  describe("searchInNewTab", () => {
+    test("opens an active tab searching the query with a drawn seed, keeping the other tabs", () => {
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple"]));
+
+      favoritesWorkspace.searchInNewTab("banana");
+      expect([readQueries(favoritesWorkspace), favoritesWorkspace.activeTab.value.session.searchOptions.value])
+        .toEqual([["apple", "banana"], { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "banana", shuffleSeed: 2 ** 30 }]);
+    });
+  });
+
   describe("closeTab", () => {
     test("closes the tab", () => {
       const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));

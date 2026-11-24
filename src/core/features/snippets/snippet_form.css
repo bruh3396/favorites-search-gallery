@@ -1,0 +1,19 @@
+.fsg-SnippetForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
+  border-radius: var(--fsg-shape-corner-extra-small);
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-SnippetForm-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.fsg-SnippetForm-confirmActions {
+  display: flex;
+  gap: 6px;
+  margin-inline-start: auto;
+}

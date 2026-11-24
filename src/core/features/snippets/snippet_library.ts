@@ -46,7 +46,7 @@ export class SnippetLibrary {
     await localSnippets.set(savedSnippet);
   }
 
-  public async delete(name: string): Promise<void> {
+  public async remove(name: string): Promise<void> {
     this.#snippets.value = this.#snippets.value.filter(snippet => snippet.name !== name);
     await this.dependencies.localSnippets.delete(name);
   }

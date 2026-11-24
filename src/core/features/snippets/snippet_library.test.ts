@@ -142,11 +142,11 @@ describe("SnippetLibrary", () => {
     });
   });
 
-  describe("delete", () => {
+  describe("remove", () => {
     test("removes a snippet from the list and storage", async() => {
       const { snippetLibrary, localSnippets } = await setup([createSnippet({ name: "fruits" }), createSnippet({ name: "pets" })]);
 
-      await snippetLibrary.delete("fruits");
+      await snippetLibrary.remove("fruits");
 
       expect(getListedNames(snippetLibrary)).toEqual(["pets"]);
       expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" })]);

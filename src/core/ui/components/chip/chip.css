@@ -19,7 +19,12 @@
   transition: border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
 }
 
-.fsg-Chip:where(:hover, [aria-expanded="true"]) {
+.fsg-Chip:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-Chip:where(:hover:enabled, [aria-expanded="true"]) {
   border-color: var(--fsg-color-on-surface-variant);
 }
 

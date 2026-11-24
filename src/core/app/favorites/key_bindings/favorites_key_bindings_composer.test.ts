@@ -7,6 +7,7 @@ import { KeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_override
 import { MemoryConfirmer } from "@/adapters/memory/ports/confirmer/memory_confirmer";
 import { composeFavoritesKeyBindings } from "@/core/app/favorites/key_bindings/favorites_key_bindings_composer";
 import { createKeyBindings } from "@/testing/key_bindings";
+import { readKeyBindingListItemText } from "@/testing/key_binding_list_item_text_reader";
 import { render } from "@/core/ui/h/h";
 
 interface Setup {
@@ -54,7 +55,7 @@ function clickResetShortcuts(pane: HTMLElement): void {
 function readShownItems(pane: HTMLElement): string[] {
   return [...pane.querySelectorAll<HTMLElement>(`.${KeyBindingListItemClass.root}`)]
     .filter(item => item.closest("[hidden]") === null)
-    .map(item => item.textContent);
+    .map(readKeyBindingListItemText);
 }
 
 function searchShortcuts(pane: HTMLElement, searchText: string): void {
@@ -75,14 +76,14 @@ describe("composeFavoritesKeyBindings", () => {
     const { pane } = setup({}, { showNext: ["ArrowRight", "d"] });
 
     clickTab(pane, "Gallery");
-    expect(readShownItems(pane).slice(0, 2)).toEqual(["Show Next→D", "Show Previous–"]);
+    expect(readShownItems(pane).slice(0, 2)).toEqual(["Show Next→D", "Show Previous"]);
   });
 
   test("matches the gallery's commands by their labels", () => {
     const { pane } = setup({});
 
     searchShortcuts(pane, "zoom");
-    expect(readShownItems(pane)).toEqual(["Toggle Zoom–"]);
+    expect(readShownItems(pane)).toEqual(["Toggle Zoom"]);
   });
 
   test("checks a gallery key only against the gallery's commands", () => {
@@ -106,7 +107,7 @@ describe("composeFavoritesKeyBindings", () => {
     const firstItem = readShownItems(pane)[0];
 
     clickTab(pane, "Gallery");
-    expect([confirmer.questions.length, firstItem, readShownItems(pane)[0]]).toEqual([1, "Focus Search Bar–", "Show Next–"]);
+    expect([confirmer.questions.length, firstItem, readShownItems(pane)[0]]).toEqual([1, "Focus Search Bar", "Show Next"]);
   });
 
   test("saves a gallery key pressed in place of a clicked one, taking it from the gallery command that had it", () => {
@@ -118,7 +119,7 @@ describe("composeFavoritesKeyBindings", () => {
     document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "z", bubbles: true, cancelable: true }));
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Overwrite")!.click();
     pane.remove();
-    expect(readShownItems(pane).filter(item => (/^(?:Show Next|Toggle Zoom)/u).test(item))).toEqual(["Show NextZ", "Toggle Zoom–"]);
+    expect(readShownItems(pane).filter(item => (/^(?:Show Next|Toggle Zoom)/u).test(item))).toEqual(["Show NextZ", "Toggle Zoom"]);
   });
 
   test("saves a removed gallery key", () => {
@@ -161,7 +162,7 @@ describe("composeFavoritesKeyBindings", () => {
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Overwrite")!.click();
     pane.remove();
     expect([conflictText, ...readShownItems(pane).slice(0, 2)])
-      .toEqual(["Focus Search BarCC is used by Toggle Search OptionsOverwriteCancel", "Focus Search BarC", "Toggle Search Options–"]);
+      .toEqual(["Focus Search BarCC is used by Toggle Search OptionsOverwriteCancel", "Focus Search BarC", "Toggle Search Options"]);
   });
 
   test("saves a removed key", () => {

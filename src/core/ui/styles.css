@@ -24,6 +24,7 @@
 @import "./components/search_box/search_box_input.css" layer(components);
 @import "./components/search_box/search_box_mirror.css" layer(components);
 @import "./components/search_field/search_field.css" layer(components);
+@import "./components/text_field/text_field.css" layer(components);
 @import "./components/suggestion_list/suggestion_list.css" layer(components);
 @import "./components/tabs/tab_strip.css" layer(components);
 @import "./components/tabs/tab_panel.css" layer(components);
@@ -35,7 +36,7 @@
 @import "./components/icon_button/icon_button.css" layer(components);
 @import "./components/count_badge/count_badge.css" layer(components);
 @import "./components/key_cap/key_cap.css" layer(components);
-@import "./components/text_button/text_button.css" layer(components);
+@import "./components/list_row/list_row.css" layer(components);
 @import "./components/key_binding_list/key_binding_list.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_heading.css" layer(components);
 @import "./components/key_binding_list/key_binding_list_section.css" layer(components);

@@ -72,10 +72,14 @@ export class FavoritesWorkspace {
   }
 
   public openBlankTab(): void {
-    const tab = this.openTab({ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, shuffleSeed: randomUint32(this.dependencies.randomSource) });
+    const tab = this.openTab(this.createSearchOptions(DEFAULT_FAVORITES_SEARCH_OPTIONS.query));
 
     this.tabManager.activate(tab.id);
     tab.value.focusSearch.emit();
+  }
+
+  public searchInNewTab(query: string): void {
+    this.tabManager.activate(this.openTab(this.createSearchOptions(query)).id);
   }
 
   public closeTab(tabId: string): void {
@@ -127,6 +131,10 @@ export class FavoritesWorkspace {
   private findActiveTab(): Tab<FavoritesTab> {
     const tabs = this.tabManager.tabs.value;
     return tabs.find(tab => tab.id === this.tabManager.activeTabId.value) ?? tabs[0];
+  }
+
+  private createSearchOptions(query: string): FavoritesSearchOptions {
+    return { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query, shuffleSeed: randomUint32(this.dependencies.randomSource) };
   }
 
   private openTab(favoritesSearchOptions: FavoritesSearchOptions): Tab<FavoritesTab> {

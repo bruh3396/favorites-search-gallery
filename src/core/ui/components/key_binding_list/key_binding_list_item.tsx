@@ -1,9 +1,10 @@
 import { Readable, Signal, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope } from "@/core/utils/reactive/scope";
+import { Chip } from "@/core/ui/components/chip/chip";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { KeyBindingListItemNotice } from "@/core/ui/components/key_binding_list/key_binding_list_item_notice";
 import { KeyCap } from "@/core/ui/components/key_cap/key_cap";
-import { TextButton } from "@/core/ui/components/text_button/text_button";
+import { ListRow } from "@/core/ui/components/list_row/list_row";
 import { h } from "@/core/ui/h/h";
 import { listHeldKeyPressModifiers } from "@/core/ui/key_bindings/key_press_modifier";
 import { normalizeKeyPress } from "@/core/ui/key_bindings/key_press_normalizer";
@@ -12,12 +13,12 @@ export const KeyBindingListItemClass = {
   root: "fsg-KeyBindingListItem",
   label: "fsg-KeyBindingListItem-label",
   keys: "fsg-KeyBindingListItem-keys",
-  unbound: "fsg-KeyBindingListItem-unbound",
   key: "fsg-KeyBindingListItem-key",
   captureGroup: "fsg-KeyBindingListItem-captureGroup",
   capture: "fsg-KeyBindingListItem-capture",
   captureActions: "fsg-KeyBindingListItem-captureActions",
   add: "fsg-KeyBindingListItem-add",
+  notSet: "fsg-KeyBindingListItem-notSet",
   notice: "fsg-KeyBindingListItem-notice"
 } as const;
 
@@ -58,7 +59,6 @@ export function KeyBindingListItem({
   const refusedKey = new Signal<string | null>(null);
   const keyConflict = new Signal<KeyConflict | null>(null);
   const keysElement = <span className={KeyBindingListItemClass.keys} />;
-  const unbound = <span className={KeyBindingListItemClass.unbound}>–</span>;
   const noticeSlot = <div className={KeyBindingListItemClass.notice} />;
   let shown: Scoped<readonly HTMLElement[]> | null = null;
   let shownNotice: Scoped<HTMLElement | null> | null = null;
@@ -157,7 +157,7 @@ export function KeyBindingListItem({
       </button>
     );
     const removeActions = isRemovable ? [
-      <TextButton
+      <Chip
         label="Remove"
         onClick={() => {
           endCapture();
@@ -191,22 +191,27 @@ export function KeyBindingListItem({
     </button>
   );
 
-  const addButton = (
-    <IconButton
-      icon="add"
-      label="Add Key"
-      size="small"
-      onClick={() => {
-        capturedKeyIndex.value = keys.peek().length;
-      }}
-    />
+  const startAddingKey = (): void => {
+    capturedKeyIndex.value = keys.peek().length;
+  };
+  const addButton = <IconButton icon="add" label="Add Key" onClick={startAddingKey} />;
+  const notSetButton = (
+    <button className={KeyBindingListItemClass.notSet} type="button" onClick={startAddingKey}>
+      Not set
+    </button>
   );
-  const addSlot = <span className={KeyBindingListItemClass.add}>{addButton}</span>;
+  const addSlot = (
+    <span className={KeyBindingListItemClass.add}>
+      {notSetButton}
+      {addButton}
+    </span>
+  );
 
   effect(() => {
     const currentKeys = keys.value;
     const currentCapturedKeyIndex = capturedKeyIndex.value;
-    const focusedKeyIndex = shown?.result.findIndex(element => element.contains(element.ownerDocument.activeElement)) ?? -1;
+    const focusedKeyIndex = shown?.result.findIndex(element => element.contains((element.getRootNode() as Document | ShadowRoot).activeElement)) ?? -1;
+    const replacedElements = [...keysElement.children];
 
     capture = null;
     shown?.dispose();
@@ -214,16 +219,19 @@ export function KeyBindingListItem({
       ...currentKeys.map((key, keyIndex) => (keyIndex === currentCapturedKeyIndex ? createCaptureGroup(keyIndex) : createKey(key, keyIndex))),
       ...currentCapturedKeyIndex === currentKeys.length ? [createCaptureGroup(currentKeys.length)] : []
     ]));
-    keysElement.replaceChildren(...shown.result.length === 0 ? [unbound] : shown.result);
+    keysElement.append(...shown.result);
     addSlot.hidden = currentCapturedKeyIndex !== null || currentKeys.length >= maxKeyCount;
+    notSetButton.hidden = currentKeys.length !== 0;
+    addButton.hidden = currentKeys.length === 0;
 
     if (capture !== null) {
       (capture as HTMLElement).focus();
-      return;
+    } else if (focusedKeyIndex !== -1) {
+      (shown.result.at(focusedKeyIndex) ?? (addSlot.hidden ? shown.result.at(-1) : (currentKeys.length === 0 ? notSetButton : addButton)))?.focus();
     }
 
-    if (focusedKeyIndex !== -1) {
-      (shown.result.at(focusedKeyIndex) ?? (addSlot.hidden ? shown.result.at(-1) : addButton))?.focus();
+    for (const replacedElement of replacedElements) {
+      replacedElement.remove();
     }
   });
   effect(() => {
@@ -236,21 +244,35 @@ export function KeyBindingListItem({
     noticeSlot.replaceChildren(...shownNotice.result === null ? [] : [shownNotice.result]);
   });
   const root: HTMLElement = (
-    <div
+    <ListRow
       className={KeyBindingListItemClass.root}
+      onMousedown={event => {
+        if (capturedKeyIndex.peek() !== null) {
+          event.preventDefault();
+        }
+      }}
+      onClick={event => {
+        if (!addSlot.hidden && !isOnButton(event)) {
+          capturedKeyIndex.value = keys.peek().length;
+        }
+      }}
       onFocusout={event => {
         if (!(event.relatedTarget instanceof Node && root.contains(event.relatedTarget))) {
           endCapture();
         }
       }}
     >
-      <span className={KeyBindingListItemClass.label}>{label}</span>
-      {keysElement}
+      <span className={KeyBindingListItemClass.label} title={label}>{label}</span>
       {addSlot}
+      {keysElement}
       {noticeSlot}
-    </div>
+    </ListRow>
   );
   return root;
+}
+
+function isOnButton(event: MouseEvent): boolean {
+  return event.composedPath().some(target => target instanceof HTMLButtonElement);
 }
 
 function describeHeldModifiers(event: KeyboardEvent): string {

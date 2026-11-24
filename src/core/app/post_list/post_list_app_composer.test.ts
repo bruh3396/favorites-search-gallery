@@ -35,7 +35,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remoteMedia: new MemoryRemoteMedia(),
     remotePages: new MemoryRemotePages(new MemoryClient(posts)),
     remotePostList,
-    localKeyedValues,
+    storedValueStorage: localKeyedValues,
     navigator: new MemoryNavigator(),
     fileSaver: new MemoryFileSaver(),
     hostPage: new MemoryHostPage()

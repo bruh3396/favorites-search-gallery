@@ -47,45 +47,45 @@ export function FavoritesSettings(props: FavoritesSettingsProps): HTMLElement {
 function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePreview, stepperScheduler }: FavoritesSettingsProps): SettingDescriptor[] {
   return [
     {
-      id: "postListEnabled", kind: "switch", label: "Enhanced Posts Page", keywords: ["post list", "search", "enhance", "run"],
+      id: "postListEnabled", kind: "switch", label: "Enhanced Posts Page",
       settingPreference: sharedPreferences.postListEnabled
     },
     {
-      id: "lightboxMode", kind: "choice", label: "Gallery", keywords: ["lightbox", "viewer", "click", "simple", "zoom"], control: "segmented",
+      id: "lightboxMode", kind: "choice", label: "Gallery", control: "segmented",
       settingPreference: favoritesPreferences.lightbox.mode, members: LIGHTBOX_MODES, labels: LIGHTBOX_MODE_LABELS
     },
     {
-      id: "theme", kind: "choice", label: "Theme", keywords: ["colors", "palette", "accent"], control: "dropdown",
+      id: "theme", kind: "choice", label: "Theme", control: "dropdown",
       settingPreference: sharedPreferences.theme, members: THEMES, labels: THEME_LABELS, onPreview: onThemePreview
     },
     {
-      id: "colorScheme", kind: "choice", label: "Color Scheme", keywords: ["color", "theme", "dark", "light"], control: "segmented",
+      id: "colorScheme", kind: "choice", label: "Color Scheme", control: "segmented",
       settingPreference: sharedPreferences.colorScheme, members: COLOR_SCHEMES, labels: COLOR_SCHEME_LABELS, icons: COLOR_SCHEME_ICONS
     },
     {
-      id: "nativeHeaderVisible", kind: "switch", label: "Header", keywords: ["site header", "native header", "navigation"],
+      id: "nativeHeaderVisible", kind: "switch", label: "Header",
       settingPreference: favoritesPreferences.nativeHeaderVisible
     },
     {
-      id: "hdTilesEnabled", kind: "switch", label: "HD", keywords: ["hd tiles", "thumbnails", "quality", "resolution", "full size"],
+      id: "hdTilesEnabled", kind: "switch", label: "HD",
       settingPreference: favoritesPreferences.grid.hdTilesEnabled
     },
     {
-      id: "layout", kind: "choice", label: "Layout", keywords: ["grid", "arrangement"], control: "segmented",
+      id: "layout", kind: "choice", label: "Layout", control: "segmented",
       settingPreference: favoritesPreferences.grid.layout, members: FAVORITES_GRID_LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
     },
     {
-      id: "tileSize", kind: "slider", label: "Size", keywords: ["tile size", "tiles per row", "columns", "zoom", "grid"],
+      id: "tileSize", kind: "slider", label: "Size",
       settingPreference: favoritesPreferences.grid.columnCount, ...FAVORITES_SETTING_RANGES.columnCount, inverted: true,
       disabled: computed(() => favoritesPreferences.grid.layout.value === "native")
     },
     {
-      id: "pageSize", kind: "number", label: "Size", keywords: ["results per page", "count", "pagination"],
+      id: "pageSize", kind: "number", label: "Size",
       settingPreference: favoritesPreferences.pagination.pageSize, ...FAVORITES_SETTING_RANGES.pageSize, stepperScheduler,
       disabled: favoritesPreferences.pagination.infiniteScroll
     },
     {
-      id: "infiniteScroll", kind: "switch", label: "Infinite Scroll", keywords: ["pagination", "scroll"],
+      id: "infiniteScroll", kind: "switch", label: "Infinite Scroll",
       settingPreference: favoritesPreferences.pagination.infiniteScroll
     }
   ];

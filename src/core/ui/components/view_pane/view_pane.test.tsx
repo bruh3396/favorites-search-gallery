@@ -40,6 +40,18 @@ describe("ViewPane", () => {
     expect([element.contains(subheader), body.contains(subheader), body.textContent]).toEqual([true, false, "Body"]);
   });
 
+  test("keeps its search out of the scrolling body", () => {
+    const search = document.createElement("input");
+    const element = render(document, () => (
+      <ViewPane title="Shortcuts" searchChild={search}>
+        <p>Body</p>
+      </ViewPane>
+    )).result;
+    const body = element.querySelector(`.${ViewPaneClass.body}`)!;
+
+    expect([element.contains(search), body.contains(search), body.textContent]).toEqual([true, false, "Body"]);
+  });
+
   test("calls an action when its button is clicked", () => {
     const onClick = vi.fn();
     const element = setup([{ label: "Reset all", icon: "reset", onClick }]);

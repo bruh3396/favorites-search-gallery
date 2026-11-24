@@ -1,0 +1,45 @@
+.fsg-SnippetRow {
+  position: relative;
+  gap: 8px;
+}
+
+.fsg-SnippetRow-name {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.fsg-SnippetRow-name::after {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--fsg-shape-corner-extra-small);
+  content: "";
+}
+
+.fsg-SnippetRow-name:focus-visible {
+  outline: none;
+}
+
+.fsg-SnippetRow-name:focus-visible::after {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: -2px;
+}
+
+.fsg-SnippetRow-edit {
+  position: relative;
+  visibility: hidden;
+}
+
+.fsg-SnippetRow:where(:hover, :focus-within) .fsg-SnippetRow-edit {
+  visibility: visible;
+}

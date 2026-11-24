@@ -12,6 +12,7 @@ import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewp
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
+import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/indexed_db_local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
@@ -32,8 +33,9 @@ function createDemoDependencies(): FavoritesAppDependencies {
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
-    localKeyedValues: new BrowserLocalKeyedValues(),
+    storedValueStorage: new BrowserLocalKeyedValues(),
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),

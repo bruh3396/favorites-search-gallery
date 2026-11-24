@@ -1,29 +1,29 @@
 .fsg-KeyBindingListItem {
-  display: flex;
+  --fsg-KeyCap-block-size: var(--fsg-control-size-small);
+
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
   gap: 4px 8px;
-  min-block-size: calc(var(--fsg-control-size-small) + 12px);
-  padding: 6px 8px 6px 14px;
 }
 
 .fsg-KeyBindingListItem-label {
+  flex: 1 1 0;
   min-inline-size: 0;
+  overflow: hidden;
   font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .fsg-KeyBindingListItem-keys {
   display: flex;
-  margin-inline-start: auto;
   flex: none;
   align-items: center;
-  gap: 4px;
   font-size: 13px;
 }
 
 .fsg-KeyBindingListItem-key {
-  padding: 0;
+  display: flex;
+  padding: 0 2px;
   border: none;
   border-radius: 4px;
   background: none;
@@ -33,13 +33,14 @@
 }
 
 .fsg-KeyBindingListItem-key:hover {
-  color: var(--fsg-color-primary);
+  --fsg-KeyCap-border-color: var(--fsg-color-primary);
 }
 
 .fsg-KeyBindingListItem-captureGroup {
   display: flex;
   align-items: center;
   gap: 4px;
+  padding-inline: 2px;
 }
 
 .fsg-KeyBindingListItem-captureActions {
@@ -48,32 +49,68 @@
 }
 
 .fsg-KeyBindingListItem-add {
+  display: flex;
   flex: none;
   opacity: 0;
 }
 
-.fsg-KeyBindingListItem:hover .fsg-KeyBindingListItem-add,
-.fsg-KeyBindingListItem-add:focus-within {
+.fsg-KeyBindingListItem-add[hidden] {
+  display: flex;
+  visibility: hidden;
+}
+
+.fsg-KeyBindingListItem-add:has(:focus-visible, .fsg-KeyBindingListItem-notSet:not([hidden])) {
   opacity: 1;
 }
 
+.fsg-KeyBindingListItem-keys:empty {
+  display: none;
+}
+
+.fsg-KeyBindingListItem-notSet {
+  display: flex;
+  margin-inline: 2px;
+  block-size: var(--fsg-control-size-small);
+  padding: 0 0.45em;
+  align-items: center;
+  border: 1px dashed var(--fsg-color-outline);
+  border-radius: 4px;
+  background: none;
+  color: var(--fsg-color-on-surface-variant);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.fsg-KeyBindingListItem-notSet:hover {
+  border-color: var(--fsg-color-primary);
+  color: var(--fsg-color-primary);
+}
+
+.fsg-KeyBindingListItem-notSet:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: -2px;
+}
+
+.fsg-KeyBindingListItem:has(.fsg-KeyBindingListItem-add:not([hidden])) {
+  cursor: pointer;
+}
+
 .fsg-KeyBindingListItem-capture {
-  padding: 0.15em 0.45em;
+  display: flex;
+  box-sizing: border-box;
+  block-size: var(--fsg-control-size-small);
+  padding: 0 0.45em;
+  align-items: center;
   border: 1px dashed var(--fsg-color-primary);
   border-radius: 4px;
   background: none;
   color: var(--fsg-color-primary);
   font: inherit;
   font-size: 0.9em;
-  line-height: 1.2;
   outline: none;
 }
 
 .fsg-KeyBindingListItem-notice {
   flex-basis: 100%;
-}
-
-.fsg-KeyBindingListItem-unbound {
-  padding-inline: 6px;
-  color: var(--fsg-color-on-surface-variant);
 }

@@ -21,7 +21,7 @@ const SCHEMA = {
 };
 
 describe("createStoredTree", () => {
-  test("stores each preference under its name, inside one section per nested schema", () => {
+  test("stores each preference under its name, inside one branch per nested schema", () => {
     const storage = createStorage({ panel: { size: 4 } });
     const { panel, volume } = createStoredTree(SCHEMA, storage, ["panel", "volume"]);
 
@@ -36,7 +36,7 @@ describe("createStoredTree", () => {
     expect(Object.keys(createStoredTree(SCHEMA, createStorage(), ["other"]))).toEqual(["other"]);
   });
 
-  test("keeps sibling sections' stored values when one section writes", () => {
+  test("keeps sibling branches' stored values when one branch writes", () => {
     const storage = createStorage({ other: { size: 3 } });
 
     createStoredTree(SCHEMA, storage, ["panel"]).panel.size.set(2);
@@ -46,7 +46,7 @@ describe("createStoredTree", () => {
   describe("a map", () => {
     const MAP_SCHEMA = { owners: new StoredMapDefinition({ size: createStoredValueDefinition(6), view: { dense: createStoredValueDefinition(false) } }) };
 
-    test("stores each key's entry in its own section", () => {
+    test("stores each key's entry in its own branch", () => {
       const storage = createStorage({ owners: { a: { size: 4 } } });
       const { owners } = createStoredTree(MAP_SCHEMA, storage, ["owners"]);
 

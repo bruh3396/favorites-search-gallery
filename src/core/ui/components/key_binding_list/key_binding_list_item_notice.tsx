@@ -1,4 +1,4 @@
-import { TextButton } from "@/core/ui/components/text_button/text_button";
+import { Chip } from "@/core/ui/components/chip/chip";
 import { h } from "@/core/ui/h/h";
 
 export const KeyBindingListItemNoticeClass = {
@@ -21,7 +21,7 @@ export function KeyBindingListItemNotice({ message, actions: keyBindingListItemN
     <div className={KeyBindingListItemNoticeClass.root}>
       {message}
       <span className={KeyBindingListItemNoticeClass.actions}>
-        {keyBindingListItemNoticeActions.map(({ label, onClick }) => <TextButton label={label} onClick={onClick} />)}
+        {keyBindingListItemNoticeActions.map(({ label, onClick }) => <Chip label={label} onClick={onClick} />)}
       </span>
     </div>
   );

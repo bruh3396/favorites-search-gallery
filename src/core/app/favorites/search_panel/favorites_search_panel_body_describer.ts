@@ -46,7 +46,7 @@ function describeNoMatches(query: string, { isFiltered, isLoading }: { isFiltere
   }
 
   if (isFiltered) {
-    return `No favorites match these filters${suffix}`;
+    return `No favorites match the search options${suffix}`;
   }
   return "No favorites yet";
 }

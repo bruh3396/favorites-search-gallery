@@ -8,6 +8,7 @@ export const ViewPaneClass = {
   header: "fsg-ViewPane-header",
   title: "fsg-ViewPane-title",
   toolbar: "fsg-ViewPane-toolbar",
+  search: "fsg-ViewPane-search",
   body: "fsg-ViewPane-body"
 } as const;
 
@@ -21,11 +22,12 @@ export interface ViewPaneAction {
 export interface ViewPaneProps {
   title: string;
   actions?: readonly ViewPaneAction[];
+  searchChild?: Child;
   subheaderChild?: Child;
   children?: Child;
 }
 
-export function ViewPane({ title, actions: viewPaneActions = [], subheaderChild, children }: ViewPaneProps): HTMLElement {
+export function ViewPane({ title, actions: viewPaneActions = [], searchChild, subheaderChild, children }: ViewPaneProps): HTMLElement {
   return (
     <section className={ViewPaneClass.root}>
       <header className={ViewPaneClass.header}>
@@ -42,6 +44,7 @@ export function ViewPane({ title, actions: viewPaneActions = [], subheaderChild,
           ))}
         </div>
       </header>
+      {searchChild !== undefined && <div className={ViewPaneClass.search}>{searchChild}</div>}
       {subheaderChild}
       <div className={ViewPaneClass.body}>{children}</div>
     </section>

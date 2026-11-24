@@ -122,7 +122,7 @@ export async function importRealDatabases(): Promise<string> {
 
   await deleteRealDatabases();
   await Promise.all(databaseBackups.map(writeDatabase));
-  return `Imported ${databaseBackups.map(databaseBackup => databaseBackup.database).join(", ")}. Open your favorites page without &lab.`;
+  return `Imported ${databaseBackups.map(databaseBackup => databaseBackup.database).join(", ")}. Open the favorites page without &lab.`;
 }
 
 export function requestPurge(): void {

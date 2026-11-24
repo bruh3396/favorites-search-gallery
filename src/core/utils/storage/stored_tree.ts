@@ -4,6 +4,7 @@ import { StoredMapDefinition } from "@/core/utils/storage/stored_map_definition"
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
+import { createBranchStoredValueStorage } from "@/core/utils/storage/branch_stored_value_storage";
 import { isRecord } from "@/core/utils/guard/unknown_utilities";
 
 export type StoredTree<S> = {
@@ -25,16 +26,16 @@ function createNode(key: string, node: unknown, storedValueStorage: StoredValueS
   if (isDefinition(node)) {
     return new KeyedStoredValue({ key, defaultValue: node.defaultValue }, { storedValueStorage, codec: node.codec });
   }
-  const sectionStoredValueStorage = createSectionStorage(key, storedValueStorage);
+  const branchStoredValueStorage = createBranchStoredValueStorage(key, storedValueStorage);
 
   if (node instanceof StoredMapDefinition) {
-    return createMap(node.entry as object, sectionStoredValueStorage);
+    return createMap(node.entry as object, branchStoredValueStorage);
   }
-  return createSection(node as object, sectionStoredValueStorage);
+  return createBranch(node as object, branchStoredValueStorage);
 }
 
-function createSection(node: object, sectionStoredValueStorage: StoredValueStorage): unknown {
-  return Object.fromEntries(Object.entries(node).map(([childKey, child]) => [childKey, createNode(childKey, child, sectionStoredValueStorage)]));
+function createBranch(node: object, branchStoredValueStorage: StoredValueStorage): unknown {
+  return Object.fromEntries(Object.entries(node).map(([childKey, child]) => [childKey, createNode(childKey, child, branchStoredValueStorage)]));
 }
 
 function createMap(entry: object, storedValueStorage: StoredValueStorage): StoredMap<object> {
@@ -42,21 +43,10 @@ function createMap(entry: object, storedValueStorage: StoredValueStorage): Store
   return {
     get: (key): StoredTree<object> => {
       if (!entries.has(key)) {
-        entries.set(key, createSection(entry, createSectionStorage(key, storedValueStorage)));
+        entries.set(key, createBranch(entry, createBranchStoredValueStorage(key, storedValueStorage)));
       }
       return entries.get(key) as StoredTree<object>;
     }
-  };
-}
-
-function createSectionStorage(name: string, parentStoredValueStorage: StoredValueStorage): StoredValueStorage {
-  const read = (): Record<string, unknown> => {
-    const stored = parentStoredValueStorage.get(name);
-    return isRecord(stored) ? stored : {};
-  };
-  return {
-    get: key => read()[key],
-    set: (key, value): void => parentStoredValueStorage.set(name, { ...read(), [key]: value })
   };
 }
 

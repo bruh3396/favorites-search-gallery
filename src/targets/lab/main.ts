@@ -17,9 +17,9 @@ import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_o
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
+import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/indexed_db_local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
 import { MediaMinter } from "@/core/domain/media/media_minter";
-import { NamespacedLocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/namespaced_local_keyed_values";
 import { Rule34CdnClient } from "@/adapters/rule34_cdn/client/rule34_cdn_client";
 import { Rule34CdnRemoteMedia } from "@/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
@@ -30,6 +30,7 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { applyPendingPurge } from "@/targets/lab/real_data";
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { createAppStorage } from "@/core/app/storage/app_storage";
+import { createBranchStoredValueStorage } from "@/core/utils/storage/branch_stored_value_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { mountLabScreen } from "@/targets/lab/lab_screen";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
@@ -39,7 +40,7 @@ declare const SCRIPT_VERSION: string;
 interface LabBase {
   readonly scheduler: FavoritesAppDependencies["scheduler"];
   readonly hostPage: FavoritesAppDependencies["hostPage"];
-  readonly localKeyedValues: FavoritesAppDependencies["localKeyedValues"];
+  readonly storedValueStorage: FavoritesAppDependencies["storedValueStorage"];
 }
 
 function createFavoritesAppDependencies(environment: Environment, rule34Document: Rule34Document, labBase: LabBase): FavoritesAppDependencies {
@@ -62,6 +63,7 @@ function createFavoritesAppDependencies(environment: Environment, rule34Document
     confirmer: new BrowserConfirmer(),
     localFavorites: new IndexedDbLocalFavorites({ ownerId: environment.favoritesOwnerId }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
+    localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
     remoteFavorites: UNCHANGED_REMOTE_FAVORITES,
     remotePosts: UNAVAILABLE_REMOTE_POSTS,
@@ -101,9 +103,9 @@ async function main(): Promise<void> {
   const environment = { version: SCRIPT_VERSION, ...readBrowserEnvironment(), ...hostEnvironment, favoritesOwnerId: LAB_OWNER_ID };
   const scheduler = new BrowserScheduler();
   const hostPage = new Rule34HostPage({ appMode: environment.appMode }, { rule34Document, claimBodyContent });
-  const localKeyedValues = new NamespacedLocalKeyedValues({ namespace: LAB_NAMESPACE }, new BrowserLocalKeyedValues());
+  const storedValueStorage = createBranchStoredValueStorage(LAB_NAMESPACE, new BrowserLocalKeyedValues());
   const labContainer = hostPage.claimContent();
-  const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["favorites"]).favorites;
+  const { nativeHeaderVisible } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(storedValueStorage).preferences, ["favorites"]).favorites;
 
   hostPage.setHeaderVisible(nativeHeaderVisible.value);
   nativeHeaderVisible.changed.on(visible => hostPage.setHeaderVisible(visible));
@@ -118,7 +120,7 @@ async function main(): Promise<void> {
     nativeHeaderVisible,
     onStart: () => {
       labContainer.remove();
-      startApp(environment, createFavoritesAppDependencies(environment, rule34Document, { scheduler, hostPage, localKeyedValues }), hostPage.claimContent());
+      startApp(environment, createFavoritesAppDependencies(environment, rule34Document, { scheduler, hostPage, storedValueStorage }), hostPage.claimContent());
     }
   });
   postCount.value = await readCorpusSize();

@@ -18,7 +18,7 @@ describe("describeFavoritesSearchPanelBody", () => {
 
   test.each([
     { input: { query: "cat", isFiltered: true }, message: "No favorites match \"cat\"", offersClear: true },
-    { input: { isFiltered: true }, message: "No favorites match these filters", offersClear: true },
+    { input: { isFiltered: true }, message: "No favorites match the search options", offersClear: true },
     { input: {}, message: "No favorites yet", offersClear: false }
   ])("says $message once searchable and loaded", ({ input, message, offersClear }) => {
     expect(describeWith({ isSearchable: true, loadPhase: "loaded", ...input })).toEqual({ kind: "empty", message, offersClear });
@@ -26,7 +26,7 @@ describe("describeFavoritesSearchPanelBody", () => {
 
   test.each([
     { input: { query: "cat", isFiltered: true }, message: "No favorites match \"cat\" yet" },
-    { input: { isFiltered: true }, message: "No favorites match these filters yet" }
+    { input: { isFiltered: true }, message: "No favorites match the search options yet" }
   ])("says $message while favorites still load", ({ input, message }) => {
     expect(describeWith({ isSearchable: true, ...input })).toEqual({ kind: "empty", message, offersClear: true });
   });

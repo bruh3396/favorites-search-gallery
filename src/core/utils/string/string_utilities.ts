@@ -72,6 +72,15 @@ export function listPrefixes(word: string): string[] {
   return prefixes;
 }
 
+export function splitSearchWords(searchText: string): string[] {
+  return searchText.toLowerCase().split(/\s+/u).filter(searchWord => searchWord !== "");
+}
+
+export function containsEverySearchWord(text: string, searchWords: readonly string[]): boolean {
+  const lowercasedText = text.toLowerCase();
+  return searchWords.every(searchWord => lowercasedText.includes(searchWord));
+}
+
 export function listSubstrings(word: string): string[] {
   const substrings: string[] = [];
 

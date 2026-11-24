@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  block-size: 28px;
+  block-size: 30px;
   box-sizing: border-box;
   padding-inline: 8px;
   border-radius: var(--fsg-shape-corner-small);

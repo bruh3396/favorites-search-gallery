@@ -23,8 +23,8 @@ import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_wor
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
-import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
+import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { MountableApp } from "@/core/app/mountable_app";
 import { Navigator } from "@/core/boundary/ports/navigator/navigator";
@@ -33,8 +33,12 @@ import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
+import { SNIPPETS_TOOL } from "@/core/features/snippets/snippets_tool";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
+import { SnippetLibrary } from "@/core/features/snippets/snippet_library";
+import { SnippetsPane } from "@/core/features/snippets/snippets_pane";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
+import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -61,6 +65,7 @@ export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration
 
 export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "favoritesPaginationPreferences" | "postLibrary"> {
   localPosts: LocalPosts;
+  localSnippets: LocalSnippets;
   localTagCategories: LocalTagCategories;
   remotePosts: RemotePosts;
   remoteMedia: RemoteMedia;
@@ -68,7 +73,7 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
   sizeObserver: SizeObserver;
   viewport: Viewport;
   remotePages: RemotePages;
-  localKeyedValues: LocalKeyedValues;
+  storedValueStorage: StoredValueStorage;
   navigator: Navigator;
   fileSaver: FileSaver;
   clipboard: Clipboard;
@@ -79,8 +84,8 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
   const { favoritesOwnerId, colorScheme } = configuration;
   const { localFavorites, localPosts, localTagCategories, remoteFavorites, remotePosts, remoteMedia, remotePages, scheduler, randomSource } = dependencies;
-  const { localKeyedValues, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard, confirmer } = dependencies;
-  const appStorage = createAppStorage(localKeyedValues);
+  const { storedValueStorage, localSnippets, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard, confirmer } = dependencies;
+  const appStorage = createAppStorage(storedValueStorage);
   const sharedPreferences = createSharedPreferences(appStorage.preferences, colorScheme, hostPage);
   const appPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites", "postList"]);
   const { favorites: favoritesPreferences, postList: postListPreferences } = appPreferences;
@@ -110,6 +115,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     sizes: ownerState.sizes, scheduler,
     results: computed(() => favoritesWorkspace.activeTab.value.session.matchedFavorites.value)
   });
+  const snippetLibrary = new SnippetLibrary({ localSnippets, scheduler });
   const lightboxPreferences = favoritesPreferences.lightbox;
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightboxKeyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_LIGHTBOX_KEY_BINDINGS, sharedPreferences.lightboxKeyBindingOverrides.value));
@@ -187,6 +193,23 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
                 lightboxKeyBindings, lightboxKeyBindingOverrides: sharedPreferences.lightboxKeyBindingOverrides,
                 confirmer
               })
+            },
+            {
+              ...SNIPPETS_TOOL,
+              renderView: (): HTMLElement => h(SnippetsPane, {
+                snippets: snippetLibrary.snippets,
+                isNameTaken: (name, previousName) => snippetLibrary.isNameTaken(name, previousName),
+                save: (draftSnippet, previousName): void => {
+                  void snippetLibrary.save(draftSnippet, previousName);
+                },
+                remove: (name): void => {
+                  void snippetLibrary.remove(name);
+                },
+                open: (snippet): void => {
+                  void snippetLibrary.recordUse(snippet.name);
+                  favoritesWorkspace.searchInNewTab(snippet.query);
+                }
+              })
             }
           ],
           value: favoritesPreferences.activeTool,
@@ -228,6 +251,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         windowFill.refit();
       });
       favoritesService.load().catch(console.error);
+      snippetLibrary.load().catch(console.error);
     }
   };
 }

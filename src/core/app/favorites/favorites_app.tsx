@@ -3,7 +3,6 @@ import { Readable, computed, effect, untracked } from "@/core/utils/reactive/sig
 import { Scoped, captureScope } from "@/core/utils/reactive/scope";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
-import FAVORITES_KEY_BINDINGS_CSS from "@/core/app/favorites/key_bindings/favorites_key_bindings.css?inline";
 import FAVORITES_SEARCH_OPTIONS_ROW_CSS from "@/core/app/favorites/search_options/favorites_search_options_row.css?inline";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
@@ -14,6 +13,7 @@ import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbo
 import LIGHTBOX_TAGS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_tags.css?inline";
 import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
+import SNIPPETS_CSS from "@/core/features/snippets/styles.css?inline";
 import { TabPanel } from "@/core/ui/components/tabs/tab_panel";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { formatKeyLabel } from "@/core/ui/key_bindings/key_label_formatter";
@@ -24,7 +24,7 @@ export const FAVORITES_APP_STYLES = [
   APP_CSS,
   SEARCH_PANEL_CSS,
   FAVORITES_SEARCH_OPTIONS_ROW_CSS,
-  FAVORITES_KEY_BINDINGS_CSS,
+  SNIPPETS_CSS,
   LIGHTBOX_CSS,
   LIGHTBOX_DETAILS_CSS,
   LIGHTBOX_TAGS_CSS,

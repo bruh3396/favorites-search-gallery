@@ -34,32 +34,19 @@ function createSwitchSetting(id: string, settingPreference = createStoredValue(f
 interface Setup {
   element: HTMLElement;
   dispose: () => void;
-  query: Signal<string>;
   sections: HTMLElement[];
 }
 
 function setup(partialSettingsScreenProps: Partial<SettingsScreenProps> = {}): Setup {
-  const query = new Signal("");
   const switchSettingDescriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
   const { result: element, dispose } = render(document, () => (
-    <SettingsScreen
-      settingsLayout={LAYOUT}
-      settingDescriptors={switchSettingDescriptors}
-      query={query}
-      {...partialSettingsScreenProps}
-    />
+    <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={switchSettingDescriptors} {...partialSettingsScreenProps} />
   ));
-  return { element, dispose, query, sections: [...element.querySelectorAll<HTMLElement>("section")] };
+  return { element, dispose, sections: [...element.querySelectorAll<HTMLElement>("section")] };
 }
 
 function readLabels(element: HTMLElement): string[] {
   return [...element.querySelectorAll(".fsg-SettingRow-label")].map(label => label.textContent ?? "");
-}
-
-function readVisibleLabels(element: HTMLElement): string[] {
-  return [...element.querySelectorAll<HTMLElement>(".fsg-SettingRow")]
-    .filter(row => !row.hidden)
-    .map(row => row.querySelector(".fsg-SettingRow-label")?.textContent ?? "");
 }
 
 describe("SettingsScreen", () => {
@@ -87,39 +74,14 @@ describe("SettingsScreen", () => {
     expect(new Set([element.dataset.size, ...sizes])).toEqual(new Set(["small"]));
   });
 
-  test("shows only the rows a query matches, and only the sections holding one", () => {
-    const { element, sections, query } = setup();
-
-    query.value = "hints";
-    expect(readVisibleLabels(element)).toEqual(["hints"]);
-    expect(sections.map(section => section.hidden)).toEqual([false, true]);
-  });
-
-  test("shows every row when given no query", () => {
-    const { element } = setup({ query: undefined });
-
-    expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
-  });
-
-  test("shows every row again when the query is cleared", () => {
-    const { element, sections, query } = setup();
-
-    query.value = "loop";
-    query.value = "  ";
-    expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
-    expect(sections.map(section => section.hidden)).toEqual([false, false]);
-  });
-
-  test("stops following its preferences and query once disposed", () => {
+  test("stops following its preferences once disposed", () => {
     const settingPreference = createStoredValue(false);
     const switchSettingDescriptors = [createSwitchSetting("hints", settingPreference), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
-    const { element, query, dispose } = setup({ settingDescriptors: switchSettingDescriptors });
+    const { element, dispose } = setup({ settingDescriptors: switchSettingDescriptors });
 
     dispose();
     settingPreference.set(true);
-    query.value = "loop";
     expect(element.querySelector("[role=switch]")?.getAttribute("aria-checked")).toBe("false");
-    expect(readVisibleLabels(element)).toEqual(["hints", "autoplay", "loop"]);
   });
 
   test("styles every class it sets", () => {

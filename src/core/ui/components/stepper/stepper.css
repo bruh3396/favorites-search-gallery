@@ -38,7 +38,7 @@
   display: grid;
   place-items: center;
   inline-size: 24px;
-  border-radius: calc(var(--fsg-shape-corner-small) - 2px);
+  border-radius: var(--fsg-shape-corner-extra-small);
   color: var(--fsg-color-on-surface-variant);
   cursor: pointer;
   user-select: none;

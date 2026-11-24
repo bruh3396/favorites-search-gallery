@@ -1,0 +1,11 @@
+.fsg-ListRow {
+  display: flex;
+  align-items: center;
+  min-block-size: calc(var(--fsg-control-size-medium) + 8px);
+  padding: 4px 4px 4px 8px;
+  border-radius: var(--fsg-shape-corner-extra-small);
+}
+
+.fsg-ListRow:where(:hover, :focus-within) {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}

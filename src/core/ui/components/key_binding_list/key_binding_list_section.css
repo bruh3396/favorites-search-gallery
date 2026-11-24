@@ -1,11 +1,5 @@
 .fsg-KeyBindingListSection {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  border-radius: var(--fsg-shape-corner-small);
-  background: var(--fsg-color-surface-container-high);
-}
-
-.fsg-KeyBindingListSection > :not([hidden]) ~ :not([hidden]) {
-  border-block-start: 1px solid var(--fsg-color-outline-variant);
+  gap: 4px;
 }

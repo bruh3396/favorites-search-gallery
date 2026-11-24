@@ -31,7 +31,7 @@ const AREAS: readonly { labArea: LabArea; title: string }[] = [
   { labArea: "settings", title: "Settings" }
 ];
 const FAVORITE_COUNT_STEP = 10_000;
-const IMPORT_WARNING = "Replace your real favorites databases with the ones in a backup file?";
+const IMPORT_WARNING = "Replace the real favorites databases with the ones in a backup file?";
 const PURGE_WARNING = "Delete every IndexedDB database except the lab's (real favorites included) and all localStorage on this site?";
 const RESET_WARNING = "Delete every lab post and favorite?";
 

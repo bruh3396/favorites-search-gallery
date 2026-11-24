@@ -6,7 +6,7 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 function setup(partialIconButtonProps: Partial<IconButtonProps> = {}): HTMLButtonElement {
-  return render(document, () => <IconButton icon="scan" label="Zen" onClick={() => undefined} {...partialIconButtonProps} />).result as HTMLButtonElement;
+  return render(document, () => <IconButton icon="leaf" label="Zen" onClick={() => undefined} {...partialIconButtonProps} />).result as HTMLButtonElement;
 }
 
 describe("IconButton", () => {

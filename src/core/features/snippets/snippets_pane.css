@@ -1,0 +1,9 @@
+.fsg-SnippetsPane-body {
+  padding: 8px 8px 12px;
+}
+
+.fsg-SnippetsPane-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

@@ -4,7 +4,7 @@ import { Size } from "@/core/utils/geometry/size";
 const DECODE_WIDTHS = [256, 384, 512, 768, 1_024, 1_536, 2_048, 3_072] as const;
 const MAX_DECODE_WIDTH = DECODE_WIDTHS[DECODE_WIDTHS.length - 1];
 const MIN_DECODE_WIDTH = 100;
-const OVERSAMPLE = 2;
+const OVERSAMPLE = 1;
 
 export function pickDecodeWidth({ layout, columnCount, gridWidth }: GridSizing, { width, height }: Size, oversample = OVERSAMPLE): number {
   if (layout === "native" || gridWidth <= 0 || columnCount <= 0) {

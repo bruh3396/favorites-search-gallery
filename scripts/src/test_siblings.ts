@@ -26,6 +26,7 @@ const UNTESTED: Readonly<Record<string, string>> = {
   "src/core/features/favorites/search/favorites_sort_key.ts": OPTION_LIST,
   "src/core/features/lightbox/commands/lightbox_command.ts": COMMAND_LIST,
   "src/core/features/lightbox/lightbox_mode.ts": OPTION_LIST,
+  "src/core/features/snippets/snippets_tool.ts": TOOL,
   "src/core/ui/fonts/default_app_font.ts": "an alias of another font; no behavior to test",
   "src/core/ui/fonts/geist_font.ts": FONT,
   "src/core/ui/fonts/instrument_font.ts": FONT,

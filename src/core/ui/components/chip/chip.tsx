@@ -9,19 +9,21 @@ export const ChipClass = {
 export interface ChipProps {
   label: string;
   value?: Reactive<string>;
-  highlighted: Readable<boolean>;
+  highlighted?: Readable<boolean>;
   pressed?: Readable<boolean>;
+  disabled?: Readable<boolean>;
   onClick?: () => void;
   children?: Child;
 }
 
-export function Chip({ label, value, highlighted, pressed, onClick, children }: ChipProps): HTMLElement {
+export function Chip({ label, value, highlighted, pressed, disabled, onClick, children }: ChipProps): HTMLElement {
   return (
     <button
       className={ChipClass.root}
       type="button"
-      dataset={{ highlighted: computed(() => String(highlighted.value)) }}
+      dataset={{ highlighted: computed(() => String(highlighted?.value ?? false)) }}
       aria-pressed={pressed === undefined ? undefined : computed(() => String(pressed.value))}
+      disabled={disabled}
       onClick={onClick}
     >
       {value === undefined ? label : <span className={ChipClass.label}>{label}</span>}

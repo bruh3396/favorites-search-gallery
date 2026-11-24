@@ -1,4 +1,5 @@
 import { Signal, computed } from "@/core/utils/reactive/signal";
+import { containsEverySearchWord, splitSearchWords } from "@/core/utils/string/string_utilities";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
 import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
 import { FavoritesKeyBindingsRow } from "@/core/app/favorites/key_bindings/favorites_key_bindings_row";
@@ -13,10 +14,6 @@ import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 import { formatKeyLabel } from "@/core/ui/key_bindings/key_label_formatter";
 import { h } from "@/core/ui/h/h";
 
-export const FavoritesKeyBindingsClass = {
-  searchField: "fsg-FavoritesKeyBindings-searchField"
-} as const;
-
 export interface FavoritesKeyBindingsProps {
   sections: readonly FavoritesKeyBindingsSection[];
   resetKeyBindings: () => void;
@@ -25,10 +22,11 @@ export interface FavoritesKeyBindingsProps {
 export function FavoritesKeyBindings({ sections: favoritesKeyBindingsSections, resetKeyBindings }: FavoritesKeyBindingsProps): HTMLElement {
   const selectedSectionTitle = new Signal<string>(favoritesKeyBindingsSections[0].title);
   const searchText = new Signal("");
-  const searchWords = computed(() => searchText.value.toLowerCase().split(/\s+/u).filter(searchWord => searchWord !== ""));
+  const searchWords = computed(() => splitSearchWords(searchText.value));
   const isSearching = computed(() => searchWords.value.length > 0);
-  const isRowMatched = (title: string, favoritesKeyBindingsRow: FavoritesKeyBindingsRow): boolean => (
-    matchesSearchWords(searchWords.value, [title, favoritesKeyBindingsRow.label, ...favoritesKeyBindingsRow.keys.value.map(formatKeyLabel)])
+  const isRowMatched = (title: string, favoritesKeyBindingsRow: FavoritesKeyBindingsRow): boolean => containsEverySearchWord(
+    [title, favoritesKeyBindingsRow.label, ...favoritesKeyBindingsRow.keys.value.map(formatKeyLabel)].join("\n"),
+    searchWords.value
   );
   const isSectionMatched = (favoritesKeyBindingsSection: FavoritesKeyBindingsSection): boolean => (
     favoritesKeyBindingsSection.rows.some(favoritesKeyBindingsRow => isRowMatched(favoritesKeyBindingsSection.title, favoritesKeyBindingsRow))
@@ -74,16 +72,16 @@ export function FavoritesKeyBindings({ sections: favoritesKeyBindingsSections, r
     <ViewPane
       title={FAVORITES_KEY_BINDINGS_TOOL.label}
       actions={[{ label: "Reset All Keyboard Shortcuts", icon: "reset", onClick: resetKeyBindings }]}
-      subheaderChild={[
-        <div className={FavoritesKeyBindingsClass.searchField}>
-          <SearchField
-            label="Search Keyboard Shortcuts"
-            value={searchText}
-            onValueChange={value => {
-              searchText.value = value;
-            }}
-          />
-        </div>,
+      searchChild={
+        <SearchField
+          label="Search Keyboard Shortcuts"
+          value={searchText}
+          onValueChange={value => {
+            searchText.value = value;
+          }}
+        />
+      }
+      subheaderChild={
         <div hidden={isSearching}>
           <TabList
             label="Keyboard Shortcut Groups"
@@ -96,14 +94,9 @@ export function FavoritesKeyBindings({ sections: favoritesKeyBindingsSections, r
             }}
           />
         </div>
-      ]}
+      }
     >
       {panel}
     </ViewPane>
   );
-}
-
-function matchesSearchWords(searchWords: readonly string[], searchedTexts: readonly string[]): boolean {
-  const searchedText = searchedTexts.join(" ").toLowerCase();
-  return searchWords.every(searchWord => searchedText.includes(searchWord));
 }

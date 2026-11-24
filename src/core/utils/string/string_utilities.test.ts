@@ -1,4 +1,4 @@
-import { camelToKebabCase, capitalize, compareStrings, computeTrigrams, copyString, escapeParentheses, getPluralSuffix, isEmptyString, isOnlyDigits, listPrefixes, listSubstrings, removeExtraWhitespace, removeLeadingModifiers, removeNonNumericCharacters, replaceSpacesWithUnderscores, snakeToCamelCase, toLowerUnderscored } from "@/core/utils/string/string_utilities";
+import { camelToKebabCase, capitalize, compareStrings, computeTrigrams, containsEverySearchWord, copyString, escapeParentheses, getPluralSuffix, isEmptyString, isOnlyDigits, listPrefixes, listSubstrings, removeExtraWhitespace, removeLeadingModifiers, removeNonNumericCharacters, replaceSpacesWithUnderscores, snakeToCamelCase, splitSearchWords, toLowerUnderscored } from "@/core/utils/string/string_utilities";
 import { describe, expect, test } from "vitest";
 
 describe("toLowerUnderscored", () => {
@@ -341,6 +341,30 @@ describe("listPrefixes", () => {
 
   test("returns nothing for an empty word", () => {
     expect(listPrefixes("")).toStrictEqual([]);
+  });
+});
+
+describe("splitSearchWords", () => {
+  test("lowercases the words, dropping every run of whitespace", () => {
+    expect(splitSearchWords("  Tile\tSIZE \n increase ")).toEqual(["tile", "size", "increase"]);
+  });
+
+  test("returns nothing for blank text", () => {
+    expect(splitSearchWords("   ")).toEqual([]);
+  });
+});
+
+describe("containsEverySearchWord", () => {
+  test("finds every word in any order and any case, inside other words", () => {
+    expect(containsEverySearchWord("Increase Tile Size", ["size", "til"])).toBe(true);
+  });
+
+  test("rejects text missing one of the words", () => {
+    expect(containsEverySearchWord("Increase Tile Size", ["size", "page"])).toBe(false);
+  });
+
+  test("accepts any text when there are no words", () => {
+    expect(containsEverySearchWord("Increase Tile Size", [])).toBe(true);
   });
 });
 

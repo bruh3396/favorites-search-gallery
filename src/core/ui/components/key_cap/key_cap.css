@@ -1,12 +1,18 @@
 .fsg-KeyCap {
-  display: inline-block;
+  display: inline-flex;
+  box-sizing: border-box;
   min-inline-size: 1.6em;
+  block-size: var(--fsg-KeyCap-block-size, auto);
   padding: 0.15em 0.45em;
-  border: 1px solid currentColor;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid var(--fsg-KeyCap-border-color, var(--fsg-color-outline));
   border-radius: 4px;
+  background: var(--fsg-color-surface-container-highest);
+  box-shadow: inset 0 -1px var(--fsg-color-outline-variant);
+  color: var(--fsg-color-on-surface);
   font: inherit;
   font-size: 0.9em;
   line-height: 1.2;
-  text-align: center;
   vertical-align: baseline;
 }

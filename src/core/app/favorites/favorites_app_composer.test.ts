@@ -15,6 +15,7 @@ import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_pa
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryLocalPosts } from "@/adapters/memory/ports/local_posts/memory_local_posts";
+import { MemoryLocalSnippets } from "@/adapters/memory/ports/local_snippets/memory_local_snippets";
 import { MemoryLocalTagCategories } from "@/adapters/memory/ports/local_tag_categories/memory_local_tag_categories";
 import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
@@ -31,6 +32,7 @@ import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { SegmentedClass } from "@/core/ui/components/segmented/segmented";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { SliderClass } from "@/core/ui/components/slider/slider";
+import { SnippetRowClass } from "@/core/features/snippets/snippet_row";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { TabStripClass } from "@/core/ui/components/tabs/tab_strip";
@@ -38,7 +40,9 @@ import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { createPost } from "@/testing/post";
+import { createSnippet } from "@/testing/snippet";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
+import { readKeyBindingListItemText } from "@/testing/key_binding_list_item_text_reader";
 
 const IDLE_VISIBILITY_OBSERVER: VisibilityObserver = { observe: () => (): void => { } };
 
@@ -48,6 +52,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   scheduler = new MemoryScheduler(),
   hostPage = new MemoryHostPage(),
   confirmer = new MemoryConfirmer(),
+  localSnippets = new MemoryLocalSnippets(),
   visibilityObserver = IDLE_VISIBILITY_OBSERVER
 } = {}): ShadowRoot {
   const container = document.createElement("div");
@@ -56,6 +61,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   composeFavoritesApp({ userOwnsFavorites: true, userLoggedIn: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
+    localSnippets,
     localTagCategories: new MemoryLocalTagCategories(),
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePosts: new MemoryRemotePosts(memoryClient),
@@ -66,7 +72,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     remotePages: new MemoryRemotePages(memoryClient),
     scheduler,
     randomSource: new MemoryRandomSource(),
-    localKeyedValues,
+    storedValueStorage: localKeyedValues,
     navigator,
     fileSaver,
     clipboard: new MemoryClipboard(),
@@ -107,7 +113,7 @@ function clickResetSettings(root: ShadowRoot): void {
 }
 
 function readKeyBindingListItem(root: ShadowRoot, label: string): string | undefined {
-  return [...root.querySelectorAll(`.${KeyBindingListItemClass.root}`)].find(item => item.textContent.startsWith(label))?.textContent;
+  return [...root.querySelectorAll(`.${KeyBindingListItemClass.root}`)].map(readKeyBindingListItemText).find(itemText => itemText.startsWith(label));
 }
 
 function clickLightboxButton(root: ShadowRoot, label: string): void {
@@ -347,6 +353,23 @@ describe("composeFavoritesApp", () => {
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Keyboard Shortcuts"]`)!.click();
     root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
     expect([keptKeyBindingOverrides, readKeyBindingListItem(root, "Toggle Zen")]).toEqual([[{ toggleZen: ["x"] }, { showNext: ["n"] }], "Toggle ZenZ"]);
+  });
+
+  test("lists the stored snippets in the Snippets tool, and searches a clicked one's query in a new active tab, recording its use", async() => {
+    const localSnippets = new MemoryLocalSnippets();
+    const scheduler = new MemoryScheduler(1_000);
+
+    await localSnippets.set(createSnippet({ name: "no ai", query: "-ai_generated" }));
+    const root = mount(new MemoryLocalKeyedValues(), [], { localSnippets, scheduler });
+
+    await flushMicrotasks();
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Snippets"]`)!.click();
+    root.querySelector<HTMLButtonElement>(`.${SnippetRowClass.name}`)!.click();
+    await flushMicrotasks();
+    expect([
+      [...root.querySelectorAll("[role=tab]")].map(tab => [tab.textContent, tab.getAttribute("aria-selected")]),
+      (await localSnippets.getAll()).map(snippet => snippet.lastUsedAt)
+    ]).toEqual([[["New", "false"], ["-ai_generated", "true"]], [1_000]]);
   });
 
   test("records the shapes of the active tab's first results after they settle", async() => {
