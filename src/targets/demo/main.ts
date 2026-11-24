@@ -24,6 +24,8 @@ import { claimBodyContent } from "@/adapters/browser/document/body_content_claim
 import { createSamplePosts } from "@/targets/demo/sample_posts";
 import { readBrowserColorScheme } from "@/adapters/browser/environment/browser_color_scheme_reader";
 
+declare const SCRIPT_VERSION: string;
+
 const SAMPLE_POST_COUNT = 300;
 const FAVORITES_OWNER_ID = "demo";
 
@@ -59,5 +61,6 @@ composeFavoritesApp({
   userLoggedIn: true,
   blacklistedTags: [],
   favoritesOwnerId: FAVORITES_OWNER_ID,
-  colorScheme: readBrowserColorScheme()
+  colorScheme: readBrowserColorScheme(),
+  scriptVersion: SCRIPT_VERSION
 }, createDemoDependencies()).mount(claimBodyContent());

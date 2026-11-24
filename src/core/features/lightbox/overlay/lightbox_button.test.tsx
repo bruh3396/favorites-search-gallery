@@ -1,4 +1,4 @@
-import { LIGHTBOX_ICON_PATHS, LightboxIcon } from "@/core/features/lightbox/overlay/lightbox_icon";
+import { ICON_PATHS, Icon } from "@/core/ui/components/icon/icon";
 import { LightboxButton, LightboxButtonClass } from "@/core/features/lightbox/overlay/lightbox_button";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -19,7 +19,7 @@ describe("LightboxButton", () => {
     const { result: button } = render(document, () => <LightboxButton icon="download" label="Download" onClick={vi.fn()} />);
 
     expect([button.getAttribute("aria-label"), button.title]).toEqual(["Download", "Download"]);
-    expect(readIconPath(button)).toBe(LIGHTBOX_ICON_PATHS.download);
+    expect(readIconPath(button)).toBe(ICON_PATHS.download);
     expect(button.hasAttribute("aria-pressed")).toBe(false);
     expect((button as HTMLButtonElement).disabled).toBe(false);
   });
@@ -33,11 +33,11 @@ describe("LightboxButton", () => {
   });
 
   test("swaps its icon when the icon changes", () => {
-    const icon = new Signal<LightboxIcon>("play");
+    const icon = new Signal<Icon>("play");
     const { result: button } = render(document, () => <LightboxButton icon={icon} label="Autoplay" onClick={vi.fn()} />);
 
     icon.value = "pause";
-    expect(readIconPath(button)).toBe(LIGHTBOX_ICON_PATHS.pause);
+    expect(readIconPath(button)).toBe(ICON_PATHS.pause);
   });
 
   test("reports whether it is pressed", () => {

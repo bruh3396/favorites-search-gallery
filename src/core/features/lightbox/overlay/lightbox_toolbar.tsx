@@ -39,7 +39,7 @@ export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, lead
         pressed={inFullscreen}
         onClick={handlers.toggleFullscreen}
       />
-      <LightboxButton icon="close" label="Close" onClick={handlers.close} />
+      <LightboxButton icon="closeLarge" label="Close" onClick={handlers.close} />
     </div>
   ) as HTMLElement;
 }

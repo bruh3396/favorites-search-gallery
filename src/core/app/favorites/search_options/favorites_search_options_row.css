@@ -8,8 +8,4 @@
     border-block-end: 1px solid var(--fsg-color-outline-variant);
     background: var(--fsg-color-surface-container);
   }
-
-  .fsg-FavoritesSearchOptionsRow-reset {
-    margin-inline-start: auto;
-  }
 }

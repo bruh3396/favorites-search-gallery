@@ -1,8 +1,8 @@
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { afterEach, describe, expect, test, vi } from "vitest";
+import { ICON_PATHS } from "@/core/ui/components/icon/icon";
 import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
-import { LIGHTBOX_ICON_PATHS } from "@/core/features/lightbox/overlay/lightbox_icon";
 import { LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
 import { LightboxDetails } from "@/core/features/lightbox/details/lightbox_details";
 import { LightboxDetailsPanelClass } from "@/core/features/lightbox/details/lightbox_details_panel";
@@ -269,14 +269,14 @@ describe("composeLightboxDialog", () => {
   test("offers to add a post that isn't a favorite", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([])) });
 
-    expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartPlus);
+    expect(readFavoriteIconPath(view)).toBe(ICON_PATHS.heartPlus);
     expect(findFavoriteButton(view)!.title).toBe("Add to Favorites");
   });
 
   test("shows a favorite as favorited", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([IMAGE.id])) });
 
-    expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartFilled);
+    expect(readFavoriteIconPath(view)).toBe(ICON_PATHS.heartFilled);
     expect(findFavoriteButton(view)!.title).toBe("Favorited");
   });
 
@@ -284,14 +284,14 @@ describe("composeLightboxDialog", () => {
     const { view, currentItem } = setup("full", { lightboxFavorite: createFavorite(new Signal([IMAGE.id])) });
 
     currentItem.value = undefined;
-    expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartPlus);
+    expect(readFavoriteIconPath(view)).toBe(ICON_PATHS.heartPlus);
   });
 
   test("follows the current item on the favorite button", () => {
     const { view, currentItem } = setup("full", { lightboxFavorite: createFavorite(new Signal([OTHER_IMAGE.id])) });
 
     currentItem.value = OTHER_IMAGE;
-    expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartFilled);
+    expect(readFavoriteIconPath(view)).toBe(ICON_PATHS.heartFilled);
   });
 
   test("fills the favorite button as soon as the current item becomes a favorite", () => {
@@ -299,7 +299,7 @@ describe("composeLightboxDialog", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(favoritedPostIds) });
 
     favoritedPostIds.value = [IMAGE.id];
-    expect(readFavoriteIconPath(view)).toBe(LIGHTBOX_ICON_PATHS.heartFilled);
+    expect(readFavoriteIconPath(view)).toBe(ICON_PATHS.heartFilled);
   });
 
   test.each<LightboxMode>(["full", "simple"])("adds the current item from the favorite button in %s mode", mode => {

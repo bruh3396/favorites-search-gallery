@@ -1,13 +1,14 @@
+import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
 import { Icon } from "@/core/ui/components/icon/icon";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
-import { h } from "@/core/ui/h/h";
 
 export const ActivityBarClass = {
   root: "fsg-ActivityBar",
   rail: "fsg-ActivityBar-rail",
   item: "fsg-ActivityBar-item",
+  footer: "fsg-ActivityBar-footer",
   view: "fsg-ActivityBar-view"
 } as const;
 
@@ -22,9 +23,10 @@ export interface ActivityBarProps {
   items: readonly ActivityBarItem[];
   value: Readable<string | null>;
   onValueChange: (id: string | null) => void;
+  footerChild?: Child;
 }
 
-export function ActivityBar({ items: activityBarItems, value, onValueChange }: ActivityBarProps): HTMLElement {
+export function ActivityBar({ items: activityBarItems, value, onValueChange, footerChild }: ActivityBarProps): HTMLElement {
   const createViewScope = captureScope();
   const activeItem = computed(() => activityBarItems.find(activityBarItem => activityBarItem.id === value.value) ?? null);
   const view = (
@@ -68,7 +70,10 @@ export function ActivityBar({ items: activityBarItems, value, onValueChange }: A
   });
   return (
     <div className={ActivityBarClass.root}>
-      <nav className={ActivityBarClass.rail} aria-label="Activities">{buttons}</nav>
+      <nav className={ActivityBarClass.rail} aria-label="Activities">
+        {buttons}
+        {footerChild !== undefined && <div className={ActivityBarClass.footer}>{footerChild}</div>}
+      </nav>
       {view}
     </div>
   );

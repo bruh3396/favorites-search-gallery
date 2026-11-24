@@ -11,7 +11,7 @@
   align-items: center;
   gap: 4px;
   inline-size: 48px;
-  padding-block: 8px;
+  padding-block: 4px;
   background: light-dark(
     var(--fsg-color-surface-container),
     color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%)
@@ -21,6 +21,14 @@
 .fsg-ActivityBar-item[aria-pressed="true"] {
   background: var(--fsg-color-surface-container-highest);
   color: var(--fsg-color-on-surface);
+}
+
+.fsg-ActivityBar-footer {
+  display: grid;
+  flex: none;
+  place-items: center;
+  min-block-size: var(--fsg-control-size-large);
+  margin-block-start: auto;
 }
 
 .fsg-ActivityBar-view {

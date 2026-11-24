@@ -1,6 +1,6 @@
-import { LightboxIcon, createLightboxIcon } from "@/core/features/lightbox/overlay/lightbox_icon";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Reactive, h } from "@/core/ui/h/h";
-import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { Readable, computed } from "@/core/utils/reactive/signal";
 
 export const LightboxButtonClass = {
   root: "fsg-LightboxButton",
@@ -8,7 +8,7 @@ export const LightboxButtonClass = {
 } as const;
 
 export interface LightboxButtonProps {
-  icon: Reactive<LightboxIcon>;
+  icon: Reactive<Icon>;
   label: Reactive<string>;
   pressed?: Readable<boolean>;
   disabled?: Reactive<boolean>;
@@ -16,7 +16,7 @@ export interface LightboxButtonProps {
 }
 
 export function LightboxButton({ icon, label, pressed, disabled = false, onClick }: LightboxButtonProps): HTMLElement {
-  const button = (
+  return (
     <button
       className={LightboxButtonClass.root}
       type="button"
@@ -25,13 +25,8 @@ export function LightboxButton({ icon, label, pressed, disabled = false, onClick
       aria-pressed={pressed === undefined ? null : computed(() => String(pressed.value))}
       title={label}
       onClick={() => onClick()}
-    />
+    >
+      {createIcon(icon, LightboxButtonClass.icon)}
+    </button>
   ) as HTMLElement;
-
-  effect(() => {
-    const currentIcon = typeof icon === "string" ? icon : icon.value;
-
-    button.replaceChildren(createLightboxIcon(button.ownerDocument, currentIcon, LightboxButtonClass.icon));
-  });
-  return button;
 }

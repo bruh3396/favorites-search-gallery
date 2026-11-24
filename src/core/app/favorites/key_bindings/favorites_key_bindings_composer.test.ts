@@ -49,7 +49,7 @@ function clickTab(pane: HTMLElement, label: string): void {
 }
 
 function clickResetShortcuts(pane: HTMLElement): void {
-  pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
+  pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset Keyboard Shortcuts\"]")!.click();
 }
 
 function readShownItems(pane: HTMLElement): string[] {

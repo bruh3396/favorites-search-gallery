@@ -2,7 +2,7 @@ import { LightboxArrow, LightboxArrowClass } from "@/core/features/lightbox/navi
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import ARROW_CSS from "@/core/features/lightbox/navigation/lightbox_arrow.css?inline";
-import { LIGHTBOX_ICON_PATHS } from "@/core/features/lightbox/overlay/lightbox_icon";
+import { ICON_PATHS } from "@/core/ui/components/icon/icon";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 describe("LightboxArrow", () => {
@@ -10,11 +10,14 @@ describe("LightboxArrow", () => {
     expectClassesStyled(LightboxArrowClass, ARROW_CSS);
   });
 
-  test.each([["previous", "Previous"], ["next", "Next"]] as const)("labels the %s arrow and draws its icon", (direction, label) => {
+  test.each([
+    ["previous", "Previous", "chevronLeftLarge"],
+    ["next", "Next", "chevronRightLarge"]
+  ] as const)("labels the %s arrow and draws its icon", (direction, label, icon) => {
     const { result: button } = render(document, () => <LightboxArrow direction={direction} onClick={vi.fn()} />);
 
     expect([button.getAttribute("aria-label"), button.title]).toEqual([label, label]);
-    expect(button.querySelector("path")?.getAttribute("d")).toBe(LIGHTBOX_ICON_PATHS[direction]);
+    expect(button.querySelector("path")?.getAttribute("d")).toBe(ICON_PATHS[icon]);
   });
 
   test("runs its action when clicked", () => {

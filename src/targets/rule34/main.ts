@@ -161,7 +161,8 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
     userLoggedIn: userId !== "",
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
-    colorScheme: environment.colorScheme
+    colorScheme: environment.colorScheme,
+    scriptVersion: environment.version
   }, {
     scheduler,
     randomSource,

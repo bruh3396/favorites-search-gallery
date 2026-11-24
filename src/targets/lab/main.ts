@@ -79,7 +79,8 @@ function startApp(environment: Environment, favoritesAppDependencies: FavoritesA
     userLoggedIn: true,
     blacklistedTags: environment.blacklistedTags,
     favoritesOwnerId: environment.favoritesOwnerId,
-    colorScheme: environment.colorScheme
+    colorScheme: environment.colorScheme,
+    scriptVersion: environment.version
   }, favoritesAppDependencies).mount(container);
 }
 

@@ -98,5 +98,6 @@ composeFavoritesApp({
   userLoggedIn: true,
   blacklistedTags: ENVIRONMENT.blacklistedTags,
   favoritesOwnerId: ENVIRONMENT.favoritesOwnerId,
-  colorScheme: ENVIRONMENT.colorScheme
+  colorScheme: ENVIRONMENT.colorScheme,
+  scriptVersion: ENVIRONMENT.version
 }, createFavoritesAppDependencies()).mount(claimBodyContent());

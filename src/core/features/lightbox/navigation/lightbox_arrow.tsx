@@ -1,4 +1,4 @@
-import { createLightboxIcon } from "@/core/features/lightbox/overlay/lightbox_icon";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { h } from "@/core/ui/h/h";
 
 export const LightboxArrowClass = {
@@ -15,12 +15,10 @@ export interface LightboxArrowProps {
 }
 
 const LABELS: Readonly<Record<LightboxArrowDirection, string>> = { previous: "Previous", next: "Next" };
+const ICONS: Readonly<Record<LightboxArrowDirection, Icon>> = { previous: "chevronLeftLarge", next: "chevronRightLarge" };
 
 export function LightboxArrow({ direction: lightboxArrowDirection, onClick }: LightboxArrowProps): HTMLElement {
-  const plate = (<span className={LightboxArrowClass.plate} />) as HTMLElement;
   const label = LABELS[lightboxArrowDirection];
-
-  plate.append(createLightboxIcon(plate.ownerDocument, lightboxArrowDirection, LightboxArrowClass.icon));
   return (
     <button
       className={LightboxArrowClass.root}
@@ -29,7 +27,7 @@ export function LightboxArrow({ direction: lightboxArrowDirection, onClick }: Li
       title={label}
       onClick={() => onClick()}
     >
-      {plate}
+      <span className={LightboxArrowClass.plate}>{createIcon(ICONS[lightboxArrowDirection], LightboxArrowClass.icon)}</span>
     </button>
   ) as HTMLElement;
 }

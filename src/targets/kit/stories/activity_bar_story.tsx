@@ -15,11 +15,11 @@ function renderSettingsView(log: (message: string) => void): HTMLElement {
       title="Settings"
       actions={[
         {
-          label: "Reset all",
+          label: "Reset Settings",
           icon: "reset",
           disabled: nothingChanged,
           onClick: (): void => {
-            log("ViewPane \"Settings\" → Reset all");
+            log("ViewPane \"Settings\" → Reset Settings");
             nothingChanged.value = true;
           }
         }

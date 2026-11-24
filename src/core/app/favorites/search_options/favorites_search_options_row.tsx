@@ -3,8 +3,7 @@ import { Readable, computed } from "@/core/utils/reactive/signal";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 
 export const FavoritesSearchOptionsRowClass = {
-  root: "fsg-FavoritesSearchOptionsRow",
-  reset: "fsg-FavoritesSearchOptionsRow-reset"
+  root: "fsg-FavoritesSearchOptionsRow"
 } as const;
 
 export interface FavoritesSearchOptionsRowProps {
@@ -18,7 +17,6 @@ export function FavoritesSearchOptionsRow({ changedSearchOptionCount, resetSearc
     <div className={FavoritesSearchOptionsRowClass.root} role="group" aria-label="Search Options">
       {children}
       <IconButton
-        className={FavoritesSearchOptionsRowClass.reset}
         icon="reset"
         label="Reset Search Options"
         size="small"

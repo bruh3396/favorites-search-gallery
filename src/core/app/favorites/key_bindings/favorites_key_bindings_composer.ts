@@ -37,7 +37,7 @@ export function composeFavoritesKeyBindings(dependencies: FavoritesKeyBindingsDe
       })
     ],
     resetKeyBindings: (): void => {
-      if (confirmer.confirm("Reset all keyboard shortcuts to their defaults?")) {
+      if (confirmer.confirm("Reset keyboard shortcuts to their defaults?")) {
         keyBindingOverrides.set({});
         lightboxKeyBindingOverrides.set({});
       }

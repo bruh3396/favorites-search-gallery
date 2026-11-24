@@ -15,7 +15,7 @@ export function composeFavoritesSettings(dependencies: FavoritesSettingsDependen
   const { favoritesPreferences, sharedPreferences, stepperScheduler, onThemePreview, resetSettings } = dependencies;
   return h(
     ViewPane,
-    { title: FAVORITES_SETTINGS_TOOL.label, actions: [{ label: "Reset All Settings", icon: "reset", onClick: resetSettings }] },
+    { title: FAVORITES_SETTINGS_TOOL.label, actions: [{ label: "Reset Settings", icon: "reset", onClick: resetSettings }] },
     h(FavoritesSettings, { favoritesPreferences, sharedPreferences, stepperScheduler, onThemePreview })
   );
 }

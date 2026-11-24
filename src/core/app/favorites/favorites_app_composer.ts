@@ -7,6 +7,7 @@ import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
+import { AppMark } from "@/core/ui/app_mark/app_mark";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
@@ -61,6 +62,7 @@ import { resetStoredTree } from "@/core/utils/storage/stored_tree_resetter";
 export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration {
   readonly favoritesOwnerId: string;
   readonly colorScheme: ColorScheme;
+  readonly scriptVersion: string;
 }
 
 export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependencies, "favoritesPaginationPreferences" | "postLibrary"> {
@@ -82,7 +84,7 @@ export interface FavoritesAppDependencies extends Omit<FavoritesServiceDependenc
 }
 
 export function composeFavoritesApp(configuration: FavoritesAppConfiguration, dependencies: FavoritesAppDependencies): MountableApp {
-  const { favoritesOwnerId, colorScheme } = configuration;
+  const { favoritesOwnerId, colorScheme, scriptVersion } = configuration;
   const { localFavorites, localPosts, localTagCategories, remoteFavorites, remotePosts, remoteMedia, remotePages, scheduler, randomSource } = dependencies;
   const { storedValueStorage, localSnippets, hostPage, navigator, fileSaver, sizeObserver, viewport, visibilityObserver, clipboard, confirmer } = dependencies;
   const appStorage = createAppStorage(storedValueStorage);
@@ -153,7 +155,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const keyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_FAVORITES_KEY_BINDINGS, favoritesPreferences.keyBindingOverrides.value));
   const previewedTheme = new Signal<Theme | null>(null);
   const resetSettings = (): void => {
-    if (confirmer.confirm("Reset all settings to their defaults?")) {
+    if (confirmer.confirm("Reset settings to their defaults?")) {
       resetStoredTree(
         { sharedPreferences, favoritesPreferences, postListPreferences },
         [
@@ -213,7 +215,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
             }
           ],
           value: favoritesPreferences.activeTool,
-          onValueChange: id => favoritesPreferences.activeTool.set(id)
+          onValueChange: id => favoritesPreferences.activeTool.set(id),
+          footerChild: h(AppMark, { scriptVersion })
         }),
         tabsHeaderChild: h("div", { hidden: computed(() => !favoritesTabStripVisible.value) }, h(TabStrip, {
           tabs: computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable }))),

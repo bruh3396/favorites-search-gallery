@@ -1,4 +1,4 @@
-import { LIGHTBOX_ICON_PATHS, LightboxIcon } from "@/core/features/lightbox/overlay/lightbox_icon";
+import { ICON_PATHS, Icon } from "@/core/ui/components/icon/icon";
 import { LightboxToolbar, LightboxToolbarClass } from "@/core/features/lightbox/overlay/lightbox_toolbar";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -45,11 +45,11 @@ function readState(button: HTMLButtonElement): [string | null, string | null | u
 
 interface ButtonState {
   readonly pressed: boolean;
-  readonly icon: LightboxIcon;
+  readonly icon: Icon;
 }
 
 function expectState(button: HTMLButtonElement, { pressed, icon }: ButtonState): void {
-  expect(readState(button)).toEqual([String(pressed), LIGHTBOX_ICON_PATHS[icon]]);
+  expect(readState(button)).toEqual([String(pressed), ICON_PATHS[icon]]);
 }
 
 describe("LightboxToolbar", () => {

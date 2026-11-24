@@ -106,6 +106,14 @@ describe("ActivityBar", () => {
     expect([findView(element).textContent, disposeView.mock.calls]).toEqual(["Downloads", [["settings"]]]);
   });
 
+  test("shows the footer it is given in the rail", () => {
+    const { result: element } = render(document, () => (
+      <ActivityBar items={[]} value={new Signal<string | null>(null)} onValueChange={vi.fn()} footerChild={<span>Logo</span>} />
+    ));
+
+    expect(element.querySelector("nav")!.textContent).toBe("Logo");
+  });
+
   test("disposes the shown view when it is disposed", () => {
     const { dispose, disposeView } = setup("settings");
 

@@ -29,12 +29,12 @@ describe("FavoritesSettings", () => {
 
     favoritesPreferences.pagination.infiniteScroll.set(true);
 
-    expect(queryInput("number", "Size").disabled).toBe(true);
+    expect(queryInput("number", "Page Size").disabled).toBe(true);
   });
 
   test("disables tile size while the layout is native", () => {
     const { favoritesPreferences, queryInput } = setup();
-    const tileSize = queryInput("range", "Size");
+    const tileSize = queryInput("range", "Tile Size");
 
     favoritesPreferences.grid.layout.set("native");
     expect(tileSize.disabled).toBe(true);

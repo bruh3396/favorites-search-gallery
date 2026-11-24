@@ -86,7 +86,7 @@ describe("FavoritesKeyBindings", () => {
   test("asks for a reset when its reset button is clicked", () => {
     const resetKeyBindings = vi.fn();
 
-    setup(createSections(), resetKeyBindings).querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
+    setup(createSections(), resetKeyBindings).querySelector<HTMLButtonElement>("button[aria-label=\"Reset Keyboard Shortcuts\"]")!.click();
     expect(resetKeyBindings).toHaveBeenCalledOnce();
   });
 

@@ -75,12 +75,12 @@ function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePre
       settingPreference: favoritesPreferences.grid.layout, members: FAVORITES_GRID_LAYOUTS, labels: LAYOUT_LABELS, icons: LAYOUT_ICONS
     },
     {
-      id: "tileSize", kind: "slider", label: "Size",
+      id: "tileSize", kind: "slider", label: "Tile Size",
       settingPreference: favoritesPreferences.grid.columnCount, ...FAVORITES_SETTING_RANGES.columnCount, inverted: true,
       disabled: computed(() => favoritesPreferences.grid.layout.value === "native")
     },
     {
-      id: "pageSize", kind: "number", label: "Size",
+      id: "pageSize", kind: "number", label: "Page Size",
       settingPreference: favoritesPreferences.pagination.pageSize, ...FAVORITES_SETTING_RANGES.pageSize, stepperScheduler,
       disabled: favoritesPreferences.pagination.infiniteScroll
     },

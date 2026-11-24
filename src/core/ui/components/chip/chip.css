@@ -43,6 +43,20 @@
   color: var(--fsg-color-on-secondary-container);
 }
 
+.fsg-Chip:where(:not([aria-pressed], [aria-haspopup])) {
+  transition:
+    border-color calc(var(--fsg-motion-duration-short) * 3) ease-out,
+    background-color calc(var(--fsg-motion-duration-short) * 3) ease-out,
+    color calc(var(--fsg-motion-duration-short) * 3) ease-out;
+}
+
+.fsg-Chip:where(:not([aria-pressed], [aria-haspopup]):active:enabled) {
+  border-color: var(--fsg-color-primary);
+  background-color: var(--fsg-color-primary);
+  color: var(--fsg-color-on-primary);
+  transition: none;
+}
+
 .fsg-Chip:where([data-highlighted="true"]) .fsg-Chip-label {
   color: inherit;
   opacity: 0.75;

@@ -2,10 +2,23 @@ import { Reactive, currentDocument } from "@/core/ui/h/h";
 import { effect } from "@/core/utils/reactive/signal";
 
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+const HEART_TOP_PATH = "a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5";
 
-const ICON_PATHS = {
+export const ICON_PATHS = {
   search: "M17.5 11a6.5 6.5 0 1 1-13 0a6.5 6.5 0 1 1 13 0M16 16l4 4",
   close: "M7 7l10 10M17 7L7 17",
+  closeLarge: "M6 6l12 12M18 6L6 18",
+  play: "M8 5.5v13l10-6.5z",
+  pause: "M9 5v14M15 5v14",
+  chevronLeftLarge: "M15 5l-7 7 7 7",
+  chevronRightLarge: "M9 5l7 7-7 7",
+  fullscreen: "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5",
+  exitFullscreen: "M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5",
+  info: "M20.5 12a8.5 8.5 0 1 1-17 0a8.5 8.5 0 1 1 17 0M12 11v5M12 8h.01",
+  tune: "M4 7h9M17 7h3M4 17h3M11 17h9M17 7a2 2 0 1 1-4 0a2 2 0 1 1 4 0M11 17a2 2 0 1 1-4 0a2 2 0 1 1 4 0",
+  postPage: "M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5",
+  heartPlus: `M14.479 19.374l-.971.939a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5${HEART_TOP_PATH}a5.2 5.2 0 0 1-.219 1.49M15 15h6M18 12v6`,
+  heartFilled: `M2 9.5${HEART_TOP_PATH}c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5`,
   add: "M12 5v14M5 12h14",
   subtract: "M5 12h14",
   ban: "M20.75 12a8.75 8.75 0 1 1-17.5 0a8.75 8.75 0 1 1 17.5 0M5.81 5.81l12.38 12.38",
@@ -38,32 +51,50 @@ const ICON_PATHS = {
   appWindow: "M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM2 8h20M6 4v4M10 4v4",
   leaf: "M11 20a10 10 0 0 0 10-10 25.9 25.9 0 0 0-1.04-7.281 1 1 0 0 0-1.755-.325C15.833 5.5 13 5.5 9.8 6.1A7 7 0 0 0 11 20" +
     "M2 21a5 5 0 0 1 2.911-4.544C7.613 15.212 8.351 15.24 11 13",
-  layoutColumn: "M3.75 3.75H9.75V12.75H3.75zM3.75 15.75H9.75V20.25H3.75zM14.25 3.75H20.25V8.25H14.25zM14.25 11.25H20.25V20.25H14.25z",
-  layoutRow: "M3.75 3.75H11.25V9.75H3.75zM14.25 3.75H20.25V9.75H14.25zM3.75 14.25H8.25V20.25H3.75zM11.25 14.25H20.25V20.25H11.25z",
-  layoutSquare: "M3.75 3.75H9.75V9.75H3.75zM14.25 3.75H20.25V9.75H14.25zM3.75 14.25H9.75V20.25H3.75zM14.25 14.25H20.25V20.25H14.25z",
+  layoutColumn: "M2.25 2.25H6.75V12.75H2.25zM2.25 15.75H6.75V21.75H2.25zM9.75 2.25H14.25V6.75H9.75zM9.75 9.75H14.25V21.75H9.75z" +
+    "M17.25 2.25H21.75V15.75H17.25zM17.25 18.75H21.75V21.75H17.25z",
+  layoutRow: "M2.25 2.25H12.75V6.75H2.25zM15.75 2.25H21.75V6.75H15.75zM2.25 9.75H6.75V14.25H2.25zM9.75 9.75H21.75V14.25H9.75z" +
+    "M2.25 17.25H9.75V21.75H2.25zM12.75 17.25H21.75V21.75H12.75z",
+  layoutSquare: "M2.25 2.25H6.75V6.75H2.25zM9.75 2.25H14.25V6.75H9.75zM17.25 2.25H21.75V6.75H17.25z" +
+    "M2.25 9.75H6.75V14.25H2.25zM9.75 9.75H14.25V14.25H9.75zM17.25 9.75H21.75V14.25H17.25z" +
+    "M2.25 17.25H6.75V21.75H2.25zM9.75 17.25H14.25V21.75H9.75zM17.25 17.25H21.75V21.75H17.25z",
   layoutGrid: "M3.75 3.75H9.75V11.25H3.75zM14.25 3.75H20.25V8.25H14.25zM3.75 14.25H9.75V20.25H3.75zM14.25 14.25H20.25V17.25H14.25z",
-  layoutNative: "M2.25 5.25H6.75V9.75H2.25zM9.75 3.75H14.25V9.75H9.75zM17.25 5.25H21.75V8.25H17.25z" +
-    "M2.25 14.25H6.75V20.25H2.25zM9.75 15.75H14.25V18.75H9.75zM17.25 14.25H21.75V18.75H17.25z",
+  layoutNative: "M2.25 2.25H6.75V9.75H2.25zM9.75 3.75H14.25V8.25H9.75zM17.25 2.25H21.75V9.75H17.25z" +
+    "M2.25 15.75H6.75V20.25H2.25zM9.75 14.25H14.25V21.75H9.75zM17.25 15.75H21.75V20.25H17.25z",
   keyboard: "M3 6h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8",
   pencil: "M21.17 6.81a2.82 2.82 0 0 0-3.99-3.99L3.84 16.17a2 2 0 0 0-.5.83l-1.32 4.35a.5.5 0 0 0 .62.62l4.35-1.32a2 2 0 0 0 .83-.5zM15 5l4 4",
-  bookmark: "M19 21l-7-4l-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
+  bookmark: "M19 21l-7-4l-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z",
+  logo: "M20.6 5.98A10.5 10.5 0 1 0 22.5 12H19.5M7.13 15.75V8.25H10.88M7.13 12H10.13" +
+    "M16.2 9.6C15.9 8.7 15.15 8.25 14.25 8.25C13.05 8.25 12.3 8.93 12.3 10.13C12.3 11.32 13.28 11.7 14.32 12" +
+    "C15.53 12.3 16.35 12.75 16.35 13.95C16.35 15.15 15.45 15.75 14.25 15.75C13.2 15.75 12.45 15.3 12.15 14.4"
 } as const;
 
 export type Icon = keyof typeof ICON_PATHS;
+
+const FILLED_ICONS: ReadonlySet<Icon> = new Set(["heartFilled"]);
 
 export function createIcon(icon: Reactive<Icon>, className: string): SVGSVGElement {
   const ownerDocument = currentDocument();
   const svg = ownerDocument.createElementNS(SVG_NAMESPACE, "svg");
   const path = ownerDocument.createElementNS(SVG_NAMESPACE, "path");
+  const draw = (currentIcon: Icon): void => {
+    path.setAttribute("d", ICON_PATHS[currentIcon]);
+
+    if (FILLED_ICONS.has(currentIcon)) {
+      path.setAttribute("fill", "currentColor");
+    } else {
+      path.removeAttribute("fill");
+    }
+  };
 
   svg.setAttribute("class", className);
   svg.setAttribute("viewBox", "0 0 24 24");
   svg.setAttribute("aria-hidden", "true");
 
   if (typeof icon === "string") {
-    path.setAttribute("d", ICON_PATHS[icon]);
+    draw(icon);
   } else {
-    effect(() => path.setAttribute("d", ICON_PATHS[icon.value]));
+    effect(() => draw(icon.value));
   }
   svg.append(path);
   return svg;

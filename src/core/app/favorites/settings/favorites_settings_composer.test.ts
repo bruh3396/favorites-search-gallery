@@ -26,13 +26,15 @@ describe("composeFavoritesSettings", () => {
   test("shows the settings under the Settings title", () => {
     const { pane } = setup();
 
-    expect([pane.querySelector("h2")?.textContent, pane.querySelector("input[type=\"number\"][aria-label=\"Size\"]") !== null]).toEqual(["Settings", true]);
+    const pageSizeInput = pane.querySelector("input[type=\"number\"][aria-label=\"Page Size\"]");
+
+    expect([pane.querySelector("h2")?.textContent, pageSizeInput !== null]).toEqual(["Settings", true]);
   });
 
   test("resets the settings from its header", () => {
     const { pane, resetSettings } = setup();
 
-    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Settings\"]")!.click();
+    pane.querySelector<HTMLButtonElement>("button[aria-label=\"Reset Settings\"]")!.click();
     expect(resetSettings).toHaveBeenCalledOnce();
   });
 });

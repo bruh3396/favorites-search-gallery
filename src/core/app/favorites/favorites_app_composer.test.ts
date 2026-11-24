@@ -58,7 +58,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   const container = document.createElement("div");
   const memoryClient = new MemoryClient(posts);
 
-  composeFavoritesApp({ userOwnsFavorites: true, userLoggedIn: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark" }, {
+  composeFavoritesApp({ userOwnsFavorites: true, userLoggedIn: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark", scriptVersion: "2" }, {
     localFavorites: new MemoryLocalFavorites(),
     localPosts: new MemoryLocalPosts(),
     localSnippets,
@@ -109,7 +109,7 @@ function readThemeAccent(root: ShadowRoot): string {
 
 function clickResetSettings(root: ShadowRoot): void {
   root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-  root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Settings\"]")!.click();
+  root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset Settings\"]")!.click();
 }
 
 function readKeyBindingListItem(root: ShadowRoot, label: string): string | undefined {
@@ -166,7 +166,7 @@ describe("composeFavoritesApp", () => {
     const grid = root.querySelector<HTMLElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root})`)!;
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
-    const slider = root.querySelector<HTMLInputElement>(`.${SliderClass.input}[aria-label="Size"]`)!;
+    const slider = root.querySelector<HTMLInputElement>(`.${SliderClass.input}[aria-label="Tile Size"]`)!;
 
     slider.value = "18";
     slider.dispatchEvent(new Event("input"));
@@ -319,7 +319,7 @@ describe("composeFavoritesApp", () => {
 
     clickResetSettings(root);
     expect(hostPage.colorScheme).toBe("dark");
-    expect(root.querySelector("button[aria-label=\"Reset All Settings\"]")?.closest("[hidden]")).toBe(null);
+    expect(root.querySelector("button[aria-label=\"Reset Settings\"]")?.closest("[hidden]")).toBe(null);
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
       preferences: { favorites: { activeTool: "settings" } },
       state: { favorites: { 1: { sizes } } }
@@ -351,7 +351,7 @@ describe("composeFavoritesApp", () => {
     const keptKeyBindingOverrides = [preferences.favorites.keyBindingOverrides, preferences.shared.lightboxKeyBindingOverrides];
 
     root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Keyboard Shortcuts"]`)!.click();
-    root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset All Keyboard Shortcuts\"]")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Reset Keyboard Shortcuts\"]")!.click();
     expect([keptKeyBindingOverrides, readKeyBindingListItem(root, "Toggle Zen")]).toEqual([[{ toggleZen: ["x"] }, { showNext: ["n"] }], "Toggle ZenZ"]);
   });
 

@@ -1,4 +1,4 @@
-import { Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { ICON_PATHS, Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { describe, expect, test } from "vitest";
 import { Signal } from "@/core/utils/reactive/signal";
 import { render } from "@/core/ui/h/h";
@@ -27,5 +27,21 @@ describe("createIcon", () => {
     expect(readPath()).not.toBe(expandPath);
     name.value = "expandAll";
     expect(readPath()).toBe(expandPath);
+  });
+
+  test("draws the icon's path with the given class", () => {
+    const { result: icon } = render(document, () => createIcon("close", "icon"));
+
+    expect([icon.getAttribute("class"), icon.querySelector("path")!.getAttribute("d")]).toEqual(["icon", ICON_PATHS.close]);
+  });
+
+  test("fills only a filled icon, also as the icon changes", () => {
+    const name = new Signal<Icon>("heartFilled");
+    const { result: icon } = render(document, () => createIcon(name, "icon"));
+    const readFill = (): string | null => icon.querySelector("path")!.getAttribute("fill");
+    const filledFill = readFill();
+
+    name.value = "heartPlus";
+    expect([filledFill, readFill()]).toEqual(["currentColor", null]);
   });
 });
