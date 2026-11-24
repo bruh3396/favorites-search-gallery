@@ -10,10 +10,9 @@ interface Setup {
   tabs: Signal<readonly TabStripItem[]>;
   activeTabId: Signal<string | null>;
   onActivate: Mock<(tabId: string) => void>;
-  onClose: Mock<(tabId: string) => void>;
+  onClose: Mock<(tabIds: readonly string[]) => void>;
   onMove: Mock<(tabId: string, index: number) => void>;
   onAdd: Mock<() => void>;
-  onCloseAll: Mock<() => void>;
 }
 
 function createTab(tabId: string, { closable = true }: { closable?: boolean } = {}): TabStripItem {
@@ -28,10 +27,9 @@ function setup(
     tabs: new Signal(tabStripItems),
     activeTabId: new Signal(activeTabId),
     onActivate: vi.fn<(tabId: string) => void>(),
-    onClose: vi.fn<(tabId: string) => void>(),
+    onClose: vi.fn<(tabIds: readonly string[]) => void>(),
     onMove: vi.fn<(tabId: string, index: number) => void>(),
-    onAdd: vi.fn<() => void>(),
-    onCloseAll: vi.fn<() => void>()
+    onAdd: vi.fn<() => void>()
   };
   const { result: element } = render(document, () => <TabStrip {...options} />);
 
@@ -45,6 +43,11 @@ function findTab(element: HTMLElement, label: string): HTMLButtonElement {
 
 function findCloseButton(element: HTMLElement, label: string): HTMLButtonElement | null {
   return element.querySelector<HTMLButtonElement>(`button[aria-label="Close ${label}"]`);
+}
+
+function openTabMenu(element: HTMLElement, label: string): Record<string, HTMLElement> {
+  findTab(element, label).dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, composed: true }));
+  return Object.fromEntries([...element.querySelectorAll<HTMLElement>("[role=menuitem]")].map(menuItem => [menuItem.textContent, menuItem]));
 }
 
 function findTabList(element: HTMLElement): HTMLElement {
@@ -118,14 +121,39 @@ describe("TabStrip", () => {
     const { element, onClose } = setup();
 
     findCloseButton(element, "apple")!.click();
-    expect(onClose).toHaveBeenCalledWith("apple");
+    expect(onClose).toHaveBeenCalledWith(["apple"]);
   });
 
   test("closes a tab on a middle click", () => {
     const { element, onClose } = setup();
 
     findTab(element, "apple").dispatchEvent(new MouseEvent("auxclick", { bubbles: true, button: 1 }));
-    expect(onClose).toHaveBeenCalledWith("apple");
+    expect(onClose).toHaveBeenCalledWith(["apple"]);
+  });
+
+  test("closes the right-clicked tab, the others, those to its right, or all, from its menu", () => {
+    const { element, onClose } = setup([createTab("a"), createTab("b"), createTab("c")]);
+
+    for (const label of ["Close", "Close Other Tabs", "Close Tabs to the Right", "Close All Tabs"]) {
+      openTabMenu(element, "b")[label].click();
+    }
+    expect(onClose.mock.calls).toEqual([[["b"]], [["a", "c"]], [["c"]], [["a", "b", "c"]]]);
+  });
+
+  test("disables menu items that would close nothing, leaving out tabs that can't be closed", () => {
+    const { element } = setup([createTab("Home", { closable: false }), createTab("apple")]);
+    const readDisabled = (label: string): (string | null)[] => Object.values(openTabMenu(element, label))
+      .map(menuItem => menuItem.getAttribute("aria-disabled"));
+
+    expect([readDisabled("Home"), readDisabled("apple")]).toEqual([["true", null, null, null], [null, "true", "true", null]]);
+  });
+
+  test("leaves a right click outside any tab to the browser", () => {
+    const { element } = setup();
+    const event = new MouseEvent("contextmenu", { bubbles: true, cancelable: true });
+
+    element.querySelector("button[aria-label='New Tab']")!.dispatchEvent(event);
+    expect([event.defaultPrevented, element.querySelector("[role=menu]")]).toEqual([false, null]);
   });
 
   test("offers no way to close a tab that can't be closed", () => {
@@ -232,13 +260,6 @@ describe("TabStrip", () => {
       scrollPositions.push(list.scrollLeft);
     }
     expect(scrollPositions).toEqual([50, 50, 100]);
-  });
-
-  test("closes all tabs from the close all button", () => {
-    const { element, onCloseAll } = setup();
-
-    element.querySelector<HTMLButtonElement>("button[aria-label='Close All Tabs']")!.click();
-    expect(onCloseAll).toHaveBeenCalledOnce();
   });
 
   test("adds a tab from the new tab button", () => {

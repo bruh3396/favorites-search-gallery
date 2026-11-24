@@ -16,9 +16,12 @@ describe("DEFAULT_FAVORITES_KEY_BINDINGS", () => {
     ["]", "increasePageSize"],
     ["[", "decreasePageSize"],
     ["l", "cycleLayout"],
-    ["h", "toggleHd"],
+    ["r", "toggleHd"],
     [",", "toggleSettings"],
-    ["?", "toggleKeyboardShortcuts"]
+    ["?", "toggleKeyboardShortcuts"],
+    ["t", "cycleTheme"],
+    ["d", "toggleColorScheme"],
+    ["h", "toggleHeader"]
   ])("binds %j to %s", (key, favoritesCommand) => {
     expect(findCommandInKeyBindings(DEFAULT_FAVORITES_KEY_BINDINGS, key)).toBe(favoritesCommand);
   });

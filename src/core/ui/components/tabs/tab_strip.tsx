@@ -1,5 +1,7 @@
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
+import { ContextMenu } from "@/core/ui/components/context_menu/context_menu";
+import { ContextMenuItem } from "@/core/ui/components/context_menu/context_menu_item";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { KeyedList } from "@/core/ui/h/keyed_list";
 
@@ -11,7 +13,6 @@ export const TabStripClass = {
   label: "fsg-TabStrip-label",
   close: "fsg-TabStrip-close",
   add: "fsg-TabStrip-add",
-  closeAll: "fsg-TabStrip-closeAll",
   trailing: "fsg-TabStrip-trailing"
 } as const;
 
@@ -26,10 +27,9 @@ export interface TabStripProps {
   activeTabId: Readable<string | null>;
   trailingChild?: Child;
   onActivate: (tabId: string) => void;
-  onClose: (tabId: string) => void;
+  onClose: (tabIds: readonly string[]) => void;
   onMove: (tabId: string, index: number) => void;
   onAdd: () => void;
-  onCloseAll: () => void;
 }
 
 type DropSide = "before" | "after";
@@ -38,14 +38,14 @@ interface TabProps {
   stripItem: TabStripItem;
   activeTabId: Readable<string | null>;
   onActivate: (tabId: string) => void;
-  onClose: (tabId: string) => void;
+  onClose: (tabIds: readonly string[]) => void;
   onDrop: (draggedTabId: string, dropSide: DropSide) => void;
 }
 
 const MIDDLE_BUTTON = 1;
 const TAB_DRAG_TYPE = "application/x-fsg-tab";
 
-export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose, onMove, onAdd, onCloseAll }: TabStripProps): HTMLElement {
+export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose, onMove, onAdd }: TabStripProps): HTMLElement {
   let isRendered = false;
   const moveNextTo = (targetTabId: string, draggedTabId: string, dropSide: DropSide): void => {
     if (draggedTabId === targetTabId) {
@@ -99,15 +99,48 @@ export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose
   });
   isRendered = true;
   return (
-    <div className={TabStripClass.root}>
-      {list}
-      <IconButton className={TabStripClass.add} icon="add" label="New Tab" size="small" onClick={onAdd} />
-      <div className={TabStripClass.trailing}>
-        {trailingChild}
-        <IconButton className={TabStripClass.closeAll} icon="ban" label="Close All Tabs" size="small" onClick={onCloseAll} />
-      </div>
-    </div>
+    <ContextMenu
+      target={
+        <div className={TabStripClass.root}>
+          {list}
+          <IconButton className={TabStripClass.add} icon="add" label="New Tab" size="small" onClick={onAdd} />
+          <div className={TabStripClass.trailing}>{trailingChild}</div>
+        </div>
+      }
+      listItems={event => listTabMenuItems(tabs.peek(), readTabId(event), onClose)}
+    />
   );
+}
+
+function readTabId(event: MouseEvent): string | undefined {
+  for (const eventTarget of event.composedPath()) {
+    if (eventTarget instanceof HTMLElement && eventTarget.dataset.tabId !== undefined) {
+      return eventTarget.dataset.tabId;
+    }
+  }
+  return undefined;
+}
+
+function listTabMenuItems(tabStripItems: readonly TabStripItem[], tabId: string | undefined, onClose: TabStripProps["onClose"]): readonly ContextMenuItem[] {
+  const index = tabStripItems.findIndex(tabStripItem => tabStripItem.id === tabId);
+
+  if (index === -1) {
+    return [];
+  }
+  const tabStripItem = tabStripItems[index];
+  const otherTabIds = listClosableTabIds(tabStripItems.filter(otherTabStripItem => otherTabStripItem !== tabStripItem));
+  const rightTabIds = listClosableTabIds(tabStripItems.slice(index + 1));
+  const allTabIds = listClosableTabIds(tabStripItems);
+  return [
+    { label: "Close", disabled: !tabStripItem.closable, onChoose: () => onClose([tabStripItem.id]) },
+    { label: "Close Other Tabs", disabled: otherTabIds.length === 0, startsGroup: true, onChoose: () => onClose(otherTabIds) },
+    { label: "Close Tabs to the Right", disabled: rightTabIds.length === 0, onChoose: () => onClose(rightTabIds) },
+    { label: "Close All Tabs", disabled: allTabIds.length === 0, onChoose: () => onClose(allTabIds) }
+  ];
+}
+
+function listClosableTabIds(tabStripItems: readonly TabStripItem[]): string[] {
+  return tabStripItems.filter(tabStripItem => tabStripItem.closable).map(tabStripItem => tabStripItem.id);
 }
 
 function markEntering(element: HTMLElement): void {
@@ -136,6 +169,7 @@ function Tab({ stripItem: tabStripItem, activeTabId, onActivate, onClose, onDrop
     <div
       className={TabStripClass.tab}
       role="presentation"
+      dataset={{ tabId: tabStripItem.id }}
       draggable={true}
       onDragstart={event => {
         event.dataTransfer?.setData(TAB_DRAG_TYPE, tabStripItem.id);
@@ -167,7 +201,7 @@ function Tab({ stripItem: tabStripItem, activeTabId, onActivate, onClose, onDrop
         onClick={() => onActivate(tabStripItem.id)}
         onAuxclick={event => {
           if (event.button === MIDDLE_BUTTON && tabStripItem.closable) {
-            onClose(tabStripItem.id);
+            onClose([tabStripItem.id]);
           }
         }}
       >
@@ -179,7 +213,7 @@ function Tab({ stripItem: tabStripItem, activeTabId, onActivate, onClose, onDrop
           icon="close"
           label={computed(() => `Close ${tabStripItem.label.value}`)}
           size="small"
-          onClick={() => onClose(tabStripItem.id)}
+          onClick={() => onClose([tabStripItem.id])}
         />
       )}
     </div>

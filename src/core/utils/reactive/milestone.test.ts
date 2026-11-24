@@ -1,6 +1,6 @@
-import { Milestone, when } from "@/core/utils/reactive/milestone";
-import { Signal, effect } from "@/core/utils/reactive/signal";
 import { describe, expect, test } from "vitest";
+import { Milestone } from "@/core/utils/reactive/milestone";
+import { effect } from "@/core/utils/reactive/signal";
 
 describe("Milestone", () => {
   test("starts unreached", () => {
@@ -39,32 +39,5 @@ describe("Milestone", () => {
 
     milestone.reach(1);
     expect(() => milestone.reach(2)).toThrow("Milestone reached twice");
-  });
-});
-
-describe("when", () => {
-  test("reaches at once when the condition already holds", () => {
-    expect(when(() => true).reached).toBe(true);
-  });
-
-  test("reaches once the signals the condition reads make it hold", async() => {
-    const count = new Signal(0);
-    const fact = when(() => count.value >= 2);
-
-    count.value = 1;
-    expect(fact.reached).toBe(false);
-    count.value = 2;
-    expect(fact.reached).toBe(true);
-    await expect(fact.wait()).resolves.toBeUndefined();
-  });
-
-  test("stays reached after the condition stops holding", () => {
-    const open = new Signal(false);
-    const fact = when(() => open.value);
-
-    open.value = true;
-    open.value = false;
-    open.value = true;
-    expect(fact.reached).toBe(true);
   });
 });

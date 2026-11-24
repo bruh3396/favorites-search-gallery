@@ -1,6 +1,6 @@
 import { Codec, createGuardedCodec } from "@/core/utils/codec/codec";
-import { Guard, createSameKindGuard } from "@/core/utils/guard/guard";
-
+import { Guard } from "@/core/utils/guard/guard";
+import { createSameKindGuard } from "@/core/utils/guard/same_kind_guard";
 export interface StoredValueDefinition<T> {
   readonly defaultValue: T;
   readonly codec: Codec<T>;

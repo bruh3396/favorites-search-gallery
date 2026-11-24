@@ -1,16 +1,6 @@
+import { createBitSet, gatherBitSetPositions } from "@/core/domain/search/testing/bitset";
 import { describe, expect, test } from "vitest";
 import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
-
-function createBitSet(size: number, positions: number[]): BitSet {
-  const bitSet = new BitSet(size);
-
-  positions.forEach(position => bitSet.set(position));
-  return bitSet;
-}
-
-function gatherPositions(bitSet: BitSet): number[] {
-  return bitSet.gather(Array.from({ length: bitSet.size }, (_, i) => i));
-}
 
 describe("BitSet", () => {
   test("stores and reports membership", () => {
@@ -45,17 +35,17 @@ describe("BitSet", () => {
     const source = Array.from({ length: 256 }, (_, i) => `d${i}`);
 
     test("visits nothing for an empty set", () => {
-      expect(gatherPositions(new BitSet(64))).toEqual([]);
+      expect(gatherBitSetPositions(new BitSet(64))).toEqual([]);
     });
 
     test("visits positions ascending within a word", () => {
-      expect(gatherPositions(createBitSet(32, [0, 1, 3, 5, 31]))).toEqual([0, 1, 3, 5, 31]);
+      expect(gatherBitSetPositions(createBitSet(32, [0, 1, 3, 5, 31]))).toEqual([0, 1, 3, 5, 31]);
     });
 
     test("visits positions ascending across word boundaries", () => {
       const positions = [0, 31, 32, 33, 63, 64, 127, 200];
 
-      expect(gatherPositions(createBitSet(256, positions))).toEqual(positions);
+      expect(gatherBitSetPositions(createBitSet(256, positions))).toEqual(positions);
     });
 
     test("maps each set position through the source in ascending order", () => {
@@ -93,7 +83,7 @@ describe("BitSet", () => {
 
       bitSet.orInPlace(createBitSet(128, [2, 65]));
 
-      expect(gatherPositions(bitSet)).toEqual([1, 2, 64, 65]);
+      expect(gatherBitSetPositions(bitSet)).toEqual([1, 2, 64, 65]);
     });
 
     test("throws on a size mismatch", () => {
@@ -106,7 +96,7 @@ describe("BitSet", () => {
       const bitSet = createBitSet(128, [1, 2, 3, 64]);
 
       expect(bitSet.andInPlace(createBitSet(128, [2, 3, 64, 65]))).toBe(false);
-      expect(gatherPositions(bitSet)).toEqual([2, 3, 64]);
+      expect(gatherBitSetPositions(bitSet)).toEqual([2, 3, 64]);
     });
 
     test("reports empty on disjoint sets", () => {
@@ -122,7 +112,7 @@ describe("BitSet", () => {
       const bitSet = createBitSet(128, [1, 2, 3, 64]);
 
       expect(bitSet.andNotInPlace(createBitSet(128, [2, 64]))).toBe(false);
-      expect(gatherPositions(bitSet)).toEqual([1, 3]);
+      expect(gatherBitSetPositions(bitSet)).toEqual([1, 3]);
     });
 
     test("reports empty when a superset is subtracted", () => {
@@ -138,7 +128,7 @@ describe("BitSet", () => {
       const bitSet = createBitSet(8, [0]);
 
       bitSet.orComplementInPlace(createBitSet(8, [0, 1]));
-      expect(gatherPositions(bitSet)).toEqual([0, 2, 3, 4, 5, 6, 7]);
+      expect(gatherBitSetPositions(bitSet)).toEqual([0, 2, 3, 4, 5, 6, 7]);
     });
   });
 
@@ -149,7 +139,7 @@ describe("BitSet", () => {
 
       clonedBitSet.set(2);
       expect(originalBitSet.has(2)).toBe(false);
-      expect(gatherPositions(clonedBitSet)).toEqual([1, 2, 64, 100]);
+      expect(gatherBitSetPositions(clonedBitSet)).toEqual([1, 2, 64, 100]);
     });
   });
 
@@ -158,7 +148,7 @@ describe("BitSet", () => {
       const bitSet = createBitSet(128, [1, 2, 64]);
 
       bitSet.clear(2);
-      expect(gatherPositions(bitSet)).toEqual([1, 64]);
+      expect(gatherBitSetPositions(bitSet)).toEqual([1, 64]);
     });
   });
 
@@ -175,7 +165,7 @@ describe("BitSet", () => {
 
       bitSet.fill();
       expect(bitSet.cardinality()).toBe(70);
-      expect(gatherPositions(bitSet)).toEqual(Array.from({ length: 70 }, (_, i) => i));
+      expect(gatherBitSetPositions(bitSet)).toEqual(Array.from({ length: 70 }, (_, i) => i));
       expect(bitSet.has(69)).toBe(true);
       expect(bitSet.has(70)).toBe(false);
     });
@@ -202,7 +192,7 @@ describe("BitSet", () => {
       const isEmpty = bitSet.andPositionsInPlace(Uint32Array.from([40, 70, 90]));
 
       expect(isEmpty).toBe(false);
-      expect(gatherPositions(bitSet)).toEqual([40, 70]);
+      expect(gatherBitSetPositions(bitSet)).toEqual([40, 70]);
     });
 
     test("reports empty when nothing intersects", () => {

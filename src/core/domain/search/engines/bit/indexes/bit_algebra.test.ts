@@ -1,8 +1,9 @@
-import { DensePosting, SparsePosting } from "@/core/domain/search/engines/bit/posting/posting";
 import { describe, expect, test } from "vitest";
 import { BitAlgebra } from "@/core/domain/search/engines/bit/indexes/bit_algebra";
-import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
+import { DensePosting } from "@/core/domain/search/engines/bit/posting/dense_posting";
 import { DocTable } from "@/core/domain/search/engines/bit/indexes/doc_table";
+import { SparsePosting } from "@/core/domain/search/engines/bit/posting/sparse_posting";
+import { createBitSet } from "@/core/domain/search/testing/bitset";
 
 const DOCS = ["apple", "banana", "cherry"];
 
@@ -17,13 +18,6 @@ function setup(): BitAlgebra<string> {
     bitAlgebra.occupy(position);
   });
   return bitAlgebra;
-}
-
-function createBitSet(...positions: number[]): BitSet {
-  const bitSet = new BitSet(64);
-
-  positions.forEach(position => bitSet.set(position));
-  return bitSet;
 }
 
 describe("BitAlgebra", () => {
@@ -72,14 +66,14 @@ describe("BitAlgebra", () => {
     test("holds the occupied positions outside the set", () => {
       const bitAlgebra = setup();
 
-      expect(bitAlgebra.docsFrom(bitAlgebra.complementOf(createBitSet(1)))).toEqual(["apple", "cherry"]);
+      expect(bitAlgebra.docsFrom(bitAlgebra.complementOf(createBitSet(64, [1])))).toEqual(["apple", "cherry"]);
     });
   });
 
   describe("unionOf", () => {
     test("holds the positions of any posting", () => {
       const bitAlgebra = setup();
-      const unionBitSet = bitAlgebra.unionOf([new SparsePosting(Uint8Array.of(0)), new DensePosting(createBitSet(2))]);
+      const unionBitSet = bitAlgebra.unionOf([new SparsePosting(Uint8Array.of(0)), new DensePosting(createBitSet(64, [2]))]);
 
       expect(bitAlgebra.docsFrom(unionBitSet)).toEqual(["apple", "cherry"]);
     });

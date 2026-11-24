@@ -12,6 +12,7 @@ import { expectClassesStyled } from "@/testing/css_utilities";
 function setup(snippets: Signal<readonly Snippet[]>, partialSnippetsPaneProps: Partial<SnippetsPaneProps> = {}): HTMLElement {
   return render(document, () => (
     <SnippetsPane
+      title="Snippets"
       snippets={snippets}
       isNameTaken={name => snippets.value.some(snippet => snippet.name === name)}
       save={vi.fn()}
@@ -193,7 +194,7 @@ describe("SnippetsPane", () => {
   test("stops following its snippets once disposed", () => {
     const snippets = createSnippets();
     const { result: snippetsPane, dispose } = render(document, () => (
-      <SnippetsPane snippets={snippets} isNameTaken={() => false} save={vi.fn()} remove={vi.fn()} open={vi.fn()} />
+      <SnippetsPane title="Snippets" snippets={snippets} isNameTaken={() => false} save={vi.fn()} remove={vi.fn()} open={vi.fn()} />
     ));
 
     clickButton(snippetsPane, "New Snippet");

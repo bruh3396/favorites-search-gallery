@@ -1,8 +1,17 @@
-import { ActivityBar, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
 import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
+import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
 import { Signal } from "@/core/utils/reactive/signal";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
+
+const STORY_ITEMS = {
+  settings: { label: "Settings", icon: "settings" },
+  downloads: { label: "Downloads", icon: "download" },
+  changelog: { label: "Changelog", icon: "changelog" },
+  help: { label: "Help", icon: "help" }
+} as const;
+
+type StoryItemId = keyof typeof STORY_ITEMS;
 
 function renderPlaceholderView(label: string): HTMLElement {
   return <ViewPane title={label}><p className="kit-Placeholder">{label} content</p></ViewPane>;
@@ -30,22 +39,22 @@ function renderSettingsView(log: (message: string) => void): HTMLElement {
   );
 }
 
-function variant(label: string, initial: string | null): StoryVariant {
+function variant(label: string, initial: StoryItemId | null): StoryVariant {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {
-      const activeItemId = new Signal<string | null>(initial);
-      const activityBarItems: readonly ActivityBarItem[] = [
-        { id: "settings", label: "Settings", icon: "settings", renderView: () => renderSettingsView(log) },
-        { id: "downloads", label: "Downloads", icon: "download", renderView: () => renderPlaceholderView("Downloads") },
-        { id: "changelog", label: "Changelog", icon: "changelog", renderView: () => renderPlaceholderView("Changelog") },
-        { id: "help", label: "Help", icon: "help", renderView: () => renderPlaceholderView("Help") }
-      ];
+      const activeItemId = new Signal<StoryItemId | null>(initial);
       const { result } = render(ownerDocument, () => (
         <div className="kit-Frame">
           <ActivityBar
-            items={activityBarItems}
+            items={STORY_ITEMS}
             value={activeItemId}
+            renderViewById={{
+              settings: () => renderSettingsView(log),
+              downloads: () => renderPlaceholderView("Downloads"),
+              changelog: () => renderPlaceholderView("Changelog"),
+              help: () => renderPlaceholderView("Help")
+            }}
             onValueChange={next => {
               log(`ActivityBar "${label}" → ${String(next)}`);
               activeItemId.value = next;

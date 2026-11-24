@@ -4,7 +4,7 @@ import { Occurrence } from "@/core/utils/reactive/occurrence";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
-import { createSameKindGuard } from "@/core/utils/guard/guard";
+import { createSameKindGuard } from "@/core/utils/guard/same_kind_guard";
 
 export interface KeyedStoredValueConfiguration<T> {
   readonly key: string;

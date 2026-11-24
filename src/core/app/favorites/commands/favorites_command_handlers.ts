@@ -6,13 +6,12 @@ import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/core/utils/numb
 import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_grid_layouts";
-import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
-import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { FAVORITES_SORT_KEYS } from "@/core/features/favorites/search/favorites_sort_key";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
 import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { FavoritesTool } from "@/core/app/favorites/favorites_tool";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { LIGHTBOX_MODES } from "@/core/features/lightbox/lightbox_mode";
 import { SharedPreferences } from "@/core/app/storage/shared_preferences";
@@ -25,7 +24,7 @@ export interface FavoritesCommandHandlersConfiguration {
 }
 
 export interface FavoritesCommandHandlersDependencies {
-  favoritesWorkspace: Pick<FavoritesWorkspace, "activeTab" | "tabManager" | "openBlankTab" | "closeTab">;
+  favoritesWorkspace: Pick<FavoritesWorkspace, "activeTab" | "tabManager" | "openBlankTab" | "closeTabs">;
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "pagination" | "lightbox" | "nativeHeaderVisible" | "activeTool">;
   sharedPreferences: Pick<SharedPreferences, "theme" | "colorScheme" | "postListEnabled">;
   favoritesTabStripVisible: StoredValue<boolean>;
@@ -55,8 +54,8 @@ export function createFavoritesCommandHandlers(
     tabManager.activate(tabs[(activeTabIndex() + offset + tabs.length) % tabs.length].id);
   };
   const goToPage = (pageNumber: number): void => activeFavoritesSession().goTo(pageNumber);
-  const toggleTool = (toolId: string): void => {
-    favoritesPreferences.activeTool.set(favoritesPreferences.activeTool.peek() === toolId ? null : toolId);
+  const toggleTool = (favoritesTool: FavoritesTool): void => {
+    favoritesPreferences.activeTool.set(favoritesPreferences.activeTool.peek() === favoritesTool ? null : favoritesTool);
   };
   return {
     focusSearch: () => favoritesWorkspace.activeTab.peek().focusSearch.emit(),
@@ -75,7 +74,7 @@ export function createFavoritesCommandHandlers(
     goToNextPage: () => goToPage(activeFavoritesSession().pageNumber.peek() + 1),
     goToPreviousPage: () => goToPage(activeFavoritesSession().pageNumber.peek() - 1),
     openNewTab: () => favoritesWorkspace.openBlankTab(),
-    closeTab: () => favoritesWorkspace.closeTab(tabManager.tabs.peek()[Math.max(activeTabIndex(), 0)].id),
+    closeTab: () => favoritesWorkspace.closeTabs([tabManager.tabs.peek()[Math.max(activeTabIndex(), 0)].id]),
     goToNextTab: () => activateTabAt(1),
     goToPreviousTab: () => activateTabAt(-1),
     toggleTabs: () => toggle(favoritesTabStripVisible),
@@ -92,8 +91,8 @@ export function createFavoritesCommandHandlers(
     exitZen: (): void => {
       zenEnabled.value = false;
     },
-    toggleSettings: () => toggleTool(FAVORITES_SETTINGS_TOOL.id),
-    toggleKeyboardShortcuts: () => toggleTool(FAVORITES_KEY_BINDINGS_TOOL.id),
+    toggleSettings: () => toggleTool("settings"),
+    toggleKeyboardShortcuts: () => toggleTool("keyBindings"),
     cycleTheme: () => sharedPreferences.theme.set(findNext(THEMES, sharedPreferences.theme.peek())),
     toggleColorScheme: () => sharedPreferences.colorScheme.set(findNext<ColorScheme>(COLOR_SCHEMES, sharedPreferences.colorScheme.peek())),
     toggleHeader: () => toggle(favoritesPreferences.nativeHeaderVisible),

@@ -1,7 +1,7 @@
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { containsEverySearchWord, splitSearchWords } from "@/core/utils/string/string_utilities";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
-import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
+import { FAVORITES_TOOL_DEFINITIONS } from "@/core/app/favorites/favorites_tool";
 import { FavoritesKeyBindingsRow } from "@/core/app/favorites/key_bindings/favorites_key_bindings_row";
 import { FavoritesKeyBindingsSection } from "@/core/app/favorites/key_bindings/favorites_key_bindings_section";
 import { KeyBindingList } from "@/core/ui/components/key_binding_list/key_binding_list";
@@ -70,7 +70,7 @@ export function FavoritesKeyBindings({ sections: favoritesKeyBindingsSections, r
   );
   return (
     <ViewPane
-      title={FAVORITES_KEY_BINDINGS_TOOL.label}
+      title={FAVORITES_TOOL_DEFINITIONS.keyBindings.label}
       actions={[{ label: "Reset Keyboard Shortcuts", icon: "reset", onClick: resetKeyBindings }]}
       searchChild={
         <SearchField

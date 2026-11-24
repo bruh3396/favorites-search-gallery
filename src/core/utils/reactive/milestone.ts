@@ -1,5 +1,5 @@
-import { Signal, effect } from "@/core/utils/reactive/signal";
 import { Fact } from "@/core/utils/reactive/fact";
+import { Signal } from "@/core/utils/reactive/signal";
 
 export class Milestone<V = void> implements Fact<V> {
   private readonly deferred = Promise.withResolvers<V>();
@@ -24,15 +24,4 @@ export class Milestone<V = void> implements Fact<V> {
   public wait(): Promise<V> {
     return this.deferred.promise;
   }
-}
-
-export function when(condition: () => boolean): Fact {
-  const milestone = new Milestone();
-
-  effect(() => {
-    if (!milestone.peek() && condition()) {
-      milestone.reach();
-    }
-  });
-  return milestone;
 }

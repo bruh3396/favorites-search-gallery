@@ -1,6 +1,8 @@
 .fsg-SnippetRow {
   position: relative;
   gap: 8px;
+  padding-inline-start: 14px;
+  border-radius: 0;
 }
 
 .fsg-SnippetRow-name {

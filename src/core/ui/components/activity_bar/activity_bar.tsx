@@ -12,56 +12,51 @@ export const ActivityBarClass = {
   view: "fsg-ActivityBar-view"
 } as const;
 
-export interface ActivityBarItem {
-  readonly id: string;
-  readonly label: string;
-  readonly icon: Icon;
-  renderView: () => HTMLElement;
-}
-
-export interface ActivityBarProps {
-  items: readonly ActivityBarItem[];
-  value: Readable<string | null>;
-  onValueChange: (id: string | null) => void;
+export interface ActivityBarProps<Id extends string> {
+  items: Readonly<Record<Id, { readonly label: string; readonly icon: Icon }>>;
+  value: Readable<Id | null>;
+  renderViewById: Readonly<Record<Id, () => HTMLElement>>;
+  onValueChange: (id: Id | null) => void;
   footerChild?: Child;
 }
 
-export function ActivityBar({ items: activityBarItems, value, onValueChange, footerChild }: ActivityBarProps): HTMLElement {
+export function ActivityBar<Id extends string>({ items, value, renderViewById, onValueChange, footerChild }: ActivityBarProps<Id>): HTMLElement {
   const createViewScope = captureScope();
-  const activeItem = computed(() => activityBarItems.find(activityBarItem => activityBarItem.id === value.value) ?? null);
+  const ids = Object.keys(items) as Id[];
+  const activeId = computed(() => ids.find(id => id === value.value) ?? null);
   const view = (
     <div
       className={ActivityBarClass.view}
       role="region"
-      aria-label={computed(() => activeItem.value?.label ?? "")}
-      hidden={computed(() => activeItem.value === null)}
+      aria-label={computed(() => (activeId.value === null ? "" : items[activeId.value].label))}
+      hidden={computed(() => activeId.value === null)}
     />
   );
   let shown: Scoped<HTMLElement> | null = null;
-  let shownActivityBarItem: ActivityBarItem | null = null;
+  let shownId: Id | null = null;
 
   effect(() => {
-    const activityBarItem = activeItem.value;
+    const id = activeId.value;
 
-    if (activityBarItem === null || activityBarItem === shownActivityBarItem) {
+    if (id === null || id === shownId) {
       return;
     }
     shown?.dispose();
-    shown = createViewScope(() => untracked(() => activityBarItem.renderView()));
-    shownActivityBarItem = activityBarItem;
+    shown = createViewScope(() => untracked(() => renderViewById[id]()));
+    shownId = id;
     view.replaceChildren(shown.result);
   });
   onCleanup(() => shown?.dispose());
 
-  const buttons = activityBarItems.map(activityBarItem => {
+  const buttons = ids.map(id => {
     const button = (
       <IconButton
         className={ActivityBarClass.item}
-        icon={activityBarItem.icon}
-        label={activityBarItem.label}
+        icon={items[id].icon}
+        label={items[id].label}
         size="large"
-        pressed={computed(() => value.value === activityBarItem.id)}
-        onClick={() => onValueChange(value.peek() === activityBarItem.id ? null : activityBarItem.id)}
+        pressed={computed(() => value.value === id)}
+        onClick={() => onValueChange(value.peek() === id ? null : id)}
       />
     );
 

@@ -1,6 +1,8 @@
-import { DensePosting, EMPTY_POSTING, Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
 import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
+import { DensePosting } from "@/core/domain/search/engines/bit/posting/dense_posting";
+import { EMPTY_POSTING } from "@/core/domain/search/engines/bit/posting/empty_posting";
+import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { PostingResolver } from "@/core/domain/search/engines/bit/resolution/posting_resolver";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 

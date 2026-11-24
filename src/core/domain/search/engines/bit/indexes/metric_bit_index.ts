@@ -1,5 +1,5 @@
 import { BitSet } from "@/core/domain/search/engines/bit/posting/bitset";
-import { DensePosting } from "@/core/domain/search/engines/bit/posting/posting";
+import { DensePosting } from "@/core/domain/search/engines/bit/posting/dense_posting";
 import { Metric } from "@/core/domain/search/metric";
 import { MetricComparator } from "@/core/domain/search/metric_comparator";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { createOneOfGuard } from "@/core/utils/guard/guard";
+import { createOneOfGuard } from "@/core/utils/guard/one_of_guard";
 import { createSetCodec } from "@/core/utils/codec/codec";
 import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_definition";
 import { isNumber } from "@/core/utils/guard/unknown_utilities";

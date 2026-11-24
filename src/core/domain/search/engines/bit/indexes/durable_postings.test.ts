@@ -1,6 +1,7 @@
-import { DensePosting, SparsePosting } from "@/core/domain/search/engines/bit/posting/posting";
 import { describe, expect, test } from "vitest";
+import { DensePosting } from "@/core/domain/search/engines/bit/posting/dense_posting";
 import { DurablePostings } from "@/core/domain/search/engines/bit/indexes/durable_postings";
+import { SparsePosting } from "@/core/domain/search/engines/bit/posting/sparse_posting";
 
 const CAPACITY = 64;
 

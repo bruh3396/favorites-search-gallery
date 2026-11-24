@@ -1,4 +1,4 @@
-import { ActivityBar, ActivityBarClass, ActivityBarItem } from "@/core/ui/components/activity_bar/activity_bar";
+import { ActivityBar, ActivityBarClass } from "@/core/ui/components/activity_bar/activity_bar";
 import { Mock, afterEach, describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import ACTIVITY_BAR_CSS from "@/core/ui/components/activity_bar/activity_bar.css?inline";
@@ -6,32 +6,37 @@ import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
+const ITEMS = { settings: { label: "Settings", icon: "settings" }, downloads: { label: "Downloads", icon: "download" } } as const;
+
+type ItemId = keyof typeof ITEMS;
+
 interface Setup {
   element: HTMLElement;
-  renderView: Mock<(id: string) => void>;
-  disposeView: Mock<(id: string) => void>;
-  onValueChange: Mock<(id: string | null) => void>;
+  renderView: Mock<(id: ItemId) => void>;
+  disposeView: Mock<(id: ItemId) => void>;
+  onValueChange: Mock<(id: ItemId | null) => void>;
   dispose: () => void;
 }
 
-function setup(initial: string | null = null): Setup {
-  const value = new Signal<string | null>(initial);
-  const renderView = vi.fn<(id: string) => void>();
-  const disposeView = vi.fn<(id: string) => void>();
-  const createItem = (id: string, label: string, icon: ActivityBarItem["icon"]): ActivityBarItem => ({
-    id, label, icon,
-    renderView: (): HTMLElement => {
-      renderView(id);
-      onCleanup(() => disposeView(id));
-      return <p>{label}</p>;
-    }
-  });
-  const activityBarItems = [createItem("settings", "Settings", "settings"), createItem("downloads", "Downloads", "download")];
-  const onValueChange = vi.fn((id: string | null): void => {
+function setup(initial: ItemId | null = null): Setup {
+  const value = new Signal<ItemId | null>(initial);
+  const renderView = vi.fn<(id: ItemId) => void>();
+  const disposeView = vi.fn<(id: ItemId) => void>();
+  const onValueChange = vi.fn((id: ItemId | null): void => {
     value.value = id;
   });
+  const createViewRenderer = (id: ItemId) => (): HTMLElement => {
+    renderView(id);
+    onCleanup(() => disposeView(id));
+    return <p>{ITEMS[id].label}</p>;
+  };
   const { result: element, dispose } = render(document, () => (
-    <ActivityBar items={activityBarItems} value={value} onValueChange={onValueChange} />
+    <ActivityBar
+      items={ITEMS}
+      value={value}
+      renderViewById={{ settings: createViewRenderer("settings"), downloads: createViewRenderer("downloads") }}
+      onValueChange={onValueChange}
+    />
   ));
 
   document.body.append(element);
@@ -108,7 +113,7 @@ describe("ActivityBar", () => {
 
   test("shows the footer it is given in the rail", () => {
     const { result: element } = render(document, () => (
-      <ActivityBar items={[]} value={new Signal<string | null>(null)} onValueChange={vi.fn()} footerChild={<span>Logo</span>} />
+      <ActivityBar items={{}} value={new Signal<string | null>(null)} renderViewById={{}} onValueChange={vi.fn()} footerChild={<span>Logo</span>} />
     ));
 
     expect(element.querySelector("nav")!.textContent).toBe("Logo");

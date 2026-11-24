@@ -5,5 +5,11 @@
 .fsg-SnippetsPane-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  overflow: hidden;
+  border-radius: var(--fsg-shape-corner-small);
+  background: var(--fsg-color-surface-container-high);
+}
+
+.fsg-SnippetsPane-list > :not([hidden]) ~ :not([hidden]) {
+  border-block-start: 1px solid var(--fsg-color-outline-variant);
 }

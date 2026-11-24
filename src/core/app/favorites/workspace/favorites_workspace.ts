@@ -82,17 +82,11 @@ export class FavoritesWorkspace {
     this.tabManager.activate(this.openTab(this.createSearchOptions(query)).id);
   }
 
-  public closeTab(tabId: string): void {
-    if (this.tabManager.tabs.peek().length > 1) {
-      this.tabManager.close(tabId);
+  public closeTabs(tabIds: readonly string[]): void {
+    if (this.tabManager.tabs.peek().every(tab => tabIds.includes(tab.id))) {
+      this.openBlankTab();
     }
-  }
-
-  public closeAllTabs(): void {
-    const previousTabs = this.tabManager.tabs.peek();
-
-    this.openBlankTab();
-    batch(() => previousTabs.forEach(tab => this.tabManager.close(tab.id)));
+    batch(() => tabIds.forEach(tabId => this.tabManager.close(tabId)));
   }
 
   public locate(favorite: Favorite): HTMLElement | undefined {

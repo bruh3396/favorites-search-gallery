@@ -1,5 +1,5 @@
 import { FavoritesSettings, FavoritesSettingsProps } from "@/core/app/favorites/settings/favorites_settings";
-import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
+import { FAVORITES_TOOL_DEFINITIONS } from "@/core/app/favorites/favorites_tool";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 import { h } from "@/core/ui/h/h";
 
@@ -15,7 +15,7 @@ export function composeFavoritesSettings(dependencies: FavoritesSettingsDependen
   const { favoritesPreferences, sharedPreferences, stepperScheduler, onThemePreview, resetSettings } = dependencies;
   return h(
     ViewPane,
-    { title: FAVORITES_SETTINGS_TOOL.label, actions: [{ label: "Reset Settings", icon: "reset", onClick: resetSettings }] },
+    { title: FAVORITES_TOOL_DEFINITIONS.settings.label, actions: [{ label: "Reset Settings", icon: "reset", onClick: resetSettings }] },
     h(FavoritesSettings, { favoritesPreferences, sharedPreferences, stepperScheduler, onThemePreview })
   );
 }

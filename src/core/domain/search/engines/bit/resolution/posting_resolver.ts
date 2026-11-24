@@ -1,8 +1,10 @@
-import { DensePosting, EMPTY_POSTING, Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
+import { DensePosting } from "@/core/domain/search/engines/bit/posting/dense_posting";
+import { EMPTY_POSTING } from "@/core/domain/search/engines/bit/posting/empty_posting";
 import { MetricBitIndex } from "@/core/domain/search/engines/bit/indexes/metric_bit_index";
 import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
+import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
 import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";

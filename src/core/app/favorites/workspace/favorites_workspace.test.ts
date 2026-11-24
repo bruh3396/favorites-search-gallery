@@ -146,6 +146,15 @@ describe("FavoritesWorkspace", () => {
     expect(bananaTab.value.session.start).toHaveBeenCalledOnce();
   });
 
+  test("treats the first tab as active while the active tab is closed outside a batch", () => {
+    const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
+    const activeTabQueries: string[] = [];
+
+    effect(() => activeTabQueries.push(favoritesWorkspace.activeTab.value.session.searchOptions.value.query));
+    favoritesWorkspace.tabManager.close(favoritesWorkspace.tabManager.tabs.value[0].id);
+    expect(activeTabQueries).toEqual(["apple", "banana"]);
+  });
+
   test("saves the tabs and which one is active as they change", () => {
     const { favoritesWorkspace, localKeyedValues } = setup(createStoredWorkspace(["apple"]));
 
@@ -197,27 +206,19 @@ describe("FavoritesWorkspace", () => {
     });
   });
 
-  describe("closeTab", () => {
-    test("closes the tab", () => {
-      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
+  describe("closeTabs", () => {
+    test("closes the given tabs", () => {
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana", "cherry"]));
+      const [appleTab, , cherryTab] = favoritesWorkspace.tabManager.tabs.value;
 
-      favoritesWorkspace.closeTab(favoritesWorkspace.tabManager.tabs.value[0].id);
+      favoritesWorkspace.closeTabs([appleTab.id, cherryTab.id]);
       expect(readQueries(favoritesWorkspace)).toEqual(["banana"]);
     });
 
-    test("keeps the last tab open", () => {
-      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple"]));
-
-      favoritesWorkspace.closeTab(favoritesWorkspace.tabManager.tabs.value[0].id);
-      expect(readQueries(favoritesWorkspace)).toEqual(["apple"]);
-    });
-  });
-
-  describe("closeAllTabs", () => {
-    test("leaves one active blank tab", () => {
+    test("leaves one active blank tab when closing every tab", () => {
       const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
 
-      favoritesWorkspace.closeAllTabs();
+      favoritesWorkspace.closeTabs(favoritesWorkspace.tabManager.tabs.value.map(tab => tab.id));
       expect([readFavoritesSearchOptions(favoritesWorkspace), readActiveIndex(favoritesWorkspace)])
         .toEqual([[{ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, shuffleSeed: 2 ** 30 }], 0]);
     });
@@ -226,7 +227,7 @@ describe("FavoritesWorkspace", () => {
       const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
       const sessions = favoritesWorkspace.tabManager.tabs.value.map(tab => vi.spyOn(tab.value.session, "dispose"));
 
-      favoritesWorkspace.closeAllTabs();
+      favoritesWorkspace.closeTabs(favoritesWorkspace.tabManager.tabs.value.map(tab => tab.id));
       expect(sessions.map(dispose => dispose.mock.calls.length)).toEqual([1, 1]);
     });
   });

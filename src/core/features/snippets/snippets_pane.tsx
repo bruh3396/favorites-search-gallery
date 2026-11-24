@@ -2,7 +2,6 @@ import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
 import { containsEverySearchWord, splitSearchWords } from "@/core/utils/string/string_utilities";
 import { EmptyState } from "@/core/ui/components/empty_state/empty_state";
-import { SNIPPETS_TOOL } from "@/core/features/snippets/snippets_tool";
 import { SearchField } from "@/core/ui/components/search_field/search_field";
 import { Snippet } from "@/core/domain/snippet/snippet";
 import { SnippetForm } from "@/core/features/snippets/snippet_form";
@@ -16,6 +15,7 @@ export const SnippetsPaneClass = {
 } as const;
 
 export interface SnippetsPaneProps {
+  title: string;
   snippets: Readable<readonly Snippet[]>;
   isNameTaken: (name: string, previousName?: string) => boolean;
   save: (draftSnippet: Pick<Snippet, "name" | "query">, previousName?: string) => void;
@@ -23,7 +23,7 @@ export interface SnippetsPaneProps {
   open: (snippet: Snippet) => void;
 }
 
-export function SnippetsPane({ snippets, isNameTaken, save, remove, open }: SnippetsPaneProps): HTMLElement {
+export function SnippetsPane({ title, snippets, isNameTaken, save, remove, open }: SnippetsPaneProps): HTMLElement {
   const searchText = new Signal("");
   const searchWords = computed(() => splitSearchWords(searchText.value));
   const isSearching = computed(() => searchWords.value.length > 0);
@@ -102,7 +102,7 @@ export function SnippetsPane({ snippets, isNameTaken, save, remove, open }: Snip
   });
   return (
     <ViewPane
-      title={SNIPPETS_TOOL.label}
+      title={title}
       actions={[
         {
           label: "New Snippet",

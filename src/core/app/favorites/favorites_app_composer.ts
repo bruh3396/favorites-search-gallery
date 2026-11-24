@@ -1,6 +1,7 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/collection/search_history";
 import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/favorites_app";
+import { FAVORITES_TOOL_DEFINITIONS, FavoritesTool } from "@/core/app/favorites/favorites_tool";
 import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
@@ -15,8 +16,6 @@ import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";
 import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { FAVORITES_COMMAND_DEFINITIONS } from "@/core/app/favorites/commands/favorites_command";
-import { FAVORITES_KEY_BINDINGS_TOOL } from "@/core/app/favorites/key_bindings/favorites_key_bindings_tool";
-import { FAVORITES_SETTINGS_TOOL } from "@/core/app/favorites/settings/favorites_settings_tool";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
@@ -34,7 +33,6 @@ import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
-import { SNIPPETS_TOOL } from "@/core/features/snippets/snippets_tool";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SnippetLibrary } from "@/core/features/snippets/snippet_library";
 import { SnippetsPane } from "@/core/features/snippets/snippets_pane";
@@ -165,6 +163,34 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       );
     }
   };
+  const renderViewByTool: Record<FavoritesTool, () => HTMLElement> = {
+    settings: () => composeFavoritesSettings({
+      favoritesPreferences, sharedPreferences, stepperScheduler: scheduler, resetSettings,
+      onThemePreview: (theme): void => {
+        previewedTheme.value = theme;
+      }
+    }),
+    keyBindings: () => composeFavoritesKeyBindings({
+      keyBindings, keyBindingOverrides: favoritesPreferences.keyBindingOverrides,
+      lightboxKeyBindings, lightboxKeyBindingOverrides: sharedPreferences.lightboxKeyBindingOverrides,
+      confirmer
+    }),
+    snippets: () => h(SnippetsPane, {
+      title: FAVORITES_TOOL_DEFINITIONS.snippets.label,
+      snippets: snippetLibrary.snippets,
+      isNameTaken: (name, previousName) => snippetLibrary.isNameTaken(name, previousName),
+      save: (draftSnippet, previousName): void => {
+        void snippetLibrary.save(draftSnippet, previousName);
+      },
+      remove: (name): void => {
+        void snippetLibrary.remove(name);
+      },
+      open: (snippet): void => {
+        void snippetLibrary.recordUse(snippet.name);
+        favoritesWorkspace.searchInNewTab(snippet.query);
+      }
+    })
+  };
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {
@@ -177,43 +203,9 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
         favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), zenEnabled,
         zenExitKeys: computed(() => [...keyBindings.value.toggleZen, ...keyBindings.value.exitZen]),
-        activityBar: h(ActivityBar, {
-          items: [
-            {
-              ...FAVORITES_SETTINGS_TOOL,
-              renderView: (): HTMLElement => composeFavoritesSettings({
-                favoritesPreferences, sharedPreferences, stepperScheduler: scheduler, resetSettings,
-                onThemePreview: (theme): void => {
-                  previewedTheme.value = theme;
-                }
-              })
-            },
-            {
-              ...FAVORITES_KEY_BINDINGS_TOOL,
-              renderView: (): HTMLElement => composeFavoritesKeyBindings({
-                keyBindings, keyBindingOverrides: favoritesPreferences.keyBindingOverrides,
-                lightboxKeyBindings, lightboxKeyBindingOverrides: sharedPreferences.lightboxKeyBindingOverrides,
-                confirmer
-              })
-            },
-            {
-              ...SNIPPETS_TOOL,
-              renderView: (): HTMLElement => h(SnippetsPane, {
-                snippets: snippetLibrary.snippets,
-                isNameTaken: (name, previousName) => snippetLibrary.isNameTaken(name, previousName),
-                save: (draftSnippet, previousName): void => {
-                  void snippetLibrary.save(draftSnippet, previousName);
-                },
-                remove: (name): void => {
-                  void snippetLibrary.remove(name);
-                },
-                open: (snippet): void => {
-                  void snippetLibrary.recordUse(snippet.name);
-                  favoritesWorkspace.searchInNewTab(snippet.query);
-                }
-              })
-            }
-          ],
+        activityBar: h(ActivityBar<FavoritesTool>, {
+          items: FAVORITES_TOOL_DEFINITIONS,
+          renderViewById: renderViewByTool,
           value: favoritesPreferences.activeTool,
           onValueChange: id => favoritesPreferences.activeTool.set(id),
           footerChild: h(AppMark, { scriptVersion })
@@ -223,10 +215,9 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
           activeTabId: tabManager.activeTabId,
           trailingChild: h(StatusText, { text: favoritesService.loadStatus }),
           onActivate: tabId => tabManager.activate(tabId),
-          onClose: tabId => favoritesWorkspace.closeTab(tabId),
+          onClose: tabIds => favoritesWorkspace.closeTabs(tabIds),
           onMove: (tabId, index) => tabManager.move(tabId, index),
-          onAdd: () => favoritesWorkspace.openBlankTab(),
-          onCloseAll: () => favoritesWorkspace.closeAllTabs()
+          onAdd: () => favoritesWorkspace.openBlankTab()
         })),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
           favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, tabCount, searchHistory, favoriteSizeRecorder,

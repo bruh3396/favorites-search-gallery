@@ -438,7 +438,8 @@ describe("composeFavoritesApp", () => {
     click(`.${TabStripClass.close}`);
     const afterClose = countTabs();
 
-    click(`.${TabStripClass.closeAll}`);
+    root.querySelector(`.${TabStripClass.tab}`)!.dispatchEvent(new MouseEvent("contextmenu", { bubbles: true, cancelable: true, composed: true }));
+    [...root.querySelectorAll<HTMLElement>("[role=menuitem]")].find(menuItem => menuItem.textContent === "Close All Tabs")!.click();
     expect([opened, afterClose, countTabs()]).toEqual([3, 2, 1]);
   });
 

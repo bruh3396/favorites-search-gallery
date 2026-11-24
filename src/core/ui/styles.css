@@ -9,6 +9,7 @@
 @import "./components/listbox/listbox.css" layer(components);
 @import "./components/dropdown/dropdown.css" layer(components);
 @import "./components/option_menu/option_menu.css" layer(components);
+@import "./components/context_menu/context_menu.css" layer(components);
 @import "./components/chip/chip.css" layer(components);
 @import "./components/chip_menu/chip_menu.css" layer(components);
 @import "./components/setting_row/setting_row.css" layer(components);

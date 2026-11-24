@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
-import { createOneOfGuard } from "@/core/utils/guard/guard";
+import { createOneOfGuard } from "@/core/utils/guard/one_of_guard";
 import { createSetCodec } from "@/core/utils/codec/codec";
 import { effect } from "@/core/utils/reactive/signal";
 

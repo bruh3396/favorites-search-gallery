@@ -1,6 +1,6 @@
 import { KeyBindings, findCommandInKeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { isRecord, isString } from "@/core/utils/guard/unknown_utilities";
-import { createListGuard } from "@/core/utils/guard/guard";
+import { createListGuard } from "@/core/utils/guard/list_guard";
 
 export type KeyBindingOverrides<Command extends string> = Readonly<Partial<Record<Command, readonly string[]>>>;
 

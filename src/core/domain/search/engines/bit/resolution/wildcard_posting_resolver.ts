@@ -1,5 +1,6 @@
-import { DensePosting, Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
+import { DensePosting } from "@/core/domain/search/engines/bit/posting/dense_posting";
+import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardResolver } from "@/core/domain/search/indexes/wildcard_resolver";
 

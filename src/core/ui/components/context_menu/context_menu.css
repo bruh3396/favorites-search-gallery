@@ -1,0 +1,28 @@
+.fsg-ContextMenu {
+  position: fixed;
+  z-index: 10;
+  min-inline-size: 168px;
+  outline: none;
+}
+
+.fsg-ContextMenu-item[data-active="true"] {
+  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-ContextMenu-item[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-ContextMenu-item[data-starts-group="true"] {
+  position: relative;
+  margin-block-start: 9px;
+}
+
+.fsg-ContextMenu-item[data-starts-group="true"]::before {
+  content: "";
+  position: absolute;
+  inset-block-start: -5px;
+  inset-inline: 0;
+  border-block-start: 1px solid var(--fsg-color-outline);
+}
