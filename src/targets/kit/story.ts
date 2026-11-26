@@ -1,4 +1,4 @@
-export interface StoryVariant {
+interface StoryVariant {
   readonly label: string;
   render: (ownerDocument: Document, log: (message: string) => void) => HTMLElement;
 }

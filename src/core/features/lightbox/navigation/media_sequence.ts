@@ -1,9 +1,5 @@
 import { MediaItem } from "@/core/domain/media/media_item";
-
-export interface MediaSequencePosition {
-  readonly index: number;
-  readonly total: number | undefined;
-}
+import { MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence_position";
 
 export interface MediaSequence<T extends MediaItem> {
   getNext: (item: T) => Promise<T | undefined>;

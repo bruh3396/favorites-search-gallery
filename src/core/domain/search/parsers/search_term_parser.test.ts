@@ -47,6 +47,10 @@ describe("parseSearchTerm", () => {
     }
   });
 
+  test.each(["invalid:100", "width::100", "--width:100"])("parses %s as an exact term", term => {
+    expect(parseSearchTerm(term)).toBeInstanceOf(ExactSearchTerm);
+  });
+
   test("parses a bare numeric as a numeric term, negated or not", () => {
     expect(["0", "7", "200", "-200"].every(term => parseSearchTerm(term) instanceof NumericSearchTerm)).toBe(true);
   });

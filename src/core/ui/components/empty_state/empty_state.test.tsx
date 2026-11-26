@@ -1,4 +1,4 @@
-import { EmptyState, EmptyStateAction, EmptyStateClass } from "@/core/ui/components/empty_state/empty_state";
+import { EmptyState, EmptyStateClass, EmptyStateProps } from "@/core/ui/components/empty_state/empty_state";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import EMPTY_STATE_CSS from "@/core/ui/components/empty_state/empty_state.css?inline";
@@ -34,7 +34,7 @@ describe("EmptyState", () => {
   });
 
   test("hides the action while there is none", () => {
-    const action = new Signal<EmptyStateAction | null>(null);
+    const action = new Signal<NonNullable<EmptyStateProps["action"]>["value"]>(null);
     const { result: element } = render(document, () => <EmptyState message={new Signal("Nothing here")} action={action} />);
 
     expect(findAction(element).hidden).toBe(true);

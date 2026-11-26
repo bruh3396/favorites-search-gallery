@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
 
 describe("MemoryHostPage", () => {
   test("reports no header unless told it has one", () => {

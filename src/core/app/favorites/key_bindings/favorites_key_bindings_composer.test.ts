@@ -76,7 +76,7 @@ describe("composeFavoritesKeyBindings", () => {
     const { pane } = setup({}, { showNext: ["ArrowRight", "d"] });
 
     clickTab(pane, "Gallery");
-    expect(readShownItems(pane).slice(0, 2)).toEqual(["Show Next→D", "Show Previous"]);
+    expect(readShownItems(pane).slice(0, 2)).toEqual(["Go to Next→D", "Go to Previous"]);
   });
 
   test("matches the gallery's commands by their labels", () => {
@@ -97,7 +97,7 @@ describe("composeFavoritesKeyBindings", () => {
 
     document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "x", bubbles: true, cancelable: true }));
     pane.remove();
-    expect([conflictText, readShownItems(pane)[0]]).toEqual(["Show NextZZ is used by Toggle ZoomOverwriteCancel", "Show NextX"]);
+    expect([conflictText, readShownItems(pane)[0]]).toEqual(["Go to NextZZ is used by Toggle ZoomOverwriteCancel", "Go to NextX"]);
   });
 
   test("clears every override, the gallery's too, once the reset is confirmed", () => {
@@ -107,7 +107,7 @@ describe("composeFavoritesKeyBindings", () => {
     const firstItem = readShownItems(pane)[0];
 
     clickTab(pane, "Gallery");
-    expect([confirmer.questions.length, firstItem, readShownItems(pane)[0]]).toEqual([1, "Focus Search Bar", "Show Next"]);
+    expect([confirmer.questions.length, firstItem, readShownItems(pane)[0]]).toEqual([1, "Focus Search Bar", "Go to Next"]);
   });
 
   test("saves a gallery key pressed in place of a clicked one, taking it from the gallery command that had it", () => {
@@ -119,7 +119,7 @@ describe("composeFavoritesKeyBindings", () => {
     document.activeElement!.dispatchEvent(new KeyboardEvent("keydown", { key: "z", bubbles: true, cancelable: true }));
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Overwrite")!.click();
     pane.remove();
-    expect(readShownItems(pane).filter(item => (/^(?:Show Next|Toggle Zoom)/u).test(item))).toEqual(["Show NextZ", "Toggle Zoom"]);
+    expect(readShownItems(pane).filter(item => (/^(?:Go to Next|Toggle Zoom)/u).test(item))).toEqual(["Go to NextZ", "Toggle Zoom"]);
   });
 
   test("saves a removed gallery key", () => {
@@ -130,7 +130,7 @@ describe("composeFavoritesKeyBindings", () => {
     pane.querySelector<HTMLButtonElement>("button[aria-label=\"Change N\"]")!.click();
     [...pane.querySelectorAll("button")].find(button => button.textContent === "Remove")!.click();
     pane.remove();
-    expect(readShownItems(pane)[0]).toBe("Show NextD");
+    expect(readShownItems(pane)[0]).toBe("Go to NextD");
   });
 
   test("keeps the overrides when the reset is declined", () => {

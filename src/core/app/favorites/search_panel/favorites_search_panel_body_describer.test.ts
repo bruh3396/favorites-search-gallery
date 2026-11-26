@@ -1,5 +1,7 @@
-import { FavoritesSearchPanelBodyInput, describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
 import { describe, expect, test } from "vitest";
+import { describeFavoritesSearchPanelBody } from "@/core/app/favorites/search_panel/favorites_search_panel_body_describer";
+
+type FavoritesSearchPanelBodyInput = Parameters<typeof describeFavoritesSearchPanelBody>[0];
 
 function describeWith(partialFavoritesSearchPanelBodyInput: Partial<FavoritesSearchPanelBodyInput>): ReturnType<typeof describeFavoritesSearchPanelBody> {
   return describeFavoritesSearchPanelBody({

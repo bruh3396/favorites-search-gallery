@@ -1,7 +1,7 @@
 import { Icon } from "@/core/ui/components/icon/icon";
 import { Readable } from "@/core/utils/reactive/signal";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
-import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 
 interface SettingBase {
   readonly id: string;
@@ -9,12 +9,12 @@ interface SettingBase {
   readonly disabled?: Readable<boolean>;
 }
 
-export interface SwitchSettingDescriptor extends SettingBase {
+interface SwitchSettingDescriptor extends SettingBase {
   readonly kind: "switch";
   readonly settingPreference: SettingPreference<boolean>;
 }
 
-export interface ChoiceSettingDescriptor<M extends string = string> extends SettingBase {
+interface ChoiceSettingDescriptor<M extends string = string> extends SettingBase {
   readonly kind: "choice";
   readonly settingPreference: SettingPreference<M>;
   readonly members: readonly M[];
@@ -24,24 +24,24 @@ export interface ChoiceSettingDescriptor<M extends string = string> extends Sett
   onPreview?(member: M | null): void;
 }
 
-export interface ChoicesSettingDescriptor<M extends string = string> extends SettingBase {
+interface ChoicesSettingDescriptor<M extends string = string> extends SettingBase {
   readonly kind: "choices";
   readonly settingPreference: SettingPreference<readonly M[]>;
   readonly members: readonly M[];
   readonly labels: Readonly<Record<M, string>>;
 }
 
-export interface NumberSettingDescriptor extends SettingBase {
+interface NumberSettingDescriptor extends SettingBase {
   readonly kind: "number";
   readonly settingPreference: SettingPreference<number>;
   readonly min: number;
   readonly max: number;
   readonly step: number;
   readonly writeOnEveryStep?: boolean;
-  readonly stepperScheduler: StepperScheduler;
+  readonly scheduler: Pick<Scheduler, "schedule">;
 }
 
-export interface SliderSettingDescriptor extends SettingBase {
+interface SliderSettingDescriptor extends SettingBase {
   readonly kind: "slider";
   readonly settingPreference: SettingPreference<number>;
   readonly min: number;

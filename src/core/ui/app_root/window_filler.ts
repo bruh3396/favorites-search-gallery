@@ -1,6 +1,6 @@
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 
-export interface WindowFill {
+interface WindowFill {
   refit: () => void;
   dispose: () => void;
 }

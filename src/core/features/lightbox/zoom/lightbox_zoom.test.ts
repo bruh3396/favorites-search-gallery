@@ -1,5 +1,5 @@
-import { FIT_LIGHTBOX_ZOOM_VIEW, LightboxZoom, LightboxZoomView } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { describe, expect, test } from "vitest";
+import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import { Size } from "@/core/utils/geometry/size";
@@ -24,7 +24,7 @@ function setup(mediaSize: Size | undefined): {
   return { lightboxZoom, currentItem, media, enabled };
 }
 
-function readView(lightboxZoom: LightboxZoom): LightboxZoomView {
+function readView(lightboxZoom: LightboxZoom): LightboxZoom["view"]["value"] {
   const { scale, x, y } = lightboxZoom.view.value;
   return { scale, x: x + 0, y: y + 0 };
 }
@@ -33,7 +33,7 @@ describe("LightboxZoom", () => {
   test("starts fitted and ready to zoom", () => {
     const { lightboxZoom } = setup(SQUARE_MEDIA);
 
-    expect(lightboxZoom.view.value).toEqual(FIT_LIGHTBOX_ZOOM_VIEW);
+    expect(lightboxZoom.view.value).toEqual({ scale: 1, x: 0, y: 0 });
     expect(lightboxZoom.isZoomed.value).toBe(false);
     expect(lightboxZoom.canZoom.value).toBe(true);
     expect(lightboxZoom.glides.value).toBe(true);
@@ -153,7 +153,7 @@ describe("LightboxZoom", () => {
       lightboxZoom.toggle();
       lightboxZoom.toggle();
       expect(lightboxZoom.isZoomed.value).toBe(false);
-      expect(lightboxZoom.view.value).toEqual(FIT_LIGHTBOX_ZOOM_VIEW);
+      expect(lightboxZoom.view.value).toEqual({ scale: 1, x: 0, y: 0 });
     });
 
     test("does nothing when it can't zoom", () => {
@@ -217,7 +217,7 @@ describe("LightboxZoom", () => {
       const { lightboxZoom } = setup(SQUARE_MEDIA);
 
       lightboxZoom.panBy(50, 50);
-      expect(lightboxZoom.view.value).toEqual(FIT_LIGHTBOX_ZOOM_VIEW);
+      expect(lightboxZoom.view.value).toEqual({ scale: 1, x: 0, y: 0 });
     });
   });
 
@@ -235,7 +235,7 @@ describe("LightboxZoom", () => {
       const { lightboxZoom } = setup(SQUARE_MEDIA);
 
       lightboxZoom.centerAt({ x: 0, y: 0 });
-      expect(lightboxZoom.view.value).toEqual(FIT_LIGHTBOX_ZOOM_VIEW);
+      expect(lightboxZoom.view.value).toEqual({ scale: 1, x: 0, y: 0 });
     });
   });
 
@@ -264,7 +264,7 @@ describe("LightboxZoom", () => {
 
       lightboxZoom.toggle();
       lightboxZoom.zoomOut();
-      expect(lightboxZoom.view.value).toEqual(FIT_LIGHTBOX_ZOOM_VIEW);
+      expect(lightboxZoom.view.value).toEqual({ scale: 1, x: 0, y: 0 });
     });
   });
 });

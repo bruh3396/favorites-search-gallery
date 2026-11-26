@@ -1,29 +1,8 @@
+import { RequestError } from "@/core/utils/error/request_error";
 import { UnreachableError } from "@/core/utils/error/unreachable_error";
 
-export type Rule34ErrorReason =
-  | "network"
-  | "http"
-  | "malformed";
-
-export interface Rule34ErrorDetails {
-  readonly subject?: string;
-  readonly status?: number;
-  readonly cause?: unknown;
-}
-
-export class Rule34Error extends Error {
-  public readonly subject: string | undefined;
-  public readonly status: number | undefined;
-
-  constructor(public readonly reason: Rule34ErrorReason, details: Rule34ErrorDetails = {}) {
-    super(
-      [reason, details.subject, details.status].filter(part => part !== undefined).join(" "),
-      { cause: details.cause }
-    );
-    this.name = "Rule34Error";
-    this.subject = details.subject;
-    this.status = details.status;
-  }
+export class Rule34Error extends RequestError<"network" | "http" | "malformed"> {
+  public override name = "Rule34Error";
 }
 
 export function isMissingPageRule34Error(error: unknown): boolean {

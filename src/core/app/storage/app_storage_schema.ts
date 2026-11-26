@@ -1,4 +1,4 @@
-import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC } from "@/core/app/favorites/workspace/favorites_workspace";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC } from "@/core/app/favorites/workspace/favorites_workspace_snapshot";
 import { DEFAULT_THEME, THEMES, Theme } from "@/core/ui/theme/theme";
 import { FAVORITES_TOOL_DEFINITIONS, FavoritesTool } from "@/core/app/favorites/favorites_tool";
 import { GRID_LAYOUTS, GridLayout } from "@/core/ui/post_grid/layout/grid_layout";

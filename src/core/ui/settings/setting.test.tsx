@@ -1,14 +1,19 @@
-import { ChoiceSettingDescriptor, ChoicesSettingDescriptor, NumberSettingDescriptor, SettingDescriptor, SliderSettingDescriptor, SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { Readable, Signal } from "@/core/utils/reactive/signal";
 import { Setting, SettingProps } from "@/core/ui/settings/setting";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
 
 const LAYOUTS = ["column", "row", "square"] as const;
 const LAYOUT_LABELS = { column: "Column", row: "Row", square: "Square" };
 
 type Layout = (typeof LAYOUTS)[number];
+type SwitchSettingDescriptor = Extract<SettingDescriptor, { kind: "switch" }>;
+type ChoiceSettingDescriptor = Extract<SettingDescriptor, { kind: "choice" }>;
+type ChoicesSettingDescriptor = Extract<SettingDescriptor, { kind: "choices" }>;
+type NumberSettingDescriptor = Extract<SettingDescriptor, { kind: "number" }>;
+type SliderSettingDescriptor = Extract<SettingDescriptor, { kind: "slider" }>;
 
 const SCHEDULER = { schedule: (): (() => void) => () => undefined };
 
@@ -32,7 +37,7 @@ function createSwitchSetting(settingPreference: SettingPreference<boolean>, disa
   return { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference, disabled };
 }
 
-function createLayoutSetting(settingPreference: SettingPreference<Layout>, control: ChoiceSettingDescriptor["control"]): ChoiceSettingDescriptor<Layout> {
+function createLayoutSetting(settingPreference: SettingPreference<Layout>, control: ChoiceSettingDescriptor["control"]): ChoiceSettingDescriptor {
   return { id: "layout", kind: "choice", label: "Layout", settingPreference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
 }
 
@@ -81,7 +86,7 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
   };
   const numberSettingDescriptor: NumberSettingDescriptor = {
     id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep,
-    stepperScheduler: scheduler
+    scheduler
   };
   const { element } = setup({ descriptor: numberSettingDescriptor });
   return { input: element.querySelector("input")!, increment: queryButtons(element)[1], preference, scheduler };
@@ -148,7 +153,7 @@ describe("Setting", () => {
 
   test("passes a dropdown's previews through", () => {
     const previewed: (string | null)[] = [];
-    const choiceSettingDescriptor: ChoiceSettingDescriptor<Layout> = {
+    const choiceSettingDescriptor: ChoiceSettingDescriptor = {
       ...createLayoutSetting(createStoredValue<Layout>("row"), "dropdown"),
       onPreview: member => previewed.push(member)
     };
@@ -206,7 +211,7 @@ describe("Setting", () => {
 
   test("toggles one of several choices", () => {
     const preference = createStoredValue<readonly Layout[]>(["column"]);
-    const choicesSettingDescriptor: ChoicesSettingDescriptor<Layout> = {
+    const choicesSettingDescriptor: ChoicesSettingDescriptor = {
       id: "layouts", kind: "choices", label: "Layouts", settingPreference: preference, members: LAYOUTS, labels: LAYOUT_LABELS
     };
     const buttons = queryButtons(renderSetting(choicesSettingDescriptor));
@@ -218,7 +223,7 @@ describe("Setting", () => {
   test("steps a number within its bounds", () => {
     const preference = createStoredValue(10);
     const numberSettingDescriptor: NumberSettingDescriptor = {
-      id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1, stepperScheduler: SCHEDULER
+      id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1, scheduler: SCHEDULER
     };
     const element = renderSetting(numberSettingDescriptor);
     const input = element.querySelector("input");

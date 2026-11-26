@@ -15,7 +15,7 @@ export interface LightboxZoomDependencies {
   enabled: Readable<boolean>;
 }
 
-export interface LightboxZoomView extends Point {
+interface LightboxZoomView extends Point {
   readonly scale: number;
 }
 
@@ -36,7 +36,7 @@ interface Frame {
   readonly mediaHeight: number;
 }
 
-export const FIT_LIGHTBOX_ZOOM_VIEW: LightboxZoomView = { scale: 1, x: 0, y: 0 };
+const FIT_LIGHTBOX_ZOOM_VIEW: LightboxZoomView = { scale: 1, x: 0, y: 0 };
 
 export class LightboxZoom {
   public readonly view: Readable<LightboxZoomView>;

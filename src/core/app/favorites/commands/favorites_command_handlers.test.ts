@@ -1,4 +1,4 @@
-import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC } from "@/core/app/favorites/workspace/favorites_workspace_snapshot";
 import { Mock, describe, expect, test, vi } from "vitest";
 import { SharedPreferences, createSharedPreferences } from "@/core/app/storage/shared_preferences";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
@@ -10,6 +10,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";

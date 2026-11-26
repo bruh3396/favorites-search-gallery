@@ -2,7 +2,7 @@ import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
 import { Point } from "@/core/utils/geometry/point";
 import { containsPoint } from "@/core/utils/geometry/rect_utilities";
 
-export type LightboxViewportCursor = "zoom-in" | "grab" | undefined;
+type LightboxViewportCursor = "zoom-in" | "grab" | undefined;
 
 export function resolveLightboxViewportCursor(
   lightboxZoom: Pick<LightboxZoom, "isZoomed" | "canZoom" | "mediaRect">,

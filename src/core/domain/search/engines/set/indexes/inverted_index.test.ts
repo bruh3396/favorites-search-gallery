@@ -1,8 +1,8 @@
-import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
 import { describe, expect, test } from "vitest";
+import { Fruit } from "@/core/domain/search/testing/fruit";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 
-function createDoc(fruitName: FruitName, tags: string[]): Fruit {
+function createDoc(fruitName: Fruit["name"], tags: string[]): Fruit {
   return { name: fruitName, tags: new Set(tags), getMetric: (): number => 0 };
 }
 

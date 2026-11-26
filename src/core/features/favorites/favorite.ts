@@ -1,5 +1,5 @@
 import { MediaItem } from "@/core/domain/media/media_item";
-import { MetricSearchable } from "@/core/domain/search/searchable";
+import { MetricSearchable } from "@/core/domain/search/metric_searchable";
 
 export interface Favorite extends MediaItem, MetricSearchable {
   readonly numericId: number;

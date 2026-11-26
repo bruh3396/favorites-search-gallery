@@ -1,4 +1,4 @@
-import { ICON_PATHS, Icon } from "@/core/ui/components/icon/icon";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { LightboxButton, LightboxButtonClass } from "@/core/features/lightbox/overlay/lightbox_button";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -10,6 +10,10 @@ function readIconPath(button: HTMLElement): string | null | undefined {
   return button.querySelector("path")?.getAttribute("d");
 }
 
+function drawnIconPath(icon: Icon): string | null {
+  return render(document, () => createIcon(icon, "")).result.querySelector("path")!.getAttribute("d");
+}
+
 describe("LightboxButton", () => {
   test("styles every class it sets", () => {
     expectClassesStyled(LightboxButtonClass, BUTTON_CSS);
@@ -19,7 +23,7 @@ describe("LightboxButton", () => {
     const { result: button } = render(document, () => <LightboxButton icon="download" label="Download" onClick={vi.fn()} />);
 
     expect([button.getAttribute("aria-label"), button.title]).toEqual(["Download", "Download"]);
-    expect(readIconPath(button)).toBe(ICON_PATHS.download);
+    expect(readIconPath(button)).toBe(drawnIconPath("download"));
     expect(button.hasAttribute("aria-pressed")).toBe(false);
     expect((button as HTMLButtonElement).disabled).toBe(false);
   });
@@ -37,7 +41,7 @@ describe("LightboxButton", () => {
     const { result: button } = render(document, () => <LightboxButton icon={icon} label="Autoplay" onClick={vi.fn()} />);
 
     icon.value = "pause";
-    expect(readIconPath(button)).toBe(ICON_PATHS.pause);
+    expect(readIconPath(button)).toBe(drawnIconPath("pause"));
   });
 
   test("reports whether it is pressed", () => {

@@ -1,21 +1,14 @@
-import { Rule34Error, Rule34ErrorReason, isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
+import { Rule34Error, isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
 import { describe, expect, test } from "vitest";
 
 describe("Rule34Error", () => {
-  test("names its reason, subject, and status", () => {
-    expect(new Rule34Error("http", { subject: "https://rule34.xxx/", status: 503 }).message)
-      .toBe("http https://rule34.xxx/ 503");
-  });
-
-  test("keeps its cause", () => {
-    const cause = new TypeError("offline");
-
-    expect(new Rule34Error("network", { cause }).cause).toBe(cause);
+  test("names itself", () => {
+    expect(new Rule34Error("http").name).toBe("Rule34Error");
   });
 });
 
 describe("isRetryableRule34Error", () => {
-  test.each<[Rule34ErrorReason, boolean]>([
+  test.each<[Rule34Error["reason"], boolean]>([
     ["network", true],
     ["malformed", false]
   ])("classifies %s as retryable: %s", (rule34ErrorReason, expected) => {
@@ -42,6 +35,6 @@ describe("isRetryableRule34Error", () => {
   });
 
   test("throws for an unknown reason", () => {
-    expect(() => isRetryableRule34Error(new Rule34Error("bogus" as Rule34ErrorReason))).toThrow("bogus");
+    expect(() => isRetryableRule34Error(new Rule34Error("bogus" as Rule34Error["reason"]))).toThrow("bogus");
   });
 });

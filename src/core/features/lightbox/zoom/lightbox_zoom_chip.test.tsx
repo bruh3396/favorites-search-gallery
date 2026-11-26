@@ -25,12 +25,4 @@ describe("LightboxZoomChip", () => {
 
     expect([chip.hidden, chip.textContent]).toEqual([false, "250%"]);
   });
-
-  test.each([1, 0.99, 1.01])("calls %s actual pixels", pixelScale => {
-    expect(renderChip(pixelScale).textContent).toBe(`${Math.round(pixelScale * 100)}% · actual pixels`);
-  });
-
-  test("stops calling it actual pixels outside the tolerance", () => {
-    expect(renderChip(1.02).textContent).toBe("102%");
-  });
 });

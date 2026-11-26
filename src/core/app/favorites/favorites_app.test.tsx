@@ -1,13 +1,14 @@
-import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { FavoritesApp, FavoritesAppClass } from "@/core/app/favorites/favorites_app";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT } from "@/core/app/favorites/workspace/favorites_workspace_snapshot";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";

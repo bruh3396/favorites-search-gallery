@@ -1,5 +1,5 @@
 import { Mock, describe, expect, test, vi } from "vitest";
-import { Stepper, StepperClass, StepperProps, StepperScheduler } from "@/core/ui/components/stepper/stepper";
+import { Stepper, StepperClass, StepperProps } from "@/core/ui/components/stepper/stepper";
 import { h, render } from "@/core/ui/h/h";
 import STEPPER_CSS from "@/core/ui/components/stepper/stepper.css?inline";
 import { Signal } from "@/core/utils/reactive/signal";
@@ -10,7 +10,7 @@ interface PendingTask {
   delay: number;
 }
 
-function createScheduler(): StepperScheduler & { runNext: () => number } {
+function createScheduler(): StepperProps["scheduler"] & { runNext: () => number } {
   let pendingTask: PendingTask | undefined;
   return {
     schedule: (task, delay): (() => void) => {

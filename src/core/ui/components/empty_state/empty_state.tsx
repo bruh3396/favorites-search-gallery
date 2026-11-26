@@ -7,7 +7,7 @@ export const EmptyStateClass = {
   action: "fsg-EmptyState-action"
 } as const;
 
-export interface EmptyStateAction {
+interface EmptyStateAction {
   readonly label: string;
   onClick: () => void;
 }

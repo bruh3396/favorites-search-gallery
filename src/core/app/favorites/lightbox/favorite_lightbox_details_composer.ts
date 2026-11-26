@@ -1,16 +1,16 @@
-import { FavoriteLightboxDetailsPreferences, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
+import { FavoriteLightboxDetailsProps, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { CopyIdButton } from "@/core/app/favorites/lightbox/copy_id_button";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteLightboxTags } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
-import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details";
+import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details_content";
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { h } from "@/core/ui/h/h";
 
 export interface FavoriteLightboxDetailsDependencies {
-  preferences: FavoriteLightboxDetailsPreferences;
+  preferences: FavoriteLightboxDetailsProps["preferences"];
   clipboard: Pick<Clipboard, "write">;
   scheduler: Pick<Scheduler, "schedule">;
   localTagCategories: Pick<LocalTagCategories, "getMany">;

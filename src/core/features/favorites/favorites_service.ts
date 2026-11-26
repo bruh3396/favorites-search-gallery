@@ -8,7 +8,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesFetcher } from "@/core/features/favorites/load/favorites_fetcher";
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesLoader } from "@/core/features/favorites/load/favorites_loader";
-import { FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
+import { FavoritesPaginationDependencies } from "@/core/features/favorites/session/favorites_pagination";
 import { FavoritesReindexer } from "@/core/features/favorites/load/favorites_reindexer";
 import { FavoritesReloader } from "@/core/features/favorites/load/favorites_reloader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
@@ -36,7 +36,7 @@ export interface FavoritesServiceDependencies {
   scheduler: Scheduler;
   postLibrary: PostLibrary;
   randomSource: RandomSource;
-  favoritesPaginationPreferences: FavoritesPaginationPreferences;
+  favoritesPaginationPreferences: FavoritesPaginationDependencies["preferences"];
 }
 
 export interface FavoritesService {

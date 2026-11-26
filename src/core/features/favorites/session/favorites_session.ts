@@ -1,4 +1,4 @@
-import { FavoritesPagination, FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
+import { FavoritesPagination, FavoritesPaginationDependencies } from "@/core/features/favorites/session/favorites_pagination";
 import { FavoritesSearchOptions, countChangedFavoritesSearchOptions, isFilteringFavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { Readable, computed } from "@/core/utils/reactive/signal";
 import { Favorite } from "@/core/features/favorites/favorite";
@@ -16,7 +16,7 @@ export interface FavoritesSessionDependencies {
   favoritesSearchIndex: FavoritesSearchIndex;
   favoritesBlacklist: FavoritesBlacklist;
   randomSource: RandomSource;
-  favoritesPaginationPreferences: FavoritesPaginationPreferences;
+  favoritesPaginationPreferences: FavoritesPaginationDependencies["preferences"];
 }
 
 export class FavoritesSession {

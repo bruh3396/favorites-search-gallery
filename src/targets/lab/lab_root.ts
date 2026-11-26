@@ -1,7 +1,8 @@
-import { DEFAULT_THEME, THEME_DEFINITIONS } from "@/core/ui/theme/theme";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
+import { DEFAULT_THEME } from "@/core/ui/theme/theme";
 import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument_font";
 import LAB_CSS from "@/targets/lab/styles.css?inline";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { mountAppRoot } from "@/core/ui/app_root/app_root";
 

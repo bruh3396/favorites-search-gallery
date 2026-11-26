@@ -55,7 +55,7 @@ function renderEveryKind(ownerDocument: Document, log: Log): HTMLElement {
     },
     {
       id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }),
-      min: 2, max: 20, step: 1, stepperScheduler: SCHEDULER
+      min: 2, max: 20, step: 1, scheduler: SCHEDULER
     },
     {
       id: "tileSize", kind: "slider", label: "Tile size", settingPreference: createStoredValue({ id: "columnCount", initial: 6, log }),
@@ -71,7 +71,7 @@ function renderDependent(ownerDocument: Document, log: Log): HTMLElement {
     {
       id: "resultsPerPage", kind: "number", label: "Results per page",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      stepperScheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
+      scheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
     }
   ]);
 }

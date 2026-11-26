@@ -1,6 +1,6 @@
-import { LightboxMediaMorph, morphLightboxMedia } from "@/core/features/lightbox/close_morph/lightbox_media_morpher";
 import { afterEach, describe, expect, onTestFinished, test, vi } from "vitest";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { morphLightboxMedia } from "@/core/features/lightbox/close_morph/lightbox_media_morpher";
 
 const MORPH_DURATION = 250;
 
@@ -27,7 +27,7 @@ function createFrames(): Frames {
   };
 }
 
-function createMorph(scheduler: MemoryScheduler, duration = MORPH_DURATION): LightboxMediaMorph {
+function createMorph(scheduler: MemoryScheduler, duration = MORPH_DURATION): Parameters<typeof morphLightboxMedia>[1] {
   return { duration, pixelRatio: 1, scheduler };
 }
 

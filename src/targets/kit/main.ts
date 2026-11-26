@@ -1,7 +1,6 @@
-import { DEFAULT_THEME, THEME_DEFINITIONS } from "@/core/ui/theme/theme";
-import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { AppFont } from "@/core/ui/fonts/app_font";
+import { DEFAULT_THEME } from "@/core/ui/theme/theme";
 import { GEIST_FONT } from "@/core/ui/fonts/geist_font";
 import { INSTRUMENT_FONT } from "@/core/ui/fonts/instrument_font";
 import { INTER_FONT } from "@/core/ui/fonts/inter_font";
@@ -10,7 +9,9 @@ import { PLEX_FONT } from "@/core/ui/fonts/plex_font";
 import { SYSTEM_FONT } from "@/core/ui/fonts/system_font";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { Signal } from "@/core/utils/reactive/signal";
+import { Story } from "@/targets/kit/story";
 import { Switch } from "@/core/ui/components/switch/switch";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
 import UI_CSS from "@/core/ui/styles.css?inline";
 import { VERDANA_FONT } from "@/core/ui/fonts/verdana_font";
 import { applyTheme } from "@/core/ui/theme/theme_applier";
@@ -47,7 +48,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(tag: K, className:
   return element;
 }
 
-function renderVariant(storyVariant: StoryVariant, log: (message: string) => void): HTMLElement {
+function renderVariant(storyVariant: Story["variants"][number], log: (message: string) => void): HTMLElement {
   const item = createElement("li", "kit-Variant");
 
   item.append(createElement("span", "kit-Variant-label", storyVariant.label), storyVariant.render(document, log));

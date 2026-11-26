@@ -1,10 +1,6 @@
-import { ALL_POST_STATUSES_MASK, isPostStatusMask } from "@/core/domain/post/post_status_mask";
-import { ALL_RATINGS_MASK, isRatingMask } from "@/core/domain/post/rating_mask";
-import { FAVORITES_SORT_KEYS, FavoritesSortKey } from "@/core/features/favorites/search/favorites_sort_key";
-import { FieldGuards } from "@/core/utils/guard/fields_guard";
-import { createOneOfGuard } from "@/core/utils/guard/one_of_guard";
-import { createSameKindGuard } from "@/core/utils/guard/same_kind_guard";
-import { isBoolean } from "@/core/utils/guard/unknown_utilities";
+import { ALL_POST_STATUSES_MASK } from "@/core/domain/post/post_status_mask";
+import { ALL_RATINGS_MASK } from "@/core/domain/post/rating_mask";
+import { FavoritesSortKey } from "@/core/features/favorites/search/favorites_sort_key";
 
 export interface FavoritesSearchOptions {
   readonly query: string;
@@ -16,10 +12,6 @@ export interface FavoritesSearchOptions {
   readonly isBlacklistEnabled: boolean;
   readonly isShuffled: boolean;
   readonly shuffleSeed: number;
-}
-
-function isSeed(stored: unknown): stored is number {
-  return Number.isInteger(stored) && (stored as number) >= 0;
 }
 
 export const DEFAULT_FAVORITES_SEARCH_OPTIONS: FavoritesSearchOptions = {
@@ -58,15 +50,3 @@ export function isReorderingFavoritesSearchOptions(favoritesSearchOptions: Pick<
 export function countChangedFavoritesSearchOptions(favoritesSearchOptions: FavoritesSearchOptions): number {
   return COUNTED_KEY_GROUPS.filter(keys => keys.some(key => favoritesSearchOptions[key] !== DEFAULT_FAVORITES_SEARCH_OPTIONS[key])).length;
 }
-
-export const FAVORITES_SEARCH_OPTIONS_GUARDS: FieldGuards<FavoritesSearchOptions> = {
-  query: createSameKindGuard(""),
-  isInverted: isBoolean,
-  sortKey: createOneOfGuard(FAVORITES_SORT_KEYS),
-  isSortAscending: isBoolean,
-  allowedRatings: isRatingMask,
-  allowedStatuses: isPostStatusMask,
-  isBlacklistEnabled: isBoolean,
-  isShuffled: isBoolean,
-  shuffleSeed: isSeed
-};

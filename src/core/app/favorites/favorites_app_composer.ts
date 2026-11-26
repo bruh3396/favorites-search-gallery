@@ -1,14 +1,14 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { DEFAULT_SEARCH_HISTORY_CONFIGURATION, SearchHistory } from "@/core/utils/collection/search_history";
-import { FAVORITES_APP_STYLES, FavoritesApp } from "@/core/app/favorites/favorites_app";
 import { FAVORITES_TOOL_DEFINITIONS, FavoritesTool } from "@/core/app/favorites/favorites_tool";
 import { FavoritesServiceConfiguration, FavoritesServiceDependencies, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { h, render } from "@/core/ui/h/h";
+import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
 import { AppMark } from "@/core/ui/app_mark/app_mark";
+import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { Confirmer } from "@/core/boundary/ports/confirmer/confirmer";
@@ -16,12 +16,17 @@ import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_FAVORITES_KEY_BINDINGS } from "@/core/app/favorites/commands/default_favorites_key_bindings";
 import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
 import { FAVORITES_COMMAND_DEFINITIONS } from "@/core/app/favorites/commands/favorites_command";
+import FAVORITES_SEARCH_OPTIONS_ROW_CSS from "@/core/app/favorites/search_options/favorites_search_options_row.css?inline";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoriteSizeRecorder } from "@/core/app/favorites/search_panel/favorite_size_recorder";
+import { FavoritesApp } from "@/core/app/favorites/favorites_app";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
+import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
+import LIGHTBOX_DETAILS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_details.css?inline";
+import LIGHTBOX_TAGS_CSS from "@/core/app/favorites/lightbox/favorite_lightbox_tags.css?inline";
 import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { LocalPosts } from "@/core/boundary/ports/local_posts/local_posts";
 import { LocalSnippets } from "@/core/boundary/ports/local_snippets/local_snippets";
@@ -33,12 +38,17 @@ import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
+import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
+import SNIPPETS_CSS from "@/core/features/snippets/styles.css?inline";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SnippetLibrary } from "@/core/features/snippets/snippet_library";
 import { SnippetsPane } from "@/core/features/snippets/snippets_pane";
 import { StatusText } from "@/core/ui/components/status_text/status_text";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
 import { TabStrip } from "@/core/ui/components/tabs/tab_strip";
+import { Theme } from "@/core/ui/theme/theme";
+import UI_CSS from "@/core/ui/styles.css?inline";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
@@ -165,7 +175,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   };
   const renderViewByTool: Record<FavoritesTool, () => HTMLElement> = {
     settings: () => composeFavoritesSettings({
-      favoritesPreferences, sharedPreferences, stepperScheduler: scheduler, resetSettings,
+      favoritesPreferences, sharedPreferences, scheduler, resetSettings,
       onThemePreview: (theme): void => {
         previewedTheme.value = theme;
       }
@@ -197,7 +207,17 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         colorScheme: sharedPreferences.colorScheme.peek(),
         themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()],
         appFont: DEFAULT_APP_FONT,
-        styles: FAVORITES_APP_STYLES
+        styles: [
+          UI_CSS,
+          APP_CSS,
+          SEARCH_PANEL_CSS,
+          FAVORITES_SEARCH_OPTIONS_ROW_CSS,
+          SNIPPETS_CSS,
+          LIGHTBOX_CSS,
+          LIGHTBOX_DETAILS_CSS,
+          LIGHTBOX_TAGS_CSS,
+          COPY_ID_BUTTON_CSS
+        ]
       });
 
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {

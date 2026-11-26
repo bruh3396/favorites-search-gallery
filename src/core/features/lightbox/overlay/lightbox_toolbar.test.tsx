@@ -1,4 +1,4 @@
-import { ICON_PATHS, Icon } from "@/core/ui/components/icon/icon";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { LightboxToolbar, LightboxToolbarClass } from "@/core/features/lightbox/overlay/lightbox_toolbar";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -43,13 +43,17 @@ function readState(button: HTMLButtonElement): [string | null, string | null | u
   return [button.getAttribute("aria-pressed"), button.querySelector("path")?.getAttribute("d")];
 }
 
+function drawnIconPath(icon: Icon): string | null {
+  return render(document, () => createIcon(icon, "")).result.querySelector("path")!.getAttribute("d");
+}
+
 interface ButtonState {
   readonly pressed: boolean;
   readonly icon: Icon;
 }
 
 function expectState(button: HTMLButtonElement, { pressed, icon }: ButtonState): void {
-  expect(readState(button)).toEqual([String(pressed), ICON_PATHS[icon]]);
+  expect(readState(button)).toEqual([String(pressed), drawnIconPath(icon)]);
 }
 
 describe("LightboxToolbar", () => {
@@ -58,8 +62,8 @@ describe("LightboxToolbar", () => {
   });
 
   test.each<[string, Signal<boolean> | null, string[]]>([
-    ["with details", new Signal(false), ["Autoplay", "Details", "Open Post Page", "Fullscreen", "Close"]],
-    ["without details", null, ["Autoplay", "Open Post Page", "Fullscreen", "Close"]]
+    ["with details", new Signal(false), ["Autoplay", "Details", "Post Page", "Fullscreen", "Close"]],
+    ["without details", null, ["Autoplay", "Post Page", "Fullscreen", "Close"]]
   ])("orders the shown buttons %s", (_case, detailsOpen, expected) => {
     const { root } = setup(detailsOpen);
     const shownButtons = [...root.querySelectorAll("button")].filter(button => button.closest("[hidden]") === null);
@@ -77,7 +81,7 @@ describe("LightboxToolbar", () => {
     ["Details", "toggleDetails"],
     ["Autoplay", "toggleAutoplay"],
     ["Fullscreen", "toggleFullscreen"],
-    ["Open Post Page", "openPostPage"],
+    ["Post Page", "openPostPage"],
     ["Close", "close"]
   ])("runs %s's command when clicked", (label, lightboxCommand) => {
     const { root, handlers } = setup();

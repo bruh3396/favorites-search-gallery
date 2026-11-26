@@ -11,44 +11,20 @@ export interface MetricComparison {
 }
 
 const metricPattern = METRICS.join("|");
+const metricComparisonRegex = new RegExp(`^(${metricPattern})(:[<>]?)(\\d+|${metricPattern})$`);
 
-export const metricComparisonRegex: RegExp = new RegExp(`^-?(${metricPattern})(:[<>]?)(\\d+|${metricPattern})$`);
-
-export function parseMetricComparison(term: string): MetricComparison {
-  const { metric, metricComparator, value } = extractExpression(term);
-
-  if (isMetric(value)) {
-    return {
-      metric,
-      comparator: metricComparator,
-      isRelative: true,
-      rightHandMetric: value,
-      value: 0,
-      isTautological: metric === value
-    };
-  }
-  return {
-    metric,
-    comparator: metricComparator,
-    isRelative: false,
-    rightHandMetric: "id",
-    value,
-    isTautological: false
-  };
-}
-
-function extractExpression(term: string): { metric: Metric; metricComparator: MetricComparator; value: Metric | number } {
+export function parseMetricComparison(term: string): MetricComparison | null {
   const match = metricComparisonRegex.exec(term);
 
-  if (match === null || match.length !== 4) {
-    return {
-      metric: "width",
-      metricComparator: ":",
-      value: 0
-    };
+  if (match === null) {
+    return null;
   }
   const metric = match[1] as Metric;
   const metricComparator = match[2] as MetricComparator;
-  const value = isMetric(match[3]) ? match[3] : Number(match[3]);
-  return { metric, metricComparator, value };
+  const value = match[3];
+
+  if (isMetric(value)) {
+    return { metric, comparator: metricComparator, isRelative: true, rightHandMetric: value, value: 0, isTautological: metric === value };
+  }
+  return { metric, comparator: metricComparator, isRelative: false, rightHandMetric: "id", value: Number(value), isTautological: false };
 }

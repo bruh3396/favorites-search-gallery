@@ -12,7 +12,7 @@ interface Frame {
   readonly boundsBox?: Box;
 }
 
-export interface LightboxMediaMorph {
+interface LightboxMediaMorph {
   readonly duration: number;
   readonly pixelRatio: number;
   readonly scheduler: Pick<Scheduler, "requestFrame">;

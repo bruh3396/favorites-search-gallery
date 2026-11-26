@@ -1,7 +1,7 @@
-import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
 import { Signal } from "@/core/utils/reactive/signal";
+import { Story } from "@/targets/kit/story";
 import { ViewPane } from "@/core/ui/components/view_pane/view_pane";
 
 const STORY_ITEMS = {
@@ -39,7 +39,7 @@ function renderSettingsView(log: (message: string) => void): HTMLElement {
   );
 }
 
-function variant(label: string, initial: StoryItemId | null): StoryVariant {
+function variant(label: string, initial: StoryItemId | null): Story["variants"][number] {
   return {
     label,
     render: (ownerDocument, log): HTMLElement => {

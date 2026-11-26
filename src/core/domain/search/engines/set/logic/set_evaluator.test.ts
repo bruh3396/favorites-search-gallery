@@ -1,7 +1,7 @@
-import { Fruit, FruitName } from "@/core/domain/search/testing/fruit";
 import { describe, expect, test } from "vitest";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
+import { Fruit } from "@/core/domain/search/testing/fruit";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
 import { PositionIndex } from "@/core/domain/search/engines/set/indexes/position_index";
 import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/relative_metric_index";
@@ -23,7 +23,7 @@ const relativeMetricIndex = new RelativeMetricIndex<Fruit>([], () => 0);
 const docResolver = new DocResolver<Fruit>({ invertedIndex, metricIndex, relativeMetricIndex, positionIndex, wildcardDocResolver });
 const setEvaluator = new SetEvaluator<Fruit>(invertedIndex, docResolver);
 
-function expectMatches(query: string, expectedFruitNames: FruitName[]): void {
+function expectMatches(query: string, expectedFruitNames: Fruit["name"][]): void {
   const actualFruitNames = setEvaluator.evaluate(parseSearchExpression(query), fruits).map(fruit => fruit.name).sort();
 
   expect(actualFruitNames, query).toEqual([...expectedFruitNames].sort());

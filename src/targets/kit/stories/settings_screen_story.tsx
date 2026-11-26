@@ -1,4 +1,3 @@
-import { Story, StoryVariant } from "@/targets/kit/story";
 import { h, render } from "@/core/ui/h/h";
 import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_scheduler";
 import { ControlSize } from "@/core/ui/components/control/control_size";
@@ -7,6 +6,7 @@ import { SettingPreference } from "@/core/ui/settings/setting_preference";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { Signal } from "@/core/utils/reactive/signal";
+import { Story } from "@/targets/kit/story";
 
 const SCHEDULER = new BrowserScheduler();
 
@@ -58,7 +58,7 @@ function createSettingDescriptors(log: Log): SettingDescriptor[] {
     },
     {
       id: "columns", kind: "number", label: "Columns", settingPreference: createStoredValue({ id: "columns", initial: 6, log }),
-      min: 2, max: 20, step: 1, stepperScheduler: SCHEDULER
+      min: 2, max: 20, step: 1, scheduler: SCHEDULER
     },
     {
       id: "sort", kind: "choice", label: "Sort layout", control: "dropdown",
@@ -69,14 +69,14 @@ function createSettingDescriptors(log: Log): SettingDescriptor[] {
     {
       id: "resultsPerPage", kind: "number", label: "Results per page",
       settingPreference: createStoredValue({ id: "resultsPerPage", initial: 50, log }), min: 10, max: 200, step: 10,
-      stepperScheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
+      scheduler: SCHEDULER, disabled: infiniteScrollSettingPreference
     }
   ];
 }
 
-function createHostVariants(): StoryVariant[] {
+function createHostVariants(): Story["variants"] {
   let settingDescriptors: SettingDescriptor[] | undefined;
-  const host = (label: string, { settingsLayout, controlSize }: { settingsLayout: SettingsLayout; controlSize: ControlSize }): StoryVariant => ({
+  const host = (label: string, { settingsLayout, controlSize }: { settingsLayout: SettingsLayout; controlSize: ControlSize }): Story["variants"][number] => ({
     label,
     render: (ownerDocument, log): HTMLElement => {
       settingDescriptors ??= createSettingDescriptors(log);

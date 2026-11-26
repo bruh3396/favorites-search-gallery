@@ -5,7 +5,7 @@ import { StoredValue } from "@/core/utils/storage/stored_value";
 import { clamp } from "@/core/utils/number/number_utilities";
 import { haveSameItems } from "@/core/utils/collection/array_utilities";
 
-export interface FavoritesPaginationPreferences {
+interface FavoritesPaginationPreferences {
   readonly pageSize: StoredValue<number>;
   readonly infiniteScroll: StoredValue<boolean>;
 }

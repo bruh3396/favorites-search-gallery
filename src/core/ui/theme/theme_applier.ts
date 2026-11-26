@@ -1,4 +1,5 @@
-import { ThemeColors, ThemeDefinition } from "@/core/ui/theme/theme";
+import { ThemeColors } from "@/core/ui/theme/theme_colors";
+import { ThemeDefinition } from "@/core/ui/theme/theme_definition";
 
 const THEME_PROPERTIES: Readonly<Record<keyof ThemeColors, string>> = {
   surface: "--fsg-theme-surface",

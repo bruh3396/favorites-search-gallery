@@ -4,7 +4,7 @@ import { effect } from "@/core/utils/reactive/signal";
 const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
 const HEART_TOP_PATH = "a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5";
 
-export const ICON_PATHS = {
+const ICON_PATHS = {
   search: "M17.5 11a6.5 6.5 0 1 1-13 0a6.5 6.5 0 1 1 13 0M16 16l4 4",
   close: "M7 7l10 10M17 7L7 17",
   closeLarge: "M6 6l12 12M18 6L6 18",

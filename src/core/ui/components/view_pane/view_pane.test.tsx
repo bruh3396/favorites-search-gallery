@@ -1,11 +1,11 @@
-import { ViewPane, ViewPaneAction, ViewPaneClass } from "@/core/ui/components/view_pane/view_pane";
+import { ViewPane, ViewPaneClass, ViewPaneProps } from "@/core/ui/components/view_pane/view_pane";
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import { Signal } from "@/core/utils/reactive/signal";
 import VIEW_PANE_CSS from "@/core/ui/components/view_pane/view_pane.css?inline";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
-function setup(viewPaneActions: readonly ViewPaneAction[] = []): HTMLElement {
+function setup(viewPaneActions: NonNullable<ViewPaneProps["actions"]> = []): HTMLElement {
   return render(document, () => (
     <ViewPane title="Settings" actions={viewPaneActions}>
       <p>Body</p>

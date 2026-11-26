@@ -1,5 +1,7 @@
-import { KeyPress, normalizeKeyPress } from "@/core/ui/key_bindings/key_press_normalizer";
 import { describe, expect, test } from "vitest";
+import { normalizeKeyPress } from "@/core/ui/key_bindings/key_press_normalizer";
+
+type KeyPress = Parameters<typeof normalizeKeyPress>[0];
 
 function createKeyPress(key: string, partialKeyPress: Partial<Omit<KeyPress, "key">> = {}): KeyPress {
   return { key, code: "", ctrlKey: false, altKey: false, metaKey: false, ...partialKeyPress };

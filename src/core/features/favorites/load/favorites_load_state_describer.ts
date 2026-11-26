@@ -1,6 +1,6 @@
-import { FavoritesLoadState, FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 
-type Describers = { readonly [Phase in FavoritesLoadStatePhase]: (state: Extract<FavoritesLoadState, { phase: Phase }>) => string };
+type Describers = { readonly [Phase in FavoritesLoadState["phase"]]: (state: Extract<FavoritesLoadState, { phase: Phase }>) => string };
 
 const DESCRIBERS: Describers = {
   starting: () => "Starting",

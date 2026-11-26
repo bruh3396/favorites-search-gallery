@@ -1,5 +1,5 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
-import { MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence";
+import { MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence_position";
 import { h } from "@/core/ui/h/h";
 
 export const LightboxPositionClass = {

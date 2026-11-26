@@ -6,11 +6,11 @@ import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_
 import { FAVORITES_SETTING_RANGES } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
 import { Icon } from "@/core/ui/components/icon/icon";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { SettingsScreen } from "@/core/ui/settings/settings_screen";
 import { SharedPreferences } from "@/core/app/storage/shared_preferences";
-import { StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { computed } from "@/core/utils/reactive/signal";
 import { h } from "@/core/ui/h/h";
 
@@ -18,7 +18,7 @@ export interface FavoritesSettingsProps {
   favoritesPreferences: Pick<AppPreferences["favorites"], "grid" | "lightbox" | "nativeHeaderVisible" | "pagination">;
   sharedPreferences: SharedPreferences;
   onThemePreview: (theme: Theme | null) => void;
-  stepperScheduler: StepperScheduler;
+  scheduler: Pick<Scheduler, "schedule">;
 }
 
 const LAYOUT: SettingsLayout = [
@@ -44,7 +44,7 @@ export function FavoritesSettings(props: FavoritesSettingsProps): HTMLElement {
   return <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={createDescriptors(props)} controlSize="small" />;
 }
 
-function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePreview, stepperScheduler }: FavoritesSettingsProps): SettingDescriptor[] {
+function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePreview, scheduler }: FavoritesSettingsProps): SettingDescriptor[] {
   return [
     {
       id: "postListEnabled", kind: "switch", label: "Enhanced Posts Page",
@@ -81,7 +81,7 @@ function createDescriptors({ favoritesPreferences, sharedPreferences, onThemePre
     },
     {
       id: "pageSize", kind: "number", label: "Page Size",
-      settingPreference: favoritesPreferences.pagination.pageSize, ...FAVORITES_SETTING_RANGES.pageSize, stepperScheduler,
+      settingPreference: favoritesPreferences.pagination.pageSize, ...FAVORITES_SETTING_RANGES.pageSize, scheduler,
       disabled: favoritesPreferences.pagination.infiniteScroll
     },
     {

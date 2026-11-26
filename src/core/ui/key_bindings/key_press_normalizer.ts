@@ -1,6 +1,6 @@
 import { listHeldKeyPressModifiers } from "@/core/ui/key_bindings/key_press_modifier";
 
-export type KeyPress = Pick<KeyboardEvent, "key" | "code" | "ctrlKey" | "altKey" | "metaKey">;
+type KeyPress = Pick<KeyboardEvent, "key" | "code" | "ctrlKey" | "altKey" | "metaKey">;
 
 const PHYSICAL_KEY_PATTERN = /^(?:Key|Digit)(?<character>[A-Z0-9])$/u;
 const ALPHANUMERIC_KEY_PATTERN = /^[a-z0-9]$/iu;

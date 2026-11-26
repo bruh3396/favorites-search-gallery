@@ -1,7 +1,8 @@
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
 import { SharedPreferences } from "@/core/app/storage/shared_preferences";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
+import { Theme } from "@/core/ui/theme/theme";
 import { applyTheme } from "@/core/ui/theme/theme_applier";
 
 export interface HostAppearanceBinderDependencies {

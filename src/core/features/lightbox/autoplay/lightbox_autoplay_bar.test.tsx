@@ -1,8 +1,7 @@
-import { LightboxAutoplayBar, LightboxAutoplayBarClass } from "@/core/features/lightbox/autoplay/lightbox_autoplay_bar";
+import { LightboxAutoplayBar, LightboxAutoplayBarClass, LightboxAutoplayBarProps } from "@/core/features/lightbox/autoplay/lightbox_autoplay_bar";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import AUTOPLAY_BAR_CSS from "@/core/features/lightbox/autoplay/lightbox_autoplay_bar.css?inline";
-import { LightboxAutoplayCountdown } from "@/core/features/lightbox/autoplay/lightbox_autoplay";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
 import { expectClassesStyled } from "@/testing/css_utilities";
@@ -13,7 +12,7 @@ describe("LightboxAutoplayBar", () => {
   });
 
   test("fills over the countdown's duration and hides while there is none", () => {
-    const countdown = new Signal<LightboxAutoplayCountdown | undefined>(undefined);
+    const countdown = new Signal<LightboxAutoplayBarProps["countdown"]["value"]>(undefined);
     const { result: bar } = render(document, () => <LightboxAutoplayBar countdown={countdown} />);
 
     expect([bar.hidden, bar.childElementCount]).toEqual([true, 0]);
@@ -25,7 +24,7 @@ describe("LightboxAutoplayBar", () => {
   });
 
   test("restarts the fill for each new countdown", () => {
-    const countdown = new Signal<LightboxAutoplayCountdown | undefined>({ mediaItem: createPost({ id: "1" }), duration: 5_000 });
+    const countdown = new Signal<LightboxAutoplayBarProps["countdown"]["value"]>({ mediaItem: createPost({ id: "1" }), duration: 5_000 });
     const { result: bar } = render(document, () => <LightboxAutoplayBar countdown={countdown} />);
     const first = bar.firstElementChild;
 

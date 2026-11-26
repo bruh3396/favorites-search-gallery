@@ -1,7 +1,8 @@
-import { THEME_DEFINITIONS, ThemeColors } from "@/core/ui/theme/theme";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
+import { ThemeColors } from "@/core/ui/theme/theme_colors";
 
 const globals = window as unknown as Record<string, unknown>;
 const replaceState = vi.fn<History["replaceState"]>();

@@ -1,5 +1,4 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
-import { POST_LIST_APP_STYLES, PostListApp } from "@/core/app/post_list/post_list_app";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
@@ -8,6 +7,7 @@ import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands
 import { FavoritesActions } from "@/core/features/favorites/actions/favorites_actions";
 import { FileSaver } from "@/core/boundary/ports/file_saver/file_saver";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
+import LIGHTBOX_CSS from "@/core/features/lightbox/styles.css?inline";
 import { ListSequence } from "@/core/features/lightbox/navigation/list_sequence";
 import { LocalFavorites } from "@/core/boundary/ports/local_favorites/local_favorites";
 import { MountableApp } from "@/core/app/mountable_app";
@@ -15,6 +15,7 @@ import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { Post } from "@/core/domain/post/post";
 import { PostActions } from "@/core/features/post_actions/post_actions";
 import { PostGrid } from "@/core/ui/post_grid/post_grid";
+import { PostListApp } from "@/core/app/post_list/post_list_app";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
@@ -22,9 +23,10 @@ import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_po
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
 import { Tile } from "@/core/ui/post_grid/tile";
 import { TileLocator } from "@/core/ui/post_grid/tile_locator";
+import UI_CSS from "@/core/ui/styles.css?inline";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
@@ -118,7 +120,7 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
         colorScheme: sharedPreferences.colorScheme.peek(),
         themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()],
         appFont: DEFAULT_APP_FONT,
-        styles: POST_LIST_APP_STYLES
+        styles: [UI_CSS, LIGHTBOX_CSS]
       });
 
       appRoot.append(...render(container.ownerDocument, renderApp).result);

@@ -1,6 +1,7 @@
-import { MediaSequence, MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence";
 import { getItemsAround, getWrappedItemsAround } from "@/core/utils/collection/array_utilities";
 import { MediaItem } from "@/core/domain/media/media_item";
+import { MediaSequence } from "@/core/features/lightbox/navigation/media_sequence";
+import { MediaSequencePosition } from "@/core/features/lightbox/navigation/media_sequence_position";
 import { Readable } from "@/core/utils/reactive/signal";
 
 export interface ListSequenceConfiguration {

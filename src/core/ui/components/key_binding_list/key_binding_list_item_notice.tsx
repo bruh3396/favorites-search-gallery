@@ -6,14 +6,9 @@ export const KeyBindingListItemNoticeClass = {
   actions: "fsg-KeyBindingListItemNotice-actions"
 } as const;
 
-export interface KeyBindingListItemNoticeAction {
-  readonly label: string;
-  onClick: () => void;
-}
-
 export interface KeyBindingListItemNoticeProps {
   message: string;
-  actions: readonly KeyBindingListItemNoticeAction[];
+  actions: readonly { readonly label: string; onClick: () => void }[];
 }
 
 export function KeyBindingListItemNotice({ message, actions: keyBindingListItemNoticeActions }: KeyBindingListItemNoticeProps): HTMLElement {

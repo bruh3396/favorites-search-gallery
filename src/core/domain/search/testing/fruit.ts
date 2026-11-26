@@ -1,4 +1,4 @@
-import { MetricSearchable } from "@/core/domain/search/searchable";
+import { MetricSearchable } from "@/core/domain/search/metric_searchable";
 
-export type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
+type FruitName = "apple" | "banana" | "cherry" | "grape" | "kiwi" | "mango" | "blueberry" | "orange" | "pear" | "strawberry" | "pineapple";
 export type Fruit = MetricSearchable & { name: FruitName };

@@ -32,7 +32,7 @@ export function LightboxToolbar({ isAutoplaying, inFullscreen, detailsOpen, lead
       <span hidden>
         <LightboxButton icon="download" label="Download" onClick={handlers.download} />
       </span>
-      <LightboxButton icon="postPage" label="Open Post Page" onClick={handlers.openPostPage} />
+      <LightboxButton icon="postPage" label="Post Page" onClick={handlers.openPostPage} />
       <LightboxButton
         icon={computed(() => (inFullscreen.value ? "exitFullscreen" : "fullscreen"))}
         label="Fullscreen"

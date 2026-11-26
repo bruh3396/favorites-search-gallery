@@ -1,6 +1,6 @@
 import { METRICS, Metric } from "@/core/domain/search/metric";
 import { describe, expect, test } from "vitest";
-import { parseMetricSearchTerm, parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -65,41 +65,41 @@ describe("DocResolver", () => {
     test("routes a constant metric term to the metric index", () => {
       const docResolver = createResolver();
 
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("score:>40")))).toEqual(["hd", "square"]);
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:1080")))).toEqual(["square"]);
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("duration:<100")))).toEqual(["sd", "square"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("score:>40")))).toEqual(["hd", "square"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:1080")))).toEqual(["square"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("duration:<100")))).toEqual(["sd", "square"]);
     });
 
     test("resolves a relative metric term against the corpus", () => {
       const docResolver = createResolver();
 
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
     });
 
     test("resolves an equal relative metric term", () => {
       const docResolver = createResolver();
 
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:height")))).toEqual(["square"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:height")))).toEqual(["square"]);
     });
 
     test("resolves each relative term consistently", () => {
       const docResolver = createResolver();
 
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("height:<width")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:>height")))).toEqual(["hd", "sd"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("height:<width")))).toEqual(["hd", "sd"]);
     });
 
     test("matches every doc for a tautological equality relative term", () => {
       const docResolver = createResolver();
 
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:width")))).toEqual(["hd", "sd", "square"]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:width")))).toEqual(["hd", "sd", "square"]);
     });
 
     test("matches nothing for a tautological inequality relative term", () => {
       const docResolver = createResolver();
 
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:>width")))).toEqual([]);
-      expect(getSortedNames(docResolver.resolve(parseMetricSearchTerm("width:<width")))).toEqual([]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:>width")))).toEqual([]);
+      expect(getSortedNames(docResolver.resolve(parseSearchTerm("width:<width")))).toEqual([]);
     });
   });
 });

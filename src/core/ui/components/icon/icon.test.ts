@@ -1,4 +1,4 @@
-import { ICON_PATHS, Icon, createIcon } from "@/core/ui/components/icon/icon";
+import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { describe, expect, test } from "vitest";
 import { Signal } from "@/core/utils/reactive/signal";
 import { render } from "@/core/ui/h/h";
@@ -29,10 +29,13 @@ describe("createIcon", () => {
     expect(readPath()).toBe(expandPath);
   });
 
-  test("draws the icon's path with the given class", () => {
-    const { result: icon } = render(document, () => createIcon("close", "icon"));
+  test("draws a different path per icon, with the given class", () => {
+    const [close, search] = (["close", "search"] as const).map(name => render(document, () => createIcon(name, "icon")).result);
+    const readPath = (icon: SVGSVGElement): string | null => icon.querySelector("path")!.getAttribute("d");
 
-    expect([icon.getAttribute("class"), icon.querySelector("path")!.getAttribute("d")]).toEqual(["icon", ICON_PATHS.close]);
+    expect(close.getAttribute("class")).toBe("icon");
+    expect(readPath(close)).toMatch(/^M/);
+    expect(readPath(close)).not.toBe(readPath(search));
   });
 
   test("fills only a filled icon, also as the icon changes", () => {

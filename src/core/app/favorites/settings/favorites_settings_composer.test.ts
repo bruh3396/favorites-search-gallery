@@ -15,7 +15,7 @@ function setup(): { pane: HTMLElement; resetSettings: () => void } {
   const pane = render(document, () => composeFavoritesSettings({
     favoritesPreferences,
     sharedPreferences: createSharedPreferences(localKeyedValues, "light", new MemoryHostPage()),
-    stepperScheduler: new MemoryScheduler(),
+    scheduler: new MemoryScheduler(),
     onThemePreview: () => undefined,
     resetSettings
   })).result;

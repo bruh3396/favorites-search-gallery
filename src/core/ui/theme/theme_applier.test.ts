@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { ThemeColors } from "@/core/ui/theme/theme";
+import { ThemeColors } from "@/core/ui/theme/theme_colors";
 import { applyTheme } from "@/core/ui/theme/theme_applier";
 
 function createColors(base: string): ThemeColors {

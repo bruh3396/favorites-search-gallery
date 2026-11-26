@@ -1,6 +1,6 @@
 import { FavoritesService, createFavoritesService } from "@/core/features/favorites/favorites_service";
 import { describe, expect, test } from "vitest";
-import { FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
+import { FavoritesPaginationDependencies } from "@/core/features/favorites/session/favorites_pagination";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalFavorites } from "@/adapters/memory/ports/local_favorites/memory_local_favorites";
@@ -22,7 +22,7 @@ import { flushMicrotasks } from "@/testing/microtask_utilities";
 interface Setup {
   favoritesService: FavoritesService;
   favoritesSession: FavoritesSession;
-  favoritesPaginationPreferences: FavoritesPaginationPreferences;
+  favoritesPaginationPreferences: FavoritesPaginationDependencies["preferences"];
   localFavorites: MemoryLocalFavorites;
   hydratedPostIds: string[];
 }
@@ -31,7 +31,7 @@ interface Created {
   favoritesService: FavoritesService;
   memoryClient: MemoryClient;
   localFavorites: MemoryLocalFavorites;
-  favoritesPaginationPreferences: FavoritesPaginationPreferences;
+  favoritesPaginationPreferences: FavoritesPaginationDependencies["preferences"];
 }
 
 function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Created {

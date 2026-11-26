@@ -1,9 +1,10 @@
-import { THEME_DEFINITIONS, Theme } from "@/core/ui/theme/theme";
 import { describe, expect, onTestFinished, test } from "vitest";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { MemoryHostPage } from "@/adapters/memory/ports/host_page/memory_host_page";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
+import { Theme } from "@/core/ui/theme/theme";
 import { bindHostAppearance } from "@/core/app/host_appearance_binder";
 import { createStoredValue } from "@/testing/stored_value";
 import { render } from "@/core/ui/h/h";

@@ -2,10 +2,10 @@ import { SettingsScreen, SettingsScreenClass, SettingsScreenProps } from "@/core
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import SCREEN_CSS from "@/core/ui/settings/settings_screen.css?inline";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
 import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { Signal } from "@/core/utils/reactive/signal";
-import { SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 const LAYOUT: SettingsLayout = [
@@ -26,6 +26,8 @@ function createStoredValue<T>(initial: T): SettingPreference<T> {
     }
   };
 }
+
+type SwitchSettingDescriptor = Extract<SettingDescriptor, { kind: "switch" }>;
 
 function createSwitchSetting(id: string, settingPreference = createStoredValue(false)): SwitchSettingDescriptor {
   return { id, kind: "switch", label: id, settingPreference };

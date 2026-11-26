@@ -17,7 +17,7 @@ function setup(): { favoritesPreferences: AppPreferences["favorites"]; queryInpu
       favoritesPreferences={favoritesPreferences}
       sharedPreferences={createSharedPreferences(localKeyedValues, "light", new MemoryHostPage())}
       onThemePreview={() => undefined}
-      stepperScheduler={new MemoryScheduler()}
+      scheduler={new MemoryScheduler()}
     />
   ));
   return { favoritesPreferences, queryInput: (type, label) => element.querySelector<HTMLInputElement>(`input[type="${type}"][aria-label="${label}"]`)! };

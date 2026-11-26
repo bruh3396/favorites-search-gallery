@@ -1,8 +1,4 @@
-export interface FavoritesSettingRange {
-  readonly min: number;
-  readonly max: number;
-  readonly step: number;
-}
+import { FavoritesSettingRange } from "@/core/app/favorites/settings/favorites_setting_range";
 
 export const FAVORITES_SETTING_RANGES = {
   columnCount: { min: 1, max: 16, step: 1 },

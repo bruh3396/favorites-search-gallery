@@ -1,10 +1,10 @@
-import { ChoiceSettingDescriptor, ChoicesSettingDescriptor, NumberSettingDescriptor, SettingDescriptor, SliderSettingDescriptor, SwitchSettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Dropdown } from "@/core/ui/components/dropdown/dropdown";
 import { MultiSelect } from "@/core/ui/components/multi_select/multi_select";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
+import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingRow } from "@/core/ui/components/setting_row/setting_row";
 import { Slider } from "@/core/ui/components/slider/slider";
 import { Stepper } from "@/core/ui/components/stepper/stepper";
@@ -17,8 +17,8 @@ export interface SettingProps {
   controlSize?: ControlSize;
 }
 
-interface SettingControlProps<D extends SettingDescriptor = SettingDescriptor> {
-  descriptor: D;
+interface SettingControlProps<K extends SettingDescriptor["kind"] = SettingDescriptor["kind"]> {
+  descriptor: Extract<SettingDescriptor, { kind: K }>;
   controlSize: ControlSize;
 }
 
@@ -55,11 +55,11 @@ function SettingControl({ descriptor: settingDescriptor, controlSize }: SettingC
   }
 }
 
-function SwitchControl({ descriptor: { settingPreference, disabled }, controlSize }: SettingControlProps<SwitchSettingDescriptor>): HTMLElement {
+function SwitchControl({ descriptor: { settingPreference, disabled }, controlSize }: SettingControlProps<"switch">): HTMLElement {
   return <Switch value={settingPreference} disabled={disabled} size={controlSize} onValueChange={next => settingPreference.set(next)} />;
 }
 
-function ChoiceControl({ descriptor: choiceSettingDescriptor, controlSize }: SettingControlProps<ChoiceSettingDescriptor>): HTMLElement {
+function ChoiceControl({ descriptor: choiceSettingDescriptor, controlSize }: SettingControlProps<"choice">): HTMLElement {
   const { settingPreference, disabled, control, onPreview } = choiceSettingDescriptor;
   const props = {
     controlChoices: createChoices(choiceSettingDescriptor),
@@ -71,7 +71,7 @@ function ChoiceControl({ descriptor: choiceSettingDescriptor, controlSize }: Set
   return control === "segmented" ? <Segmented<string> {...props} /> : <Dropdown<string> {...props} onPreview={onPreview} />;
 }
 
-function ChoicesControl({ descriptor: choicesSettingDescriptor, controlSize }: SettingControlProps<ChoicesSettingDescriptor>): HTMLElement {
+function ChoicesControl({ descriptor: choicesSettingDescriptor, controlSize }: SettingControlProps<"choices">): HTMLElement {
   const { settingPreference, disabled } = choicesSettingDescriptor;
   return (
     <MultiSelect<string>
@@ -85,9 +85,9 @@ function ChoicesControl({ descriptor: choicesSettingDescriptor, controlSize }: S
 }
 
 function NumberControl({
-  descriptor: { settingPreference, disabled, label, min, max, step, writeOnEveryStep = false, stepperScheduler },
+  descriptor: { settingPreference, disabled, label, min, max, step, writeOnEveryStep = false, scheduler },
   controlSize
-}: SettingControlProps<NumberSettingDescriptor>): HTMLElement {
+}: SettingControlProps<"number">): HTMLElement {
   const draft = new Signal(settingPreference.peek());
   const write = (next: number): void => settingPreference.set(next);
   const preview = (next: number): void => {
@@ -104,7 +104,7 @@ function NumberControl({
       max={max}
       step={step}
       size={controlSize}
-      scheduler={stepperScheduler}
+      scheduler={scheduler}
       disabled={disabled}
       value={draft}
       onValueChange={writeOnEveryStep ? write : preview}
@@ -116,7 +116,7 @@ function NumberControl({
 function SliderControl({
   descriptor: { settingPreference, disabled, label, min, max, step, inverted = false },
   controlSize
-}: SettingControlProps<SliderSettingDescriptor>): HTMLElement {
+}: SettingControlProps<"slider">): HTMLElement {
   const toPosition = (value: number): number => (inverted ? min + max - value : value);
   return (
     <Slider
@@ -132,7 +132,7 @@ function SliderControl({
   );
 }
 
-function createChoices(descriptor: ChoiceSettingDescriptor | ChoicesSettingDescriptor): ControlChoice<string>[] {
+function createChoices(descriptor: Extract<SettingDescriptor, { kind: "choice" | "choices" }>): ControlChoice<string>[] {
   const { members, labels } = descriptor;
   const icons = descriptor.kind === "choice" ? descriptor.icons : undefined;
   return members.map(member => ({ value: member, label: labels[member], icon: icons?.[member] }));

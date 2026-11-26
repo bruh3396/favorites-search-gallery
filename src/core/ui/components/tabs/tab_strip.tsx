@@ -16,7 +16,7 @@ export const TabStripClass = {
   trailing: "fsg-TabStrip-trailing"
 } as const;
 
-export interface TabStripItem {
+interface TabStripItem {
   readonly id: string;
   readonly label: Readable<string>;
   readonly closable: boolean;

@@ -1,4 +1,4 @@
-import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsPreferences, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
+import { FavoriteLightboxDetailsClass, FavoriteLightboxDetailsProps, createFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details";
 import { FavoriteLightboxTags, FavoriteLightboxTagsClass } from "@/core/app/favorites/lightbox/favorite_lightbox_tags";
 import { describe, expect, test } from "vitest";
 import { h, render } from "@/core/ui/h/h";
@@ -11,7 +11,7 @@ import { expectClassesStyled } from "@/testing/css_utilities";
 
 interface Setup {
   element: HTMLElement;
-  favoriteLightboxDetailsPreferences: FavoriteLightboxDetailsPreferences;
+  favoriteLightboxDetailsPreferences: FavoriteLightboxDetailsProps["preferences"];
   viewButton: HTMLButtonElement;
   viewSettings: HTMLElement;
   chooseView: (label: string) => void;
@@ -33,7 +33,7 @@ function setup(): Setup {
     });
     return <div>{titleChild}{controlsChild}{bodyChild}</div> as HTMLElement;
   });
-  const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"View Settings\"]")!;
+  const viewButton = element.querySelector<HTMLButtonElement>("[aria-label=\"Display\"]")!;
   const viewSettings = element.querySelector<HTMLElement>(`.${FavoriteLightboxDetailsClass.view}`)!;
   const chooseView = (label: string): void => [...viewSettings.querySelectorAll<HTMLButtonElement>("button")]
     .find(button => button.getAttribute("aria-label") === label)!.click();

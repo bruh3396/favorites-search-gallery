@@ -1,7 +1,7 @@
 import { Signal, computed } from "@/core/utils/reactive/signal";
 import { ControlChoice } from "@/core/ui/components/control/control_choice";
 import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
-import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details";
+import { LightboxDetailsContent } from "@/core/features/lightbox/details/lightbox_details_content";
 import { Segmented } from "@/core/ui/components/segmented/segmented";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
@@ -30,7 +30,7 @@ const SIZE_CHOICES: readonly ControlChoice<TagSize>[] = [
   { value: "large", label: "Large", icon: "textLarge" }
 ];
 
-export interface FavoriteLightboxDetailsPreferences {
+interface FavoriteLightboxDetailsPreferences {
   readonly organization: StoredValue<TagOrganization>;
   readonly alignment: StoredValue<TagAlignment>;
   readonly size: StoredValue<TagSize>;
@@ -65,7 +65,7 @@ function FavoriteLightboxTitle({ copyIdButton, viewOpen }: { copyIdButton: Node;
       <h2 className={FavoriteLightboxDetailsClass.id}>
         {copyIdButton}
       </h2>
-      <LightboxButton icon="tune" label="View Settings" pressed={viewOpen} onClick={() => {
+      <LightboxButton icon="tune" label="Display" pressed={viewOpen} onClick={() => {
         viewOpen.value = !viewOpen.value;
       }} />
     </div>
@@ -90,7 +90,7 @@ interface FavoriteLightboxViewSettingsProps {
 
 function FavoriteLightboxViewSettings({ favoriteLightboxDetailsPreferences }: FavoriteLightboxViewSettingsProps): HTMLElement {
   return (
-    <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="View Settings">
+    <div className={FavoriteLightboxDetailsClass.view} role="group" aria-label="Display">
       <ViewOption label="Organization" controlChoices={ORGANIZATION_CHOICES} value={favoriteLightboxDetailsPreferences.organization} />
       <ViewOption label="Alignment" controlChoices={ALIGNMENT_CHOICES} value={favoriteLightboxDetailsPreferences.alignment} />
       <ViewOption label="Size" controlChoices={SIZE_CHOICES} value={favoriteLightboxDetailsPreferences.size} />

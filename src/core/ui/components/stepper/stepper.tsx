@@ -1,6 +1,7 @@
 import { Icon, createIcon } from "@/core/ui/components/icon/icon";
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { ControlProps } from "@/core/ui/components/control/control_props";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { StepGesture } from "@/core/ui/components/stepper/step_gesture";
 import { doNothing } from "@/core/utils/function/function_utilities";
 import { h } from "@/core/ui/h/h";
@@ -12,17 +13,13 @@ export const StepperClass = {
   icon: "fsg-Stepper-icon"
 } as const;
 
-export interface StepperScheduler {
-  schedule: (task: () => void, delay: number) => () => void;
-}
-
 export interface StepperProps extends ControlProps<number> {
   label: string;
   min: number;
   max: number | Readable<number>;
   step?: number;
   isFocused?: Readable<boolean>;
-  scheduler: StepperScheduler;
+  scheduler: Pick<Scheduler, "schedule">;
   onValueCommit?: (value: number) => void;
 }
 
@@ -48,7 +45,7 @@ export function Stepper({
   step = 1,
   size: controlSize = "medium",
   isFocused,
-  scheduler: stepperScheduler,
+  scheduler,
   value,
   disabled = new Signal(false),
   onValueChange,
@@ -56,7 +53,7 @@ export function Stepper({
 }: StepperProps): HTMLElement {
   const upper = typeof max === "number" ? new Signal(max) : max;
   const stepGesture = new StepGesture({
-    schedule: (task, delay): (() => void) => stepperScheduler.schedule(task, delay),
+    schedule: (task, delay): (() => void) => scheduler.schedule(task, delay),
     getValue: (): number => value.peek(),
     commit: onValueCommit
   });

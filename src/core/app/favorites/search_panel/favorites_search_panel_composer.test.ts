@@ -315,7 +315,7 @@ describe("composeFavoritesSearchPanel", () => {
   test("enters zen from the zen button", () => {
     const { element, enterZen } = setup();
 
-    element.querySelector<HTMLButtonElement>("button[aria-label=\"Enter Zen\"]")!.click();
+    element.querySelector<HTMLButtonElement>("button[aria-label=\"Zen\"]")!.click();
     expect(enterZen).toHaveBeenCalledOnce();
   });
 

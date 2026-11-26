@@ -1,5 +1,5 @@
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
-import { ThemeDefinition } from "@/core/ui/theme/theme";
+import { ThemeDefinition } from "@/core/ui/theme/theme_definition";
 
 export interface HostPage {
   readonly hasHeader: boolean;

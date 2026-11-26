@@ -1,13 +1,9 @@
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
+import { GridSizing } from "@/core/ui/post_grid/layout/grid_sizing";
 
 export const GridTilerClass = {
   column: "fsg-GridTiler-column"
 } as const;
-
-export interface GridTiling {
-  readonly layout: GridLayout;
-  readonly columnCount: number;
-}
 
 type Arranger = (grid: HTMLElement, tiles: readonly HTMLElement[], columnCount: number) => void;
 
@@ -19,7 +15,7 @@ const ARRANGERS: Record<GridLayout, Arranger> = {
   native: appendInOrder
 };
 
-export function tileGrid(grid: HTMLElement, tiles: readonly HTMLElement[], { layout, columnCount }: GridTiling): void {
+export function tileGrid(grid: HTMLElement, tiles: readonly HTMLElement[], { layout, columnCount }: Pick<GridSizing, "layout" | "columnCount">): void {
   grid.dataset.layout = layout;
   grid.style.setProperty("--fsg-GridTiler-columnCount", String(columnCount));
   ARRANGERS[layout](grid, tiles, columnCount);

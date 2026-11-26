@@ -1,20 +1,14 @@
-import { FrozenCobaltError, FrozenCobaltErrorReason, isRetryableFrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
+import { FrozenCobaltError, isRetryableFrozenCobaltError } from "@/adapters/frozen_cobalt/client/frozen_cobalt_error";
 import { describe, expect, test } from "vitest";
 
 describe("FrozenCobaltError", () => {
-  test("names its reason, subject, and status", () => {
-    expect(new FrozenCobaltError("http", { subject: "1", status: 503 }).message).toBe("http 1 503");
-  });
-
-  test("keeps its cause", () => {
-    const cause = new TypeError("offline");
-
-    expect(new FrozenCobaltError("network", { cause }).cause).toBe(cause);
+  test("names itself", () => {
+    expect(new FrozenCobaltError("http").name).toBe("FrozenCobaltError");
   });
 });
 
 describe("isRetryableFrozenCobaltError", () => {
-  test.each<[FrozenCobaltErrorReason, boolean]>([
+  test.each<[FrozenCobaltError["reason"], boolean]>([
     ["timeout", true],
     ["network", true],
     ["retry", true],
@@ -42,6 +36,6 @@ describe("isRetryableFrozenCobaltError", () => {
   });
 
   test("throws for an unknown reason", () => {
-    expect(() => isRetryableFrozenCobaltError(new FrozenCobaltError("bogus" as FrozenCobaltErrorReason))).toThrow("bogus");
+    expect(() => isRetryableFrozenCobaltError(new FrozenCobaltError("bogus" as FrozenCobaltError["reason"]))).toThrow("bogus");
   });
 });

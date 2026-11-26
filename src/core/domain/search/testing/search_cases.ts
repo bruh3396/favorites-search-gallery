@@ -1,6 +1,8 @@
-import { SearchCaseAssertion, SearchCaseGroup } from "@/core/domain/search/testing/search_case";
 import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { Fruit } from "@/core/domain/search/testing/fruit";
+import { SearchCaseGroup } from "@/core/domain/search/testing/search_case_group";
+
+type SearchCaseAssertion = Parameters<NonNullable<SearchCaseGroup["run"]>>[0];
 
 const { fruits, fruitNames, allTerms } = FRUIT_CORPUS;
 

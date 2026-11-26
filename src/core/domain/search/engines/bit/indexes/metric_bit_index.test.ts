@@ -31,7 +31,7 @@ function setup(docsByPosition: (Doc | undefined)[] = [square, tall, wide, peer])
   return {
     metricBitIndex,
     getMetric,
-    findNames: (term: string): string[] => metricBitIndex.getPosting(parseMetricComparison(term)).toBitSet().gather(docs).map(doc => doc.name).sort()
+    findNames: (term: string): string[] => metricBitIndex.getPosting(parseMetricComparison(term)!).toBitSet().gather(docs).map(doc => doc.name).sort()
   };
 }
 
@@ -81,8 +81,8 @@ describe("MetricBitIndex", () => {
       findNames("score:5");
       findNames("width:height");
       metricBitIndex.build(WIDTH, [wide]);
-      expect(metricBitIndex.getPosting(parseMetricComparison("score:>0")).cardinality).toBe(1);
-      expect(metricBitIndex.getPosting(parseMetricComparison("width:height")).cardinality).toBe(0);
+      expect(metricBitIndex.getPosting(parseMetricComparison("score:>0")!).cardinality).toBe(1);
+      expect(metricBitIndex.getPosting(parseMetricComparison("width:height")!).cardinality).toBe(0);
     });
   });
 });

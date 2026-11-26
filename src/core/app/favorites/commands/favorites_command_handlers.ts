@@ -1,16 +1,17 @@
 import { ALL_POST_STATUSES_MASK, toPostStatusMask } from "@/core/domain/post/post_status_mask";
 import { ALL_RATINGS_MASK, toRatingMask } from "@/core/domain/post/rating_mask";
 import { COLOR_SCHEMES, ColorScheme } from "@/core/boundary/environment/color_scheme";
-import { FAVORITES_SETTING_RANGES, FavoritesSettingRange } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { clamp, roundDownToMultiple, roundUpToMultiple } from "@/core/utils/number/number_utilities";
 import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
 import { FAVORITES_GRID_LAYOUTS } from "@/core/app/favorites/settings/favorites_grid_layouts";
+import { FAVORITES_SETTING_RANGES } from "@/core/app/favorites/settings/favorites_setting_ranges";
 import { FAVORITES_SORT_KEYS } from "@/core/features/favorites/search/favorites_sort_key";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
 import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { FavoritesSettingRange } from "@/core/app/favorites/settings/favorites_setting_range";
 import { FavoritesTool } from "@/core/app/favorites/favorites_tool";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { LIGHTBOX_MODES } from "@/core/features/lightbox/lightbox_mode";

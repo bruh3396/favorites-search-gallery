@@ -1,4 +1,3 @@
-import { Environment, HostEnvironment } from "@/core/boundary/environment/environment";
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { LAB_INDEXED_DB_CONFIGURATION, LAB_NAMESPACE, LAB_OWNER_ID, applyPendingReset, readCorpusSize, readFavoriteCount } from "@/targets/lab/databases";
 import { UNAVAILABLE_REMOTE_POSTS, UNCHANGED_REMOTE_FAVORITES } from "@/targets/lab/offline_remotes";
@@ -14,6 +13,8 @@ import { BrowserScheduler } from "@/adapters/browser/ports/scheduler/browser_sch
 import { BrowserSizeObserver } from "@/adapters/browser/ports/size_observer/browser_size_observer";
 import { BrowserViewport } from "@/adapters/browser/ports/viewport/browser_viewport";
 import { BrowserVisibilityObserver } from "@/adapters/browser/ports/visibility_observer/browser_visibility_observer";
+import { Environment } from "@/core/boundary/environment/environment";
+import { HostEnvironment } from "@/core/boundary/environment/host_environment";
 import { IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorites/indexed_db_local_favorites";
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
@@ -115,7 +116,7 @@ async function main(): Promise<void> {
   const favoriteCount = new Signal<number | null>(null);
 
   mountLabScreen(labContainer, { colorScheme: environment.colorScheme }, {
-    stepperScheduler: scheduler,
+    scheduler,
     postCount,
     favoriteCount,
     nativeHeaderVisible,

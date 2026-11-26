@@ -2,7 +2,7 @@ import { createPost, createPosts } from "@/testing/post";
 import { describe, expect, test, vi } from "vitest";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
 import { FavoritesFetcher } from "@/core/features/favorites/load/favorites_fetcher";
-import { FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesLoader } from "@/core/features/favorites/load/favorites_loader";
 import { FavoritesReloader } from "@/core/features/favorites/load/favorites_reloader";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
@@ -73,8 +73,8 @@ async function setup({ localFavoritePosts = [], remoteFavoritePosts }: LoadSourc
   return { favoritesLoader, favoritesCollection, favoritesSearchIndex, localFavorites, remoteFavorites, scheduler };
 }
 
-function recordPhases(favoritesLoader: FavoritesLoader): FavoritesLoadStatePhase[] {
-  const phases: FavoritesLoadStatePhase[] = [];
+function recordPhases(favoritesLoader: FavoritesLoader): FavoritesLoadState["phase"][] {
+  const phases: FavoritesLoadState["phase"][] = [];
 
   effect(() => {
     phases.push(favoritesLoader.state.value.phase);

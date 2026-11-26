@@ -1,6 +1,6 @@
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { HostPage } from "@/core/boundary/ports/host_page/host_page";
-import { ThemeDefinition } from "@/core/ui/theme/theme";
+import { ThemeDefinition } from "@/core/ui/theme/theme_definition";
 
 export class MemoryHostPage implements HostPage {
   public headerVisible = true;

@@ -1,6 +1,6 @@
 import { MetricComparator } from "@/core/domain/search/metric_comparator";
 import { MetricComparison } from "@/core/domain/search/parsers/metric_comparison";
-import { MetricSearchable } from "@/core/domain/search/searchable";
+import { MetricSearchable } from "@/core/domain/search/metric_searchable";
 import { ParsedTerm } from "@/core/domain/search/terms/parsed_term";
 import { SearchTerm } from "@/core/domain/search/terms/search_term";
 

@@ -34,7 +34,7 @@ import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
 import { SliderClass } from "@/core/ui/components/slider/slider";
 import { SnippetRowClass } from "@/core/features/snippets/snippet_row";
 import { SwitchClass } from "@/core/ui/components/switch/switch";
-import { THEME_DEFINITIONS } from "@/core/ui/theme/theme";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
 import { TabStripClass } from "@/core/ui/components/tabs/tab_strip";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -477,7 +477,7 @@ describe("composeFavoritesApp", () => {
   test("enters zen from the search panel's zen button", () => {
     const root = mount();
 
-    root.querySelector<HTMLButtonElement>("button[aria-label=\"Enter Zen\"]")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Zen\"]")!.click();
     expect(root.querySelector(`.${FavoritesAppClass.root}`)!.hasAttribute("data-zen")).toBe(true);
   });
 
@@ -494,7 +494,7 @@ describe("composeFavoritesApp", () => {
   test("exits zen on Escape", () => {
     const root = mount();
 
-    root.querySelector<HTMLButtonElement>("button[aria-label=\"Enter Zen\"]")!.click();
+    root.querySelector<HTMLButtonElement>("button[aria-label=\"Zen\"]")!.click();
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     expect(root.querySelector(`.${FavoritesAppClass.root}`)!.hasAttribute("data-zen")).toBe(false);
   });

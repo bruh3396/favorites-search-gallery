@@ -12,7 +12,7 @@ export const ViewPaneClass = {
   body: "fsg-ViewPane-body"
 } as const;
 
-export interface ViewPaneAction {
+interface ViewPaneAction {
   readonly label: Reactive<string>;
   readonly icon: Reactive<Icon>;
   readonly disabled?: Readable<boolean>;

@@ -1,14 +1,14 @@
-import { FavoritesLoadStatePhase } from "@/core/features/favorites/load/favorites_load_state";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 
-export type FavoritesSearchPanelBody =
+type FavoritesSearchPanelBody =
   | { readonly kind: "skeleton" }
   | { readonly kind: "results" }
   | { readonly kind: "empty"; readonly message: string; readonly offersClear: boolean };
 
-export interface FavoritesSearchPanelBodyInput {
+interface FavoritesSearchPanelBodyInput {
   readonly resultCount: number;
   readonly isSearchable: boolean;
-  readonly loadPhase: FavoritesLoadStatePhase;
+  readonly loadPhase: FavoritesLoadState["phase"];
   readonly query: string;
   readonly isFiltered: boolean;
 }

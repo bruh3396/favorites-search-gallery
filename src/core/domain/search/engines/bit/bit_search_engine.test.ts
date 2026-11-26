@@ -1,8 +1,9 @@
-import { MetricSearchable, Searchable } from "@/core/domain/search/searchable";
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
 import { Fruit } from "@/core/domain/search/testing/fruit";
+import { MetricSearchable } from "@/core/domain/search/metric_searchable";
+import { Searchable } from "@/core/domain/search/searchable";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TermUpdate } from "@/core/domain/search/engines/term_update";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";

@@ -1,4 +1,4 @@
-import { FieldGuards } from "@/core/utils/guard/fields_guard";
+import { FieldGuards } from "@/core/utils/guard/field_guards";
 import { Guard } from "@/core/utils/guard/guard";
 import { isRecord } from "@/core/utils/guard/unknown_utilities";
 

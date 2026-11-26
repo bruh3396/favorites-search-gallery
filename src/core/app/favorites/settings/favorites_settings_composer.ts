@@ -6,16 +6,16 @@ import { h } from "@/core/ui/h/h";
 export interface FavoritesSettingsDependencies {
   favoritesPreferences: FavoritesSettingsProps["favoritesPreferences"];
   sharedPreferences: FavoritesSettingsProps["sharedPreferences"];
-  stepperScheduler: FavoritesSettingsProps["stepperScheduler"];
+  scheduler: FavoritesSettingsProps["scheduler"];
   onThemePreview: FavoritesSettingsProps["onThemePreview"];
   resetSettings: () => void;
 }
 
 export function composeFavoritesSettings(dependencies: FavoritesSettingsDependencies): HTMLElement {
-  const { favoritesPreferences, sharedPreferences, stepperScheduler, onThemePreview, resetSettings } = dependencies;
+  const { favoritesPreferences, sharedPreferences, scheduler, onThemePreview, resetSettings } = dependencies;
   return h(
     ViewPane,
     { title: FAVORITES_TOOL_DEFINITIONS.settings.label, actions: [{ label: "Reset Settings", icon: "reset", onClick: resetSettings }] },
-    h(FavoritesSettings, { favoritesPreferences, sharedPreferences, stepperScheduler, onThemePreview })
+    h(FavoritesSettings, { favoritesPreferences, sharedPreferences, scheduler, onThemePreview })
   );
 }

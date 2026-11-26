@@ -1,6 +1,5 @@
 import {
-  DEFAULT_FAVORITES_SEARCH_OPTIONS, FAVORITES_SEARCH_OPTIONS_GUARDS, countChangedFavoritesSearchOptions, isFilteringFavoritesSearchOptions,
-  isReorderingFavoritesSearchOptions
+  DEFAULT_FAVORITES_SEARCH_OPTIONS, countChangedFavoritesSearchOptions, isFilteringFavoritesSearchOptions, isReorderingFavoritesSearchOptions
 } from "@/core/features/favorites/search/favorites_search_options";
 import { describe, expect, test } from "vitest";
 
@@ -79,24 +78,5 @@ describe("isReorderingFavoritesSearchOptions", () => {
     const filteredFavoritesSearchOptions = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "apple", isInverted: true };
 
     expect(isReorderingFavoritesSearchOptions(filteredFavoritesSearchOptions)).toBe(false);
-  });
-});
-
-describe("FAVORITES_SEARCH_OPTIONS_GUARDS", () => {
-  test("accepts every default option", () => {
-    for (const [key, accepts] of Object.entries(FAVORITES_SEARCH_OPTIONS_GUARDS)) {
-      expect(accepts(DEFAULT_FAVORITES_SEARCH_OPTIONS[key as keyof typeof DEFAULT_FAVORITES_SEARCH_OPTIONS])).toBe(true);
-    }
-  });
-
-  test("rejects an unknown sort key", () => {
-    expect(FAVORITES_SEARCH_OPTIONS_GUARDS.sortKey("tags")).toBe(false);
-  });
-
-  test("accepts only a non-negative integer seed", () => {
-    expect(FAVORITES_SEARCH_OPTIONS_GUARDS.shuffleSeed(42)).toBe(true);
-    expect(FAVORITES_SEARCH_OPTIONS_GUARDS.shuffleSeed(-1)).toBe(false);
-    expect(FAVORITES_SEARCH_OPTIONS_GUARDS.shuffleSeed(1.5)).toBe(false);
-    expect(FAVORITES_SEARCH_OPTIONS_GUARDS.shuffleSeed("1")).toBe(false);
   });
 });

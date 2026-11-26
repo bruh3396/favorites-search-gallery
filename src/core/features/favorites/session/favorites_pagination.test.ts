@@ -1,4 +1,4 @@
-import { FavoritesPagination, FavoritesPaginationPreferences } from "@/core/features/favorites/session/favorites_pagination";
+import { FavoritesPagination, FavoritesPaginationDependencies } from "@/core/features/favorites/session/favorites_pagination";
 import { describe, expect, test } from "vitest";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -12,6 +12,8 @@ import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/f
 import { createPost } from "@/testing/post";
 import { createStoredValue } from "@/testing/stored_value";
 import { effect } from "@/core/utils/reactive/signal";
+
+type FavoritesPaginationPreferences = FavoritesPaginationDependencies["preferences"];
 
 interface Setup {
   favoritesPagination: FavoritesPagination;

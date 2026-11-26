@@ -15,7 +15,7 @@ export interface LightboxAutoplayDependencies {
   video: Readable<HTMLVideoElement | undefined>;
 }
 
-export interface LightboxAutoplayCountdown {
+interface LightboxAutoplayCountdown {
   readonly mediaItem: MediaItem;
   readonly duration: number;
 }

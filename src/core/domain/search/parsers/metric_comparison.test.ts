@@ -1,20 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { metricComparisonRegex, parseMetricComparison } from "@/core/domain/search/parsers/metric_comparison";
-
-describe("metricComparisonRegex", () => {
-  test("matches a metric compared to a number or another metric", () => {
-    expect(metricComparisonRegex.test("score:10")).toBe(true);
-    expect(metricComparisonRegex.test("score:<10")).toBe(true);
-    expect(metricComparisonRegex.test("-width:>height")).toBe(true);
-  });
-
-  test("rejects anything else", () => {
-    expect(metricComparisonRegex.test("score")).toBe(false);
-    expect(metricComparisonRegex.test("score:=10")).toBe(false);
-    expect(metricComparisonRegex.test("color:10")).toBe(false);
-    expect(metricComparisonRegex.test("score:ten")).toBe(false);
-  });
-});
+import { parseMetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 
 describe("parseMetricComparison", () => {
   test("parses a comparison against a number", () => {
@@ -40,14 +25,10 @@ describe("parseMetricComparison", () => {
   });
 
   test("flags a metric compared to itself as tautological", () => {
-    expect(parseMetricComparison("score:score").isTautological).toBe(true);
+    expect(parseMetricComparison("score:score")?.isTautological).toBe(true);
   });
 
-  test("ignores a leading negation", () => {
-    expect(parseMetricComparison("-score:5")).toMatchObject({ metric: "score", comparator: ":", value: 5 });
-  });
-
-  test("falls back to width:0 for a term that isn't a comparison", () => {
-    expect(parseMetricComparison("apple")).toMatchObject({ metric: "width", comparator: ":", value: 0, isRelative: false });
+  test.each(["apple", "score", "score:=10", "color:10", "score:ten", "-score:5"])("returns null for %s", term => {
+    expect(parseMetricComparison(term)).toBeNull();
   });
 });

@@ -1,4 +1,3 @@
-import { metricComparisonRegex, parseMetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 import { ExactSearchTerm } from "@/core/domain/search/terms/exact_search_term";
 import { MetricSearchTerm } from "@/core/domain/search/terms/metric_search_term";
 import { NumericSearchTerm } from "@/core/domain/search/terms/numeric_search_term";
@@ -7,6 +6,7 @@ import { SearchTerm } from "@/core/domain/search/terms/search_term";
 import { WildcardMatchType } from "@/core/domain/search/terms/wildcard_match_type";
 import { WildcardSearchTerm } from "@/core/domain/search/terms/wildcard_search_term";
 import { escapeParentheses } from "@/core/utils/string/string_utilities";
+import { parseMetricComparison } from "@/core/domain/search/parsers/metric_comparison";
 
 const unmatchableRegex = /^\b$/;
 
@@ -18,16 +18,13 @@ export function parseSearchTerm(term: string): SearchTerm {
   if (isWildcardTerm(term)) {
     return parseWildcardSearchTerm(term);
   }
-
-  if (isMetricTerm(term)) {
-    return parseMetricSearchTerm(term);
-  }
-  return parseExactSearchTerm(term);
+  return parseMetricSearchTerm(term) ?? parseExactSearchTerm(term);
 }
 
 export function parseNumericSearchTerm(term: string): NumericSearchTerm {
   const parsedTerm = parseSearchTermNegation(term);
-  return new NumericSearchTerm(parsedTerm, parseMetricComparison(`id:${parsedTerm.value}`));
+  const value = Number(parsedTerm.value);
+  return new NumericSearchTerm(parsedTerm, { metric: "id", comparator: ":", isRelative: false, rightHandMetric: "id", value, isTautological: false });
 }
 
 export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
@@ -35,9 +32,10 @@ export function parseWildcardSearchTerm(term: string): WildcardSearchTerm {
   return new WildcardSearchTerm(parsedTerm, { matchType: chooseWildcardMatchType(parsedTerm.value), regex: buildWildcardRegex(parsedTerm.value) });
 }
 
-export function parseMetricSearchTerm(term: string): MetricSearchTerm {
+export function parseMetricSearchTerm(term: string): MetricSearchTerm | null {
   const parsedTerm = parseSearchTermNegation(term);
-  return new MetricSearchTerm(parsedTerm, parseMetricComparison(parsedTerm.value));
+  const metricComparison = parseMetricComparison(parsedTerm.value);
+  return metricComparison === null ? null : new MetricSearchTerm(parsedTerm, metricComparison);
 }
 
 export function parseExactSearchTerm(term: string): ExactSearchTerm {
@@ -50,10 +48,6 @@ function isNumericTerm(term: string): boolean {
 
 function isWildcardTerm(term: string): boolean {
   return term.includes("*");
-}
-
-function isMetricTerm(term: string): boolean {
-  return metricComparisonRegex.test(term);
 }
 
 export function parseSearchTermNegation(term: string): ParsedTerm {

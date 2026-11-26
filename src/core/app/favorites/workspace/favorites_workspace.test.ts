@@ -1,5 +1,5 @@
 import { DEFAULT_FAVORITES_SEARCH_OPTIONS, FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
-import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC, FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
+import { DEFAULT_FAVORITES_WORKSPACE_SNAPSHOT, FAVORITES_WORKSPACE_SNAPSHOT_CODEC } from "@/core/app/favorites/workspace/favorites_workspace_snapshot";
 import { describe, expect, test, vi } from "vitest";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
@@ -7,6 +7,7 @@ import { FavoritesCollection } from "@/core/features/favorites/collection/favori
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
+import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
 import { MemoryRandomSource } from "@/adapters/memory/ports/random_source/memory_random_source";
@@ -98,44 +99,6 @@ describe("FavoritesWorkspace", () => {
     expect(readQueries(favoritesWorkspace)).toEqual(["apple", "banana"]);
     expect(favoritesWorkspace.activeTab.value).toBe(bananaFavoritesTab);
     expect([appleFavoritesTab.session.start, bananaFavoritesTab.session.start].map(start => vi.mocked(start).mock.calls.length)).toEqual([0, 1]);
-  });
-
-  test("activates the first tab when the stored active tab is missing or out of range", () => {
-    const favoritesSearchOptions = [{ query: "apple" }, { query: "banana" }];
-
-    expect([undefined, 2, -1, 0.5, "1"]
-      .map(activeIndex => readActiveIndex(setup({ tabGroups: [{ favoritesSearchOptions, activeIndex }] }).favoritesWorkspace)))
-      .toEqual([0, 0, 0, 0, 0]);
-  });
-
-  test("drops a stored tab that isn't a record and keeps the rest", () => {
-    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchOptions: ["apple", { query: "banana" }] }] });
-
-    expect(readQueries(favoritesWorkspace)).toEqual(["banana"]);
-  });
-
-  test("fills a stored tab's invalid field with its default", () => {
-    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchOptions: [{ query: "apple", sortKey: "unknown" }] }] });
-
-    expect(readFavoritesSearchOptions(favoritesWorkspace)).toEqual([{ ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "apple" }]);
-  });
-
-  test("skips a stored tab group left without tabs", () => {
-    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchOptions: [] }, { favoritesSearchOptions: [{ query: "apple" }] }, "pane"] });
-
-    expect(readQueries(favoritesWorkspace)).toEqual(["apple"]);
-  });
-
-  test("opens one blank tab when no stored tab group survives", () => {
-    const { favoritesWorkspace } = setup({ tabGroups: [{ favoritesSearchOptions: ["apple"] }] });
-
-    expect(readFavoritesSearchOptions(favoritesWorkspace)).toEqual([DEFAULT_FAVORITES_SEARCH_OPTIONS]);
-  });
-
-  test("opens one blank tab when the stored workspace isn't a record", () => {
-    const { favoritesWorkspace } = setup("workspace");
-
-    expect(readFavoritesSearchOptions(favoritesWorkspace)).toEqual([DEFAULT_FAVORITES_SEARCH_OPTIONS]);
   });
 
   test("starts a tab's session once it is activated", () => {

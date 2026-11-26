@@ -1,10 +1,9 @@
 import { describe, expect, test } from "vitest";
 import { BitSearchEngine } from "@/core/domain/search/engines/bit/bit_search_engine";
 import { FRUIT_CORPUS } from "@/core/domain/search/testing/fruit_corpus";
-import { FruitName } from "@/core/domain/search/testing/fruit";
 import { Metric } from "@/core/domain/search/metric";
 import { SEARCH_CASES } from "@/core/domain/search/testing/search_cases";
-import { SearchCaseAssertion } from "@/core/domain/search/testing/search_case";
+import { SearchCaseGroup } from "@/core/domain/search/testing/search_case_group";
 import { SearchEngine } from "@/core/domain/search/engines/search_engine";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { Searchable } from "@/core/domain/search/searchable";
@@ -106,7 +105,7 @@ const implementations:{ name: string; implementation: Searcher; supportsAST: boo
 
 for (const { name, implementation, supportsAST } of implementations) {
   describe(name, () => {
-    const assertMatches: SearchCaseAssertion = (query: string, expectedFruitNames: FruitName[]): void => {
+    const assertMatches: Parameters<NonNullable<SearchCaseGroup["run"]>>[0] = (query, expectedFruitNames): void => {
       expect(implementation(query, FRUIT_CORPUS.fruits).sort(), query).toEqual([...expectedFruitNames].sort());
     };
 

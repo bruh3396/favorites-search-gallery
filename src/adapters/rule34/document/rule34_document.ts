@@ -1,7 +1,9 @@
-import { THEME_DEFINITIONS, ThemeColors, ThemeDefinition } from "@/core/ui/theme/theme";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { RULE34_PAGE_SIZE } from "@/adapters/rule34/client/rule34_page_size";
 import { Rule34PageName } from "@/adapters/rule34/document/rule34_page_name";
+import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
+import { ThemeColors } from "@/core/ui/theme/theme_colors";
+import { ThemeDefinition } from "@/core/ui/theme/theme_definition";
 
 const TAG_BLACKLIST_ENCODINGS = 3;
 const COOKIE_LIFETIME_SECONDS = 365 * 24 * 60 * 60;

@@ -1,10 +1,11 @@
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
-import { Stepper, StepperScheduler } from "@/core/ui/components/stepper/stepper";
 import { exportCorpus, importCorpus, pickCorpusFile, pullCorpus, requestReset, setFavoriteCount } from "@/targets/lab/databases";
 import { exportRealDatabases, importRealDatabases, requestPurge } from "@/targets/lab/real_data";
 import { h, render } from "@/core/ui/h/h";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
+import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SettingRow } from "@/core/ui/components/setting_row/setting_row";
+import { Stepper } from "@/core/ui/components/stepper/stepper";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Switch } from "@/core/ui/components/switch/switch";
 import { mountLabRoot } from "@/targets/lab/lab_root";
@@ -40,7 +41,7 @@ export interface LabScreenConfiguration {
 }
 
 export interface LabScreenDependencies {
-  stepperScheduler: StepperScheduler;
+  scheduler: Pick<Scheduler, "schedule">;
   postCount: Readable<number | null>;
   favoriteCount: Readable<number | null>;
   nativeHeaderVisible: StoredValue<boolean>;
@@ -162,7 +163,7 @@ export function mountLabScreen(container: HTMLElement, labScreenConfiguration: L
                 min={0}
                 max={computed(() => postCount.value ?? 0)}
                 step={FAVORITE_COUNT_STEP}
-                scheduler={labScreenDependencies.stepperScheduler}
+                scheduler={labScreenDependencies.scheduler}
                 value={count}
                 disabled={isBusy}
                 onValueChange={next => {
