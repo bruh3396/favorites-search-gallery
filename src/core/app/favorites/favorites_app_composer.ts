@@ -235,6 +235,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
           activeTabId: tabManager.activeTabId,
           trailingChild: h(StatusText, { text: favoritesService.loadStatus }),
           onActivate: tabId => tabManager.activate(tabId),
+          onDuplicate: tabId => favoritesWorkspace.duplicateTab(tabId),
           onClose: tabIds => favoritesWorkspace.closeTabs(tabIds),
           onMove: (tabId, index) => tabManager.move(tabId, index),
           onAdd: () => favoritesWorkspace.openBlankTab()

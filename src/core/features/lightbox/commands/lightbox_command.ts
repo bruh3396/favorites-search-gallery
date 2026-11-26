@@ -11,7 +11,7 @@ export const LIGHTBOX_COMMAND_DEFINITIONS = {
   toggleDetails: { label: "Toggle Details" },
   addFavorite: { label: "Add to Favorites" },
   openPostPage: { label: "Open Post Page" },
-  openOriginal: { label: "Open Original" },
+  openOriginal: { label: "Open Original File" },
   download: { label: "Download" },
   dismiss: { label: "Dismiss" },
   close: { label: "Close" }

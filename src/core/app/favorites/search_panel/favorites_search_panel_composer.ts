@@ -80,7 +80,7 @@ export function composeFavoritesSearchPanel(
     focusSearch: favoritesTab.focusSearch,
     fieldTrailingChild: h(CountToggleButton, {
       icon: "sliders",
-      label: computed(() => (changedSearchOptionCount.value > 0 ? `Search Options, ${changedSearchOptionCount.value} Changed` : "Search Options")),
+      label: "Search Options",
       pressed: favoritesSearchOptionsVisible,
       count: changedSearchOptionCount,
       onClick: () => favoritesSearchOptionsVisible.set(!favoritesSearchOptionsVisible.peek())
@@ -93,7 +93,7 @@ export function composeFavoritesSearchPanel(
     trailingChild: [
       h(CountToggleButton, {
         icon: "appWindow",
-        label: computed(() => (hiddenTabCount.value > 0 ? `Tabs, ${hiddenTabCount.value} Open` : "Tabs")),
+        label: "Tabs",
         pressed: favoritesTabStripVisible,
         count: hiddenTabCount,
         onClick: () => favoritesTabStripVisible.set(!favoritesTabStripVisible.peek())

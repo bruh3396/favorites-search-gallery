@@ -27,6 +27,7 @@ export interface TabStripProps {
   activeTabId: Readable<string | null>;
   trailingChild?: Child;
   onActivate: (tabId: string) => void;
+  onDuplicate: (tabId: string) => void;
   onClose: (tabIds: readonly string[]) => void;
   onMove: (tabId: string, index: number) => void;
   onAdd: () => void;
@@ -45,7 +46,7 @@ interface TabProps {
 const MIDDLE_BUTTON = 1;
 const TAB_DRAG_TYPE = "application/x-fsg-tab";
 
-export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose, onMove, onAdd }: TabStripProps): HTMLElement {
+export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onDuplicate, onClose, onMove, onAdd }: TabStripProps): HTMLElement {
   let isRendered = false;
   const moveNextTo = (targetTabId: string, draggedTabId: string, dropSide: DropSide): void => {
     if (draggedTabId === targetTabId) {
@@ -107,7 +108,7 @@ export function TabStrip({ tabs, activeTabId, trailingChild, onActivate, onClose
           <div className={TabStripClass.trailing}>{trailingChild}</div>
         </div>
       }
-      listItems={event => listTabMenuItems(tabs.peek(), readTabId(event), onClose)}
+      listItems={event => listTabMenuItems(tabs.peek(), readTabId(event), { onDuplicate, onClose })}
     />
   );
 }
@@ -121,7 +122,11 @@ function readTabId(event: MouseEvent): string | undefined {
   return undefined;
 }
 
-function listTabMenuItems(tabStripItems: readonly TabStripItem[], tabId: string | undefined, onClose: TabStripProps["onClose"]): readonly ContextMenuItem[] {
+function listTabMenuItems(
+  tabStripItems: readonly TabStripItem[],
+  tabId: string | undefined,
+  { onDuplicate, onClose }: Pick<TabStripProps, "onDuplicate" | "onClose">
+): readonly ContextMenuItem[] {
   const index = tabStripItems.findIndex(tabStripItem => tabStripItem.id === tabId);
 
   if (index === -1) {
@@ -132,7 +137,8 @@ function listTabMenuItems(tabStripItems: readonly TabStripItem[], tabId: string 
   const rightTabIds = listClosableTabIds(tabStripItems.slice(index + 1));
   const allTabIds = listClosableTabIds(tabStripItems);
   return [
-    { label: "Close", disabled: !tabStripItem.closable, onChoose: () => onClose([tabStripItem.id]) },
+    { label: "Duplicate", onChoose: () => onDuplicate(tabStripItem.id) },
+    { label: "Close", disabled: !tabStripItem.closable, startsGroup: true, onChoose: () => onClose([tabStripItem.id]) },
     { label: "Close Other Tabs", disabled: otherTabIds.length === 0, startsGroup: true, onChoose: () => onClose(otherTabIds) },
     { label: "Close Tabs to the Right", disabled: rightTabIds.length === 0, onChoose: () => onClose(rightTabIds) },
     { label: "Close All Tabs", disabled: allTabIds.length === 0, onChoose: () => onClose(allTabIds) }

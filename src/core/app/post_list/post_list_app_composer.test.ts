@@ -72,7 +72,7 @@ describe("composePostListApp", () => {
   });
 
   test("opens a clicked post in the lightbox", () => {
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]);
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })]);
 
     root.querySelector<HTMLAnchorElement>(`.${TileClass.link}`)!.click();
     expect(root.querySelector("dialog")!.open).toBe(true);
@@ -83,7 +83,7 @@ describe("composePostListApp", () => {
     const click = new MouseEvent("click", { bubbles: true, cancelable: true });
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { postList: { lightbox: { mode: "off" } } } });
-    const root = mount(localKeyedValues, [createPost({ id: "1" })]);
+    const root = mount(localKeyedValues, [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })]);
 
     root.querySelector(`.${TileClass.link}`)!.dispatchEvent(click);
     expect([click.defaultPrevented, root.querySelector("dialog")!.open]).toEqual([false, false]);

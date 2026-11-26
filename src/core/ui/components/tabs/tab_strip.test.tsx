@@ -12,6 +12,7 @@ interface Setup {
   tabs: Signal<readonly TabStripItem[]>;
   activeTabId: Signal<string | null>;
   onActivate: Mock<(tabId: string) => void>;
+  onDuplicate: Mock<(tabId: string) => void>;
   onClose: Mock<(tabIds: readonly string[]) => void>;
   onMove: Mock<(tabId: string, index: number) => void>;
   onAdd: Mock<() => void>;
@@ -29,6 +30,7 @@ function setup(
     tabs: new Signal(tabStripItems),
     activeTabId: new Signal(activeTabId),
     onActivate: vi.fn<(tabId: string) => void>(),
+    onDuplicate: vi.fn<(tabId: string) => void>(),
     onClose: vi.fn<(tabIds: readonly string[]) => void>(),
     onMove: vi.fn<(tabId: string, index: number) => void>(),
     onAdd: vi.fn<() => void>()
@@ -142,12 +144,19 @@ describe("TabStrip", () => {
     expect(onClose.mock.calls).toEqual([[["b"]], [["a", "c"]], [["c"]], [["a", "b", "c"]]]);
   });
 
+  test("duplicates the right-clicked tab from its menu", () => {
+    const { element, onDuplicate } = setup([createTab("a"), createTab("b")]);
+
+    openTabMenu(element, "b").Duplicate.click();
+    expect(onDuplicate).toHaveBeenCalledWith("b");
+  });
+
   test("disables menu items that would close nothing, leaving out tabs that can't be closed", () => {
     const { element } = setup([createTab("Home", { closable: false }), createTab("apple")]);
     const readDisabled = (label: string): (string | null)[] => Object.values(openTabMenu(element, label))
       .map(menuItem => menuItem.getAttribute("aria-disabled"));
 
-    expect([readDisabled("Home"), readDisabled("apple")]).toEqual([["true", null, null, null], [null, "true", "true", null]]);
+    expect([readDisabled("Home"), readDisabled("apple")]).toEqual([[null, "true", null, null, null], [null, null, "true", "true", null]]);
   });
 
   test("leaves a right click outside any tab to the browser", () => {

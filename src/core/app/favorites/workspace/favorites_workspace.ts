@@ -46,6 +46,15 @@ export class FavoritesWorkspace {
     this.tabManager.activate(this.openTab(this.createSearchOptions(query)).id);
   }
 
+  public duplicateTab(tabId: string): void {
+    const tabs = this.tabManager.tabs.peek();
+    const index = tabs.findIndex(tab => tab.id === tabId);
+    const tab = this.openTab(tabs[index].value.session.searchOptions.peek());
+
+    this.tabManager.move(tab.id, index + 1);
+    this.tabManager.activate(tab.id);
+  }
+
   public closeTabs(tabIds: readonly string[]): void {
     if (this.tabManager.tabs.peek().every(tab => tabIds.includes(tab.id))) {
       this.openBlankTab();

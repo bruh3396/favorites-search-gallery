@@ -16,6 +16,7 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { composeLightboxDialog } from "@/core/features/lightbox/lightbox_dialog_composer";
+import { hasMedia } from "@/core/domain/media/media";
 
 const SETTLE_DELAY = 75;
 const RETENTION_CAPACITY = 8;
@@ -57,7 +58,7 @@ export function createLightbox<T extends MediaItem>(dependencies: LightboxDepend
     closed: lightboxNavigation.closed,
     mediaCorrected: lightboxMediaResolver.corrected,
     open: (mediaSequence, item): boolean => {
-      if (lightboxPreferences.mode.peek() === "off") {
+      if (!hasMedia(item.media) || lightboxPreferences.mode.peek() === "off") {
         return false;
       }
       lightboxNavigation.open(mediaSequence, item);

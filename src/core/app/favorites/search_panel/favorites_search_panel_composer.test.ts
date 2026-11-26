@@ -247,13 +247,12 @@ describe("composeFavoritesSearchPanel", () => {
     expect(isRowHidden()).toBe(false);
   });
 
-  test("searches the tab from the search options row and counts the change on the Search Options button", () => {
+  test("searches the tab from the search options row", () => {
     const { element, favoritesSession } = setup();
-    const searchOptionsButton = element.querySelector<HTMLButtonElement>("button[aria-label='Search Options']")!;
     const invert = [...element.querySelectorAll("button")].find(button => button.textContent === "Invert")!;
 
     invert.click();
-    expect([favoritesSession.searchOptions.value.isInverted, searchOptionsButton.getAttribute("aria-label")]).toEqual([true, "Search Options, 1 Changed"]);
+    expect(favoritesSession.searchOptions.value.isInverted).toBe(true);
   });
 
   test("counts the changed search options on the Search Options button only while there are some and the row is closed", () => {
@@ -296,7 +295,7 @@ describe("composeFavoritesSearchPanel", () => {
     const { element, favoritesTabStripVisible, tabCount } = setup();
     const tabsButton = element.querySelector<HTMLButtonElement>("button[aria-label^=Tabs]")!;
     const badge = tabsButton.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
-    const readBadge = (): [boolean, string, string | null] => [badge.hidden, badge.textContent!, tabsButton.getAttribute("aria-label")];
+    const readBadge = (): [boolean, string] => [badge.hidden, badge.textContent!];
 
     tabCount.value = 3;
     const shown = readBadge();
@@ -305,11 +304,7 @@ describe("composeFavoritesSearchPanel", () => {
     const hidden = readBadge();
 
     tabCount.value = 1;
-    expect([shown, hidden, readBadge()]).toEqual([
-      [true, "0", "Tabs"],
-      [false, "3", "Tabs, 3 Open"],
-      [true, "0", "Tabs"]
-    ]);
+    expect([shown, hidden, readBadge()]).toEqual([[true, "0"], [false, "3"], [true, "0"]]);
   });
 
   test("enters zen from the zen button", () => {

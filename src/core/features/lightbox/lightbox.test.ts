@@ -8,6 +8,7 @@ import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { MemoryViewport } from "@/adapters/memory/ports/viewport/memory_viewport";
+import { NO_MEDIA } from "@/core/domain/media/media";
 import { Post } from "@/core/domain/post/post";
 import { Signal } from "@/core/utils/reactive/signal";
 import { createPost } from "@/testing/post";
@@ -81,6 +82,14 @@ describe("createLightbox", () => {
     const { lightbox: offLightbox } = setup("off");
 
     expect([fullLightbox.open(mediaSequence, IMAGE), offLightbox.open(mediaSequence, IMAGE), offLightbox.isOpen.value]).toEqual([true, false, false]);
+  });
+
+  test("declines an item without media and stays closed", () => {
+    const { lightbox, mediaSequence } = setup();
+    const post = createPost({ media: NO_MEDIA });
+
+    expect(lightbox.open(mediaSequence, post)).toBe(false);
+    expect(lightbox.isOpen.value).toBe(false);
   });
 
   test("loads a settled item and its neighbours", async() => {

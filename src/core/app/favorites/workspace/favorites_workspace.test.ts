@@ -169,6 +169,18 @@ describe("FavoritesWorkspace", () => {
     });
   });
 
+  describe("duplicateTab", () => {
+    test("opens an active copy of the tab's search right after it", () => {
+      const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana"]));
+      const appleTab = favoritesWorkspace.tabManager.tabs.value[0];
+
+      appleTab.value.session.submit("cherry");
+      favoritesWorkspace.duplicateTab(appleTab.id);
+      expect([readFavoritesSearchOptions(favoritesWorkspace)[1], readQueries(favoritesWorkspace), readActiveIndex(favoritesWorkspace)])
+        .toEqual([appleTab.value.session.searchOptions.value, ["cherry", "cherry", "banana"], 1]);
+    });
+  });
+
   describe("closeTabs", () => {
     test("closes the given tabs", () => {
       const { favoritesWorkspace } = setup(createStoredWorkspace(["apple", "banana", "cherry"]));

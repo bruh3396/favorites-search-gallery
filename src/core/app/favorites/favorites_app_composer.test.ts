@@ -563,7 +563,11 @@ describe("composeFavoritesApp", () => {
     const scheduler = new MemoryScheduler();
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pagination: { pageSize: 1 } } } });
-    const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" }), createPost({ id: "3" })], { scheduler });
+    const root = mount(localKeyedValues, [
+      createPost({ id: "1", media: { kind: "image", locator: "images/1" } }),
+      createPost({ id: "2", media: { kind: "image", locator: "images/2" } }),
+      createPost({ id: "3", media: { kind: "image", locator: "images/3" } })
+    ], { scheduler });
     const readPage = (): string | null | undefined => root.querySelector(`.${PageSlotClass.page}[aria-current="page"]`)?.textContent;
 
     await flushMicrotasks();
@@ -586,7 +590,10 @@ describe("composeFavoritesApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { pagination: { pageSize: 50, infiniteScroll } } } });
-    const root = mount(localKeyedValues, [createPost({ id: "1" }), createPost({ id: "2" })]);
+    const root = mount(localKeyedValues, [
+      createPost({ id: "1", media: { kind: "image", locator: "images/1" } }),
+      createPost({ id: "2", media: { kind: "image", locator: "images/2" } })
+    ]);
 
     await flushMicrotasks();
     root.querySelectorAll<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)[1].click();
@@ -616,7 +623,7 @@ describe("composeFavoritesApp", () => {
   });
 
   test("closes plainly without a morph while the lightbox's media is still loading", async() => {
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]);
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })]);
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
@@ -625,7 +632,7 @@ describe("composeFavoritesApp", () => {
   });
 
   test("leaves a tile's click to its post link once the gallery is turned off in the Settings tool", async() => {
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })]);
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })]);
     const click = new MouseEvent("click", { bubbles: true, cancelable: true });
 
     await flushMicrotasks();
@@ -639,7 +646,7 @@ describe("composeFavoritesApp", () => {
     const localKeyedValues = new MemoryLocalKeyedValues();
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { lightbox: { mode: "simple" } } } });
-    const root = mount(localKeyedValues, [createPost({ id: "1" })]);
+    const root = mount(localKeyedValues, [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })]);
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
@@ -678,7 +685,7 @@ describe("composeFavoritesApp", () => {
 
   test("saves the lightbox favorite's original, named by its id, from the download button", async() => {
     const fileSaver = new MemoryFileSaver();
-    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { fileSaver });
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })], { fileSaver });
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();

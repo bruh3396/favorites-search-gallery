@@ -185,7 +185,7 @@ export function mountLabScreen(container: HTMLElement, labScreenConfiguration: L
           {section(
             "settings",
             <SettingRow
-              label="Native header"
+              label="Native Header"
               control={<Switch value={labScreenDependencies.nativeHeaderVisible} onValueChange={next => labScreenDependencies.nativeHeaderVisible.set(next)} />}
             />
           )}
