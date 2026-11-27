@@ -1,0 +1,7 @@
+.fsg-LabCard {
+  box-sizing: border-box;
+  border: 1px solid var(--fsg-color-outline-variant);
+  border-radius: 12px;
+  background: var(--fsg-color-surface-container-low);
+  overflow: hidden;
+}

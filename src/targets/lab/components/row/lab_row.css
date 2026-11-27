@@ -1,0 +1,44 @@
+.fsg-LabRow {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  block-size: 64px;
+  position: relative;
+  padding: 0 24px;
+}
+
+.fsg-LabRow + .fsg-LabRow {
+  border-block-start: 1px solid var(--fsg-color-outline-variant);
+}
+
+.fsg-LabRow-name {
+  font-weight: 600;
+}
+
+.fsg-LabRow-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.fsg-LabRow-controls .fsg-Stepper-input {
+  inline-size: 9ch;
+}
+
+.fsg-LabRow-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.fsg-LabRow-actions > * {
+  min-inline-size: 96px;
+}
+
+.fsg-LabRow-progress {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+}

@@ -21,7 +21,8 @@ const DOM_TESTS = [
   "src/adapters/rule34/client/{rule34_client,rule34_favorites_page_parser,rule34_post_list_page_parser,rule34_post_page_parser,rule34_profile_favorite_count_parser,rule34_thumb_parser,rule34_user_id_parser}.test.ts",
   "src/adapters/rule34/document/rule34_document.test.ts",
   "src/adapters/rule34_cdn/client/{rule34_cdn_client,rule34_cdn_video_duration_prober}.test.ts",
-  "src/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media.test.ts"
+  "src/adapters/rule34_cdn/ports/remote_media/rule34_cdn_remote_media.test.ts",
+  "src/targets/lab/**/*.test.tsx"
 ];
 
 export default defineConfig({
@@ -46,7 +47,7 @@ export default defineConfig({
           environment: "happy-dom",
           environmentOptions: { happyDOM: { settings: { disableCSSFileLoading: true, handleDisabledFileLoadingAsSuccess: true } } },
           setupFiles: ["src/testing/dom_setup.ts"],
-          css: { include: [/src\/core\/.+\.css/] }
+          css: { include: [/src\/(core|targets\/lab)\/.+\.css/] }
         }
       }
     ],

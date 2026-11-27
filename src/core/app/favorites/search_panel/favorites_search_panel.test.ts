@@ -161,7 +161,7 @@ describe("FavoritesSearchPanel", () => {
 
     favoritesSearchOptions.value = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "cat" };
     loadState.value = LOADED;
-    expect([emptyState.querySelector("p")!.textContent, emptyState.querySelector("button")!.hidden]).toEqual(["No favorites yet", true]);
+    expect([emptyState.querySelector("p")!.textContent, emptyState.querySelector("button")!.closest("[hidden]") !== null]).toEqual(["No favorites yet", true]);
   });
 
   test("submits what is entered in the search box", () => {

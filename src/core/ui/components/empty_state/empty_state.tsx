@@ -1,10 +1,10 @@
 import { Readable, computed } from "@/core/utils/reactive/signal";
+import { Button } from "@/core/ui/components/button/button";
 import { h } from "@/core/ui/h/h";
 
 export const EmptyStateClass = {
   root: "fsg-EmptyState",
-  message: "fsg-EmptyState-message",
-  action: "fsg-EmptyState-action"
+  message: "fsg-EmptyState-message"
 } as const;
 
 interface EmptyStateAction {
@@ -22,14 +22,9 @@ export function EmptyState({ message, action }: EmptyStateProps): HTMLElement {
     <div className={EmptyStateClass.root}>
       <p className={EmptyStateClass.message}>{message}</p>
       {action && (
-        <button
-          className={EmptyStateClass.action}
-          type="button"
-          hidden={computed(() => action.value === null)}
-          onClick={() => action.peek()?.onClick()}
-        >
-          {computed(() => action.value?.label ?? "")}
-        </button>
+        <div hidden={computed(() => action.value === null)}>
+          <Button label={computed(() => action.value?.label ?? "")} onClick={() => action.peek()?.onClick()} />
+        </div>
       )}
     </div>
   );

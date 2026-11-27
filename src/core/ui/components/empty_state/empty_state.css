@@ -1,4 +1,6 @@
 .fsg-EmptyState {
+  --fsg-Button-corner: var(--fsg-shape-corner-full);
+
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -7,33 +9,8 @@
   text-align: center;
 }
 
-.fsg-EmptyState-action[hidden] {
-  display: none;
-}
-
 .fsg-EmptyState-message {
   margin: 0;
   color: var(--fsg-color-on-surface-variant);
   font-size: var(--fsg-typescale-label-large-size);
-}
-
-.fsg-EmptyState-action {
-  block-size: var(--fsg-control-size-medium);
-  padding: 0 16px;
-  border: 1px solid var(--fsg-color-outline);
-  border-radius: var(--fsg-shape-corner-full);
-  background: none;
-  color: inherit;
-  font: inherit;
-  font-size: var(--fsg-typescale-label-large-size);
-  cursor: pointer;
-}
-
-.fsg-EmptyState-action:hover {
-  background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
-}
-
-.fsg-EmptyState-action:focus-visible {
-  outline: 2px solid var(--fsg-color-primary);
-  outline-offset: 1px;
 }

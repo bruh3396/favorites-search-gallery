@@ -62,7 +62,9 @@ export class Rule34FavoriteActions {
       if (!this.claimIntent(postId, "remove")) {
         return false;
       }
-      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, RULE34_URLS.removeFavorite(postId), { redirect: "manual", throwsHttpErrors: false }));
+      const url = RULE34_URLS.removeFavorite(postId);
+
+      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, url, { redirect: "manual", throwsHttpErrors: false }));
       return true;
     });
   }

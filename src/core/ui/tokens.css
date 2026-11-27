@@ -6,6 +6,7 @@
 
   --fsg-color-primary: var(--fsg-theme-accent);
   --fsg-color-on-primary: var(--fsg-theme-on-accent);
+  --fsg-color-error: light-dark(#c62828, #ef6b6b);
   --fsg-color-secondary-container: light-dark(
     color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-accent) 16%),
     color-mix(in oklab, var(--fsg-theme-surface), var(--fsg-theme-accent) 20%)

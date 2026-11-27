@@ -10,10 +10,11 @@ const LIGHTBOX_COMMANDS = Object.keys(LIGHTBOX_COMMAND_DEFINITIONS) as LightboxC
 interface SetupOptions {
   isZoomed?: boolean;
   canZoom?: boolean;
+  isMuted?: boolean;
   canMute?: boolean;
 }
 
-function setup({ isZoomed = false, canZoom = false, canMute = false }: SetupOptions = {}): {
+function setup({ isZoomed = false, canZoom = false, isMuted = false, canMute = false }: SetupOptions = {}): {
   lightboxMoreMenu: HTMLElement;
   handlers: LightboxMoreMenuProps["handlers"];
   onOpenChange: (isOpen: boolean) => void;
@@ -24,7 +25,7 @@ function setup({ isZoomed = false, canZoom = false, canMute = false }: SetupOpti
     handlers,
     lightboxKeyBindings: new Signal(createKeyBindings(LIGHTBOX_COMMANDS, { download: ["d", "x"] })),
     lightboxZoom: { isZoomed: new Signal(isZoomed), canZoom: new Signal(canZoom) },
-    muted: new Signal(false),
+    muted: new Signal(isMuted),
     canMute: new Signal(canMute),
     onOpenChange
   }));
@@ -80,6 +81,15 @@ describe("LightboxMoreMenu", () => {
     const mute = listMenuItems().at(-1)!;
 
     expect([mute.textContent, mute.getAttribute("aria-checked")]).toEqual(["Mute", "false"]);
+  });
+
+  test("checks mute while muted", () => {
+    const { lightboxMoreMenu } = setup({ isMuted: true, canMute: true });
+
+    lightboxMoreMenu.click();
+    const mute = listMenuItems().at(-1)!;
+
+    expect([mute.textContent, mute.getAttribute("aria-checked")]).toEqual(["Mute", "true"]);
   });
 
   test("reports opening and closing", () => {

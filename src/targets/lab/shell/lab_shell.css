@@ -1,0 +1,62 @@
+.fsg-LabShell {
+  --fsg-control-size-medium: 36px;
+
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100vh;
+  background: var(--fsg-color-surface);
+  font-size: 14px;
+}
+
+.fsg-LabShell-bar {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  gap: 16px;
+  block-size: 40px;
+  padding-inline: 12px;
+  border-block-end: 1px solid var(--fsg-color-outline-variant);
+}
+
+.fsg-LabShell-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.fsg-LabShell-logo {
+  inline-size: 24px;
+  block-size: 24px;
+  fill: none;
+  stroke: var(--fsg-color-primary);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fsg-LabShell-bar > .fsg-TabList {
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.fsg-LabShell-bar .fsg-TabList-tab {
+  flex: none;
+  block-size: 100%;
+  padding-inline: 12px;
+  font-size: 15px;
+}
+
+.fsg-LabShell-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+}
+
+.fsg-LabShell-panel:has(.fsg-LabShell-bleed) {
+  padding: 0;
+}

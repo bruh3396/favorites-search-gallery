@@ -13,6 +13,7 @@ const UNTESTED: Readonly<Record<string, string>> = {
   "src/core/app/favorites/favorites_tool.ts": "a tool definition table and its union; no behavior to test",
   "src/core/app/favorites/settings/favorites_grid_layouts.ts": "a list of layouts; no behavior to test",
   "src/core/app/favorites/settings/favorites_setting_ranges.ts": "range constants; no behavior to test",
+  "src/core/app/help_links.ts": "a table of help links; no behavior to test",
   "src/core/app/favorites/lightbox/tag_alignment.ts": OPTION_LIST,
   "src/core/app/favorites/lightbox/tag_organization.ts": OPTION_LIST,
   "src/core/app/favorites/lightbox/tag_size.ts": OPTION_LIST,

@@ -57,6 +57,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
 } = {}): ShadowRoot {
   const container = document.createElement("div");
   const memoryClient = new MemoryClient(posts);
+  const documentListenerSpy = vi.spyOn(document, "addEventListener");
 
   composeFavoritesApp({ userOwnsFavorites: true, userLoggedIn: true, blacklistedTags: [], favoritesOwnerId: "1", colorScheme: "dark", scriptVersion: "2" }, {
     localFavorites: new MemoryLocalFavorites(),
@@ -79,6 +80,14 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     hostPage,
     confirmer
   }).mount(container);
+  const documentListeners = [...documentListenerSpy.mock.calls];
+
+  documentListenerSpy.mockRestore();
+  onTestFinished(() => {
+    for (const [type, listener, options] of documentListeners) {
+      document.removeEventListener(type, listener, options);
+    }
+  });
   return container.shadowRoot!;
 }
 

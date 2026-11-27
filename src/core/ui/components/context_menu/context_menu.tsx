@@ -29,8 +29,8 @@ export function ContextMenu({ target, opensOn = "contextmenu", listItems, onOpen
   const ownerWindow = target.ownerDocument.defaultView;
   let contextMenuItems: readonly ContextMenuItem[] = [];
   let itemElements: HTMLElement[] = [];
-  let disposeItemElements = (): void => undefined;
-  let placePopup = (): void => undefined;
+  let disposeItemElements: (() => void) | undefined;
+  let openingPointer: Pick<MouseEvent, "clientX" | "clientY"> = { clientX: 0, clientY: 0 };
   let activeIndex = NO_ITEM;
   let focusedElement: HTMLElement | null = null;
   const scrim: HTMLElement = <div className={ContextMenuClass.scrim} />;
@@ -102,6 +102,14 @@ export function ContextMenu({ target, opensOn = "contextmenu", listItems, onOpen
     return itemElement;
   }
 
+  function placePopup(): void {
+    if (isClickTriggered) {
+      placeUnderAnchor(popup, target);
+    } else {
+      placeAtPointer(popup, openingPointer);
+    }
+  }
+
   function show(event: MouseEvent): void {
     close();
     contextMenuItems = listItems(event);
@@ -117,10 +125,9 @@ export function ContextMenu({ target, opensOn = "contextmenu", listItems, onOpen
     if (isClickTriggered) {
       target.after(scrim, popup);
       target.setAttribute("aria-expanded", "true");
-      placePopup = (): void => placeUnderAnchor(popup, target);
     } else {
       target.append(scrim, popup);
-      placePopup = (): void => placeAtPointer(popup, event);
+      openingPointer = event;
     }
     placePopup();
     ownerWindow?.addEventListener("resize", placePopup);
@@ -136,7 +143,7 @@ export function ContextMenu({ target, opensOn = "contextmenu", listItems, onOpen
     }
     scrim.remove();
     popup.remove();
-    disposeItemElements();
+    disposeItemElements?.();
 
     if (isClickTriggered) {
       target.setAttribute("aria-expanded", "false");
@@ -213,9 +220,9 @@ function readViewport(popup: HTMLElement): { zoom: number; width: number; height
   return { zoom, width: clientWidth / zoom, height: clientHeight / zoom };
 }
 
-function placeAtPointer(popup: HTMLElement, event: MouseEvent): void {
+function placeAtPointer(popup: HTMLElement, pointer: Pick<MouseEvent, "clientX" | "clientY">): void {
   const { zoom, width, height } = readViewport(popup);
-  const [x, y] = [event.clientX / zoom, event.clientY / zoom];
+  const [x, y] = [pointer.clientX / zoom, pointer.clientY / zoom];
   const { offsetWidth, offsetHeight } = popup;
 
   popup.style.left = `${Math.max(x + offsetWidth > width ? x - offsetWidth : x, 0)}px`;

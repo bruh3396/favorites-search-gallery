@@ -1,0 +1,57 @@
+.fsg-Button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  block-size: var(--fsg-control-size-medium);
+  padding: 0 16px;
+  border: 1px solid var(--fsg-color-outline);
+  border-radius: var(--fsg-Button-corner, var(--fsg-shape-corner-small));
+  background: transparent;
+  color: var(--fsg-color-on-surface);
+  font: inherit;
+  font-size: var(--fsg-typescale-label-large-size);
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
+    border-color var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);
+}
+
+.fsg-Button:where(:hover:enabled) {
+  background-color: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-Button:where([data-emphasis="filled"]) {
+  border-color: var(--fsg-color-primary);
+  background-color: var(--fsg-color-primary);
+  color: var(--fsg-color-on-primary);
+  font-weight: 600;
+}
+
+.fsg-Button:where([data-emphasis="filled"]:hover:enabled) {
+  background-color: var(--fsg-color-primary);
+  filter: brightness(1.06);
+}
+
+.fsg-Button:where([data-emphasis="destructive"]) {
+  border-color: color-mix(in oklab, var(--fsg-color-error), var(--fsg-color-surface) 40%);
+  color: var(--fsg-color-error);
+}
+
+.fsg-Button:where([aria-pressed="true"]) {
+  border-color: var(--fsg-color-primary);
+  background-color: var(--fsg-color-secondary-container);
+}
+
+.fsg-Button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fsg-Button:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: 1px;
+}

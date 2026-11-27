@@ -1,0 +1,105 @@
+.fsg-BenchmarksPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.fsg-BenchmarksPanel-race {
+  flex: 1;
+}
+
+.fsg-BenchmarksPanel-table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.fsg-BenchmarksPanel-table th,
+.fsg-BenchmarksPanel-table td {
+  padding: 8px 24px;
+  border-block-start: 1px solid var(--fsg-color-outline-variant);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.fsg-BenchmarksPanel-table thead th {
+  block-size: 40px;
+  padding-block: 0;
+  background: var(--fsg-color-surface-dim);
+  color: var(--fsg-color-on-surface-variant);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fsg-BenchmarksPanel-table th:first-child,
+.fsg-BenchmarksPanel-table td:first-child {
+  inline-size: 100%;
+  text-align: start;
+  white-space: normal;
+}
+
+.fsg-BenchmarksPanel-table td {
+  block-size: 52px;
+}
+
+.fsg-BenchmarksPanel-group th {
+  block-size: 36px;
+  padding-block: 0;
+  font-weight: 600;
+  text-align: start;
+}
+
+.fsg-BenchmarksPanel-case {
+  display: flex;
+  flex-direction: column;
+}
+
+.fsg-BenchmarksPanel-case code {
+  color: var(--fsg-color-on-surface-variant);
+  font: 12px/1.5 ui-monospace, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
+.fsg-BenchmarksPanel-engine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fsg-BenchmarksPanel-engine::before {
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  background: var(--fsg-BenchmarksPanel-engine-color);
+  content: "";
+}
+
+.fsg-BenchmarksPanel-engine[data-engine="bit"] {
+  --fsg-BenchmarksPanel-engine-color: #4fae5a;
+}
+
+.fsg-BenchmarksPanel-engine[data-engine="set"] {
+  --fsg-BenchmarksPanel-engine-color: #4a8fe0;
+}
+
+.fsg-BenchmarksPanel-engine[data-engine="linear"] {
+  --fsg-BenchmarksPanel-engine-color: #d0609a;
+}
+
+.fsg-BenchmarksPanel-muted {
+  color: var(--fsg-color-outline);
+}
+
+.fsg-BenchmarksPanel-slower {
+  color: var(--fsg-color-error);
+}
+
+.fsg-BenchmarksPanel-mismatch {
+  color: var(--fsg-color-error);
+  font-weight: 600;
+}
+
+.fsg-BenchmarksPanel-table .fsg-BenchmarksPanel-tool {
+  inline-size: 1%;
+  padding-inline-start: 0;
+}

@@ -36,6 +36,7 @@
 @import "./components/activity_bar/activity_bar.css" layer(components);
 @import "./components/view_pane/view_pane.css" layer(components);
 @import "./components/icon_button/icon_button.css" layer(components);
+@import "./components/button/button.css" layer(components);
 @import "./components/count_badge/count_badge.css" layer(components);
 @import "./components/key_cap/key_cap.css" layer(components);
 @import "./components/list_row/list_row.css" layer(components);

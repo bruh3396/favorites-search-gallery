@@ -37,8 +37,9 @@ describe("EmptyState", () => {
     const action = new Signal<NonNullable<EmptyStateProps["action"]>["value"]>(null);
     const { result: element } = render(document, () => <EmptyState message={new Signal("Nothing here")} action={action} />);
 
-    expect(findAction(element).hidden).toBe(true);
+    const wasHidden = findAction(element).closest("[hidden]") !== null;
+
     action.value = { label: "Clear", onClick: vi.fn() };
-    expect(findAction(element).hidden).toBe(false);
+    expect([wasHidden, findAction(element).closest("[hidden]") !== null]).toEqual([true, false]);
   });
 });
