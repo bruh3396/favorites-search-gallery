@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/exact_search_term_parser";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 const MATCHES = parseSearchExpression("cat");

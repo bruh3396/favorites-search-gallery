@@ -1,6 +1,6 @@
 import { FavoritesSearchOptions } from "@/core/features/favorites/search/favorites_search_options";
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
-import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/exact_search_term_parser";
 
 export interface FavoritesBlacklistConfiguration {
   readonly blacklistedTags: readonly string[];

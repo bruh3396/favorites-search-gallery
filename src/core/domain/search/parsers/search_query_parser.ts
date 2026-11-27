@@ -1,6 +1,5 @@
 import { SearchQuery } from "@/core/domain/search/expressions/search_query";
 import { SearchTerm } from "@/core/domain/search/terms/search_term";
-import { desugarNestedOrGroups } from "@/core/domain/search/parsers/nested_or_group_desugarer";
 import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { removeExtraWhitespace } from "@/core/utils/string/string_utilities";
 
@@ -31,7 +30,7 @@ function normalizeSearchQuery<Doc>(andSearchTerms: SearchTerm[], orGroups: Searc
 }
 
 function parseTermGroups(normalized: string): { orGroups: string[][]; andTerms: string[] } {
-  normalized = desugarNestedOrGroups(removeExtraWhitespace(normalized).toLowerCase());
+  normalized = removeExtraWhitespace(normalized).toLowerCase();
   return { andTerms: parseAndTerms(normalized), orGroups: parseOrGroups(normalized) };
 }
 

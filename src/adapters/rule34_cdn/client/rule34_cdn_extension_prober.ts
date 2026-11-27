@@ -1,8 +1,8 @@
 import { MediaKind } from "@/core/domain/media/media_kind";
+import { RULE34_CDN_URLS } from "@/adapters/rule34_cdn/client/rule34_cdn_urls";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Rule34CdnFileExtension } from "@/adapters/rule34_cdn/client/rule34_cdn_file_extension";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { buildRule34CdnFileUrl } from "@/adapters/rule34_cdn/client/rule34_cdn_url_builder";
 
 export interface Rule34CdnExtensionProberDependencies {
   fetch: (url: string, init?: RequestInit) => Promise<Response>;
@@ -43,7 +43,7 @@ export class Rule34CdnExtensionProber {
 
   private async findExtension(locator: string, rule34CdnFileExtensions: readonly Rule34CdnFileExtension[]): Promise<Rule34CdnFileExtension | null> {
     for (const rule34CdnFileExtension of rule34CdnFileExtensions) {
-      if (await this.exists(buildRule34CdnFileUrl(locator, rule34CdnFileExtension))) {
+      if (await this.exists(RULE34_CDN_URLS.file(locator, rule34CdnFileExtension))) {
         return rule34CdnFileExtension;
       }
     }

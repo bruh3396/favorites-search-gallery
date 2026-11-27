@@ -3,7 +3,7 @@ import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_b
 import { SearchExpression } from "@/core/domain/search/expressions/search_expression";
 import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { compileFavoritesSearchRequest } from "@/core/features/favorites/search/favorites_search_request_compiler";
-import { parseExactSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/exact_search_term_parser";
 import { parseSearchExpression } from "@/core/domain/search/parsers/search_expression_parser";
 
 const NO_BLACKLIST = new FavoritesBlacklist({ blacklistedTags: [], force: false });

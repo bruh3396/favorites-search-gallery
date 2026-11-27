@@ -1,5 +1,5 @@
 import { FoundSearchTerm } from "@/core/domain/search/parsers/found_search_term";
-import { parseSearchTermNegation } from "@/core/domain/search/parsers/search_term_parser";
+import { parseSearchTermNegation } from "@/core/domain/search/parsers/search_term_negation_parser";
 
 const TRAILING_WORD = /\S+$/;
 const WORD_END = /\s|$/;

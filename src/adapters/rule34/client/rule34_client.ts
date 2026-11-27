@@ -1,14 +1,7 @@
-import {
-  buildRule34AccountHomePageUrl,
-  buildRule34FavoritesPageUrl,
-  buildRule34PostListPageUrl,
-  buildRule34PostListUrl,
-  buildRule34PostPageUrl,
-  buildRule34ProfilePageUrl
-} from "@/adapters/rule34/client/rule34_url_builder";
 import { CategorizedPost } from "@/core/domain/post/categorized_post";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { Post } from "@/core/domain/post/post";
+import { RULE34_URLS } from "@/adapters/rule34/client/rule34_urls";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { Retry } from "@/core/utils/async/retry";
 import { Rule34Document } from "@/adapters/rule34/document/rule34_document";
@@ -21,7 +14,7 @@ import { parseRule34PostListPage } from "@/adapters/rule34/client/rule34_post_li
 import { parseRule34PostPage } from "@/adapters/rule34/client/rule34_post_page_parser";
 import { parseRule34ProfileFavoriteCount } from "@/adapters/rule34/client/rule34_profile_favorite_count_parser";
 import { parseRule34UserId } from "@/adapters/rule34/client/rule34_user_id_parser";
-import { sendOkRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
+import { sendRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 
 export interface Rule34ClientDependencies {
   fetch: Rule34Fetch;
@@ -61,36 +54,36 @@ export class Rule34Client {
   }
 
   public postPageUrl(postId: string): string {
-    return buildRule34PostPageUrl(postId);
+    return RULE34_URLS.postPage(postId);
   }
 
   public postListUrl(searchQuery: string): string {
-    return buildRule34PostListUrl(searchQuery);
+    return RULE34_URLS.postList(searchQuery);
   }
 
   public async fetchFavoritesPage(userId: string, pageIndex: number): Promise<Post[]> {
-    const html = await this.fetchHtml(buildRule34FavoritesPageUrl(userId, pageIndex));
+    const html = await this.fetchHtml(RULE34_URLS.favoritesPage(userId, pageIndex));
     return parseRule34FavoritesPage(new DOMParser().parseFromString(html, "text/html"), this.dependencies.mintMedia);
   }
 
   public async fetchFavoriteCount(userId: string): Promise<number> {
-    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34ProfilePageUrl(userId)));
+    const html = await this.rateLimiter.run(() => this.fetchHtml(RULE34_URLS.profilePage(userId)));
     return parseRule34ProfileFavoriteCount(html);
   }
 
   public fetchUserId(): Promise<string> {
-    return this.userIdRetry.retry(async() => parseRule34UserId(await this.fetchHtml(buildRule34AccountHomePageUrl())));
+    return this.userIdRetry.retry(async() => parseRule34UserId(await this.fetchHtml(RULE34_URLS.accountHomePage())));
   }
 
   public async fetchPostListPage(searchQuery: string, pageIndex: number): Promise<Post[]> {
-    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34PostListPageUrl(searchQuery, pageIndex)));
+    const html = await this.rateLimiter.run(() => this.fetchHtml(RULE34_URLS.postListPage(searchQuery, pageIndex)));
     const page = new DOMParser().parseFromString(html, "text/html");
     return this.keepPaginator(pageIndex, parseRule34PostListPage(page, this.dependencies.mintMedia));
   }
 
   public async fetchPostPage(postId: string): Promise<CategorizedPost> {
     await Promise.all(this.favoritesFetches);
-    const html = await this.rateLimiter.run(() => this.fetchHtml(buildRule34PostPageUrl(postId)));
+    const html = await this.rateLimiter.run(() => this.fetchHtml(RULE34_URLS.postPage(postId)));
     return parseRule34PostPage(html, this.dependencies.mintMedia);
   }
 
@@ -109,6 +102,6 @@ export class Rule34Client {
   }
 
   private async fetchHtml(url: string): Promise<string> {
-    return (await sendOkRule34Request(this.dependencies.fetch, url)).text();
+    return (await sendRule34Request(this.dependencies.fetch, url)).text();
   }
 }

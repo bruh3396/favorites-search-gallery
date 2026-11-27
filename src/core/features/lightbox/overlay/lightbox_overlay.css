@@ -4,6 +4,11 @@
   inset-inline-start: var(--fsg-lightbox-start-inset, 0px);
   pointer-events: none;
   user-select: none;
+  color-scheme: dark;
+  --fsg-color-surface-container-high: rgb(28 28 28 / 0.94);
+  --fsg-color-on-surface: rgb(255 255 255 / 0.92);
+  --fsg-color-on-surface-variant: rgb(255 255 255 / 0.55);
+  --fsg-color-outline: rgb(255 255 255 / 0.12);
   transition:
     opacity var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard),
     inset-inline-start var(--fsg-motion-duration-short) var(--fsg-motion-easing-standard);

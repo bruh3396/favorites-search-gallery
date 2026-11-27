@@ -9,6 +9,7 @@ import { h } from "@/core/ui/h/h";
 import { hasMedia } from "@/core/domain/media/media";
 import { onCleanup } from "@/core/utils/reactive/scope";
 import { pickDecodeWidth } from "@/core/ui/post_grid/image_loading/decode_width_picker";
+import { setTileAspectRatio } from "@/core/ui/post_grid/tile_aspect_ratio_setter";
 
 export const TileClass = {
   root: "fsg-Tile",
@@ -34,8 +35,6 @@ interface PreviewElements {
   readonly root: HTMLElement;
   readonly preview: HTMLImageElement;
 }
-
-const ASPECT_RATIO_PROPERTY = "--fsg-Tile-aspect-ratio";
 
 export function Tile(props: TileProps): HTMLElement {
   const { mediaItem, size, sizing, actions, href, onPlainClick, onCtrlClick } = props;
@@ -112,11 +111,7 @@ function setHrefOnInteraction(link: HTMLAnchorElement, href: string): void {
 }
 
 function showPreview({ root, preview }: PreviewElements, url: string): void {
-  const takeShapeFromPreview = (): void => {
-    if (root.style.getPropertyValue(ASPECT_RATIO_PROPERTY) === "") {
-      setTileAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
-    }
-  };
+  const takeShapeFromPreview = (): void => setTileAspectRatio(root, { width: preview.naturalWidth, height: preview.naturalHeight });
 
   preview.src = url;
   preview.addEventListener("animationend", () => {
@@ -131,11 +126,5 @@ function showPreview({ root, preview }: PreviewElements, url: string): void {
       takeShapeFromPreview();
       preview.hidden = false;
     }, { once: true });
-  }
-}
-
-export function setTileAspectRatio(root: HTMLElement, { width, height }: Size): void {
-  if (width > 0 && height > 0) {
-    root.style.setProperty(ASPECT_RATIO_PROPERTY, `${width} / ${height}`);
   }
 }

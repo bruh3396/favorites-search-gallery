@@ -1,6 +1,5 @@
 import { METRICS, Metric } from "@/core/domain/search/metric";
 import { describe, expect, test } from "vitest";
-import { parseSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { DocResolver } from "@/core/domain/search/engines/set/resolution/doc_resolver";
 import { InvertedIndex } from "@/core/domain/search/engines/set/indexes/inverted_index";
 import { MetricIndex } from "@/core/domain/search/engines/set/indexes/metric_index";
@@ -9,6 +8,8 @@ import { RelativeMetricIndex } from "@/core/domain/search/engines/set/indexes/re
 import { Searchable } from "@/core/domain/search/searchable";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardDocResolver } from "@/core/domain/search/engines/set/resolution/wildcard_doc_resolver";
+import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/wildcard_search_term_parser";
 
 type Doc = Searchable & { name: string; metrics: Partial<Record<Metric, number>> };
 

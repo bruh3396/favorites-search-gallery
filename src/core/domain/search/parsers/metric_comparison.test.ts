@@ -24,8 +24,8 @@ describe("parseMetricComparison", () => {
     });
   });
 
-  test("flags a metric compared to itself as tautological", () => {
-    expect(parseMetricComparison("score:score")?.isTautological).toBe(true);
+  test.each(["score:score", "width:>width"])("flags %s, a metric compared to itself, as tautological", term => {
+    expect(parseMetricComparison(term)?.isTautological).toBe(true);
   });
 
   test.each(["apple", "score", "score:=10", "color:10", "score:ten", "-score:5"])("returns null for %s", term => {

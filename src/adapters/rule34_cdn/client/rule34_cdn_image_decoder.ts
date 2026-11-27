@@ -1,4 +1,4 @@
-import { buildRule34CdnWimgUrl } from "@/adapters/rule34_cdn/client/rule34_cdn_url_builder";
+import { RULE34_CDN_URLS } from "@/adapters/rule34_cdn/client/rule34_cdn_urls";
 
 export interface Rule34CdnImageDecoderDependencies {
   fetch: (url: string, init?: RequestInit) => Promise<Response>;
@@ -34,7 +34,7 @@ export class Rule34CdnImageDecoder {
   }
 
   private async loadElement(url: string, signal?: AbortSignal): Promise<HTMLImageElement> {
-    const image = await this.dependencies.loadImage(buildRule34CdnWimgUrl(url), signal);
+    const image = await this.dependencies.loadImage(RULE34_CDN_URLS.wimg(url), signal);
 
     this.elementOnlyUrls.add(url);
     return image;

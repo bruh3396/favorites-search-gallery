@@ -90,6 +90,7 @@ export const SEARCH_CASES: SearchCaseGroup[] = [
   },
   {
     name: "nested or",
+    isAST: true,
     cases: [
       { query: "( red ~ ( sweet berry ) )", expectedFruitNames: ["apple", "cherry", "strawberry", "blueberry"] },
       { query: "( ( sweet berry ) ~ red )", expectedFruitNames: ["apple", "cherry", "strawberry", "blueberry"] },

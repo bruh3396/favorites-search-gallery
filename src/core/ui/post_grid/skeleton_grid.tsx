@@ -1,10 +1,11 @@
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { TileClass, setTileAspectRatio } from "@/core/ui/post_grid/tile";
 import { GridLayout } from "@/core/ui/post_grid/layout/grid_layout";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Size } from "@/core/utils/geometry/size";
+import { TileClass } from "@/core/ui/post_grid/tile";
 import { clamp } from "@/core/utils/number/number_utilities";
 import { h } from "@/core/ui/h/h";
+import { setTileAspectRatio } from "@/core/ui/post_grid/tile_aspect_ratio_setter";
 import { tileGrid } from "@/core/ui/post_grid/layout/grid_tiler";
 
 export const SkeletonGridClass = {

@@ -1,8 +1,8 @@
 import { Rule34CdnFileExtension, isRule34CdnFileExtension } from "@/adapters/rule34_cdn/client/rule34_cdn_file_extension";
 import { Rule34CdnImageDecoder, Rule34CdnImageDecoderDependencies } from "@/adapters/rule34_cdn/client/rule34_cdn_image_decoder";
-import { buildRule34CdnFileUrl, buildRule34CdnPreviewUrl, buildRule34CdnWimgUrl } from "@/adapters/rule34_cdn/client/rule34_cdn_url_builder";
 import { Media } from "@/core/domain/media/media";
 import { MediaKind } from "@/core/domain/media/media_kind";
+import { RULE34_CDN_URLS } from "@/adapters/rule34_cdn/client/rule34_cdn_urls";
 import { Rule34CdnExtensionProber } from "@/adapters/rule34_cdn/client/rule34_cdn_extension_prober";
 import { Rule34CdnVideoDurationProber } from "@/adapters/rule34_cdn/client/rule34_cdn_video_duration_prober";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
@@ -46,15 +46,15 @@ export class Rule34CdnClient {
   }
 
   public previewUrl(media: Media): string {
-    return buildRule34CdnPreviewUrl(media.locator);
+    return RULE34_CDN_URLS.preview(media.locator);
   }
 
   public async originalUrl(media: Media): Promise<string> {
-    return buildRule34CdnFileUrl(media.locator, await this.extension(media));
+    return RULE34_CDN_URLS.file(media.locator, await this.extension(media));
   }
 
   public stillUrl(media: Media): Promise<string> {
-    return media.kind === "video" ? Promise.resolve(buildRule34CdnFileUrl(media.locator, "jpg")) : this.originalUrl(media);
+    return media.kind === "video" ? Promise.resolve(RULE34_CDN_URLS.file(media.locator, "jpg")) : this.originalUrl(media);
   }
 
   public async decodeStill(media: Media, signal?: AbortSignal, width?: number): Promise<ImageBitmap> {
@@ -90,7 +90,7 @@ export class Rule34CdnClient {
       if (signal?.aborted === true) {
         throw error;
       }
-      return this.dependencies.loadImage(buildRule34CdnWimgUrl(url), signal);
+      return this.dependencies.loadImage(RULE34_CDN_URLS.wimg(url), signal);
     }
   }
 

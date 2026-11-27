@@ -1,5 +1,4 @@
-import { buildRule34AddFavoriteUrl, buildRule34PostVoteUrl, buildRule34RemoveFavoriteUrl } from "@/adapters/rule34/client/rule34_url_builder";
-import { sendOkRule34Request, sendRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
+import { RULE34_URLS } from "@/adapters/rule34/client/rule34_urls";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
 import { RateLimiter } from "@/core/utils/async/rate_limiter";
 import { RemoteFavoriteAddResult } from "@/core/boundary/ports/remote_favorites/remote_favorite_add_result";
@@ -8,6 +7,7 @@ import { Rule34Fetch } from "@/adapters/rule34/client/rule34_fetch";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { createExponentialBackoff } from "@/core/utils/async/exponential_backoff";
 import { isRetryableRule34Error } from "@/adapters/rule34/client/rule34_error";
+import { sendRule34Request } from "@/adapters/rule34/client/rule34_request_sender";
 
 export interface Rule34FavoriteActionsDependencies {
   fetch: Rule34Fetch;
@@ -50,8 +50,8 @@ export class Rule34FavoriteActions {
       if (!this.claimIntent(postId, "add")) {
         return "failed";
       }
-      sendRule34Request(this.dependencies.fetch, buildRule34PostVoteUrl(postId)).catch(() => { });
-      const answer = await (await sendOkRule34Request(this.dependencies.fetch, buildRule34AddFavoriteUrl(postId))).text();
+      sendRule34Request(this.dependencies.fetch, RULE34_URLS.postVote(postId)).catch(() => { });
+      const answer = await (await sendRule34Request(this.dependencies.fetch, RULE34_URLS.addFavorite(postId))).text();
       return ADD_ANSWERS[parseInt(answer, 10)] ?? "failed";
     });
   }
@@ -62,7 +62,7 @@ export class Rule34FavoriteActions {
       if (!this.claimIntent(postId, "remove")) {
         return false;
       }
-      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, buildRule34RemoveFavoriteUrl(postId), { redirect: "manual" }));
+      await this.removeRetry.retry(() => sendRule34Request(this.dependencies.fetch, RULE34_URLS.removeFavorite(postId), { redirect: "manual", throwsHttpErrors: false }));
       return true;
     });
   }

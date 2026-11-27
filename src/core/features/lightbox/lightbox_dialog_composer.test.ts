@@ -165,34 +165,64 @@ describe("composeLightboxDialog", () => {
 
   test("titles a command button with its first key, following changed key bindings", () => {
     const { view, lightboxKeyBindings } = setup();
-    const button = findButton(view, "Enter Fullscreen")!;
+    const button = findButton(view, "Fullscreen")!;
     const title = button.title;
 
     lightboxKeyBindings.value = { ...lightboxKeyBindings.peek(), toggleFullscreen: [] };
-    expect([title, button.title]).toEqual(["Enter Fullscreen (F)", "Enter Fullscreen"]);
+    expect([title, button.title]).toEqual(["Fullscreen (F)", "Fullscreen"]);
+  });
+
+  test("labels a command button with its command's label by default", () => {
+    const { view, close } = setup();
+
+    findButton(view, "Close")!.click();
+    expect(close).toHaveBeenCalledOnce();
   });
 
   test("titles its arrows with their keys", () => {
     expect(findButton(setup().view, "Go to Next")!.title).toBe("Go to Next (→)");
   });
 
-  test("offers to stop autoplay while autoplaying", () => {
+  test("shows autoplay as a pressed pause button while autoplaying", () => {
     const { view } = setup();
+    const button = findButton(view, "Autoplay")!;
 
     pressKey(view, " ");
-    const button = findButton(view, "Stop Autoplay")!;
+    const playing = [button.getAttribute("aria-pressed"), button.title, readIconPath(button)];
 
-    expect([button.title, readIconPath(button)]).toEqual(["Stop Autoplay (Space)", drawnIconPath("pause")]);
     button.click();
-    expect(readIconPath(findButton(view, "Start Autoplay")!)).toBe(drawnIconPath("play"));
+    const stopped = [button.getAttribute("aria-pressed"), readIconPath(button)];
+
+    expect([playing, stopped]).toEqual([["true", "Autoplay (Space)", drawnIconPath("pause")], ["false", drawnIconPath("play")]]);
   });
 
-  test("offers to exit fullscreen while in fullscreen", () => {
+  test("shows fullscreen as a pressed exit button while in fullscreen", () => {
     const { view } = setup();
+    const button = findButton(view, "Fullscreen")!;
 
     Object.defineProperty(document, "fullscreenElement", { value: document.documentElement, configurable: true });
     document.dispatchEvent(new Event("fullscreenchange"));
-    expect(readIconPath(findButton(view, "Exit Fullscreen")!)).toBe(drawnIconPath("exitFullscreen"));
+    expect([button.getAttribute("aria-pressed"), readIconPath(button)]).toEqual(["true", drawnIconPath("exitFullscreen")]);
+  });
+
+  test("holds the overlay and autoplay while the more menu is open", async() => {
+    const { view, isOpen, scheduler, retainedItems, goToNext } = setup();
+
+    retainedItems.value = [IMAGE];
+    await flushMicrotasks();
+    isOpen.value = true;
+    pressKey(view, " ");
+    findButton(view, "More")!.click();
+    scheduler.advance(LONGER_THAN_ANY_INTERVAL);
+    const whileOpen = [view.hasAttribute("data-idle"), vi.mocked(goToNext).mock.calls.length];
+
+    document.querySelector<HTMLElement>("[role=menu]")!.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    scheduler.advance(LONGER_THAN_ANY_INTERVAL);
+    expect([whileOpen, [view.hasAttribute("data-idle"), vi.mocked(goToNext).mock.calls.length]]).toEqual([[false, 0], [true, 1]]);
+  });
+
+  test("keeps the post page action out of the toolbar", () => {
+    expect(findButton(setup().view, "Post Page")).toBeNull();
   });
 
   test("steps from its arrows", () => {
@@ -291,7 +321,7 @@ describe("composeLightboxDialog", () => {
   test("leaves out the details panel and its button without details", () => {
     const { view } = setup();
 
-    expect([findDetailsPanel(view), view.querySelector("[aria-label=\"Show Details\"]")]).toEqual([null, null]);
+    expect([findDetailsPanel(view), findButton(view, "Details")]).toEqual([null, null]);
   });
 
   test("mounts the details content and toggles the panel from the details button", () => {
@@ -299,19 +329,20 @@ describe("composeLightboxDialog", () => {
     const { view } = setup("full", { lightboxDetails });
 
     expect(findDetailsPanel(view)!.textContent).toContain("details content");
-    view.querySelector<HTMLButtonElement>("[aria-label=\"Show Details\"]")!.click();
+    findButton(view, "Details")!.click();
     expect(lightboxDetails.isOpen.value).toBe(true);
   });
 
-  test("offers to hide the details while they are open, from the toolbar and the panel", () => {
+  test("shows details as pressed while open, and hides them from the panel", () => {
     const lightboxDetails = createDetails();
     const { view } = setup("full", { lightboxDetails });
+    const detailsButton = findButton(view, "Details")!;
 
     lightboxDetails.isOpen.set(true);
-    const hideButtons = [...view.querySelectorAll<HTMLButtonElement>("[aria-label=\"Hide Details\"]")];
+    const pressedWhileOpen = detailsButton.getAttribute("aria-pressed");
 
-    hideButtons[1].click();
-    expect([hideButtons.length, lightboxDetails.isOpen.value]).toEqual([2, false]);
+    findButton(view, "Hide Details")!.click();
+    expect([pressedWhileOpen, lightboxDetails.isOpen.value, detailsButton.getAttribute("aria-pressed")]).toEqual(["true", false, "false"]);
   });
 
   test("keeps the overlay awake while the pointer is over the details panel", () => {
@@ -391,7 +422,7 @@ describe("composeLightboxDialog", () => {
 
     Object.defineProperty(HTMLElement.prototype, "requestFullscreen", { value: requestFullscreen, configurable: true });
     isOpen.value = true;
-    const button = view.querySelector<HTMLButtonElement>("[aria-label=\"Enter Fullscreen\"]")!;
+    const button = findButton(view, "Fullscreen")!;
 
     button.click();
     const target = requestFullscreen.mock.contexts[0] as HTMLElement;

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import { parseMetricSearchTerm, parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 import { Metric } from "@/core/domain/search/metric";
 import { MetricSearchable } from "@/core/domain/search/metric_searchable";
+import { parseSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
 
 function createMetricSearchable(metrics: Partial<Record<Metric, number>>): MetricSearchable {
   const values: Record<Metric, number> = {
@@ -104,15 +104,6 @@ describe("MetricSearchTerm", () => {
     test("compares a large id", () => {
       expect(parseSearchTerm("id:9999999").matches(squareMetricSearchable)).toBe(true);
       expect(parseSearchTerm("id:<9999999").matches(hdMetricSearchable)).toBe(true);
-    });
-  });
-
-  describe("comparison", () => {
-    test("flags a self-comparison as tautological and leaves other comparisons unflagged", () => {
-      expect(parseMetricSearchTerm("width:width")?.comparison.isTautological).toBe(true);
-      expect(parseMetricSearchTerm("width:>width")?.comparison.isTautological).toBe(true);
-      expect(parseMetricSearchTerm("width:height")?.comparison.isTautological).toBe(false);
-      expect(parseMetricSearchTerm("width:100")?.comparison.isTautological).toBe(false);
     });
   });
 });

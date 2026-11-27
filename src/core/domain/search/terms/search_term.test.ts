@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { parseExactSearchTerm, parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseExactSearchTerm } from "@/core/domain/search/parsers/exact_search_term_parser";
+import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/wildcard_search_term_parser";
 
 describe("SearchTerm", () => {
   describe("literal", () => {

@@ -1,13 +1,7 @@
 import { Mock, afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import {
-  buildRule34AccountHomePageUrl,
-  buildRule34FavoritesPageUrl,
-  buildRule34PostListUrl,
-  buildRule34PostPageUrl,
-  buildRule34ProfilePageUrl
-} from "@/adapters/rule34/client/rule34_url_builder";
 import { Media } from "@/core/domain/media/media";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
+import { RULE34_URLS } from "@/adapters/rule34/client/rule34_urls";
 import { Rule34Client } from "@/adapters/rule34/client/rule34_client";
 import { Rule34Error } from "@/adapters/rule34/client/rule34_error";
 import { advanceAndSettle } from "@/testing/microtask_utilities";
@@ -76,7 +70,7 @@ describe("Rule34Client", () => {
       const { rule34Client, fetch } = setup();
       const { post, tagCategories } = await rule34Client.fetchPostPage("42");
 
-      expect(fetch).toHaveBeenCalledWith(buildRule34PostPageUrl("42"), undefined);
+      expect(fetch).toHaveBeenCalledWith(RULE34_URLS.postPage("42"), {});
       expect(post).toMatchObject({ id: "42", width: 1_920, height: 1_080, status: "deleted" });
       expect(tagCategories).toEqual(new Map([["alice", "character"], ["bob", "artist"]]));
     });
@@ -96,13 +90,13 @@ describe("Rule34Client", () => {
 
   describe("postPageUrl", () => {
     test("links a post's page", () => {
-      expect(setup().rule34Client.postPageUrl("42")).toBe(buildRule34PostPageUrl("42"));
+      expect(setup().rule34Client.postPageUrl("42")).toBe(RULE34_URLS.postPage("42"));
     });
   });
 
   describe("postListUrl", () => {
     test("links the site's search for a query", () => {
-      expect(setup().rule34Client.postListUrl("apple")).toBe(buildRule34PostListUrl("apple"));
+      expect(setup().rule34Client.postListUrl("apple")).toBe(RULE34_URLS.postList("apple"));
     });
   });
 
@@ -111,7 +105,7 @@ describe("Rule34Client", () => {
       const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(createThumb("7"))));
 
       expect((await rule34Client.fetchFavoritesPage("9", 2)).map(post => post.id)).toEqual(["7"]);
-      expect(fetch).toHaveBeenCalledWith(buildRule34FavoritesPageUrl("9", 2), undefined);
+      expect(fetch).toHaveBeenCalledWith(RULE34_URLS.favoritesPage("9", 2), {});
     });
   });
 
@@ -120,7 +114,7 @@ describe("Rule34Client", () => {
       const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(PROFILE_PAGE)));
 
       expect(await rule34Client.fetchFavoriteCount("9")).toBe(1_234);
-      expect(fetch).toHaveBeenCalledWith(buildRule34ProfilePageUrl("9"), undefined);
+      expect(fetch).toHaveBeenCalledWith(RULE34_URLS.profilePage("9"), {});
     });
   });
 
@@ -129,7 +123,7 @@ describe("Rule34Client", () => {
       const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(ACCOUNT_HOME_PAGE)));
 
       expect(await rule34Client.fetchUserId()).toBe("9");
-      expect(fetch).toHaveBeenCalledWith(buildRule34AccountHomePageUrl(), undefined);
+      expect(fetch).toHaveBeenCalledWith(RULE34_URLS.accountHomePage(), {});
     });
 
     test("retries a refused page a second apart and reads the user once it goes through", async() => {
@@ -200,7 +194,7 @@ describe("Rule34Client", () => {
       const { rule34Client, fetch } = setup(() => Promise.resolve(new Response(createThumb("7"))));
 
       expect((await rule34Client.fetchPostListPage("apple", 2)).map(post => post.id)).toEqual(["7"]);
-      expect(fetch).toHaveBeenCalledWith("https://rule34.xxx/index.php?page=post&s=list&tags=apple&pid=84", undefined);
+      expect(fetch).toHaveBeenCalledWith("https://rule34.xxx/index.php?page=post&s=list&tags=apple&pid=84", {});
     });
 
     test("hands the fetched page's paginator to the document", async() => {

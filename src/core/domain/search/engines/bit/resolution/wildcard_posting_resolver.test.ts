@@ -3,7 +3,7 @@ import { BitIndex } from "@/core/domain/search/engines/bit/indexes/bit_index";
 import { Posting } from "@/core/domain/search/engines/bit/posting/posting";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { WildcardPostingResolver } from "@/core/domain/search/engines/bit/resolution/wildcard_posting_resolver";
-import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/search_term_parser";
+import { parseWildcardSearchTerm } from "@/core/domain/search/parsers/wildcard_search_term_parser";
 
 interface Doc {
   id: string;

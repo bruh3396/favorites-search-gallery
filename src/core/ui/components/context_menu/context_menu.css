@@ -1,6 +1,12 @@
+.fsg-ContextMenu-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
 .fsg-ContextMenu {
   position: fixed;
-  z-index: 10;
+  z-index: 11;
   min-inline-size: 168px;
   outline: none;
 }
@@ -12,6 +18,34 @@
 .fsg-ContextMenu-item[aria-disabled="true"] {
   opacity: 0.4;
   cursor: default;
+}
+
+.fsg-ContextMenu-icon {
+  flex: none;
+  box-sizing: content-box;
+  inline-size: 16px;
+  block-size: 16px;
+  margin: -3px;
+  padding: 3px;
+  border-radius: var(--fsg-shape-corner-small);
+  color: var(--fsg-color-on-surface-variant);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fsg-ContextMenu-item[aria-checked="true"] .fsg-ContextMenu-icon {
+  background: color-mix(in srgb, var(--fsg-color-primary) 22%, transparent);
+  color: var(--fsg-color-primary);
+}
+
+.fsg-ContextMenu-shortcut {
+  margin-inline-start: auto;
+  padding-inline-start: 18px;
+  color: var(--fsg-color-on-surface-variant);
+  font-size: 0.85em;
 }
 
 .fsg-ContextMenu-item[data-starts-group="true"] {
