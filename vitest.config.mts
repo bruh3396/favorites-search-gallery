@@ -3,7 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
-const EXCLUDED_TESTS = [...configDefaults.exclude, ".*/**", "playground/**", "checks/**"];
+const EXCLUDED_TESTS = [...configDefaults.exclude, ".*/**", "checks/**"];
 const DOM_TESTS = [
   "src/core/app/**/*.test.{ts,tsx}",
   "src/core/ui/**/*.test.{ts,tsx}",

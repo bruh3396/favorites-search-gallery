@@ -714,7 +714,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["scripts/**/*.ts", "playground/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
+    files: ["scripts/**/*.ts", ".scripts/**/*.ts", "**/*.test.{ts,tsx}"],
     rules: {
       "no-console": "off"
     }
@@ -744,7 +744,7 @@ export default defineConfig([
     }
   },
   {
-    files: ["src/core/domain/search/testing/fruit_corpus.ts", "playground/search_performance/queries.ts"],
+    files: ["src/core/domain/search/testing/fruit_corpus.ts"],
     rules: {
       "@stylistic/max-len": "off"
     }
