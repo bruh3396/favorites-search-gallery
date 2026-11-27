@@ -17,8 +17,8 @@ export function FavoritesSearchOptionsRow({ changedSearchOptionCount, resetSearc
     <div className={FavoritesSearchOptionsRowClass.root} role="group" aria-label="Search Options">
       {children}
       <IconButton
-        icon="reset"
-        label="Reset Search Options"
+        icon="rotateCcw"
+        label="Clear Search Options"
         size="small"
         disabled={computed(() => changedSearchOptionCount.value === 0)}
         onClick={resetSearchOptions}

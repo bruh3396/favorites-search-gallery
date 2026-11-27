@@ -4,6 +4,7 @@
   align-items: center;
   gap: 2px;
   max-inline-size: 44px;
+  padding-block-start: 6px;
 }
 
 .fsg-AppMark-logo {

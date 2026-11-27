@@ -1,6 +1,5 @@
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, effect } from "@/core/utils/reactive/signal";
-import { LightboxButton } from "@/core/features/lightbox/overlay/lightbox_button";
 
 export const LightboxDetailsPanelClass = {
   root: "fsg-LightboxDetailsPanel",
@@ -13,9 +12,9 @@ export const LightboxDetailsPanelClass = {
 export interface LightboxDetailsPanelProps {
   isOpen: Readable<boolean>;
   titleChild?: Child;
+  trailingChild?: Child;
   controlsChild?: Child;
   contentChild: Child;
-  onClose: () => void;
   onPointerenter: () => void;
   onPointerleave: () => void;
 }
@@ -30,7 +29,7 @@ export function LightboxDetailsPanel(props: LightboxDetailsPanelProps): HTMLElem
     >
       <div className={LightboxDetailsPanelClass.header}>
         <div className={LightboxDetailsPanelClass.title}>{props.titleChild}</div>
-        <LightboxButton icon="closeLarge" label="Hide Details" onClick={props.onClose} />
+        {props.trailingChild}
       </div>
       <div className={LightboxDetailsPanelClass.controls}>{props.controlsChild}</div>
       <div className={LightboxDetailsPanelClass.content}>{props.contentChild}</div>

@@ -10,6 +10,7 @@
 
 .fsg-SearchBox-field {
   --fsg-IconButton-corner: var(--fsg-shape-corner-full);
+  --fsg-CountBadge-ring: var(--fsg-color-surface-dim);
 
   position: absolute;
   inset-block-start: 0;

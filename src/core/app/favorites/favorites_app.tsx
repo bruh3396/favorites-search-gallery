@@ -1,14 +1,15 @@
 import { Child, h } from "@/core/ui/h/h";
 import { Readable, computed, effect, untracked } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope } from "@/core/utils/reactive/scope";
+import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { FavoritesWorkspace } from "@/core/app/favorites/workspace/favorites_workspace";
 import { KeyCap } from "@/core/ui/components/key_cap/key_cap";
+import { Progress } from "@/core/ui/components/progress_line/progress";
 import { ProgressLine } from "@/core/ui/components/progress_line/progress_line";
 import { TabPanel } from "@/core/ui/components/tabs/tab_panel";
 import { formatKeyLabel } from "@/core/ui/key_bindings/key_label_formatter";
-import { measureFavoritesLoadProgress } from "@/core/app/favorites/favorites_load_progress_measurer";
 
 export const FavoritesAppClass = {
   root: "fsg-FavoritesApp",
@@ -26,11 +27,13 @@ export interface FavoritesAppProps {
   tabsHeaderChild: Child;
   zenEnabled: Readable<boolean>;
   zenExitKeys: Readable<readonly string[]>;
+  nativeHeaderVisible: Readable<boolean>;
   renderPanel: (favoritesTab: FavoritesTab) => HTMLElement;
 }
 
 export function FavoritesApp({
-  favoritesService, favoritesWorkspace, lightboxView, activityBar, tabsHeaderChild, zenEnabled, zenExitKeys, renderPanel
+  favoritesService, favoritesWorkspace, lightboxView, activityBar, tabsHeaderChild,
+  zenEnabled, zenExitKeys, nativeHeaderVisible, renderPanel
 }: FavoritesAppProps): HTMLElement[] {
   const zenExitKeyList = <span />;
   const createZenExitKeysScope = captureScope();
@@ -44,9 +47,13 @@ export function FavoritesApp({
     zenExitKeyList.replaceChildren(...shownZenExitKeys.result);
   });
   return [
-    <div className={FavoritesAppClass.root} data-zen={computed(() => (zenEnabled.value ? "" : null))}>
+    <div
+      className={FavoritesAppClass.root}
+      data-zen={computed(() => (zenEnabled.value ? "" : null))}
+      data-native-header-visible={computed(() => (nativeHeaderVisible.value ? "" : null))}
+    >
       <div className={FavoritesAppClass.loadLine}>
-        <ProgressLine label="Loading Favorites" progress={computed(() => measureFavoritesLoadProgress(favoritesService.loadState.value))} />
+        <ProgressLine label="Loading Favorites" progress={computed(() => measureLoadProgress(favoritesService.loadState.value))} />
       </div>
       <main className={FavoritesAppClass.panes}>
         {activityBar}
@@ -66,6 +73,21 @@ export function FavoritesApp({
     </div>,
     lightboxView
   ];
+}
+
+function measureLoadProgress(favoritesLoadState: FavoritesLoadState): Progress {
+  switch (favoritesLoadState.phase) {
+    case "fetching":
+    case "restoring": {
+      const { loadedCount, expectedCount } = favoritesLoadState;
+      return expectedCount === null || expectedCount === 0 ? "indeterminate" : loadedCount / expectedCount;
+    }
+    case "loaded":
+    case "interrupted":
+      return "idle";
+    default:
+      return "indeterminate";
+  }
 }
 
 function listZenExitKeyNodes(zenExitKeys: readonly string[]): (Node | string)[] {

@@ -6,9 +6,11 @@ import { Emitter } from "@/core/utils/reactive/emitter";
 import { Favorite } from "@/core/features/favorites/favorite";
 import { FavoritesBlacklist } from "@/core/features/favorites/search/favorites_blacklist";
 import { FavoritesCollection } from "@/core/features/favorites/collection/favorites_collection";
+import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
 import { FavoritesLoadState } from "@/core/features/favorites/load/favorites_load_state";
 import { FavoritesSearchIndex } from "@/core/features/favorites/search/favorites_search_index";
 import { FavoritesSession } from "@/core/features/favorites/session/favorites_session";
+import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { KeyedStoredValue } from "@/core/utils/storage/keyed_stored_value";
 import { MemoryClient } from "@/adapters/memory/client/memory_client";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
@@ -22,7 +24,6 @@ import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal } from "@/core/utils/reactive/signal";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
-import { StoredValue } from "@/core/utils/storage/stored_value";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -40,21 +41,15 @@ interface Setup {
   favoritesSession: FavoritesSession;
   watched: Set<Element>;
   openLightbox: Mock<(favorite: Favorite) => boolean>;
-  enterZen: Mock<() => void>;
   navigator: MemoryNavigator;
   searchHistory: SearchHistory;
-  favoritesTabStripVisible: StoredValue<boolean>;
-  tabCount: Signal<number>;
+  keyBindings: Signal<Pick<KeyBindings<FavoritesCommand>, "toggleSearchOptions">>;
 }
 
 function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Setup {
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
-  const { favoritesTabStripVisible, favoritesSearchOptionsVisible } = createStoredTree(
-    APP_STORAGE_SCHEMA.state,
-    new MemoryLocalKeyedValues(),
-    ["favoritesTabStripVisible", "favoritesSearchOptionsVisible"]
-  );
+  const { favoritesSearchOptionsVisible } = createStoredTree(APP_STORAGE_SCHEMA.state, new MemoryLocalKeyedValues(), ["favoritesSearchOptionsVisible"]);
   const watched = new Set<Element>();
   const visibilityObserver: VisibilityObserver = {
     observe: element => {
@@ -65,9 +60,7 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
     }
   };
   const openLightbox = vi.fn<(favorite: Favorite) => boolean>(() => true);
-  const enterZen = vi.fn<() => void>();
   const navigator = new MemoryNavigator();
-  const tabCount = new Signal(1);
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, {
     submittedQueries: new KeyedStoredValue<readonly string[]>(
       { key: "submittedQueries", defaultValue: [] },
@@ -86,6 +79,7 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
 
   favoritesSession.start();
   const scheduler = new MemoryScheduler();
+  const keyBindings = new Signal<Pick<KeyBindings<FavoritesCommand>, "toggleSearchOptions">>({ toggleSearchOptions: ["o"] });
   const { result: element, dispose } = render(document, () => composeFavoritesSearchPanel(createFavoritesTab(favoritesSession), { userOwnsFavorites }, {
     favoritesService: {
       loadState: new Signal<FavoritesLoadState>({ phase: "starting" }),
@@ -95,9 +89,8 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
       countFavoritesWithTag: tag => favoritesSearchIndex.countFavoritesWithTag(tag)
     },
     favoritesPreferences,
-    favoritesTabStripVisible,
     favoritesSearchOptionsVisible,
-    tabCount,
+    keyBindings,
     searchHistory,
     favoriteSizeRecorder: { sizes: [] },
     visibilityObserver,
@@ -106,10 +99,9 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
     remotePages: new MemoryRemotePages(new MemoryClient([])),
     navigator,
     openLightbox,
-    postActions: { openOriginal: vi.fn() },
-    enterZen
+    postActions: { openOriginal: vi.fn() }
   }));
-  return { element, dispose, favoritesSession, watched, openLightbox, enterZen, navigator, searchHistory, favoritesTabStripVisible, tabCount };
+  return { element, dispose, favoritesSession, watched, openLightbox, navigator, searchHistory, keyBindings };
 }
 
 function queryTileLinks(element: HTMLElement): HTMLAnchorElement[] {
@@ -247,6 +239,15 @@ describe("composeFavoritesSearchPanel", () => {
     expect(isRowHidden()).toBe(false);
   });
 
+  test("names the Search Options key in its tooltip, following rebinding", () => {
+    const { element, keyBindings } = setup();
+    const searchOptionsButton = element.querySelector<HTMLButtonElement>("button[aria-label='Search Options']")!;
+    const bound = searchOptionsButton.title;
+
+    keyBindings.value = { toggleSearchOptions: [] };
+    expect([bound, searchOptionsButton.title]).toEqual(["Search Options (O)", "Search Options"]);
+  });
+
   test("searches the tab from the search options row", () => {
     const { element, favoritesSession } = setup();
     const invert = [...element.querySelectorAll("button")].find(button => button.textContent === "Invert")!;
@@ -276,42 +277,6 @@ describe("composeFavoritesSearchPanel", () => {
     const hasBlacklist = (element: HTMLElement): boolean => [...element.querySelectorAll("button")].some(button => button.textContent === "Blacklist");
 
     expect([hasBlacklist(setup().element), hasBlacklist(setup([], { userOwnsFavorites: false }).element)]).toEqual([true, false]);
-  });
-
-  test("toggles the tab strip from the Tabs button and reports it as pressed while shown", () => {
-    const { element, favoritesTabStripVisible } = setup();
-    const tabsButton = element.querySelector<HTMLButtonElement>("button[aria-label^=Tabs]")!;
-    const readState = (): [boolean, string | null] => [favoritesTabStripVisible.value, tabsButton.getAttribute("aria-pressed")];
-    const before = readState();
-
-    tabsButton.click();
-    const hidden = readState();
-
-    tabsButton.click();
-    expect([before, hidden, readState()]).toEqual([[true, "true"], [false, "false"], [true, "true"]]);
-  });
-
-  test("counts the open tabs on the Tabs button only while the strip hides more than one", () => {
-    const { element, favoritesTabStripVisible, tabCount } = setup();
-    const tabsButton = element.querySelector<HTMLButtonElement>("button[aria-label^=Tabs]")!;
-    const badge = tabsButton.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
-    const readBadge = (): [boolean, string] => [badge.hidden, badge.textContent!];
-
-    tabCount.value = 3;
-    const shown = readBadge();
-
-    favoritesTabStripVisible.set(false);
-    const hidden = readBadge();
-
-    tabCount.value = 1;
-    expect([shown, hidden, readBadge()]).toEqual([[true, "0"], [false, "3"], [true, "0"]]);
-  });
-
-  test("enters zen from the zen button", () => {
-    const { element, enterZen } = setup();
-
-    element.querySelector<HTMLButtonElement>("button[aria-label=\"Zen\"]")!.click();
-    expect(enterZen).toHaveBeenCalledOnce();
   });
 
   test("stops watching its tiles once disposed", () => {

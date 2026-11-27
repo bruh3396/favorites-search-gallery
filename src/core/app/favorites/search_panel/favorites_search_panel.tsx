@@ -18,7 +18,6 @@ export const FavoritesSearchPanelClass = {
   fieldTrailing: "fsg-FavoritesSearchPanel-fieldTrailing",
   count: "fsg-FavoritesSearchPanel-count",
   paginator: "fsg-FavoritesSearchPanel-paginator",
-  trailing: "fsg-FavoritesSearchPanel-trailing",
   body: "fsg-FavoritesSearchPanel-body"
 } as const;
 
@@ -30,7 +29,6 @@ export interface FavoritesSearchPanelProps {
   focusSearch: Emitter<void>;
   fieldTrailingChild: Child;
   subheaderChild: Child;
-  trailingChild: Child;
   fieldPopupChild?: Child;
   searchBoxAssist?: SearchBoxAssist;
   activeDescendantElement?: Readable<HTMLElement | null>;
@@ -41,14 +39,13 @@ export interface FavoritesSearchPanelProps {
 }
 
 export function FavoritesSearchPanel({
-  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, fieldTrailingChild, subheaderChild, trailingChild, fieldPopupChild,
+  favoritesService, favoritesSession, submittedQueries, submit, focusSearch, fieldTrailingChild, subheaderChild, fieldPopupChild,
   searchBoxAssist, activeDescendantElement, getSearchBoxTextSpans, skeleton, grid, searchElsewhere
 }: FavoritesSearchPanelProps): HTMLElement {
   const panelBody = computed(() => describeFavoritesSearchPanelBody({
     resultCount: favoritesSession.matchedFavorites.value.length,
     isSearchable: favoritesService.searchable.reached,
     loadPhase: favoritesService.loadState.value.phase,
-    query: favoritesSession.query.value,
     isFiltered: favoritesSession.isFiltered.value
   }));
   const body: HTMLElement = (
@@ -58,7 +55,7 @@ export function FavoritesSearchPanel({
         <EmptyState
           message={computed(() => (panelBody.value.kind === "empty" ? panelBody.value.message : ""))}
           action={computed(() => (panelBody.value.kind === "empty" && panelBody.value.offersClear ? {
-            label: "Clear",
+            label: "Clear Search",
             onClick: (): void => {
               favoritesSession.clearSearch();
               focusSearch.emit();
@@ -106,7 +103,6 @@ export function FavoritesSearchPanel({
             }}
           />
         </div>
-        <div className={FavoritesSearchPanelClass.trailing}>{trailingChild}</div>
       </header>
       {subheaderChild}
       {body}

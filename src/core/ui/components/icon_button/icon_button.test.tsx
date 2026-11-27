@@ -22,6 +22,14 @@ describe("IconButton", () => {
     expect(setup({ label: "Zen" }).title).toBe("Zen");
   });
 
+  test("shows a tooltip apart from its name when given one", () => {
+    const title = new Signal("Zen (Z)");
+    const element = setup({ label: "Zen", title });
+
+    title.value = "Zen (X)";
+    expect([element.title, element.getAttribute("aria-label")]).toEqual(["Zen (X)", "Zen"]);
+  });
+
   test("submits its form when it is a submit button", () => {
     expect(setup({ type: "submit" }).type).toBe("submit");
   });

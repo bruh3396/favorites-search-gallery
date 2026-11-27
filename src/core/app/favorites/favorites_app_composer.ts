@@ -6,8 +6,6 @@ import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
-import { ActivityBar } from "@/core/ui/components/activity_bar/activity_bar";
-import { AppMark } from "@/core/ui/app_mark/app_mark";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
@@ -53,13 +51,13 @@ import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { applyKeyBindingOverrides } from "@/core/ui/key_bindings/key_binding_overrides";
 import { bindHostAppearance } from "@/core/app/host_appearance_binder";
-import { composeFavoriteLightboxDetails } from "@/core/app/favorites/lightbox/favorite_lightbox_details_composer";
+import { composeFavoritesActivityBar } from "@/core/app/favorites/activity_bar/favorites_activity_bar_composer";
 import { composeFavoritesKeyBindings } from "@/core/app/favorites/key_bindings/favorites_key_bindings_composer";
 import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel_composer";
 import { composeFavoritesSettings } from "@/core/app/favorites/settings/favorites_settings_composer";
 import { createAppStorage } from "@/core/app/storage/app_storage";
 import { createFavoritesCommandHandlers } from "@/core/app/favorites/commands/favorites_command_handlers";
-import { createLightbox } from "@/core/features/lightbox/lightbox";
+import { createFavoritesLightbox } from "@/core/app/favorites/lightbox/favorites_lightbox";
 import { createSharedPreferences } from "@/core/app/storage/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { fillWindow } from "@/core/ui/app_root/window_filler";
@@ -100,8 +98,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const appPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, appStorage.preferences, ["favorites", "postList"]);
   const { favorites: favoritesPreferences, postList: postListPreferences } = appPreferences;
   const appState = createStoredTree(
-    APP_STORAGE_SCHEMA.state,
-    appStorage.state,
+    APP_STORAGE_SCHEMA.state, appStorage.state,
     ["favorites", "favoritesSearchHistory", "favoritesTabStripVisible", "favoritesSearchOptionsVisible"]
   );
   const { favorites: favoritesState, favoritesSearchHistory, favoritesTabStripVisible, favoritesSearchOptionsVisible } = appState;
@@ -109,43 +106,24 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, { submittedQueries: favoritesSearchHistory });
   const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
   const favoritesService = createFavoritesService({
-    userOwnsFavorites: configuration.userOwnsFavorites,
-    userLoggedIn: configuration.userLoggedIn,
-    blacklistedTags: configuration.blacklistedTags
+    userOwnsFavorites: configuration.userOwnsFavorites, userLoggedIn: configuration.userLoggedIn, blacklistedTags: configuration.blacklistedTags
   }, {
-    localFavorites, remoteFavorites, remotePages, scheduler, postLibrary, randomSource,
-    favoritesPaginationPreferences: favoritesPreferences.pagination
+    localFavorites, remoteFavorites, remotePages, scheduler, postLibrary, randomSource, favoritesPaginationPreferences: favoritesPreferences.pagination
   });
   const favoritesWorkspace = new FavoritesWorkspace({
-    favoritesWorkspaceSnapshot: ownerState.workspace,
-    createSession: (favoritesSearchOptions): FavoritesSession => favoritesService.createSession({ favoritesSearchOptions }),
-    randomSource
+    favoritesWorkspaceSnapshot: ownerState.workspace, randomSource,
+    createSession: (favoritesSearchOptions): FavoritesSession => favoritesService.createSession({ favoritesSearchOptions })
   });
   const favoriteSizeRecorder = new FavoriteSizeRecorder({ measuredCount: 50, recordDelay: 500 }, {
     sizes: ownerState.sizes, scheduler,
     results: computed(() => favoritesWorkspace.activeTab.value.session.matchedFavorites.value)
   });
   const snippetLibrary = new SnippetLibrary({ localSnippets, scheduler });
-  const lightboxPreferences = favoritesPreferences.lightbox;
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightboxKeyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_LIGHTBOX_KEY_BINDINGS, sharedPreferences.lightboxKeyBindingOverrides.value));
-  const lightbox = createLightbox<Favorite>({
-    scheduler, sizeObserver, viewport, remoteMedia, actions: postActions,
-    preferences: lightboxPreferences,
-    lightboxKeyBindings,
-    locateItem: favorite => favoritesWorkspace.locate(favorite),
-    details: {
-      isOpen: lightboxPreferences.details.isOpen,
-      createContent: favorite => composeFavoriteLightboxDetails(favorite, {
-        preferences: lightboxPreferences.details, clipboard, scheduler, localTagCategories
-      })
-    },
-    favorite: {
-      isFavorited: favorite => favoritesService.isFavorited(favorite.id),
-      add: (favorite): void => {
-        favoritesService.actions.add(favorite.id).catch(console.error);
-      }
-    }
+  const lightbox = createFavoritesLightbox({
+    scheduler, sizeObserver, viewport, remoteMedia, actions: postActions, preferences: favoritesPreferences.lightbox, lightboxKeyBindings,
+    clipboard, localTagCategories, favoritesService, favoritesWorkspace
   });
   const openLightbox = (favoritesSession: FavoritesSession, favorite: Favorite): boolean => lightbox.open(
     new ListSequence({ wraps: !favoritesPreferences.pagination.infiniteScroll.peek() }, favoritesSession.matchedFavorites),
@@ -154,23 +132,16 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const imageLoaderService = new ImageLoaderService(DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, {
     remoteMedia, scheduler, enabled: favoritesPreferences.grid.hdTilesEnabled, paused: lightbox.isOpen
   });
-
-  lightbox.settled.on(favorite => favoritesWorkspace.turnToPageContaining(favorite));
-  lightbox.closed.on(favorite => favoritesWorkspace.reveal(favorite));
   const { tabManager } = favoritesWorkspace;
-  const tabCount = computed(() => tabManager.tabs.value.length);
   const zenEnabled = new Signal(false);
   const keyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_FAVORITES_KEY_BINDINGS, favoritesPreferences.keyBindingOverrides.value));
   const previewedTheme = new Signal<Theme | null>(null);
   const resetSettings = (): void => {
     if (confirmer.confirm("Reset settings to their defaults?")) {
-      resetStoredTree(
-        { sharedPreferences, favoritesPreferences, postListPreferences },
-        [
-          sharedPreferences.colorScheme, sharedPreferences.lightboxKeyBindingOverrides,
-          favoritesPreferences.activeTool, favoritesPreferences.keyBindingOverrides
-        ]
-      );
+      resetStoredTree({ sharedPreferences, favoritesPreferences, postListPreferences }, [
+        sharedPreferences.colorScheme, sharedPreferences.lightboxKeyBindingOverrides,
+        favoritesPreferences.activeTool, favoritesPreferences.keyBindingOverrides
+      ]);
     }
   };
   const renderViewByTool: Record<FavoritesTool, () => HTMLElement> = {
@@ -182,12 +153,10 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     }),
     keyBindings: () => composeFavoritesKeyBindings({
       keyBindings, keyBindingOverrides: favoritesPreferences.keyBindingOverrides,
-      lightboxKeyBindings, lightboxKeyBindingOverrides: sharedPreferences.lightboxKeyBindingOverrides,
-      confirmer
+      lightboxKeyBindings, lightboxKeyBindingOverrides: sharedPreferences.lightboxKeyBindingOverrides, confirmer
     }),
     snippets: () => h(SnippetsPane, {
-      title: FAVORITES_TOOL_DEFINITIONS.snippets.label,
-      snippets: snippetLibrary.snippets,
+      title: FAVORITES_TOOL_DEFINITIONS.snippets.label, snippets: snippetLibrary.snippets,
       isNameTaken: (name, previousName) => snippetLibrary.isNameTaken(name, previousName),
       save: (draftSnippet, previousName): void => {
         void snippetLibrary.save(draftSnippet, previousName);
@@ -204,63 +173,45 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   return {
     mount: (container): void => {
       const appRoot = mountAppRoot(container, {
-        colorScheme: sharedPreferences.colorScheme.peek(),
-        themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()],
-        appFont: DEFAULT_APP_FONT,
+        colorScheme: sharedPreferences.colorScheme.peek(), themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()], appFont: DEFAULT_APP_FONT,
         styles: [
-          UI_CSS,
-          APP_CSS,
-          SEARCH_PANEL_CSS,
-          FAVORITES_SEARCH_OPTIONS_ROW_CSS,
-          SNIPPETS_CSS,
-          LIGHTBOX_CSS,
-          LIGHTBOX_DETAILS_CSS,
-          LIGHTBOX_TAGS_CSS,
-          COPY_ID_BUTTON_CSS
+          UI_CSS, APP_CSS, SEARCH_PANEL_CSS, FAVORITES_SEARCH_OPTIONS_ROW_CSS, SNIPPETS_CSS,
+          LIGHTBOX_CSS, LIGHTBOX_DETAILS_CSS, LIGHTBOX_TAGS_CSS, COPY_ID_BUTTON_CSS
         ]
       });
 
       appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
         favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), zenEnabled,
         zenExitKeys: computed(() => [...keyBindings.value.toggleZen, ...keyBindings.value.exitZen]),
-        activityBar: h(ActivityBar<FavoritesTool>, {
-          items: FAVORITES_TOOL_DEFINITIONS,
-          renderViewById: renderViewByTool,
-          value: favoritesPreferences.activeTool,
-          onValueChange: id => favoritesPreferences.activeTool.set(id),
-          footerChild: h(AppMark, { scriptVersion })
-        }),
-        tabsHeaderChild: h("div", { hidden: computed(() => !favoritesTabStripVisible.value) }, h(TabStrip, {
-          tabs: computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable }))),
-          activeTabId: tabManager.activeTabId,
-          trailingChild: h(StatusText, { text: favoritesService.loadStatus }),
-          onActivate: tabId => tabManager.activate(tabId),
-          onDuplicate: tabId => favoritesWorkspace.duplicateTab(tabId),
-          onClose: tabIds => favoritesWorkspace.closeTabs(tabIds),
-          onMove: (tabId, index) => tabManager.move(tabId, index),
-          onAdd: () => favoritesWorkspace.openBlankTab()
-        })),
-        renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
-          favoritesService, favoritesPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, tabCount, searchHistory, favoriteSizeRecorder,
-          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions,
-          openLightbox: favorite => openLightbox(favoritesTab.session, favorite),
+        nativeHeaderVisible: computed(() => hostPage.hasHeader && favoritesPreferences.nativeHeaderVisible.value),
+        activityBar: composeFavoritesActivityBar({ scriptVersion }, {
+          favoritesPreferences, favoritesTabStripVisible, tabManager, keyBindings, renderViewByTool,
           enterZen: (): void => {
             zenEnabled.value = true;
           }
+        }),
+        tabsHeaderChild: h("div", { hidden: computed(() => !favoritesTabStripVisible.value) }, h(TabStrip, {
+          tabs: computed(() => tabManager.tabs.value.map(tab => ({ id: tab.id, label: tab.value.title, closable: tab.closable }))),
+          activeTabId: tabManager.activeTabId, trailingChild: h(StatusText, { text: favoritesService.loadStatus }),
+          onActivate: tabId => tabManager.activate(tabId), onDuplicate: tabId => favoritesWorkspace.duplicateTab(tabId),
+          onClose: tabIds => favoritesWorkspace.closeTabs(tabIds), onMove: (tabId, index) => tabManager.move(tabId, index),
+          onAdd: () => favoritesWorkspace.openBlankTab()
+        })),
+        renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
+          favoritesService, favoritesPreferences, favoritesSearchOptionsVisible, keyBindings, searchHistory, favoriteSizeRecorder,
+          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions,
+          openLightbox: favorite => openLightbox(favoritesTab.session, favorite)
         })
       })).result);
       const windowFill = fillWindow(appRoot, sizeObserver);
 
       bindHostAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
-      listenForKeyBindings(
-        { keyBindings, commandDefinitionByCommand: FAVORITES_COMMAND_DEFINITIONS },
-        {
-          target: container.ownerDocument,
-          handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {
-            favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled, openLightbox
-          })
-        }
-      );
+      listenForKeyBindings({ keyBindings, commandDefinitionByCommand: FAVORITES_COMMAND_DEFINITIONS }, {
+        target: container.ownerDocument,
+        handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {
+          favoritesWorkspace, favoritesPreferences, sharedPreferences, favoritesTabStripVisible, favoritesSearchOptionsVisible, zenEnabled, openLightbox
+        })
+      });
       effect(() => {
         hostPage.setHeaderVisible(favoritesPreferences.nativeHeaderVisible.value);
         windowFill.refit();

@@ -18,15 +18,15 @@ describe("createIcon", () => {
   });
 
   test("redraws as the icon it is given changes", () => {
-    const name = new Signal<Icon>("expandAll");
+    const name = new Signal<Icon>("play");
     const { result: icon } = render(document, () => createIcon(name, "icon"));
     const readPath = (): string | null => icon.querySelector("path")!.getAttribute("d");
-    const expandPath = readPath();
+    const playPath = readPath();
 
-    name.value = "collapseAll";
-    expect(readPath()).not.toBe(expandPath);
-    name.value = "expandAll";
-    expect(readPath()).toBe(expandPath);
+    name.value = "pause";
+    expect(readPath()).not.toBe(playPath);
+    name.value = "play";
+    expect(readPath()).toBe(playPath);
   });
 
   test("draws a different path per icon, with the given class", () => {

@@ -6,7 +6,6 @@
 @import "./media/lightbox_video.css" layer(components);
 @import "./zoom/lightbox_viewport.css" layer(components);
 @import "./overlay/lightbox_overlay.css" layer(components);
-@import "./overlay/lightbox_toolbar.css" layer(components);
 @import "./overlay/lightbox_button.css" layer(components);
 @import "./navigation/lightbox_arrow.css" layer(components);
 @import "./navigation/lightbox_position.css" layer(components);

@@ -3,6 +3,7 @@ import { LightboxArrow, LightboxArrowClass } from "@/core/features/lightbox/navi
 import { describe, expect, test, vi } from "vitest";
 import { h, render } from "@/core/ui/h/h";
 import ARROW_CSS from "@/core/features/lightbox/navigation/lightbox_arrow.css?inline";
+import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
 function drawnIconPath(icon: Icon): string | null {
@@ -15,18 +16,25 @@ describe("LightboxArrow", () => {
   });
 
   test.each([
-    ["previous", "Previous", "chevronLeftLarge"],
-    ["next", "Next", "chevronRightLarge"]
-  ] as const)("labels the %s arrow and draws its icon", (direction, label, icon) => {
-    const { result: button } = render(document, () => <LightboxArrow direction={direction} onClick={vi.fn()} />);
+    ["previous", "chevronLeftLarge"],
+    ["next", "chevronRightLarge"]
+  ] as const)("draws the %s arrow's icon", (direction, icon) => {
+    const { result: button } = render(document, () => <LightboxArrow direction={direction} label="Step" title="Step" onClick={vi.fn()} />);
 
-    expect([button.getAttribute("aria-label"), button.title]).toEqual([label, label]);
     expect(button.querySelector("path")?.getAttribute("d")).toBe(drawnIconPath(icon));
+  });
+
+  test("labels itself and shows its title as it changes", () => {
+    const title = new Signal("Show Next (→)");
+    const { result: button } = render(document, () => <LightboxArrow direction="next" label="Show Next" title={title} onClick={vi.fn()} />);
+
+    title.value = "Show Next (N)";
+    expect([button.getAttribute("aria-label"), button.title]).toEqual(["Show Next", "Show Next (N)"]);
   });
 
   test("runs its action when clicked", () => {
     const onClick = vi.fn();
-    const { result: button } = render(document, () => <LightboxArrow direction="next" onClick={onClick} />);
+    const { result: button } = render(document, () => <LightboxArrow direction="next" label="Show Next" title="Show Next" onClick={onClick} />);
 
     button.click();
     expect(onClick).toHaveBeenCalledOnce();

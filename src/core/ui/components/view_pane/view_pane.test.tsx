@@ -54,7 +54,7 @@ describe("ViewPane", () => {
 
   test("calls an action when its button is clicked", () => {
     const onClick = vi.fn();
-    const element = setup([{ label: "Reset all", icon: "reset", onClick }]);
+    const element = setup([{ label: "Reset all", icon: "rotateCcw", onClick }]);
 
     findAction(element, "Reset all").click();
     expect(onClick).toHaveBeenCalledOnce();
@@ -62,7 +62,7 @@ describe("ViewPane", () => {
 
   test("follows an action's disabled signal", () => {
     const disabled = new Signal(true);
-    const button = findAction(setup([{ label: "Reset all", icon: "reset", disabled, onClick: vi.fn() }]), "Reset all");
+    const button = findAction(setup([{ label: "Reset all", icon: "rotateCcw", disabled, onClick: vi.fn() }]), "Reset all");
     const wasDisabled = button.disabled;
 
     disabled.value = false;
@@ -71,13 +71,13 @@ describe("ViewPane", () => {
 
   test("follows an action's label signal", () => {
     const label = new Signal("Expand all");
-    const element = setup([{ label, icon: "expandAll", onClick: vi.fn() }]);
+    const element = setup([{ label, icon: "add", onClick: vi.fn() }]);
 
     label.value = "Collapse all";
     expect(findAction(element, "Collapse all").title).toBe("Collapse all");
   });
 
   test("enables an action without a disabled signal", () => {
-    expect(findAction(setup([{ label: "Reset all", icon: "reset", onClick: vi.fn() }]), "Reset all").disabled).toBe(false);
+    expect(findAction(setup([{ label: "Reset all", icon: "rotateCcw", onClick: vi.fn() }]), "Reset all").disabled).toBe(false);
   });
 });

@@ -52,6 +52,15 @@ describe("CountToggleButton", () => {
     expect([badge.hidden, badge.textContent]).toEqual([false, "2"]);
   });
 
+  test("sizes its badge with the button", () => {
+    const { result: element } = render(document, () => (
+      <CountToggleButton icon="sliders" label="Options" size="large" pressed={new Signal(false)} count={new Signal(1)} onClick={() => undefined} />
+    ));
+    const badge = element.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
+
+    expect([element.dataset.size, badge.dataset.size]).toEqual(["large", "large"]);
+  });
+
   test("hides its badge while pressed", () => {
     const { element, pressed, count } = setup();
     const badge = element.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;

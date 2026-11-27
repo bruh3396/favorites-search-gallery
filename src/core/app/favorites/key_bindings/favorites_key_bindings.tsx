@@ -71,7 +71,7 @@ export function FavoritesKeyBindings({ sections: favoritesKeyBindingsSections, r
   return (
     <ViewPane
       title={FAVORITES_TOOL_DEFINITIONS.keyBindings.label}
-      actions={[{ label: "Reset Keyboard Shortcuts", icon: "reset", onClick: resetKeyBindings }]}
+      actions={[{ label: "Reset Keyboard Shortcuts", icon: "rotateCcw", onClick: resetKeyBindings }]}
       searchChild={
         <SearchField
           label="Search Keyboard Shortcuts"

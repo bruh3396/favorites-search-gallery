@@ -122,8 +122,16 @@ function findFavoriteButton(view: HTMLElement): HTMLButtonElement | null {
   return view.querySelector<HTMLButtonElement>("[aria-label=\"Add to Favorites\"], [aria-label=\"Favorited\"]");
 }
 
+function findButton(view: HTMLElement, label: string): HTMLButtonElement | null {
+  return view.querySelector<HTMLButtonElement>(`[aria-label="${label}"]`);
+}
+
+function readIconPath(button: HTMLElement): string | null | undefined {
+  return button.querySelector("path")?.getAttribute("d");
+}
+
 function readFavoriteIconPath(view: HTMLElement): string | null | undefined {
-  return findFavoriteButton(view)?.querySelector("path")?.getAttribute("d");
+  return readIconPath(findFavoriteButton(view)!);
 }
 
 function drawnIconPath(icon: Icon): string | null {
@@ -155,16 +163,48 @@ describe("composeLightboxDialog", () => {
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
+  test("titles a command button with its first key, following changed key bindings", () => {
+    const { view, lightboxKeyBindings } = setup();
+    const button = findButton(view, "Enter Fullscreen")!;
+    const title = button.title;
+
+    lightboxKeyBindings.value = { ...lightboxKeyBindings.peek(), toggleFullscreen: [] };
+    expect([title, button.title]).toEqual(["Enter Fullscreen (F)", "Enter Fullscreen"]);
+  });
+
+  test("titles its arrows with their keys", () => {
+    expect(findButton(setup().view, "Go to Next")!.title).toBe("Go to Next (→)");
+  });
+
+  test("offers to stop autoplay while autoplaying", () => {
+    const { view } = setup();
+
+    pressKey(view, " ");
+    const button = findButton(view, "Stop Autoplay")!;
+
+    expect([button.title, readIconPath(button)]).toEqual(["Stop Autoplay (Space)", drawnIconPath("pause")]);
+    button.click();
+    expect(readIconPath(findButton(view, "Start Autoplay")!)).toBe(drawnIconPath("play"));
+  });
+
+  test("offers to exit fullscreen while in fullscreen", () => {
+    const { view } = setup();
+
+    Object.defineProperty(document, "fullscreenElement", { value: document.documentElement, configurable: true });
+    document.dispatchEvent(new Event("fullscreenchange"));
+    expect(readIconPath(findButton(view, "Exit Fullscreen")!)).toBe(drawnIconPath("exitFullscreen"));
+  });
+
   test("steps from its arrows", () => {
     const { view, goToNext } = setup();
 
-    view.querySelector<HTMLButtonElement>("[aria-label=\"Next\"]")!.click();
+    view.querySelector<HTMLButtonElement>("[aria-label=\"Go to Next\"]")!.click();
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
   test("keeps the overlay awake while the pointer is over the chrome", () => {
     const { view, isOpen, scheduler } = setup();
-    const slot = view.querySelector<HTMLButtonElement>("[aria-label=\"Next\"]")!.parentElement!;
+    const slot = view.querySelector<HTMLButtonElement>("[aria-label=\"Go to Next\"]")!.parentElement!;
 
     isOpen.value = true;
     slot.dispatchEvent(new PointerEvent("pointerenter"));
@@ -214,16 +254,25 @@ describe("composeLightboxDialog", () => {
     expect(goToNext).toHaveBeenCalledOnce();
   });
 
-  test.each<[LightboxMode, number]>([
-    ["simple", 200],
-    ["full", 250]
-  ])("morphs back to the item's thumb over %s mode's %ims", async(mode, duration) => {
+  test("closes immediately without morphing in simple mode with loaded media", async() => {
+    const locateItem = vi.fn(() => document.createElement("div"));
+    const { view, retainedItems, close } = setup("simple", { locateItem });
+
+    retainedItems.value = [IMAGE];
+    await flushMicrotasks();
+    view.dispatchEvent(new Event("close"));
+    expect(close).toHaveBeenCalledOnce();
+    expect(locateItem).not.toHaveBeenCalled();
+  });
+
+  test("morphs back to the item's thumb over full mode's 250ms", async() => {
+    const duration = 250;
     const thumb = document.createElement("div");
     const isThumbHidden = (): boolean => thumb.style.getPropertyValue("visibility") === "hidden";
 
     document.body.append(thumb);
     vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 0, 100, 100));
-    const { view, retainedItems, scheduler } = setup(mode, { locateItem: () => thumb });
+    const { view, retainedItems, scheduler } = setup("full", { locateItem: () => thumb });
 
     retainedItems.value = [IMAGE];
     await flushMicrotasks();
@@ -242,7 +291,7 @@ describe("composeLightboxDialog", () => {
   test("leaves out the details panel and its button without details", () => {
     const { view } = setup();
 
-    expect([findDetailsPanel(view), view.querySelector("[aria-label=\"Details\"]")]).toEqual([null, null]);
+    expect([findDetailsPanel(view), view.querySelector("[aria-label=\"Show Details\"]")]).toEqual([null, null]);
   });
 
   test("mounts the details content and toggles the panel from the details button", () => {
@@ -250,8 +299,19 @@ describe("composeLightboxDialog", () => {
     const { view } = setup("full", { lightboxDetails });
 
     expect(findDetailsPanel(view)!.textContent).toContain("details content");
-    view.querySelector<HTMLButtonElement>("[aria-label=\"Details\"]")!.click();
+    view.querySelector<HTMLButtonElement>("[aria-label=\"Show Details\"]")!.click();
     expect(lightboxDetails.isOpen.value).toBe(true);
+  });
+
+  test("offers to hide the details while they are open, from the toolbar and the panel", () => {
+    const lightboxDetails = createDetails();
+    const { view } = setup("full", { lightboxDetails });
+
+    lightboxDetails.isOpen.set(true);
+    const hideButtons = [...view.querySelectorAll<HTMLButtonElement>("[aria-label=\"Hide Details\"]")];
+
+    hideButtons[1].click();
+    expect([hideButtons.length, lightboxDetails.isOpen.value]).toEqual([2, false]);
   });
 
   test("keeps the overlay awake while the pointer is over the details panel", () => {
@@ -274,14 +334,14 @@ describe("composeLightboxDialog", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([])) });
 
     expect(readFavoriteIconPath(view)).toBe(drawnIconPath("heartPlus"));
-    expect(findFavoriteButton(view)!.title).toBe("Add to Favorites");
+    expect(findFavoriteButton(view)!.title).toBe("Add to Favorites (E)");
   });
 
   test("shows a favorite as favorited", () => {
     const { view } = setup("full", { lightboxFavorite: createFavorite(new Signal([IMAGE.id])) });
 
     expect(readFavoriteIconPath(view)).toBe(drawnIconPath("heartFilled"));
-    expect(findFavoriteButton(view)!.title).toBe("Favorited");
+    expect(findFavoriteButton(view)!.title).toBe("Favorited (E)");
   });
 
   test("offers to add when no item is current", () => {
@@ -331,7 +391,7 @@ describe("composeLightboxDialog", () => {
 
     Object.defineProperty(HTMLElement.prototype, "requestFullscreen", { value: requestFullscreen, configurable: true });
     isOpen.value = true;
-    const button = view.querySelector<HTMLButtonElement>("[aria-label=\"Fullscreen\"]")!;
+    const button = view.querySelector<HTMLButtonElement>("[aria-label=\"Enter Fullscreen\"]")!;
 
     button.click();
     const target = requestFullscreen.mock.contexts[0] as HTMLElement;

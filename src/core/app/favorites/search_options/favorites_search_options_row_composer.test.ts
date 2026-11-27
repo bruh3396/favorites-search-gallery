@@ -154,10 +154,10 @@ describe("composeFavoritesSearchOptionsRow", () => {
     expect(queryChip(row, "Rating")!.textContent).toBe(expected);
   });
 
-  test("resets from Reset", () => {
+  test("resets from Clear Search Options", () => {
     const { row, favoritesSession } = setup();
 
-    row.querySelector<HTMLElement>("button[aria-label=\"Reset Search Options\"]")!.click();
+    row.querySelector<HTMLElement>("button[aria-label=\"Clear Search Options\"]")!.click();
     expect(favoritesSession.resetSearchOptions).toHaveBeenCalledOnce();
   });
 });

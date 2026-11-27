@@ -222,6 +222,22 @@ describe("composeFavoritesApp", () => {
     expect(hostPage.headerVisible).toBe(false);
   });
 
+  test("marks the app as below the native header until the header is switched off in the Settings tool", () => {
+    const root = mount(new MemoryLocalKeyedValues(), [], { hostPage: new MemoryHostPage(true) });
+    const app = root.querySelector(`.${FavoritesAppClass.root}`)!;
+    const wasMarked = app.hasAttribute("data-native-header-visible");
+
+    root.querySelector<HTMLButtonElement>(`.${ActivityBarClass.item}[aria-label="Settings"]`)!.click();
+    clickSettingsSwitch(root, "Header");
+    expect([wasMarked, app.hasAttribute("data-native-header-visible")]).toEqual([true, false]);
+  });
+
+  test("never marks the app as below a native header on a page without one", () => {
+    const app = mount().querySelector(`.${FavoritesAppClass.root}`)!;
+
+    expect(app.hasAttribute("data-native-header-visible")).toBe(false);
+  });
+
   test("switches the app and the site to the color scheme picked in the Settings tool", () => {
     const hostPage = new MemoryHostPage();
 
@@ -277,8 +293,9 @@ describe("composeFavoritesApp", () => {
     const hostPage = new MemoryHostPage(true);
 
     localKeyedValues.set("favorites-search-gallery", { preferences: { favorites: { nativeHeaderVisible: false } } });
-    mount(localKeyedValues, [], { hostPage });
-    expect(hostPage.headerVisible).toBe(false);
+    const app = mount(localKeyedValues, [], { hostPage }).querySelector(`.${FavoritesAppClass.root}`)!;
+
+    expect([hostPage.headerVisible, app.hasAttribute("data-native-header-visible")]).toEqual([false, false]);
   });
 
   test("puts every preference back to its default, live and in storage, once the reset is confirmed", () => {
@@ -294,7 +311,7 @@ describe("composeFavoritesApp", () => {
     expect(readThemeAccent(root)).toBe(`light-dark(${THEME_DEFINITIONS.rule34.lightColors.accent}, ${THEME_DEFINITIONS.rule34.darkColors.accent})`);
     expect(grid.dataset.layout).toBe("column");
     expect(localKeyedValues.get("favorites-search-gallery")).toMatchObject({
-      preferences: { shared: { theme: "rule34" }, favorites: { grid: { layout: "column" } }, postList: { grid: { columnCount: 6 } } }
+      preferences: { shared: { theme: "rule34" }, favorites: { grid: { layout: "column" } }, postList: { grid: { columnCount: 4 } } }
     });
   });
 
@@ -474,7 +491,7 @@ describe("composeFavoritesApp", () => {
     expect([wasHidden, isStripHidden(), queryPanel()]).toEqual([true, false, panel]);
   });
 
-  test("enters zen from the search panel's zen button", () => {
+  test("enters zen from the Zen button", () => {
     const root = mount();
 
     root.querySelector<HTMLButtonElement>("button[aria-label=\"Zen\"]")!.click();
@@ -683,13 +700,13 @@ describe("composeFavoritesApp", () => {
     expect([navigator.opened, dialog.open]).toEqual([["#post-1", "https://originals/1.png"], true]);
   });
 
-  test("saves the lightbox favorite's original, named by its id, from the download button", async() => {
+  test("saves the lightbox favorite's original, named by its id, from the download key", async() => {
     const fileSaver = new MemoryFileSaver();
     const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1", media: { kind: "image", locator: "images/1" } })], { fileSaver });
 
     await flushMicrotasks();
     root.querySelector<HTMLAnchorElement>(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.link}`)!.click();
-    clickLightboxButton(root, "Download");
+    pressKey(root, "s");
     await flushMicrotasks();
     expect(fileSaver.saved.map(saved => saved.name)).toEqual(["1"]);
   });

@@ -25,6 +25,7 @@ interface Setup {
   loadState: Signal<FavoritesLoadState>;
   zenEnabled: Signal<boolean>;
   zenExitKeys: Signal<readonly string[]>;
+  nativeHeaderVisible: Signal<boolean>;
 }
 
 function createWorkspace(): FavoritesWorkspace {
@@ -51,6 +52,7 @@ function setup(): Setup {
   const tabsHeader = document.createElement("nav");
   const zenEnabled = new Signal(false);
   const zenExitKeys = new Signal<readonly string[]>(["z", "Escape"]);
+  const nativeHeaderVisible = new Signal(true);
   const { result: elements } = render(document, () => h(FavoritesApp, {
     favoritesService: { loadState },
     favoritesWorkspace: createWorkspace(),
@@ -59,9 +61,14 @@ function setup(): Setup {
     tabsHeaderChild: tabsHeader,
     zenEnabled,
     zenExitKeys,
+    nativeHeaderVisible,
     renderPanel: () => document.createElement("section")
   }));
-  return { elements, element: elements[0], lightboxView, tabsHeader, loadState, zenEnabled, zenExitKeys };
+  return { elements, element: elements[0], lightboxView, tabsHeader, loadState, zenEnabled, zenExitKeys, nativeHeaderVisible };
+}
+
+function readProgressBar(element: HTMLElement): HTMLElement {
+  return element.querySelector<HTMLElement>("[role=progressbar]")!;
 }
 
 function readZenHint(element: HTMLElement): HTMLElement {
@@ -87,12 +94,40 @@ describe("FavoritesApp", () => {
     expect(element.contains(tabsHeader)).toBe(true);
   });
 
-  test("shows the load's progress until it finishes", () => {
-    const { element, loadState } = setup();
-    const progressBar = element.querySelector<HTMLElement>("[role=progressbar]")!;
+  test.each([
+    { favoritesLoadState: { phase: "fetching", loadedCount: 150, expectedCount: 600 }, percent: "25" },
+    { favoritesLoadState: { phase: "restoring", loadedCount: 300, expectedCount: 600 }, percent: "50" }
+  ] satisfies { favoritesLoadState: FavoritesLoadState; percent: string }[])(
+    "shows the share loaded so far while $favoritesLoadState.phase",
+    ({ favoritesLoadState, percent }) => {
+      const { element, loadState } = setup();
+      const progressBar = readProgressBar(element);
 
-    expect([progressBar.hidden, progressBar.getAttribute("aria-valuenow")]).toEqual([false, "25"]);
-    loadState.value = { phase: "loaded", newCount: 0, unfavoritedCount: 0 };
+      loadState.value = favoritesLoadState;
+      expect([progressBar.hidden, progressBar.getAttribute("aria-valuenow")]).toEqual([false, percent]);
+    }
+  );
+
+  test.each([
+    { phase: "fetching", loadedCount: 150, expectedCount: null },
+    { phase: "restoring", loadedCount: 0, expectedCount: 0 },
+    ...(["starting", "saving", "pulling", "indexing", "checkingMissing"] as const).map(phase => ({ phase }))
+  ] satisfies FavoritesLoadState[])("shows indeterminate progress while $phase without a share", state => {
+    const { element, loadState } = setup();
+    const progressBar = readProgressBar(element);
+
+    loadState.value = state;
+    expect([progressBar.hidden, progressBar.hasAttribute("aria-valuenow")]).toEqual([false, false]);
+  });
+
+  test.each([
+    { phase: "loaded", newCount: 0, unfavoritedCount: 0 },
+    { phase: "interrupted" }
+  ] satisfies FavoritesLoadState[])("hides the progress once $phase", state => {
+    const { element, loadState } = setup();
+    const progressBar = readProgressBar(element);
+
+    loadState.value = state;
     expect(progressBar.hidden).toBe(true);
   });
 
@@ -102,6 +137,14 @@ describe("FavoritesApp", () => {
     expect(element.hasAttribute("data-zen")).toBe(false);
     zenEnabled.value = true;
     expect(element.hasAttribute("data-zen")).toBe(true);
+  });
+
+  test("marks itself as below the native header only while that header is visible", () => {
+    const { element, nativeHeaderVisible } = setup();
+
+    expect(element.hasAttribute("data-native-header-visible")).toBe(true);
+    nativeHeaderVisible.value = false;
+    expect(element.hasAttribute("data-native-header-visible")).toBe(false);
   });
 
   test("shows how to exit Zen only while zen is enabled", () => {

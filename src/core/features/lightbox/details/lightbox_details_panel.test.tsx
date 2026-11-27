@@ -14,7 +14,6 @@ function setup(partialLightboxDetailsPanelProps: Partial<LightboxDetailsPanelPro
   const lightboxDetailsPanelProps: LightboxDetailsPanelProps = {
     isOpen,
     contentChild: "content",
-    onClose: vi.fn(),
     onPointerenter: vi.fn(),
     onPointerleave: vi.fn(),
     ...partialLightboxDetailsPanelProps
@@ -32,11 +31,11 @@ describe("LightboxDetailsPanel", () => {
     expect(setup().panel.textContent).toContain("content");
   });
 
-  test("shows its title beside the close button", () => {
-    const { panel } = setup({ titleChild: "#12" });
-    const closeButton = panel.querySelector("[aria-label=\"Hide Details\"]")!;
+  test("shows its title and its trailing slot", () => {
+    const trailingChild = document.createElement("button");
+    const { panel } = setup({ titleChild: "#12", trailingChild });
 
-    expect(closeButton.parentElement!.textContent).toContain("#12");
+    expect([panel.textContent!.includes("#12"), panel.contains(trailingChild)]).toEqual([true, true]);
   });
 
   test("keeps its controls outside the scrolling content", () => {
@@ -54,13 +53,6 @@ describe("LightboxDetailsPanel", () => {
     isOpen.value = true;
     expect(panel.inert).toBe(false);
     expect(panel.hasAttribute("data-open")).toBe(true);
-  });
-
-  test("closes from its close button", () => {
-    const { panel, lightboxDetailsPanelProps } = setup();
-
-    panel.querySelector<HTMLButtonElement>("[aria-label=\"Hide Details\"]")!.click();
-    expect(lightboxDetailsPanelProps.onClose).toHaveBeenCalledOnce();
   });
 
   test("reports the pointer entering and leaving", () => {

@@ -5,6 +5,12 @@
 }
 
 .fsg-ActivityBar-rail {
+  --fsg-ActivityBar-rail-background: light-dark(
+    var(--fsg-color-surface-container),
+    color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%)
+  );
+  --fsg-CountBadge-ring: var(--fsg-ActivityBar-rail-background);
+
   display: flex;
   flex: none;
   flex-direction: column;
@@ -12,10 +18,7 @@
   gap: 4px;
   inline-size: 48px;
   padding-block: 4px;
-  background: light-dark(
-    var(--fsg-color-surface-container),
-    color-mix(in oklab, var(--fsg-color-surface-dim), var(--fsg-color-surface) 40%)
-  );
+  background: var(--fsg-ActivityBar-rail-background);
 }
 
 .fsg-ActivityBar-item[aria-pressed="true"] {
@@ -24,11 +27,21 @@
 }
 
 .fsg-ActivityBar-footer {
-  display: grid;
+  display: flex;
   flex: none;
-  place-items: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   min-block-size: var(--fsg-control-size-large);
   margin-block-start: auto;
+}
+
+.fsg-ActivityBar-footer::before {
+  content: "";
+  inline-size: 24px;
+  block-size: 1px;
+  margin-block-end: -4px;
+  background: var(--fsg-color-outline-variant);
 }
 
 .fsg-ActivityBar-view {

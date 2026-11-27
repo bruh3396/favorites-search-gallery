@@ -5,13 +5,16 @@ export const CountBadgeClass = {
   root: "fsg-CountBadge"
 } as const;
 
+type CountBadgeSize = "medium" | "large";
+
 export interface CountBadgeProps {
   count: Readable<number>;
+  size?: CountBadgeSize;
 }
 
-export function CountBadge({ count }: CountBadgeProps): HTMLElement {
+export function CountBadge({ count, size: countBadgeSize = "medium" }: CountBadgeProps): HTMLElement {
   return (
-    <span className={CountBadgeClass.root} hidden={computed(() => count.value === 0)}>
+    <span className={CountBadgeClass.root} data-size={countBadgeSize} hidden={computed(() => count.value === 0)}>
       {computed(() => String(count.value))}
     </span>
   );

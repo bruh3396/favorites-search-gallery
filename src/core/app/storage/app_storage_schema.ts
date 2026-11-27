@@ -19,7 +19,7 @@ import { createStoredValueDefinition } from "@/core/utils/storage/stored_value_d
 
 const POST_GRID = {
   layout: createStoredValueDefinition<GridLayout>("column", createOneOfGuard(GRID_LAYOUTS)),
-  columnCount: createStoredValueDefinition(6),
+  columnCount: createStoredValueDefinition(4),
   hdTilesEnabled: createStoredValueDefinition(true)
 };
 

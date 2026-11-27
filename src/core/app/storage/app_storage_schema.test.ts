@@ -44,7 +44,7 @@ describe("APP_STORAGE_SCHEMA", () => {
 
     postList.grid.columnCount.set(3);
     postList.lightbox.muted.set(true);
-    expect([favorites.grid.columnCount.value, favorites.lightbox.muted.value]).toEqual([6, false]);
+    expect([favorites.grid.columnCount.value, favorites.lightbox.muted.value]).toEqual([4, false]);
   });
 
   test("falls back to the default lightbox volume for one outside 0 to 1", () => {

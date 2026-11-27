@@ -12,6 +12,7 @@ type IconButtonSize = "small" | "medium" | "large";
 export interface IconButtonProps {
   icon: Reactive<Icon>;
   label: Reactive<string>;
+  title?: Reactive<string>;
   size?: IconButtonSize;
   type?: "button" | "submit";
   pressed?: Readable<boolean>;
@@ -22,7 +23,7 @@ export interface IconButtonProps {
 }
 
 export function IconButton({
-  icon, label, size: iconButtonSize = "medium", type = "button", pressed, disabled, className, onClick, children
+  icon, label, title = label, size: iconButtonSize = "medium", type = "button", pressed, disabled, className, onClick, children
 }: IconButtonProps): HTMLElement {
   return (
     <button
@@ -30,7 +31,7 @@ export function IconButton({
       type={type}
       data-size={iconButtonSize}
       aria-label={label}
-      title={label}
+      title={title}
       aria-pressed={pressed === undefined ? undefined : computed(() => String(pressed.value))}
       disabled={disabled}
       onClick={onClick}

@@ -17,8 +17,8 @@ export const FavoriteLightboxDetailsClass = {
 } as const;
 
 const ORGANIZATION_CHOICES: readonly ControlChoice<TagOrganization>[] = [
-  { value: "category", label: "By Category", icon: "tagsGrouped" },
-  { value: "list", label: "One List", icon: "tagsFlat" }
+  { value: "category", label: "By Category", icon: "listIndented" },
+  { value: "list", label: "One List", icon: "linesWrapped" }
 ];
 const ALIGNMENT_CHOICES: readonly ControlChoice<TagAlignment>[] = [
   { value: "start", label: "Left", icon: "alignLeft" },
@@ -65,7 +65,7 @@ function FavoriteLightboxTitle({ copyIdButton, viewOpen }: { copyIdButton: Node;
       <h2 className={FavoriteLightboxDetailsClass.id}>
         {copyIdButton}
       </h2>
-      <LightboxButton icon="tune" label="Display" pressed={viewOpen} onClick={() => {
+      <LightboxButton icon="sliders" label="Display" pressed={viewOpen} onClick={() => {
         viewOpen.value = !viewOpen.value;
       }} />
     </div>

@@ -124,7 +124,6 @@ function showPreview({ root, preview }: PreviewElements, url: string): void {
   }, { once: true });
 
   if (preview.complete) {
-    preview.decoding = "sync";
     takeShapeFromPreview();
   } else {
     preview.hidden = true;

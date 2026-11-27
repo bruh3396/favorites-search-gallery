@@ -1,7 +1,8 @@
 import { LIGHTBOX_COMMAND_DEFINITIONS, LightboxCommand } from "@/core/features/lightbox/commands/lightbox_command";
+import { Reactive, currentDocument, h } from "@/core/ui/h/h";
 import { Readable, computed, effect } from "@/core/utils/reactive/signal";
-import { currentDocument, h } from "@/core/ui/h/h";
 import { CommandHandlers } from "@/core/ui/key_bindings/command_handlers";
+import { Icon } from "@/core/ui/components/icon/icon";
 import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { LightboxActions } from "@/core/features/lightbox/lightbox_actions";
 import { LightboxArrow } from "@/core/features/lightbox/navigation/lightbox_arrow";
@@ -26,7 +27,6 @@ import { LightboxPosition } from "@/core/features/lightbox/navigation/lightbox_p
 import { LightboxPreferences } from "@/core/features/lightbox/lightbox_preferences";
 import { LightboxPreview } from "@/core/features/lightbox/media/lightbox_preview";
 import { LightboxStage } from "@/core/features/lightbox/media/lightbox_stage";
-import { LightboxToolbar } from "@/core/features/lightbox/overlay/lightbox_toolbar";
 import { LightboxVideo } from "@/core/features/lightbox/media/lightbox_video";
 import { LightboxViewport } from "@/core/features/lightbox/zoom/lightbox_viewport";
 import { LightboxZoom } from "@/core/features/lightbox/zoom/lightbox_zoom";
@@ -38,6 +38,7 @@ import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer"
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
 import { createLightboxCommandHandlers } from "@/core/features/lightbox/commands/lightbox_command_handlers";
 import { createLightboxMouseListeners } from "@/core/features/lightbox/commands/lightbox_mouse_listeners";
+import { formatCommandTitle } from "@/core/ui/key_bindings/command_title_formatter";
 import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
 import { onCleanup } from "@/core/utils/reactive/scope";
 
@@ -48,8 +49,7 @@ const OVERLAY_LEAVE_DELAY = 1_000;
 const ZOOM_MINIMUM_SCALE = 2;
 const ZOOM_MAXIMUM_SCALE = 8;
 const AUTOPLAY_INTERVAL = 3_000;
-const FULL_MORPH_DURATION = 250;
-const SIMPLE_MORPH_DURATION = 200;
+const MORPH_DURATION = 250;
 const SIMPLE_COMMANDS: ReadonlySet<LightboxCommand> = new Set<LightboxCommand>([
   "showNext",
   "showPrevious",
@@ -111,8 +111,8 @@ export function composeLightboxDialog<T extends MediaItem>(dependencies: Lightbo
     viewport,
     lightboxNavigation,
     shownMedia: lightboxStage.shownMedia,
-    canMorph: computed(() => !lightboxFullscreen.inFullscreen.value),
-    morphDuration: computed(() => (simple.value ? SIMPLE_MORPH_DURATION : FULL_MORPH_DURATION)),
+    canMorph: computed(() => !simple.value && !lightboxFullscreen.inFullscreen.value),
+    morphDuration: computed(() => MORPH_DURATION),
     locateItem
   });
   const handlers = limitToSimpleCommands(
@@ -121,6 +121,23 @@ export function composeLightboxDialog<T extends MediaItem>(dependencies: Lightbo
     }),
     simple
   );
+  const computeLightboxCommandTitle = (
+    lightboxCommand: LightboxCommand,
+    label: Reactive<string> = LIGHTBOX_COMMAND_DEFINITIONS[lightboxCommand].label
+  ): Readable<string> => computed(() => formatCommandTitle(
+    typeof label === "string" ? label : label.value,
+    lightboxKeyBindings.value[lightboxCommand]
+  ));
+  const renderLightboxCommandButton = (
+    lightboxCommand: LightboxCommand,
+    icon: Reactive<Icon>,
+    label: Reactive<string> = LIGHTBOX_COMMAND_DEFINITIONS[lightboxCommand].label
+  ): HTMLElement => h(LightboxButton, {
+    icon,
+    label,
+    title: computeLightboxCommandTitle(lightboxCommand, label),
+    onClick: handlers[lightboxCommand]
+  });
 
   effect(() => {
     if (!lightboxNavigation.isOpen.value) {
@@ -158,19 +175,42 @@ export function composeLightboxDialog<T extends MediaItem>(dependencies: Lightbo
         onSlotLeave: () => lightboxOverlayVisibility.release(),
         topEdgeChild: h(LightboxAutoplayBar, { countdown: lightboxAutoplay.countdown }),
         topStartChild: h(LightboxPosition, { position: lightboxNavigation.position }),
-        topEndChild: h(LightboxToolbar, {
-          isAutoplaying: lightboxAutoplay.isPlaying,
-          inFullscreen: lightboxFullscreen.inFullscreen,
-          detailsOpen: lightboxDetails?.isOpen,
-          leadingChild: lightboxFavorite === undefined ? undefined : h(LightboxButton, {
-            icon: computed(() => (isFavorited.value ? "heartFilled" : "heartPlus")),
-            label: computed(() => (isFavorited.value ? "Favorited" : "Add to Favorites")),
-            onClick: handlers.addFavorite
-          }),
-          handlers
+        topEndChild: [
+          lightboxFavorite === undefined ? undefined : renderLightboxCommandButton(
+            "addFavorite",
+            computed(() => (isFavorited.value ? "heartFilled" : "heartPlus")),
+            computed(() => (isFavorited.value ? "Favorited" : "Add to Favorites"))
+          ),
+          renderLightboxCommandButton(
+            "toggleAutoplay",
+            computed(() => (lightboxAutoplay.isPlaying.value ? "pause" : "play")),
+            computed(() => (lightboxAutoplay.isPlaying.value ? "Stop Autoplay" : "Start Autoplay"))
+          ),
+          lightboxDetails === undefined ? undefined : renderLightboxCommandButton(
+            "toggleDetails",
+            "info",
+            computed(() => (lightboxDetails.isOpen.value ? "Hide Details" : "Show Details"))
+          ),
+          renderLightboxCommandButton("openPostPage", "external"),
+          renderLightboxCommandButton(
+            "toggleFullscreen",
+            computed(() => (lightboxFullscreen.inFullscreen.value ? "exitFullscreen" : "fullscreen")),
+            computed(() => (lightboxFullscreen.inFullscreen.value ? "Exit Fullscreen" : "Enter Fullscreen"))
+          ),
+          renderLightboxCommandButton("close", "closeLarge")
+        ],
+        startEdgeChild: h(LightboxArrow, {
+          direction: "previous",
+          label: LIGHTBOX_COMMAND_DEFINITIONS.showPrevious.label,
+          title: computeLightboxCommandTitle("showPrevious"),
+          onClick: handlers.showPrevious
         }),
-        startEdgeChild: h(LightboxArrow, { direction: "previous", onClick: handlers.showPrevious }),
-        endEdgeChild: h(LightboxArrow, { direction: "next", onClick: handlers.showNext })
+        endEdgeChild: h(LightboxArrow, {
+          direction: "next",
+          label: LIGHTBOX_COMMAND_DEFINITIONS.showNext.label,
+          title: computeLightboxCommandTitle("showNext"),
+          onClick: handlers.showNext
+        })
       }),
       h(LightboxZoomChip, { pixelScale: lightboxZoom.pixelScale }),
       h(LightboxMinimap, { previewUrl: lightboxStage.previewUrl, lightboxZoom }),
@@ -178,8 +218,8 @@ export function composeLightboxDialog<T extends MediaItem>(dependencies: Lightbo
         isOpen: lightboxDetails.isOpen,
         titleChild: lightboxDetailsContent.titleChild,
         controlsChild: lightboxDetailsContent.controlsChild,
+        trailingChild: renderLightboxCommandButton("toggleDetails", "closeLarge", "Hide Details"),
         contentChild: lightboxDetailsContent.bodyChild,
-        onClose: handlers.toggleDetails,
         onPointerenter: () => lightboxOverlayVisibility.hold(),
         onPointerleave: () => lightboxOverlayVisibility.release()
       })

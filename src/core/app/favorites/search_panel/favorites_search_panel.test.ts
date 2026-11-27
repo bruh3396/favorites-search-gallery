@@ -31,7 +31,6 @@ interface Setup {
   grid: HTMLElement;
   fieldTrailingChild: HTMLElement;
   subheaderChild: HTMLElement;
-  trailingChild: HTMLElement;
 }
 
 function createFavorite(postId: string): Favorite {
@@ -61,7 +60,6 @@ function setup(): Setup {
   const grid = document.createElement("div");
   const fieldTrailingChild = document.createElement("button");
   const subheaderChild = document.createElement("div");
-  const trailingChild = document.createElement("button");
   const favoritesService = { loadState, searchable };
   const favoritesSession = {
     query: computed(() => favoritesSearchOptions.value.query),
@@ -81,7 +79,6 @@ function setup(): Setup {
     focusSearch: new Emitter<void>(),
     fieldTrailingChild,
     subheaderChild,
-    trailingChild,
     skeleton,
     grid,
     searchElsewhere: vi.fn()
@@ -89,7 +86,7 @@ function setup(): Setup {
   const emptyState = element.querySelector<HTMLElement>(`.${EmptyStateClass.root}`)!;
   return {
     element, dispose, searchResults, searched, pageNumber, loadState, searchable, submit, goTo, clearSearch, favoritesSearchOptions, skeleton, emptyState, grid,
-    fieldTrailingChild, subheaderChild, trailingChild
+    fieldTrailingChild, subheaderChild
   };
 }
 
@@ -128,7 +125,7 @@ describe("FavoritesSearchPanel", () => {
 
     searchable.reach();
     favoritesSearchOptions.value = { ...DEFAULT_FAVORITES_SEARCH_OPTIONS, query: "cat" };
-    expect([isHidden(skeleton), isHidden(emptyState), emptyState.querySelector("p")!.textContent]).toEqual([true, false, "No favorites match \"cat\" yet"]);
+    expect([isHidden(skeleton), isHidden(emptyState), emptyState.querySelector("p")!.textContent]).toEqual([true, false, "No matching favorites yet"]);
   });
 
   test("hides the empty state once results arrive", () => {
@@ -275,12 +272,6 @@ describe("FavoritesSearchPanel", () => {
     const { element, subheaderChild } = setup();
 
     expect(element.contains(subheaderChild)).toBe(true);
-  });
-
-  test("shows its trailing content in the header", () => {
-    const { element, trailingChild } = setup();
-
-    expect(element.querySelector("header")!.contains(trailingChild)).toBe(true);
   });
 
   test("stops following the favorites once disposed", () => {

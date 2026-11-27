@@ -5,21 +5,27 @@
     grid-template-rows: minmax(0, 1fr);
     grid-template-columns: minmax(0, 1fr);
     block-size: 100%;
-    border-block-start: 1px solid var(--fsg-color-outline-variant);
     background: var(--fsg-color-surface-dim);
     /* zoom: 0.95; */
+  }
+
+  .fsg-FavoritesApp[data-native-header-visible] {
+    border-block-start: 1px solid var(--fsg-color-outline-variant);
   }
 
   .fsg-FavoritesApp-loadLine {
     position: absolute;
     z-index: 1;
-    inset-block-start: -1px;
+    inset-block-start: 0;
     inset-inline: 0;
+  }
+
+  .fsg-FavoritesApp[data-native-header-visible] .fsg-FavoritesApp-loadLine {
+    inset-block-start: -1px;
   }
 
   .fsg-FavoritesApp-panes {
     display: flex;
-    gap: 4px;
     min-block-size: 0;
     padding: 4px;
   }
@@ -31,7 +37,19 @@
     background: var(--fsg-color-surface);
   }
 
+  .fsg-FavoritesApp-panes > :not(:last-child) {
+    border-inline-end: 0;
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+  }
+
+  .fsg-FavoritesApp-panes > :not(:first-child) {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+  }
+
   .fsg-FavoritesApp[data-zen] .fsg-FavoritesApp-panes {
+    gap: 4px;
     padding: 0;
   }
 

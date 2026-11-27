@@ -87,10 +87,6 @@ function startApp(environment: Environment, favoritesAppDependencies: FavoritesA
 
 async function main(): Promise<void> {
   const rule34Document = new Rule34Document();
-
-  if (rule34Document.readPageName() !== "favorites") {
-    return;
-  }
   const hostEnvironment: HostEnvironment = {
     appMode: "favorites",
     favoritesOwnerId: rule34Document.readFavoritesOwnerId(),

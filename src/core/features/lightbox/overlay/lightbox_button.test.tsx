@@ -36,6 +36,14 @@ describe("LightboxButton", () => {
     expect([button.getAttribute("aria-label"), button.title]).toEqual(["Added", "Added"]);
   });
 
+  test("shows a given title in place of its label", () => {
+    const title = new Signal("Download (S)");
+    const { result: button } = render(document, () => <LightboxButton icon="download" label="Download" title={title} onClick={vi.fn()} />);
+
+    title.value = "Download (X)";
+    expect([button.getAttribute("aria-label"), button.title]).toEqual(["Download", "Download (X)"]);
+  });
+
   test("swaps its icon when the icon changes", () => {
     const icon = new Signal<Icon>("play");
     const { result: button } = render(document, () => <LightboxButton icon={icon} label="Autoplay" onClick={vi.fn()} />);

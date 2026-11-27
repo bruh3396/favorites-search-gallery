@@ -9,12 +9,11 @@ interface FavoritesSearchPanelBodyInput {
   readonly resultCount: number;
   readonly isSearchable: boolean;
   readonly loadPhase: FavoritesLoadState["phase"];
-  readonly query: string;
   readonly isFiltered: boolean;
 }
 
 export function describeFavoritesSearchPanelBody({
-  resultCount, isSearchable, loadPhase, query, isFiltered
+  resultCount, isSearchable, loadPhase, isFiltered
 }: FavoritesSearchPanelBodyInput): FavoritesSearchPanelBody {
   if (resultCount > 0) {
     return { kind: "results" };
@@ -22,7 +21,7 @@ export function describeFavoritesSearchPanelBody({
 
   if (isSearchable) {
     const isLoading = loadPhase !== "loaded" && loadPhase !== "interrupted";
-    return { kind: "empty", message: describeNoMatches(query, { isFiltered, isLoading }), offersClear: isFiltered };
+    return { kind: "empty", message: describeNoMatches({ isFiltered, isLoading }), offersClear: isFiltered };
   }
 
   switch (loadPhase) {
@@ -38,15 +37,9 @@ export function describeFavoritesSearchPanelBody({
   }
 }
 
-function describeNoMatches(query: string, { isFiltered, isLoading }: { isFiltered: boolean; isLoading: boolean }): string {
-  const suffix = isLoading ? " yet" : "";
-
-  if (query !== "") {
-    return `No favorites match "${query}"${suffix}`;
-  }
-
+function describeNoMatches({ isFiltered, isLoading }: { isFiltered: boolean; isLoading: boolean }): string {
   if (isFiltered) {
-    return `No favorites match the search options${suffix}`;
+    return isLoading ? "No matching favorites yet" : "No matching favorites";
   }
   return "No favorites yet";
 }

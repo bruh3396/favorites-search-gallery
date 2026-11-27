@@ -21,6 +21,14 @@ describe("CountBadge", () => {
     expect(result.hidden).toBe(false);
   });
 
+  test("defaults to the medium size", () => {
+    const readSize = (size?: "medium" | "large"): string | undefined => {
+      return render(document, () => <CountBadge count={new Signal(1)} size={size} />).result.dataset.size;
+    };
+
+    expect([readSize(), readSize("large")]).toEqual(["medium", "large"]);
+  });
+
   test("styles every class it sets", () => {
     expectClassesStyled(CountBadgeClass, COUNT_BADGE_CSS);
   });
