@@ -185,7 +185,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         zenExitKeys: computed(() => [...keyBindings.value.toggleZen, ...keyBindings.value.exitZen]),
         nativeHeaderVisible: computed(() => hostPage.hasHeader && favoritesPreferences.nativeHeaderVisible.value),
         activityBar: composeFavoritesActivityBar({ scriptVersion }, {
-          favoritesPreferences, favoritesTabStripVisible, tabManager, keyBindings, renderViewByTool,
+          favoritesPreferences, favoritesTabStripVisible, tabManager, keyBindings, renderViewByTool, navigator,
           enterZen: (): void => {
             zenEnabled.value = true;
           }

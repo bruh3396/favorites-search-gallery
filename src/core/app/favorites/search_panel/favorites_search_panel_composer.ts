@@ -9,6 +9,7 @@ import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_comman
 import { FavoritesSearchPanel } from "@/core/app/favorites/search_panel/favorites_search_panel";
 import { FavoritesService } from "@/core/features/favorites/favorites_service";
 import { FavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
+import { HELP_LINKS } from "@/core/app/help_links";
 import { ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { MetatagSuggester } from "@/core/features/autocomplete/metatag_suggester";
@@ -93,6 +94,7 @@ export function composeFavoritesSearchPanel(
     fieldPopupChild: h("div", { hidden: computed(() => autocomplete.suggestions.value.length === 0) }, h(SuggestionList, {
       suggestions: autocomplete.suggestions,
       highlightedIndex: autocomplete.highlightedIndex,
+      footerLink: { label: HELP_LINKS.searchSyntax.label, onChoose: () => navigator.open(HELP_LINKS.searchSyntax.url) },
       onAccept: autocomplete.accept,
       onActiveDescendantChange: currentActiveDescendantElement => {
         activeDescendantElement.value = currentActiveDescendantElement;

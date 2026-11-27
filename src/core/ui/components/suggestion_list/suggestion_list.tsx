@@ -11,23 +11,37 @@ export const SuggestionListClass = {
   icon: "fsg-SuggestionList-icon",
   text: "fsg-SuggestionList-text",
   match: "fsg-SuggestionList-match",
-  detail: "fsg-SuggestionList-detail"
+  detail: "fsg-SuggestionList-detail",
+  rows: "fsg-SuggestionList-rows",
+  footer: "fsg-SuggestionList-footer",
+  footerLink: "fsg-SuggestionList-footerLink"
 } as const;
 
 export interface SuggestionListProps {
   suggestions: Readable<readonly Suggestion[]>;
   highlightedIndex: Readable<number | null>;
+  footerLink?: { label: string; onChoose: () => void };
   onAccept: (suggestion: Suggestion) => void;
   onActiveDescendantChange?: (activeDescendantElement: HTMLElement | null) => void;
 }
 
-export function SuggestionList({ suggestions, highlightedIndex, onAccept, onActiveDescendantChange }: SuggestionListProps): HTMLElement {
+export function SuggestionList({ suggestions, highlightedIndex, footerLink, onAccept, onActiveDescendantChange }: SuggestionListProps): HTMLElement {
   const renderedSuggestions = new KeyedList<Suggestion>({
     getKey: (suggestion): string => JSON.stringify(suggestion),
     create: (suggestion): HTMLElement => <Row suggestion={suggestion} onAccept={onAccept} />
   });
   const rowElements = computed(() => renderedSuggestions.reconcile(suggestions.value));
-  const list = <ul className={`${ListboxClass.root} ${SuggestionListClass.root}`} role="listbox" onMousedown={event => event.preventDefault()} />;
+  const list = <ul className={SuggestionListClass.rows} role="listbox" />;
+  const root = (
+    <div className={`${ListboxClass.root} ${SuggestionListClass.root}`} onMousedown={event => event.preventDefault()}>
+      {list}
+      {footerLink !== undefined && (
+        <div className={SuggestionListClass.footer}>
+          <button type="button" className={SuggestionListClass.footerLink} tabIndex={-1} onClick={footerLink.onChoose}>{footerLink.label}</button>
+        </div>
+      )}
+    </div>
+  );
 
   effect(() => list.replaceChildren(...rowElements.value));
   effect(() => {
@@ -40,7 +54,7 @@ export function SuggestionList({ suggestions, highlightedIndex, onAccept, onActi
     activeDescendantElement?.scrollIntoView?.({ block: "nearest" });
     onActiveDescendantChange?.(activeDescendantElement);
   });
-  return list;
+  return root;
 }
 
 function Row({ suggestion, onAccept }: Pick<SuggestionListProps, "onAccept"> & { suggestion: Suggestion }): HTMLElement {

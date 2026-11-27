@@ -215,6 +215,14 @@ describe("composeFavoritesSearchPanel", () => {
     expect(navigator.opened).toEqual(["#search-cat%20dog"]);
   });
 
+  test("opens the search syntax help from the suggestion list's footer", () => {
+    const { element, navigator } = setup();
+    const footerLink = [...element.querySelectorAll("button")].find(button => button.textContent === "Search Syntax")!;
+
+    footerLink.click();
+    expect(navigator.opened).toEqual(["https://github.com/bruh3396/favorites-search-gallery#search-syntax"]);
+  });
+
   test("searches the tab and remembers each submitted query, newest first", () => {
     const { element, favoritesSession, searchHistory } = setup();
     const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;

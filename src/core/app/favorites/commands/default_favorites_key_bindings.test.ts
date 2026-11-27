@@ -19,7 +19,8 @@ describe("DEFAULT_FAVORITES_KEY_BINDINGS", () => {
     ["r", "toggleHd"],
     [",", "toggleSettings"],
     ["?", "toggleKeyboardShortcuts"],
-    ["t", "cycleTheme"],
+    ["c", "cycleTheme"],
+    ["t", "toggleTabs"],
     ["d", "toggleColorScheme"],
     ["h", "toggleHeader"]
   ])("binds %j to %s", (key, favoritesCommand) => {

@@ -1,5 +1,41 @@
 .fsg-SuggestionList {
+  display: flex;
+  flex-direction: column;
   max-block-size: 320px;
+}
+
+.fsg-SuggestionList-rows {
+  flex: 0 1 auto;
+  min-block-size: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fsg-color-outline) transparent;
+}
+
+.fsg-SuggestionList-footer {
+  flex: none;
+  margin-block-start: 4px;
+  padding: 6px 8px 3px;
+  border-block-start: 1px solid var(--fsg-color-outline-variant);
+}
+
+.fsg-SuggestionList-footerLink {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--fsg-color-on-surface-variant);
+  font: inherit;
+  font-size: var(--fsg-typescale-label-medium-size);
+  cursor: pointer;
+}
+
+.fsg-SuggestionList-footerLink:hover {
+  color: var(--fsg-color-on-surface);
+  text-decoration: underline;
 }
 
 .fsg-SuggestionList-row:hover,

@@ -4,7 +4,23 @@
   align-items: center;
   gap: 2px;
   max-inline-size: 44px;
-  padding-block-start: 6px;
+  padding: 6px 4px 4px;
+  border: 0;
+  border-radius: var(--fsg-shape-corner-small);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.fsg-AppMark:hover,
+.fsg-AppMark[aria-expanded="true"] {
+  background-color: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
+}
+
+.fsg-AppMark:focus-visible {
+  outline: 2px solid var(--fsg-color-primary);
+  outline-offset: -2px;
 }
 
 .fsg-AppMark-logo {
@@ -23,5 +39,4 @@
   font-variant-numeric: tabular-nums;
   line-height: 1.2;
   white-space: nowrap;
-  user-select: text;
 }

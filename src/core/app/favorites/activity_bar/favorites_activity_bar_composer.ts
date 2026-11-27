@@ -5,8 +5,10 @@ import { AppMark } from "@/core/ui/app_mark/app_mark";
 import { AppPreferences } from "@/core/app/storage/app_preferences";
 import { CountToggleButton } from "@/core/ui/components/count_toggle_button/count_toggle_button";
 import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
+import { HELP_LINKS } from "@/core/app/help_links";
 import { IconButton } from "@/core/ui/components/icon_button/icon_button";
 import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
+import { Navigator } from "@/core/boundary/ports/navigator/navigator";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { TabManager } from "@/core/ui/components/tabs/tab_manager";
 import { formatCommandTitle } from "@/core/ui/key_bindings/command_title_formatter";
@@ -22,6 +24,7 @@ export interface FavoritesActivityBarDependencies {
   tabManager: Pick<TabManager<unknown>, "tabs">;
   keyBindings: Readable<Pick<KeyBindings<FavoritesCommand>, "toggleTabs" | "toggleZen">>;
   renderViewByTool: Readonly<Record<FavoritesTool, () => HTMLElement>>;
+  navigator: Pick<Navigator, "open">;
   enterZen: () => void;
 }
 
@@ -29,7 +32,7 @@ export function composeFavoritesActivityBar(
   configuration: FavoritesActivityBarConfiguration,
   dependencies: FavoritesActivityBarDependencies
 ): HTMLElement {
-  const { favoritesPreferences, favoritesTabStripVisible, tabManager, keyBindings, renderViewByTool, enterZen } = dependencies;
+  const { favoritesPreferences, favoritesTabStripVisible, tabManager, keyBindings, renderViewByTool, navigator, enterZen } = dependencies;
   const hiddenTabCount = computed(() => {
     const tabCount = tabManager.tabs.value.length;
     return !favoritesTabStripVisible.value && tabCount > 1 ? tabCount : 0;
@@ -56,7 +59,11 @@ export function composeFavoritesActivityBar(
         size: "large",
         onClick: enterZen
       }),
-      h(AppMark, { scriptVersion: configuration.scriptVersion })
+      h(AppMark, {
+        scriptVersion: configuration.scriptVersion,
+        contextMenuItems: [HELP_LINKS.searchSyntax, HELP_LINKS.changelog, { ...HELP_LINKS.reportBug, startsGroup: true }]
+          .map(({ url, ...helpLink }) => ({ ...helpLink, onChoose: () => navigator.open(url) }))
+      })
     ]
   });
 }

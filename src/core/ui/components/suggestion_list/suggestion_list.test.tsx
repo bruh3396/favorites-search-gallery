@@ -44,7 +44,7 @@ describe("SuggestionList", () => {
   test("shows a row for each suggestion", () => {
     const { list } = setup();
 
-    expect(list.role).toBe("listbox");
+    expect(list.querySelector("[role=listbox]")).not.toBeNull();
     expect(queryOptions(list).map(option => option.textContent)).toEqual(["cat_ears812", "cats41", "score:"]);
   });
 
@@ -148,6 +148,28 @@ describe("SuggestionList", () => {
 
     queryOptions(setup().list)[0].dispatchEvent(press);
     expect(press.defaultPrevented).toBe(true);
+  });
+
+  test("shows no footer link unless given one", () => {
+    expect(setup().list.querySelector("button")).toBeNull();
+  });
+
+  test("chooses its footer link when clicked, keeping focus where it is", () => {
+    const onChoose = vi.fn<() => void>();
+    const { result: list } = render(document, () => (
+      <SuggestionList
+        suggestions={new Signal(SUGGESTIONS)}
+        highlightedIndex={new Signal(null)}
+        footerLink={{ label: "Search Syntax", onChoose }}
+        onAccept={vi.fn()}
+      />
+    ));
+    const footerLink = list.querySelector("button")!;
+    const press = new MouseEvent("mousedown", { bubbles: true, cancelable: true });
+
+    footerLink.dispatchEvent(press);
+    footerLink.click();
+    expect([footerLink.textContent, press.defaultPrevented, onChoose.mock.calls.length]).toEqual(["Search Syntax", true, 1]);
   });
 
   test("stops following its suggestions once disposed", () => {

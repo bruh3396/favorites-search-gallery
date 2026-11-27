@@ -4,6 +4,7 @@ import { CountBadgeClass } from "@/core/ui/components/count_badge/count_badge";
 import { FavoritesCommand } from "@/core/app/favorites/commands/favorites_command";
 import { KeyBindings } from "@/core/ui/key_bindings/key_bindings";
 import { MemoryLocalKeyedValues } from "@/adapters/memory/ports/local_keyed_values/memory_local_keyed_values";
+import { MemoryNavigator } from "@/adapters/memory/ports/navigator/memory_navigator";
 import { Signal } from "@/core/utils/reactive/signal";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { Tab } from "@/core/ui/components/tabs/tab";
@@ -16,6 +17,7 @@ interface Setup {
   favoritesTabStripVisible: StoredValue<boolean>;
   tabs: Signal<readonly Tab<unknown>[]>;
   keyBindings: Signal<Pick<KeyBindings<FavoritesCommand>, "toggleTabs" | "toggleZen">>;
+  navigator: MemoryNavigator;
   enterZen: Mock<() => void>;
 }
 
@@ -30,15 +32,16 @@ function setup(): Setup {
   const tabs = new Signal<readonly Tab<unknown>[]>(createTabs(1));
   const keyBindings = new Signal<Pick<KeyBindings<FavoritesCommand>, "toggleTabs" | "toggleZen">>({ toggleTabs: ["t"], toggleZen: ["z"] });
   const enterZen = vi.fn<() => void>();
+  const navigator = new MemoryNavigator();
   const { result: element } = render(document, () => composeFavoritesActivityBar({ scriptVersion: "2.0.0" }, {
-    favoritesPreferences, favoritesTabStripVisible, tabManager: { tabs }, keyBindings, enterZen,
+    favoritesPreferences, favoritesTabStripVisible, tabManager: { tabs }, keyBindings, navigator, enterZen,
     renderViewByTool: {
       settings: () => document.createElement("section"),
       keyBindings: () => document.createElement("section"),
       snippets: () => document.createElement("section")
     }
   }));
-  return { element, favoritesTabStripVisible, tabs, keyBindings, enterZen };
+  return { element, favoritesTabStripVisible, tabs, keyBindings, navigator, enterZen };
 }
 
 function findButton(element: HTMLElement, label: string): HTMLButtonElement {
@@ -74,6 +77,18 @@ describe("composeFavoritesActivityBar", () => {
 
     findButton(element, "Zen").click();
     expect(enterZen).toHaveBeenCalledOnce();
+  });
+
+  test("lists the help links under the app mark, opening the chosen one", () => {
+    const { element, navigator } = setup();
+
+    document.body.replaceChildren(element);
+    findButton(element, "Favorites Search Gallery 2.0.0").click();
+    const menuItems = [...document.querySelectorAll<HTMLElement>("[role='menuitem']")];
+
+    menuItems[2].click();
+    expect([menuItems.map(menuItem => menuItem.textContent), navigator.opened])
+      .toEqual([["Search Syntax", "Changelog", "Report a Bug"], ["https://github.com/bruh3396/favorites-search-gallery/issues"]]);
   });
 
   test("names the bound keys in the Tabs and Zen tooltips, following rebinding", () => {
