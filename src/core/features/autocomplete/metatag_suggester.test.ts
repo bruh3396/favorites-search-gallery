@@ -8,7 +8,7 @@ function listTexts(prefix: string): string[] {
 describe("MetatagSuggester", () => {
   describe("suggest", () => {
     test("describes a metatag with its icon", () => {
-      expect(new MetatagSuggester().suggest("width:<")).toEqual([{ text: "width:<height", icon: "sliders" }]);
+      expect(new MetatagSuggester().suggest("width:<")).toEqual([{ text: "width:<height", icon: "hash" }]);
     });
 
     test("offers every comparison from the start of a name", () => {

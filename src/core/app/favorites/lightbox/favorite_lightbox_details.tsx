@@ -65,7 +65,7 @@ function FavoriteLightboxTitle({ copyIdButton, viewOpen }: { copyIdButton: Node;
       <h2 className={FavoriteLightboxDetailsClass.id}>
         {copyIdButton}
       </h2>
-      <LightboxButton icon="sliders" label="Display" pressed={viewOpen} onClick={() => {
+      <LightboxButton icon="hash" label="Display" pressed={viewOpen} onClick={() => {
         viewOpen.value = !viewOpen.value;
       }} />
     </div>

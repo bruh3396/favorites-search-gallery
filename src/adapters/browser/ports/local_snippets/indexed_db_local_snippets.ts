@@ -27,11 +27,4 @@ export class IndexedDbLocalSnippets implements LocalSnippets {
   public async delete(name: string): Promise<void> {
     await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => store.delete(name));
   }
-
-  public async replaceAll(snippets: readonly Readonly<Snippet>[]): Promise<void> {
-    await this.indexedDbClient.runTransaction(STORE_NAME, "readwrite", store => {
-      store.clear();
-      snippets.forEach(snippet => store.put(snippet));
-    });
-  }
 }

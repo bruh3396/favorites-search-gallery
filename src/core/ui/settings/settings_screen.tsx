@@ -1,8 +1,6 @@
 import { ControlSize } from "@/core/ui/components/control/control_size";
 import { Setting } from "@/core/ui/settings/setting";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
-import { SettingSection } from "@/core/ui/settings/setting_section";
-import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { h } from "@/core/ui/h/h";
 
 export const SettingsScreenClass = {
@@ -12,28 +10,29 @@ export const SettingsScreenClass = {
   group: "fsg-SettingsScreen-group"
 } as const;
 
-export interface SettingsScreenProps {
-  settingsLayout: SettingsLayout;
-  settingDescriptors: readonly SettingDescriptor[];
+export interface SettingsScreenProps<SettingId extends string> {
+  settingsLayout: readonly { readonly title: string; readonly settingIds: readonly SettingId[] }[];
+  settingDescriptors: Readonly<Record<SettingId, SettingDescriptor>>;
   controlSize?: ControlSize;
 }
 
 interface SectionProps {
-  settingSection: SettingSection;
+  title: string;
   settingDescriptors: readonly SettingDescriptor[];
   renderSetting: (settingDescriptor: SettingDescriptor) => HTMLElement;
 }
 
-export function SettingsScreen({ settingsLayout, settingDescriptors, controlSize = "medium" }: SettingsScreenProps): HTMLElement {
-  const descriptorsById = new Map(settingDescriptors.map(settingDescriptor => [settingDescriptor.id, settingDescriptor]));
+export function SettingsScreen<SettingId extends string>({
+  settingsLayout, settingDescriptors, controlSize = "medium"
+}: SettingsScreenProps<SettingId>): HTMLElement {
   return (
     <div className={SettingsScreenClass.root} dataset={{ size: controlSize }}>
       {settingsLayout
-        .filter(settingSection => settingSection.settings.length > 0)
-        .map(settingSection => (
+        .filter(({ settingIds }) => settingIds.length > 0)
+        .map(({ title, settingIds }) => (
           <Section
-            settingSection={settingSection}
-            settingDescriptors={settingSection.settings.map(id => getDescriptor(descriptorsById, id))}
+            title={title}
+            settingDescriptors={settingIds.map(settingId => settingDescriptors[settingId])}
             renderSetting={settingDescriptor => (
               <Setting descriptor={settingDescriptor} controlSize={controlSize} />
             )}
@@ -43,8 +42,8 @@ export function SettingsScreen({ settingsLayout, settingDescriptors, controlSize
   );
 }
 
-function Section({ settingSection, settingDescriptors, renderSetting }: SectionProps): HTMLElement {
-  const heading = <h3 className={SettingsScreenClass.heading}>{settingSection.title}</h3>;
+function Section({ title, settingDescriptors, renderSetting }: SectionProps): HTMLElement {
+  const heading = <h3 className={SettingsScreenClass.heading}>{title}</h3>;
   const element = (
     <section className={SettingsScreenClass.section}>
       {heading}
@@ -54,13 +53,4 @@ function Section({ settingSection, settingDescriptors, renderSetting }: SectionP
 
   element.ariaLabelledByElements = [heading];
   return element;
-}
-
-function getDescriptor(descriptorsById: ReadonlyMap<string, SettingDescriptor>, id: string): SettingDescriptor {
-  const descriptor = descriptorsById.get(id);
-
-  if (descriptor === undefined) {
-    throw new Error(`The layout names a setting with no descriptor: "${id}"`);
-  }
-  return descriptor;
 }

@@ -4,14 +4,15 @@ import { h, render } from "@/core/ui/h/h";
 import SCREEN_CSS from "@/core/ui/settings/settings_screen.css?inline";
 import { SettingDescriptor } from "@/core/ui/settings/setting_descriptor";
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
-import { SettingsLayout } from "@/core/ui/settings/settings_layout";
 import { Signal } from "@/core/utils/reactive/signal";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
-const LAYOUT: SettingsLayout = [
-  { id: "general", title: "General", settings: ["hints", "autoplay"] },
-  { id: "empty", title: "Empty", settings: [] },
-  { id: "gallery", title: "Gallery", settings: ["loop"] }
+type TestSetting = "autoplay" | "hints" | "loop";
+
+const LAYOUT: SettingsScreenProps<TestSetting>["settingsLayout"] = [
+  { title: "General", settingIds: ["hints", "autoplay"] },
+  { title: "Empty", settingIds: [] },
+  { title: "Gallery", settingIds: ["loop"] }
 ];
 
 function createStoredValue<T>(initial: T): SettingPreference<T> {
@@ -29,8 +30,8 @@ function createStoredValue<T>(initial: T): SettingPreference<T> {
 
 type SwitchSettingDescriptor = Extract<SettingDescriptor, { kind: "switch" }>;
 
-function createSwitchSetting(id: string, settingPreference = createStoredValue(false)): SwitchSettingDescriptor {
-  return { id, kind: "switch", label: id, settingPreference };
+function createSwitchSetting(label: string, settingPreference = createStoredValue(false)): SwitchSettingDescriptor {
+  return { kind: "switch", label, settingPreference };
 }
 
 interface Setup {
@@ -39,8 +40,8 @@ interface Setup {
   sections: HTMLElement[];
 }
 
-function setup(partialSettingsScreenProps: Partial<SettingsScreenProps> = {}): Setup {
-  const switchSettingDescriptors = ["autoplay", "hints", "loop"].map(id => createSwitchSetting(id));
+function setup(partialSettingsScreenProps: Partial<SettingsScreenProps<TestSetting>> = {}): Setup {
+  const switchSettingDescriptors = { autoplay: createSwitchSetting("autoplay"), hints: createSwitchSetting("hints"), loop: createSwitchSetting("loop") };
   const { result: element, dispose } = render(document, () => (
     <SettingsScreen settingsLayout={LAYOUT} settingDescriptors={switchSettingDescriptors} {...partialSettingsScreenProps} />
   ));
@@ -65,10 +66,6 @@ describe("SettingsScreen", () => {
     expect(element.textContent).not.toContain("Empty");
   });
 
-  test("refuses a layout that names a setting with no descriptor", () => {
-    expect(() => setup({ settingsLayout: [{ id: "general", title: "General", settings: ["missing"] }] })).toThrow("\"missing\"");
-  });
-
   test("draws sections and rows at the host's size", () => {
     const { element } = setup({ controlSize: "small" });
     const sizes = [...element.querySelectorAll<HTMLElement>("[data-size]")].map(sized => sized.dataset.size);
@@ -78,7 +75,11 @@ describe("SettingsScreen", () => {
 
   test("stops following its preferences once disposed", () => {
     const settingPreference = createStoredValue(false);
-    const switchSettingDescriptors = [createSwitchSetting("hints", settingPreference), createSwitchSetting("autoplay"), createSwitchSetting("loop")];
+    const switchSettingDescriptors = {
+      hints: createSwitchSetting("hints", settingPreference),
+      autoplay: createSwitchSetting("autoplay"),
+      loop: createSwitchSetting("loop")
+    };
     const { element, dispose } = setup({ settingDescriptors: switchSettingDescriptors });
 
     dispose();

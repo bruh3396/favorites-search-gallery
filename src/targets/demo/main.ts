@@ -31,7 +31,7 @@ const FAVORITES_OWNER_ID = "demo";
 
 function createDemoDependencies(): FavoritesAppDependencies {
   const memoryClient = new MemoryClient(createSamplePosts(SAMPLE_POST_COUNT));
-  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, () => null);
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION);
   return {
     localFavorites: new IndexedDbLocalFavorites({ ownerId: FAVORITES_OWNER_ID }, indexedDbClient),
     localPosts: new IndexedDbLocalPosts(indexedDbClient),

@@ -16,7 +16,7 @@ async function setup(storedSnippets: readonly Snippet[] = []): Promise<{
   const scheduler = new MemoryScheduler(START_TIME);
   const snippetLibrary = new SnippetLibrary({ localSnippets, scheduler });
 
-  await localSnippets.replaceAll(storedSnippets);
+  await Promise.all(storedSnippets.map(storedSnippet => localSnippets.set(storedSnippet)));
   await snippetLibrary.load();
   return { snippetLibrary, localSnippets, scheduler };
 }
@@ -173,27 +173,6 @@ describe("SnippetLibrary", () => {
 
       expect(snippetLibrary.snippets.value).toEqual([storedSnippet]);
       expect(await localSnippets.getAll()).toEqual([storedSnippet]);
-    });
-  });
-
-  describe("replaceAll", () => {
-    test("replaces every snippet, listed A to Z", async() => {
-      const { snippetLibrary, localSnippets } = await setup([createSnippet({ name: "fruits" })]);
-
-      await snippetLibrary.replaceAll([createSnippet({ name: "pets" }), createSnippet({ name: "apples" })]);
-
-      expect(getListedNames(snippetLibrary)).toEqual(["apples", "pets"]);
-      expect(await getStoredSnippets(localSnippets)).toEqual([createSnippet({ name: "apples" }), createSnippet({ name: "pets" })]);
-    });
-
-    test("keeps the first snippet of names that differ only in case", async() => {
-      const { snippetLibrary, localSnippets } = await setup();
-      const firstSnippet = createSnippet({ name: "no ai", query: "-ai_generated" });
-
-      await snippetLibrary.replaceAll([firstSnippet, createSnippet({ name: "No AI", query: "apple" })]);
-
-      expect(snippetLibrary.snippets.value).toEqual([firstSnippet]);
-      expect(await localSnippets.getAll()).toEqual([firstSnippet]);
     });
   });
 });

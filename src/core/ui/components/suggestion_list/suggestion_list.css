@@ -1,19 +1,18 @@
 .fsg-SuggestionList {
   display: flex;
   flex-direction: column;
-  max-block-size: 320px;
+  max-inline-size: 440px;
 }
 
 .fsg-SuggestionList-rows {
   flex: 0 1 auto;
   min-block-size: 0;
+  max-block-size: calc(10.5 * 30px);
   margin: 0;
   padding: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   list-style: none;
-  scrollbar-width: thin;
-  scrollbar-color: var(--fsg-color-outline) transparent;
 }
 
 .fsg-SuggestionList-footer {
@@ -39,14 +38,12 @@
 }
 
 .fsg-SuggestionList-row:hover,
-.fsg-SuggestionList:not(:has([aria-selected="true"])) .fsg-SuggestionList-row:first-child {
+.fsg-SuggestionList:not(:has([aria-selected="true"], .fsg-SuggestionList-row:hover)) .fsg-SuggestionList-row:first-child {
   background: color-mix(in srgb, currentColor var(--fsg-state-hover-state-layer-opacity), transparent);
 }
 
 .fsg-SuggestionList-row[aria-selected="true"] {
-  background: var(--fsg-color-secondary-container);
-  box-shadow: inset 0 0 0 2px var(--fsg-color-primary);
-  color: var(--fsg-color-on-secondary-container);
+  background: var(--fsg-color-surface-container-highest);
 }
 
 .fsg-SuggestionList-icon {
@@ -65,14 +62,19 @@
   flex: 0 1 auto;
   min-inline-size: 0;
   overflow: hidden;
+  color: var(--fsg-color-on-surface-variant);
   line-height: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.fsg-SuggestionList-row[aria-selected="true"] .fsg-SuggestionList-text,
 .fsg-SuggestionList-match {
-  color: var(--fsg-color-primary);
-  font-weight: 700;
+  color: var(--fsg-color-on-surface);
+}
+
+.fsg-SuggestionList-match {
+  font-weight: inherit;
 }
 
 .fsg-SuggestionList-detail {

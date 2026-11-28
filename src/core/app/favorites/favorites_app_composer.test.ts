@@ -88,7 +88,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
       document.removeEventListener(type, listener, options);
     }
   });
-  return container.shadowRoot!;
+  return container.firstElementChild!.shadowRoot!;
 }
 
 function findStandIn(): HTMLCanvasElement | null {

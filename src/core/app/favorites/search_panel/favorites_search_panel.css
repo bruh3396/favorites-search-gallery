@@ -56,8 +56,6 @@
     padding: 8px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-width: thin;
-    scrollbar-color: var(--fsg-color-outline) transparent;
     scrollbar-gutter: stable both-edges;
   }
 }

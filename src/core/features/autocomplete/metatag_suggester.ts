@@ -9,7 +9,7 @@ export class MetatagSuggester implements Suggester {
   public suggest(prefix: string): readonly Suggestion[] {
     return SUGGESTED_METRICS.flatMap(listComparisons)
       .filter(metatag => metatag.startsWith(prefix) && metatag !== prefix)
-      .map(text => ({ text, icon: "sliders" }));
+      .map(text => ({ text, icon: "hash" }));
   }
 }
 

@@ -257,6 +257,24 @@ describe("Autocomplete", () => {
       expect(textEdits).toEqual([{ start: 0, end: 2, text: "cat " }]);
     });
 
+    test("tells an accepted suggestion it was accepted, after inserting it", () => {
+      const { autocomplete, textEdits } = setup();
+      const insertedTexts: string[] = [];
+
+      type(autocomplete, "ca");
+      autocomplete.accept({ text: "cat", onAccept: () => insertedTexts.push(...textEdits.map(textEdit => textEdit.text)) });
+      expect(insertedTexts).toEqual(["cat"]);
+    });
+
+    test("does not tell a suggestion accepted without a word at the caret", () => {
+      const { autocomplete } = setup();
+      const onAccept = vi.fn();
+
+      type(autocomplete, "dog ");
+      autocomplete.accept({ text: "cat", onAccept });
+      expect(onAccept).not.toHaveBeenCalled();
+    });
+
     test("does nothing without a word at the caret", () => {
       const { autocomplete, textEdits } = setup();
 

@@ -38,6 +38,7 @@ export class Autocomplete implements SearchBoxAssist {
       const { start, end } = this.foundSearchTerm;
 
       this.#textEdits.emit({ start, end, text: suggestion.acceptedText ?? suggestion.text });
+      suggestion.onAccept?.();
     }
   };
 

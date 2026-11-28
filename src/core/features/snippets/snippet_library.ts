@@ -64,13 +64,6 @@ export class SnippetLibrary {
     await localSnippets.set(usedSnippet);
   }
 
-  public async replaceAll(snippets: readonly Snippet[]): Promise<void> {
-    const dedupedSnippets = sortSnippets(dedupeSnippets(snippets));
-
-    this.#snippets.value = dedupedSnippets;
-    await this.dependencies.localSnippets.replaceAll(dedupedSnippets);
-  }
-
   private find(name: string | undefined): Snippet | undefined {
     return name === undefined ? undefined : this.#snippets.value.find(snippet => snippet.name === name);
   }
@@ -82,17 +75,4 @@ function normalizeSnippetName(name: string): string {
 
 function sortSnippets(snippets: readonly Snippet[]): readonly Snippet[] {
   return [...snippets].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
-}
-
-function dedupeSnippets(snippets: readonly Snippet[]): readonly Snippet[] {
-  const normalizedNames = new Set<string>();
-  return snippets.filter(snippet => {
-    const normalizedName = normalizeSnippetName(snippet.name);
-
-    if (normalizedNames.has(normalizedName)) {
-      return false;
-    }
-    normalizedNames.add(normalizedName);
-    return true;
-  });
 }

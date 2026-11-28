@@ -8,24 +8,33 @@ export const AppRootClass = {
   root: "fsg-App"
 } as const;
 
-export interface AppRootProps {
-  colorScheme: ColorScheme;
-  themeDefinition: ThemeDefinition;
-  appFont: AppFont;
-  styles: readonly string[];
+export interface AppRootConfiguration {
+  readonly colorScheme: ColorScheme;
+  readonly themeDefinition: ThemeDefinition;
+  readonly appFont: AppFont;
+  readonly styles: readonly string[];
 }
 
-export function mountAppRoot(container: HTMLElement, { colorScheme, themeDefinition, appFont, styles }: AppRootProps): HTMLElement {
-  const shadowRoot = container.attachShadow({ mode: "open" });
-  const root = container.ownerDocument.createElement("div");
+export class AppRoot {
+  public readonly element: HTMLElement;
+  readonly #host: HTMLElement;
 
-  root.className = AppRootClass.root;
-  root.style.colorScheme = colorScheme;
-  applyTheme(root, themeDefinition);
-  installAppFont(root, appFont);
-  shadowRoot.adoptedStyleSheets = styles.map(createStyleSheet);
-  shadowRoot.append(root);
-  return root;
+  constructor(private readonly configuration: AppRootConfiguration, document: Document) {
+    const { colorScheme, themeDefinition, styles } = configuration;
+    const shadowRoot = (this.#host = document.createElement("div")).attachShadow({ mode: "open" });
+
+    this.element = document.createElement("div");
+    this.element.className = AppRootClass.root;
+    this.element.style.colorScheme = colorScheme;
+    applyTheme(this.element, themeDefinition);
+    shadowRoot.adoptedStyleSheets = styles.map(createStyleSheet);
+    shadowRoot.append(this.element);
+  }
+
+  public mount(container: HTMLElement): void {
+    installAppFont(this.element, this.configuration.appFont);
+    container.append(this.#host);
+  }
 }
 
 function createStyleSheet(css: string): CSSStyleSheet {

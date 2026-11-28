@@ -24,7 +24,8 @@ describe("MemoryLocalSnippets", () => {
   test("renames a snippet, dropping its previous name", async() => {
     const localSnippets = new MemoryLocalSnippets();
 
-    await localSnippets.replaceAll([createSnippet({ name: "fruits" }), createSnippet({ name: "pets" })]);
+    await localSnippets.set(createSnippet({ name: "fruits" }));
+    await localSnippets.set(createSnippet({ name: "pets" }));
     await localSnippets.rename("fruits", createSnippet({ name: "produce", query: "banana" }));
 
     expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" }), createSnippet({ name: "produce", query: "banana" })]);
@@ -51,18 +52,10 @@ describe("MemoryLocalSnippets", () => {
   test("deletes a snippet by name", async() => {
     const localSnippets = new MemoryLocalSnippets();
 
-    await localSnippets.replaceAll([createSnippet({ name: "fruits" }), createSnippet({ name: "pets" })]);
+    await localSnippets.set(createSnippet({ name: "fruits" }));
+    await localSnippets.set(createSnippet({ name: "pets" }));
     await localSnippets.delete("fruits");
     await localSnippets.delete("missing");
-
-    expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" })]);
-  });
-
-  test("replaces every snippet", async() => {
-    const localSnippets = new MemoryLocalSnippets();
-
-    await localSnippets.set(createSnippet({ name: "fruits" }));
-    await localSnippets.replaceAll([createSnippet({ name: "pets" })]);
 
     expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" })]);
   });

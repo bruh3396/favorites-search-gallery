@@ -24,6 +24,7 @@ import { Post } from "@/core/domain/post/post";
 import { PostGridClass } from "@/core/ui/post_grid/post_grid";
 import { Signal } from "@/core/utils/reactive/signal";
 import { SkeletonGridClass } from "@/core/ui/post_grid/skeleton_grid";
+import { Snippet } from "@/core/domain/snippet/snippet";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { TileClass } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
@@ -32,6 +33,7 @@ import { composeFavoritesSearchPanel } from "@/core/app/favorites/search_panel/f
 import { createFavoritesTab } from "@/core/app/favorites/workspace/favorites_tab";
 import { createImageLoaderService } from "@/testing/image_loader_service";
 import { createPost } from "@/testing/post";
+import { createSnippet } from "@/testing/snippet";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { render } from "@/core/ui/h/h";
 
@@ -46,7 +48,7 @@ interface Setup {
   keyBindings: Signal<Pick<KeyBindings<FavoritesCommand>, "toggleSearchOptions">>;
 }
 
-function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavorites?: boolean } = {}): Setup {
+function setup(posts: Post[] = [], { userOwnsFavorites = true, snippets = [] }: { userOwnsFavorites?: boolean; snippets?: Snippet[] } = {}): Setup {
   const favoritesSearchIndex = new FavoritesSearchIndex(new StringInterner());
   const favoritesPreferences = createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites;
   const { favoritesSearchOptionsVisible } = createStoredTree(APP_STORAGE_SCHEMA.state, new MemoryLocalKeyedValues(), ["favoritesSearchOptionsVisible"]);
@@ -99,7 +101,8 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true }: { userOwnsFavor
     remotePages: new MemoryRemotePages(new MemoryClient([])),
     navigator,
     openLightbox,
-    postActions: { openOriginal: vi.fn() }
+    postActions: { openOriginal: vi.fn() },
+    snippetLibrary: { snippets: new Signal(snippets), recordUse: vi.fn(() => Promise.resolve()) }
   }));
   return { element, dispose, favoritesSession, watched, openLightbox, navigator, searchHistory, keyBindings };
 }
@@ -151,6 +154,15 @@ describe("composeFavoritesSearchPanel", () => {
     textarea.value = "sc";
     textarea.dispatchEvent(new Event("input"));
     expect([...element.querySelectorAll("[role=option]")].map(option => option.textContent)).toEqual(["score:>", "score:<", "score:"]);
+  });
+
+  test("suggests snippets before the metatags", () => {
+    const { element } = setup([], { snippets: [createSnippet({ name: "scenery", query: "landscape" })] });
+    const textarea = element.querySelector<HTMLTextAreaElement>("search textarea")!;
+
+    textarea.value = "sc";
+    textarea.dispatchEvent(new Event("input"));
+    expect([...element.querySelectorAll("[role=option]")].map(option => option.textContent)).toEqual(["scenerylandscape", "score:>", "score:<", "score:"]);
   });
 
   test("suggests the favorites' tags after the metatags, most used first", () => {

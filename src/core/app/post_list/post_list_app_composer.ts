@@ -1,6 +1,7 @@
 import { DEFAULT_IMAGE_LOADER_SERVICE_CONFIGURATION, ImageLoaderService } from "@/core/ui/post_grid/image_loading/image_loader_service";
 import { h, render } from "@/core/ui/h/h";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
+import { AppRoot } from "@/core/ui/app_root/app_root";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
 import { DEFAULT_APP_FONT } from "@/core/ui/fonts/default_app_font";
 import { DEFAULT_LIGHTBOX_KEY_BINDINGS } from "@/core/features/lightbox/commands/default_lightbox_key_bindings";
@@ -37,7 +38,6 @@ import { createLightbox } from "@/core/features/lightbox/lightbox";
 import { createPostListService } from "@/core/features/post_list/post_list_service";
 import { createSharedPreferences } from "@/core/app/storage/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
-import { mountAppRoot } from "@/core/ui/app_root/app_root";
 
 export interface PostListAppConfiguration {
   readonly colorScheme: ColorScheme;
@@ -116,15 +116,16 @@ export function composePostListApp(configuration: PostListAppConfiguration, depe
   });
   return {
     mount: (container): void => {
-      const appRoot = mountAppRoot(container, {
+      const appRoot = new AppRoot({
         colorScheme: sharedPreferences.colorScheme.peek(),
         themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()],
         appFont: DEFAULT_APP_FONT,
         styles: [UI_CSS, LIGHTBOX_CSS]
-      });
+      }, container.ownerDocument);
 
-      appRoot.append(...render(container.ownerDocument, renderApp).result);
-      bindHostAppearance(appRoot, { sharedPreferences, hostPage });
+      appRoot.mount(container);
+      appRoot.element.append(...render(container.ownerDocument, renderApp).result);
+      bindHostAppearance(appRoot.element, { sharedPreferences, hostPage });
     }
   };
 }

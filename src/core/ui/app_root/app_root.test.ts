@@ -1,4 +1,4 @@
-import { AppRootClass, mountAppRoot } from "@/core/ui/app_root/app_root";
+import { AppRoot, AppRootClass, AppRootConfiguration } from "@/core/ui/app_root/app_root";
 import { describe, expect, test } from "vitest";
 import { SYSTEM_FONT } from "@/core/ui/fonts/system_font";
 import { THEME_DEFINITIONS } from "@/core/ui/theme/theme_definitions";
@@ -6,46 +6,55 @@ import TOKENS_CSS from "@/core/ui/tokens.css?inline";
 import { VERDANA_FONT } from "@/core/ui/fonts/verdana_font";
 import { expectClassesStyled } from "@/testing/css_utilities";
 
-const THEME = THEME_DEFINITIONS.slate;
+const CONFIGURATION: AppRootConfiguration = { colorScheme: "light", themeDefinition: THEME_DEFINITIONS.slate, appFont: SYSTEM_FONT, styles: [] };
 
-describe("mountAppRoot", () => {
-  test("mounts the root inside a shadow root on the container", () => {
-    const container = document.createElement("div");
-    const root = mountAppRoot(container, { colorScheme: "dark", themeDefinition: THEME, appFont: SYSTEM_FONT, styles: [] });
+function createAppRoot(partialConfiguration: Partial<AppRootConfiguration> = {}): AppRoot {
+  return new AppRoot({ ...CONFIGURATION, ...partialConfiguration }, document);
+}
 
-    expect(container.shadowRoot?.firstElementChild).toBe(root);
-    expect(root.classList.contains(AppRootClass.root)).toBe(true);
+describe("AppRoot", () => {
+  test("builds its element inside a shadow root without touching the page", () => {
+    const appRoot = createAppRoot();
+
+    expect([appRoot.element.isConnected, (appRoot.element.getRootNode() as ShadowRoot).host.isConnected]).toEqual([false, false]);
+    expect(appRoot.element.classList.contains(AppRootClass.root)).toBe(true);
   });
 
-  test("applies the color scheme to the root", () => {
-    const root = mountAppRoot(document.createElement("div"), { colorScheme: "light", themeDefinition: THEME, appFont: SYSTEM_FONT, styles: [] });
-
-    expect(root.style.colorScheme).toBe("light");
+  test("applies the color scheme to its element", () => {
+    expect(createAppRoot({ colorScheme: "dark" }).element.style.colorScheme).toBe("dark");
   });
 
-  test("applies the theme to the root", () => {
-    const root = mountAppRoot(document.createElement("div"), {
-      colorScheme: "light", themeDefinition: THEME_DEFINITIONS.cherry, appFont: SYSTEM_FONT, styles: []
-    });
+  test("applies the theme to its element", () => {
+    const appRoot = createAppRoot({ themeDefinition: THEME_DEFINITIONS.cherry });
 
-    expect(root.style.getPropertyValue("--fsg-theme-accent"))
+    expect(appRoot.element.style.getPropertyValue("--fsg-theme-accent"))
       .toBe(`light-dark(${THEME_DEFINITIONS.cherry.lightColors.accent}, ${THEME_DEFINITIONS.cherry.darkColors.accent})`);
   });
 
-  test("applies the font to the root", () => {
-    const root = mountAppRoot(document.createElement("div"), { colorScheme: "light", themeDefinition: THEME, appFont: VERDANA_FONT, styles: [] });
-
-    expect(root.style.getPropertyValue("--fsg-font-family")).toBe(VERDANA_FONT.text);
-  });
-
   test("adopts one stylesheet per style", () => {
-    const container = document.createElement("div");
+    const appRoot = createAppRoot({ styles: [".a { color: red; }", ".b { color: blue; }"] });
 
-    mountAppRoot(container, { colorScheme: "dark", themeDefinition: THEME, appFont: SYSTEM_FONT, styles: [".a { color: red; }", ".b { color: blue; }"] });
-    expect(container.shadowRoot?.adoptedStyleSheets).toHaveLength(2);
+    expect((appRoot.element.getRootNode() as ShadowRoot).adoptedStyleSheets).toHaveLength(2);
   });
 
   test("styles every class it sets", () => {
     expectClassesStyled(AppRootClass, TOKENS_CSS);
+  });
+
+  describe("mount", () => {
+    test("places its shadow host in the container", () => {
+      const container = document.createElement("div");
+      const appRoot = createAppRoot();
+
+      appRoot.mount(container);
+      expect(container.firstElementChild?.shadowRoot?.firstElementChild).toBe(appRoot.element);
+    });
+
+    test("installs the font on its element", () => {
+      const appRoot = createAppRoot({ appFont: VERDANA_FONT });
+
+      appRoot.mount(document.createElement("div"));
+      expect(appRoot.element.style.getPropertyValue("--fsg-font-family")).toBe(VERDANA_FONT.text);
+    });
   });
 });

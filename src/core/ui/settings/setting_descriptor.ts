@@ -4,7 +4,6 @@ import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SettingPreference } from "@/core/ui/settings/setting_preference";
 
 interface SettingBase {
-  readonly id: string;
   readonly label: string;
   readonly disabled?: Readable<boolean>;
 }

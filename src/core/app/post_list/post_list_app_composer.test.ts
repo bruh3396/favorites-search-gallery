@@ -40,7 +40,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     fileSaver: new MemoryFileSaver(),
     hostPage: new MemoryHostPage()
   }).mount(container);
-  return container.shadowRoot!;
+  return container.firstElementChild!.shadowRoot!;
 }
 
 describe("composePostListApp", () => {

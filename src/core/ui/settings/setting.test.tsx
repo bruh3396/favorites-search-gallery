@@ -34,15 +34,15 @@ function createStoredValue<T>(initial: T): SettingPreference<T> & { writes: T[] 
 }
 
 function createSwitchSetting(settingPreference: SettingPreference<boolean>, disabled?: Readable<boolean>): SwitchSettingDescriptor {
-  return { id: "autoplay", kind: "switch", label: "Autoplay", settingPreference, disabled };
+  return { kind: "switch", label: "Autoplay", settingPreference, disabled };
 }
 
 function createLayoutSetting(settingPreference: SettingPreference<Layout>, control: ChoiceSettingDescriptor["control"]): ChoiceSettingDescriptor {
-  return { id: "layout", kind: "choice", label: "Layout", settingPreference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
+  return { kind: "choice", label: "Layout", settingPreference, members: LAYOUTS, labels: LAYOUT_LABELS, control };
 }
 
 function createSizeSetting(settingPreference: SettingPreference<number>, { inverted }: { inverted?: boolean } = {}): SliderSettingDescriptor {
-  return { id: "size", kind: "slider", label: "Size", settingPreference, min: 1, max: 20, step: 1, inverted };
+  return { kind: "slider", label: "Size", settingPreference, min: 1, max: 20, step: 1, inverted };
 }
 
 function slide(input: HTMLInputElement, to: number): void {
@@ -85,7 +85,7 @@ function setupHeldNumber({ writeOnEveryStep }: { writeOnEveryStep: boolean }): {
     runNext: (): void => pending()
   };
   const numberSettingDescriptor: NumberSettingDescriptor = {
-    id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep,
+    kind: "number", label: "Columns", settingPreference: preference, min: 0, max: 10, step: 1, writeOnEveryStep,
     scheduler
   };
   const { element } = setup({ descriptor: numberSettingDescriptor });
@@ -212,7 +212,7 @@ describe("Setting", () => {
   test("toggles one of several choices", () => {
     const preference = createStoredValue<readonly Layout[]>(["column"]);
     const choicesSettingDescriptor: ChoicesSettingDescriptor = {
-      id: "layouts", kind: "choices", label: "Layouts", settingPreference: preference, members: LAYOUTS, labels: LAYOUT_LABELS
+      kind: "choices", label: "Layouts", settingPreference: preference, members: LAYOUTS, labels: LAYOUT_LABELS
     };
     const buttons = queryButtons(renderSetting(choicesSettingDescriptor));
 
@@ -223,7 +223,7 @@ describe("Setting", () => {
   test("steps a number within its bounds", () => {
     const preference = createStoredValue(10);
     const numberSettingDescriptor: NumberSettingDescriptor = {
-      id: "columns", kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1, scheduler: SCHEDULER
+      kind: "number", label: "Columns", settingPreference: preference, min: 2, max: 10, step: 1, scheduler: SCHEDULER
     };
     const element = renderSetting(numberSettingDescriptor);
     const input = element.querySelector("input");

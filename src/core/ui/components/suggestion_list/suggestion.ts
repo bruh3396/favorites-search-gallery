@@ -6,4 +6,5 @@ export interface Suggestion {
   readonly matchedLength?: number;
   readonly icon?: Icon;
   readonly detail?: string;
+  onAccept?: () => void;
 }

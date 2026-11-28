@@ -1,3 +1,4 @@
+import { DEFAULT_SNIPPET_SUGGESTER_CONFIGURATION, SnippetSuggester } from "@/core/features/autocomplete/snippet_suggester";
 import { DEFAULT_TAG_SUGGESTER_CONFIGURATION, TagSuggester } from "@/core/features/autocomplete/tag_suggester";
 import { Readable, Signal, computed } from "@/core/utils/reactive/signal";
 import { AppPreferences } from "@/core/app/storage/app_preferences";
@@ -20,6 +21,7 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { SearchHistory } from "@/core/utils/collection/search_history";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
+import { SnippetLibrary } from "@/core/features/snippets/snippet_library";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { SuggestionList } from "@/core/ui/components/suggestion_list/suggestion_list";
 import { Tile } from "@/core/ui/post_grid/tile";
@@ -47,6 +49,7 @@ export interface FavoritesSearchPanelDependencies {
   navigator: Pick<Navigator, "open">;
   openLightbox: (favorite: Favorite) => boolean;
   postActions: Pick<PostActions, "openOriginal">;
+  snippetLibrary: Pick<SnippetLibrary, "snippets" | "recordUse">;
 }
 
 export function composeFavoritesSearchPanel(
@@ -56,10 +59,11 @@ export function composeFavoritesSearchPanel(
 ): HTMLElement {
   const {
     favoritesService, favoritesPreferences, favoritesSearchOptionsVisible, keyBindings, searchHistory, favoriteSizeRecorder,
-    visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, openLightbox, postActions
+    visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, openLightbox, postActions, snippetLibrary
   } = dependencies;
   const autocomplete = new Autocomplete({
     suggesters: [
+      new SnippetSuggester(DEFAULT_SNIPPET_SUGGESTER_CONFIGURATION, { snippetLibrary }),
       new MetatagSuggester(),
       new TagSuggester(DEFAULT_TAG_SUGGESTER_CONFIGURATION, {
         getTagsStartingWith: favoritesService.getTagsStartingWith,

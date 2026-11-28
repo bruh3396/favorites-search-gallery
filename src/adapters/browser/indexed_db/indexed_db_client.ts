@@ -1,7 +1,6 @@
-import { LegacyMigration, prepareLegacyMigration } from "@/adapters/browser/indexed_db/legacy_migration";
 import { IndexedDbStoreName } from "@/adapters/browser/indexed_db/indexed_db_store_name";
-import { LegacyDatabaseNames } from "@/adapters/browser/indexed_db/legacy_database_names";
-import { MediaMinter } from "@/core/domain/media/media_minter";
+import { V1Storage } from "@/adapters/browser/v1_storage/v1_storage";
+import { V1StorageContents } from "@/adapters/browser/v1_storage/v1_storage_contents";
 
 const VERSION = 1;
 
@@ -14,12 +13,10 @@ const STORES: Readonly<Record<IndexedDbStoreName, IDBObjectStoreParameters>> = {
 
 export interface IndexedDbClientConfiguration {
   readonly databaseName: string;
-  readonly legacyDatabaseNames: LegacyDatabaseNames | null;
 }
 
 export const DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION: IndexedDbClientConfiguration = {
-  databaseName: "favorites-search-gallery",
-  legacyDatabaseNames: { favorites: "FavoritesV2", posts: "Posts", tagCategories: "TagCategories" }
+  databaseName: "favorites-search-gallery"
 };
 
 export class IndexedDbClient {
@@ -27,7 +24,7 @@ export class IndexedDbClient {
 
   constructor(
     private readonly configuration: IndexedDbClientConfiguration,
-    private readonly mintLegacyMedia: MediaMinter
+    private readonly v1Storage?: Pick<V1Storage, "read" | "delete">
   ) {}
 
   public async runTransaction<T>(
@@ -46,29 +43,31 @@ export class IndexedDbClient {
   }
 
   private open(): Promise<IDBDatabase> {
-    this.connection ??= this.migrateAndOpen().catch((error: unknown) => {
+    this.connection ??= this.connect().catch((error: unknown) => {
       this.connection = undefined;
       throw error;
     });
     return this.connection;
   }
 
-  private async migrateAndOpen(): Promise<IDBDatabase> {
-    const { databaseName, legacyDatabaseNames } = this.configuration;
-    const legacyMigration = await prepareLegacyMigration(databaseName, legacyDatabaseNames, this.mintLegacyMedia);
-    const database = await this.openWithMigration(legacyMigration);
+  private async connect(): Promise<IDBDatabase> {
+    const v1StorageContents = await this.v1Storage?.read() ?? null;
+    const database = await this.openDatabase(v1StorageContents);
 
-    legacyMigration.deleteLegacyDatabases();
+    await this.v1Storage?.delete();
     return database;
   }
 
-  private openWithMigration(legacyMigration: LegacyMigration): Promise<IDBDatabase> {
+  private openDatabase(v1StorageContents: V1StorageContents | null): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(this.configuration.databaseName, VERSION);
 
       request.onupgradeneeded = (): void => {
         createStores(request.result);
-        legacyMigration.writeToNewDatabase(request.transaction!);
+
+        if (v1StorageContents !== null) {
+          addV1StorageContents(request.transaction!, v1StorageContents);
+        }
       };
       request.onsuccess = (): void => {
         request.result.onversionchange = (): void => {
@@ -86,4 +85,18 @@ function createStores(database: IDBDatabase): void {
   for (const [name, parameters] of Object.entries(STORES)) {
     database.createObjectStore(name, parameters);
   }
+}
+
+function addV1StorageContents(transaction: IDBTransaction, { posts, favoriteIdsByOwnerId, tagCategoryByTagName, snippets }: V1StorageContents): void {
+  posts.forEach(post => addIfAbsent(transaction.objectStore("posts"), post));
+  favoriteIdsByOwnerId.forEach((favoriteIds, ownerId) => addIfAbsent(transaction.objectStore("favorites"), favoriteIds, ownerId));
+  tagCategoryByTagName.forEach((tagCategory, tagName) => addIfAbsent(transaction.objectStore("tagCategories"), tagCategory, tagName));
+  snippets.forEach(snippet => addIfAbsent(transaction.objectStore("snippets"), snippet));
+}
+
+function addIfAbsent(store: IDBObjectStore, value: unknown, key?: IDBValidKey): void {
+  store.add(value, key).onerror = (event): void => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
 }

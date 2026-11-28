@@ -22,10 +22,4 @@ export class MemoryLocalSnippets implements LocalSnippets {
     this.snippets.delete(name);
     return Promise.resolve();
   }
-
-  public replaceAll(snippets: readonly Readonly<Snippet>[]): Promise<void> {
-    this.snippets.clear();
-    snippets.forEach(snippet => this.snippets.set(snippet.name, { ...snippet }));
-    return Promise.resolve();
-  }
 }

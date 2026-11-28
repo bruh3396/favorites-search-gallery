@@ -20,6 +20,7 @@ import { IndexedDbLocalFavorites } from "@/adapters/browser/ports/local_favorite
 import { IndexedDbLocalPosts } from "@/adapters/browser/ports/local_posts/indexed_db_local_posts";
 import { IndexedDbLocalSnippets } from "@/adapters/browser/ports/local_snippets/indexed_db_local_snippets";
 import { IndexedDbLocalTagCategories } from "@/adapters/browser/ports/local_tag_categories/indexed_db_local_tag_categories";
+import { LocalKeyedValues } from "@/core/boundary/ports/local_keyed_values/local_keyed_values";
 import { Media } from "@/core/domain/media/media";
 import { MediaMinter } from "@/core/domain/media/media_minter";
 import { RandomSource } from "@/core/boundary/ports/random_source/random_source";
@@ -35,13 +36,14 @@ import { Rule34RemotePages } from "@/adapters/rule34/ports/remote_pages/rule34_r
 import { Rule34RemotePostList } from "@/adapters/rule34/ports/remote_post_list/rule34_remote_post_list";
 import { Rule34RemotePosts } from "@/adapters/rule34/ports/remote_posts/rule34_remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
-import { StoredValueStorage } from "@/core/utils/storage/stored_value_storage";
 import { UnavailableRemotePosts } from "@/core/boundary/ports/remote_posts/unavailable_remote_posts";
+import { V1Storage } from "@/adapters/browser/v1_storage/v1_storage";
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { composePostListApp } from "@/core/app/post_list/post_list_app_composer";
 import { createAppStorage } from "@/core/app/storage/app_storage";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
+import { migrateV1Preferences } from "@/core/app/storage/v1_preferences_migrator";
 import { readBrowserEnvironment } from "@/adapters/browser/environment/browser_environment_reader";
 
 declare const SCRIPT_VERSION: string;
@@ -56,7 +58,8 @@ interface Rule34Dependencies {
   rule34Document: Rule34Document;
   rule34CdnClient: Rule34CdnClient;
   hostPage: Rule34HostPage;
-  storedValueStorage: StoredValueStorage;
+  localKeyedValues: LocalKeyedValues;
+  v1Storage: V1Storage;
 }
 
 type StartApp = (environment: Environment, rule34Dependencies: Rule34Dependencies, userId: string) => void;
@@ -111,9 +114,10 @@ function createRule34Dependencies(appMode: AppMode, rule34Document: Rule34Docume
   const mintMedia: MediaMinter = file => rule34CdnClient.mintMediaFromUrl(file);
   const rule34Client = new Rule34Client({ fetch: boundFetch, scheduler, mintMedia, rule34Document });
   const hostPage = new Rule34HostPage({ appMode }, { rule34Document, claimBodyContent });
+  const localKeyedValues = new BrowserLocalKeyedValues();
   return {
     fetch: boundFetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient,
-    hostPage, storedValueStorage: new BrowserLocalKeyedValues()
+    hostPage, localKeyedValues, v1Storage: new V1Storage({ mintMedia, localKeyedValues })
   };
 }
 
@@ -152,8 +156,8 @@ function startRemotePosts(
 }
 
 function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34Dependencies, userId: string): void {
-  const { fetch, scheduler, randomSource, mintMedia, rule34Client, rule34Document, rule34CdnClient, hostPage, storedValueStorage } = rule34Dependencies;
-  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia);
+  const { fetch, scheduler, randomSource, rule34Client, rule34Document, rule34CdnClient, hostPage, localKeyedValues, v1Storage } = rule34Dependencies;
+  const indexedDbClient = new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, v1Storage);
   const remotePosts = startRemotePosts(environment, userId, { fetch, scheduler, randomSource, rule34Client, rule34CdnClient });
 
   composeFavoritesApp({
@@ -166,7 +170,7 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
   }, {
     scheduler,
     randomSource,
-    storedValueStorage,
+    storedValueStorage: localKeyedValues,
     hostPage,
     sizeObserver: new BrowserSizeObserver(),
 
@@ -188,9 +192,9 @@ function startFavoritesApp(environment: Environment, rule34Dependencies: Rule34D
 }
 
 function startPostListApp(environment: Environment, {
-  fetch, mintMedia, hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, storedValueStorage, scheduler
+  fetch, hostPage, rule34Client, rule34CdnClient, rule34Document, randomSource, localKeyedValues, scheduler, v1Storage
 }: Rule34Dependencies, userId: string): void {
-  const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(storedValueStorage).preferences, ["shared"]);
+  const { shared: sharedPreferences } = createStoredTree(APP_STORAGE_SCHEMA.preferences, createAppStorage(localKeyedValues).preferences, ["shared"]);
 
   if (!sharedPreferences.postListEnabled.peek()) {
     return;
@@ -201,7 +205,7 @@ function startPostListApp(environment: Environment, {
     remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch, scheduler, randomSource }),
     localFavorites: new IndexedDbLocalFavorites(
       { ownerId: environment.favoritesOwnerId },
-      new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, mintMedia)
+      new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, v1Storage)
     ),
     scheduler,
     visibilityObserver: new BrowserVisibilityObserver(),
@@ -211,7 +215,7 @@ function startPostListApp(environment: Environment, {
     remoteMedia: new Rule34CdnRemoteMedia(rule34CdnClient),
     remotePages: new Rule34RemotePages({ rule34Client, scheduler, randomSource }),
     remotePostList,
-    storedValueStorage,
+    storedValueStorage: localKeyedValues,
     navigator: new BrowserNavigator(),
     fileSaver: new BrowserFileSaver(document),
     hostPage
@@ -222,6 +226,8 @@ async function main(): Promise<void> {
   const rule34Document = new Rule34Document();
   const appMode = readAppMode(rule34Document);
   const rule34Dependencies = createRule34Dependencies(appMode, rule34Document);
+
+  migrateV1Preferences(rule34Dependencies.localKeyedValues);
   const userId = await readUserId(appMode, rule34Dependencies);
 
   APPS[appMode](readEnvironment(appMode, rule34Document, userId), rule34Dependencies, userId);

@@ -5,5 +5,4 @@ export interface LocalSnippets {
   set: (snippet: Readonly<Snippet>) => Promise<void>;
   rename: (previousName: string, snippet: Readonly<Snippet>) => Promise<void>;
   delete: (name: string) => Promise<void>;
-  replaceAll: (snippets: readonly Readonly<Snippet>[]) => Promise<void>;
 }

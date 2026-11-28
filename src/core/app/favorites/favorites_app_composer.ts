@@ -6,6 +6,7 @@ import { Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { h, render } from "@/core/ui/h/h";
 import APP_CSS from "@/core/app/favorites/favorites_app.css?inline";
 import { APP_STORAGE_SCHEMA } from "@/core/app/storage/app_storage_schema";
+import { AppRoot } from "@/core/ui/app_root/app_root";
 import COPY_ID_BUTTON_CSS from "@/core/app/favorites/lightbox/copy_id_button.css?inline";
 import { Clipboard } from "@/core/boundary/ports/clipboard/clipboard";
 import { ColorScheme } from "@/core/boundary/environment/color_scheme";
@@ -62,7 +63,6 @@ import { createSharedPreferences } from "@/core/app/storage/shared_preferences";
 import { createStoredTree } from "@/core/utils/storage/stored_tree";
 import { fillWindow } from "@/core/ui/app_root/window_filler";
 import { listenForKeyBindings } from "@/core/ui/key_bindings/key_bindings_listener";
-import { mountAppRoot } from "@/core/ui/app_root/app_root";
 import { resetStoredTree } from "@/core/utils/storage/stored_tree_resetter";
 
 export interface FavoritesAppConfiguration extends FavoritesServiceConfiguration {
@@ -172,15 +172,16 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   };
   return {
     mount: (container): void => {
-      const appRoot = mountAppRoot(container, {
+      const appRoot = new AppRoot({
         colorScheme: sharedPreferences.colorScheme.peek(), themeDefinition: THEME_DEFINITIONS[sharedPreferences.theme.peek()], appFont: DEFAULT_APP_FONT,
         styles: [
           UI_CSS, APP_CSS, SEARCH_PANEL_CSS, FAVORITES_SEARCH_OPTIONS_ROW_CSS, SNIPPETS_CSS,
           LIGHTBOX_CSS, LIGHTBOX_DETAILS_CSS, LIGHTBOX_TAGS_CSS, COPY_ID_BUTTON_CSS
         ]
-      });
+      }, container.ownerDocument);
 
-      appRoot.append(...render(container.ownerDocument, () => h(FavoritesApp, {
+      appRoot.mount(container);
+      appRoot.element.append(...render(container.ownerDocument, () => h(FavoritesApp, {
         favoritesService, favoritesWorkspace, lightboxView: lightbox.createView(), zenEnabled,
         zenExitKeys: computed(() => [...keyBindings.value.toggleZen, ...keyBindings.value.exitZen]),
         nativeHeaderVisible: computed(() => hostPage.hasHeader && favoritesPreferences.nativeHeaderVisible.value),
@@ -199,13 +200,13 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         })),
         renderPanel: favoritesTab => composeFavoritesSearchPanel(favoritesTab, { userOwnsFavorites: configuration.userOwnsFavorites }, {
           favoritesService, favoritesPreferences, favoritesSearchOptionsVisible, keyBindings, searchHistory, favoriteSizeRecorder,
-          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions,
+          visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, postActions, snippetLibrary,
           openLightbox: favorite => openLightbox(favoritesTab.session, favorite)
         })
       })).result);
-      const windowFill = fillWindow(appRoot, sizeObserver);
+      const windowFill = fillWindow(appRoot.element, sizeObserver);
 
-      bindHostAppearance(appRoot, { sharedPreferences, hostPage, previewedTheme });
+      bindHostAppearance(appRoot.element, { sharedPreferences, hostPage, previewedTheme });
       listenForKeyBindings({ keyBindings, commandDefinitionByCommand: FAVORITES_COMMAND_DEFINITIONS }, {
         target: container.ownerDocument,
         handlers: createFavoritesCommandHandlers({ userOwnsFavorites: configuration.userOwnsFavorites }, {

@@ -4,6 +4,11 @@
   box-sizing: border-box;
 }
 
+:where([class^="fsg-"], [class*=" fsg-"]) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--fsg-color-outline) transparent;
+}
+
 :where([class^="fsg-"], [class*=" fsg-"])[hidden] {
   display: none !important;
 }

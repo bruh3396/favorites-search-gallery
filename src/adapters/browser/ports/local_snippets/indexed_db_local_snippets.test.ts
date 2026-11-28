@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 function createLocalSnippets(): IndexedDbLocalSnippets {
-  return new IndexedDbLocalSnippets(new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, () => null));
+  return new IndexedDbLocalSnippets(new IndexedDbClient(DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION));
 }
 
 describe("IndexedDbLocalSnippets", () => {
@@ -35,7 +35,8 @@ describe("IndexedDbLocalSnippets", () => {
   test("renames a snippet, dropping its previous name", async() => {
     const localSnippets = createLocalSnippets();
 
-    await localSnippets.replaceAll([createSnippet({ name: "fruits" }), createSnippet({ name: "pets" })]);
+    await localSnippets.set(createSnippet({ name: "fruits" }));
+    await localSnippets.set(createSnippet({ name: "pets" }));
     await localSnippets.rename("fruits", createSnippet({ name: "produce", query: "banana" }));
 
     expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" }), createSnippet({ name: "produce", query: "banana" })]);
@@ -62,19 +63,12 @@ describe("IndexedDbLocalSnippets", () => {
   test("deletes a snippet by name", async() => {
     const localSnippets = createLocalSnippets();
 
-    await localSnippets.replaceAll([createSnippet({ name: "fruits" }), createSnippet({ name: "pets" })]);
+    await localSnippets.set(createSnippet({ name: "fruits" }));
+    await localSnippets.set(createSnippet({ name: "pets" }));
     await localSnippets.delete("fruits");
     await localSnippets.delete("missing");
 
     expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" })]);
   });
 
-  test("replaces every snippet", async() => {
-    const localSnippets = createLocalSnippets();
-
-    await localSnippets.set(createSnippet({ name: "fruits" }));
-    await localSnippets.replaceAll([createSnippet({ name: "pets" })]);
-
-    expect(await localSnippets.getAll()).toEqual([createSnippet({ name: "pets" })]);
-  });
 });

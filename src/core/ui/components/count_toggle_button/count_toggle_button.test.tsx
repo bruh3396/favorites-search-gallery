@@ -19,7 +19,7 @@ function setup(): Setup {
     clickCount += 1;
   };
   const element = render(document, () => (
-    <CountToggleButton icon="sliders" label="Options" pressed={pressed} count={count} onClick={countClick} />
+    <CountToggleButton icon="hash" label="Options" pressed={pressed} count={count} onClick={countClick} />
   )).result as HTMLButtonElement;
   return { element, pressed, count, readClickCount: () => clickCount };
 }
@@ -54,7 +54,7 @@ describe("CountToggleButton", () => {
 
   test("sizes its badge with the button", () => {
     const { result: element } = render(document, () => (
-      <CountToggleButton icon="sliders" label="Options" size="large" pressed={new Signal(false)} count={new Signal(1)} onClick={() => undefined} />
+      <CountToggleButton icon="hash" label="Options" size="large" pressed={new Signal(false)} count={new Signal(1)} onClick={() => undefined} />
     ));
     const badge = element.querySelector<HTMLElement>(`.${CountBadgeClass.root}`)!;
 

@@ -80,7 +80,7 @@ function startFavoritesApp(container: HTMLElement, indexedDbClient: IndexedDbCli
 
 function main(): void {
   const rule34Document = new Rule34Document();
-  const indexedDbClient = new IndexedDbClient({ databaseName: "fsg-lab", legacyDatabaseNames: null }, () => null);
+  const indexedDbClient = new IndexedDbClient({ databaseName: "fsg-lab" });
   const corpusLocalFavorites = new IndexedDbLocalFavorites({ ownerId: "corpus" }, indexedDbClient);
   const labLocalFavorites = new IndexedDbLocalFavorites({ ownerId: "lab" }, indexedDbClient);
   const localPosts = new IndexedDbLocalPosts(indexedDbClient);
@@ -98,7 +98,7 @@ function main(): void {
     renderStoragePanel: composeStoragePanel({
       confirmer: new BrowserConfirmer(),
       fileSaver: new BrowserFileSaver(document),
-      mainIndexedDbClient: new IndexedDbClient({ databaseName: "favorites-search-gallery", legacyDatabaseNames: null }, () => null),
+      mainIndexedDbClient: new IndexedDbClient({ databaseName: "favorites-search-gallery" }),
       corpusFile: new CorpusFile({ chunkSize: 10_000 }, {
         localPosts,
         corpusLocalFavorites,
