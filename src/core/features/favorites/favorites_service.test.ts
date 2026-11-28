@@ -14,6 +14,7 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
+import { ScrapedTagRepairer } from "@/core/features/favorites/load/scraped_tag_repairer";
 import { buildFavoritesSearchOptions } from "@/core/features/favorites/testing/favorites_search_options_builder";
 import { createPost } from "@/testing/post";
 import { createStoredValue } from "@/testing/stored_value";
@@ -49,6 +50,7 @@ function create(posts: Post[], { userOwnsFavorites = true }: { userOwnsFavorites
       localTagCategories: new MemoryLocalTagCategories(),
       remotePosts: new MemoryRemotePosts(memoryClient),
       remoteMedia: new MemoryRemoteMedia(),
+      scrapedTagRepairer: new ScrapedTagRepairer(),
       scheduler
     }),
     randomSource: new MemoryRandomSource([0.25, 0.5]),

@@ -11,6 +11,13 @@
       { "entry": "src/targets/lab/main.ts", "outfile": "dist/lab/lab.js" }
     ]
   },
+  "scratch": {
+    "version": "scratch",
+    "optional": true,
+    "bundles": [
+      { "entry": "src/targets/scratch/main.ts", "outfile": "dist/scratch/scratch.js" }
+    ]
+  },
   "demo": {
     "version": "demo",
     "html": "src/targets/demo/index.html",

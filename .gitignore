@@ -5,6 +5,7 @@ scripts/bin
 node_modules
 dist
 coverage
+src/targets/scratch/
 .*/
 *.md
 !README.md

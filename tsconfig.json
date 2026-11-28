@@ -20,6 +20,7 @@
     "src/**/*.tsx"
   ],
   "exclude": [
-    "src/targets/electron/launcher.ts"
+    "src/targets/electron/launcher.ts",
+    "src/targets/scratch/**"
   ]
 }

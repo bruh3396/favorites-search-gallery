@@ -1,5 +1,5 @@
 import { Bundle, Target, createBuildOptions, readTargets } from "./config";
-import { copyFileSync, readFileSync, writeFileSync } from "fs";
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
 import { build } from "esbuild";
 import { filterMetafile } from "./metafile_filter";
@@ -20,6 +20,11 @@ async function buildTarget(name: string): Promise<void> {
   if (target === undefined) {
     throw new Error(`Unknown build target: ${name}`);
   }
+
+  if (target.optional === true && !target.bundles.every(bundle => existsSync(bundle.entry))) {
+    console.log(`- Skipped ${name}: no entry.`);
+    return;
+  }
   await Promise.all(target.bundles.map(bundle => buildBundle(target, bundle)));
 
   if (target.html !== undefined) {
@@ -28,4 +33,10 @@ async function buildTarget(name: string): Promise<void> {
   console.log(`✔ Build completed (${name}).`);
 }
 
-buildTarget("rule34").then(() => Promise.all(Object.keys(readTargets()).filter(name => name !== "rule34").map(buildTarget)));
+const requestedTarget = process.argv[2];
+
+if (requestedTarget === undefined) {
+  buildTarget("rule34").then(() => Promise.all(Object.keys(readTargets()).filter(name => name !== "rule34").map(buildTarget)));
+} else {
+  buildTarget(requestedTarget);
+}

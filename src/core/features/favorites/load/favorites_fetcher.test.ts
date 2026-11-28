@@ -15,6 +15,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteFavorites } from "@/core/boundary/ports/remote_favorites/remote_favorites";
+import { ScrapedTagRepairer } from "@/core/features/favorites/load/scraped_tag_repairer";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
@@ -57,6 +58,7 @@ function setup(fetcherSources: FetcherSources = {}): {
     localTagCategories: new MemoryLocalTagCategories(),
     remotePosts: new MemoryRemotePosts(new MemoryClient(fetcherSources.remotePosts ?? [])),
     remoteMedia: { probeDurationSeconds: (): Promise<number> => Promise.resolve(0) },
+    scrapedTagRepairer: new ScrapedTagRepairer(),
     scheduler: new MemoryScheduler()
   });
 

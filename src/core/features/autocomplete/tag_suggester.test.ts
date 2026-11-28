@@ -33,8 +33,14 @@ describe("TagSuggester", () => {
       expect(createTagSuggester().suggest("catg")).toEqual([{ text: "catgirl", acceptedText: "catgirl ", icon: "tag", detail: "40" }]);
     });
 
-    test("tints a tag by its category", () => {
-      expect(createTagSuggester().suggest("cats").map(suggestion => suggestion.textClassName)).toEqual([TagSuggesterClass.character]);
+    test.each(["artist", "character", "copyright", "metadata"] as const)("tints a %s tag by its category", tagCategory => {
+      const tagSuggester = new TagSuggester({ maxSuggestionCount: 10 }, {
+        getTagsStartingWith: (): string[] => ["cats"],
+        countFavoritesWithTag: (): number => 1,
+        tagCategoryResolver: { resolveCommon: (): TagCategory => tagCategory }
+      });
+
+      expect(tagSuggester.suggest("cats").map(suggestion => suggestion.textClassName)).toEqual([TagSuggesterClass[tagCategory]]);
     });
 
     test("leaves general tags and tags the dictionary lacks untinted", () => {

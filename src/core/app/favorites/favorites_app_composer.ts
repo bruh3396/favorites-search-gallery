@@ -40,6 +40,7 @@ import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { RemoteTagDictionary } from "@/core/boundary/ports/remote_tag_dictionary/remote_tag_dictionary";
 import SEARCH_PANEL_CSS from "@/core/app/favorites/search_panel/favorites_search_panel.css?inline";
 import SNIPPETS_CSS from "@/core/features/snippets/styles.css?inline";
+import { ScrapedTagRepairer } from "@/core/features/favorites/load/scraped_tag_repairer";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { SnippetLibrary } from "@/core/features/snippets/snippet_library";
 import { SnippetsPane } from "@/core/features/snippets/snippets_pane";
@@ -109,7 +110,8 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
   const { favorites: favoritesState, favoritesSearchHistory, favoritesTabStripVisible, favoritesSearchOptionsVisible } = appState;
   const ownerState = favoritesState.get(favoritesOwnerId);
   const searchHistory = new SearchHistory(DEFAULT_SEARCH_HISTORY_CONFIGURATION, { submittedQueries: favoritesSearchHistory });
-  const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scheduler });
+  const scrapedTagRepairer = new ScrapedTagRepairer();
+  const postLibrary = new PostLibrary({ localPosts, localTagCategories, remotePosts, remoteMedia, scrapedTagRepairer, scheduler });
   const favoritesService = createFavoritesService({
     userOwnsFavorites: configuration.userOwnsFavorites, userLoggedIn: configuration.userLoggedIn, blacklistedTags: configuration.blacklistedTags
   }, {
@@ -124,7 +126,7 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
     results: computed(() => favoritesWorkspace.activeTab.value.session.matchedFavorites.value)
   });
   const snippetLibrary = new SnippetLibrary({ localSnippets, scheduler });
-  const tagCategoryResolver = new TagCategoryResolver({ remoteTagDictionary, localTagCategories });
+  const tagCategoryResolver = new TagCategoryResolver({ localTagCategories });
   const postActions = new PostActions({ remoteMedia, remotePages, navigator, fileSaver });
   const lightboxKeyBindings = computed(() => applyKeyBindingOverrides(DEFAULT_LIGHTBOX_KEY_BINDINGS, sharedPreferences.lightboxKeyBindingOverrides.value));
   const lightbox = createFavoritesLightbox({
@@ -223,9 +225,12 @@ export function composeFavoritesApp(configuration: FavoritesAppConfiguration, de
         hostPage.setHeaderVisible(favoritesPreferences.nativeHeaderVisible.value);
         windowFill.refit();
       });
+      remoteTagDictionary.fetch().then(tagDictionary => {
+        scrapedTagRepairer.prime(new Set(tagDictionary.keys()));
+        tagCategoryResolver.prime(tagDictionary);
+      }, console.error);
       favoritesService.load().catch(console.error);
       snippetLibrary.load().catch(console.error);
-      tagCategoryResolver.load().catch(console.error);
     }
   };
 }

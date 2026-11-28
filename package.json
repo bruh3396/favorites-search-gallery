@@ -24,7 +24,8 @@
   },
   "scripts": {
     "build": "npm run compile-scripts && node scripts/bin/build",
-    "electron": "npm run build && electron dist/electron/launcher.js",
+    "build:scratch": "npm run compile-scripts && node scripts/bin/build scratch",
+    "electron": "npm run build &&electron dist/electron/launcher.js",
     "build:demo-page": "node .storefront/recording/demo_page_builder.mjs",
     "typecheck": "tsc --project tsconfig.json --noEmit && tsc --project src/targets/electron/tsconfig.json --noEmit",
     "test": "vitest --run --coverage",

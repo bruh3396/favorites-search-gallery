@@ -32,13 +32,47 @@ describe("parseRule34Thumb", () => {
     });
   });
 
-  test("repairs the truncated video tag and collapses whitespace", () => {
-    const post = parseThumbHtml(`<span class="thumb" id="s1"><img src="${PREVIEW}" title="  vide   apple  video "></span>`);
+  function parseTitle(title: string): Post | null {
+    return parseThumbHtml(`<span class="thumb" id="s1"><img src="${PREVIEW}" title="${title}"></span>`);
+  }
 
-    expect(post?.tags).toBe("video apple video");
+  test("repairs a cut video tag before minting media, and collapses whitespace", () => {
+    const post = parseTitle("  apple   banana  vide ");
+
+    expect(post?.tags).toBe("apple banana video");
+    expect(post?.media.locator).toBe(`${PREVIEW} apple banana video`);
   });
 
-  test("falls back to the Cloudflare lazy source when the image has no src", () => {
+  test("repairs a known cut first tag and last tag", () => {
+    expect(parseTitle("boy apple wing")?.tags).toBe("1boy apple wings");
+  });
+
+  test("leaves middle tags alone, since the site never cuts them", () => {
+    expect(parseTitle("apple boy wing banana")?.tags).toBe("apple boy wing banana");
+  });
+
+  test("leaves an end tag alone when it is not a known cut", () => {
+    expect(parseTitle("1girls apple wings")?.tags).toBe("1girls apple wings");
+  });
+
+  test("repairs a one-tag title as a first tag", () => {
+    expect(parseTitle("boy")?.tags).toBe("1boy");
+    expect(parseTitle("zelinda_(rexpecs")?.tags).toBe("zelinda_(rexpecs");
+  });
+
+  test("closes an unclosed qualifier on the last tag", () => {
+    expect(parseTitle("apple zelinda_(rexpecs")?.tags).toBe("apple zelinda_(rexpecs)");
+  });
+
+  test("opens an unopened qualifier on the first tag", () => {
+    expect(parseTitle("sekiren2023) apple")?.tags).toBe("(sekiren2023) apple");
+  });
+
+  test("leaves whole bracketed end tags alone", () => {
+    expect(parseTitle(":) apple superman_(series)")?.tags).toBe(":) apple superman_(series)");
+  });
+
+  test("falls back to the lazy source when the image has no src", () => {
     const post = parseThumbHtml(`<span class="thumb" id="s1"><img data-cfsrc="${PREVIEW}" title="apple"></span>`);
 
     expect(post?.media.locator).toBe(`${PREVIEW} apple`);

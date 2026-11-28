@@ -1,9 +1,7 @@
 import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
-import { RemoteTagDictionary } from "@/core/boundary/ports/remote_tag_dictionary/remote_tag_dictionary";
 import { TagCategory } from "@/core/domain/tag_category/tag_category";
 
 export interface TagCategoryResolverDependencies {
-  remoteTagDictionary: RemoteTagDictionary;
   localTagCategories: Pick<LocalTagCategories, "getMany">;
 }
 
@@ -12,8 +10,8 @@ export class TagCategoryResolver {
 
   constructor(private readonly dependencies: TagCategoryResolverDependencies) { }
 
-  public async load(): Promise<void> {
-    this.tagDictionary = await this.dependencies.remoteTagDictionary.fetch();
+  public prime(tagDictionary: ReadonlyMap<string, TagCategory>): void {
+    this.tagDictionary = tagDictionary;
   }
 
   public resolveCommon(tagName: string): TagCategory | undefined {

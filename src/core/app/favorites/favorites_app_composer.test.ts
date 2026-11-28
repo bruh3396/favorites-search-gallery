@@ -54,6 +54,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
   hostPage = new MemoryHostPage(),
   confirmer = new MemoryConfirmer(),
   localSnippets = new MemoryLocalSnippets(),
+  remoteTagDictionary = new MemoryRemoteTagDictionary(),
   visibilityObserver = IDLE_VISIBILITY_OBSERVER
 } = {}): ShadowRoot {
   const container = document.createElement("div");
@@ -65,7 +66,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     localPosts: new MemoryLocalPosts(),
     localSnippets,
     localTagCategories: new MemoryLocalTagCategories(),
-    remoteTagDictionary: new MemoryRemoteTagDictionary(),
+    remoteTagDictionary,
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
@@ -398,6 +399,19 @@ describe("composeFavoritesApp", () => {
       [...root.querySelectorAll("[role=tab]")].map(tab => [tab.textContent, tab.getAttribute("aria-selected")]),
       (await localSnippets.getAll()).map(snippet => snippet.lastUsedAt)
     ]).toEqual([[["New", "false"], ["-ai_generated", "true"]], [1_000]]);
+  });
+
+  test("keeps loading favorites when the tag dictionary can't be fetched", async() => {
+    const remoteTagDictionary = new MemoryRemoteTagDictionary();
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => { });
+
+    onTestFinished(() => consoleError.mockRestore());
+    vi.spyOn(remoteTagDictionary, "fetch").mockRejectedValue(new Error("offline"));
+    const root = mount(new MemoryLocalKeyedValues(), [createPost({ id: "1" })], { remoteTagDictionary });
+
+    await flushMicrotasks();
+    expect(root.querySelectorAll(`.${PostGridClass.root}:not(.${SkeletonGridClass.root}) .${TileClass.root}`)).toHaveLength(1);
+    expect(consoleError).toHaveBeenCalledWith(new Error("offline"));
   });
 
   test("records the shapes of the active tab's first results after they settle", async() => {

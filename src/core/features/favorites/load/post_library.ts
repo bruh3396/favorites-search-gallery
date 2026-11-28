@@ -9,6 +9,7 @@ import { Post } from "@/core/domain/post/post";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
+import { ScrapedTagRepairer } from "@/core/features/favorites/load/scraped_tag_repairer";
 import { TagCategory } from "@/core/domain/tag_category/tag_category";
 import { daysToMilliseconds } from "@/core/utils/number/number_utilities";
 import { partition } from "@/core/utils/collection/array_utilities";
@@ -45,6 +46,7 @@ export interface PostLibraryDependencies {
   localTagCategories: Pick<LocalTagCategories, "setMany">;
   remotePosts: Pick<RemotePosts, "fetch">;
   remoteMedia: Pick<RemoteMedia, "probeDurationSeconds">;
+  scrapedTagRepairer: Pick<ScrapedTagRepairer, "repair">;
   scheduler: Scheduler;
 }
 
@@ -72,9 +74,12 @@ export class PostLibrary {
   }
 
   public async adopt(posts: readonly Readonly<Post>[]): Promise<Post[]> {
-    await this.dependencies.localPosts.setManyIfAbsent(posts);
-    const local = await this.getLocalPostsById(posts.map(post => post.id));
-    return posts.map(post => local.get(post.id) ?? post);
+    const { localPosts, scrapedTagRepairer } = this.dependencies;
+    const repairedPosts = posts.map(post => ({ ...post, tags: scrapedTagRepairer.repair(post.tags) }));
+
+    await localPosts.setManyIfAbsent(repairedPosts);
+    const local = await this.getLocalPostsById(repairedPosts.map(post => post.id));
+    return repairedPosts.map(post => local.get(post.id) ?? post);
   }
 
   public async markPurged(posts: readonly Post[]): Promise<void> {

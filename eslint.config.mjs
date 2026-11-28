@@ -84,7 +84,8 @@ export default defineConfig([
       "node_modules/**",
       "**/*.min.js",
       "**/*.js",
-      "src/**/vite.config.mts"
+      "src/**/vite.config.mts",
+      "src/targets/scratch/**"
     ]
   },
   {

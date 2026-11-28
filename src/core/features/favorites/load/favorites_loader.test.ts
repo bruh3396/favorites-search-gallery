@@ -17,6 +17,7 @@ import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_r
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
+import { ScrapedTagRepairer } from "@/core/features/favorites/load/scraped_tag_repairer";
 import { StringInterner } from "@/core/utils/string/string_interner";
 import { buildFavoritesSearchIndex } from "@/core/features/favorites/testing/favorites_search_index_builder";
 import { effect } from "@/core/utils/reactive/signal";
@@ -50,6 +51,7 @@ async function setup({ localFavoritePosts = [], remoteFavoritePosts }: LoadSourc
     localTagCategories: new MemoryLocalTagCategories(),
     remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),
+    scrapedTagRepairer: new ScrapedTagRepairer(),
     scheduler
   });
   const favoritesLoader = new FavoritesLoader({

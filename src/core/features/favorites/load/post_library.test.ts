@@ -7,6 +7,7 @@ import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_schedu
 import { Post } from "@/core/domain/post/post";
 import { PostLibrary } from "@/core/features/favorites/load/post_library";
 import { RemoteMedia } from "@/core/boundary/ports/remote_media/remote_media";
+import { ScrapedTagRepairer } from "@/core/features/favorites/load/scraped_tag_repairer";
 import { createPost } from "@/testing/post";
 import { flushMicrotasks } from "@/testing/microtask_utilities";
 
@@ -22,6 +23,7 @@ function setup(remotePosts: Post[] = [], probeDurationSeconds: RemoteMedia["prob
   postLibrary: PostLibrary;
   localPosts: MemoryLocalPosts;
   localTagCategories: MemoryLocalTagCategories;
+  scrapedTagRepairer: ScrapedTagRepairer;
   scheduler: MemoryScheduler;
   probeDurationSeconds: ReturnType<typeof vi.fn<RemoteMedia["probeDurationSeconds"]>>;
   onRefresh: ReturnType<typeof vi.fn>;
@@ -31,16 +33,18 @@ function setup(remotePosts: Post[] = [], probeDurationSeconds: RemoteMedia["prob
   const scheduler = new MemoryScheduler(NOW);
   const probeDuration = vi.fn(probeDurationSeconds);
   const onRefresh = vi.fn();
+  const scrapedTagRepairer = new ScrapedTagRepairer();
   const postLibrary = new PostLibrary({
     localPosts,
     localTagCategories,
     remotePosts: new MemoryRemotePosts(new MemoryClient(remotePosts)),
     remoteMedia: { probeDurationSeconds: probeDuration },
+    scrapedTagRepairer,
     scheduler
   });
 
   postLibrary.refreshed.on(onRefresh);
-  return { postLibrary, localPosts, localTagCategories, scheduler, probeDurationSeconds: probeDuration, onRefresh };
+  return { postLibrary, localPosts, localTagCategories, scrapedTagRepairer, scheduler, probeDurationSeconds: probeDuration, onRefresh };
 }
 
 async function readLocalPostIds(localPosts: MemoryLocalPosts, postIds: string[]): Promise<string[]> {
@@ -127,6 +131,26 @@ describe("PostLibrary", () => {
     vi.spyOn(localPosts, "setManyIfAbsent").mockResolvedValue();
 
     expect(await postLibrary.adopt([post])).toEqual([post]);
+  });
+
+  test("stores and returns repaired scraped tags when adopting", async() => {
+    const { postLibrary, localPosts, scrapedTagRepairer } = setup();
+
+    scrapedTagRepairer.prime(new Set(["tiefling", "apple", "turtleneck"]));
+    const adoptedPosts = await postLibrary.adopt([createPost({ id: "1", tags: "iefling apple turtlenec" })]);
+
+    expect(adoptedPosts.map(post => post.tags)).toEqual(["tiefling apple turtleneck"]);
+    expect((await localPosts.getMany(["1"])).map(post => post.tags)).toEqual(["tiefling apple turtleneck"]);
+  });
+
+  test("keeps a stored post's tags when adopting", async() => {
+    const { postLibrary, localPosts, scrapedTagRepairer } = setup();
+
+    scrapedTagRepairer.prime(new Set(["tiefling", "apple"]));
+    await localPosts.setMany([createPost({ id: "1", tags: "iefling apple" })]);
+    const adoptedPosts = await postLibrary.adopt([createPost({ id: "1", tags: "iefling apple" })]);
+
+    expect(adoptedPosts.map(post => post.tags)).toEqual(["iefling apple"]);
   });
 
   test("leaves a fresh post alone", async() => {

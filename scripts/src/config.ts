@@ -15,6 +15,7 @@ export interface Bundle {
 
 export interface Target {
   userscript?: boolean;
+  optional?: boolean;
   version?: string;
   html?: string;
   defaults?: Record<string, string>;
