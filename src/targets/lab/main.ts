@@ -63,6 +63,7 @@ function startFavoritesApp(container: HTMLElement, indexedDbClient: IndexedDbCli
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
     localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
+    remoteTagDictionary: { fetch: () => Promise.resolve(new Map()) },
     remoteFavorites: {
       fetchCount: () => Promise.resolve(0),
       fetchAll: () => Promise.resolve(),

@@ -102,7 +102,8 @@ function setup(posts: Post[] = [], { userOwnsFavorites = true, snippets = [] }: 
     navigator,
     openLightbox,
     postActions: { openOriginal: vi.fn() },
-    snippetLibrary: { snippets: new Signal(snippets), recordUse: vi.fn(() => Promise.resolve()) }
+    snippetLibrary: { snippets: new Signal(snippets), recordUse: vi.fn(() => Promise.resolve()) },
+    tagCategoryResolver: { resolveCommon: () => undefined }
   }));
   return { element, dispose, favoritesSession, watched, openLightbox, navigator, searchHistory, keyBindings };
 }

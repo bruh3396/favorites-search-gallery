@@ -23,6 +23,7 @@ import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
+import { MemoryRemoteTagDictionary } from "@/adapters/memory/ports/remote_tag_dictionary/memory_remote_tag_dictionary";
 import { MemoryScheduler } from "@/adapters/memory/ports/scheduler/memory_scheduler";
 import { MemorySizeObserver } from "@/adapters/memory/ports/size_observer/memory_size_observer";
 import { MemoryViewport } from "@/adapters/memory/ports/viewport/memory_viewport";
@@ -64,6 +65,7 @@ function mount(localKeyedValues = new MemoryLocalKeyedValues(), posts: Post[] = 
     localPosts: new MemoryLocalPosts(),
     localSnippets,
     localTagCategories: new MemoryLocalTagCategories(),
+    remoteTagDictionary: new MemoryRemoteTagDictionary(),
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePosts: new MemoryRemotePosts(memoryClient),
     remoteMedia: new MemoryRemoteMedia(),

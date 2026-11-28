@@ -20,6 +20,7 @@ import { MemoryRemoteFavorites } from "@/adapters/memory/ports/remote_favorites/
 import { MemoryRemoteMedia } from "@/adapters/memory/ports/remote_media/memory_remote_media";
 import { MemoryRemotePages } from "@/adapters/memory/ports/remote_pages/memory_remote_pages";
 import { MemoryRemotePosts } from "@/adapters/memory/ports/remote_posts/memory_remote_posts";
+import { MemoryRemoteTagDictionary } from "@/adapters/memory/ports/remote_tag_dictionary/memory_remote_tag_dictionary";
 import { claimBodyContent } from "@/adapters/browser/document/body_content_claimer";
 import { createSamplePosts } from "@/targets/demo/sample_posts";
 import { readBrowserColorScheme } from "@/adapters/browser/environment/browser_color_scheme_reader";
@@ -37,6 +38,7 @@ function createDemoDependencies(): FavoritesAppDependencies {
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
     localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
+    remoteTagDictionary: new MemoryRemoteTagDictionary(),
     storedValueStorage: new BrowserLocalKeyedValues(),
     remoteFavorites: new MemoryRemoteFavorites(memoryClient),
     remotePosts: new MemoryRemotePosts(memoryClient),

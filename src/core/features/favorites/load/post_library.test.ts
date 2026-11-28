@@ -213,13 +213,22 @@ describe("PostLibrary", () => {
     expect(await readLocalPostIds(localPosts, ["0"])).toEqual([]);
   });
 
-  test("fills a video's duration on its fetched copy", async() => {
+  test("reports a video's fetched copy, then that copy with its duration filled", async() => {
     const { postLibrary, onRefresh } = setup([createPost({ ...DIMENSIONS, ...UNTIMED_VIDEO, score: 9 })]);
 
     await postLibrary.refresh([createPost({ ...UNTIMED_VIDEO })]);
 
-    expect(onRefresh).toHaveBeenCalledOnce();
-    expect(onRefresh.mock.calls[0][0]).toMatchObject({ score: 9, durationSeconds: 12 });
+    expect(onRefresh.mock.calls.map(([post]) => [(post as Post).score, (post as Post).durationSeconds])).toEqual([[9, 0], [9, 12]]);
+  });
+
+  test("writes a video's fetched copy without waiting for its duration", async() => {
+    const { postLibrary, localPosts, scheduler } = setup([createPost({ ...DIMENSIONS, ...UNTIMED_VIDEO, score: 9 })], () => new Promise(() => { }));
+
+    void postLibrary.refresh([createPost({ ...UNTIMED_VIDEO })]);
+    await flushMicrotasks();
+    scheduler.advance(WRITE_DELAY);
+
+    expect((await localPosts.getMany(["0"])).map(post => post.score)).toEqual([9]);
   });
 
   test("still fills a video's duration when its fetch fails", async() => {

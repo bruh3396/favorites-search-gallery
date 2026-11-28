@@ -1,3 +1,4 @@
+import { DEFAULT_FROZEN_COBALT_REMOTE_TAG_DICTIONARY_CONFIGURATION, FrozenCobaltRemoteTagDictionary } from "@/adapters/frozen_cobalt/ports/remote_tag_dictionary/frozen_cobalt_remote_tag_dictionary";
 import { DEFAULT_INDEXED_DB_CLIENT_CONFIGURATION, IndexedDbClient } from "@/adapters/browser/indexed_db/indexed_db_client";
 import { FavoritesAppDependencies, composeFavoritesApp } from "@/core/app/favorites/favorites_app_composer";
 import { decodeBitmap, loadImage } from "@/adapters/browser/image/image_utilities";
@@ -66,6 +67,7 @@ function createFavoritesAppDependencies(): FavoritesAppDependencies {
     localPosts: new IndexedDbLocalPosts(indexedDbClient),
     localSnippets: new IndexedDbLocalSnippets(indexedDbClient),
     localTagCategories: new IndexedDbLocalTagCategories(indexedDbClient),
+    remoteTagDictionary: new FrozenCobaltRemoteTagDictionary(DEFAULT_FROZEN_COBALT_REMOTE_TAG_DICTIONARY_CONFIGURATION, { scheduler, fetch: boundFetch }),
     storedValueStorage: new BrowserLocalKeyedValues(),
     remoteFavorites: new Rule34RemoteFavorites({ rule34Client, rule34Document, fetch: boundFetch, scheduler, randomSource }),
     remotePosts: new FallbackRemotePosts({

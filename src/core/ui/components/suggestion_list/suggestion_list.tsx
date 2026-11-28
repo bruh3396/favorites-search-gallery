@@ -58,11 +58,11 @@ export function SuggestionList({ suggestions, highlightedIndex, footerLink, onAc
 }
 
 function Row({ suggestion, onAccept }: Pick<SuggestionListProps, "onAccept"> & { suggestion: Suggestion }): HTMLElement {
-  const { text, matchedLength = 0, icon, detail } = suggestion;
+  const { text, textClassName, matchedLength = 0, icon, detail } = suggestion;
   return (
     <li className={`${ListboxClass.option} ${SuggestionListClass.row}`} role="option" onClick={() => onAccept(suggestion)}>
       {icon !== undefined && createIcon(icon, SuggestionListClass.icon)}
-      <span className={SuggestionListClass.text}>
+      <span className={textClassName === undefined ? SuggestionListClass.text : `${SuggestionListClass.text} ${textClassName}`}>
         <b className={SuggestionListClass.match}>{text.slice(0, matchedLength)}</b>
         {text.slice(matchedLength)}
       </span>

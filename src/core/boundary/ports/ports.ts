@@ -12,6 +12,7 @@ import { RemotePages } from "@/core/boundary/ports/remote_pages/remote_pages";
 import { RemotePostList } from "@/core/boundary/ports/remote_post_list/remote_post_list";
 import { RemotePosts } from "@/core/boundary/ports/remote_posts/remote_posts";
 import { RemoteTagCategories } from "@/core/boundary/ports/remote_tag_categories/remote_tag_categories";
+import { RemoteTagDictionary } from "@/core/boundary/ports/remote_tag_dictionary/remote_tag_dictionary";
 import { Scheduler } from "@/core/boundary/ports/scheduler/scheduler";
 import { SizeObserver } from "@/core/boundary/ports/size_observer/size_observer";
 import { Viewport } from "@/core/boundary/ports/viewport/viewport";
@@ -32,6 +33,7 @@ export interface Ports {
   readonly remotePosts: RemotePosts;
   readonly remotePostList: RemotePostList;
   readonly remoteTagCategories: RemoteTagCategories;
+  readonly remoteTagDictionary: RemoteTagDictionary;
   readonly scheduler: Scheduler;
   readonly sizeObserver: SizeObserver;
   readonly visibilityObserver: VisibilityObserver;

@@ -101,14 +101,20 @@ export class PostLibrary {
 
   private async refreshOne(post: Post): Promise<void> {
     const { post: refetchedPost, tagCategories } = await this.refetchIfStale(post);
-    const refreshedPost = await this.fillDuration(refetchedPost);
 
     this.saveTagCategories(tagCategories);
 
-    if (refreshedPost === post) {
-      return;
+    if (refetchedPost !== post) {
+      this.save(refetchedPost);
     }
+    const durationFilledPost = await this.fillDuration(refetchedPost);
 
+    if (durationFilledPost !== refetchedPost) {
+      this.save(durationFilledPost);
+    }
+  }
+
+  private save(refreshedPost: Post): void {
     if (hasDimensions(refreshedPost)) {
       this.localPostsWriter.schedule(refreshedPost);
     }

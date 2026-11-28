@@ -1,0 +1,19 @@
+.fsg-TagSuggester-artist {
+  --fsg-SuggestionList-match-color: light-dark(oklch(from #cc0000 0.52 0.19 h), oklch(from #f0a0a0 0.8 0.13 h));
+  --fsg-SuggestionList-text-color: color-mix(in oklab, var(--fsg-SuggestionList-match-color) 72%, var(--fsg-color-surface-container-high));
+}
+
+.fsg-TagSuggester-character {
+  --fsg-SuggestionList-match-color: light-dark(oklch(from #00aa00 0.52 0.16 h), oklch(from #f0f0a0 0.88 0.14 h));
+  --fsg-SuggestionList-text-color: color-mix(in oklab, var(--fsg-SuggestionList-match-color) 72%, var(--fsg-color-surface-container-high));
+}
+
+.fsg-TagSuggester-copyright {
+  --fsg-SuggestionList-match-color: light-dark(oklch(from #aa00aa 0.5 0.2 h), oklch(from #f0a0f0 0.8 0.15 h));
+  --fsg-SuggestionList-text-color: color-mix(in oklab, var(--fsg-SuggestionList-match-color) 72%, var(--fsg-color-surface-container-high));
+}
+
+.fsg-TagSuggester-metadata {
+  --fsg-SuggestionList-match-color: light-dark(oklch(from #ff8800 0.58 0.16 h), oklch(from #90d9ed 0.82 0.11 h));
+  --fsg-SuggestionList-text-color: color-mix(in oklab, var(--fsg-SuggestionList-match-color) 72%, var(--fsg-color-surface-container-high));
+}

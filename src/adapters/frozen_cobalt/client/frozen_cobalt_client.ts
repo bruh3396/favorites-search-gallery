@@ -22,7 +22,8 @@ type FrozenCobaltEndpoint = keyof FrozenCobaltEndpoints;
 type Resolved = ReadonlyMap<string, unknown>;
 
 const REQUEST_TIMEOUT = 10_000;
-const REQUEST_COALESCING = { flushSize: 200, flushTimeout: 2_000 };
+const POST_REQUEST_COALESCING = { flushSize: 100, flushTimeout: 2_000 };
+const TAG_REQUEST_COALESCING = { flushSize: 200, flushTimeout: 2_000 };
 const POST_RATE_LIMIT = { concurrency: 4, ratePerSecond: 2 };
 const TAG_RATE_LIMIT = { concurrency: 4, ratePerSecond: 10 };
 
@@ -43,11 +44,11 @@ export class FrozenCobaltClient {
       version: configuration.identity?.version ?? "",
       platform: configuration.identity?.platform ?? ""
     });
-    this.postResolver = new CoalescingResolver(REQUEST_COALESCING, {
+    this.postResolver = new CoalescingResolver(POST_REQUEST_COALESCING, {
       resolve: (postIds): Promise<Resolved> => postRateLimiter.run(() => this.requestBatch("posts", { ids: postIds }, postIds)),
       scheduler: dependencies.scheduler
     });
-    this.tagResolver = new CoalescingResolver(REQUEST_COALESCING, {
+    this.tagResolver = new CoalescingResolver(TAG_REQUEST_COALESCING, {
       resolve: (tagNames): Promise<Resolved> => tagRateLimiter.run(() => this.requestBatch("tags", { tagNames }, tagNames)),
       scheduler: dependencies.scheduler
     });

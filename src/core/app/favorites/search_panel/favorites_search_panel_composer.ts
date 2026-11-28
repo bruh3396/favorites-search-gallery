@@ -24,6 +24,7 @@ import { SkeletonGrid } from "@/core/ui/post_grid/skeleton_grid";
 import { SnippetLibrary } from "@/core/features/snippets/snippet_library";
 import { StoredValue } from "@/core/utils/storage/stored_value";
 import { SuggestionList } from "@/core/ui/components/suggestion_list/suggestion_list";
+import { TagCategoryResolver } from "@/core/features/tag_categories/tag_category_resolver";
 import { Tile } from "@/core/ui/post_grid/tile";
 import { VisibilityObserver } from "@/core/boundary/ports/visibility_observer/visibility_observer";
 import { composeFavoritesSearchOptionsRow } from "@/core/app/favorites/search_options/favorites_search_options_row_composer";
@@ -50,6 +51,7 @@ export interface FavoritesSearchPanelDependencies {
   openLightbox: (favorite: Favorite) => boolean;
   postActions: Pick<PostActions, "openOriginal">;
   snippetLibrary: Pick<SnippetLibrary, "snippets" | "recordUse">;
+  tagCategoryResolver: Pick<TagCategoryResolver, "resolveCommon">;
 }
 
 export function composeFavoritesSearchPanel(
@@ -59,7 +61,8 @@ export function composeFavoritesSearchPanel(
 ): HTMLElement {
   const {
     favoritesService, favoritesPreferences, favoritesSearchOptionsVisible, keyBindings, searchHistory, favoriteSizeRecorder,
-    visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, openLightbox, postActions, snippetLibrary
+    visibilityObserver, sizeObserver, imageLoaderService, remotePages, navigator, openLightbox, postActions, snippetLibrary,
+    tagCategoryResolver
   } = dependencies;
   const autocomplete = new Autocomplete({
     suggesters: [
@@ -67,7 +70,8 @@ export function composeFavoritesSearchPanel(
       new MetatagSuggester(),
       new TagSuggester(DEFAULT_TAG_SUGGESTER_CONFIGURATION, {
         getTagsStartingWith: favoritesService.getTagsStartingWith,
-        countFavoritesWithTag: favoritesService.countFavoritesWithTag
+        countFavoritesWithTag: favoritesService.countFavoritesWithTag,
+        tagCategoryResolver
       })
     ]
   });

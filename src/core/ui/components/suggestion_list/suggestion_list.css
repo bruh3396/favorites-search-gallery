@@ -62,18 +62,18 @@
   flex: 0 1 auto;
   min-inline-size: 0;
   overflow: hidden;
-  color: var(--fsg-color-on-surface-variant);
+  color: var(--fsg-SuggestionList-text-color, var(--fsg-color-on-surface-variant));
   line-height: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.fsg-SuggestionList-row[aria-selected="true"] .fsg-SuggestionList-text,
-.fsg-SuggestionList-match {
-  color: var(--fsg-color-on-surface);
+.fsg-SuggestionList-row[aria-selected="true"] .fsg-SuggestionList-text {
+  color: var(--fsg-SuggestionList-text-color, var(--fsg-color-on-surface));
 }
 
 .fsg-SuggestionList-match {
+  color: var(--fsg-SuggestionList-match-color, var(--fsg-color-on-surface));
   font-weight: inherit;
 }
 

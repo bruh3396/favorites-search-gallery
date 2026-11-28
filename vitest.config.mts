@@ -10,6 +10,7 @@ const DOM_TESTS = [
   "src/core/features/**/*.test.tsx",
   "src/core/features/*/{commands,input,ui}/**/*.test.ts",
   "src/core/features/lightbox/**/*.test.ts",
+  "src/core/features/autocomplete/tag_suggester.test.ts",
   "src/adapters/browser/document/body_content_claimer.test.ts",
   "src/adapters/browser/image/image_utilities.test.ts",
   "src/adapters/browser/ports/viewport/browser_viewport.test.ts",

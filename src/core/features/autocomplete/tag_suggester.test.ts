@@ -1,12 +1,17 @@
+import { TagSuggester, TagSuggesterClass } from "@/core/features/autocomplete/tag_suggester";
 import { describe, expect, test } from "vitest";
-import { TagSuggester } from "@/core/features/autocomplete/tag_suggester";
+import TAG_SUGGESTER_CSS from "@/core/features/autocomplete/tag_suggester.css?inline";
+import { TagCategory } from "@/core/domain/tag_category/tag_category";
+import { expectClassesStyled } from "@/testing/css_utilities";
 
 const TAG_COUNTS: Record<string, number> = { cat: 2, cat_ears: 7, cats: 2, catgirl: 40 };
+const TAG_CATEGORY_BY_TAG: Record<string, TagCategory> = { cats: "character", cat: "general" };
 
 function createTagSuggester(maxSuggestionCount: number = 10): TagSuggester {
   return new TagSuggester({ maxSuggestionCount }, {
     getTagsStartingWith: prefix => Object.keys(TAG_COUNTS).filter(tag => tag.startsWith(prefix)),
-    countFavoritesWithTag: tag => TAG_COUNTS[tag]
+    countFavoritesWithTag: tag => TAG_COUNTS[tag],
+    tagCategoryResolver: { resolveCommon: tag => TAG_CATEGORY_BY_TAG[tag] }
   });
 }
 
@@ -28,8 +33,24 @@ describe("TagSuggester", () => {
       expect(createTagSuggester().suggest("catg")).toEqual([{ text: "catgirl", acceptedText: "catgirl ", icon: "tag", detail: "40" }]);
     });
 
+    test("tints a tag by its category", () => {
+      expect(createTagSuggester().suggest("cats").map(suggestion => suggestion.textClassName)).toEqual([TagSuggesterClass.character]);
+    });
+
+    test("leaves general tags and tags the dictionary lacks untinted", () => {
+      const textClassNames = createTagSuggester().suggest("cat").map(suggestion => suggestion.textClassName);
+
+      expect(textClassNames).toEqual([undefined, undefined, undefined, TagSuggesterClass.character]);
+    });
+
     test("suggests nothing for an unknown prefix", () => {
       expect(createTagSuggester().suggest("zzz")).toEqual([]);
     });
+  });
+});
+
+describe("TagSuggesterClass", () => {
+  test("styles every class it sets", () => {
+    expectClassesStyled(TagSuggesterClass, TAG_SUGGESTER_CSS);
   });
 });

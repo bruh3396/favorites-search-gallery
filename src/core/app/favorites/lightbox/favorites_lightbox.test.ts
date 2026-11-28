@@ -49,7 +49,7 @@ function setup(): Setup {
     preferences: createStoredTree(APP_STORAGE_SCHEMA.preferences, new MemoryLocalKeyedValues(), ["favorites"]).favorites.lightbox,
     lightboxKeyBindings: new Signal({ ...DEFAULT_LIGHTBOX_KEY_BINDINGS, addFavorite: ["e"] }),
     clipboard: new MemoryClipboard(),
-    localTagCategories: { getMany: () => Promise.resolve(new Map()) },
+    tagCategoryResolver: { resolve: () => Promise.resolve(new Map()) },
     favoritesService: {
       isFavorited: () => false,
       actions: { add, remove: (): Promise<boolean> => Promise.resolve(true) }

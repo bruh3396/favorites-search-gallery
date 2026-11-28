@@ -1,9 +1,9 @@
 import { Readable, Signal, computed, effect } from "@/core/utils/reactive/signal";
 import { Scoped, captureScope, onCleanup } from "@/core/utils/reactive/scope";
 import { Favorite } from "@/core/features/favorites/favorite";
-import { LocalTagCategories } from "@/core/boundary/ports/local_tag_categories/local_tag_categories";
 import { TagAlignment } from "@/core/app/favorites/lightbox/tag_alignment";
 import { TagCategory } from "@/core/domain/tag_category/tag_category";
+import { TagCategoryResolver } from "@/core/features/tag_categories/tag_category_resolver";
 import { TagOrganization } from "@/core/app/favorites/lightbox/tag_organization";
 import { TagSize } from "@/core/app/favorites/lightbox/tag_size";
 import { h } from "@/core/ui/h/h";
@@ -39,7 +39,7 @@ export interface FavoriteLightboxTagsProps {
   organization: Readable<TagOrganization>;
   alignment: Readable<TagAlignment>;
   size: Readable<TagSize>;
-  localTagCategories: Pick<LocalTagCategories, "getMany">;
+  tagCategoryResolver: Pick<TagCategoryResolver, "resolve">;
   collapsedTagCount: number;
 }
 
@@ -48,7 +48,7 @@ export function FavoriteLightboxTags({
   organization,
   alignment,
   size,
-  localTagCategories,
+  tagCategoryResolver,
   collapsedTagCount
 }: FavoriteLightboxTagsProps): HTMLElement {
   const groups = new Signal<readonly TagGroup[]>([]);
@@ -67,7 +67,7 @@ export function FavoriteLightboxTags({
     groups.value = [];
 
     if (currentFavorite !== undefined) {
-      localTagCategories.getMany([...currentFavorite.tags]).then(showGroups, (error: unknown) => {
+      tagCategoryResolver.resolve([...currentFavorite.tags]).then(showGroups, (error: unknown) => {
         console.error(error);
         showGroups(new Map());
       });

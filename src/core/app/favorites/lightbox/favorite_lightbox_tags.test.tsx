@@ -23,7 +23,7 @@ interface Setup {
   organization: Signal<TagOrganization>;
   alignment: Signal<TagAlignment>;
   size: Signal<TagSize>;
-  getMany: Mock<(names: readonly string[]) => Promise<Map<string, TagCategory>>>;
+  resolve: Mock<(names: readonly string[]) => Promise<Map<string, TagCategory>>>;
   readGroups: () => string[][];
   clickShowMore: () => void;
   dispose: () => void;
@@ -34,7 +34,7 @@ function setup(shownFavorite: ShownFavorite | undefined, categories: ReadonlyMap
   const organization = new Signal<TagOrganization>("category");
   const alignment = new Signal<TagAlignment>("start");
   const size = new Signal<TagSize>("medium");
-  const getMany = vi.fn((names: readonly string[]) => Promise.resolve(new Map(names.flatMap(name => {
+  const resolve = vi.fn((names: readonly string[]) => Promise.resolve(new Map(names.flatMap(name => {
     const category = categories.get(name);
     return category === undefined ? [] : [[name, category] as const];
   }))));
@@ -44,14 +44,14 @@ function setup(shownFavorite: ShownFavorite | undefined, categories: ReadonlyMap
       organization={organization}
       alignment={alignment}
       size={size}
-      localTagCategories={{ getMany }}
+      tagCategoryResolver={{ resolve }}
       collapsedTagCount={6}
     />
   ));
   const readGroups = (): string[][] => [...element.querySelectorAll(`.${FavoriteLightboxTagsClass.group}`)]
     .map(group => [...group.querySelectorAll<HTMLElement>("h3, li:not([hidden])")].map(item => item.textContent ?? ""));
   const clickShowMore = (): void => element.querySelector<HTMLButtonElement>(`.${FavoriteLightboxTagsClass.showMore}`)!.click();
-  return { element, favorite, organization, alignment, size, getMany, readGroups, clickShowMore, dispose };
+  return { element, favorite, organization, alignment, size, resolve, readGroups, clickShowMore, dispose };
 }
 
 describe("FavoriteLightboxTags", () => {
@@ -129,11 +129,11 @@ describe("FavoriteLightboxTags", () => {
   });
 
   test("shows a newer favorite's tags when an older lookup resolves late", async() => {
-    const { favorite, getMany, readGroups } = setup(undefined);
+    const { favorite, resolve, readGroups } = setup(undefined);
     let resolveLate: (categories: Map<string, TagCategory>) => void = () => undefined;
 
-    getMany.mockReturnValueOnce(new Promise(resolve => {
-      resolveLate = resolve;
+    resolve.mockReturnValueOnce(new Promise(resolvePromise => {
+      resolveLate = resolvePromise;
     }));
     favorite.value = createFavorite(["stale"]);
     favorite.value = createFavorite(["fresh"]);
@@ -145,10 +145,10 @@ describe("FavoriteLightboxTags", () => {
   });
 
   test("shows every tag under general when the lookup fails", async() => {
-    const { favorite, getMany, readGroups } = setup(undefined);
+    const { favorite, resolve, readGroups } = setup(undefined);
 
     vi.spyOn(console, "error").mockImplementation(() => undefined);
-    getMany.mockRejectedValueOnce(new Error("blocked"));
+    resolve.mockRejectedValueOnce(new Error("blocked"));
     favorite.value = createFavorite(["solo"]);
     await flushMicrotasks();
 

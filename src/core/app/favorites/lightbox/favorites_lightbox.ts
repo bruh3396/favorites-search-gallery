@@ -10,7 +10,7 @@ export interface FavoritesLightboxDependencies extends Omit<LightboxDependencies
     details: FavoriteLightboxDetailsDependencies["preferences"] & Pick<LightboxDetails<Favorite>, "isOpen">;
   };
   clipboard: FavoriteLightboxDetailsDependencies["clipboard"];
-  localTagCategories: FavoriteLightboxDetailsDependencies["localTagCategories"];
+  tagCategoryResolver: FavoriteLightboxDetailsDependencies["tagCategoryResolver"];
   favoritesService: Pick<FavoritesService, "isFavorited" | "actions">;
   favoritesWorkspace: Pick<FavoritesWorkspace, "locate" | "turnToPageContaining" | "reveal">;
 }
@@ -18,7 +18,7 @@ export interface FavoritesLightboxDependencies extends Omit<LightboxDependencies
 export function createFavoritesLightbox(dependencies: FavoritesLightboxDependencies): Lightbox<Favorite> {
   const {
     scheduler, sizeObserver, viewport, remoteMedia, actions: lightboxActions, lightboxKeyBindings,
-    preferences: favoritesLightboxPreferences, clipboard, localTagCategories, favoritesService, favoritesWorkspace
+    preferences: favoritesLightboxPreferences, clipboard, tagCategoryResolver, favoritesService, favoritesWorkspace
   } = dependencies;
   const lightbox = createLightbox<Favorite>({
     scheduler, sizeObserver, viewport, remoteMedia, actions: lightboxActions, preferences: favoritesLightboxPreferences, lightboxKeyBindings,
@@ -26,7 +26,7 @@ export function createFavoritesLightbox(dependencies: FavoritesLightboxDependenc
     details: {
       isOpen: favoritesLightboxPreferences.details.isOpen,
       createContent: favorite => composeFavoriteLightboxDetails(favorite, {
-        preferences: favoritesLightboxPreferences.details, clipboard, scheduler, localTagCategories
+        preferences: favoritesLightboxPreferences.details, clipboard, scheduler, tagCategoryResolver
       })
     },
     favorite: {

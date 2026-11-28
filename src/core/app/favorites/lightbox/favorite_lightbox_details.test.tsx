@@ -27,7 +27,7 @@ function setup(): Setup {
       tags: <FavoriteLightboxTags
         favorite={new Signal(undefined)}
         {...favoriteLightboxDetailsPreferences}
-        localTagCategories={{ getMany: () => Promise.resolve(new Map()) }}
+        tagCategoryResolver={{ resolve: () => Promise.resolve(new Map()) }}
         collapsedTagCount={6}
       />
     });

@@ -31,7 +31,7 @@ function setup(shownFavorite: ShownFavorite): Setup {
       preferences,
       clipboard,
       scheduler: new MemoryScheduler(),
-      localTagCategories: { getMany: () => Promise.resolve(new Map()) }
+      tagCategoryResolver: { resolve: () => Promise.resolve(new Map()) }
     });
     return h("div", {}, titleChild, bodyChild) as HTMLElement;
   });

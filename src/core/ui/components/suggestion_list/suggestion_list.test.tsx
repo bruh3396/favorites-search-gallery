@@ -54,6 +54,12 @@ describe("SuggestionList", () => {
     expect(queryOptions(list).map(option => option.querySelector("svg") !== null)).toEqual([true, false, false]);
   });
 
+  test("applies the text class name it was given", () => {
+    const { list } = setup([{ text: "alice", textClassName: "fsg-Test-text" }]);
+
+    expect(list.querySelector(".fsg-Test-text")!.textContent).toBe("alice");
+  });
+
   test("marks the matched start of a row's text", () => {
     const { list } = setup([{ text: "score:", matchedLength: 2 }]);
 
